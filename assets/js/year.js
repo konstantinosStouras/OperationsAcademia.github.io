@@ -1,3 +1,3 @@
-function yearFunction(){
-	document.write(currentYear);
-}
+today=new Date();
+currentYear=today.getFullYear();
+document.write(currentYear);
