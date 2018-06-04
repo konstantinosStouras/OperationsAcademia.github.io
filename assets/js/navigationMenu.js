@@ -9,11 +9,14 @@ document.getElementById( "nav" ).innerHTML = '<ul>' + '<li>' +
 	'<li><a href="candidates.html">Candidates</a></li>' +
 	'<li><a href="jobs.html">Job postings</a></li>' +
 	'<li><a href="placements.html">Confirmed placements</a></li>' + '</ul>' +
-	'</li>' + '<li>' + '<a href="resources-for-candidates.html">Resources</a>' + '<ul>' +
-	'<li><a href="previous-markets.html">Previous job markets</a></li>' +
+	'</li>' + '<li>' + '<a href="resources-for-candidates.html">Resources</a>' + '<ul>'+
 	'<li><a href="resources-for-candidates.html">For job candidates</a></li>' +
+	'<li><a href="universities.html">Universities</a></li>'  +
+	'<li><a href="previous-markets.html">Previous job markets</a></li>' +
 	'<li><a href="recent-faculty.html">Recent junior faculty</a></li>' + '</ul>' + '</li>' + '<li>' +
 	'<a href="faqs.html">About</a>' + '<ul>' + '<li><a href="faqs.html">FAQs</a></li>' +
+	'<li><a href="blog.html">Blog</a></li>' +
+	'<li><a href="donate.html">Donate</a></li>' + 
 	'<li><a href="analytics.html">Analytics</a></li>' + '<li><a href="contact.html">Contact</a></li>' + '</ul>' +
 	'</li>' + '</ul>';
 
@@ -27,9 +30,9 @@ document.getElementById( "discover-column" ).innerHTML =
 
 document.getElementById( "site-column" ).innerHTML =
     '<ul></ul>' +
-	'<a class="box-no-padding" href="faqs.html">About</a>' +
 	'<a class="box-no-padding" href="blog.html">Blog</a>' +
 	'<a class="box-no-padding" href="donate.html">Donate</a>' +
+	'<a class="box-no-padding" href="analytics.html">Analytics</a>' +
 	'<a class="box-no-padding" href="faqs.html">FAQs</a>' +
 	'<a class="box-no-padding" href="contact.html">Contact</a>';
 	
