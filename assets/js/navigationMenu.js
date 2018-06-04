@@ -27,7 +27,7 @@ document.getElementById( "discover-column" ).innerHTML =
 
 document.getElementById( "site-column" ).innerHTML =
     '<ul></ul>' +
-	'<a class="box-no-padding" href="about.html">About</a>' +
+	'<a class="box-no-padding" href="faqs.html">About</a>' +
 	'<a class="box-no-padding" href="blog.html">Blog</a>' +
 	'<a class="box-no-padding" href="donate.html">Donate</a>' +
 	'<a class="box-no-padding" href="faqs.html">FAQs</a>' +
