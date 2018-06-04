@@ -23,7 +23,7 @@ document.getElementById( "discover-column" ).innerHTML =
 	'<a class="box-no-padding" href="candidates.html">Candidates</a>' +
 	'<a class="box-no-padding" href="placements.html">Placements</a>' +
 	'<a class="box-no-padding" href="survey.html">Survey</a>' +
-	'<a class="box-no-padding" href="resources.html">Resources</a>' ;
+	'<a class="box-no-padding" href="resources-for-candidates.html">Resources</a>' ;
 
 document.getElementById( "site-column" ).innerHTML =
     '<ul></ul>' +
