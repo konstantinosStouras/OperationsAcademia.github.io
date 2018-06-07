@@ -6,7 +6,7 @@
 
                     var bg = "padding: 0; background: rgb("+red+","+green+","+blue+");";
                     var element = document.getElementById("foot-img");
-                    element.style = bg;},1000); 
+                    element.style = bg;}, 0); 
                 }
 
 
