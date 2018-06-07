@@ -6,7 +6,7 @@ function MouseOver(event){
 
                     var bg = "padding: 0; background: rgb("+red+","+green+","+blue+");";
                     var element = document.getElementById("header-image");
-                    element.style = bg;}, 1000); 
+                    element.style = bg;}, 10); 
 }
 
 
