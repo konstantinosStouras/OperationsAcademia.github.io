@@ -10,7 +10,7 @@ function MouseOverOld(event){
         element.style = bg;}, 0); 
  }
 
-function MouseOverOld(event){
+function MouseOver(event){
         var red = Math.round(Math.random() * 255);
         var green = Math.round(Math.random() *255);
         var blue = Math.round(Math.random() *255);
