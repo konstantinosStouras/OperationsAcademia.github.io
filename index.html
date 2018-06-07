@@ -27,9 +27,8 @@
 				<!-- Header -->
 
 				<div class="container" id="header">
-						<a href="index.html" id="logo"><img alt="Operations Academia Logo" 
-						src="images/OperationsAcademiaLogo.PNG" width=
-						"100"></a>
+						<a href="index.html" id="logo"><img id="header-image" onmouseover="MouseOver(event)" onmouseout="MouseOut(event)" alt="Operations Academia Logo" 
+						src="images/logo-image-transpernd.png" width = "130" style = "background: black; margin-top:3px;"></a>
 					<!-- Navigation menu -->
 
 					<nav id="nav">
@@ -86,7 +85,7 @@
 									</li>
 
 									<li>
-										<a class="pennant" href="candidates.html"><span class="icon fa-users"></span></a>
+										<a class="pennant" href="candidates.html"><span class="icon fa-graduation-cap"></span></a>
 										<header>
 											<h3>
 												Candidates
@@ -121,37 +120,70 @@
 			</div>
 		</div>
 
-		<footer>
-			<div class="row social-row">
-				<div class="footer-column">
-					<span class="footer-title">Discover</span> <span class="links"></span>
-					<nav id="discover-column">
-						<span class="links"></span>
-					</nav>
-				</div>
+		<!-- Footer Wrapper -->
+			<div id="footer-wrapper">
 
-				<div class="footer-column">
-					<span class="footer-title">Site</span>
-					<div class="links">
-						<nav id="site-column">
-						</nav>
+				<!-- Footer -->
+					<div id="footer" class="container">
+
+							<div class="row">
+								<section class="6u 12u(narrower)">
+									<p>
+										Supported by:<br>
+										<!-- <img src="http://meetings2.informs.org/wordpress/nashville2016/files/2016/11/informs_logo_new-300x92.jpg"> -->
+										<a href="https://msomsociety.org/"><img src="https://higherlogicdownload.s3.amazonaws.com/INFORMS/f779d040-38c8-42bb-aa09-0911d651a7eb/UploadedImages/MSOM.png"></a>
+									</p>
+									<span id="copyright"></span>
+								</section>
+
+								<section class="2u 12u(narrower)">
+									<header>
+										<h2>Discover</h2>
+									</header>
+									<ul>
+										<li><a class="box-no-padding" href="jobs.html">Job postings</a></li>
+										<li><a class="box-no-padding" href="candidates.html">Candidates</a></li>
+										<li><a class="box-no-padding" href="placements.html">Placements</a></li>
+										<li><a class="box-no-padding" href="survey.html">Survey</a></li>
+										<li><a class="box-no-padding" href="resources-for-candidates.html">Resources</a></li>
+									</ul>
+								</section>
+
+								<section class="2u 12u(narrower)">
+									<header>
+										<h2>Site</h2>
+									</header>
+									<ul>
+										<li><a class="box-no-padding" href="https://operationsacademia.wordpress.com">Blog</a></li>
+										<li><a class="box-no-padding" href="http://a.co/ev61V45">Donate (in books)</a></li>
+										<li><a class="box-no-padding" href="analytics.html">Analytics</a></li>
+										<li><a class="box-no-padding" href="faqs.html">FAQs</a></li>
+										<li><a class="box-no-padding" href="contact.html">Contact</a></li>
+									</ul>
+								</section>
+
+								<section class="2u 12u(narrower)">
+									<header>
+										<h2>Legal</h2>
+									</header>
+									<ul>
+										<li><a class="box-no-padding" href="terms-and-conditions.html">Terms and Conditions</a></li>
+										<li><a class="box-no-padding" href="privacy-policy.html">Privacy Policy  </a></li>
+									</ul>
+								</section>
+
+							</div>
+
+						</div>
+
 					</div>
-				</div>
 
-				<div class="footer-column">
-					<span class="footer-title">Legal</span>
-					<div class="links">
-						<nav id="legal-column">
-						</nav>
-					</div>
-				</div>
-			</div>
-		</footer>
-		<!-- Copyright -->
+			
 
-		<nav id="copyright">
-		</nav>
+
+
 		<!-- Scripts -->
+        <script type="text/javascript" src="assets/js/colour.js"></script>
 		<script src="assets/js/navigationMenu.js">
 		</script> 
 		<script src="assets/js/jquery.min.js">
