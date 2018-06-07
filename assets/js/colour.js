@@ -14,7 +14,7 @@ function MouseOver(event){
         var red = Math.round(Math.random() * 255);
         var green = Math.round(Math.random() *255);
         var blue = Math.round(Math.random() *255);
-        event.target.setAttributeNS(null, "fill", rgb("+ red +","+ green +","+ blue +")");
+        event.target.setAttributeNS(null, "fill", "rgb("+ red +","+ green +","+ blue +")");
  }
 
 
