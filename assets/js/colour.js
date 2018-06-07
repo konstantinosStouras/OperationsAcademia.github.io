@@ -5,7 +5,7 @@
                     var blue = Math.round(Math.random() *255);
 
                     var bg = "padding: 0; background: rgb("+red+","+green+","+blue+");";
-                    var element = document.getElementById("header");
+                    var element = document.getElementById("header-image");
                     element.style = bg;}, 10); 
                 }
 
@@ -13,7 +13,7 @@
 
 
             function MouseOut(){
-                document.getElementById("header").style = "padding: 0; background: black;"
+                document.getElementById("header-image").style = "padding: 0; background: black;"
             }
        
      
