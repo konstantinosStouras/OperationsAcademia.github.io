@@ -6,7 +6,7 @@
 
                     var bg = "padding: 0; background: rgb("+red+","+green+","+blue+");";
                     var element = document.getElementById("header");
-                    element.style = bg;}, 0); 
+                    element.style = bg;}, 10); 
                 }
 
 
