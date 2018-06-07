@@ -832,12 +832,12 @@ body {
 	}
 }
 @media screen and (max-width: 840px) {
-	.row>* {
+/*	.row>* {
 		padding: 30px 0 0 30px;
 	}
 	.row {
 		margin: -30px 0 -1px -30px;
-	}
+	}*/
 	.row.uniform>* {
 		padding: 30px 0 0 30px;
 	}
@@ -967,7 +967,7 @@ body {
 	.\-8u\28narrower\29 {
 		margin-left: 66.66667%;
 	}
-	.\-7u\28narrower\29 {
+   	.\-7u\28narrower\29 {
 		margin-left: 58.33333%;
 	}
 	.\-6u\28narrower\29 {
@@ -990,12 +990,12 @@ body {
 	}
 }
 @media screen and (max-width: 736px) {
-	.row>* {
+/*	.row>* {
 		padding: 20px 0 0 20px;
 	}
 	.row {
 		margin: 20px 0 -1px 20px;
-	}
+	}*/
 	.row.uniform>* {
 		padding: 20px 0 0 20px;
 	}
@@ -1197,7 +1197,8 @@ a:link    {
 a:hover {
 	/* color: #bb0000; */
     background-color: transparent;
-    text-decoration: overline underline;
+    /*text-decoration: overline underline;*/
+    text-decoration: underline;
 }
 a:visited {
     color: #0b0080;
@@ -1489,32 +1490,47 @@ table.style1 tfoot {
 	background: #242E39;
 	border-color: #242E39;
 }
+
+
 .button.blue {
 	border-color: #3B7DBC;
 	background: #3B7DBC;
 	color: #FFF !important;
+    margin: 48px 0px 0px 0px;
+    display: inline-block;
+    max-width: 400px;
+    min-width: 100px;
 }
+
 .button.blue:hover {
 	border-color: #4B8DCC;
 	background: #4B8DCC;
 }
+
 .button.blue:active {
 	background: #2489a8;
 	border-color: #2489a8;
 }
+/*
+
 .button.feedback {
 	border-color: rgb(197,190,69);
 	background: rgb(197,190,69);
 	color: #FFF !important;
-	text-align:right;
-	margin:48px;
+	text-align:center;
+    float:right;
+    display: inline-block;
+    margin: 48px 0px 48px 0px;    
+    max-width: 200px;
+    min-width: 100px;
+       
 }
 .button.feedback:hover {
 	border-color: rgb(206,201,100);
 	background: rgb(206,201,100);
-	text-align:right;
-	margin:48px;
+	text-align:center;
 }
+*/
 
 /* Main Title Heading */
 
@@ -1542,41 +1558,24 @@ header p {
 }
 /* Footer */
 
-.social-row { 
-padding: 60px 5% 60px 5%; 
-max-width: 1200px;
+.social-row {
+padding: 60px 0 0 10%; 
+width: 1320px;
 text-align: left;
 }
-footer#footer_img {
-    float: left;
-    background-color: red;
-}
+
 footer {
 	margin-left: auto;
 	margin-right: auto;
-	max-width: 1200px;
-    width: 100%;
+	width: 1200px;
 	/*background-color: rgb(59, 125, 188);*/
 }
 footer .footer-column {
-	width: 18.33%;
-    padding-left: 0;
-    margin-left: 0;
-    margin-right: 0;
-    padding-right: 0;
+	width: 30%;
+    display: inline-block;
 	position: relative;
 	padding-right: 1em;
 }
-footer .footer-column-copy {
-	width:45%;
-    padding-left: 0;
-    margin-left: 0;
-    margin-right: 0;
-    padding-right: 0;
-    text-align: left;
-	position: relative;
-	padding-right: 1em;
-    }
 footer .footer-title {
 	color: Black;
 	text-align: left;
@@ -1673,6 +1672,7 @@ footer .box-no-padding {
 	position: fixed;
 	z-index: 10000;
 	width: 100%;
+    font-size: 1.5em;
 	height: 2.5em;
 	top: 0;
 	left: 0;
@@ -1713,12 +1713,12 @@ footer .box-no-padding {
 #footer-wrapper {
 	position: relative;
 	background: #FFF;
-	padding: 8em 0 4em 0;
+	padding: 4em 0 4em 0;
 }
 #featured-wrapper {
 	position: relative;
 	background: #343e49;
-	padding: 8em 0 4em 0;
+	padding: 4em 0 4em 0;
 	color: #eee;
 	color: rgba(255, 255, 255, 0.75);
 }
@@ -1741,6 +1741,11 @@ footer .box-no-padding {
 	text-decoration: none;
 	font-weight: 900;
 	color: #343e49;
+}
+#header img {
+    background: black;
+    margin-top: 10px;
+    transition: 4s;   
 }
 /* Nav */
 
@@ -1842,7 +1847,7 @@ footer .box-no-padding {
 
 #copyright {
 	position: relative;
-	text-align: left;
+	text-align: center;
 	color: #a1a6ac;
 	padding: 5em 0em 7em 0em;
 }
@@ -1887,7 +1892,7 @@ footer .box-no-padding {
 		padding: 4em 0 3em 0;
 	}
 	.homepage #main-wrapper {
-		padding: 8em 0 5em;
+		padding: 4em 0 5em;
 	}
 }
 /* Normal */
@@ -1933,6 +1938,7 @@ footer .box-no-padding {
 @media screen and (max-width: 840px) {
 	html, body {
 		overflow-x: hidden;
+         
 	}
 	/* Lists */
 	ul.style1 {
@@ -2135,7 +2141,7 @@ footer .box-no-padding {
 	/* Basic */
 	body, input, textarea, select {
 		font-size: 12pt;
-		text-align: justify;
+		text-align:justify;
 	}
 	h2 {
 		font-size: 1.25em;
@@ -2206,11 +2212,14 @@ footer .box-no-padding {
 		padding: 2.5em 20px 2.5em 20px;
 	}
 	#footer-wrapper {
-		padding: 6em 20px 2em 20px;
+		padding: 2em 20px 2em 20px;
 	}
 	#featured-wrapper {
-		padding: 6em 20px 2em 20px;
+		padding: 2em 20px 2em 20px;
 	}
+	section, article {
+		margin-bottom: 0;
+	}	
 	/* Banner */
 	#banner .major h2 {
 		font-size: 2.5em;
