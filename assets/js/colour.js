@@ -12,7 +12,8 @@ function MouseOver(event){
 
 
 
-function MouseOut(event){
+function MouseOut(event){  
+  setInterval(function(){ 
   var bg = "padding: 0; background: black;";
   var element = document.getElementById("header-image");
   element.style = bg;}, 0);
