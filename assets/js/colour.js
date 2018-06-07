@@ -1,6 +1,6 @@
 
 
-function MouseOverOld(event){
+function MouseOver(event){
      setInterval(function(){ 
         var red = Math.round(Math.random() * 255);
         var green = Math.round(Math.random() *255);
@@ -10,7 +10,7 @@ function MouseOverOld(event){
         element.style = bg;}, 0); 
  }
 
-function MouseOver(event){
+function MouseOverNew(event){
         var red = Math.round(Math.random() * 255);
         var green = Math.round(Math.random() *255);
         var blue = Math.round(Math.random() *255);
