@@ -23,6 +23,8 @@ document.getElementById( "nav" ).innerHTML = '<ul>' + '<li>' +
 today = new Date();
 currentYear = today.getFullYear();
 document.getElementById( "copyright" ).innerHTML =
-	'&copy' + '2014-' + currentYear + ". Made  with " +
-	'<i class="fa fa-coffee"></i>' + " by " +
+	'&copy' + '2014-' + currentYear + ". " +
 	'<a href="http://www.stouras.com/">Konstantinos I. Stouras</a>';
+/* 	'&copy' + '2014-' + currentYear + ". Made  with " +
+	'<i class="fa fa-coffee"></i>' + " by " +
+	'<a href="http://www.stouras.com/">Konstantinos I. Stouras</a>'; */
