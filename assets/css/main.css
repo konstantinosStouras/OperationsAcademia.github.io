@@ -74,28 +74,6 @@ body {
 		max-width: 1425px;
 		min-width: 1140px;
 	}
-	
-	  .OAlogo:hover {
-    animation: colorReplace 10s infinite;
-    animation-timing-function: linear;
-    animation-direction: alternate;
-  }
-  
-  @keyframes colorReplace
-  {
-    0%   {background-color: rgb(44, 132, 231);}
-    10%  {background-color: rgb(61, 192, 90);}
-    20%  {background-color: rgb(255, 211, 59);}
-    30%  {background-color: rgb(253, 136, 24);}
-    40%  {background-color: rgb(243, 129, 174);}
-    50%  {background-color: rgb(34, 138, 230);}
-    60%  {background-color: rgb(62, 192, 89);}
-    70%  {background-color: rgb(255, 211, 59);}
-    80%  {background-color: rgb(71, 193, 86);}
-    90%  {background-color: rgb(253, 126, 20);}
-    100% {background-color: rgb(233, 109, 132);}
-  }
-	
 	.container.\37 5\25 {
 		width: 855px;
 	}
