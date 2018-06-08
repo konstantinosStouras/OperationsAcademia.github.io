@@ -2245,7 +2245,15 @@ footer .box-no-padding {
 		padding: 2em 0em;
 	}
 	
-	logoFooter { 
+	.logoFooter { 
 		float: left
+		background-color: transparent;
+		animation-play-state: paused;			
+	}
+	
+	.logoFooter:hover {
+		animation: colorReplace 10s infinite;
+	        animation-timing-function: linear;
+		animation-direction: alternate;
 	}
 }
