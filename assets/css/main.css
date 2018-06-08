@@ -2244,4 +2244,8 @@ footer .box-no-padding {
 	#copyright {
 		padding: 2em 0em;
 	}
+	
+	logoFooter { 
+		float: left
+	}
 }
