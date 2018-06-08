@@ -70,15 +70,35 @@ body {
 }
 
 .OAlogo {
-    background-color: transparent;
-    animation-play-state: paused;
+    background-color: black;/* 
+    animation-play-state: paused; */
   }
 
-  .OAlogo:hover {
+/*   .OAlogo:hover {
     animation: colorReplace 10s infinite;
     animation-timing-function: linear;
     animation-direction: alternate;
-  }
+  } */
+  
+#logoFooterText{   
+ font-size: large;	
+position: relative;
+	text-align: center;
+	/* color: #a1a6ac; */
+	color: black;
+	padding: 5em 0em 7em 0em;}
+	
+#logoFooterText a {
+	/* color: #a1a6ac; */
+	color: black;
+	text-decoration: none;
+}
+
+#logoFooterText span {
+	/* color: #a1a6ac; */
+	color: black;
+}
+
 
 	.logoFooter { 
 		float: left;
@@ -1865,15 +1885,18 @@ footer .box-no-padding {
 #copyright {
 	position: relative;
 	text-align: center;
-	color: #a1a6ac;
+	/* color: #a1a6ac; */
+	color: black;
 	padding: 5em 0em 7em 0em;
 }
 #copyright a {
-	color: #a1a6ac;
+	/* color: #a1a6ac; */
+	color: black;
 	text-decoration: none;
 }
 #copyright span {
-	color: #a1a6ac;
+	/* color: #a1a6ac; */
+	color: black;
 }
 /* Featured */
 
