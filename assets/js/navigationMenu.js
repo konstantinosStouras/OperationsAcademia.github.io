@@ -20,27 +20,6 @@ document.getElementById( "nav" ).innerHTML = '<ul>' + '<li>' +
 	'<li><a href="analytics.html">Analytics</a></li>' + '<li><a href="contact.html">Contact</a></li>' + '</ul>' +
 	'</li>' + '</ul>';
 
-document.getElementById( "discover-column" ).innerHTML =
-	'<ul></ul>' +
-	'<a class="box-no-padding" href="jobs.html">Job postings</a>' +
-	'<a class="box-no-padding" href="candidates.html">Candidates</a>' +
-	'<a class="box-no-padding" href="placements.html">Placements</a>' +
-	'<a class="box-no-padding" href="survey.html">Survey</a>' +
-	'<a class="box-no-padding" href="resources-for-candidates.html">Resources</a>' ;
-
-document.getElementById( "site-column" ).innerHTML =
-    '<ul></ul>' +
-	'<a class="box-no-padding" href="https://operationsacademia.wordpress.com">Blog</a>' +
-	'<a class="box-no-padding" href="http://a.co/ev61V45">Donate (in books)</a>' +
-	'<a class="box-no-padding" href="analytics.html">Analytics</a>' +
-	'<a class="box-no-padding" href="faqs.html">FAQs</a>' +
-	'<a class="box-no-padding" href="contact.html">Contact</a>';
-	
-	document.getElementById( "legal-column" ).innerHTML =
-	'<ul></ul>' +
-	'<a class="box-no-padding" href="terms-and-conditions.html">Terms and Conditions</a>' +
-	'<a class="box-no-padding" href="privacy-policy.html">Privacy Policy  </a>';
-
 today = new Date();
 currentYear = today.getFullYear();
 document.getElementById( "copyright" ).innerHTML =
