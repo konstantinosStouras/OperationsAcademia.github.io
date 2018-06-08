@@ -74,6 +74,28 @@ body {
 		max-width: 1425px;
 		min-width: 1140px;
 	}
+	
+	  .OAlogo:hover {
+    animation: colorReplace 10s infinite;
+    animation-timing-function: linear;
+    animation-direction: alternate;
+  }
+  
+  @keyframes colorReplace
+  {
+    0%   {background-color: rgb(44, 132, 231);}
+    10%  {background-color: rgb(61, 192, 90);}
+    20%  {background-color: rgb(255, 211, 59);}
+    30%  {background-color: rgb(253, 136, 24);}
+    40%  {background-color: rgb(243, 129, 174);}
+    50%  {background-color: rgb(34, 138, 230);}
+    60%  {background-color: rgb(62, 192, 89);}
+    70%  {background-color: rgb(255, 211, 59);}
+    80%  {background-color: rgb(71, 193, 86);}
+    90%  {background-color: rgb(253, 126, 20);}
+    100% {background-color: rgb(233, 109, 132);}
+  }
+	
 	.container.\37 5\25 {
 		width: 855px;
 	}
@@ -296,34 +318,6 @@ body {
 	clear: none;
 	margin-left: 0;
 }
-
-  .OAlogo {
-    background-color: transparent;
-    animation-play-state: paused;
-  }
-
-  .OAlogo:hover {
-    animation: colorReplace 10s infinite;
-    animation-timing-function: linear;
-    animation-direction: alternate;
-  }
-  
-  @keyframes colorReplace
-  {
-    0%   {background-color: rgb(44, 132, 231);}
-    10%  {background-color: rgb(61, 192, 90);}
-    20%  {background-color: rgb(255, 211, 59);}
-    30%  {background-color: rgb(253, 136, 24);}
-    40%  {background-color: rgb(243, 129, 174);}
-    50%  {background-color: rgb(34, 138, 230);}
-    60%  {background-color: rgb(62, 192, 89);}
-    70%  {background-color: rgb(255, 211, 59);}
-    80%  {background-color: rgb(71, 193, 86);}
-    90%  {background-color: rgb(253, 126, 20);}
-    100% {background-color: rgb(233, 109, 132);}
-  }
-
-
 .\35 u, .\35 u\24 {
 	width: 41.6666666667%;
 	clear: none;
@@ -995,7 +989,7 @@ body {
 	.\-8u\28narrower\29 {
 		margin-left: 66.66667%;
 	}
-   	.\-7u\28narrower\29 {
+	.\-7u\28narrower\29 {
 		margin-left: 58.33333%;
 	}
 	.\-6u\28narrower\29 {
@@ -1518,47 +1512,32 @@ table.style1 tfoot {
 	background: #242E39;
 	border-color: #242E39;
 }
-
-
 .button.blue {
 	border-color: #3B7DBC;
 	background: #3B7DBC;
 	color: #FFF !important;
-    margin: 48px 0px 0px 0px;
-    display: inline-block;
-    max-width: 400px;
-    min-width: 100px;
 }
-
 .button.blue:hover {
 	border-color: #4B8DCC;
 	background: #4B8DCC;
 }
-
 .button.blue:active {
 	background: #2489a8;
 	border-color: #2489a8;
 }
-/*
-
 .button.feedback {
 	border-color: rgb(197,190,69);
 	background: rgb(197,190,69);
 	color: #FFF !important;
-	text-align:center;
-    float:right;
-    display: inline-block;
-    margin: 48px 0px 48px 0px;    
-    max-width: 200px;
-    min-width: 100px;
-       
+	text-align:right;
+	margin:48px;
 }
 .button.feedback:hover {
 	border-color: rgb(206,201,100);
 	background: rgb(206,201,100);
-	text-align:center;
+	text-align:right;
+	margin:48px;
 }
-*/
 
 /* Main Title Heading */
 
@@ -1600,7 +1579,6 @@ footer {
 }
 footer .footer-column {
 	width: 30%;
-    display: inline-block;
 	position: relative;
 	padding-right: 1em;
 }
@@ -1700,7 +1678,6 @@ footer .box-no-padding {
 	position: fixed;
 	z-index: 10000;
 	width: 100%;
-    font-size: 1.5em;
 	height: 2.5em;
 	top: 0;
 	left: 0;
@@ -1769,11 +1746,6 @@ footer .box-no-padding {
 	text-decoration: none;
 	font-weight: 900;
 	color: #343e49;
-}
-#header-image {
-    background: black;
-    margin-top: 10px;
-    transition: 1s;   
 }
 /* Nav */
 
@@ -1966,7 +1938,6 @@ footer .box-no-padding {
 @media screen and (max-width: 840px) {
 	html, body {
 		overflow-x: hidden;
-         
 	}
 	/* Lists */
 	ul.style1 {
@@ -2169,7 +2140,7 @@ footer .box-no-padding {
 	/* Basic */
 	body, input, textarea, select {
 		font-size: 12pt;
-		text-align:justify;
+		text-align: justify;
 	}
 	h2 {
 		font-size: 1.25em;
