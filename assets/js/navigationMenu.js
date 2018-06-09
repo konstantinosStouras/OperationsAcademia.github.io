@@ -14,8 +14,11 @@ document.getElementById( "nav" ).innerHTML = '<ul>' + '<li>' +
 	'<li><a href="universities">Universities</a></li>'  +
 	'<li><a href="previous-markets">Previous job markets</a></li>' +
 	'<li><a href="recent-faculty">Recent junior faculty</a></li>' + '</ul>' + '</li>' + '<li>' +
-	'<a href="faqs">About</a>' + '<ul>' + '<li><a href="faqs">FAQs</a></li>' +
+	'<a href="faqs">About</a>' + '<ul>' + '<li><a href="directors-and-contributors">Directors and contributors</a></li>' + '<li><a href="faqs">FAQs</a></li>' +
 	'<li><a href="https://operationsacademia.wordpress.com">Blog</a></li>' +
 	'<li><a href="http://a.co/ev61V45">Donate (in books)</a></li>' + 
 	'<li><a href="analytics">Analytics</a></li>' + '<li><a href="https://operationsacademia.uservoice.com/">Feedback</a></li>' + '<li><a href="contact">Contact</a></li>' + '</ul>' +
 	'</li>' + '</ul>';
+	
+	
+	
