@@ -39,7 +39,11 @@
 				$(
 					'<div id="titleBar">' +
 						'<a href="#navPanel" class="toggle"></a>' +
+<<<<<<< HEAD
 						'<a href="index.html" class="title">' + $('#logo').html() + '</a>' +
+=======
+						'<a href="http://www.operationsacademia.org/" class="title">' + $('#logo').html() + '</a>' +
+>>>>>>> parent of af408f2... Update main.js
 					'</div>'
 				)
 					.appendTo($body);
