@@ -44,7 +44,7 @@
 			// Title Bar.
 				$(
 					'<div id="titleBar">' +
-						'<a href="#navPanel" class="toggle"></a>' +
+						'<a href="#nav" class="toggle"></a>' +
 						'<a href="http://www.operationsacademia.org/" class="title">' + $('#logo').html() + '</a>' +
 					'</div>'
 				)
