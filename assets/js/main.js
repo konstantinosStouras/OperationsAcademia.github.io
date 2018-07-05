@@ -1,9 +1,3 @@
-/*
-	Iconic by Pixelarity
-	pixelarity.com | hello@pixelarity.com
-	License: pixelarity.com/license
-*/
-
 (function($) {
 
 	skel.breakpoints({
@@ -44,8 +38,8 @@
 			// Title Bar.
 				$(
 					'<div id="titleBar">' +
-						'<a href="#nav" class="toggle"></a>' +
-						'<a href="http://www.operationsacademia.org/" class="title">' + $('#logo').html() + '</a>' +
+						'<a href="#navPanel" class="toggle"></a>' +
+						'<a href="index.html" class="title">' + $('#logo').html() + '</a>' +
 					'</div>'
 				)
 					.appendTo($body);
