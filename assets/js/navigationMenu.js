@@ -20,5 +20,3 @@ document.getElementById( "nav" ).innerHTML = '<ul>' + '<li>' +
 	'<li><a href="analytics">Analytics</a></li>' + '<li><a href="https://operationsacademia.uservoice.com/">Feedback</a></li>' + '<li><a href="contact">Contact</a></li>' + '</ul>' +
 	'</li>' + '</ul>';
 	
-	
-	
