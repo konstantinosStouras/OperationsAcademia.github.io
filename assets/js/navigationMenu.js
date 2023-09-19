@@ -5,7 +5,7 @@
 document.getElementById( "nav" ).innerHTML = '<ul>' + '<li>' +
 	'<a href="survey">Annual job market survey</a><ul>' +
 	'<li><a href="survey-faqs">Survey FAQs</a></li>' + '</ul>' + '</li>' + '<li>' +
-	'<a href="jobs">2022-2023 job market</a>' + '<ul>' +
+	'<a href="jobs">2023-2024 job market</a>' + '<ul>' +
 	'<li><a href="candidates">Candidates</a></li>' +
 	'<li><a href="jobs">Job postings</a></li>' +
 	'<li><a href="placements">Confirmed placements</a></li>' + '</ul>' +
