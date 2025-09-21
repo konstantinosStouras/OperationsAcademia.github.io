@@ -102,13 +102,15 @@ body {
   margin-right: 20px;
   margin-bottom: 25px;
   margin-top: 20px;
-  animation-play-state: paused;
+  /* animation-play-state: paused; */
+  /* autoplay animation */
+  animation: colorReplace 10s infinite linear alternate;
 }
-.logoFooter:hover {
+/* .logoFooter:hover {
   animation: colorReplace 10s infinite;
   animation-timing-function: linear;
   animation-direction: alternate;
-}
+} */
 
 /* On touch devices (no hover), always run the colour cycle */
 @media (hover: none) and (pointer: coarse) {
