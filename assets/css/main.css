@@ -106,11 +106,9 @@ body {
   /* autoplay animation */
   animation: colorReplace 10s infinite linear alternate;
 }
-/* .logoFooter:hover {
-  animation: colorReplace 10s infinite;
-  animation-timing-function: linear;
-  animation-direction: alternate;
-} */
+ .logoFooter:hover {
+  animation-play-state: paused;
+} 
 
 /* On touch devices (no hover), always run the colour cycle */
 @media (hover: none) and (pointer: coarse) {
