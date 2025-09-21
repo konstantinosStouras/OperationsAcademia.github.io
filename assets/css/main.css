@@ -2504,7 +2504,7 @@ footer .box-no-padding {
 }
 
 .sponsor-lead {
-  font-size: 14px;
+  font-size: 16px;       /* changed from 14 to 16 */
   color: #444;           /* same as your body text */
   font-family: inherit;  /* ensures same font as rest of site */
 }
