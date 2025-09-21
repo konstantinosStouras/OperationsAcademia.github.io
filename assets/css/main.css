@@ -96,18 +96,20 @@ body {
 }
 
 .logoFooter {
-  float: left;
-  background-color: black;   /* default bg like before */
-  width: 40px;               /* match your HTML width */
+  background-color: black;
+  width: 40px;                 /* keep the size you were using */
+  display: block;              /* logo sits in its own row */
+  margin-right: 20px;
+  margin-bottom: 25px;
+  margin-top: 20px;
   animation-play-state: paused;
 }
-
-
 .logoFooter:hover {
-	animation: colorReplace 10s infinite;
-	animation-timing-function: linear;
-	animation-direction: alternate;
+  animation: colorReplace 10s infinite;
+  animation-timing-function: linear;
+  animation-direction: alternate;
 }
+
 
 @keyframes colorReplace {
 	0%{
