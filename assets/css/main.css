@@ -96,7 +96,7 @@ body {
 }
 
 .logoFooter {
-  background-color: transparent;
+  background-color: black;
   width: 40px;                 /* keep the size you were using */
   display: block;              /* logo sits in its own row */
   margin-right: 20px;
