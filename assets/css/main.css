@@ -2491,7 +2491,6 @@ footer .box-no-padding {
 		padding: 2em 0em;
 	}
 }
-
 /* Sponsor section styles */
 .sponsor-bar {
   display: flex;
@@ -2504,34 +2503,56 @@ footer .box-no-padding {
 }
 
 .sponsor-lead {
-  font-size: 16px;       /* changed from 14 to 16 */
-  color: #444;           /* same as your body text */
-  font-family: inherit;  /* ensures same font as rest of site */
+  font-size: 16px;       
+  color: #444;
+  font-family: inherit;
 }
 
 .sponsor-logos {
   display: flex;
-  gap: 16px;             /* adds space between logos */
+  gap: 16px;
   align-items: center;
-  margin-left: 12px;     /* adds gap between text and first logo */
+  margin-left: 12px;
+  flex-wrap: wrap;       /* allow breaking if needed */
 }
 
 .sponsor-logos img {
   height: 40px;
   width: auto;
   display: block;
+  max-width: 140px;      /* prevents long logos from overflowing */
 }
 
+/* Mobile stacking */
+@media (max-width: 640px) {
+  .sponsor-bar {
+    flex-direction: column;      /* stack vertically */
+    align-items: flex-start;     /* align left */
+  }
+  .sponsor-lead {
+    margin-bottom: 6px;          /* space between text and logos */
+  }
+  .sponsor-logos {
+    margin-left: 0;
+    gap: 12px;
+  }
+  .sponsor-logos img {
+    height: 32px;                /* slightly smaller on phones */
+    max-width: 45vw;             /* ensures logos fit in viewport */
+  }
+}
+
+/* Footer sponsors (shared section at bottom of site) */
 .footer-sponsors {
   display: flex;
   align-items: center;
-  gap: 10px;        /* space between items */
+  gap: 10px;
   margin-top: 8px;
-  flex-wrap: wrap;  /* allow wrap on small screens */
+  flex-wrap: wrap;
 }
 
 .footer-sponsors span {
-  color: #444;      /* match your footer text */
+  color: #444;
   font-size: 14px;
 }
 
@@ -2539,16 +2560,27 @@ footer .box-no-padding {
   height: 28px;
   width: auto;
   display: block;
+  max-width: 120px;
 }
 
+/* Mobile footer tweaks */
+@media (max-width: 640px) {
+  .footer-sponsors {
+    gap: 8px;
+  }
+  .footer-sponsors img {
+    height: 24px;
+    max-width: 40vw;
+  }
+}
+
+/* Sponsor text color accents */
 .cuhk-text {
-  color: #660066;   /* CUHK purple (official brand: #660066) */
-  font-weight: 600; /* optional: make it stand out */
-}
-
-.msom-text {
-  color: #f15a22;   /* MSOM orange (approx brand orange) */
+  color: #660066;   /* CUHK purple */
   font-weight: 600;
 }
 
-
+.msom-text {
+  color: #f15a22;   /* MSOM orange */
+  font-weight: 600;
+}
