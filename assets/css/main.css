@@ -110,6 +110,13 @@ body {
   animation-direction: alternate;
 }
 
+/* On touch devices (no hover), always run the colour cycle */
+@media (hover: none) and (pointer: coarse) {
+  .logoFooter {
+    animation: colorReplace 10s infinite linear alternate;
+  }
+}
+
 
 @keyframes colorReplace {
 	0%{
@@ -2098,10 +2105,8 @@ footer .box-no-padding {
 	text-decoration: none;
 }
 
-#copyright span {
-	/* color: #a1a6ac; */
-	color: black;
-}
+#copyright span { color: inherit; }
+
 
 /* Featured */
 
@@ -2583,12 +2588,7 @@ footer .box-no-padding {
 }
 
 /* Sponsor text color accents */
-.cuhk-text {
-  color: #660066;   /* CUHK purple */
-  font-weight: 600;
-}
+/* Brand accent text — always win, even inside #copyright */
+.cuhk-text { color: #660066 !important; font-weight: 600; }
+.msom-text { color: #f15a22 !important; font-weight: 600; }
 
-.msom-text {
-  color: #f15a22;   /* MSOM orange */
-  font-weight: 600;
-}
