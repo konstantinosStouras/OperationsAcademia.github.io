@@ -2522,4 +2522,33 @@ footer .box-no-padding {
   display: block;
 }
 
+.footer-sponsors {
+  display: flex;
+  align-items: center;
+  gap: 10px;        /* space between items */
+  margin-top: 8px;
+  flex-wrap: wrap;  /* allow wrap on small screens */
+}
+
+.footer-sponsors span {
+  color: #444;      /* match your footer text */
+  font-size: 14px;
+}
+
+.footer-sponsors img {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.cuhk-text {
+  color: #660066;   /* CUHK purple (official brand: #660066) */
+  font-weight: 600; /* optional: make it stand out */
+}
+
+.msom-text {
+  color: #f15a22;   /* MSOM orange (approx brand orange) */
+  font-weight: 600;
+}
+
 
