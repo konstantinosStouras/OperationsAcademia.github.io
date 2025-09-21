@@ -96,10 +96,12 @@ body {
 }
 
 .logoFooter {
-	float: left;
-	background-color: transparent;
-	animation-play-state: paused;
+  float: left;
+  background-color: black;   /* default bg like before */
+  width: 40px;               /* match your HTML width */
+  animation-play-state: paused;
 }
+
 
 .logoFooter:hover {
 	animation: colorReplace 10s infinite;
@@ -2522,7 +2524,8 @@ footer .box-no-padding {
   height: 40px;       /* fixed height */
   width: auto;        /* keep aspect ratio */
   display: block;
-  max-width: 100%;    /* never overflow container */
+  max-width: 140px;    /* Add a max width cap so very wide logos don’t push the layout */
+  max-inline-size: 100%;    /* never overflow container */
 }
 
 
