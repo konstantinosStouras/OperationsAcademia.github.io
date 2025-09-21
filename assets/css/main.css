@@ -2588,7 +2588,20 @@ footer .box-no-padding {
 }
 
 /* Sponsor text color accents */
-/* Brand accent text — always win, even inside #copyright */
-.cuhk-text { color: #660066 !important; font-weight: 600; }
-.msom-text { color: #f15a22 !important; font-weight: 600; }
+.cuhk-text, .msom-text { font-weight: 600; }
+
+.cuhk-text:link,
+.cuhk-text:visited,
+.cuhk-text:hover,
+.cuhk-text:active {
+  color:#660066 !important;
+}
+
+.msom-text:link,
+.msom-text:visited,
+.msom-text:hover,
+.msom-text:active {
+  color:#f15a22 !important;
+}
+
 
