@@ -2519,11 +2519,12 @@ footer .box-no-padding {
 }
 
 .sponsor-logos img {
-  height: 40px;
-  width: auto;
+  height: 40px;       /* fixed height */
+  width: auto;        /* keep aspect ratio */
   display: block;
-  max-width: 140px;      /* prevents long logos from overflowing */
+  max-width: 100%;    /* never overflow container */
 }
+
 
 /* Mobile stacking */
 @media (max-width: 640px) {
