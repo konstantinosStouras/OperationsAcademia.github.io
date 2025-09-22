@@ -2638,7 +2638,7 @@ at the mobile breakpoint, they shrink smoothly as the screen gets narrower. */
   flex-wrap: wrap;
 }
 
-.sponsor-lead { font-weight: 600; }
+/* .sponsor-lead { font-weight: 600; } */
 
 .sponsor-logos {
   display: flex;
