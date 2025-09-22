@@ -2537,7 +2537,7 @@ footer .box-no-padding {
 
 /* Override just the MSOM logo */
 .sponsor-logos img[src*="msom-logo"] {
-  height: 32px;   /* smaller height for balance */
+  height: 20px;   /* 32? smaller height for balance */
 }
 
 
