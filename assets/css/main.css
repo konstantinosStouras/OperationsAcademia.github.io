@@ -2535,6 +2535,11 @@ footer .box-no-padding {
   max-inline-size: 100%;    /* never overflow container */
 }
 
+/* Override just the MSOM logo */
+.sponsor-logos img[src*="msom-logo"] {
+  height: 32px;   /* smaller height for balance */
+}
+
 
 /* Mobile stacking */
 @media (max-width: 640px) {
@@ -2548,10 +2553,15 @@ footer .box-no-padding {
   .sponsor-logos {
     margin-left: 0;
     gap: 12px;
+    flex-wrap: wrap;          /* ensure wrapping on narrow screens */
   }
   .sponsor-logos img {
     height: 32px;                /* slightly smaller on phones */
     max-width: 45vw;             /* ensures logos fit in viewport */
+  }
+  /* Keep MSOM proportionally smaller on mobile too */
+  .sponsor-logos img[src*="msom-logo"] {
+    height: 26px;             /* ~0.8 × 32px to match desktop ratio */
   }
 }
 
