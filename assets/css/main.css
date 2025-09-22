@@ -2630,4 +2630,59 @@ at the mobile breakpoint, they shrink smoothly as the screen gets narrower. */
   color:#f15a22 !important;
 }
 
+/* ---- Sponsor bar logo sizing (Candidates page) ---- */
+.sponsor-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sponsor-lead { font-weight: 600; }
+
+.sponsor-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  /* Baseline responsive logo height (all logos) */
+  --logo-h-min: 26px;   /* floor on tiny screens */
+  --logo-h-vw: 5.2vw;   /* responsive growth */
+  --logo-h-max: 34px;   /* cap on desktops */
+}
+
+/* Default logo sizing (keeps aspect ratio; no distortion) */
+.sponsor-logos img.logo {
+  height: clamp(var(--logo-h-min), var(--logo-h-vw), var(--logo-h-max));
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* CUHK square logo: make slightly taller for readability */
+.sponsor-logos img.logo[data-logo="business-school"] {
+  --logo-h-min: 30px;   /* +~15% vs baseline */
+  --logo-h-vw: 6.2vw;   /* grows a touch more on small screens */
+  --logo-h-max: 40px;   /* +~18% vs baseline */
+}
+
+/* INFORMS: keep at baseline */
+.sponsor-logos img.logo[data-logo="informs"] {
+  /* inherits baseline variables */
+}
+
+/* Mobile guardrail so wide raster logos don't overflow */
+@media (max-width: 640px) {
+  .sponsor-bar { flex-direction: column; align-items: flex-start; }
+  .sponsor-lead { margin-bottom: 6px; }
+  .sponsor-logos { gap: 12px; }
+  .sponsor-logos img.logo { max-width: 45vw; }
+}
+
+/* Minor quality boost for non-SVG bitmaps */
+.sponsor-logos img.logo {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
 
