@@ -2565,6 +2565,22 @@ footer .box-no-padding {
   }
 }
 
+/* Smoother scaling of logos across devices. 
+clamp(min, preferred, max) lets the browser choose a size that scales with viewport width (vw), 
+but never goes below min or above max. So instead of logos suddenly jumping from 40px → 32px 
+at the mobile breakpoint, they shrink smoothly as the screen gets narrower. */
+
+@media (max-width: 640px) {
+  .sponsor-logos img {
+    height: clamp(28px, 6vw, 32px);   /* scales with screen width */
+    max-width: 45vw;
+  }
+  .sponsor-logos img[src*="msom-logo"] {
+    height: clamp(22px, 4.8vw, 26px); /* proportional to CUHK logo */
+  }
+}
+
+
 /* Footer sponsors (shared section at bottom of site) */
 .footer-sponsors {
   display: flex;
