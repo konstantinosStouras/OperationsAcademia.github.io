@@ -39,7 +39,7 @@
 				$(
 					'<div id="titleBar">' +
 						'<a href="#navPanel" class="toggle"></a>' +
-						'<a href="http://www.operationsacademia.org/" class="title">' + $('#logo').html() + '</a>' +
+						'<a href="https://www.operationsacademia.org/" class="title">' + $('#logo').html() + '</a>' +
 					'</div>'
 				)
 					.appendTo($body);
