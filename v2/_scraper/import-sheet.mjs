@@ -265,9 +265,14 @@ export function rowsFromSheets(displayRows, rawRows) {
 
 /* ------------------------------------------------------------------- main */
 
-function arg(name, fallback = '') {
+/** The value after `name`, or `fallback`. A token that is itself a flag is NOT
+    a value: `--sheet --merge` means "the default sheet, merged", and reading
+    "--merge" as the sheet id is exactly what the first scheduled run did (it
+    asked Google for a spreadsheet called --merge and got a 404). */
+export function arg(name, fallback = '') {
   const i = process.argv.indexOf(name);
-  return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
+  const next = i !== -1 ? process.argv[i + 1] : undefined;
+  return next && !next.startsWith('--') ? next : fallback;
 }
 
 async function main() {
@@ -384,6 +389,15 @@ function selftest() {
     ok(JSON.stringify(a) === JSON.stringify(b),
       `${w}\n      expected ${JSON.stringify(b)}\n      got      ${JSON.stringify(a)}`);
   }
+
+  // the flag parser: `--sheet --merge` must not read "--merge" as the sheet id
+  const savedArgv = process.argv;
+  process.argv = ['node', 'import-sheet.mjs', '--sheet', '--merge'];
+  ok(arg('--sheet', SHEET_ID) === SHEET_ID, 'a bare --sheet falls back to the default id');
+  ok(arg('--out', 'v2/data/jobs.json') === 'v2/data/jobs.json', 'an absent flag falls back');
+  process.argv = ['node', 'import-sheet.mjs', '--sheet', 'ABC123', '--merge'];
+  ok(arg('--sheet', SHEET_ID) === 'ABC123', 'an explicit sheet id is read');
+  process.argv = savedArgv;
 
   const a = anchor('<a href="https://x.edu/ad" target="_blank">link to Job ad</a>');
   ok(a.url === 'https://x.edu/ad' && a.label === 'link to Job ad', 'anchor cell');
