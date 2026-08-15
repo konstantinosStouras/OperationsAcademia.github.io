@@ -1,47 +1,58 @@
 {
- "generated": "2026-08-15T17:42:05.021Z",
- "count": 80,
+ "generated": "2026-08-15T18:29:35.607Z",
+ "count": 170,
  "years": {
   "2020": 1,
   "2025": 67,
-  "2026": 12
+  "2026": 95,
+  "2027": 6,
+  "2028": 1
  },
  "types": {
-  "Business School": 57,
-  "University": 23
+  "Business School": 126,
+  "University": 44
  },
  "levels": {
-  "Assistant Professor": 61,
-  "Other Ranks": 34,
-  "Post-Doc": 8,
-  "Non-tenure track (teaching) position": 6,
-  "Visiting Faculty (various levels)": 2
+  "Assistant Professor": 127,
+  "Other Ranks": 76,
+  "Non-tenure track (teaching) position": 14,
+  "Post-Doc": 13,
+  "Visiting Faculty (various levels)": 6
  },
  "countries": {
-  "USA": 43,
-  "Hong Kong": 6,
-  "China": 5,
-  "Germany": 5,
-  "Canada": 4,
-  "Singapore": 3,
-  "United Kingdom": 3,
-  "France": 2,
+  "USA": 93,
+  "UK": 11,
+  "Hong Kong": 10,
+  "Germany": 8,
+  "China": 6,
+  "France": 6,
+  "Singapore": 6,
+  "Canada": 5,
+  "United Kingdom": 4,
+  "Spain": 3,
+  "Australia": 2,
+  "Belgium": 2,
   "India": 2,
-  "Spain": 2,
-  "Australia": 1,
-  "Belgium": 1,
+  "Turkey": 2,
+  "Chile": 1,
   "China (Shanghai)": 1,
+  "Cyprus": 1,
+  "Hong Kong SAR": 1,
+  "Ireland": 1,
+  "Lebanon": 1,
   "Portugal": 1,
-  "Turkey": 1
+  "Republic of Korea": 1,
+  "Shenzhen, China": 1,
+  "The Netherlands": 1
  },
  "characteristics": {
-  "Research seminars": 71,
-  "Undergrad": 65,
-  "Masters": 64,
-  "MBA": 64,
-  "PhD": 60,
-  "Exec Ed": 51
+  "Research seminars": 149,
+  "Masters": 143,
+  "Undergrad": 143,
+  "MBA": 139,
+  "PhD": 120,
+  "Exec Ed": 119
  },
  "featured": 1,
- "newestPosted": "2025-08-13"
+ "newestPosted": "2026-08-12"
 }

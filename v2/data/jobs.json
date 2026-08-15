@@ -18,18 +18,2741 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=CUHK Business School",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=CUHK%20Business%20School",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
    "MBA",
+   "Undergrad",
    "Exec Ed"
   ],
   "featured": true,
   "source": "sheet-import",
-  "addedAt": "2025-08-06T08:42:07Z"
+  "addedAt": "2025-08-06T00:00:00Z"
+ },
+ {
+  "id": "2027-university-of-virginia-20260812",
+  "year": 2027,
+  "posted": "2026-08-12",
+  "institution": "University of Virginia",
+  "department": "Darden School of Business",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Review of applications will begin on August 28, 2026, though we welcome applications after that date and will continue to review applications until the position is filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1h2JPj5a96z5jG3vAtF-nOpJttDoHKs32",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/190572",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-08-12T00:00:00Z"
+ },
+ {
+  "id": "2027-the-ohio-state-university-20260810",
+  "year": 2027,
+  "posted": "2026-08-10",
+  "institution": "The Ohio State University",
+  "department": "Max M. Fisher College of Business, Department of Operations and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2026",
+  "applyByDate": "2026-10-15",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://osu.wd1.myworkdayjobs.com/OSUCareers/job/Columbus-Campus/Assistant-Professor--Tenure-Track-_R155287",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Ohio%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-08-10T00:00:00Z"
+ },
+ {
+  "id": "2028-university-of-kansas-20260806",
+  "year": 2028,
+  "posted": "2026-08-06",
+  "institution": "University of Kansas",
+  "department": "School of Business, Analytics, Information, and Operations Management Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled. First review of applications will begin on September 8, 2026, and will continue until the position has been filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1NEdiuYBx2TfgD3RsCFy-UB9q6Y4JrzND",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://sjobs.brassring.com/TGnewUI/Search/home/HomeWithPreLoad?PageType=JobDetails&partnerid=25752&siteid=5539&jobid=5231500#jobDetails=5231500_5539",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Kansas",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-08-06T00:00:00Z"
+ },
+ {
+  "id": "2027-national-university-of-singapore-20260730",
+  "year": 2027,
+  "posted": "2026-07-30",
+  "institution": "National University of Singapore",
+  "department": "NUS Business School, Department of Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 9, 2026",
+  "applyByDate": "2026-10-09",
+  "comments": "",
+  "country": "Singapore",
+  "adUrl": "https://drive.google.com/open?id=1OPkSBEGWhFnG4nAAeoRBp493SBkzbBX3",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-07-30T00:00:00Z"
+ },
+ {
+  "id": "2026-mcgill-university-20260728",
+  "year": 2026,
+  "posted": "2026-07-28",
+  "institution": "McGill University",
+  "department": "Desautels Faculty of Management, Operations Management Area",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2026. Tenure-track position in Operations Management",
+  "applyByDate": "2026-10-15",
+  "comments": "",
+  "country": "Canada",
+  "adUrl": "https://drive.google.com/open?id=19ycjWPZ76lQKZXUsGo0vFMJj_28YLEFl",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://mcgill.wd3.myworkdayjobs.com/en-US/McGill_Careers/job/Bronfman-Building/Tenure-Track-Position-in-Operations-Management--Desautels-Faculty-of-Management--McGill-University_JR0000078492?workerSubType=5b8bbc1be9ca01d9ed26d340de00890e",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=McGill%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-07-28T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-mannheim-20260720",
+  "year": 2026,
+  "posted": "2026-07-20",
+  "institution": "University of Mannheim",
+  "department": "Operations Management",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "September 15, 2026",
+  "applyByDate": "2026-09-15",
+  "comments": "",
+  "country": "Germany",
+  "adUrl": "https://drive.google.com/open?id=1kqmS-itVXheKCRz4cT_DzStMyOMzp0Jn",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.bwl.uni-mannheim.de/media/Lehrstuehle/bwl/Stolletz/Jobs/2026_07_16_PhD_OperationsAnalytics.pdf/flipbook",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Mannheim",
+  "characteristics": [
+   "PhD"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-07-20T00:00:00Z"
+ },
+ {
+  "id": "2027-university-of-michigan-20260708",
+  "year": 2027,
+  "posted": "2026-07-08",
+  "institution": "University of Michigan",
+  "department": "Stephen M. Ross School of Business",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "October 15, 2026",
+  "applyByDate": "2026-10-15",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1qxLKe7xslVOEh9vPsU8biIv9xBKrrxfQ",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/188537",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Michigan",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-07-08T00:00:00Z"
+ },
+ {
+  "id": "2027-ku-leuven-20260702",
+  "year": 2027,
+  "posted": "2026-07-02",
+  "institution": "KU LEUVEN",
+  "department": "Faculty of Economics and Business",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "September 14, 2026. Apply for this job no later than September 14, 2026 CET",
+  "applyByDate": "2026-09-14",
+  "comments": "",
+  "country": "Belgium",
+  "adUrl": "https://drive.google.com/open?id=11guKtCALEY7taF1w7j17ijfQUY2xUd5L",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.kuleuven.be/personeel/jobsite/jobs/60640174?lang=en",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KU%20LEUVEN",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-07-02T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-houston-20260428",
+  "year": 2026,
+  "posted": "2026-04-28",
+  "institution": "University of Houston",
+  "department": "University of Houston and DISC",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "May 15, 2026",
+  "applyByDate": "2026-05-15",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1_K5GveJQCNzzw7pNBVdMWNw7saoSp7fU",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-04-28T00:00:00Z"
+ },
+ {
+  "id": "2026-tulane-university-20260408",
+  "year": 2026,
+  "posted": "2026-04-08",
+  "institution": "Tulane University",
+  "department": "Freeman School of Business, Management Science",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-04-08T00:00:00Z"
+ },
+ {
+  "id": "2027-tulane-university-20260407",
+  "year": 2027,
+  "posted": "2026-04-07",
+  "institution": "Tulane University",
+  "department": "Freeman School of Business",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://tulane-ibqejb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs/preview/333/?keyword=freeman&mode=location",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-04-07T00:00:00Z"
+ },
+ {
+  "id": "2026-tulane-university-20260407",
+  "year": 2026,
+  "posted": "2026-04-07",
+  "institution": "Tulane University",
+  "department": "Freeman School of Business",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://tulane-ibqejb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs/preview/333/?keyword=freeman&mode=location",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-04-07T00:00:00Z"
+ },
+ {
+  "id": "2026-tulane-university-20260407-2",
+  "year": 2026,
+  "posted": "2026-04-07",
+  "institution": "Tulane University",
+  "department": "Freeman School of Business, Management Sciences Area",
+  "type": "Business School",
+  "levels": [
+   "Visiting Faculty (various levels)"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://tulane-ibqejb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs/preview/333/?keyword=freeman&mode=location",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-04-07T00:00:00Z"
+ },
+ {
+  "id": "2026-tulane-university-20260407-3",
+  "year": 2026,
+  "posted": "2026-04-07",
+  "institution": "Tulane University",
+  "department": "Freeman School of Business, Management Sciences Area",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://tulane-ibqejb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs/preview/276/?keyword=freeman&mode=location",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-04-07T00:00:00Z"
+ },
+ {
+  "id": "2026-institut-mines-telecom-business-school-20260319",
+  "year": 2026,
+  "posted": "2026-03-19",
+  "institution": "Institut Mines-Telecom Business School",
+  "department": "Department of Management, Marketing and Strategy",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "March 31, 2026",
+  "applyByDate": "2026-03-31",
+  "comments": "",
+  "country": "France",
+  "adUrl": "https://drive.google.com/open?id=1iQAi8Uhj4BL7UvjAotTOLJLe4FtKiD7c",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://institutminestelecom.recruitee.com/o/pd-en-supply-chain-logistique-cdd-12-mois?lang=en",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Institut%20Mines-Telecom%20Business%20School",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-03-19T00:00:00Z"
+ },
+ {
+  "id": "2026-tilburg-university-20260224",
+  "year": 2026,
+  "posted": "2026-02-24",
+  "institution": "Tilburg University",
+  "department": "Tilburg School of Economics and Management, Department of Information Systems and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "April 1, 2026. We will start reviewing applications immediately upon submission. Interviews will be conducted on a rolling basis (we invite the best candidates from the list of applicants up to that point). The vacancy will remain open until filled",
+  "applyByDate": "2026-04-01",
+  "comments": "",
+  "country": "The Netherlands",
+  "adUrl": "https://drive.google.com/open?id=1YfaSfzAk4RuwFlSBOTZ_Uam4EDDE46yV",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://tiu.nu/23444",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tilburg%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-24T00:00:00Z"
+ },
+ {
+  "id": "2026-georgetown-university-20260223",
+  "year": 2026,
+  "posted": "2026-02-23",
+  "institution": "Georgetown University",
+  "department": "McDonough School of Business, NRF Business of Retail Initiative",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "March 16, 2026. Applications will be reviewed on a rolling basis, and candidates who wish to receive full consideration should apply by March 15th. Applications past this deadline may also be considered if the position is not filled.",
+  "applyByDate": "2026-03-16",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1LemgKvaqH00uCs0KzDlGrDmAV9dXEE6k",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://msb.georgetown.edu/faculty-research/open-positions/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Georgetown%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-23T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20260223",
+  "year": 2026,
+  "posted": "2026-02-23",
+  "institution": "University College London",
+  "department": "Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "March 13, 2026. Please apply for the School's three advertised tenure-track Assistant Professor positions (officially called Lecturer in the UK system) separately: AP in Sustainable Supply Chain Management, AP in Supply Chain Management & Logistics, and AP in Operations & Project Management.",
+  "applyByDate": "2026-03-14",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=41857&jobTitle=Lecturer+in+Sustainable+Supply+Chain+Management",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-23T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20260223-2",
+  "year": 2026,
+  "posted": "2026-02-23",
+  "institution": "University College London",
+  "department": "Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "March 14, 2026. Please apply for the School's three advertised tenure-track Assistant Professor positions (officially called Lecturer in the UK system) separately: AP in Sustainable Supply Chain Management, AP in Supply Chain Management & Logistics, and AP in Operations & Project Management.",
+  "applyByDate": "2026-03-14",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=41673&jobTitle=Lecturer+in+Supply+Chain+Management+and+Logistics",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-23T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20260210",
+  "year": 2026,
+  "posted": "2026-02-10",
+  "institution": "University College London",
+  "department": "Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "March 4, 2026. Main teaching load: 5-week UG module on project management; some basic knowledge on AI and project management is desirable, but no requirement of research exposure in this field --- this is a general healthcare ops position",
+  "applyByDate": "2026-03-04",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=41065&jobTitle=Lecturer+in+Operations+and+Project+Management+%28AI+focus%29",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-10T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-utah-20260209",
+  "year": 2026,
+  "posted": "2026-02-09",
+  "institution": "University of Utah",
+  "department": "David Eccles School of Business, Department of Operations & Info Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Utah",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-09T00:00:00Z"
+ },
+ {
+  "id": "2026-georgia-state-university-20260206",
+  "year": 2026,
+  "posted": "2026-02-06",
+  "institution": "Georgia State University",
+  "department": "Robinson College of Business-Department of Management",
+  "type": "University",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled. Until filled",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1zuoK_P9r_lfT84j4zT9gT_BBkKxkbVIL",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://facultycareers.gsu.edu/postings/6565",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Georgia%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-06T00:00:00Z"
+ },
+ {
+  "id": "2026-hec-paris-20260203",
+  "year": 2026,
+  "posted": "2026-02-03",
+  "institution": "HEC Paris",
+  "department": "Information Systems and Operations Management Department",
+  "type": "Business School",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "France",
+  "adUrl": "https://drive.google.com/open?id=1fZFLxOs28YCKp3tfDLfDd0bEWFFkYr3l",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Paris",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-02-03T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-cyprus-20260127",
+  "year": 2026,
+  "posted": "2026-01-27",
+  "institution": "University of Cyprus",
+  "department": "School Economics and Management, Department of Business and Public Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "February 24, 2026",
+  "applyByDate": "2026-02-24",
+  "comments": "",
+  "country": "Cyprus",
+  "adUrl": "https://drive.google.com/open?id=1a6J0kZpM9zZbKh3E8E3QQS6XmI-lJKp1",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Cyprus",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-01-27T00:00:00Z"
+ },
+ {
+  "id": "2026-carnegie-mellon-university-20260119",
+  "year": 2026,
+  "posted": "2026-01-19",
+  "institution": "Carnegie Mellon University",
+  "department": "Heinz College of Information Systems and Public Policy",
+  "type": "University",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "Until filled. 1/23/2026",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1Dk3oZvHjpQCMx25IsLbDqa9iiO60AgZq",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Carnegie%20Mellon%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-01-19T00:00:00Z"
+ },
+ {
+  "id": "2026-the-hong-kong-polytechnic-university-20260111",
+  "year": 2026,
+  "posted": "2026-01-11",
+  "institution": "The Hong Kong Polytechnic University",
+  "department": "Department of Logistics and Maritime Studies",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Consideration of applications and nominations will commence on 20 February 2026 until the position is filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "https://drive.google.com/open?id=1RnJ2KSWpWfwBNEVXFAS7yhU7S5cDuMbo",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=260109004",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
+  "characteristics": [
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-01-11T00:00:00Z"
+ },
+ {
+  "id": "2026-united-states-naval-academy-20260106",
+  "year": 2026,
+  "posted": "2026-01-06",
+  "institution": "United States Naval Academy",
+  "department": "Mathematics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled. See online posting for details.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1YOao1Gs4RMH4WK3U5nEic5-oZepvl43I",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://usna.edu/HRO/jobinfo/TT-MATH-26-27.php",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=United%20States%20Naval%20Academy",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-01-06T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-mannheim-20251208",
+  "year": 2026,
+  "posted": "2025-12-08",
+  "institution": "University of Mannheim",
+  "department": "Business School, Chair of Production Management",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "January 15, 2026. Deadline for the scholarship January 15th or March 31st, 2026",
+  "applyByDate": "2026-01-15",
+  "comments": "",
+  "country": "Germany",
+  "adUrl": "https://drive.google.com/open?id=1IhUOU98l66V2XeFqreXHXOREj6M8q12k",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.bwl.uni-mannheim.de/media/Lehrstuehle/bwl/Stolletz/Jobs/2025_12_04_EN_PhD_OperationsAnalytics.pdf",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Mannheim",
+  "characteristics": [
+   "PhD"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-12-08T00:00:00Z"
+ },
+ {
+  "id": "2026-tbs-education-20251203",
+  "year": 2026,
+  "posted": "2025-12-03",
+  "institution": "TBS Education",
+  "department": "TBS Education, Information, Operations and Management Sciences Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "January 15, 2026",
+  "applyByDate": "2026-01-15",
+  "comments": "",
+  "country": "France",
+  "adUrl": "https://drive.google.com/open?id=1bhc8IGlCyfsxteG23s1_yLpqpb_vxWYR",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.tbs-education.com/faculty-research/faculty/recruitment/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=TBS%20Education",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-12-03T00:00:00Z"
+ },
+ {
+  "id": "2026-villanova-university-20251120",
+  "year": 2026,
+  "posted": "2025-11-20",
+  "institution": "Villanova University",
+  "department": "Villanova School of Business, Management and Operations Area",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 5, 2025",
+  "applyByDate": "2025-12-05",
+  "comments": "First round interviews by zoom",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1LPl5V6KDfSRLAYdysjYSTfJKt5QdGZQt",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.villanova.edu/postings/33298",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Villanova%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-11-20T00:00:00Z"
+ },
+ {
+  "id": "2026-city-university-of-hong-kong-20251118",
+  "year": 2026,
+  "posted": "2025-11-18",
+  "institution": "City University of Hong Kong",
+  "department": "College of Business, Department of Decision Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "December 30, 2025. Applications will be reviewed immediately upon receipt, and the recruitment window will close once the position is successfully filled. Early application is therefore strongly encouraged.",
+  "applyByDate": "2025-12-30",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "https://drive.google.com/open?id=1kIVpNaD2Ppi-P0WB_epboX2W61dFzW6a",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.cityu.edu.hk/hro/en/job/current/research.asp?ref=ur-t16825",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20University%20of%20Hong%20Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-11-18T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20251113",
+  "year": 2026,
+  "posted": "2025-11-13",
+  "institution": "University College London",
+  "department": "Global Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 16, 2025",
+  "applyByDate": "2025-11-16",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=38729&jobTitle=Lecturer+in+Operations+Project+Management",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-11-13T00:00:00Z"
+ },
+ {
+  "id": "2026-auburn-university-20251106",
+  "year": 2026,
+  "posted": "2025-11-06",
+  "institution": "Auburn University",
+  "department": "Department of Industrial and Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 12, 2025. Position will remain open until filled. Apply before \"apply by\" date for full consideration.",
+  "applyByDate": "2025-12-12",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1fdXc4tJEuMGdZjEsrPI7KudGskUdZ9yb",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.auemployment.com/postings/56368",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Auburn%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-11-06T00:00:00Z"
+ },
+ {
+  "id": "2026-the-pennsylvania-state-university-20251104",
+  "year": 2026,
+  "posted": "2025-11-04",
+  "institution": "The Pennsylvania State University",
+  "department": "Supply Chain & Information Systems",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Review of applications will begin approximately 10/31/2025 and will continue until the position is filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1IlGatm5IKspJiU427vRf-RwW7voiHHVN",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://psu.wd1.myworkdayjobs.com/PSU_Academic/job/Penn-State-University-Park/Open-Rank-Professor-in-Supply-Chain-Management_REQ_0000072356-1",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Pennsylvania%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-11-04T00:00:00Z"
+ },
+ {
+  "id": "2026-the-pennsylvania-state-university-20251104-2",
+  "year": 2026,
+  "posted": "2025-11-04",
+  "institution": "The Pennsylvania State University",
+  "department": "Supply Chain & Information Systems",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled. Review of applications will begin approximately 10/31/2025 and will continue until the position is filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1ZEkcsh-EehePwY9aS7eSKjsUoS30ZI0P",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://psu.wd1.myworkdayjobs.com/PSU_Academic/job/Penn-State-University-Park/Assistant-Professor-in-Supply-Chain-Management_REQ_0000072293-1",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Pennsylvania%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-11-04T00:00:00Z"
+ },
+ {
+  "id": "2026-lehigh-university-20251029",
+  "year": 2026,
+  "posted": "2025-10-29",
+  "institution": "Lehigh University",
+  "department": "College of Business, Department of Decision and Technology Analytics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "December 1, 2025. Review of applications will begin on December 1, 2025 and will continue until the position is filled. For full consideration, applications should be received by December 1, 2025.",
+  "applyByDate": "2025-12-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1KOz5-amZM7ETKKe3v-zSnwLtixnkqlxq",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/174882",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Lehigh%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-29T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-south-carolina-20251024",
+  "year": 2026,
+  "posted": "2025-10-24",
+  "institution": "University of South Carolina",
+  "department": "Darla Moore School of Business, Department of Management Science",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1LMR0e8VefurIo-wd7dzfhlDo7IJFM6Ea",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://uscjobs.sc.edu/postings/196393",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-24T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-california-berkeley-20251023",
+  "year": 2026,
+  "posted": "2025-10-23",
+  "institution": "University of California Berkeley",
+  "department": "Department of Industrial Engineering & Operations Research (IEOR)",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 1, 2025",
+  "applyByDate": "2025-12-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apptrkr.com/6659403",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%20Berkeley",
+  "characteristics": [
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-23T00:00:00Z"
+ },
+ {
+  "id": "2026-korea-advanced-institute-of-science-and-technolo-20251022",
+  "year": 2026,
+  "posted": "2025-10-22",
+  "institution": "Korea Advanced Institute of Science and Technology (KAIST)",
+  "department": "College of Business, Operations Strategy and Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 31, 2025. We have a flexible deadline, but early submissions are encouraged.",
+  "applyByDate": "2025-12-31",
+  "comments": "",
+  "country": "Republic of Korea",
+  "adUrl": "https://drive.google.com/open?id=1iUUE92I55TWeC2pm2hrvIkraSjoX0aTI",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Korea%20Advanced%20Institute%20of%20Science%20and%20Technology%20(KAIST)",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-22T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-california-berkeley-20251022",
+  "year": 2026,
+  "posted": "2025-10-22",
+  "institution": "University of California, Berkeley",
+  "department": "Department of Industrial Engineering and Operations Research (IEOR)",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "December 1, 2025",
+  "applyByDate": "2025-12-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://aprecruit.berkeley.edu/JPF05133",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%2C%20Berkeley",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-22T00:00:00Z"
+ },
+ {
+  "id": "2026-arizona-state-university-20251021",
+  "year": 2026,
+  "posted": "2025-10-21",
+  "institution": "Arizona State University",
+  "department": "W. P. Carey School of Business, Department of Information Systems",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 20, 2025",
+  "applyByDate": "2025-11-20",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1E4MnyhrM71GnH3B7v3-Wt8sKOKFwDY3_",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/175964",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Arizona%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-21T00:00:00Z"
+ },
+ {
+  "id": "2026-the-university-of-texas-at-dallas-20251021",
+  "year": 2026,
+  "posted": "2025-10-21",
+  "institution": "The University of Texas at Dallas",
+  "department": "Naveen Jindal School of Management/Healthcare Management Area",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 31, 2025",
+  "applyByDate": "2025-10-31",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.utdallas.edu/postings/30527",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20University%20of%20Texas%20at%20Dallas",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-21T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-cambridge-20251017",
+  "year": 2026,
+  "posted": "2025-10-17",
+  "institution": "University of Cambridge",
+  "department": "Judge Business School",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 15, 2025. We will be closing the application process by 15/12/2025 (in the event of a change we will be posting alternative dates in the official application website)",
+  "applyByDate": "2025-12-15",
+  "comments": "There is a chance for very few INFORMS informal meetings where we will be sharing more about the position.",
+  "country": "UK",
+  "adUrl": "https://drive.google.com/open?id=1ALF30pwYP-_WcAdtSWyJ6-nW3qV-gnVU",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Cambridge",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-17T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-san-diego-20251017",
+  "year": 2026,
+  "posted": "2025-10-17",
+  "institution": "University of San Diego",
+  "department": "The Knauss School of Business at the University of San Diego",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 16, 2025. Submissions should be complete by December 15th, 2025.",
+  "applyByDate": "2025-11-16",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apptrkr.com/6467359",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20San%20Diego",
+  "characteristics": [
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-17T00:00:00Z"
+ },
+ {
+  "id": "2026-columbia-university-20251013",
+  "year": 2026,
+  "posted": "2025-10-13",
+  "institution": "Columbia University",
+  "department": "Department of Industrial Engineering and Operations Research",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. All applications received by November 21, 2025 will receive full consideration, though we encourage early application.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1px6ShWZAiNggS4FIjWJ-KboYIbim_ga6",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.engineering.columbia.edu/faculty-resources/faculty-positions",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Columbia%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-13T00:00:00Z"
+ },
+ {
+  "id": "2026-unsw-sydney-20251013",
+  "year": 2026,
+  "posted": "2025-10-13",
+  "institution": "UNSW Sydney",
+  "department": "UNSW Business School - School of Information Systems and Technology Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 31, 2025. Please apply by the deadline for full consideration.",
+  "applyByDate": "2025-10-31",
+  "comments": "A limited number of informal meetings will occur at INFORMS.",
+  "country": "Australia",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://external-careers.jobs.unsw.edu.au/cw/en/job/534991/lecturer-senior-lecturer-school-of-information-systems-technology-management-unsw-business-school",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=UNSW%20Sydney",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-13T00:00:00Z"
+ },
+ {
+  "id": "2026-temple-university-20251010",
+  "year": 2026,
+  "posted": "2025-10-10",
+  "institution": "Temple University",
+  "department": "Fox School of Business, Operations and Supply Chain Management area",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Until filled.",
+  "applyByDate": "",
+  "comments": "Current faculty members will be attending the 2025 INFORMS Annual Conference in Atlanta.",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1QVmB8cncaTDBKvB9gpTTcYWK7YeLswRM",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Temple%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-10T00:00:00Z"
+ },
+ {
+  "id": "2026-baruch-college-the-city-university-of-new-york-c-20251007",
+  "year": 2026,
+  "posted": "2025-10-07",
+  "institution": "Baruch College, The City University of New York (CUNY)",
+  "department": "Zicklin School of Business, Loomba Department of Management, Operations Management Group",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Please reach out to [e-mail address — see the advertisement link] to request meetings with departmental representatives at the INFORMS or DSI meetings.",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://cuny.jobs/new-york-ny/assistant-professor-in-operations-and-decision-analytics-oda/939E9FBF3DD74AB59093878C2FB9034B/job/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Baruch%20College%2C%20The%20City%20University%20of%20New%20York%20(CUNY)",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-07T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-virginia-20251007",
+  "year": 2026,
+  "posted": "2025-10-07",
+  "institution": "University of Virginia",
+  "department": "Darden School of Business, Data Analytics and Decision Sciences (DADS) Area",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Review of applications will begin on November 5, 2025, though we welcome applications after that date and will continue to review applications until the position is filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/173752",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
+  "characteristics": [
+   "Research seminars",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-07T00:00:00Z"
+ },
+ {
+  "id": "2026-american-university-of-beirut-20251006",
+  "year": 2026,
+  "posted": "2025-10-06",
+  "institution": "American University of Beirut",
+  "department": "Industrial Engineering and Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 15, 2025. We will continue considering applications until the positions are filled, but early submissions are encouraged.",
+  "applyByDate": "2025-12-15",
+  "comments": "",
+  "country": "Lebanon",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.chronicle.com/job/37890678/multiple-tenure-track-faculty-positions-in-industrial-engineering-and-management-/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=American%20University%20of%20Beirut",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-06T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-virginia-20251005",
+  "year": 2026,
+  "posted": "2025-10-05",
+  "institution": "University of Virginia",
+  "department": "Darden School of Business, Data Analytics and Decision Sciences (DADS) Area",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled. Review of applications will begin on November 5, 2025, though we welcome applications after that date and will continue to review applications until the position is filled",
+  "applyByDate": "",
+  "comments": "Review of applications will begin on November 5, 2025, though we welcome applications after that date and will continue to review applications until the position is filled",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/173753",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
+  "characteristics": [
+   "Research seminars",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-05T00:00:00Z"
+ },
+ {
+  "id": "2026-michigan-state-university-20251004",
+  "year": 2026,
+  "posted": "2025-10-04",
+  "institution": "Michigan State University",
+  "department": "Eli Broad College of Business, Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 25, 2025. Review of applications will begin October 6, 2025, and continue until the position is filled. To ensure full consideration, applications should be received by October 25, 2025. Applications must be submitted online at: http://careers.msu.edu.",
+  "applyByDate": "2025-10-25",
+  "comments": "We do Zoom interviews with the committee. Our faculty will be at INFORMS conference and you are encouraged to reach out to them for more information.",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=17hz2kns9vc4161UWxAvXkL1jTgUky1DP",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://careers.msu.edu/jobs/assistant-associate-professor-tenure-system-east-lansing-michigan-united-states-638308b1-5d2d-434c-9dd7-888de4a1fae8",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Michigan%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-04T00:00:00Z"
+ },
+ {
+  "id": "2026-ozyegin-university-20251003",
+  "year": 2026,
+  "posted": "2025-10-03",
+  "institution": "Özyeğin University",
+  "department": "School of Business, Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled. we have a flexible deadline, but early submissions are encouraged",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Turkey",
+  "adUrl": "https://drive.google.com/open?id=1YgctGWQKljivD7nvbUDt8ZddKXsO0ssC",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ozyegin.edu.tr/en/faculty-business",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=%C3%96zye%C4%9Fin%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-03T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-texas-at-dallas-20251003",
+  "year": 2026,
+  "posted": "2025-10-03",
+  "institution": "University of Texas at Dallas",
+  "department": "Naveen Jindal School of Management, Supply Chain/Operations Management Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Priority will be given to completed applications received by 10/12/2025.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1nUv-yAO4mLIBzT6Mu4dTKSl0_zqaPEhz",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.utdallas.edu/postings/30416",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Texas%20at%20Dallas",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-03T00:00:00Z"
+ },
+ {
+  "id": "2026-michigan-state-university-20251002",
+  "year": 2026,
+  "posted": "2025-10-02",
+  "institution": "Michigan State University",
+  "department": "The Eli Broad College of Business, Department of Supply Chain Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 25, 2025",
+  "applyByDate": "2025-10-25",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://careers.msu.edu/jobs/assistant-associate-professor-tenure-system-east-lansing-michigan-united-states-638308b1-5d2d-434c-9dd7-888de4a1fae8",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Michigan%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-02T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-miami-20251002",
+  "year": 2026,
+  "posted": "2025-10-02",
+  "institution": "University of Miami",
+  "department": "Miami Herbert Business School, Department of Management Science",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Review of applications will begin immediately and continue until the positions are filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1wruOSaPVGrJdKQ4CPbU-KAIFLhfcmc_I",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://careers.miami.edu/us/en/job/R100081474/MHBS-Assistant-Associate-Full-Professor",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Miami",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-02T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-utah-20251002",
+  "year": 2026,
+  "posted": "2025-10-02",
+  "institution": "University of Utah",
+  "department": "David Eccles School of Business, Operations & Information Systems Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. For full consideration we encourage you to apply by October 17, 2025.",
+  "applyByDate": "",
+  "comments": "Candidates presenting at INFORMS are strongly encouraged to submit a cover letter indicating the details of their talk (session, title) at the earliest. Please email Varun Gupta ([e-mail address — see the advertisement link]) for any queries.",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1Z8ZXDPLQ-IdeLnoGqy0w0iRIFQ0weDXz",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://utah.peopleadmin.com/postings/189425",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Utah",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-10-02T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20250929",
+  "year": 2026,
+  "posted": "2025-09-29",
+  "institution": "University College London",
+  "department": "Global Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 12, 2025. (Extended deadline.) Research-track position with low teaching load; faculty can choose to submit work to either top business or medical journals.",
+  "applyByDate": "2025-10-12",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=38226&jobTitle=Lecturer+in+Technology+and+Operations+Management",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-29T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-minnesota-20250929",
+  "year": 2026,
+  "posted": "2025-09-29",
+  "institution": "University of Minnesota",
+  "department": "Carlson School of Management, Supply Chain and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled. Application Deadline The search committee will begin reviewing applications on October 6, 2025. Applications will continue to be accepted until the position is filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1xX-luwVj3BahF0v7jziZCbI52rDweElm",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://employment.umn.edu/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Minnesota",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-29T00:00:00Z"
+ },
+ {
+  "id": "2026-city-university-of-hong-kong-20250926",
+  "year": 2026,
+  "posted": "2025-09-26",
+  "institution": "City University of Hong Kong",
+  "department": "College of Business, Department of Decision Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2025. For candidates seeking interviews at the 2025 INFORMS Annual Meeting in Atlanta (Oct 26-29), early applications are encouraged.",
+  "applyByDate": "2025-12-31",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "https://drive.google.com/open?id=1__j3-KKlnFtrSNFz7w685hvxZbWn1Nqk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20University%20of%20Hong%20Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-26T00:00:00Z"
+ },
+ {
+  "id": "2026-city-university-of-hong-kong-20250926-2",
+  "year": 2026,
+  "posted": "2025-09-26",
+  "institution": "City University of Hong Kong",
+  "department": "College of Business, Department of Decision Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "December 31, 2025. Applications will receive full consideration until the positions are filled",
+  "applyByDate": "2025-12-31",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "https://drive.google.com/open?id=1CUGz4apFZvCedqmRvVnjEmirOSqEbCuW",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20University%20of%20Hong%20Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-26T00:00:00Z"
+ },
+ {
+  "id": "2026-lehigh-university-20250926",
+  "year": 2026,
+  "posted": "2025-09-26",
+  "institution": "Lehigh University",
+  "department": "College of Business, Department of Decision and Technology Analytics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 1, 2025. For full consideration, applications should be received by November 1, 2025.",
+  "applyByDate": "2025-11-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1TCrXBuWzyCg8Rim2vvlUq2b0CB_HLqhV",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://facultyjobs.lehigh.edu/node/1195",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Lehigh%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-26T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-illinois-urbana-champaign-20250925",
+  "year": 2026,
+  "posted": "2025-09-25",
+  "institution": "University of Illinois Urbana-Champaign",
+  "department": "Gies College of Business, Department of Business Administration",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 19, 2025",
+  "applyByDate": "2025-10-19",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1Txo41M-05KNHawcBdyjnZUcgXm2BPRze",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Illinois%20Urbana-Champaign",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-25T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-virginia-20250925",
+  "year": 2026,
+  "posted": "2025-09-25",
+  "institution": "University of Virginia",
+  "department": "Darden School of Business",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1WT__xXiEhvjL6duZ7JNGLoLEvPY29H-t",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/173754",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-25T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-virginia-20250925-2",
+  "year": 2026,
+  "posted": "2025-09-25",
+  "institution": "University of Virginia",
+  "department": "Darden School of Business",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1wIPPeEqPXV6arEt_6YQq0Kn_FtWLrOHz",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/173755",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-25T00:00:00Z"
+ },
+ {
+  "id": "2026-nanyang-technological-university-20250924",
+  "year": 2026,
+  "posted": "2025-09-24",
+  "institution": "Nanyang Technological University",
+  "department": "Nanyang Business School",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "July 28, 2026. we have a flexible deadline, but early submissions are encouraged",
+  "applyByDate": "2026-07-28",
+  "comments": "",
+  "country": "Singapore",
+  "adUrl": "https://drive.google.com/open?id=1ImleXAfLdejnCRqHzb3JYgjn70eIijGV",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Nanyang%20Technological%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-24T00:00:00Z"
+ },
+ {
+  "id": "2026-the-ohio-state-university-20250923",
+  "year": 2026,
+  "posted": "2025-09-23",
+  "institution": "The Ohio State University",
+  "department": "Max M. Fisher College of Business, Operations and Business Analytics Department",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. To ensure consideration for the first round of interviews, candidates should apply by October 15, 2025.",
+  "applyByDate": "",
+  "comments": "October 15, 2025",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1E4FZ53lBLF9A3jIKDbTnGIz4fm5qvCcV",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Ohio%20State%20University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-23T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-houston-20250923",
+  "year": 2026,
+  "posted": "2025-09-23",
+  "institution": "University of Houston",
+  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Early submissions are encouraged",
+  "applyByDate": "2025-10-15",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1TTs0x7UMp_WyMYWOXnKmir7P3vRWf9ft",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://careers.uh.edu/jobs/assistant-associate-full-professor-decision-information-sciences-houston-texas-united-states",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-23T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-houston-20250923-2",
+  "year": 2026,
+  "posted": "2025-09-23",
+  "institution": "University of Houston",
+  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled. To ensure consideration for the first round of interviews, candidates should apply by October 15, 2025.",
+  "applyByDate": "2025-10-15",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1cuX6-acP5-guXnVTfXALJLITXwFIQOdL",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://careers.uh.edu/jobs/professor-of-practice-decision-information-sciences-houston-texas-united-states",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-23T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-houston-20250923-3",
+  "year": 2026,
+  "posted": "2025-09-23",
+  "institution": "University of Houston",
+  "department": "Decision and Information Sciences (DISC)",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2025",
+  "applyByDate": "2025-10-15",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1VFLTlnhPwjJo3X6xZZ52yRzWEzoolDLJ",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-23T00:00:00Z"
+ },
+ {
+  "id": "2026-shanghai-university-of-finance-and-economics-20250922",
+  "year": 2026,
+  "posted": "2025-09-22",
+  "institution": "Shanghai University of Finance and Economics",
+  "department": "College of Business",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 20, 2025. Early submissions are encouraged",
+  "applyByDate": "2025-12-20",
+  "comments": "First round interview at 2025 INFORMS Annual Meeting",
+  "country": "China",
+  "adUrl": "https://drive.google.com/open?id=19ob9nEKK730tBUoerJEz8vhUsdWzkew5",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Shanghai%20University%20of%20Finance%20and%20Economics",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-22T00:00:00Z"
+ },
+ {
+  "id": "2026-national-university-of-singapore-20250918",
+  "year": 2026,
+  "posted": "2025-09-18",
+  "institution": "National University of Singapore",
+  "department": "Department of Industrial Systems Engineering and Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 1, 2025. We have a flexible deadline, but early submissions are encouraged.",
+  "applyByDate": "2025-11-01",
+  "comments": "Applicants are encouraged to send a CV by October 10, 2025 for a conference interview at the INFORMS Annual Meeting in Atlanta.",
+  "country": "Singapore",
+  "adUrl": "https://drive.google.com/open?id=1ZHIbqRdo3yzBQLZoBeCI3MztL5-RA7-y",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://cde.nus.edu.sg/isem/careers/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-18T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-san-diego-20250918",
+  "year": 2026,
+  "posted": "2025-09-18",
+  "institution": "University of San Diego",
+  "department": "The Knauss School of Business at the University of San Diego",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 18, 2025",
+  "applyByDate": "2025-10-18",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apptrkr.com/6467358",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20San%20Diego",
+  "characteristics": [
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-18T00:00:00Z"
+ },
+ {
+  "id": "2026-london-business-school-20250916",
+  "year": 2026,
+  "posted": "2025-09-16",
+  "institution": "London Business School",
+  "department": "Management Science & Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2025",
+  "applyByDate": "2025-10-15",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/173946",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=London%20Business%20School",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-16T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20250913",
+  "year": 2026,
+  "posted": "2025-09-13",
+  "institution": "University College London",
+  "department": "Global Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 26, 2025. (Extended deadline.) Low teaching load (effectively just half a course); faculty can choose to submit work to either top business or medical journals.",
+  "applyByDate": "2025-09-26",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=37953&jobTitle=Lecturer+in+Technology+and+Operations+Management",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Research seminars",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-13T00:00:00Z"
+ },
+ {
+  "id": "2026-city-st-george-s-university-of-london-20250911",
+  "year": 2026,
+  "posted": "2025-09-11",
+  "institution": "City St. George's, University of London",
+  "department": "Bayes Business School, Faculty of Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 19, 2025",
+  "applyByDate": "2025-10-19",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.citystgeorges.ac.uk/about/jobs/apply/details.html?jobId=5846&jobTitle=Lecturer%20in%20Analytics",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20St.%20George's%2C%20University%20of%20London",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-11T00:00:00Z"
+ },
+ {
+  "id": "2026-the-university-of-hong-kong-20250910",
+  "year": 2026,
+  "posted": "2025-09-10",
+  "institution": "The University of Hong Kong",
+  "department": "Faculty of Business and Economics, Innovation and Information Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Apply before Oct 12th 2025 for first round Zoom interview (Oct 15 - Oct 20)",
+  "applyByDate": "",
+  "comments": "Oct 12th 2025",
+  "country": "Hong Kong SAR",
+  "adUrl": "https://drive.google.com/open?id=172zJPtoasQEnGor30GpBEGIy4uGMqwr-",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.hku.hk/cw/en/job/532417/tenuretrack-professorassociate-professorassistant-professor-in-business-analytics-several-posts",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20University%20of%20Hong%20Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-10T00:00:00Z"
+ },
+ {
+  "id": "2026-tulane-university-20250904",
+  "year": 2026,
+  "posted": "2025-09-04",
+  "institution": "Tulane University",
+  "department": "A.B. Freeman School of Business, Management Science Department",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "July 1, 2026",
+  "applyByDate": "2026-07-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1fRJ0uAFBrnpYUvz_AD10BBVIxruBEUhD",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-04T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20250903",
+  "year": 2026,
+  "posted": "2025-09-03",
+  "institution": "University College London",
+  "department": "Global Business School for Health",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 12, 2025. Very low teaching load (approx. half a course); faculty can choose to publish in either business or medical journals",
+  "applyByDate": "2025-09-12",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=37142&jobTitle=Lecturer+in+Technology+and+Operations+Management",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-03T00:00:00Z"
+ },
+ {
+  "id": "2026-institut-mines-telecom-20250902",
+  "year": 2026,
+  "posted": "2025-09-02",
+  "institution": "Institut Mines-Télécom",
+  "department": "Institut Mines-Télécom Business School, Department of Management, Marketing and Strategy (MMS)",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 30, 2025. The deadline for applications is strict.",
+  "applyByDate": "2025-09-30",
+  "comments": "Prof. Sébastien Mitraille (Head of department MMS) will be at Informs in Atlanta for informal discussions. First round interviews will be online.",
+  "country": "France",
+  "adUrl": "https://drive.google.com/open?id=1Uii9UhcLM3S6gj5B1wfXEtGyhDkuMaru",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://institutminestelecom.recruitee.com/l/en/o/mdc-supply-chain",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Institut%20Mines-T%C3%A9l%C3%A9com",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-09-02T00:00:00Z"
+ },
+ {
+  "id": "2026-imperial-college-london-20250830",
+  "year": 2026,
+  "posted": "2025-08-30",
+  "institution": "Imperial College London",
+  "department": "Imperial Business School, Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 8, 2025",
+  "applyByDate": "2025-10-08",
+  "comments": "",
+  "country": "United Kingdom",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.imperial.ac.uk/jobs/search-jobs/description/index.php?jobId=25344&jobTitle=Professor+%28Assistant%2FAssociate%2F+Full+Professor%29+in+Analytics+and+Operations",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Imperial%20College%20London",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-30T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-london-20250827",
+  "year": 2026,
+  "posted": "2025-08-27",
+  "institution": "University College London",
+  "department": "The UCL School of Management, Operations & Technology group",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 3, 2025",
+  "applyByDate": "2025-10-03",
+  "comments": "",
+  "country": "UK",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/170038",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-27T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-south-carolina-20250822",
+  "year": 2026,
+  "posted": "2025-08-22",
+  "institution": "University of South Carolina",
+  "department": "Darla Moore School of Business, Management Science Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Department representatives will be conducting prescreening interviews at upcoming conferences in Fall 2025, prior to on-campus interviews for finalist candidates.",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1m93aodt9UuqAWbmyBBEtyAE0fAvL7CMf",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://uscjobs.sc.edu/postings/193782",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-22T00:00:00Z"
+ },
+ {
+  "id": "2026-frankfurt-school-of-finance-management-20250821",
+  "year": 2026,
+  "posted": "2025-08-21",
+  "institution": "Frankfurt School of Finance & Management",
+  "department": "Management Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 30, 2025. Applications will be assessed on a rolling basis and candidates who submit their application package by September 28, 2025, will be given priority. All applications must be received by October 30, 2025.",
+  "applyByDate": "2025-10-30",
+  "comments": "First round online interviews (starting in September). In-person interviews at INFORMS possible.",
+  "country": "Germany",
+  "adUrl": "https://drive.google.com/open?id=1xAI4FWNgDx1qFe46WmB-T7oGiRJcON1d",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Frankfurt%20School%20of%20Finance%20%26%20Management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-21T00:00:00Z"
+ },
+ {
+  "id": "2026-universidad-de-los-andes-20250821",
+  "year": 2026,
+  "posted": "2025-08-21",
+  "institution": "Universidad de los Andes",
+  "department": "School of Business and Economics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "September 30, 2025. Review of applications will begin on October 10th and will continue until the positions are filled.",
+  "applyByDate": "2025-09-30",
+  "comments": "If the candidate is attending INFORMS or Decision Sciences, please let us know in your application so we can arrange an interview. An initial online interview is also possible.",
+  "country": "Chile",
+  "adUrl": "https://drive.google.com/file/d/1X-5h50vEamSSekoKD1HjvJ5r6NHveG-N/view",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Universidad%20de%20los%20Andes",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-21T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-wisconsin-madison-20250819",
+  "year": 2026,
+  "posted": "2025-08-19",
+  "institution": "University of Wisconsin-Madison",
+  "department": "Wisconsin School of Business, Operations and Information Management Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 3, 2025. The deadline for assuring full consideration is October 3, 2025. However, the position will remain open and applications may be considered until the position is filled.",
+  "applyByDate": "2025-10-03",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1ooohpQgv6xWAzuxntUfkfKTCQMXkuUDG",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Wisconsin-Madison",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-19T00:00:00Z"
+ },
+ {
+  "id": "2026-university-college-dublin-20250817",
+  "year": 2026,
+  "posted": "2025-08-17",
+  "institution": "University College Dublin",
+  "department": "UCD Michael Smurfit Graduate School of Business, Management Area",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 5, 2025. To apply use the link below and search under \"academic\" vacancies in \"business\".",
+  "applyByDate": "2025-09-05",
+  "comments": "UCD faculty attending AOM and EUROMA but won't be attending INFORMS 2025.",
+  "country": "Ireland",
+  "adUrl": "https://drive.google.com/open?id=1ZmYLyjzc6MXqcJ06eRgfhtsYVqGRc6bt",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://my.corehr.com/pls/ucdrecruit/erq_search_package.search_form?p_company=1&p_internal_external=E%E2%80%93",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20Dublin",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-17T00:00:00Z"
+ },
+ {
+  "id": "2026-iese-business-school-20250816",
+  "year": 2026,
+  "posted": "2025-08-16",
+  "institution": "IESE Business School",
+  "department": "Operations, Information and Technology Department",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled. Applications will be reviewed dynamically starting on September 1, so early applications are welcome. Those who plan on attending INFORMS should submit their application by September 19, while those who plan on attending ICIS should submit their application by November 6.",
+  "applyByDate": "",
+  "comments": "Those who plan on attending INFORMS should submit their application by September 19.",
+  "country": "Spain",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/171505",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IESE%20Business%20School",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-16T00:00:00Z"
+ },
+ {
+  "id": "2026-the-chinese-university-of-hong-kong-shenzhen-20250815",
+  "year": 2026,
+  "posted": "2025-08-15",
+  "institution": "The Chinese University of Hong Kong, Shenzhen",
+  "department": "Operations Management Division, The School of Management and Economics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Shenzhen, China",
+  "adUrl": "https://drive.google.com/open?id=1eGCrm1IrovJcZ7ldBg4zwnx_CYVr2bSl",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Chinese%20University%20of%20Hong%20Kong%2C%20Shenzhen",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-15T00:00:00Z"
+ },
+ {
+  "id": "2026-university-of-san-diego-20250814",
+  "year": 2026,
+  "posted": "2025-08-14",
+  "institution": "University of San Diego",
+  "department": "The Knauss School of Business",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "February 1, 2026",
+  "applyByDate": "2026-02-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apptrkr.com/6467357",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20San%20Diego",
+  "characteristics": [
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-08-14T00:00:00Z"
  },
  {
   "id": "2026-university-of-notre-dame-20250813",
@@ -50,17 +2773,17 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://apply.interfolio.com/171937",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Notre Dame",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Notre%20Dame",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Undergrad"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-13T17:02:06Z"
+  "addedAt": "2025-08-13T00:00:00Z"
  },
  {
   "id": "2026-indian-school-of-business-20250807",
@@ -81,7 +2804,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://apply.interfolio.com/169971",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Indian School of Business",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Indian%20School%20of%20Business",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -90,7 +2813,7 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-07T08:38:17Z"
+  "addedAt": "2025-08-07T00:00:00Z"
  },
  {
   "id": "2026-depauw-university-20250805",
@@ -110,13 +2833,13 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://depauw.wd5.myworkdayjobs.com/en-US/DePauw_University/details/Assistant-Professor-of-Business-Analytics--Tenure-track-_JR100234",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=DePauw University",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=DePauw%20University",
   "characteristics": [
    "Undergrad"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-05T14:55:06Z"
+  "addedAt": "2025-08-05T00:00:00Z"
  },
  {
   "id": "2025-university-of-san-diego-20250714",
@@ -163,18 +2886,18 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=National University of Singapore",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
    "MBA",
+   "Undergrad",
    "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-07-08T03:57:00Z"
+  "addedAt": "2025-07-08T00:00:00Z"
  },
  {
   "id": "2026-hec-paris-20250621",
@@ -187,7 +2910,7 @@
    "Assistant Professor",
    "Other Ranks"
   ],
-  "applyBy": "Until filled. Review of applications will be conducted on a rolling basis until the position is filled.  Starting date: As early as mutually agreeable and no later than Fall 2026",
+  "applyBy": "Until filled. Review of applications will be conducted on a rolling basis until the position is filled. Starting date: As early as mutually agreeable and no later than Fall 2026",
   "applyByDate": "",
   "comments": "",
   "country": "France",
@@ -195,18 +2918,18 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=HEC Paris",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Paris",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
    "MBA",
+   "Undergrad",
    "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-21T03:13:50Z"
+  "addedAt": "2025-06-21T00:00:00Z"
  },
  {
   "id": "2026-the-chinese-university-of-hong-kong-shenzhen-20250612",
@@ -226,18 +2949,18 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://www.cuhk.edu.cn/zh-hans/recruitment/15323",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The Chinese University of Hong Kong, Shenzhen",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Chinese%20University%20of%20Hong%20Kong%2C%20Shenzhen",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
    "MBA",
+   "Undergrad",
    "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-12T04:56:06Z"
+  "addedAt": "2025-06-12T00:00:00Z"
  },
  {
   "id": "2026-the-hong-kong-polytechnic-university-20250605",
@@ -257,16 +2980,16 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=250605003",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The Hong Kong Polytechnic University",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
   "characteristics": [
    "PhD",
-   "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Undergrad"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-05T04:14:12Z"
+  "addedAt": "2025-06-05T00:00:00Z"
  },
  {
   "id": "2026-the-hong-kong-polytechnic-university-20250605-2",
@@ -286,16 +3009,16 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=250605004",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The Hong Kong Polytechnic University",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
   "characteristics": [
    "PhD",
-   "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Undergrad"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-05T04:17:54Z"
+  "addedAt": "2025-06-05T00:00:00Z"
  },
  {
   "id": "2026-the-hong-kong-polytechnic-university-20250605-3",
@@ -315,16 +3038,16 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=250605005",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The Hong Kong Polytechnic University",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
   "characteristics": [
    "PhD",
-   "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Undergrad"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-05T04:20:31Z"
+  "addedAt": "2025-06-05T00:00:00Z"
  },
  {
   "id": "2026-university-of-mannheim-20250605",
@@ -344,18 +3067,18 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://www.bwl.uni-mannheim.de/en/fleischmann/details-kopie-1/?tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=29794&cHash=5d76a9455f645ca1f1197637be75faa1",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Mannheim",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Mannheim",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
    "MBA",
+   "Undergrad",
    "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-05T04:31:26Z"
+  "addedAt": "2025-06-05T00:00:00Z"
  },
  {
   "id": "2026-ivey-business-school-western-university-20250526",
@@ -375,18 +3098,18 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://grad.uwo.ca/doc/postdoc/opportunities/Postdoctoral%20Associate%20Position%20in%20MS%20Ivey%20Western.pdf",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Ivey Business School, Western University",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ivey%20Business%20School%2C%20Western%20University",
   "characteristics": [
    "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
    "MBA",
+   "Undergrad",
    "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-05-26T18:19:51Z"
+  "addedAt": "2025-05-26T00:00:00Z"
  },
  {
   "id": "2025-technical-university-of-munich-20250320",
