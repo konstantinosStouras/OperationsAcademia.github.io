@@ -74,6 +74,24 @@ export async function fetchTab(id, tab) {
   return body;
 }
 
+/* ------------------------------------------------------------- redaction
+
+   The sheet's free text carries contact addresses ("send materials to
+   search@school.edu"). On the vendor page that was published as typed; here
+   the same text would land in a file committed to a PUBLIC repository, where
+   it is indexed and scraped forever rather than rendered once. The import
+   guard caught exactly this — 102 postings refused at the last step — and the
+   guard is right, so the text is redacted rather than the guard relaxed.
+
+   Applying by e-mail is not lost: the advertisement link is on every card
+   (100 of those 102 rows carry one), which is where the address belongs. */
+
+export function redactEmails(s) {
+  return String(s || '').replace(
+    /(?:mailto:)?[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+    '[e-mail address — see the advertisement link]');
+}
+
 /* --------------------------------------------------------------- CSV parse */
 
 /** RFC 4180: quoted fields, "" escapes, newlines inside quotes. */
@@ -203,8 +221,8 @@ export function rowsFromSheets(displayRows, rawRows) {
     const raw = D ? rawBy.get(posted + '|' + institution.toLowerCase()) : row;
     if (D && !raw) unmatched++;
 
-    const department = text(
-      pick(row, idx, ['Department', 'School Name, Department/Area/Group Name']), 220);
+    const department = redactEmails(text(
+      pick(row, idx, ['Department', 'School Name, Department/Area/Group Name']), 220));
     const typeRaw = text(pick(row, idx, ['Type', 'Type of Institution']), 40);
     const type = TYPES.includes(typeRaw) ? typeRaw : '';
     const country = text(
@@ -216,7 +234,7 @@ export function rowsFromSheets(displayRows, rawRows) {
     let applyByDate = raw && R ? day(pick(raw, R.index, ['Apply by (exact date is required)'])) : '';
     if (!applyByDate) applyByDate = day(applyProse);
 
-    const applyBy = applyProse ||
+    const applyBy = redactEmails(applyProse) ||
       (applyByDate ? longDate(applyByDate) : 'Until filled.');
 
     const ad = anchor(pick(row, idx, ['File link']));
@@ -250,7 +268,7 @@ export function rowsFromSheets(displayRows, rawRows) {
       levels,
       applyBy,
       applyByDate,
-      comments: text(pick(row, idx, ['Comments on Job Posting']), 1200)
+      comments: redactEmails(text(pick(row, idx, ['Comments on Job Posting']), 1200))
         .replace(/^(NA|N\/A)$/i, ''),
       country,
       adUrl,
@@ -445,6 +463,15 @@ function selftest() {
   process.argv = ['node', 'import-sheet.mjs', '--sheet', 'ABC123', '--merge'];
   ok(arg('--sheet', SHEET_ID) === 'ABC123', 'an explicit sheet id is read');
   process.argv = savedArgv;
+
+  // a contact address in the sheet's free text never reaches a public file
+  ok(redactEmails('Send to search@duke.edu by 1 Nov')
+       === 'Send to [e-mail address — see the advertisement link] by 1 Nov',
+     'an e-mail address in free text is redacted');
+  ok(redactEmails('mailto:a.b-c%d@x.ac.uk').indexOf('@') === -1,
+     'a mailto: form is redacted too');
+  ok(redactEmails('Interviewing at INFORMS') === 'Interviewing at INFORMS',
+     'ordinary prose is untouched');
 
   const a = anchor('<a href="https://x.edu/ad" target="_blank">link to Job ad</a>');
   ok(a.url === 'https://x.edu/ad' && a.label === 'link to Job ad', 'anchor cell');
