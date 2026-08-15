@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <title>Feedback - OperationsAcademia.org</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="Report a problem or suggest an improvement to Operations Academia." name="description">
+    <meta name="robots" content="noindex,nofollow">
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+  </head>
+  <body class="no-sidebar">
+    <div id="page-wrapper">
+      <div id="header-wrapper">
+        <div class="container" id="header">
+          <a href="/v2/" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
+            src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
+          <nav id="nav"></nav>
+          <div id="oa-account"></div>
+        </div>
+      </div>
+
+      <div id="main-wrapper">
+        <div class="container" id="page">
+          <div class="title-heading">
+            <h2>Feedback</h2>
+          </div>
+
+          <div id="main">
+            <div class="row">
+              <div class="12u" id="content">
+                <div class="oa-form">
+
+                  <!-- ===================================== maintainer inbox -->
+                  <section id="oa-inbox" hidden>
+                    <h3 style="font-size:19px;color:#313a45;margin:0 0 10px">
+                      &#128229; Feedback inbox</h3>
+                    <div class="oa-tabs" id="oa-inbox-tabs">
+                      <button type="button" class="oa-tab is-on" data-tab="open">Open</button>
+                      <button type="button" class="oa-tab" data-tab="closed">Closed</button>
+                      <button type="button" class="oa-tab" data-tab="all">All</button>
+                    </div>
+                    <div id="oa-inbox-list"></div>
+                    <hr style="margin:32px 0;border:0;border-top:1px solid #e6e6e6">
+                  </section>
+
+                  <div class="oa-note">
+                    <p><strong>Found something wrong, or have an idea?</strong> Tell us here. A
+                    broken link, a posting in the wrong place, something that reads oddly on your
+                    phone &mdash; all of it is useful.</p>
+                    <p>You do not need an account. Leaving your e-mail is optional, but it is the
+                    only way we can tell you when the thing you reported is fixed.</p>
+                  </div>
+
+                  <div class="oa-note is-warn" id="oa-offline" hidden>
+                    <p><strong>The feedback form is not switched on yet.</strong> This preview of
+                    the new site is not connected to its database. In the meantime, please write to
+                    <a href="mailto:kostas.stouras@ucd.ie">kostas.stouras@ucd.ie</a>.</p>
+                  </div>
+
+                  <form id="oa-fb-form" novalidate>
+                    <fieldset>
+                      <legend>Your message</legend>
+
+                      <div class="oa-field">
+                        <label for="fb-message">What would you like to tell us? <span class="oa-req" aria-hidden="true">*</span></label>
+                        <textarea id="fb-message" name="message" maxlength="6000" required
+                                  style="min-height:150px"></textarea>
+                        <p class="oa-hint"><span id="fb-count">0</span> / 6000 characters</p>
+                      </div>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="fb-name">Your name</label>
+                          <p class="oa-hint">Optional.</p>
+                          <input type="text" id="fb-name" name="name" maxlength="160" autocomplete="name">
+                        </div>
+                        <div class="oa-field">
+                          <label for="fb-email">Your e-mail</label>
+                          <p class="oa-hint">Optional &mdash; but without it we cannot reply.</p>
+                          <input type="email" id="fb-email" name="email" maxlength="200" autocomplete="email">
+                        </div>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="fb-shots">Screenshots</label>
+                        <p class="oa-hint">Up to five. They are shrunk in your browser before being
+                        sent, so a phone photo is fine.</p>
+                        <input type="file" id="fb-shots" name="shots" accept="image/*" multiple>
+                        <div id="fb-thumbs" class="oa-thumbs"></div>
+                      </div>
+                    </fieldset>
+
+                    <div class="oa-actions">
+                      <button type="submit" class="button blue" id="fb-submit">Send feedback</button>
+                      <p class="oa-form-msg" id="fb-msg" role="alert"></p>
+                    </div>
+                  </form>
+
+                  <div class="oa-done" id="fb-done" hidden>
+                    <h3>Thank you &mdash; we have your message.</h3>
+                    <p>Your ticket is <span class="oa-ticket" id="fb-ticket"></span>. Quote it if you
+                    write to us about this.</p>
+                    <p id="fb-done-mail">We will e-mail you when it is dealt with.</p>
+                    <p><a href="jobs.html">Back to the job postings</a> &middot;
+                       <a href="feedback.html">Send something else</a></p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-include="/partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+
+      <script src="assets/oa-nav.js"></script>
+      <script src="assets/oa-firebase.js"></script>
+      <script src="assets/oa-accounts.js"></script>
+      <script src="assets/oa-feedback.js"></script>
+    </div>
+  </body>
+</html>

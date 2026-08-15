@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
+ "updates": [
+  {
+   "id": "own-job-postings-table",
+   "date": "2026-08-15",
+   "title": "The job postings list is now our own",
+   "summary": "The job postings page no longer depends on a third-party table service. It is built from data held in the site's own repository, so it loads faster, keeps working if any vendor goes away, and can be improved whenever we like. Filtering behaves as before, with one addition: a filtered view now has its own web address, so you can bookmark or share exactly what you are looking at.",
+   "url": "https://www.operationsacademia.org/jobs"
+  },
+  {
+   "id": "post-a-job-form",
+   "date": "2026-08-15",
+   "title": "Posting a job no longer goes through a Google form",
+   "summary": "Job postings are submitted on the site itself. You sign in once, and your posting appears on the list automatically, normally within the hour. Because it is tied to your account, you can come back to correct a deadline or a broken link, or withdraw the posting once the search closes — none of which was possible before.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
+   "id": "accounts-and-alerts",
+   "date": "2026-08-15",
+   "title": "Accounts, and e-mail alerts you control",
+   "summary": "You can now create a free account and subscribe to e-mail alerts: every new job posting, or only the ones matching filters you choose — a country, a rank, a type of school. You pick how often to hear from us, and every message carries a one-click unsubscribe.",
+   "url": "https://www.operationsacademia.org/alerts"
+  },
+  {
+   "id": "feedback-page",
+   "date": "2026-08-15",
+   "title": "A feedback page that actually closes the loop",
+   "summary": "Report a problem, attach a screenshot, and get a ticket number — no account needed. When the thing you reported is fixed, you get an e-mail telling you what was done and linking to it.",
+   "url": "https://www.operationsacademia.org/feedback"
+  }
+ ]
+}

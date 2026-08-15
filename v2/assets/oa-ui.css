@@ -7,6 +7,14 @@
    far too large for a 19-field form.
    --------------------------------------------------------------------------- */
 
+/* main.css's reset declares `section { display: block }` (and the same for
+   article/aside/header/footer/nav/figure/details/menu). An author rule beats
+   the user-agent's `[hidden] { display: none }`, so a hidden <section> stays
+   VISIBLE — which briefly showed the maintainer's feedback inbox to everyone.
+   Every panel in v2 is toggled with the `hidden` attribute, so restore it once,
+   here, rather than remembering per element. */
+[hidden] { display: none !important; }
+
 /* -------------------------------------------------------------- account chip */
 
 /* #header is position:relative, height 3em, with #nav absolutely placed at
@@ -426,4 +434,162 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   .oa-row > .oa-field { flex: 1 1 100%; }
   #oa-account { font-size: 13px; }
   .oa-acct-btn, .oa-acct-chip { padding: 3px 8px; }
+}
+
+/* ------------------------------------------------------- feedback + inbox */
+
+.oa-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+
+.oa-thumb {
+  position: relative;
+  width: 120px;
+  margin: 0;
+}
+
+.oa-thumbs img {
+  display: block;
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background: #fafafa;
+}
+
+.oa-thumb button {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 15px;
+  line-height: 1;
+  color: #666;
+  cursor: pointer;
+}
+
+.oa-thumb button:hover { color: #b3261e; border-color: #b3261e; }
+
+.oa-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+
+.oa-tab {
+  padding: 5px 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.oa-tab.is-on { border-color: #3b7dbc; background: #3b7dbc; color: #fff; }
+
+.oa-fb-card {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.oa-fb-card header { margin-bottom: 10px; font-size: 13px; }
+
+.oa-fb-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.oa-fb-status.is-open { background: #b06b12; }
+.oa-fb-status.is-closed { background: #2e7d5b; }
+
+.oa-fb-body { margin: 10px 0 0; white-space: pre-wrap; font-size: 15px; line-height: 1.55; }
+
+.oa-fb-res {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #2e7d5b;
+  background: #f2faf5;
+  font-size: 14px;
+}
+
+.oa-fb-card code {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #f2f2f2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+/* --------------------------------------------------------------- alerts */
+
+.oa-alert-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 10px;
+  padding: 14px 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.oa-alert-card.is-off { background: #fafafa; opacity: 0.75; }
+
+.oa-alert-main { flex: 1 1 320px; }
+.oa-alert-main strong { font-size: 16px; color: #313a45; }
+.oa-alert-main .oa-hint { margin: 3px 0 0; }
+
+.oa-alert-actions { display: flex; gap: 6px; flex: 0 0 auto; }
+
+.oa-alert-actions button {
+  padding: 4px 11px;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: #444;
+  cursor: pointer;
+}
+
+.oa-alert-actions button:hover { background: #f2f6fb; border-color: #3b7dbc; }
+.oa-alert-actions button.is-danger:hover { background: #fdf2f1; border-color: #b3261e; color: #b3261e; }
+
+/* the live example e-mail */
+.oa-preview {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.oa-preview-head {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  background: #f7f9fc;
+  font-size: 14px;
+}
+
+.oa-preview-body { padding: 16px; font-size: 14px; line-height: 1.6; }
+.oa-preview-body ul { margin: 8px 0 12px; padding-left: 20px; list-style: disc; }
+.oa-preview-body li { margin-bottom: 8px; }
+.oa-preview-body p { margin: 0 0 10px; }
+
+.oa-preview-foot {
+  margin-top: 14px !important;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  font-size: 12px;
+  color: #888;
 }
