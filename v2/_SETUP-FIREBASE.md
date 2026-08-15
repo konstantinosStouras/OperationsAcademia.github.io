@@ -80,17 +80,37 @@ project is upgraded to **Identity Platform** (GCIP). That upgrade is free for
 the first 50,000 monthly active users — far more than this site will see — but
 it is a deliberate step, and it puts the project on a Cloud billing account.
 
-**1. Register an ORCID API client.** Sign in at
-<https://orcid.org> → your name → **Developer tools**. You need a verified
-e-mail and at least one public record item before it will let you. Create a
-client and set the redirect URI to:
+**1. Add this site's callback to your existing ORCID API client.** Sign in at
+<https://orcid.org> → your name → **Developer tools**, and add a **redirect
+URI**:
 
 ```
 https://operations-academia.firebaseapp.com/__/auth/handler
 ```
 
-That is Firebase's own callback, not a page on this site. You get a **client
-ID** (`APP-XXXXXXXXXXXXXXXX`) and a **client secret**.
+That is Firebase's own callback, not a page on this site.
+
+**Do NOT look for a way to register a second client — there isn't one.** ORCID
+issues exactly **one public API client per ORCID iD**; a further set of
+credentials needs ORCID membership (the Member API) or a request to
+`support@orcid.org`. The intended way to cover several apps is one client with
+several redirect URIs, which is what the existing client
+(`APP-VWG4YW59MEUCRQE2`, shared with `stouras.com/lit`) already does. Keep the
+entries that are there — `https://www.stouras.com/lit/` and
+`https://lit-paper-browser.firebaseapp.com/__/auth/handler` — and add this one
+alongside them; they are not alternatives.
+
+So the **client ID** and **client secret** for step 2 are the ones already
+shown on that page, not new values.
+
+Two consequences of sharing the client, both accepted deliberately:
+
+- The ORCID authorisation screen shows the *client's* name and description, and
+  there is only one client — so both sites present the same app name. Rename it
+  on the developer-tools page to something that covers both if the current name
+  reads as belonging to one of them. Cosmetic only.
+- The secret protects both sites at once. It lives only in the two Firebase
+  consoles; rotating it means updating both.
 
 **2. Add the OIDC provider in Firebase.** Authentication → Sign-in method →
 **Add new provider** → **OpenID Connect**. Firebase will offer the Identity
