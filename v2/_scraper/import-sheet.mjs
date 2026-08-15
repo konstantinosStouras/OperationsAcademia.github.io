@@ -131,11 +131,26 @@ export function splitLevels(cell) {
 
 /* ------------------------------------------------------------- the mapping */
 
+/* Awesome Table keeps a control row under the header ("Hidden",
+   "CategoryFilter - Hidden", "CardsContent", …). A CSV exported by hand keeps
+   the two rows apart; Google's gviz endpoint FUSES them into one compound
+   header, so the column arrives as "University/Institution StringFilter" and
+   every lookup by the plain name misses — which is how a sheet of 171 rows
+   imported as 0 postings. Strip the control token off the end of a header. */
+const CONTROL_TOKENS =
+  /\s*(?:HTML\s+)?(?:String|Category|csv|Numeric|Date|Boolean)?Filter(?:\s*-\s*Hidden)?$|\s*(?:HTML\s+)?Hidden$|\s*CardsContent$/i;
+
+export function normHeader(h) {
+  let out = text(h, 160);
+  for (let i = 0; i < 3 && CONTROL_TOKENS.test(out); i++) out = out.replace(CONTROL_TOKENS, '').trim();
+  return out;
+}
+
 function header(rows) {
   // The display tab has an Awesome Table control row directly under the
   // header ("Hidden", "CategoryFilter - Hidden", "CardsContent", …). Skip it,
   // or the first posting imported would be that row of filter keywords.
-  const head = rows[0].map((h) => text(h, 120));
+  const head = rows[0].map(normHeader);
   const looksLikeControl = (r) => {
     const vals = r.filter(Boolean).map(String);
     return vals.length > 2 &&
@@ -285,6 +300,17 @@ async function main() {
   const outPath = arg('--out', 'v2/data/jobs.json');
   const dry = process.argv.includes('--dry-run');
   const merge = process.argv.includes('--merge');
+  /* The sheet is the WHOLE history — 171 rows back to 2019, every job market
+     it has ever carried. The page is one market at a time ("Job postings
+     (2025-2026)"), which is why the live Awesome Tables view shows 92 and not
+     171; older markets live on /previous-markets. So the sync takes the
+     current market year by default, and --min-year <y> widens it (0 = every
+     year). The market year rolls in June, exactly as rowFromSubmission
+     computes it for a submission with no year of its own. */
+  const now = new Date();
+  const marketYear = now.getUTCFullYear() + (now.getUTCMonth() >= 5 ? 1 : 0);
+  const minYear = process.argv.includes('--min-year')
+    ? Number(arg('--min-year', marketYear)) : marketYear;
   const sheetId = process.argv.includes('--sheet') ? arg('--sheet', SHEET_ID) : '';
 
   if (!displayPath && !rawPath && !sheetId) {
@@ -323,7 +349,12 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
   const display = displayCsv ? parseCsv(displayCsv) : null;
   const raw = rawCsv ? parseCsv(rawCsv) : null;
 
-  const { rows, unmatched } = rowsFromSheets(display, raw);
+  let { rows, unmatched } = rowsFromSheets(display, raw);
+  if (sheetId && minYear) {
+    const before = rows.length;
+    rows = rows.filter((r) => r.year >= minYear);
+    console.log(`market scope: ${rows.length} of ${before} rows are ${minYear} or later`);
+  }
   const published = rows.map(publicRow);
 
   /* An import of ZERO postings from a sheet that answered is not a healthy
