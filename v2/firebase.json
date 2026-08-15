@@ -1,0 +1,9 @@
+{
+  "//": "Firebase CLI config for Operations Academia. Deploy from THIS directory:",
+  "//deploy": "cd v2 && firebase deploy --only firestore:rules",
+  "//why-here": "The CLI requires every path it references to live inside the config's own directory, so this sits beside _firestore.rules rather than at the repository root. Hosting is NOT configured: the site is served by GitHub Pages, and adding a hosting block here would invite an accidental `firebase deploy` that publishes a second, stale copy of the site at a firebaseapp.com address.",
+  "firestore": {
+    "rules": "_firestore.rules",
+    "indexes": "_firestore.indexes.json"
+  }
+}

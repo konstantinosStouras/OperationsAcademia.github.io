@@ -72,10 +72,17 @@ separate exercise. When you do it, add `'orcid'` to `AUTH_PROVIDERS` in
 ```bash
 npm install -g firebase-tools
 firebase login
+
+cd v2                      # the config lives here, beside the rules
 firebase deploy --only firestore:rules --project operations-academia
 ```
 
-pointing at **`v2/_firestore.rules`**. Firestore must exist first: Firestore
+`v2/firebase.json` already points the CLI at `_firestore.rules`, so that is the
+whole command. (It must be run from `v2/` — the CLI refuses paths outside its
+config's own directory. `v2/.firebaserc` holds a `PASTE_PROJECT_ID` placeholder
+you can fill in to drop the `--project` flag.)
+
+Firestore must exist first: Firestore
 Database → **Create database** → production mode → a region near your readers
 (`eur3` or `nam5`). The region cannot be changed afterwards.
 

@@ -1,0 +1,5 @@
+{
+  "//": "No composite indexes are needed. Every query the site and its scheduled jobs make is single-field, which Firestore indexes automatically: jobSubmissions by status, feedback by forwarded and by ticket, feedback ordered by createdAt, and an unfiltered collectionGroup read of users/*/alerts. If you add a query that combines a filter with an orderBy on a different field, Firestore will refuse it at runtime and print a link that generates the index — paste the result here and redeploy.",
+  "indexes": [],
+  "fieldOverrides": []
+}
