@@ -1,0 +1,146 @@
+rules_version = '2';
+
+// ---------------------------------------------------------------------------
+// Operations Academia — Firestore security rules.
+//
+// DEPLOY THESE BEFORE ANNOUNCING ANYTHING. Until they are published, every
+// write below is refused and the site's forms report that they are not
+// switched on yet (which is the state the code ships in).
+//
+//     firebase deploy --only firestore:rules --project <project-id>
+//
+// The governing idea, taken from /lit/: the browser is never trusted with
+// anything that decides what gets published. A poster may CREATE a submission
+// and may edit or withdraw their OWN, but they cannot set `status` to anything
+// except 'queued'/'withdrawn', cannot write someone else's uid onto it, and
+// cannot mark it featured. The scheduled build runs with the Admin SDK, which
+// bypasses these rules, and re-validates every field again before it reaches a
+// served file (v2/_scraper/jobs-model.mjs).
+// ---------------------------------------------------------------------------
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // The maintainer. Keep in sync with ADMIN_EMAIL in v2/assets/oa-firebase.js
+    // (that one only decides whether an admin panel is DRAWN; this one is the
+    // actual authorisation).
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'kstouras@gmail.com';
+    }
+
+    function str(field, maxLen) {
+      return !(field in request.resource.data)
+        || (request.resource.data[field] is string
+            && request.resource.data[field].size() <= maxLen);
+    }
+
+    function list(field, maxItems) {
+      return !(field in request.resource.data)
+        || (request.resource.data[field] is list
+            && request.resource.data[field].size() <= maxItems);
+    }
+
+    // ---------------------------------------------------------------- jobs
+
+    match /jobSubmissions/{id} {
+
+      function shapeOk() {
+        return str('institution', 200) && str('department', 260)
+            && str('country', 80)      && str('type', 40)
+            && str('applyByDate', 20)  && str('applyByNote', 400)
+            && str('comments', 1500)   && str('postedAtUrl', 600)
+            && str('adUrl', 600)       && str('ref', 60)
+            && str('firstName', 100)   && str('lastName', 100)
+            && str('email', 200)       && str('chairName', 160)
+            && str('chairEmail', 200)  && str('note', 1500)
+            && str('source', 40)       && str('authEmail', 200)
+            && list('levels', 8)       && list('characteristics', 12)
+            && request.resource.data.year is int
+            && request.resource.data.year >= 2000
+            && request.resource.data.year <= 2100
+            // a poster cannot promote their own posting
+            && !('featured' in request.resource.data);
+      }
+
+      // Anyone signed in may post. Identity is pinned to the caller and the
+      // status is pinned to 'queued' — the build decides what is published.
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'queued'
+                    && shapeOk()
+                    && request.resource.data.keys().size() <= 30;
+
+      // A poster may read, correct and withdraw their own posting.
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.status in ['queued', 'withdrawn']
+                    && shapeOk();
+
+      allow delete: if isAdmin();
+
+      // The maintainer can hide a posting, feature one, or fix a typo.
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------ feedback
+
+    match /feedback/{id} {
+      // Feedback may be left by ANYONE, signed in or not — the point is to
+      // lower the bar for a bug report. Bounded so it cannot be used as free
+      // storage: 5 screenshots, and Firestore's own ~1 MB document ceiling.
+      allow create: if str('message', 6000)
+                    && str('email', 200)
+                    && str('name', 160)
+                    && str('ticket', 40)
+                    && str('page', 400)
+                    && list('shots', 5)
+                    && request.resource.data.status == 'open'
+                    && request.resource.data.forwarded == false
+                    && request.resource.data.keys().size() <= 16;
+
+      // The submitter never reads the collection back; only the maintainer does.
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------- accounts data
+
+    // Every account's own private subtree: profile, e-mail alert
+    // subscriptions, test-e-mail requests. Nobody else can read it, including
+    // other signed-in users. The alerts mailer reads it with the Admin SDK.
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /profiles/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // A contentless public tally so the site can show "N registered users"
+    // without exposing the user list. One document per account holding a
+    // coarse timestamp and nothing else — no e-mail, no name.
+    match /registeredUsers/{uid} {
+      allow read: if true;
+      allow create, update: if isOwner(uid)
+                            && request.resource.data.keys().hasOnly(['t'])
+                            && request.resource.data.t is number;
+      allow delete: if false;
+    }
+
+    // Anything not named above is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

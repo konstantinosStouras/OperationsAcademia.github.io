@@ -1,5 +1,37 @@
 [
  {
+  "id": "2026-cuhk-business-school-20250806",
+  "year": 2026,
+  "posted": "2025-08-06",
+  "institution": "CUHK Business School",
+  "department": "Department of Decisions, Operations and Technology",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 31, 2025. We advise candidates who are attending INFORMS to submit by 30th September",
+  "applyByDate": "2025-12-31",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "https://drive.google.com/open?id=1wkldwvjnqVaxnvEDv9BcZYgI_gRcfuf9",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=CUHK Business School",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": true,
+  "source": "sheet-import",
+  "addedAt": "2025-08-06T08:42:07Z"
+ },
+ {
   "id": "2026-university-of-notre-dame-20250813",
   "year": 2026,
   "posted": "2025-08-13",
@@ -59,38 +91,6 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-08-07T08:38:17Z"
- },
- {
-  "id": "2026-cuhk-business-school-20250806",
-  "year": 2026,
-  "posted": "2025-08-06",
-  "institution": "CUHK Business School",
-  "department": "Department of Decisions, Operations and Technology",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks"
-  ],
-  "applyBy": "December 31, 2025. We advise candidates who are attending INFORMS to submit by 30th September",
-  "applyByDate": "2025-12-31",
-  "comments": "",
-  "country": "Hong Kong",
-  "adUrl": "https://drive.google.com/open?id=1wkldwvjnqVaxnvEDv9BcZYgI_gRcfuf9",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "http://www.operationsacademia.org/",
-  "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=CUHK Business School",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
-  "featured": true,
-  "source": "sheet-import",
-  "addedAt": "2025-08-06T08:42:07Z"
  },
  {
   "id": "2026-depauw-university-20250805",
@@ -240,37 +240,6 @@
   "addedAt": "2025-06-12T04:56:06Z"
  },
  {
-  "id": "2026-university-of-mannheim-20250605",
-  "year": 2026,
-  "posted": "2025-06-05",
-  "institution": "University of Mannheim",
-  "department": "Business School, Chair of Supply Chain Management",
-  "type": "University",
-  "levels": [
-   "Post-Doc"
-  ],
-  "applyBy": "June 30, 2025",
-  "applyByDate": "2025-06-30",
-  "comments": "",
-  "country": "Germany",
-  "adUrl": "https://drive.google.com/open?id=16i4YxN16JxQacuJANtt2xeuq6Bu7WoeC",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.bwl.uni-mannheim.de/en/fleischmann/details-kopie-1/?tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=29794&cHash=5d76a9455f645ca1f1197637be75faa1",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Mannheim",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-06-05T04:31:26Z"
- },
- {
   "id": "2026-the-hong-kong-polytechnic-university-20250605",
   "year": 2026,
   "posted": "2025-06-05",
@@ -356,6 +325,37 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2025-06-05T04:20:31Z"
+ },
+ {
+  "id": "2026-university-of-mannheim-20250605",
+  "year": 2026,
+  "posted": "2025-06-05",
+  "institution": "University of Mannheim",
+  "department": "Business School, Chair of Supply Chain Management",
+  "type": "University",
+  "levels": [
+   "Post-Doc"
+  ],
+  "applyBy": "June 30, 2025",
+  "applyByDate": "2025-06-30",
+  "comments": "",
+  "country": "Germany",
+  "adUrl": "https://drive.google.com/open?id=16i4YxN16JxQacuJANtt2xeuq6Bu7WoeC",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.bwl.uni-mannheim.de/en/fleischmann/details-kopie-1/?tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=29794&cHash=5d76a9455f645ca1f1197637be75faa1",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Mannheim",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2025-06-05T04:31:26Z"
  },
  {
   "id": "2026-ivey-business-school-western-university-20250526",
@@ -744,6 +744,36 @@
   "addedAt": "2024-10-17T19:23:32Z"
  },
  {
+  "id": "2025-united-states-military-academy-west-point-20241015",
+  "year": 2025,
+  "posted": "2024-10-15",
+  "institution": "United States Military Academy - West Point",
+  "department": "United States Military Academy - Department of Systems Engineering",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks",
+   "Post-Doc",
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "November 13, 2024. Must send are required documents to [e-mail removed]",
+  "applyByDate": "2024-11-13",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1GGsErHi8ZbB35XnC_qMdq9koef1OPR6B",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.usajobs.gov/job/810154900",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=United States Military Academy - West Point",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-10-15T15:24:25Z"
+ },
+ {
   "id": "2025-washington-university-in-st-louis-20241015",
   "year": 2025,
   "posted": "2024-10-15",
@@ -773,36 +803,6 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2024-10-15T15:04:54Z"
- },
- {
-  "id": "2025-united-states-military-academy-west-point-20241015",
-  "year": 2025,
-  "posted": "2024-10-15",
-  "institution": "United States Military Academy - West Point",
-  "department": "United States Military Academy - Department of Systems Engineering",
-  "type": "University",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks",
-   "Post-Doc",
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "November 13, 2024. Must send are required documents to [e-mail removed]",
-  "applyByDate": "2024-11-13",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1GGsErHi8ZbB35XnC_qMdq9koef1OPR6B",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.usajobs.gov/job/810154900",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=United States Military Academy - West Point",
-  "characteristics": [
-   "Research seminars",
-   "Undergrad"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-10-15T15:24:25Z"
  },
  {
   "id": "2025-university-of-miami-20241011",
@@ -837,38 +837,6 @@
   "addedAt": "2024-10-11T21:11:33Z"
  },
  {
-  "id": "2025-washington-university-in-st-louis-20241010",
-  "year": 2025,
-  "posted": "2024-10-10",
-  "institution": "Washington University in St. Louis",
-  "department": "Olin Business School",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks"
-  ],
-  "applyBy": "November 8, 2024",
-  "applyByDate": "2024-11-08",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1jNaSb14F-ivxOfue9qg9T-OMSJ_cdlOg",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "http://apply.interfolio.com/157014",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Washington University in St. Louis",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-10-10T11:52:47Z"
- },
- {
   "id": "2025-city-university-of-hong-kong-20241010",
   "year": 2025,
   "posted": "2024-10-10",
@@ -901,33 +869,36 @@
   "addedAt": "2024-10-10T20:53:15Z"
  },
  {
-  "id": "2025-the-university-of-sydney-20241003",
+  "id": "2025-washington-university-in-st-louis-20241010",
   "year": 2025,
-  "posted": "2024-10-03",
-  "institution": "The University of Sydney",
-  "department": "Discipline of Business Analytics",
+  "posted": "2024-10-10",
+  "institution": "Washington University in St. Louis",
+  "department": "Olin Business School",
   "type": "Business School",
   "levels": [
-   "Assistant Professor"
+   "Assistant Professor",
+   "Other Ranks"
   ],
-  "applyBy": "October 30, 2024. Applications close Wednesday 30th October 11:59 PM AEDT (UTC+11:00)",
-  "applyByDate": "2024-10-30",
-  "comments": "Please submit your application by Monday 14th October if you are attending INFORMS for a potential preliminary interview.",
-  "country": "Australia",
-  "adUrl": "",
+  "applyBy": "November 8, 2024",
+  "applyByDate": "2024-11-08",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1jNaSb14F-ivxOfue9qg9T-OMSJ_cdlOg",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://usyd.wd3.myworkdayjobs.com/en-US/USYD_EXTERNAL_CAREER_SITE/job/Lecturers-in-Business-Analytics--Teaching-and-Research---Sydney-Business-School-_0124750-1",
+  "postedAtUrl": "http://apply.interfolio.com/157014",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The University of Sydney",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Washington University in St. Louis",
   "characteristics": [
    "Research seminars",
    "PhD",
    "Undergrad",
-   "Masters"
+   "Masters",
+   "MBA",
+   "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-10-03T00:21:18Z"
+  "addedAt": "2024-10-10T11:52:47Z"
  },
  {
   "id": "2025-nyu-shanghai-20241003",
@@ -957,6 +928,35 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2024-10-03T11:39:02Z"
+ },
+ {
+  "id": "2025-the-university-of-sydney-20241003",
+  "year": 2025,
+  "posted": "2024-10-03",
+  "institution": "The University of Sydney",
+  "department": "Discipline of Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 30, 2024. Applications close Wednesday 30th October 11:59 PM AEDT (UTC+11:00)",
+  "applyByDate": "2024-10-30",
+  "comments": "Please submit your application by Monday 14th October if you are attending INFORMS for a potential preliminary interview.",
+  "country": "Australia",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://usyd.wd3.myworkdayjobs.com/en-US/USYD_EXTERNAL_CAREER_SITE/job/Lecturers-in-Business-Analytics--Teaching-and-Research---Sydney-Business-School-_0124750-1",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The University of Sydney",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "Masters"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-10-03T00:21:18Z"
  },
  {
   "id": "2025-university-of-oklahoma-20241002",
@@ -991,33 +991,36 @@
   "addedAt": "2024-10-02T17:24:52Z"
  },
  {
-  "id": "2025-stony-brook-university-20240926",
+  "id": "2025-essec-business-school-20240926",
   "year": 2025,
   "posted": "2024-09-26",
-  "institution": "Stony Brook University",
-  "department": "College of Business - Operations and Decision Analytics",
-  "type": "University",
+  "institution": "ESSEC Business School",
+  "department": "Operations Management group",
+  "type": "Business School",
   "levels": [
-   "Assistant Professor"
+   "Assistant Professor",
+   "Other Ranks"
   ],
-  "applyBy": "October 2, 2024",
-  "applyByDate": "2024-10-02",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "",
+  "applyBy": "December 5, 2024. Please use the online application interface (link provided in the job ad)",
+  "applyByDate": "2024-12-05",
+  "comments": "We do not interview at the INFORMS Annual Meeting, but do not hesitate to reach out to our colleagues who attend the conference if you have any questions about the position!",
+  "country": "France",
+  "adUrl": "https://drive.google.com/open?id=1rwbAhS96QdgiGBfB9Qv9Jo8WMCdD9aSj",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://apply.interfolio.com/152433",
+  "postedAtUrl": "https://essec.edu/en/pages/become-professor-at-essec/",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Stony Brook University",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=ESSEC Business School",
   "characteristics": [
    "Research seminars",
+   "PhD",
    "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-09-26T11:10:17Z"
+  "addedAt": "2024-09-26T15:05:18Z"
  },
  {
   "id": "2025-nyu-shanghai-20240926",
@@ -1049,25 +1052,55 @@
   "addedAt": "2024-09-26T14:26:51Z"
  },
  {
-  "id": "2025-essec-business-school-20240926",
+  "id": "2025-stony-brook-university-20240926",
   "year": 2025,
   "posted": "2024-09-26",
-  "institution": "ESSEC Business School",
-  "department": "Operations Management group",
+  "institution": "Stony Brook University",
+  "department": "College of Business - Operations and Decision Analytics",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 2, 2024",
+  "applyByDate": "2024-10-02",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/152433",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Stony Brook University",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad",
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-26T11:10:17Z"
+ },
+ {
+  "id": "2025-ozyegin-university-20240923",
+  "year": 2025,
+  "posted": "2024-09-23",
+  "institution": "Ozyegin University",
+  "department": "Faculty of Business-Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
-   "Other Ranks"
+   "Other Ranks",
+   "Visiting Faculty (various levels)"
   ],
-  "applyBy": "December 5, 2024. Please use the online application interface (link provided in the job ad)",
-  "applyByDate": "2024-12-05",
-  "comments": "We do not interview at the INFORMS Annual Meeting, but do not hesitate to reach out to our colleagues who attend the conference if you have any questions about the position!",
-  "country": "France",
-  "adUrl": "https://drive.google.com/open?id=1rwbAhS96QdgiGBfB9Qv9Jo8WMCdD9aSj",
+  "applyBy": "September 1, 2025. Review of applications will start immediately and continue on an ongoing basis until the position is filled.",
+  "applyByDate": "2025-09-01",
+  "comments": "Candidates attending INFORMS Conference can attend a first round interview.",
+  "country": "Turkey",
+  "adUrl": "https://drive.google.com/open?id=1VkUm3CsW6SHUIWU_sqrkwgh3zBQcwWEn",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://essec.edu/en/pages/become-professor-at-essec/",
+  "postedAtUrl": "https://www.ozyegin.edu.tr/en/human-resources/job-opportunities",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=ESSEC Business School",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Ozyegin University",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -1078,7 +1111,7 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-09-26T15:05:18Z"
+  "addedAt": "2024-09-23T04:35:41Z"
  },
  {
   "id": "2025-stanford-university-20240923",
@@ -1144,39 +1177,6 @@
   "addedAt": "2024-09-23T12:11:35Z"
  },
  {
-  "id": "2025-ozyegin-university-20240923",
-  "year": 2025,
-  "posted": "2024-09-23",
-  "institution": "Ozyegin University",
-  "department": "Faculty of Business-Operations Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks",
-   "Visiting Faculty (various levels)"
-  ],
-  "applyBy": "September 1, 2025. Review of applications will start immediately and continue on an ongoing basis until the position is filled.",
-  "applyByDate": "2025-09-01",
-  "comments": "Candidates attending INFORMS Conference can attend a first round interview.",
-  "country": "Turkey",
-  "adUrl": "https://drive.google.com/open?id=1VkUm3CsW6SHUIWU_sqrkwgh3zBQcwWEn",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.ozyegin.edu.tr/en/human-resources/job-opportunities",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Ozyegin University",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-23T04:35:41Z"
- },
- {
   "id": "2025-the-hong-kong-university-of-science-and-technolo-20240922",
   "year": 2025,
   "posted": "2024-09-22",
@@ -1202,126 +1202,6 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2024-09-22T23:06:07Z"
- },
- {
-  "id": "2025-york-university-20240920",
-  "year": 2025,
-  "posted": "2024-09-20",
-  "institution": "York University",
-  "department": "Schulich School of Business, Operations Management and Information Systems Area",
-  "type": "Business School",
-  "levels": [
-   "Other Ranks"
-  ],
-  "applyBy": "January 31, 2025",
-  "applyByDate": "2025-01-31",
-  "comments": "",
-  "country": "Canada",
-  "adUrl": "https://drive.google.com/open?id=1Nus9yBqvUU5vnRbIcp6oAguTT67F6Xp3",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "http://www.operationsacademia.org/",
-  "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=York University",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-20T15:08:16Z"
- },
- {
-  "id": "2025-university-of-nebraska-lincoln-20240920",
-  "year": 2025,
-  "posted": "2024-09-20",
-  "institution": "University of Nebraska - Lincoln",
-  "department": "College of Business, Supply Chain Management & Analytics Department",
-  "type": "Business School",
-  "levels": [
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "October 31, 2024. To ensure full consideration, applications should be received by October 31, 2024. However, applications will be considered until the position is filled.",
-  "applyByDate": "2024-10-31",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1ZDiFO2OdfuGBXaLhmbSXN9Szrmr47xqD",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://employment.unl.edu/postings/93253",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Nebraska - Lincoln",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters",
-   "MBA"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-20T14:22:54Z"
- },
- {
-  "id": "2025-university-of-cincinnati-20240920",
-  "year": 2025,
-  "posted": "2024-09-20",
-  "institution": "University of Cincinnati",
-  "department": "Lindner College of Business; Department of Operations, Business Analytics & Information Systems (OBAIS)",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "Until filled. Early submissions are encouraged.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1bc5TT8v1zWOEB_u-L9HZNREOFarEJyc8",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://jobs.uc.edu/job/Cincinnati-Assistant-Professor%2C-Operations-Management%2C-Lindner-College-of-Business-OH-45201/1201498300/",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Cincinnati",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "MBA"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-20T09:51:54Z"
- },
- {
-  "id": "2025-ucla-20240920",
-  "year": 2025,
-  "posted": "2024-09-20",
-  "institution": "UCLA",
-  "department": "Anderson School of Management, Decisions, Operations and Technology Management (DOTM)",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "September 30, 2024. Apply by this date to ensure full consideration by the committee.",
-  "applyByDate": "2024-09-30",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=17x0lQipo0S54aL5_i7DL0HF719mOC9c-",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "http://www.operationsacademia.org/",
-  "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=UCLA",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-20T11:59:39Z"
  },
  {
   "id": "2025-indiana-university-20240920",
@@ -1356,6 +1236,126 @@
   "addedAt": "2024-09-20T08:58:58Z"
  },
  {
+  "id": "2025-ucla-20240920",
+  "year": 2025,
+  "posted": "2024-09-20",
+  "institution": "UCLA",
+  "department": "Anderson School of Management, Decisions, Operations and Technology Management (DOTM)",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 30, 2024. Apply by this date to ensure full consideration by the committee.",
+  "applyByDate": "2024-09-30",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=17x0lQipo0S54aL5_i7DL0HF719mOC9c-",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=UCLA",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-20T11:59:39Z"
+ },
+ {
+  "id": "2025-university-of-cincinnati-20240920",
+  "year": 2025,
+  "posted": "2024-09-20",
+  "institution": "University of Cincinnati",
+  "department": "Lindner College of Business; Department of Operations, Business Analytics & Information Systems (OBAIS)",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled. Early submissions are encouraged.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1bc5TT8v1zWOEB_u-L9HZNREOFarEJyc8",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.uc.edu/job/Cincinnati-Assistant-Professor%2C-Operations-Management%2C-Lindner-College-of-Business-OH-45201/1201498300/",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Cincinnati",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-20T09:51:54Z"
+ },
+ {
+  "id": "2025-university-of-nebraska-lincoln-20240920",
+  "year": 2025,
+  "posted": "2024-09-20",
+  "institution": "University of Nebraska - Lincoln",
+  "department": "College of Business, Supply Chain Management & Analytics Department",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "October 31, 2024. To ensure full consideration, applications should be received by October 31, 2024. However, applications will be considered until the position is filled.",
+  "applyByDate": "2024-10-31",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1ZDiFO2OdfuGBXaLhmbSXN9Szrmr47xqD",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://employment.unl.edu/postings/93253",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Nebraska - Lincoln",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-20T14:22:54Z"
+ },
+ {
+  "id": "2025-york-university-20240920",
+  "year": 2025,
+  "posted": "2024-09-20",
+  "institution": "York University",
+  "department": "Schulich School of Business, Operations Management and Information Systems Area",
+  "type": "Business School",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "January 31, 2025",
+  "applyByDate": "2025-01-31",
+  "comments": "",
+  "country": "Canada",
+  "adUrl": "https://drive.google.com/open?id=1Nus9yBqvUU5vnRbIcp6oAguTT67F6Xp3",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=York University",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-20T15:08:16Z"
+ },
+ {
   "id": "2025-university-of-chicago-20240919",
   "year": 2025,
   "posted": "2024-09-19",
@@ -1387,32 +1387,6 @@
   "addedAt": "2024-09-19T15:20:58Z"
  },
  {
-  "id": "2025-university-of-texas-at-austin-20240918",
-  "year": 2025,
-  "posted": "2024-09-18",
-  "institution": "University of Texas at Austin",
-  "department": "McCombs School of Business: Information, Risk, and Operations Management",
-  "type": "University",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "October 25, 2024",
-  "applyByDate": "2024-10-25",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://faculty.utexas.edu/career/148167",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Texas at Austin",
-  "characteristics": [
-   "Research seminars"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-18T15:55:28Z"
- },
- {
   "id": "2025-georgetown-university-20240918",
   "year": 2025,
   "posted": "2024-09-18",
@@ -1441,6 +1415,32 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2024-09-18T01:44:03Z"
+ },
+ {
+  "id": "2025-university-of-texas-at-austin-20240918",
+  "year": 2025,
+  "posted": "2024-09-18",
+  "institution": "University of Texas at Austin",
+  "department": "McCombs School of Business: Information, Risk, and Operations Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 25, 2024",
+  "applyByDate": "2024-10-25",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://faculty.utexas.edu/career/148167",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Texas at Austin",
+  "characteristics": [
+   "Research seminars"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-18T15:55:28Z"
  },
  {
   "id": "2025-university-of-colorado-boulder-20240917",
@@ -1534,6 +1534,33 @@
   "addedAt": "2024-09-13T09:57:04Z"
  },
  {
+  "id": "2025-bucknell-university-20240911",
+  "year": 2025,
+  "posted": "2024-09-11",
+  "institution": "Bucknell University",
+  "department": "Freeman College of Management, Department of Analytics and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 30, 2024. We review applications on a rolling basis until the position is filled.",
+  "applyByDate": "2024-09-30",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1BQ5E5P4aD-P2if_j3dledVTDmcdFWazi",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://bucknell.wd1.myworkdayjobs.com/en-US/External/details/Assistant-Professor-of-Analytics-and-Operations-Management_R0000000360?jobFamilyGroup=3ce5feabe53e01fb2262242fcb6e5c06",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Bucknell University",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-09-11T17:16:07Z"
+ },
+ {
   "id": "2025-london-business-school-20240911",
   "year": 2025,
   "posted": "2024-09-11",
@@ -1561,33 +1588,6 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2024-09-11T08:59:29Z"
- },
- {
-  "id": "2025-bucknell-university-20240911",
-  "year": 2025,
-  "posted": "2024-09-11",
-  "institution": "Bucknell University",
-  "department": "Freeman College of Management, Department of Analytics and Operations Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "September 30, 2024. We review applications on a rolling basis until the position is filled.",
-  "applyByDate": "2024-09-30",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1BQ5E5P4aD-P2if_j3dledVTDmcdFWazi",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://bucknell.wd1.myworkdayjobs.com/en-US/External/details/Assistant-Professor-of-Analytics-and-Operations-Management_R0000000360?jobFamilyGroup=3ce5feabe53e01fb2262242fcb6e5c06",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Bucknell University",
-  "characteristics": [
-   "Research seminars",
-   "Undergrad"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-09-11T17:16:07Z"
  },
  {
   "id": "2025-university-of-south-carolina-20240909",
@@ -1620,32 +1620,35 @@
   "addedAt": "2024-09-09T17:18:36Z"
  },
  {
-  "id": "2025-the-hong-kong-polytechnic-university-20240905",
+  "id": "2025-arizona-state-university-20240905",
   "year": 2025,
   "posted": "2024-09-05",
-  "institution": "The Hong Kong Polytechnic University",
-  "department": "Department of Logistics and Maritime Studies",
-  "type": "University",
+  "institution": "Arizona State University",
+  "department": "W. P. Carey School of Business, Department of Information Systems",
+  "type": "Business School",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "September 20, 2024. Consideration of applications will commence on 20 September 2024 until the positions are filled.",
-  "applyByDate": "2024-09-20",
+  "applyBy": "October 6, 2024",
+  "applyByDate": "2024-10-06",
   "comments": "",
-  "country": "Hong Kong",
+  "country": "USA",
   "adUrl": "",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=240905005",
+  "postedAtUrl": "https://apply.interfolio.com/152007",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The Hong Kong Polytechnic University",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Arizona State University",
   "characteristics": [
+   "Research seminars",
    "PhD",
+   "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-09-05T00:20:27Z"
+  "addedAt": "2024-09-05T15:37:56Z"
  },
  {
   "id": "2025-texas-a-m-university-20240905",
@@ -1679,35 +1682,32 @@
   "addedAt": "2024-09-05T20:17:10Z"
  },
  {
-  "id": "2025-arizona-state-university-20240905",
+  "id": "2025-the-hong-kong-polytechnic-university-20240905",
   "year": 2025,
   "posted": "2024-09-05",
-  "institution": "Arizona State University",
-  "department": "W. P. Carey School of Business, Department of Information Systems",
-  "type": "Business School",
+  "institution": "The Hong Kong Polytechnic University",
+  "department": "Department of Logistics and Maritime Studies",
+  "type": "University",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 6, 2024",
-  "applyByDate": "2024-10-06",
+  "applyBy": "September 20, 2024. Consideration of applications will commence on 20 September 2024 until the positions are filled.",
+  "applyByDate": "2024-09-20",
   "comments": "",
-  "country": "USA",
+  "country": "Hong Kong",
   "adUrl": "",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://apply.interfolio.com/152007",
+  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=240905005",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Arizona State University",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=The Hong Kong Polytechnic University",
   "characteristics": [
-   "Research seminars",
    "PhD",
-   "Undergrad",
    "Masters",
-   "MBA",
-   "Exec Ed"
+   "MBA"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-09-05T15:37:56Z"
+  "addedAt": "2024-09-05T00:20:27Z"
  },
  {
   "id": "2025-shanghai-university-of-finance-and-economics-20240831",
@@ -1949,32 +1949,35 @@
   "addedAt": "2024-08-23T09:36:25Z"
  },
  {
-  "id": "2025-tulane-university-20240819",
+  "id": "2025-national-university-of-singapore-20240819",
   "year": 2025,
   "posted": "2024-08-19",
-  "institution": "Tulane University",
-  "department": "A. B. Freeman School of Business / Management Sciecne",
+  "institution": "National University of Singapore",
+  "department": "NUS Business School, The Department of Analytics and Operations",
   "type": "Business School",
   "levels": [
-   "Other Ranks"
+   "Assistant Professor"
   ],
-  "applyBy": "July 1, 2025. Preferably before Friday, October 11th, 2024",
-  "applyByDate": "2025-07-01",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1dRuxjAD_iKmd-CpcX2OZudUtVWp79bZl",
+  "applyBy": "October 1, 2024. Candidates attending the INFORMS Annual Meeting 2024 are strongly encouraged to submit their applications, including presentation information, by Oct. 1, 2024. Applications will continue to be reviewed after this date.",
+  "applyByDate": "2024-10-01",
+  "comments": "Faculty members from the department will be attending the INFORMS Annual Meeting 2024 and look forward to meeting qualified candidates.",
+  "country": "Singapore",
+  "adUrl": "https://drive.google.com/open?id=1V5PasUWN7XAZ2FYOMmCWO7T_sNZE76Np",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "http://www.operationsacademia.org/",
-  "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Tulane University",
+  "postedAtUrl": "https://careercenter.informs.org/job/assistant-professor-of-analytics-operations-at-nus-business-school-national-university-of-singapore-singapore-4206",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=National University of Singapore",
   "characteristics": [
    "Research seminars",
+   "PhD",
+   "Undergrad",
    "Masters",
-   "MBA"
+   "MBA",
+   "Exec Ed"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-08-19T02:12:30Z"
+  "addedAt": "2024-08-19T10:05:34Z"
  },
  {
   "id": "2025-naval-postgraduate-school-20240819",
@@ -2007,35 +2010,32 @@
   "addedAt": "2024-08-19T12:59:24Z"
  },
  {
-  "id": "2025-national-university-of-singapore-20240819",
+  "id": "2025-tulane-university-20240819",
   "year": 2025,
   "posted": "2024-08-19",
-  "institution": "National University of Singapore",
-  "department": "NUS Business School, The Department of Analytics and Operations",
+  "institution": "Tulane University",
+  "department": "A. B. Freeman School of Business / Management Sciecne",
   "type": "Business School",
   "levels": [
-   "Assistant Professor"
+   "Other Ranks"
   ],
-  "applyBy": "October 1, 2024. Candidates attending the INFORMS Annual Meeting 2024 are strongly encouraged to submit their applications, including presentation information, by Oct. 1, 2024. Applications will continue to be reviewed after this date.",
-  "applyByDate": "2024-10-01",
-  "comments": "Faculty members from the department will be attending the INFORMS Annual Meeting 2024 and look forward to meeting qualified candidates.",
-  "country": "Singapore",
-  "adUrl": "https://drive.google.com/open?id=1V5PasUWN7XAZ2FYOMmCWO7T_sNZE76Np",
+  "applyBy": "July 1, 2025. Preferably before Friday, October 11th, 2024",
+  "applyByDate": "2025-07-01",
+  "comments": "",
+  "country": "USA",
+  "adUrl": "https://drive.google.com/open?id=1dRuxjAD_iKmd-CpcX2OZudUtVWp79bZl",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://careercenter.informs.org/job/assistant-professor-of-analytics-operations-at-nus-business-school-national-university-of-singapore-singapore-4206",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=National University of Singapore",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Tulane University",
   "characteristics": [
    "Research seminars",
-   "PhD",
-   "Undergrad",
    "Masters",
-   "MBA",
-   "Exec Ed"
+   "MBA"
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-08-19T10:05:34Z"
+  "addedAt": "2024-08-19T02:12:30Z"
  },
  {
   "id": "2025-boston-college-20240814",
@@ -2069,6 +2069,35 @@
   "addedAt": "2024-08-14T05:12:55Z"
  },
  {
+  "id": "2025-ku-leuven-20240813",
+  "year": 2025,
+  "posted": "2024-08-13",
+  "institution": "KU Leuven",
+  "department": "Faculty of Economics and Business",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 29, 2024",
+  "applyByDate": "2024-10-29",
+  "comments": "",
+  "country": "Belgium",
+  "adUrl": "https://drive.google.com/open?id=1tz3DCoW8x8YfLElnvLleZA-FiJTx6oWV",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://www.kuleuven.be/personeel/jobsite/jobs/60326166?lang=en",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=KU Leuven",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Undergrad",
+   "Masters"
+  ],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2024-08-13T09:25:05Z"
+ },
+ {
   "id": "2025-university-of-alberta-20240813",
   "year": 2025,
   "posted": "2024-08-13",
@@ -2098,35 +2127,6 @@
   "featured": false,
   "source": "sheet-import",
   "addedAt": "2024-08-13T17:46:24Z"
- },
- {
-  "id": "2025-ku-leuven-20240813",
-  "year": 2025,
-  "posted": "2024-08-13",
-  "institution": "KU Leuven",
-  "department": "Faculty of Economics and Business",
-  "type": "University",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "October 29, 2024",
-  "applyByDate": "2024-10-29",
-  "comments": "",
-  "country": "Belgium",
-  "adUrl": "https://drive.google.com/open?id=1tz3DCoW8x8YfLElnvLleZA-FiJTx6oWV",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.kuleuven.be/personeel/jobsite/jobs/60326166?lang=en",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=KU Leuven",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Undergrad",
-   "Masters"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2024-08-13T09:25:05Z"
  },
  {
   "id": "2025-university-of-michigan-20240812",
@@ -2191,25 +2191,24 @@
   "addedAt": "2024-08-11T10:03:22Z"
  },
  {
-  "id": "2025-university-of-chicago-20240807",
+  "id": "2025-duke-university-20240807",
   "year": 2025,
   "posted": "2024-08-07",
-  "institution": "University of Chicago",
-  "department": "Booth School of Business, Operations Management Area",
+  "institution": "Duke University",
+  "department": "Fuqua School of Business, Operations Management group",
   "type": "Business School",
   "levels": [
-   "Assistant Professor",
-   "Other Ranks"
+   "Assistant Professor"
   ],
-  "applyBy": "November 4, 2024. We will begin formally reviewing applications on September 27, 2024 and we strongly encourage you to submit all materials by that date to ensure full and timely consideration.  We will continue to accept applications until November 4, 2024, at which point your application must be complete.",
-  "applyByDate": "2024-11-04",
-  "comments": "Booth faculty will be available to interview prospective applicants during the INFORMS Annual Meeting, October 20-23, 2024.  To express an interest for an interview during INFORMS, please complete the Google form at this link: https://forms.gle/uU11DGpRdHP7w56S7 by Friday, September 27, 2024.",
+  "applyBy": "November 1, 2024",
+  "applyByDate": "2024-11-01",
+  "comments": "While we are not interviewing at the INFORMS Annual Meeting in Seattle, if you are presenting at the conference, it would be helpful to receive at least a partial packet by October 1, 2024 with details about your session. The deadline for applications is November 1, 2024.",
   "country": "USA",
   "adUrl": "",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "http://apply.interfolio.com/145326",
+  "postedAtUrl": "https://academicjobsonline.org/ajo/jobs/27916",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Chicago",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Duke University",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -2220,7 +2219,7 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-08-07T05:04:45Z"
+  "addedAt": "2024-08-07T04:56:43Z"
  },
  {
   "id": "2025-iese-20240807",
@@ -2255,24 +2254,25 @@
   "addedAt": "2024-08-07T05:11:59Z"
  },
  {
-  "id": "2025-duke-university-20240807",
+  "id": "2025-university-of-chicago-20240807",
   "year": 2025,
   "posted": "2024-08-07",
-  "institution": "Duke University",
-  "department": "Fuqua School of Business, Operations Management group",
+  "institution": "University of Chicago",
+  "department": "Booth School of Business, Operations Management Area",
   "type": "Business School",
   "levels": [
-   "Assistant Professor"
+   "Assistant Professor",
+   "Other Ranks"
   ],
-  "applyBy": "November 1, 2024",
-  "applyByDate": "2024-11-01",
-  "comments": "While we are not interviewing at the INFORMS Annual Meeting in Seattle, if you are presenting at the conference, it would be helpful to receive at least a partial packet by October 1, 2024 with details about your session. The deadline for applications is November 1, 2024.",
+  "applyBy": "November 4, 2024. We will begin formally reviewing applications on September 27, 2024 and we strongly encourage you to submit all materials by that date to ensure full and timely consideration.  We will continue to accept applications until November 4, 2024, at which point your application must be complete.",
+  "applyByDate": "2024-11-04",
+  "comments": "Booth faculty will be available to interview prospective applicants during the INFORMS Annual Meeting, October 20-23, 2024.  To express an interest for an interview during INFORMS, please complete the Google form at this link: https://forms.gle/uU11DGpRdHP7w56S7 by Friday, September 27, 2024.",
   "country": "USA",
   "adUrl": "",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://academicjobsonline.org/ajo/jobs/27916",
+  "postedAtUrl": "http://apply.interfolio.com/145326",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=Duke University",
+  "furtherInfoUrl": "http://www.operationsacademia.org/universities?filterA=University of Chicago",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -2283,7 +2283,7 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2024-08-07T04:56:43Z"
+  "addedAt": "2024-08-07T05:04:45Z"
  },
  {
   "id": "2025-indian-school-of-business-20240805",

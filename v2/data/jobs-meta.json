@@ -1,0 +1,47 @@
+{
+ "generated": "2026-08-15T15:33:47.133Z",
+ "count": 80,
+ "years": {
+  "2020": 1,
+  "2025": 67,
+  "2026": 12
+ },
+ "types": {
+  "Business School": 57,
+  "University": 23
+ },
+ "levels": {
+  "Assistant Professor": 61,
+  "Other Ranks": 34,
+  "Post-Doc": 8,
+  "Non-tenure track (teaching) position": 6,
+  "Visiting Faculty (various levels)": 2
+ },
+ "countries": {
+  "USA": 43,
+  "Hong Kong": 6,
+  "China": 5,
+  "Germany": 5,
+  "Canada": 4,
+  "Singapore": 3,
+  "United Kingdom": 3,
+  "France": 2,
+  "India": 2,
+  "Spain": 2,
+  "Australia": 1,
+  "Belgium": 1,
+  "China (Shanghai)": 1,
+  "Portugal": 1,
+  "Turkey": 1
+ },
+ "characteristics": {
+  "Research seminars": 71,
+  "Undergrad": 65,
+  "Masters": 64,
+  "MBA": 64,
+  "PhD": 60,
+  "Exec Ed": 51
+ },
+ "featured": 1,
+ "newestPosted": "2025-08-13"
+}
