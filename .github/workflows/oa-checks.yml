@@ -46,13 +46,20 @@ jobs:
             echo "::error::an e-mail address is present in v2/data/"
             exit 1
           fi
-          # A pasted Firebase config in a committed file is fine (web configs
-          # are public by design), but a service-account private key is not.
-          if grep -rl 'BEGIN PRIVATE KEY' v2/ ; then
-            echo "::error::a private key is committed under v2/"
+          # A pasted Firebase WEB config is fine — those are public by design and
+          # appear in the page source of every Firebase site. A service-account
+          # PRIVATE key is not.
+          #
+          # Match the full PEM delimiter INCLUDING its dashes. Grepping for the
+          # bare words matched this repo's own documentation, which names the
+          # string while explaining this very check — a guard that fails on
+          # every push teaches people to ignore it, which is worse than not
+          # having one.
+          if grep -rlE -- '-----BEGIN [A-Z ]*PRIVATE KEY-----' v2/ ; then
+            echo "::error::private key material is committed under v2/"
             exit 1
           fi
-          echo "no e-mail addresses and no private keys in the served files"
+          echo "no e-mail addresses and no private key material in the served files"
 
       - name: The page renders its data
         run: |
