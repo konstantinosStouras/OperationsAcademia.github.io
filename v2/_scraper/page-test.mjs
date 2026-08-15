@@ -121,8 +121,14 @@ const usa = await countAfter(async () => {
 });
 ok(usa > 0 && usa < total, `a location filter narrows the list (${usa} of ${total})`);
 
-const both = await countAfter(() => page.fill('#oaf-institution', 'Chicago'));
-ok(both > 0 && both <= usa, `a text search chains with it, ANDed (${both})`);
+/* The search term is taken FROM the list on screen, never hardcoded: the
+   dataset is the live one and its contents move every time the sheet syncs or
+   a market rolls, so a fixed name ("Chicago") turns a passing check into a
+   failing one the day that posting leaves the current market. */
+const term = await page.$eval('.oa-card:first-child .oa-card-title',
+  (n) => n.textContent.trim().split(/\s+/).find((w) => w.length > 4) || 'University');
+const both = await countAfter(() => page.fill('#oaf-institution', term));
+ok(both > 0 && both <= usa, `a text search chains with it, ANDed (${both} for "${term}")`);
 
 // the option counts are cross-filtered, not raw totals
 await page.click('#oaf-type');
@@ -135,7 +141,7 @@ await page.keyboard.press('Escape');
 /* ------------------------------------------------------------- deep links */
 
 const url = page.url();
-ok(url.includes('country=USA') && url.includes('institution=Chicago'),
+ok(url.includes('country=USA') && url.includes('institution=' + encodeURIComponent(term)),
   'filter state is mirrored into the query string');
 
 await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -143,7 +149,7 @@ await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
 eq(Number((await page.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim().split(' ')[0]),
   both, 'reloading a filtered URL restores the same result set');
-eq(await page.$eval('#oaf-institution', (n) => n.value), 'Chicago', 'the text filter is restored');
+eq(await page.$eval('#oaf-institution', (n) => n.value), term, 'the text filter is restored');
 
 // the legacy Awesome Table deep link the footer and the "Further info" column
 // still emit must keep working
