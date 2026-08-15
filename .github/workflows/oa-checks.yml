@@ -1,0 +1,62 @@
+name: OA v2 — checks
+
+# The offline guard rails for the v2 rebuild. No network, no credentials, so
+# this runs on every push and every pull request.
+
+on:
+  push:
+    paths:
+      - 'v2/**'
+      - '.github/workflows/oa-checks.yml'
+  pull_request:
+    paths:
+      - 'v2/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Every script parses
+        run: |
+          set -e
+          for f in v2/assets/*.js; do node --check "$f"; done
+          for f in v2/_scraper/*.mjs; do node --check "$f"; done
+          echo "all scripts parse"
+
+      - name: The data model, the merge, and the served file
+        run: node v2/_scraper/selftest.mjs
+
+      - name: No secret ever reaches a served file
+        run: |
+          set -e
+          # The repository is public. data/ is fetched by every visitor, so a
+          # submitter's e-mail address landing there would be a disclosure.
+          if grep -rEl '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' v2/data/ ; then
+            echo "::error::an e-mail address is present in v2/data/"
+            exit 1
+          fi
+          # A pasted Firebase config in a committed file is fine (web configs
+          # are public by design), but a service-account private key is not.
+          if grep -rl 'BEGIN PRIVATE KEY' v2/ ; then
+            echo "::error::a private key is committed under v2/"
+            exit 1
+          fi
+          echo "no e-mail addresses and no private keys in the served files"
+
+      - name: The page renders its data
+        run: |
+          set -e
+          npm install --no-save --no-audit --no-fund playwright@1
+          npx playwright install --with-deps chromium
+          node v2/_scraper/page-test.mjs

@@ -1,0 +1,72 @@
+name: OA feedback — forward and resolve
+
+# Phase 1 forwards new feedback to the maintainer and sends the submitter a
+# receipt. Phase 2 applies any file in v2/_feedback-resolutions/, closing that
+# ticket and e-mailing the submitter what was done.
+#
+# A no-op until FIREBASE_SERVICE_ACCOUNT is set.
+
+on:
+  schedule:
+    - cron: '13,43 * * * *'
+  push:
+    branches: [master]
+    paths:
+      - 'v2/_feedback-resolutions/**'      # resolve as soon as one is pushed
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Render everything, send nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-feedback-mail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Is Firebase configured?
+        id: gate
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          # Until the project exists this job has nothing to do. Checking first
+          # saves an npm install on every scheduled fire — ~100 no-op runs a day
+          # while the site is still being set up.
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Firebase is not configured yet — nothing to do. See v2/_SETUP-FIREBASE.md"
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+        if: steps.gate.outputs.ready == 'true'
+
+      - name: Offline checks
+        run: node v2/_scraper/feedback-mailer.mjs --selftest
+
+      - name: Forward and resolve
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          FEEDBACK_TO: ${{ vars.FEEDBACK_TO }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+        run: node v2/_scraper/feedback-mailer.mjs ${{ inputs.dry_run && '--dry-run' || '' }}

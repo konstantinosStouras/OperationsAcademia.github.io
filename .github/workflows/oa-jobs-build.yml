@@ -1,0 +1,98 @@
+name: OA jobs — publish queued postings
+
+# Turns job postings submitted through /v2/post-a-job.html into rows in
+# v2/data/jobs.json and commits them. This is what replaced Awesome Tables:
+# the data lives in this repository, and the page reads it directly.
+#
+# It is a NO-OP until the FIREBASE_SERVICE_ACCOUNT secret is set, so it is safe
+# to have running before the Firebase project exists.
+
+on:
+  schedule:
+    # every 20 minutes, off the hour so this repo does not queue behind every
+    # other :00 job on the runners
+    - cron: '7,27,47 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report what would change, write nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# One writer of v2/data/ at a time. Overlapping fires queue and coalesce rather
+# than racing each other's commit — the same discipline as /lit/'s data jobs.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Is Firebase configured?
+        id: gate
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          # Until the project exists this job has nothing to do. Checking first
+          # saves an npm install on every scheduled fire — ~100 no-op runs a day
+          # while the site is still being set up.
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Firebase is not configured yet — nothing to do. See v2/_SETUP-FIREBASE.md"
+          fi
+
+      - name: Install the Admin SDK
+        if: steps.gate.outputs.ready == 'true'
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: Offline checks
+        run: node v2/_scraper/selftest.mjs
+
+      - name: Publish queued postings
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          node v2/_scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Re-check the file we are about to commit
+        run: node v2/_scraper/selftest.mjs
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.dry_run
+        run: |
+          if [ -z "$(git status --porcelain v2/data)" ]; then
+            echo "no change — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v2/data
+          git commit -m "OA jobs: publish queued postings"
+
+          # plain fast-forward, with rebase-and-retry: a concurrent writer may
+          # have moved the branch on while this run was working
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected — rebasing onto the new tip (attempt $i)"
+            git pull --rebase origin ${{ github.ref_name }} || exit 1
+            sleep $((i * 3))
+          done
+          echo "could not push after 5 attempts"
+          exit 1
