@@ -57,7 +57,7 @@ Settings → Secrets and variables → Actions.
 |---|---|---|
 | `MAIL_FROM` | `Operations Academia <no-reply@operationsacademia.org>` | `Operations Academia <SMTP_USER>` |
 | `FEEDBACK_TO` | where feedback lands | `kstouras@gmail.com` |
-| `CONTACT_EMAIL` | the human address in every footer | `kostas.stouras@ucd.ie` |
+| `CONTACT_EMAIL` | the human address in every footer | `operationsacademia@gmail.com` |
 | `SITE_URL` | absolute site root | `https://www.operationsacademia.org` |
 
 ## 3. Make the mail actually arrive

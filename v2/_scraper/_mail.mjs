@@ -13,13 +13,13 @@
    Environment:
      SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS   the mailbox to send from
      MAIL_FROM      display From:              default "Operations Academia <SMTP_USER>"
-     CONTACT_EMAIL  the human to reply to      default kostas.stouras@ucd.ie
+     CONTACT_EMAIL  address shown in footers   default operationsacademia@gmail.com
      SITE_URL       absolute site root         default https://www.operationsacademia.org
    --------------------------------------------------------------------------- */
 
 export const SITE = (process.env.SITE_URL || 'https://www.operationsacademia.org')
   .replace(/\/+$/, '');
-export const CONTACT = process.env.CONTACT_EMAIL || 'kostas.stouras@ucd.ie';
+export const CONTACT = process.env.CONTACT_EMAIL || 'operationsacademia@gmail.com';
 
 export function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => (
