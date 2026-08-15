@@ -616,3 +616,205 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
 }
+
+
+/* ------------------------------------------------- the confirmation panel */
+
+/* The two follow-on actions are buttons, not a line of links: at the end of a
+   form the reader is choosing what to do next, and a choice should look like
+   one. `.button` and `.button.blue` come from the site's own main.css; only the
+   quiet variant is new. */
+.oa-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px !important;
+}
+
+.oa-done-actions .button { line-height: 2.6em; font-size: 15px; }
+
+.button.oa-btn-ghost {
+  border-color: #3b7dbc;
+  background: #fff;
+  color: #3b7dbc !important;   /* beats `.button { color: #343e49 !important }` */
+}
+
+.button.oa-btn-ghost:hover { background: #eef4fa; border-color: #4b8dcc; }
+.button.oa-btn-ghost:active { background: #dceafa; }
+
+@media screen and (max-width: 480px) {
+  .oa-done-actions { flex-direction: column; }
+  .oa-done-actions .button { width: 100%; box-sizing: border-box; }
+}
+
+/* the provider buttons carry their mark, as on /lit/ */
+.oa-auth-provider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.oa-auth-provider svg { flex: 0 0 auto; }
+
+/* ---------------------------------------------------- header: Feedback button
+
+   /lit/ carries About / Data Analytics / Feedback / Sign in in its header, so
+   feedback is one click from anywhere. Same idea here, pinned to the opposite
+   corner from #nav (which main.css places absolutely at left:8em). */
+
+#oa-headnav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 2.5em;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* the account control sits inside the row now, not pinned itself */
+#oa-headnav #oa-account { position: static; height: auto; }
+
+.oa-headbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  background: #fff;
+  font-weight: 600;
+  color: #444 !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+
+.oa-headbtn:hover { border-color: #3b7dbc; color: #3b7dbc !important; background: #f2f6fb; }
+.oa-headbtn.is-on { border-color: #3b7dbc; color: #3b7dbc !important; }
+
+@media screen and (max-width: 736px) {
+  /* below 840px main.css hides the whole header bar and main.js takes over,
+     so this only matters in the narrow band where the bar is still shown */
+  .oa-headbtn span[aria-hidden] { display: none; }
+  .oa-headbtn { padding: 4px 8px; }
+}
+
+/* --------------------------------------------------------- feedback layout */
+
+.oa-panel {
+  margin: 0 0 22px;
+  padding: 26px 28px;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.oa-panel-h {
+  margin: 0 0 10px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-lede { font-size: 16px; line-height: 1.6; }
+.oa-muted { color: #7a7a7a; font-weight: 400; }
+.oa-rule { margin: 28px 0 22px; border: 0; border-top: 1px solid #ececec; }
+
+.oa-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* the screenshot drop zone */
+.oa-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+  padding: 22px 18px;
+  border: 2px dashed #cfd8e3;
+  border-radius: 6px;
+  background: #fafbfd;
+  font: inherit;
+  font-size: 14px;
+  color: #444;
+  text-align: left;
+  cursor: pointer;
+}
+
+.oa-drop:hover, .oa-drop:focus-visible {
+  border-color: #3b7dbc;
+  background: #f2f6fb;
+  outline: none;
+}
+
+.oa-drop.is-over { border-color: #3b7dbc; background: #e8f1fb; }
+.oa-drop-icon { font-size: 22px; line-height: 1; }
+.oa-drop-text strong { display: block; color: #313a45; }
+.oa-drop-text .oa-muted { font-size: 13px; }
+
+/* "reach me directly" */
+.oa-contacts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oa-contacts a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  border: 1px solid #e4e4e4;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 14px;
+  color: #222 !important;
+  text-decoration: none !important;
+}
+
+.oa-contacts a:hover { border-color: #3b7dbc; background: #f7fafd; }
+
+.oa-contacts strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-contacts span span, .oa-contacts a > span:last-child { line-height: 1.35; color: #777; font-size: 13px; }
+
+.oa-contact-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border: 1px solid #e4e4e4;
+  border-radius: 5px;
+  background: #fafafa;
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+}
+
+@media screen and (max-width: 640px) {
+  .oa-panel { padding: 20px 18px; }
+  .oa-contacts { grid-template-columns: 1fr; }
+}

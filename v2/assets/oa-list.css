@@ -273,11 +273,25 @@
 
 .oa-cards { margin: 14px 0 0; padding: 0; list-style: none; }
 
+/* Awesome Table drew its cards with a Material elevation that lifted on hover.
+   Reproduced here as elevation 1 at rest and elevation 3 under the pointer, so
+   the list feels the same to anyone used to the old page. The transition is
+   dropped for readers who ask for less motion. */
 .oa-card {
   margin: 0 0 12px;
   background: #fff;
   border: 1px solid #eee;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.oa-card:hover,
+.oa-card:focus-within {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oa-card { transition: none; }
 }
 
 .oa-card-head {

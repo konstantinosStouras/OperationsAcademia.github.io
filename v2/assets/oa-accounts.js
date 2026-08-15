@@ -111,7 +111,29 @@
 
   /* -------------------------------------------------------------- auth modal */
 
-  var PROVIDER_LABEL = { google: 'Continue with Google', orcid: 'Continue with ORCID' };
+  /* Provider buttons, matching the ones on /lit/. The marks are inline SVG
+     rather than image files: the pages load no third-party assets, so an icon
+     fetched from a CDN would be the only such request on the site — and would
+     leave a blank square whenever that CDN is slow or blocked. */
+  var PROVIDER = {
+    google: {
+      label: 'Continue with Google',
+      icon: '<svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">' +
+        '<path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/>' +
+        '<path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.33A9 9 0 0 0 9 18z"/>' +
+        '<path fill="#FBBC05" d="M3.95 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l2.99-2.33z"/>' +
+        '<path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l2.99 2.33C4.66 5.16 6.65 3.58 9 3.58z"/>' +
+        '</svg>'
+    },
+    orcid: {
+      label: 'Continue with ORCID',
+      icon: '<svg viewBox="0 0 256 256" width="18" height="18" aria-hidden="true">' +
+        '<circle cx="128" cy="128" r="128" fill="#A6CE39"/>' +
+        '<path fill="#fff" d="M86.3 186.2H70.9V79.1h15.4v107.1zM78.6 66.9a9.9 9.9 0 1 1 0-19.8 9.9 9.9 0 0 1 0 19.8z"/>' +
+        '<path fill="#fff" d="M108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.6-56.8 53.6h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.9-26.5 42.9-39.7 0-21.5-13.7-39.7-43.7-39.7h-23.7v79.4z"/>' +
+        '</svg>'
+    }
+  };
 
   function openAuth() {
     if (state.user) return;                      // invariant 1
@@ -120,10 +142,10 @@
     if ($('#oa-auth')) { $('#oa-auth').hidden = false; return; }
 
     var third = (OAFB.providers || [])
-      .filter(function (p) { return p !== 'password'; })
+      .filter(function (p) { return p !== 'password' && PROVIDER[p]; })
       .map(function (p) {
         return '<button type="button" class="oa-auth-provider" data-provider="' + p + '">' +
-          esc(PROVIDER_LABEL[p] || p) + '</button>';
+          PROVIDER[p].icon + '<span>' + esc(PROVIDER[p].label) + '</span></button>';
       }).join('');
 
     var wrap = document.createElement('div');
@@ -168,6 +190,18 @@
       if (c === 'auth/weak-password') return 'Please choose a password of at least 6 characters.';
       if (c === 'auth/popup-blocked') return 'Your browser blocked the sign-in window. Allow pop-ups and try again.';
       if (c === 'auth/popup-closed-by-user') return '';
+      if (c === 'auth/operation-not-allowed') {
+        return 'That sign-in method is not switched on for this site yet. ' +
+          'Please use one of the others for now.';
+      }
+      if (c === 'auth/unauthorized-domain') {
+        return 'Sign-in is not allowed from this address. If you are the site ' +
+          'owner, add it under Authentication > Settings > Authorized domains.';
+      }
+      if (c === 'auth/account-exists-with-different-credential') {
+        return 'You already have an account with this e-mail, created through a ' +
+          'different sign-in method. Use that one, and you can link the two afterwards.';
+      }
       if (c === 'auth/network-request-failed') return 'We could not reach the sign-in service. Check your connection.';
       if (/sdk-load-failed|not-configured/.test(err && err.message || '')) {
         return 'We could not load the sign-in service. If you use an ad blocker, ' +
