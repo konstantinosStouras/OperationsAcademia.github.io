@@ -326,6 +326,22 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
   const { rows, unmatched } = rowsFromSheets(display, raw);
   const published = rows.map(publicRow);
 
+  /* An import of ZERO postings from a sheet that answered is not a healthy
+     sync — it is a header mismatch being reported as success, which is exactly
+     what the first scheduled run did (it fetched CSV, parsed nothing, and
+     committed a no-op). Say what the tab actually looks like, and fail. */
+  if (sheetId && !rows.length) {
+    const head = display ? display[0] : (raw ? raw[0] : []);
+    console.log(`::error::the sheet answered but no posting could be read from it`);
+    console.log(`  rows in the tab: ${display ? display.length : 0}`);
+    console.log(`  header columns : ${JSON.stringify((head || []).slice(0, 40))}`);
+    console.log(`  second row     : ${JSON.stringify(((display || [])[1] || []).slice(0, 40))}`);
+    console.log('  The importer keys off "University/Institution" (display tab) or');
+    console.log('  "University Name/ Institution" (raw tab). If neither is above, the');
+    console.log('  tab name or the sheet id is wrong — check --sheet <id> and the tab.');
+    process.exit(1);
+  }
+
   console.log(`imported ${published.length} postings`);
   if (unmatched) console.log(`  ${unmatched} display row(s) had no matching form response`);
   console.log(`  ${published.filter((r) => r.adUrl).length} with a job-ad link`);
