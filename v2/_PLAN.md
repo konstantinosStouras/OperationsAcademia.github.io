@@ -68,22 +68,24 @@ depends on it.
 | `/recent-faculty` | Recent Faculty in Operations (Responses) | `16j0bQulL7jWIpajmVRzlJZmz6rf8k_r7z_4enfXBAuk` | 212 | 190 |
 | `/universities` | List of Universities | `1aW8z50zk98vmsrt6llJySvPH2ID0s0GtT_4Xh-J0rMw` | 144 | — (map) |
 
-**Two numbers there need your attention.**
+> **The jobs row counts above are from the original recovery and are too low.**
+> They were read through Google Drive's text rendering of the sheet, which
+> **truncates large files without saying so**. An earlier draft of this plan
+> concluded from them that the display tab stopped at row 80 and that *rows
+> 81–129 (13 Aug → 21 Oct 2025) had never been published*. **That finding is
+> withdrawn.** The scheduled sync, reading the real CSV endpoint from CI,
+> returns postings the rendering never showed — including rows dated well after
+> 21 Oct 2025 — so there is no evidence of a publication gap. Treat the CSV
+> endpoint as the only authority on what the sheet contains; anything derived
+> from the Drive rendering is a lower bound at best. The other five sheets'
+> counts come from the same source and carry the same caveat.
 
-*The jobs display tab shows 80 rows but there are 129 raw responses.* The
-display tab is built by **positional formulas** reading raw row N — its 80
-timestamps are exactly the first 80 raw timestamps — so the formulas simply
-stop at row 80. **Rows 81–129 (13 August → 21 October 2025) have never been
-published.** Some will be expired by now; some may be postings a school
-believes are live on your site. This is the single most valuable thing the
-audit turned up, and it is a decision, not a bug to fix: publish them, review
-them, or archive them. §3.3.
-
-*The live page reads "1 – 10 / 92", not 80.* Two independent reads of the sheet
-found 80 display rows. The gap is unexplained — the Awesome Table view may be
-configured over a wider range than the formulas currently fill, or the sheet
-may have moved since. **Reconcile this against a fresh CSV export before
-cutover** (§3.3); the export is the authority, not my recovery.
+*The live page reads "1 – 10 / 92".* That reconciles: the sync returns 102 rows
+at or after market 2026, of which 7 are for later seasons the vendor page
+filters out and 8 were repeat submissions of postings already in the list
+(§3.3). What is left is 87, against a vendor count read at a different moment
+while the sheet kept receiving. **The new list is not missing postings; it
+carries slightly more.**
 
 ### How one sheet worked
 
@@ -277,11 +279,13 @@ files without saying so**. The scheduled sync, reading the real CSV endpoint,
 returns postings the rendering never showed. There is no evidence of a
 publication gap, and the finding is withdrawn.
 
-#### The job market rolls in June, and nothing about that is typed by hand
+#### The job market year, defined once and typed nowhere
 
-`marketYear()` in `jobs-model.mjs` owns the rule: the market rolls on 1 June and
-is numbered by the year it ENDS, matching the sheet's own *Job Market Year*
-column. Everything derives from it —
+**A market year runs 1 July of the previous year to 30 June of its own, and is
+numbered by the year it ends** — market 2027 is 1 Jul 2026 – 30 Jun 2027 —
+matching the sheet's own *Job Market Year* column. `marketYear()` in
+`jobs-model.mjs` owns it, and `MARKET_ROLL_MONTH` is the whole rule: July,
+0-based 6. Everything derives from it —
 
 | Consumer | How |
 |---|---|
@@ -291,7 +295,7 @@ column. Everything derives from it —
 
 This is the one thing that had already gone wrong: the heading was typed, the
 workflow was pinned to `--min-year 2026` to agree with it, and by August 2026
-both were a season behind the market that had started in June.
+both were a season behind the market that had started on 1 July.
 
 **`MARKET_WINDOW = 2`** — the page carries the current season and the one
 before. One season is what the title implies, and it was measured on

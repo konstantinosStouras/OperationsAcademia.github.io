@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
-  marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW,
+  marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 
@@ -280,11 +280,30 @@ function finish() {
 function testMarketYear() {
   const at = (s) => marketYear(new Date(s));
 
+  /* A market year runs 1 July of the previous year to 30 June of its own, and
+     is numbered by the year it ends. Both ends of market 2026 are pinned —
+     1 Jul 2025 and 30 Jun 2026 — because the rule is entirely a month
+     boundary, and it was wrong by one month (rolling in June) until the owner
+     said so on 2026-08-15. */
+  eq(at('2025-07-01T00:00:00Z'), 2026, 'market 2026 opens on 1 July 2025');
+  eq(at('2026-06-30T23:59:59Z'), 2026, 'and closes at the end of 30 June 2026');
+  eq(at('2026-07-01T00:00:00Z'), 2027, 'market 2027 opens the very next day');
+  eq(at('2025-06-30T23:59:59Z'), 2025, 'the day before it opened was still market 2025');
+
   eq(at('2026-08-15T00:00:00Z'), 2027, 'August 2026 is in market 2027');
-  eq(at('2026-06-01T00:00:00Z'), 2027, 'the market rolls on 1 June');
-  eq(at('2026-05-31T23:59:59Z'), 2026, 'the day before, it has not');
   eq(at('2026-01-15T00:00:00Z'), 2026, 'January stays in the season under way');
   eq(at('2025-12-31T23:59:59Z'), 2026, 'and so does New Year\'s Eve');
+
+  // the off-by-one that was here: June belongs to the season ENDING, not the
+  // one about to start
+  eq(at('2026-06-01T00:00:00Z'), 2026, 'June does not roll the market');
+  eq(at('2026-06-15T12:00:00Z'), 2026, 'nor does mid-June');
+
+  // every month lands in exactly one market, and the year advances once
+  const months = Array.from({ length: 12 }, (_, i) =>
+    at(`2026-${String(i + 1).padStart(2, '0')}-15T00:00:00Z`));
+  eq(months.join(','), '2026,2026,2026,2026,2026,2026,2027,2027,2027,2027,2027,2027',
+    'the calendar year splits Jan-Jun / Jul-Dec across two markets');
 
   eq(marketLabel(2027), '2026-2027', 'a market is labelled by the years it spans');
   eq(marketLabel('2026'), '2025-2026', 'a numeric string labels the same way');
@@ -307,7 +326,9 @@ async function testPageHeadingRule() {
 
   const m = html.match(/getUTCFullYear\(\)\s*\+\s*\(\s*d\.getUTCMonth\(\)\s*>=\s*(\d+)\s*\?\s*1\s*:\s*0\s*\)/);
   ok(m, 'jobs.html derives the heading year rather than hard-coding a season');
-  if (m) eq(Number(m[1]), 5, 'the page rolls in the same month as marketYear()');
+  // read from the model, never written down again — the page's copy of the
+  // rule is the one that drifts, so it is pinned to the constant itself
+  if (m) eq(Number(m[1]), MARKET_ROLL_MONTH, 'the page rolls in the same month as marketYear()');
 
   ok(/id="oa-jobs-heading"/.test(html), 'the heading element is addressable');
 

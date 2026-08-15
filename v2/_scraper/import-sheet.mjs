@@ -331,7 +331,7 @@ async function main() {
   const merge = process.argv.includes('--merge');
   /* The sheet is the WHOLE history — every job market it has ever carried,
      back to 2019 — so the sync scopes it to the recent markets. The floor
-     comes from marketFloor() in jobs-model.mjs, which owns the roll-in-June
+     comes from marketFloor() in jobs-model.mjs, which owns the roll rule
      rule and the MARKET_WINDOW width; --min-year <y> overrides it for a
      one-off (0 = every year).
 

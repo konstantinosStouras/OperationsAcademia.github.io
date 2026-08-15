@@ -121,13 +121,20 @@ export function jobId(row) {
    hand — had already drifted a whole season behind by August 2026.           */
 
 /**
- * The job-market year a moment falls in. The market rolls in June, and is
- * numbered by the year it ENDS, matching the sheet's own "Job Market Year"
- * column: a posting made in June 2026 belongs to market 2027, the 2026-2027
- * season.
+ * The job-market year a moment falls in.
+ *
+ * A market year runs **1 July of the previous year to 30 June of its own**, and
+ * is numbered by the year it ENDS — market 2027 is 1 Jul 2026 – 30 Jun 2027 —
+ * matching the sheet's own "Job Market Year" column. So the roll is on 1 JULY,
+ * and 30 June is the last day of the season under way.
+ *
+ * The month index is the whole rule, so it is spelled out: getUTCMonth() is
+ * 0-based, JULY is 6.
  */
+export const MARKET_ROLL_MONTH = 6; // July, 0-based
+
 export function marketYear(now = new Date()) {
-  return now.getUTCFullYear() + (now.getUTCMonth() >= 5 ? 1 : 0);
+  return now.getUTCFullYear() + (now.getUTCMonth() >= MARKET_ROLL_MONTH ? 1 : 0);
 }
 
 /** 2027 -> "2026-2027", the way the page heading names a season. */

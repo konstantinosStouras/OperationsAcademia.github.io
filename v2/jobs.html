@@ -51,7 +51,7 @@
 
           <div class="title-heading">
             <!-- The season is filled in by the script at the foot of this page
-                 from the same roll-in-June rule the sync uses, so the heading
+                 from the same market-year rule the sync uses, so the heading
                  cannot fall a season behind the data again. The literal here
                  is the no-JavaScript fallback. -->
             <h2 id="oa-jobs-heading">
@@ -174,8 +174,9 @@
       /* The heading names the CURRENT job market, derived — never typed. This
          is a third copy of the rule in jobs-model.mjs (marketYear/marketLabel);
          it cannot import the module because this page ships no build step, so
-         the selftest asserts the two agree. The market rolls in June and is
-         numbered by the year it ends: June 2026 onwards is 2026-2027. */
+         the selftest asserts the two agree. A market year runs 1 July of the
+         previous year to 30 June of its own and is numbered by the year it
+         ends, so the roll is on 1 JULY and getUTCMonth() (0-based) is 6. */
       /* MARKET_WINDOW in jobs-model.mjs — keep the two in step. */
       var MARKET_WINDOW = 2;
 
@@ -183,7 +184,7 @@
         var el = document.getElementById('oa-jobs-heading');
         if (!el) return;
         var d = new Date();
-        var y = d.getUTCFullYear() + (d.getUTCMonth() >= 5 ? 1 : 0);
+        var y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
         el.textContent = 'Job postings (' + (y - 1) + '-' + y + ')';
 
         /* The list carries more than the season in the title — the previous
