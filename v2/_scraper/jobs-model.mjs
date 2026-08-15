@@ -112,6 +112,51 @@ export function jobId(row) {
   return `${row.year}-${slug(row.institution)}-${String(row.posted || '').replace(/-/g, '')}`;
 }
 
+/* --------------------------------------------------------- the market year
+
+   ONE definition, because there were two: rowFromSubmission derived the year
+   for a submission that did not carry one, and import-sheet.mjs derived the
+   same value again to decide what is in scope. Two copies of a rule that rolls
+   once a year drift silently, and the page heading — a third copy, typed by
+   hand — had already drifted a whole season behind by August 2026.           */
+
+/**
+ * The job-market year a moment falls in. The market rolls in June, and is
+ * numbered by the year it ENDS, matching the sheet's own "Job Market Year"
+ * column: a posting made in June 2026 belongs to market 2027, the 2026-2027
+ * season.
+ */
+export function marketYear(now = new Date()) {
+  return now.getUTCFullYear() + (now.getUTCMonth() >= 5 ? 1 : 0);
+}
+
+/** 2027 -> "2026-2027", the way the page heading names a season. */
+export function marketLabel(year) {
+  const y = Math.trunc(Number(year));
+  return `${y - 1}-${y}`;
+}
+
+/**
+ * How many market years the jobs page carries, counting back from the current
+ * one. TWO, deliberately, and this is the one number to change if that is
+ * wrong.
+ *
+ * One season is what the page's title implies and what the vendor page did.
+ * Measured against the real data on 2026-08-15 it would have cut the list from
+ * 102 postings to 7, and 38 of the 95 dropped were still live — 2 open by
+ * their own deadline and 36 "until filled". Postings are also still ARRIVING
+ * tagged with the previous season (the newest market-2026 row was submitted
+ * 2026-07-28, six weeks after the roll), because the poster picks that field
+ * by hand. So a single-season window drops advertisements that are open for
+ * applications, which is the one thing this page exists to show.
+ */
+export const MARKET_WINDOW = 2;
+
+/** The oldest market year in scope at `now`. */
+export function marketFloor(now = new Date(), window = MARKET_WINDOW) {
+  return marketYear(now) - (Math.max(1, window) - 1);
+}
+
 /* ------------------------------------------------------------- the mapping */
 
 /**
@@ -131,7 +176,7 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
 
   const year = Number.isFinite(+doc.year) && +doc.year >= 2000 && +doc.year <= 2100
     ? Math.trunc(+doc.year)
-    : now.getUTCFullYear() + (now.getUTCMonth() >= 5 ? 1 : 0);
+    : marketYear(now);
 
   const posted = day(doc.postedOn) || isoDay(tsToDate(doc.createdAt) || now);
   const applyByDate = doc.untilFilled ? '' : day(doc.applyByDate);
@@ -198,6 +243,74 @@ export function publicRow(row) {
   return out;
 }
 
+/* --------------------------------------------------------- same-day repeats
+
+   The Google Form has no edit step, so a poster who wanted to change something
+   submitted the whole thing again. The sheet therefore holds four Tulane rows
+   for 2026-04-07 and three Hong Kong PolyU rows for 2025-06-05, and the vendor
+   page rendered every one of them — which is why the live list shows the same
+   school three times in a row.                                                */
+
+/** How much a row carries, so the fullest of a set of repeats is the one kept.
+    An advertisement link counts double: it is the field a reader came for. */
+function fullness(row) {
+  let n = 0;
+  for (const k of PUBLIC_FIELDS) {
+    const v = row[k];
+    if (Array.isArray(v) ? v.length : (v !== '' && v !== null && v !== undefined && v !== false)) n++;
+  }
+  if (row.adUrl) n += 2;
+  if (row.featured) n += 1;
+  return n;
+}
+
+/**
+ * Which of two repeats to keep. Ownership FIRST, and not as a bonus that a
+ * wordier row can outweigh: a posting made on the site carries a `ref`, and
+ * its author can correct or withdraw it through their account. Dropping that
+ * in favour of an anonymous sheet row describing the same job would strand
+ * them — the posting would stay on the page with no way for them to touch it.
+ * Only between two rows of equal standing does fullness decide.
+ */
+function better(a, b) {
+  if (!!a.ref !== !!b.ref) return a.ref ? a : b;
+  return fullness(a) >= fullness(b) ? a : b;
+}
+
+function sameDayKey(row) {
+  return [row.year, slug(row.institution), slug(row.department), row.posted].join('|');
+}
+
+/**
+ * Collapse repeat submissions of ONE posting — same market year, institution,
+ * department and posting date — keeping the fullest.
+ *
+ * Deliberately narrow: only the same DAY collapses. A school advertising again
+ * weeks later, or in the next market year, is a genuinely different posting;
+ * telling a re-advertisement from a correction needs a judgement this cannot
+ * make, and merging them would silently drop a real advertisement. So the
+ * spread-apart repeats in the data (UCL across September-November 2025,
+ * Virginia across two seasons) are LEFT ALONE.
+ *
+ * Returns { rows, collapsed } with rows in their original order.
+ */
+export function collapseSameDay(rows) {
+  const best = new Map();
+  const order = [];
+
+  for (const row of rows) {
+    const k = sameDayKey(row);
+    if (!best.has(k)) {
+      best.set(k, row);
+      order.push(k);
+    } else {
+      best.set(k, better(best.get(k), row));
+    }
+  }
+
+  return { rows: order.map((k) => best.get(k)), collapsed: rows.length - order.length };
+}
+
 /* -------------------------------------------------------------------- merge */
 
 /** Two rows are the same posting when they carry the same reference, or the
@@ -229,8 +342,15 @@ export function mergeRows(existing, fresh, remove = []) {
   let removed = 0;
   for (const k of drop) if (by.delete(k)) removed++;
 
-  const rows = [...by.values()].sort(displayOrder);
-  return { rows, added, updated, removed };
+  /* Collapse AFTER the merge, not only on the way in, so repeats already
+     committed heal on the next run. They cannot heal themselves otherwise: a
+     merge adds, replaces and removes by key, and the duplicates carry distinct
+     keys (`<id>-2`, `<id>-3`) — which is precisely why eight of them sat in
+     the served file. */
+  const { rows: kept, collapsed } = collapseSameDay([...by.values()]);
+
+  const rows = kept.sort(displayOrder);
+  return { rows, added, updated, removed, collapsed };
 }
 
 /** Featured first, then newest posting first, then institution — the order the

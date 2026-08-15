@@ -50,9 +50,14 @@
           <!-- Main Heading -->
 
           <div class="title-heading">
-            <h2>
-              Job postings (2025-2026)
+            <!-- The season is filled in by the script at the foot of this page
+                 from the same roll-in-June rule the sync uses, so the heading
+                 cannot fall a season behind the data again. The literal here
+                 is the no-JavaScript fallback. -->
+            <h2 id="oa-jobs-heading">
+              Job postings (2026-2027)
             </h2>
+            <p class="oa-season-note" id="oa-jobs-season"></p>
           </div>
           <!-- Main Content -->
 
@@ -165,6 +170,35 @@
     (function () {
       'use strict';
       var U = window.OAList.safeUrl;
+
+      /* The heading names the CURRENT job market, derived — never typed. This
+         is a third copy of the rule in jobs-model.mjs (marketYear/marketLabel);
+         it cannot import the module because this page ships no build step, so
+         the selftest asserts the two agree. The market rolls in June and is
+         numbered by the year it ends: June 2026 onwards is 2026-2027. */
+      /* MARKET_WINDOW in jobs-model.mjs — keep the two in step. */
+      var MARKET_WINDOW = 2;
+
+      (function heading() {
+        var el = document.getElementById('oa-jobs-heading');
+        if (!el) return;
+        var d = new Date();
+        var y = d.getUTCFullYear() + (d.getUTCMonth() >= 5 ? 1 : 0);
+        el.textContent = 'Job postings (' + (y - 1) + '-' + y + ')';
+
+        /* The list carries more than the season in the title — the previous
+           one is kept because its "until filled" advertisements are still open
+           and posters go on filing under it for weeks after the roll. Saying
+           so beats a heading that quietly covers 87 rows it does not name. */
+        var note = document.getElementById('oa-jobs-season');
+        if (note && MARKET_WINDOW > 1) {
+          var first = y - (MARKET_WINDOW - 1);
+          note.textContent = 'Also showing postings from ' +
+            (MARKET_WINDOW === 2 ? (first - 1) + '-' + first
+                                 : (first - 1) + '-' + first + ' onwards') +
+            ' — many are still open. Filter by Deadline to hide expired ones.';
+        }
+      })();
 
       function link(url, label) {
         var u = U(url);

@@ -1032,3 +1032,15 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   font-size: 13px;
   color: #8a8a8a !important;
 }
+
+/* The jobs page's season note, under the heading. The heading names the
+   current market; the list also carries the previous one, whose "until filled"
+   advertisements are still open (see MARKET_WINDOW in jobs-model.mjs). */
+.oa-season-note {
+  margin: -6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7480;
+}
+
+.oa-season-note:empty { display: none; }

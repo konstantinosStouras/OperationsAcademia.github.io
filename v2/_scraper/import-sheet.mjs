@@ -37,6 +37,7 @@ import { existsSync } from 'node:fs';
 import {
   text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta, mergeRows,
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
+  marketYear, marketLabel, marketFloor, MARKET_WINDOW, collapseSameDay,
 } from './jobs-model.mjs';
 
 /* ----------------------------------------------------------- the live sheet
@@ -283,17 +284,27 @@ export function rowsFromSheets(displayRows, rawRows) {
       addedAt: posted ? posted + 'T00:00:00Z' : '',
     };
 
+    out.push(rec);
+  }
+
+  /* Repeat submissions of one posting collapse BEFORE ids are handed out.
+     They used to survive as `<id>-2`, `<id>-3`: the id carries year,
+     institution and date, so a resubmission collided, and the suffix made it a
+     distinct row rather than the same one twice. What remains colliding after
+     the collapse is a real second posting — a school advertising two different
+     departments on one day — and still needs the suffix. */
+  const { rows: unique, collapsed } = collapseSameDay(out);
+
+  for (const rec of unique) {
     rec.id = jobId(rec);
     let id = rec.id, n = 2;
     while (seen.has(id)) id = `${rec.id}-${n++}`;
     rec.id = id;
     seen.add(id);
-
-    out.push(rec);
   }
 
-  out.sort(displayOrder);
-  return { rows: out, unmatched };
+  unique.sort(displayOrder);
+  return { rows: unique, unmatched, collapsed };
 }
 
 /* ------------------------------------------------------------------- main */
@@ -318,17 +329,19 @@ async function main() {
   const outPath = arg('--out', 'v2/data/jobs.json');
   const dry = process.argv.includes('--dry-run');
   const merge = process.argv.includes('--merge');
-  /* The sheet is the WHOLE history — 171 rows back to 2019, every job market
-     it has ever carried. The page is one market at a time ("Job postings
-     (2025-2026)"), which is why the live Awesome Tables view shows 92 and not
-     171; older markets live on /previous-markets. So the sync takes the
-     current market year by default, and --min-year <y> widens it (0 = every
-     year). The market year rolls in June, exactly as rowFromSubmission
-     computes it for a submission with no year of its own. */
+  /* The sheet is the WHOLE history — every job market it has ever carried,
+     back to 2019 — so the sync scopes it to the recent markets. The floor
+     comes from marketFloor() in jobs-model.mjs, which owns the roll-in-June
+     rule and the MARKET_WINDOW width; --min-year <y> overrides it for a
+     one-off (0 = every year).
+
+     The floor is NOT pinned to a literal here any more. It was — `--min-year
+     2026`, passed by the workflow to match a page heading typed by hand — and
+     that is exactly how the sync came to be serving the season BEFORE the one
+     that had already started. */
   const now = new Date();
-  const marketYear = now.getUTCFullYear() + (now.getUTCMonth() >= 5 ? 1 : 0);
   const minYear = process.argv.includes('--min-year')
-    ? Number(arg('--min-year', marketYear)) : marketYear;
+    ? Number(arg('--min-year', marketFloor(now))) : marketFloor(now);
   const sheetId = process.argv.includes('--sheet') ? arg('--sheet', SHEET_ID) : '';
 
   if (!displayPath && !rawPath && !sheetId) {
@@ -367,11 +380,15 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
   const display = displayCsv ? parseCsv(displayCsv) : null;
   const raw = rawCsv ? parseCsv(rawCsv) : null;
 
-  let { rows, unmatched } = rowsFromSheets(display, raw);
+  let { rows, unmatched, collapsed } = rowsFromSheets(display, raw);
+  if (collapsed) console.log(`collapsed ${collapsed} same-day repeat submission(s)`);
   if (sheetId && minYear) {
     const before = rows.length;
     rows = rows.filter((r) => r.year >= minYear);
-    console.log(`market scope: ${rows.length} of ${before} rows are ${minYear} or later`);
+    console.log(
+      `market scope: ${rows.length} of ${before} rows are market ${minYear} ` +
+      `(${marketLabel(minYear)}) or later — current market is ${marketYear(now)} ` +
+      `(${marketLabel(marketYear(now))}), window ${MARKET_WINDOW}`);
   }
   const published = rows.map(publicRow);
 

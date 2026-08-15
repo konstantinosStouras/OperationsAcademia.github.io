@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
+  marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 
@@ -268,10 +269,119 @@ function finish() {
   return true;
 }
 
+/* ------------------------------------------------- the market year, and its
+   third copy on the page
+
+   The rule lives once in jobs-model.mjs, but jobs.html ships no build step and
+   cannot import it, so the page carries its own two lines. That copy is what
+   drifted a whole season last time — as a hand-typed literal — so it is pinned
+   here against the model rather than trusted.                                */
+
+function testMarketYear() {
+  const at = (s) => marketYear(new Date(s));
+
+  eq(at('2026-08-15T00:00:00Z'), 2027, 'August 2026 is in market 2027');
+  eq(at('2026-06-01T00:00:00Z'), 2027, 'the market rolls on 1 June');
+  eq(at('2026-05-31T23:59:59Z'), 2026, 'the day before, it has not');
+  eq(at('2026-01-15T00:00:00Z'), 2026, 'January stays in the season under way');
+  eq(at('2025-12-31T23:59:59Z'), 2026, 'and so does New Year\'s Eve');
+
+  eq(marketLabel(2027), '2026-2027', 'a market is labelled by the years it spans');
+  eq(marketLabel('2026'), '2025-2026', 'a numeric string labels the same way');
+
+  // the window, and what it is for
+  eq(marketFloor(new Date('2026-08-15T00:00:00Z'), 1), 2027, 'a one-season window floors at the current market');
+  eq(marketFloor(new Date('2026-08-15T00:00:00Z'), 2), 2026, 'two seasons reach back one market');
+  eq(marketFloor(new Date('2026-08-15T00:00:00Z')), 2027 - (MARKET_WINDOW - 1),
+    'the default floor follows MARKET_WINDOW');
+  ok(marketFloor(new Date('2026-08-15T00:00:00Z')) <= 2026,
+    'the shipped window still carries the previous season, whose "until filled" postings are live');
+
+  // a submission with no year of its own is stamped with the market
+  const r = rowFromSubmission({ ...GOOD, year: undefined }, { now: new Date('2026-08-15T00:00:00Z') });
+  eq(r.year, 2027, 'an unyeared submission lands in the current market');
+}
+
+async function testPageHeadingRule() {
+  const html = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+
+  const m = html.match(/getUTCFullYear\(\)\s*\+\s*\(\s*d\.getUTCMonth\(\)\s*>=\s*(\d+)\s*\?\s*1\s*:\s*0\s*\)/);
+  ok(m, 'jobs.html derives the heading year rather than hard-coding a season');
+  if (m) eq(Number(m[1]), 5, 'the page rolls in the same month as marketYear()');
+
+  ok(/id="oa-jobs-heading"/.test(html), 'the heading element is addressable');
+
+  // the literal in the markup is only a no-JavaScript fallback, but a WRONG
+  // fallback is worse than none — it is what a crawler and a reader with
+  // scripts off will see.
+  const fb = html.match(/id="oa-jobs-heading"[^>]*>\s*Job postings \((\d{4})-(\d{4})\)/);
+  ok(fb, 'the fallback heading names a season');
+  if (fb) {
+    const now = marketYear(new Date());
+    eq(Number(fb[2]), now, 'the fallback names the current market');
+    eq(Number(fb[1]), now - 1, 'and spans the year before it');
+    eq(`${fb[1]}-${fb[2]}`, marketLabel(now), 'in marketLabel() form');
+  }
+}
+
+function testCollapseSameDay() {
+  const base = {
+    year: 2026, posted: '2025-06-05', institution: 'The Hong Kong Polytechnic University',
+    department: 'Department of Logistics and Maritime Studies', type: 'University',
+    levels: ['Assistant Professor'], country: 'Hong Kong', applyBy: '', applyByDate: '',
+    comments: '', adUrl: '', postedAtUrl: '', furtherInfoUrl: '', characteristics: [],
+    featured: false, source: 'sheet-import', addedAt: '',
+  };
+
+  // three submissions of one posting, the middle one carrying the most
+  const full = { ...base, adUrl: 'https://example.edu/ad', comments: 'Interviewing at INFORMS' };
+  let c = collapseSameDay([{ ...base }, full, { ...base }]);
+  eq(c.rows.length, 1, 'three same-day repeats collapse to one');
+  eq(c.collapsed, 2, 'and say how many went');
+  eq(c.rows[0].adUrl, 'https://example.edu/ad', 'the fullest row is the one kept');
+
+  // a different department on the same day is a different posting
+  c = collapseSameDay([base, { ...base, department: 'School of Accounting and Finance' }]);
+  eq(c.rows.length, 2, 'two departments on one day are two postings');
+
+  // the same posting a fortnight later is a re-advertisement, not a repeat —
+  // this is the "leave past duplicates alone" rule, asserted so a later
+  // widening of the key cannot silently start merging them
+  c = collapseSameDay([base, { ...base, posted: '2025-06-19' }]);
+  eq(c.rows.length, 2, 'a later re-advertisement is kept');
+  c = collapseSameDay([base, { ...base, year: 2027 }]);
+  eq(c.rows.length, 2, 'the next market year is kept');
+
+  // a site posting is owned — its author can correct or withdraw it — so it
+  // outranks a fuller anonymous sheet row describing the same job
+  const owned = { ...base, ref: 'OA-JOB-260815-ABCD' };
+  const richer = { ...base, adUrl: 'https://example.edu/ad', comments: 'x', applyBy: 'y' };
+  eq(collapseSameDay([richer, owned]).rows[0].ref, 'OA-JOB-260815-ABCD',
+    'the owned posting survives a fuller anonymous repeat');
+  eq(collapseSameDay([owned, richer]).rows[0].ref, 'OA-JOB-260815-ABCD',
+    'and does so whichever order they arrive in');
+
+  // committed repeats heal through the merge, which is the only path that ever
+  // reaches an already-served file
+  const m = mergeRows([{ ...base, id: 'x' }, { ...base, id: 'x-2' }], []);
+  eq(m.rows.length, 1, 'a repeat already in the served file is collapsed by a merge');
+  eq(m.collapsed, 1, 'and the merge reports it');
+
+  // order is preserved, and an empty input is not a special case
+  eq(collapseSameDay([]).rows.length, 0, 'nothing collapses to nothing');
+  const order = collapseSameDay([
+    { ...base, institution: 'A' }, { ...base, institution: 'B' }, { ...base, institution: 'A' },
+  ]);
+  eq(order.rows.map((r) => r.institution).join(''), 'AB', 'first-seen order is kept');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
   testMerge();
+  testMarketYear();
+  testCollapseSameDay();
+  await testPageHeadingRule();
   await testServedFile();
   process.exit(finish() ? 0 : 1);
 }

@@ -265,34 +265,60 @@ Follow `_SETUP-EMAIL.md`. The part people skip is SPF/DKIM/DMARC, and skipping
 it means alert digests go to spam for most academic mail systems without anyone
 being told.
 
-### 3.3 Re-import the postings faithfully — **an hour**
+### 3.3 The postings are imported on a schedule — **done**
 
-`v2/data/jobs.json` currently holds **80 postings recovered from the sheet**,
-which is what the display tab contains. Before cutover, re-run the import from a
-clean CSV export so nothing is lost to the recovery route I had to use:
+`oa-jobs-sheet-sync.yml` reads both tabs straight from the published sheet and
+merges what is missing, so the file no longer depends on a hand export.
 
-```bash
-# In Google Sheets: File ▸ Download ▸ Comma-separated values, once per tab
-node v2/_scraper/import-sheet.mjs \
-     --display jobsData.csv --raw rawData.csv --out v2/data/jobs.json
-node v2/_scraper/selftest.mjs
-```
+**A correction to an earlier draft of this plan.** It said the display tab held
+80 rows and that *49 submissions were never published*. Both numbers came from
+reading the sheet through Google Drive's text rendering, which **truncates large
+files without saying so**. The scheduled sync, reading the real CSV endpoint,
+returns postings the rendering never showed. There is no evidence of a
+publication gap, and the finding is withdrawn.
 
-Then compare the count against the live page. If it differs, the display tab has
-rows my recovery did not see, and the CSV is the authority.
+#### The job market rolls in June, and nothing about that is typed by hand
 
-**Then deal with the 49 unpublished submissions.** Import the raw tab on its own
-and diff it against what the display tab published:
+`marketYear()` in `jobs-model.mjs` owns the rule: the market rolls on 1 June and
+is numbered by the year it ENDS, matching the sheet's own *Job Market Year*
+column. Everything derives from it —
 
-```bash
-node v2/_scraper/import-sheet.mjs --raw rawData.csv --out /tmp/raw-all.json --dry-run
-```
+| Consumer | How |
+|---|---|
+| scope of the sync | `marketFloor()`, no `--min-year` in the workflow |
+| the page heading | the same two lines inline in `jobs.html` (no build step, so it cannot import; the selftest pins the copy to the model) |
+| a submission with no year | `rowFromSubmission` |
 
-Every row in the raw tab that is not in `jobs.json` is a posting somebody sent
-you that never appeared. Decide per row. This is exactly the failure mode the
-old stack made invisible and the new one cannot have: `build-jobs.mjs` publishes
-every queued submission, and anything it refuses is reported as a warning rather
-than silently dropped.
+This is the one thing that had already gone wrong: the heading was typed, the
+workflow was pinned to `--min-year 2026` to agree with it, and by August 2026
+both were a season behind the market that had started in June.
+
+**`MARKET_WINDOW = 2`** — the page carries the current season and the one
+before. One season is what the title implies, and it was measured on
+2026-08-15: it would have cut the list from 102 postings to **7**, and 38 of the
+95 dropped were still live (2 open by their own deadline, 36 *until filled*).
+Postings also keep ARRIVING under the previous season — the newest market-2026
+row was filed 2026-07-28, six weeks after the roll — because the poster picks
+that field by hand. Set it to `1` if you would rather the list match its title
+exactly; it is one constant in `jobs-model.mjs`, mirrored in `jobs.html`.
+
+Because the heading then names a season the list exceeds, the page prints a note
+under it saying so.
+
+#### Repeat submissions collapse
+
+The Google Form has no edit step, so a poster who wanted to change something
+submitted again — hence four Tulane rows for 2026-04-07 and three Hong Kong
+PolyU rows for 2025-06-05, all rendered by the vendor page. `collapseSameDay()`
+keeps one per (market year, institution, department, posting date). A posting
+made on the site wins over an anonymous sheet row for the same job, whatever
+each contains, because its author can still correct or withdraw it.
+
+Deliberately narrow: only the SAME DAY collapses. The same school advertising
+again weeks later, or in the next season, is a different posting, and telling a
+re-advertisement from a correction is a judgement this cannot make. So the
+spread-apart repeats — UCL across September–November 2025, Virginia across two
+seasons — are left alone. Revisit if they become a nuisance.
 
 ### 3.4 Decide about the PDF uploads — **a decision, then a day if yes**
 
