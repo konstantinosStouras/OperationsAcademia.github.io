@@ -35,9 +35,14 @@
   };
 
   // Sign-in methods offered on the auth modal, in display order.
-  // 'orcid' additionally needs the OIDC provider configured in the console —
-  // see v2/_SETUP-FIREBASE.md before adding it here.
-  var AUTH_PROVIDERS = ['google', 'password'];
+  //
+  // 'orcid' is a GENERIC OIDC provider (`oidc.orcid`), which Firebase only
+  // offers once the project is upgraded to Identity Platform. Until that is
+  // done the button is present but Firebase answers
+  // `auth/operation-not-allowed`, which the modal reports as "that sign-in
+  // method is not switched on for this site yet" rather than a raw error.
+  // Steps: v2/_SETUP-FIREBASE.md, "ORCID".
+  var AUTH_PROVIDERS = ['google', 'orcid', 'password'];
 
   // The maintainer. Governs who sees the admin inboxes. This is a UI hint
   // only — the real check is isAdmin() in v2/_firestore.rules.

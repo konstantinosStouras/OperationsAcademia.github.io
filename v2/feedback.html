@@ -17,7 +17,11 @@
           <a href="/v2/" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
             src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
           <nav id="nav"></nav>
-          <div id="oa-account"></div>
+          <div id="oa-headnav">
+            <a class="oa-headbtn is-on" href="/v2/feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
         </div>
       </div>
 
@@ -25,6 +29,7 @@
         <div class="container" id="page">
           <div class="title-heading">
             <h2>Feedback</h2>
+            <p>Tell us what to improve</p>
           </div>
 
           <div id="main">
@@ -33,62 +38,76 @@
                 <div class="oa-form">
 
                   <!-- ===================================== maintainer inbox -->
-                  <section id="oa-inbox" hidden>
-                    <h3 style="font-size:19px;color:#313a45;margin:0 0 10px">
-                      &#128229; Feedback inbox</h3>
+                  <section class="oa-panel" id="oa-inbox" hidden>
+                    <h3 class="oa-panel-h">&#128229; Feedback inbox</h3>
                     <div class="oa-tabs" id="oa-inbox-tabs">
                       <button type="button" class="oa-tab is-on" data-tab="open">Open</button>
                       <button type="button" class="oa-tab" data-tab="closed">Closed</button>
                       <button type="button" class="oa-tab" data-tab="all">All</button>
                     </div>
                     <div id="oa-inbox-list"></div>
-                    <hr style="margin:32px 0;border:0;border-top:1px solid #e6e6e6">
                   </section>
 
-                  <div class="oa-note">
-                    <p><strong>Found something wrong, or have an idea?</strong> Tell us here. A
-                    broken link, a posting in the wrong place, something that reads oddly on your
-                    phone &mdash; all of it is useful.</p>
-                    <p>You do not need an account. Leaving your e-mail is optional, but it is the
-                    only way we can tell you when the thing you reported is fixed.</p>
-                  </div>
+                  <section class="oa-panel">
 
-                  <div class="oa-note is-warn" id="oa-offline" hidden>
-                    <p><strong>The feedback form is not switched on yet.</strong> This preview of
-                    the new site is not connected to its database. In the meantime, please write to
-                    <a href="mailto:kostas.stouras@ucd.ie">kostas.stouras@ucd.ie</a>.</p>
-                  </div>
+                    <div class="oa-note is-warn" id="oa-offline" hidden>
+                      <p><strong>The feedback form is not switched on yet.</strong> This preview
+                      is not connected to its database. Please write to
+                      <a href="mailto:kostas.stouras@ucd.ie">kostas.stouras@ucd.ie</a>.</p>
+                    </div>
+
+                    <p class="oa-lede"><span class="oa-muted">Operations Academia is run by one
+                    person and is always a work in progress</span> &mdash;
+                    <strong>I would love to hear what to fix or add.</strong></p>
+
+                    <p>Describe anything that looks wrong, confusing, or missing &mdash; a broken
+                    link, a posting in the wrong place, something that reads oddly on your phone
+                    &mdash; and attach screenshots if they help. The more detail the better, but
+                    short notes are just as welcome. <strong>No account needed</strong>; your
+                    message comes straight to me.</p>
 
                   <form id="oa-fb-form" novalidate>
                     <fieldset>
-                      <legend>Your message</legend>
+                      <div class="oa-field">
+                        <label for="fb-message">What should improve?
+                          <span class="oa-muted">&mdash; be as specific as you like (what you did,
+                          what you expected, what happened)</span></label>
+                        <textarea id="fb-message" name="message" maxlength="6000" required
+                          placeholder="e.g. On the job postings page, the Deadline filter&hellip; / It would be great if I could&hellip;"></textarea>
+                        <p class="oa-hint"><span id="fb-count">0</span> / 6000 characters</p>
+                      </div>
 
                       <div class="oa-field">
-                        <label for="fb-message">What would you like to tell us? <span class="oa-req" aria-hidden="true">*</span></label>
-                        <textarea id="fb-message" name="message" maxlength="6000" required
-                                  style="min-height:150px"></textarea>
-                        <p class="oa-hint"><span id="fb-count">0</span> / 6000 characters</p>
+                        <span class="oa-label-text" id="lbl-shots">Screenshots
+                          <span class="oa-muted">&mdash; optional; drag &amp; drop or click to
+                          browse (up to 5 images)</span></span>
+
+                        <button type="button" class="oa-drop" id="fb-drop"
+                                aria-describedby="lbl-shots">
+                          <span class="oa-drop-icon" aria-hidden="true">&#128444;&#65039;</span>
+                          <span class="oa-drop-text"><strong>Add screenshots</strong>
+                            <span class="oa-muted">PNG or JPG &mdash; compressed in your browser
+                            before sending</span></span>
+                        </button>
+                        <input type="file" id="fb-shots" name="shots" accept="image/*" multiple
+                               class="oa-visually-hidden" tabindex="-1">
+
+                        <div id="fb-thumbs" class="oa-thumbs"></div>
                       </div>
 
                       <div class="oa-row">
                         <div class="oa-field">
-                          <label for="fb-name">Your name</label>
-                          <p class="oa-hint">Optional.</p>
-                          <input type="text" id="fb-name" name="name" maxlength="160" autocomplete="name">
+                          <label for="fb-name">Your name
+                            <span class="oa-muted">&mdash; optional</span></label>
+                          <input type="text" id="fb-name" name="name" maxlength="160"
+                                 autocomplete="name" placeholder="Name">
                         </div>
                         <div class="oa-field">
-                          <label for="fb-email">Your e-mail</label>
-                          <p class="oa-hint">Optional &mdash; but without it we cannot reply.</p>
-                          <input type="email" id="fb-email" name="email" maxlength="200" autocomplete="email">
+                          <label for="fb-email">Your e-mail
+                            <span class="oa-muted">&mdash; optional, if you would like a reply</span></label>
+                          <input type="email" id="fb-email" name="email" maxlength="200"
+                                 autocomplete="email" placeholder="you@example.com">
                         </div>
-                      </div>
-
-                      <div class="oa-field">
-                        <label for="fb-shots">Screenshots</label>
-                        <p class="oa-hint">Up to five. They are shrunk in your browser before being
-                        sent, so a phone photo is fine.</p>
-                        <input type="file" id="fb-shots" name="shots" accept="image/*" multiple>
-                        <div id="fb-thumbs" class="oa-thumbs"></div>
                       </div>
                     </fieldset>
 
@@ -103,9 +122,42 @@
                     <p>Your ticket is <span class="oa-ticket" id="fb-ticket"></span>. Quote it if you
                     write to us about this.</p>
                     <p id="fb-done-mail">We will e-mail you when it is dealt with.</p>
-                    <p><a href="jobs.html">Back to the job postings</a> &middot;
-                       <a href="feedback.html">Send something else</a></p>
+                    <p class="oa-done-actions">
+                      <a class="button blue" href="jobs.html">Back to the job postings</a>
+                      <a class="button oa-btn-ghost" href="feedback.html">Send something else</a>
+                    </p>
                   </div>
+
+                    <hr class="oa-rule">
+
+                    <h3 class="oa-panel-h">Prefer to reach me directly?</h3>
+                    <p class="oa-hint">Any of these works &mdash; whatever is easiest.</p>
+
+                    <ul class="oa-contacts">
+                      <li><a href="mailto:kostas.stouras@ucd.ie">
+                        <span class="oa-contact-icon" aria-hidden="true">&#9993;</span>
+                        <span><strong>E-mail</strong>kostas.stouras@ucd.ie</span></a></li>
+                      <li><a href="/contact">
+                        <span class="oa-contact-icon" aria-hidden="true">OA</span>
+                        <span><strong>Contact form</strong>operationsacademia.org/contact</span></a></li>
+                      <li><a href="https://x.com/stourask" target="_blank" rel="noopener">
+                        <span class="oa-contact-icon" aria-hidden="true">&#120143;</span>
+                        <span><strong>X (Twitter)</strong>@stourask</span></a></li>
+                      <li><a href="https://www.linkedin.com/in/stouras" target="_blank" rel="noopener">
+                        <span class="oa-contact-icon" aria-hidden="true">in</span>
+                        <span><strong>LinkedIn</strong>in/stouras</span></a></li>
+                      <li><a href="https://orcid.org/0000-0002-2398-9566" target="_blank" rel="noopener">
+                        <span class="oa-contact-icon" aria-hidden="true">iD</span>
+                        <span><strong>ORCID</strong>0000-0002-2398-9566</span></a></li>
+                      <!-- a name search rather than a guessed profile id: it always
+                           resolves. Swap in the real /citations?user=<id> when convenient. -->
+                      <li><a href="https://scholar.google.com/scholar?q=Konstantinos+Stouras"
+                             target="_blank" rel="noopener">
+                        <span class="oa-contact-icon" aria-hidden="true">G</span>
+                        <span><strong>Google Scholar</strong>Publications &amp; citations</span></a></li>
+                    </ul>
+
+                  </section>
 
                 </div>
               </div>

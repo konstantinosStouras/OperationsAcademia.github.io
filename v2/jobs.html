@@ -16,6 +16,7 @@
     <meta property="og:image" content="/images/OA_logo_1200x294.png" />
     <link href="/assets/css/main.css" rel="stylesheet">
     <link href="assets/oa-list.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet" type="text/css">
   </head>
   <body class="no-sidebar">
@@ -32,6 +33,12 @@
 
           <nav id="nav">
           </nav>
+
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="/v2/feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
         </div>
       </div>
       <!-- Main Wrapper -->
@@ -151,6 +158,8 @@
     <script src="/assets/js/main.js"></script>
 
     <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
     <script src="assets/oa-list.js"></script>
     <script>
     (function () {

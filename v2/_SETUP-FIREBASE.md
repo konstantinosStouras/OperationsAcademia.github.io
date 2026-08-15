@@ -60,12 +60,74 @@ Then Authentication → Settings → **Authorized domains**, and add:
 
 `localhost` is there by default, which is what makes local testing work.
 
-### ORCID (optional, later)
+### ORCID — the button is live, the provider is not
 
-`/lit/` offers "Continue with ORCID" through a generic OIDC provider. It needs
-Identity Platform enabled and a client secret held in the console, so it is a
-separate exercise. When you do it, add `'orcid'` to `AUTH_PROVIDERS` in
-`oa-firebase.js` — the button and the sign-in path are already written.
+**"Continue with ORCID" is already on the sign-in modal**, exactly as on
+`/lit/`. Until the three steps below are done, pressing it answers
+`auth/operation-not-allowed`, which the modal reports as *"That sign-in method
+is not switched on for this site yet. Please use one of the others for now."*
+Nothing breaks; ORCID just does not work yet.
+
+Verified against your project on 2026-08-15:
+
+```
+providerId=oidc.orcid  -> OPERATION_NOT_ALLOWED : Use of this method requires GCIP
+providerId=google.com  -> INVALID_IDP_RESPONSE   (i.e. configured and working)
+```
+
+ORCID is a **generic OIDC** provider, and Firebase only offers those once the
+project is upgraded to **Identity Platform** (GCIP). That upgrade is free for
+the first 50,000 monthly active users — far more than this site will see — but
+it is a deliberate step, and it puts the project on a Cloud billing account.
+
+**1. Register an ORCID API client.** Sign in at
+<https://orcid.org> → your name → **Developer tools**. You need a verified
+e-mail and at least one public record item before it will let you. Create a
+client and set the redirect URI to:
+
+```
+https://operations-academia.firebaseapp.com/__/auth/handler
+```
+
+That is Firebase's own callback, not a page on this site. You get a **client
+ID** (`APP-XXXXXXXXXXXXXXXX`) and a **client secret**.
+
+**2. Add the OIDC provider in Firebase.** Authentication → Sign-in method →
+**Add new provider** → **OpenID Connect**. Firebase will offer the Identity
+Platform upgrade here; accept it.
+
+| Field | Value |
+|---|---|
+| Provider ID | **`oidc.orcid`** — must match exactly; the code asks for this string |
+| Name | ORCID |
+| Client ID | from step 1 |
+| Issuer (URL) | `https://orcid.org` |
+| Client secret | from step 1 |
+| Grant type | Code flow |
+
+**3. Nothing to change in this repository.** `AUTH_PROVIDERS` in
+`v2/assets/oa-firebase.js` already lists `'orcid'`, and `oa-accounts.js`
+already builds the provider with `new fb.auth.OAuthProvider('oidc.orcid')`.
+The button starts working the moment step 2 is saved.
+
+To check it afterwards without clicking anything, re-run the probe:
+
+```bash
+curl -s -X POST \
+ "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=<apiKey>" \
+ -H 'Content-Type: application/json' \
+ -d '{"postBody":"id_token=fake&providerId=oidc.orcid",
+      "requestUri":"http://localhost","returnSecureToken":true}'
+```
+
+`OPERATION_NOT_ALLOWED` means still not configured. Anything about an invalid
+or unparseable token means it *is* configured — the request got as far as
+being rejected on its fake credential, which only happens once the provider
+exists.
+
+**If you would rather not upgrade to Identity Platform**, remove `'orcid'` from
+`AUTH_PROVIDERS` and the button disappears. Google and e-mail/password cover
+everyone; ORCID is a convenience for a community that mostly has one.
 
 ## 4. Deploy the security rules — **before announcing anything**
 

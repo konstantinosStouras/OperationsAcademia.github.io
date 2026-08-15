@@ -226,6 +226,37 @@
     });
     $('fb-shots').addEventListener('change', onFiles);
 
+    /* The drop zone. The real <input type=file> is visually hidden and driven
+       from here, so the control can be a proper button (keyboard-reachable,
+       announced) while still accepting a drag. Both paths end in onFiles, so
+       there is one code path for shrinking and encoding. */
+    var drop = $('fb-drop');
+    if (drop) {
+      drop.addEventListener('click', function () { $('fb-shots').click(); });
+      ['dragenter', 'dragover'].forEach(function (e) {
+        drop.addEventListener(e, function (ev) {
+          ev.preventDefault();
+          drop.classList.add('is-over');
+        });
+      });
+      ['dragleave', 'drop'].forEach(function (e) {
+        drop.addEventListener(e, function (ev) {
+          ev.preventDefault();
+          drop.classList.remove('is-over');
+        });
+      });
+      drop.addEventListener('drop', function (ev) {
+        var files = (ev.dataTransfer && ev.dataTransfer.files) || [];
+        if (files.length) onFiles({ target: { files: files, value: '' } });
+      });
+      // dropping anywhere else must not make the browser navigate to the image
+      ['dragover', 'drop'].forEach(function (e) {
+        window.addEventListener(e, function (ev) {
+          if (!drop.contains(ev.target)) ev.preventDefault();
+        });
+      });
+    }
+
     function standDown(why) {
       var note = $('oa-offline');
       if (why) note.innerHTML = '<p>' + why + '</p>';
