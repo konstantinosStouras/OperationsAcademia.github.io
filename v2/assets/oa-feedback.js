@@ -226,11 +226,30 @@
     });
     $('fb-shots').addEventListener('change', onFiles);
 
-    if (!window.OAFB || !OAFB.enabled) {
-      show($('oa-offline'), true);
+    function standDown(why) {
+      var note = $('oa-offline');
+      if (why) note.innerHTML = '<p>' + why + '</p>';
+      show(note, true);
       form.querySelectorAll('input, textarea, button').forEach(function (n) { n.disabled = true; });
+    }
+
+    if (!window.OAFB || !OAFB.enabled) {
+      standDown();
       return;
     }
+
+    // Unlike posting a job, feedback needs no account — so the form is shown
+    // to everyone. It still needs Firestore to send, though, and if the SDK
+    // never loaded the button would fail only after someone had typed out
+    // their whole report. Stand it down before that happens.
+    OAAccounts.onChange(function () {
+      if (OAAccounts.failed && OAAccounts.failed()) {
+        standDown('<strong>We cannot reach the feedback service right now.</strong> ' +
+          'If you use an ad blocker, allow <code>gstatic.com</code> and reload. ' +
+          'Otherwise please write to ' +
+          '<a href="mailto:kostas.stouras@ucd.ie">kostas.stouras@ucd.ie</a>.');
+      }
+    });
 
     wireInbox();
 

@@ -212,6 +212,65 @@ ok(mobileNav.panelLinks > 0,
   `the off-canvas menu has links (${mobileNav.panelLinks}) — without the site's ` +
   'script chain a phone would have no navigation at all');
 
+/* ------------------------------- when Firebase cannot be reached at all
+
+   Offline, a blocked CDN, or an ad blocker that eats gstatic. The pages must
+   fall into an explained state — never a blank card, and never a control that
+   looks usable and then fails after someone has typed out a whole form.
+
+   This regressed once: oa-accounts.js resolved its auth state on SDK failure
+   but did not notify its listeners, so post-a-job.html showed neither its form
+   nor its sign-in prompt.                                                    */
+
+for (const [name, expect] of [
+  ['post-a-job.html', { prompt: '#oa-needauth', form: '#oa-job-form' }],
+  ['alerts.html', { prompt: '#oa-needauth', form: '#oa-alerts-app' }],
+]) {
+  const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const qErrors = [];
+  q.on('pageerror', (e) => qErrors.push(e.message));
+  await q.route('**/firebasejs/**', (r) => r.abort());
+  await q.goto(BASE + name, { waitUntil: 'domcontentloaded' });
+  await q.waitForTimeout(2500);
+
+  const seen = await q.evaluate((sel) => {
+    const vis = (s) => {
+      const e = document.querySelector(s);
+      return !!e && getComputedStyle(e).display !== 'none';
+    };
+    return {
+      prompt: vis(sel.prompt),
+      form: vis(sel.form),
+      header: (document.querySelector('#oa-account') || {}).textContent || '',
+    };
+  }, expect);
+
+  ok(seen.prompt, `${name}: an unreachable SDK still shows the sign-in prompt`);
+  ok(!seen.form, `${name}: the form stays hidden when nobody can sign in`);
+  ok(/unavailable/i.test(seen.header),
+    `${name}: the header says sign-in is unavailable rather than inviting a click`);
+  eq(qErrors, [], `${name}: no uncaught error when the SDK is unreachable`);
+  await q.close();
+}
+
+// feedback needs no account, so its form is shown — but it must be stood down
+// rather than failing on the button after the report is typed
+{
+  const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await q.route('**/firebasejs/**', (r) => r.abort());
+  await q.goto(BASE + 'feedback.html', { waitUntil: 'domcontentloaded' });
+  await q.waitForTimeout(2500);
+  const seen = await q.evaluate(() => ({
+    disabled: document.getElementById('fb-submit').disabled,
+    explained: getComputedStyle(document.getElementById('oa-offline')).display !== 'none',
+    inboxHidden: getComputedStyle(document.getElementById('oa-inbox')).display === 'none',
+  }));
+  ok(seen.disabled, 'feedback: the form is disabled when it could not be sent');
+  ok(seen.explained, 'feedback: and says why, with somewhere else to write to');
+  ok(seen.inboxHidden, 'feedback: the maintainer inbox stays hidden');
+  await q.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');
