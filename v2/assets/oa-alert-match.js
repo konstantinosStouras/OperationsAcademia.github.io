@@ -111,16 +111,46 @@
     });
   }
 
-  /** Every change-log entry dated in (since, until] that the alert wants. */
-  function newUpdatesFor(entries, c, since, until) {
+  /**
+   * Every change-log entry the alert has not been sent yet.
+   *
+   * `sinceDate` is the DATE OF THE LAST ENTRY ALREADY SENT (yyyy-mm-dd), not a
+   * timestamp. That distinction is the whole point: change-log entries are
+   * calendar days while a send mark is an instant, and comparing the two
+   * directly silently drops every entry dated on the day of the last send —
+   * which in practice means an announcement made the same morning as a digest
+   * reaches nobody, ever. Tracking the last entry date instead makes the
+   * comparison like-for-like.
+   *
+   * `untilDate` bounds it at today, so an entry dated in the future (a
+   * scheduled announcement) waits rather than going out early.
+   */
+  function newUpdatesFor(entries, c, sinceDate, untilDate) {
     if (!wantsUpdates(c)) return [];
+    var since = String(sinceDate || '').slice(0, 10);
+    var until = String(untilDate || '').slice(0, 10);
     return arr(entries).filter(function (e) {
-      var d = String(e.date || '');
-      if (!d) return false;
-      if (since && !(d > String(since).slice(0, 10))) return false;
-      if (until && d > String(until).slice(0, 10)) return false;
+      var d = String(e.date || '').slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+      if (since && d <= since) return false;
+      if (until && d > until) return false;
       return true;
     });
+  }
+
+  /** The newest entry date in a set — what to store as the next `sinceDate`. */
+  function latestUpdateDate(entries) {
+    return arr(entries).reduce(function (m, e) {
+      var d = String(e.date || '').slice(0, 10);
+      return d > m ? d : m;
+    }, '');
+  }
+
+  /** yyyy-mm-dd, n days before `now`. Used to cap a first-ever send so a new
+      subscriber is not posted the whole back-catalogue. */
+  function daysBefore(now, n) {
+    var d = new Date(now.getTime() - n * 86400000);
+    return d.toISOString().slice(0, 10);
   }
 
   /**
@@ -156,6 +186,8 @@
     matchesJob: matchesJob,
     newJobsFor: newJobsFor,
     newUpdatesFor: newUpdatesFor,
+    latestUpdateDate: latestUpdateDate,
+    daysBefore: daysBefore,
     isDue: isDue,
     hasIntent: hasIntent
   };

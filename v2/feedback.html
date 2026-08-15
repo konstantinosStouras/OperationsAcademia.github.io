@@ -114,13 +114,33 @@
         </div>
       </div>
 
+            <!-- Footer: shared include -->
       <div data-include="/partials/footer.html"></div>
       <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
 
-      <script src="assets/oa-nav.js"></script>
-      <script src="assets/oa-firebase.js"></script>
-      <script src="assets/oa-accounts.js"></script>
-      <script src="assets/oa-feedback.js"></script>
-    </div>
-  </body>
+    <!-- The site's own script chain, in the order every other page uses it.
+         All three parts are load-bearing and none of them is optional:
+           ypo-parakolouthisi.js defines the global `ga` that the footer's
+             inline onclick handlers call — without it every footer link throws;
+           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
+             relative hrefs would resolve inside /v2/);
+           jquery + dropotron + skel + util + main.js build the off-canvas
+             panel that IS the navigation below 840px, where main.css hides
+             #header-wrapper outright. Drop them and a phone gets no menu.
+         Awesome Tables is deliberately NOT here. It is a leaf dependency:
+         nothing in the site's own CSS or JS refers to it. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-feedback.js"></script>
+</body>
 </html>

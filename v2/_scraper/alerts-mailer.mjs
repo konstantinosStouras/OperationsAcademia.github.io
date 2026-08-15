@@ -38,6 +38,14 @@ const DRY = argv.has('--dry-run');
 const SCAN = argv.has('--scan');
 
 const MANAGE_URL = `${SITE}/alerts`;
+
+/** The link that actually stops these e-mails. It carries the alert id and the
+    owning account, because the alerts page must find the subscription without
+    the reader having to work out which of theirs it was. */
+function unsubscribeUrl(a) {
+  return `${MANAGE_URL}?unsubscribe=${encodeURIComponent(a.id)}` +
+    (a.uid ? `&u=${encodeURIComponent(a.uid)}` : '');
+}
 const MAX_ROWS = 60;          // an e-mail listing more than this is unreadable
 
 /* --------------------------------------------------------------- rendering */
@@ -101,7 +109,7 @@ export function renderAlertEmail({ alert, jobs, updates }) {
     title: alert.name || 'Operations Academia',
     bodyHtml: parts.join('\n'),
     manageUrl: MANAGE_URL,
-    unsubUrl: `${MANAGE_URL}?unsubscribe=${encodeURIComponent(alert.id || '')}`,
+    unsubUrl: unsubscribeUrl(alert),
   });
 }
 
@@ -143,10 +151,30 @@ function selftest() {
     { id: 'a', date: '2026-08-15', title: 'T', summary: 'S' },
     { id: 'b', date: '2026-08-01', title: 'U', summary: 'S' },
   ];
-  ok(M.newUpdatesFor(log, { topics: ['updates'] }, '2026-08-10').length === 1,
-    'only change-log entries inside the window are sent');
+  const UP = { topics: ['updates'] };
+  ok(M.newUpdatesFor(log, UP, '2026-08-10').length === 1,
+    'only change-log entries after the last one sent are sent');
   ok(M.newUpdatesFor(log, { topics: ['jobs'] }, '').length === 0,
     'a jobs-only alert is sent no change-log entries');
+
+  // The window is keyed on the DATE OF THE LAST ENTRY SENT, not on a send
+  // timestamp. Comparing a calendar date against an instant drops every entry
+  // dated on the day of the last send — so an announcement made the same
+  // morning as a digest would reach nobody, ever.
+  ok(M.newUpdatesFor(log, UP, '2026-08-14', '2026-08-15').length === 1,
+    'an entry dated today is sent when the last one sent was yesterday');
+  ok(M.newUpdatesFor(log, UP, '2026-08-15', '2026-08-15').length === 0,
+    'an entry already sent is not sent twice');
+  ok(M.newUpdatesFor([{ date: '2026-12-01', title: 'later' }], UP, '', '2026-08-15').length === 0,
+    'an entry dated in the future waits rather than going out early');
+  ok(M.newUpdatesFor([{ title: 'no date' }], UP, '', '2026-08-15').length === 0,
+    'an entry with no date is never sent');
+  ok(M.latestUpdateDate(log) === '2026-08-15',
+    'latestUpdateDate reports the newest entry, to become the next mark');
+  ok(M.latestUpdateDate([]) === '',
+    'latestUpdateDate of nothing is empty, so the mark is left alone');
+  ok(M.daysBefore(new Date('2026-08-15T00:00:00Z'), 31) === '2026-07-15',
+    'a first-ever send is capped rather than posting the back-catalogue');
 
   // due-ness
   const now = new Date('2026-08-15T12:00:00Z');
@@ -163,6 +191,17 @@ function selftest() {
   ok(html.includes('Duke University'), 'the e-mail lists the matching postings');
   ok(html.includes('Unsubscribe'), 'the e-mail offers an unsubscribe');
   ok(html.includes('operationsacademia.org/alerts'), 'the e-mail links to the manage page');
+  ok(html.includes('unsubscribe=x'),
+    'the unsubscribe link names the alert, so opening it can actually stop it');
+
+  // The List-Unsubscribe header must not promise one-click. This site is
+  // served by GitHub Pages and cannot accept the POST that header declares;
+  // announcing it shows a button that silently does nothing.
+  const h = unsubHeaders('https://www.operationsacademia.org/alerts?unsubscribe=x');
+  ok(!!h['List-Unsubscribe'], 'a List-Unsubscribe header is set');
+  ok(!('List-Unsubscribe-Post' in h),
+    'one-click is NOT declared — there is no endpoint that could honour it');
+  ok(h['List-Unsubscribe'].includes('mailto:'), 'a mailto fallback is offered');
   ok(!/<script/i.test(html), 'the e-mail contains no script');
 
   const evil = renderAlertEmail({
@@ -229,7 +268,12 @@ async function main() {
     const since = a.lastSentAt || a.createdAt || '';
     const jobs = M.newJobsFor(rows, a.criteria, since)
       .sort((x, y) => String(y.addedAt).localeCompare(String(x.addedAt)));
-    const news = M.newUpdatesFor(updates, a.criteria, String(since).slice(0, 10),
+
+    // The change-log window is tracked by the DATE OF THE LAST ENTRY SENT, not
+    // by the send timestamp — see newUpdatesFor. On a first-ever send, cap it
+    // at 31 days so a new subscriber is not posted the whole back-catalogue.
+    const sinceUpdate = a.lastUpdateDate || M.daysBefore(now, 31);
+    const news = M.newUpdatesFor(updates, a.criteria, sinceUpdate,
       now.toISOString().slice(0, 10));
 
     if (!jobs.length && !news.length) {
@@ -256,16 +300,21 @@ async function main() {
         to: a.email,
         subject,
         html,
-        headers: unsubHeaders(`${MANAGE_URL}?unsubscribe=${encodeURIComponent(a.id)}`),
+        headers: unsubHeaders(unsubscribeUrl(a)),
       }, { dryRun: DRY });
 
       if (!DRY) {
         // advanced only on success — a failure retries this alert, not the world
-        await doc.ref.update({
+        const patch = {
           lastSentAt: now.toISOString(),
           lastCheckedAt: now.toISOString(),
           lastSentCount: jobs.length + news.length,
-        });
+        };
+        // record the newest change-log entry actually sent, so the next window
+        // starts after it rather than at a timestamp
+        const latest = M.latestUpdateDate(news);
+        if (latest) patch.lastUpdateDate = latest;
+        await doc.ref.update(patch);
       }
       sent++;
       console.log(`sent ${label}: ${jobs.length} posting(s), ${news.length} update(s)`);

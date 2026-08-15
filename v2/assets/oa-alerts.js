@@ -330,12 +330,73 @@
     OAAccounts.onChange(function (user) {
       show($('oa-alerts-app'), !!user);
       show($('oa-needauth'), !user);
-      if (!user) return;
+      if (!user) { showUnsubNotice('signin'); return; }
       ready.then(function () {
         writeForm(null);
-        load();
-      });
+        return load();
+      }).then(handleUnsubscribeLink);
     });
+  }
+
+  /* ------------------------------------------------------- unsubscribing
+
+     Every alert e-mail carries ?unsubscribe=<alertId> in its footer and in the
+     List-Unsubscribe header. Opening it must actually stop the e-mails.
+
+     A subscription lives inside its owner's private Firestore subtree, so the
+     reader has to be signed in for us to touch it — a static site has no
+     endpoint that could act on an unauthenticated token. That is a real
+     limitation and the page says so plainly rather than appearing to work.
+     If you ever add a Cloud Function, a signed token would remove this step
+     (and only then should List-Unsubscribe-Post be declared; see _mail.mjs). */
+
+  function unsubTarget() {
+    var p = new URLSearchParams(location.search);
+    return p.get('unsubscribe') || '';
+  }
+
+  function showUnsubNotice(kind, name) {
+    var host = $('oa-unsub-notice');
+    if (!host) return;
+    if (!unsubTarget()) { show(host, false); return; }
+    var msg;
+    if (kind === 'signin') {
+      msg = '<strong>To stop these e-mails, please sign in.</strong> ' +
+        'Your alerts are private to your account, so we cannot change one ' +
+        'without knowing it is you. Sign in and this page will stop it ' +
+        'straight away.';
+    } else if (kind === 'done') {
+      msg = '<strong>Stopped.</strong> You will receive no more e-mails from ' +
+        '&ldquo;' + esc(name) + '&rdquo;. It is paused rather than deleted, so ' +
+        'you can turn it back on below whenever you like.';
+      host.className = 'oa-note';
+    } else if (kind === 'already') {
+      msg = '<strong>That alert is already paused.</strong> You are not ' +
+        'receiving e-mails from it.';
+      host.className = 'oa-note';
+    } else {
+      msg = '<strong>We could not find that alert.</strong> It may already have ' +
+        'been deleted, or it may belong to a different account. Your current ' +
+        'alerts are listed below.';
+    }
+    host.innerHTML = '<p>' + msg + '</p>';
+    show(host, true);
+  }
+
+  function handleUnsubscribeLink() {
+    var id = unsubTarget();
+    if (!id) return;
+    var found = null;
+    for (var i = 0; i < alerts.length; i++) if (alerts[i].id === id) found = alerts[i];
+    if (!found) { showUnsubNotice('missing'); return; }
+    if (found.enabled === false) { showUnsubNotice('already', found.name); return; }
+    return coll()
+      .then(function (c) { return c.doc(id).set({ enabled: false }, { merge: true }); })
+      .then(function () {
+        showUnsubNotice('done', found.name);
+        return load();
+      })
+      .catch(function () { showUnsubNotice('missing'); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

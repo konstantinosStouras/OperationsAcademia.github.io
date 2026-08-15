@@ -148,11 +148,20 @@ export async function send(tx, msg, { dryRun = false } = {}) {
   return true;
 }
 
-/** The headers that make an unsubscribe a native, one-click affair. */
+/**
+ * The header that lets a mail client offer its own unsubscribe control.
+ *
+ * Deliberately WITHOUT `List-Unsubscribe-Post: One-Click`. That header is a
+ * promise that the URL accepts an unauthenticated POST and unsubscribes on the
+ * spot. This site is served by GitHub Pages and cannot accept a POST at all, so
+ * declaring it would make Gmail and Outlook show a one-click button that
+ * silently does nothing — worse than not offering one. The URL given here is a
+ * real link that unsubscribes when opened, and the mailto is a genuine
+ * fallback. Add the POST header only alongside an endpoint that honours it.
+ */
 export function unsubHeaders(manageUrl) {
   return {
     'List-Unsubscribe': `<${manageUrl}>, <mailto:${CONTACT}?subject=unsubscribe>`,
-    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
   };
 }
 

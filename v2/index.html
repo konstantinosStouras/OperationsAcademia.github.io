@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <title>Operations Academia — new site preview</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="Preview of the rebuilt Operations Academia site." name="description">
+    <meta name="robots" content="noindex,nofollow">
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+  </head>
+  <body class="no-sidebar">
+    <div id="page-wrapper">
+      <div id="header-wrapper">
+        <div class="container" id="header">
+          <a href="/v2/" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
+            src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
+          <nav id="nav"></nav>
+          <div id="oa-account"></div>
+        </div>
+      </div>
+
+      <div id="main-wrapper">
+        <div class="container" id="page">
+          <div class="title-heading">
+            <h2>New site preview</h2>
+          </div>
+
+          <div id="main">
+            <div class="row">
+              <div class="12u" id="content">
+                <div class="oa-form">
+
+                  <div class="oa-note is-warn">
+                    <p><strong>This is a preview, not the live site.</strong> It sits at
+                    <code>/v2/</code>, is marked <code>noindex</code>, and changes nothing on
+                    <a href="/">operationsacademia.org</a>. The pages below are rebuilt; everything
+                    else in the menu still points at the live site.</p>
+                  </div>
+
+                  <p>What is being replaced, and why:</p>
+
+                  <ul style="margin:0 0 26px 20px;list-style:disc;line-height:1.7">
+                    <li>The job postings list was rendered by <strong>Awesome Tables</strong>, a paid
+                      third-party service reading a Google Sheet. It is now rendered by the site
+                      itself from a data file held in this repository.</li>
+                    <li>Job postings were submitted through a <strong>Google Form</strong>. They are
+                      now submitted on the site, tied to an account, so a poster can correct or
+                      withdraw a posting.</li>
+                    <li>There were no accounts, no e-mail alerts and no feedback channel that closed
+                      the loop. There are now.</li>
+                  </ul>
+
+                  <h3 style="font-size:18px;color:#313a45;margin:0 0 12px">Rebuilt pages</h3>
+
+                  <ul class="oa-preview-list">
+                    <li>
+                      <a href="jobs.html"><strong>Job postings</strong></a>
+                      <p>The replacement for the Awesome Table. Same seven filters, same cards, same
+                      Featured badge — plus filter state in the address bar, so a filtered view can
+                      be bookmarked and shared.</p>
+                    </li>
+                    <li>
+                      <a href="post-a-job.html"><strong>Post a job</strong></a>
+                      <p>The replacement for the Google Form. Needs an account; the posting appears
+                      on the list automatically at the next scheduled update.</p>
+                    </li>
+                    <li>
+                      <a href="alerts.html"><strong>E-mail alerts</strong></a>
+                      <p>Subscribe to new postings — all of them, or matching filters — and to
+                      changes on the site. With a live preview of the e-mail you would get.</p>
+                    </li>
+                    <li>
+                      <a href="feedback.html"><strong>Feedback</strong></a>
+                      <p>Report a problem with screenshots and get a ticket number. When it is
+                      fixed, you are e-mailed what was done.</p>
+                    </li>
+                  </ul>
+
+                  <div class="oa-note">
+                    <p><strong>Sign-in, posting, alerts and feedback are inert until a Firebase
+                    project is configured.</strong> Each page says so plainly rather than failing;
+                    the job postings list works regardless, because it reads a static file.</p>
+                    <p>What is left to do, and how the cutover works, is in
+                    <code>v2/_PLAN.md</code> in the repository.</p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Footer: shared include -->
+      <div data-include="/partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <!-- The site's own script chain, in the order every other page uses it.
+         All three parts are load-bearing and none of them is optional:
+           ypo-parakolouthisi.js defines the global `ga` that the footer's
+             inline onclick handlers call — without it every footer link throws;
+           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
+             relative hrefs would resolve inside /v2/);
+           jquery + dropotron + skel + util + main.js build the off-canvas
+             panel that IS the navigation below 840px, where main.css hides
+             #header-wrapper outright. Drop them and a phone gets no menu.
+         Awesome Tables is deliberately NOT here. It is a leaf dependency:
+         nothing in the site's own CSS or JS refers to it. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+</body>
+</html>

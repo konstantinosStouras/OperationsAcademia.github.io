@@ -155,6 +155,31 @@ const mannheim = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.tex
 ok(mannheim.length > 0 && mannheim.every((t) => /Mannheim/.test(t)),
   'the legacy ?filterA= deep link still selects an institution');
 
+/* --------------------------------------------- the site's own script chain
+
+   These pages drop the Awesome Tables tag but must keep everything else the
+   site loads. Two things break silently otherwise, on every v2 page:
+     - below 840px main.css hides #header-wrapper outright and the navigation
+       exists ONLY as the off-canvas panel main.js builds at runtime, so
+       without jQuery/skel/util/main.js a phone gets no menu at all;
+     - the shared footer partial carries inline onclick="ga(...)" handlers, so
+       without ypo-parakolouthisi.js every footer link throws.                */
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.waitForTimeout(800);
+
+eq(await page.evaluate(() => typeof window.ga), 'function',
+  'the global `ga` the footer\'s inline handlers call exists');
+eq(await page.evaluate(() => typeof window.jQuery), 'function', 'jQuery is loaded');
+ok(await page.$$eval('#nav a', (n) => n.length > 0), 'the navigation menu is populated');
+eq(await page.evaluate(() => {
+  const a = document.querySelector('#footer a[onclick]');
+  if (!a) return 'no-handler';
+  try { new Function(a.getAttribute('onclick')).call(a); return 'ok'; }
+  catch (e) { return 'threw: ' + e.message; }
+}), 'ok', 'a footer link with an inline analytics handler does not throw');
+
 /* -------------------------------------------------------- states + mobile */
 
 await page.goto(BASE + 'jobs.html?institution=zzzznotathing', { waitUntil: 'domcontentloaded' });
@@ -169,6 +194,23 @@ await m.click('.oa-card:first-child .oa-card-head');
 await m.waitForTimeout(200);
 eq(await m.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
   0, 'no horizontal overflow at 390px with a card open');
+
+await m.waitForTimeout(600);
+const mobileNav = await m.evaluate(() => {
+  const bar = document.querySelector('#titleBar');
+  const panel = document.querySelector('#navPanel');
+  return {
+    headerHidden: !document.querySelector('#header-wrapper') ||
+      getComputedStyle(document.querySelector('#header-wrapper')).display === 'none',
+    barShown: !!bar && getComputedStyle(bar).display !== 'none',
+    panelLinks: panel ? panel.querySelectorAll('a').length : 0,
+  };
+});
+ok(mobileNav.headerHidden, 'below 840px the desktop header is hidden, as main.css intends');
+ok(mobileNav.barShown, 'the mobile title bar is built');
+ok(mobileNav.panelLinks > 0,
+  `the off-canvas menu has links (${mobileNav.panelLinks}) — without the site's ` +
+  'script chain a phone would have no navigation at all');
 
 /* ------------------------------------------------------------------ done */
 
