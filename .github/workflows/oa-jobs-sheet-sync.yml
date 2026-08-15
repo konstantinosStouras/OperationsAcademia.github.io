@@ -52,9 +52,14 @@ jobs:
       - name: Offline checks
         run: node v2/_scraper/selftest.mjs
 
+      # --min-year is the market the page is TITLED for, pinned rather than
+      # derived. The derived rule (roll in June) says 2027 in August 2026,
+      # which is the market after the one /v2/jobs.html shows — it would have
+      # synced 7 postings and left the 92 the page is actually for behind.
+      # WHEN THE MARKET ROLLS: bump this and the page's heading together.
       - name: Read the sheet and merge what is missing
         run: |
-          node v2/_scraper/import-sheet.mjs --sheet --merge \
+          node v2/_scraper/import-sheet.mjs --sheet --merge --min-year 2026 \
                --out v2/data/jobs.json ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Re-check the file we are about to commit
