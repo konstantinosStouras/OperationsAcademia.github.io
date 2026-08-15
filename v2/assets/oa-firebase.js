@@ -13,13 +13,25 @@
 (function () {
   'use strict';
 
+  // The web config of the `operations-academia` Firebase project.
+  //
+  // NOT A SECRET. It identifies the project to the browser and is visible in
+  // the page source of every Firebase site on the internet. What protects the
+  // data is v2/_firestore.rules — which is why those must be deployed before
+  // the site is announced.
   var FB_CONFIG = {
-    apiKey: 'PASTE_API_KEY',
-    authDomain: 'PASTE_PROJECT.firebaseapp.com',
-    projectId: 'PASTE_PROJECT',
-    storageBucket: 'PASTE_PROJECT.appspot.com',
-    messagingSenderId: 'PASTE_SENDER_ID',
-    appId: 'PASTE_APP_ID'
+    apiKey: 'AIzaSyD2iytcJ66wHW4UMR0efJkX3Bk1cHZwZI8',
+    authDomain: 'operations-academia.firebaseapp.com',
+    projectId: 'operations-academia',
+    storageBucket: 'operations-academia.firebasestorage.app',
+    messagingSenderId: '64536305283',
+    appId: '1:64536305283:web:82626604b00bd6dd4945b6'
+    // The console also issues `measurementId: 'G-2CX86W7PHB'` for Google
+    // Analytics. It is deliberately omitted: nothing here loads the analytics
+    // SDK, so carrying it would only imply a second analytics property is
+    // running on the site when none is. Add it back alongside the SDK if you
+    // ever decide to use GA4 (see _PLAN.md — the site's existing Universal
+    // Analytics has been dead since July 2023 and wants a decision either way).
   };
 
   // Sign-in methods offered on the auth modal, in display order.

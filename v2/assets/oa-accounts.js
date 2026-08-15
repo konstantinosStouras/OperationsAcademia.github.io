@@ -20,7 +20,7 @@
   'use strict';
 
   var HINT_KEY = 'oaAuthHint';
-  var state = { user: null, resolved: false, profile: null };
+  var state = { user: null, resolved: false, profile: null, failed: false };
   var queue = [];
   var listeners = [];
 
@@ -68,6 +68,13 @@
       return;
     }
 
+    if (state.failed) {
+      host.innerHTML =
+        '<span class="oa-acct-off" title="We could not reach the sign-in ' +
+        'service. Check your connection and reload.">Sign-in unavailable</span>';
+      return;
+    }
+
     var u = state.user || (!state.resolved ? readHint() : null);
     if (!u) {
       host.innerHTML = '<button type="button" class="oa-acct-btn" id="oa-signin">Sign in</button>';
@@ -109,6 +116,7 @@
   function openAuth() {
     if (state.user) return;                      // invariant 1
     if (!window.OAFB || !OAFB.enabled) return;
+    if (state.failed) return;                    // the SDK never loaded
     if ($('#oa-auth')) { $('#oa-auth').hidden = false; return; }
 
     var third = (OAFB.providers || [])
@@ -161,6 +169,10 @@
       if (c === 'auth/popup-blocked') return 'Your browser blocked the sign-in window. Allow pop-ups and try again.';
       if (c === 'auth/popup-closed-by-user') return '';
       if (c === 'auth/network-request-failed') return 'We could not reach the sign-in service. Check your connection.';
+      if (/sdk-load-failed|not-configured/.test(err && err.message || '')) {
+        return 'We could not load the sign-in service. If you use an ad blocker, ' +
+          'allow gstatic.com and reload.';
+      }
       return 'Sign-in failed. Please try again.' + (c ? ' (' + c + ')' : '');
     }
 
@@ -234,6 +246,10 @@
     if (state.resolved) fn(state.user);
   }
 
+  function notify(u) {
+    listeners.forEach(function (fn) { try { fn(u); } catch (e) {} });
+  }
+
   function boot() {
     paint();
     if (!window.OAFB || !OAFB.enabled) { state.resolved = true; return; }
@@ -258,9 +274,21 @@
         } else {
           queue.length = 0;
         }
-        listeners.forEach(function (fn) { try { fn(u); } catch (e) {} });
+        notify(u);
       });
-    }).catch(function () { state.resolved = true; paint(); });
+    }).catch(function (err) {
+      // The SDK itself could not be loaded — offline, a blocked CDN, an ad
+      // blocker. Resolving without notifying would leave every page that waits
+      // on onChange (the posting form, alerts, feedback) showing NEITHER its
+      // form nor its sign-in prompt: a blank card with no explanation. Treat it
+      // as "signed out, and say why".
+      state.failed = true;
+      state.resolved = true;
+      queue.length = 0;
+      paint();
+      notify(null);
+      if (window.console) console.error('OA accounts: ' + (err && err.message));
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
@@ -273,6 +301,10 @@
     onChange: onChange,
     user: function () { return state.user; },
     resolved: function () { return state.resolved; },
+    /** True when the SDK itself could not be loaded — offline, a blocked
+        CDN, an ad blocker. Pages use this to say so instead of offering a
+        control that cannot work. */
+    failed: function () { return state.failed; },
     isAdmin: function () {
       return !!(state.user && window.OAFB &&
         (state.user.email || '').toLowerCase() === String(OAFB.adminEmail).toLowerCase());
