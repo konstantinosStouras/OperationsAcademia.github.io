@@ -1,0 +1,429 @@
+/* ---------------------------------------------------------------------------
+   Operations Academia — shared UI for the parts that are new in v2:
+   the account control, modals, and the site's own forms.
+
+   Follows main.css: Source Sans Pro, #3B7DBC, links #0645ad, body #222.
+   Form controls are set at 15px rather than the site's 16pt body size, which is
+   far too large for a 19-field form.
+   --------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------- account chip */
+
+/* #header is position:relative, height 3em, with #nav absolutely placed at
+   left:8em — so the account control is pinned to the opposite corner rather
+   than floated, which would drop it out of the fixed 2.5em header bar. */
+#oa-account {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 2.5em;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.oa-acct-btn,
+.oa-acct-chip {
+  padding: 4px 12px;
+  border: 1px solid #3b7dbc;
+  border-radius: 3px;
+  background: #fff;
+  font: inherit;
+  font-weight: 600;
+  color: #3b7dbc;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.oa-acct-btn:hover,
+.oa-acct-chip:hover { background: #3b7dbc; color: #fff; }
+
+.oa-acct-off {
+  padding: 4px 12px;
+  color: #999;
+  cursor: default;
+}
+
+.oa-acct-wrap { position: relative; }
+
+.oa-acct-menu {
+  position: absolute;
+  z-index: 10001;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 230px;
+  padding: 6px 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  text-align: left;
+}
+
+.oa-acct-menu[hidden] { display: none; }
+
+.oa-acct-as {
+  padding: 8px 14px 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #777;
+}
+
+.oa-acct-as strong { color: #222; font-weight: 600; overflow-wrap: anywhere; }
+
+.oa-acct-menu a,
+.oa-acct-menu button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: #222;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.oa-acct-menu a:hover,
+.oa-acct-menu button:hover { background: #f2f6fb; text-decoration: none; }
+
+/* -------------------------------------------------------------------- modal */
+
+.oa-modal {
+  position: fixed;
+  z-index: 20000;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;   /* long-hand fallback for `inset` */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6vh 16px 16px;
+  overflow-y: auto;
+  background: rgba(20, 30, 45, 0.55);
+}
+
+.oa-modal[hidden] { display: none; }
+
+.oa-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  padding: 26px 28px 24px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #222;
+}
+
+.oa-modal-card h3 { margin: 0 0 8px; font-size: 20px; color: #313a45; }
+
+.oa-modal-lede { margin: 0 0 18px; font-size: 14px; color: #666; }
+
+.oa-modal-x {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 2px 8px;
+  border: 0;
+  background: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #999;
+  cursor: pointer;
+}
+
+.oa-modal-x:hover { color: #222; }
+
+.oa-auth-providers { display: flex; flex-direction: column; gap: 8px; }
+
+.oa-auth-provider {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  background: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oa-auth-provider:hover { background: #f5f7fa; }
+
+.oa-or {
+  margin: 14px 0;
+  font-size: 13px;
+  color: #999;
+  text-align: center;
+}
+
+.oa-auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 16px;
+}
+
+.oa-linkbtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: #0645ad;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.oa-auth-msg { margin: 12px 0 0; font-size: 14px; min-height: 1px; }
+.oa-auth-msg.is-err { color: #b3261e; }
+.oa-auth-msg.is-ok { color: #1c6b45; }
+
+/* --------------------------------------------------------------------- forms */
+
+.oa-form {
+  max-width: 760px;
+  margin: 0 auto;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #222;
+}
+
+.oa-form fieldset { margin: 0 0 26px; padding: 0; border: 0; }
+
+.oa-form legend {
+  display: block;
+  width: 100%;
+  margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e6e6e6;
+  font-size: 17px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-field { margin: 0 0 18px; }
+
+.oa-field > label,
+.oa-field > .oa-label-text {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-req { color: #b3261e; font-weight: 400; }
+
+.oa-hint {
+  margin: 2px 0 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #777;
+}
+
+.oa-form input[type='text'],
+.oa-form input[type='email'],
+.oa-form input[type='url'],
+.oa-form input[type='date'],
+.oa-form input[type='number'],
+.oa-form select,
+.oa-form textarea,
+.oa-modal-card input,
+.oa-modal-card select,
+.oa-modal-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #222;
+}
+
+.oa-modal-card label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-modal-card label input { margin-top: 4px; font-weight: 400; }
+
+.oa-form textarea { min-height: 92px; resize: vertical; }
+
+.oa-form input:focus,
+.oa-form select:focus,
+.oa-form textarea:focus,
+.oa-modal-card input:focus {
+  outline: none;
+  border-color: #3b7dbc;
+  box-shadow: 0 0 0 3px rgba(59, 125, 188, 0.18);
+}
+
+.oa-form input[aria-invalid='true'],
+.oa-form select[aria-invalid='true'],
+.oa-form textarea[aria-invalid='true'] { border-color: #b3261e; }
+
+.oa-err {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #b3261e;
+}
+
+.oa-checks { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+
+/* main.css:1568 applies `-webkit-appearance: none` to EVERY `form input`, which
+   collapses a native checkbox to 0x0 — invisible and unclickable. Rather than
+   fight that rule (it is load-bearing for the site's text inputs), draw the box
+   ourselves, which also makes it look the same in every browser. */
+.oa-check input[type='checkbox'],
+.oa-check input[type='radio'] {
+  position: relative;
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 1px solid #9a9a9a;
+  border-radius: 3px;
+  background: #fff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.oa-check input[type='radio'] { border-radius: 50%; }
+
+.oa-check input[type='checkbox']:hover,
+.oa-check input[type='radio']:hover { border-color: #3b7dbc; }
+
+.oa-check input[type='checkbox']:checked,
+.oa-check input[type='radio']:checked {
+  border-color: #3b7dbc;
+  background: #3b7dbc;
+}
+
+.oa-check input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 3px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.oa-check input[type='radio']:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.oa-check input[type='checkbox']:focus-visible,
+.oa-check input[type='radio']:focus-visible {
+  outline: 2px solid #3b7dbc;
+  outline-offset: 2px;
+}
+
+.oa-check input[disabled] { opacity: 0.5; cursor: default; }
+
+.oa-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #222;
+  cursor: pointer;
+}
+
+.oa-check input { flex: 0 0 auto; margin-top: 5px; }
+
+.oa-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+}
+
+.oa-row > .oa-field { flex: 1 1 240px; }
+
+.oa-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid #e6e6e6;
+}
+
+.oa-form-msg { margin: 0; font-size: 15px; }
+.oa-form-msg.is-err { color: #b3261e; }
+.oa-form-msg.is-ok { color: #1c6b45; }
+
+.oa-note {
+  padding: 16px 18px;
+  margin: 0 0 24px;
+  background: rgb(249, 249, 249);
+  border: 1px solid rgb(204, 204, 204);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.oa-note.is-warn { background: #fff8e6; border-color: #e6c866; }
+
+.oa-note p { margin: 0 0 8px; }
+.oa-note p:last-child { margin-bottom: 0; }
+
+.oa-done {
+  padding: 26px 24px;
+  background: #f2faf5;
+  border: 1px solid #b6dfc7;
+  border-radius: 4px;
+}
+
+.oa-done h3 { margin: 0 0 10px; font-size: 19px; color: #17573a; }
+.oa-done p { margin: 0 0 10px; font-size: 15px; line-height: 1.6; }
+.oa-done .oa-ticket {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 3px;
+  background: #17573a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  color: #fff;
+}
+
+button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
+
+@media screen and (max-width: 640px) {
+  .oa-row > .oa-field { flex: 1 1 100%; }
+  #oa-account { font-size: 13px; }
+  .oa-acct-btn, .oa-acct-chip { padding: 3px 8px; }
+}
