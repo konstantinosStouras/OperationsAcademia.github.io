@@ -32,6 +32,33 @@
   "addedAt": "2025-08-06T08:42:07Z"
  },
  {
+  "id": "2028-test-20260815",
+  "year": 2028,
+  "posted": "2026-08-15",
+  "institution": "test",
+  "department": "sdf",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "February 2, 2028. dsfsdf",
+  "applyByDate": "2028-02-02",
+  "comments": "qqq",
+  "country": "Portugal",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=test",
+  "characteristics": [
+   "Research seminars"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-15T17:02:06Z",
+  "ref": "OA-JOB-260815-7T9B"
+ },
+ {
   "id": "2026-university-of-notre-dame-20250813",
   "year": 2026,
   "posted": "2025-08-13",
