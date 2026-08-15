@@ -1,0 +1,59 @@
+name: OA alerts — send what is due
+
+# Sends every e-mail alert subscription that is due. Each alert carries its own
+# high-water mark, advanced only when its own send succeeds, so one failure
+# never swallows a window for anybody else.
+#
+# A no-op until FIREBASE_SERVICE_ACCOUNT is set.
+
+on:
+  schedule:
+    # hourly, off the hour. "immediate" subscriptions are bounded by this
+    # cadence; daily/weekly/monthly ones simply are not due most of the time.
+    - cron: '23 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Match and render, send nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'Only report which alerts are due'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-alerts-mail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+
+      - name: Offline checks
+        run: node v2/_scraper/alerts-mailer.mjs --selftest
+
+      - name: Send
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+        run: |
+          node v2/_scraper/alerts-mailer.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
