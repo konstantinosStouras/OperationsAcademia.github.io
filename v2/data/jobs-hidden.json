@@ -1,0 +1,9 @@
+{
+ "_comment": "Postings never published, by id or by reference. The Google Sheet re-offers every row it holds on each sync, so a withdrawn or test posting has to be suppressed here rather than deleted from jobs.json — deleting it alone brings it straight back on the next run. Honoured by import-sheet.mjs and build-jobs.mjs.",
+ "refs": [
+  "OA-JOB-260815-7T9B"
+ ],
+ "ids": [
+  "2028-test-20260815"
+ ]
+}

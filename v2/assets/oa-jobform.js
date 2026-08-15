@@ -218,6 +218,7 @@
     }
 
     $('oa-needauth-btn').addEventListener('click', function () { OAAccounts.openAuth(); });
+    $('oa-needauth-new').addEventListener('click', function () { OAAccounts.openAuth('register'); });
 
     /* Clear a field's error as soon as the reader acts on it. Without this the
        red message sits under a field they have already corrected, and the only
@@ -240,6 +241,8 @@
     OAAccounts.onChange(function (user) {
       show(form, !!user);
       show(needauth, !user);
+      // the intro explains a form that is not on screen while signed out
+      show($('oa-intro'), !!user);
       if (user && !$('f-email').value) $('f-email').value = user.email || '';
     });
 

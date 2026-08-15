@@ -35,9 +35,44 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
 import {
-  text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta,
+  text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta, mergeRows,
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
 } from './jobs-model.mjs';
+
+/* ----------------------------------------------------------- the live sheet
+
+   The migration was a one-off snapshot, and that is exactly why /v2/jobs.html
+   fell behind: the sheet kept receiving postings through the Google form (92
+   on the live page) while the imported file stayed at the 81 captured on the
+   day. Until the form is retired the sheet is still a WRITER of the dataset,
+   so it has to be read on a schedule like any other writer.
+
+   `--sheet <id>` reads both tabs straight from the published sheet, which
+   needs no credentials (File > Share > Anyone with the link can view) and no
+   continuing access to the account. Paired with `--merge` it only ADDS what is
+   missing, so a posting made through /v2/post-a-job.html is never overwritten
+   by the sheet that does not know about it.                                  */
+
+export const SHEET_ID = '1YgTajXa5W1r4Ekm2zkFGQoQFNiE3C82l4_54aMYizok';
+
+export function sheetCsvUrl(id, tab) {
+  return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(id)}` +
+    `/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+}
+
+/** Fetch one tab as CSV. Google answers an unshared sheet with an HTML sign-in
+    page, not a 403, so the content type is checked as well as the status. */
+export async function fetchTab(id, tab) {
+  const res = await fetch(sheetCsvUrl(id, tab), { redirect: 'follow' });
+  if (!res.ok) throw new Error(`${tab}: HTTP ${res.status}`);
+  const body = await res.text();
+  if (/^\s*</.test(body)) {
+    throw new Error(
+      `${tab}: Google returned a web page rather than CSV — the sheet is not ` +
+      'readable by anyone with the link');
+  }
+  return body;
+}
 
 /* --------------------------------------------------------------- CSV parse */
 
@@ -244,16 +279,19 @@ async function main() {
   const rawPath = arg('--raw');
   const outPath = arg('--out', 'v2/data/jobs.json');
   const dry = process.argv.includes('--dry-run');
+  const merge = process.argv.includes('--merge');
+  const sheetId = process.argv.includes('--sheet') ? arg('--sheet', SHEET_ID) : '';
 
-  if (!displayPath && !rawPath) {
+  if (!displayPath && !rawPath && !sheetId) {
     console.log(`Usage:
   node v2/_scraper/import-sheet.mjs --display jobsData.csv [--raw rawData.csv]
                                     [--out v2/data/jobs.json] [--dry-run]
+  node v2/_scraper/import-sheet.mjs --sheet [<id>] --merge [--dry-run]
 
-Export each tab from Google Sheets with File > Download > Comma-separated
-values. Giving both tabs is recommended: the display tab says what is shown
-today (including which posting is Featured), the raw tab supplies the exact
-apply-by date.`);
+--display/--raw read tabs exported by hand (File > Download > Comma-separated
+values). --sheet reads the same two tabs from the published sheet directly,
+which is what the scheduled sync uses. --merge adds what is missing instead of
+replacing the file, so postings made through /v2/post-a-job.html survive.`);
     process.exit(1);
   }
 
@@ -261,8 +299,24 @@ apply-by date.`);
     if (!existsSync(p)) { console.error(`no such file: ${p}`); process.exit(1); }
   }
 
-  const display = displayPath ? parseCsv(await readFile(displayPath, 'utf8')) : null;
-  const raw = rawPath ? parseCsv(await readFile(rawPath, 'utf8')) : null;
+  let displayCsv = displayPath ? await readFile(displayPath, 'utf8') : '';
+  let rawCsv = rawPath ? await readFile(rawPath, 'utf8') : '';
+
+  if (sheetId) {
+    console.log(`reading sheet ${sheetId}`);
+    displayCsv = await fetchTab(sheetId, 'jobsData');
+    // The raw tab only sharpens the deadline; a sheet that does not expose it
+    // must not fail the whole sync.
+    try {
+      rawCsv = await fetchTab(sheetId, 'rawData');
+    } catch (e) {
+      console.log(`::warning::rawData unavailable (${e.message}) — deadlines come from the display tab`);
+      rawCsv = '';
+    }
+  }
+
+  const display = displayCsv ? parseCsv(displayCsv) : null;
+  const raw = rawCsv ? parseCsv(rawCsv) : null;
 
   const { rows, unmatched } = rowsFromSheets(display, raw);
   const published = rows.map(publicRow);
@@ -280,11 +334,37 @@ apply-by date.`);
     process.exit(1);
   }
 
-  if (dry) { console.log('--dry-run: not writing.'); return; }
-  await writeFile(outPath, serialise(rows));
+  /* Merge, or replace. Merging is what the scheduled sync does: the sheet is
+     one writer of this file among several, and it knows nothing about the rows
+     the posting form contributed. */
+  let final = rows;
+  if (merge) {
+    const existing = existsSync(outPath)
+      ? JSON.parse(await readFile(outPath, 'utf8')) : [];
+    const res = mergeRows(existing, rows);
+    final = res.rows;
+    console.log(`merge: +${res.added} new, ${res.updated} refreshed  (${final.length} total)`);
+    if (!res.added && !res.updated) { console.log('nothing new in the sheet.'); }
+  }
+
+  /* Postings the maintainer has taken down. The sheet keeps re-offering every
+     row it holds, so without a committed suppression list a withdrawn or test
+     posting would come back on the very next sync. */
+  const hiddenPath = outPath.replace(/jobs\.json$/, 'jobs-hidden.json');
+  if (existsSync(hiddenPath)) {
+    const hide = JSON.parse(await readFile(hiddenPath, 'utf8'));
+    const ids = new Set([].concat(hide.ids || [], hide.refs || []));
+    const before = final.length;
+    final = final.filter((r) => !ids.has(r.id) && !ids.has(r.ref));
+    if (before !== final.length) console.log(`hidden: ${before - final.length} row(s) withheld`);
+  }
+
+  const out = final.map(publicRow);
+  if (dry) { console.log(`--dry-run: not writing (${out.length} rows).`); return; }
+  await writeFile(outPath, serialise(final));
   await writeFile(outPath.replace(/jobs\.json$/, 'jobs-meta.json'),
-    JSON.stringify(buildMeta(published, { generated: new Date().toISOString() }), null, 1) + '\n');
-  console.log(`wrote ${outPath}`);
+    JSON.stringify(buildMeta(out, { generated: new Date().toISOString() }), null, 1) + '\n');
+  console.log(`wrote ${outPath} (${out.length} postings)`);
 }
 
 /* --------------------------------------------------------------- selftest */

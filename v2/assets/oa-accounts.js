@@ -52,10 +52,40 @@
 
   function displayName(u) {
     if (!u) return '';
-    return u.name || u.displayName || (u.email || '').split('@')[0] || 'Account';
+    var p = state.profile;
+    var full = p && [p.firstName, p.lastName].filter(Boolean).join(' ').trim();
+    return full || u.name || u.displayName || (u.email || '').split('@')[0] || 'Account';
+  }
+
+  /** Two letters for the avatar: the initials of the name we show, falling
+      back to the first letter of the e-mail. Never empty — a blank disc reads
+      as a broken image. */
+  function initials(u) {
+    var parts = displayName(u).replace(/[^\p{L}\p{N} ]/gu, ' ').trim().split(/\s+/);
+    var s = parts.length > 1
+      ? parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+      : (parts[0] || (u && u.email) || '?').slice(0, 2);
+    return s.toUpperCase();
+  }
+
+  /** A stable colour per account, so the disc is recognisably "yours" and does
+      not change between pages or sessions. Hue from a hash of the uid; the
+      saturation and lightness are fixed, so every avatar has the same weight
+      and the white initials always clear 4.5:1. */
+  function avatarHue(u) {
+    var s = String((u && (u.uid || u.email)) || ''), h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+    return h;
   }
 
   /* ------------------------------------------------------------------- chrome */
+
+  var ICON = {
+    post: '&#128221;',
+    alerts: '&#9993;',
+    profile: '&#128100;',
+    feedback: '&#128172;'
+  };
 
   function paint() {
     var host = $('#oa-account');
@@ -82,16 +112,36 @@
       return;
     }
 
+    var hue = avatarHue(u);
     host.innerHTML =
       '<div class="oa-acct-wrap">' +
         '<button type="button" class="oa-acct-chip" id="oa-chip" aria-haspopup="menu" ' +
-          'aria-expanded="false">' + esc(displayName(u)) + '</button>' +
+          'aria-expanded="false" title="Your account">' +
+          '<span class="oa-avatar" aria-hidden="true" style="--oa-hue:' + hue + '">' +
+            esc(initials(u)) + '</span>' +
+          '<span class="oa-acct-name">' + esc(displayName(u)) + '</span>' +
+          '<span class="oa-caret" aria-hidden="true"></span>' +
+        '</button>' +
         '<div class="oa-acct-menu" id="oa-menu" role="menu" hidden>' +
-          '<div class="oa-acct-as">Signed in as<br><strong>' + esc(u.email || '') + '</strong></div>' +
-          '<a role="menuitem" href="/v2/post-a-job.html">Post a job</a>' +
-          '<a role="menuitem" href="/v2/alerts.html">E-mail alerts</a>' +
-          '<a role="menuitem" href="/v2/feedback.html">Send feedback</a>' +
-          '<button role="menuitem" type="button" id="oa-signout">Sign out</button>' +
+          '<div class="oa-acct-as">' +
+            '<span class="oa-avatar oa-avatar-lg" aria-hidden="true" style="--oa-hue:' + hue + '">' +
+              esc(initials(u)) + '</span>' +
+            '<span class="oa-acct-who">' +
+              '<strong>' + esc(displayName(u)) + '</strong>' +
+              '<span class="oa-acct-mail">' + esc(u.email || '') + '</span>' +
+            '</span>' +
+          '</div>' +
+          '<div class="oa-acct-group">' +
+            '<a role="menuitem" href="/v2/post-a-job.html">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
+            '<a role="menuitem" href="/v2/alerts.html">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts</a>' +
+            '<button role="menuitem" type="button" id="oa-editprofile">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.profile + '</span>Edit profile</button>' +
+            '<a role="menuitem" href="/v2/feedback.html">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.feedback + '</span>Send feedback</a>' +
+          '</div>' +
+          '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">Sign out</button>' +
         '</div>' +
       '</div>';
 
@@ -102,11 +152,121 @@
       chip.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true');
     });
     document.addEventListener('mousedown', function (e) {
-      if (!menu.hidden && !menu.contains(e.target) && e.target !== chip) close();
+      if (!menu.hidden && !menu.contains(e.target) && !chip.contains(e.target)) close();
     }, true);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
     var so = $('#oa-signout');
     if (so) so.addEventListener('click', signOut);
+    var ep = $('#oa-editprofile');
+    if (ep) ep.addEventListener('click', function () { close(); openProfile(); });
+  }
+
+  /* ------------------------------------------------------------ profile card
+
+     The name on the chip comes from here. Firebase gives us an e-mail and
+     nothing else for a password account, so without this the header would
+     greet everyone by the left-hand half of their address. Stored at
+     profiles/{uid}, which the deployed rules already make owner-only — no
+     rules change is needed to switch this on. */
+
+  var PROFILE_FIELDS = ['firstName', 'lastName', 'affiliation', 'website'];
+
+  function profileDoc(fb, uid) {
+    return fb.firestore().collection(OAFB.col.profiles).doc(uid);
+  }
+
+  function loadProfile(u) {
+    if (!u) { state.profile = null; return; }
+    OAFB.ready()
+      .then(function (fb) { return profileDoc(fb, u.uid).get(); })
+      .then(function (snap) {
+        state.profile = (snap && snap.exists ? snap.data() : null) || null;
+        paint();
+        // A first-run account has no name yet. Ask once, and never again —
+        // being nagged on every visit is what makes a profile prompt hated.
+        try {
+          if (!state.profile && !localStorage.getItem('oaProfileAsked')) {
+            localStorage.setItem('oaProfileAsked', '1');
+            openProfile(true);
+          }
+        } catch (e) { /* private mode */ }
+      })
+      .catch(function () { /* rules not deployed yet — the chip still works */ });
+  }
+
+  function openProfile(firstRun) {
+    var u = state.user;
+    if (!u) { openAuth(); return; }
+    var old = $('#oa-profile');
+    if (old) old.parentNode.removeChild(old);
+
+    var p = state.profile || {};
+    var wrap = document.createElement('div');
+    wrap.className = 'oa-modal';
+    wrap.id = 'oa-profile';
+    wrap.innerHTML =
+      '<div class="oa-modal-card oa-profile-card" role="dialog" aria-modal="true" ' +
+        'aria-labelledby="oa-profile-h">' +
+        '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
+        '<div class="oa-profile-head">' +
+          '<span class="oa-avatar oa-avatar-xl" aria-hidden="true" style="--oa-hue:' +
+            avatarHue(u) + '">' + esc(initials(u)) + '</span>' +
+          '<div>' +
+            '<h3 id="oa-profile-h">' + (firstRun ? 'Welcome' : 'My profile') + '</h3>' +
+            '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
+              'anything you post. Your affiliation is never published.</p>' +
+          '</div>' +
+        '</div>' +
+        '<form id="oa-profile-form">' +
+          '<div class="oa-prow">' +
+            '<label>First name<input name="firstName" maxlength="80" autocomplete="given-name" ' +
+              'value="' + esc(p.firstName || '') + '"></label>' +
+            '<label>Last name<input name="lastName" maxlength="80" autocomplete="family-name" ' +
+              'value="' + esc(p.lastName || '') + '"></label>' +
+          '</div>' +
+          '<label>Affiliation <span class="oa-opt">(optional)</span>' +
+            '<input name="affiliation" maxlength="160" placeholder="University or company" ' +
+              'autocomplete="organization" value="' + esc(p.affiliation || '') + '"></label>' +
+          '<label>Website <span class="oa-opt">(optional)</span>' +
+            '<input name="website" maxlength="300" placeholder="https://…" type="url" ' +
+              'value="' + esc(p.website || '') + '"></label>' +
+          '<label>E-mail' +
+            '<input value="' + esc(u.email || '') + '" disabled>' +
+            '<span class="oa-opt oa-fine">This is the address you sign in with.</span></label>' +
+          '<div class="oa-auth-actions">' +
+            '<button type="submit" class="button blue">Save profile</button>' +
+            (firstRun ? '<button type="button" class="oa-linkbtn" id="oa-profile-later">Not now</button>' : '') +
+          '</div>' +
+        '</form>' +
+        '<p class="oa-auth-msg" id="oa-profile-msg" role="alert"></p>' +
+      '</div>';
+    document.body.appendChild(wrap);
+
+    function close() { wrap.hidden = true; }
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    $('.oa-modal-x', wrap).addEventListener('click', close);
+    var later = $('#oa-profile-later', wrap);
+    if (later) later.addEventListener('click', close);
+
+    $('#oa-profile-form', wrap).addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = e.target, out = {};
+      PROFILE_FIELDS.forEach(function (k) { out[k] = String(f[k].value || '').trim().slice(0, 300); });
+      var msg = $('#oa-profile-msg', wrap);
+      msg.className = 'oa-auth-msg';
+      msg.textContent = 'Saving…';
+      OAFB.ready()
+        .then(function (fb) { return profileDoc(fb, state.user.uid).set(out, { merge: true }); })
+        .then(function () {
+          state.profile = out;
+          paint();
+          close();
+        })
+        .catch(function () {
+          msg.className = 'oa-auth-msg is-err';
+          msg.textContent = 'We could not save your profile just now. Please try again.';
+        });
+    });
   }
 
   /* -------------------------------------------------------------- auth modal */
@@ -135,11 +295,21 @@
     }
   };
 
-  function openAuth() {
+  /** mode: 'register' opens the same box worded for someone who has no
+      account yet. Both buttons stay on either wording — someone who came to
+      register and turns out to have an account must not have to close the box
+      and find another button. */
+  function openAuth(mode) {
     if (state.user) return;                      // invariant 1
     if (!window.OAFB || !OAFB.enabled) return;
     if (state.failed) return;                    // the SDK never loaded
-    if ($('#oa-auth')) { $('#oa-auth').hidden = false; return; }
+    var registering = mode === 'register';
+    if ($('#oa-auth')) {
+      $('#oa-auth').hidden = false;
+      var em = $('#oa-auth-form') && $('#oa-auth-form').email;
+      if (em) em.focus();
+      return;
+    }
 
     var third = (OAFB.providers || [])
       .filter(function (p) { return p !== 'password' && PROVIDER[p]; })
@@ -154,9 +324,11 @@
     wrap.innerHTML =
       '<div class="oa-modal-card" role="dialog" aria-modal="true" aria-labelledby="oa-auth-h">' +
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
-        '<h3 id="oa-auth-h">Sign in to Operations Academia</h3>' +
+        '<h3 id="oa-auth-h">' + (registering
+          ? 'Create your Operations Academia account'
+          : 'Sign in to Operations Academia') + '</h3>' +
         '<p class="oa-modal-lede">An account lets you post a job, subscribe to e-mail ' +
-          'alerts, and manage what you have posted. It is free.</p>' +
+          'alerts, and manage what you have posted. It is free, and takes a moment.</p>' +
         (third ? '<div class="oa-auth-providers">' + third + '</div><div class="oa-or">or</div>' : '') +
         '<form id="oa-auth-form">' +
           '<label>E-mail<input type="email" name="email" autocomplete="email" required></label>' +
@@ -292,10 +464,12 @@
       fb.auth().onAuthStateChanged(function (u) {
         state.user = u || null;
         state.resolved = true;
+        if (!u) state.profile = null;
         writeHint(u);
         paint();
 
         if (u) {
+          loadProfile(u);
           // Public, contentless tally so the site can show a registered-user
           // count without anyone being able to read the user list. Same shape
           // as /lit/'s registeredUsers/{uid}: a coarse timestamp, nothing else.
@@ -330,6 +504,9 @@
 
   window.OAAccounts = {
     openAuth: openAuth,
+    openProfile: openProfile,
+    profile: function () { return state.profile; },
+    displayName: function () { return displayName(state.user); },
     signOut: signOut,
     whenSignedIn: whenSignedIn,
     onChange: onChange,

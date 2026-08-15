@@ -149,8 +149,18 @@ async function main() {
 
   const existing = await readJson(JOBS, []);
   const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
-  const { rows, added, updated, removed } =
-    mergeRows(existing, fresh.map((f) => f.row), removeRefs);
+
+  // The maintainer's committed suppression list, honoured by every writer of
+  // this file (see data/jobs-hidden.json). A posting listed here is withheld
+  // even if it is still queued in Firestore.
+  const hide = await readJson(path.join(DATA, 'jobs-hidden.json'), {});
+  const hidden = new Set([].concat(hide.ids || [], hide.refs || []));
+
+  const merged =
+    mergeRows(existing, fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
+      removeRefs);
+  const { added, updated, removed } = merged;
+  const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
   const before = serialise(existing);
   const after = serialise(rows);
