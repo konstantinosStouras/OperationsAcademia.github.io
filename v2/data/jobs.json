@@ -421,36 +421,6 @@
   "addedAt": "2026-04-07T00:00:00Z"
  },
  {
-  "id": "2026-tulane-university-20260407-3",
-  "year": 2026,
-  "posted": "2026-04-07",
-  "institution": "Tulane University",
-  "department": "Freeman School of Business, Management Sciences Area",
-  "type": "Business School",
-  "levels": [
-   "Other Ranks"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://tulane-ibqejb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs/preview/276/?keyword=freeman&mode=location",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Tulane%20University",
-  "characteristics": [
-   "Research seminars",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2026-04-07T00:00:00Z"
- },
- {
   "id": "2026-institut-mines-telecom-business-school-20260319",
   "year": 2026,
   "posted": "2026-03-19",
@@ -556,35 +526,6 @@
   "adUrl": "",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=41857&jobTitle=Lecturer+in+Sustainable+Supply+Chain+Management",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
-  "characteristics": [
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2026-02-23T00:00:00Z"
- },
- {
-  "id": "2026-university-college-london-20260223-2",
-  "year": 2026,
-  "posted": "2026-02-23",
-  "institution": "University College London",
-  "department": "Business School for Health",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "March 14, 2026. Please apply for the School's three advertised tenure-track Assistant Professor positions (officially called Lecturer in the UK system) separately: AP in Sustainable Supply Chain Management, AP in Supply Chain Management & Logistics, and AP in Operations & Project Management.",
-  "applyByDate": "2026-03-14",
-  "comments": "",
-  "country": "UK",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.ucl.ac.uk/work-at-ucl/search-ucl-jobs/details?jobId=41673&jobTitle=Lecturer+in+Supply+Chain+Management+and+Logistics",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
   "characteristics": [
@@ -1035,37 +976,6 @@
   "adUrl": "https://drive.google.com/open?id=1IlGatm5IKspJiU427vRf-RwW7voiHHVN",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://psu.wd1.myworkdayjobs.com/PSU_Academic/job/Penn-State-University-Park/Open-Rank-Professor-in-Supply-Chain-Management_REQ_0000072356-1",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Pennsylvania%20State%20University",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-11-04T00:00:00Z"
- },
- {
-  "id": "2026-the-pennsylvania-state-university-20251104-2",
-  "year": 2026,
-  "posted": "2025-11-04",
-  "institution": "The Pennsylvania State University",
-  "department": "Supply Chain & Information Systems",
-  "type": "University",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "Until filled. Review of applications will begin approximately 10/31/2025 and will continue until the position is filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1ZEkcsh-EehePwY9aS7eSKjsUoS30ZI0P",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://psu.wd1.myworkdayjobs.com/PSU_Academic/job/Penn-State-University-Park/Assistant-Professor-in-Supply-Chain-Management_REQ_0000072293-1",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Pennsylvania%20State%20University",
   "characteristics": [
@@ -1836,37 +1746,6 @@
   "addedAt": "2025-09-26T00:00:00Z"
  },
  {
-  "id": "2026-city-university-of-hong-kong-20250926-2",
-  "year": 2026,
-  "posted": "2025-09-26",
-  "institution": "City University of Hong Kong",
-  "department": "College of Business, Department of Decision Analytics and Operations",
-  "type": "Business School",
-  "levels": [
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "December 31, 2025. Applications will receive full consideration until the positions are filled",
-  "applyByDate": "2025-12-31",
-  "comments": "",
-  "country": "Hong Kong",
-  "adUrl": "https://drive.google.com/open?id=1CUGz4apFZvCedqmRvVnjEmirOSqEbCuW",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "http://www.operationsacademia.org/",
-  "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20University%20of%20Hong%20Kong",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-09-26T00:00:00Z"
- },
- {
   "id": "2026-lehigh-university-20250926",
   "year": 2026,
   "posted": "2025-09-26",
@@ -1945,36 +1824,6 @@
   "adUrl": "https://drive.google.com/open?id=1WT__xXiEhvjL6duZ7JNGLoLEvPY29H-t",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://apply.interfolio.com/173754",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
-  "characteristics": [
-   "Research seminars",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-09-25T00:00:00Z"
- },
- {
-  "id": "2026-university-of-virginia-20250925-2",
-  "year": 2026,
-  "posted": "2025-09-25",
-  "institution": "University of Virginia",
-  "department": "Darden School of Business",
-  "type": "Business School",
-  "levels": [
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1wIPPeEqPXV6arEt_6YQq0Kn_FtWLrOHz",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://apply.interfolio.com/173755",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
   "characteristics": [
@@ -2086,37 +1935,6 @@
  },
  {
   "id": "2026-university-of-houston-20250923-2",
-  "year": 2026,
-  "posted": "2025-09-23",
-  "institution": "University of Houston",
-  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
-  "type": "Business School",
-  "levels": [
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "Until filled. To ensure consideration for the first round of interviews, candidates should apply by October 15, 2025.",
-  "applyByDate": "2025-10-15",
-  "comments": "",
-  "country": "USA",
-  "adUrl": "https://drive.google.com/open?id=1cuX6-acP5-guXnVTfXALJLITXwFIQOdL",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://careers.uh.edu/jobs/professor-of-practice-decision-information-sciences-houston-texas-united-states",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-09-23T00:00:00Z"
- },
- {
-  "id": "2026-university-of-houston-20250923-3",
   "year": 2026,
   "posted": "2025-09-23",
   "institution": "University of Houston",
@@ -2952,64 +2770,6 @@
   "adUrl": "",
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=250605003",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
-  "characteristics": [
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-06-05T00:00:00Z"
- },
- {
-  "id": "2026-the-hong-kong-polytechnic-university-20250605-2",
-  "year": 2026,
-  "posted": "2025-06-05",
-  "institution": "The Hong Kong Polytechnic University",
-  "department": "Department of Logistics and Maritime Studies",
-  "type": "University",
-  "levels": [
-   "Other Ranks"
-  ],
-  "applyBy": "Until filled. Consideration of applications will commence on 12 June 2025 until the position is filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "Hong Kong",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=250605004",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
-  "characteristics": [
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-06-05T00:00:00Z"
- },
- {
-  "id": "2026-the-hong-kong-polytechnic-university-20250605-3",
-  "year": 2026,
-  "posted": "2025-06-05",
-  "institution": "The Hong Kong Polytechnic University",
-  "department": "Department of Logistics and Maritime Studies",
-  "type": "University",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "Until filled. Consideration of applications will commence on 12 June 2025 until the position is filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "Hong Kong",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=250605005",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
   "characteristics": [
