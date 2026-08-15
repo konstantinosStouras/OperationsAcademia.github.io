@@ -1,0 +1,87 @@
+name: OA jobs — sync the Google Sheet
+
+# WHY THIS EXISTS. The migration into v2/data/jobs.json was a one-off snapshot
+# (81 postings). The old Google form kept writing to the sheet afterwards, so
+# the live Awesome Tables page went on to 92 while the v2 page stayed at 81 —
+# the "where are the rest of the job postings?" report.
+#
+# Until the Google form is retired the sheet is still a WRITER of this dataset,
+# so it is read on a schedule like any other writer. The import runs in --merge
+# mode: it only ADDS what is missing, so a posting made through
+# /v2/post-a-job.html is never overwritten by a sheet that does not know about
+# it, and data/jobs-hidden.json withholds anything taken down.
+#
+# It needs no credentials — the sheet is readable by anyone with the link — and
+# it writes nothing when the sheet holds nothing new.
+#
+# AT CUTOVER: when the Google form is switched off, delete this workflow. The
+# posting form and oa-jobs-build.yml are then the only writers.
+
+on:
+  schedule:
+    # twice an hour, off the boundary so it does not queue behind every other
+    # :00 job on the runners, and offset from oa-jobs-build.yml's 7/27/47
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report what would change, write nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# Shares the group with oa-jobs-build.yml: both write v2/data/, so they must
+# never race each other's commit. Overlapping fires queue and coalesce.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Offline checks
+        run: node v2/_scraper/selftest.mjs
+
+      - name: Read the sheet and merge what is missing
+        run: |
+          node v2/_scraper/import-sheet.mjs --sheet --merge \
+               --out v2/data/jobs.json ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Re-check the file we are about to commit
+        run: node v2/_scraper/selftest.mjs
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.dry_run
+        run: |
+          if [ -z "$(git status --porcelain v2/data)" ]; then
+            echo "no change — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v2/data
+          git commit -m "OA jobs: sync postings from the Google Sheet"
+
+          # plain fast-forward, with rebase-and-retry — the posting pipeline may
+          # have moved the branch on while this run was working
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected — rebasing onto the new tip (attempt $i)"
+            git pull --rebase origin ${{ github.ref_name }} || exit 1
+            sleep $((i * 3))
+          done
+          echo "could not push after 5 attempts"
+          exit 1

@@ -3,6 +3,20 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "account-menu-and-profile",
+   "date": "2026-08-15",
+   "title": "A proper account menu, and a profile with your name on it",
+   "summary": "Signed-in visitors now get an account button in the header carrying their initials and their name, opening a menu with everything their account can do: post a job, e-mail alerts, edit profile, send feedback, sign out. A new profile card lets you set the name you are known by — until now the site could only greet you by half of your e-mail address. Posting a job also asks you to sign in or register up front, rather than after the form has been filled in.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
+   "id": "jobs-sheet-sync",
+   "date": "2026-08-15",
+   "title": "Every job posting is listed again",
+   "summary": "Postings submitted through the old Google form kept arriving after the new list was built from a one-off copy of the spreadsheet, so the new page had fallen behind the old one. The spreadsheet is now read automatically twice an hour and anything missing is added, so both lists show the same postings until the old form is retired.",
+   "url": "https://www.operationsacademia.org/jobs"
+  },
+  {
    "id": "own-job-postings-table",
    "date": "2026-08-15",
    "title": "The job postings list is now our own",

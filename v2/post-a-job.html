@@ -56,10 +56,21 @@
                        target="_blank" rel="noopener">current Google form</a>.</p>
                   </div>
 
-                  <!-- shown while signed out -->
-                  <div class="oa-note" id="oa-needauth" hidden>
-                    <p><strong>Please sign in to post a job.</strong></p>
-                    <p><button type="button" class="button blue" id="oa-needauth-btn">Sign in or create an account</button></p>
+                  <!-- The gate. Shown while signed out; the form below is not
+                       rendered at all until an account is known, so nobody can
+                       fill in twenty fields and only then be told to sign in. -->
+                  <div class="oa-gate" id="oa-needauth" hidden>
+                    <div class="oa-gate-icon" aria-hidden="true">&#128274;</div>
+                    <h3>Sign in to post a job</h3>
+                    <p>Posting is free. An account takes a moment to create, and it is what
+                    lets you come back later to correct, extend or withdraw your posting &mdash;
+                    and to reach you if a link breaks.</p>
+                    <p class="oa-gate-actions">
+                      <button type="button" class="button blue" id="oa-needauth-btn">Sign in</button>
+                      <button type="button" class="button oa-btn-ghost" id="oa-needauth-new">Create an account</button>
+                    </p>
+                    <p class="oa-gate-fine">You can sign in with Google or ORCID, or with an
+                    e-mail address and a password. We never publish your e-mail address.</p>
                   </div>
 
                   <form id="oa-job-form" novalidate hidden>

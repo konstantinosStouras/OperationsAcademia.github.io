@@ -173,6 +173,27 @@ eq(await page.evaluate(() => typeof window.ga), 'function',
   'the global `ga` the footer\'s inline handlers call exists');
 eq(await page.evaluate(() => typeof window.jQuery), 'function', 'jQuery is loaded');
 ok(await page.$$eval('#nav a', (n) => n.length > 0), 'the navigation menu is populated');
+
+/* The header row sits on ONE baseline with the menu. It did not: #oa-headnav
+   set its own font-size and then positioned itself in em, so the same 0.1em /
+   2em that place #nav resolved against 14px there and 16px here, and the
+   account button rode a few pixels high. Measured, because that is the only
+   way this stays fixed. */
+const headRow = await page.evaluate(() => {
+  const mid = (el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; };
+  const nav = document.querySelector('#nav > ul > li > a');
+  const btns = [...document.querySelectorAll('#oa-headnav .oa-headbtn, #oa-headnav #oa-account > *')];
+  return {
+    nav: nav ? mid(nav) : null,
+    mids: btns.map(mid),
+    heights: btns.map((b) => Math.round(b.getBoundingClientRect().height)),
+  };
+});
+ok(headRow.mids.length > 0, 'the header carries its own control row');
+ok(headRow.mids.every((m) => Math.abs(m - headRow.nav) <= 2),
+  'every header control is centred on the navigation menu\'s own line');
+ok(new Set(headRow.heights).size === 1,
+  `the header controls are one height (${headRow.heights.join(', ')})`);
 eq(await page.evaluate(() => {
   const a = document.querySelector('#footer a[onclick]');
   if (!a) return 'no-handler';
@@ -246,6 +267,22 @@ for (const [name, expect] of [
   }, expect);
 
   ok(seen.prompt, `${name}: an unreachable SDK still shows the sign-in prompt`);
+  if (name === 'post-a-job.html') {
+    // signing in must be offered BEFORE the form, not after twenty fields
+    const gate = await q.evaluate(() => {
+      const g = document.querySelector('#oa-needauth');
+      return g && {
+        signIn: !!g.querySelector('#oa-needauth-btn'),
+        register: !!g.querySelector('#oa-needauth-new'),
+        aboveForm: !!(document.querySelector('#oa-job-form') &&
+          g.compareDocumentPosition(document.querySelector('#oa-job-form')) &
+          Node.DOCUMENT_POSITION_FOLLOWING),
+      };
+    });
+    ok(gate && gate.signIn && gate.register,
+      'post-a-job: the gate offers both signing in and registering');
+    ok(gate && gate.aboveForm, 'post-a-job: the gate stands in front of the form');
+  }
   ok(!seen.form, `${name}: the form stays hidden when nobody can sign in`);
   ok(/unavailable/i.test(seen.header),
     `${name}: the header says sign-in is unavailable rather than inviting a click`);
