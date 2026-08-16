@@ -101,8 +101,7 @@
       <section class="v3-hero">
         <div class="v3-container">
           <span class="v3-kicker">The Operations job market, in one place</span>
-          <h1 class="v3-h1">Matching supply with demand<br>
-          <em class="v3-h1-accent">in the Operations job&nbsp;market.</em></h1>
+          <h1 class="v3-h1">Matching supply with demand in&nbsp;the Operations job&nbsp;market.</h1>
           <p class="v3-lede">Academic job postings, this market&rsquo;s candidates, confirmed
           placements and the annual Job Market Survey for Operations Management, Operations
           Research and Analytics &mdash; posted by the community itself, free, since 2014.</p>
@@ -133,54 +132,69 @@
       </section>
 
       <!-- ================================================================ jobs -->
+      <!-- Two columns, the reference site's shape (owner, 2026-08-16): the
+           search card on the LEFT with the explore button directly under its
+           filters; the ten most recent postings as a PANEL on the right. The
+           button leads to jobs.html, where the full list lives and the
+           filters nudge a sign-in. -->
       <section class="v3-section" id="jobs">
         <div class="v3-container">
-          <div class="v3-section-head v3-reveal">
-            <span class="v3-kicker">Job postings</span>
-            <h2 class="v3-h2" id="oa-jobs-heading">Job postings (2026-2027)</h2>
-            <p class="v3-lede">A centralised database of academic job postings in Operations
-            Research and related fields &mdash; the openings that are otherwise scattered across
-            INFORMS/MSOM Connect, POMS listings and departmental pages, every entry made by a
-            verified member of the community. The ten most recent postings are below; the full,
-            searchable list has <a href="jobs.html">its own page</a>.</p>
-            <div class="v3-section-cta">
-              <a class="v3-btn primary" href="post-a-job.html">Post a job &mdash; it&rsquo;s free</a>
-              <a class="v3-btn ghost" href="alerts.html">Get e-mail alerts</a>
+          <div class="v3-jobs-grid">
+
+            <div class="v3-jobs-left v3-reveal">
+              <span class="v3-kicker">Job postings</span>
+              <h2 class="v3-h2" id="oa-jobs-heading">Job postings (2026-2027)</h2>
+              <p class="v3-lede" style="font-size:16.5px">Every academic opening in Operations
+              Research and related fields, posted by verified members of the community &mdash;
+              in one searchable place instead of scattered across INFORMS/MSOM Connect, POMS
+              listings and departmental pages.</p>
+
+              <!-- the launcher: pick a value or two and jump into the full
+                   list. The selects are filled from the live data and already
+                   SHOW their value ("All types") — never a bare placeholder. -->
+              <form class="v3-launcher" id="v3-jobs-launcher">
+                <label class="v3-flabel" for="jl-q">Search</label>
+                <input type="search" id="jl-q" placeholder="Search by university or department&hellip;" autocomplete="off">
+                <div class="v3-launcher-row">
+                  <div>
+                    <label class="v3-flabel" for="jl-type">Type</label>
+                    <select id="jl-type"><option value="">All types</option></select>
+                  </div>
+                  <div>
+                    <label class="v3-flabel" for="jl-level">Entry level</label>
+                    <select id="jl-level"><option value="">All levels</option></select>
+                  </div>
+                  <div>
+                    <label class="v3-flabel" for="jl-country">Location</label>
+                    <select id="jl-country"><option value="">All locations</option></select>
+                  </div>
+                </div>
+                <div class="v3-launcher-actions">
+                  <button type="submit" class="v3-btn primary" id="jl-go">&#128269; Explore all postings</button>
+                  <a class="v3-btn ghost" href="post-a-job.html">Post a job</a>
+                </div>
+                <p class="v3-mut" style="font-size:13.5px;margin:12px 0 0">More filters &mdash;
+                deadline, characteristics, date posted &mdash; are on the
+                <a href="jobs.html">full list</a>. Posting is free, and you can
+                <a href="alerts.html">get new postings by e-mail</a>.</p>
+              </form>
             </div>
+
+            <div class="v3-jobs-right v3-reveal">
+              <div class="v3-panel">
+                <div class="v3-panel-head">
+                  <h3>&#10022; The ten most recent postings</h3>
+                  <a href="jobs.html">Full list &rarr;</a>
+                </div>
+                <div id="oa-jobs-recent"></div>
+                <div class="v3-panel-foot">
+                  <span class="v3-mut">Updated automatically as postings arrive</span>
+                  <a href="jobs.html" id="v3-jobs-all">Explore all postings &rarr;</a>
+                </div>
+              </div>
+            </div>
+
           </div>
-
-          <!-- the launcher: pick a value or two and jump into the full list.
-               The selects are filled from the live data and already SHOW their
-               value ("All types", "All locations") — never a bare placeholder. -->
-          <form class="v3-launcher v3-reveal" id="v3-jobs-launcher">
-            <label class="v3-flabel" for="jl-q">Search</label>
-            <input type="search" id="jl-q" placeholder="Search by university, institution or department&hellip;" autocomplete="off">
-            <div class="v3-launcher-row">
-              <div>
-                <label class="v3-flabel" for="jl-type">Type</label>
-                <select id="jl-type"><option value="">All types</option></select>
-              </div>
-              <div>
-                <label class="v3-flabel" for="jl-level">Entry level</label>
-                <select id="jl-level"><option value="">All levels</option></select>
-              </div>
-              <div>
-                <label class="v3-flabel" for="jl-country">Location</label>
-                <select id="jl-country"><option value="">All locations</option></select>
-              </div>
-            </div>
-            <div class="v3-launcher-actions">
-              <button type="submit" class="v3-btn primary" id="jl-go">&#128269; Explore all postings</button>
-              <span class="v3-mut">More filters &mdash; deadline, characteristics, date posted &mdash;
-              are on the <a href="jobs.html">full list</a>.</span>
-            </div>
-          </form>
-
-          <h3 class="v3-h3 v3-reveal" style="margin:0 0 14px">The ten most recent postings</h3>
-          <div id="oa-jobs-recent"></div>
-          <p style="text-align:center;margin:26px 0 0">
-            <a class="v3-btn primary" href="jobs.html" id="v3-jobs-all">Explore all postings &rarr;</a>
-          </p>
         </div>
       </section>
 
@@ -866,13 +880,18 @@
           },
           filters: [
             { key: 'name',        label: 'Name',             type: 'text',
-              fields: ['name'], placeholder: '' },
+              fields: ['name'], placeholder: 'Search by name…' },
             { key: 'affiliation', label: 'Affiliation',      type: 'text',
-              fields: ['affiliation'], placeholder: '', legacyParam: 'filterE' },
-            { key: 'position',    label: 'Current position', field: 'position' },
-            { key: 'area',        label: 'Research area',    field: 'researchAreas' },
-            { key: 'day',         label: 'INFORMS day',      field: 'informsDays' },
-            { key: 'posted',      label: 'Date posted',      derive: 'datePosted' }
+              fields: ['affiliation'], placeholder: 'Search by affiliation…',
+              legacyParam: 'filterE' },
+            { key: 'position',    label: 'Current position', field: 'position',
+              placeholder: 'All positions' },
+            { key: 'area',        label: 'Research area',    field: 'researchAreas',
+              placeholder: 'All areas' },
+            { key: 'day',         label: 'INFORMS day',      field: 'informsDays',
+              placeholder: 'All days' },
+            { key: 'posted',      label: 'Date posted',      derive: 'datePosted',
+              placeholder: 'Any date' }
           ],
           onCard: function (li, r) { window.OACandidateEdit && OACandidateEdit.onCard(li, r); },
           card: {
@@ -927,12 +946,13 @@
           },
           filters: [
             { key: 'name',    label: 'Candidate',           type: 'text',
-              fields: ['name', 'first', 'last'], placeholder: '' },
-            { key: 'year',    label: 'Job market year',     field: 'year' },
+              fields: ['name', 'first', 'last'], placeholder: 'Search by candidate…' },
+            { key: 'year',    label: 'Job market year',     field: 'year',
+              placeholder: 'All years' },
             { key: 'phd',     label: 'PhD institution',     type: 'text',
-              fields: ['phdInstitution'], placeholder: '' },
+              fields: ['phdInstitution'], placeholder: 'Search by PhD institution…' },
             { key: 'joining', label: 'Joining institution', type: 'text',
-              fields: ['joiningInstitution'], placeholder: '' }
+              fields: ['joiningInstitution'], placeholder: 'Search by joining institution…' }
           ],
           onCard: function (li, r) { window.OAPlacementEdit && OAPlacementEdit.onCard(li, r); },
           card: {
