@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <title>Post a job - OperationsAcademia.org</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="Post an academic job opening in Operations to Operations Academia." name="description">
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+  </head>
+  <body class="no-sidebar">
+    <div id="page-wrapper">
+      <div id="header-wrapper">
+        <div class="container" id="header">
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
+            src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
+          <nav id="nav"></nav>
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="main-wrapper">
+        <div class="container" id="page">
+          <div class="title-heading">
+            <h2>Post a job</h2>
+          </div>
+
+          <div id="main">
+            <div class="row">
+              <div class="12u" id="content">
+
+                <div class="oa-form">
+
+                  <div class="oa-note" id="oa-intro">
+                    <p><strong>Posting a job is free.</strong> Your posting appears on the
+                    <a href="jobs.html">job postings page</a> automatically, normally within an
+                    hour, and stays there for the rest of the job market year.</p>
+                    <p>You need an Operations Academia account to post, so that we know where a
+                    posting comes from and can reach you about it. To correct or withdraw one
+                    later, write to us with the reference we give you. Nothing you enter here is shared
+                    with anyone; only the fields marked <em>shown publicly</em> ever appear on the
+                    site.</p>
+                  </div>
+
+                  <!-- shown while Firebase has not been configured for this site yet -->
+                  <div class="oa-note is-warn" id="oa-offline" hidden>
+                    <p><strong>Submissions are not switched on yet.</strong> This preview of the
+                    new site is not connected to its database, so the form below cannot be sent.
+                    In the meantime, please keep using the
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScdNoVJhjhTO8E_v01VefQjZzlBGLW16jhwQGBdt9DWOIxFiA/viewform?usp=pp_url&amp;entry.956351437=2026"
+                       target="_blank" rel="noopener">current Google form</a>.</p>
+                  </div>
+
+                  <!-- The gate. Shown while signed out; the form below is not
+                       rendered at all until an account is known, so nobody can
+                       fill in twenty fields and only then be told to sign in. -->
+                  <div class="oa-gate" id="oa-needauth" hidden>
+                    <div class="oa-gate-icon" aria-hidden="true">&#128274;</div>
+                    <h3>Sign in to post a job</h3>
+                    <p>Posting is free. An account takes a moment to create, and it is how we
+                    know where a posting comes from &mdash; and how we reach you if a link
+                    breaks, or you ask us to correct, extend or withdraw it.</p>
+                    <p class="oa-gate-actions">
+                      <button type="button" class="button blue" id="oa-needauth-btn">Sign in</button>
+                      <button type="button" class="button oa-btn-ghost" id="oa-needauth-new">Create an account</button>
+                    </p>
+                    <p class="oa-gate-fine">You can sign in with Google or ORCID, or with an
+                    e-mail address and a password. We never publish your e-mail address.</p>
+                  </div>
+
+                  <form id="oa-job-form" novalidate hidden>
+
+                    <fieldset>
+                      <legend>The position</legend>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-institution">University / Institution <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly, as the heading of your posting.</p>
+                          <input type="text" id="f-institution" name="institution" maxlength="160"
+                                 autocomplete="organization" required>
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-type">Type of institution <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly. Used by the <em>Type</em> filter.</p>
+                          <select id="f-type" name="type" required>
+                            <option value="">Choose…</option>
+                            <option>Business School</option>
+                            <option>University</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-school">School, faculty or college</label>
+                          <p class="oa-hint">For example &ldquo;Fuqua School of Business&rdquo;. Leave
+                          empty if the department sits directly under the university.</p>
+                          <input type="text" id="f-school" name="school" maxlength="160">
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-unit">Department, area or group</label>
+                          <p class="oa-hint">For example &ldquo;Operations Management group&rdquo;.</p>
+                          <input type="text" id="f-unit" name="unit" maxlength="160">
+                        </div>
+                      </div>
+
+                      <p class="oa-hint oa-derived" id="f-department-preview" aria-live="polite"></p>
+
+                      <!-- What the two fields above are joined into, and what
+                           every posting before the form was split still uses.
+                           Kept as a real field so the form still works without
+                           JavaScript and so validation has one thing to fail. -->
+                      <input type="hidden" id="f-department" name="department" maxlength="220">
+
+                      <div class="oa-field">
+                        <span class="oa-label-text" id="lbl-levels">Entry level <span class="oa-req" aria-hidden="true">*</span></span>
+                        <p class="oa-hint">Shown publicly. Tick every rank this posting covers.</p>
+                        <div class="oa-checks" role="group" aria-labelledby="lbl-levels" id="f-levels">
+                          <label class="oa-check"><input type="checkbox" name="levels" value="Assistant Professor"> Assistant Professor</label>
+                          <label class="oa-check"><input type="checkbox" name="levels" value="Other Ranks"> Other Ranks (Associate, Full, Chaired)</label>
+                          <label class="oa-check"><input type="checkbox" name="levels" value="Post-Doc"> Post-Doc</label>
+                          <label class="oa-check"><input type="checkbox" name="levels" value="Non-tenure track (teaching) position"> Non-tenure track (teaching) position</label>
+                          <label class="oa-check"><input type="checkbox" name="levels" value="Visiting Faculty (various levels)"> Visiting Faculty (various levels)</label>
+                        </div>
+                      </div>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-country">Country of the campus <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly. Used by the <em>Location</em> filter.</p>
+                          <input type="text" id="f-country" name="country" list="oa-countries" maxlength="60" required>
+                          <datalist id="oa-countries"></datalist>
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-year">Job market year <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">The academic year 2025&ndash;2026 is &ldquo;2026&rdquo;.</p>
+                          <select id="f-year" name="year" required></select>
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Applying</legend>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-applyByDate">Apply by <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly. Drives the <em>Deadline</em> filter, so
+                          the posting stops showing as open once the date passes.</p>
+                          <!-- bounded so the picker cannot offer a year the build
+                               would drop (jobs-model day(): 1990-2100) -->
+                          <input type="date" id="f-applyByDate" name="applyByDate"
+                                 min="1990-01-01" max="2100-12-31" required>
+                        </div>
+                        <div class="oa-field">
+                          <label class="oa-check" style="margin-top:32px;font-weight:400">
+                            <input type="checkbox" id="f-untilFilled" name="untilFilled">
+                            There is no fixed deadline &mdash; applications are considered until the post is filled
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="f-applyByNote">Notes on the deadline</label>
+                        <p class="oa-hint">Shown publicly, after the date. For example
+                        &ldquo;Early submissions are encouraged.&rdquo;</p>
+                        <input type="text" id="f-applyByNote" name="applyByNote" maxlength="300">
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="f-comments">Comments on the posting</label>
+                        <p class="oa-hint">Shown publicly. This is where most schools mention
+                        whether they will be interviewing at INFORMS, and by when they would like
+                        a packet.</p>
+                        <textarea id="f-comments" name="comments" maxlength="1200"></textarea>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="f-postedAtUrl">Link to the official advertisement</label>
+                        <p class="oa-hint">Shown publicly as <em>Posted online at</em>. Your own
+                        HR page, Interfolio, AcademicJobsOnline, and so on.</p>
+                        <input type="url" id="f-postedAtUrl" name="postedAtUrl" maxlength="500"
+                               placeholder="https://">
+                      </div>
+
+                      <div class="oa-field">
+                        <span class="oa-label-text" id="lbl-advert">The job advertisement</span>
+                        <p class="oa-hint">Shown publicly as <em>File link</em>. Upload the advert
+                        itself &mdash; PDF or Word, up to 15&nbsp;MB &mdash; or paste a link to one
+                        you host. An uploaded file is stored in Operations Academia's own archive,
+                        so the link on your posting keeps working.</p>
+
+                        <div class="oa-advert" role="group" aria-labelledby="lbl-advert">
+                          <label class="oa-file" id="f-adFile-label">
+                            <input type="file" id="f-adFile"
+                                   accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                            <span class="oa-file-btn" aria-hidden="true">Choose a file&hellip;</span>
+                            <span class="oa-file-name" id="f-adFile-name">No file chosen</span>
+                          </label>
+                          <button type="button" class="oa-file-clear" id="f-adFile-clear" hidden>
+                            Remove</button>
+                          <p class="oa-hint oa-advert-or">&mdash; or paste a link &mdash;</p>
+                          <label class="oa-visually-hidden" for="f-adUrl">Link to the job advert</label>
+                          <input type="url" id="f-adUrl" name="adUrl" maxlength="500" placeholder="https://">
+                        </div>
+                        <p class="oa-error" id="f-adFile-error" hidden></p>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Your department</legend>
+
+                      <div class="oa-field">
+                        <span class="oa-label-text" id="lbl-chars">Does your school or department have any of the following?</span>
+                        <p class="oa-hint">Shown publicly as small tags, and used by the
+                        <em>Characteristics</em> filter. Tick all that apply.</p>
+                        <div class="oa-checks" role="group" aria-labelledby="lbl-chars" id="f-chars">
+                          <label class="oa-check"><input type="checkbox" name="characteristics" value="Research seminars"> Research seminars</label>
+                          <label class="oa-check"><input type="checkbox" name="characteristics" value="PhD"> A PhD programme in Operations</label>
+                          <label class="oa-check"><input type="checkbox" name="characteristics" value="Masters"> Master programme(s) related to Operations</label>
+                          <label class="oa-check"><input type="checkbox" name="characteristics" value="MBA"> An MBA programme with Operations courses</label>
+                          <label class="oa-check"><input type="checkbox" name="characteristics" value="Undergrad"> An undergraduate programme with Operations courses</label>
+                          <label class="oa-check"><input type="checkbox" name="characteristics" value="Exec Ed"> Executive education in Operations</label>
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Contact details</legend>
+                      <p class="oa-hint" style="margin-bottom:16px">
+                        <strong>None of this section is published.</strong> It is stored so that we
+                        can reach you if a link breaks or the posting needs correcting. The site's
+                        data files are public, so these fields are never written to them.</p>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-firstName">Your first name <span class="oa-req" aria-hidden="true">*</span></label>
+                          <input type="text" id="f-firstName" name="firstName" maxlength="80"
+                                 autocomplete="given-name" required>
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-lastName">Your last name <span class="oa-req" aria-hidden="true">*</span></label>
+                          <input type="text" id="f-lastName" name="lastName" maxlength="80"
+                                 autocomplete="family-name" required>
+                        </div>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="f-email">Your e-mail <span class="oa-req" aria-hidden="true">*</span></label>
+                        <input type="email" id="f-email" name="email" maxlength="160"
+                               autocomplete="email" required>
+                      </div>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-chairName">Area coordinator or department chair</label>
+                          <p class="oa-hint">Full name, no titles needed.</p>
+                          <input type="text" id="f-chairName" name="chairName" maxlength="120">
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-chairEmail">Their e-mail</label>
+                          <p class="oa-hint">&nbsp;</p>
+                          <input type="email" id="f-chairEmail" name="chairEmail" maxlength="160">
+                        </div>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="f-note">Anything you would like to tell us</label>
+                        <p class="oa-hint">Not published. Goes straight to the maintainer.</p>
+                        <textarea id="f-note" name="note" maxlength="1200"></textarea>
+                      </div>
+                    </fieldset>
+
+                    <div class="oa-actions">
+                      <button type="submit" class="button blue" id="oa-submit">Post this job</button>
+                      <p class="oa-form-msg" id="oa-msg" role="alert"></p>
+                    </div>
+                  </form>
+
+                  <div class="oa-done" id="oa-done" hidden>
+                    <h3>Thank you &mdash; your posting has been received.</h3>
+                    <p>Reference <span class="oa-ticket" id="oa-ref"></span> &mdash; keep this if you
+                    need to write to us about the posting.</p>
+                    <p>It will appear on the <a href="jobs.html">job postings page</a> at the next
+                    scheduled update, normally within an hour. We do not send a confirmation
+                    e-mail, so please keep the reference above.</p>
+                    <p class="oa-done-actions">
+                      <a class="button blue" href="jobs.html">Back to the job postings</a>
+                      <a class="button oa-btn-ghost" href="post-a-job.html">Post another job</a>
+                    </p>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Footer: shared include -->
+      <div data-include="partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <!-- The site's own script chain, in the order every other page uses it.
+         All three parts are load-bearing and none of them is optional:
+           ypo-parakolouthisi.js defines the global `ga` that the footer's
+             inline onclick handlers call — without it every footer link throws;
+           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
+             relative hrefs would resolve inside /v2/);
+           jquery + dropotron + skel + util + main.js build the off-canvas
+             panel that IS the navigation below 840px, where main.css hides
+             #header-wrapper outright. Drop them and a phone gets no menu.
+         Awesome Tables is deliberately NOT here. It is a leaf dependency:
+         nothing in the site's own CSS or JS refers to it. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-combo.js"></script>
+    <script src="assets/oa-jobform.js"></script>
+</body>
+</html>

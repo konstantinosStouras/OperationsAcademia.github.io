@@ -3,6 +3,41 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "cutover-new-site-live",
+   "date": "2026-08-16",
+   "title": "The new site is live — and the old one is archived at /v1",
+   "summary": "The rebuilt site now IS operationsacademia.org: every page, the job postings list, posting a job, e-mail alerts and feedback all run on the site's own machinery, with no third-party table service in the reading path. The previous version is preserved exactly as it was at operationsacademia.org/v1, for reference.",
+   "url": "https://www.operationsacademia.org/"
+  },
+  {
+   "id": "jobs-current-market-only",
+   "date": "2026-08-16",
+   "title": "The job postings page shows the market year under way",
+   "summary": "The list now carries exactly the season its title names: postings filed since 1 July, plus anything a school has already advertised for this market or the next. Previous seasons remain in the archive at /v1 and in the site's records.",
+   "url": "https://www.operationsacademia.org/jobs"
+  },
+  {
+   "id": "candidates-own-form",
+   "date": "2026-08-16",
+   "title": "Candidate profiles are posted on the site itself",
+   "summary": "Job-market candidates now create their profile directly on the site: sign in once, fill in the form, upload a CV and a research summary, and the profile appears on the Candidates page at the next update. Because the profile is tied to your account, you can come back to correct it, replace or remove your files, or take the profile down — none of which was possible before.",
+   "url": "https://www.operationsacademia.org/candidates"
+  },
+  {
+   "id": "placements-own-form",
+   "date": "2026-08-16",
+   "title": "Confirmed placements are reported on the site itself",
+   "summary": "Reporting a confirmed placement is now a form on the site: who, from which PhD program, joining which institution as what. The placement appears on the Placements page at the next update, and the person who reported it can correct or withdraw it.",
+   "url": "https://www.operationsacademia.org/placements"
+  },
+  {
+   "id": "whats-new-page",
+   "date": "2026-08-16",
+   "title": "A What's-new page, with e-mail updates you can subscribe to",
+   "summary": "About → What's new lists every change to the site, newest first — this page you are reading. It is generated from the same record the e-mail digests are sent from, so signing in and subscribing to site updates delivers exactly these entries to your inbox as they ship.",
+   "url": "https://www.operationsacademia.org/whats-new"
+  },
+  {
    "id": "whole-site-in-v2",
    "date": "2026-08-16",
    "title": "Every page of the site is now in the new version",

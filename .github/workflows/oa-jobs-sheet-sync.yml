@@ -2,7 +2,7 @@ name: OA jobs — sync the Google Sheet (RETIRED)
 
 # RETIRED on 2026-08-16. The Google Sheet is no longer a writer of this
 # dataset: every posting was migrated into Firestore
-# (v2/_scraper/migrate-to-firestore.mjs) and the postings are now the database,
+# (_scraper/migrate-to-firestore.mjs) and the postings are now the database,
 # so oa-jobs-build.yml generates data/jobs.json from documents that can be
 # edited. Reading the sheet on a schedule would UNDO an edit — it rebuilds a
 # row from the sheet, which knows nothing about the correction — which is the
@@ -15,7 +15,7 @@ name: OA jobs — sync the Google Sheet (RETIRED)
 #
 # THE OLD GOOGLE FORM MUST BE SWITCHED OFF. While it accepts responses they go
 # into a sheet nothing reads any more, so a poster gets a confirmation and
-# their posting never appears. Point it at /v2/post-a-job.html.
+# their posting never appears. Point it at /post-a-job.html.
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ on:
 permissions:
   contents: write
 
-# Shares the group with oa-jobs-build.yml: both write v2/data/, so they must
+# Shares the group with oa-jobs-build.yml: both write data/, so they must
 # never race each other's commit. Overlapping fires queue and coalesce.
 concurrency:
   group: oa-jobs-data-${{ github.ref }}
@@ -46,7 +46,7 @@ jobs:
           node-version: '22'
 
       - name: Offline checks
-        run: node v2/_scraper/selftest.mjs
+        run: node _scraper/selftest.mjs
 
       # NO --min-year. The scope is derived by marketFloor() in jobs-model.mjs,
       # which owns the roll rule (1 July) and the MARKET_WINDOW width, and the
@@ -58,22 +58,22 @@ jobs:
       # already started. Pass --min-year only for a deliberate one-off.
       - name: Read the sheet and merge what is missing
         run: |
-          node v2/_scraper/import-sheet.mjs --sheet --merge \
-               --out v2/data/jobs.json --dry-run
+          node _scraper/import-sheet.mjs --sheet --merge \
+               --out data/jobs.json --dry-run
 
       - name: Re-check the file we are about to commit
-        run: node v2/_scraper/selftest.mjs
+        run: node _scraper/selftest.mjs
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run
         run: |
-          if [ -z "$(git status --porcelain v2/data)" ]; then
+          if [ -z "$(git status --porcelain data)" ]; then
             echo "no change — nothing to commit"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v2/data
+          git add data
           git commit -m "OA jobs: sync postings from the Google Sheet"
 
           # plain fast-forward, with rebase-and-retry — the posting pipeline may

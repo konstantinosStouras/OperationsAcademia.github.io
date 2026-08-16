@@ -1,5 +1,11 @@
 # Rebuilding Operations Academia
 
+> **THE CUTOVER RAN on 2026-08-16.** The rebuilt site now serves from the
+> repository ROOT (this file moved with it); the old site is archived at
+> `/v1/`, and `/v2/` holds redirect stubs for links shared during the preview.
+> Path references to `v2/…` below are the pre-cutover layout — read them as
+> the root now. Kept as the record of how and why the rebuild was made.
+
 **What this is:** the plan for replacing the paid *Awesome Tables* vendor, the
 Google Forms and the Google Sheets behind operationsacademia.org with the site's
 own form, its own data files, and its own renderer — the architecture used by

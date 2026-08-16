@@ -2,11 +2,11 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — browser checks for the rebuilt job postings page.
 
-   Serves the repository statically and drives /v2/jobs.html in Chromium. This
+   Serves the repository statically and drives /jobs.html in Chromium. This
    is the test that would have caught the two things the vendor swap could
    silently break: the list not rendering at all, and the filters not chaining.
 
-       node v2/_scraper/page-test.mjs
+       node _scraper/page-test.mjs
 
    Needs Playwright. In CI that is installed by .github/workflows/oa-checks.yml.
    Locally, set PW_CHROMIUM to a chromium binary if the default is not found.
@@ -18,7 +18,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -52,7 +52,7 @@ const eq = (a, b, what) =>
     `${what}\n      expected ${JSON.stringify(b)}\n      got      ${JSON.stringify(a)}`);
 
 const { server, port } = await serve();
-const BASE = `http://127.0.0.1:${port}/v2/`;
+const BASE = `http://127.0.0.1:${port}/`;
 
 let chromium;
 try {
@@ -477,7 +477,7 @@ eq(np && np.html, '', 'and stays empty while the SDK is unreachable — never a 
 
 const titleHref = await m.$eval('#titleBar a.title', (a) => a.getAttribute('href'));
 eq(titleHref, './',
-  'the mobile title bar\'s wordmark stays inside /v2/ rather than leaving for the live site');
+  'the mobile title bar\'s wordmark stays on the site rather than leaving it');
 
 /* ------------------------------- when Firebase cannot be reached at all
 
@@ -759,7 +759,7 @@ for (const [name, expect] of [
    that a job posting changes hands while the account that owns it still
    exists. Get that order wrong and the damage is silent. */
 {
-  const SHIM = await readFile(path.join(ROOT, 'v2', '_scraper', '_fake-firebase.js'), 'utf8');
+  const SHIM = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
 
   const DUP = 'dup-account-uid-0001';
   const KEPT = 'kept-account-uid-0002';

@@ -1,13 +1,13 @@
 name: OA data — publish queued postings, candidates and placements
 
 # Turns everything submitted through the site's own forms into rows in
-# v2/data/ and commits them: job postings (post-a-job) into jobs.json,
+# data/ and commits them: job postings (post-a-job) into jobs.json,
 # candidate profiles (post-a-candidate) into candidates.json — held back
 # until the reveal date in candidates-reveal.json — and confirmed placements
 # (post-a-placement) into placements.json. This is what replaced Awesome
 # Tables: the data lives in this repository, and the pages read it directly.
 #
-# ONE workflow for all three on purpose: they all write v2/data/, so they
+# ONE workflow for all three on purpose: they all write data/, so they
 # must share the concurrency group below, and one runner + one commit beats
 # three queued fires racing each other's push.
 #
@@ -29,7 +29,7 @@ on:
 permissions:
   contents: write
 
-# One writer of v2/data/ at a time. Overlapping fires queue and coalesce rather
+# One writer of data/ at a time. Overlapping fires queue and coalesce rather
 # than racing each other's commit — the same discipline as /lit/'s data jobs.
 concurrency:
   group: oa-jobs-data-${{ github.ref }}
@@ -58,7 +58,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Firebase is not configured yet — nothing to do. See v2/_SETUP-FIREBASE.md"
+            echo "Firebase is not configured yet — nothing to do. See _SETUP-FIREBASE.md"
           fi
 
       - name: Install the Admin SDK
@@ -66,7 +66,7 @@ jobs:
         run: npm install --no-save --no-audit --no-fund firebase-admin@12
 
       - name: Offline checks
-        run: node v2/_scraper/selftest.mjs
+        run: node _scraper/selftest.mjs
 
       - name: Publish queued postings
         if: steps.gate.outputs.ready == 'true'
@@ -79,7 +79,7 @@ jobs:
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
         run: |
-          node v2/_scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+          node _scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Publish candidate profiles
         if: steps.gate.outputs.ready == 'true'
@@ -91,28 +91,28 @@ jobs:
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
         run: |
-          node v2/_scraper/build-candidates.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+          node _scraper/build-candidates.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Publish confirmed placements
         if: steps.gate.outputs.ready == 'true'
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          node v2/_scraper/build-placements.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+          node _scraper/build-placements.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Re-check the file we are about to commit
-        run: node v2/_scraper/selftest.mjs
+        run: node _scraper/selftest.mjs
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run
         run: |
-          if [ -z "$(git status --porcelain v2/data)" ]; then
+          if [ -z "$(git status --porcelain data)" ]; then
             echo "no change — nothing to commit"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v2/data
+          git add data
           git commit -m "OA data: publish queued submissions"
 
           # plain fast-forward, with rebase-and-retry: a concurrent writer may

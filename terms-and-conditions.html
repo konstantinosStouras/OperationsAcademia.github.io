@@ -2,7 +2,7 @@
 
 <html>
   <head>
-    <link href="images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <title>
       Terms and Conditions
     </title>
@@ -15,9 +15,10 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.operationsacademia.org" /> 
     <meta property="og:image" content="OA_logo_1200x294" /> 
-    <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
-    <link href="assets/css/main.css" rel="stylesheet">
-    <!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+    <!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+    <!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
   </head>
   <body class="no-sidebar">
     <div id="page-wrapper">
@@ -27,13 +28,19 @@
         <!-- Header -->
 
         <div class="container" id="header">
-          <a href="index.html" id="logo" onclick=
+          <a href="./" id="logo" onclick=
           "ga('send', 'pageview', 'logoHeader');"><img alt="Operations Academia Logo" class=
-          "OAlogo" src="images/OperationsAcademiaLogo.png" style=
+          "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
           "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
 
           <nav id="nav">
           </nav>
+
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
         </div>
       </div>
       <!-- Main Wrapper -->
@@ -72,7 +79,7 @@
                   </h2>
 
                   <p style='text-align: justify'>
-                    Please read our <a href="privacy-policy" onclick=
+                    Please read our <a href="privacy-policy.html" onclick=
                     "ga('send', 'pageview', 'privacy-policy');" target="_blank">Privacy Policy</a>
                     for details of how we use information about you. By proceeding with access to
                     the Site you will be deemed to have read and accepted the provisions of such
@@ -161,7 +168,7 @@
 
                   <p style='text-align: justify'>
                     Other than personally identifiable information, which is covered under our
-                    <a href="privacy-policy" onclick="ga('send', 'pageview', 'privacy-policy');"
+                    <a href="privacy-policy.html" onclick="ga('send', 'pageview', 'privacy-policy');"
                     target="_blank">Privacy Policy</a>, any material you transmit or post to the
                     Site shall be considered non-confidential and non-proprietary. We shall have no
                     obligations with respect to such material and we shall have the right to use,
@@ -206,7 +213,7 @@
                   </h2>
 
                   <p style='text-align: justify'>
-                    For all enquiries please <a href="contact" onclick=
+                    For all enquiries please <a href="contact.html" onclick=
                     "ga('send', 'pageview', 'contact');" target="_blank">contact us</a>.
                   </p>
                 </div>
@@ -221,26 +228,28 @@
     <!-- Footer Wrapper -->
 
       <!-- Footer: shared include -->
-<div data-include="/partials/footer.html"></div>
+<div data-include="partials/footer.html"></div>
 <script src="/assets/js/include-partials.js"></script>
 	
     <!-- Scripts -->
-    <script src="assets/js/ypo-parakolouthisi.js">
+    <script src="/assets/js/ypo-parakolouthisi.js">
     </script> 
-    <script src="assets/js/navigationMenu.js">
+    <script src="assets/oa-nav.js">
     </script> 
-    <script src="assets/js/jquery.min.js">
+    <script src="/assets/js/jquery.min.js">
     </script> 
-    <script src="assets/js/jquery.dropotron.min.js">
+    <script src="/assets/js/jquery.dropotron.min.js">
     </script> 
-    <script src="assets/js/skel.min.js">
+    <script src="/assets/js/skel.min.js">
     </script> 
-    <script src="https://awesome-table.com/AwesomeTableInclude.js">
-    </script> 
-    <script src="assets/js/util.js">
-    </script> <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+    <script src="/assets/js/util.js">
+    </script> <!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
      
-    <script src="assets/js/main.js">
+    <script src="/assets/js/main.js">
     </script>
+    <!-- v2: the account chip in the header. Inert until a Firebase project
+         is configured, exactly as on the rebuilt pages. -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
   </body>
 </html>

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* ---------------------------------------------------------------------------
-   Operations Academia — archive the OLD site at /v1/, verbatim.
+   Operations Academia — archive the OLD site at /v1/, verbatim. [RETIRED:
+   the 2026-08-16 cutover ran; v1/ exists and this script refuses to rewrite it.]
 
        node v2/_scraper/archive-v1.mjs            # write v1/ from the root pages
        node v2/_scraper/archive-v1.mjs --check    # fail if the archive drifted
@@ -38,7 +39,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(HERE, '..', '..');
+const ROOT = path.resolve(HERE, '..');
 const V1 = path.join(ROOT, 'v1');
 
 /* Every page of the old site. `jobs - Copy.html` is left behind on purpose —

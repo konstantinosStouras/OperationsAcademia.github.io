@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <title>E-mail alerts - OperationsAcademia.org</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="Be e-mailed when a job posting matching your interests is added to Operations Academia." name="description">
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+  </head>
+  <body class="no-sidebar">
+    <div id="page-wrapper">
+      <div id="header-wrapper">
+        <div class="container" id="header">
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
+            src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
+          <nav id="nav"></nav>
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="main-wrapper">
+        <div class="container" id="page">
+          <div class="title-heading">
+            <h2>E-mail alerts</h2>
+          </div>
+
+          <div id="main">
+            <div class="row">
+              <div class="12u" id="content">
+                <div class="oa-form">
+
+                  <div class="oa-note">
+                    <p><strong>Be told when something you care about appears</strong> &mdash; a new
+                    job posting matching your filters, or a change to the site. You choose what and
+                    how often; every message carries a one-click unsubscribe.</p>
+                  </div>
+
+                  <!-- shown only when the visitor arrived from an
+                       "Unsubscribe" link in one of their alert e-mails -->
+                  <div class="oa-note is-warn" id="oa-unsub-notice" hidden></div>
+
+                  <div class="oa-note is-warn" id="oa-offline" hidden>
+                    <p><strong>Alerts are not switched on yet.</strong> This preview of the new site
+                    is not connected to its database.</p>
+                  </div>
+
+                  <div class="oa-note" id="oa-needauth" hidden>
+                    <p><strong>Please sign in to manage your alerts.</strong></p>
+                    <p><button type="button" class="button blue" id="oa-needauth-btn">Sign in or create an account</button></p>
+                  </div>
+
+                  <section id="oa-alerts-app" hidden>
+
+                    <h3 style="font-size:17px;color:#313a45;margin:0 0 12px">Your alerts</h3>
+                    <div id="oa-alert-list"><p class="oa-hint">Loading…</p></div>
+
+                    <hr style="margin:30px 0;border:0;border-top:1px solid #e6e6e6">
+
+                    <form id="oa-alert-form" novalidate>
+                      <fieldset>
+                        <legend id="oa-form-legend">Create an alert</legend>
+
+                        <div class="oa-field">
+                          <label for="a-name">Name this alert <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Used as the subject line of the e-mails you receive, so
+                          make it something you will recognise in an inbox.</p>
+                          <input type="text" id="a-name" maxlength="120" required
+                                 placeholder="e.g. Assistant Professor posts in Europe">
+                        </div>
+
+                        <div class="oa-field">
+                          <span class="oa-label-text" id="lbl-topics">What should we e-mail you about? <span class="oa-req" aria-hidden="true">*</span></span>
+                          <div class="oa-checks" role="group" aria-labelledby="lbl-topics">
+                            <label class="oa-check"><input type="checkbox" id="t-jobs" checked>
+                              <span><strong>New job postings.</strong> Every posting added, or only
+                              those matching the filters below.</span></label>
+                            <label class="oa-check"><input type="checkbox" id="t-updates">
+                              <span><strong>Changes to the website.</strong> New features and
+                              improvements, taken from the site's own change log.</span></label>
+                            <label class="oa-check"><input type="checkbox" id="t-candidates" disabled>
+                              <span><strong>New job market candidates.</strong>
+                              <em>Not available yet — the candidates page is still on the old
+                              system. This will start working when it moves across.</em></span></label>
+                            <label class="oa-check"><input type="checkbox" id="t-news" disabled>
+                              <span><strong>Job market news.</strong>
+                              <em>Not available yet.</em></span></label>
+                          </div>
+                        </div>
+                      </fieldset>
+
+                      <fieldset id="a-filters">
+                        <legend>Which job postings?</legend>
+                        <p class="oa-hint" style="margin-bottom:16px">Leave everything blank to be
+                        told about <strong>every</strong> new posting. Otherwise a posting must match
+                        <em>every</em> box you fill in, and any of the values you tick inside one.</p>
+
+                        <!-- the Type / Entry level / Location lists are built from the postings
+                             currently on the site; if that file could not be read they are empty,
+                             which must not read as "there are no values" -->
+                        <div class="oa-note is-warn" id="a-filters-note" hidden>
+                          <p><strong>We could not load the current postings,</strong> so the lists
+                          below are empty. Reload the page to try again — an alert saved without
+                          these filters will simply cover every posting.</p>
+                        </div>
+
+                        <div class="oa-field">
+                          <label for="a-text">Institution or department contains</label>
+                          <input type="text" id="a-text" maxlength="120" placeholder="e.g. Dublin">
+                        </div>
+
+                        <div class="oa-row">
+                          <div class="oa-field">
+                            <span class="oa-label-text" id="lbl-a-type">Type</span>
+                            <div class="oa-checks" role="group" aria-labelledby="lbl-a-type" id="a-type"></div>
+                          </div>
+                          <div class="oa-field">
+                            <span class="oa-label-text" id="lbl-a-level">Entry level</span>
+                            <div class="oa-checks" role="group" aria-labelledby="lbl-a-level" id="a-level"></div>
+                          </div>
+                        </div>
+
+                        <div class="oa-field">
+                          <span class="oa-label-text" id="lbl-a-country">Location</span>
+                          <p class="oa-hint">Only the countries that currently have postings are listed.</p>
+                          <div class="oa-checks" role="group" aria-labelledby="lbl-a-country" id="a-country"
+                               style="max-height:190px;overflow-y:auto"></div>
+                        </div>
+                      </fieldset>
+
+                      <fieldset>
+                        <legend>How often, and where</legend>
+                        <div class="oa-row">
+                          <div class="oa-field">
+                            <label for="a-freq">How often</label>
+                            <select id="a-freq">
+                              <option value="immediate">As soon as something appears</option>
+                              <option value="daily" selected>A daily digest</option>
+                              <option value="weekly">A weekly digest</option>
+                              <option value="monthly">A monthly digest</option>
+                            </select>
+                          </div>
+                          <div class="oa-field">
+                            <label for="a-email">Send to</label>
+                            <input type="email" id="a-email" maxlength="200">
+                          </div>
+                        </div>
+                      </fieldset>
+
+                      <div class="oa-actions">
+                        <button type="submit" class="button blue" id="a-save">Create alert</button>
+                        <button type="button" class="oa-linkbtn" id="a-cancel" hidden>Cancel</button>
+                        <p class="oa-form-msg" id="a-msg" role="alert"></p>
+                      </div>
+                    </form>
+
+                    <h3 style="font-size:17px;color:#313a45;margin:34px 0 10px">
+                      What an e-mail will look like</h3>
+                    <p class="oa-hint">Built from this alert and the postings currently on the site,
+                    so it updates as you edit above.</p>
+                    <div class="oa-preview" id="oa-preview"></div>
+
+                  </section>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Footer: shared include -->
+      <div data-include="partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <!-- The site's own script chain, in the order every other page uses it.
+         All three parts are load-bearing and none of them is optional:
+           ypo-parakolouthisi.js defines the global `ga` that the footer's
+             inline onclick handlers call — without it every footer link throws;
+           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
+             relative hrefs would resolve inside /v2/);
+           jquery + dropotron + skel + util + main.js build the off-canvas
+             panel that IS the navigation below 840px, where main.css hides
+             #header-wrapper outright. Drop them and a phone gets no menu.
+         Awesome Tables is deliberately NOT here. It is a leaf dependency:
+         nothing in the site's own CSS or JS refers to it. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-alert-match.js"></script>
+    <script src="assets/oa-alerts.js"></script>
+</body>
+</html>

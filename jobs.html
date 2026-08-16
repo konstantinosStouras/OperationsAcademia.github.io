@@ -1,23 +1,22 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
   <head>
-    <link href="images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <title>
       Jobs - OperationsAcademia.org
     </title>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no"> -->
-    <meta content="Matching supply with demand in the Operations job market" name="description">	
-    <meta property="og:title" content="Operations Academia" /> 
+    <meta content="Matching supply with demand in the Operations job market" name="description">
+    <meta property="og:title" content="Operations Academia" />
     <meta property="og:site_name" content="Operations Academia" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.operationsacademia.org" /> 
-    <meta property="og:image" content="images/OA_logo_1200x294.png" /> 
-    <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
-    <link href="assets/css/main.css" rel="stylesheet">
-    <!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+    <meta property="og:url" content="https://www.operationsacademia.org" />
+    <meta property="og:image" content="/images/OA_logo_1200x294.png" />
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-list.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet" type="text/css">
   </head>
   <body class="no-sidebar">
     <div id="page-wrapper">
@@ -27,13 +26,18 @@
         <!-- Header -->
 
         <div class="container" id="header">
-          <a href="index.html" id="logo" onclick=
-          "ga('send', 'pageview', 'logoHeader');"><img alt="Operations Academia Logo" class=
-          "OAlogo" src="images/OperationsAcademiaLogo.png" style=
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class=
+          "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
           "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
 
           <nav id="nav">
           </nav>
+
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
         </div>
       </div>
       <!-- Main Wrapper -->
@@ -45,8 +49,12 @@
           <!-- Main Heading -->
 
           <div class="title-heading">
-            <h2>
-              Job postings (2025-2026)
+            <!-- The season is filled in by the script at the foot of this page
+                 from the same market-year rule the sync uses, so the heading
+                 cannot fall a season behind the data again. The literal here
+                 is the no-JavaScript fallback. -->
+            <h2 id="oa-jobs-heading">
+              Job postings (2026-2027)
             </h2>
           </div>
           <!-- Main Content -->
@@ -54,23 +62,20 @@
           <div id="main">
             <div class="row">
               <div class="12u" id="content">
-                <div dir="ltr" style=
-                  "padding:25px 20px">
-				<!-- Sponsors -->
+                <div dir="ltr" style="padding:25px 20px">
+                <!-- Sponsors -->
 <div class="sponsor-bar" role="complementary" aria-label="Sponsors">
   <span class="sponsor-lead">Proudly sponsored and supported by</span>
   <div class="sponsor-logos">
     <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/"
-       target="_blank" rel="noopener" aria-label="CUHK Business School – Department of Decisions, Operations and Technology"
-       onclick="ga && ga('send','event','sponsor','click','CUHK DOT jobs');">
+       target="_blank" rel="noopener" aria-label="CUHK Business School – Department of Decisions, Operations and Technology">
       <img src="/images/logos/cuhk_dot_logo.png"
            alt="CUHK Business School – Department of Decisions, Operations and Technology"
            loading="lazy" height="40">
     </a>
 
     <a href="https://connect.informs.org/msom/home"
-       target="_blank" rel="noopener" aria-label="INFORMS Manufacturing and Service Operations Management (MSOM) Society"
-       onclick="ga && ga('send','event','sponsor','click','MSOM jobs');">
+       target="_blank" rel="noopener" aria-label="INFORMS Manufacturing and Service Operations Management (MSOM) Society">
       <img src="/images/logos/informs-msom.png"
            alt="INFORMS Manufacturing and Service Operations Management (MSOM) Society"
            loading="lazy" height="20">
@@ -78,7 +83,7 @@
   </div>
 </div>
 
-				<br>
+                <br>
                 <br>
                   <div style=
                   "clear:both;padding:25px 20px;background-color:rgb(249,249,249);text-align:justify;border:1px solid rgb(204,204,204)">
@@ -86,11 +91,11 @@
                     "color:rgb(102,102,102);line-height:20px;font-size:14px;display:inline;margin:5px 10px;float:right">
                       <br>
                     </div>
-					<span style="text-align:left"></span>
+                    <span style="text-align:left"></span>
                     <div style=
                     "color:rgb(68,68,68);line-height:21px;display:inline;float:left;margin:5px 10px 0px 0px">
                       <span style="text-align:left"><img border="0" src=
-                      "images/information.png"></span>
+                      "/images/information.png" alt=""></span>
                     </div>
                     We display below a centralized and easy-to-search database of academic job
                     postings in Operations Research (and related fields). Such postings are
@@ -99,35 +104,29 @@
                     (results appear as you type, and are shown ranked by <i>posting date</i>).<br>
                     <br>
                     All the entries below have been made publicly available by reliable and verified
-                    individuals. However, please <a href="contact">let us know if any information
-                    is misplaced</a>. 
-					<br>
-					<br>
-					Posting a job is free, but, if you want to say thanks, you can...
-					<br>
-					
-				<br>				
-				<a href="https://www.buymeacoffee.com/kstouras"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book/coffee&emoji=📖&slug=kstouras&button_colour=FFDD00&font_colour=000000&font_family=Lato&outline_colour=000000&coffee_colour=ffffff" /></a>
+                    individuals. However, please <a href="contact.html">let us know if any information
+                    is misplaced</a>.
+                    <br>
+                    <br>
+                    Posting a job is free, but, if you want to say thanks, you can...
+                    <br>
+
                 <br>
-					</div>
+                <a href="https://www.buymeacoffee.com/kstouras"><img alt="Buy me a book or a coffee" src="https://img.buymeacoffee.com/button-api/?text=Buy me a book/coffee&emoji=📖&slug=kstouras&button_colour=FFDD00&font_colour=000000&font_family=Lato&outline_colour=000000&coffee_colour=ffffff" /></a>
+                <br>
+                    </div>
                 </div>
-				
-				<!-- <div dir="ltr" style=
-                  "padding:25px 20px">
-				<br>				
-				<a href="https://www.buymeacoffee.com/kstouras"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book/coffee&emoji=📖&slug=kstouras&button_colour=FFDD00&font_colour=000000&font_family=Lato&outline_colour=000000&coffee_colour=ffffff" /></a>
-                <br>
-				</div> -->
 
                 <div style="text-align:center;">
-                  <a class="button blue" href=
-                  "https://docs.google.com/forms/d/e/1FAIpQLScdNoVJhjhTO8E_v01VefQjZzlBGLW16jhwQGBdt9DWOIxFiA/viewform?usp=pp_url&entry.956351437=2026" target="_blank" >
-                  Post a job!</a>
+                  <a class="button blue" href="post-a-job.html">Post a job!</a>
                 </div>
                 <br>
                 <br>
 
-                <div data-type="AwesomeTableView" data-filters="" data-viewID="-O_tq18fckswU28d7JCQ"></div>
+                <!-- The job list. Replaces the Awesome Table view that used to
+                     sit here (data-viewID="-O_tq18fckswU28d7JCQ"). -->
+                <div id="oa-jobs"></div>
+
               </div>
             </div>
           </div>
@@ -137,27 +136,181 @@
       </div>
       <!-- Footer Wrapper -->
 
-      <!-- Footer: shared include -->
-<div data-include="/partials/footer.html"></div>
-<script src="/assets/js/include-partials.js"></script>
-	
-    <!-- Scripts -->
-    <script src="assets/js/ypo-parakolouthisi.js">
-    </script> 
-    <script src="assets/js/navigationMenu.js">
-    </script> 
-    <script src="assets/js/jquery.min.js">
-    </script> 
-    <script src="assets/js/jquery.dropotron.min.js">
-    </script> 
-    <script src="assets/js/skel.min.js">
-    </script> 
-    <script src="https://awesome-table.com/AwesomeTableInclude.js">
-    </script> 
-    <script src="assets/js/util.js">
-    </script> <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-     
-    <script src="assets/js/main.js">
+            <!-- Footer: shared include -->
+      <div data-include="partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <!-- The site's own script chain, in the order every other page uses it.
+         All three parts are load-bearing and none of them is optional:
+           ypo-parakolouthisi.js defines the global `ga` that the footer's
+             inline onclick handlers call — without it every footer link throws;
+           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
+             relative hrefs would resolve inside /v2/);
+           jquery + dropotron + skel + util + main.js build the off-canvas
+             panel that IS the navigation below 840px, where main.css hides
+             #header-wrapper outright. Drop them and a phone gets no menu.
+         Awesome Tables is deliberately NOT here. It is a leaf dependency:
+         nothing in the site's own CSS or JS refers to it. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-list.js"></script>
+    <script src="assets/oa-jobedit.js"></script>
+    <script>
+    (function () {
+      'use strict';
+      var U = window.OAList.safeUrl;
+
+      /* The Universities map deep-links into this page as
+         `?filterD=<University/Institution>` — 144 rows' worth of anchors in the
+         wild (see _AUDIT.md §76 and §G.3). `legacyParam` below takes ONE alias,
+         so the second one is renamed here, before the list reads the URL.
+         Renaming rather than adding matters: syncUrl rebuilds the query string
+         from the keys the engine owns, so an unrecognised parameter is not just
+         ignored, it is wiped from the address bar a moment after the page
+         paints and the reader never sees what was asked for. */
+      (function legacyDeepLink() {
+        var p = new URLSearchParams(location.search);
+        if (!p.has('filterD') || p.has('institution') || p.has('filterA')) return;
+        p.set('institution', p.get('filterD'));
+        p['delete']('filterD');
+        history.replaceState(null, '',
+          location.pathname + '?' + p.toString() + location.hash);
+      })();
+
+      /* The heading names the CURRENT job market, derived — never typed. This
+         is a fourth copy of the rule in jobs-model.mjs (marketYear/marketLabel)
+         — assets/oa-nav.js carries one too, for the menu label — and it cannot
+         import the module because this page ships no build step, so the
+         selftest asserts they agree. A market year runs 1 July of the previous
+         year to 30 June of its own and is numbered by the year it ends, so the
+         roll is on 1 JULY and getUTCMonth() (0-based) is 6. */
+      (function heading() {
+        var el = document.getElementById('oa-jobs-heading');
+        if (!el) return;
+        var d = new Date();
+        var y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+        el.textContent = 'Job postings (' + (y - 1) + '-' + y + ')';
+      })();
+
+      /* THE LIST SHOWS ONLY THE MARKET YEAR UNDER WAY (owner, 2026-08-16) —
+         exactly what the heading above names. This mirrors inCurrentMarket()
+         in jobs-model.mjs, and the selftest pins the two together (like the
+         heading rule): a row is in scope when it was POSTED on or after
+         1 July of the season under way, OR its poster tagged it for the
+         current market year or later — the tag is picked by hand and is often
+         a season behind, so either signal admits. data/jobs.json itself stays
+         complete (it is the archive previous seasons live in); the page just
+         stops rendering them. */
+      function inCurrentMarket(row) {
+        var d = new Date();
+        var year = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+        var start = (year - 1) + '-07-01';
+        return String(row.posted || '') >= start || Number(row.year) >= year;
+      }
+
+      /* A posting's stored links name this site by its FULL URL: "Further info"
+         points at the Universities page, and a posting with no "posted online
+         at" falls back to the site root. Inside /v2/ those are the only card
+         links that walk the reader out of the rebuild, so they are re-pointed
+         at v2's own copy — the same closed-preview rule port-pages.mjs applies
+         to the ported pages. Only a slug that EXISTS here is rewritten, so an
+         unknown one stays absolute and working rather than becoming a
+         fabricated 404; the replacement is relative, so it still lands on the
+         right page after cutover. */
+      var OWN_ORIGIN =
+        /^https?:\/\/(?:www\.)?operationsacademia\.org(\/[^?#]*)?((?:[?#].*)?)$/i;
+      var OWN_PAGES = ['universities', 'candidates', 'placements', 'previous-markets',
+        'recent-faculty', 'resources-for-candidates', 'faqs', 'contact', 'jobs'];
+
+      function ownSite(url) {
+        var m = OWN_ORIGIN.exec(String(url || '').trim());
+        if (!m) return url;
+        var slug = (m[1] || '/').replace(/^\/+/, '').replace(/\.html$/i, '');
+        if (!slug || slug === 'index') return './' + (m[2] || '');
+        if (OWN_PAGES.indexOf(slug) === -1) return url;
+        return './' + slug + '.html' + (m[2] || '');
+      }
+
+      function link(url, label) {
+        var u = U(ownSite(url));
+        if (!u) return null;
+        var a = document.createElement('a');
+        a.href = u;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = label || 'link';
+        return a.outerHTML;
+      }
+
+      var jobs = OAList.mount({
+        mount: '#oa-jobs',
+        data: 'data/jobs.json',
+        perPage: 10,
+        prepare: function (rows) { return rows.filter(inCurrentMarket); },
+
+        // newest posting first, but a Featured posting always leads — the same
+        // order the Awesome Table view used.
+        sort: function (a, b) {
+          if (!!b.featured !== !!a.featured) return b.featured ? 1 : -1;
+          return (b.posted || '').localeCompare(a.posted || '');
+        },
+
+        filters: [
+          /* Searching Department under this label is deliberate and PAIRED:
+             assets/oa-alert-match.js mirrors these two fields so "what I see on
+             the site" and "what I am e-mailed" cannot mean different things.
+             Narrow it here and that file has to move in the same change. */
+          { key: 'institution', label: 'University/Institution', type: 'text',
+            fields: ['institution', 'department'],
+            placeholder: '', legacyParam: 'filterA' },
+          // legacyValues: this filter briefly said "Open" where the vendor page
+          // says "Closing soon", so a link shared in that window still works.
+          { key: 'deadline',    label: 'Deadline',        derive: 'deadline',
+            legacyValues: { Open: 'Closing soon' } },
+          { key: 'type',        label: 'Type',            field: 'type' },
+          { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one' },
+          { key: 'country',     label: 'Location',        field: 'country', sort: 'count' },
+          { key: 'chars',       label: 'Characteristics', field: 'characteristics', type: 'one' },
+          { key: 'posted',      label: 'Date posted',     derive: 'datePosted' }
+        ],
+
+        // Edit / Take down, drawn only on the postings the signed-in user may
+        // change. See assets/oa-jobedit.js — the rules are the authorisation.
+        onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+
+        card: {
+          title:    function (r) { return r.institution; },
+          subtitle: function (r) { return r.department; },
+          badges:   function (r) {
+            var out = [];
+            if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
+            return out;
+          },
+          rows: function (r) {
+            return [
+              { label: 'Entry level', value: (r.levels || []).join(', ') },
+              { label: 'Apply by',    value: r.applyBy },
+              { label: 'Comments on Job Posting', value: r.comments },
+              { label: 'File link',   html: link(r.adUrl, r.adLabel || 'link to Job ad') },
+              { label: 'Posted online at', html: link(r.postedAtUrl, r.postedAtLabel || 'link') },
+              { label: 'Further info', html: link(r.furtherInfoUrl, 'link') }
+            ];
+          }
+        }
+      });
+
+      if (window.OAJobEdit) OAJobEdit.attach(jobs);
+    })();
     </script>
-  </body>
+</body>
 </html>
