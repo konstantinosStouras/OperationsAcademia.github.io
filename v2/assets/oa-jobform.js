@@ -339,6 +339,16 @@
     if (!adFile) return Promise.resolve(null);
 
     return OAFB.readyStorage().then(function (fb) {
+      /* The SDK's default is to retry a failing upload silently for TEN
+         MINUTES before erroring — which on a missing bucket or a blocking
+         extension looks exactly like "loading forever" at 0%. 45 seconds is
+         enough for genuine flakiness; a real upload that is making progress
+         is not affected by this timer. */
+      try {
+        fb.storage().setMaxUploadRetryTime(45000);
+        fb.storage().setMaxOperationRetryTime(45000);
+      } catch (e) { /* older SDK — the defaults apply */ }
+
       var clean = String(adFile.name || 'advert')
         .replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120) || 'advert';
       var path = 'uploads/' + user.uid + '/jobs/' + Date.now() + '-' + clean;
@@ -620,7 +630,13 @@
         }).catch(function (err) {
           btn.disabled = false;
           var code = (err && err.code) || '';
-          if (code === 'storage/unauthorized') {
+          if (code === 'storage/retry-limit-exceeded' || code === 'storage/unknown') {
+            say('We could not reach the file storage service. Most often this means ' +
+                'Cloud Storage has not been set up for this site yet (Firebase console ' +
+                '\u2192 Storage \u2192 Get started), or a browser extension is blocking ' +
+                'firebasestorage.googleapis.com. Your posting was NOT sent — remove the ' +
+                'file to post with a link instead, or try again once storage is up.', 'err');
+          } else if (code === 'storage/unauthorized') {
             say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
                 'and the site\u2019s storage rules must be published.', 'err');
           } else if (code === 'permission-denied') {
