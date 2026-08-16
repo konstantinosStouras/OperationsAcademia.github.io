@@ -1,29 +1,17 @@
 {
- "generated": "2026-08-16T01:17:15.029Z",
+ "generated": "2026-08-16T05:00:38.109Z",
  "universities": [
   {
    "v": "University College London",
-   "n": 8
+   "n": 7
   },
   {
    "v": "Tulane University",
-   "n": 6
+   "n": 4
   },
   {
    "v": "University of Virginia",
-   "n": 5
-  },
-  {
-   "v": "The Hong Kong Polytechnic University",
    "n": 4
-  },
-  {
-   "v": "University of Houston",
-   "n": 4
-  },
-  {
-   "v": "City University of Hong Kong",
-   "n": 3
   },
   {
    "v": "National University of Singapore",
@@ -36,6 +24,10 @@
   {
    "v": "University of San Diego",
    "n": 3
+  },
+  {
+   "v": "City University of Hong Kong",
+   "n": 2
   },
   {
    "v": "HEC Paris",
@@ -54,15 +46,19 @@
    "n": 2
   },
   {
+   "v": "The Hong Kong Polytechnic University",
+   "n": 2
+  },
+  {
    "v": "The Ohio State University",
    "n": 2
   },
   {
-   "v": "The Pennsylvania State University",
+   "v": "University of California, Berkeley",
    "n": 2
   },
   {
-   "v": "University of California, Berkeley",
+   "v": "University of Houston",
    "n": 2
   },
   {
@@ -182,6 +178,10 @@
    "n": 1
   },
   {
+   "v": "The Pennsylvania State University",
+   "n": 1
+  },
+  {
    "v": "The University of Hong Kong",
    "n": 1
   },
@@ -257,22 +257,18 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 7
+   "n": 6
   },
   {
    "v": "Darden School of Business",
-   "n": 5
-  },
-  {
-   "v": "Freeman School of Business",
-   "n": 5
+   "n": 4
   },
   {
    "v": "Global Business School for Health",
    "n": 4
   },
   {
-   "v": "Business School for Health",
+   "v": "Freeman School of Business",
    "n": 3
   },
   {
@@ -280,7 +276,7 @@
    "n": 2
   },
   {
-   "v": "C. T. Bauer College of Business",
+   "v": "Business School for Health",
    "n": 2
   },
   {
@@ -450,14 +446,6 @@
  ],
  "units": [
   {
-   "v": "Department of Logistics and Maritime Studies",
-   "n": 4
-  },
-  {
-   "v": "Department of Decision Analytics and Operations",
-   "n": 3
-  },
-  {
    "v": "Data Analytics and Decision Sciences (DADS) Area",
    "n": 2
   },
@@ -466,11 +454,15 @@
    "n": 2
   },
   {
-   "v": "Department of Decision and Information Sciences",
+   "v": "Department of Decision Analytics and Operations",
    "n": 2
   },
   {
    "v": "Department of Decision and Technology Analytics",
+   "n": 2
+  },
+  {
+   "v": "Department of Logistics and Maritime Studies",
    "n": 2
   },
   {
@@ -486,15 +478,7 @@
    "n": 2
   },
   {
-   "v": "Management Sciences Area",
-   "n": 2
-  },
-  {
    "v": "Operations Management",
-   "n": 2
-  },
-  {
-   "v": "Supply Chain & Information Systems",
    "n": 2
   },
   {
@@ -626,6 +610,10 @@
    "n": 1
   },
   {
+   "v": "Management Sciences Area",
+   "n": 1
+  },
+  {
    "v": "Mathematics",
    "n": 1
   },
@@ -671,6 +659,10 @@
   },
   {
    "v": "Operations, Information and Technology Department",
+   "n": 1
+  },
+  {
+   "v": "Supply Chain & Information Systems",
    "n": 1
   },
   {
@@ -1045,12 +1037,9 @@
    ]
   },
   "University of Houston": {
-   "schools": [
-    "C. T. Bauer College of Business"
-   ],
+   "schools": [],
    "units": [
     "Decision and Information Sciences (DISC)",
-    "Department of Decision and Information Sciences",
     "University of Houston and DISC"
    ]
   },
