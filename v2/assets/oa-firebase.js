@@ -159,6 +159,8 @@
       registered: 'registeredUsers',
       accountKeys: 'accountKeys',
       jobSubmissions: 'jobSubmissions',
+      candidateSubmissions: 'candidateSubmissions',
+      placementSubmissions: 'placementSubmissions',
       feedback: 'feedback'
     }
   };
