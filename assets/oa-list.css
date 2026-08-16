@@ -409,12 +409,16 @@
    and at Chrome's "Large" the department subtitle overtook the fixed-16px
    university title. Same rendering at the 16px default, in the file's own px
    scale. */
+/* BLACK, not the vendor's greys (owner, 2026-08-16). The Awesome Table clone
+   shipped #616161 titles over 54%-black subtitles; the card's headline is the
+   most important text on the page and was the lightest. The size step keeps
+   the title/subtitle hierarchy. */
 .oa-card-title {
   margin: 5px 0;
   font-size: 16px;
   font-weight: 400;
   line-height: 22px;
-  color: #616161;
+  color: #000;
 }
 
 .oa-card-sub {
@@ -422,7 +426,7 @@
   font-size: 14.4px;
   font-weight: 400;
   line-height: 22px;
-  color: rgba(0, 0, 0, 0.54);
+  color: #000;
 }
 
 .oa-card-body { padding: 0 32px 6px 22px; }
