@@ -210,6 +210,7 @@
 
   var ICON = {
     post: '&#128221;',
+    mine: '&#128203;',
     alerts: '&#9993;',
     profile: '&#128100;',
     feedback: '&#128172;'
@@ -270,6 +271,8 @@
           '<div class="oa-acct-group">' +
             '<a role="menuitem" href="post-a-job.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
+            '<a role="menuitem" href="my-postings.html">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.mine + '</span>My postings</a>' +
             '<a role="menuitem" href="alerts.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts</a>' +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
@@ -350,6 +353,7 @@
     box.innerHTML =
       '<span class="oa-np-as"><strong>' + esc(displayName(u)) + '</strong>' +
         esc(u.email || '') + '</span>' +
+      '<a class="link depth-0" href="my-postings.html">My postings</a>' +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {
@@ -1614,6 +1618,18 @@
     onChange: onChange,
     user: function () { return state.user; },
     resolved: function () { return state.resolved; },
+    /** The localStorage memory of the LAST resolved auth state — 'in', 'out',
+        or null on a first visit. What lets a page paint its signed-in or
+        signed-out shape immediately instead of holding everything blank while
+        the SDK downloads and the session restores (~1-3 s on a cold cache);
+        the real state reconciles it when it arrives. */
+    hint: function () {
+      if (state.resolved) return state.user ? 'in' : 'out';
+      // The stored hint exists only for a signed-in session (sign-out removes
+      // it), so a first-time visitor and a signed-out one read the same —
+      // 'out' — which is the right shape to paint first for both.
+      return readHint() ? 'in' : 'out';
+    },
     /** True when the SDK itself could not be loaded — offline, a blocked
         CDN, an ad blocker. Pages use this to say so instead of offering a
         control that cannot work. */

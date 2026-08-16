@@ -1,0 +1,9 @@
+{
+  "name": "oa-functions",
+  "description": "Operations Academia Cloud Functions — instant publish on posting changes",
+  "engines": { "node": "20" },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-functions": "^5.1.0"
+  }
+}

@@ -33,9 +33,16 @@ import { splitDepartment, joinDepartment } from './vocab.mjs';
 export const PUBLIC_FIELDS = [
   'id', 'year', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'comments', 'country',
-  'adUrl', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
+  'adUrl', 'adPending', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
 ];
+
+/* Prose that means the search stays open. ONE definition: import-sheet.mjs
+   clears parsed dates with it, rowFromSubmission clears stored dates with it,
+   and the selftest rejects any served row whose applyBy matches it while a
+   date is set — the page buckets "Until filled" purely on the date being
+   empty, so a row carrying both would sort as dated and read as open-ended. */
+export const OPEN_ENDED_RX = /until\s*filled|open\s*until|rolling/i;
 
 export const LEVELS = [
   'Assistant Professor',
@@ -273,7 +280,7 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
   const stamped = isoDay(tsToDate(doc.createdAt) || now);
   const asked = day(doc.postedOn);
   const posted = asked && asked <= stamped ? asked : stamped;
-  const applyByDate = doc.untilFilled ? '' : day(doc.applyByDate);
+  let applyByDate = doc.untilFilled ? '' : day(doc.applyByDate);
 
   // What the card shows on the "Apply by" line. The sheet stored this as one
   // free-text field ("November 1, 2025. Early submissions are encouraged."), so
@@ -288,6 +295,18 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
   const applyBy = text(doc.applyByText, MAXLEN.applyBy) || composeApplyBy({
     untilFilled: doc.untilFilled, applyByDate, applyByNote: doc.applyByNote,
   });
+
+  /* THE OPEN-ENDED RULE, applied at the LAST writer. The page buckets a
+     posting "Until filled" purely on `applyByDate` being empty, so prose that
+     says the search stays open ("until filled", "open until", "rolling") must
+     win over a parsed date — import-sheet.mjs has always enforced this, and
+     the served-file check in selftest.mjs rejects any row violating it. It has
+     to be enforced HERE too, not only at import: six documents were migrated
+     before the committed dates were blanked and still carry the date their own
+     prose contradicts, so the first database rebuild resurrected all six dates
+     and the selftest gate stopped the whole publish. Healing at read makes the
+     stored shape irrelevant. */
+  if (applyByDate && OPEN_ENDED_RX.test(applyBy)) applyByDate = '';
 
   const row = {
     id: '',
@@ -304,6 +323,12 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     comments: text(doc.comments, MAXLEN.comments),
     country,
     adUrl: url(doc.adUrl),
+    /* The poster uploaded an advert that has not been filed into Drive yet
+       (the build files it, normally in the same run — see transferUploads).
+       The card shows "soon to be available" instead of nothing, so a posting
+       is never held back by its file: the posting publishes NOW, the link
+       replaces the note at whichever run manages the transfer. */
+    adPending: !url(doc.adUrl) && (!!doc.adUploadPath || doc.adPending === true),
     /* These four were fixed values, which was right while every posting came
        from this form. The migration off the Google Sheet makes a document out
        of an EXISTING row, so they have to survive the round trip: the sheet
@@ -320,7 +345,13 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     source: text(doc.source, 40) || 'oa-form',
     addedAt: isoStamp(tsToDate(doc.createdAt) || now),
     ref: text(doc.ref, 40),
-    owner: ownerTag(doc.uid),
+    /* Normally derived from the account behind the document. The fallback is
+       the ROUND TRIP's: submissionFromRow cannot invert a hash back into a
+       uid, so it carries the published tag itself, and a document that has no
+       account (uid null) but a carried tag keeps the row's ownership rather
+       than silently orphaning it. A client cannot forge this — the rules
+       refuse any client-written document carrying an `owner` key. */
+    owner: ownerTag(doc.uid) || text(doc.owner, 64),
   };
   row.id = jobId(row);
   return row;
@@ -360,7 +391,9 @@ export function publicRow(row) {
     // `ref` addresses a posting made through the site; a posting migrated off
     // the sheet has none, and writing `"ref": ""` onto every one of those rows
     // is 90-odd lines of noise in a file whose diff is meant to be readable.
-    if (k === 'ref' && !row[k]) continue;
+    // `adPending` is the same: meaningful only while true, noise on every
+    // other row.
+    if ((k === 'ref' || k === 'adPending') && !row[k]) continue;
     out[k] = row[k];
   }
   return out;
@@ -449,6 +482,12 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
     ref: row.ref || '',
     uid,
     status,
+    /* The published owner TAG, carried as itself: a hash cannot be inverted
+       back into the uid it came from, so a row owned by an account keeps its
+       ownership through the round trip even when the account is not known
+       here (uid null). rowFromSubmission prefers a real uid when one exists. */
+    ...(row.owner ? { owner: row.owner } : {}),
+    ...(row.adPending ? { adPending: true } : {}),
     // only when the line cannot be rebuilt from its parts — see applyByText
     ...(composed === applyBy ? {} : { applyByText: applyBy }),
     year: row.year,
@@ -474,6 +513,98 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
     postedAtLabel: row.postedAtLabel || '',
     createdAt: row.addedAt || '',
   };
+}
+
+/* ------------------------------------------------------- what an edit changed
+
+   The admin is e-mailed a before/after of every change to a published posting
+   (the owner\u2019s request: an edit goes live automatically, and the human
+   finds out rather than having to notice). The diff is computed here, over
+   PUBLIC_FIELDS — the fields a reader can actually see — so an internal
+   bookkeeping write (a status stamp, a cleared upload path) never produces an
+   e-mail claiming the posting changed.                                       */
+
+/** Field-by-field difference between two rows, public fields only. */
+export function diffRows(before, after) {
+  const out = [];
+  for (const k of PUBLIC_FIELDS) {
+    // `adPending` flips as a side effect of the build filing an upload into
+    // Drive — bookkeeping, not an edit the poster made, so it never produces
+    // a change e-mail on its own.
+    if (k === 'id' || k === 'adPending') continue;
+    const a = before ? before[k] : undefined;
+    const b = after ? after[k] : undefined;
+    const av = Array.isArray(a) ? a.join(', ') : (a === undefined || a === null ? '' : String(a));
+    const bv = Array.isArray(b) ? b.join(', ') : (b === undefined || b === null ? '' : String(b));
+    if (av !== bv) out.push({ field: k, before: av, after: bv });
+  }
+  return out;
+}
+
+/**
+ * Everything a build run changed, against the previously served rows.
+ *
+ *   edits      rows present before AND after whose visible content differs
+ *   takedowns  rows removed because their posting was withdrawn or hidden
+ *   added      count only — new postings already have their own channel (the
+ *              subscriber alerts); the admin e-mail exists for CHANGES
+ */
+export function collectChanges(existingRows, freshRows, removeRefs = []) {
+  const key = (r) => (r.ref ? 'ref:' + r.ref : 'id:' + r.id);
+  const before = new Map();
+  for (const r of existingRows) before.set(key(r), r);
+
+  const edits = [];
+  let added = 0;
+  for (const r of freshRows) {
+    const prev = before.get(key(r));
+    if (!prev) { added++; continue; }
+    const fields = diffRows(prev, r);
+    if (fields.length) edits.push({ before: prev, after: r, fields });
+  }
+
+  const takedowns = [];
+  const gone = new Set(removeRefs.filter(Boolean));
+  for (const r of existingRows) {
+    if (r.ref && gone.has(r.ref)) takedowns.push({ before: r });
+  }
+
+  return { edits, takedowns, added };
+}
+
+/** The admin e-mail body: one section per changed posting, before/after per
+    field. Self-contained HTML (its own escaping) so the model stays free of
+    the mail plumbing. */
+export function renderChangesHtml({ edits, takedowns, added }) {
+  const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const section = (title, row, rowsHtml) =>
+    `<h3 style="margin:18px 0 4px;font-size:16px;">${esc(title)}</h3>
+     <p style="margin:0 0 8px;color:#555;">${esc(row.institution)}${row.department ? ' \u2014 ' + esc(row.department) : ''}
+        ${row.ref ? ' \u00b7 ' + esc(row.ref) : ''}</p>${rowsHtml}`;
+
+  const table = (fields) =>
+    `<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;">
+      <tr style="background:#f2f5f8;"><th align="left">Field</th><th align="left">Before</th><th align="left">After</th></tr>
+      ${fields.map((f) =>
+        `<tr>
+          <td style="border-top:1px solid #e5e9ee;white-space:nowrap;vertical-align:top;"><strong>${esc(f.field)}</strong></td>
+          <td style="border-top:1px solid #e5e9ee;vertical-align:top;color:#a3364a;">${esc(f.before) || '<em>(empty)</em>'}</td>
+          <td style="border-top:1px solid #e5e9ee;vertical-align:top;color:#2e6b4f;">${esc(f.after) || '<em>(empty)</em>'}</td>
+        </tr>`).join('')}
+    </table>`;
+
+  const parts = [];
+  for (const e of edits) parts.push(section('Edited', e.after, table(e.fields)));
+  for (const t of takedowns) {
+    parts.push(section('Taken down', t.before,
+      '<p style="margin:0;color:#a3364a;">This posting was withdrawn or hidden and has been removed from the list.</p>'));
+  }
+  if (added) {
+    parts.push(`<p style="margin:16px 0 0;color:#555;">${added} new posting${added === 1 ? '' : 's'} also published this run (new postings go out via the e-mail alerts; this message covers changes).</p>`);
+  }
+  return parts.join('\n');
 }
 
 /* --------------------------------------------------------- same-day repeats

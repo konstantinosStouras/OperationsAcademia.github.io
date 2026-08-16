@@ -1102,6 +1102,90 @@ for (const [name, expect] of [
   await u.close();
 }
 
+/* --------------------------------------------------- the draft survives
+
+   Born of a real loss: the first upload attempt hung, the poster refreshed,
+   and a fully filled-in form was gone. What is checked is the whole point —
+   type, RELOAD, and the words are still there.                               */
+
+{
+  const d = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  await d.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+  await d.waitForTimeout(1500);
+  await d.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await d.waitForSelector('#f-institution', { state: 'visible' });
+
+  await d.fill('#f-institution', 'University of Draftshire');
+  await d.fill('#f-comments', 'Interviewing at INFORMS.');
+  await d.check('input[name="levels"][value="Post-Doc"]');
+  await d.waitForTimeout(700);   // past the 400ms save debounce
+
+  await d.reload({ waitUntil: 'domcontentloaded' });
+  await d.waitForTimeout(1500);
+  await d.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await d.waitForSelector('#f-institution', { state: 'visible' });
+
+  eq(await d.inputValue('#f-institution'), 'University of Draftshire',
+    'draft: a reload keeps what was typed');
+  eq(await d.inputValue('#f-comments'), 'Interviewing at INFORMS.',
+    'draft: textareas too');
+  eq(await d.$eval('input[name="levels"][value="Post-Doc"]', (n) => n.checked), true,
+    'draft: and the ticked boxes');
+
+  await d.close();
+}
+
+/* ------------------------------------------- the posting page paints NOW
+
+   The page used to hold everything hidden until the Firebase SDK had loaded
+   AND the session had restored — blank space for seconds on a cold cache, and
+   for the full 15-second timeout when the CDN is unreachable (which it is in
+   this sandbox, making that exact worst case the one measured here). The
+   accounts hint paints the signed-out shape immediately; this asserts a
+   visitor sees the sign-in gate well before any network verdict. */
+
+{
+  const f = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const t0 = Date.now();
+  await f.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+  await f.waitForSelector('#oa-needauth', { state: 'visible', timeout: 4000 });
+  const ms = Date.now() - t0;
+  ok(ms < 4000, `fastpaint: the sign-in gate is visible in ${ms}ms, not after an SDK timeout`);
+  eq(await f.$eval('#oa-job-form', (n) => n.hidden), true,
+    'fastpaint: while the form itself stays hidden for a signed-out visitor');
+  await f.close();
+}
+
+/* ----------------------------------------------- My postings loads cleanly
+
+   The page's real behaviour is a Firestore read this sandbox cannot make; what
+   a browser CAN prove is that the page boots without a script error and lands
+   a signed-out visitor on the sign-in gate at the same fastpaint speed as the
+   posting page — not on a blank screen. */
+
+{
+  const m = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const t0 = Date.now();
+  await m.goto(BASE + 'my-postings.html', { waitUntil: 'domcontentloaded' });
+  /* The gate paints from the hint immediately; in this sandbox the SDK then
+     fails fast and the page swaps it for the cannot-reach notice — either box
+     is a correct landing, a blank page is the failure being tested for. */
+  await m.waitForSelector('#oa-needauth:not([hidden]), #oa-offline:not([hidden])',
+    { timeout: 4000 });
+  ok(Date.now() - t0 < 4000, 'my postings: a signed-out visitor lands on a message, not a blank page');
+  eq(await m.$eval('#oa-my-list', (n) => n.hidden), true,
+    'my postings: no list is shown to a signed-out visitor');
+  await m.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

@@ -19,6 +19,7 @@ import {
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, marketStart,
+  diffRows, collectChanges, renderChangesHtml,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
@@ -163,6 +164,63 @@ function testMapping() {
 
   // the mapping is deterministic
   eq(rowFromSubmission(GOOD), rowFromSubmission(GOOD), 'mapping is deterministic');
+}
+
+/* ------------------------------ ownership, open-endedness, the pending advert
+
+   Three rules the FIRST real signed-in posting exposed at once (OA-JOB-260816-
+   BK7Q, 2026-08-16): every migrated row has uid null, an applyBy shape the
+   committed file already agreed with, and no upload — so none of these paths
+   had ever run against live data until that posting failed the publish gate. */
+
+function testOwnershipAndPending() {
+  // The owner tag survives the round trip. It is a one-way hash of the uid,
+  // so submissionFromRow cannot recover the account — it must carry the tag
+  // itself, or the first rebuild of an owned posting silently orphans it
+  // (and the round-trip gate stops the whole publish, which is how this was
+  // found).
+  const owned = rowFromSubmission(GOOD);
+  ok(/^[0-9a-f]{16}$/.test(owned.owner), 'a signed-in posting carries an owner tag');
+  eq(rowFromSubmission(submissionFromRow(owned)).owner, owned.owner,
+    'the owner tag survives the round trip when the account is not known');
+  eq(rowFromSubmission({ ...submissionFromRow(owned), uid: 'u_secret' }).owner, owned.owner,
+    'and a real uid derives the same tag rather than deferring to the carried one');
+
+  /* The open-ended rule heals a STALE document: six postings were migrated
+     before their committed dates were blanked, so their documents still carry
+     the date their own prose contradicts. Rebuilt through rowFromSubmission
+     they must serve date-free — the page buckets "Until filled" purely on the
+     date being empty. */
+  const healed = rowFromSubmission({
+    ...GOOD, untilFilled: false, applyByDate: '2025-12-12',
+    applyByText: 'December 12, 2025. Position will remain open until filled.',
+  });
+  eq(healed.applyByDate, '', 'prose that says "open until filled" wins over a stored date');
+  eq(healed.applyBy, 'December 12, 2025. Position will remain open until filled.',
+    'while the prose itself is untouched');
+  const rolling = rowFromSubmission({
+    ...GOOD, applyByDate: '2026-03-16',
+    applyByNote: 'Applications will be reviewed on a rolling basis.',
+  });
+  eq(rolling.applyByDate, '', '"rolling" is open-ended too');
+  eq(rowFromSubmission(GOOD).applyByDate, '2025-11-30',
+    'a dated posting with ordinary prose keeps its date');
+
+  /* An uploaded-but-not-yet-filed advert NEVER holds the posting back (owner,
+     2026-08-16): the row publishes at once, flagged pending, and the public
+     card says the file is coming. The flag flipping when the build files the
+     upload is bookkeeping, not an edit. */
+  const pend = rowFromSubmission({
+    ...GOOD, adUrl: '', adUploadPath: 'uploads/u_secret/jobs/1-ad.pdf',
+  });
+  eq(pend.adPending, true, 'an unfiled upload marks the row pending');
+  eq(publicRow(pend).adPending, true, 'and the flag is published');
+  eq(rowFromSubmission(submissionFromRow(pend)).adPending, true,
+    'and survives the round trip');
+  ok(!('adPending' in publicRow(rowFromSubmission(GOOD))),
+    'a row with a filed advert publishes no adPending noise');
+  eq(diffRows(publicRow(pend), publicRow({ ...pend, adPending: false })), [],
+    'the flag flipping is never a change e-mail on its own');
 }
 
 /* ------------------------------------------------------------------ merge */
@@ -478,6 +536,13 @@ async function testFleetPins() {
   ok(!/href=["']\/v2\//.test(acct),
     'oa-accounts.js carries no absolute /v2/ link');
 
+  // The public card never shows a poster an empty File row for an advert that
+  // exists but has not reached Drive yet — the posting publishes first and the
+  // link follows (owner, 2026-08-16).
+  const jobsPage = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  ok(/adPending/.test(jobsPage) && /soon to be available/.test(jobsPage),
+    'the jobs card says a pending advert file is coming');
+
   // The feedback inbox renders attacker-writable `shots` strings; they must
   // be shape-validated (data:image only) and never interpolated raw.
   const fb = await readFile(path.join(HERE, '..', 'assets', 'oa-feedback.js'), 'utf8');
@@ -487,6 +552,38 @@ async function testFleetPins() {
     'the inbox renders screenshots only through the safeShots() validator');
   ok(/function safeShots[\s\S]{0,220}DATA_IMAGE\.test\(u\)[\s\S]{0,80}\.map\(esc\)/.test(fb),
     'safeShots() both validates the shape and escapes what survives');
+}
+
+/* ----------------------------------------------- My postings (my-postings.html)
+
+   The signed-in poster's own postings — pending, live and taken down — each
+   editable through the same editor the public list's Edit button uses. Source
+   assertions, because the page's behaviour is a Firestore read CI cannot make;
+   each stands for a specific way the feature breaks. */
+
+async function testMyPostingsPage() {
+  const page = await readFile(path.join(HERE, '..', 'my-postings.html'), 'utf8');
+  ok(/assets\/oa-myjobs\.js/.test(page), 'the page loads its own script');
+  ok(/assets\/oa-firebase\.js/.test(page) && /assets\/oa-accounts\.js/.test(page),
+    'and the account plumbing before it');
+  ok(page.indexOf('oa-firebase.js') < page.indexOf('oa-myjobs.js'),
+    'in the right order');
+  ok(!/(href|src)=["']\/v2\//.test(page),
+    'no absolute /v2/ links — the page survives the cutover');
+  ok(/id="oa-needauth"/.test(page) && /id="oa-offline"/.test(page),
+    'the signed-out and not-configured states both have a box to appear in');
+
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-myjobs.js'), 'utf8');
+  ok(/where\('uid',\s*'==',\s*user\.uid\)/.test(js),
+    'the page reads ONLY the signed-in poster\'s own documents');
+  ok(/status:\s*'withdrawn'/.test(js) && !/\.delete\(/.test(js),
+    'taking down is a status change, never a document delete');
+  ok(/post-a-job\.html\?edit=/.test(js),
+    'Edit goes through the same editor as the public list');
+
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+  ok((acct.match(/my-postings\.html/g) || []).length >= 2,
+    'both account menus (header and phone panel) link My postings');
 }
 
 /* ------------------------------------------ merging two accounts into one
@@ -887,22 +984,95 @@ function testDriveUpload() {
   ok(body.endsWith('--BOUND--\r\n'), 'and closes the multipart properly');
 }
 
+/* -------------------------------------------- the admin\u2019s change e-mail */
+
+function testChanges() {
+  const a = { id: 'x', ref: 'OA-JOB-1', institution: 'Tulane University',
+    department: 'Freeman School of Business', applyBy: 'November 1, 2026.',
+    levels: ['Assistant Professor'], comments: '', adUrl: '' };
+
+  // an edit is the same posting with different VISIBLE content
+  const edited = { ...a, applyBy: 'December 1, 2026.', adUrl: 'https://drive.google.com/x' };
+  let c = collectChanges([a], [edited], []);
+  eq(c.edits.length, 1, 'a changed posting is an edit');
+  eq(c.edits[0].fields.map((f) => f.field).sort(), ['adUrl', 'applyBy'],
+    'and exactly the changed fields are reported');
+  eq(c.added, 0, 'nothing counted as new');
+
+  // field values render as before -> after
+  const d = diffRows(a, edited);
+  eq(d.find((f) => f.field === 'applyBy').before, 'November 1, 2026.', 'before is kept');
+  eq(d.find((f) => f.field === 'applyBy').after, 'December 1, 2026.', 'after is kept');
+
+  // an identical row is NOT an edit — this is what keeps the build's own
+  // bookkeeping writes (status stamps, cleared upload paths) out of the inbox
+  c = collectChanges([a], [{ ...a }], []);
+  eq(c.edits.length, 0, 'an unchanged posting produces no e-mail');
+
+  // lists compare by content, not identity
+  c = collectChanges([a], [{ ...a, levels: ['Assistant Professor'] }], []);
+  eq(c.edits.length, 0, 'an equal list is not a change');
+
+  // a new posting is counted, never diffed against nothing
+  c = collectChanges([a], [edited, { ...a, id: 'y', ref: 'OA-JOB-2' }], []);
+  eq(c.added, 1, 'a new posting is a count, not a diff');
+
+  // a takedown names the posting that left
+  c = collectChanges([a], [], ['OA-JOB-1']);
+  eq(c.takedowns.length, 1, 'a withdrawn posting is a takedown');
+  eq(c.takedowns[0].before.institution, 'Tulane University', 'and carries what it was');
+
+  // the rendering is complete and escaped
+  const html = renderChangesHtml(collectChanges(
+    [{ ...a, institution: 'A & B <School>' }],
+    [{ ...a, institution: 'A & B <School>', applyBy: 'later' }], []));
+  ok(html.includes('A &amp; B &lt;School&gt;'), 'HTML in a field value is escaped');
+  ok(html.includes('November 1, 2026.') && html.includes('later'),
+    'both sides of the change are shown');
+  ok(!renderChangesHtml({ edits: [], takedowns: [], added: 0 }),
+    'nothing changed renders as nothing');
+}
+
+/* -------------------------------------------- the posting page loads fast */
+
+async function testPageSpeedWiring() {
+  const html = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  const fbjs = await readFile(path.join(HERE, '..', 'assets', 'oa-firebase.js'), 'utf8');
+
+  /* The preloads only help while they name the EXACT scripts oa-firebase.js
+     injects. A version bump there without one here would fetch dead weight on
+     every visit and silently lose the head start. */
+  const sdk = (fbjs.match(/var SDK = '([^']+)'/) || [])[1];
+  ok(sdk, 'oa-firebase.js declares its SDK base URL');
+  const parts = (fbjs.match(/var PARTS = \[([^\]]+)\]/) || [])[1] || '';
+  for (const part of parts.match(/'[^']+'/g).map((x) => x.slice(1, -1))) {
+    ok(html.includes(`<link rel="preload" as="script" href="${sdk}${part}">`),
+      `post-a-job preloads ${part} at the version the code loads`);
+  }
+  ok(html.includes('rel="preconnect" href="https://www.gstatic.com"'),
+    'and preconnects to the CDN');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
+  testOwnershipAndPending();
   testMerge();
   testMarketYear();
   testVocab();
   testSplitFields();
   testCollapseSameDay();
   testAssignIds();
+  testChanges();
   await testPageHeadingRule();
+  await testPageSpeedWiring();
   await testFleetPins();
   await testMigrationRoundTrip();
   await testMigrationDocs();
   await testDriveFolders();
   testDriveUpload();
   await testServedFile();
+  await testMyPostingsPage();
   await testAccountMerge();
   process.exit(finish() ? 0 : 1);
 }

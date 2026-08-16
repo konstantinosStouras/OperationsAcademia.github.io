@@ -1,0 +1,82 @@
+# Instant publish — setup
+
+**What it does.** A posting created, edited, withdrawn or taken down appears on
+the site in about a minute instead of at the next 20-minute build. A small
+Cloud Function (`v2/_functions/index.js`) watches `jobSubmissions` and rings
+the GitHub build's doorbell (`repository_dispatch`); the build itself is
+unchanged and the 20-minute schedule stays as the safety net, so nothing is
+lost if the function is down — changes just take up to 20 minutes again.
+
+The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
+build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was
+published. Until the `SMTP_*` secrets are set the message is printed into the
+build log instead of e-mailed, so the record still exists.
+
+## 1. A GitHub token the function may ring the doorbell with
+
+The function needs permission to fire a `repository_dispatch` event — nothing
+more.
+
+1. GitHub → your avatar → **Settings** → **Developer settings** →
+   **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+2. Token name: `OA instant publish`.
+3. **Expiration**: custom, one year (the maximum). Put a note in your calendar —
+   when it expires the function logs `dispatch refused (401)` and the site
+   silently falls back to the 20-minute schedule, which is easy not to notice.
+4. **Repository access**: *Only select repositories* →
+   `OperationsAcademia.github.io`.
+5. **Permissions** → Repository permissions → **Contents: Read and write**.
+   Nothing else. (This is the permission `repository_dispatch` requires.)
+6. Generate, and copy the `github_pat_…` value.
+
+## 2. Give it to the function as a secret
+
+From the repo's `v2/` directory:
+
+```
+firebase functions:secrets:set GH_DISPATCH_TOKEN --project operations-academia
+```
+
+Paste the PAT when prompted. The secret lives in Google Secret Manager, not in
+any file.
+
+## 3. Deploy the function
+
+```
+cd v2
+npm install --prefix _functions
+firebase deploy --only functions --project operations-academia
+```
+
+First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
+Artifact Registry, Eventarc) — say yes. It takes a few minutes.
+
+## 4. Verify
+
+Post or edit a job on the site, then look at
+**Actions → OA jobs — publish queued postings**: a run should appear within a
+few seconds whose trigger reads `repository_dispatch`. The posting is live
+when that run finishes (~1 minute, plus Pages' propagation).
+
+Function logs, if needed:
+
+```
+firebase functions:log --project operations-academia
+```
+
+`build dispatched` = working. `dispatch refused (401)` = the PAT expired or is
+wrong — mint a new one and re-run step 2, then redeploy (step 3) so the
+function picks the new secret version up.
+
+## Why this never loops
+
+The build writes to the same documents it reads (stamping `published`,
+attaching the Drive link). The function dispatches **only** when a document's
+new state is one a *client* produces — `queued`, `withdrawn`, `hidden` — and
+never on the build's own `published` stamp. A build therefore cannot trigger
+itself.
+
+## Cost
+
+Firestore triggers bill per invocation; this site's posting traffic is a few
+events a day against a free tier of 2 million a month. Effectively zero.

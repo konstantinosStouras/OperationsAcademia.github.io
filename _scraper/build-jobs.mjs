@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
-  marketYear, inCurrentMarket,
+  marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
@@ -342,10 +342,10 @@ async function main() {
          'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
 
-  const merged =
-    mergeRows(orphans, fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
-      removeRefs);
-  const { added, updated, removed } = merged;
+  const freshVisible = fresh.map((f) => f.row)
+    .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
+
+  const merged = mergeRows(orphans, freshVisible, removeRefs);
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
@@ -358,14 +358,28 @@ async function main() {
     log(`${rows.length - onPage} of ${rows.length} posting(s) are previous-market and off the page`);
   }
 
+  /* What changed AGAINST THE SERVED FILE — the comparison a reader of this log
+     actually means. mergeRows' own counters compare against the orphan carry,
+     so on a normal run ("every posting has a document") they read "+95 new"
+     when one posting is new and six were edited. Computed once, used for both
+     the log and the admin e-mail, so the two can never tell different
+     stories. */
+  const changes = collectChanges(existing, freshVisible, removeRefs);
+
   const before = serialise(existing);
   const after = serialise(rows);
 
   if (before === after) {
     log('the dataset is already up to date — writing nothing.');
   } else {
-    log(`jobs.json: +${added} new, ${updated} updated, ${removed} removed  (${rows.length} total)`);
-    for (const f of fresh) log(`  + ${f.row.ref || f.row.id}  ${f.row.institution}`);
+    log(`jobs.json: +${changes.added} new, ${changes.edits.length} edited, ` +
+        `${changes.takedowns.length} taken down  (${rows.length} total)`);
+    const known = new Set(existing.map((r) => (r.ref ? 'ref:' + r.ref : 'id:' + r.id)));
+    for (const r of freshVisible) {
+      if (!known.has(r.ref ? 'ref:' + r.ref : 'id:' + r.id)) {
+        log(`  + ${r.ref || r.id}  ${r.institution}`);
+      }
+    }
     if (DRY) {
       log('--dry-run: not writing.');
     } else {
@@ -380,6 +394,43 @@ async function main() {
          it. */
       await writeFile(VOCAB, serialiseVocab(buildVocab(rows, { generated: now.toISOString() })));
       log(`wrote ${path.relative(process.cwd(), JOBS)}, jobs-meta.json and vocab.json`);
+    }
+  }
+
+  /* ------------------------------------------ tell the admin what changed
+
+     Every EDIT to a published posting, and every takedown, goes to the admin
+     as a before/after — the owner's request: an edit goes live automatically,
+     and the human finds out rather than having to notice. Computed from the
+     rows (PUBLIC_FIELDS), so bookkeeping writes never produce an e-mail.
+
+     Best-effort by design: with SMTP unset the mail plumbing PRINTS the
+     message into this log instead — the record still exists, just not in an
+     inbox — and a send failure never stops the publish; the change is already
+     live, which is the point. */
+  if (before !== after && !DRY) {
+    try {
+      if (changes.edits.length || changes.takedowns.length) {
+        const mail = await import('./_mail.mjs');
+        const tx = await mail.transport();
+        const what = [
+          changes.edits.length && `${changes.edits.length} edited`,
+          changes.takedowns.length && `${changes.takedowns.length} taken down`,
+        ].filter(Boolean).join(', ');
+        await mail.send(tx, {
+          to: process.env.ADMIN_NOTIFY || 'kstouras@gmail.com',
+          subject: `[OA] Job postings changed: ${what}`,
+          html: mail.shell({
+            title: 'Job postings changed',
+            bodyHtml: renderChangesHtml(changes),
+            manageUrl: null,
+          }),
+        });
+        log(`change e-mail: ${what} -> ${process.env.ADMIN_NOTIFY || 'kstouras@gmail.com'}` +
+            (tx ? '' : ' (printed only — SMTP is not configured)'));
+      }
+    } catch (e) {
+      warn(`change e-mail failed (${e.message}) — the changes are live regardless`);
     }
   }
 

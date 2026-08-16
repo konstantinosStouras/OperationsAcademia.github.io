@@ -15,6 +15,12 @@ name: OA data — publish queued postings, candidates and placements
 # to have running before the Firebase project exists.
 
 on:
+  # The instant path: a Cloud Function (v2/_functions) fires this the moment a
+  # posting is created, edited, withdrawn or hidden, so the change is live in
+  # about a minute. The schedule below is the safety net that catches anything
+  # the doorbell missed.
+  repository_dispatch:
+    types: [oa-jobs-changed]
   schedule:
     # every 20 minutes, off the hour so this repo does not queue behind every
     # other :00 job on the runners
@@ -63,7 +69,7 @@ jobs:
 
       - name: Install the Admin SDK
         if: steps.gate.outputs.ready == 'true'
-        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
 
       - name: Offline checks
         run: node _scraper/selftest.mjs
@@ -78,6 +84,12 @@ jobs:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          # For the before/after e-mail on every edit or takedown. Unset =
+          # the message is printed into this log instead of sent.
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
         run: |
           node _scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 

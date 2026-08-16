@@ -31,7 +31,66 @@
   ],
   "featured": true,
   "source": "sheet-import",
-  "addedAt": "2025-08-06T00:00:00Z"
+  "addedAt": "2025-08-06T00:00:00Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-national-university-of-singapore-20260816",
+  "year": 2027,
+  "posted": "2026-08-16",
+  "institution": "National University of Singapore",
+  "department": "NUS Business School, Department of Analytics and Operations",
+  "school": "NUS Business School",
+  "unit": "Department of Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "September 9, 2027. Notes on the deadline",
+  "applyByDate": "2027-09-09",
+  "comments": "Comments on the posting",
+  "country": "Singapore",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore",
+  "characteristics": [],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-16T08:11:16Z",
+  "ref": "OA-JOB-260816-L6R5",
+  "owner": "b634c4738dcb2337"
+ },
+ {
+  "id": "2028-university-college-london-20260816",
+  "year": 2028,
+  "posted": "2026-08-16",
+  "institution": "University College London",
+  "department": "Business School, Operations & Technology group",
+  "school": "Business School",
+  "unit": "Operations & Technology group",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "February 9, 2027. Notes on the deadline",
+  "applyByDate": "2027-02-09",
+  "comments": "Comments on the posting",
+  "country": "Canada",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
+  "characteristics": [
+   "Research seminars"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-16T08:03:40Z",
+  "ref": "OA-JOB-260816-BK7Q",
+  "owner": "b634c4738dcb2337"
  },
  {
   "id": "2027-university-of-virginia-20260812",
@@ -62,7 +121,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-08-12T00:00:00Z"
+  "addedAt": "2026-08-12T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2027-the-ohio-state-university-20260810",
@@ -95,7 +155,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-08-10T00:00:00Z"
+  "addedAt": "2026-08-10T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2028-university-of-kansas-20260806",
@@ -126,7 +187,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-08-06T00:00:00Z"
+  "addedAt": "2026-08-06T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2027-national-university-of-singapore-20260730",
@@ -159,7 +221,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-07-30T00:00:00Z"
+  "addedAt": "2026-07-30T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-mcgill-university-20260728",
@@ -192,7 +255,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-07-28T00:00:00Z"
+  "addedAt": "2026-07-28T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-mannheim-20260720",
@@ -220,7 +284,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-07-20T00:00:00Z"
+  "addedAt": "2026-07-20T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2027-university-of-michigan-20260708",
@@ -253,7 +318,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-07-08T00:00:00Z"
+  "addedAt": "2026-07-08T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2027-ku-leuven-20260702",
@@ -285,7 +351,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-07-02T00:00:00Z"
+  "addedAt": "2026-07-02T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-houston-20260428",
@@ -318,7 +385,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-04-28T00:00:00Z"
+  "addedAt": "2026-04-28T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-tulane-university-20260408",
@@ -350,7 +418,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-04-08T00:00:00Z"
+  "addedAt": "2026-04-08T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-tulane-university-20260407",
@@ -382,7 +451,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-04-07T00:00:00Z"
+  "addedAt": "2026-04-07T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-tulane-university-20260407-2",
@@ -414,7 +484,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-04-07T00:00:00Z"
+  "addedAt": "2026-04-07T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2027-tulane-university-20260407",
@@ -446,7 +517,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-04-07T00:00:00Z"
+  "addedAt": "2026-04-07T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-institut-mines-telecom-business-school-20260319",
@@ -478,7 +550,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-03-19T00:00:00Z"
+  "addedAt": "2026-03-19T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-tilburg-university-20260224",
@@ -509,7 +582,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-24T00:00:00Z"
+  "addedAt": "2026-02-24T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-georgetown-university-20260223",
@@ -541,7 +615,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-23T00:00:00Z"
+  "addedAt": "2026-02-23T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20260223",
@@ -572,7 +647,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-23T00:00:00Z"
+  "addedAt": "2026-02-23T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20260210",
@@ -603,7 +679,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-10T00:00:00Z"
+  "addedAt": "2026-02-10T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-utah-20260209",
@@ -638,7 +715,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-09T00:00:00Z"
+  "addedAt": "2026-02-09T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-georgia-state-university-20260206",
@@ -671,7 +749,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-06T00:00:00Z"
+  "addedAt": "2026-02-06T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-hec-paris-20260203",
@@ -704,7 +783,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-02-03T00:00:00Z"
+  "addedAt": "2026-02-03T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-cyprus-20260127",
@@ -738,7 +818,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-01-27T00:00:00Z"
+  "addedAt": "2026-01-27T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-carnegie-mellon-university-20260119",
@@ -771,7 +852,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-01-19T00:00:00Z"
+  "addedAt": "2026-01-19T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-hong-kong-polytechnic-university-20260111",
@@ -802,7 +884,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-01-11T00:00:00Z"
+  "addedAt": "2026-01-11T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-united-states-naval-academy-20260106",
@@ -831,7 +914,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2026-01-06T00:00:00Z"
+  "addedAt": "2026-01-06T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-mannheim-20251208",
@@ -859,7 +943,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-12-08T00:00:00Z"
+  "addedAt": "2025-12-08T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-tbs-education-20251203",
@@ -892,7 +977,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-12-03T00:00:00Z"
+  "addedAt": "2025-12-03T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-villanova-university-20251120",
@@ -924,7 +1010,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-11-20T00:00:00Z"
+  "addedAt": "2025-11-20T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-city-university-of-hong-kong-20251118",
@@ -957,7 +1044,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-11-18T00:00:00Z"
+  "addedAt": "2025-11-18T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20251113",
@@ -988,7 +1076,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-11-13T00:00:00Z"
+  "addedAt": "2025-11-13T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-auburn-university-20251106",
@@ -1020,7 +1109,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-11-06T00:00:00Z"
+  "addedAt": "2025-11-06T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-pennsylvania-state-university-20251104",
@@ -1054,7 +1144,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-11-04T00:00:00Z"
+  "addedAt": "2025-11-04T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-lehigh-university-20251029",
@@ -1086,7 +1177,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-29T00:00:00Z"
+  "addedAt": "2025-10-29T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-south-carolina-20251024",
@@ -1119,7 +1211,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-24T00:00:00Z"
+  "addedAt": "2025-10-24T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-california-berkeley-20251023",
@@ -1147,7 +1240,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-23T00:00:00Z"
+  "addedAt": "2025-10-23T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-korea-advanced-institute-of-science-and-technolo-20251022",
@@ -1180,7 +1274,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-22T00:00:00Z"
+  "addedAt": "2025-10-22T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-california-berkeley-20251022",
@@ -1211,7 +1306,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-22T00:00:00Z"
+  "addedAt": "2025-10-22T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-arizona-state-university-20251021",
@@ -1244,7 +1340,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-21T00:00:00Z"
+  "addedAt": "2025-10-21T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-university-of-texas-at-dallas-20251021",
@@ -1277,7 +1374,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-21T00:00:00Z"
+  "addedAt": "2025-10-21T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-cambridge-20251017",
@@ -1310,7 +1408,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-17T00:00:00Z"
+  "addedAt": "2025-10-17T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-san-diego-20251017",
@@ -1338,7 +1437,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-17T00:00:00Z"
+  "addedAt": "2025-10-17T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-columbia-university-20251013",
@@ -1370,7 +1470,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-13T00:00:00Z"
+  "addedAt": "2025-10-13T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-unsw-sydney-20251013",
@@ -1402,7 +1503,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-13T00:00:00Z"
+  "addedAt": "2025-10-13T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-temple-university-20251010",
@@ -1436,7 +1538,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-10T00:00:00Z"
+  "addedAt": "2025-10-10T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-baruch-college-the-city-university-of-new-york-c-20251007",
@@ -1469,7 +1572,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-07T00:00:00Z"
+  "addedAt": "2025-10-07T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-virginia-20251007",
@@ -1500,7 +1604,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-07T00:00:00Z"
+  "addedAt": "2025-10-07T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-american-university-of-beirut-20251006",
@@ -1531,7 +1636,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-06T00:00:00Z"
+  "addedAt": "2025-10-06T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-virginia-20251005",
@@ -1561,7 +1667,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-05T00:00:00Z"
+  "addedAt": "2025-10-05T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-michigan-state-university-20251004",
@@ -1595,7 +1702,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-04T00:00:00Z"
+  "addedAt": "2025-10-04T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-ozyegin-university-20251003",
@@ -1628,7 +1736,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-03T00:00:00Z"
+  "addedAt": "2025-10-03T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-texas-at-dallas-20251003",
@@ -1662,7 +1771,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-03T00:00:00Z"
+  "addedAt": "2025-10-03T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-michigan-state-university-20251002",
@@ -1696,7 +1806,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-02T00:00:00Z"
+  "addedAt": "2025-10-02T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-miami-20251002",
@@ -1730,7 +1841,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-02T00:00:00Z"
+  "addedAt": "2025-10-02T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-utah-20251002",
@@ -1764,7 +1876,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-10-02T00:00:00Z"
+  "addedAt": "2025-10-02T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20250929",
@@ -1795,7 +1908,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-29T00:00:00Z"
+  "addedAt": "2025-09-29T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-minnesota-20250929",
@@ -1825,7 +1939,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-29T00:00:00Z"
+  "addedAt": "2025-09-29T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-city-university-of-hong-kong-20250926",
@@ -1859,7 +1974,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-26T00:00:00Z"
+  "addedAt": "2025-09-26T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-lehigh-university-20250926",
@@ -1892,7 +2008,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-26T00:00:00Z"
+  "addedAt": "2025-09-26T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-illinois-urbana-champaign-20250925",
@@ -1924,7 +2041,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-25T00:00:00Z"
+  "addedAt": "2025-09-25T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-virginia-20250925",
@@ -1957,7 +2075,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-25T00:00:00Z"
+  "addedAt": "2025-09-25T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-nanyang-technological-university-20250924",
@@ -1991,7 +2110,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-24T00:00:00Z"
+  "addedAt": "2025-09-24T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-ohio-state-university-20250923",
@@ -2025,7 +2145,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-23T00:00:00Z"
+  "addedAt": "2025-09-23T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-houston-20250923",
@@ -2059,7 +2180,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-23T00:00:00Z"
+  "addedAt": "2025-09-23T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-houston-20250923-2",
@@ -2092,7 +2214,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-23T00:00:00Z"
+  "addedAt": "2025-09-23T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-shanghai-university-of-finance-and-economics-20250922",
@@ -2124,7 +2247,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-22T00:00:00Z"
+  "addedAt": "2025-09-22T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-national-university-of-singapore-20250918",
@@ -2157,7 +2281,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-18T00:00:00Z"
+  "addedAt": "2025-09-18T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-san-diego-20250918",
@@ -2186,7 +2311,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-18T00:00:00Z"
+  "addedAt": "2025-09-18T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-london-business-school-20250916",
@@ -2218,7 +2344,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-16T00:00:00Z"
+  "addedAt": "2025-09-16T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20250913",
@@ -2249,7 +2376,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-13T00:00:00Z"
+  "addedAt": "2025-09-13T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-city-st-george-s-university-of-london-20250911",
@@ -2282,7 +2410,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-11T00:00:00Z"
+  "addedAt": "2025-09-11T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-university-of-hong-kong-20250910",
@@ -2316,7 +2445,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-10T00:00:00Z"
+  "addedAt": "2025-09-10T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-tulane-university-20250904",
@@ -2347,7 +2477,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-04T00:00:00Z"
+  "addedAt": "2025-09-04T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20250903",
@@ -2380,7 +2511,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-03T00:00:00Z"
+  "addedAt": "2025-09-03T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-institut-mines-telecom-20250902",
@@ -2411,7 +2543,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-09-02T00:00:00Z"
+  "addedAt": "2025-09-02T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-imperial-college-london-20250830",
@@ -2445,7 +2578,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-30T00:00:00Z"
+  "addedAt": "2025-08-30T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-london-20250827",
@@ -2479,7 +2613,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-27T00:00:00Z"
+  "addedAt": "2025-08-27T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-south-carolina-20250822",
@@ -2512,7 +2647,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-22T00:00:00Z"
+  "addedAt": "2025-08-22T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-frankfurt-school-of-finance-management-20250821",
@@ -2545,7 +2681,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-21T00:00:00Z"
+  "addedAt": "2025-08-21T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-universidad-de-los-andes-20250821",
@@ -2577,7 +2714,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-21T00:00:00Z"
+  "addedAt": "2025-08-21T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-wisconsin-madison-20250819",
@@ -2611,7 +2749,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-19T00:00:00Z"
+  "addedAt": "2025-08-19T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-college-dublin-20250817",
@@ -2644,7 +2783,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-17T00:00:00Z"
+  "addedAt": "2025-08-17T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-iese-business-school-20250816",
@@ -2677,7 +2817,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-16T00:00:00Z"
+  "addedAt": "2025-08-16T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-chinese-university-of-hong-kong-shenzhen-20250815",
@@ -2711,7 +2852,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-15T00:00:00Z"
+  "addedAt": "2025-08-15T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-san-diego-20250814",
@@ -2740,7 +2882,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-14T00:00:00Z"
+  "addedAt": "2025-08-14T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-notre-dame-20250813",
@@ -2773,7 +2916,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-13T00:00:00Z"
+  "addedAt": "2025-08-13T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-indian-school-of-business-20250807",
@@ -2805,7 +2949,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-07T00:00:00Z"
+  "addedAt": "2025-08-07T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-depauw-university-20250805",
@@ -2833,7 +2978,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-08-05T00:00:00Z"
+  "addedAt": "2025-08-05T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-national-university-of-singapore-20250708",
@@ -2866,7 +3012,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-07-08T00:00:00Z"
+  "addedAt": "2025-07-08T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-hec-paris-20250621",
@@ -2900,7 +3047,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-21T00:00:00Z"
+  "addedAt": "2025-06-21T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-chinese-university-of-hong-kong-shenzhen-20250612",
@@ -2933,7 +3081,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-12T00:00:00Z"
+  "addedAt": "2025-06-12T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-the-hong-kong-polytechnic-university-20250605",
@@ -2964,7 +3113,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-05T00:00:00Z"
+  "addedAt": "2025-06-05T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-university-of-mannheim-20250605",
@@ -2997,7 +3147,8 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-06-05T00:00:00Z"
+  "addedAt": "2025-06-05T00:00:00Z",
+  "owner": ""
  },
  {
   "id": "2026-ivey-business-school-western-university-20250526",
@@ -3030,6 +3181,7 @@
   ],
   "featured": false,
   "source": "sheet-import",
-  "addedAt": "2025-05-26T00:00:00Z"
+  "addedAt": "2025-05-26T00:00:00Z",
+  "owner": ""
  }
 ]

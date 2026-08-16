@@ -76,7 +76,7 @@
    "id": "jobs-sheet-sync",
    "date": "2026-08-15",
    "title": "Every job posting is listed again",
-   "summary": "Postings submitted through the old Google form kept arriving after the new list was built from a one-off copy of the spreadsheet, so the new page had fallen behind the old one. The spreadsheet is now read automatically twice an hour and anything missing is added, so both lists show the same postings until the old form is retired.",
+   "summary": "Postings submitted through the old form kept arriving after the new list was built from a one-off copy of the spreadsheet, so the new page had fallen behind the old one. The spreadsheet is now read automatically twice an hour and anything missing is added, so both lists show the same postings until the old form is retired.",
    "url": "https://www.operationsacademia.org/jobs"
   },
   {
@@ -89,7 +89,7 @@
   {
    "id": "post-a-job-form",
    "date": "2026-08-15",
-   "title": "Posting a job no longer goes through a Google form",
+   "title": "Posting a job no longer goes through a third-party form",
    "summary": "Job postings are submitted on the site itself. You sign in once, and your posting appears on the list automatically, normally within the hour. Because it is tied to your account, you can come back to correct a deadline or a broken link, or withdraw the posting once the search closes — none of which was possible before.",
    "url": "https://www.operationsacademia.org/post-a-job"
   },

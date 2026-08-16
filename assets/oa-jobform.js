@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — "Post a job" form.
 
-   Replaces the Google Form that fed the "Job Postings" spreadsheet. It writes
+   Replaces the third-party form that fed the "Job Postings" spreadsheet. It writes
    ONE bounded document into the Firestore `jobSubmissions` collection; the
    scheduled build (v2/_scraper/build-jobs.mjs) turns queued documents into rows
    in v2/data/jobs.json and commits them, and the static page then lazy-loads
@@ -250,6 +250,87 @@
 
   /* ------------------------------------------------------------------- wiring */
 
+  /* ------------------------------------------------------------ the draft
+
+     Everything typed is mirrored to localStorage as it is typed, and restored
+     on the next visit. Exists because of a real loss: the first upload attempt
+     hung, the poster refreshed, and a fully filled-in form was gone. A draft
+     costs nothing and makes a refresh — or a crash, or a closed tab — cost
+     nothing either.
+
+     NOT restored into edit mode (the loaded posting is the truth there), and
+     cleared on a successful send. The chosen FILE cannot be kept — a File
+     handle does not survive the page — so after a restore the poster
+     re-chooses it; the fields are the part that hurts to lose. */
+
+  var DRAFT_KEY = 'oa:jobdraft:v1';
+
+  function draftSave() {
+    try {
+      var form = $('oa-job-form');
+      if (!form || EDIT_ID) return;
+      var data = {};
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[id], select[id], textarea[id]'),
+        function (el) {
+          if (el.type === 'file' || el.type === 'hidden') return;
+          if (el.type === 'checkbox') return;             // handled by name below
+          if (el.value) data[el.id] = el.value;
+        });
+      var ticked = [];
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[type="checkbox"]:checked'),
+        function (cb) { ticked.push(cb.name + '=' + cb.value); });
+      if (ticked.length) data.__checks = ticked;
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    } catch (e) { /* private mode / quota — a draft is best-effort */ }
+  }
+
+  function draftRestore() {
+    try {
+      if (EDIT_ID) return;
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      Object.keys(data).forEach(function (id) {
+        if (id === '__checks') return;
+        var el = $(id);
+        if (el && !el.value) el.value = data[id];
+      });
+      (data.__checks || []).forEach(function (pair) {
+        var i = pair.indexOf('=');
+        var box = document.querySelector(
+          'input[type="checkbox"][name="' + pair.slice(0, i) + '"][value="' +
+          CSS.escape(pair.slice(i + 1)) + '"]');
+        if (box) box.checked = true;
+      });
+      // keep the derived department line and the until-filled state in step
+      var school = $('f-school');
+      if (school) school.dispatchEvent(new Event('input', { bubbles: true }));
+      var uf = $('f-untilFilled');
+      if (uf && uf.checked) uf.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) { /* a corrupt draft is discarded by the next save */ }
+  }
+
+  function draftClear() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  }
+
+  var draftTimer = null;
+  function wireDraft() {
+    var form = $('oa-job-form');
+    if (!form) return;
+    draftRestore();
+    form.addEventListener('input', function () {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(draftSave, 400);
+    });
+    form.addEventListener('change', function () {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(draftSave, 400);
+    });
+  }
+
   /* ------------------------------------------------------- the advert file
 
      The poster attaches the advertisement itself instead of hunting for a URL.
@@ -339,6 +420,16 @@
     if (!adFile) return Promise.resolve(null);
 
     return OAFB.readyStorage().then(function (fb) {
+      /* The SDK's default is to retry a failing upload silently for TEN
+         MINUTES before erroring — which on a missing bucket or a blocking
+         extension looks exactly like "loading forever" at 0%. 45 seconds is
+         enough for genuine flakiness; a real upload that is making progress
+         is not affected by this timer. */
+      try {
+        fb.storage().setMaxUploadRetryTime(45000);
+        fb.storage().setMaxOperationRetryTime(45000);
+      } catch (e) { /* older SDK — the defaults apply */ }
+
       var clean = String(adFile.name || 'advert')
         .replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120) || 'advert';
       var path = 'uploads/' + user.uid + '/jobs/' + Date.now() + '-' + clean;
@@ -467,8 +558,24 @@
   }
 
   function boot() {
+    /* FIRST PAINT, before Firebase exists. Everything on this page used to
+       stay hidden until the SDK had downloaded from gstatic AND the session
+       had restored over the network — a heading over blank space for one to
+       three seconds on a cold cache, and for the full 15-second timeout when
+       the CDN is blocked. The accounts hint remembers how the LAST visit
+       resolved, so the page shows its signed-in shape (the form) or its
+       signed-out shape (the sign-in gate) immediately; the real auth state
+       reconciles it through the same onChange handler as always, and a stale
+       hint costs one visible swap, not a wrong capability — the rules, not
+       the paint, decide who can post. */
+    var hinted = window.OAAccounts && OAAccounts.hint && OAAccounts.hint();
+    show($('oa-job-form'), hinted === 'in');
+    show($('oa-intro'), hinted === 'in');
+    show($('oa-needauth'), hinted !== 'in');
+
     wireVocab();
     wireAdFile();
+    wireDraft();
     enterEditMode();
     fillStaticOptions();
 
@@ -598,6 +705,7 @@
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
           return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
+          draftClear();
           sent = true;
           /* The confirmation is written for a NEW posting — a reference to keep,
              a copy e-mailed, "post another". None of that is true of a
@@ -620,7 +728,13 @@
         }).catch(function (err) {
           btn.disabled = false;
           var code = (err && err.code) || '';
-          if (code === 'storage/unauthorized') {
+          if (code === 'storage/retry-limit-exceeded' || code === 'storage/unknown') {
+            say('We could not reach the file storage service. Most often this means ' +
+                'Cloud Storage has not been set up for this site yet (Firebase console ' +
+                '\u2192 Storage \u2192 Get started), or a browser extension is blocking ' +
+                'firebasestorage.googleapis.com. Your posting was NOT sent — remove the ' +
+                'file to post with a link instead, or try again once storage is up.', 'err');
+          } else if (code === 'storage/unauthorized') {
             say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
                 'and the site\u2019s storage rules must be published.', 'err');
           } else if (code === 'permission-denied') {

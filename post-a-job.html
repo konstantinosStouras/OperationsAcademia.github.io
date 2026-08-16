@@ -6,6 +6,17 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta content="Post an academic job opening in Operations to Operations Academia." name="description">
+    <!-- The Firebase SDK is fetched by script (assets/oa-firebase.js), which
+         means the download used to start only after the whole page and every
+         other script had been parsed. These hints start the connection and the
+         three downloads DURING the HTML parse, which is worth several hundred
+         milliseconds on a cold cache — and they must name the exact same URLs
+         oa-firebase.js injects, or they fetch dead weight. -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
     <link href="/assets/css/main.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
   </head>
@@ -51,9 +62,8 @@
                   <div class="oa-note is-warn" id="oa-offline" hidden>
                     <p><strong>Submissions are not switched on yet.</strong> This preview of the
                     new site is not connected to its database, so the form below cannot be sent.
-                    In the meantime, please keep using the
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScdNoVJhjhTO8E_v01VefQjZzlBGLW16jhwQGBdt9DWOIxFiA/viewform?usp=pp_url&amp;entry.956351437=2026"
-                       target="_blank" rel="noopener">current Google form</a>.</p>
+                    Please try again later, or tell us on the
+                    <a href="feedback.html">feedback page</a>.</p>
                   </div>
 
                   <!-- The gate. Shown while signed out; the form below is not
