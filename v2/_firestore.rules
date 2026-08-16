@@ -147,6 +147,116 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ---------------------------------------------------------- candidates
+
+    /* A job-market candidate's own profile: the same lifecycle as a job
+       posting (create queued -> the build publishes -> correct or withdraw),
+       plus two optional uploads (CV, research summary) that land in Storage
+       (see _storage.rules, kind 'candidates') and are filed into Drive by the
+       build, exactly like a job advert. `email` is published ONLY when
+       `emailPublic` is true — the old sheet published every address, which is
+       the disclosure the rebuild retires. */
+    match /candidateSubmissions/{id} {
+
+      function candShapeOk() {
+        return str('first', 100)      && str('last', 100)
+            && str('affiliation', 220) && str('position', 160)
+            && str('cvUrl', 600)       && str('rsUrl', 600)
+            && str('webUrl', 600)      && str('email', 200)
+            && str('note', 1500)       && str('source', 40)
+            && str('authEmail', 200)   && str('ref', 60)
+            && str('cvUploadPath', 400) && str('cvUploadName', 200)
+            && str('cvUploadType', 100)
+            && str('rsUploadPath', 400) && str('rsUploadName', 200)
+            && str('rsUploadType', 100)
+            && list('researchAreas', 10) && list('informsDays', 10)
+            && (!('emailPublic' in request.resource.data)
+                || request.resource.data.emailPublic is bool)
+            && request.resource.data.year is int
+            && request.resource.data.year >= 2000
+            && request.resource.data.year <= 2100
+            // derived by the build, never client-supplied
+            && !('postedOn' in request.resource.data)
+            && !('owner' in request.resource.data)
+            && !('featured' in request.resource.data);
+      }
+
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'queued'
+                    && request.resource.data.createdAt == request.time
+                    && candShapeOk()
+                    && request.resource.data.keys().size() <= 30;
+
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      // Correct, or take the profile down; back to 'queued' re-publishes it.
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.status in ['queued', 'withdrawn']
+                    && candShapeOk();
+
+      // account merge hand-over — same shape and reasoning as jobSubmissions
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['uid', 'mergedFrom', 'mergedAt'])
+                    && request.resource.data.uid is string
+                    && request.resource.data.uid.size() >= 10
+                    && request.resource.data.uid != resource.data.uid
+                    && request.resource.data.mergedFrom == request.auth.uid;
+
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ---------------------------------------------------------- placements
+
+    /* A confirmed placement: who, from which PhD, joining where as what.
+       Same lifecycle as the other two, no uploads. */
+    match /placementSubmissions/{id} {
+
+      function plShapeOk() {
+        return str('first', 100)             && str('last', 100)
+            && str('phdInstitution', 220)     && str('undergradInstitution', 220)
+            && str('joiningInstitution', 220) && str('joiningPosition', 160)
+            && str('webUrl', 600)             && str('email', 200)
+            && str('note', 1500)              && str('source', 40)
+            && str('authEmail', 200)          && str('ref', 60)
+            && request.resource.data.year is int
+            && request.resource.data.year >= 2000
+            && request.resource.data.year <= 2100
+            && !('postedOn' in request.resource.data)
+            && !('owner' in request.resource.data)
+            && !('featured' in request.resource.data);
+      }
+
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'queued'
+                    && request.resource.data.createdAt == request.time
+                    && plShapeOk()
+                    && request.resource.data.keys().size() <= 25;
+
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.status in ['queued', 'withdrawn']
+                    && plShapeOk();
+
+      // account merge hand-over — same shape and reasoning as jobSubmissions
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['uid', 'mergedFrom', 'mergedAt'])
+                    && request.resource.data.uid is string
+                    && request.resource.data.uid.size() >= 10
+                    && request.resource.data.uid != resource.data.uid
+                    && request.resource.data.mergedFrom == request.auth.uid;
+
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
     // ------------------------------------------------------------ feedback
 
     match /feedback/{id} {

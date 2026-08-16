@@ -1406,3 +1406,36 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 
 .oa-advert-or { margin: 10px 0 6px; color: #8a929b; }
+
+/* --------------------------------------------------------------- what's new
+   The update log on whats-new.html, rendered from changelog.json — the /lit/
+   About page's list, in this site's colours. */
+
+.oa-wn-entry {
+  margin: 0 0 22px;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid #3b7dbc;
+}
+
+.oa-wn-date {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a929b;
+}
+
+.oa-wn-title { margin: 0 0 6px; font-size: 17px; line-height: 1.35; }
+.oa-wn-title a { color: #2f6ea8; text-decoration: none; }
+.oa-wn-title a:hover { text-decoration: underline; }
+
+.oa-wn-body {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #444;
+}
+
+/* the subscribe button rides inside the note's own paragraph */
+.oa-wn-sub { display: inline-block; margin-left: 10px; vertical-align: middle; }

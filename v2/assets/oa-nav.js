@@ -62,6 +62,7 @@
       '</li>' +
       item('faqs.html', 'About') +
         '<ul>' +
+          item('whats-new.html', "What's new") + '</li>' +
           item('directors-and-contributors.html', 'Directors and contributors') + '</li>' +
           item('faqs.html', 'FAQs') + '</li>' +
           item('http://a.co/ev61V45', 'Donate (in books)') + '</li>' +

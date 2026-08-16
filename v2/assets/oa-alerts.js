@@ -138,8 +138,13 @@
 
   function writeForm(a) {
     // a NEW alert starts on jobs — the matcher no longer invents that default,
-    // and this is where a default belongs
-    a = a || { criteria: { topics: ['jobs'] } };
+    // and this is where a default belongs. The What's-new page deep-links
+    // ?topic=updates, arriving from "Subscribe to site updates": that visitor
+    // asked for the OTHER stream, so the new form starts there instead.
+    if (!a) {
+      var wanted = new URLSearchParams(location.search).get('topic');
+      a = { criteria: { topics: wanted === 'updates' ? ['updates'] : ['jobs'] } };
+    }
     var c = M.normalise(a.criteria);
     $('a-name').value = a.name || '';
     $('a-email').value = a.email || (OAAccounts.user() || {}).email || '';

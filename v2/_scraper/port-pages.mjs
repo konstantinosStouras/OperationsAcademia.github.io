@@ -69,15 +69,16 @@ const V2 = path.join(ROOT, 'v2');
    unreferenced backup of an older jobs page (no link anywhere, not in
    sitemap.xml), so porting it would publish a page the live site does not
    serve. */
+/* candidates and placements LEFT this list on 2026-08-16: both pages grew
+   their own forms and lists (the vendor swap), so they are hand-maintained
+   now and deliberately diverge from the live originals. */
 export const PAGES = [
   'index',
   'analytics',
-  'candidates',
   'contact',
   'directors-and-contributors',
   'faqs',
   'informed_consent_statement',
-  'placements',
   'previous-markets',
   'privacy-policy',
   'recent-faculty',
@@ -93,6 +94,8 @@ export const PAGES = [
 const V2_OWN = {
   jobs: 'jobs.html',
   feedback: 'feedback.html',
+  candidates: 'candidates.html',
+  placements: 'placements.html',
 };
 
 /* Slugs the live pages link to, written every way they are written there:
