@@ -38,6 +38,7 @@ import {
   text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta, mergeRows,
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
   marketYear, marketLabel, marketFloor, MARKET_WINDOW, collapseSameDay,
+  keyOf, isoStamp,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab, splitDepartment, joinDepartment } from './vocab.mjs';
 
@@ -236,6 +237,14 @@ export function rowsFromSheets(displayRows, rawRows) {
     let applyByDate = raw && R ? day(pick(raw, R.index, ['Apply by (exact date is required)'])) : '';
     if (!applyByDate) applyByDate = day(applyProse);
 
+    /* A posting whose prose says the search is open-ended carries NO deadline
+       date, whatever the raw tab holds beside it — rowFromSubmission's own
+       invariant (jobs-model.mjs: `untilFilled ? '' : …`). Four shipped rows
+       had both, and the page's Deadline bucket then read the date ("Open" /
+       "Expired") while the visible text said "until filled" — the same regex
+       oa-list.js buckets by, so the two can never disagree. */
+    if (/until\s*filled|open\s*until|rolling/i.test(applyProse)) applyByDate = '';
+
     const applyBy = redactEmails(applyProse) ||
       (applyByDate ? longDate(applyByDate) : 'Until filled.');
 
@@ -287,7 +296,10 @@ export function rowsFromSheets(displayRows, rawRows) {
       characteristics,
       featured: String(pick(row, idx, ['Featured'])).trim() === '1',
       source: 'sheet-import',
-      addedAt: posted ? posted + 'T00:00:00Z' : '',
+      // stamped in main(), where the rows already in the output file are known
+      // — see stampAddedAt(). It means "when this row entered the dataset",
+      // never the day the poster says they advertised (that is `posted`).
+      addedAt: '',
     };
 
     out.push(rec);
@@ -311,6 +323,29 @@ export function rowsFromSheets(displayRows, rawRows) {
 
   unique.sort(displayOrder);
   return { rows: unique, unmatched, collapsed };
+}
+
+/* ------------------------------------------------------------ when it arrived
+
+   `addedAt` means the moment a row entered THIS dataset — see PUBLIC_FIELDS in
+   jobs-model.mjs, and rowFromSubmission, which stamps the submission's own
+   arrival. The importer used to write the poster's "job posted on" date at
+   midnight UTC instead, which is a different thing entirely: the sync runs
+   every 30 minutes, so a posting first read at 14:47 arrived carrying a
+   timestamp fifteen hours in the past. `addedAt` is the ONLY cursor the e-mail
+   alerts have (oa-alert-match.js keeps a row when `addedAt > lastSentAt`), and
+   lastSentAt only ever moves forward, so every subscriber whose digest had
+   gone out earlier that day never saw the posting at all — not late, never.
+
+   A row the output file already carries keeps the stamp it came in with, so a
+   re-sync of the whole sheet does not re-alert the entire back-catalogue. */
+
+export function stampAddedAt(rows, existing, now = new Date()) {
+  const known = new Map();
+  for (const r of existing || []) if (r.addedAt) known.set(keyOf(r), r.addedAt);
+  const stamp = isoStamp(now);
+  for (const r of rows) r.addedAt = known.get(keyOf(r)) || stamp;
+  return rows;
 }
 
 /* ------------------------------------------------------------------- main */
@@ -396,6 +431,14 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
       `(${marketLabel(minYear)}) or later — current market is ${marketYear(now)} ` +
       `(${marketLabel(marketYear(now))}), window ${MARKET_WINDOW}`);
   }
+  /* Read once: it is both what a row's arrival stamp is carried forward from
+     and what `--merge` merges into. An outPath that exists but does not parse
+     throws here rather than being read as an empty dataset — the same rule
+     build-jobs.mjs applies. */
+  const existing = existsSync(outPath)
+    ? JSON.parse(await readFile(outPath, 'utf8')) : [];
+  stampAddedAt(rows, existing, now);
+
   const published = rows.map(publicRow);
 
   /* An import of ZERO postings from a sheet that answered is not a healthy
@@ -432,8 +475,6 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
      the posting form contributed. */
   let final = rows;
   if (merge) {
-    const existing = existsSync(outPath)
-      ? JSON.parse(await readFile(outPath, 'utf8')) : [];
     const res = mergeRows(existing, rows);
     final = res.rows;
     console.log(`merge: +${res.added} new, ${res.updated} refreshed  (${final.length} total)`);

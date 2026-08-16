@@ -15,6 +15,13 @@
    here, rather than remembering per element. */
 [hidden] { display: none !important; }
 
+/* …but `!important` also outranks a deliberate override, and oa-list.css has
+   one: it re-shows every collapsed job card for print. Without this exception
+   printing /v2/jobs.html gives a list of institution names and nothing else. */
+@media print {
+  .oa-card-body[hidden] { display: block !important; }
+}
+
 /* -------------------------------------------------------------- account chip */
 
 /* #header is position:relative, height 3em, with #nav absolutely placed at
@@ -178,6 +185,13 @@
   font-size: 12px;
   font-weight: 400;
   color: #999;
+  /* oa-list.css uses `.oa-opt` for a row of the jobs filter dropdown (padded,
+     clickable, blue on hover). jobs.html loads both sheets and the profile card
+     opens over it, so the three properties this rule does not set have to be
+     put back or "(optional)" is padded, cursored and highlights blue. */
+  padding: 0;
+  background: none;
+  cursor: inherit;
 }
 
 .oa-modal-card label .oa-opt.oa-fine {
@@ -457,6 +471,11 @@
 .oa-form select,
 .oa-form textarea,
 .oa-modal-card input,
+/* main.css:1571 styles `form input[type=password]` (borderless, grey, 0.5em
+   radius) more specifically than `.oa-modal-card input`, so the sign-in modal's
+   password field rendered as a grey pill under a white bordered e-mail box.
+   Naming the type here outranks it. */
+.oa-modal-card input[type='password'],
 .oa-modal-card select,
 .oa-modal-card textarea {
   width: 100%;
@@ -470,6 +489,30 @@
   font-weight: 400;
   line-height: 1.45;
   color: #222;
+}
+
+/* main.css:1568 applies `-webkit-appearance: none` to every `form select` as
+   well as to inputs (see the checkbox note below), which drops the dropdown
+   arrow: the control then looks exactly like the text boxes above and below it,
+   and "Choose…" reads as an empty field. Handing the arrow back to the browser
+   (`appearance: menulist`) also hands back its box, which comes out 3px shorter
+   than the inputs it sits between — so draw the chevron ourselves, exactly as
+   the checkboxes below are drawn, which keeps one box model and one look in
+   every browser. */
+.oa-form select,
+.oa-modal-card select,
+/* the focused pair is named too: main.css's `form select:focus` is a background
+   SHORTHAND, so without them it would blank the chevron the moment the control
+   is focused. */
+.oa-form select:focus,
+.oa-modal-card select:focus {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23555' d='M0 0h10L5 6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
 }
 
 .oa-modal-card label {
@@ -487,9 +530,17 @@
 .oa-form input:focus,
 .oa-form select:focus,
 .oa-form textarea:focus,
-.oa-modal-card input:focus {
+.oa-modal-card input:focus,
+/* main.css:1585 turns `form input[type=text]:focus` grey, and names only `text`
+   and `password` — so one field of a form went grey on focus while the e-mail,
+   url and date fields beside it stayed white, which reads as a rendering fault.
+   These two selectors carry the type so they outrank it; the white background
+   below is what they are here for. */
+.oa-form input[type='text']:focus,
+.oa-modal-card input[type='password']:focus {
   outline: none;
   border-color: #3b7dbc;
+  background-color: #fff;   /* not the shorthand: it would drop the select's chevron */
   box-shadow: 0 0 0 3px rgba(59, 125, 188, 0.18);
 }
 
@@ -638,12 +689,11 @@
 
 button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
+/* Header rules do NOT belong here: main.css hides #header-wrapper outright below
+   841px, so anything about the account chip in this block is dead. The header's
+   own narrow band is 841–980px and is handled beside the header rules below. */
 @media screen and (max-width: 640px) {
   .oa-row > .oa-field { flex: 1 1 100%; }
-  #oa-account { font-size: 13px; }
-  .oa-acct-btn, .oa-acct-chip { padding: 3px 8px; }
-  .oa-acct-name { display: none; }
-  #oa-headnav .oa-acct-chip { padding: 0 8px 0 4px; }
   .oa-prow { flex-wrap: wrap; }
 }
 
@@ -888,7 +938,29 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   display: flex;
   align-items: center;
   gap: 8px;
+  /* #nav is absolute too (left:8em) and neither box reserves space for the
+     other, so this row slid over the last menu item — "About" — as the window
+     narrowed, and being later in the DOM it won the hit test as well: clicking
+     "About" opened feedback.html and its whole submenu became unreachable.
+     #nav's width is em-based throughout (0.9em labels, 1.5em gaps), so it
+     measures a constant ~30em at every one of main.css's breakpoints; reserving
+     8em + 30em + 1em of clearance from the header's left edge keeps this row off
+     it at every width and font size. */
+  max-width: calc(100% - 39em);
 }
+
+/* …and the row gives way inside that bound rather than spilling out of it: the
+   account name is the one content-sized part, so it is the part that ellipsises
+   (`min-width: 0` is what lets a flex item shrink below its text). */
+#oa-headnav #oa-account,
+#oa-headnav .oa-acct-wrap,
+#oa-headnav .oa-acct-chip { min-width: 0; }
+
+/* the chip is inline-flex inside .oa-acct-wrap, so shrinking the wrap alone
+   would leave it hanging out of the header's right edge instead */
+#oa-headnav .oa-acct-btn,
+#oa-headnav .oa-acct-chip,
+#oa-headnav .oa-acct-off { max-width: 100%; }
 
 /* the account control sits inside the row now, not pinned itself */
 #oa-headnav #oa-account {
@@ -936,6 +1008,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 #oa-headnav .oa-acct-btn { color: #3b7dbc !important; border-color: #3b7dbc; }
 
 .oa-acct-name {
+  min-width: 0;
   max-width: 15em;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -978,11 +1051,49 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-avatar-lg { width: 38px; height: 38px; font-size: 15px; }
 .oa-avatar-xl { width: 52px; height: 52px; font-size: 20px; }
 
-@media screen and (max-width: 736px) {
-  /* below 840px main.css hides the whole header bar and main.js takes over,
-     so this only matters in the narrow band where the bar is still shown */
-  .oa-headbtn span[aria-hidden] { display: none; }
-  .oa-headbtn { padding: 4px 8px; }
+/* Below 841px main.css hides the whole header bar and main.js's off-canvas panel
+   takes over, so the band where this row has to be compact is 841–980px, NOT the
+   736px the first version of this rule guarded — that one could never fire while
+   the bar was on screen. There is only ~123px of clear space left of the menu at
+   841px, so the pill keeps its glyph and drops its label, and the chip keeps its
+   avatar and drops the name. */
+@media screen and (min-width: 841px) and (max-width: 980px) {
+  /* the label is a bare text node next to the glyph's span, so it is zeroed
+     here and the glyph given its size back — the text stays in the document
+     for screen readers, and Feedback is in the About menu either way */
+  .oa-headbtn { font-size: 0; gap: 0; padding: 0 9px; }
+  .oa-headbtn span[aria-hidden] { font-size: 15px; }
+  .oa-acct-name { display: none; }
+  #oa-headnav .oa-acct-chip { padding: 0 8px 0 4px; gap: 6px; }
+  #oa-headnav .oa-acct-btn { padding: 0 9px; }
+  /* "Sign-in unavailable" is the widest thing this row can hold and it carries
+     no action at all, so where the space is tightest it is the first to go */
+  #oa-headnav .oa-acct-off { display: none; }
+}
+
+/* Below 841px main.css hides #header-wrapper outright and main.js rebuilds the
+   menu as the off-canvas #navPanel from #nav ALONE — so this row, and with it
+   the site's only sign-out control, is gone on a phone. CSS cannot rescue it
+   (the whole subtree is display:none from an ancestor); the items have to be
+   appended to the panel by oa-accounts.js, which runs after main.js builds it.
+   These are the styles they land in: an identity line above the account links,
+   which carry main.css's own `link depth-0` classes and so need nothing here. */
+@media screen and (max-width: 840px) {
+  #navPanel .oa-np-as {
+    display: block;
+    padding: 14px 1em 10px;
+    border-top: solid 1px rgba(255, 255, 255, 0.05);
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  #navPanel .oa-np-as strong {
+    display: block;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* --------------------------------------------------------- feedback layout */
@@ -1156,17 +1267,8 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: #8a8a8a !important;
 }
 
-/* The jobs page's season note, under the heading. The heading names the
-   current market; the list also carries the previous one, whose "until filled"
-   advertisements are still open (see MARKET_WINDOW in jobs-model.mjs). */
-.oa-season-note {
-  margin: -6px 0 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #6b7480;
-}
-
-.oa-season-note:empty { display: none; }
+/* The season note that used to sit under the jobs heading was removed at the
+   owner's request (2026-08-16), rules and element both. */
 
 /* ------------------------------------------------ search-as-you-type picker
    The vocabulary picker on the posting form (assets/oa-combo.js). The input

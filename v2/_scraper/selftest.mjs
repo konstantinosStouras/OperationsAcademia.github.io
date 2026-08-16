@@ -403,6 +403,62 @@ function testCollapseSameDay() {
   eq(order.rows.map((r) => r.institution).join(''), 'AB', 'first-seen order is kept');
 }
 
+/* Pins for the 2026-08 fleet-review fixes. Each of these asserts the SHAPE of
+   a fix that lives in a file this suite cannot execute (page scripts, the
+   rules) or an invariant that spans two files — the cheapest guard that keeps
+   a later edit from silently reopening the bug. */
+async function testFleetPins() {
+  // oa-nav.js derives its menu label from the SAME market-roll month as
+  // marketYear() — a third copy of the rule, pinned like jobs.html's.
+  const nav = await readFile(path.join(HERE, '..', 'assets', 'oa-nav.js'), 'utf8');
+  const navRoll = nav.match(/getUTCFullYear\(\)\s*\+\s*\(\s*d\.getUTCMonth\(\)\s*>=\s*(\d+)\s*\?\s*1\s*:\s*0\s*\)/);
+  ok(navRoll, 'oa-nav.js derives its season label rather than hard-coding one');
+  if (navRoll) eq(Number(navRoll[1]), MARKET_ROLL_MONTH, 'oa-nav.js rolls in the same month as marketYear()');
+
+  // A replacement must never re-stamp addedAt: it is the e-mail alerts' only
+  // cursor, and a moved stamp re-alerts every subscriber about a posting they
+  // were already sent.
+  const sub = { institution: 'U', department: 'D', country: 'USA',
+    type: 'University', levels: ['Assistant Professor'], uid: 'u1', ref: 'OA-JOB-1' };
+  const a = rowFromSubmission({ ...sub, createdAt: '2026-08-01T10:00:00Z' });
+  const b = rowFromSubmission({ ...sub, createdAt: '2026-08-09T10:00:00Z', comments: 'corrected' });
+  const merged = mergeRows([a], [b]);
+  eq(merged.rows[0].addedAt, a.addedAt, 'a correction keeps the original addedAt');
+  eq(merged.rows[0].comments, 'corrected', 'while the correction itself lands');
+
+  // The open-ended-deadline rule lives in the WRITERS: the page buckets a row
+  // "Until filled" purely on `applyByDate` being empty, so import-sheet.mjs
+  // (this regex) and rowFromSubmission (`untilFilled ? '' : …`, tested above)
+  // must guarantee an open-ended posting never carries a date — and no served
+  // row may violate it.
+  const RX_OPEN = 'until\\s*filled|open\\s*until|rolling';
+  const sheet = await readFile(path.join(HERE, 'import-sheet.mjs'), 'utf8');
+  ok(sheet.includes(RX_OPEN), 'import-sheet.mjs clears dates with the open-ended regex');
+  if (existsSync(JOBS)) {
+    const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+    const contradicts = rows.filter((r) =>
+      r.applyByDate && new RegExp(RX_OPEN, 'i').test(r.applyBy || ''));
+    eq(contradicts.map((r) => r.id).join(', '), '',
+      'no served row carries both an "until filled" deadline and a date');
+  }
+
+  // Everything inside /v2/ links relative, so the pages survive the cutover's
+  // move up one directory. The account menu was the last absolute holdout.
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+  ok(!/href=["']\/v2\//.test(acct),
+    'oa-accounts.js carries no absolute /v2/ link');
+
+  // The feedback inbox renders attacker-writable `shots` strings; they must
+  // be shape-validated (data:image only) and never interpolated raw.
+  const fb = await readFile(path.join(HERE, '..', 'assets', 'oa-feedback.js'), 'utf8');
+  ok(/DATA_IMAGE\s*=\s*\/\^data:image\\\//.test(fb),
+    'oa-feedback.js pins screenshot URLs to a strict data:image shape');
+  ok(fb.includes('safeShots(v.shots)'),
+    'the inbox renders screenshots only through the safeShots() validator');
+  ok(/function safeShots[\s\S]{0,220}DATA_IMAGE\.test\(u\)[\s\S]{0,80}\.map\(esc\)/.test(fb),
+    'safeShots() both validates the shape and escapes what survives');
+}
+
 /* ------------------------------------------ merging two accounts into one
 
    The merge itself is browser code, exercised in page-test.mjs. What is
@@ -761,6 +817,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testCollapseSameDay();
   testAssignIds();
   await testPageHeadingRule();
+  await testFleetPins();
   await testMigrationRoundTrip();
   await testMigrationDocs();
   await testDriveFolders();

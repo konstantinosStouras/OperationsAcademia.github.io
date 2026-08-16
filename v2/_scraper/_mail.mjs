@@ -27,6 +27,38 @@ export function esc(s) {
   ));
 }
 
+/**
+ * A URL fit to be an href in an e-mail we send.
+ *
+ * Job-ad links and posting links are submitted by strangers and reach a
+ * reader's inbox unreviewed, so the SCHEME is checked here: `javascript:` and
+ * `data:` hrefs are phishing and script-injection vectors that esc() cannot
+ * catch, because escaping quotes leaves the scheme intact. Only http(s) — the
+ * only schemes a job advertisement can legitimately use — survive; anything
+ * else returns '' and the caller simply omits the link.
+ */
+export function safeUrl(u) {
+  const s = String(u ?? '').trim();
+  return /^https?:\/\/[^\s]+$/i.test(s) ? s : '';
+}
+
+/**
+ * Fold a value down to something that can safely be an e-mail HEADER.
+ *
+ * A header ends at the first CR or LF, so a subscriber whose alert is named
+ * "News\r\nBcc: everyone@example.com", or a submitter whose address carries a
+ * newline, would otherwise have the rest read as further headers. Every message
+ * passes through send(), so the guard lives there rather than in each caller.
+ */
+export function headerSafe(v) {
+  if (Array.isArray(v)) return v.map(headerSafe);
+  return String(v ?? '')
+    // CR, LF, NUL and the other C0/C1 controls, plus the two Unicode line
+    // separators a JS engine also treats as newlines.
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ')
+    .trim();
+}
+
 /** Nodemailer transport, or null when this environment cannot send. */
 export async function transport() {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
@@ -127,7 +159,11 @@ export function toPlain(html) {
 
 /**
  * Send one message, or print it when there is no transport.
- * Returns true when it was actually accepted for delivery.
+ *
+ * RETURNS TRUE ONLY WHEN THE MESSAGE WAS ACTUALLY HANDED TO A TRANSPORT.
+ * Both callers key their Firestore bookkeeping on that — a high-water mark, a
+ * `forwarded` flag — so a printed message must never be mistaken for a sent
+ * one. A real delivery failure throws instead, and is caught per message.
  */
 export async function send(tx, msg, { dryRun = false } = {}) {
   const full = {
@@ -135,6 +171,18 @@ export async function send(tx, msg, { dryRun = false } = {}) {
     ...msg,
     text: msg.text || toPlain(msg.html || ''),
   };
+
+  // Addresses and subjects come from subscribers and submitters, so fold them
+  // to a single line before they become headers (see headerSafe).
+  for (const k of ['from', 'to', 'cc', 'bcc', 'replyTo', 'subject']) {
+    if (full[k] != null) full[k] = headerSafe(full[k]);
+  }
+  if (full.headers) {
+    const h = {};
+    for (const k of Object.keys(full.headers)) h[headerSafe(k)] = headerSafe(full.headers[k]);
+    full.headers = h;
+  }
+
   if (!tx || dryRun) {
     console.log(`\n--- ${dryRun ? 'DRY RUN' : 'NO SMTP'}: would send ---`);
     console.log(`To:      ${full.to}`);

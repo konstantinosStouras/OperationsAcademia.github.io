@@ -14,11 +14,11 @@
     <div id="page-wrapper">
       <div id="header-wrapper">
         <div class="container" id="header">
-          <a href="/v2/" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
             src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
           <nav id="nav"></nav>
           <div id="oa-headnav">
-            <a class="oa-headbtn" href="/v2/feedback.html">
+            <a class="oa-headbtn" href="feedback.html">
               <span aria-hidden="true">&#128172;</span> Feedback</a>
             <div id="oa-account"></div>
           </div>
@@ -101,6 +101,15 @@
                         told about <strong>every</strong> new posting. Otherwise a posting must match
                         <em>every</em> box you fill in, and any of the values you tick inside one.</p>
 
+                        <!-- the Type / Entry level / Location lists are built from the postings
+                             currently on the site; if that file could not be read they are empty,
+                             which must not read as "there are no values" -->
+                        <div class="oa-note is-warn" id="a-filters-note" hidden>
+                          <p><strong>We could not load the current postings,</strong> so the lists
+                          below are empty. Reload the page to try again — an alert saved without
+                          these filters will simply cover every posting.</p>
+                        </div>
+
                         <div class="oa-field">
                           <label for="a-text">Institution or department contains</label>
                           <input type="text" id="a-text" maxlength="120" placeholder="e.g. Dublin">
@@ -167,7 +176,7 @@
       </div>
 
             <!-- Footer: shared include -->
-      <div data-include="/partials/footer.html"></div>
+      <div data-include="partials/footer.html"></div>
       <script src="/assets/js/include-partials.js"></script>
     </div><!-- /#page-wrapper -->
 

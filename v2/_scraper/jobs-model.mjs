@@ -16,16 +16,25 @@
    whole model offline.
    --------------------------------------------------------------------------- */
 
+import { createHash } from 'node:crypto';
+
 import { splitDepartment, joinDepartment } from './vocab.mjs';
 
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/jobs.json — which is how submitter and chair
-    e-mail addresses stay out of a public repository. */
+    e-mail addresses stay out of a public repository.
+
+    `addedAt` means ONE thing in every writer: the moment the row entered this
+    dataset, not the day the poster says they advertised (that is `posted`).
+    It is the only cursor the e-mail alerts have — oa-alert-match.js keeps a
+    row when `addedAt > lastSentAt` — so a writer that back-dates it to
+    midnight hides every posting it adds from every subscriber whose last
+    digest went out later that day, permanently. */
 export const PUBLIC_FIELDS = [
   'id', 'year', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'comments', 'country',
   'adUrl', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
-  'characteristics', 'featured', 'source', 'addedAt', 'ref',
+  'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
 ];
 
 export const LEVELS = [
@@ -114,6 +123,31 @@ export function jobId(row) {
   return `${row.year}-${slug(row.institution)}-${String(row.posted || '').replace(/-/g, '')}`;
 }
 
+/* ------------------------------------------------------------- who owns a row
+
+   The ONE thing on a submission the browser cannot choose. `uid` is pinned by
+   the security rules (`request.resource.data.uid == request.auth.uid`);
+   everything else on the document — including `ref` — is whatever the poster's
+   browser typed. So the merge identity is built from the uid, not from `ref`.
+
+   It matters because `ref` is PUBLISHED in this very file. Keyed on `ref`
+   alone, any signed-in account could read a reference out of data/jobs.json,
+   create one submission carrying it, and REPLACE somebody else's advertisement
+   — or flip that submission to 'withdrawn' (which the rules let its own owner
+   do) and delete theirs.
+
+   The uid itself is not published: it identifies a person across their
+   postings, and PUBLIC_FIELDS exists to keep exactly that out of a public
+   repository. A short digest is enough, because an attacker cannot choose
+   their own uid — Firebase assigns it — so there is nothing to collide with.
+   `ref` stays what it always was: a reference number the poster can quote.  */
+
+export function ownerTag(uid) {
+  const s = String(uid ?? '').trim();
+  if (!s) return '';
+  return createHash('sha256').update(s).digest('hex').slice(0, 16);
+}
+
 /* --------------------------------------------------------- the market year
 
    ONE definition, because there were two: rowFromSubmission derived the year
@@ -200,7 +234,15 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     ? Math.trunc(+doc.year)
     : marketYear(now);
 
-  const posted = day(doc.postedOn) || isoDay(tsToDate(doc.createdAt) || now);
+  /* `posted` is the page's primary sort key, so a value the client picks is a
+     value the client can use to pin its own card to the top of the list for
+     ever. The form does not send `postedOn` and the rules do not mention it,
+     so it is honoured only when it is no LATER than the moment the submission
+     was actually stored — a poster may say a posting went up earlier, never
+     that it goes up in 2100. */
+  const stamped = isoDay(tsToDate(doc.createdAt) || now);
+  const asked = day(doc.postedOn);
+  const posted = asked && asked <= stamped ? asked : stamped;
   const applyByDate = doc.untilFilled ? '' : day(doc.applyByDate);
 
   // What the card shows on the "Apply by" line. The sheet stored this as one
@@ -248,18 +290,25 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     source: text(doc.source, 40) || 'oa-form',
     addedAt: isoStamp(tsToDate(doc.createdAt) || now),
     ref: text(doc.ref, 40),
+    owner: ownerTag(doc.uid),
   };
   row.id = jobId(row);
   return row;
 }
 
+/** Any of the three shapes a stored timestamp arrives in, or null.
+    TOTAL, deliberately: the validity check used to guard only the string
+    branch, so `createdAt: 1e16` — a plain number the rules place no bound on —
+    survived as an Invalid Date and threw RangeError out of toISOString() a few
+    lines later, killing the whole publish run on that one document. It stayed
+    queued, so every later run died on it too. */
 function tsToDate(ts) {
   if (!ts) return null;
-  if (ts instanceof Date) return ts;
-  if (typeof ts.toDate === 'function') return ts.toDate();          // Firestore Timestamp
-  if (typeof ts === 'number') return new Date(ts);
-  const d = new Date(ts);
-  return Number.isNaN(+d) ? null : d;
+  let d;
+  if (ts instanceof Date) d = ts;
+  else if (typeof ts.toDate === 'function') d = ts.toDate();        // Firestore Timestamp
+  else d = new Date(ts);
+  return d instanceof Date && !Number.isNaN(+d) ? d : null;
 }
 
 export function isoDay(d) { return d.toISOString().slice(0, 10); }
@@ -428,11 +477,42 @@ function fullness(row) {
  */
 function better(a, b) {
   if (!!a.ref !== !!b.ref) return a.ref ? a : b;
+
+  if (a.ref && b.ref) {
+    const at = String(a.addedAt || ''), bt = String(b.addedAt || '');
+    /* Two submissions from the SAME account for one posting on one day. There
+       is no edit step — the form mints a fresh reference on every send — so
+       sending it again is the only way a poster can correct anything, and the
+       LATER one is by definition what they meant to say. Fullness cannot
+       decide this: a correction that changes a value without adding a field
+       (a wrong link, a typo'd deadline) ties, and the tie handed it to the
+       stale row, which then stayed on the page. */
+    if ((a.owner || '') === (b.owner || '')) return at >= bt ? a : b;
+    /* Two DIFFERENT accounts describing one posting is not a correction —
+       nobody can correct somebody else's advertisement. Whoever posted first
+       keeps the slot, or anyone could displace a posting by submitting a
+       wordier copy of it. */
+    return at <= bt ? a : b;
+  }
+
   return fullness(a) >= fullness(b) ? a : b;
 }
 
-function sameDayKey(row) {
-  return [row.year, slug(row.institution), slug(row.department), row.posted].join('|');
+/* The key is IDENTITY, so it must not be truncated. `slug()` caps at 48
+   characters to keep an id short, and departments here are routinely written
+   "<long school name>, Department of <field>" — 46 of the 94 shipped rows have
+   a department slug at that cap — so two genuinely different departments
+   agreed on the key and one advertisement was silently dropped as a repeat. */
+function normKey(s) {
+  return String(s ?? '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function sameDayKey(row) {
+  return [row.year, normKey(row.institution), normKey(row.department), row.posted].join('|');
 }
 
 /**
@@ -467,34 +547,60 @@ export function collapseSameDay(rows) {
 
 /* -------------------------------------------------------------------- merge */
 
-/** Two rows are the same posting when they carry the same reference, or the
-    same id. A school re-posting the same job next year differs in `year`, so
-    it is correctly a different row. */
-function keyOf(row) {
-  return row.ref ? 'ref:' + row.ref : 'id:' + row.id;
+/** Two rows are the same posting when the same ACCOUNT carries the same
+    reference, or when they share an id. The owner tag is half the key on
+    purpose — see ownerTag(): `ref` alone is client-chosen and published, so
+    keyed on it a stranger's submission could replace or withdraw this row.
+    A school re-posting the same job next year differs in `year`, so it is
+    correctly a different row. */
+export function keyOf(row) {
+  return row.ref ? 'ref:' + (row.owner || '') + ':' + row.ref : 'id:' + row.id;
 }
 
 /**
  * Merge freshly-built rows into the committed ones.
  *   - a new row is appended
  *   - a row already present is REPLACED (a poster corrected their posting)
- *   - a ref listed in `remove` is dropped (withdrawn, or hidden by the maintainer)
+ *   - an entry in `remove` is dropped
+ *
+ * A `remove` entry is either `{ ref, owner }` — a WITHDRAWAL, which may only
+ * take down a row the same account published — or a bare reference string,
+ * which is the maintainer's committed take-down list (data/jobs-hidden.json)
+ * and is trusted to reach a row whoever posted it.
+ *
  * Returns { rows, added, updated, removed } with rows in display order.
  */
 export function mergeRows(existing, fresh, remove = []) {
-  const drop = new Set(remove.filter(Boolean).map((r) => 'ref:' + r));
   const by = new Map();
   for (const r of existing) by.set(keyOf(r), r);
 
   let added = 0, updated = 0;
   for (const r of fresh) {
     const k = keyOf(r);
-    if (by.has(k)) updated++; else added++;
+    const prev = by.get(k);
+    if (prev) {
+      updated++;
+      /* `addedAt` records when this dataset FIRST saw the posting, and it is
+         the only cursor the e-mail alerts have — a replacement (a same-day
+         correction, a sheet re-read) must not re-stamp it, or every
+         subscriber is alerted again about a posting they were already sent.
+         import-sheet.mjs guards its own rows the same way (stampAddedAt). */
+      if (prev.addedAt) r.addedAt = prev.addedAt;
+    } else {
+      added++;
+    }
     by.set(k, r);
   }
 
   let removed = 0;
-  for (const k of drop) if (by.delete(k)) removed++;
+  for (const spec of remove) {
+    if (!spec) continue;
+    if (typeof spec === 'string') {
+      for (const [k, r] of [...by]) if (r.ref === spec) { by.delete(k); removed++; }
+    } else if (spec.ref) {
+      if (by.delete('ref:' + (spec.owner || '') + ':' + spec.ref)) removed++;
+    }
+  }
 
   /* Collapse AFTER the merge, not only on the way in, so repeats already
      committed heal on the next run. They cannot heal themselves otherwise: a
@@ -503,8 +609,30 @@ export function mergeRows(existing, fresh, remove = []) {
      the served file. */
   const { rows: kept, collapsed } = collapseSameDay([...by.values()]);
 
-  const rows = kept.sort(displayOrder);
+  const rows = uniqueIds(kept.sort(displayOrder));
   return { rows, added, updated, removed, collapsed };
+}
+
+/**
+ * Make every id unique, the way import-sheet.mjs already does on the way in.
+ *
+ * `jobId` carries year, institution and posting date but NOT department, so
+ * two departments at one school advertising on one day produce the same id.
+ * They are two real postings — collapseSameDay keeps both, correctly — and a
+ * duplicate id is not cosmetic: the page keys each card's expanded state and
+ * its DOM id on it, and selftest.mjs rejects the served file for it, AFTER the
+ * build has already written the file and stamped Firestore. Deterministic,
+ * because the input is already in display order.
+ */
+export function uniqueIds(rows) {
+  const seen = new Set();
+  return rows.map((r) => {
+    if (!seen.has(r.id)) { seen.add(r.id); return r; }
+    let id = r.id, n = 2;
+    while (seen.has(id)) id = `${r.id}-${n++}`;
+    seen.add(id);
+    return { ...r, id };
+  });
 }
 
 /** Featured first, then newest posting first, then institution — the order the

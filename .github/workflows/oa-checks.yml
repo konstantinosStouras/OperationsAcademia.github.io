@@ -8,9 +8,17 @@ on:
     paths:
       - 'v2/**'
       - '.github/workflows/oa-checks.yml'
+      # the live pages are the SOURCE of the ported v2 pages — an edit to one
+      # must fail the port's --check until the port is re-run
+      - '*.html'
+      - 'partials/**'
+      - 'assets/**'
   pull_request:
     paths:
       - 'v2/**'
+      - '*.html'
+      - 'partials/**'
+      - 'assets/**'
   workflow_dispatch:
 
 permissions:
@@ -36,6 +44,12 @@ jobs:
 
       - name: The data model, the merge, and the served file
         run: node v2/_scraper/selftest.mjs
+
+      - name: The ported pages match the live pages they were built from
+        # v2/<page>.html files are GENERATED from the live pages at the root by
+        # port-pages.mjs. --check re-derives every one and fails on drift, so a
+        # live page edited without re-running the port cannot slip through.
+        run: node v2/_scraper/port-pages.mjs --check
 
       - name: No secret ever reaches a served file
         run: |

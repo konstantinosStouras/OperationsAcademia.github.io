@@ -235,6 +235,12 @@ eq(await page.$$eval('.oa-chip button', (ns) => ns.length), 0,
 const narrowed = Number((await page.$eval('.oa-count', (n) => n.textContent))
   .split('/')[1].trim().split(' ')[0]);
 
+// a multi-select menu deliberately stays open after a tick (so several values
+// can be chosen in one visit) — close it the way a reader would, or it sits
+// over the chip this click aims at
+await page.keyboard.press('Escape');
+await page.waitForTimeout(150);
+
 // click the LABEL, which is where a pointer lands, not the ×
 await page.click('.oa-chip .oa-chip-label');
 await page.waitForTimeout(350);
@@ -321,6 +327,78 @@ eq(await page.evaluate(() => {
   catch (e) { return 'threw: ' + e.message; }
 }), 'ok', 'a footer link with an inline analytics handler does not throw');
 
+/* ------------------------------------------- the picker, driven like a user
+
+   Pins for the 2026-08 fleet fixes. The search box was rebuilt on every
+   keystroke and re-focused with the caret at 0, so typed text came out
+   REVERSED and any 2+ character query matched nothing; a second click on the
+   picker button did not close it; and every tick in a multi-select facet
+   closed the menu. All three are things only a driven browser can catch.    */
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+
+await page.click('#oaf-country');
+await page.waitForSelector('.oa-pick-menu:not([hidden]) .oa-pick-search');
+await page.type('.oa-pick-menu:not([hidden]) .oa-pick-search', 'usa', { delay: 60 });
+eq(await page.$eval('.oa-pick-menu:not([hidden]) .oa-pick-search', (n) => n.value),
+  'usa', 'typing into the picker search lands in order, not reversed');
+ok(await page.$$eval('.oa-pick-menu:not([hidden]) .oa-opt:not(.is-empty)', (ns) => ns.length > 0),
+  'and the typed query still matches its option');
+
+// a second click on the button closes the menu it opened
+await page.click('#oaf-country');
+await page.waitForTimeout(150);
+eq(await page.$$eval('.oa-pick-menu:not([hidden])', (ns) => ns.length), 0,
+  'clicking the open picker button again closes it');
+
+// a multi-select facet (country — level is deliberately single-select) takes
+// several ticks without reopening
+await page.click('#oaf-country');
+await page.waitForSelector('.oa-pick-menu:not([hidden])');
+await page.click('.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(1) input');
+await page.waitForTimeout(250);
+eq(await page.$$eval('.oa-pick-menu:not([hidden])', (ns) => ns.length), 1,
+  'a multi-select menu stays open after the first tick');
+await page.click('.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(2) input');
+await page.waitForTimeout(250);
+eq(await page.$$eval('.oa-pick-menu:not([hidden]) input:checked', (ns) => ns.length), 2,
+  'and holds both selections');
+await page.keyboard.press('Escape');
+
+/* -------------------------------------------------- URL state, edge cases */
+
+// a foreign query parameter survives the list's own URL writing
+await page.goto(BASE + 'jobs.html?utm_source=newsletter&country=USA',
+  { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(400);
+ok(page.url().includes('utm_source=newsletter'),
+  'a foreign query parameter is not erased from the address bar');
+
+// the Universities map deep-links institutions as ?filterD=
+await page.goto(BASE + 'jobs.html?filterD=University%20of%20Mannheim',
+  { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(300);
+const viaD = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
+ok(viaD.length > 0 && viaD.every((t) => /Mannheim/.test(t)),
+  'the Universities map\'s ?filterD= deep link selects an institution');
+
+// safeUrl refuses every protocol-relative and backslash disguise
+eq(await page.evaluate(() =>
+  ['//evil.example/a', '/\\evil.example/b', '///evil.example/c'].map(window.OAList.safeUrl)),
+  ['', '', ''], 'safeUrl refuses protocol-relative URLs');
+ok(await page.evaluate(() => window.OAList.safeUrl('/universities.html') === '/universities.html'),
+  'while a genuine rooted path passes');
+
+// printing must show the card details readers expanded — and the ones they
+// did not, since paper cannot be clicked
+await page.emulateMedia({ media: 'print' });
+eq(await page.$eval('.oa-card .oa-card-body', (n) => getComputedStyle(n).display),
+  'block', 'a collapsed card body prints its details');
+await page.emulateMedia({ media: 'screen' });
+
 /* -------------------------------------------------------- states + mobile */
 
 await page.goto(BASE + 'jobs.html?institution=zzzznotathing', { waitUntil: 'domcontentloaded' });
@@ -352,6 +430,24 @@ ok(mobileNav.barShown, 'the mobile title bar is built');
 ok(mobileNav.panelLinks > 0,
   `the off-canvas menu has links (${mobileNav.panelLinks}) — without the site's ` +
   'script chain a phone would have no navigation at all');
+
+/* The account control's off-canvas copy. Below 840px the header — and with it
+   the site's only sign-out — is display:none, so oa-accounts.js paints a
+   second host into #navPanel. In THIS run the SDK is unreachable (the proxy
+   eats gstatic), so the correct panel state is present-but-EMPTY: a dead
+   "Sign in" link would be the same silent no-op the header fixed. The
+   healthy-path states (sign-in link; identity + sign-out) are exercised with
+   a stubbed SDK in the fleet's own checks. */
+const np = await m.evaluate(() => {
+  const b = document.querySelector('#oa-np');
+  return b ? { inPanel: !!b.closest('#navPanel'), html: b.innerHTML } : null;
+});
+ok(np && np.inPanel, 'the account control mounts its mobile host inside #navPanel');
+eq(np && np.html, '', 'and stays empty while the SDK is unreachable — never a dead link');
+
+const titleHref = await m.$eval('#titleBar a.title', (a) => a.getAttribute('href'));
+eq(titleHref, './',
+  'the mobile title bar\'s wordmark stays inside /v2/ rather than leaving for the live site');
 
 /* ------------------------------- when Firebase cannot be reached at all
 

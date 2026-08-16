@@ -9,7 +9,7 @@
 
    Posting requires an account (the maintainer's choice): the identity is known,
    so the posting publishes automatically without a review step, and the poster
-   can come back to correct or withdraw it.
+   is reachable afterwards about the posting.
 
    The client is never trusted with what gets published — v2/_firestore.rules
    pins `status` to 'queued' and `uid` to the caller, and the build re-validates
@@ -46,10 +46,16 @@
   /* The job market year is named for the calendar year it ENDS in: the
      2025-2026 market is "2026". It turns over in the summer, when postings for
      the next one start going up. Offer the previous year too — a posting made
-     in September for a market that is already running is common. */
+     in September for a market that is already running is common.
+
+     The turnover is JULY, read in UTC — the same rule as jobs-model.mjs
+     (MARKET_ROLL_MONTH = 6), jobs.html and oa-nav.js. Rolling a month early,
+     or in local time, pre-selected a season one ahead of the one the rest of
+     the site names for the whole of June, and the default is what most posters
+     accept — so the wrong year was baked into the row id and the year tally. */
   function jobMarketYears() {
     var now = new Date();
-    var base = now.getFullYear() + (now.getMonth() >= 5 ? 1 : 0);
+    var base = now.getUTCFullYear() + (now.getUTCMonth() >= 6 ? 1 : 0);
     return { list: [base - 1, base, base + 1], current: base };
   }
 
@@ -95,11 +101,33 @@
     }
   }
 
+  /* The SAME expression the build re-validates with (jobs-model.mjs url()),
+     anchored at BOTH ends. Unanchored, only a prefix had to match, so a link
+     carrying a space — "…/Assistant Professor.pdf", a Drive path, a link
+     copied out of a wrapped e-mail — passed here, was reported as sent, and
+     was then dropped by the build: the published card lost the advert link
+     the reader came for, and nobody was told. */
   function httpUrl(v) {
     v = String(v || '').trim();
     if (!v) return '';
-    if (!/^https?:\/\/\S+\.\S+/i.test(v)) return null;   // null = present but invalid
+    if (!/^https?:\/\/[^\s<>"']+\.[^\s<>"']+$/i.test(v)) return null;   // null = present but invalid
     return v;
+  }
+
+  /* The deadline, checked by the build's rule (jobs-model.mjs day()): a real
+     calendar day with the year in 1990-2100. <input type="date"> holds
+     "0026-11-01" quite happily — that is what Chrome keeps after the US-habit
+     "11/01/26" — and reports it as valid, so nothing else catches it. The
+     build then drops the field, and a posting with a hard deadline publishes
+     with no Apply-by line at all, filed under "Until filled". */
+  function isoDay(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '').trim());
+    if (!m) return '';
+    var y = +m[1], mo = +m[2], d = +m[3];
+    if (y < 1990 || y > 2100 || mo < 1 || mo > 12 || d < 1 || d > 31) return '';
+    var t = new Date(Date.UTC(y, mo - 1, d));
+    if (t.getUTCMonth() !== mo - 1 || t.getUTCDate() !== d) return '';   // 31 February
+    return m[0];
   }
 
   /** Read + validate the form. Returns the submission document, or null. */
@@ -151,10 +179,17 @@
     var day = String($('f-applyByDate').value || '').trim();
     if (untilFilled) {
       out.applyByDate = '';
-    } else {
+    } else if (!day) {
+      setError($('f-applyByDate'), 'Please give a deadline, or tick that there is no fixed one.');
+      if (!firstBad) firstBad = $('f-applyByDate');
+      out.applyByDate = '';
+    } else if (!isoDay(day)) {
       setError($('f-applyByDate'),
-        day ? '' : 'Please give a deadline, or tick that there is no fixed one.');
-      if (!day && !firstBad) firstBad = $('f-applyByDate');
+        'Please check that date — the year should be a four-digit one, like 2026.');
+      if (!firstBad) firstBad = $('f-applyByDate');
+      out.applyByDate = '';
+    } else {
+      setError($('f-applyByDate'), '');
       out.applyByDate = day;
     }
     out.untilFilled = !!untilFilled;
@@ -323,6 +358,7 @@
     enterEditMode();
     fillStaticOptions();
 
+    var sent = false;                 // latched once a posting has been written
     var form = $('oa-job-form');
     var offline = $('oa-offline');
     var needauth = $('oa-needauth');
@@ -354,7 +390,44 @@
       if (this.checked) { d.value = ''; setError(d, ''); }
     });
 
+    /* Say what has happened rather than offering a control that cannot work —
+       the same stand-down feedback.html does. The SDK is loaded from gstatic,
+       which an ad blocker, a corporate proxy or a national firewall can refuse;
+       oa-accounts then resolves as "signed out", so without this the reader was
+       shown a "Sign in to post a job" gate for a service that cannot answer,
+       with no explanation on the page and no other way to reach us.
+
+       The gate itself stays on screen, DISABLED — the state oa-accounts.js
+       renders for its own header control when there is no working project: an
+       explained, inert version of the normal page, never a missing one. */
+    function standDown(why) {
+      offline.innerHTML = '<p>' + why + '</p>';
+      show(offline, true);
+      show($('oa-intro'), false);
+      show(needauth, true);
+      show(form, false);
+      [$('oa-needauth-btn'), $('oa-needauth-new')].forEach(function (b) {
+        b.disabled = true;
+        b.setAttribute('aria-disabled', 'true');
+      });
+    }
+
     OAAccounts.onChange(function (user) {
+      // The posting has already been sent. Re-showing the form (and the intro)
+      // over the confirmation on any later auth event left the poster with a
+      // filled-in form they could not submit — the button is only re-enabled
+      // in the failure path — beside a thank-you for a posting already made.
+      if (sent) return;
+
+      if (OAAccounts.failed && OAAccounts.failed()) {
+        standDown('<strong>We cannot reach the posting service right now.</strong> ' +
+          'If you use an ad blocker, allow <code>gstatic.com</code> and reload. ' +
+          'Otherwise please send the posting to ' +
+          '<a href="mailto:operationsacademia@gmail.com">operationsacademia@gmail.com</a> ' +
+          'and we will put it up for you.');
+        return;
+      }
+
       show(form, !!user);
       show(needauth, !user);
       // the intro explains a form that is not on screen while signed out
@@ -396,6 +469,7 @@
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
           return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
+          sent = true;
           /* The confirmation is written for a NEW posting — a reference to keep,
              a copy e-mailed, "post another". None of that is true of a
              correction, so say what actually happened instead. */

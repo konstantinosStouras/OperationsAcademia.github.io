@@ -56,6 +56,11 @@
   width: 100%;
   height: 35px;
   box-sizing: border-box;
+  /* main.css only sets this under a <form> ancestor and this control has none,
+     so on WebKit the box would keep the native searchfield's pill shape and
+     intrinsic height instead of the 35px that matches the five pickers. */
+  -webkit-appearance: none;
+  appearance: none;
   padding: 1px 8px;
   border: 1px solid #d9d9d9;
   border-radius: 0;
@@ -184,6 +189,10 @@
   margin-top: 4px;
 }
 
+/* nothing chosen yet: no gap to leave under the control, and the phantom 4px
+   is what the bottom-aligned Clear button would otherwise line up against */
+.oa-chips:empty { margin-top: 0; }
+
 .oa-chip {
   display: inline-flex;
   align-items: center;
@@ -226,10 +235,14 @@
   line-height: 1;
 }
 
+/* Bottom-align the Clear button with the 35px controls beside it, not with
+   their bold labels. `align-items` cannot do it: .oa-filters aligns its items
+   flex-start, so this box is shrink-to-fit and has no free space of its own to
+   align inside — the alignment has to be asked for on the item itself. */
 .oa-filter-actions {
   display: flex;
+  align-self: flex-end;
   align-items: flex-end;
-  padding-bottom: 1px;
   margin-left: auto;
 }
 
@@ -261,6 +274,13 @@
   font-size: 13px;
   color: rgba(97, 97, 97, 0.9);
 }
+
+/* Before the data lands — and on the error path, which replaces only the card
+   list — these two boxes have nothing in them, and an empty result bar still
+   paints its top and bottom rules. Two hairlines around nothing, above "The job
+   postings could not be loaded.", read as a second broken widget. */
+.oa-filters:empty,
+.oa-resultbar:empty { display: none; }
 
 .oa-count { font-variant-numeric: tabular-nums; }
 
@@ -377,19 +397,26 @@
 .oa-label-primary { background-color: #426394; }
 .oa-label-open { background-color: #2e7d5b; }
 
+/* The three values below were 1.375rem / 0.9rem / 1.375rem — the vendor's own
+   numbers, but `rem` resolves against the ROOT font size and nothing else on
+   this page does: main.css leaves html at the browser's default and pins the
+   list at 14px. So they alone tracked the reader's browser font-size setting,
+   and at Chrome's "Large" the department subtitle overtook the fixed-16px
+   university title. Same rendering at the 16px default, in the file's own px
+   scale. */
 .oa-card-title {
   margin: 5px 0;
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.375rem;
+  line-height: 22px;
   color: #616161;
 }
 
 .oa-card-sub {
   margin: 5px 0 0;
-  font-size: 0.9rem;
+  font-size: 14.4px;
   font-weight: 400;
-  line-height: 1.375rem;
+  line-height: 22px;
   color: rgba(0, 0, 0, 0.54);
 }
 
@@ -452,7 +479,10 @@
 
 @media print {
   .oa-filters, .oa-pager, .oa-clear { display: none; }
-  .oa-card-body[hidden] { display: block; }
+  /* !important because oa-ui.css restores `[hidden] { display: none !important }`
+     for the whole site and is loaded after this file — without matching it, a
+     printed list was institution and department headings and nothing else. */
+  .oa-card-body[hidden] { display: block !important; }
 }
 
 /* --------------------------------------------- Edit / Take down on a posting

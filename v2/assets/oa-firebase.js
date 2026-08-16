@@ -58,6 +58,19 @@
   var SDK = 'https://www.gstatic.com/firebasejs/10.12.5/';
   var PARTS = ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-firestore-compat.js'];
 
+  // How long we wait for gstatic before giving up.
+  //
+  // `onerror` covers a request that is REFUSED. It does not cover one that is
+  // accepted and then never answered — a hotel/conference captive portal, a
+  // filtering proxy that black-holes the connection, a stalled CDN. Without a
+  // timeout the promise simply stays pending, and everything downstream waits
+  // on it for ever: oa-accounts never resolves its auth state, so the posting
+  // form and the alerts page show NEITHER their form nor their sign-in prompt
+  // — a heading, an intro paragraph and nothing else, with no explanation.
+  // The reject path is already handled honestly everywhere ("Sign-in
+  // unavailable"); this only makes sure it is reached.
+  var LOAD_TIMEOUT_MS = 15000;
+
   var readyPromise = null;
 
   /** Resolves with the firebase namespace, or rejects when not configured. */
@@ -68,21 +81,38 @@
         reject(new Error('firebase-not-configured'));
         return;
       }
-      var i = 0;
-      (function next() {
-        if (i >= PARTS.length) {
+
+      var timer = setTimeout(function () {
+        reject(new Error('firebase-sdk-load-failed'));
+      }, LOAD_TIMEOUT_MS);
+
+      function fail() {
+        clearTimeout(timer);
+        reject(new Error('firebase-sdk-load-failed'));
+      }
+
+      // All three at once, with `async = false`. A dynamically created script
+      // is async by default, which is why this used to be a chain — each part
+      // appended only from the previous one's onload, i.e. three SERIAL round
+      // trips on every page of the site. Explicitly clearing `async` keeps the
+      // app -> auth -> firestore execution order the compat bundles need while
+      // letting the browser download them in parallel.
+      var left = PARTS.length;
+      PARTS.forEach(function (part) {
+        var s = document.createElement('script');
+        s.src = SDK + part;
+        s.async = false;
+        s.onload = function () {
+          if (--left) return;             // the last one to execute wins
+          clearTimeout(timer);
           try {
             if (!window.firebase.apps.length) window.firebase.initializeApp(FB_CONFIG);
             resolve(window.firebase);
           } catch (e) { reject(e); }
-          return;
-        }
-        var s = document.createElement('script');
-        s.src = SDK + PARTS[i++];
-        s.onload = next;
-        s.onerror = function () { reject(new Error('firebase-sdk-load-failed')); };
+        };
+        s.onerror = fail;
         document.head.appendChild(s);
-      })();
+      });
     });
     return readyPromise;
   }

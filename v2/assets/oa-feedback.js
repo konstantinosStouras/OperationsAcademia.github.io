@@ -28,6 +28,8 @@
   var MAX_EDGE = 1400;
 
   var shots = [];                  // [{ name, dataUrl }]
+  var pending = null;              // the shrink+encode currently in flight
+  var sending = false;             // true from the moment Send is pressed
 
   function $(id) { return document.getElementById(id); }
   function show(el, on) { if (el) el.hidden = !on; }
@@ -36,6 +38,27 @@
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
+  }
+
+  /* The only screenshot shape this page ever writes: a base64 JPEG data URL
+     straight out of canvas.toDataURL. Anything else in a stored `shots` array
+     did not come from this form.
+
+     That matters because the inbox below is the one place on the site where a
+     STRANGER'S input is rendered to the maintainer, and `shots` is the one
+     field that lands inside an HTML attribute. Anyone may create a feedback
+     document — that is the point of the form — and v2/_firestore.rules bounds
+     the array's LENGTH, not the contents of its items, so an entry could carry
+     a double quote, break out of href="…" and run script in this origin inside
+     the one session the rules trust. So: accept only this shape, drop
+     everything else, and escape what survives anyway. */
+  var DATA_IMAGE = /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+
+  function safeShots(arr) {
+    if (!arr || typeof arr.length !== 'number') return [];
+    return Array.prototype.filter.call(arr, function (u) {
+      return typeof u === 'string' && u.length <= 2 * 1024 * 1024 && DATA_IMAGE.test(u);
+    }).map(esc);
   }
 
   function say(msg, kind) {
@@ -116,19 +139,38 @@
   function onFiles(e) {
     var files = Array.prototype.slice.call(e.target.files || []);
     e.target.value = '';
-    if (!files.length) return;
+    if (!files.length || sending) return;
+
+    // Over the cap: keep what fits, and remember the rest by NAME. The
+    // encode's own say('') used to run last and wipe the warning, so the
+    // extras were dropped in silence and the report went out without the
+    // screenshots that mattered.
+    var dropped = [];
     if (shots.length + files.length > MAX_SHOTS) {
-      say('Please attach at most ' + MAX_SHOTS + ' screenshots.', 'err');
+      dropped = files.slice(Math.max(0, MAX_SHOTS - shots.length)).map(function (f) {
+        return f.name || 'one image';
+      });
       files = files.slice(0, MAX_SHOTS - shots.length);
-      if (!files.length) return;
+      if (!files.length) {
+        say('You already have ' + MAX_SHOTS + ' screenshots. Remove one to add another.', 'err');
+        return;
+      }
     }
+
+    function tooMany() {
+      return dropped.length
+        ? dropped.join(', ') + (dropped.length > 1 ? ' were' : ' was') +
+          ' not added — ' + MAX_SHOTS + ' screenshots is the limit.'
+        : '';
+    }
+
     say('Preparing the screenshots…');
-    Promise.all(files.map(shrink))
+    var run = Promise.all(files.map(shrink))
       .then(function (canvases) {
         var all = shots.map(function (s) { return s.canvas; }).concat(canvases);
         var enc = encodeAll(all);
         if (!enc) {
-          say('Those images are too large even after shrinking. Please attach fewer, or crop them.', 'err');
+          if (!sending) say('Those images are too large even after shrinking. Please attach fewer, or crop them.', 'err');
           return;
         }
         shots = all.map(function (c, i) {
@@ -137,9 +179,17 @@
             canvas: c, dataUrl: enc.urls[i] };
         });
         renderThumbs();
-        say('');
+        // Never blank a message the send has since written ("Sending…").
+        if (!sending) say(tooMany(), dropped.length ? 'err' : '');
       })
-      .catch(function (err) { say(err.message, 'err'); });
+      .catch(function (err) { if (!sending) say(err.message, 'err'); })
+      .then(function () { if (pending === run) pending = null; });
+    // Shrinking and encoding are asynchronous (FileReader -> decode -> canvas),
+    // and `shots` is only assigned when that chain finishes. A submit landing
+    // in that window used to read the OLD `shots` and file the report with no
+    // screenshot at all — while reporting success. The submit handler waits on
+    // this instead.
+    pending = run;
   }
 
   /* ------------------------------------------------------------ the inbox */
@@ -150,15 +200,39 @@
     return d.toISOString().slice(0, 10) + ' ' + d.toISOString().slice(11, 16);
   }
 
+  var PAGE = 200;
+
+  /* Filter in the QUERY, not after it.
+     limit() is applied by the server, so fetching the newest PAGE documents of
+     the whole collection and only then keeping the ones whose status matches
+     the tab makes the limit a window over EVERY ticket. Past PAGE pieces of
+     feedback an older ticket that is still open falls outside that window and
+     vanishes from the Open tab — the maintainer reads "Nothing here" while
+     unanswered reports sit in the database. */
+  function fetchInbox(db, tab) {
+    var col = db.collection(OAFB.col.feedback);
+    if (tab === 'all') return col.orderBy('createdAt', 'desc').limit(PAGE).get();
+    return col.where('status', '==', tab).orderBy('createdAt', 'desc').limit(PAGE).get()
+      .catch(function (err) {
+        // status+createdAt is a COMPOSITE index (v2/_firestore.indexes.json).
+        // Until it is deployed Firestore answers failed-precondition; fall back
+        // to the old client-side filter rather than showing an error.
+        if ((err && err.code) !== 'failed-precondition') throw err;
+        return col.orderBy('createdAt', 'desc').limit(PAGE).get()
+          .then(function (snap) {
+            return { docs: snap.docs.filter(function (d) {
+              return (d.data().status || 'open') === tab;
+            }) };
+          });
+      });
+  }
+
   function renderInbox(db, tab) {
     var list = $('oa-inbox-list');
     list.innerHTML = '<p class="oa-hint">Loading…</p>';
-    db.collection(OAFB.col.feedback).orderBy('createdAt', 'desc').limit(200).get()
+    fetchInbox(db, tab)
       .then(function (snap) {
-        var docs = snap.docs.filter(function (d) {
-          var s = d.data().status || 'open';
-          return tab === 'all' || s === tab;
-        });
+        var docs = snap.docs;
         if (!docs.length) {
           list.innerHTML = '<p class="oa-hint">Nothing here.</p>';
           return;
@@ -166,6 +240,8 @@
         list.innerHTML = '';
         docs.forEach(function (d) {
           var v = d.data();
+          var pics = safeShots(v.shots);
+          var raw = (v.shots && v.shots.length) || 0;
           var card = document.createElement('article');
           card.className = 'oa-fb-card';
           card.innerHTML =
@@ -176,10 +252,18 @@
               '<span class="oa-hint" style="display:inline">' + esc(fmtDate(v.createdAt)) +
                 (v.email ? ' &middot; ' + esc(v.email) : ' &middot; anonymous') + '</span>' +
             '</header>' +
-            (v.shots && v.shots.length
-              ? '<div class="oa-thumbs">' + v.shots.map(function (u) {
+            (pics.length
+              ? '<div class="oa-thumbs">' + pics.map(function (u) {
                   return '<a href="' + u + '" target="_blank" rel="noopener"><img src="' + u + '" alt=""></a>';
                 }).join('') + '</div>'
+              : '') +
+            // Say so rather than silently showing fewer pictures: a document
+            // carrying something that is not one of our own data URLs was not
+            // written by this form.
+            (raw > pics.length
+              ? '<p class="oa-form-msg is-err">' + (raw - pics.length) +
+                ' attachment(s) on this ticket were not written by the feedback ' +
+                'form and have been ignored.</p>'
               : '') +
             '<p class="oa-fb-body">' + esc(v.message || '') + '</p>' +
             (v.resolution ? '<p class="oa-fb-res"><strong>Resolution:</strong> ' +
@@ -189,6 +273,15 @@
               'to the repository &mdash; the submitter is e-mailed automatically.</p>';
           list.appendChild(card);
         });
+        // A truncated list must always say it is truncated, or a full page
+        // reads like the end of the queue.
+        if (docs.length >= PAGE) {
+          var more = document.createElement('p');
+          more.className = 'oa-hint';
+          more.textContent = 'Showing the newest ' + PAGE +
+            ' — there are older tickets than these.';
+          list.appendChild(more);
+        }
       })
       .catch(function (err) {
         list.innerHTML = '<p class="oa-form-msg is-err">Could not load the inbox (' +
@@ -196,21 +289,36 @@
       });
   }
 
+  /** Which tab the maintainer is actually looking at. */
+  function currentTab() {
+    var on = document.querySelector('#oa-inbox-tabs .oa-tab.is-on');
+    return (on && on.dataset.tab) || 'open';
+  }
+
   function wireInbox() {
+    var wired = false;
     OAAccounts.onChange(function () {
       if (!OAAccounts.isAdmin()) { show($('oa-inbox'), false); return; }
       show($('oa-inbox'), true);
       OAFB.ready().then(function (fb) {
         var db = fb.firestore();
         var tabs = $('oa-inbox-tabs');
-        tabs.addEventListener('click', function (e) {
-          var b = e.target.closest('.oa-tab');
-          if (!b) return;
-          Array.prototype.forEach.call(tabs.children, function (x) { x.classList.remove('is-on'); });
-          b.classList.add('is-on');
-          renderInbox(db, b.dataset.tab);
-        });
-        renderInbox(db, 'open');
+        // onChange fires on EVERY auth state change, so bind the tabs once.
+        // Binding them again per change left one click firing two, then three
+        // concurrent 200-document reads, all racing to write the same list.
+        if (!wired) {
+          wired = true;
+          tabs.addEventListener('click', function (e) {
+            var b = e.target.closest('.oa-tab');
+            if (!b) return;
+            Array.prototype.forEach.call(tabs.children, function (x) { x.classList.remove('is-on'); });
+            b.classList.add('is-on');
+            renderInbox(db, b.dataset.tab);
+          });
+        }
+        // Re-render what is SELECTED, not always 'open' — otherwise a sign-out
+        // and back in shows the open tickets under a highlighted Closed tab.
+        renderInbox(db, currentTab());
       });
     });
   }
@@ -249,10 +357,15 @@
         var files = (ev.dataTransfer && ev.dataTransfer.files) || [];
         if (files.length) onFiles({ target: { files: files, value: '' } });
       });
-      // dropping anywhere else must not make the browser navigate to the image
+      // Dropping an image anywhere else must not make the browser navigate to
+      // it. Only cancel drags that actually carry FILES, though: cancelling
+      // every drop on the page also killed dragging selected text into the
+      // message box and the name/e-mail fields.
       ['dragover', 'drop'].forEach(function (e) {
         window.addEventListener(e, function (ev) {
-          if (!drop.contains(ev.target)) ev.preventDefault();
+          var types = (ev.dataTransfer && ev.dataTransfer.types) || [];
+          var hasFiles = Array.prototype.indexOf.call(types, 'Files') !== -1;
+          if (hasFiles && !drop.contains(ev.target)) ev.preventDefault();
         });
       });
     }
@@ -306,43 +419,60 @@
 
       var btn = $('fb-submit');
       btn.disabled = true;
-      say('Sending…');
 
-      var ticket = makeTicket();
-      OAFB.ready().then(function (fb) {
-        return fb.firestore().collection(OAFB.col.feedback).add({
-          ticket: ticket,
-          message: text.slice(0, 6000),
-          name: $('fb-name').value.trim().slice(0, 160),
-          email: email.slice(0, 200),
-          shots: shots.map(function (s) { return s.dataUrl; }),
-          page: (document.referrer || location.href).slice(0, 400),
-          ua: navigator.userAgent.slice(0, 300),
-          status: 'open',
-          forwarded: false,
-          createdAt: fb.firestore.FieldValue.serverTimestamp()
+      // Send is the normal thing to press the instant a photo has been chosen,
+      // and a 12 MP phone photo takes a moment to shrink. Wait for it rather
+      // than filing the report with the screenshots still missing.
+      if (pending) {
+        say('Finishing the screenshots…');
+        pending.then(send, send);
+      } else {
+        send();
+      }
+
+      function send() {
+        sending = true;
+        say('Sending…');
+
+        var ticket = makeTicket();
+        OAFB.ready().then(function (fb) {
+          return fb.firestore().collection(OAFB.col.feedback).add({
+            ticket: ticket,
+            message: text.slice(0, 6000),
+            name: $('fb-name').value.trim().slice(0, 160),
+            email: email.slice(0, 200),
+            shots: shots.map(function (s) { return s.dataUrl; }),
+            page: (document.referrer || location.href).slice(0, 400),
+            ua: navigator.userAgent.slice(0, 300),
+            status: 'open',
+            forwarded: false,
+            createdAt: fb.firestore.FieldValue.serverTimestamp()
+          });
+        }).then(function () {
+          $('fb-ticket').textContent = ticket;
+          $('fb-done-mail').textContent = email
+            ? 'We will e-mail you at ' + email + ' when it is dealt with.'
+            : 'You did not leave an e-mail address, so we cannot write back — but the ' +
+              'message has reached us.';
+          show(form, false);
+          show($('fb-done'), true);
+          $('fb-done').scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }).catch(function (err) {
+          // The report did not go anywhere, so the form is live again — and so
+          // are its screenshots.
+          sending = false;
+          btn.disabled = false;
+          var code = (err && err.code) || '';
+          if (code === 'permission-denied') {
+            say('Feedback is not switched on yet — the database rules have not been published.', 'err');
+          } else if (/longer than|exceeds|invalid-argument/i.test(err.message || '')) {
+            say('That message and its screenshots are too large to send. Please attach fewer images.', 'err');
+          } else {
+            say('We could not send that. Please try again in a moment.' + (code ? ' (' + code + ')' : ''), 'err');
+          }
+          if (window.console) console.error('feedback:', err);
         });
-      }).then(function () {
-        $('fb-ticket').textContent = ticket;
-        $('fb-done-mail').textContent = email
-          ? 'We will e-mail you at ' + email + ' when it is dealt with.'
-          : 'You did not leave an e-mail address, so we cannot write back — but the ' +
-            'message has reached us.';
-        show(form, false);
-        show($('fb-done'), true);
-        $('fb-done').scrollIntoView({ block: 'center', behavior: 'smooth' });
-      }).catch(function (err) {
-        btn.disabled = false;
-        var code = (err && err.code) || '';
-        if (code === 'permission-denied') {
-          say('Feedback is not switched on yet — the database rules have not been published.', 'err');
-        } else if (/longer than|exceeds|invalid-argument/i.test(err.message || '')) {
-          say('That message and its screenshots are too large to send. Please attach fewer images.', 'err');
-        } else {
-          say('We could not send that. Please try again in a moment.' + (code ? ' (' + code + ')' : ''), 'err');
-        }
-        if (window.console) console.error('feedback:', err);
-      });
+      }
     });
   }
 

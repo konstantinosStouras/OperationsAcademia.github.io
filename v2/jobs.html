@@ -27,7 +27,7 @@
         <!-- Header -->
 
         <div class="container" id="header">
-          <a href="/v2/" id="logo"><img alt="Operations Academia Logo" class=
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class=
           "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
           "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
 
@@ -35,7 +35,7 @@
           </nav>
 
           <div id="oa-headnav">
-            <a class="oa-headbtn" href="/v2/feedback.html">
+            <a class="oa-headbtn" href="feedback.html">
               <span aria-hidden="true">&#128172;</span> Feedback</a>
             <div id="oa-account"></div>
           </div>
@@ -57,7 +57,6 @@
             <h2 id="oa-jobs-heading">
               Job postings (2026-2027)
             </h2>
-            <p class="oa-season-note" id="oa-jobs-season"></p>
           </div>
           <!-- Main Content -->
 
@@ -106,7 +105,7 @@
                     (results appear as you type, and are shown ranked by <i>posting date</i>).<br>
                     <br>
                     All the entries below have been made publicly available by reliable and verified
-                    individuals. However, please <a href="/contact">let us know if any information
+                    individuals. However, please <a href="contact.html">let us know if any information
                     is misplaced</a>.
                     <br>
                     <br>
@@ -139,7 +138,7 @@
       <!-- Footer Wrapper -->
 
             <!-- Footer: shared include -->
-      <div data-include="/partials/footer.html"></div>
+      <div data-include="partials/footer.html"></div>
       <script src="/assets/js/include-partials.js"></script>
     </div><!-- /#page-wrapper -->
 
@@ -172,38 +171,68 @@
       'use strict';
       var U = window.OAList.safeUrl;
 
-      /* The heading names the CURRENT job market, derived — never typed. This
-         is a third copy of the rule in jobs-model.mjs (marketYear/marketLabel);
-         it cannot import the module because this page ships no build step, so
-         the selftest asserts the two agree. A market year runs 1 July of the
-         previous year to 30 June of its own and is numbered by the year it
-         ends, so the roll is on 1 JULY and getUTCMonth() (0-based) is 6. */
-      /* MARKET_WINDOW in jobs-model.mjs — keep the two in step. */
-      var MARKET_WINDOW = 2;
+      /* The Universities map deep-links into this page as
+         `?filterD=<University/Institution>` — 144 rows' worth of anchors in the
+         wild (see _AUDIT.md §76 and §G.3). `legacyParam` below takes ONE alias,
+         so the second one is renamed here, before the list reads the URL.
+         Renaming rather than adding matters: syncUrl rebuilds the query string
+         from the keys the engine owns, so an unrecognised parameter is not just
+         ignored, it is wiped from the address bar a moment after the page
+         paints and the reader never sees what was asked for. */
+      (function legacyDeepLink() {
+        var p = new URLSearchParams(location.search);
+        if (!p.has('filterD') || p.has('institution') || p.has('filterA')) return;
+        p.set('institution', p.get('filterD'));
+        p['delete']('filterD');
+        history.replaceState(null, '',
+          location.pathname + '?' + p.toString() + location.hash);
+      })();
 
+      /* The heading names the CURRENT job market, derived — never typed. This
+         is a fourth copy of the rule in jobs-model.mjs (marketYear/marketLabel)
+         — assets/oa-nav.js carries one too, for the menu label — and it cannot
+         import the module because this page ships no build step, so the
+         selftest asserts they agree. A market year runs 1 July of the previous
+         year to 30 June of its own and is numbered by the year it ends, so the
+         roll is on 1 JULY and getUTCMonth() (0-based) is 6. */
       (function heading() {
         var el = document.getElementById('oa-jobs-heading');
         if (!el) return;
         var d = new Date();
         var y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
         el.textContent = 'Job postings (' + (y - 1) + '-' + y + ')';
-
-        /* The list carries more than the season in the title — the previous
-           one is kept because its "until filled" advertisements are still open
-           and posters go on filing under it for weeks after the roll. Saying
-           so beats a heading that quietly covers 87 rows it does not name. */
-        var note = document.getElementById('oa-jobs-season');
-        if (note && MARKET_WINDOW > 1) {
-          var first = y - (MARKET_WINDOW - 1);
-          note.textContent = 'Also showing postings from ' +
-            (MARKET_WINDOW === 2 ? (first - 1) + '-' + first
-                                 : (first - 1) + '-' + first + ' onwards') +
-            ' — many are still open. Filter by Deadline to hide expired ones.';
-        }
+        /* The list also carries the previous season's postings (MARKET_WINDOW
+           in jobs-model.mjs — their "until filled" advertisements are still
+           open), but the heading deliberately says nothing about it: the note
+           that used to sit here was removed at the owner's request 2026-08-16.
+           The Deadline and Date-posted filters remain the way to narrow. */
       })();
 
+      /* A posting's stored links name this site by its FULL URL: "Further info"
+         points at the Universities page, and a posting with no "posted online
+         at" falls back to the site root. Inside /v2/ those are the only card
+         links that walk the reader out of the rebuild, so they are re-pointed
+         at v2's own copy — the same closed-preview rule port-pages.mjs applies
+         to the ported pages. Only a slug that EXISTS here is rewritten, so an
+         unknown one stays absolute and working rather than becoming a
+         fabricated 404; the replacement is relative, so it still lands on the
+         right page after cutover. */
+      var OWN_ORIGIN =
+        /^https?:\/\/(?:www\.)?operationsacademia\.org(\/[^?#]*)?((?:[?#].*)?)$/i;
+      var OWN_PAGES = ['universities', 'candidates', 'placements', 'previous-markets',
+        'recent-faculty', 'resources-for-candidates', 'faqs', 'contact', 'jobs'];
+
+      function ownSite(url) {
+        var m = OWN_ORIGIN.exec(String(url || '').trim());
+        if (!m) return url;
+        var slug = (m[1] || '/').replace(/^\/+/, '').replace(/\.html$/i, '');
+        if (!slug || slug === 'index') return './' + (m[2] || '');
+        if (OWN_PAGES.indexOf(slug) === -1) return url;
+        return './' + slug + '.html' + (m[2] || '');
+      }
+
       function link(url, label) {
-        var u = U(url);
+        var u = U(ownSite(url));
         if (!u) return null;
         var a = document.createElement('a');
         a.href = u;
@@ -226,6 +255,10 @@
         },
 
         filters: [
+          /* Searching Department under this label is deliberate and PAIRED:
+             assets/oa-alert-match.js mirrors these two fields so "what I see on
+             the site" and "what I am e-mailed" cannot mean different things.
+             Narrow it here and that file has to move in the same change. */
           { key: 'institution', label: 'University/Institution', type: 'text',
             fields: ['institution', 'department'],
             placeholder: '', legacyParam: 'filterA' },

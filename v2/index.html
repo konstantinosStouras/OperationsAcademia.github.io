@@ -1,128 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<!-- Ported from /index.html (source sha256:db9bd7f34df1a5b9) by
+     v2/_scraper/port-pages.mjs. DO NOT EDIT BY HAND: re-run the script.
+     The page body is the live page verbatim; only the chrome is v2's. -->
+<html>
   <head>
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
-    <title>Operations Academia — new site preview</title>
+    <title>Operations Academia</title>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <meta content="Preview of the rebuilt Operations Academia site." name="description">
+	<!-- <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no"> -->
+    <meta content="Matching supply with demand in the Operations job market" name="description">
+    <link rel="canonical" href="https://www.operationsacademia.org/" />
+    <!-- Open Graph: link previews on Messenger, WhatsApp, Viber, Facebook, LinkedIn, etc. -->
+    <meta property="og:title" content="Operations Academia" />
+    <meta property="og:site_name" content="Operations Academia" />
+    <meta property="og:description" content="Matching supply with demand in the Operations job market — the academic job market hub for Operations Management, Operations Research and Analytics." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.operationsacademia.org/" />
+    <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg" />
+    <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market." />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Operations Academia" />
+    <meta name="twitter:description" content="Matching supply with demand in the Operations job market." />
+    <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg" />
+    <!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
     <meta name="robots" content="noindex,nofollow">
     <link href="/assets/css/main.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
+    <!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+	<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
+<!-- <script>
+window.addEventListener("load", function(){
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#edeff5",
+      "text": "#838391"
+    },
+    "button": {
+      "background": "#4b81e8"
+    }
+  },
+  "position": "bottom-left",
+  "content": {
+    "href": "https://www.operationsacademia.org/privacy-policy"
+  }
+})});
+</script> -->
   </head>
-  <body class="no-sidebar">
+  <body class="homepage">
     <div id="page-wrapper">
+      <!-- Header Wrapper -->
+
       <div id="header-wrapper">
+        <!-- Header -->
+
         <div class="container" id="header">
-          <a href="/v2/" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
-            src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
-          <nav id="nav"></nav>
+          <a href="./" id="logo" onclick=
+          "ga('send', 'pageview', 'logoHeader');"><img alt="Operations Academia Logo" class=
+          "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
+          "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
+
+          <nav id="nav">
+          </nav>
+
           <div id="oa-headnav">
-            <a class="oa-headbtn" href="/v2/feedback.html">
+            <a class="oa-headbtn" href="feedback.html">
               <span aria-hidden="true">&#128172;</span> Feedback</a>
             <div id="oa-account"></div>
           </div>
         </div>
       </div>
+      <!-- Main Wrapper -->
 
       <div id="main-wrapper">
-        <div class="container" id="page">
-          <div class="title-heading">
-            <h2>New site preview</h2>
-          </div>
+        <!-- Main -->
 
-          <div id="main">
+        <div id="banner-wrapper">
+          <section class="container" id="banner">
             <div class="row">
               <div class="12u" id="content">
-                <div class="oa-form">
+                <header class="major">
+                  <h2>
+                    Operations Academia
+                  </h2>
 
-                  <div class="oa-note is-warn">
-                    <p><strong>This is a preview, not the live site.</strong> It sits at
-                    <code>/v2/</code>, is marked <code>noindex</code>, and changes nothing on
-                    <a href="/">operationsacademia.org</a>. The pages below are rebuilt; everything
-                    else in the menu still points at the live site.</p>
-                  </div>
+                  <p>
+                    Matching supply with demand in the Operations job market
+                  </p>
+                </header>
 
-                  <p>What is being replaced, and why:</p>
+                <ul class="pennants">
+                  <li>
+                    <a class="pennant" href="survey.html"><span class="icon fa-signal"></span></a>
+                    <header>
+                      <h3>
+                        Job market survey
+                      </h3>
+                    </header>
 
-                  <ul style="margin:0 0 26px 20px;list-style:disc;line-height:1.7">
-                    <li>The job postings list was rendered by <strong>Awesome Tables</strong>, a paid
-                      third-party service reading a Google Sheet. It is now rendered by the site
-                      itself from a data file held in this repository.</li>
-                    <li>Job postings were submitted through a <strong>Google Form</strong>. They are
-                      now submitted on the site, tied to an account, so a poster can correct or
-                      withdraw a posting.</li>
-                    <li>There were no accounts, no e-mail alerts and no feedback channel that closed
-                      the loop. There are now.</li>
-                  </ul>
+                    <p>
+                      Either as a School or as a past Candidate, share your job market experience
+                      to improve the matching process for all the rest.
+                    </p>
+                  </li>
 
-                  <h3 style="font-size:18px;color:#313a45;margin:0 0 12px">Rebuilt pages</h3>
+                  <li>
+                    <a class="pennant" href="jobs.html"><span class=
+                    "icon fas fa-university"></span></a>
+                    <header>
+                      <h3>
+                        Job postings
+                      </h3>
+                    </header>
 
-                  <ul class="oa-preview-list">
-                    <li>
-                      <a href="jobs.html"><strong>Job postings</strong></a>
-                      <p>The replacement for the Awesome Table. Same seven filters, same cards, same
-                      Featured badge — plus filter state in the address bar, so a filtered view can
-                      be bookmarked and shared.</p>
-                    </li>
-                    <li>
-                      <a href="post-a-job.html"><strong>Post a job</strong></a>
-                      <p>The replacement for the Google Form. Needs an account; the posting appears
-                      on the list automatically at the next scheduled update.</p>
-                    </li>
-                    <li>
-                      <a href="alerts.html"><strong>E-mail alerts</strong></a>
-                      <p>Subscribe to new postings — all of them, or matching filters — and to
-                      changes on the site. With a live preview of the e-mail you would get.</p>
-                    </li>
-                    <li>
-                      <a href="feedback.html"><strong>Feedback</strong></a>
-                      <p>Report a problem with screenshots and get a ticket number. When it is
-                      fixed, you are e-mailed what was done.</p>
-                    </li>
-                  </ul>
+                    <p>
+                      Reach out to a wider audience for your academic vacancies by posting a job.
+                    </p>
+                  </li>
 
-                  <div class="oa-note">
-                    <p><strong>Sign-in, posting, alerts and feedback are inert until a Firebase
-                    project is configured.</strong> Each page says so plainly rather than failing;
-                    the job postings list works regardless, because it reads a static file.</p>
-                    <p>What is left to do, and how the cutover works, is in
-                    <code>v2/_PLAN.md</code> in the repository.</p>
-                  </div>
+                  <li>
+                    <a class="pennant" href="candidates.html"><span class=
+                    "icon fa-users"></span></a>
+                    <header>
+                      <h3>
+                        Candidates
+                      </h3>
+                    </header>
 
-                </div>
+                    <p>
+                      Find and hire a candidate, promote your research, or help prospective
+                      universities find you easier.
+                    </p>
+                  </li>
+
+                  <li>
+                    <a class="pennant" href="resources-for-candidates.html"><span class=
+                    "icon fa-chart-line"></span></a>
+                    <header>
+                      <h3>
+                        Resources
+                      </h3>
+                    </header>
+
+                    <p>
+                      Discover job market resources for candidates, previous job postings and
+                      recent faculty members.
+                    </p>
+                  </li>
+                </ul>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
+    </div>
+    <!-- Footer Wrapper -->
 
-            <!-- Footer: shared include -->
-      <div data-include="/partials/footer.html"></div>
-      <script src="/assets/js/include-partials.js"></script>
-    </div><!-- /#page-wrapper -->
-
-    <!-- The site's own script chain, in the order every other page uses it.
-         All three parts are load-bearing and none of them is optional:
-           ypo-parakolouthisi.js defines the global `ga` that the footer's
-             inline onclick handlers call — without it every footer link throws;
-           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
-             relative hrefs would resolve inside /v2/);
-           jquery + dropotron + skel + util + main.js build the off-canvas
-             panel that IS the navigation below 840px, where main.css hides
-             #header-wrapper outright. Drop them and a phone gets no menu.
-         Awesome Tables is deliberately NOT here. It is a leaf dependency:
-         nothing in the site's own CSS or JS refers to it. -->
-    <script src="/assets/js/ypo-parakolouthisi.js"></script>
-    <script src="assets/oa-nav.js"></script>
-    <script src="/assets/js/jquery.min.js"></script>
-    <script src="/assets/js/jquery.dropotron.min.js"></script>
-    <script src="/assets/js/skel.min.js"></script>
-    <script src="/assets/js/util.js"></script>
-    <script src="/assets/js/main.js"></script>
-
-    <!-- v2 -->
+      <!-- Footer: shared include -->
+<div data-include="partials/footer.html"></div>
+<script src="/assets/js/include-partials.js"></script>
+	
+    <!-- Scripts -->
+    <script src="/assets/js/ypo-parakolouthisi.js">
+    </script> 
+    <script src="assets/oa-nav.js">
+    </script> 
+    <script src="/assets/js/jquery.min.js">
+    </script> 
+    <script src="/assets/js/jquery.dropotron.min.js">
+    </script> 
+    <script src="/assets/js/skel.min.js">
+    </script> 
+    <script src="/assets/js/util.js">
+    </script> <!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
+     
+    <script src="/assets/js/main.js">
+    </script>
+    <!-- v2: the account chip in the header. Inert until a Firebase project
+         is configured, exactly as on the rebuilt pages. -->
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
-</body>
+  </body>
 </html>

@@ -69,7 +69,15 @@
     u = String(u || '').trim();
     if (!u) return '';
     if (/^https?:\/\//i.test(u)) return u;
-    if (u.charAt(0) === '/' || u.slice(0, 2) === './') return u;
+    if (u.charAt(0) === '/') {
+      // "//host/path" is protocol-relative — it points at ANOTHER origin, not
+      // at this site, and the URL parser reads a backslash there the same way.
+      // So a leading slash only counts as relative when what follows is not
+      // another slash or backslash.
+      var next = u.charAt(1);
+      return next === '/' || next === '\\' ? '' : u;
+    }
+    if (u.slice(0, 2) === './') return u;
     return '';
   }
 
@@ -108,7 +116,10 @@
 
   var DERIVE = {
     deadline: function (row) {
-      // no closing date on record — the sheet's "Until filled." postings
+      // No closing date on record — the sheet's "Until filled." postings.
+      // (The writers guarantee the two cannot disagree: a row whose prose says
+      // "until filled"/"rolling" carries NO date, in every pipeline and in the
+      // served file — see import-sheet.mjs and rowFromSubmission.)
       if (!row.applyByDate) return 'Until filled';
       // a deadline that falls TODAY is still open, hence < 0 rather than <= 0
       return daysBetween(todayISO(), row.applyByDate) < 0 ? 'Expired' : 'Closing soon';
@@ -168,6 +179,8 @@
 
     // state: text filters hold a string, value filters hold a Set
     var sel = {};
+    // pending debounce per text filter, so a rebuild can cancel it (below)
+    var textTimers = {};
     filters.forEach(function (f) {
       sel[f.key] = f.type === 'text' ? '' : new Set();
     });
@@ -247,6 +260,11 @@
     }
 
     function buildBar() {
+      // A pending text debounce closes over the <input> this rebuild is about
+      // to throw away. Left running it fires against the detached node and
+      // pushes the old typed value back into `sel` — so Clear filters emptied
+      // the bar while the list stayed filtered by text shown nowhere.
+      filters.forEach(function (f) { clearTimeout(textTimers[f.key]); });
       barEl.innerHTML = '';
       filters.forEach(function (f) {
         var wrap = el('div', { class: 'oa-filter' + (f.type === 'text' ? '' : ' oa-pick') });
@@ -261,10 +279,9 @@
             placeholder: f.placeholder || '',
             autocomplete: 'off',
           });
-          var t = null;
           input.addEventListener('input', function () {
-            clearTimeout(t);
-            t = setTimeout(function () {
+            clearTimeout(textTimers[f.key]);
+            textTimers[f.key] = setTimeout(function () {
               sel[f.key] = input.value;
               page = 0;
               apply();
@@ -272,8 +289,20 @@
           });
           wrap.appendChild(input);
         } else {
-          wrap.appendChild(buildPicker(f, id));
-          wrap.appendChild(buildChips(f));
+          // Picking a value used to call buildBar(), which emptied this very
+          // node — tearing down the menu the reader was standing in, so a
+          // multi-select facet had to be reopened for every single value (and
+          // keyboard focus fell back to <body> each time). Refresh only the
+          // chips instead and leave the open menu alone.
+          var chipsBox = buildChips(f);
+          var onPick = function () {
+            var fresh = buildChips(f);
+            wrap.replaceChild(fresh, chipsBox);
+            chipsBox = fresh;
+            apply(); // render() re-reads the Clear button's disabled state
+          };
+          wrap.appendChild(buildPicker(f, id, onPick));
+          wrap.appendChild(chipsBox);
         }
         barEl.appendChild(wrap);
       });
@@ -329,9 +358,15 @@
       return box;
     }
 
-    function buildPicker(f, id) {
+    function buildPicker(f, id, onPick) {
       var chosen = sel[f.key];
       var multi = f.type !== 'one';
+      var btnLabel = el('span', {
+        class: 'oa-pick-label',
+        text: chosen.size
+          ? chosen.size + ' selected'
+          : (f.placeholder || 'Choose a value'),
+      });
       var btn = el('button', {
         type: 'button',
         id: id,
@@ -339,51 +374,70 @@
         'aria-haspopup': 'listbox',
         'aria-expanded': 'false',
       }, [
-        el('span', {
-          class: 'oa-pick-label',
-          text: chosen.size
-            ? chosen.size + ' selected'
-            : (f.placeholder || 'Choose a value'),
-        }),
+        btnLabel,
         el('span', { class: 'oa-pick-caret', 'aria-hidden': 'true', text: multi ? '+' : '⌄' }),
       ]);
 
+      // the button's own summary, refreshed in place now that a tick no longer
+      // rebuilds the bar around it
+      function syncBtn() {
+        btn.className = 'oa-pick-btn' + (chosen.size ? ' is-set' : '');
+        btnLabel.textContent = chosen.size
+          ? chosen.size + ' selected'
+          : (f.placeholder || 'Choose a value');
+      }
+
       var menu = el('div', { class: 'oa-pick-menu', role: 'listbox', hidden: true });
+
+      /* The search box is created ONCE and never re-rendered. It used to be
+         rebuilt inside fill() on every keystroke and then re-focused, which put
+         the caret back at position 0 — so the next character landed in FRONT of
+         the last one and "sing" was typed into the box as "gnis", matching
+         nothing. Only the option rows below it are redrawn. */
+      var search = null;
+      if (f.searchable !== false) {
+        search = el('input', {
+          class: 'oa-pick-search',
+          type: 'text',
+          placeholder: 'Search…',
+          autocomplete: 'off',
+        });
+        search.addEventListener('input', function () { fill(search.value); });
+        search.addEventListener('keydown', function (e) { e.stopPropagation(); });
+        menu.appendChild(search);
+      }
+      var optsEl = el('div', { class: 'oa-pick-opts' });
+      menu.appendChild(optsEl);
 
       function close() {
         menu.hidden = true;
+        // drop the rows with it: their counts are cross-filtered and go stale
+        // the moment another filter moves, and a closed picker used to carry no
+        // options at all (the bar was rebuilt around it)
+        optsEl.innerHTML = '';
         btn.setAttribute('aria-expanded', 'false');
         document.removeEventListener('mousedown', onOutside, true);
         document.removeEventListener('keydown', onEsc, true);
       }
       function onOutside(e) {
-        if (!menu.contains(e.target) && e.target !== btn) close();
+        // containment, not identity: the button holds a label span and a caret
+        // span, so a mousedown on the words closed the menu here and the click
+        // that followed reopened it — the toggle looked dead.
+        if (!menu.contains(e.target) && !btn.contains(e.target)) close();
       }
       function onEsc(e) {
         if (e.key === 'Escape') { close(); btn.focus(); }
       }
 
       function fill(q) {
-        menu.innerHTML = '';
-        if (f.searchable !== false) {
-          var s = el('input', {
-            class: 'oa-pick-search',
-            type: 'text',
-            placeholder: 'Search…',
-            value: q || '',
-            autocomplete: 'off',
-          });
-          s.addEventListener('input', function () { fill(s.value); });
-          s.addEventListener('keydown', function (e) { e.stopPropagation(); });
-          menu.appendChild(s);
-        }
+        optsEl.innerHTML = '';
         var opts = optionsFor(f);
         var needle = fold(q || '');
         if (needle) {
           opts = opts.filter(function (o) { return fold(o.value).indexOf(needle) !== -1; });
         }
         if (!opts.length) {
-          menu.appendChild(el('div', { class: 'oa-opt is-empty', text: 'No matches' }));
+          optsEl.appendChild(el('div', { class: 'oa-opt is-empty', text: 'No matches' }));
         }
         opts.forEach(function (o) {
           var cb = el('input', { type: multi ? 'checkbox' : 'radio', name: id });
@@ -397,27 +451,27 @@
             if (!multi) chosen.clear();
             if (cb.checked) chosen.add(o.value); else chosen['delete'](o.value);
             page = 0;
+            syncBtn();
             if (!multi) close();
-            buildBar();
-            apply();
+            // NOT a rebuild: the option counts in THIS menu are cross-filtered
+            // on every OTHER filter (optionsFor skips f.key), so ticking a
+            // value here cannot change them — and leaving the rows in place is
+            // what keeps a multi-select menu open under the pointer.
+            onPick();
           });
-          menu.appendChild(row);
+          optsEl.appendChild(row);
         });
-        // keep the freshly rebuilt menu open where the user left it
-        if (q !== undefined && menu.querySelector('.oa-pick-search')) {
-          menu.querySelector('.oa-pick-search').focus();
-        }
       }
 
       btn.addEventListener('click', function () {
         if (menu.hidden) {
+          if (search) search.value = '';
           fill('');
           menu.hidden = false;
           btn.setAttribute('aria-expanded', 'true');
           document.addEventListener('mousedown', onOutside, true);
           document.addEventListener('keydown', onEsc, true);
-          var s = menu.querySelector('.oa-pick-search');
-          if (s) s.focus();
+          if (search) search.focus();
         } else {
           close();
         }
@@ -459,11 +513,19 @@
       // cards
       listEl.innerHTML = '';
       if (!view.length) {
+        // an empty DATASET is not an over-filtered search: saying "try removing
+        // a filter" beside a disabled Clear button and an untouched bar sends
+        // the reader hunting for something that is not there
         listEl.appendChild(
-          el('li', { class: 'oa-empty' }, [
-            el('strong', { text: 'No job postings match these filters.' }),
-            el('span', { text: 'Try removing a filter, or clear them all to see every posting.' }),
-          ])
+          rows.length
+            ? el('li', { class: 'oa-empty' }, [
+                el('strong', { text: 'No job postings match these filters.' }),
+                el('span', { text: 'Try removing a filter, or clear them all to see every posting.' }),
+              ])
+            : el('li', { class: 'oa-empty' }, [
+                el('strong', { text: 'No job postings are listed at the moment.' }),
+                el('span', { text: 'Please check back soon — new postings are added as they arrive.' }),
+              ])
         );
       } else {
         view.slice(page * perPage, (page + 1) * perPage).forEach(function (r) {
@@ -547,12 +609,24 @@
 
     function syncUrl() {
       if (syncing) return;
-      var p = new URLSearchParams();
+      // Seed from the URL the visitor actually arrived on and clear only the
+      // keys this engine owns. Rebuilding from an empty set deleted every
+      // foreign parameter — utm_*, gclid, a mail-shot token — a second after
+      // the page painted.
+      var p = new URLSearchParams(location.search);
+      filters.forEach(function (f) {
+        p['delete'](f.key);
+        if (f.legacyParam) p['delete'](f.legacyParam);
+      });
+      p['delete']('page');
       filters.forEach(function (f) {
         if (f.type === 'text') {
           if (sel[f.key]) p.set(f.key, sel[f.key]);
-        } else if (sel[f.key].size) {
-          p.set(f.key, Array.from(sel[f.key]).join('|'));
+        } else {
+          // one parameter PER value rather than a "a|b" join: a facet value is
+          // free text off the posting form, and one containing a pipe used to
+          // round-trip as two values that match nothing at all
+          sel[f.key].forEach(function (v) { p.append(f.key, v); });
         }
       });
       if (page > 0) p.set('page', String(page + 1));
@@ -561,22 +635,41 @@
       history.replaceState(null, '', url);
     }
 
+    // does this facet actually hold `v` as one of its values?
+    function facetHas(f, v) {
+      for (var i = 0; i < rows.length; i++) {
+        if (valuesOf(rows[i], f).indexOf(v) !== -1) return true;
+      }
+      return false;
+    }
+
     function readUrl() {
       var p = new URLSearchParams(location.search);
       filters.forEach(function (f) {
         // ?filterA= is the legacy Awesome Table deep link the footer and the
         // "Further info" column still emit — honour it as the text filter.
-        var raw = p.get(f.key);
-        if (raw === null && f.legacyParam) raw = p.get(f.legacyParam);
-        if (raw === null) return;
-        if (f.type === 'text') sel[f.key] = raw;
-        else raw.split('|').forEach(function (v) {
+        var all = p.getAll(f.key);
+        if (!all.length && f.legacyParam) all = p.getAll(f.legacyParam);
+        if (!all.length) return;
+        if (f.type === 'text') { sel[f.key] = all[0]; return; }
+        var add = function (v) {
           if (!v) return;
           // a value this filter used to publish under another name, so a link
           // someone bookmarked or shared still selects what they meant
           if (f.legacyValues && f.legacyValues[v]) v = f.legacyValues[v];
           sel[f.key].add(v);
-        });
+        };
+        if (all.length > 1) {
+          all.forEach(add);
+        } else if (all[0].indexOf('|') === -1 || facetHas(f, all[0])) {
+          add(all[0]);
+        } else {
+          // ONE occurrence carrying a pipe is ambiguous — one value, or the
+          // older "a|b" join that links already in the wild still use. The data
+          // settles it: readUrl runs after the rows land, so a string the facet
+          // really holds is taken whole.
+          all[0].split('|').forEach(add);
+        }
       });
       var pg = parseInt(p.get('page'), 10);
       if (pg > 1) page = pg - 1;

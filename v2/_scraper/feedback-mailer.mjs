@@ -43,6 +43,13 @@ const SCAN = argv.has('--scan');
 
 const TO = process.env.FEEDBACK_TO || 'kstouras@gmail.com';
 
+/** The submitter's address, for the run log. Actions logs of a public
+    repository are world-readable, and a feedback address is personal data. */
+function redact(email) {
+  const m = String(email || '').match(/^([^@]{1,2})[^@]*(@.*)$/);
+  return m ? `${m[1]}***${m[2]}` : (email ? '***' : 'nobody');
+}
+
 /* -------------------------------------------------------- resolution files */
 
 /**
@@ -149,15 +156,24 @@ export function renderReceiptEmail(v) {
 }
 
 /** Firestore holds screenshots as JPEG data URLs; turn them into attachments
-    so the maintainer's mail client shows them normally. */
+    so the maintainer's mail client shows them normally.
+
+    The type is checked against a fixed list of raster formats rather than
+    `image/*`: the feedback page compresses everything to JPEG, and the one
+    image type that is NOT inert — SVG, which is a script-carrying document
+    when opened — has no business arriving as a screenshot. */
+const SHOT_TYPES = { 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png',
+  'image/gif': 'gif', 'image/webp': 'webp' };
+
 function attachments(shots) {
   return (shots || []).map((u, i) => {
-    const m = String(u).match(/^data:(image\/[a-z+]+);base64,(.+)$/i);
-    if (!m) return null;
+    const m = String(u).match(/^data:([a-z/+-]+);base64,(.+)$/i);
+    const ext = m && SHOT_TYPES[m[1].toLowerCase()];
+    if (!ext) return null;
     return {
-      filename: `screenshot-${i + 1}.${m[1].split('/')[1].replace('jpeg', 'jpg')}`,
+      filename: `screenshot-${i + 1}.${ext}`,
       content: Buffer.from(m[2], 'base64'),
-      contentType: m[1],
+      contentType: m[1].toLowerCase(),
     };
   }).filter(Boolean);
 }
@@ -216,10 +232,22 @@ function selftest() {
   ok(m.includes('x &lt; y &amp; z'), 'the maintainer copy escapes the message');
   ok(m.includes('_feedback-resolutions/OA-2.md'), 'the maintainer copy says how to close it');
 
-  ok(attachments(['data:image/jpeg;base64,' + Buffer.from('hi').toString('base64')]).length === 1,
-    'a data URL becomes an attachment');
+  const jpg = 'data:image/jpeg;base64,' + Buffer.from('hi').toString('base64');
+  ok(attachments([jpg]).length === 1, 'a data URL becomes an attachment');
+  ok(attachments([jpg])[0].filename === 'screenshot-1.jpg', 'the attachment is named sensibly');
   ok(attachments(['not-a-data-url']).length === 0, 'a non-data URL is not attached');
+  // an SVG is a script-carrying document, and is never a screenshot from the
+  // feedback page, which compresses everything to JPEG
+  ok(attachments(['data:image/svg+xml;base64,AAA']).length === 0, 'an SVG is not attached');
+  ok(attachments(['data:text/html;base64,AAA']).length === 0, 'a non-image is not attached');
+
   ok(toPlain(html).includes('We fixed it.'), 'the plain-text alternative carries the body');
+
+  // Actions logs of a public repository are world-readable, and a feedback
+  // address is personal data.
+  ok(redact('reporter@example.com') === 're***@example.com',
+    'the run log does not print a submitter address in full');
+  ok(redact('') === 'nobody', 'an anonymous submission still reads sensibly');
 
   if (fails.length) {
     console.log(`\n${fails.length} FAILED, ${pass} passed`);
@@ -271,15 +299,20 @@ async function main() {
     const v = { id: doc.id, ...doc.data() };
     if (SCAN) { console.log(`  new  ${v.ticket}  ${(v.message || '').slice(0, 60)}`); continue; }
 
+    let forwarded = false;
     try {
-      await send(tx, {
+      // `forwarded` is stamped ONLY behind a real delivery. send() returns
+      // false when it merely printed the message (a dry run, or no SMTP yet):
+      // marking it anyway would take the submission out of the pending queue
+      // for good, and nobody would ever read it.
+      forwarded = await send(tx, {
         to: TO,
         replyTo: v.email || undefined,
         subject: `[${v.ticket}] Operations Academia feedback`,
         html: renderMaintainerEmail(v),
         attachments: attachments(v.shots),
       }, { dryRun: DRY });
-      if (!DRY) await doc.ref.update({ forwarded: true, forwardedAt: new Date().toISOString() });
+      if (forwarded) await doc.ref.update({ forwarded: true, forwardedAt: new Date().toISOString() });
     } catch (err) {
       console.log(`::warning::could not forward ${v.ticket}: ${err.message}`);
       continue;   // leave it unforwarded so the next run retries
@@ -289,17 +322,17 @@ async function main() {
     // the maintainer already has.
     if (v.email && !v.ackSent) {
       try {
-        await send(tx, {
+        const acked = await send(tx, {
           to: v.email,
           subject: `We have your feedback (${v.ticket})`,
           html: renderReceiptEmail(v),
         }, { dryRun: DRY });
-        if (!DRY) await doc.ref.update({ ackSent: true });
+        if (acked) await doc.ref.update({ ackSent: true });
       } catch (err) {
         console.log(`::warning::could not send the receipt for ${v.ticket}: ${err.message}`);
       }
     }
-    console.log(`forwarded ${v.ticket}`);
+    console.log(`${forwarded ? 'forwarded' : 'would forward'} ${v.ticket}`);
   }
 
   /* ---- phase 2: resolve ---- */
@@ -314,13 +347,23 @@ async function main() {
     const doc = snap.docs[0];
     const v = doc.data();
 
-    if (v.resolutionHash === r.hash) continue;      // already applied, unchanged
+    // A resolution is FINISHED only once the submitter has been told, so
+    // `resolutionSent` is part of the test and not just the hash. Keyed on the
+    // hash alone, a notification that failed — a transient SMTP error, or a run
+    // before the mailbox existed — was skipped forever on every later run, and
+    // the person who reported the problem never heard that it was fixed. (An
+    // anonymous submission has nobody to tell, so the hash alone finishes it.)
+    if (v.resolutionHash === r.hash && (v.resolutionSent || !v.email)) continue;
 
     if (SCAN) { console.log(`  resolve  ${r.ticket}  ${r.body.slice(0, 60)}`); continue; }
 
     // CLOSE FIRST. If the send then fails, the ticket is still recorded as
-    // resolved and only the notification retries.
-    if (!DRY) {
+    // resolved and only the notification retries — so the guard is "not
+    // already closed at this hash", which makes a retry write nothing.
+    // A run with no transport writes nothing at all: it is a dry run (see the
+    // warning above), and closing a ticket nobody can yet be told about is
+    // exactly the premature bookkeeping this whole file now avoids.
+    if (v.resolutionHash !== r.hash && !DRY && tx) {
       await doc.ref.update({
         status: 'closed',
         resolution: r.body,
@@ -334,15 +377,17 @@ async function main() {
     if (!v.email) { console.log(`closed ${r.ticket} (anonymous — nobody to tell)`); continue; }
 
     try {
-      await send(tx, {
+      const told = await send(tx, {
         to: v.email,
         subject: `Your feedback (${r.ticket}) is resolved`,
         html: renderResolutionEmail({
           ticket: r.ticket, body: r.body, url: r.url, original: v.message,
         }),
       }, { dryRun: DRY });
-      if (!DRY) await doc.ref.update({ resolutionSent: true });
-      console.log(`resolved ${r.ticket} and told ${v.email}`);
+      if (told) await doc.ref.update({ resolutionSent: true });
+      console.log(told
+        ? `resolved ${r.ticket} and told ${redact(v.email)}`
+        : `would resolve ${r.ticket}`);
     } catch (err) {
       console.log(`::warning::closed ${r.ticket} but could not e-mail: ${err.message}`);
     }

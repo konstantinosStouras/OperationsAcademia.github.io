@@ -46,11 +46,22 @@
     try { return JSON.parse(localStorage.getItem(HINT_KEY) || 'null'); } catch (e) { return null; }
   }
 
-  function writeHint(u) {
+  /** `name` overrides what we store for the next page load. Firebase gives a
+      password account no displayName, so the name we display comes from the
+      Firestore profile — pass it in once that read has landed, or the hint
+      would only ever carry an empty string. */
+  function writeHint(u, name) {
     try {
       if (u) {
+        if (name === undefined) {
+          // Called before the profile read has landed. Keep whatever name the
+          // previous visit resolved for this same account rather than blanking
+          // it — otherwise the hint can never carry a name at all.
+          var prev = readHint();
+          name = (prev && prev.uid === u.uid && prev.name) || '';
+        }
         localStorage.setItem(HINT_KEY, JSON.stringify({
-          uid: u.uid, email: u.email || '', name: u.displayName || ''
+          uid: u.uid, email: u.email || '', name: name || u.displayName || ''
         }));
       } else {
         localStorage.removeItem(HINT_KEY);
@@ -62,7 +73,14 @@
     if (!u) return '';
     var p = state.profile;
     var full = p && [p.firstName, p.lastName].filter(Boolean).join(' ').trim();
-    return full || u.name || u.displayName || (u.email || '').split('@')[0] || 'Account';
+    if (full) return full;
+    // Auth has resolved but the profile read has not. A password account
+    // carries no displayName, so without the hint the chip would drop from
+    // "Jane Doe" to "jane.doe" for the length of one Firestore round trip, on
+    // every single page load.
+    var h = !p && readHint();
+    var hinted = (h && h.uid === u.uid && h.name) || '';
+    return u.name || u.displayName || hinted || (u.email || '').split('@')[0] || 'Account';
   }
 
   /** Two letters for the avatar: the initials of the name we show, falling
@@ -198,6 +216,10 @@
   };
 
   function paint() {
+    // The off-canvas copy first: it must follow every state change even on a
+    // page without #oa-account, and even down the early-return branches below.
+    paintPanel();
+
     var host = $('#oa-account');
     if (!host) return;
 
@@ -241,14 +263,18 @@
               '<span class="oa-acct-mail">' + esc(u.email || '') + '</span>' +
             '</span>' +
           '</div>' +
+          // Relative, like oa-nav.js and every page in /v2/. These were the
+          // only absolute internal links on the site, and at cutover the
+          // pages move up one directory — /v2/… would then be three dead
+          // links in every signed-in reader's menu.
           '<div class="oa-acct-group">' +
-            '<a role="menuitem" href="/v2/post-a-job.html">' +
+            '<a role="menuitem" href="post-a-job.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
-            '<a role="menuitem" href="/v2/alerts.html">' +
+            '<a role="menuitem" href="alerts.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts</a>' +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.profile + '</span>Edit profile</button>' +
-            '<a role="menuitem" href="/v2/feedback.html">' +
+            '<a role="menuitem" href="feedback.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.feedback + '</span>Send feedback</a>' +
           '</div>' +
           '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">Sign out</button>' +
@@ -268,7 +294,118 @@
     var so = $('#oa-signout');
     if (so) so.addEventListener('click', signOut);
     var ep = $('#oa-editprofile');
-    if (ep) ep.addEventListener('click', function () { close(); openProfile(); });
+    // Through the queue, like every other mid-restore action (invariant 1).
+    // This chip is painted from the localStorage hint BEFORE Firebase has
+    // restored the session, so state.user is still null while the menu is on
+    // screen — calling openProfile() directly showed a signed-in reader the
+    // "Sign in to Operations Academia" box and threw their click away.
+    if (ep) ep.addEventListener('click', function () { close(); whenSignedIn(function () { openProfile(); }); });
+  }
+
+  /* The same control, in the off-canvas panel. main.css hides #header-wrapper
+     outright at ≤840px and main.js rebuilds the menu as #navPanel from #nav
+     ALONE, so on a phone #oa-headnav — and with it the site's only sign-out —
+     does not exist. CSS cannot rescue a subtree that is display:none from an
+     ancestor, so the account control is painted a second time, into the
+     panel. `link depth-0` are main.css's own panel classes; the identity line
+     (.oa-np-as) is styled in oa-ui.css. main.js builds the panel at
+     DOM-ready, which is AFTER this script's first paint — hence the one
+     deferred retry. The panel's hideOnClick closes it after a tap for us. */
+  function paintPanel() {
+    var nav = document.querySelector('#navPanel nav');
+    if (!nav) {
+      // Bounded: a page where main.js never built the panel (script blocked)
+      // must not poll for ever. Twenty ticks is five seconds — DOM-ready is
+      // orders of magnitude sooner.
+      paintPanel.tries = (paintPanel.tries || 0) + 1;
+      if (!paintPanel.armed && paintPanel.tries <= 20) {
+        paintPanel.armed = true;
+        setTimeout(function () { paintPanel.armed = false; paintPanel(); }, 250);
+      }
+      return;
+    }
+    paintPanel.tries = 0;
+
+    var box = document.getElementById('oa-np');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'oa-np';
+      nav.appendChild(box);
+    }
+
+    // Not configured, or unreachable: no entry at all. A dead "Sign in" link
+    // in the panel would be the same silent no-op the header just fixed.
+    if (!window.OAFB || !OAFB.enabled || state.failed) { box.innerHTML = ''; return; }
+
+    var u = state.user || (!state.resolved ? readHint() : null);
+    if (!u) {
+      box.innerHTML = '<a class="link depth-0" id="oa-np-signin" href="#">Sign in</a>';
+      $('#oa-np-signin').addEventListener('click', function (e) {
+        e.preventDefault();
+        openAuth();
+      });
+      return;
+    }
+
+    box.innerHTML =
+      '<span class="oa-np-as"><strong>' + esc(displayName(u)) + '</strong>' +
+        esc(u.email || '') + '</span>' +
+      '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
+      '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
+    $('#oa-np-profile').addEventListener('click', function (e) {
+      e.preventDefault();
+      whenSignedIn(function () { openProfile(); });
+    });
+    $('#oa-np-signout').addEventListener('click', function (e) {
+      e.preventDefault();
+      signOut();
+    });
+  }
+
+  /* --------------------------------------------------------------- modals */
+
+  /** Escape closes an open dialog. Both cards claim role="dialog"
+      aria-modal="true", and a box a keyboard user cannot leave is not a modal
+      — it is a trap. The only Escape handler in the file used to be the
+      account menu's, registered only when the signed-in chip is painted, so a
+      signed-out visitor's sign-in box had no key handler at all. */
+  function wireModalKeys(wrap, close) {
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (!wrap.parentNode || wrap.hidden) return;      // already closed
+      close();
+    });
+  }
+
+  /** A plain, honest box for when there is nothing to sign in WITH: the SDK
+      never loaded, or the project is not configured yet. The gates on
+      post-a-job and alerts put a prominent "Sign in" button in front of the
+      reader; pressing it and having literally nothing happen — no modal, no
+      message — is the one failure mode this site is not allowed to have. */
+  function openNotice(text) {
+    var old = $('#oa-notice');
+    if (old) old.parentNode.removeChild(old);
+
+    var wrap = document.createElement('div');
+    wrap.className = 'oa-modal';
+    wrap.id = 'oa-notice';
+    wrap.innerHTML =
+      '<div class="oa-modal-card" role="dialog" aria-modal="true" aria-labelledby="oa-notice-h">' +
+        '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
+        '<h3 id="oa-notice-h">Sign-in is unavailable</h3>' +
+        '<p class="oa-modal-lede">' + text + '</p>' +
+        '<div class="oa-auth-actions">' +
+          '<button type="button" class="button blue" id="oa-notice-ok">Close</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+
+    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    $('.oa-modal-x', wrap).addEventListener('click', close);
+    $('#oa-notice-ok', wrap).addEventListener('click', close);
+    wireModalKeys(wrap, close);
+    $('#oa-notice-ok', wrap).focus();
   }
 
   /* ------------------------------------------------------------ profile card
@@ -286,17 +423,36 @@
   }
 
   function loadProfile(u) {
-    if (!u) { state.profile = null; return; }
+    state.profile = null;                // never carry the previous account's
+    if (!u) return;
+    var uid = u.uid;
+
+    /** The account can change while the read is in flight — sign out, then
+        sign in as someone else. Without this the older read wins and pins the
+        previous person's name above the current person's e-mail, for the rest
+        of the page's life. */
+    function stillOurs() { return !!(state.user && state.user.uid === uid); }
+
     OAFB.ready()
-      .then(function (fb) { return profileDoc(fb, u.uid).get(); })
+      .then(function (fb) { return profileDoc(fb, uid).get(); })
       .then(function (snap) {
+        if (!stillOurs()) return;
         state.profile = (snap && snap.exists ? snap.data() : null) || null;
         paint();
+        // Write the name we actually SHOW back into the hint. Firebase leaves
+        // displayName null for a password account, so without this the chip
+        // changed identity on every page load — "jane.doe", then "Jane Doe"
+        // once the profile read landed. On a flat static site that is every
+        // navigation.
+        writeHint(state.user, displayName(state.user));
         // A first-run account has no name yet. Ask once, and never again —
         // being nagged on every visit is what makes a profile prompt hated.
+        // Keyed on the uid: a browser-wide flag meant the SECOND account on a
+        // shared or lab machine was never asked at all, and stayed known by
+        // the left-hand half of its e-mail address for ever.
         try {
-          if (!state.profile && !localStorage.getItem('oaProfileAsked')) {
-            localStorage.setItem('oaProfileAsked', '1');
+          if (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)) {
+            localStorage.setItem('oaProfileAsked:' + uid, '1');
             openProfile(true);
           }
         } catch (e) { /* private mode */ }
@@ -327,7 +483,15 @@
 
   function openProfile(firstRun) {
     var u = state.user;
-    if (!u) { openAuth(); return; }
+    if (!u) {
+      // Belt and braces for invariant 1: mid-restore we do not yet know who
+      // this is, so queue rather than bounce a signed-in reader to a sign-in
+      // box. Only once auth has genuinely resolved to "signed out" is the
+      // modal the right answer.
+      if (!state.resolved) { whenSignedIn(function () { openProfile(firstRun); }); return; }
+      openAuth();
+      return;
+    }
     var old = $('#oa-profile');
     if (old) old.parentNode.removeChild(old);
 
@@ -382,15 +546,29 @@
     function close() { wrap.hidden = true; }
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     $('.oa-modal-x', wrap).addEventListener('click', close);
+    wireModalKeys(wrap, close);
     var later = $('#oa-profile-later', wrap);
     if (later) later.addEventListener('click', close);
     wireOtherAccounts(wrap, close);
+    var first = $('#oa-profile-form input', wrap);
+    if (first) first.focus();
 
     $('#oa-profile-form', wrap).addEventListener('submit', function (e) {
       e.preventDefault();
       var f = e.target, out = {};
       var msg = $('#oa-profile-msg', wrap);
       PROFILE_FIELDS.forEach(function (k) { out[k] = String(f[k].value || '').trim().slice(0, 300); });
+
+      // The card's own lede says the profile is how you appear "on anything
+      // you post", i.e. this field exists to be rendered as a link one day.
+      // type="url" happily accepts `javascript:alert(1)` as a valid absolute
+      // URL, so refuse anything we would not be willing to put in an href
+      // rather than storing a stored-XSS seed for the first renderer.
+      if (out.website && !/^https?:\/\//i.test(out.website)) {
+        msg.className = 'oa-auth-msg is-err';
+        msg.textContent = 'Please give a website address starting with http:// or https://.';
+        return;
+      }
 
       // The iD is only editable while it is UNVERIFIED — one we were handed by
       // an ORCID sign-in is shown as a chip and left alone.
@@ -419,6 +597,7 @@
         .then(function () {
           state.profile = Object.assign({}, state.profile || {}, out);
           paint();
+          writeHint(state.user, displayName(state.user));   // the next page starts with the new name
           accountKeysChecked = false;      // a new iD is a new identity to claim
           claimAccountKeys();
           close();
@@ -607,15 +786,29 @@
       and find another button. */
   function openAuth(mode) {
     if (state.user) return;                      // invariant 1
-    if (!window.OAFB || !OAFB.enabled) return;
-    if (state.failed) return;                    // the SDK never loaded
-    var registering = mode === 'register';
-    if ($('#oa-auth')) {
-      $('#oa-auth').hidden = false;
-      var em = $('#oa-auth-form') && $('#oa-auth-form').email;
-      if (em) em.focus();
+    if (!window.OAFB || !OAFB.enabled) {
+      openNotice('Sign-in is not switched on for this site yet. ' +
+        'Everything else on the page works as usual.');
       return;
     }
+    if (state.failed) {
+      // The SDK never loaded. Say so — a prominent button that does nothing
+      // at all when pressed is worse than the sentence explaining why.
+      openNotice('We could not load the sign-in service. If you use an ad ' +
+        'blocker, allow <code>gstatic.com</code> and reload the page. ' +
+        'Otherwise check your connection and try again.');
+      return;
+    }
+    var registering = mode === 'register';
+
+    // Rebuilt on every open, like the profile card. Reusing the node carried
+    // the FIRST open's heading for the rest of the page's life ("Create an
+    // account" then "Sign in" still read "Create your … account"), left the
+    // previous attempt's red error on screen attached to nothing, and — on a
+    // shared or lab machine — handed the previous person's e-mail and typed
+    // password to whoever opened the box next.
+    var old = $('#oa-auth');
+    if (old) old.parentNode.removeChild(old);
 
     var third = providerButtonsHTML();
 
@@ -645,12 +838,17 @@
       '</div>';
     document.body.appendChild(wrap);
 
-    function close() { wrap.hidden = true; }
+    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     $('.oa-modal-x', wrap).addEventListener('click', close);
+    wireModalKeys(wrap, close);
+    $('#oa-auth-form', wrap).email.focus();
 
     function say(msg, ok) {
-      var m = $('#oa-auth-msg');
+      // Scoped to THIS card, and null-safe: close() removes the node now, and
+      // a slow rejection can land after the reader has closed the box.
+      var m = $('#oa-auth-msg', wrap);
+      if (!m) return;
       m.textContent = msg;
       m.className = 'oa-auth-msg' + (ok ? ' is-ok' : msg ? ' is-err' : '');
     }
@@ -1297,8 +1495,28 @@
 
   function signOut() {
     writeHint(null);
+    // Repaint AT ONCE, before awaiting the SDK. The chip is painted from the
+    // hint and is therefore clickable long before Firebase has landed, and
+    // deferring everything to ready() left the name, e-mail and avatar sitting
+    // there with no sign that anything had happened. Telling the listeners too,
+    // so the posting form and the alerts page fall back to their gate rather
+    // than staying open for an account that is on its way out.
+    state.user = null;
+    state.profile = null;
+    queue.length = 0;
+    paint();
+    notify(null);
     if (!window.OAFB || !OAFB.enabled) return;
-    OAFB.ready().then(function (fb) { return fb.auth().signOut(); });
+    OAFB.ready()
+      .then(function (fb) { return fb.auth().signOut(); })
+      .catch(function () {
+        // ready() rejects when gstatic is unreachable, and that rejection can
+        // arrive AFTER the hint-painted chip has been clicked. Unhandled it is
+        // an uncaught error in the page. The hint is already gone, so the
+        // honest end state is the one the header shows for a dead SDK.
+        state.failed = true;
+        paint();
+      });
   }
 
   /* -------------------------------------------------------------- lifecycle */
@@ -1342,14 +1560,28 @@
           // Public, contentless tally so the site can show a registered-user
           // count without anyone being able to read the user list. Same shape
           // as /lit/'s registeredUsers/{uid}: a coarse timestamp, nothing else.
-          fb.firestore().collection(OAFB.col.registered).doc(u.uid)
-            .set({ t: Date.now() }, { merge: true })
-            .catch(function () { /* rule not deployed yet — never block sign-in */ });
+          //
+          // ONCE PER SESSION, as /lit/ does it — not once per page view. This
+          // is a flat multi-page site: a signed-in reader opening ten pages
+          // would otherwise cost ten writes, all of them overwriting the same
+          // coarse timestamp, against a 20k/day free-tier ceiling.
+          var tally = 'oaTally:' + u.uid, done = false;
+          try { done = !!sessionStorage.getItem(tally); } catch (e) { /* private mode */ }
+          if (!done) {
+            try { sessionStorage.setItem(tally, '1'); } catch (e) { /* private mode */ }
+            fb.firestore().collection(OAFB.col.registered).doc(u.uid)
+              .set({ t: Date.now() }, { merge: true })
+              .catch(function () { /* rule not deployed yet — never block sign-in */ });
+          }
 
           var q = queue.splice(0, queue.length);
           q.forEach(function (fn) { try { fn(u); } catch (e) { if (window.console) console.error(e); } });
         } else {
-          queue.length = 0;
+          // Anything queued during the restore window belongs to someone who
+          // turns out NOT to be signed in. Dropping it silently loses the
+          // click; whenSignedIn's own contract is to offer the sign-in box.
+          var pending = queue.splice(0, queue.length);
+          if (pending.length) openAuth();
         }
         notify(u);
       });

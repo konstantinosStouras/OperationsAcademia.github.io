@@ -58,6 +58,16 @@ async function readJson(file, fallback) {
   }
 }
 
+/** jobs.json, strictly. An UNREADABLE dataset must abort the run, not stand in
+    for an empty one: before the migration has run, the orphan-carry below is
+    the only thing keeping the file's rows alive, and a parse error read as []
+    means no orphans — the whole back-catalogue silently dropped from the next
+    write, with every gate still green. A missing file is genuinely empty. */
+async function readJobsStrict(file) {
+  if (!existsSync(file)) return [];
+  return JSON.parse(await readFile(file, 'utf8'));   // a SyntaxError kills the run, loudly
+}
+
 /* ------------------------------------------------------------------ firebase */
 
 /** The Admin SDK, or null when this environment has no credentials. */
@@ -96,8 +106,13 @@ async function firestore() {
 
 async function main() {
   if (argv.has('--selftest')) {
-    const { runSelftest } = await import('./selftest.mjs');
-    process.exit(runSelftest() ? 0 : 1);
+    /* The WHOLE suite, not runSelftest()'s three-suite subset — running this
+       flag used to skip the merge/served-file/migration checks while printing
+       a passing total, which reads as covered when it is not. The suite's own
+       entry point already runs everything, so run it as itself. */
+    const { spawnSync } = await import('node:child_process');
+    const r = spawnSync(process.execPath, [path.join(HERE, 'selftest.mjs')], { stdio: 'inherit' });
+    process.exit(r.status === 0 ? 0 : 1);
   }
 
   const db = await firestore();
@@ -143,7 +158,16 @@ async function main() {
   const fresh = [];
   const rejected = [];
   for (const d of live) {
-    const row = rowFromSubmission(d.data(), { now });
+    let row = null;
+    try {
+      row = rowFromSubmission(d.data(), { now });
+    } catch (e) {
+      // One unreadable document must not kill the run: it stays as it is, so
+      // without this the next scheduled run dies on it too and no posting is
+      // ever published again until a human finds it.
+      warn(`submission ${d.data().ref || d.id} could not be read (${e.message}) — skipped`);
+      continue;
+    }
     if (row) fresh.push({ id: d.id, key: d.id, row, queued: d.data().status === 'queued' });
     else rejected.push({ id: d.id, ref: d.data().ref || d.id });
   }
@@ -157,7 +181,7 @@ async function main() {
      Tulane's and Houston's second departments disappeared. */
   assignIds(fresh);
 
-  const existing = await readJson(JOBS, []);
+  const existing = await readJobsStrict(JOBS);
   const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
 
   // The maintainer's committed suppression list, honoured by every writer of
@@ -218,27 +242,31 @@ async function main() {
 
   if (DRY) return;
 
-  // Only now stamp Firestore. A failure here is recoverable: the row is already
-  // in the file, and re-publishing it next run replaces it in place.
-  const batch = db.batch();
-  let stamped = 0;
+  /* Only now stamp Firestore. A failure here is recoverable: the row is
+     already in the file, and re-publishing it next run replaces it in place.
+
+     CHUNKED, because Firestore caps a batched write at 500 documents: one
+     batch would collect a whole backlog and then throw on commit — AFTER the
+     file was written — leaving every submission queued and re-collected
+     forever. */
+  const writes = [];
   for (const f of fresh.filter((x) => x.queued)) {
-    batch.update(col.doc(f.id), {
+    writes.push([f.id, {
       status: 'published',
       publishedAt: new Date(),
       publishedId: f.row.id,
-    });
-    stamped++;
+    }]);
   }
   for (const d of pulled) {
     if (d.data().status !== 'withdrawn') continue;   // 'hidden' stays hidden
-    batch.update(col.doc(d.id), { status: 'removed', removedAt: new Date() });
-    stamped++;
+    writes.push([d.id, { status: 'removed', removedAt: new Date() }]);
   }
-  if (stamped) {
+  for (let i = 0; i < writes.length; i += 400) {
+    const batch = db.batch();
+    for (const [id, patch] of writes.slice(i, i + 400)) batch.update(col.doc(id), patch);
     await batch.commit();
-    log(`stamped ${stamped} submission(s) in Firestore`);
   }
+  if (writes.length) log(`stamped ${writes.length} submission(s) in Firestore`);
 }
 
 main().catch((err) => {
