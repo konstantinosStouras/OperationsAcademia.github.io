@@ -1,6 +1,6 @@
 {
  "_note": [
-  "Where uploaded files are filed in the operations.academia@gmail.com Drive.",
+  "Where uploaded files are filed in the project's own Google Drive (the operations.academia account).",
   "",
   "One entry per JOB MARKET YEAR (see marketYear() in _scraper/jobs-model.mjs:",
   "a market year runs 1 July to 30 June and is numbered by the year it ends).",
