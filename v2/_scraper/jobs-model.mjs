@@ -297,6 +297,36 @@ export function composeApplyBy({ untilFilled, applyByDate, applyByNote }) {
   return [applyByDate ? longDate(applyByDate) : '', note].filter(Boolean).join('. ');
 }
 
+/**
+ * Give every row a distinct id, deterministically.
+ *
+ * `jobId` is (year, institution, posting date) and does NOT include the
+ * department, so two genuinely different postings from one institution on one
+ * day derive the SAME id — Tulane advertised two Freeman departments on
+ * 2026-04-07, and Houston two on 2025-09-23. The sheet importer had always
+ * disambiguated those with a `-2` suffix; the Firestore build had no
+ * equivalent, so the second row simply overwrote the first in the merge and
+ * two real postings vanished from the site the moment it became the source of
+ * truth.
+ *
+ * Entries are `{ key, row }` where `key` is the document id. Sorting by it
+ * before assigning is what makes the result STABLE: the same posting keeps the
+ * same id on every build, rather than the suffix landing on whichever document
+ * Firestore happened to return first.
+ */
+export function assignIds(entries) {
+  const ordered = entries.slice().sort((a, b) => String(a.key).localeCompare(String(b.key)));
+  const seen = new Set();
+  for (const e of ordered) {
+    const base = jobId(e.row);
+    let id = base, n = 2;
+    while (seen.has(id)) id = `${base}-${n++}`;
+    e.row.id = id;
+    seen.add(id);
+  }
+  return entries;
+}
+
 /* ------------------------------------------------ a row back into a submission
 
    The migration off the Google Sheet needs every existing posting to become a

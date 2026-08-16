@@ -18,7 +18,7 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
-  submissionFromRow, composeApplyBy,
+  submissionFromRow, composeApplyBy, assignIds,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
@@ -645,6 +645,51 @@ async function testMigrationDocs() {
   eq(docIdFor({ id: '' }), '', 'nor is nothing');
 }
 
+function testAssignIds() {
+  /* THE BUG THIS EXISTS FOR: jobId is (year, institution, posting date) and
+     carries no department, so two real postings from one institution on one day
+     derive the same id. The sheet importer had always suffixed them; the
+     Firestore build had not, so the second overwrote the first and two
+     postings — Tulane's second Freeman department and Houston's — disappeared
+     from the site the moment the database became the source of truth. */
+  const row = (dept) => ({
+    year: 2026, posted: '2026-04-07', institution: 'Tulane University',
+    department: dept, school: 'Freeman School of Business', unit: dept,
+  });
+
+  const entries = [
+    { key: '2026-tulane-university-20260407-2', row: row('Management Sciences Area') },
+    { key: '2026-tulane-university-20260407', row: row('') },
+  ];
+  assignIds(entries);
+  const ids = entries.map((e) => e.row.id);
+  eq(new Set(ids).size, 2, 'two postings on one day keep two ids');
+  ok(ids.includes('2026-tulane-university-20260407'), 'one takes the plain id');
+  ok(ids.includes('2026-tulane-university-20260407-2'), 'the other is suffixed');
+
+  // STABLE: the suffix follows the document id, not the order they arrived in
+  const shuffled = [
+    { key: '2026-tulane-university-20260407', row: row('') },
+    { key: '2026-tulane-university-20260407-2', row: row('Management Sciences Area') },
+  ];
+  assignIds(shuffled);
+  eq(shuffled.find((e) => e.key.endsWith('-2')).row.id, '2026-tulane-university-20260407-2',
+    'the same document keeps the same id whichever order it is read in');
+  eq(entries.find((e) => e.key.endsWith('-2')).row.id,
+    shuffled.find((e) => e.key.endsWith('-2')).row.id, 'so a rebuild does not churn ids');
+
+  // three of them, and the unrelated posting is untouched
+  const three = [
+    { key: 'c', row: row('A') }, { key: 'a', row: row('B') }, { key: 'b', row: row('C') },
+    { key: 'z', row: { ...row('D'), institution: 'Duke University' } },
+  ];
+  assignIds(three);
+  eq(new Set(three.map((e) => e.row.id)).size, 4, 'four distinct ids');
+  eq(three[3].row.id, '2026-duke-university-20260407', 'a different institution needs no suffix');
+
+  eq(assignIds([]).length, 0, 'nothing to assign is not a special case');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -653,6 +698,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testVocab();
   testSplitFields();
   testCollapseSameDay();
+  testAssignIds();
   await testPageHeadingRule();
   await testMigrationRoundTrip();
   await testMigrationDocs();

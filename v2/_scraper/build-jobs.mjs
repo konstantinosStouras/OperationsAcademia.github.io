@@ -29,7 +29,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder,
+  rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
@@ -144,13 +144,18 @@ async function main() {
   const rejected = [];
   for (const d of live) {
     const row = rowFromSubmission(d.data(), { now });
-    if (row) fresh.push({ id: d.id, row, queued: d.data().status === 'queued' });
+    if (row) fresh.push({ id: d.id, key: d.id, row, queued: d.data().status === 'queued' });
     else rejected.push({ id: d.id, ref: d.data().ref || d.id });
   }
 
   for (const r of rejected) {
     warn(`submission ${r.ref} is missing required fields — left queued for review`);
   }
+
+  /* Distinct ids, stably. Without this two postings from one institution on one
+     day derive the same id and the second overwrites the first — which is how
+     Tulane's and Houston's second departments disappeared. */
+  assignIds(fresh);
 
   const existing = await readJson(JOBS, []);
   const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
