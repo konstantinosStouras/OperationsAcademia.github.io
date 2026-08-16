@@ -228,7 +228,10 @@
           { key: 'institution', label: 'University/Institution', type: 'text',
             fields: ['institution', 'department'],
             placeholder: '', legacyParam: 'filterA' },
-          { key: 'deadline',    label: 'Deadline',        derive: 'deadline' },
+          // legacyValues: this filter briefly said "Open" where the vendor page
+          // says "Closing soon", so a link shared in that window still works.
+          { key: 'deadline',    label: 'Deadline',        derive: 'deadline',
+            legacyValues: { Open: 'Closing soon' } },
           { key: 'type',        label: 'Type',            field: 'type' },
           { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one' },
           { key: 'country',     label: 'Location',        field: 'country', sort: 'count' },

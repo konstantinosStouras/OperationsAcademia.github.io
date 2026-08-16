@@ -18,8 +18,11 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
+  submissionFromRow, composeApplyBy,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
+import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
+import { docIdFor, migrationDoc, lostFields } from './migrate-to-firestore.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -464,13 +467,195 @@ async function testAccountMerge() {
   }
 }
 
+/* ------------------------------------------------- the posting vocabulary */
+
+function testVocab() {
+  const s = (v) => splitDepartment(v);
+
+  // the five shapes the committed data actually holds
+  eq(s('Fuqua School of Business, Operations Management group'),
+    { school: 'Fuqua School of Business', unit: 'Operations Management group' },
+    'school and unit, comma separated');
+  eq(s('Darden School of Business'), { school: 'Darden School of Business', unit: '' },
+    'a school on its own');
+  eq(s('Operations Management'), { school: '', unit: 'Operations Management' },
+    'a unit on its own is a unit, not a school');
+
+  // THE case a naive comma split gets wrong: the comma is inside the name
+  eq(s('Department of Decisions, Operations and Technology'),
+    { school: '', unit: 'Department of Decisions, Operations and Technology' },
+    'a comma inside a department name does not split it');
+  eq(s('School of Business, Analytics, Information, and Operations Management Department'),
+    { school: 'School of Business', unit: 'Analytics, Information, and Operations Management Department' },
+    'the unit keeps its own commas');
+
+  // a segment naming both, hyphenated
+  eq(s('Robinson College of Business-Department of Management'),
+    { school: 'Robinson College of Business', unit: 'Department of Management' },
+    'a hyphen splits school from department');
+
+  // "Area"/"Group" are TRAILING qualifiers — splitting at one strands the word
+  eq(s('Naveen Jindal School of Management/Healthcare Management Area').unit, '',
+    'a trailing "Area" is not treated as the start of a unit');
+  eq(s('Desautels Faculty of Management, Operations Management Area'),
+    { school: 'Desautels Faculty of Management', unit: 'Operations Management Area' },
+    'but a comma still separates them');
+
+  eq(s(''), { school: '', unit: '' }, 'nothing splits to nothing');
+  eq(s('  ,  '), { school: '', unit: '' }, 'punctuation only splits to nothing');
+
+  // joining is the inverse, and is what the card shows
+  eq(joinDepartment('Fuqua School of Business', 'Operations Management group'),
+    'Fuqua School of Business, Operations Management group', 'join');
+  eq(joinDepartment('', 'Operations Management'), 'Operations Management', 'join with no school');
+  eq(joinDepartment('Darden School of Business', ''), 'Darden School of Business', 'join with no unit');
+
+  // one identity for spellings that differ only in case or punctuation
+  eq(vocabKey('Operations Management'), vocabKey('operations  management!'), 'vocabKey folds');
+
+  const v = buildVocab([
+    { institution: 'Duke University', department: 'Fuqua School of Business, Operations Management' },
+    { institution: 'Duke University', department: 'Fuqua School of Business, Operations Management' },
+    { institution: 'Duke University', department: 'Fuqua School of Business, Decision Sciences' },
+    { institution: 'Tulane University', department: 'Freeman School of Business' },
+  ]);
+  eq(v.universities[0], { v: 'Duke University', n: 3 }, 'the most-used university leads');
+  eq(v.schools[0], { v: 'Fuqua School of Business', n: 3 }, 'schools are tallied across postings');
+  eq(v.units.find((u) => u.v === 'Operations Management').n, 2, 'units are tallied');
+  eq(v.byUniversity['Duke University'].units, ['Decision Sciences', 'Operations Management'],
+    'a university carries the units seen at it, sorted');
+  eq(v.byUniversity['Tulane University'].units, [], 'a school-only posting adds no unit');
+
+  // a row that already carries the split is taken as given, not re-derived
+  const given = buildVocab([{ institution: 'X', school: 'S', unit: 'U', department: 'ignored' }]);
+  eq(given.schools[0].v, 'S', 'an explicit school is used as given');
+  eq(given.units[0].v, 'U', 'an explicit unit is used as given');
+}
+
+function testSplitFields() {
+  // the form now sends school + unit; department is derived from them
+  const r = rowFromSubmission({ ...GOOD, department: undefined,
+    school: 'Fuqua School of Business', unit: 'Operations Management group' });
+  eq(r.school, 'Fuqua School of Business', 'school carried');
+  eq(r.unit, 'Operations Management group', 'unit carried');
+  eq(r.department, 'Fuqua School of Business, Operations Management group',
+    'department is derived from the two');
+
+  // either alone is enough
+  eq(rowFromSubmission({ ...GOOD, department: undefined, school: 'Darden School of Business', unit: '' })
+    .department, 'Darden School of Business', 'a school alone publishes');
+  eq(rowFromSubmission({ ...GOOD, department: undefined, school: '', unit: 'Operations Management' })
+    .department, 'Operations Management', 'a unit alone publishes');
+  ok(rowFromSubmission({ ...GOOD, department: '', school: '', unit: '' }) === null,
+    'neither is not publishable');
+
+  // a legacy submission carrying only `department` is split for the vocabulary
+  const legacy = rowFromSubmission({ ...GOOD, department: 'NUS Business School, Department of Analytics' });
+  eq(legacy.school, 'NUS Business School', 'a legacy posting gains a school');
+  eq(legacy.unit, 'Department of Analytics', 'and a unit');
+  eq(legacy.department, 'NUS Business School, Department of Analytics',
+    'and its published line is unchanged');
+
+  ok(PUBLIC_FIELDS.includes('school') && PUBLIC_FIELDS.includes('unit'),
+    'both parts are published');
+}
+
+/* ------------------------------------------- the migration off the sheet
+
+   Every existing posting has to become a document that can be edited, and the
+   only faithful way to build one is to invert the mapping. So the inverse is
+   checked against the REAL committed file, field by field: a migration that
+   rewrites the site's content while moving it is worse than no migration.   */
+
+async function testMigrationRoundTrip() {
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  ok(rows.length > 50, 'there are postings to migrate');
+
+  /* The one difference allowed, and it is deliberate: `department` is now
+     derived by joining school and unit with ", ", so the two rows that used a
+     HYPHEN as the separator ("Robinson College of Business-Department of
+     Management") come back normalised. Anything else is a loss. */
+  const NORMALISED = (a, b) => String(a).replace(/\s*-\s*/g, ', ') === String(b);
+
+  const lost = [];
+  let verbatim = 0;
+  for (const row of rows) {
+    const sub = submissionFromRow(row);
+    if (sub.applyByText) verbatim++;
+    const back = rowFromSubmission(sub);
+    if (!back) { lost.push(`${row.id}: no longer publishable`); continue; }
+    const out = publicRow({ ...back, id: row.id });
+    for (const k of Object.keys(row)) {
+      if (JSON.stringify(row[k]) === JSON.stringify(out[k])) continue;
+      if (k === 'department' && NORMALISED(row[k], out[k])) continue;
+      lost.push(`${row.id}.${k}: ${JSON.stringify(row[k])} -> ${JSON.stringify(out[k])}`);
+    }
+  }
+  eq(lost, [], 'every committed posting survives the round trip through a submission');
+
+  /* Four rows carry prose that disagrees with their own parsed date, because
+     the importer read the date from the raw tab and the prose from the display
+     tab. They must be carried VERBATIM rather than re-composed, or the date a
+     reader sees changes. */
+  ok(verbatim > 0, 'the rows whose apply-by prose cannot be rebuilt are carried verbatim');
+  ok(verbatim < rows.length / 10, 'and they are the exception, not the rule');
+
+  // the composition rule itself
+  eq(composeApplyBy({ untilFilled: true, applyByNote: '' }), 'Until filled.', 'until filled');
+  eq(composeApplyBy({ untilFilled: true, applyByNote: 'Early applications welcome.' }),
+    'Until filled. Early applications welcome.', 'until filled with a note');
+  eq(composeApplyBy({ applyByDate: '2025-11-30', applyByNote: 'Early.' }),
+    'November 30, 2025. Early.', 'a date and a note');
+  eq(composeApplyBy({ applyByDate: '', applyByNote: 'See the advert.' }), 'See the advert.',
+    'a note alone');
+
+  // a verbatim line wins over composition, and only then
+  eq(rowFromSubmission({ ...GOOD, applyByText: 'Whenever you like.' }).applyBy,
+    'Whenever you like.', 'applyByText is used verbatim');
+  eq(rowFromSubmission({ ...GOOD, applyByText: '' }).applyBy,
+    'November 30, 2025. Early submissions are encouraged.',
+    'an empty applyByText falls back to composition');
+
+  // an empty ref is not written to every migrated row
+  ok(!('ref' in publicRow({ ...rowFromSubmission({ ...GOOD, ref: '' }), id: 'x' })),
+    'a posting with no reference publishes no empty ref field');
+}
+
+async function testMigrationDocs() {
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  // every row must be addressable as a document id, or it cannot be migrated
+  const unusable = rows.filter((r) => !docIdFor(r)).map((r) => r.id);
+  eq(unusable, [], 'every posting id is usable as a Firestore document id');
+  eq(new Set(rows.map(docIdFor)).size, rows.length, 'and they are distinct');
+
+  // the gate the migration runs before writing anything
+  const bad = [];
+  for (const row of rows) for (const l of lostFields(row, migrationDoc(row))) bad.push(`${row.id}.${l}`);
+  eq(bad, [], 'no posting changes when migrated into the database');
+
+  const d = migrationDoc(rows[0], { now: new Date('2026-08-16T00:00:00Z') });
+  eq(d.status, 'published', 'a migrated posting is published, not queued');
+  eq(d.uid, null, 'and has no owner — there is no account behind a sheet posting');
+  eq(d.migratedFrom, 'jobs.json', 'its provenance is recorded');
+  ok(!('email' in d) && !('authEmail' in d) && !('chairEmail' in d),
+    'no contact address is invented for a migrated posting');
+
+  eq(docIdFor({ id: 'a/b' }), '', 'a slash is not usable as a document id');
+  eq(docIdFor({ id: '' }), '', 'nor is nothing');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
   testMerge();
   testMarketYear();
+  testVocab();
+  testSplitFields();
   testCollapseSameDay();
   await testPageHeadingRule();
+  await testMigrationRoundTrip();
+  await testMigrationDocs();
   await testServedFile();
   await testAccountMerge();
   process.exit(finish() ? 0 : 1);

@@ -10,6 +10,13 @@
    "url": "https://www.operationsacademia.org/"
   },
   {
+   "id": "jobs-filters-and-cards",
+   "date": "2026-08-16",
+   "title": "The job filters read as they always did, and the list feels it",
+   "summary": "The Deadline filter offers exactly the three choices the old table did — Closing soon, Expired and Until filled — so a posting whose closing date is still ahead is described the way it has always been described. A value you have chosen can now be removed by clicking anywhere on its blue tag, rather than having to hit the small × on it. And the posting under your pointer now lifts gently off the page, so it is obvious which one you are about to open.",
+   "url": "https://www.operationsacademia.org/jobs"
+  },
+  {
    "id": "account-menu-and-profile",
    "date": "2026-08-15",
    "title": "A proper account menu, and a profile with your name on it",

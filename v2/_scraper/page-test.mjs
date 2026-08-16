@@ -162,6 +162,119 @@ const mannheim = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.tex
 ok(mannheim.length > 0 && mannheim.every((t) => /Mannheim/.test(t)),
   'the legacy ?filterA= deep link still selects an institution');
 
+/* ------------------------------------------ the Deadline filter's own words
+
+   The vendor page offers three values and only three — "Closing soon",
+   "Expired", "Until filled". This page offered "Open" instead of the first,
+   which the owner caught by putting the two dropdowns side by side, so the
+   check is on the WHOLE vocabulary rather than on one label: a fourth word is
+   the defect, whichever word it is.
+
+   Asserted against the list actually offered, not a fixed triple, because
+   whether a bucket appears at all depends on the live data — a value with no
+   postings behind it is correctly absent.                                    */
+
+const DEADLINES = ['Closing soon', 'Expired', 'Until filled'];
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.click('#oaf-deadline');
+await page.waitForTimeout(200);
+const buckets = await page.$$eval('.oa-pick-menu:not([hidden]) .oa-opt-name',
+  (ns) => ns.map((n) => n.textContent));
+ok(buckets.length > 0, 'the Deadline filter offers its values');
+eq(buckets.filter((b) => DEADLINES.indexOf(b) === -1), [],
+  'every Deadline value is one the vendor page offers');
+eq(buckets, DEADLINES.filter((b) => buckets.indexOf(b) !== -1),
+  'and they are listed in the vendor page\'s order');
+await page.keyboard.press('Escape');
+
+// and the rule behind them, from the page's own function
+eq(await page.evaluate(() => {
+  const off = (n) => {
+    const t = new Date();
+    t.setDate(t.getDate() + n);
+    return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') +
+      '-' + String(t.getDate()).padStart(2, '0');
+  };
+  const D = window.OAList.derive.deadline;
+  return {
+    none: D({ applyBy: 'Until filled. Review begins in September.' }),
+    past: D({ applyByDate: off(-30) }),
+    today: D({ applyByDate: off(0) }),
+    soon: D({ applyByDate: off(21) }),
+    far: D({ applyByDate: off(300) }),
+  };
+}), {
+  none: 'Until filled', past: 'Expired', today: 'Closing soon',
+  soon: 'Closing soon', far: 'Closing soon',
+}, 'a posting lands in the bucket the vendor page would have put it in');
+
+// a link shared while the filter said "Open" still selects what it meant
+await page.goto(BASE + 'jobs.html?deadline=Open', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(300);
+eq(await page.$$eval('.oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
+  ['Closing soon'], 'a ?deadline=Open link still selects the bucket it named');
+
+/* ------------------------------------------------- a chip is one blue button
+
+   The whole chip removes the value; the × is decoration. It used to be the
+   other way round — a chip carrying a 9-pixel button — so a click on the blue
+   did nothing at all.                                                        */
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.click('#oaf-type');
+await page.waitForTimeout(200);
+await page.click('.oa-pick-menu:not([hidden]) .oa-opt');
+await page.waitForTimeout(350);
+eq(await page.$$eval('.oa-chip', (ns) => ns.length), 1, 'choosing a value shows its chip');
+eq(await page.$$eval('.oa-chip button', (ns) => ns.length), 0,
+  'the chip holds no button of its own — it IS the button');
+const narrowed = Number((await page.$eval('.oa-count', (n) => n.textContent))
+  .split('/')[1].trim().split(' ')[0]);
+
+// click the LABEL, which is where a pointer lands, not the ×
+await page.click('.oa-chip .oa-chip-label');
+await page.waitForTimeout(350);
+eq(await page.$$eval('.oa-chip', (ns) => ns.length), 0,
+  'clicking anywhere on the chip drops that filter');
+const widened = Number((await page.$eval('.oa-count', (n) => n.textContent))
+  .split('/')[1].trim().split(' ')[0]);
+ok(widened > narrowed, `and the list widens again (${narrowed} -> ${widened})`);
+
+/* ------------------------------------------------------- the card elevation
+
+   Every posting rests on a shadow and the one under the pointer, alone, lifts.
+   The lift used to be on :focus-within too, so a card someone had clicked
+   stayed raised after the pointer moved on and two cards read as hovered at
+   once — which is the state the owner saw.                                   */
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.mouse.move(2, 2);
+await page.waitForTimeout(250);
+const rest = await page.$$eval('.oa-card', (ns) => ns.map((n) => getComputedStyle(n).boxShadow));
+ok(rest.length > 3 && rest[0] !== 'none', 'every posting carries a resting shadow');
+eq(new Set(rest).size, 1, 'and they all rest at the same height');
+
+await page.hover('.oa-card:nth-child(3) .oa-card-head');
+await page.waitForTimeout(300);
+const lifted = await page.$$eval('.oa-card', (ns) => ns.map((n) => getComputedStyle(n).boxShadow));
+eq(lifted.filter((s, i) => s !== rest[i]).length, 1,
+  'exactly one card is raised while the pointer is over the list');
+ok(lifted[2] !== rest[2], 'and it is the card the pointer is over');
+
+await page.click('.oa-card:nth-child(3) .oa-card-head');
+await page.mouse.move(2, 2);
+await page.waitForTimeout(300);
+eq(await page.$$eval('.oa-card', (ns) => ns.map((n) => getComputedStyle(n).boxShadow))
+  .then((now) => now.filter((s, i) => s !== rest[i])), [],
+  'a card that was clicked settles back once the pointer leaves it');
+ok(await page.evaluate(() => document.activeElement.classList.contains('oa-card-head')),
+  'though it still holds the keyboard focus, which has its own ring');
+
 /* --------------------------------------------- the site's own script chain
 
    These pages drop the Awesome Tables tag but must keep everything else the
@@ -664,6 +777,82 @@ for (const [name, expect] of [
     'an ORCID sign-in that duplicates an existing account is told so, and shown the merge');
   eq(noticed.keyUntouched, 'somebody-elses-uid-9',
     'and the first account keeps its claim — the duplicate never overwrites it');
+}
+
+/* ------------------------------------------- the posting form's name pickers
+
+   The three name fields offer the vocabulary the site has already published,
+   which is what keeps one school from arriving under six spellings. All of it
+   is behaviour no unit test can see, so it is driven here.                   */
+
+{
+  const f = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const formErrors = [];
+  f.on('pageerror', (e) => formErrors.push(e.message));
+  await f.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+
+  /* The form sits behind the sign-in gate, and auth resolving (failing, with no
+     Firebase reachable from CI) re-hides it a moment after load — so reveal it
+     AFTER that settles, or the unhide is quietly undone. */
+  await f.waitForTimeout(1500);
+  await f.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await f.waitForSelector('#f-institution', { state: 'visible' });
+  await f.waitForTimeout(400);
+
+  await f.click('#f-institution');
+  await f.waitForTimeout(250);
+  const all = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
+  ok(all > 10, 'form: the university picker opens with the published vocabulary');
+
+  await f.fill('#f-institution', 'tul');
+  await f.waitForTimeout(200);
+  const narrowed = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
+    (n) => n.map((x) => x.textContent));
+  ok(narrowed.length < all, 'form: typing narrows the list');
+  ok(narrowed.some((t) => /Tulane/i.test(t)), 'form: "tul" finds Tulane');
+
+  await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-institution'), 'Tulane University', 'form: choosing fills the field');
+
+  // the chosen university's own schools lead the next list
+  await f.click('#f-school');
+  await f.waitForTimeout(250);
+  const firstSchool = await f.$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
+    (n) => n.textContent);
+  ok(/Freeman/i.test(firstSchool), 'form: schools already used at that university lead');
+
+  // a name nobody has posted before is offered rather than refused
+  await f.fill('#f-school', 'Wibble School of Widgets');
+  await f.waitForTimeout(200);
+  const add = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
+  ok(add.length === 1 && /not on the list yet/.test(add[0]),
+    'form: an unknown name is offered as a new one');
+  await f.click('.oa-combo-add');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'Wibble School of Widgets', 'form: a new name is accepted');
+
+  // keyboard: Enter takes the highlighted option and must NOT submit the form
+  await f.fill('#f-unit', 'oper');
+  await f.waitForTimeout(200);
+  await f.keyboard.press('ArrowDown');
+  await f.keyboard.press('Enter');
+  await f.waitForTimeout(150);
+  const unit = await f.inputValue('#f-unit');
+  ok(unit && unit !== 'oper', 'form: arrow keys and Enter select an option');
+
+  // what gets published is derived from the two, and shown before sending
+  eq(await f.inputValue('#f-department'), `Wibble School of Widgets, ${unit}`,
+    'form: the published line joins school and unit');
+  ok((await f.textContent('#f-department-preview')).includes(unit),
+    'form: the poster is shown what will appear under the institution name');
+
+  eq(formErrors, [], 'form: no uncaught script errors');
+  await f.close();
 }
 
 /* ------------------------------------------------------------------ done */

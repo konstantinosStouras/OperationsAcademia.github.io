@@ -56,6 +56,10 @@ service cloud.firestore {
 
       function shapeOk() {
         return str('institution', 200) && str('department', 260)
+            // school and unit are what the form now asks for separately;
+            // `department` is the line they are joined into, and is still what
+            // every posting made before the split carries.
+            && str('school', 200)      && str('unit', 200)
             && str('country', 80)      && str('type', 40)
             && str('applyByDate', 20)  && str('applyByNote', 400)
             && str('comments', 1500)   && str('postedAtUrl', 600)

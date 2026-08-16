@@ -96,12 +96,27 @@
                         </div>
                       </div>
 
-                      <div class="oa-field">
-                        <label for="f-department">School, department, area or group <span class="oa-req" aria-hidden="true">*</span></label>
-                        <p class="oa-hint">Shown publicly, under the institution name. For example
-                        &ldquo;Fuqua School of Business, Operations Management group&rdquo;.</p>
-                        <input type="text" id="f-department" name="department" maxlength="220" required>
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-school">School, faculty or college</label>
+                          <p class="oa-hint">For example &ldquo;Fuqua School of Business&rdquo;. Leave
+                          empty if the department sits directly under the university.</p>
+                          <input type="text" id="f-school" name="school" maxlength="160">
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-unit">Department, area or group</label>
+                          <p class="oa-hint">For example &ldquo;Operations Management group&rdquo;.</p>
+                          <input type="text" id="f-unit" name="unit" maxlength="160">
+                        </div>
                       </div>
+
+                      <p class="oa-hint oa-derived" id="f-department-preview" aria-live="polite"></p>
+
+                      <!-- What the two fields above are joined into, and what
+                           every posting before the form was split still uses.
+                           Kept as a real field so the form still works without
+                           JavaScript and so validation has one thing to fail. -->
+                      <input type="hidden" id="f-department" name="department" maxlength="220">
 
                       <div class="oa-field">
                         <span class="oa-label-text" id="lbl-levels">Entry level <span class="oa-req" aria-hidden="true">*</span></span>
@@ -298,6 +313,7 @@
     <!-- v2 -->
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-combo.js"></script>
     <script src="assets/oa-jobform.js"></script>
 </body>
 </html>

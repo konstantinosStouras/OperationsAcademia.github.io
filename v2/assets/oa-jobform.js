@@ -27,7 +27,7 @@
   ];
 
   var MAX = {
-    institution: 160, department: 220, country: 60, applyByNote: 300,
+    institution: 160, department: 220, school: 160, unit: 160, country: 60, applyByNote: 300,
     comments: 1200, postedAtUrl: 500, adUrl: 500,
     firstName: 80, lastName: 80, email: 160, chairName: 120, chairEmail: 160, note: 1200
   };
@@ -115,7 +115,18 @@
     }
 
     need('f-institution', 'institution', 'the name of the institution');
-    need('f-department', 'department', 'the school, department or group');
+
+    /* School and unit are each optional — plenty of departments sit directly
+       under a university, and plenty of schools advertise without naming one —
+       but a posting with NEITHER has nothing under the institution name, so
+       the requirement is on the line they are joined into. The error is put on
+       the department field, which is the one a poster is most likely to mean. */
+    out.school = String($('f-school').value || '').trim().slice(0, MAX.school);
+    out.unit = String($('f-unit').value || '').trim().slice(0, MAX.unit);
+    out.department = [out.school, out.unit].filter(Boolean).join(', ').slice(0, MAX.department);
+    var unitEl = $('f-unit');
+    setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');
+    if (!out.department && !firstBad) firstBad = $('f-school');
     need('f-country', 'country', 'the country of the campus');
     need('f-firstName', 'firstName', 'your first name');
     need('f-lastName', 'lastName', 'your last name');
@@ -205,6 +216,7 @@
   /* ------------------------------------------------------------------- wiring */
 
   function boot() {
+    wireVocab();
     fillStaticOptions();
 
     var form = $('oa-job-form');
@@ -285,6 +297,72 @@
         });
       });
     });
+  }
+
+  /* ------------------------------------------------------ the shared vocabulary
+
+     The three name fields offer what the site has already published, so the
+     same school arrives spelled the same way each time. The list is
+     data/vocab.json, rebuilt from the postings by every writer of jobs.json —
+     so a name a poster adds today is offered to the next poster, with nobody
+     maintaining a list.
+
+     Entirely optional: if the fetch fails the fields stay ordinary text
+     inputs and the form works exactly as it did.                            */
+
+  function wireVocab() {
+    var inst = $('f-institution'), school = $('f-school'), unit = $('f-unit');
+    var dept = $('f-department'), preview = $('f-department-preview');
+    if (!inst || !school || !unit) return;
+
+    /* Keep the hidden joined field and the preview in step on every keystroke,
+       so what will be published is visible before it is sent. */
+    function sync() {
+      var joined = [String(school.value || '').trim(), String(unit.value || '').trim()]
+        .filter(Boolean).join(', ');
+      if (dept) dept.value = joined;
+      if (preview) {
+        preview.textContent = joined
+          ? 'Shown under the institution name as: ' + joined
+          : '';
+      }
+    }
+    school.addEventListener('input', sync);
+    unit.addEventListener('input', sync);
+    sync();
+
+    if (!window.OACombo) return;
+
+    var combos = {
+      inst: OACombo.attach(inst, { options: [] }),
+      school: OACombo.attach(school, {
+        options: [], hint: 'Schools already posted at this university are listed first.' }),
+      unit: OACombo.attach(unit, {
+        options: [], hint: 'Departments already posted at this university are listed first.' }),
+    };
+
+    fetch('data/vocab.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (v) {
+        if (!v) return;
+        combos.inst.setOptions(v.universities || []);
+        combos.school.setOptions(v.schools || []);
+        combos.unit.setOptions(v.units || []);
+
+        /* Choosing a university floats that university's own schools and
+           departments to the top of the other two lists. A HINT, never a
+           restriction — a school can open a new department, and the form must
+           not make that unpostable. */
+        function prefer() {
+          var e = (v.byUniversity || {})[String(inst.value || '').trim()] || { schools: [], units: [] };
+          combos.school.setPreferred(e.schools || []);
+          combos.unit.setPreferred(e.units || []);
+        }
+        inst.addEventListener('change', prefer);
+        inst.addEventListener('input', prefer);
+        prefer();
+      })
+      .catch(function () { /* the fields are plain text inputs; that is fine */ });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
