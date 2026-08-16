@@ -201,12 +201,23 @@
         var d = new Date();
         var y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
         el.textContent = 'Job postings (' + (y - 1) + '-' + y + ')';
-        /* The list also carries the previous season's postings (MARKET_WINDOW
-           in jobs-model.mjs — their "until filled" advertisements are still
-           open), but the heading deliberately says nothing about it: the note
-           that used to sit here was removed at the owner's request 2026-08-16.
-           The Deadline and Date-posted filters remain the way to narrow. */
       })();
+
+      /* THE LIST SHOWS ONLY THE MARKET YEAR UNDER WAY (owner, 2026-08-16) —
+         exactly what the heading above names. This mirrors inCurrentMarket()
+         in jobs-model.mjs, and the selftest pins the two together (like the
+         heading rule): a row is in scope when it was POSTED on or after
+         1 July of the season under way, OR its poster tagged it for the
+         current market year or later — the tag is picked by hand and is often
+         a season behind, so either signal admits. data/jobs.json itself stays
+         complete (it is the archive previous seasons live in); the page just
+         stops rendering them. */
+      function inCurrentMarket(row) {
+        var d = new Date();
+        var year = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+        var start = (year - 1) + '-07-01';
+        return String(row.posted || '') >= start || Number(row.year) >= year;
+      }
 
       /* A posting's stored links name this site by its FULL URL: "Further info"
          points at the Universities page, and a posting with no "posted online
@@ -246,6 +257,7 @@
         mount: '#oa-jobs',
         data: 'data/jobs.json',
         perPage: 10,
+        prepare: function (rows) { return rows.filter(inCurrentMarket); },
 
         // newest posting first, but a Featured posting always leads — the same
         // order the Awesome Table view used.

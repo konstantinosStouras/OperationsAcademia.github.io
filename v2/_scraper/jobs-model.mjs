@@ -200,6 +200,36 @@ export function marketFloor(now = new Date(), window = MARKET_WINDOW) {
   return marketYear(now) - (Math.max(1, window) - 1);
 }
 
+/** The first day of the market year under way at `now`, as an ISO day —
+    1 July of the year the season started. */
+export function marketStart(now = new Date()) {
+  return `${marketYear(now) - 1}-07-01`;
+}
+
+/**
+ * Does this row belong on THE JOBS PAGE, which shows only the market year
+ * under way? (Owner decision 2026-08-16, superseding the two-season window:
+ * the previous seasons live at /v1 and in the git history, not on the page.)
+ *
+ * A row qualifies EITHER way it can say so:
+ *   - it was POSTED inside the current market year (on or after 1 July), or
+ *   - its poster TAGGED it for the current market year or a later one.
+ *
+ * Both legs are needed. Posting date alone would drop a posting filed in May
+ * for the season starting in September (the 2028 Kansas row); the tag alone
+ * would drop postings still being filed under the previous season's label
+ * weeks after the roll (the July Mannheim row) — the poster picks that field
+ * by hand and is often a season behind.
+ *
+ * Note MARKET_WINDOW above still governs the SHEET IMPORT's reach, on
+ * purpose: the import must capture late filings under the old label so this
+ * predicate — not the import's scope — is what decides the page.
+ */
+export function inCurrentMarket(row, now = new Date()) {
+  return String(row.posted || '') >= marketStart(now)
+      || Number(row.year) >= marketYear(now);
+}
+
 /* ------------------------------------------------------------- the mapping */
 
 /**

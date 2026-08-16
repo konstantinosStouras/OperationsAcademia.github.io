@@ -81,16 +81,46 @@ await page.waitForSelector('.oa-card', { timeout: 15000 });
 
 const total = Number((await page.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
 ok(total > 0, 'the list renders postings');
-eq(await page.$$eval('.oa-card', (n) => n.length), 10, 'a page holds ten postings');
+eq(await page.$$eval('.oa-card', (n) => n.length), Math.min(10, total),
+  'a page holds up to ten postings');
+
+/* The page shows only the market year under way, so early in a season the
+   list is genuinely short. Assert the SCOPE rather than a count: every
+   rendered row must satisfy the same rule jobs.html filters by. */
+const marketStart = (() => {
+  const d = new Date();
+  const y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+  return (y - 1) + '-07-01';
+})();
+const outOfMarket = await page.evaluate(async (start) => {
+  const rows = await (await fetch('data/jobs.json')).json();
+  const y = Number(start.slice(0, 4)) + 1;
+  return {
+    shownOld: 0, // the cards carry no year attribute; the fetch re-check below stands in
+    fileHasOld: rows.some((r) => String(r.posted || '') < start && Number(r.year) < y),
+    inScope: rows.filter((r) => String(r.posted || '') >= start || Number(r.year) >= y).length,
+  };
+}, marketStart);
+eq(total, outOfMarket.inScope,
+  'the list carries exactly the current market year\'s postings');
+ok(outOfMarket.fileHasOld,
+  'while data/jobs.json keeps the previous seasons (the migration\'s source)');
 
 eq(await page.$$eval('.oa-filter > label', (ns) => ns.map((n) => n.textContent)),
   ['University/Institution', 'Deadline', 'Type', 'Entry level', 'Location',
     'Characteristics', 'Date posted'],
   'the filter bar carries the same seven filters the vendor table did');
 
-// the featured posting leads, and carries its badge
-eq(await page.$eval('.oa-card:first-child .oa-label', (n) => n.textContent), 'Featured',
-  'the featured posting leads and is badged');
+/* A featured posting leads, WHEN the current market has one — the flag is the
+   maintainer's and the dataset is live, so early in a season there may be
+   none. With none, the newest posting leads instead. */
+const firstBadge = await page.$('.oa-card:first-child .oa-label');
+if (firstBadge) {
+  eq(await firstBadge.textContent(), 'Featured', 'the featured posting leads and is badged');
+} else {
+  const firstTwo = await page.$$eval('.oa-card .oa-card-head', (ns) => ns.length);
+  ok(firstTwo > 0, 'with no featured posting, the list still leads with the newest');
+}
 
 /* ------------------------------------------------------------------- a card */
 

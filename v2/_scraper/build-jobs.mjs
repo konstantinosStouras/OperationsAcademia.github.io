@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
-  marketYear,
+  marketYear, inCurrentMarket,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
@@ -347,6 +347,16 @@ async function main() {
       removeRefs);
   const { added, updated, removed } = merged;
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+
+  /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
+     the FILE stays complete: it is the projection of every live document, the
+     source the migration reads, and the archive previous seasons live in.
+     The filtering is the page's (jobs.html mirrors inCurrentMarket(), and the
+     selftest pins the two together) — the build only reports the split. */
+  const onPage = rows.filter((r) => inCurrentMarket(r, now)).length;
+  if (onPage < rows.length) {
+    log(`${rows.length - onPage} of ${rows.length} posting(s) are previous-market and off the page`);
+  }
 
   const before = serialise(existing);
   const after = serialise(rows);

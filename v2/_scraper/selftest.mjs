@@ -18,7 +18,7 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
-  submissionFromRow, composeApplyBy, assignIds,
+  submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, marketStart,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
@@ -409,6 +409,27 @@ function testCollapseSameDay() {
    rules) or an invariant that spans two files — the cheapest guard that keeps
    a later edit from silently reopening the bug. */
 async function testFleetPins() {
+  // jobs.html's inline inCurrentMarket() mirrors the model's — the page ships
+  // no build step, so the copy is pinned here instead (like the heading rule).
+  const jobsHtml = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  ok(/function inCurrentMarket\(row\)/.test(jobsHtml),
+    'jobs.html filters the list to the current market year');
+  ok(jobsHtml.includes("'-07-01'"),
+    "the page's market start is 1 July, the model's own roll day");
+  ok(/prepare:\s*function \(rows\) \{ return rows\.filter\(inCurrentMarket\); \}/.test(jobsHtml),
+    'and the filter is wired into the list as its prepare step');
+  // the model's own predicate, both legs
+  const NOWM = new Date('2026-08-16T12:00:00Z');
+  ok(inCurrentMarket({ posted: '2026-07-20', year: 2026 }, NOWM),
+    'posted after the roll counts, whatever the tag says');
+  ok(inCurrentMarket({ posted: '2026-04-07', year: 2027 }, NOWM),
+    'tagged for the current market counts, whenever it was posted');
+  ok(inCurrentMarket({ posted: '2026-08-06', year: 2028 }, NOWM),
+    'tagged for a FUTURE market counts too');
+  ok(!inCurrentMarket({ posted: '2026-06-30', year: 2026 }, NOWM),
+    'the previous season is out — posted before the roll, tagged before it');
+  ok(marketStart(NOWM) === '2026-07-01', 'marketStart is 1 July of the season under way');
+
   // oa-nav.js derives its menu label from the SAME market-roll month as
   // marketYear() — a third copy of the rule, pinned like jobs.html's.
   const nav = await readFile(path.join(HERE, '..', 'assets', 'oa-nav.js'), 'utf8');
