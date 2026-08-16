@@ -1,21 +1,21 @@
 {
- "generated": "2026-08-16T08:28:21.858Z",
+ "generated": "2026-08-16T08:44:40.901Z",
  "universities": [
   {
    "v": "University College London",
-   "n": 8
+   "n": 7
   },
   {
    "v": "Tulane University",
    "n": 5
   },
   {
-   "v": "National University of Singapore",
+   "v": "University of Virginia",
    "n": 4
   },
   {
-   "v": "University of Virginia",
-   "n": 4
+   "v": "National University of Singapore",
+   "n": 3
   },
   {
    "v": "University of Houston",
@@ -273,11 +273,7 @@
   },
   {
    "v": "Business School",
-   "n": 3
-  },
-  {
-   "v": "NUS Business School",
-   "n": 3
+   "n": 2
   },
   {
    "v": "Business School for Health",
@@ -293,6 +289,10 @@
   },
   {
    "v": "Max M. Fisher College of Business",
+   "n": 2
+  },
+  {
+   "v": "NUS Business School",
    "n": 2
   },
   {
@@ -450,11 +450,11 @@
  ],
  "units": [
   {
-   "v": "Department of Analytics and Operations",
-   "n": 3
+   "v": "Data Analytics and Decision Sciences (DADS) Area",
+   "n": 2
   },
   {
-   "v": "Data Analytics and Decision Sciences (DADS) Area",
+   "v": "Department of Analytics and Operations",
    "n": 2
   },
   {
@@ -479,10 +479,6 @@
   },
   {
    "v": "Management Science Department",
-   "n": 2
-  },
-  {
-   "v": "Operations & Technology group",
    "n": 2
   },
   {
@@ -635,6 +631,10 @@
   },
   {
    "v": "Operations & Information Systems Department",
+   "n": 1
+  },
+  {
+   "v": "Operations & Technology group",
    "n": 1
   },
   {
@@ -1010,7 +1010,6 @@
   },
   "University College London": {
    "schools": [
-    "Business School",
     "Business School for Health",
     "Global Business School for Health",
     "The UCL School of Management"

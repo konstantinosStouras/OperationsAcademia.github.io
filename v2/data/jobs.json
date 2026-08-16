@@ -35,64 +35,6 @@
   "owner": ""
  },
  {
-  "id": "2027-national-university-of-singapore-20260816",
-  "year": 2027,
-  "posted": "2026-08-16",
-  "institution": "National University of Singapore",
-  "department": "NUS Business School, Department of Analytics and Operations",
-  "school": "NUS Business School",
-  "unit": "Department of Analytics and Operations",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "September 9, 2027. Notes on the deadline",
-  "applyByDate": "2027-09-09",
-  "comments": "Comments on the posting",
-  "country": "Singapore",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore",
-  "characteristics": [],
-  "featured": false,
-  "source": "oa-form",
-  "addedAt": "2026-08-16T08:11:16Z",
-  "ref": "OA-JOB-260816-L6R5",
-  "owner": "b634c4738dcb2337"
- },
- {
-  "id": "2028-university-college-london-20260816",
-  "year": 2028,
-  "posted": "2026-08-16",
-  "institution": "University College London",
-  "department": "Business School, Operations & Technology group",
-  "school": "Business School",
-  "unit": "Operations & Technology group",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "February 9, 2027. Notes on the deadline",
-  "applyByDate": "2027-02-09",
-  "comments": "Comments on the posting",
-  "country": "Canada",
-  "adUrl": "",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20College%20London",
-  "characteristics": [
-   "Research seminars"
-  ],
-  "featured": false,
-  "source": "oa-form",
-  "addedAt": "2026-08-16T08:03:40Z",
-  "ref": "OA-JOB-260816-BK7Q",
-  "owner": "b634c4738dcb2337"
- },
- {
   "id": "2027-university-of-virginia-20260812",
   "year": 2027,
   "posted": "2026-08-12",
