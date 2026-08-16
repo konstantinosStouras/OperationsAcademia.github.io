@@ -16,11 +16,13 @@
    whole model offline.
    --------------------------------------------------------------------------- */
 
+import { splitDepartment, joinDepartment } from './vocab.mjs';
+
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/jobs.json — which is how submitter and chair
     e-mail addresses stay out of a public repository. */
 export const PUBLIC_FIELDS = [
-  'id', 'year', 'posted', 'institution', 'department', 'type', 'levels',
+  'id', 'year', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'comments', 'country',
   'adUrl', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
   'characteristics', 'featured', 'source', 'addedAt', 'ref',
@@ -41,7 +43,7 @@ export const CHARACTERISTICS = [
 export const TYPES = ['Business School', 'University'];
 
 const MAXLEN = {
-  institution: 160, department: 220, country: 60, applyBy: 400,
+  institution: 160, department: 220, school: 160, unit: 160, country: 60, applyBy: 400,
   comments: 1200, adUrl: 500, postedAtUrl: 500, furtherInfoUrl: 500,
   adLabel: 60, postedAtLabel: 60,
 };
@@ -173,10 +175,23 @@ export function marketFloor(now = new Date(), window = MARKET_WINDOW) {
  */
 export function rowFromSubmission(doc, { now = new Date() } = {}) {
   const institution = text(doc.institution, MAXLEN.institution);
-  const department = text(doc.department, MAXLEN.department);
   const country = text(doc.country, MAXLEN.country);
   const levels = pickList(doc.levels, LEVELS);
   const type = TYPES.includes(text(doc.type, 40)) ? text(doc.type, 40) : '';
+
+  /* School and unit are now two fields the poster picks separately, and
+     `department` is the line the card shows, derived from them. A submission
+     made before the form was split — and every row imported from the sheet —
+     carries only `department`, so it is taken apart instead. Either way a row
+     ends up with all three, and the published line reads the same as it always
+     did. */
+  const given = text(doc.school, MAXLEN.school) || text(doc.unit, MAXLEN.unit);
+  const parts = given
+    ? { school: text(doc.school, MAXLEN.school), unit: text(doc.unit, MAXLEN.unit) }
+    : splitDepartment(text(doc.department, MAXLEN.department));
+  const school = text(parts.school, MAXLEN.school);
+  const unit = text(parts.unit, MAXLEN.unit);
+  const department = text(joinDepartment(school, unit), MAXLEN.department);
 
   // the minimum a card needs to be worth rendering
   if (!institution || !department || !country || !type || !levels.length) return null;
@@ -202,6 +217,8 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     posted,
     institution,
     department,
+    school,
+    unit,
     type,
     levels,
     applyBy: text(applyBy, MAXLEN.applyBy),

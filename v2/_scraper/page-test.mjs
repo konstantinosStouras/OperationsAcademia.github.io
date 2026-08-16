@@ -427,6 +427,82 @@ for (const [name, expect] of [
   await q.close();
 }
 
+/* ------------------------------------------- the posting form's name pickers
+
+   The three name fields offer the vocabulary the site has already published,
+   which is what keeps one school from arriving under six spellings. All of it
+   is behaviour no unit test can see, so it is driven here.                   */
+
+{
+  const f = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const formErrors = [];
+  f.on('pageerror', (e) => formErrors.push(e.message));
+  await f.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+
+  /* The form sits behind the sign-in gate, and auth resolving (failing, with no
+     Firebase reachable from CI) re-hides it a moment after load — so reveal it
+     AFTER that settles, or the unhide is quietly undone. */
+  await f.waitForTimeout(1500);
+  await f.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await f.waitForSelector('#f-institution', { state: 'visible' });
+  await f.waitForTimeout(400);
+
+  await f.click('#f-institution');
+  await f.waitForTimeout(250);
+  const all = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
+  ok(all > 10, 'form: the university picker opens with the published vocabulary');
+
+  await f.fill('#f-institution', 'tul');
+  await f.waitForTimeout(200);
+  const narrowed = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
+    (n) => n.map((x) => x.textContent));
+  ok(narrowed.length < all, 'form: typing narrows the list');
+  ok(narrowed.some((t) => /Tulane/i.test(t)), 'form: "tul" finds Tulane');
+
+  await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-institution'), 'Tulane University', 'form: choosing fills the field');
+
+  // the chosen university's own schools lead the next list
+  await f.click('#f-school');
+  await f.waitForTimeout(250);
+  const firstSchool = await f.$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
+    (n) => n.textContent);
+  ok(/Freeman/i.test(firstSchool), 'form: schools already used at that university lead');
+
+  // a name nobody has posted before is offered rather than refused
+  await f.fill('#f-school', 'Wibble School of Widgets');
+  await f.waitForTimeout(200);
+  const add = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
+  ok(add.length === 1 && /not on the list yet/.test(add[0]),
+    'form: an unknown name is offered as a new one');
+  await f.click('.oa-combo-add');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'Wibble School of Widgets', 'form: a new name is accepted');
+
+  // keyboard: Enter takes the highlighted option and must NOT submit the form
+  await f.fill('#f-unit', 'oper');
+  await f.waitForTimeout(200);
+  await f.keyboard.press('ArrowDown');
+  await f.keyboard.press('Enter');
+  await f.waitForTimeout(150);
+  const unit = await f.inputValue('#f-unit');
+  ok(unit && unit !== 'oper', 'form: arrow keys and Enter select an option');
+
+  // what gets published is derived from the two, and shown before sending
+  eq(await f.inputValue('#f-department'), `Wibble School of Widgets, ${unit}`,
+    'form: the published line joins school and unit');
+  ok((await f.textContent('#f-department-preview')).includes(unit),
+    'form: the poster is shown what will appear under the institution name');
+
+  eq(formErrors, [], 'form: no uncaught script errors');
+  await f.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

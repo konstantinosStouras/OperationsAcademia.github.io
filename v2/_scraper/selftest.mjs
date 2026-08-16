@@ -20,6 +20,7 @@ import {
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
+import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -396,11 +397,106 @@ function testCollapseSameDay() {
   eq(order.rows.map((r) => r.institution).join(''), 'AB', 'first-seen order is kept');
 }
 
+/* ------------------------------------------------- the posting vocabulary */
+
+function testVocab() {
+  const s = (v) => splitDepartment(v);
+
+  // the five shapes the committed data actually holds
+  eq(s('Fuqua School of Business, Operations Management group'),
+    { school: 'Fuqua School of Business', unit: 'Operations Management group' },
+    'school and unit, comma separated');
+  eq(s('Darden School of Business'), { school: 'Darden School of Business', unit: '' },
+    'a school on its own');
+  eq(s('Operations Management'), { school: '', unit: 'Operations Management' },
+    'a unit on its own is a unit, not a school');
+
+  // THE case a naive comma split gets wrong: the comma is inside the name
+  eq(s('Department of Decisions, Operations and Technology'),
+    { school: '', unit: 'Department of Decisions, Operations and Technology' },
+    'a comma inside a department name does not split it');
+  eq(s('School of Business, Analytics, Information, and Operations Management Department'),
+    { school: 'School of Business', unit: 'Analytics, Information, and Operations Management Department' },
+    'the unit keeps its own commas');
+
+  // a segment naming both, hyphenated
+  eq(s('Robinson College of Business-Department of Management'),
+    { school: 'Robinson College of Business', unit: 'Department of Management' },
+    'a hyphen splits school from department');
+
+  // "Area"/"Group" are TRAILING qualifiers — splitting at one strands the word
+  eq(s('Naveen Jindal School of Management/Healthcare Management Area').unit, '',
+    'a trailing "Area" is not treated as the start of a unit');
+  eq(s('Desautels Faculty of Management, Operations Management Area'),
+    { school: 'Desautels Faculty of Management', unit: 'Operations Management Area' },
+    'but a comma still separates them');
+
+  eq(s(''), { school: '', unit: '' }, 'nothing splits to nothing');
+  eq(s('  ,  '), { school: '', unit: '' }, 'punctuation only splits to nothing');
+
+  // joining is the inverse, and is what the card shows
+  eq(joinDepartment('Fuqua School of Business', 'Operations Management group'),
+    'Fuqua School of Business, Operations Management group', 'join');
+  eq(joinDepartment('', 'Operations Management'), 'Operations Management', 'join with no school');
+  eq(joinDepartment('Darden School of Business', ''), 'Darden School of Business', 'join with no unit');
+
+  // one identity for spellings that differ only in case or punctuation
+  eq(vocabKey('Operations Management'), vocabKey('operations  management!'), 'vocabKey folds');
+
+  const v = buildVocab([
+    { institution: 'Duke University', department: 'Fuqua School of Business, Operations Management' },
+    { institution: 'Duke University', department: 'Fuqua School of Business, Operations Management' },
+    { institution: 'Duke University', department: 'Fuqua School of Business, Decision Sciences' },
+    { institution: 'Tulane University', department: 'Freeman School of Business' },
+  ]);
+  eq(v.universities[0], { v: 'Duke University', n: 3 }, 'the most-used university leads');
+  eq(v.schools[0], { v: 'Fuqua School of Business', n: 3 }, 'schools are tallied across postings');
+  eq(v.units.find((u) => u.v === 'Operations Management').n, 2, 'units are tallied');
+  eq(v.byUniversity['Duke University'].units, ['Decision Sciences', 'Operations Management'],
+    'a university carries the units seen at it, sorted');
+  eq(v.byUniversity['Tulane University'].units, [], 'a school-only posting adds no unit');
+
+  // a row that already carries the split is taken as given, not re-derived
+  const given = buildVocab([{ institution: 'X', school: 'S', unit: 'U', department: 'ignored' }]);
+  eq(given.schools[0].v, 'S', 'an explicit school is used as given');
+  eq(given.units[0].v, 'U', 'an explicit unit is used as given');
+}
+
+function testSplitFields() {
+  // the form now sends school + unit; department is derived from them
+  const r = rowFromSubmission({ ...GOOD, department: undefined,
+    school: 'Fuqua School of Business', unit: 'Operations Management group' });
+  eq(r.school, 'Fuqua School of Business', 'school carried');
+  eq(r.unit, 'Operations Management group', 'unit carried');
+  eq(r.department, 'Fuqua School of Business, Operations Management group',
+    'department is derived from the two');
+
+  // either alone is enough
+  eq(rowFromSubmission({ ...GOOD, department: undefined, school: 'Darden School of Business', unit: '' })
+    .department, 'Darden School of Business', 'a school alone publishes');
+  eq(rowFromSubmission({ ...GOOD, department: undefined, school: '', unit: 'Operations Management' })
+    .department, 'Operations Management', 'a unit alone publishes');
+  ok(rowFromSubmission({ ...GOOD, department: '', school: '', unit: '' }) === null,
+    'neither is not publishable');
+
+  // a legacy submission carrying only `department` is split for the vocabulary
+  const legacy = rowFromSubmission({ ...GOOD, department: 'NUS Business School, Department of Analytics' });
+  eq(legacy.school, 'NUS Business School', 'a legacy posting gains a school');
+  eq(legacy.unit, 'Department of Analytics', 'and a unit');
+  eq(legacy.department, 'NUS Business School, Department of Analytics',
+    'and its published line is unchanged');
+
+  ok(PUBLIC_FIELDS.includes('school') && PUBLIC_FIELDS.includes('unit'),
+    'both parts are published');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
   testMerge();
   testMarketYear();
+  testVocab();
+  testSplitFields();
   testCollapseSameDay();
   await testPageHeadingRule();
   await testServedFile();

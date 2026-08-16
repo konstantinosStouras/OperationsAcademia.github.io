@@ -31,11 +31,13 @@ import { fileURLToPath } from 'node:url';
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder,
 } from './jobs-model.mjs';
+import { buildVocab, serialiseVocab } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
 const JOBS = path.join(DATA, 'jobs.json');
 const META = path.join(DATA, 'jobs-meta.json');
+const VOCAB = path.join(DATA, 'vocab.json');
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -178,7 +180,12 @@ async function main() {
         META,
         JSON.stringify(buildMeta(rows, { generated: now.toISOString() }), null, 1) + '\n'
       );
-      log(`wrote ${path.relative(process.cwd(), JOBS)} and jobs-meta.json`);
+      /* The form's option lists come from the postings themselves, so a name
+         a poster entered today is offered to the next poster tomorrow with
+         nobody curating a list. Rewritten with the dataset, never apart from
+         it. */
+      await writeFile(VOCAB, serialiseVocab(buildVocab(rows, { generated: now.toISOString() })));
+      log(`wrote ${path.relative(process.cwd(), JOBS)}, jobs-meta.json and vocab.json`);
     }
   }
 

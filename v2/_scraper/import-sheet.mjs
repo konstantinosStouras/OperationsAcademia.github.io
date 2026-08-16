@@ -39,6 +39,7 @@ import {
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
   marketYear, marketLabel, marketFloor, MARKET_WINDOW, collapseSameDay,
 } from './jobs-model.mjs';
+import { buildVocab, serialiseVocab, splitDepartment, joinDepartment } from './vocab.mjs';
 
 /* ----------------------------------------------------------- the live sheet
 
@@ -265,6 +266,11 @@ export function rowsFromSheets(displayRows, rawRows) {
       posted,
       institution,
       department,
+      /* The sheet has one fused field; the form now has two. Splitting on the
+         way in is what puts the sheet's back-catalogue into the vocabulary the
+         form offers, so a poster picking "Fuqua School of Business" gets the
+         spelling the site already uses instead of inventing a third one. */
+      ...splitDepartment(department),
       type,
       levels,
       applyBy,
@@ -451,6 +457,8 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
   await writeFile(outPath, serialise(final));
   await writeFile(outPath.replace(/jobs\.json$/, 'jobs-meta.json'),
     JSON.stringify(buildMeta(out, { generated: new Date().toISOString() }), null, 1) + '\n');
+  await writeFile(outPath.replace(/jobs\.json$/, 'vocab.json'),
+    serialiseVocab(buildVocab(out, { generated: new Date().toISOString() })));
   console.log(`wrote ${outPath} (${out.length} postings)`);
 }
 
