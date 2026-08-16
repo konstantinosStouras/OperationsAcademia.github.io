@@ -25,7 +25,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
@@ -101,7 +101,8 @@
       <section class="v3-hero">
         <div class="v3-container">
           <span class="v3-kicker">The Operations job market, in one place</span>
-          <h1 class="v3-h1">Matching supply with demand in&nbsp;the Operations job&nbsp;market.</h1>
+          <h1 class="v3-h1">Matching supply with demand<br>
+          <em class="v3-h1-accent">in the Operations job&nbsp;market.</em></h1>
           <p class="v3-lede">Academic job postings, this market&rsquo;s candidates, confirmed
           placements and the annual Job Market Survey for Operations Management, Operations
           Research and Analytics &mdash; posted by the community itself, free, since 2014.</p>
@@ -137,20 +138,49 @@
           <div class="v3-section-head v3-reveal">
             <span class="v3-kicker">Job postings</span>
             <h2 class="v3-h2" id="oa-jobs-heading">Job postings (2026-2027)</h2>
-            <p class="v3-lede">A centralised, easy-to-search database of academic job postings in
-            Operations Research and related fields &mdash; the openings that are otherwise
-            scattered across INFORMS/MSOM Connect, POMS listings and departmental pages. Results
-            appear as you type, ranked by posting date, and every entry was made by a verified
-            member of the community.</p>
+            <p class="v3-lede">A centralised database of academic job postings in Operations
+            Research and related fields &mdash; the openings that are otherwise scattered across
+            INFORMS/MSOM Connect, POMS listings and departmental pages, every entry made by a
+            verified member of the community. The ten most recent postings are below; the full,
+            searchable list has <a href="jobs.html">its own page</a>.</p>
             <div class="v3-section-cta">
               <a class="v3-btn primary" href="post-a-job.html">Post a job &mdash; it&rsquo;s free</a>
               <a class="v3-btn ghost" href="alerts.html">Get e-mail alerts</a>
             </div>
-            <p class="v3-mut" style="font-size:14px">Spotted something misplaced?
-            <a href="#contact">Let us know</a>. Want to say thanks?
-            <a href="https://www.buymeacoffee.com/kstouras" target="_blank" rel="noopener">Buy me a book or a coffee</a>.</p>
           </div>
-          <div id="oa-jobs"></div>
+
+          <!-- the launcher: pick a value or two and jump into the full list.
+               The selects are filled from the live data and already SHOW their
+               value ("All types", "All locations") — never a bare placeholder. -->
+          <form class="v3-launcher v3-reveal" id="v3-jobs-launcher">
+            <label class="v3-flabel" for="jl-q">Search</label>
+            <input type="search" id="jl-q" placeholder="Search by university, institution or department&hellip;" autocomplete="off">
+            <div class="v3-launcher-row">
+              <div>
+                <label class="v3-flabel" for="jl-type">Type</label>
+                <select id="jl-type"><option value="">All types</option></select>
+              </div>
+              <div>
+                <label class="v3-flabel" for="jl-level">Entry level</label>
+                <select id="jl-level"><option value="">All levels</option></select>
+              </div>
+              <div>
+                <label class="v3-flabel" for="jl-country">Location</label>
+                <select id="jl-country"><option value="">All locations</option></select>
+              </div>
+            </div>
+            <div class="v3-launcher-actions">
+              <button type="submit" class="v3-btn primary" id="jl-go">&#128269; Explore all postings</button>
+              <span class="v3-mut">More filters &mdash; deadline, characteristics, date posted &mdash;
+              are on the <a href="jobs.html">full list</a>.</span>
+            </div>
+          </form>
+
+          <h3 class="v3-h3 v3-reveal" style="margin:0 0 14px">The ten most recent postings</h3>
+          <div id="oa-jobs-recent"></div>
+          <p style="text-align:center;margin:26px 0 0">
+            <a class="v3-btn primary" href="jobs.html" id="v3-jobs-all">Explore all postings &rarr;</a>
+          </p>
         </div>
       </section>
 
@@ -626,15 +656,69 @@
         return a.outerHTML;
       }
 
-      /* ------------------------------------------------------ hero stats */
+      /* --------------------------- hero stats + the jobs launcher card
+         One read of the live file feeds all three: the hero stat, the
+         launcher's selects (which always SHOW a value — "All types" until a
+         narrower one is picked), and the count on the explore button. */
       fetch('/data/jobs.json', { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
           if (!data) return;
           var rows = (Array.isArray(data) ? data : data.rows || []).filter(inCurrentMarket);
+          if (!rows.length) return;
           var el = document.querySelector('[data-stat="jobs"]');
-          if (el && rows.length) V3.statTo(el, String(rows.length));
+          if (el) V3.statTo(el, String(rows.length));
+          var all = document.getElementById('v3-jobs-all');
+          if (all) all.textContent = 'Explore all ' + rows.length + ' postings →';
+
+          // the values the full page's filters offer, so a pick here lands on
+          // exactly the same facet there
+          function fill(id, values) {
+            var sel = document.getElementById(id);
+            if (!sel) return;
+            values.forEach(function (v) {
+              var o = document.createElement('option');
+              o.value = v; o.textContent = v;
+              sel.appendChild(o);
+            });
+          }
+          function counts(read) {
+            var n = Object.create(null);
+            rows.forEach(function (r) {
+              (read(r) || []).forEach(function (v) {
+                v = String(v).trim();
+                if (v) n[v] = (n[v] || 0) + 1;
+              });
+            });
+            return n;
+          }
+          var types = counts(function (r) { return [r.type]; });
+          var levels = counts(function (r) { return r.levels; });
+          var countries = counts(function (r) { return [r.country]; });
+          fill('jl-type', Object.keys(types).sort());
+          fill('jl-level', Object.keys(levels).sort());
+          fill('jl-country', Object.keys(countries).sort(function (a, b) {
+            return countries[b] - countries[a] || a.localeCompare(b);
+          }));
         }).catch(function () {});
+
+      /* the launcher hands its choice to the full page's own filters */
+      (function launcher() {
+        var form = document.getElementById('v3-jobs-launcher');
+        if (!form) return;
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var p = new URLSearchParams();
+          var q = document.getElementById('jl-q').value.trim();
+          if (q) p.set('institution', q);
+          ['type', 'level', 'country'].forEach(function (k) {
+            var v = document.getElementById('jl-' + k).value;
+            if (v) p.append(k, v);
+          });
+          var qs = p.toString();
+          location.href = 'jobs.html' + (qs ? '?' + qs : '');
+        });
+      })();
       /* The placements DATASET restarted empty at the 2026 cutover — the
          ~173 historical placements live in the /v1 archive's records — so the
          static "170+" stands until the live file grows past it. */
@@ -699,29 +783,33 @@
          the first paint of the one-pager stays light. Each engine namespaces
          its URL keys (urlPrefix), so three of them share one address bar. */
 
-      V3.lazy('#oa-jobs', function () {
+      /* The TEN most recent postings — a teaser, not the list. The full,
+         filterable list lives on jobs.html (owner, 2026-08-16). Rendered
+         through the same engine so the cards look and behave identically
+         (expand, edit/take-down for the owner); the engine's filter bar and
+         result bar are simply removed — with no filters and one page they
+         hold nothing. */
+      V3.lazy('#oa-jobs-recent', function () {
         var jobs = OAList.mount({
-          mount: '#oa-jobs',
+          mount: '#oa-jobs-recent',
           data: '/data/jobs.json',
           perPage: 10,
-          urlPrefix: '',            // owns the legacy ?filterA= deep links
-          prepare: function (rows) { return rows.filter(inCurrentMarket); },
-          sort: function (a, b) {
-            if (!!b.featured !== !!a.featured) return b.featured ? 1 : -1;
-            return (b.posted || '').localeCompare(a.posted || '');
+          urlPrefix: 'r_',          // never collides with candidates/placements
+          strings: {
+            loading: 'Loading the latest postings…',
+            emptyData: 'No job postings are listed at the moment.',
+            emptyDataHint: 'Please check back soon — new postings are added as they arrive.',
+            loadError: 'The job postings could not be loaded.',
+            loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
+            unit: 'postings'
           },
-          filters: [
-            { key: 'institution', label: 'University/Institution', type: 'text',
-              fields: ['institution', 'department'],
-              placeholder: '', legacyParam: 'filterA' },
-            { key: 'deadline',    label: 'Deadline',        derive: 'deadline',
-              legacyValues: { Open: 'Closing soon' } },
-            { key: 'type',        label: 'Type',            field: 'type' },
-            { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one' },
-            { key: 'country',     label: 'Location',        field: 'country', sort: 'count' },
-            { key: 'chars',       label: 'Characteristics', field: 'characteristics', type: 'one' },
-            { key: 'posted',      label: 'Date posted',     derive: 'datePosted' }
-          ],
+          prepare: function (rows) {
+            return rows.filter(inCurrentMarket).sort(function (a, b) {
+              return (b.posted || '').localeCompare(a.posted || '');
+            }).slice(0, 10);
+          },
+          sort: function (a, b) { return (b.posted || '').localeCompare(a.posted || ''); },
+          filters: [],
           onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
           card: {
             title:    function (r) { return r.institution; },
@@ -746,6 +834,12 @@
           }
         });
         if (window.OAJobEdit) OAJobEdit.attach(jobs);
+        // no filters, one fixed page: the bar and the result bar hold nothing
+        var host = document.getElementById('oa-jobs-recent');
+        var bar = host.querySelector('.oa-filters');
+        if (bar) bar.remove();
+        var res = host.querySelector('.oa-resultbar');
+        if (res) res.remove();
       });
 
       V3.lazy('#oa-candidates', function () {

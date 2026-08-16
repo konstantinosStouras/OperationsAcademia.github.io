@@ -1367,26 +1367,41 @@ for (const [name, expect] of [
 
 const MOBILE_PAGES = ['jobs.html', 'candidates.html', 'placements.html',
   'previous-markets.html', 'recent-faculty.html',
-  // the v3 preview's one-pager mounts the same engine three times — the jobs
-  // mount (the first .oa-filters on the page) is what the gate measures
-  'v3/index.html'];
+  // the v3 preview: the one-pager (whose jobs teaser has NO filter bar — the
+  // first VISIBLE bar is the candidates mount, reached by the walk below) and
+  // the dedicated jobs page (whose bar carries the sign-in lock; the gate's
+  // programmatic clicks work through pointer-events:none, which is the point
+  // of measuring rather than tapping here)
+  'v3/index.html', 'v3/jobs.html'];
 
 for (const pageName of MOBILE_PAGES) {
   const m = await browser.newPage({
     viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
   await m.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
-  // The v3 one-pager mounts its lists LAZILY as they near the viewport, so
-  // nudge the scroll to trigger the first mount. Harmless on the root pages,
-  // whose lists mount at load.
-  await m.evaluate(() => window.scrollTo(0, 600));
-  await m.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
+  // The v3 one-pager mounts its lists LAZILY as they near the viewport, and
+  // its jobs teaser carries no filter bar at all — so walk down one viewport
+  // per poll until BOTH a rendered list and a VISIBLE filter bar exist. On
+  // every root page both are there at the first look, with no scrolling.
+  await m.waitForFunction(() => {
+    const listed = document.querySelector('.oa-card, .oa-empty');
+    const bar = [...document.querySelectorAll('.oa-filters')]
+      .find((el) => el.offsetParent !== null);
+    if (listed && bar) return true;
+    window.scrollBy(0, window.innerHeight);
+    return false;
+  }, null, { timeout: 30000, polling: 400 });
   await m.evaluate(() => window.scrollTo(0, 0));
 
   const mob = await m.evaluate(() => {
     const doc = document.documentElement;
-    const filters = document.querySelector('.oa-filters').getBoundingClientRect();
-    const search = document.querySelector('.oa-filter input[type="search"]');
+    // the first VISIBLE bar — the v3 one-pager's jobs teaser removes its own
+    // (display:none-in-DOM bars measure as 0×0 and would fail the gutter)
+    const bar = [...document.querySelectorAll('.oa-filters')]
+      .find((el) => el.offsetParent !== null);
+    const filters = bar.getBoundingClientRect();
+    const search = bar.querySelector('input[type="search"]') ||
+      document.querySelector('.oa-filter input[type="search"]');
     const card = document.querySelector('.oa-card');
     const cr = card && card.getBoundingClientRect();
     const btns = [...document.querySelectorAll('.oa-pick .oa-pick-btn')];
