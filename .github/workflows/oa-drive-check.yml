@@ -1,0 +1,56 @@
+name: OA Drive — check the upload credentials
+
+# Proves that files can actually be written into the Drive folders before
+# anything depends on it, and says precisely what is wrong when they cannot.
+#
+# It writes a small text file into BOTH "Jobs Files" and "Candidates Files" for
+# the current job market year, then deletes it again. Nothing else in the Drive
+# is read, listed or touched — the token carries only the drive.file scope, so
+# it cannot see anything it did not create.
+#
+# RUN THIS:
+#   - after minting or rotating the refresh token;
+#   - after adding a new market year to v2/data/drive-folders.json (each July);
+#   - whenever an upload fails and you want to know whether it is the
+#     credentials, the folder ids, or the file itself.
+#
+# The one uncertainty it settles: whether a per-file (drive.file) token may
+# CREATE a file inside a folder it did not create. If it cannot, this reports a
+# 404 explaining that the folder id is probably fine and the approach is not.
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'Leave the probe file in Drive instead of deleting it'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-drive-check-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Offline checks
+        run: node v2/_scraper/selftest.mjs
+
+      - name: Write a probe file into each folder, then remove it
+        run: |
+          node v2/_scraper/drive-upload.mjs --check \
+            ${{ inputs.keep && '--keep' || '' }}
+        env:
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}

@@ -27,6 +27,7 @@ import {
   folderFor, isConfigured, auditFolders, isFolderId, isPlaceholder,
   resourceKeyFor, resourceKeyHeader, KINDS,
 } from './drive-folders.mjs';
+import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -807,6 +808,52 @@ async function testDriveFolders() {
   ok(/unknown upload kind/.test(msg), 'an unknown kind is refused');
 }
 
+function testDriveUpload() {
+  // Drive-hostile characters, and the control characters that would make the
+  // request itself malformed
+  eq(safeName('a/b:c*d?e"f<g>h|i'), 'a b c d e f g h i', 'path characters are stripped');
+  eq(safeName('a\u0000b\u001fc'), 'a b c', 'control characters are stripped');
+  eq(safeName('Université Paris-Saclay'), 'Universite Paris-Saclay',
+    'diacritics are folded but a hyphenated name keeps its hyphen');
+  eq(safeName('   '), '', 'whitespace only');
+  eq(safeName(null), '', 'nothing');
+
+  /* The name has to say what the file is without opening it: a folder of forty
+     "advert.pdf" is not a filing system. Date first so the folder sorts
+     chronologically, institution next, reference last so it traces back. */
+  const name = driveFileName({
+    posted: '2026-08-16', institution: 'Tulane University',
+    department: 'Freeman School of Business', ref: 'OA-JOB-260816-ABCD',
+    original: 'Job Advert.PDF',
+  });
+  eq(name, '2026-08-16 Tulane University — Freeman School of Business (OA-JOB-260816-ABCD).pdf',
+    'the Drive filename says what the file is');
+  ok(/^\d{4}-\d{2}-\d{2} /.test(name), 'it starts with the date, so a folder sorts by time');
+  ok(/\.pdf$/.test(name), 'the extension is carried over, lower-cased');
+
+  eq(driveFileName({ posted: '2026-08-16', institution: 'X', original: 'a.docx' }),
+    '2026-08-16 X.docx', 'a Word file keeps its extension');
+  eq(driveFileName({ posted: '2026-08-16', institution: 'X', original: 'no-extension' }),
+    '2026-08-16 X', 'a file with no extension gets none invented');
+
+  // every failure Drive can return says what to DO about it
+  ok(/Testing/.test(explain(401, {})), '401 points at the 7-day Testing expiry');
+  ok(/drive\.file/.test(explain(403, 'insufficientPermissions')), '403 names the missing scope');
+  ok(/service account/i.test(explain(403, 'storage quota')), 'a quota 403 names the SA trap');
+  ok(/did not create/.test(explain(404, {})), '404 distinguishes a wrong id from a scope limit');
+  ok(/temporarily/.test(explain(503, {})), '5xx reads as transient');
+  ok(/Retrying/.test(explain(429, {})), 'so does 429');
+
+  // the multipart body Drive requires: metadata part, media part, closing boundary
+  const body = multipartBody({ name: 'x' }, Buffer.from('hello'), 'text/plain', 'BOUND').toString();
+  ok(body.startsWith('--BOUND\r\n'), 'the body opens with the boundary');
+  ok(body.includes('application/json'), 'the metadata part declares JSON');
+  ok(body.includes('{"name":"x"}'), 'and carries the metadata');
+  ok(body.includes('Content-Type: text/plain'), 'the media part declares its type');
+  ok(body.includes('hello'), 'and carries the bytes');
+  ok(body.endsWith('--BOUND--\r\n'), 'and closes the multipart properly');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -821,6 +868,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testMigrationRoundTrip();
   await testMigrationDocs();
   await testDriveFolders();
+  testDriveUpload();
   await testServedFile();
   await testAccountMerge();
   process.exit(finish() ? 0 : 1);
