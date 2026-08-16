@@ -1072,6 +1072,47 @@ for (const [name, expect] of [
   await u.close();
 }
 
+/* --------------------------------------------------- the draft survives
+
+   Born of a real loss: the first upload attempt hung, the poster refreshed,
+   and a fully filled-in form was gone. What is checked is the whole point —
+   type, RELOAD, and the words are still there.                               */
+
+{
+  const d = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  await d.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+  await d.waitForTimeout(1500);
+  await d.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await d.waitForSelector('#f-institution', { state: 'visible' });
+
+  await d.fill('#f-institution', 'University of Draftshire');
+  await d.fill('#f-comments', 'Interviewing at INFORMS.');
+  await d.check('input[name="levels"][value="Post-Doc"]');
+  await d.waitForTimeout(700);   // past the 400ms save debounce
+
+  await d.reload({ waitUntil: 'domcontentloaded' });
+  await d.waitForTimeout(1500);
+  await d.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await d.waitForSelector('#f-institution', { state: 'visible' });
+
+  eq(await d.inputValue('#f-institution'), 'University of Draftshire',
+    'draft: a reload keeps what was typed');
+  eq(await d.inputValue('#f-comments'), 'Interviewing at INFORMS.',
+    'draft: textareas too');
+  eq(await d.$eval('input[name="levels"][value="Post-Doc"]', (n) => n.checked), true,
+    'draft: and the ticked boxes');
+
+  await d.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

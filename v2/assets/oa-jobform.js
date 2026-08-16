@@ -250,6 +250,87 @@
 
   /* ------------------------------------------------------------------- wiring */
 
+  /* ------------------------------------------------------------ the draft
+
+     Everything typed is mirrored to localStorage as it is typed, and restored
+     on the next visit. Exists because of a real loss: the first upload attempt
+     hung, the poster refreshed, and a fully filled-in form was gone. A draft
+     costs nothing and makes a refresh — or a crash, or a closed tab — cost
+     nothing either.
+
+     NOT restored into edit mode (the loaded posting is the truth there), and
+     cleared on a successful send. The chosen FILE cannot be kept — a File
+     handle does not survive the page — so after a restore the poster
+     re-chooses it; the fields are the part that hurts to lose. */
+
+  var DRAFT_KEY = 'oa:jobdraft:v1';
+
+  function draftSave() {
+    try {
+      var form = $('oa-job-form');
+      if (!form || EDIT_ID) return;
+      var data = {};
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[id], select[id], textarea[id]'),
+        function (el) {
+          if (el.type === 'file' || el.type === 'hidden') return;
+          if (el.type === 'checkbox') return;             // handled by name below
+          if (el.value) data[el.id] = el.value;
+        });
+      var ticked = [];
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[type="checkbox"]:checked'),
+        function (cb) { ticked.push(cb.name + '=' + cb.value); });
+      if (ticked.length) data.__checks = ticked;
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    } catch (e) { /* private mode / quota — a draft is best-effort */ }
+  }
+
+  function draftRestore() {
+    try {
+      if (EDIT_ID) return;
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      Object.keys(data).forEach(function (id) {
+        if (id === '__checks') return;
+        var el = $(id);
+        if (el && !el.value) el.value = data[id];
+      });
+      (data.__checks || []).forEach(function (pair) {
+        var i = pair.indexOf('=');
+        var box = document.querySelector(
+          'input[type="checkbox"][name="' + pair.slice(0, i) + '"][value="' +
+          CSS.escape(pair.slice(i + 1)) + '"]');
+        if (box) box.checked = true;
+      });
+      // keep the derived department line and the until-filled state in step
+      var school = $('f-school');
+      if (school) school.dispatchEvent(new Event('input', { bubbles: true }));
+      var uf = $('f-untilFilled');
+      if (uf && uf.checked) uf.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (e) { /* a corrupt draft is discarded by the next save */ }
+  }
+
+  function draftClear() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  }
+
+  var draftTimer = null;
+  function wireDraft() {
+    var form = $('oa-job-form');
+    if (!form) return;
+    draftRestore();
+    form.addEventListener('input', function () {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(draftSave, 400);
+    });
+    form.addEventListener('change', function () {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(draftSave, 400);
+    });
+  }
+
   /* ------------------------------------------------------- the advert file
 
      The poster attaches the advertisement itself instead of hunting for a URL.
@@ -479,6 +560,7 @@
   function boot() {
     wireVocab();
     wireAdFile();
+    wireDraft();
     enterEditMode();
     fillStaticOptions();
 
@@ -608,6 +690,7 @@
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
           return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
+          draftClear();
           sent = true;
           /* The confirmation is written for a NEW posting — a reference to keep,
              a copy e-mailed, "post another". None of that is true of a
