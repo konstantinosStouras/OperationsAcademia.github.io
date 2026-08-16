@@ -252,7 +252,18 @@ export function portPage(html, { source }) {
       '$1\n    <link href="assets/oa-ui.css" rel="stylesheet">');
   }
 
-  // 4. header: the Feedback button and the account chip
+  // 4. Google Forms are not part of the new site (owner, 2026-08-16). The
+  //    live pages' call-to-action buttons ("Create your Job Market Profile!",
+  //    "Post a Placement!", "Add a junior faculty!") all point at
+  //    docs.google.com/forms; each rebuilt dataset brings its own form, the
+  //    way post-a-job.html replaced the jobs one. Until then the ported page
+  //    simply carries no submission button — an absent feature reads better
+  //    than a link into the machinery this rebuild exists to retire. The
+  //    <a> element is removed whole; the centred wrapper div it sat in stays,
+  //    which renders as nothing.
+  out = out.replace(/<a\b[^>]*docs\.google\.com\/forms[^>]*>[\s\S]*?<\/a>/gi, '');
+
+  // 4b. header: the Feedback button and the account chip
   if (!/id="oa-headnav"/.test(out)) {
     out = out.replace(/(<nav id="nav">\s*<\/nav>)/, '$1\n' + HEADNAV);
   }

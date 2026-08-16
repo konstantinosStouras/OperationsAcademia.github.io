@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — "Post a job" form.
 
-   Replaces the Google Form that fed the "Job Postings" spreadsheet. It writes
+   Replaces the third-party form that fed the "Job Postings" spreadsheet. It writes
    ONE bounded document into the Firestore `jobSubmissions` collection; the
    scheduled build (v2/_scraper/build-jobs.mjs) turns queued documents into rows
    in v2/data/jobs.json and commits them, and the static page then lazy-loads
