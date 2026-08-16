@@ -471,7 +471,24 @@
           btn.setAttribute('aria-expanded', 'true');
           document.addEventListener('mousedown', onOutside, true);
           document.addEventListener('keydown', onEsc, true);
-          if (search) search.focus();
+
+          /* Keep the menu on screen. The phone layout puts pickers two per
+             row, and a right-column menu — left-aligned, up to 320px wide —
+             ran off the viewport's right edge. Measured after it is shown,
+             not guessed from column position, so it holds at any width and
+             any number of filters. */
+          menu.classList.remove('oa-menu-right');
+          var mr = menu.getBoundingClientRect();
+          if (mr.right > document.documentElement.clientWidth - 8) {
+            menu.classList.add('oa-menu-right');
+          }
+
+          /* Autofocusing the search box is right for a keyboard, wrong for a
+             thumb: on a phone it throws the on-screen keyboard over the very
+             options the tap asked to see. */
+          if (search && !window.matchMedia('(pointer: coarse)').matches) {
+            search.focus();
+          }
         } else {
           close();
         }

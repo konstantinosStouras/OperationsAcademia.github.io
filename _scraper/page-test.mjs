@@ -1164,6 +1164,62 @@ for (const [name, expect] of [
   await f.close();
 }
 
+/* ------------------------------------------------- the list on a phone
+
+   The skel grid cancels its own gutter below 736px (#content pads 30px, .row
+   pulls -30px), which had the filters and cards running EDGE TO EDGE; and any
+   focused input under 16px makes iOS Safari zoom the page in and leave it
+   zoomed. Both are pinned here, plus the things a thumb needs: 40px+ targets
+   and every picker menu staying inside the viewport. */
+
+{
+  const m = await browser.newPage({
+    viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+  });
+  await m.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await m.waitForSelector('.oa-card', { timeout: 15000 });
+
+  const mob = await m.evaluate(() => {
+    const doc = document.documentElement;
+    const list = document.querySelector('.oa-list').getBoundingClientRect();
+    const filters = document.querySelector('.oa-filters').getBoundingClientRect();
+    const search = document.querySelector('.oa-filter input[type="search"]');
+    const card = document.querySelector('.oa-card').getBoundingClientRect();
+    const btns = [...document.querySelectorAll('.oa-pick .oa-pick-btn')];
+    const menus = btns.map((btn) => {
+      btn.click();                                   // open
+      const r = btn.parentElement.querySelector('.oa-pick-menu').getBoundingClientRect();
+      btn.click();                                   // close
+      return { left: Math.round(r.left), right: Math.round(r.right) };
+    });
+    const pager = document.querySelector('.oa-pager button');
+    return {
+      overflowX: doc.scrollWidth > doc.clientWidth,
+      gutterLeft: Math.round(filters.left),
+      cardLeft: Math.round(card.left),
+      cardRight: Math.round(doc.clientWidth - card.right),
+      searchFont: parseFloat(getComputedStyle(search).fontSize),
+      searchH: Math.round(search.getBoundingClientRect().height),
+      pickH: Math.round(btns[0].getBoundingClientRect().height),
+      pagerH: Math.round(pager.getBoundingClientRect().height),
+      menus,
+      vw: doc.clientWidth,
+    };
+  });
+
+  ok(!mob.overflowX, 'mobile: the page never scrolls sideways');
+  ok(mob.gutterLeft >= 8 && mob.cardLeft >= 8 && mob.cardRight >= 8,
+    `mobile: filters and cards keep a side gutter (got ${mob.gutterLeft}/${mob.cardLeft}/${mob.cardRight})`);
+  ok(mob.searchFont >= 16,
+    `mobile: the search input is 16px+ so iOS does not zoom the page (got ${mob.searchFont}px)`);
+  ok(mob.searchH >= 40 && mob.pickH >= 40,
+    `mobile: search and picker controls are touch targets (got ${mob.searchH}/${mob.pickH}px)`);
+  ok(mob.pagerH >= 36, `mobile: pager chevrons are tappable (got ${mob.pagerH}px)`);
+  ok(mob.menus.every((r) => r.left >= 0 && r.right <= mob.vw),
+    `mobile: every picker menu stays on screen (got ${JSON.stringify(mob.menus)})`);
+  await m.close();
+}
+
 /* ----------------------------------------------- My postings loads cleanly
 
    The page's real behaviour is a Firestore read this sandbox cannot make; what

@@ -142,6 +142,11 @@
 
 .oa-pick-menu[hidden] { display: none; }
 
+/* Set by oa-list.js when an opened menu would run off the viewport's right
+   edge (the phone layout puts pickers two per row, and a right-column menu is
+   wider than its button). Measured, never guessed from column position. */
+.oa-pick-menu.oa-menu-right { left: auto; right: 0; }
+
 .oa-pick-search {
   width: calc(100% - 16px);
   margin: 4px 8px 6px;
@@ -469,7 +474,43 @@
 }
 
 @media screen and (max-width: 640px) {
-  .oa-filter { width: 100%; }
+  /* skel's mobile grid cancels its own gutter (#content pads 30px, .row pulls
+     it back with -30px), so the whole list ran EDGE TO EDGE on a phone —
+     labels starting on the screen edge, inputs and cards touching both sides.
+     The list carries its own gutter instead of touching the shared theme. */
+  .oa-list { padding: 0 14px; }
+
+  /* Two pickers per row halves the wall of filters a phone reader scrolls
+     before the first posting; the free-text university search keeps the full
+     width — it is the primary way in. */
+  .oa-filter { width: calc(50% - 6px); }
+  .oa-filter:not(.oa-pick) { width: 100%; }
+
+  /* 16px is not cosmetic: iOS Safari zooms the whole page into any focused
+     input whose font is smaller, and leaves it zoomed. 42px tall is a real
+     touch target (the desktop 35px is a mouse target). */
+  .oa-filter input[type='search'],
+  .oa-pick-btn {
+    height: 42px;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+  .oa-pick-search { font-size: 16px; padding: 8px 10px; }
+
+  /* Never wider than the screen: a right-column picker's menu right-aligns
+     itself (oa-menu-right, set by measurement in oa-list.js), and this cap is
+     what guarantees the flipped menu still fits. */
+  .oa-pick-menu { max-width: calc(100vw - 28px); max-height: 50vh; }
+  .oa-opt { padding: 10px 12px; }
+
+  .oa-clear { height: 42px; padding: 0 16px; border-radius: 6px; }
+
+  /* pager chevrons at finger size */
+  .oa-pager button { width: 42px; height: 40px; font-size: 24px; }
+
+  .oa-chip { padding: 6px 10px; border-radius: 4px; }
+
+  .oa-card { border-radius: 6px; }
   .oa-card-head { padding: 12px 16px 18px; }
   .oa-card-body { padding: 0 16px 6px; }
   .oa-kv th, .oa-kv td { display: block; width: auto; padding: 4px 0; }
@@ -553,7 +594,9 @@
 @media screen and (max-width: 640px) {
   .oa-card-actions { position: static; padding: 0 16px 12px; }
   .oa-card-owned .oa-card-head { padding-right: 16px; }
-  .oa-jobbtn { opacity: 1; }
+  /* full strength and finger-sized: on a phone there is no hover to reveal
+     them, and 4px-tall pills are a stylus target, not a thumb one */
+  .oa-jobbtn { opacity: 1; padding: 8px 14px; font-size: 13px; border-radius: 6px; }
 }
 
 @media print { .oa-card-actions { display: none; } }
