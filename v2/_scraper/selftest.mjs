@@ -430,6 +430,14 @@ async function testFleetPins() {
     'the previous season is out — posted before the roll, tagged before it');
   ok(marketStart(NOWM) === '2026-07-01', 'marketStart is 1 July of the season under way');
 
+  // candidates.html mirrors the same two inline rules jobs.html does — the
+  // derived heading and the current-market filter — pinned the same way.
+  const candHtml = await readFile(path.join(HERE, '..', 'candidates.html'), 'utf8');
+  ok(/getUTCMonth\(\)\s*>=\s*6/.test(candHtml),
+    'candidates.html derives its heading season with the July roll');
+  ok(/function inCurrentMarket\(row\)/.test(candHtml) && candHtml.includes("'-07-01'"),
+    'candidates.html filters to the current market with the model\'s own rule');
+
   // oa-nav.js derives its menu label from the SAME market-roll month as
   // marketYear() — a third copy of the rule, pinned like jobs.html's.
   const nav = await readFile(path.join(HERE, '..', 'assets', 'oa-nav.js'), 'utf8');

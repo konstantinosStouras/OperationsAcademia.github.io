@@ -1,8 +1,15 @@
-name: OA jobs — publish queued postings
+name: OA data — publish queued postings, candidates and placements
 
-# Turns job postings submitted through /v2/post-a-job.html into rows in
-# v2/data/jobs.json and commits them. This is what replaced Awesome Tables:
-# the data lives in this repository, and the page reads it directly.
+# Turns everything submitted through the site's own forms into rows in
+# v2/data/ and commits them: job postings (post-a-job) into jobs.json,
+# candidate profiles (post-a-candidate) into candidates.json — held back
+# until the reveal date in candidates-reveal.json — and confirmed placements
+# (post-a-placement) into placements.json. This is what replaced Awesome
+# Tables: the data lives in this repository, and the pages read it directly.
+#
+# ONE workflow for all three on purpose: they all write v2/data/, so they
+# must share the concurrency group below, and one runner + one commit beats
+# three queued fires racing each other's push.
 #
 # It is a NO-OP until the FIREBASE_SERVICE_ACCOUNT secret is set, so it is safe
 # to have running before the Firebase project exists.
@@ -74,6 +81,25 @@ jobs:
         run: |
           node v2/_scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
+      - name: Publish candidate profiles
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # same Drive credentials: CVs and research summaries are filed into
+          # the season's "Candidates Files" folder
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+        run: |
+          node v2/_scraper/build-candidates.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Publish confirmed placements
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          node v2/_scraper/build-placements.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
       - name: Re-check the file we are about to commit
         run: node v2/_scraper/selftest.mjs
 
@@ -87,7 +113,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v2/data
-          git commit -m "OA jobs: publish queued postings"
+          git commit -m "OA data: publish queued submissions"
 
           # plain fast-forward, with rebase-and-retry: a concurrent writer may
           # have moved the branch on while this run was working
