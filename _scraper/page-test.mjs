@@ -1164,6 +1164,193 @@ for (const [name, expect] of [
   await f.close();
 }
 
+/* ---------------------------------- the three rebuilt Awesome Table pages
+
+   recent-faculty and previous-markets mount the same OAList engine as jobs,
+   so what needs pinning is what is THEIRS: the dataset each reads, the
+   vendor's own ?filter deep links still selecting what they always selected,
+   the archive folding in the jobs rows that left the current market, and the
+   engine's "job postings" wording reworded where it would mislead. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('recent-faculty: ' + e.message));
+  await p.goto(BASE + 'recent-faculty.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card', { timeout: 15000 });
+
+  const rf = JSON.parse(await readFile(path.join(ROOT, 'data', 'recent-faculty.json'), 'utf8'));
+  const total = Number((await p.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
+  eq(total, rf.length, 'recent-faculty: every row of the dataset is offered');
+
+  const labels = await p.$$eval('.oa-filter label', (ns) => ns.map((n) => n.textContent));
+  eq(labels, ['Name', 'Placement', 'Alma mater', 'Undergrad institution', 'Job market year'],
+    'recent-faculty: the vendor page’s filters, in its order, plus the year');
+
+  const firstTitles = await p.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
+  const lasts = firstTitles.map((t, i) => rf[i] && rf[i].last).filter(Boolean);
+  eq([...lasts].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })), lasts,
+    'recent-faculty: page one reads alphabetically by last name, as the vendor page did');
+
+  const sr = await p.$eval('.oa-sr', (n) => n.textContent);
+  ok(/ faculty match$/.test(sr), `recent-faculty: the wording says faculty, not postings (got "${sr}")`);
+
+  /* the Universities map deep-links here as ?filterE= (recent hires) and
+     ?filterF= (PhD alumni) — the vendor's own column letters */
+  const someSchool = rf.find((r) => r.placement) || { placement: 'University' };
+  const viaE = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  viaE.on('pageerror', (e) => jsErrors.push('recent-faculty filterE: ' + e.message));
+  await viaE.goto(BASE + 'recent-faculty.html?filterE=' +
+    encodeURIComponent(someSchool.placement), { waitUntil: 'domcontentloaded' });
+  await viaE.waitForSelector('.oa-card', { timeout: 15000 });
+  const eCount = Number(((await viaE.$eval('.oa-count', (n) => n.textContent)).match(/\/\s*(\d+)/) || [])[1]);
+  const eExpect = rf.filter((r) =>
+    (r.placement || '').toLowerCase().includes(someSchool.placement.toLowerCase())).length;
+  eq(eCount, eExpect, 'recent-faculty: ?filterE selects by placement, as it always has');
+  ok(viaE.url().includes('placement='), 'recent-faculty: the legacy link is renamed in the bar');
+  await viaE.close();
+  await p.close();
+}
+
+{
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('previous-markets: ' + e.message));
+  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card', { timeout: 15000 });
+
+  /* the total = the committed archive + the jobs.json rows that have left the
+     current market window — the same formula the page runs, recomputed here
+     from the files, so the fold-in cannot silently stop working */
+  const past = JSON.parse(await readFile(path.join(ROOT, 'data', 'past-postings.json'), 'utf8'));
+  const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  const d = new Date();
+  const yr = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+  const start = `${yr - 1}-07-01`;
+  const ids = new Set(past.map((r) => r.id));
+  const folded = jobs.filter((r) =>
+    !(String(r.posted || '') >= start || Number(r.year) >= yr) && !ids.has(r.id));
+  const total = Number((await p.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
+  eq(total, past.length + folded.length,
+    'previous-markets: the archive plus every jobs row that left the current market');
+
+  const years = [...new Set([...past, ...folded].map((r) => Number(r.year)))];
+  const shownYear = Number(await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent));
+  eq(shownYear, Math.max(...years),
+    'previous-markets: the newest past market leads the archive');
+
+  // ?filterD= is how the Universities map has always linked here
+  const someInst = past[past.length - 1].institution.split(' ')[0];
+  const viaD = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  viaD.on('pageerror', (e) => jsErrors.push('previous-markets filterD: ' + e.message));
+  await viaD.goto(BASE + 'previous-markets.html?filterD=' + encodeURIComponent(someInst),
+    { waitUntil: 'domcontentloaded' });
+  await viaD.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
+  const dCount = Number(((await viaD.$eval('.oa-count', (n) => n.textContent)).match(/\/\s*(\d+)/) || [])[1]);
+  ok(dCount >= 1 && dCount < total,
+    `previous-markets: ?filterD narrows the archive (got ${dCount} of ${total})`);
+  ok(viaD.url().includes('university='), 'previous-markets: the legacy link is renamed in the bar');
+  await viaD.close();
+  await p.close();
+}
+
+/* --------------------------------------------------- the Universities map
+
+   Not an OAList page — a Leaflet map over data/universities.json, vendored
+   under assets/leaflet/. What the vendor view did is what is pinned: every
+   school with coordinates is a pin, the search filters the pins as you type,
+   a pin's popup carries the links into the site's own pages, and the legacy
+   ?filterA= deep link (every posting's "Further info" column) lands in the
+   search. Tiles come from openstreetmap.org at runtime and are deliberately
+   NOT asserted — this sandbox has no network, and the map's own DOM is the
+   part that is ours. */
+
+{
+  const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('universities: ' + e.message));
+  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
+
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
+    'universities: the count line carries the whole dataset');
+
+  // search filters the pins as you type, and lands in the URL
+  const needle = 'insead';
+  const expect = unis.filter((r) =>
+    [r.name, r.institution, r.school, r.department, r.schoolDept, r.address]
+      .some((v) => String(v || '').toLowerCase().includes(needle))).length;
+  ok(expect >= 1, 'universities: the search fixture exists in the dataset');
+  await p.fill('#oa-uni-search', needle);
+  await p.waitForTimeout(400);
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent),
+    `${expect} of ${unis.length} universities`,
+    'universities: the search narrows the pins as you type');
+  eq(await p.$$eval('img.leaflet-marker-icon', (ns) => ns.length), expect,
+    'universities: what the count says is what the map shows');
+  ok(p.url().includes('q=' + needle), 'universities: the search is shareable from the address bar');
+
+  // a pin's popup is the vendor tooltip: the school, then the site's own pages
+  await p.$eval('img.leaflet-marker-icon', (n) =>
+    n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  await p.waitForSelector('.leaflet-popup .oa-uni-pop', { timeout: 5000 });
+  const pop = await p.$eval('.leaflet-popup .oa-uni-pop', (n) => ({
+    title: n.querySelector('h3').textContent,
+    links: [...n.querySelectorAll('a')].map((a) => a.getAttribute('href')),
+  }));
+  ok(pop.title.length > 0, 'universities: the popup names the school');
+  for (const want of ['recent-faculty.html?placement=', 'recent-faculty.html?alma=',
+    'candidates.html?affiliation=', 'jobs.html?institution=', 'previous-markets.html?university=']) {
+    ok(pop.links.some((h) => h.startsWith(want)),
+      `universities: the popup links into ${want.split('.html')[0]} pre-filtered`);
+  }
+  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?)/.test(h)),
+    'universities: every popup link is a page of this site or a real URL');
+
+  // the deep link every posting's Further-info column emits
+  const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  viaA.on('pageerror', (e) => jsErrors.push('universities filterA: ' + e.message));
+  await viaA.goto(BASE + 'universities.html?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
+  await viaA.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
+  eq(await viaA.inputValue('#oa-uni-search'), 'INSEAD',
+    'universities: ?filterA lands in the search, as it landed in the vendor filter');
+  eq(await viaA.$eval('.oa-uni-count', (n) => n.textContent),
+    `${expect} of ${unis.length} universities`,
+    'universities: and it narrows the map the same way');
+  await viaA.close();
+  await p.close();
+}
+
+/* the map page on a phone — it cannot mount OAList, so it is not in
+   MOBILE_PAGES; the same rules are asserted against its own controls */
+{
+  const m = await browser.newPage({
+    viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+  });
+  m.on('pageerror', (e) => jsErrors.push('universities mobile: ' + e.message));
+  await m.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await m.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
+
+  const mob = await m.evaluate(() => {
+    const doc = document.documentElement;
+    const input = document.querySelector('#oa-uni-search');
+    const box = document.querySelector('.oa-uni-map').getBoundingClientRect();
+    return {
+      overflowX: doc.scrollWidth > doc.clientWidth,
+      inputFont: parseFloat(getComputedStyle(input).fontSize),
+      inputH: Math.round(input.getBoundingClientRect().height),
+      gutterLeft: Math.round(box.left),
+      mapRightGap: Math.round(doc.clientWidth - box.right),
+      vw: doc.clientWidth,
+    };
+  });
+  ok(!mob.overflowX, 'universities mobile: the page never scrolls sideways');
+  ok(mob.inputFont >= 16,
+    `universities mobile: the search is 16px+ so iOS does not zoom (got ${mob.inputFont}px)`);
+  ok(mob.inputH >= 40, `universities mobile: the search is a touch target (got ${mob.inputH}px)`);
+  ok(mob.gutterLeft >= 8 && mob.mapRightGap >= 8,
+    `universities mobile: the map keeps the side gutter (got ${mob.gutterLeft}/${mob.mapRightGap})`);
+  await m.close();
+}
+
 /* ------------------------------------------- every list page, on a phone
 
    The skel grid cancels its own gutter below 736px (#content pads 30px, .row
@@ -1178,7 +1365,8 @@ for (const [name, expect] of [
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
 
-const MOBILE_PAGES = ['jobs.html', 'candidates.html', 'placements.html'];
+const MOBILE_PAGES = ['jobs.html', 'candidates.html', 'placements.html',
+  'previous-markets.html', 'recent-faculty.html'];
 
 for (const pageName of MOBILE_PAGES) {
   const m = await browser.newPage({

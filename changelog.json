@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "legacy-tables-own-stack",
+   "date": "2026-08-16",
+   "title": "The Universities map, Past job postings and Recent faculty now run on the site itself",
+   "summary": "The last three vendor tables are gone: the Universities page is now the site's own interactive map (search, clustered pins, and per-school links into candidates, jobs and placements), Past job postings is a filterable archive of every recorded market — including seasons that were previously nowhere on the site — and Recent faculty keeps its familiar list with shareable filtered links. Every deep link that worked before still works.",
+   "url": "https://www.operationsacademia.org/universities"
+  },
+  {
    "id": "cutover-new-site-live",
    "date": "2026-08-16",
    "title": "The new site is live — and the old one is archived at /v1",
