@@ -167,7 +167,9 @@ export function normHeader(h) {
   return out;
 }
 
-function header(rows) {
+// Exported for import-legacy-tables.mjs, which reads the same kind of
+// Awesome Table display tabs out of the OTHER legacy sheets.
+export function header(rows) {
   // The display tab has an Awesome Table control row directly under the
   // header ("Hidden", "CategoryFilter - Hidden", "CardsContent", …). Skip it,
   // or the first posting imported would be that row of filter keywords.
@@ -183,7 +185,7 @@ function header(rows) {
   return { head, index, body, hadControlRow: looksLikeControl(rows[1] || []) };
 }
 
-function pick(row, index, names) {
+export function pick(row, index, names) {
   for (const n of names) if (n in index) return row[index[n]] ?? '';
   return '';
 }

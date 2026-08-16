@@ -81,12 +81,15 @@ Run locally:
     node _scraper/selftest.mjs
     node _scraper/page-test.mjs        (needs Playwright; PW_CHROMIUM=<path> to pin the browser)
 
-## Legacy exemptions (each one doomed, not blessed)
+## Non-list pages: the Universities map
 
-`previous-markets.html`, `recent-faculty.html` and `universities.html` still
-embed the old Awesome Table iframes; their interior is the vendor's and
-cannot be held to these rules. They are exempt ONLY until rebuilt — the plan
-(`_PLAN.md`) already retires previous-markets into a jobs-page filter and
-rebuilds the others on the site's own stack, at which point they mount
-OAList and join the test gate like everyone else. Do not add a new Awesome
-Table embed for any reason.
+There are no Awesome Table embeds left (2026-08-16: `previous-markets.html`
+and `recent-faculty.html` were rebuilt on OAList and joined `MOBILE_PAGES`;
+`universities.html` became a Leaflet map over `data/universities.json`).
+**Do not add a new Awesome Table embed for any reason.**
+
+The map page cannot mount OAList, so it follows these rules through its own
+stylesheet (`assets/oa-uni-map.css`: the 14px phone gutter, the 16px/42px
+search input) and has its own phone block in `page-test.mjs` instead of a
+`MOBILE_PAGES` entry — a future non-list page should do the same, and the
+selftest pins that the block exists.
