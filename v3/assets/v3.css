@@ -144,7 +144,7 @@ body.v3 ::selection { background: var(--brand); color: var(--on-brand); }
   margin: 0 0 14px;
 }
 
-.v3-lede { font-size: 18.5px; color: var(--ink-2); max-width: 46em; }
+.v3-lede { font-size: 18.5px; color: var(--ink-2); }
 .v3-mut { color: var(--mut); }
 
 /* focus */
@@ -442,7 +442,7 @@ body.v3-sheet-open { overflow: hidden; }
 
 .v3-section { padding: clamp(64px, 10vh, 110px) 0; scroll-margin-top: calc(var(--header-h) + 8px); }
 .v3-section + .v3-section { border-top: 1px solid var(--line-soft); }
-.v3-section-head { max-width: 720px; margin-bottom: 36px; }
+.v3-section-head { margin-bottom: 36px; }
 .v3-section-head .v3-lede { margin: 14px 0 0; }
 .v3-section-cta { margin: 22px 0 30px; display: flex; flex-wrap: wrap; gap: 12px; }
 
@@ -505,7 +505,7 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 
 /* ------------------------------------------------------------------- FAQ */
 
-.v3-faq { max-width: 860px; }
+.v3-faq { }
 .v3-faq-item {
   background: var(--bg-2);
   border: 1px solid var(--line-soft);
@@ -556,11 +556,10 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 
 /* ----------------------------------------------------------------- about */
 
-.v3-prose { max-width: 760px; color: var(--ink-2); }
+.v3-prose { color: var(--ink-2); }
 .v3-prose p { margin: 0 0 16px; }
 
 .v3-ack {
-  max-width: 860px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   background: var(--bg-2);
@@ -576,7 +575,7 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-ack .v3-ack-body { padding: 0 0 18px; color: var(--ink-2); font-size: 14.5px; }
 
 /* what's new list */
-.v3-news { list-style: none; margin: 0; padding: 0; max-width: 860px; }
+.v3-news { list-style: none; margin: 0; padding: 0; }
 .v3-news li {
   position: relative;
   padding: 0 0 22px 28px;
@@ -799,12 +798,43 @@ body.v3 .oa-note {
 body.v3 .oa-note strong { color: var(--ink); }
 body.v3 .oa-note.is-warn { background: var(--warn-bg); border-color: var(--warn-line); border-left-color: var(--gold); }
 
+/* The form's base colours are hardcoded light-theme values in oa-ui.css
+   (#222 text — the Entry level labels are BARE TEXT nodes inheriting it, so
+   they vanished on dark; owner screenshot 2026-08-16), and the fieldset
+   "card" had padding 0, so content hugged its edges. */
+body.v3 .oa-form { color: var(--ink-2); max-width: 780px; }
 body.v3 .oa-form fieldset, body.v3 .oa-panel {
   background: var(--bg-2);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
+body.v3 .oa-form fieldset { padding: 26px 30px 18px; margin: 0 0 24px; }
+body.v3 .oa-form legend {
+  float: left;             /* keeps a legend INSIDE the padded card box */
+  width: 100%;
+  padding: 0 0 10px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--line-soft);
+}
+body.v3 .oa-form legend + * { clear: both; }
+body.v3 .oa-check { color: var(--ink-2); }
+body.v3 .oa-check input[type='checkbox'],
+body.v3 .oa-check input[type='radio'] {
+  background: var(--bg);
+  border-color: var(--mut);
+}
+body.v3 .oa-check input[type='checkbox']:checked,
+body.v3 .oa-check input[type='radio']:checked {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+body.v3 .oa-check input[type='checkbox']:checked::after { border-color: var(--on-brand); }
+body.v3 .oa-check input[type='radio']:checked::after { background: var(--on-brand); }
+body.v3 .oa-req { color: var(--err); }
+body.v3 .oa-form input[aria-invalid='true'],
+body.v3 .oa-form select[aria-invalid='true'],
+body.v3 .oa-form textarea[aria-invalid='true'] { border-color: var(--err); }
 body.v3 .oa-form legend { color: var(--ink); background: var(--bg-2); font-family: var(--font-sans); font-size: 17px; font-weight: 700; }
 body.v3 .oa-field > label, body.v3 .oa-field > .oa-label-text { color: var(--ink); }
 body.v3 .oa-hint { color: var(--mut); }
@@ -818,10 +848,15 @@ body.v3 .oa-modal-card input, body.v3 .oa-modal-card select, body.v3 .oa-modal-c
   color: var(--ink);
   border-radius: 10px;
 }
+/* background-color declared too: oa-ui's focus rule turns the box WHITE,
+   which on dark meant near-white text on a white field while typing */
 body.v3 .oa-form input:focus, body.v3 .oa-form select:focus, body.v3 .oa-form textarea:focus,
+body.v3 .oa-form input[type='text']:focus,
 body.v3 .oa-modal-card input:focus, body.v3 .oa-modal-card select:focus,
-body.v3 .oa-modal-card textarea:focus {
+body.v3 .oa-modal-card textarea:focus,
+body.v3 .oa-modal-card input[type='password']:focus {
   border-color: var(--brand);
+  background-color: var(--bg);
   box-shadow: 0 0 0 3px var(--brand-soft);
 }
 body.v3 .oa-form input[disabled], body.v3 .oa-modal-card input[disabled] {
@@ -1318,6 +1353,15 @@ body.v3 .v3-panel .oa-card:last-child { border-bottom: 0; }
   .v3-faq-a .v3-faq-body { padding: 0 18px 18px; }
   .v3-hero { padding-top: calc(var(--header-h) + 44px); }
   .v3-top { right: 14px; bottom: 60px; }
+
+  /* forms on a phone: 16px inputs (iOS zooms into anything smaller and
+     stays zoomed), finger-height controls, a card that still breathes */
+  body.v3 .oa-form fieldset { padding: 18px 16px 12px; }
+  body.v3 .oa-form input, body.v3 .oa-form select {
+    font-size: 16px; min-height: 44px;
+  }
+  body.v3 .oa-form textarea { font-size: 16px; }
+  body.v3 .oa-check { font-size: 15.5px; }
 }
 
 /* very small phones: keep the stat numbers from wrapping awkwardly */
