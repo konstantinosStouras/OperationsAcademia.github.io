@@ -88,6 +88,25 @@ service cloud.firestore {
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && shapeOk();
 
+      // MERGING TWO ACCOUNTS hands a posting over to the account its owner is
+      // keeping. A posting is a top-level document owned by a `uid` field, so
+      // without this the rule above (which pins that field) would strand every
+      // posting of a merged-away account: unwithdrawable, uncorrectable, owned
+      // by a sign-in that no longer exists.
+      //
+      // Only the CURRENT owner may hand one over, and `diff().affectedKeys()`
+      // pins everything else — the posting itself cannot be edited under cover
+      // of a merge, not even by its owner, and `featured` is as untouchable
+      // here as it is above. `mergedFrom` records where it came from, so the
+      // change is visible in the document rather than inferred.
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['uid', 'mergedFrom', 'mergedAt'])
+                    && request.resource.data.uid is string
+                    && request.resource.data.uid.size() >= 10
+                    && request.resource.data.uid != resource.data.uid
+                    && request.resource.data.mergedFrom == request.auth.uid;
+
       allow delete: if isAdmin();
 
       // The maintainer can hide a posting, feature one, or fix a typo.
@@ -135,7 +154,41 @@ service cloud.firestore {
       allow create, update: if isOwner(uid)
                             && request.resource.data.keys().hasOnly(['t'])
                             && request.resource.data.t is number;
-      allow delete: if false;
+      // An account may withdraw its OWN mark, and only its own — which is what
+      // a merge does with the duplicate it removes, so the tally counts people
+      // rather than sign-ins. It can only ever lower the count, never inflate it.
+      allow delete: if isOwner(uid);
+    }
+
+    // ------------------------------------------------------ identity keys
+    //
+    // How the site notices that one person has two accounts. Each session
+    // claims a document per identity it can prove — `orcid:<iD>` and
+    // `email:<sha256 of the lowercased address>` — holding a uid and a coarse
+    // timestamp. A key already claimed by a DIFFERENT uid is the same person
+    // twice, and the site offers to merge them.
+    //
+    // The e-mail address is HASHED, and reads are `get` only, never `list`:
+    // a signed-in visitor can ask "who holds this identity, which I already
+    // know" and cannot enumerate the site's users or their addresses. Nobody
+    // can claim a key for anyone but themselves, and nothing here grants
+    // access to anything — an account's data is still gated on its own uid.
+    //
+    // A claim CAN be taken over by another signed-in account, and that is
+    // deliberate rather than an oversight: it is how the ghost claim left
+    // behind by an account that was merged away heals, and how the merge hands
+    // the identity to the account being kept. Nothing can be proved here about
+    // who really owns an ORCID iD, so the honest statement of what this
+    // collection is worth is: a HINT that two accounts belong together, which
+    // only ever leads to an offer the user has to answer by signing in to the
+    // other account themselves. It is never an authorisation.
+    match /accountKeys/{key} {
+      allow get: if signedIn();
+      allow create, update: if signedIn()
+                            && request.resource.data.keys().hasOnly(['uid', 't'])
+                            && request.resource.data.uid == request.auth.uid
+                            && request.resource.data.t is number;
+      allow list, delete: if false;
     }
 
     // Anything not named above is closed.

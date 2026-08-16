@@ -14,6 +14,7 @@
 
 import http from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -312,6 +313,357 @@ for (const [name, expect] of [
   ok(seen.explained, 'feedback: and says why, with somewhere else to write to');
   ok(seen.inboxHidden, 'feedback: the maintainer inbox stays hidden');
   await q.close();
+}
+
+/* ------------------------------------------- merging two accounts into one
+
+   What travels between two accounts, and what does not. These are the
+   decisions the merge makes; the Firestore writes around them are exercised
+   by hand against the real project, but the rules the writes follow are
+   ordinary functions and belong under test.
+
+   OAAccounts.pure is exported for exactly this. It is read from a page that
+   never reached Firebase, so nothing here depends on a session. */
+{
+  const P = await page.evaluate(() => {
+    const p = window.OAAccounts && window.OAAccounts.pure;
+    if (!p) return null;
+
+    // an ORCID iD is 16 digits with an ISO 7064 MOD 11-2 check character
+    const orcid = {
+      plain: p.normOrcid('0000-0002-2398-9566'),
+      spaced: p.normOrcid('0000 0002 2398 9566'),
+      url: p.normOrcid('https://orcid.org/0000-0002-1825-0097'),
+      xcheck: p.normOrcid('0000-0002-1694-233X'),
+      lowerx: p.normOrcid('0000-0002-1694-233x'),
+      typo: p.normOrcid('0000-0002-2398-9567'),
+      short: p.normOrcid('0000-0002'),
+      junk: p.normOrcid('my orcid'),
+      empty: p.normOrcid(''),
+      nullish: p.normOrcid(null),
+    };
+
+    const full = {
+      firstName: 'Ada', lastName: 'Lovelace', affiliation: 'Somewhere',
+      website: 'https://example.edu', orcid: '0000-0002-2398-9566', orcidVerified: true,
+    };
+
+    const patch = {
+      intoEmpty: p.profilePatch({}, full),
+      intoFull: p.profilePatch(
+        { firstName: 'A', lastName: 'L', affiliation: 'Elsewhere', website: 'https://x.edu' },
+        full),
+      partial: p.profilePatch({ firstName: 'A' }, full),
+      blankIsEmpty: p.profilePatch({ firstName: '   ' }, full),
+      sameOrcid: p.profilePatch({ orcid: '0000-0002-2398-9566' }, full),
+      otherOrcid: p.profilePatch({ orcid: '0000-0002-1825-0097' }, full),
+      nothingToGive: p.profilePatch(full, {}),
+    };
+
+    const a = {
+      name: 'OM jobs', email: 'me@example.edu', frequency: 'weekly',
+      criteria: { topics: ['jobs'], text: '', type: ['University'], level: ['Assistant Professor'],
+                  country: ['USA', 'Canada'], characteristics: [] },
+    };
+    const reordered = JSON.parse(JSON.stringify(a));
+    reordered.criteria.country = ['Canada', 'USA'];
+    const different = JSON.parse(JSON.stringify(a));
+    different.criteria.country = ['USA'];
+
+    return {
+      orcid,
+      patch,
+      sig: {
+        same: p.alertSig(a) === p.alertSig(reordered),
+        differs: p.alertSig(a) !== p.alertSig(different),
+        caseFolded: p.alertSig(a) === p.alertSig(Object.assign({}, a, { email: 'ME@Example.edu' })),
+      },
+      initials: {
+        two: p.initialsFrom('Jane Roe', 'j@x.edu'),
+        one: p.initialsFrom('Jane', 'j@x.edu'),
+        none: p.initialsFrom('', 'jane@x.edu'),
+        blank: p.initialsFrom('', ''),
+      },
+      summary: {
+        one: p.providerSummary({ providerData: [{ providerId: 'google.com' }] }),
+        two: p.providerSummary({ providerData: [
+          { providerId: 'google.com' }, { providerId: 'oidc.orcid' }] }),
+        orcid: p.providerSummary({ providerData: [{ providerId: 'oidc.orcid' }] }),
+      },
+      alertFields: p.ALERT_FIELDS,
+    };
+  });
+
+  ok(P, 'the accounts module exports the merge decisions for testing');
+  if (P) {
+    eq(P.orcid.plain, '0000-0002-2398-9566', 'an ORCID iD is kept in its canonical form');
+    eq(P.orcid.spaced, '0000-0002-2398-9566', 'spaces in a pasted iD are ignored');
+    eq(P.orcid.url, '0000-0002-1825-0097', 'and a whole orcid.org address is accepted');
+    eq(P.orcid.xcheck, '0000-0002-1694-233X', 'an X check character is valid');
+    eq(P.orcid.lowerx, '0000-0002-1694-233X', 'and is normalised to upper case');
+    // the one that matters: a typo would become an identity key matching
+    // nobody, quietly switching the duplicate check off for that account
+    eq(P.orcid.typo, '', 'a mistyped iD is refused, not stored');
+    eq([P.orcid.short, P.orcid.junk, P.orcid.empty, P.orcid.nullish], ['', '', '', ''],
+      'and so is anything that is not an iD at all');
+
+    eq(P.patch.intoEmpty.firstName, 'Ada', 'a merge fills in details the kept account lacks');
+    eq(P.patch.intoEmpty.orcid, '0000-0002-2398-9566', 'including an ORCID iD it has none of');
+    eq(P.patch.intoEmpty.orcidVerified, true, 'carrying the fact that ORCID vouched for it');
+    eq(Object.keys(P.patch.intoFull).sort(), ['orcid', 'orcidVerified'],
+      'and overwrites no detail the kept account already answered — only the iD it lacked');
+    eq(Object.keys(P.patch.partial).sort(), ['affiliation', 'lastName', 'orcid', 'orcidVerified', 'website'],
+      'a half-filled profile takes only what is missing');
+    eq(P.patch.blankIsEmpty.firstName, 'Ada', 'whitespace is not an answer');
+    eq(P.patch.otherOrcid.orcid, undefined,
+      'two different ORCID iDs are two people — the merge leaves that alone');
+    eq(P.patch.sameOrcid.orcidVerified, true,
+      'the same iD, now verified, upgrades the kept account');
+    eq(P.patch.nothingToGive, {}, 'an empty account gives nothing');
+
+    ok(P.sig.same, 'two alerts that would send the same e-mail look the same to the merge');
+    ok(P.sig.differs, 'and two that would not, do not');
+    ok(P.sig.caseFolded, 'the recipient address is compared case-insensitively');
+
+    eq(P.initials.two, 'JR', 'initials come from the first and last name');
+    eq(P.initials.one, 'JA', 'a single name gives two letters');
+    eq(P.initials.none, 'JA', 'and an account with no name falls back to its address');
+    eq(P.initials.blank, '?', 'never an empty disc');
+
+    eq(P.summary.one, 'Google', 'the sign-in method is named in words');
+    eq(P.summary.two, 'Google and ORCID', 'and reads as a sentence when there are two');
+    eq(P.summary.orcid, 'ORCID', 'ORCID included');
+
+    // dropping a high-water mark makes a copied alert look brand new, and the
+    // first e-mail after a merge is then the entire catalogue
+    for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate']) {
+      ok(P.alertFields.includes(f), `a copied alert keeps its ${f} mark`);
+    }
+  }
+
+  /* The card the reader actually meets. Rendered from the two pure builders,
+     so every branch can be read without a Firebase session behind it. */
+  const CARD = await page.evaluate(() => {
+    const p = window.OAAccounts.pure;
+    const host = document.createElement('div');
+    host.id = 'oa-card-probe';
+    document.body.appendChild(host);
+
+    const read = (html) => {
+      host.innerHTML = html;
+      return {
+        html,
+        chip: !!host.querySelector('.oa-orcid-chip'),
+        verified: !!host.querySelector('.oa-verified'),
+        input: !!host.querySelector('input[name="orcid"]'),
+        value: (host.querySelector('input[name="orcid"]') || {}).value,
+        linkOrcid: !!host.querySelector('#oa-link-orcid'),
+        linkGoogle: !!host.querySelector('#oa-link-google'),
+        merge: !!host.querySelector('#oa-merge-open'),
+        text: host.textContent.replace(/\s+/g, ' ').trim(),
+      };
+    };
+
+    const google = { providerData: [{ providerId: 'google.com' }] };
+    const orcidOnly = { providerData: [{ providerId: 'oidc.orcid' }] };
+    const iD = '0000-0002-2398-9566';
+
+    return {
+      verifiedField: read(p.orcidFieldHTML({ orcid: iD, orcidVerified: true })),
+      typedField: read(p.orcidFieldHTML({ orcid: iD })),
+      emptyField: read(p.orcidFieldHTML({})),
+      escaped: read(p.orcidFieldHTML({ orcid: '"><img src=x onerror=alert(1)>' })),
+      googleNoOrcid: read(p.otherAccountsHTML({}, google)),
+      googleWithOrcid: read(p.otherAccountsHTML({ orcid: iD }, google)),
+      orcidOnly: read(p.otherAccountsHTML({ orcid: iD, orcidVerified: true }, orcidOnly)),
+      bothLinked: read(p.otherAccountsHTML({ orcid: iD }, {
+        providerData: [{ providerId: 'google.com' }, { providerId: 'oidc.orcid' }] })),
+    };
+  });
+
+  ok(CARD.verifiedField.chip && CARD.verifiedField.verified && !CARD.verifiedField.input,
+    'an iD ORCID vouched for is shown as a verified chip, not an editable field');
+  ok(CARD.typedField.input && CARD.typedField.value === '0000-0002-2398-9566',
+    'an iD the reader typed stays editable, so it can be corrected or cleared');
+  ok(CARD.emptyField.input && !CARD.emptyField.value,
+    'and an account without one is offered an empty field');
+  ok(!/onerror=/.test(CARD.escaped.html) || /&quot;|&lt;/.test(CARD.escaped.html),
+    'a stored value is escaped into the field, never interpolated as markup');
+  ok(!CARD.escaped.html.includes('<img'), 'markup in a stored iD cannot reach the page');
+
+  // the whole point of the linking rows: offer only what is still missing
+  ok(!CARD.googleNoOrcid.linkGoogle, 'a Google account is not offered Google again');
+  ok(!CARD.googleNoOrcid.linkOrcid,
+    'nor ORCID sign-in while we have no iD to attach it to');
+  ok(CARD.googleWithOrcid.linkOrcid,
+    'once an iD is on file, attaching ORCID sign-in is offered — that is what stops a duplicate');
+  ok(CARD.orcidOnly.linkGoogle && !CARD.orcidOnly.linkOrcid,
+    'an ORCID-only account is offered Google, and not the sign-in it already has');
+  ok(!CARD.bothLinked.linkGoogle && !CARD.bothLinked.linkOrcid,
+    'an account reachable both ways is offered nothing');
+
+  ok(CARD.googleNoOrcid.merge && CARD.orcidOnly.merge && CARD.bothLinked.merge,
+    'every account can start a merge — two Gmail addresses are two accounts too');
+  ok(/You sign in to this account with Google\./.test(CARD.googleNoOrcid.text),
+    'the card says how this account is reached, in words');
+  ok(/ORCID/.test(CARD.orcidOnly.text), 'and names ORCID when that is the way in');
+
+  await page.evaluate(() => document.getElementById('oa-card-probe').remove());
+}
+
+/* ------------------------------------------------- the merge, start to end
+
+   Driven against _fake-firebase.js — an in-memory stand-in for the compat SDK
+   that records every operation in order. It proves nothing about Firebase, and
+   the security rules are asserted separately (selftest.mjs). What it does show
+   is the thing no screenshot can: that the merge copies before it deletes, and
+   that a job posting changes hands while the account that owns it still
+   exists. Get that order wrong and the damage is silent. */
+{
+  const SHIM = await readFile(path.join(ROOT, 'v2', '_scraper', '_fake-firebase.js'), 'utf8');
+
+  const DUP = 'dup-account-uid-0001';
+  const KEPT = 'kept-account-uid-0002';
+  const ORCID = '0000-0002-2398-9566';
+
+  async function withFakeFirebase(seed, drive) {
+    const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify(seed)};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('#oa-chip', { timeout: 10000 });
+    const out = await drive(q);
+    eq(errors, [], 'merge run: no uncaught script error');
+    await q.close();
+    return out;
+  }
+
+  const seed = {
+    user: { uid: DUP, email: '', displayName: 'Ada',
+            providerData: [{ providerId: 'oidc.orcid', uid: ORCID }] },
+    keptUser: { uid: KEPT, email: 'ada@example.edu', displayName: 'Ada Lovelace',
+                providerData: [{ providerId: 'google.com' }] },
+    docs: [
+      { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Lovelace',
+                                         affiliation: 'Somewhere' } },
+      { path: `profiles/${KEPT}`, data: { firstName: 'A.' } },
+      { path: `users/${DUP}/alerts/a1`, data: {
+          name: 'OM jobs', email: 'ada@example.edu', frequency: 'weekly', enabled: true,
+          criteria: { topics: ['jobs'], country: ['USA'] },
+          lastSentAt: '2026-08-10T00:00:00.000Z', lastCheckedAt: '2026-08-14T00:00:00.000Z' } },
+      { path: `jobSubmissions/j1`, data: {
+          uid: DUP, status: 'queued', ref: 'OA-JOB-260815-ABCD', institution: 'Somewhere',
+          featured: true } },
+      { path: `registeredUsers/${DUP}`, data: { t: 1 } },
+    ],
+  };
+
+  const run = await withFakeFirebase(seed, async (q) => {
+    // the iD an ORCID sign-in vouched for is recorded without being asked for
+    await q.waitForFunction(() => window.__fb && window.__fb.at('set', 'profiles/') !== -1,
+      null, { timeout: 8000 });
+
+    await q.evaluate(() => window.OAAccounts.openProfile());
+    await q.waitForSelector('#oa-merge-open');
+    await q.click('#oa-merge-open');
+
+    await q.waitForSelector('#oa-merge .oa-auth-provider[data-provider="google"]');
+    const holds = await q.textContent('#oa-merge-holds');
+    const orcidOffered = await q.$('#oa-merge .oa-auth-provider[data-provider="orcid"]');
+    await q.click('#oa-merge .oa-auth-provider[data-provider="google"]');
+
+    await q.waitForSelector('#oa-merge-step2:not([hidden])', { timeout: 8000 });
+    const into = await q.textContent('#oa-merge-into');
+    await q.click('#oa-merge-go');
+
+    await q.waitForFunction(() => window.__fb.at('deleteUser', '') !== -1, null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+
+    return q.evaluate(() => ({
+      docs: window.__fb.dump(),
+      log: window.__fb.log.map((e) => e.op + ' ' + e.path),
+      order: {
+        copyAlert: window.__fb.at('set', 'alerts/a1'),
+        handOver: window.__fb.at('update', 'jobSubmissions/j1'),
+        dropAlert: window.__fb.at('delete', 'alerts/a1'),
+        dropProfile: window.__fb.at('delete', 'profiles/'),
+        killSignIn: window.__fb.at('deleteUser', ''),
+      },
+    })).then((r) => Object.assign(r, { holds, into, orcidOffered: !!orcidOffered }));
+  });
+
+  // what the reader was told before agreeing to any of it
+  ok(/1 e-mail alert/.test(run.holds) && /1 job posting/.test(run.holds),
+    'the dialog counts what is actually at stake before asking');
+  ok(/ada@example\.edu/.test(run.into),
+    'and names the account being merged into, so it cannot be the wrong one');
+  ok(!run.orcidOffered,
+    'an ORCID account is not offered ORCID as the account to keep — one iD is one account');
+
+  // the alert arrives under its own id, with the mailer's marks intact
+  const moved = run.docs[`users/${KEPT}/alerts/a1`];
+  ok(moved, 'the alert lands in the account being kept');
+  eq(moved && moved.lastSentAt, '2026-08-10T00:00:00.000Z',
+    'carrying its send history — without it the first e-mail is the whole catalogue');
+  eq(moved && moved.mergedFrom, DUP, 'and a note of where it came from');
+  eq(moved && moved.criteria.country, ['USA'], 'with its filters unchanged');
+  ok(!run.docs[`users/${DUP}/alerts/a1`],
+    'and is gone from the old account — a copy left behind sends everything twice for ever');
+
+  // details fill blanks and overwrite nothing
+  const keptProfile = run.docs[`profiles/${KEPT}`];
+  eq(keptProfile.firstName, 'A.', 'the kept account keeps the name it chose');
+  eq(keptProfile.lastName, 'Lovelace', 'and gains what it was missing');
+  eq(keptProfile.orcid, ORCID, 'including the ORCID iD the duplicate was registered with');
+  eq(keptProfile.orcidVerified, true, 'still marked as one ORCID vouched for');
+  ok(!run.docs[`profiles/${DUP}`], 'the old profile is cleared away');
+  ok(!run.docs[`registeredUsers/${DUP}`],
+    'and so is its entry in the user tally, so the count is of people');
+
+  // the posting changes hands rather than being re-created
+  const job = run.docs['jobSubmissions/j1'];
+  eq(job.uid, KEPT, 'the job posting is now owned by the account being kept');
+  eq(job.mergedFrom, DUP, 'stamped with where it came from');
+  eq(job.ref, 'OA-JOB-260815-ABCD', 'keeping its reference — the poster was given that number');
+  eq(job.featured, true, 'and everything else about it, including what only the maintainer sets');
+
+  eq(run.docs['accountKeys/orcid:' + ORCID].uid, KEPT,
+    'the ORCID identity now points at the account that holds it');
+
+  // ORDER. Each of these is a way to lose something with nothing on screen.
+  const o = run.order;
+  ok(o.copyAlert > -1 && o.dropAlert > o.copyAlert,
+    'the alert is copied before the original is deleted');
+  ok(o.handOver > -1 && o.killSignIn > o.handOver,
+    'the posting changes hands before the sign-in that owns it is removed');
+  ok(o.killSignIn > o.dropProfile && o.killSignIn > o.dropAlert,
+    'and the sign-in goes last of all');
+
+  /* A duplicate that ANNOUNCES itself. An ORCID registration whose iD is
+     already claimed by another account is offered the repair on the spot,
+     rather than left to find it in a menu it has no reason to open. */
+  const noticed = await withFakeFirebase({
+    user: seed.user,
+    keptUser: seed.keptUser,
+    docs: [
+      { path: `profiles/${DUP}`, data: { orcid: ORCID, orcidVerified: true } },
+      { path: 'accountKeys/orcid:' + ORCID, data: { uid: 'somebody-elses-uid-9', t: 1 } },
+    ],
+  }, async (q) => {
+    await q.waitForSelector('#oa-merge', { timeout: 8000 });
+    return {
+      msg: await q.textContent('#oa-merge-msg'),
+      keyUntouched: await q.evaluate((k) => window.__fb.docs[k].uid, 'accountKeys/orcid:' + ORCID),
+    };
+  });
+
+  ok(/already have an Operations Academia account/.test(noticed.msg),
+    'an ORCID sign-in that duplicates an existing account is told so, and shown the merge');
+  eq(noticed.keyUntouched, 'somebody-elses-uid-9',
+    'and the first account keeps its claim — the duplicate never overwrites it');
 }
 
 /* ------------------------------------------------------------------ done */

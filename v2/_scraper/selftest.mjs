@@ -396,6 +396,74 @@ function testCollapseSameDay() {
   eq(order.rows.map((r) => r.institution).join(''), 'AB', 'first-seen order is kept');
 }
 
+/* ------------------------------------------ merging two accounts into one
+
+   The merge itself is browser code, exercised in page-test.mjs. What is
+   checked HERE is the part that has no browser and no Firebase to run
+   against, and that would fail silently rather than loudly: the security
+   rules the merge depends on, and the two steps of it whose omission does
+   damage nobody would notice for weeks.
+
+   These are source-level assertions on purpose. Every one of them stands for
+   a specific way the feature breaks, named in its message. */
+
+async function testAccountMerge() {
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const accounts = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+
+  // Duplicate DETECTION needs its collection, or every session's claim is
+  // refused and two accounts are never noticed to be one person.
+  ok(/match \/accountKeys\/\{key\}/.test(rules), 'the accountKeys collection has a rule');
+  ok(/allow get: if signedIn\(\);/.test(rules),
+    'an identity key can be looked up by someone signed in');
+  ok(/allow list, delete: if false;/.test(rules),
+    'but the identity keys cannot be enumerated — that would be the user list');
+  ok(/email:<sha256/.test(rules) && /email:' \+ h/.test(accounts),
+    'the e-mail identity key is hashed, so the collection is not a list of addresses');
+
+  // The HAND-OVER. A job posting is a top-level document owned by a uid field:
+  // without this branch a merged-away account's postings are stranded, and
+  // with a loose one the merge becomes a way to edit a posting behind the
+  // rules that normally bound it.
+  ok(/affectedKeys\(\)\.hasOnly\(\['uid', 'mergedFrom', 'mergedAt'\]\)/.test(rules),
+    'a hand-over may change ownership and nothing else about a posting');
+  ok(/request\.resource\.data\.mergedFrom == request\.auth\.uid/.test(rules),
+    'and is stamped with the account it came from');
+  ok(/allow update: if isOwner\(resource\.data\.uid\)[\s\S]{0,400}?affectedKeys/.test(rules),
+    'only the posting\'s current owner may hand it over');
+
+  // The merge deletes the duplicate's alerts. Firebase deleting a SIGN-IN does
+  // not delete its Firestore data, and the mailer reads every alert in the
+  // database by collection group — so an alert left behind sends the user two
+  // of everything, for ever, with nothing on screen to explain it.
+  ok(/alertsCol\.doc\(a\.id\)\.delete\(\)/.test(accounts),
+    'the merge deletes the merged-away account\'s alerts, or they keep sending');
+  ok(/allow delete: if isOwner\(uid\);/.test(rules),
+    'an account can withdraw its own registered-users mark, so the tally counts people');
+
+  // Order: nothing is deleted until everything has been copied. Asserted by
+  // position, because a reordering is exactly the edit that would lose data.
+  const copyAt = accounts.indexOf('keptAlerts.doc(a.id).set(');
+  const handAt = accounts.indexOf('jobSubmissions).doc(j.id).update(');
+  const dropAt = accounts.indexOf('alertsCol.doc(a.id).delete()');
+  const killAt = accounts.indexOf('return deleteCurrentSignIn(fb)');
+  ok(copyAt > 0 && handAt > copyAt && dropAt > handAt && killAt > dropAt,
+    'the merge copies, then hands over, then deletes — in that order');
+
+  // A postings list we could not read must stop the merge, or the last step
+  // removes the only sign-in that could ever reach them again.
+  ok(/if \(!survey\.jobsOk\)/.test(accounts),
+    'a merge refuses to run when the postings could not be listed');
+
+  // The mailer's high-water marks travel with a copied alert. Without them the
+  // alert looks brand new and newJobsFor() with an empty `since` matches the
+  // whole catalogue — one enormous e-mail as the reward for merging.
+  const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
+  for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'criteria', 'enabled']) {
+    ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
+  }
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -404,5 +472,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testCollapseSameDay();
   await testPageHeadingRule();
   await testServedFile();
+  await testAccountMerge();
   process.exit(finish() ? 0 : 1);
 }

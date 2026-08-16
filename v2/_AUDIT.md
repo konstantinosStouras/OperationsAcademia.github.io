@@ -214,6 +214,26 @@ The whole feature is one IIFE at `lit/index.html:5158‑8209` on the **compat** 
 
 **Drop:** everything keyed on papers (`docIdFor`, `acctStar*`, `panelHTML`, lists, tags, the library view, `publicLists`, `?list=` viewer, default-filters/`renderPrefEditorial`); **the entire ORCID layer** (`ORCID_OAUTH` implicit flow 6782‑6896, `oidc.orcid` provider, `normOrcid`, `orcidMatchName`, `backfillOrcidAuthorName`, `litMyPubCount`); and with it **`accountKeys` duplicate-detection + the merge flow** (6600‑6692) — that machinery exists *only* because ORCID's OIDC returns no e-mail. Google + e-mail/password does not need it.
 
+> **REVERSED, 2026‑08‑16 (owner).** The premise of that last sentence did not
+> survive the build: `AUTH_PROVIDERS` ships as `['google','orcid','password']`,
+> so ORCID's OIDC — and its missing e-mail — is exactly what OA offers. `normOrcid`
+> (checksum and all), the `oidc.orcid` provider, `accountKeys` detection and a
+> merge are all present in `v2/assets/oa-accounts.js`. The rest of the ORCID
+> layer stays dropped: nothing here matches an author to papers, so
+> `orcidMatchName`, `backfillOrcidAuthorName` and `litMyPubCount` have no
+> subject, and the iD is read from the sign-in's own OIDC `sub` rather than
+> through a second implicit OAuth flow.
+>
+> The owner's requirement is also WIDER than /lit/'s: two Gmail addresses are
+> two accounts as surely as Google-and-ORCID is, so **any** two accounts merge,
+> not only an ORCID-only duplicate. That is why the flow differs from /lit/'s
+> localStorage hand-over: a **job posting** is a top-level `jobSubmissions`
+> document owned by a `uid` field, so once the duplicate sign-in is deleted
+> nobody can ever reach it again. The merge therefore signs the kept account in
+> on a **second Firebase app** and proves both at once, handing the postings
+> over while the account that owns them is still there. See the comment above
+> `openMerge`.
+
 ### C.4 E-mail alerts — **lift the engine, generalise the streams**
 
 `/lit/` splits this three ways: the modal in `index.html` (7112‑7575), the mailer `lit/_scraper/alerts-mailer.mjs` (1,262 lines, zero runtime deps beyond lazily-imported `firebase-admin` + `nodemailer`), and `lit/changelog.json` as the single source read by three consumers.
@@ -370,7 +390,7 @@ This replaces /lit/'s `sources.json` + `meta.json`. It lets the filter bar paint
 | `users/{uid}/testEmails/{id}` | "Send me a test e-mail" | the 15-min test pass (delivers then **deletes**) | `{…criteria, test:true, attempts}` |
 | `registeredUsers/{uid}` | `onAuthStateChanged`, best-effort | a public `count()` on a stats tile | `{t}` only, no PII |
 
-**Not carried over:** `accountKeys` (ORCID-only need), `publicLists`, `paperSubmissions`.
+**Not carried over:** `publicLists`, `paperSubmissions`. (`accountKeys` **is** carried over after all — see the reversal note in C.3. `accountKeys/{key}` holds `{uid, t}` under `orcid:<iD>` / `email:<sha256>`, is `get`-only for anyone signed in and never listable, and is a hint that two accounts are one person — never an authorisation.)
 
 **Alert `criteria` for OA** — one `topics` array (`['jobs','candidates','news','updates']`, already the vocabulary in `v2/assets/oa-alert-match.js` **[verified in repo]**) plus per-topic filter Sets mirroring the page's `sel` (country, type, level, characteristic, year, institution/free text), plus `allJobs`-style short-circuits. A save needs **any one intent** (`alertHasIntent`).
 

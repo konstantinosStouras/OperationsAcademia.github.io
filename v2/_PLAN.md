@@ -190,8 +190,8 @@ e-mails they receive, silently. One file removes the possibility.
 
 | Command | Checks |
 |---|---|
-| `node v2/_scraper/selftest.mjs` | 963 — the data model, the merge, and the served file |
-| `node v2/_scraper/page-test.mjs` | 17 — the page in a real browser |
+| `node v2/_scraper/selftest.mjs` | 1188 — the data model, the row merge, the served file, and the security rules the account merge depends on |
+| `node v2/_scraper/page-test.mjs` | 70 — the page in a real browser, plus the account merge's own decisions |
 | `node v2/_scraper/alerts-mailer.mjs --selftest` | 21 |
 | `node v2/_scraper/feedback-mailer.mjs --selftest` | 20 |
 | `node v2/_scraper/import-sheet.mjs --selftest` | 18 |

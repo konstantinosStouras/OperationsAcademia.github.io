@@ -149,6 +149,34 @@ exists.
 `AUTH_PROVIDERS` and the button disappears. Google and e-mail/password cover
 everyone; ORCID is a convenience for a community that mostly has one.
 
+### What switching ORCID on brings with it: duplicate accounts
+
+ORCID's OIDC hands Firebase **no e-mail address**, so Firebase cannot see that
+the person pressing "Continue with ORCID" is the one who registered with Google
+last month. It makes them a second account. (Two different Gmail addresses do
+the same thing, and always could.) Each account holds its own alerts and its own
+job postings, and neither can see the other's.
+
+That is handled, not merely acknowledged — see **the merge**, below, and the
+long comment above `openMerge` in `v2/assets/oa-accounts.js`:
+
+- **Prevention.** Edit profile offers *Enable "Continue with ORCID"/"…Google"
+  for this account*, which attaches that sign-in to the account you already
+  have. Afterwards the other button lands you here rather than starting a
+  second account, and no duplicate can form.
+- **Detection.** Every session claims its identity keys in `accountKeys`. A key
+  already held by another uid is one person with two accounts; an ORCID-only
+  registration that trips it is offered the merge on the spot, and any other
+  account is told once.
+- **Repair.** Edit profile → *Merge this account into another of mine*. The
+  account you keep signs in on a second Firebase app — both are then proved at
+  once — and the alerts, the job postings and any details the kept account was
+  missing move across before anything is deleted.
+
+The detection half is INERT until the `accountKeys` rule is deployed (step 4);
+the prevention and the merge work as soon as ORCID does. Nothing in the merge
+depends on ORCID: it merges any two accounts, whatever they sign in with.
+
 ## 4. Deploy the security rules — **before announcing anything**
 
 ```bash
@@ -179,8 +207,18 @@ What the rules do:
 | `feedback` | **anyone** may create one, bounded to 5 screenshots and ~16 fields; only the maintainer may read the collection |
 | `users/{uid}/**` | the owner only — this is where alert subscriptions live |
 | `profiles/{uid}` | the owner only |
-| `registeredUsers/{uid}` | world-readable but contentless (one coarse timestamp), owner-write only, no delete — it exists so the site can show a user count without exposing the user list |
+| `registeredUsers/{uid}` | world-readable but contentless (one coarse timestamp), owner-write only; an account may delete **its own** mark, which is what a merge does with the duplicate it removes |
+| `accountKeys/{key}` | one document per identity (`orcid:<iD>`, `email:<sha256>`) saying which uid holds it; readable one-at-a-time by anyone signed in, never listable, writable only for yourself. It is how the site notices one person has two accounts |
 | everything else | closed |
+
+`jobSubmissions` carries a **second** `allow update`, for the account merge. A
+posting is a top-level document owned by a `uid` field, and the first rule pins
+that field — so without this one, merging an account away would strand every
+posting it had made under a sign-in that no longer exists: unwithdrawable,
+uncorrectable, for ever. The branch lets the **current owner** change
+`uid`/`mergedFrom`/`mergedAt` **and nothing else** (`diff().affectedKeys()`
+does the pinning), so a merge cannot be used to edit a posting behind the rules
+that normally bound it, and `featured` stays as untouchable as it is above.
 
 `isAdmin()` in the rules hardcodes `kstouras@gmail.com` **and requires a
 verified e-mail**. Change it there if that address ever changes; the copy in
