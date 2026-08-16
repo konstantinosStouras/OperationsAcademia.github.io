@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-16T05:00:38.109Z",
+ "generated": "2026-08-16T05:38:37.116Z",
  "universities": [
   {
    "v": "University College London",
@@ -7,7 +7,7 @@
   },
   {
    "v": "Tulane University",
-   "n": 4
+   "n": 5
   },
   {
    "v": "University of Virginia",
@@ -15,6 +15,10 @@
   },
   {
    "v": "National University of Singapore",
+   "n": 3
+  },
+  {
+   "v": "University of Houston",
    "n": 3
   },
   {
@@ -55,10 +59,6 @@
   },
   {
    "v": "University of California, Berkeley",
-   "n": 2
-  },
-  {
-   "v": "University of Houston",
    "n": 2
   },
   {
@@ -264,12 +264,12 @@
    "n": 4
   },
   {
-   "v": "Global Business School for Health",
+   "v": "Freeman School of Business",
    "n": 4
   },
   {
-   "v": "Freeman School of Business",
-   "n": 3
+   "v": "Global Business School for Health",
+   "n": 4
   },
   {
    "v": "Business School",
@@ -309,6 +309,10 @@
   },
   {
    "v": "Bayes Business School, Faculty of Management",
+   "n": 1
+  },
+  {
+   "v": "C. T. Bauer College of Business",
    "n": 1
   },
   {
@@ -511,6 +515,10 @@
   },
   {
    "v": "Department of Business and Public Administration",
+   "n": 1
+  },
+  {
+   "v": "Department of Decision and Information Sciences",
    "n": 1
   },
   {
@@ -1037,9 +1045,12 @@
    ]
   },
   "University of Houston": {
-   "schools": [],
+   "schools": [
+    "C. T. Bauer College of Business"
+   ],
    "units": [
     "Decision and Information Sciences (DISC)",
+    "Department of Decision and Information Sciences",
     "University of Houston and DISC"
    ]
   },
