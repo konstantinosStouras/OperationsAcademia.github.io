@@ -1113,6 +1113,27 @@ for (const [name, expect] of [
   await d.close();
 }
 
+/* ------------------------------------------- the posting page paints NOW
+
+   The page used to hold everything hidden until the Firebase SDK had loaded
+   AND the session had restored — blank space for seconds on a cold cache, and
+   for the full 15-second timeout when the CDN is unreachable (which it is in
+   this sandbox, making that exact worst case the one measured here). The
+   accounts hint paints the signed-out shape immediately; this asserts a
+   visitor sees the sign-in gate well before any network verdict. */
+
+{
+  const f = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const t0 = Date.now();
+  await f.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+  await f.waitForSelector('#oa-needauth', { state: 'visible', timeout: 4000 });
+  const ms = Date.now() - t0;
+  ok(ms < 4000, `fastpaint: the sign-in gate is visible in ${ms}ms, not after an SDK timeout`);
+  eq(await f.$eval('#oa-job-form', (n) => n.hidden), true,
+    'fastpaint: while the form itself stays hidden for a signed-out visitor');
+  await f.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

@@ -558,6 +558,21 @@
   }
 
   function boot() {
+    /* FIRST PAINT, before Firebase exists. Everything on this page used to
+       stay hidden until the SDK had downloaded from gstatic AND the session
+       had restored over the network — a heading over blank space for one to
+       three seconds on a cold cache, and for the full 15-second timeout when
+       the CDN is blocked. The accounts hint remembers how the LAST visit
+       resolved, so the page shows its signed-in shape (the form) or its
+       signed-out shape (the sign-in gate) immediately; the real auth state
+       reconciles it through the same onChange handler as always, and a stale
+       hint costs one visible swap, not a wrong capability — the rules, not
+       the paint, decide who can post. */
+    var hinted = window.OAAccounts && OAAccounts.hint && OAAccounts.hint();
+    show($('oa-job-form'), hinted === 'in');
+    show($('oa-intro'), hinted === 'in');
+    show($('oa-needauth'), hinted !== 'in');
+
     wireVocab();
     wireAdFile();
     wireDraft();

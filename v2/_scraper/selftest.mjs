@@ -907,6 +907,26 @@ function testChanges() {
     'nothing changed renders as nothing');
 }
 
+/* -------------------------------------------- the posting page loads fast */
+
+async function testPageSpeedWiring() {
+  const html = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  const fbjs = await readFile(path.join(HERE, '..', 'assets', 'oa-firebase.js'), 'utf8');
+
+  /* The preloads only help while they name the EXACT scripts oa-firebase.js
+     injects. A version bump there without one here would fetch dead weight on
+     every visit and silently lose the head start. */
+  const sdk = (fbjs.match(/var SDK = '([^']+)'/) || [])[1];
+  ok(sdk, 'oa-firebase.js declares its SDK base URL');
+  const parts = (fbjs.match(/var PARTS = \[([^\]]+)\]/) || [])[1] || '';
+  for (const part of parts.match(/'[^']+'/g).map((x) => x.slice(1, -1))) {
+    ok(html.includes(`<link rel="preload" as="script" href="${sdk}${part}">`),
+      `post-a-job preloads ${part} at the version the code loads`);
+  }
+  ok(html.includes('rel="preconnect" href="https://www.gstatic.com"'),
+    'and preconnects to the CDN');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -918,6 +938,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testAssignIds();
   testChanges();
   await testPageHeadingRule();
+  await testPageSpeedWiring();
   await testFleetPins();
   await testMigrationRoundTrip();
   await testMigrationDocs();

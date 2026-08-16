@@ -1614,6 +1614,18 @@
     onChange: onChange,
     user: function () { return state.user; },
     resolved: function () { return state.resolved; },
+    /** The localStorage memory of the LAST resolved auth state — 'in', 'out',
+        or null on a first visit. What lets a page paint its signed-in or
+        signed-out shape immediately instead of holding everything blank while
+        the SDK downloads and the session restores (~1-3 s on a cold cache);
+        the real state reconciles it when it arrives. */
+    hint: function () {
+      if (state.resolved) return state.user ? 'in' : 'out';
+      // The stored hint exists only for a signed-in session (sign-out removes
+      // it), so a first-time visitor and a signed-out one read the same —
+      // 'out' — which is the right shape to paint first for both.
+      return readHint() ? 'in' : 'out';
+    },
     /** True when the SDK itself could not be loaded — offline, a blocked
         CDN, an ad blocker. Pages use this to say so instead of offering a
         control that cannot work. */
