@@ -554,6 +554,39 @@ async function testFleetPins() {
     'safeShots() both validates the shape and escapes what survives');
 }
 
+/* --------------------------------------- the mobile standard stays wired up
+
+   _MOBILE-STANDARDS.md is the living standard for every table/list page on a
+   phone, and it works through two hooks: CLAUDE.md tells the next builder to
+   consult it, and page-test.mjs's MOBILE_PAGES loop enforces it. A broken
+   link in that chain fails silently — a page built without the standard just
+   ships — so the chain itself is pinned. */
+
+async function testMobileStandards() {
+  const std = await readFile(path.join(HERE, '..', '_MOBILE-STANDARDS.md'), 'utf8');
+  ok(/max-width: 640px/.test(std) && /16px/.test(std),
+    'the standards file names the breakpoint and the iOS 16px rule');
+
+  const claude = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(claude.includes('_MOBILE-STANDARDS.md'),
+    'CLAUDE.md points the next builder at the mobile standards');
+
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  const listed = /const MOBILE_PAGES = \[([^\]]*)\]/.exec(pt);
+  ok(!!listed, 'page-test.mjs carries the MOBILE_PAGES gate');
+  for (const p of ['jobs.html', 'candidates.html', 'placements.html']) {
+    ok(listed && listed[1].includes(p), `${p} is under the mobile gate`);
+  }
+
+  // the engine rules the standard leans on
+  const css = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  ok(/max-width: 640px/.test(css) && /font-size: 16px/.test(css),
+    'oa-list.css implements the phone breakpoint with 16px inputs');
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
+  ok(js.includes('oa-menu-right') && js.includes('pointer: coarse'),
+    'oa-list.js keeps menus on screen and the keyboard off the options');
+}
+
 /* ----------------------------------------------- My postings (my-postings.html)
 
    The signed-in poster's own postings — pending, live and taken down — each
@@ -1072,6 +1105,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testDriveFolders();
   testDriveUpload();
   await testServedFile();
+  await testMobileStandards();
   await testMyPostingsPage();
   await testAccountMerge();
   process.exit(finish() ? 0 : 1);

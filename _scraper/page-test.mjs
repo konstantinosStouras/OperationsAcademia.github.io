@@ -1164,27 +1164,35 @@ for (const [name, expect] of [
   await f.close();
 }
 
-/* ------------------------------------------------- the list on a phone
+/* ------------------------------------------- every list page, on a phone
 
    The skel grid cancels its own gutter below 736px (#content pads 30px, .row
    pulls -30px), which had the filters and cards running EDGE TO EDGE; and any
    focused input under 16px makes iOS Safari zoom the page in and leave it
    zoomed. Both are pinned here, plus the things a thumb needs: 40px+ targets
-   and every picker menu staying inside the viewport. */
+   and every picker menu staying inside the viewport.
 
-{
+   THE STANDARD IS _MOBILE-STANDARDS.md, and this loop is its gate: every
+   page that mounts OAList must be listed here in the same change that
+   creates it. Candidates and placements ship with empty datasets until
+   their pipelines fill, so the card checks run only when cards exist — the
+   filter-bar rules hold either way. */
+
+const MOBILE_PAGES = ['jobs.html', 'candidates.html', 'placements.html'];
+
+for (const pageName of MOBILE_PAGES) {
   const m = await browser.newPage({
     viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
-  await m.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
-  await m.waitForSelector('.oa-card', { timeout: 15000 });
+  await m.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await m.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
 
   const mob = await m.evaluate(() => {
     const doc = document.documentElement;
-    const list = document.querySelector('.oa-list').getBoundingClientRect();
     const filters = document.querySelector('.oa-filters').getBoundingClientRect();
     const search = document.querySelector('.oa-filter input[type="search"]');
-    const card = document.querySelector('.oa-card').getBoundingClientRect();
+    const card = document.querySelector('.oa-card');
+    const cr = card && card.getBoundingClientRect();
     const btns = [...document.querySelectorAll('.oa-pick .oa-pick-btn')];
     const menus = btns.map((btn) => {
       btn.click();                                   // open
@@ -1196,27 +1204,29 @@ for (const [name, expect] of [
     return {
       overflowX: doc.scrollWidth > doc.clientWidth,
       gutterLeft: Math.round(filters.left),
-      cardLeft: Math.round(card.left),
-      cardRight: Math.round(doc.clientWidth - card.right),
+      cardLeft: cr && Math.round(cr.left),
+      cardRight: cr && Math.round(doc.clientWidth - cr.right),
       searchFont: parseFloat(getComputedStyle(search).fontSize),
       searchH: Math.round(search.getBoundingClientRect().height),
-      pickH: Math.round(btns[0].getBoundingClientRect().height),
-      pagerH: Math.round(pager.getBoundingClientRect().height),
+      pickH: btns.length && Math.round(btns[0].getBoundingClientRect().height),
+      pagerH: pager && Math.round(pager.getBoundingClientRect().height),
       menus,
       vw: doc.clientWidth,
     };
   });
 
-  ok(!mob.overflowX, 'mobile: the page never scrolls sideways');
-  ok(mob.gutterLeft >= 8 && mob.cardLeft >= 8 && mob.cardRight >= 8,
-    `mobile: filters and cards keep a side gutter (got ${mob.gutterLeft}/${mob.cardLeft}/${mob.cardRight})`);
+  const at = `mobile ${pageName}:`;
+  ok(!mob.overflowX, `${at} the page never scrolls sideways`);
+  ok(mob.gutterLeft >= 8, `${at} the filters keep a side gutter (got ${mob.gutterLeft})`);
+  ok(mob.cardLeft === null || (mob.cardLeft >= 8 && mob.cardRight >= 8),
+    `${at} cards keep the gutter too (got ${mob.cardLeft}/${mob.cardRight})`);
   ok(mob.searchFont >= 16,
-    `mobile: the search input is 16px+ so iOS does not zoom the page (got ${mob.searchFont}px)`);
-  ok(mob.searchH >= 40 && mob.pickH >= 40,
-    `mobile: search and picker controls are touch targets (got ${mob.searchH}/${mob.pickH}px)`);
-  ok(mob.pagerH >= 36, `mobile: pager chevrons are tappable (got ${mob.pagerH}px)`);
+    `${at} the search input is 16px+ so iOS does not zoom the page (got ${mob.searchFont}px)`);
+  ok(mob.searchH >= 40 && (!mob.pickH || mob.pickH >= 40),
+    `${at} search and picker controls are touch targets (got ${mob.searchH}/${mob.pickH}px)`);
+  ok(!mob.pagerH || mob.pagerH >= 36, `${at} pager chevrons are tappable (got ${mob.pagerH}px)`);
   ok(mob.menus.every((r) => r.left >= 0 && r.right <= mob.vw),
-    `mobile: every picker menu stays on screen (got ${JSON.stringify(mob.menus)})`);
+    `${at} every picker menu stays on screen (got ${JSON.stringify(mob.menus)})`);
   await m.close();
 }
 
