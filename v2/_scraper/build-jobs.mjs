@@ -106,8 +106,13 @@ async function firestore() {
 
 async function main() {
   if (argv.has('--selftest')) {
-    const { runSelftest } = await import('./selftest.mjs');
-    process.exit(runSelftest() ? 0 : 1);
+    /* The WHOLE suite, not runSelftest()'s three-suite subset — running this
+       flag used to skip the merge/served-file/migration checks while printing
+       a passing total, which reads as covered when it is not. The suite's own
+       entry point already runs everything, so run it as itself. */
+    const { spawnSync } = await import('node:child_process');
+    const r = spawnSync(process.execPath, [path.join(HERE, 'selftest.mjs')], { stdio: 'inherit' });
+    process.exit(r.status === 0 ? 0 : 1);
   }
 
   const db = await firestore();
