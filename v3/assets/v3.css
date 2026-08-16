@@ -129,6 +129,8 @@ body.v3 ::selection { background: var(--brand); color: var(--on-brand); }
   margin: 0;
 }
 .v3-h1 { font-size: clamp(38px, 6vw, 62px); line-height: 1.08; }
+/* the Kurate-style second line: italic serif, lighter, muted */
+.v3-h1-accent { font-style: italic; font-weight: 500; color: var(--mut); }
 .v3-h2 { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.15; }
 .v3-h3 { font-size: 21px; line-height: 1.3; }
 
@@ -410,12 +412,15 @@ body.v3-sheet-open { overflow: hidden; }
 }
 .v3-stat b {
   display: block;
-  font-family: var(--font-serif);
-  font-size: clamp(26px, 3vw, 34px);
-  font-weight: 600;
+  /* NUMBERS are data — plain sans, tabular (owner, 2026-08-16: serif for
+     key display headings only; databases/tables/figures in the UI font) */
+  font-family: var(--font-sans);
+  font-size: clamp(25px, 3vw, 32px);
+  font-weight: 700;
   color: var(--ink);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 .v3-stat span { color: var(--mut); font-size: 14px; }
 
@@ -661,7 +666,24 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
    oa-list.css loads first; these same-or-higher specificity rules win.
    ========================================================================== */
 
-body.v3 .oa-list { font-family: var(--font-sans); }
+/* Everything data-shaped runs on the UI sans, never the serif (owner,
+   2026-08-16). Form CONTROLS do not inherit font-family, and the vendored
+   oa-ui.css names 'Source Sans Pro' (which v3 does not load) — so the engine,
+   the forms and every control are pinned to Inter explicitly. Serif headings
+   inside these areas (the modal's brand heading, the gate's) re-claim it with
+   their own later rules. */
+body.v3 .oa-list,
+body.v3 .oa-list input, body.v3 .oa-list select, body.v3 .oa-list button,
+body.v3 .oa-form,
+body.v3 .oa-form input, body.v3 .oa-form select, body.v3 .oa-form textarea,
+body.v3 .oa-form button,
+body.v3 .oa-note, body.v3 .oa-gate, body.v3 .oa-panel,
+body.v3 #oa-account, body.v3 .oa-acct-menu,
+body.v3 .oa-modal-card,
+body.v3 .oa-modal-card input, body.v3 .oa-modal-card select,
+body.v3 .oa-modal-card textarea, body.v3 .oa-modal-card button {
+  font-family: var(--font-sans);
+}
 
 body.v3 .oa-filters {
   background: var(--bg-2);
@@ -716,7 +738,7 @@ body.v3 .oa-card {
   body.v3 .oa-card:hover { border-color: var(--line); box-shadow: var(--shadow-lg); }
 }
 body.v3 .oa-card-head { background: none; }
-body.v3 .oa-card-title { color: var(--ink); font-weight: 650; }
+body.v3 .oa-card-title { color: var(--ink); font-weight: 600; }
 body.v3 .oa-card-sub { color: var(--mut); }
 body.v3 .oa-card-body { border-top: 1px solid var(--line-soft); }
 body.v3 .oa-kv th { color: var(--mut); }
@@ -756,7 +778,7 @@ body.v3 .oa-form fieldset, body.v3 .oa-panel {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
-body.v3 .oa-form legend { color: var(--brand); background: var(--bg-2); font-family: var(--font-serif); font-size: 20px; }
+body.v3 .oa-form legend { color: var(--ink); background: var(--bg-2); font-family: var(--font-sans); font-size: 17px; font-weight: 700; }
 body.v3 .oa-field > label, body.v3 .oa-field > .oa-label-text { color: var(--ink); }
 body.v3 .oa-hint { color: var(--mut); }
 body.v3 .oa-lede { color: var(--ink-2); }
@@ -1005,7 +1027,8 @@ body.v3 .oa-merge-from, body.v3 .oa-merge-into { background: var(--bg-3); border
 .v3-pa-card h3 { margin: 0; font-size: 17px; color: var(--ink); display: flex; gap: 10px; align-items: center; }
 .v3-pa-card p { margin: 0; font-size: 14.5px; color: var(--mut); }
 .v3-pa-card .v3-pa-n {
-  font-family: var(--font-serif); font-size: 30px; font-weight: 600; color: var(--ink);
+  font-family: var(--font-sans); font-size: 28px; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .v3-pa-empty {
@@ -1029,6 +1052,135 @@ body.v3 .oa-merge-from, body.v3 .oa-merge-into { background: var(--bg-3); border
   box-shadow: var(--shadow-lg);
   padding: 40px;
   text-align: center;
+}
+
+/* ----------------------------------------------------- jobs launcher card
+
+   The main page shows the TEN most recent postings and this compact search
+   card (owner, 2026-08-16, from the reference screenshots): labelled
+   controls that already display their value ("All types", "All locations"),
+   and one primary button that carries the choice to the dedicated
+   jobs.html page, where the full list lives. */
+
+.v3-launcher {
+  background: var(--bg-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 26px;
+  margin: 0 0 26px;
+  max-width: 860px;
+}
+.v3-launcher .v3-flabel {
+  display: block;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--mut);
+  margin: 0 0 8px;
+}
+.v3-launcher input[type='search'] {
+  display: block; width: 100%;
+  font-family: var(--font-sans); font-size: 16px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 15px;
+  -webkit-appearance: none; appearance: none;
+}
+.v3-launcher input[type='search']:focus { border-color: var(--brand); outline: none;
+  box-shadow: 0 0 0 3px var(--brand-soft); }
+.v3-launcher-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.v3-launcher select {
+  display: block; width: 100%;
+  font-family: var(--font-sans); font-size: 15.5px; font-weight: 600;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 36px 11px 13px;
+  cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23888f98' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+}
+.v3-launcher select:focus { border-color: var(--brand); outline: none;
+  box-shadow: 0 0 0 3px var(--brand-soft); }
+.v3-launcher-actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin-top: 20px;
+}
+.v3-launcher-actions .v3-mut { font-size: 13.5px; }
+
+/* the ten-most-recent list under it renders through the same engine but
+   without its filter bar (the page removes the bar and result-bar nodes) */
+
+/* the engine's own filter labels, where the full bar IS shown (jobs.html,
+   candidates, placements): the reference site's small-caps look */
+body.v3 .oa-filter > label {
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--mut);
+}
+
+/* ------------------------------------------------- filters sign-in lock
+
+   On the dedicated jobs page the LIST is public but the FILTERS unlock on
+   sign-in (owner, from the reference site's "Sign up for free" panel). The
+   lock is a nudge, not security — the data is a public file. */
+
+.v3-lock { position: relative; }
+.v3-lock.is-locked .oa-filters {
+  opacity: 0.45;
+  pointer-events: none;
+  -webkit-user-select: none; user-select: none;
+  filter: saturate(0.6);
+}
+.v3-lock-card {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 18px;
+}
+.v3-lock:not(.is-locked) .v3-lock-card { display: none; }
+.v3-lock-card-inner {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 22px 28px;
+  max-width: 460px;
+}
+.v3-lock-card-inner h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-sans);
+  font-size: 16.5px; font-weight: 700; color: var(--ink);
+}
+.v3-lock-card-inner p { margin: 0 0 16px; font-size: 14px; color: var(--mut); }
+.v3-lock-card-inner .v3-cta-row { justify-content: center; margin: 0; }
+.v3-lock-card-inner .v3-btn { padding: 11px 20px; font-size: 14.5px; }
+
+@media (max-width: 640px) {
+  .v3-launcher { padding: 18px; }
+  .v3-launcher-row { grid-template-columns: 1fr; gap: 12px; }
+  .v3-launcher-actions .v3-btn { flex: 1 1 auto; }
+  /* phone: the sign-in card flows ABOVE the dimmed bar instead of floating
+     over it — the bar stays visible (and measurable by the mobile gate),
+     just inert until sign-in */
+  .v3-lock.is-locked { display: flex; flex-direction: column-reverse; }
+  .v3-lock-card { position: static; padding: 0 0 16px; }
 }
 
 /* ------------------------------------------------------------- responsive */

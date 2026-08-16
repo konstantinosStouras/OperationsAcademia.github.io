@@ -22,6 +22,12 @@ page carries `noindex,nofollow` until the owner promotes it.
   (`localStorage oaV3Theme`), defaulting to the system preference.
 - The six action pages (post-a-job, post-a-candidate, post-a-placement,
   my-postings, alerts, feedback) ported into the same shell.
+- **Jobs are a teaser + a dedicated page** (owner, 2026-08-16, second round):
+  the one-pager's Jobs section shows a compact launcher card (search + three
+  selects that always SHOW their value — "All types", "All locations") and
+  the TEN most recent postings; "Explore all postings" leads to `jobs.html`,
+  where the full filterable list lives and **the filters unlock on sign-in**
+  (the list itself stays public — the lock is a nudge, not security).
 
 ## What it reads and writes
 
