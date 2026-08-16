@@ -1,0 +1,82 @@
+rules_version = '2';
+
+// ---------------------------------------------------------------------------
+// Operations Academia — Cloud Storage security rules.
+//
+//     firebase deploy --only storage --project operations-academia
+//
+// WHAT STORAGE IS FOR HERE. It is a LANDING STRIP, not a library. A poster's
+// browser cannot write into the operations.academia@gmail.com Drive — that
+// needs a credential no browser may hold — so the file is uploaded here, a
+// function copies it into the right "JM" folder in Drive, and the object is
+// deleted. Nothing is meant to live here for more than a few seconds.
+//
+// That is why NOTHING IS PUBLICLY READABLE. The served link on a posting is
+// the Drive link; if these objects were readable the site would have two URLs
+// for one file, one of which keeps working after the file is withdrawn.
+// ---------------------------------------------------------------------------
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'kstouras@gmail.com';
+    }
+
+    /* A job advertisement or a CV: PDF or Word, and nothing else. The check is
+       on the DECLARED content type, which a client controls — so it is a
+       courtesy that gives a clear error, not a security boundary. The function
+       that moves the file into Drive re-checks what it actually received. */
+    function allowedType() {
+      return request.resource.contentType in [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+    }
+
+    /* 15 MB. A job advert is a few hundred KB and a CV rarely more than two
+       megabytes; the cap is what stops the landing strip being used as free
+       hosting, and it is generous enough that nobody legitimate meets it. */
+    function smallEnough() {
+      return request.resource.size < 15 * 1024 * 1024;
+    }
+
+    /* uploads/{uid}/{kind}/{name}
+       Keyed by the uploader's own uid, so the rule is "your own folder" rather
+       than a list of who may write where. `kind` is jobs or candidates, which
+       decides which Drive folder the file ends up in — the function reads it
+       from the path rather than trusting a parameter. */
+    match /uploads/{uid}/{kind}/{name} {
+
+      // Only the uploader may write, and only into their own folder.
+      allow create: if signedIn()
+                    && request.auth.uid == uid
+                    && kind in ['jobs', 'candidates']
+                    && allowedType()
+                    && smallEnough();
+
+      /* No update. A file is written once and moved; letting it be replaced in
+         place would mean the Drive copy and this one could differ, with the
+         posting linking to whichever won. Upload a new one instead. */
+      allow update: if false;
+
+      /* The uploader may read back what they just sent — the form shows the
+         name and size while the transfer finishes — and may cancel it before
+         the function has taken it. The maintainer may do both to clear up
+         after a failure. Nobody else can do either. */
+      allow read, delete: if (signedIn() && request.auth.uid == uid) || isAdmin();
+    }
+
+    // Nothing else in the bucket is reachable from a browser at all.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
