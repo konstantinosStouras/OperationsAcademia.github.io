@@ -68,6 +68,10 @@ service cloud.firestore {
             && str('email', 200)       && str('chairName', 160)
             && str('chairEmail', 200)  && str('note', 1500)
             && str('source', 40)       && str('authEmail', 200)
+            // the uploaded advert, waiting in Storage for the build to file
+            // it into Drive (oa-jobform.js / build-jobs.mjs)
+            && str('adUploadPath', 400) && str('adUploadName', 200)
+            && str('adUploadType', 100)
             && list('levels', 8)       && list('characteristics', 12)
             && request.resource.data.year is int
             && request.resource.data.year >= 2000

@@ -124,6 +124,23 @@
     adminEmail: ADMIN_EMAIL,
     ready: ready,
 
+    /* The Storage SDK, loaded ONLY when asked for. The posting form is the one
+       page that uploads anything, and the compat bundle is ~40 KB — putting it
+       in PARTS would tax every page of the site for one form's feature. */
+    readyStorage: function () {
+      return ready().then(function (fb) {
+        if (fb.storage) return fb;
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = SDK + 'firebase-storage-compat.js';
+          s.async = false;
+          s.onload = function () { resolve(fb); };
+          s.onerror = function () { reject(new Error('firebase-sdk-load-failed')); };
+          document.head.appendChild(s);
+        });
+      });
+    },
+
     /* Collection names, so a rename is a one-line change here and in the rules.
        Mirrors the /lit/ layout:
          users/{uid}                  private per-account subtree (alerts live under it)

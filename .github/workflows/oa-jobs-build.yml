@@ -65,6 +65,12 @@ jobs:
         if: steps.gate.outputs.ready == 'true'
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # The Drive credentials, for filing uploaded adverts into the
+          # season's "Jobs Files" folder. Missing = the build still publishes
+          # postings, just without their File links, and warns.
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
         run: |
           node v2/_scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 

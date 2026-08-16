@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
+  marketYear,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
@@ -102,6 +103,118 @@ async function firestore() {
   return app.firestore();
 }
 
+/** The default Storage bucket, or null. Callers treat null as "skip". */
+async function storageBucket() {
+  let admin;
+  try { admin = await import('firebase-admin'); } catch { return null; }
+  const app = admin.default || admin;
+  if (!app.apps.length) return null;
+  try {
+    return app.storage().bucket('operations-academia.firebasestorage.app');
+  } catch {
+    return null;
+  }
+}
+
+/* -------------------------------------------------------------- uploads */
+
+async function transferUploads(db, live, { now }) {
+  const pending = live.filter((d) => {
+    const v = d.data() || {};
+    return v.adUploadPath && !v.adUrl;
+  });
+  if (!pending.length) return;
+
+  let drive, folders;
+  try {
+    drive = await import('./drive-upload.mjs');
+    folders = await import('./drive-folders.mjs');
+  } catch (e) {
+    warn(`advert uploads: could not load the Drive client (${e.message}) — left for the next run`);
+    return;
+  }
+
+  if (drive.missingCredentials().length) {
+    warn(`advert uploads: ${pending.length} waiting, but ` +
+      `${drive.missingCredentials().join(', ')} not set — left for the next run`);
+    return;
+  }
+
+  const bucket = await storageBucket();
+  if (!bucket) {
+    warn('advert uploads: no Storage bucket available — left for the next run');
+    return;
+  }
+
+  const config = JSON.parse(await readFile(path.join(DATA, 'drive-folders.json'), 'utf8'));
+  const year = marketYear(now);
+
+  let token;
+  try {
+    token = await drive.accessToken();
+  } catch (e) {
+    warn(`advert uploads: ${e.message} — left for the next run`);
+    return;
+  }
+
+  for (const d of pending) {
+    const v = d.data();
+    try {
+      /* The path is checked against the shape the Storage rules enforce
+         (uploads/{uid}/{kind}/{name}) rather than trusted: the document field
+         is client-writable, and an arbitrary path here would let a poster
+         exfiltrate any object the service account can read into a public
+         Drive link. */
+      const m = /^uploads\/([^/]+)\/(jobs|candidates)\/([^/]+)$/.exec(String(v.adUploadPath));
+      if (!m) {
+        warn(`advert uploads: ${v.ref || d.id} has a malformed path — cleared`);
+        await d.ref.update({ adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null });
+        continue;
+      }
+      if (v.uid && m[1] !== v.uid) {
+        warn(`advert uploads: ${v.ref || d.id} path does not belong to its poster — cleared`);
+        await d.ref.update({ adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null });
+        continue;
+      }
+
+      const file = bucket.file(v.adUploadPath);
+      const [bytes] = await file.download();
+
+      const name = drive.driveFileName({
+        posted: (v.createdAt && v.createdAt.toDate
+          ? v.createdAt.toDate() : now).toISOString().slice(0, 10),
+        institution: v.institution,
+        department: v.department || [v.school, v.unit].filter(Boolean).join(', '),
+        ref: v.ref,
+        original: v.adUploadName || m[3],
+      });
+
+      const uploaded = await drive.uploadFile({
+        token,
+        folderId: folders.folderFor(config, year, m[2]),
+        resourceKey: folders.resourceKeyHeader(config, year, m[2]),
+        name,
+        bytes,
+        contentType: v.adUploadType || 'application/pdf',
+      });
+
+      /* Write the link BEFORE deleting the landing-strip object: a crash in
+         between leaves a stray object in Storage (harmless, cleaned by hand)
+         rather than a filed-and-forgotten upload with no link anywhere. */
+      await d.ref.update({
+        adUrl: uploaded.webViewLink,
+        adDriveId: uploaded.id,
+        adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null,
+      });
+      await file.delete().catch(() => {});
+
+      log(`  filed advert for ${v.ref || d.id}: ${uploaded.name}`);
+    } catch (e) {
+      warn(`advert uploads: ${v.ref || d.id}: ${e.message} — left for the next run`);
+    }
+  }
+}
+
 /* ---------------------------------------------------------------------- main */
 
 async function main() {
@@ -155,6 +268,26 @@ async function main() {
   }
 
   const now = new Date();
+
+  /* -------------------------------------------- file the uploaded adverts
+
+     A posting can carry an advert the poster uploaded to the Storage landing
+     strip (adUploadPath — see oa-jobform.js and _storage.rules). Before rows
+     are built, each one is moved into the season's "Jobs Files" folder in the
+     operations.academia@gmail.com Drive and the document gains the Drive link
+     as its adUrl — so the SAME build publishes the posting with its File link.
+
+     Filed under the CURRENT market year's folder, deliberately: "Current JM"
+     is where files that arrive now belong, exactly as the Drive has always
+     been organised — a posting back-dated to last season still produces a file
+     that arrives today.
+
+     WHOLLY NON-FATAL. Drive being down, a missing credential, an unconfigured
+     season — each is warned about and the posting publishes WITHOUT its File
+     link; the upload stays in Storage and the next run retries. A failure here
+     must never stop the postings pipeline. */
+  await transferUploads(db, live, { now });
+
   const fresh = [];
   const rejected = [];
   for (const d of live) {

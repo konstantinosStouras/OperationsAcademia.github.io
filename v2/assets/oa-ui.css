@@ -1341,3 +1341,68 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 /* the read-back of what the two name fields will be published as */
 .oa-derived { margin: -8px 0 18px; color: #4a6b8a; }
 .oa-derived:empty { display: none; }
+
+/* ------------------------------------------------------ the advert uploader
+   A styled file picker: the native control cannot be styled, so the real
+   input is visually hidden inside the label and the button+filename beside it
+   are what the eye sees. Keyboard and screen-reader behaviour stay native. */
+
+.oa-advert { max-width: 560px; }
+
+.oa-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.oa-file input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.oa-file-btn {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid #3b7dbc;
+  border-radius: 4px;
+  background: #fff;
+  color: #2f6ea8;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.oa-file:hover .oa-file-btn { background: #eaf3fb; }
+
+.oa-file input[type='file']:focus-visible + .oa-file-btn {
+  outline: 2px solid #3b7dbc;
+  outline-offset: 2px;
+}
+
+.oa-file-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  color: #5b6470;
+}
+
+.oa-file-clear {
+  margin-top: 6px;
+  padding: 2px 8px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: #a3364a;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.oa-advert-or { margin: 10px 0 6px; color: #8a929b; }

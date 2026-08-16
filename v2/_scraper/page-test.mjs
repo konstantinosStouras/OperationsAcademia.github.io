@@ -1014,6 +1014,64 @@ for (const [name, expect] of [
   await j.close();
 }
 
+/* ------------------------------------------------- the advert file picker
+
+   The form offers "upload the advert itself" beside "paste a link". What is
+   checked: a wrong type is refused with a sentence, a good file supersedes the
+   URL field and Remove restores it, and with no file chosen the form behaves
+   exactly as it always did.                                                  */
+
+{
+  const u = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const uErrors = [];
+  u.on('pageerror', (e) => uErrors.push(e.message));
+  await u.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+  await u.waitForTimeout(1500);
+  await u.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await u.waitForSelector('#f-adFile-label', { state: 'visible' });
+
+  ok(await u.$('#f-adFile'), 'advert: the file input exists');
+  eq(await u.$eval('#f-adFile-name', (n) => n.textContent.trim()), 'No file chosen',
+    'advert: and starts empty');
+
+  // a text file is refused with a sentence, before any upload
+  await u.setInputFiles('#f-adFile', {
+    name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello'),
+  });
+  await u.waitForTimeout(150);
+  ok(/PDF or Word/.test(await u.$eval('#f-adFile-error', (n) => n.textContent)),
+    'advert: a text file is refused, naming what is accepted');
+  eq(await u.$eval('#f-adFile-name', (n) => n.textContent.trim()), 'No file chosen',
+    'advert: and nothing is held');
+
+  // a PDF is accepted; choosing it supersedes the pasted-link field
+  await u.fill('#f-adUrl', 'https://example.edu/ad.pdf');
+  await u.setInputFiles('#f-adFile', {
+    name: 'Advert Final.pdf', mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4 fake'),
+  });
+  await u.waitForTimeout(150);
+  ok(/Advert Final\.pdf/.test(await u.$eval('#f-adFile-name', (n) => n.textContent)),
+    'advert: the chosen file is named, with its size');
+  eq(await u.$eval('#f-adUrl', (n) => n.value), '', 'advert: a chosen file clears the URL');
+  eq(await u.$eval('#f-adUrl', (n) => n.disabled), true, 'advert: and disables pasting another');
+  eq(await u.$eval('#f-adFile-clear', (n) => n.hidden), false, 'advert: Remove appears');
+
+  // Remove restores the paste-a-link path
+  await u.click('#f-adFile-clear');
+  await u.waitForTimeout(100);
+  eq(await u.$eval('#f-adUrl', (n) => n.disabled), false, 'advert: Remove re-enables the URL');
+  eq(await u.$eval('#f-adFile-name', (n) => n.textContent.trim()), 'No file chosen',
+    'advert: and forgets the file');
+
+  eq(uErrors, [], 'advert: no uncaught script errors');
+  await u.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

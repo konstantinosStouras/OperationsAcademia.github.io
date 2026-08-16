@@ -250,6 +250,119 @@
 
   /* ------------------------------------------------------------------- wiring */
 
+  /* ------------------------------------------------------- the advert file
+
+     The poster attaches the advertisement itself instead of hunting for a URL.
+     The browser cannot write into the operations.academia@gmail.com Drive —
+     that needs a credential no browser may hold — so the file goes to a
+     Firebase Storage LANDING STRIP (uploads/{uid}/jobs/…, see _storage.rules)
+     and the scheduled build moves it into the season's "Jobs Files" folder,
+     writes the Drive link onto the posting as its File link, and deletes the
+     Storage object. The posting appears with its file link in the same build.
+
+     PDF and Word only, 15 MB — mirrored from the Storage rules so a wrong file
+     is refused HERE, with a sentence, rather than by the rules after a full
+     upload. */
+
+  var AD_TYPES = {
+    'application/pdf': '.pdf',
+    'application/msword': '.doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  };
+  var AD_MAX_BYTES = 15 * 1024 * 1024;
+
+  var adFile = null;   // the File chosen, not yet uploaded
+
+  function adFileProblem(f) {
+    if (!f) return '';
+    var named = /\.(pdf|docx?)$/i.test(f.name || '');
+    if (!AD_TYPES[f.type] && !named) {
+      return 'Please attach a PDF or Word file (.pdf, .doc or .docx).';
+    }
+    if (f.size > AD_MAX_BYTES) {
+      return 'That file is ' + (f.size / 1048576).toFixed(1) +
+        ' MB; the limit is 15 MB. A job advert rarely needs more than one or two.';
+    }
+    if (!f.size) return 'That file is empty.';
+    return '';
+  }
+
+  function wireAdFile() {
+    var input = $('f-adFile'), name = $('f-adFile-name'),
+        clear = $('f-adFile-clear'), err = $('f-adFile-error'),
+        urlEl = $('f-adUrl');
+    if (!input) return;
+
+    function sayFile(msg) {
+      if (!err) return;
+      err.hidden = !msg;
+      err.textContent = msg || '';
+    }
+
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0];
+      var bad = adFileProblem(f);
+      if (bad) {
+        input.value = '';
+        adFile = null;
+        name.textContent = 'No file chosen';
+        clear.hidden = true;
+        sayFile(bad);
+        return;
+      }
+      adFile = f || null;
+      sayFile('');
+      name.textContent = f ? f.name + ' (' + (f.size / 1048576).toFixed(1) + ' MB)' : 'No file chosen';
+      clear.hidden = !f;
+      /* One advert per posting: a chosen file supersedes a pasted link, and
+         saying so beats silently ignoring one of them. */
+      if (f && urlEl) {
+        urlEl.value = '';
+        urlEl.disabled = true;
+        urlEl.placeholder = 'the uploaded file will be the File link';
+      }
+    });
+
+    clear.addEventListener('click', function () {
+      input.value = '';
+      adFile = null;
+      name.textContent = 'No file chosen';
+      clear.hidden = true;
+      sayFile('');
+      if (urlEl) { urlEl.disabled = false; urlEl.placeholder = 'https://'; }
+    });
+  }
+
+  /** Upload the chosen file to the landing strip. Resolves with the fields the
+      submission document carries, or null when there is nothing to upload. */
+  function uploadAdvert(user, onProgress) {
+    if (!adFile) return Promise.resolve(null);
+
+    return OAFB.readyStorage().then(function (fb) {
+      var clean = String(adFile.name || 'advert')
+        .replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120) || 'advert';
+      var path = 'uploads/' + user.uid + '/jobs/' + Date.now() + '-' + clean;
+
+      return new Promise(function (resolve, reject) {
+        var task = fb.storage().ref(path).put(adFile, {
+          contentType: AD_TYPES[adFile.type] ? adFile.type : 'application/pdf',
+        });
+        task.on('state_changed', function (snap) {
+          if (onProgress && snap.totalBytes) {
+            onProgress(Math.round(100 * snap.bytesTransferred / snap.totalBytes));
+          }
+        }, reject, function () {
+          resolve({
+            adUploadPath: path,
+            adUploadName: String(adFile.name || '').slice(0, 200),
+            adUploadType: String(adFile.type || '').slice(0, 100),
+            adUploadSize: adFile.size,
+          });
+        });
+      });
+    });
+  }
+
   /* ------------------------------------------------------------ edit mode
 
      `?edit=<document id>` turns this page from "post a job" into "correct this
@@ -355,6 +468,7 @@
 
   function boot() {
     wireVocab();
+    wireAdFile();
     enterEditMode();
     fillStaticOptions();
 
@@ -445,7 +559,22 @@
       say(EDIT_ID ? 'Saving…' : 'Sending…');
 
       OAAccounts.whenSignedIn(function (user) {
-        OAFB.ready().then(function (fb) {
+        /* The file first, then the document that references it — the reverse
+           order could publish a posting pointing at an upload that failed. */
+        uploadAdvert(user, function (pct) {
+          say((EDIT_ID ? 'Saving… ' : 'Sending… ') + 'uploading the advert (' + pct + '%)');
+        }).then(function (uploaded) {
+          if (uploaded) {
+            doc.adUploadPath = uploaded.adUploadPath;
+            doc.adUploadName = uploaded.adUploadName;
+            doc.adUploadType = uploaded.adUploadType;
+            doc.adUploadSize = uploaded.adUploadSize;
+            // The build replaces this with the Drive link when it files the
+            // upload; until then the posting simply has no File link row.
+            doc.adUrl = '';
+          }
+          return OAFB.ready();
+        }).then(function (fb) {
           var col = fb.firestore().collection(OAFB.col.jobSubmissions);
 
           /* EDITING an existing posting. `uid` and `createdAt` are deliberately
@@ -491,7 +620,10 @@
         }).catch(function (err) {
           btn.disabled = false;
           var code = (err && err.code) || '';
-          if (code === 'permission-denied') {
+          if (code === 'storage/unauthorized') {
+            say('The file was refused — it must be a PDF or Word file under 15 MB, ' +
+                'and the site\u2019s storage rules must be published.', 'err');
+          } else if (code === 'permission-denied') {
             say(EDIT_ID
               ? 'You are not allowed to change this posting.'
               : 'The site is not accepting postings yet — its database rules have not been ' +

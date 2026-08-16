@@ -191,11 +191,26 @@
                       </div>
 
                       <div class="oa-field">
-                        <label for="f-adUrl">Link to the job advert as a PDF</label>
-                        <p class="oa-hint">Shown publicly as <em>File link</em>. Paste a link to a
-                        PDF you host, or to a shared Google Drive / Dropbox file. Please make sure
-                        it is readable by anyone with the link.</p>
-                        <input type="url" id="f-adUrl" name="adUrl" maxlength="500" placeholder="https://">
+                        <span class="oa-label-text" id="lbl-advert">The job advertisement</span>
+                        <p class="oa-hint">Shown publicly as <em>File link</em>. Upload the advert
+                        itself &mdash; PDF or Word, up to 15&nbsp;MB &mdash; or paste a link to one
+                        you host. An uploaded file is stored in Operations Academia's own archive,
+                        so the link on your posting keeps working.</p>
+
+                        <div class="oa-advert" role="group" aria-labelledby="lbl-advert">
+                          <label class="oa-file" id="f-adFile-label">
+                            <input type="file" id="f-adFile"
+                                   accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                            <span class="oa-file-btn" aria-hidden="true">Choose a file&hellip;</span>
+                            <span class="oa-file-name" id="f-adFile-name">No file chosen</span>
+                          </label>
+                          <button type="button" class="oa-file-clear" id="f-adFile-clear" hidden>
+                            Remove</button>
+                          <p class="oa-hint oa-advert-or">&mdash; or paste a link &mdash;</p>
+                          <label class="oa-visually-hidden" for="f-adUrl">Link to the job advert</label>
+                          <input type="url" id="f-adUrl" name="adUrl" maxlength="500" placeholder="https://">
+                        </div>
+                        <p class="oa-error" id="f-adFile-error" hidden></p>
                       </div>
                     </fieldset>
 
