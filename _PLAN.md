@@ -6,6 +6,12 @@
 > Path references to `v2/…` below are the pre-cutover layout — read them as
 > the root now. Kept as the record of how and why the rebuild was made.
 
+> **`/v3/` is the next preview** (started 2026-08-16, same day): a
+> single-page redesign — flat keyword nav, eased scrolling, new FAQ, new
+> sign-in/personal area, light+dark mode — reading the ROOT's live `data/`
+> and the live Firebase project. See `v3/README.md` for what differs and how
+> it would be promoted. Every v3 page is `noindex` until then.
+
 **What this is:** the plan for replacing the paid *Awesome Tables* vendor, the
 Google Forms and the Google Sheets behind operationsacademia.org with the site's
 own form, its own data files, and its own renderer — the architecture used by

@@ -1366,14 +1366,22 @@ for (const [name, expect] of [
    filter-bar rules hold either way. */
 
 const MOBILE_PAGES = ['jobs.html', 'candidates.html', 'placements.html',
-  'previous-markets.html', 'recent-faculty.html'];
+  'previous-markets.html', 'recent-faculty.html',
+  // the v3 preview's one-pager mounts the same engine three times — the jobs
+  // mount (the first .oa-filters on the page) is what the gate measures
+  'v3/index.html'];
 
 for (const pageName of MOBILE_PAGES) {
   const m = await browser.newPage({
     viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
   await m.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  // The v3 one-pager mounts its lists LAZILY as they near the viewport, so
+  // nudge the scroll to trigger the first mount. Harmless on the root pages,
+  // whose lists mount at load.
+  await m.evaluate(() => window.scrollTo(0, 600));
   await m.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
+  await m.evaluate(() => window.scrollTo(0, 0));
 
   const mob = await m.evaluate(() => {
     const doc = document.documentElement;
