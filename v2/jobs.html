@@ -166,6 +166,7 @@
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
     <script src="assets/oa-list.js"></script>
+    <script src="assets/oa-jobedit.js"></script>
     <script>
     (function () {
       'use strict';
@@ -212,7 +213,7 @@
         return a.outerHTML;
       }
 
-      OAList.mount({
+      var jobs = OAList.mount({
         mount: '#oa-jobs',
         data: 'data/jobs.json',
         perPage: 10,
@@ -239,6 +240,10 @@
           { key: 'posted',      label: 'Date posted',     derive: 'datePosted' }
         ],
 
+        // Edit / Take down, drawn only on the postings the signed-in user may
+        // change. See assets/oa-jobedit.js — the rules are the authorisation.
+        onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+
         card: {
           title:    function (r) { return r.institution; },
           subtitle: function (r) { return r.department; },
@@ -259,6 +264,8 @@
           }
         }
       });
+
+      if (window.OAJobEdit) OAJobEdit.attach(jobs);
     })();
     </script>
 </body>

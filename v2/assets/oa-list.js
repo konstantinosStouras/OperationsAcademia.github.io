@@ -525,7 +525,16 @@
         expanded[r.id] = nowOpen;
       });
 
-      return el('li', { class: 'oa-card', id: 'job-' + r.id }, [head, body]);
+      var li = el('li', { class: 'oa-card', id: 'job-' + r.id }, [head, body]);
+
+      /* A hook rather than a built-in "edit" button, because this engine is
+         deliberately dataset-generic — it renders Candidates and Placements
+         too, which have nothing to edit. Whoever mounts the list decides what,
+         if anything, belongs on a card. */
+      if (typeof cfg.onCard === 'function') {
+        try { cfg.onCard(li, r); } catch (e) { if (window.console) console.error(e); }
+      }
+      return li;
     }
 
     /* ------------------------------------------------------- url <-> state
@@ -601,6 +610,11 @@
 
     return {
       reload: function () { apply(); },
+      /* Re-run the render with the rows already loaded. Sign-in resolves AFTER
+         the first paint, so the controls a signed-in user may see have to be
+         able to arrive late without refetching the dataset. */
+      rerender: function () { render(); },
+      rows: function () { return rows.slice(); },
       state: sel,
     };
   }

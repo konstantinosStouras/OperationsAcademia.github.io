@@ -215,8 +215,112 @@
 
   /* ------------------------------------------------------------------- wiring */
 
+  /* ------------------------------------------------------------ edit mode
+
+     `?edit=<document id>` turns this page from "post a job" into "correct this
+     posting". The id comes from the Edit button on a card, and is only useful
+     to someone the rules let read that document — an ordinary visitor pasting
+     one gets a permission error rather than a form full of someone else's
+     posting.                                                                */
+
+  var EDIT_ID = (function () {
+    var m = /[?&]edit=([^&]+)/.exec(location.search);
+    return m ? decodeURIComponent(m[1]) : '';
+  })();
+  var EDIT_REF = '';
+
+  /** Put a loaded document back into the form. The inverse of collect(). */
+  function fill(v) {
+    function set(id, value) { var el = $(id); if (el) el.value = value == null ? '' : value; }
+    function ticks(name, values) {
+      var want = {};
+      (values || []).forEach(function (x) { want[x] = true; });
+      Array.prototype.forEach.call(
+        $('oa-job-form').querySelectorAll('input[name="' + name + '"]'),
+        function (cb) { cb.checked = !!want[cb.value]; });
+    }
+
+    set('f-institution', v.institution);
+    set('f-type', v.type);
+
+    /* A posting made before the form was split carries only `department`. Its
+       school and unit are filled in by the build, so an older document may have
+       them; if not, the whole line goes in the department field rather than
+       being guessed at here — the poster can split it while they are editing. */
+    set('f-school', v.school || '');
+    set('f-unit', v.unit || (v.school ? '' : v.department) || '');
+
+    set('f-country', v.country);
+    set('f-applyByDate', v.applyByDate);
+    set('f-applyByNote', v.applyByNote);
+    set('f-comments', v.comments);
+    set('f-adUrl', v.adUrl);
+    set('f-postedAtUrl', v.postedAtUrl);
+    set('f-firstName', v.firstName);
+    set('f-lastName', v.lastName);
+    set('f-email', v.email || v.authEmail);
+    set('f-chairName', v.chairName);
+    set('f-chairEmail', v.chairEmail);
+    set('f-note', v.note);
+
+    ticks('levels', v.levels);
+    ticks('characteristics', v.characteristics);
+
+    var uf = $('f-untilFilled');
+    if (uf) {
+      uf.checked = !!v.untilFilled;
+      var d = $('f-applyByDate');
+      if (d) d.disabled = uf.checked;
+    }
+
+    EDIT_REF = v.ref || '';
+
+    // keep the derived department line and its preview in step
+    var school = $('f-school');
+    if (school) school.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function enterEditMode() {
+    if (!EDIT_ID) return;
+
+    document.title = 'Edit a posting - OperationsAcademia.org';
+    var h = document.querySelector('.title-heading h2');
+    if (h) h.textContent = 'Edit a posting';
+
+    var submit = $('oa-submit');
+    if (submit) submit.textContent = 'Save changes';
+
+    var intro = $('oa-intro');
+    if (intro) {
+      intro.innerHTML = '<p><strong>You are correcting a posting that is already ' +
+        'on the site.</strong> Your changes appear on the ' +
+        '<a href="jobs.html">job postings page</a> at the next update, normally ' +
+        'within an hour. The posting date does not change.</p>';
+    }
+
+    OAAccounts.whenSignedIn(function () {
+      OAFB.ready().then(function (fb) {
+        return fb.firestore().collection(OAFB.col.jobSubmissions).doc(EDIT_ID).get();
+      }).then(function (snap) {
+        if (!snap.exists) {
+          say('That posting no longer exists.', 'err');
+          show($('oa-job-form'), false);
+          return;
+        }
+        fill(snap.data() || {});
+      }).catch(function (err) {
+        say(err && err.code === 'permission-denied'
+          ? 'You are not allowed to edit this posting.'
+          : 'We could not load that posting. Please try again.', 'err');
+        show($('oa-job-form'), false);
+        if (window.console) console.error('edit:', err);
+      });
+    });
+  }
+
   function boot() {
     wireVocab();
+    enterEditMode();
     fillStaticOptions();
 
     var form = $('oa-job-form');
@@ -265,20 +369,47 @@
 
       var btn = $('oa-submit');
       btn.disabled = true;
-      say('Sending…');
+      say(EDIT_ID ? 'Saving…' : 'Sending…');
 
       OAAccounts.whenSignedIn(function (user) {
         OAFB.ready().then(function (fb) {
+          var col = fb.firestore().collection(OAFB.col.jobSubmissions);
+
+          /* EDITING an existing posting. `uid` and `createdAt` are deliberately
+             NOT written: the rule pins the owner (a poster cannot hand their
+             posting to someone else through this path), and the posting date is
+             when it was first advertised, not when a typo was fixed. Status goes
+             back to 'queued' so the build picks it up — including a posting that
+             had been withdrawn, which is how a correction un-withdraws one. */
+          if (EDIT_ID) {
+            doc.status = 'queued';
+            doc.updatedAt = new Date().toISOString();
+            delete doc.uid;
+            return col.doc(EDIT_ID).update(doc).then(function () { return EDIT_REF; });
+          }
+
           doc.ref = makeRef();
           doc.uid = user.uid;
           doc.authEmail = user.email || '';
           doc.status = 'queued';       // the rules pin this; the build publishes it
           doc.source = 'oa-form';
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
-          return fb.firestore().collection(OAFB.col.jobSubmissions).add(doc)
-            .then(function () { return doc.ref; });
+          return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
-          $('oa-ref').textContent = ref;
+          /* The confirmation is written for a NEW posting — a reference to keep,
+             a copy e-mailed, "post another". None of that is true of a
+             correction, so say what actually happened instead. */
+          if (EDIT_ID) {
+            var done = $('oa-done');
+            done.innerHTML =
+              '<h3>Your changes have been saved.</h3>' +
+              '<p>The posting is updated on the <a href="jobs.html">job postings page</a> ' +
+              'at the next update, normally within an hour.</p>' +
+              '<p class="oa-done-actions">' +
+              '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
+          } else {
+            $('oa-ref').textContent = ref || '—';
+          }
           show(form, false);
           show($('oa-intro'), false);
           show($('oa-done'), true);
@@ -287,7 +418,9 @@
           btn.disabled = false;
           var code = (err && err.code) || '';
           if (code === 'permission-denied') {
-            say('The site is not accepting postings yet — its database rules have not been ' +
+            say(EDIT_ID
+              ? 'You are not allowed to change this posting.'
+              : 'The site is not accepting postings yet — its database rules have not been ' +
                 'published. Please try again later, or contact us.', 'err');
           } else {
             say('We could not send your posting. Please try again in a moment.' +

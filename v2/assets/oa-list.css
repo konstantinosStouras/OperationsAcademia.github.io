@@ -454,3 +454,76 @@
   .oa-filters, .oa-pager, .oa-clear { display: none; }
   .oa-card-body[hidden] { display: block; }
 }
+
+/* --------------------------------------------- Edit / Take down on a posting
+
+   Drawn only on the postings the signed-in user may change (assets/
+   oa-jobedit.js). Positioned over the card rather than inside its head,
+   because the head is itself a button and nesting one inside it would be
+   invalid — and every click on Edit would also toggle the card open. */
+
+.oa-card { position: relative; }
+
+.oa-card-actions {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  /* the card lifts on hover; the buttons must sit above the shadow */
+  z-index: 2;
+}
+
+.oa-jobbtn {
+  padding: 4px 10px;
+  border: 1px solid #d3d9df;
+  border-radius: 4px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  /* Held back until the pointer is on the card: these are maintenance
+     controls, not part of reading a posting, and at full strength on 94 cards
+     they would be the loudest thing on the page. */
+  opacity: 0.55;
+  transition: opacity 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.oa-card:hover .oa-jobbtn,
+.oa-card:focus-within .oa-jobbtn { opacity: 1; }
+
+.oa-jobbtn-edit { color: #2f6ea8; }
+.oa-jobbtn-edit:hover { background: #eaf3fb; border-color: #9cc3e4; }
+
+.oa-jobbtn-del { color: #a3364a; }
+.oa-jobbtn-del:hover { background: #fdf0f2; border-color: #e2aab4; }
+
+.oa-jobbtn:focus-visible { outline: 2px solid #3b7dbc; outline-offset: 1px; }
+.oa-jobbtn[disabled] { opacity: 0.5; cursor: default; }
+
+/* the head's own padding has to clear the buttons, or a long institution name
+   runs under them */
+.oa-card-owned .oa-card-head { padding-right: 190px; }
+
+.oa-card-note {
+  margin: 0;
+  padding: 8px 22px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #2e6b4f;
+}
+
+.oa-card-note.is-bad { color: #a3364a; }
+
+.oa-card-gone { opacity: 0.55; }
+
+@media screen and (max-width: 640px) {
+  .oa-card-actions { position: static; padding: 0 16px 12px; }
+  .oa-card-owned .oa-card-head { padding-right: 16px; }
+  .oa-jobbtn { opacity: 1; }
+}
+
+@media print { .oa-card-actions { display: none; } }

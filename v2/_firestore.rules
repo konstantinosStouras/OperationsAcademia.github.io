@@ -71,9 +71,18 @@ service cloud.firestore {
             && list('levels', 8)       && list('characteristics', 12)
             && request.resource.data.year is int
             && request.resource.data.year >= 2000
-            && request.resource.data.year <= 2100
-            // a poster cannot promote their own posting
-            && !('featured' in request.resource.data);
+            && request.resource.data.year <= 2100;
+      }
+
+      /* A poster cannot promote their own posting. On CREATE that is simply
+         "no featured field". On UPDATE it has to be "featured is UNCHANGED":
+         update() merges, so an already-featured posting carries the field into
+         every request, and refusing the field outright would make the one
+         featured posting the only one its owner could never correct. */
+      function featuredUnchanged() {
+        return ('featured' in request.resource.data) == ('featured' in resource.data)
+            && (!('featured' in request.resource.data)
+                || request.resource.data.featured == resource.data.featured);
       }
 
       // Anyone signed in may post. Identity is pinned to the caller and the
@@ -82,14 +91,19 @@ service cloud.firestore {
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
                     && shapeOk()
+                    && !('featured' in request.resource.data)
                     && request.resource.data.keys().size() <= 30;
 
       // A poster may read, correct and withdraw their own posting.
       allow read: if isOwner(resource.data.uid) || isAdmin();
 
+      // A poster correcting or withdrawing their own posting. `status` back to
+      // 'queued' is what a correction does — including to a posting that had
+      // been withdrawn, which is how one is put back.
       allow update: if isOwner(resource.data.uid)
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
+                    && featuredUnchanged()
                     && shapeOk();
 
       // MERGING TWO ACCOUNTS hands a posting over to the account its owner is

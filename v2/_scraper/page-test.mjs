@@ -855,6 +855,69 @@ for (const [name, expect] of [
   await f.close();
 }
 
+/* --------------------------------- Edit / Take down, and who may see them
+
+   The controls are drawn from a Firestore read that CI cannot make, so the
+   permission map is injected directly. What is being checked is the part that
+   is easy to get wrong and impossible to unit-test: that a visitor sees no
+   controls at all, that a signed-in poster sees them ONLY on their own
+   posting, and that pressing Edit does not also toggle the card open.        */
+
+{
+  const j = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const jErrors = [];
+  j.on('pageerror', (e) => jErrors.push(e.message));
+  await j.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await j.waitForSelector('.oa-card');
+  await j.waitForTimeout(600);
+
+  eq(await j.$$eval('.oa-card-actions', (n) => n.length), 0,
+    'jobs: a visitor who is not signed in sees no Edit or Take down');
+
+  // one posting becomes editable, as it would be for the poster who made it
+  const firstId = await j.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  await j.evaluate((id) => {
+    void id;
+  }, firstId).catch(() => {});
+
+  await j.evaluate((id) => {
+    // stand in for the permission read: mark exactly one row as ours
+    const mod = window.OAJobEdit;
+    mod.__setPermissionsForTest({ ready: true, admin: false, byId: { [id]: id }, byRef: {} });
+  }, firstId);
+  await j.waitForTimeout(200);
+
+  eq(await j.$$eval('.oa-card-actions', (n) => n.length), 1,
+    'jobs: exactly the one posting they own carries the controls');
+  eq(await j.$$eval('.oa-card-actions .oa-jobbtn', (n) => n.map((x) => x.textContent)),
+    ['Edit', 'Take down'], 'jobs: both controls, in that order');
+
+  const owned = await j.$eval('.oa-card-actions', (n) => n.closest('.oa-card').id);
+  eq(owned, 'job-' + firstId, 'jobs: and on the right card');
+
+  // the card head is itself a button; the controls must not be inside it
+  eq(await j.$$eval('.oa-card-head .oa-jobbtn', (n) => n.length), 0,
+    'jobs: the controls are not nested inside the card toggle');
+
+  // Edit leaves for the form carrying the document id, and does NOT expand
+  const before = await j.$eval('#job-' + firstId + ' .oa-card-body', (n) => n.hidden);
+  await j.click('.oa-jobbtn-edit');
+  await j.waitForURL(/post-a-job\.html\?edit=/, { timeout: 5000 });
+  ok(j.url().includes('edit=' + encodeURIComponent(firstId)),
+    'jobs: Edit opens the form for that posting');
+  ok(before, 'jobs: the card was closed before Edit was pressed');
+
+  // the form says it is editing rather than posting
+  await j.waitForTimeout(1200);
+  eq(await j.$eval('.title-heading h2', (n) => n.textContent.trim()), 'Edit a posting',
+    'form: edit mode renames the page');
+  eq(await j.$eval('#oa-submit', (n) => n.textContent.trim()), 'Save changes',
+    'form: and the button says what it does');
+
+  eq(jErrors, [], 'jobs: no uncaught script errors');
+  await j.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');
