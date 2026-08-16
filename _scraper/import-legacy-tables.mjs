@@ -101,20 +101,53 @@ async function fetchText(u, what) {
 }
 
 /** Every tab of a sheet, as parsed CSV. Anonymous read — the sheets are
-    link-readable (the vendor's own embed read them the same way). */
+    link-readable (the vendor's own embed read them the same way).
+
+    Discovery tries the three HTML renderings Google has served over the
+    years — /htmlview (the classic multi-tab "HTML view"), /pubhtml (the
+    published-to-the-web variant) and /htmlpreview — and takes the first one
+    that yields a tab list. A rendering that exists but parses to nothing is
+    fine to fall through: gid 0 always exists, and classifyTab() decides by
+    header signature whether a downloaded tab is used, so discovery can only
+    ever MISS a tab, never import a wrong one. */
 export async function fetchAllTabs(id, what) {
-  const preview = await fetchText(
-    `https://docs.google.com/spreadsheets/d/${encodeURIComponent(id)}/htmlpreview`, what);
-  if (/accounts\.google\.com|type="password"/i.test(preview)) {
-    throw new Error(`${what}: Google answered a sign-in page — the sheet is not link-readable`);
+  let tabs = [];
+  const tried = [];
+  for (const view of ['htmlview', 'pubhtml', 'htmlpreview']) {
+    let preview = '';
+    try {
+      preview = await fetchText(
+        `https://docs.google.com/spreadsheets/d/${encodeURIComponent(id)}/${view}`,
+        `${what} ${view}`);
+    } catch (e) {
+      tried.push(e.message);
+      continue;
+    }
+    if (/accounts\.google\.com|type="password"/i.test(preview)) {
+      throw new Error(`${what}: Google answered a sign-in page — the sheet is not link-readable`);
+    }
+    tabs = parseHtmlPreviewTabs(preview);
+    if (tabs.length) break;
+    tried.push(`${view}: no tab markup`);
   }
-  let tabs = parseHtmlPreviewTabs(preview);
-  if (!tabs.length) tabs = [{ gid: '0', name: '(first tab)' }];
+  if (!tabs.length) {
+    console.log(`::warning::${what}: no tab list could be discovered ` +
+      `(${tried.join('; ')}) — falling back to the first tab only`);
+    tabs = [{ gid: '0', name: '(first tab)' }];
+  }
   const out = [];
   for (const t of tabs) {
-    const csv = await fetchText(
-      `https://docs.google.com/spreadsheets/d/${encodeURIComponent(id)}` +
-      `/export?format=csv&gid=${t.gid}`, `${what} gid ${t.gid}`);
+    let csv = '';
+    try {
+      csv = await fetchText(
+        `https://docs.google.com/spreadsheets/d/${encodeURIComponent(id)}` +
+        `/export?format=csv&gid=${t.gid}`, `${what} gid ${t.gid}`);
+    } catch (e) {
+      // a tab that will not export (a chart sheet, say) must not kill the
+      // run — the signature gates at the end catch a MISSING dataset loudly
+      console.log(`::warning::${e.message} — tab "${t.name}" skipped`);
+      continue;
+    }
     if (/^\s*</.test(csv)) continue;                    // an HTML answer is not a tab
     out.push({ ...t, rows: parseCsv(csv) });
   }
