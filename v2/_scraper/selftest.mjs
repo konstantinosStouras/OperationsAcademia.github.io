@@ -23,6 +23,10 @@ import {
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
 import { docIdFor, migrationDoc, lostFields } from './migrate-to-firestore.mjs';
+import {
+  folderFor, isConfigured, auditFolders, isFolderId, isPlaceholder,
+  resourceKeyFor, resourceKeyHeader, KINDS,
+} from './drive-folders.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -690,6 +694,63 @@ function testAssignIds() {
   eq(assignIds([]).length, 0, 'nothing to assign is not a special case');
 }
 
+async function testDriveFolders() {
+  const cfg = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'drive-folders.json'), 'utf8'));
+
+  /* The season the site is CURRENTLY in must be configured, or an upload fails
+     at the last step after someone has chosen a file. This is the check that
+     fires each July when the market rolls and the new folders have not been
+     added yet — deliberately, since the alternative is filing this season's
+     CVs into last season's folder, which nobody notices. */
+  const now = marketYear(new Date());
+  eq(auditFolders(cfg, { years: [now] }), [],
+    `the current market year (${now}) has both Drive folders configured`);
+
+  for (const kind of KINDS) {
+    ok(isConfigured(cfg, now, kind), `${kind} uploads are configured for ${now}`);
+    ok(isFolderId(folderFor(cfg, now, kind)), `the ${kind} folder id is well formed`);
+  }
+
+  // the two folders must be DIFFERENT, or candidates' CVs land with job adverts
+  ok(folderFor(cfg, now, 'jobs') !== folderFor(cfg, now, 'candidates'),
+    'jobs and candidates are filed in different folders');
+
+  // legacy folders carry a resource key; the header is "<id>/<key>"
+  const key = resourceKeyFor(cfg, now, 'jobs');
+  if (key) {
+    eq(resourceKeyHeader(cfg, now, 'jobs'), folderFor(cfg, now, 'jobs') + '/' + key,
+      'the resource-key header pairs the id with its key');
+  }
+  eq(resourceKeyFor({ byMarketYear: { 2027: { jobs: 'x'.repeat(30) } } }, 2027, 'jobs'), '',
+    'a folder with no resource key reports none rather than undefined');
+
+  // an unconfigured season REFUSES rather than falling back to another year
+  const oneYear = { byMarketYear: { 2027: { jobs: 'a'.repeat(30), candidates: 'b'.repeat(30) } } };
+  ok(!isConfigured(oneYear, 2028, 'jobs'), 'a season with no entry is not configured');
+  let msg = '';
+  try { folderFor(oneYear, 2028, 'jobs'); } catch (e) { msg = e.message; }
+  ok(/market year 2028/.test(msg), 'and says which season is missing');
+  ok(/1 July/.test(msg), 'and why that is expected');
+  ok(/drive-folders\.json/.test(msg), 'and where to fix it');
+
+  // a placeholder is not a folder id
+  const unfilled = { byMarketYear: { 2027: { jobs: 'PASTE_JOBS_FILES_FOLDER_ID', candidates: 'b'.repeat(30) } } };
+  ok(isPlaceholder('PASTE_X'), 'placeholders are recognised');
+  ok(!isConfigured(unfilled, 2027, 'jobs'), 'an unfilled placeholder is not configured');
+  try { folderFor(unfilled, 2027, 'jobs'); } catch (e) { msg = e.message; }
+  ok(/Jobs Files/.test(msg), 'and the message names the Drive folder to open');
+
+  // junk is rejected rather than sent to Drive to fail opaquely
+  const junk = { byMarketYear: { 2027: { jobs: 'https://drive.google.com/drive/folders/abc', candidates: 'b'.repeat(30) } } };
+  try { folderFor(junk, 2027, 'jobs'); } catch (e) { msg = e.message; }
+  ok(/does not look like a Drive folder id/.test(msg), 'a pasted URL is refused');
+  ok(!isFolderId('short'), 'a short string is not a folder id');
+  ok(!isFolderId(''), 'nor is nothing');
+
+  try { folderFor(cfg, now, 'nonsense'); } catch (e) { msg = e.message; }
+  ok(/unknown upload kind/.test(msg), 'an unknown kind is refused');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -702,6 +763,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testPageHeadingRule();
   await testMigrationRoundTrip();
   await testMigrationDocs();
+  await testDriveFolders();
   await testServedFile();
   await testAccountMerge();
   process.exit(finish() ? 0 : 1);
