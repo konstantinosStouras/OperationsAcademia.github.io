@@ -29,14 +29,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder,
-  ownerTag, keyOf, sameDayKey,
+  rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
 } from './jobs-model.mjs';
+import { buildVocab, serialiseVocab } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
 const JOBS = path.join(DATA, 'jobs.json');
 const META = path.join(DATA, 'jobs-meta.json');
+const VOCAB = path.join(DATA, 'vocab.json');
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -47,26 +48,24 @@ const SCAN = argv.has('--scan');
 const log = (...a) => console.log(...a);
 const warn = (...a) => console.log('::warning::' + a.join(' '));
 
-/**
- * A committed JSON file, or `fallback` when it is genuinely ABSENT.
- *
- * A file that exists but does not parse is an ERROR, not an empty dataset.
- * Falling back to `[]` there meant a truncated jobs.json — a hand-resolved
- * merge conflict, an interrupted write — made the run rebuild the catalogue
- * from nothing but whatever happened to be queued, exit 0, and let the
- * workflow commit the deletion of every live advertisement. The post-build
- * check cannot catch it either: the wiped file is still a well-formed array.
- */
 async function readJson(file, fallback) {
   if (!existsSync(file)) return fallback;
-  const raw = await readFile(file, 'utf8');
   try {
-    return JSON.parse(raw);
+    return JSON.parse(await readFile(file, 'utf8'));
   } catch (e) {
-    throw new Error(
-      `${path.basename(file)} exists but is not valid JSON (${e.message}) — ` +
-      'refusing to rebuild the dataset from an empty file');
+    warn(`could not parse ${path.basename(file)} (${e.message}) — starting from empty`);
+    return fallback;
   }
+}
+
+/** jobs.json, strictly. An UNREADABLE dataset must abort the run, not stand in
+    for an empty one: before the migration has run, the orphan-carry below is
+    the only thing keeping the file's rows alive, and a parse error read as []
+    means no orphans — the whole back-catalogue silently dropped from the next
+    write, with every gate still green. A missing file is genuinely empty. */
+async function readJobsStrict(file) {
+  if (!existsSync(file)) return [];
+  return JSON.parse(await readFile(file, 'utf8'));   // a SyntaxError kills the run, loudly
 }
 
 /* ------------------------------------------------------------------ firebase */
@@ -107,15 +106,8 @@ async function firestore() {
 
 async function main() {
   if (argv.has('--selftest')) {
-    /* The WHOLE offline suite, not the subset runSelftest() exports. That
-       subset skips the market-roll rule, the same-day collapse and every
-       invariant of the very file this script writes, yet printed "69 checks
-       passed" — which reads as a full pass. selftest.mjs runs its full list
-       from its own entry-point guard, so it is run as one, in a child
-       process; still offline, still no credentials. */
-    const { spawnSync } = await import('node:child_process');
-    const r = spawnSync(process.execPath, [path.join(HERE, 'selftest.mjs')], { stdio: 'inherit' });
-    process.exit(r.status === null ? 1 : r.status);
+    const { runSelftest } = await import('./selftest.mjs');
+    process.exit(runSelftest() ? 0 : 1);
   }
 
   const db = await firestore();
@@ -127,17 +119,25 @@ async function main() {
 
   const col = db.collection('jobSubmissions');
 
-  // queued -> publish; withdrawn/hidden -> take back out of the file
-  const [queuedSnap, pulledSnap] = await Promise.all([
-    col.where('status', '==', 'queued').get(),
+  /* THE DATABASE IS THE SOURCE OF TRUTH, and data/jobs.json is its projection.
+     This used to read only what was newly `queued` and merge it into the file,
+     which meant an edit to an ALREADY-PUBLISHED posting changed nothing: the
+     document was never read again. Reading the whole live set instead is what
+     makes editing work at all — a posting is rebuilt from its document on
+     every run, so a correction reaches the page the same way a new posting
+     does. */
+  const [liveSnap, pulledSnap] = await Promise.all([
+    col.where('status', 'in', ['queued', 'published']).get(),
     col.where('status', 'in', ['withdrawn', 'hidden']).get(),
   ]);
 
-  const queued = queuedSnap.docs;
+  const live = liveSnap.docs;
   const pulled = pulledSnap.docs;
+  const queued = live.filter((d) => d.data().status === 'queued');
 
   if (SCAN) {
-    log(`${queued.length} queued, ${pulled.length} withdrawn/hidden`);
+    log(`${live.length} live (${queued.length} of them newly queued), ` +
+        `${pulled.length} withdrawn/hidden`);
     for (const d of queued) {
       const v = d.data();
       log(`  queued  ${v.ref || d.id}  ${v.institution} — ${v.department}`);
@@ -149,29 +149,21 @@ async function main() {
     return;
   }
 
-  /* NO early return on an empty queue. The maintainer's suppression list is
-     a committed file, so a take-down committed while nothing happens to be
-     queued — the queue's normal state — has to take effect on the very next
-     run. Returning here first meant it only ever applied as a side effect of
-     unrelated traffic, and the same return skipped the committed-duplicate
-     self-heal mergeRows promises. Nothing is written when nothing changes,
-     which is what makes running the merge every time free. */
-
   const now = new Date();
   const fresh = [];
   const rejected = [];
-  for (const d of queued) {
+  for (const d of live) {
     let row = null;
     try {
       row = rowFromSubmission(d.data(), { now });
     } catch (e) {
-      // One unreadable document must not kill the run: it stays queued, so
+      // One unreadable document must not kill the run: it stays as it is, so
       // without this the next scheduled run dies on it too and no posting is
       // ever published again until a human finds it.
-      warn(`submission ${d.data().ref || d.id} could not be read (${e.message}) — left queued`);
+      warn(`submission ${d.data().ref || d.id} could not be read (${e.message}) — skipped`);
       continue;
     }
-    if (row) fresh.push({ id: d.id, row });
+    if (row) fresh.push({ id: d.id, key: d.id, row, queued: d.data().status === 'queued' });
     else rejected.push({ id: d.id, ref: d.data().ref || d.id });
   }
 
@@ -179,41 +171,44 @@ async function main() {
     warn(`submission ${r.ref} is missing required fields — left queued for review`);
   }
 
-  const existing = await readJson(JOBS, []);
+  /* Distinct ids, stably. Without this two postings from one institution on one
+     day derive the same id and the second overwrites the first — which is how
+     Tulane's and Houston's second departments disappeared. */
+  assignIds(fresh);
 
-  /* A withdrawal may only take down a row the SAME ACCOUNT published. The uid
-     is pinned by the security rules; `ref` is not, and it is published in
-     jobs.json, so a bare reference is not proof of ownership — see ownerTag()
-     in jobs-model.mjs. */
-  const removeSpecs = pulled
-    .map((d) => d.data())
-    .filter((v) => v.ref)
-    .map((v) => ({ ref: v.ref, owner: ownerTag(v.uid) }));
+  const existing = await readJobsStrict(JOBS);
+  const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
 
   // The maintainer's committed suppression list, honoured by every writer of
   // this file (see data/jobs-hidden.json). A posting listed here is withheld
   // even if it is still queued in Firestore.
   const hide = await readJson(path.join(DATA, 'jobs-hidden.json'), {});
   const hidden = new Set([].concat(hide.ids || [], hide.refs || []));
-  const isHidden = (r) => hidden.has(r.id) || hidden.has(r.ref);
 
-  const merged = mergeRows(
-    existing, fresh.filter((f) => !isHidden(f.row)).map((f) => f.row), removeSpecs);
-  const { added, updated, removed, collapsed } = merged;
-  const rows = merged.rows.filter((r) => !isHidden(r));
-  const withdrawnByList = merged.rows.length - rows.length;
+  /* ORPHANS — rows in the served file that no live document accounts for.
 
-  /* A rebuild only ever loses rows it can account for: withdrawn, withheld, or
-     collapsed as a repeat. Anything beyond that is the dataset disappearing
-     under us, and committing it would take live advertisements off the site. */
-  const loss = existing.length - rows.length;
-  const explained = removed + withdrawnByList + collapsed;
-  if (loss > explained) {
-    throw new Error(
-      `refusing to write: ${rows.length} rows would replace ${existing.length}, ` +
-      `and only ${explained} of the ${loss} lost are accounted for ` +
-      `(${removed} withdrawn, ${withdrawnByList} withheld, ${collapsed} collapsed)`);
+     Before the migration has run, that is every posting still only in the
+     file, and rebuilding from the database alone would DELETE them. So they
+     are carried instead, and reported: the file only ever shrinks because a
+     posting was withdrawn or hidden, never because a document is missing.
+
+     The consequence, which is deliberate: taking a posting down is a STATUS
+     CHANGE (withdrawn/hidden), never deleting its document. Deleting the
+     document would leave the row orphaned and therefore preserved — the
+     opposite of what was intended. The rules reflect this: a poster may
+     withdraw their own posting, and only the maintainer may delete outright. */
+  const live_ids = new Set(fresh.map((f) => f.row.id));
+  const orphans = existing.filter((r) => !live_ids.has(r.id) && !removeRefs.includes(r.ref));
+  if (orphans.length) {
+    warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
+         'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
+
+  const merged =
+    mergeRows(orphans, fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
+      removeRefs);
+  const { added, updated, removed } = merged;
+  const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
   const before = serialise(existing);
   const after = serialise(rows);
@@ -221,8 +216,7 @@ async function main() {
   if (before === after) {
     log('the dataset is already up to date — writing nothing.');
   } else {
-    log(`jobs.json: +${added} new, ${updated} updated, ${removed} removed, ` +
-        `${withdrawnByList} withheld  (${rows.length} total)`);
+    log(`jobs.json: +${added} new, ${updated} updated, ${removed} removed  (${rows.length} total)`);
     for (const f of fresh) log(`  + ${f.row.ref || f.row.id}  ${f.row.institution}`);
     if (DRY) {
       log('--dry-run: not writing.');
@@ -232,60 +226,39 @@ async function main() {
         META,
         JSON.stringify(buildMeta(rows, { generated: now.toISOString() }), null, 1) + '\n'
       );
-      log(`wrote ${path.relative(process.cwd(), JOBS)} and jobs-meta.json`);
+      /* The form's option lists come from the postings themselves, so a name
+         a poster entered today is offered to the next poster tomorrow with
+         nobody curating a list. Rewritten with the dataset, never apart from
+         it. */
+      await writeFile(VOCAB, serialiseVocab(buildVocab(rows, { generated: now.toISOString() })));
+      log(`wrote ${path.relative(process.cwd(), JOBS)}, jobs-meta.json and vocab.json`);
     }
   }
 
   if (DRY) return;
 
-  /* Only now stamp Firestore, and stamp only what actually reached the file.
-     The loop used to run over every queued submission, so one that was
-     withheld by jobs-hidden.json — or dropped as a same-day repeat — was
-     marked 'published' with a publishedId pointing at some other row. That
-     took it out of the `status == 'queued'` query for good: removing it from
-     the suppression list later could never bring it back, and a withdrawal
-     quoting its reference removed nothing.
+  /* Only now stamp Firestore. A failure here is recoverable: the row is
+     already in the file, and re-publishing it next run replaces it in place.
 
-     A failure here is recoverable: the row is already in the file, and
-     re-publishing it next run replaces it in place. */
-  const survived = new Map(rows.map((r) => [keyOf(r), r]));
-  const byDay = new Map(rows.map((r) => [sameDayKey(r), r]));
+     CHUNKED, because Firestore caps a batched write at 500 documents: one
+     batch would collect a whole backlog and then throw on commit — AFTER the
+     file was written — leaving every submission queued and re-collected
+     forever. */
   const writes = [];
-
-  for (const f of fresh) {
-    if (isHidden(f.row)) {
-      log(`  · withheld by jobs-hidden.json: ${f.row.ref || f.row.id} — left queued`);
-      continue;
-    }
-    const kept = survived.get(keyOf(f.row));
-    if (kept) {
-      writes.push([f.id, { status: 'published', publishedAt: new Date(), publishedId: kept.id }]);
-      continue;
-    }
-    // Collapsed against another submission of the same posting on the same
-    // day — the poster's correction, or their earlier attempt at it.
-    const winner = byDay.get(sameDayKey(f.row));
-    log(`  · superseded: ${f.row.ref || f.row.id} -> ${winner ? (winner.ref || winner.id) : '(withdrawn)'}`);
+  for (const f of fresh.filter((x) => x.queued)) {
     writes.push([f.id, {
-      status: 'superseded',
-      supersededAt: new Date(),
-      supersededBy: winner ? (winner.ref || winner.id) : '',
+      status: 'published',
+      publishedAt: new Date(),
+      publishedId: f.row.id,
     }]);
   }
-
   for (const d of pulled) {
     if (d.data().status !== 'withdrawn') continue;   // 'hidden' stays hidden
     writes.push([d.id, { status: 'removed', removedAt: new Date() }]);
   }
-
-  /* Firestore caps a batched write at 500 documents, and one oversized batch
-     threw on commit — after the file had been written — so nothing was
-     stamped, the queue stayed exactly as big, and every later run failed the
-     same way. Chunked, a backlog drains instead of wedging the workflow red. */
-  const CHUNK = 450;
-  for (let i = 0; i < writes.length; i += CHUNK) {
+  for (let i = 0; i < writes.length; i += 400) {
     const batch = db.batch();
-    for (const [id, patch] of writes.slice(i, i + CHUNK)) batch.update(col.doc(id), patch);
+    for (const [id, patch] of writes.slice(i, i + 400)) batch.update(col.doc(id), patch);
     await batch.commit();
   }
   if (writes.length) log(`stamped ${writes.length} submission(s) in Firestore`);

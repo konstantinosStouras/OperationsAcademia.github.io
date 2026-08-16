@@ -165,6 +165,7 @@
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
     <script src="assets/oa-list.js"></script>
+    <script src="assets/oa-jobedit.js"></script>
     <script>
     (function () {
       'use strict';
@@ -241,7 +242,7 @@
         return a.outerHTML;
       }
 
-      OAList.mount({
+      var jobs = OAList.mount({
         mount: '#oa-jobs',
         data: 'data/jobs.json',
         perPage: 10,
@@ -261,13 +262,20 @@
           { key: 'institution', label: 'University/Institution', type: 'text',
             fields: ['institution', 'department'],
             placeholder: '', legacyParam: 'filterA' },
-          { key: 'deadline',    label: 'Deadline',        derive: 'deadline' },
+          // legacyValues: this filter briefly said "Open" where the vendor page
+          // says "Closing soon", so a link shared in that window still works.
+          { key: 'deadline',    label: 'Deadline',        derive: 'deadline',
+            legacyValues: { Open: 'Closing soon' } },
           { key: 'type',        label: 'Type',            field: 'type' },
           { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one' },
           { key: 'country',     label: 'Location',        field: 'country', sort: 'count' },
           { key: 'chars',       label: 'Characteristics', field: 'characteristics', type: 'one' },
           { key: 'posted',      label: 'Date posted',     derive: 'datePosted' }
         ],
+
+        // Edit / Take down, drawn only on the postings the signed-in user may
+        // change. See assets/oa-jobedit.js — the rules are the authorisation.
+        onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
 
         card: {
           title:    function (r) { return r.institution; },
@@ -289,6 +297,8 @@
           }
         }
       });
+
+      if (window.OAJobEdit) OAJobEdit.attach(jobs);
     })();
     </script>
 </body>

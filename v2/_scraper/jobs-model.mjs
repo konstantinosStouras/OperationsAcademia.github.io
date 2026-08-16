@@ -18,6 +18,8 @@
 
 import { createHash } from 'node:crypto';
 
+import { splitDepartment, joinDepartment } from './vocab.mjs';
+
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/jobs.json — which is how submitter and chair
     e-mail addresses stay out of a public repository.
@@ -29,7 +31,7 @@ import { createHash } from 'node:crypto';
     midnight hides every posting it adds from every subscriber whose last
     digest went out later that day, permanently. */
 export const PUBLIC_FIELDS = [
-  'id', 'year', 'posted', 'institution', 'department', 'type', 'levels',
+  'id', 'year', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'comments', 'country',
   'adUrl', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
@@ -50,7 +52,7 @@ export const CHARACTERISTICS = [
 export const TYPES = ['Business School', 'University'];
 
 const MAXLEN = {
-  institution: 160, department: 220, country: 60, applyBy: 400,
+  institution: 160, department: 220, school: 160, unit: 160, country: 60, applyBy: 400,
   comments: 1200, adUrl: 500, postedAtUrl: 500, furtherInfoUrl: 500,
   adLabel: 60, postedAtLabel: 60,
 };
@@ -207,10 +209,23 @@ export function marketFloor(now = new Date(), window = MARKET_WINDOW) {
  */
 export function rowFromSubmission(doc, { now = new Date() } = {}) {
   const institution = text(doc.institution, MAXLEN.institution);
-  const department = text(doc.department, MAXLEN.department);
   const country = text(doc.country, MAXLEN.country);
   const levels = pickList(doc.levels, LEVELS);
   const type = TYPES.includes(text(doc.type, 40)) ? text(doc.type, 40) : '';
+
+  /* School and unit are now two fields the poster picks separately, and
+     `department` is the line the card shows, derived from them. A submission
+     made before the form was split — and every row imported from the sheet —
+     carries only `department`, so it is taken apart instead. Either way a row
+     ends up with all three, and the published line reads the same as it always
+     did. */
+  const given = text(doc.school, MAXLEN.school) || text(doc.unit, MAXLEN.unit);
+  const parts = given
+    ? { school: text(doc.school, MAXLEN.school), unit: text(doc.unit, MAXLEN.unit) }
+    : splitDepartment(text(doc.department, MAXLEN.department));
+  const school = text(parts.school, MAXLEN.school);
+  const unit = text(parts.unit, MAXLEN.unit);
+  const department = text(joinDepartment(school, unit), MAXLEN.department);
 
   // the minimum a card needs to be worth rendering
   if (!institution || !department || !country || !type || !levels.length) return null;
@@ -233,10 +248,16 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
   // What the card shows on the "Apply by" line. The sheet stored this as one
   // free-text field ("November 1, 2025. Early submissions are encouraged."), so
   // the date and the note are recombined into the same shape.
-  const note = text(doc.applyByNote, MAXLEN.applyBy);
-  const applyBy = doc.untilFilled
-    ? (note ? `Until filled. ${note}` : 'Until filled.')
-    : [applyByDate ? longDate(applyByDate) : '', note].filter(Boolean).join('. ');
+  /* `applyByText` is a VERBATIM override, and exists for one reason: four
+     postings imported from the sheet carry prose that disagrees with their own
+     parsed date ("March 13, 2026. Please apply…" against an applyByDate of
+     2026-03-14 — the importer read the date from the raw tab and the prose from
+     the display tab). Re-composing those would quietly change the date a reader
+     sees, so the migration carries the original line instead. A posting made
+     through the form never sets it, and composition applies as it always did. */
+  const applyBy = text(doc.applyByText, MAXLEN.applyBy) || composeApplyBy({
+    untilFilled: doc.untilFilled, applyByDate, applyByNote: doc.applyByNote,
+  });
 
   const row = {
     id: '',
@@ -244,6 +265,8 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     posted,
     institution,
     department,
+    school,
+    unit,
     type,
     levels,
     applyBy: text(applyBy, MAXLEN.applyBy),
@@ -251,13 +274,20 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     comments: text(doc.comments, MAXLEN.comments),
     country,
     adUrl: url(doc.adUrl),
-    adLabel: 'link to Job ad',
+    /* These four were fixed values, which was right while every posting came
+       from this form. The migration off the Google Sheet makes a document out
+       of an EXISTING row, so they have to survive the round trip: the sheet
+       carries its own link labels ("Operations Academia"), its own
+       further-info URL, and a source that is not this form. Each still
+       defaults to what it always was. */
+    adLabel: text(doc.adLabel, MAXLEN.adLabel) || 'link to Job ad',
     postedAtUrl: url(doc.postedAtUrl),
-    postedAtLabel: 'link',
-    furtherInfoUrl: `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
+    postedAtLabel: text(doc.postedAtLabel, MAXLEN.postedAtLabel) || 'link',
+    furtherInfoUrl: url(doc.furtherInfoUrl) ||
+      `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
     characteristics: pickList(doc.characteristics, CHARACTERISTICS),
     featured: doc.featured === true,
-    source: 'oa-form',
+    source: text(doc.source, 40) || 'oa-form',
     addedAt: isoStamp(tsToDate(doc.createdAt) || now),
     ref: text(doc.ref, 40),
     owner: ownerTag(doc.uid),
@@ -295,8 +325,125 @@ export function longDate(iso) {
     changes nothing produces a byte-identical file and commits nothing. */
 export function publicRow(row) {
   const out = {};
-  for (const k of PUBLIC_FIELDS) if (row[k] !== undefined) out[k] = row[k];
+  for (const k of PUBLIC_FIELDS) {
+    if (row[k] === undefined) continue;
+    // `ref` addresses a posting made through the site; a posting migrated off
+    // the sheet has none, and writing `"ref": ""` onto every one of those rows
+    // is 90-odd lines of noise in a file whose diff is meant to be readable.
+    if (k === 'ref' && !row[k]) continue;
+    out[k] = row[k];
+  }
   return out;
+}
+
+/**
+ * The "Apply by" line, composed from the three things a poster actually gives.
+ * ONE definition, because `submissionFromRow` has to invert it exactly.
+ */
+export function composeApplyBy({ untilFilled, applyByDate, applyByNote }) {
+  const note = text(applyByNote, MAXLEN.applyBy);
+  if (untilFilled) return note ? `Until filled. ${note}` : 'Until filled.';
+  return [applyByDate ? longDate(applyByDate) : '', note].filter(Boolean).join('. ');
+}
+
+/**
+ * Give every row a distinct id, deterministically.
+ *
+ * `jobId` is (year, institution, posting date) and does NOT include the
+ * department, so two genuinely different postings from one institution on one
+ * day derive the SAME id — Tulane advertised two Freeman departments on
+ * 2026-04-07, and Houston two on 2025-09-23. The sheet importer had always
+ * disambiguated those with a `-2` suffix; the Firestore build had no
+ * equivalent, so the second row simply overwrote the first in the merge and
+ * two real postings vanished from the site the moment it became the source of
+ * truth.
+ *
+ * Entries are `{ key, row }` where `key` is the document id. Sorting by it
+ * before assigning is what makes the result STABLE: the same posting keeps the
+ * same id on every build, rather than the suffix landing on whichever document
+ * Firestore happened to return first.
+ */
+export function assignIds(entries) {
+  const ordered = entries.slice().sort((a, b) => String(a.key).localeCompare(String(b.key)));
+  const seen = new Set();
+  for (const e of ordered) {
+    const base = jobId(e.row);
+    let id = base, n = 2;
+    while (seen.has(id)) id = `${base}-${n++}`;
+    e.row.id = id;
+    seen.add(id);
+  }
+  return entries;
+}
+
+/* ------------------------------------------------ a row back into a submission
+
+   The migration off the Google Sheet needs every existing posting to become a
+   document that can be edited, and the only faithful way to build one is to
+   invert the mapping above. Inverting it is also how the migration is CHECKED:
+   `rowFromSubmission(submissionFromRow(row))` must reproduce the row, which the
+   selftest asserts over every committed posting. A migration that cannot
+   round-trip is one that silently rewrites the site's content.               */
+
+/**
+ * A published row -> the `jobSubmissions` document it would have come from.
+ *
+ * `applyBy` is the awkward one: the row keeps it as one line of prose that the
+ * mapping BUILT from a date, a note and an until-filled flag, so those three
+ * are recovered from it rather than guessed.
+ */
+export function submissionFromRow(row, { uid = null, status = 'published' } = {}) {
+  const applyBy = String(row.applyBy || '');
+  let untilFilled = false;
+  let applyByNote = '';
+
+  /* `&& !row.applyByDate` matters: one imported posting reads "Until filled…"
+     yet carries a real deadline date too. Reading it as until-filled would make
+     the mapping CLEAR that date, losing it — so a row with a date is never
+     treated as until-filled, and its prose is carried verbatim instead. */
+  if (/^until filled/i.test(applyBy.trim()) && !row.applyByDate) {
+    untilFilled = true;
+    applyByNote = applyBy.trim().replace(/^until filled\.?\s*/i, '');
+  } else if (row.applyByDate) {
+    const lead = longDate(row.applyByDate);
+    applyByNote = applyBy.startsWith(lead)
+      ? applyBy.slice(lead.length).replace(/^\.\s*/, '')
+      : applyBy;
+  } else {
+    applyByNote = applyBy;
+  }
+
+  const composed = composeApplyBy({ untilFilled, applyByDate: row.applyByDate, applyByNote });
+
+  return {
+    ref: row.ref || '',
+    uid,
+    status,
+    // only when the line cannot be rebuilt from its parts — see applyByText
+    ...(composed === applyBy ? {} : { applyByText: applyBy }),
+    year: row.year,
+    postedOn: row.posted,
+    institution: row.institution || '',
+    school: row.school || '',
+    unit: row.unit || '',
+    department: row.department || '',
+    type: row.type || '',
+    levels: (row.levels || []).slice(),
+    country: row.country || '',
+    untilFilled,
+    applyByDate: row.applyByDate || '',
+    applyByNote,
+    comments: row.comments || '',
+    adUrl: row.adUrl || '',
+    postedAtUrl: row.postedAtUrl || '',
+    furtherInfoUrl: row.furtherInfoUrl || '',
+    characteristics: (row.characteristics || []).slice(),
+    featured: !!row.featured,
+    source: row.source || 'sheet-import',
+    adLabel: row.adLabel || '',
+    postedAtLabel: row.postedAtLabel || '',
+    createdAt: row.addedAt || '',
+  };
 }
 
 /* --------------------------------------------------------- same-day repeats

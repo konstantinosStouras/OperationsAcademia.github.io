@@ -102,22 +102,27 @@
      The Google Sheet held "Deadline" and "Date posted" as spreadsheet FORMULA
      columns, so their values froze at whatever the last edit computed — every
      row in the export reads "Older posts" regardless of age. Computing them
-     here from the real dates instead means the buckets are always correct.     */
+     here from the real dates instead means the buckets are always correct.
+
+     THE DEADLINE VOCABULARY IS THE VENDOR PAGE'S OWN, and matching it exactly
+     is the point: the live Awesome Table view offers three values and only
+     three — "Closing soon", "Expired", "Until filled" — so a returning visitor
+     finds the same choices in the same words. It used to read "Open" here,
+     which is a fourth word for a list that has never had one.
+
+     "Closing soon" therefore covers EVERY deadline still ahead, not a near
+     window: the vendor page shows no fourth bucket for a posting whose closing
+     date is months out, so a narrower reading would have to invent one.       */
 
   var DERIVE = {
     deadline: function (row) {
-      // No usable date — missing, or a value Date.parse cannot read. Only prose
-      // that really is open-ended earns "Until filled"; a deadline the importer
-      // failed to parse is NOT open-ended and must not be advertised as one.
-      // (Both arms of this test used to return 'Until filled', so the check was
-      // computed and thrown away and every undated row was filed open-ended.)
-      var days = row.applyByDate ? daysBetween(todayISO(), row.applyByDate) : NaN;
-      if (isNaN(days)) {
-        return /until\s*filled|open\s*until|rolling/i.test(row.applyBy || '')
-          ? 'Until filled'
-          : 'Deadline not stated';
-      }
-      return days < 0 ? 'Expired' : 'Open';
+      // No closing date on record — the sheet's "Until filled." postings.
+      // (The writers guarantee the two cannot disagree: a row whose prose says
+      // "until filled"/"rolling" carries NO date, in every pipeline and in the
+      // served file — see import-sheet.mjs and rowFromSubmission.)
+      if (!row.applyByDate) return 'Until filled';
+      // a deadline that falls TODAY is still open, hence < 0 rather than <= 0
+      return daysBetween(todayISO(), row.applyByDate) < 0 ? 'Expired' : 'Closing soon';
     },
     datePosted: function (row) {
       if (!row.posted) return 'Older posts';
@@ -130,8 +135,10 @@
     },
   };
 
+  /* The order the values are offered in. Deadline follows the vendor page's
+     list exactly, down to the order the three sit in. */
   var BUCKET_ORDER = {
-    deadline: ['Open', 'Until filled', 'Deadline not stated', 'Expired'],
+    deadline: ['Closing soon', 'Expired', 'Until filled'],
     datePosted: ['Last 7 days', 'Last 30 days', 'Last 3 months', 'Older posts'],
   };
 
@@ -317,23 +324,34 @@
       barEl.appendChild(el('div', { class: 'oa-filter-actions' }, [clear]));
     }
 
+    /* A chip is ONE button: clicking anywhere on the blue area drops that value
+       from the filter, and the × is decoration rather than the only target.
+       Reported by the owner — the chip is what reads as the thing to click, and
+       a 9-pixel × is a target nobody should have to hit, least of all on a
+       phone. It is also what stouras.com/lit/ does, so the two sites behave the
+       same way.
+
+       Hence a <button> wrapping two <span>s and not the other way round: a
+       button inside a button is invalid, so making the chip clickable means
+       the × stops being one. */
     function buildChips(f) {
       var box = el('div', { class: 'oa-chips' });
       sel[f.key].forEach(function (v) {
         box.appendChild(
-          el('span', { class: 'oa-chip' }, [
-            el('span', { text: v }),
-            el('button', {
-              type: 'button',
-              'aria-label': 'Remove filter ' + v,
-              text: '×',
-              onclick: function () {
-                sel[f.key]['delete'](v);
-                page = 0;
-                buildBar();
-                apply();
-              },
-            }),
+          el('button', {
+            type: 'button',
+            class: 'oa-chip',
+            title: 'Remove filter “' + v + '”',
+            'aria-label': 'Remove filter ' + v,
+            onclick: function () {
+              sel[f.key]['delete'](v);
+              page = 0;
+              buildBar();
+              apply();
+            },
+          }, [
+            el('span', { class: 'oa-chip-label', text: v }),
+            el('span', { class: 'oa-chip-x', 'aria-hidden': 'true', text: '×' }),
           ])
         );
       });
@@ -569,7 +587,16 @@
         expanded[r.id] = nowOpen;
       });
 
-      return el('li', { class: 'oa-card', id: 'job-' + r.id }, [head, body]);
+      var li = el('li', { class: 'oa-card', id: 'job-' + r.id }, [head, body]);
+
+      /* A hook rather than a built-in "edit" button, because this engine is
+         deliberately dataset-generic — it renders Candidates and Placements
+         too, which have nothing to edit. Whoever mounts the list decides what,
+         if anything, belongs on a card. */
+      if (typeof cfg.onCard === 'function') {
+        try { cfg.onCard(li, r); } catch (e) { if (window.console) console.error(e); }
+      }
+      return li;
     }
 
     /* ------------------------------------------------------- url <-> state
@@ -624,17 +651,24 @@
         var all = p.getAll(f.key);
         if (!all.length && f.legacyParam) all = p.getAll(f.legacyParam);
         if (!all.length) return;
-        if (f.type === 'text') sel[f.key] = all[0];
-        else if (all.length > 1) {
-          all.forEach(function (v) { if (v) sel[f.key].add(v); });
+        if (f.type === 'text') { sel[f.key] = all[0]; return; }
+        var add = function (v) {
+          if (!v) return;
+          // a value this filter used to publish under another name, so a link
+          // someone bookmarked or shared still selects what they meant
+          if (f.legacyValues && f.legacyValues[v]) v = f.legacyValues[v];
+          sel[f.key].add(v);
+        };
+        if (all.length > 1) {
+          all.forEach(add);
         } else if (all[0].indexOf('|') === -1 || facetHas(f, all[0])) {
-          if (all[0]) sel[f.key].add(all[0]);
+          add(all[0]);
         } else {
           // ONE occurrence carrying a pipe is ambiguous — one value, or the
           // older "a|b" join that links already in the wild still use. The data
           // settles it: readUrl runs after the rows land, so a string the facet
           // really holds is taken whole.
-          all[0].split('|').forEach(function (v) { if (v) sel[f.key].add(v); });
+          all[0].split('|').forEach(add);
         }
       });
       var pg = parseInt(p.get('page'), 10);
@@ -669,6 +703,11 @@
 
     return {
       reload: function () { apply(); },
+      /* Re-run the render with the rows already loaded. Sign-in resolves AFTER
+         the first paint, so the controls a signed-in user may see have to be
+         able to arrive late without refetching the dataset. */
+      rerender: function () { render(); },
+      rows: function () { return rows.slice(); },
       state: sel,
     };
   }

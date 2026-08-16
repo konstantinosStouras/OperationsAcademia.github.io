@@ -1,0 +1,62 @@
+name: OA jobs — migrate the postings into the database
+
+# THE ONE-OFF that replaces the Google Sheet. Every posting in
+# v2/data/jobs.json becomes a document in `jobSubmissions`, after which
+# oa-jobs-build.yml generates the served file from the database alone and a
+# posting can be edited.
+#
+# SAFE TO RUN AGAIN. Documents are keyed by the row's own id, so a second run
+# creates nothing. Nothing is ever deleted.
+#
+# IT REFUSES RATHER THAN REWRITES. Before writing anything it checks that
+# re-publishing every document reproduces the row it came from, field by field,
+# and exits 1 if any posting would change.
+#
+# Run it with dry_run first and read the output. It needs
+# FIREBASE_SERVICE_ACCOUNT; without it the script reports and does nothing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Check and report, write nothing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Shares the group with the build: both touch the same postings, and a
+# migration racing a build would have the build read a half-migrated
+# collection.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Offline checks
+        run: node v2/_scraper/selftest.mjs
+
+      - name: Install the Admin SDK
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: What would happen
+        run: node v2/_scraper/migrate-to-firestore.mjs --scan
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Migrate
+        run: |
+          node v2/_scraper/migrate-to-firestore.mjs \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

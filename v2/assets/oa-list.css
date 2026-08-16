@@ -178,7 +178,10 @@
 .oa-opt.is-empty { color: #aaa; cursor: default; }
 .oa-opt.is-empty:hover { background: transparent; }
 
-/* chosen values, shown under the control like Awesome Table's selected list */
+/* Chosen values, shown under the control like Awesome Table's selected list.
+   The WHOLE chip is the button that removes the value — see buildChips() — so
+   it carries the pointer, the hover state and the focus ring, and the × is
+   only a hint at what a click will do. */
 .oa-chips {
   display: flex;
   flex-wrap: wrap;
@@ -195,34 +198,42 @@
   align-items: center;
   gap: 5px;
   max-width: 100%;
+  margin: 0;
   padding: 2px 6px;
   border: 1px solid #81c0f2;
   border-radius: 2px;
   background: #81c0f2;
+  font: inherit;
   font-size: 12px;
   line-height: 1.5;
   color: #14405f;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease-out, border-color 0.12s ease-out;
 }
 
-.oa-chip span {
+.oa-chip:hover {
+  background: #6ab1ec;
+  border-color: #6ab1ec;
+  color: #0b2c43;
+}
+
+.oa-chip:focus-visible {
+  outline: 2px solid #3b7dbc;
+  outline-offset: 1px;
+}
+
+.oa-chip-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.oa-chip button {
+.oa-chip-x {
   flex: 0 0 auto;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
   font-size: 13px;
   line-height: 1;
-  color: #14405f;
-  cursor: pointer;
 }
-
-.oa-chip button:hover { color: #000; }
 
 /* Bottom-align the Clear button with the 35px controls beside it, not with
    their bold labels. `align-items` cannot do it: .oa-filters aligns its items
@@ -293,29 +304,56 @@
 
 .oa-cards { margin: 14px 0 0; padding: 0; list-style: none; }
 
-/* Awesome Table drew its cards with a soft drop shadow that deepened and
-   spread under the pointer. Each state is two layers: a tight contact shadow
-   that keeps the card's edge crisp, over a wide, low-opacity one that does the
-   floating. Tuned against screenshots of the live page — the earlier values
-   were Material elevation 1/3, which sat too tight and too dark against the
-   card edge to read as a lift at all.
+/* THE CARD ELEVATION — every posting rests on a shadow, and the one under the
+   pointer, alone, lifts off the page.
+
+   Resting is two layers: a 1px contact shadow that keeps the card's bottom
+   edge crisp against the white page, over a soft ambient one that gives it its
+   weight. Hover adds a third, wide layer with a NEGATIVE spread, so the lift
+   reads as height rather than as a dark halo, and raises the card 1px. Both
+   are tinted navy (16, 24, 40) rather than pure black: a black shadow over a
+   white page goes grey and muddy, and a stack of ten of them reads as dirt.
+
+   Two rules are what make it say "you are over THIS one":
+     - the lift is on :hover ONLY. It used to be on :focus-within as well, so a
+       card someone had clicked stayed raised after the pointer had moved on
+       and two cards looked hovered at once. Keyboard focus has its own ring on
+       .oa-card-head below, which is a clearer indicator than a shadow anyway.
+     - it is gated on a real pointer, because a tap leaves :hover stuck on a
+       phone until something else is touched.
+   The hovered card is also lifted out of the paint order (position/z-index):
+   siblings are painted after it, so without that its own shadow is cut off by
+   the next card's white background.
 
    The transition is dropped for readers who ask for less motion. */
 .oa-card {
+  position: relative;
   margin: 0 0 14px;
   background: #fff;
-  border: 1px solid #eee;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 4px 11px rgba(0, 0, 0, 0.10);
-  transition: box-shadow 0.2s ease-in-out;
+  border: 1px solid #e7e9ec;
+  border-radius: 3px;
+  box-shadow:
+    0 1px 1px rgba(16, 24, 40, 0.05),
+    0 2px 6px rgba(16, 24, 40, 0.08);
+  transition: box-shadow 0.18s ease-out, border-color 0.18s ease-out,
+    transform 0.18s ease-out;
 }
 
-.oa-card:hover,
-.oa-card:focus-within {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.09), 0 12px 28px rgba(0, 0, 0, 0.19);
+@media (hover: hover) and (pointer: fine) {
+  .oa-card:hover {
+    z-index: 1;
+    border-color: #dcdfe4;
+    box-shadow:
+      0 1px 1px rgba(16, 24, 40, 0.05),
+      0 4px 10px -1px rgba(16, 24, 40, 0.10),
+      0 14px 26px -6px rgba(16, 24, 40, 0.16);
+    transform: translateY(-1px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .oa-card { transition: none; }
+  .oa-card:hover { transform: none; }
 }
 
 .oa-card-head {
@@ -332,9 +370,13 @@
 
 .oa-card-head:hover .oa-card-title { text-decoration: underline; }
 
+/* Keyboard focus, and keyboard focus only — this is the card's "you are here",
+   which is why the hover lift above does not double as one. Rounded with the
+   card so the ring sits inside its corners rather than across them. */
 .oa-card-head:focus-visible {
   outline: 2px solid #3b7dbc;
   outline-offset: -2px;
+  border-radius: 2px;
 }
 
 .oa-badges { margin-bottom: 6px; }
@@ -442,3 +484,76 @@
      printed list was institution and department headings and nothing else. */
   .oa-card-body[hidden] { display: block !important; }
 }
+
+/* --------------------------------------------- Edit / Take down on a posting
+
+   Drawn only on the postings the signed-in user may change (assets/
+   oa-jobedit.js). Positioned over the card rather than inside its head,
+   because the head is itself a button and nesting one inside it would be
+   invalid — and every click on Edit would also toggle the card open. */
+
+.oa-card { position: relative; }
+
+.oa-card-actions {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  /* the card lifts on hover; the buttons must sit above the shadow */
+  z-index: 2;
+}
+
+.oa-jobbtn {
+  padding: 4px 10px;
+  border: 1px solid #d3d9df;
+  border-radius: 4px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  /* Held back until the pointer is on the card: these are maintenance
+     controls, not part of reading a posting, and at full strength on 94 cards
+     they would be the loudest thing on the page. */
+  opacity: 0.55;
+  transition: opacity 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.oa-card:hover .oa-jobbtn,
+.oa-card:focus-within .oa-jobbtn { opacity: 1; }
+
+.oa-jobbtn-edit { color: #2f6ea8; }
+.oa-jobbtn-edit:hover { background: #eaf3fb; border-color: #9cc3e4; }
+
+.oa-jobbtn-del { color: #a3364a; }
+.oa-jobbtn-del:hover { background: #fdf0f2; border-color: #e2aab4; }
+
+.oa-jobbtn:focus-visible { outline: 2px solid #3b7dbc; outline-offset: 1px; }
+.oa-jobbtn[disabled] { opacity: 0.5; cursor: default; }
+
+/* the head's own padding has to clear the buttons, or a long institution name
+   runs under them */
+.oa-card-owned .oa-card-head { padding-right: 190px; }
+
+.oa-card-note {
+  margin: 0;
+  padding: 8px 22px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #2e6b4f;
+}
+
+.oa-card-note.is-bad { color: #a3364a; }
+
+.oa-card-gone { opacity: 0.55; }
+
+@media screen and (max-width: 640px) {
+  .oa-card-actions { position: static; padding: 0 16px 12px; }
+  .oa-card-owned .oa-card-head { padding-right: 16px; }
+  .oa-jobbtn { opacity: 1; }
+}
+
+@media print { .oa-card-actions { display: none; } }

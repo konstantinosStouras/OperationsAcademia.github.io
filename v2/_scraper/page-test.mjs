@@ -14,6 +14,7 @@
 
 import http from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -160,6 +161,125 @@ await page.waitForTimeout(300);
 const mannheim = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
 ok(mannheim.length > 0 && mannheim.every((t) => /Mannheim/.test(t)),
   'the legacy ?filterA= deep link still selects an institution');
+
+/* ------------------------------------------ the Deadline filter's own words
+
+   The vendor page offers three values and only three — "Closing soon",
+   "Expired", "Until filled". This page offered "Open" instead of the first,
+   which the owner caught by putting the two dropdowns side by side, so the
+   check is on the WHOLE vocabulary rather than on one label: a fourth word is
+   the defect, whichever word it is.
+
+   Asserted against the list actually offered, not a fixed triple, because
+   whether a bucket appears at all depends on the live data — a value with no
+   postings behind it is correctly absent.                                    */
+
+const DEADLINES = ['Closing soon', 'Expired', 'Until filled'];
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.click('#oaf-deadline');
+await page.waitForTimeout(200);
+const buckets = await page.$$eval('.oa-pick-menu:not([hidden]) .oa-opt-name',
+  (ns) => ns.map((n) => n.textContent));
+ok(buckets.length > 0, 'the Deadline filter offers its values');
+eq(buckets.filter((b) => DEADLINES.indexOf(b) === -1), [],
+  'every Deadline value is one the vendor page offers');
+eq(buckets, DEADLINES.filter((b) => buckets.indexOf(b) !== -1),
+  'and they are listed in the vendor page\'s order');
+await page.keyboard.press('Escape');
+
+// and the rule behind them, from the page's own function
+eq(await page.evaluate(() => {
+  const off = (n) => {
+    const t = new Date();
+    t.setDate(t.getDate() + n);
+    return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') +
+      '-' + String(t.getDate()).padStart(2, '0');
+  };
+  const D = window.OAList.derive.deadline;
+  return {
+    none: D({ applyBy: 'Until filled. Review begins in September.' }),
+    past: D({ applyByDate: off(-30) }),
+    today: D({ applyByDate: off(0) }),
+    soon: D({ applyByDate: off(21) }),
+    far: D({ applyByDate: off(300) }),
+  };
+}), {
+  none: 'Until filled', past: 'Expired', today: 'Closing soon',
+  soon: 'Closing soon', far: 'Closing soon',
+}, 'a posting lands in the bucket the vendor page would have put it in');
+
+// a link shared while the filter said "Open" still selects what it meant
+await page.goto(BASE + 'jobs.html?deadline=Open', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(300);
+eq(await page.$$eval('.oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
+  ['Closing soon'], 'a ?deadline=Open link still selects the bucket it named');
+
+/* ------------------------------------------------- a chip is one blue button
+
+   The whole chip removes the value; the × is decoration. It used to be the
+   other way round — a chip carrying a 9-pixel button — so a click on the blue
+   did nothing at all.                                                        */
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.click('#oaf-type');
+await page.waitForTimeout(200);
+await page.click('.oa-pick-menu:not([hidden]) .oa-opt');
+await page.waitForTimeout(350);
+eq(await page.$$eval('.oa-chip', (ns) => ns.length), 1, 'choosing a value shows its chip');
+eq(await page.$$eval('.oa-chip button', (ns) => ns.length), 0,
+  'the chip holds no button of its own — it IS the button');
+const narrowed = Number((await page.$eval('.oa-count', (n) => n.textContent))
+  .split('/')[1].trim().split(' ')[0]);
+
+// a multi-select menu deliberately stays open after a tick (so several values
+// can be chosen in one visit) — close it the way a reader would, or it sits
+// over the chip this click aims at
+await page.keyboard.press('Escape');
+await page.waitForTimeout(150);
+
+// click the LABEL, which is where a pointer lands, not the ×
+await page.click('.oa-chip .oa-chip-label');
+await page.waitForTimeout(350);
+eq(await page.$$eval('.oa-chip', (ns) => ns.length), 0,
+  'clicking anywhere on the chip drops that filter');
+const widened = Number((await page.$eval('.oa-count', (n) => n.textContent))
+  .split('/')[1].trim().split(' ')[0]);
+ok(widened > narrowed, `and the list widens again (${narrowed} -> ${widened})`);
+
+/* ------------------------------------------------------- the card elevation
+
+   Every posting rests on a shadow and the one under the pointer, alone, lifts.
+   The lift used to be on :focus-within too, so a card someone had clicked
+   stayed raised after the pointer moved on and two cards read as hovered at
+   once — which is the state the owner saw.                                   */
+
+await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+await page.mouse.move(2, 2);
+await page.waitForTimeout(250);
+const rest = await page.$$eval('.oa-card', (ns) => ns.map((n) => getComputedStyle(n).boxShadow));
+ok(rest.length > 3 && rest[0] !== 'none', 'every posting carries a resting shadow');
+eq(new Set(rest).size, 1, 'and they all rest at the same height');
+
+await page.hover('.oa-card:nth-child(3) .oa-card-head');
+await page.waitForTimeout(300);
+const lifted = await page.$$eval('.oa-card', (ns) => ns.map((n) => getComputedStyle(n).boxShadow));
+eq(lifted.filter((s, i) => s !== rest[i]).length, 1,
+  'exactly one card is raised while the pointer is over the list');
+ok(lifted[2] !== rest[2], 'and it is the card the pointer is over');
+
+await page.click('.oa-card:nth-child(3) .oa-card-head');
+await page.mouse.move(2, 2);
+await page.waitForTimeout(300);
+eq(await page.$$eval('.oa-card', (ns) => ns.map((n) => getComputedStyle(n).boxShadow))
+  .then((now) => now.filter((s, i) => s !== rest[i])), [],
+  'a card that was clicked settles back once the pointer leaves it');
+ok(await page.evaluate(() => document.activeElement.classList.contains('oa-card-head')),
+  'though it still holds the keyboard focus, which has its own ring');
 
 /* --------------------------------------------- the site's own script chain
 
@@ -402,6 +522,496 @@ for (const [name, expect] of [
   ok(seen.explained, 'feedback: and says why, with somewhere else to write to');
   ok(seen.inboxHidden, 'feedback: the maintainer inbox stays hidden');
   await q.close();
+}
+
+/* ------------------------------------------- merging two accounts into one
+
+   What travels between two accounts, and what does not. These are the
+   decisions the merge makes; the Firestore writes around them are exercised
+   by hand against the real project, but the rules the writes follow are
+   ordinary functions and belong under test.
+
+   OAAccounts.pure is exported for exactly this. It is read from a page that
+   never reached Firebase, so nothing here depends on a session. */
+{
+  const P = await page.evaluate(() => {
+    const p = window.OAAccounts && window.OAAccounts.pure;
+    if (!p) return null;
+
+    // an ORCID iD is 16 digits with an ISO 7064 MOD 11-2 check character
+    const orcid = {
+      plain: p.normOrcid('0000-0002-2398-9566'),
+      spaced: p.normOrcid('0000 0002 2398 9566'),
+      url: p.normOrcid('https://orcid.org/0000-0002-1825-0097'),
+      xcheck: p.normOrcid('0000-0002-1694-233X'),
+      lowerx: p.normOrcid('0000-0002-1694-233x'),
+      typo: p.normOrcid('0000-0002-2398-9567'),
+      short: p.normOrcid('0000-0002'),
+      junk: p.normOrcid('my orcid'),
+      empty: p.normOrcid(''),
+      nullish: p.normOrcid(null),
+    };
+
+    const full = {
+      firstName: 'Ada', lastName: 'Lovelace', affiliation: 'Somewhere',
+      website: 'https://example.edu', orcid: '0000-0002-2398-9566', orcidVerified: true,
+    };
+
+    const patch = {
+      intoEmpty: p.profilePatch({}, full),
+      intoFull: p.profilePatch(
+        { firstName: 'A', lastName: 'L', affiliation: 'Elsewhere', website: 'https://x.edu' },
+        full),
+      partial: p.profilePatch({ firstName: 'A' }, full),
+      blankIsEmpty: p.profilePatch({ firstName: '   ' }, full),
+      sameOrcid: p.profilePatch({ orcid: '0000-0002-2398-9566' }, full),
+      otherOrcid: p.profilePatch({ orcid: '0000-0002-1825-0097' }, full),
+      nothingToGive: p.profilePatch(full, {}),
+    };
+
+    const a = {
+      name: 'OM jobs', email: 'me@example.edu', frequency: 'weekly',
+      criteria: { topics: ['jobs'], text: '', type: ['University'], level: ['Assistant Professor'],
+                  country: ['USA', 'Canada'], characteristics: [] },
+    };
+    const reordered = JSON.parse(JSON.stringify(a));
+    reordered.criteria.country = ['Canada', 'USA'];
+    const different = JSON.parse(JSON.stringify(a));
+    different.criteria.country = ['USA'];
+
+    return {
+      orcid,
+      patch,
+      sig: {
+        same: p.alertSig(a) === p.alertSig(reordered),
+        differs: p.alertSig(a) !== p.alertSig(different),
+        caseFolded: p.alertSig(a) === p.alertSig(Object.assign({}, a, { email: 'ME@Example.edu' })),
+      },
+      initials: {
+        two: p.initialsFrom('Jane Roe', 'j@x.edu'),
+        one: p.initialsFrom('Jane', 'j@x.edu'),
+        none: p.initialsFrom('', 'jane@x.edu'),
+        blank: p.initialsFrom('', ''),
+      },
+      summary: {
+        one: p.providerSummary({ providerData: [{ providerId: 'google.com' }] }),
+        two: p.providerSummary({ providerData: [
+          { providerId: 'google.com' }, { providerId: 'oidc.orcid' }] }),
+        orcid: p.providerSummary({ providerData: [{ providerId: 'oidc.orcid' }] }),
+      },
+      alertFields: p.ALERT_FIELDS,
+    };
+  });
+
+  ok(P, 'the accounts module exports the merge decisions for testing');
+  if (P) {
+    eq(P.orcid.plain, '0000-0002-2398-9566', 'an ORCID iD is kept in its canonical form');
+    eq(P.orcid.spaced, '0000-0002-2398-9566', 'spaces in a pasted iD are ignored');
+    eq(P.orcid.url, '0000-0002-1825-0097', 'and a whole orcid.org address is accepted');
+    eq(P.orcid.xcheck, '0000-0002-1694-233X', 'an X check character is valid');
+    eq(P.orcid.lowerx, '0000-0002-1694-233X', 'and is normalised to upper case');
+    // the one that matters: a typo would become an identity key matching
+    // nobody, quietly switching the duplicate check off for that account
+    eq(P.orcid.typo, '', 'a mistyped iD is refused, not stored');
+    eq([P.orcid.short, P.orcid.junk, P.orcid.empty, P.orcid.nullish], ['', '', '', ''],
+      'and so is anything that is not an iD at all');
+
+    eq(P.patch.intoEmpty.firstName, 'Ada', 'a merge fills in details the kept account lacks');
+    eq(P.patch.intoEmpty.orcid, '0000-0002-2398-9566', 'including an ORCID iD it has none of');
+    eq(P.patch.intoEmpty.orcidVerified, true, 'carrying the fact that ORCID vouched for it');
+    eq(Object.keys(P.patch.intoFull).sort(), ['orcid', 'orcidVerified'],
+      'and overwrites no detail the kept account already answered — only the iD it lacked');
+    eq(Object.keys(P.patch.partial).sort(), ['affiliation', 'lastName', 'orcid', 'orcidVerified', 'website'],
+      'a half-filled profile takes only what is missing');
+    eq(P.patch.blankIsEmpty.firstName, 'Ada', 'whitespace is not an answer');
+    eq(P.patch.otherOrcid.orcid, undefined,
+      'two different ORCID iDs are two people — the merge leaves that alone');
+    eq(P.patch.sameOrcid.orcidVerified, true,
+      'the same iD, now verified, upgrades the kept account');
+    eq(P.patch.nothingToGive, {}, 'an empty account gives nothing');
+
+    ok(P.sig.same, 'two alerts that would send the same e-mail look the same to the merge');
+    ok(P.sig.differs, 'and two that would not, do not');
+    ok(P.sig.caseFolded, 'the recipient address is compared case-insensitively');
+
+    eq(P.initials.two, 'JR', 'initials come from the first and last name');
+    eq(P.initials.one, 'JA', 'a single name gives two letters');
+    eq(P.initials.none, 'JA', 'and an account with no name falls back to its address');
+    eq(P.initials.blank, '?', 'never an empty disc');
+
+    eq(P.summary.one, 'Google', 'the sign-in method is named in words');
+    eq(P.summary.two, 'Google and ORCID', 'and reads as a sentence when there are two');
+    eq(P.summary.orcid, 'ORCID', 'ORCID included');
+
+    // dropping a high-water mark makes a copied alert look brand new, and the
+    // first e-mail after a merge is then the entire catalogue
+    for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate']) {
+      ok(P.alertFields.includes(f), `a copied alert keeps its ${f} mark`);
+    }
+  }
+
+  /* The card the reader actually meets. Rendered from the two pure builders,
+     so every branch can be read without a Firebase session behind it. */
+  const CARD = await page.evaluate(() => {
+    const p = window.OAAccounts.pure;
+    const host = document.createElement('div');
+    host.id = 'oa-card-probe';
+    document.body.appendChild(host);
+
+    const read = (html) => {
+      host.innerHTML = html;
+      return {
+        html,
+        chip: !!host.querySelector('.oa-orcid-chip'),
+        verified: !!host.querySelector('.oa-verified'),
+        input: !!host.querySelector('input[name="orcid"]'),
+        value: (host.querySelector('input[name="orcid"]') || {}).value,
+        linkOrcid: !!host.querySelector('#oa-link-orcid'),
+        linkGoogle: !!host.querySelector('#oa-link-google'),
+        merge: !!host.querySelector('#oa-merge-open'),
+        text: host.textContent.replace(/\s+/g, ' ').trim(),
+      };
+    };
+
+    const google = { providerData: [{ providerId: 'google.com' }] };
+    const orcidOnly = { providerData: [{ providerId: 'oidc.orcid' }] };
+    const iD = '0000-0002-2398-9566';
+
+    return {
+      verifiedField: read(p.orcidFieldHTML({ orcid: iD, orcidVerified: true })),
+      typedField: read(p.orcidFieldHTML({ orcid: iD })),
+      emptyField: read(p.orcidFieldHTML({})),
+      escaped: read(p.orcidFieldHTML({ orcid: '"><img src=x onerror=alert(1)>' })),
+      googleNoOrcid: read(p.otherAccountsHTML({}, google)),
+      googleWithOrcid: read(p.otherAccountsHTML({ orcid: iD }, google)),
+      orcidOnly: read(p.otherAccountsHTML({ orcid: iD, orcidVerified: true }, orcidOnly)),
+      bothLinked: read(p.otherAccountsHTML({ orcid: iD }, {
+        providerData: [{ providerId: 'google.com' }, { providerId: 'oidc.orcid' }] })),
+    };
+  });
+
+  ok(CARD.verifiedField.chip && CARD.verifiedField.verified && !CARD.verifiedField.input,
+    'an iD ORCID vouched for is shown as a verified chip, not an editable field');
+  ok(CARD.typedField.input && CARD.typedField.value === '0000-0002-2398-9566',
+    'an iD the reader typed stays editable, so it can be corrected or cleared');
+  ok(CARD.emptyField.input && !CARD.emptyField.value,
+    'and an account without one is offered an empty field');
+  ok(!/onerror=/.test(CARD.escaped.html) || /&quot;|&lt;/.test(CARD.escaped.html),
+    'a stored value is escaped into the field, never interpolated as markup');
+  ok(!CARD.escaped.html.includes('<img'), 'markup in a stored iD cannot reach the page');
+
+  // the whole point of the linking rows: offer only what is still missing
+  ok(!CARD.googleNoOrcid.linkGoogle, 'a Google account is not offered Google again');
+  ok(!CARD.googleNoOrcid.linkOrcid,
+    'nor ORCID sign-in while we have no iD to attach it to');
+  ok(CARD.googleWithOrcid.linkOrcid,
+    'once an iD is on file, attaching ORCID sign-in is offered — that is what stops a duplicate');
+  ok(CARD.orcidOnly.linkGoogle && !CARD.orcidOnly.linkOrcid,
+    'an ORCID-only account is offered Google, and not the sign-in it already has');
+  ok(!CARD.bothLinked.linkGoogle && !CARD.bothLinked.linkOrcid,
+    'an account reachable both ways is offered nothing');
+
+  ok(CARD.googleNoOrcid.merge && CARD.orcidOnly.merge && CARD.bothLinked.merge,
+    'every account can start a merge — two Gmail addresses are two accounts too');
+  ok(/You sign in to this account with Google\./.test(CARD.googleNoOrcid.text),
+    'the card says how this account is reached, in words');
+  ok(/ORCID/.test(CARD.orcidOnly.text), 'and names ORCID when that is the way in');
+
+  await page.evaluate(() => document.getElementById('oa-card-probe').remove());
+}
+
+/* ------------------------------------------------- the merge, start to end
+
+   Driven against _fake-firebase.js — an in-memory stand-in for the compat SDK
+   that records every operation in order. It proves nothing about Firebase, and
+   the security rules are asserted separately (selftest.mjs). What it does show
+   is the thing no screenshot can: that the merge copies before it deletes, and
+   that a job posting changes hands while the account that owns it still
+   exists. Get that order wrong and the damage is silent. */
+{
+  const SHIM = await readFile(path.join(ROOT, 'v2', '_scraper', '_fake-firebase.js'), 'utf8');
+
+  const DUP = 'dup-account-uid-0001';
+  const KEPT = 'kept-account-uid-0002';
+  const ORCID = '0000-0002-2398-9566';
+
+  async function withFakeFirebase(seed, drive) {
+    const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify(seed)};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('#oa-chip', { timeout: 10000 });
+    const out = await drive(q);
+    eq(errors, [], 'merge run: no uncaught script error');
+    await q.close();
+    return out;
+  }
+
+  const seed = {
+    user: { uid: DUP, email: '', displayName: 'Ada',
+            providerData: [{ providerId: 'oidc.orcid', uid: ORCID }] },
+    keptUser: { uid: KEPT, email: 'ada@example.edu', displayName: 'Ada Lovelace',
+                providerData: [{ providerId: 'google.com' }] },
+    docs: [
+      { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Lovelace',
+                                         affiliation: 'Somewhere' } },
+      { path: `profiles/${KEPT}`, data: { firstName: 'A.' } },
+      { path: `users/${DUP}/alerts/a1`, data: {
+          name: 'OM jobs', email: 'ada@example.edu', frequency: 'weekly', enabled: true,
+          criteria: { topics: ['jobs'], country: ['USA'] },
+          lastSentAt: '2026-08-10T00:00:00.000Z', lastCheckedAt: '2026-08-14T00:00:00.000Z' } },
+      { path: `jobSubmissions/j1`, data: {
+          uid: DUP, status: 'queued', ref: 'OA-JOB-260815-ABCD', institution: 'Somewhere',
+          featured: true } },
+      { path: `registeredUsers/${DUP}`, data: { t: 1 } },
+    ],
+  };
+
+  const run = await withFakeFirebase(seed, async (q) => {
+    // the iD an ORCID sign-in vouched for is recorded without being asked for
+    await q.waitForFunction(() => window.__fb && window.__fb.at('set', 'profiles/') !== -1,
+      null, { timeout: 8000 });
+
+    await q.evaluate(() => window.OAAccounts.openProfile());
+    await q.waitForSelector('#oa-merge-open');
+    await q.click('#oa-merge-open');
+
+    await q.waitForSelector('#oa-merge .oa-auth-provider[data-provider="google"]');
+    const holds = await q.textContent('#oa-merge-holds');
+    const orcidOffered = await q.$('#oa-merge .oa-auth-provider[data-provider="orcid"]');
+    await q.click('#oa-merge .oa-auth-provider[data-provider="google"]');
+
+    await q.waitForSelector('#oa-merge-step2:not([hidden])', { timeout: 8000 });
+    const into = await q.textContent('#oa-merge-into');
+    await q.click('#oa-merge-go');
+
+    await q.waitForFunction(() => window.__fb.at('deleteUser', '') !== -1, null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+
+    return q.evaluate(() => ({
+      docs: window.__fb.dump(),
+      log: window.__fb.log.map((e) => e.op + ' ' + e.path),
+      order: {
+        copyAlert: window.__fb.at('set', 'alerts/a1'),
+        handOver: window.__fb.at('update', 'jobSubmissions/j1'),
+        dropAlert: window.__fb.at('delete', 'alerts/a1'),
+        dropProfile: window.__fb.at('delete', 'profiles/'),
+        killSignIn: window.__fb.at('deleteUser', ''),
+      },
+    })).then((r) => Object.assign(r, { holds, into, orcidOffered: !!orcidOffered }));
+  });
+
+  // what the reader was told before agreeing to any of it
+  ok(/1 e-mail alert/.test(run.holds) && /1 job posting/.test(run.holds),
+    'the dialog counts what is actually at stake before asking');
+  ok(/ada@example\.edu/.test(run.into),
+    'and names the account being merged into, so it cannot be the wrong one');
+  ok(!run.orcidOffered,
+    'an ORCID account is not offered ORCID as the account to keep — one iD is one account');
+
+  // the alert arrives under its own id, with the mailer's marks intact
+  const moved = run.docs[`users/${KEPT}/alerts/a1`];
+  ok(moved, 'the alert lands in the account being kept');
+  eq(moved && moved.lastSentAt, '2026-08-10T00:00:00.000Z',
+    'carrying its send history — without it the first e-mail is the whole catalogue');
+  eq(moved && moved.mergedFrom, DUP, 'and a note of where it came from');
+  eq(moved && moved.criteria.country, ['USA'], 'with its filters unchanged');
+  ok(!run.docs[`users/${DUP}/alerts/a1`],
+    'and is gone from the old account — a copy left behind sends everything twice for ever');
+
+  // details fill blanks and overwrite nothing
+  const keptProfile = run.docs[`profiles/${KEPT}`];
+  eq(keptProfile.firstName, 'A.', 'the kept account keeps the name it chose');
+  eq(keptProfile.lastName, 'Lovelace', 'and gains what it was missing');
+  eq(keptProfile.orcid, ORCID, 'including the ORCID iD the duplicate was registered with');
+  eq(keptProfile.orcidVerified, true, 'still marked as one ORCID vouched for');
+  ok(!run.docs[`profiles/${DUP}`], 'the old profile is cleared away');
+  ok(!run.docs[`registeredUsers/${DUP}`],
+    'and so is its entry in the user tally, so the count is of people');
+
+  // the posting changes hands rather than being re-created
+  const job = run.docs['jobSubmissions/j1'];
+  eq(job.uid, KEPT, 'the job posting is now owned by the account being kept');
+  eq(job.mergedFrom, DUP, 'stamped with where it came from');
+  eq(job.ref, 'OA-JOB-260815-ABCD', 'keeping its reference — the poster was given that number');
+  eq(job.featured, true, 'and everything else about it, including what only the maintainer sets');
+
+  eq(run.docs['accountKeys/orcid:' + ORCID].uid, KEPT,
+    'the ORCID identity now points at the account that holds it');
+
+  // ORDER. Each of these is a way to lose something with nothing on screen.
+  const o = run.order;
+  ok(o.copyAlert > -1 && o.dropAlert > o.copyAlert,
+    'the alert is copied before the original is deleted');
+  ok(o.handOver > -1 && o.killSignIn > o.handOver,
+    'the posting changes hands before the sign-in that owns it is removed');
+  ok(o.killSignIn > o.dropProfile && o.killSignIn > o.dropAlert,
+    'and the sign-in goes last of all');
+
+  /* A duplicate that ANNOUNCES itself. An ORCID registration whose iD is
+     already claimed by another account is offered the repair on the spot,
+     rather than left to find it in a menu it has no reason to open. */
+  const noticed = await withFakeFirebase({
+    user: seed.user,
+    keptUser: seed.keptUser,
+    docs: [
+      { path: `profiles/${DUP}`, data: { orcid: ORCID, orcidVerified: true } },
+      { path: 'accountKeys/orcid:' + ORCID, data: { uid: 'somebody-elses-uid-9', t: 1 } },
+    ],
+  }, async (q) => {
+    await q.waitForSelector('#oa-merge', { timeout: 8000 });
+    return {
+      msg: await q.textContent('#oa-merge-msg'),
+      keyUntouched: await q.evaluate((k) => window.__fb.docs[k].uid, 'accountKeys/orcid:' + ORCID),
+    };
+  });
+
+  ok(/already have an Operations Academia account/.test(noticed.msg),
+    'an ORCID sign-in that duplicates an existing account is told so, and shown the merge');
+  eq(noticed.keyUntouched, 'somebody-elses-uid-9',
+    'and the first account keeps its claim — the duplicate never overwrites it');
+}
+
+/* ------------------------------------------- the posting form's name pickers
+
+   The three name fields offer the vocabulary the site has already published,
+   which is what keeps one school from arriving under six spellings. All of it
+   is behaviour no unit test can see, so it is driven here.                   */
+
+{
+  const f = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const formErrors = [];
+  f.on('pageerror', (e) => formErrors.push(e.message));
+  await f.goto(BASE + 'post-a-job.html', { waitUntil: 'domcontentloaded' });
+
+  /* The form sits behind the sign-in gate, and auth resolving (failing, with no
+     Firebase reachable from CI) re-hides it a moment after load — so reveal it
+     AFTER that settles, or the unhide is quietly undone. */
+  await f.waitForTimeout(1500);
+  await f.evaluate(() => {
+    document.getElementById('oa-job-form').hidden = false;
+    const g = document.getElementById('oa-needauth');
+    if (g) g.hidden = true;
+  });
+  await f.waitForSelector('#f-institution', { state: 'visible' });
+  await f.waitForTimeout(400);
+
+  await f.click('#f-institution');
+  await f.waitForTimeout(250);
+  const all = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
+  ok(all > 10, 'form: the university picker opens with the published vocabulary');
+
+  await f.fill('#f-institution', 'tul');
+  await f.waitForTimeout(200);
+  const narrowed = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
+    (n) => n.map((x) => x.textContent));
+  ok(narrowed.length < all, 'form: typing narrows the list');
+  ok(narrowed.some((t) => /Tulane/i.test(t)), 'form: "tul" finds Tulane');
+
+  await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-institution'), 'Tulane University', 'form: choosing fills the field');
+
+  // the chosen university's own schools lead the next list
+  await f.click('#f-school');
+  await f.waitForTimeout(250);
+  const firstSchool = await f.$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
+    (n) => n.textContent);
+  ok(/Freeman/i.test(firstSchool), 'form: schools already used at that university lead');
+
+  // a name nobody has posted before is offered rather than refused
+  await f.fill('#f-school', 'Wibble School of Widgets');
+  await f.waitForTimeout(200);
+  const add = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
+  ok(add.length === 1 && /not on the list yet/.test(add[0]),
+    'form: an unknown name is offered as a new one');
+  await f.click('.oa-combo-add');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'Wibble School of Widgets', 'form: a new name is accepted');
+
+  // keyboard: Enter takes the highlighted option and must NOT submit the form
+  await f.fill('#f-unit', 'oper');
+  await f.waitForTimeout(200);
+  await f.keyboard.press('ArrowDown');
+  await f.keyboard.press('Enter');
+  await f.waitForTimeout(150);
+  const unit = await f.inputValue('#f-unit');
+  ok(unit && unit !== 'oper', 'form: arrow keys and Enter select an option');
+
+  // what gets published is derived from the two, and shown before sending
+  eq(await f.inputValue('#f-department'), `Wibble School of Widgets, ${unit}`,
+    'form: the published line joins school and unit');
+  ok((await f.textContent('#f-department-preview')).includes(unit),
+    'form: the poster is shown what will appear under the institution name');
+
+  eq(formErrors, [], 'form: no uncaught script errors');
+  await f.close();
+}
+
+/* --------------------------------- Edit / Take down, and who may see them
+
+   The controls are drawn from a Firestore read that CI cannot make, so the
+   permission map is injected directly. What is being checked is the part that
+   is easy to get wrong and impossible to unit-test: that a visitor sees no
+   controls at all, that a signed-in poster sees them ONLY on their own
+   posting, and that pressing Edit does not also toggle the card open.        */
+
+{
+  const j = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const jErrors = [];
+  j.on('pageerror', (e) => jErrors.push(e.message));
+  await j.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await j.waitForSelector('.oa-card');
+  await j.waitForTimeout(600);
+
+  eq(await j.$$eval('.oa-card-actions', (n) => n.length), 0,
+    'jobs: a visitor who is not signed in sees no Edit or Take down');
+
+  // one posting becomes editable, as it would be for the poster who made it
+  const firstId = await j.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  await j.evaluate((id) => {
+    void id;
+  }, firstId).catch(() => {});
+
+  await j.evaluate((id) => {
+    // stand in for the permission read: mark exactly one row as ours
+    const mod = window.OAJobEdit;
+    mod.__setPermissionsForTest({ ready: true, admin: false, byId: { [id]: id }, byRef: {} });
+  }, firstId);
+  await j.waitForTimeout(200);
+
+  eq(await j.$$eval('.oa-card-actions', (n) => n.length), 1,
+    'jobs: exactly the one posting they own carries the controls');
+  eq(await j.$$eval('.oa-card-actions .oa-jobbtn', (n) => n.map((x) => x.textContent)),
+    ['Edit', 'Take down'], 'jobs: both controls, in that order');
+
+  const owned = await j.$eval('.oa-card-actions', (n) => n.closest('.oa-card').id);
+  eq(owned, 'job-' + firstId, 'jobs: and on the right card');
+
+  // the card head is itself a button; the controls must not be inside it
+  eq(await j.$$eval('.oa-card-head .oa-jobbtn', (n) => n.length), 0,
+    'jobs: the controls are not nested inside the card toggle');
+
+  // Edit leaves for the form carrying the document id, and does NOT expand
+  const before = await j.$eval('#job-' + firstId + ' .oa-card-body', (n) => n.hidden);
+  await j.click('.oa-jobbtn-edit');
+  await j.waitForURL(/post-a-job\.html\?edit=/, { timeout: 5000 });
+  ok(j.url().includes('edit=' + encodeURIComponent(firstId)),
+    'jobs: Edit opens the form for that posting');
+  ok(before, 'jobs: the card was closed before Edit was pressed');
+
+  // the form says it is editing rather than posting
+  await j.waitForTimeout(1200);
+  eq(await j.$eval('.title-heading h2', (n) => n.textContent.trim()), 'Edit a posting',
+    'form: edit mode renames the page');
+  eq(await j.$eval('#oa-submit', (n) => n.textContent.trim()), 'Save changes',
+    'form: and the button says what it does');
+
+  eq(jErrors, [], 'jobs: no uncaught script errors');
+  await j.close();
 }
 
 /* ------------------------------------------------------------------ done */

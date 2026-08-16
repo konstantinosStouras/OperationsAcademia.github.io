@@ -18,8 +18,11 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
+  submissionFromRow, composeApplyBy, assignIds,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
+import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
+import { docIdFor, migrationDoc, lostFields } from './migrate-to-firestore.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -419,13 +422,14 @@ async function testFleetPins() {
   eq(merged.rows[0].addedAt, a.addedAt, 'a correction keeps the original addedAt');
   eq(merged.rows[0].comments, 'corrected', 'while the correction itself lands');
 
-  // The open-ended-deadline rule is ONE regex in three places: what oa-list.js
-  // buckets by, import-sheet.mjs must clear by, and no served row may violate.
+  // The open-ended-deadline rule lives in the WRITERS: the page buckets a row
+  // "Until filled" purely on `applyByDate` being empty, so import-sheet.mjs
+  // (this regex) and rowFromSubmission (`untilFilled ? '' : …`, tested above)
+  // must guarantee an open-ended posting never carries a date — and no served
+  // row may violate it.
   const RX_OPEN = 'until\\s*filled|open\\s*until|rolling';
-  const list = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
   const sheet = await readFile(path.join(HERE, 'import-sheet.mjs'), 'utf8');
-  ok(list.includes(RX_OPEN), 'oa-list.js buckets deadlines with the shared open-ended regex');
-  ok(sheet.includes(RX_OPEN), 'import-sheet.mjs clears dates with the same regex');
+  ok(sheet.includes(RX_OPEN), 'import-sheet.mjs clears dates with the open-ended regex');
   if (existsSync(JOBS)) {
     const rows = JSON.parse(await readFile(JOBS, 'utf8'));
     const contradicts = rows.filter((r) =>
@@ -451,14 +455,311 @@ async function testFleetPins() {
     'safeShots() both validates the shape and escapes what survives');
 }
 
+/* ------------------------------------------ merging two accounts into one
+
+   The merge itself is browser code, exercised in page-test.mjs. What is
+   checked HERE is the part that has no browser and no Firebase to run
+   against, and that would fail silently rather than loudly: the security
+   rules the merge depends on, and the two steps of it whose omission does
+   damage nobody would notice for weeks.
+
+   These are source-level assertions on purpose. Every one of them stands for
+   a specific way the feature breaks, named in its message. */
+
+async function testAccountMerge() {
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const accounts = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+
+  // Duplicate DETECTION needs its collection, or every session's claim is
+  // refused and two accounts are never noticed to be one person.
+  ok(/match \/accountKeys\/\{key\}/.test(rules), 'the accountKeys collection has a rule');
+  ok(/allow get: if signedIn\(\);/.test(rules),
+    'an identity key can be looked up by someone signed in');
+  ok(/allow list, delete: if false;/.test(rules),
+    'but the identity keys cannot be enumerated — that would be the user list');
+  ok(/email:<sha256/.test(rules) && /email:' \+ h/.test(accounts),
+    'the e-mail identity key is hashed, so the collection is not a list of addresses');
+
+  // The HAND-OVER. A job posting is a top-level document owned by a uid field:
+  // without this branch a merged-away account's postings are stranded, and
+  // with a loose one the merge becomes a way to edit a posting behind the
+  // rules that normally bound it.
+  ok(/affectedKeys\(\)\.hasOnly\(\['uid', 'mergedFrom', 'mergedAt'\]\)/.test(rules),
+    'a hand-over may change ownership and nothing else about a posting');
+  ok(/request\.resource\.data\.mergedFrom == request\.auth\.uid/.test(rules),
+    'and is stamped with the account it came from');
+  ok(/allow update: if isOwner\(resource\.data\.uid\)[\s\S]{0,400}?affectedKeys/.test(rules),
+    'only the posting\'s current owner may hand it over');
+
+  // The merge deletes the duplicate's alerts. Firebase deleting a SIGN-IN does
+  // not delete its Firestore data, and the mailer reads every alert in the
+  // database by collection group — so an alert left behind sends the user two
+  // of everything, for ever, with nothing on screen to explain it.
+  ok(/alertsCol\.doc\(a\.id\)\.delete\(\)/.test(accounts),
+    'the merge deletes the merged-away account\'s alerts, or they keep sending');
+  ok(/allow delete: if isOwner\(uid\);/.test(rules),
+    'an account can withdraw its own registered-users mark, so the tally counts people');
+
+  // Order: nothing is deleted until everything has been copied. Asserted by
+  // position, because a reordering is exactly the edit that would lose data.
+  const copyAt = accounts.indexOf('keptAlerts.doc(a.id).set(');
+  const handAt = accounts.indexOf('jobSubmissions).doc(j.id).update(');
+  const dropAt = accounts.indexOf('alertsCol.doc(a.id).delete()');
+  const killAt = accounts.indexOf('return deleteCurrentSignIn(fb)');
+  ok(copyAt > 0 && handAt > copyAt && dropAt > handAt && killAt > dropAt,
+    'the merge copies, then hands over, then deletes — in that order');
+
+  // A postings list we could not read must stop the merge, or the last step
+  // removes the only sign-in that could ever reach them again.
+  ok(/if \(!survey\.jobsOk\)/.test(accounts),
+    'a merge refuses to run when the postings could not be listed');
+
+  // The mailer's high-water marks travel with a copied alert. Without them the
+  // alert looks brand new and newJobsFor() with an empty `since` matches the
+  // whole catalogue — one enormous e-mail as the reward for merging.
+  const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
+  for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'criteria', 'enabled']) {
+    ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
+  }
+}
+
+/* ------------------------------------------------- the posting vocabulary */
+
+function testVocab() {
+  const s = (v) => splitDepartment(v);
+
+  // the five shapes the committed data actually holds
+  eq(s('Fuqua School of Business, Operations Management group'),
+    { school: 'Fuqua School of Business', unit: 'Operations Management group' },
+    'school and unit, comma separated');
+  eq(s('Darden School of Business'), { school: 'Darden School of Business', unit: '' },
+    'a school on its own');
+  eq(s('Operations Management'), { school: '', unit: 'Operations Management' },
+    'a unit on its own is a unit, not a school');
+
+  // THE case a naive comma split gets wrong: the comma is inside the name
+  eq(s('Department of Decisions, Operations and Technology'),
+    { school: '', unit: 'Department of Decisions, Operations and Technology' },
+    'a comma inside a department name does not split it');
+  eq(s('School of Business, Analytics, Information, and Operations Management Department'),
+    { school: 'School of Business', unit: 'Analytics, Information, and Operations Management Department' },
+    'the unit keeps its own commas');
+
+  // a segment naming both, hyphenated
+  eq(s('Robinson College of Business-Department of Management'),
+    { school: 'Robinson College of Business', unit: 'Department of Management' },
+    'a hyphen splits school from department');
+
+  // "Area"/"Group" are TRAILING qualifiers — splitting at one strands the word
+  eq(s('Naveen Jindal School of Management/Healthcare Management Area').unit, '',
+    'a trailing "Area" is not treated as the start of a unit');
+  eq(s('Desautels Faculty of Management, Operations Management Area'),
+    { school: 'Desautels Faculty of Management', unit: 'Operations Management Area' },
+    'but a comma still separates them');
+
+  eq(s(''), { school: '', unit: '' }, 'nothing splits to nothing');
+  eq(s('  ,  '), { school: '', unit: '' }, 'punctuation only splits to nothing');
+
+  // joining is the inverse, and is what the card shows
+  eq(joinDepartment('Fuqua School of Business', 'Operations Management group'),
+    'Fuqua School of Business, Operations Management group', 'join');
+  eq(joinDepartment('', 'Operations Management'), 'Operations Management', 'join with no school');
+  eq(joinDepartment('Darden School of Business', ''), 'Darden School of Business', 'join with no unit');
+
+  // one identity for spellings that differ only in case or punctuation
+  eq(vocabKey('Operations Management'), vocabKey('operations  management!'), 'vocabKey folds');
+
+  const v = buildVocab([
+    { institution: 'Duke University', department: 'Fuqua School of Business, Operations Management' },
+    { institution: 'Duke University', department: 'Fuqua School of Business, Operations Management' },
+    { institution: 'Duke University', department: 'Fuqua School of Business, Decision Sciences' },
+    { institution: 'Tulane University', department: 'Freeman School of Business' },
+  ]);
+  eq(v.universities[0], { v: 'Duke University', n: 3 }, 'the most-used university leads');
+  eq(v.schools[0], { v: 'Fuqua School of Business', n: 3 }, 'schools are tallied across postings');
+  eq(v.units.find((u) => u.v === 'Operations Management').n, 2, 'units are tallied');
+  eq(v.byUniversity['Duke University'].units, ['Decision Sciences', 'Operations Management'],
+    'a university carries the units seen at it, sorted');
+  eq(v.byUniversity['Tulane University'].units, [], 'a school-only posting adds no unit');
+
+  // a row that already carries the split is taken as given, not re-derived
+  const given = buildVocab([{ institution: 'X', school: 'S', unit: 'U', department: 'ignored' }]);
+  eq(given.schools[0].v, 'S', 'an explicit school is used as given');
+  eq(given.units[0].v, 'U', 'an explicit unit is used as given');
+}
+
+function testSplitFields() {
+  // the form now sends school + unit; department is derived from them
+  const r = rowFromSubmission({ ...GOOD, department: undefined,
+    school: 'Fuqua School of Business', unit: 'Operations Management group' });
+  eq(r.school, 'Fuqua School of Business', 'school carried');
+  eq(r.unit, 'Operations Management group', 'unit carried');
+  eq(r.department, 'Fuqua School of Business, Operations Management group',
+    'department is derived from the two');
+
+  // either alone is enough
+  eq(rowFromSubmission({ ...GOOD, department: undefined, school: 'Darden School of Business', unit: '' })
+    .department, 'Darden School of Business', 'a school alone publishes');
+  eq(rowFromSubmission({ ...GOOD, department: undefined, school: '', unit: 'Operations Management' })
+    .department, 'Operations Management', 'a unit alone publishes');
+  ok(rowFromSubmission({ ...GOOD, department: '', school: '', unit: '' }) === null,
+    'neither is not publishable');
+
+  // a legacy submission carrying only `department` is split for the vocabulary
+  const legacy = rowFromSubmission({ ...GOOD, department: 'NUS Business School, Department of Analytics' });
+  eq(legacy.school, 'NUS Business School', 'a legacy posting gains a school');
+  eq(legacy.unit, 'Department of Analytics', 'and a unit');
+  eq(legacy.department, 'NUS Business School, Department of Analytics',
+    'and its published line is unchanged');
+
+  ok(PUBLIC_FIELDS.includes('school') && PUBLIC_FIELDS.includes('unit'),
+    'both parts are published');
+}
+
+/* ------------------------------------------- the migration off the sheet
+
+   Every existing posting has to become a document that can be edited, and the
+   only faithful way to build one is to invert the mapping. So the inverse is
+   checked against the REAL committed file, field by field: a migration that
+   rewrites the site's content while moving it is worse than no migration.   */
+
+async function testMigrationRoundTrip() {
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  ok(rows.length > 50, 'there are postings to migrate');
+
+  /* The one difference allowed, and it is deliberate: `department` is now
+     derived by joining school and unit with ", ", so the two rows that used a
+     HYPHEN as the separator ("Robinson College of Business-Department of
+     Management") come back normalised. Anything else is a loss. */
+  const NORMALISED = (a, b) => String(a).replace(/\s*-\s*/g, ', ') === String(b);
+
+  const lost = [];
+  let verbatim = 0;
+  for (const row of rows) {
+    const sub = submissionFromRow(row);
+    if (sub.applyByText) verbatim++;
+    const back = rowFromSubmission(sub);
+    if (!back) { lost.push(`${row.id}: no longer publishable`); continue; }
+    const out = publicRow({ ...back, id: row.id });
+    for (const k of Object.keys(row)) {
+      if (JSON.stringify(row[k]) === JSON.stringify(out[k])) continue;
+      if (k === 'department' && NORMALISED(row[k], out[k])) continue;
+      lost.push(`${row.id}.${k}: ${JSON.stringify(row[k])} -> ${JSON.stringify(out[k])}`);
+    }
+  }
+  eq(lost, [], 'every committed posting survives the round trip through a submission');
+
+  /* Four rows carry prose that disagrees with their own parsed date, because
+     the importer read the date from the raw tab and the prose from the display
+     tab. They must be carried VERBATIM rather than re-composed, or the date a
+     reader sees changes. */
+  ok(verbatim > 0, 'the rows whose apply-by prose cannot be rebuilt are carried verbatim');
+  ok(verbatim < rows.length / 10, 'and they are the exception, not the rule');
+
+  // the composition rule itself
+  eq(composeApplyBy({ untilFilled: true, applyByNote: '' }), 'Until filled.', 'until filled');
+  eq(composeApplyBy({ untilFilled: true, applyByNote: 'Early applications welcome.' }),
+    'Until filled. Early applications welcome.', 'until filled with a note');
+  eq(composeApplyBy({ applyByDate: '2025-11-30', applyByNote: 'Early.' }),
+    'November 30, 2025. Early.', 'a date and a note');
+  eq(composeApplyBy({ applyByDate: '', applyByNote: 'See the advert.' }), 'See the advert.',
+    'a note alone');
+
+  // a verbatim line wins over composition, and only then
+  eq(rowFromSubmission({ ...GOOD, applyByText: 'Whenever you like.' }).applyBy,
+    'Whenever you like.', 'applyByText is used verbatim');
+  eq(rowFromSubmission({ ...GOOD, applyByText: '' }).applyBy,
+    'November 30, 2025. Early submissions are encouraged.',
+    'an empty applyByText falls back to composition');
+
+  // an empty ref is not written to every migrated row
+  ok(!('ref' in publicRow({ ...rowFromSubmission({ ...GOOD, ref: '' }), id: 'x' })),
+    'a posting with no reference publishes no empty ref field');
+}
+
+async function testMigrationDocs() {
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  // every row must be addressable as a document id, or it cannot be migrated
+  const unusable = rows.filter((r) => !docIdFor(r)).map((r) => r.id);
+  eq(unusable, [], 'every posting id is usable as a Firestore document id');
+  eq(new Set(rows.map(docIdFor)).size, rows.length, 'and they are distinct');
+
+  // the gate the migration runs before writing anything
+  const bad = [];
+  for (const row of rows) for (const l of lostFields(row, migrationDoc(row))) bad.push(`${row.id}.${l}`);
+  eq(bad, [], 'no posting changes when migrated into the database');
+
+  const d = migrationDoc(rows[0], { now: new Date('2026-08-16T00:00:00Z') });
+  eq(d.status, 'published', 'a migrated posting is published, not queued');
+  eq(d.uid, null, 'and has no owner — there is no account behind a sheet posting');
+  eq(d.migratedFrom, 'jobs.json', 'its provenance is recorded');
+  ok(!('email' in d) && !('authEmail' in d) && !('chairEmail' in d),
+    'no contact address is invented for a migrated posting');
+
+  eq(docIdFor({ id: 'a/b' }), '', 'a slash is not usable as a document id');
+  eq(docIdFor({ id: '' }), '', 'nor is nothing');
+}
+
+function testAssignIds() {
+  /* THE BUG THIS EXISTS FOR: jobId is (year, institution, posting date) and
+     carries no department, so two real postings from one institution on one day
+     derive the same id. The sheet importer had always suffixed them; the
+     Firestore build had not, so the second overwrote the first and two
+     postings — Tulane's second Freeman department and Houston's — disappeared
+     from the site the moment the database became the source of truth. */
+  const row = (dept) => ({
+    year: 2026, posted: '2026-04-07', institution: 'Tulane University',
+    department: dept, school: 'Freeman School of Business', unit: dept,
+  });
+
+  const entries = [
+    { key: '2026-tulane-university-20260407-2', row: row('Management Sciences Area') },
+    { key: '2026-tulane-university-20260407', row: row('') },
+  ];
+  assignIds(entries);
+  const ids = entries.map((e) => e.row.id);
+  eq(new Set(ids).size, 2, 'two postings on one day keep two ids');
+  ok(ids.includes('2026-tulane-university-20260407'), 'one takes the plain id');
+  ok(ids.includes('2026-tulane-university-20260407-2'), 'the other is suffixed');
+
+  // STABLE: the suffix follows the document id, not the order they arrived in
+  const shuffled = [
+    { key: '2026-tulane-university-20260407', row: row('') },
+    { key: '2026-tulane-university-20260407-2', row: row('Management Sciences Area') },
+  ];
+  assignIds(shuffled);
+  eq(shuffled.find((e) => e.key.endsWith('-2')).row.id, '2026-tulane-university-20260407-2',
+    'the same document keeps the same id whichever order it is read in');
+  eq(entries.find((e) => e.key.endsWith('-2')).row.id,
+    shuffled.find((e) => e.key.endsWith('-2')).row.id, 'so a rebuild does not churn ids');
+
+  // three of them, and the unrelated posting is untouched
+  const three = [
+    { key: 'c', row: row('A') }, { key: 'a', row: row('B') }, { key: 'b', row: row('C') },
+    { key: 'z', row: { ...row('D'), institution: 'Duke University' } },
+  ];
+  assignIds(three);
+  eq(new Set(three.map((e) => e.row.id)).size, 4, 'four distinct ids');
+  eq(three[3].row.id, '2026-duke-university-20260407', 'a different institution needs no suffix');
+
+  eq(assignIds([]).length, 0, 'nothing to assign is not a special case');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
   testMerge();
   testMarketYear();
+  testVocab();
+  testSplitFields();
   testCollapseSameDay();
+  testAssignIds();
   await testPageHeadingRule();
   await testFleetPins();
+  await testMigrationRoundTrip();
+  await testMigrationDocs();
   await testServedFile();
+  await testAccountMerge();
   process.exit(finish() ? 0 : 1);
 }

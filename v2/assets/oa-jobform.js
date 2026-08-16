@@ -27,7 +27,7 @@
   ];
 
   var MAX = {
-    institution: 160, department: 220, country: 60, applyByNote: 300,
+    institution: 160, department: 220, school: 160, unit: 160, country: 60, applyByNote: 300,
     comments: 1200, postedAtUrl: 500, adUrl: 500,
     firstName: 80, lastName: 80, email: 160, chairName: 120, chairEmail: 160, note: 1200
   };
@@ -143,7 +143,18 @@
     }
 
     need('f-institution', 'institution', 'the name of the institution');
-    need('f-department', 'department', 'the school, department or group');
+
+    /* School and unit are each optional — plenty of departments sit directly
+       under a university, and plenty of schools advertise without naming one —
+       but a posting with NEITHER has nothing under the institution name, so
+       the requirement is on the line they are joined into. The error is put on
+       the department field, which is the one a poster is most likely to mean. */
+    out.school = String($('f-school').value || '').trim().slice(0, MAX.school);
+    out.unit = String($('f-unit').value || '').trim().slice(0, MAX.unit);
+    out.department = [out.school, out.unit].filter(Boolean).join(', ').slice(0, MAX.department);
+    var unitEl = $('f-unit');
+    setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');
+    if (!out.department && !firstBad) firstBad = $('f-school');
     need('f-country', 'country', 'the country of the campus');
     need('f-firstName', 'firstName', 'your first name');
     need('f-lastName', 'lastName', 'your last name');
@@ -239,7 +250,112 @@
 
   /* ------------------------------------------------------------------- wiring */
 
+  /* ------------------------------------------------------------ edit mode
+
+     `?edit=<document id>` turns this page from "post a job" into "correct this
+     posting". The id comes from the Edit button on a card, and is only useful
+     to someone the rules let read that document — an ordinary visitor pasting
+     one gets a permission error rather than a form full of someone else's
+     posting.                                                                */
+
+  var EDIT_ID = (function () {
+    var m = /[?&]edit=([^&]+)/.exec(location.search);
+    return m ? decodeURIComponent(m[1]) : '';
+  })();
+  var EDIT_REF = '';
+
+  /** Put a loaded document back into the form. The inverse of collect(). */
+  function fill(v) {
+    function set(id, value) { var el = $(id); if (el) el.value = value == null ? '' : value; }
+    function ticks(name, values) {
+      var want = {};
+      (values || []).forEach(function (x) { want[x] = true; });
+      Array.prototype.forEach.call(
+        $('oa-job-form').querySelectorAll('input[name="' + name + '"]'),
+        function (cb) { cb.checked = !!want[cb.value]; });
+    }
+
+    set('f-institution', v.institution);
+    set('f-type', v.type);
+
+    /* A posting made before the form was split carries only `department`. Its
+       school and unit are filled in by the build, so an older document may have
+       them; if not, the whole line goes in the department field rather than
+       being guessed at here — the poster can split it while they are editing. */
+    set('f-school', v.school || '');
+    set('f-unit', v.unit || (v.school ? '' : v.department) || '');
+
+    set('f-country', v.country);
+    set('f-applyByDate', v.applyByDate);
+    set('f-applyByNote', v.applyByNote);
+    set('f-comments', v.comments);
+    set('f-adUrl', v.adUrl);
+    set('f-postedAtUrl', v.postedAtUrl);
+    set('f-firstName', v.firstName);
+    set('f-lastName', v.lastName);
+    set('f-email', v.email || v.authEmail);
+    set('f-chairName', v.chairName);
+    set('f-chairEmail', v.chairEmail);
+    set('f-note', v.note);
+
+    ticks('levels', v.levels);
+    ticks('characteristics', v.characteristics);
+
+    var uf = $('f-untilFilled');
+    if (uf) {
+      uf.checked = !!v.untilFilled;
+      var d = $('f-applyByDate');
+      if (d) d.disabled = uf.checked;
+    }
+
+    EDIT_REF = v.ref || '';
+
+    // keep the derived department line and its preview in step
+    var school = $('f-school');
+    if (school) school.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function enterEditMode() {
+    if (!EDIT_ID) return;
+
+    document.title = 'Edit a posting - OperationsAcademia.org';
+    var h = document.querySelector('.title-heading h2');
+    if (h) h.textContent = 'Edit a posting';
+
+    var submit = $('oa-submit');
+    if (submit) submit.textContent = 'Save changes';
+
+    var intro = $('oa-intro');
+    if (intro) {
+      intro.innerHTML = '<p><strong>You are correcting a posting that is already ' +
+        'on the site.</strong> Your changes appear on the ' +
+        '<a href="jobs.html">job postings page</a> at the next update, normally ' +
+        'within an hour. The posting date does not change.</p>';
+    }
+
+    OAAccounts.whenSignedIn(function () {
+      OAFB.ready().then(function (fb) {
+        return fb.firestore().collection(OAFB.col.jobSubmissions).doc(EDIT_ID).get();
+      }).then(function (snap) {
+        if (!snap.exists) {
+          say('That posting no longer exists.', 'err');
+          show($('oa-job-form'), false);
+          return;
+        }
+        fill(snap.data() || {});
+      }).catch(function (err) {
+        say(err && err.code === 'permission-denied'
+          ? 'You are not allowed to edit this posting.'
+          : 'We could not load that posting. Please try again.', 'err');
+        show($('oa-job-form'), false);
+        if (window.console) console.error('edit:', err);
+      });
+    });
+  }
+
   function boot() {
+    wireVocab();
+    enterEditMode();
     fillStaticOptions();
 
     var sent = false;                 // latched once a posting has been written
@@ -326,21 +442,48 @@
 
       var btn = $('oa-submit');
       btn.disabled = true;
-      say('Sending…');
+      say(EDIT_ID ? 'Saving…' : 'Sending…');
 
       OAAccounts.whenSignedIn(function (user) {
         OAFB.ready().then(function (fb) {
+          var col = fb.firestore().collection(OAFB.col.jobSubmissions);
+
+          /* EDITING an existing posting. `uid` and `createdAt` are deliberately
+             NOT written: the rule pins the owner (a poster cannot hand their
+             posting to someone else through this path), and the posting date is
+             when it was first advertised, not when a typo was fixed. Status goes
+             back to 'queued' so the build picks it up — including a posting that
+             had been withdrawn, which is how a correction un-withdraws one. */
+          if (EDIT_ID) {
+            doc.status = 'queued';
+            doc.updatedAt = new Date().toISOString();
+            delete doc.uid;
+            return col.doc(EDIT_ID).update(doc).then(function () { return EDIT_REF; });
+          }
+
           doc.ref = makeRef();
           doc.uid = user.uid;
           doc.authEmail = user.email || '';
           doc.status = 'queued';       // the rules pin this; the build publishes it
           doc.source = 'oa-form';
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
-          return fb.firestore().collection(OAFB.col.jobSubmissions).add(doc)
-            .then(function () { return doc.ref; });
+          return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
           sent = true;
-          $('oa-ref').textContent = ref;
+          /* The confirmation is written for a NEW posting — a reference to keep,
+             a copy e-mailed, "post another". None of that is true of a
+             correction, so say what actually happened instead. */
+          if (EDIT_ID) {
+            var done = $('oa-done');
+            done.innerHTML =
+              '<h3>Your changes have been saved.</h3>' +
+              '<p>The posting is updated on the <a href="jobs.html">job postings page</a> ' +
+              'at the next update, normally within an hour.</p>' +
+              '<p class="oa-done-actions">' +
+              '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
+          } else {
+            $('oa-ref').textContent = ref || '—';
+          }
           show(form, false);
           show($('oa-intro'), false);
           show($('oa-done'), true);
@@ -349,7 +492,9 @@
           btn.disabled = false;
           var code = (err && err.code) || '';
           if (code === 'permission-denied') {
-            say('The site is not accepting postings yet — its database rules have not been ' +
+            say(EDIT_ID
+              ? 'You are not allowed to change this posting.'
+              : 'The site is not accepting postings yet — its database rules have not been ' +
                 'published. Please try again later, or contact us.', 'err');
           } else {
             say('We could not send your posting. Please try again in a moment.' +
@@ -359,6 +504,72 @@
         });
       });
     });
+  }
+
+  /* ------------------------------------------------------ the shared vocabulary
+
+     The three name fields offer what the site has already published, so the
+     same school arrives spelled the same way each time. The list is
+     data/vocab.json, rebuilt from the postings by every writer of jobs.json —
+     so a name a poster adds today is offered to the next poster, with nobody
+     maintaining a list.
+
+     Entirely optional: if the fetch fails the fields stay ordinary text
+     inputs and the form works exactly as it did.                            */
+
+  function wireVocab() {
+    var inst = $('f-institution'), school = $('f-school'), unit = $('f-unit');
+    var dept = $('f-department'), preview = $('f-department-preview');
+    if (!inst || !school || !unit) return;
+
+    /* Keep the hidden joined field and the preview in step on every keystroke,
+       so what will be published is visible before it is sent. */
+    function sync() {
+      var joined = [String(school.value || '').trim(), String(unit.value || '').trim()]
+        .filter(Boolean).join(', ');
+      if (dept) dept.value = joined;
+      if (preview) {
+        preview.textContent = joined
+          ? 'Shown under the institution name as: ' + joined
+          : '';
+      }
+    }
+    school.addEventListener('input', sync);
+    unit.addEventListener('input', sync);
+    sync();
+
+    if (!window.OACombo) return;
+
+    var combos = {
+      inst: OACombo.attach(inst, { options: [] }),
+      school: OACombo.attach(school, {
+        options: [], hint: 'Schools already posted at this university are listed first.' }),
+      unit: OACombo.attach(unit, {
+        options: [], hint: 'Departments already posted at this university are listed first.' }),
+    };
+
+    fetch('data/vocab.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (v) {
+        if (!v) return;
+        combos.inst.setOptions(v.universities || []);
+        combos.school.setOptions(v.schools || []);
+        combos.unit.setOptions(v.units || []);
+
+        /* Choosing a university floats that university's own schools and
+           departments to the top of the other two lists. A HINT, never a
+           restriction — a school can open a new department, and the form must
+           not make that unpostable. */
+        function prefer() {
+          var e = (v.byUniversity || {})[String(inst.value || '').trim()] || { schools: [], units: [] };
+          combos.school.setPreferred(e.schools || []);
+          combos.unit.setPreferred(e.units || []);
+        }
+        inst.addEventListener('change', prefer);
+        inst.addEventListener('input', prefer);
+        prefer();
+      })
+      .catch(function () { /* the fields are plain text inputs; that is fine */ });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
