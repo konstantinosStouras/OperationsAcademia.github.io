@@ -101,6 +101,7 @@
          users/{uid}/testEmails/{id}  one-off "send me a test" requests
          profiles/{uid}               the account's own profile document
          registeredUsers/{uid}        contentless public tally, for the count() aggregate
+         accountKeys/{key}            "one person, two accounts" hints (orcid:… / email:…)
          jobSubmissions/{id}          a posted job, before the build commits it to JSON
          feedback/{id}                feedback + screenshots                          */
     col: {
@@ -109,6 +110,7 @@
       testEmails: 'testEmails',
       profiles: 'profiles',
       registered: 'registeredUsers',
+      accountKeys: 'accountKeys',
       jobSubmissions: 'jobSubmissions',
       feedback: 'feedback'
     }

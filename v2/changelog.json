@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "merge-duplicate-accounts",
+   "date": "2026-08-16",
+   "title": "Signed up twice? Merge the two accounts into one",
+   "summary": "You can sign in with Google, with ORCID, or with an e-mail address and a password — and until now each of those started a separate account, because ORCID shares no e-mail address for us to recognise you by. So did a second Gmail address. Two accounts meant your alerts on one and your job postings on the other. Edit profile now offers 'Merge this account into another of mine': you sign in to the one you want to keep, and everything moves across — your alerts with their history intact, your job postings still yours to correct or withdraw, and any details the account you keep was missing. Nothing is deleted until the move has succeeded. The same card also lets you attach a second sign-in to the account you already have, so it never happens again — and if we spot that an ORCID registration duplicates an account you already had, we say so and offer the merge instead of leaving you to find it.",
+   "url": "https://www.operationsacademia.org/"
+  },
+  {
    "id": "jobs-filters-and-cards",
    "date": "2026-08-16",
    "title": "The job filters read as they always did, and the list feels it",

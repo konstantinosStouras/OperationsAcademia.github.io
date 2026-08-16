@@ -1,1 +1,5 @@
-node_modules/
+# no trailing slash: a `node_modules/` pattern matches a DIRECTORY only, and
+# a local test run may leave a node_modules SYMLINK (pointing at a global
+# install of playwright) — which git sees as a file, so the slashed form let
+# `git add -A` commit it.
+node_modules

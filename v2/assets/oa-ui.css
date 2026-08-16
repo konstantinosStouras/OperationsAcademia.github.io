@@ -187,6 +187,129 @@
 
 #oa-profile-form input[disabled] { background: #f6f6f6; color: #777; }
 
+/* A value we were GIVEN rather than one that is typed — an ORCID iD that came
+   from an ORCID sign-in. Shaped like a label + field so it sits in the column
+   with the real fields, but it is text, not an input. */
+.oa-field-static { margin: 0 0 14px; }
+
+/* the note under it is a line of its own, exactly as under a real field —
+   .oa-opt.oa-fine's block rule is scoped to labels, and this is not one */
+.oa-field-static .oa-opt.oa-fine { display: block; margin: 6px 0 0; }
+
+.oa-flabel {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-orcid-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid #cfe0b6;
+  border-radius: 3px;
+  background: #f4f9ec;
+  font-size: 14px;
+  color: #3c5220;
+}
+
+.oa-verified {
+  margin-left: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1c6b45;
+}
+
+/* ------------------------------------------------- other accounts / merging */
+
+.oa-acct-other {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #ececec;
+}
+
+.oa-acct-other h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+.oa-acct-other .oa-opt.oa-fine { display: block; margin: 4px 0 0; }
+.oa-acct-signedin { margin: 0 0 12px; }
+.oa-acct-linkrow { margin: 0 0 12px; }
+
+.oa-acct-mergelede {
+  margin: 14px 0 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #555;
+}
+
+.oa-mergebtn {
+  padding: 7px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #313a45;
+  cursor: pointer;
+}
+
+.oa-mergebtn:hover { background: #f5f7fa; border-color: #b9c6d4; }
+
+.oa-merge-card { max-width: 520px; }
+
+.oa-merge-card h4 {
+  margin: 20px 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #313a45;
+}
+
+/* The two accounts, drawn the same way so the direction of the move is the
+   only difference the reader has to take in. */
+.oa-merge-from,
+.oa-merge-into {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: #fafbfc;
+}
+
+.oa-merge-into { margin-top: 8px; border-color: #cfe0b6; background: #f7fbf1; }
+
+.oa-merge-who { min-width: 0; }
+.oa-merge-who strong { display: block; font-size: 14.5px; color: #313a45; }
+
+.oa-merge-holds {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #666;
+}
+
+.oa-merge-note { margin: 0 0 12px !important; }
+
+.oa-merge-log {
+  margin: 14px 0 0;
+  padding: 0 0 0 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #444;
+  list-style: disc;
+}
+
+.oa-merge-log[hidden] { display: none; }
+
 /* -------------------------------------------------------------------- modal */
 
 .oa-modal {
