@@ -34,45 +34,46 @@
   --radius-lg: 20px;
   --container: 1120px;
 
-  /* light (default) */
+  /* light (default) — NEUTRAL palette (owner, 2026-08-16: no blue anywhere;
+     charcoal/gray accents modelled on the reference site's look) */
   --bg: #f8f7f4;
   --bg-2: #ffffff;
-  --bg-3: #eef0f4;
-  --ink: #16233b;
-  --ink-2: #3d4b63;
-  --mut: #66748c;
-  --line: #dfe3ea;
-  --line-soft: #e9edf2;
-  --brand: #34589c;
-  --brand-2: #27447c;
-  --brand-soft: #e7edf7;
+  --bg-3: #eff0f2;
+  --ink: #22272e;
+  --ink-2: #454c56;
+  --mut: #6e7681;
+  --line: #dde0e4;
+  --line-soft: #e8eaec;
+  --brand: #3a424d;
+  --brand-2: #262d36;
+  --brand-soft: #e9ebee;
   --on-brand: #ffffff;
   --gold: #b98a3e;
   --ok: #2e7d4f;
   --err: #b3413d;
   --warn-bg: #fdf6e8;
   --warn-line: #ecd9ac;
-  --shadow: 0 1px 2px rgba(22, 35, 59, 0.05), 0 14px 34px -20px rgba(22, 35, 59, 0.28);
-  --shadow-lg: 0 2px 6px rgba(22, 35, 59, 0.06), 0 30px 70px -30px rgba(22, 35, 59, 0.4);
+  --shadow: 0 1px 2px rgba(23, 27, 33, 0.05), 0 14px 34px -20px rgba(23, 27, 33, 0.28);
+  --shadow-lg: 0 2px 6px rgba(23, 27, 33, 0.06), 0 30px 70px -30px rgba(23, 27, 33, 0.4);
   --header-bg: rgba(248, 247, 244, 0.82);
-  --backdrop: rgba(22, 30, 46, 0.5);
+  --backdrop: rgba(18, 21, 25, 0.5);
 
   color-scheme: light;
 }
 
 [data-theme='dark'] {
-  --bg: #0b0e15;
-  --bg-2: #131826;
-  --bg-3: #0f1420;
-  --ink: #edf1f7;
-  --ink-2: #c3ccdb;
-  --mut: #8a96ab;
-  --line: #242d41;
-  --line-soft: #1b2334;
-  --brand: #8ab1e6;
-  --brand-2: #a5c5f0;
-  --brand-soft: rgba(138, 177, 230, 0.14);
-  --on-brand: #0b0e15;
+  --bg: #0d0f12;
+  --bg-2: #15181d;
+  --bg-3: #111317;
+  --ink: #eef0f2;
+  --ink-2: #c5cad1;
+  --mut: #8d949e;
+  --line: #2a2f36;
+  --line-soft: #1e2227;
+  --brand: #c6ccd4;
+  --brand-2: #dde2e8;
+  --brand-soft: rgba(198, 204, 212, 0.13);
+  --on-brand: #0d0f12;
   --gold: #d9a55e;
   --ok: #6fbf92;
   --err: #e08a86;
@@ -80,8 +81,8 @@
   --warn-line: #4d3d1d;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 16px 40px -22px rgba(0, 0, 0, 0.65);
   --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.45), 0 34px 80px -32px rgba(0, 0, 0, 0.8);
-  --header-bg: rgba(11, 14, 21, 0.82);
-  --backdrop: rgba(3, 5, 9, 0.66);
+  --header-bg: rgba(13, 15, 18, 0.82);
+  --backdrop: rgba(4, 5, 7, 0.66);
 
   color-scheme: dark;
 }
