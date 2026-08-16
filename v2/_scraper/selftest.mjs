@@ -18,9 +18,11 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
+  submissionFromRow, composeApplyBy,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
+import { docIdFor, migrationDoc, lostFields } from './migrate-to-firestore.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
@@ -490,6 +492,91 @@ function testSplitFields() {
     'both parts are published');
 }
 
+/* ------------------------------------------- the migration off the sheet
+
+   Every existing posting has to become a document that can be edited, and the
+   only faithful way to build one is to invert the mapping. So the inverse is
+   checked against the REAL committed file, field by field: a migration that
+   rewrites the site's content while moving it is worse than no migration.   */
+
+async function testMigrationRoundTrip() {
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  ok(rows.length > 50, 'there are postings to migrate');
+
+  /* The one difference allowed, and it is deliberate: `department` is now
+     derived by joining school and unit with ", ", so the two rows that used a
+     HYPHEN as the separator ("Robinson College of Business-Department of
+     Management") come back normalised. Anything else is a loss. */
+  const NORMALISED = (a, b) => String(a).replace(/\s*-\s*/g, ', ') === String(b);
+
+  const lost = [];
+  let verbatim = 0;
+  for (const row of rows) {
+    const sub = submissionFromRow(row);
+    if (sub.applyByText) verbatim++;
+    const back = rowFromSubmission(sub);
+    if (!back) { lost.push(`${row.id}: no longer publishable`); continue; }
+    const out = publicRow({ ...back, id: row.id });
+    for (const k of Object.keys(row)) {
+      if (JSON.stringify(row[k]) === JSON.stringify(out[k])) continue;
+      if (k === 'department' && NORMALISED(row[k], out[k])) continue;
+      lost.push(`${row.id}.${k}: ${JSON.stringify(row[k])} -> ${JSON.stringify(out[k])}`);
+    }
+  }
+  eq(lost, [], 'every committed posting survives the round trip through a submission');
+
+  /* Four rows carry prose that disagrees with their own parsed date, because
+     the importer read the date from the raw tab and the prose from the display
+     tab. They must be carried VERBATIM rather than re-composed, or the date a
+     reader sees changes. */
+  ok(verbatim > 0, 'the rows whose apply-by prose cannot be rebuilt are carried verbatim');
+  ok(verbatim < rows.length / 10, 'and they are the exception, not the rule');
+
+  // the composition rule itself
+  eq(composeApplyBy({ untilFilled: true, applyByNote: '' }), 'Until filled.', 'until filled');
+  eq(composeApplyBy({ untilFilled: true, applyByNote: 'Early applications welcome.' }),
+    'Until filled. Early applications welcome.', 'until filled with a note');
+  eq(composeApplyBy({ applyByDate: '2025-11-30', applyByNote: 'Early.' }),
+    'November 30, 2025. Early.', 'a date and a note');
+  eq(composeApplyBy({ applyByDate: '', applyByNote: 'See the advert.' }), 'See the advert.',
+    'a note alone');
+
+  // a verbatim line wins over composition, and only then
+  eq(rowFromSubmission({ ...GOOD, applyByText: 'Whenever you like.' }).applyBy,
+    'Whenever you like.', 'applyByText is used verbatim');
+  eq(rowFromSubmission({ ...GOOD, applyByText: '' }).applyBy,
+    'November 30, 2025. Early submissions are encouraged.',
+    'an empty applyByText falls back to composition');
+
+  // an empty ref is not written to every migrated row
+  ok(!('ref' in publicRow({ ...rowFromSubmission({ ...GOOD, ref: '' }), id: 'x' })),
+    'a posting with no reference publishes no empty ref field');
+}
+
+async function testMigrationDocs() {
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  // every row must be addressable as a document id, or it cannot be migrated
+  const unusable = rows.filter((r) => !docIdFor(r)).map((r) => r.id);
+  eq(unusable, [], 'every posting id is usable as a Firestore document id');
+  eq(new Set(rows.map(docIdFor)).size, rows.length, 'and they are distinct');
+
+  // the gate the migration runs before writing anything
+  const bad = [];
+  for (const row of rows) for (const l of lostFields(row, migrationDoc(row))) bad.push(`${row.id}.${l}`);
+  eq(bad, [], 'no posting changes when migrated into the database');
+
+  const d = migrationDoc(rows[0], { now: new Date('2026-08-16T00:00:00Z') });
+  eq(d.status, 'published', 'a migrated posting is published, not queued');
+  eq(d.uid, null, 'and has no owner — there is no account behind a sheet posting');
+  eq(d.migratedFrom, 'jobs.json', 'its provenance is recorded');
+  ok(!('email' in d) && !('authEmail' in d) && !('chairEmail' in d),
+    'no contact address is invented for a migrated posting');
+
+  eq(docIdFor({ id: 'a/b' }), '', 'a slash is not usable as a document id');
+  eq(docIdFor({ id: '' }), '', 'nor is nothing');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -499,6 +586,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testSplitFields();
   testCollapseSameDay();
   await testPageHeadingRule();
+  await testMigrationRoundTrip();
+  await testMigrationDocs();
   await testServedFile();
   process.exit(finish() ? 0 : 1);
 }

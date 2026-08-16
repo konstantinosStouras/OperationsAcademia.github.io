@@ -109,17 +109,25 @@ async function main() {
 
   const col = db.collection('jobSubmissions');
 
-  // queued -> publish; withdrawn/hidden -> take back out of the file
-  const [queuedSnap, pulledSnap] = await Promise.all([
-    col.where('status', '==', 'queued').get(),
+  /* THE DATABASE IS THE SOURCE OF TRUTH, and data/jobs.json is its projection.
+     This used to read only what was newly `queued` and merge it into the file,
+     which meant an edit to an ALREADY-PUBLISHED posting changed nothing: the
+     document was never read again. Reading the whole live set instead is what
+     makes editing work at all — a posting is rebuilt from its document on
+     every run, so a correction reaches the page the same way a new posting
+     does. */
+  const [liveSnap, pulledSnap] = await Promise.all([
+    col.where('status', 'in', ['queued', 'published']).get(),
     col.where('status', 'in', ['withdrawn', 'hidden']).get(),
   ]);
 
-  const queued = queuedSnap.docs;
+  const live = liveSnap.docs;
   const pulled = pulledSnap.docs;
+  const queued = live.filter((d) => d.data().status === 'queued');
 
   if (SCAN) {
-    log(`${queued.length} queued, ${pulled.length} withdrawn/hidden`);
+    log(`${live.length} live (${queued.length} of them newly queued), ` +
+        `${pulled.length} withdrawn/hidden`);
     for (const d of queued) {
       const v = d.data();
       log(`  queued  ${v.ref || d.id}  ${v.institution} — ${v.department}`);
@@ -131,17 +139,12 @@ async function main() {
     return;
   }
 
-  if (!queued.length && !pulled.length) {
-    log('nothing queued and nothing withdrawn — no change.');
-    return;
-  }
-
   const now = new Date();
   const fresh = [];
   const rejected = [];
-  for (const d of queued) {
+  for (const d of live) {
     const row = rowFromSubmission(d.data(), { now });
-    if (row) fresh.push({ id: d.id, row });
+    if (row) fresh.push({ id: d.id, row, queued: d.data().status === 'queued' });
     else rejected.push({ id: d.id, ref: d.data().ref || d.id });
   }
 
@@ -158,8 +161,27 @@ async function main() {
   const hide = await readJson(path.join(DATA, 'jobs-hidden.json'), {});
   const hidden = new Set([].concat(hide.ids || [], hide.refs || []));
 
+  /* ORPHANS — rows in the served file that no live document accounts for.
+
+     Before the migration has run, that is every posting still only in the
+     file, and rebuilding from the database alone would DELETE them. So they
+     are carried instead, and reported: the file only ever shrinks because a
+     posting was withdrawn or hidden, never because a document is missing.
+
+     The consequence, which is deliberate: taking a posting down is a STATUS
+     CHANGE (withdrawn/hidden), never deleting its document. Deleting the
+     document would leave the row orphaned and therefore preserved — the
+     opposite of what was intended. The rules reflect this: a poster may
+     withdraw their own posting, and only the maintainer may delete outright. */
+  const live_ids = new Set(fresh.map((f) => f.row.id));
+  const orphans = existing.filter((r) => !live_ids.has(r.id) && !removeRefs.includes(r.ref));
+  if (orphans.length) {
+    warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
+         'unchanged. Run migrate-to-firestore.mjs to make them editable.');
+  }
+
   const merged =
-    mergeRows(existing, fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
+    mergeRows(orphans, fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
       removeRefs);
   const { added, updated, removed } = merged;
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
@@ -195,7 +217,7 @@ async function main() {
   // in the file, and re-publishing it next run replaces it in place.
   const batch = db.batch();
   let stamped = 0;
-  for (const f of fresh) {
+  for (const f of fresh.filter((x) => x.queued)) {
     batch.update(col.doc(f.id), {
       status: 'published',
       publishedAt: new Date(),

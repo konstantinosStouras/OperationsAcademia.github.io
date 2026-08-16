@@ -1,27 +1,23 @@
-name: OA jobs — sync the Google Sheet
+name: OA jobs — sync the Google Sheet (RETIRED)
 
-# WHY THIS EXISTS. The migration into v2/data/jobs.json was a one-off snapshot
-# (81 postings). The old Google form kept writing to the sheet afterwards, so
-# the live Awesome Tables page went on to 92 while the v2 page stayed at 81 —
-# the "where are the rest of the job postings?" report.
+# RETIRED on 2026-08-16. The Google Sheet is no longer a writer of this
+# dataset: every posting was migrated into Firestore
+# (v2/_scraper/migrate-to-firestore.mjs) and the postings are now the database,
+# so oa-jobs-build.yml generates data/jobs.json from documents that can be
+# edited. Reading the sheet on a schedule would UNDO an edit — it rebuilds a
+# row from the sheet, which knows nothing about the correction — which is the
+# exact failure this retirement removes.
 #
-# Until the Google form is retired the sheet is still a WRITER of this dataset,
-# so it is read on a schedule like any other writer. The import runs in --merge
-# mode: it only ADDS what is missing, so a posting made through
-# /v2/post-a-job.html is never overwritten by a sheet that does not know about
-# it, and data/jobs-hidden.json withholds anything taken down.
+# It is kept, disabled, rather than deleted: it is the only description of how
+# the sheet was read, and it is the way back if the migration has to be redone.
+# The schedule is gone; it runs only when dispatched by hand, and then only in
+# dry-run.
 #
-# It needs no credentials — the sheet is readable by anyone with the link — and
-# it writes nothing when the sheet holds nothing new.
-#
-# AT CUTOVER: when the Google form is switched off, delete this workflow. The
-# posting form and oa-jobs-build.yml are then the only writers.
+# THE OLD GOOGLE FORM MUST BE SWITCHED OFF. While it accepts responses they go
+# into a sheet nothing reads any more, so a poster gets a confirmation and
+# their posting never appears. Point it at /v2/post-a-job.html.
 
 on:
-  schedule:
-    # twice an hour, off the boundary so it does not queue behind every other
-    # :00 job on the runners, and offset from oa-jobs-build.yml's 7/27/47
-    - cron: '17,47 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -63,7 +59,7 @@ jobs:
       - name: Read the sheet and merge what is missing
         run: |
           node v2/_scraper/import-sheet.mjs --sheet --merge \
-               --out v2/data/jobs.json ${{ inputs.dry_run && '--dry-run' || '' }}
+               --out v2/data/jobs.json --dry-run
 
       - name: Re-check the file we are about to commit
         run: node v2/_scraper/selftest.mjs

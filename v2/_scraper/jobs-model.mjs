@@ -206,10 +206,16 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
   // What the card shows on the "Apply by" line. The sheet stored this as one
   // free-text field ("November 1, 2025. Early submissions are encouraged."), so
   // the date and the note are recombined into the same shape.
-  const note = text(doc.applyByNote, MAXLEN.applyBy);
-  const applyBy = doc.untilFilled
-    ? (note ? `Until filled. ${note}` : 'Until filled.')
-    : [applyByDate ? longDate(applyByDate) : '', note].filter(Boolean).join('. ');
+  /* `applyByText` is a VERBATIM override, and exists for one reason: four
+     postings imported from the sheet carry prose that disagrees with their own
+     parsed date ("March 13, 2026. Please apply…" against an applyByDate of
+     2026-03-14 — the importer read the date from the raw tab and the prose from
+     the display tab). Re-composing those would quietly change the date a reader
+     sees, so the migration carries the original line instead. A posting made
+     through the form never sets it, and composition applies as it always did. */
+  const applyBy = text(doc.applyByText, MAXLEN.applyBy) || composeApplyBy({
+    untilFilled: doc.untilFilled, applyByDate, applyByNote: doc.applyByNote,
+  });
 
   const row = {
     id: '',
@@ -226,13 +232,20 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     comments: text(doc.comments, MAXLEN.comments),
     country,
     adUrl: url(doc.adUrl),
-    adLabel: 'link to Job ad',
+    /* These four were fixed values, which was right while every posting came
+       from this form. The migration off the Google Sheet makes a document out
+       of an EXISTING row, so they have to survive the round trip: the sheet
+       carries its own link labels ("Operations Academia"), its own
+       further-info URL, and a source that is not this form. Each still
+       defaults to what it always was. */
+    adLabel: text(doc.adLabel, MAXLEN.adLabel) || 'link to Job ad',
     postedAtUrl: url(doc.postedAtUrl),
-    postedAtLabel: 'link',
-    furtherInfoUrl: `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
+    postedAtLabel: text(doc.postedAtLabel, MAXLEN.postedAtLabel) || 'link',
+    furtherInfoUrl: url(doc.furtherInfoUrl) ||
+      `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
     characteristics: pickList(doc.characteristics, CHARACTERISTICS),
     featured: doc.featured === true,
-    source: 'oa-form',
+    source: text(doc.source, 40) || 'oa-form',
     addedAt: isoStamp(tsToDate(doc.createdAt) || now),
     ref: text(doc.ref, 40),
   };
@@ -263,8 +276,95 @@ export function longDate(iso) {
     changes nothing produces a byte-identical file and commits nothing. */
 export function publicRow(row) {
   const out = {};
-  for (const k of PUBLIC_FIELDS) if (row[k] !== undefined) out[k] = row[k];
+  for (const k of PUBLIC_FIELDS) {
+    if (row[k] === undefined) continue;
+    // `ref` addresses a posting made through the site; a posting migrated off
+    // the sheet has none, and writing `"ref": ""` onto every one of those rows
+    // is 90-odd lines of noise in a file whose diff is meant to be readable.
+    if (k === 'ref' && !row[k]) continue;
+    out[k] = row[k];
+  }
   return out;
+}
+
+/**
+ * The "Apply by" line, composed from the three things a poster actually gives.
+ * ONE definition, because `submissionFromRow` has to invert it exactly.
+ */
+export function composeApplyBy({ untilFilled, applyByDate, applyByNote }) {
+  const note = text(applyByNote, MAXLEN.applyBy);
+  if (untilFilled) return note ? `Until filled. ${note}` : 'Until filled.';
+  return [applyByDate ? longDate(applyByDate) : '', note].filter(Boolean).join('. ');
+}
+
+/* ------------------------------------------------ a row back into a submission
+
+   The migration off the Google Sheet needs every existing posting to become a
+   document that can be edited, and the only faithful way to build one is to
+   invert the mapping above. Inverting it is also how the migration is CHECKED:
+   `rowFromSubmission(submissionFromRow(row))` must reproduce the row, which the
+   selftest asserts over every committed posting. A migration that cannot
+   round-trip is one that silently rewrites the site's content.               */
+
+/**
+ * A published row -> the `jobSubmissions` document it would have come from.
+ *
+ * `applyBy` is the awkward one: the row keeps it as one line of prose that the
+ * mapping BUILT from a date, a note and an until-filled flag, so those three
+ * are recovered from it rather than guessed.
+ */
+export function submissionFromRow(row, { uid = null, status = 'published' } = {}) {
+  const applyBy = String(row.applyBy || '');
+  let untilFilled = false;
+  let applyByNote = '';
+
+  /* `&& !row.applyByDate` matters: one imported posting reads "Until filled…"
+     yet carries a real deadline date too. Reading it as until-filled would make
+     the mapping CLEAR that date, losing it — so a row with a date is never
+     treated as until-filled, and its prose is carried verbatim instead. */
+  if (/^until filled/i.test(applyBy.trim()) && !row.applyByDate) {
+    untilFilled = true;
+    applyByNote = applyBy.trim().replace(/^until filled\.?\s*/i, '');
+  } else if (row.applyByDate) {
+    const lead = longDate(row.applyByDate);
+    applyByNote = applyBy.startsWith(lead)
+      ? applyBy.slice(lead.length).replace(/^\.\s*/, '')
+      : applyBy;
+  } else {
+    applyByNote = applyBy;
+  }
+
+  const composed = composeApplyBy({ untilFilled, applyByDate: row.applyByDate, applyByNote });
+
+  return {
+    ref: row.ref || '',
+    uid,
+    status,
+    // only when the line cannot be rebuilt from its parts — see applyByText
+    ...(composed === applyBy ? {} : { applyByText: applyBy }),
+    year: row.year,
+    postedOn: row.posted,
+    institution: row.institution || '',
+    school: row.school || '',
+    unit: row.unit || '',
+    department: row.department || '',
+    type: row.type || '',
+    levels: (row.levels || []).slice(),
+    country: row.country || '',
+    untilFilled,
+    applyByDate: row.applyByDate || '',
+    applyByNote,
+    comments: row.comments || '',
+    adUrl: row.adUrl || '',
+    postedAtUrl: row.postedAtUrl || '',
+    furtherInfoUrl: row.furtherInfoUrl || '',
+    characteristics: (row.characteristics || []).slice(),
+    featured: !!row.featured,
+    source: row.source || 'sheet-import',
+    adLabel: row.adLabel || '',
+    postedAtLabel: row.postedAtLabel || '',
+    createdAt: row.addedAt || '',
+  };
 }
 
 /* --------------------------------------------------------- same-day repeats
