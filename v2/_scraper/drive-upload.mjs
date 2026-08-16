@@ -82,6 +82,19 @@ export function driveFileName({ posted, institution, department, ref, original }
 export function explain(status, body) {
   const text = typeof body === 'string' ? body : JSON.stringify(body || {});
 
+  /* THE most likely failure, and it used to fall through to the generic branch
+     as a raw stack trace: the refresh token no longer works. Google says only
+     "invalid_grant / Bad Request" for every cause, so the causes are listed. */
+  if (status === 400 && /invalid_grant/i.test(text)) {
+    return 'GDRIVE_REFRESH_TOKEN is no longer valid (400 invalid_grant). Google ' +
+      'gives one message for several causes: the grant was revoked at ' +
+      'myaccount.google.com/permissions; a newer token replaced it; it was ' +
+      'issued against a different client id or secret than the ones set here; ' +
+      'or the consent screen is in "Testing", where tokens expire after 7 days. ' +
+      'The fix is the same in every case: mint a new refresh token and update ' +
+      'the secret. Note that revoking access invalidates the STORED token too, ' +
+      'so this is the expected state between revoking and updating the secret.';
+  }
   if (status === 401) {
     return 'Drive rejected the credentials (401). Either GDRIVE_REFRESH_TOKEN is ' +
       'wrong, or it has been revoked. The commonest cause: the OAuth consent ' +
@@ -228,7 +241,16 @@ async function check({ keep = false } = {}) {
     process.exit(1);
   }
 
-  const token = await accessToken();
+  /* Wrapped, because this is the call most likely to fail and it was the one
+     path that escaped as an unhandled rejection — a stack trace where the whole
+     point of this script is a sentence saying what to do. */
+  let token;
+  try {
+    token = await accessToken();
+  } catch (e) {
+    console.log(`::error::${e.message}`);
+    process.exit(1);
+  }
   if (!token) {
     console.log('::error::the credentials are set but no access token came back.');
     process.exit(1);

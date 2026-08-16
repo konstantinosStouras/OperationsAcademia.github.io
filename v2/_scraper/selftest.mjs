@@ -837,6 +837,10 @@ function testDriveUpload() {
     '2026-08-16 X', 'a file with no extension gets none invented');
 
   // every failure Drive can return says what to DO about it
+  ok(/invalid_grant/.test(explain(400, { error: 'invalid_grant' })),
+    'a dead refresh token is explained rather than thrown as a stack trace');
+  ok(/revoking access invalidates the STORED token/.test(explain(400, { error: 'invalid_grant' })),
+    'and says why this is expected between revoking and updating the secret');
   ok(/Testing/.test(explain(401, {})), '401 points at the 7-day Testing expiry');
   ok(/drive\.file/.test(explain(403, 'insufficientPermissions')), '403 names the missing scope');
   ok(/service account/i.test(explain(403, 'storage quota')), 'a quota 403 names the SA trap');
