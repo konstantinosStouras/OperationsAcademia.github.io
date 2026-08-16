@@ -38,10 +38,19 @@
    * The criteria a subscriber can express. Normalising here — rather than
    * trusting whatever is on the stored document — is what stops an old alert,
    * saved before a field existed, from throwing inside the mailer at 6am.
+   *
+   * It deliberately does NOT invent a topic for an alert that names none. It
+   * used to default an empty list to ['jobs'], and that one line made every
+   * guard downstream unreachable: hasIntent() below is defined on the
+   * normalised topics, so it was constant true, and wantsJobs() was true for
+   * an alert whose owner had explicitly unticked "New job postings" — the
+   * failure firing exactly when the reader asked for silence. Empty means
+   * empty; the alerts page seeds ['jobs'] on a NEW form, where a default
+   * belongs.
    */
   function normalise(c) {
     c = c || {};
-    var out = {
+    return {
       topics: arr(c.topics).filter(function (t) { return TOPICS.indexOf(t) !== -1; }),
       text: String(c.text || '').trim().slice(0, 120),
       type: arr(c.type).map(String),
@@ -49,8 +58,6 @@
       country: arr(c.country).map(String),
       characteristics: arr(c.characteristics).map(String)
     };
-    if (!out.topics.length) out.topics = ['jobs'];
-    return out;
   }
 
   /** True when the alert asks for job postings at all. */
@@ -83,9 +90,14 @@
     if (!row) return false;
 
     if (n.text) {
+      // Each field is searched on its own, NOT as one concatenated string.
+      // The jobs page's own text filter is `fields:['institution','department']`
+      // matched with .some() (oa-list.js), so a needle spanning the two —
+      // "virginia darden" — finds four postings here and none on the site. One
+      // rule, or the e-mail promises postings the site says do not exist.
       var needle = fold(n.text);
-      var hay = fold(row.institution) + ' ' + fold(row.department);
-      if (hay.indexOf(needle) === -1) return false;
+      if (fold(row.institution).indexOf(needle) === -1 &&
+          fold(row.department).indexOf(needle) === -1) return false;
     }
     if (n.type.length && n.type.indexOf(row.type) === -1) return false;
     if (n.country.length && n.country.indexOf(row.country) === -1) return false;
@@ -171,7 +183,9 @@
     }
   }
 
-  /** An alert with nothing selected must never be saved — it would be silence. */
+  /** An alert with nothing selected must never be saved — it would be silence.
+      Read straight off the stored topics: an alert that names none has no
+      intent, and nothing anywhere may quietly supply one for it. */
   function hasIntent(c) {
     return normalise(c).topics.length > 0;
   }

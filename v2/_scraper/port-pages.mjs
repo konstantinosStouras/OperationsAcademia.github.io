@@ -24,11 +24,14 @@
    across VERBATIM. Only the chrome moves:
 
      1. asset URLs are absolutised (`assets/…` -> `/assets/…`, `images/…` ->
-        `/images/…`), because a v2 page sits one directory down;
+        `/images/…`, including the `content=` of og:image), because a v2 page
+        sits one directory down;
      2. `assets/js/navigationMenu.js` -> `assets/oa-nav.js`, the same menu with
         hrefs that resolve inside /v2/;
-     3. internal page links point at their /v2/ counterpart, so the preview is
-        a closed site — a reader can never fall out of it by clicking;
+     3. internal page links point at their /v2/ counterpart — written relative
+        (`href="contact"`) or as this site's own full URL
+        (`href="https://www.operationsacademia.org/contact"`) — so the preview is
+        a closed site: a reader can never fall out of it by clicking;
      4. the footer include points at v2's own copy of the partial (same markup,
         v2 links);
      5. the head gains `noindex` and `assets/oa-ui.css`;
@@ -107,6 +110,34 @@ const LINK_ALIASES = {
 
 const RX_ATTR = /(\b(?:href|src|data-include)\s*=\s*")([^"]*)(")/g;
 
+/* A handful of the live pages hard-code their OWN origin instead of writing the
+   link relative: faqs.html's "contact us", the opening sentence of
+   privacy-policy.html and informed_consent_statement.html, and the footer's
+   logo. Those are the only same-site links the transform used to leave alone,
+   and inside /v2/ each one is an exit door — a reader evaluating the rebuild
+   clicks it and is silently dropped back onto the site v2 replaces. Rewritten
+   they are still correct after cutover, because the replacement is relative.
+
+   ONLY inside an <a>. og:url and rel=canonical also name this origin, but they
+   declare the page's identity to a crawler rather than offering a click, and a
+   relative canonical would point the live site's SEO at /v2/. */
+const RX_OWN_ORIGIN =
+  /^https?:\/\/(?:www\.)?operationsacademia\.org(\/[^?#]*)?((?:[?#].*)?)$/i;
+
+/** The tag an attribute at index `i` belongs to, lower-cased ('a', 'link', …). */
+function tagAt(html, i) {
+  const lt = html.lastIndexOf('<', i);
+  if (lt === -1) return '';
+  const m = /^<\s*([a-z][a-z0-9-]*)/i.exec(html.slice(lt, lt + 24));
+  return m ? m[1].toLowerCase() : '';
+}
+
+/** Run RX_ATTR over a document, telling rewriteValue which tag it is in. */
+function rewriteAttrs(html) {
+  return html.replace(RX_ATTR, (m, pre, val, post, offset) =>
+    pre + rewriteValue(val, tagAt(html, offset)) + post);
+}
+
 /** Every link target that resolves to a page of this site, mapped to its v2 path. */
 function pageTarget(raw) {
   const [pathPart, ...rest] = raw.split(/(?=[?#])/);
@@ -120,9 +151,17 @@ function pageTarget(raw) {
 }
 
 /** Rewrite one attribute value. Returns the value to emit. */
-function rewriteValue(v) {
+function rewriteValue(v, tag) {
   const t = v.trim();
   if (!t) return v;
+
+  // a link the reader can click that names this site by its full URL
+  const own = tag === 'a' && RX_OWN_ORIGIN.exec(t);
+  if (own) {
+    const page = pageTarget((own[1] || '/') + (own[2] || ''));
+    return page === null ? v : page;   // e.g. /images/… is not a page: leave it
+  }
+
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(t)) return v;   // absolute, protocol-relative, anchor
 
   // the shared footer partial: v2 keeps its own copy, with v2 links
@@ -181,7 +220,21 @@ export function portPage(html, { source }) {
   let out = html;
 
   // 1. every href/src/data-include
-  out = out.replace(RX_ATTR, (m, pre, val, post) => pre + rewriteValue(val) + post);
+  out = rewriteAttrs(out);
+
+  /* 1b. the Open Graph image, which is rule 1's `images/… -> /images/…` again
+     but lives in `content=` and so was missed. A scraper resolves a relative
+     og:image against the page URL, so from /v2/<page>.html the live pages'
+     `images/OA_logo_1200x294.png` names /v2/images/…, and there is no v2/images
+     directory at all: a v2 link pasted into Slack or LinkedIn unfurls with no
+     card image where the live link unfurls with the logo. The rooted form is
+     what v2's own jobs.html already writes, and it survives cutover unchanged.
+     terms-and-conditions.html's `content="OA_logo_1200x294"` (no directory, no
+     extension) is broken on the live page too and is deliberately NOT matched:
+     the port carries the live page across, it does not improve it. */
+  out = out.replace(
+    /(<meta\s+property="og:image(?::secure_url)?"\s+content=")(images\/[^"]*)(")/gi,
+    (m, pre, val, post) => pre + '/' + val + post);
 
   // 2. the vendor script, on pages with no vendor widget
   const hasWidget = /data-type\s*=\s*"AwesomeTableView"/i.test(
@@ -224,7 +277,7 @@ export function portPage(html, { source }) {
 /** The shared footer, with its links pointing inside /v2/. */
 export function portFooter(html) {
   html = html.replace(/\r\n/g, '\n');   // see portPage
-  let out = html.replace(RX_ATTR, (m, pre, val, post) => pre + rewriteValue(val) + post);
+  let out = rewriteAttrs(html);
 
   /* The live footer's "Feedback" goes to UserVoice, a service the site no
      longer runs. v2 has its own feedback page — the one the header button and

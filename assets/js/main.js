@@ -39,7 +39,10 @@
 				$(
 					'<div id="titleBar">' +
 						'<a href="#navPanel" class="toggle"></a>' +
-						'<a href="https://www.operationsacademia.org/" class="title">' + $('#logo').html() + '</a>' +
+						// The title bar reuses the page's own logo link rather than a
+						// hard-coded absolute URL, so it stays inside whichever copy of
+						// the site the reader is on ("index.html" here, "./" under /v2/).
+						'<a href="' + ($('#logo').attr('href') || 'index.html') + '" class="title">' + $('#logo').html() + '</a>' +
 					'</div>'
 				)
 					.appendTo($body);

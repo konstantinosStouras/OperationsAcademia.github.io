@@ -15,8 +15,15 @@
 
   var M = window.OAAlertMatch;
   var jobs = [];          // the current postings, for the preview and the vocab
+  var jobsState = 'loading';   // 'loading' | 'ok' | 'failed' — see renderPreview
   var alerts = [];        // this account's alerts
+  var listFailed = false; // the last load() could not read the collection
   var editingId = null;
+  var editing = null;     // the alert being edited, for the fields the form has no control for
+
+  // which fieldset each checkbox group lives in — writeGroup needs it to
+  // render a stored value the current catalogue no longer offers
+  var GROUP_HOST = { type: 'a-type', level: 'a-level', country: 'a-country' };
 
   function $(id) { return document.getElementById(id); }
   function show(el, on) { if (el) el.hidden = !on; }
@@ -43,17 +50,23 @@
     return Object.keys(c).sort(function (a, b) { return c[b] - c[a] || a.localeCompare(b); });
   }
 
+  function addCheck(host, name, v, orphan) {
+    var id = name + '-' + M.fold(v).replace(/[^a-z0-9]+/g, '-');
+    var lab = document.createElement('label');
+    lab.className = 'oa-check';
+    if (orphan) lab.setAttribute('data-orphan', '1');
+    lab.innerHTML = '<input type="checkbox" id="' + esc(id) + '" value="' + esc(v) + '" ' +
+      (orphan ? 'data-orphan="1" ' : '') +
+      'data-group="' + name + '"> <span>' + esc(v) +
+      (orphan ? ' <em class="oa-hint" style="display:inline">— no current postings</em>' : '') +
+      '</span>';
+    host.appendChild(lab);
+  }
+
   function fillChecks(hostId, values, name) {
     var host = $(hostId);
     host.innerHTML = '';
-    values.forEach(function (v) {
-      var id = name + '-' + M.fold(v).replace(/[^a-z0-9]+/g, '-');
-      var lab = document.createElement('label');
-      lab.className = 'oa-check';
-      lab.innerHTML = '<input type="checkbox" id="' + esc(id) + '" value="' + esc(v) + '" ' +
-        'data-group="' + name + '"> <span>' + esc(v) + '</span>';
-      host.appendChild(lab);
-    });
+    values.forEach(function (v) { addCheck(host, name, v, false); });
   }
 
   function readGroup(name) {
@@ -64,6 +77,30 @@
 
   function writeGroup(name, values) {
     var want = values || [];
+    var host = $(GROUP_HOST[name]);
+
+    // Drop the boxes a previous alert needed us to invent (below) — they are
+    // not part of the current vocabulary and must not linger as options.
+    if (host) {
+      Array.prototype.forEach.call(host.querySelectorAll('label[data-orphan]'),
+        function (n) { n.parentNode.removeChild(n); });
+    }
+
+    /* A saved alert can name a value no posting currently carries — the
+       catalogue rotates, and 'Ireland', 'Turkey' and friends are one posting
+       each today. With no control for it, writeGroup could not tick it and
+       readGroup could not read it back, so the next save — even one that only
+       fixed a typo in the name — silently WIDENED the alert: an empty filter
+       means "any". Render it instead, marked as currently unmatched. */
+    var known = {};
+    Array.prototype.forEach.call(
+      document.querySelectorAll('input[data-group="' + name + '"]'),
+      function (n) { known[n.value] = 1; }
+    );
+    want.forEach(function (v) {
+      if (host && !known[v]) { addCheck(host, name, v, true); known[v] = 1; }
+    });
+
     Array.prototype.forEach.call(
       document.querySelectorAll('input[data-group="' + name + '"]'),
       function (n) { n.checked = want.indexOf(n.value) !== -1; }
@@ -72,6 +109,12 @@
 
   /* ------------------------------------------------------------ the form */
 
+  /* Deliberately NO `enabled` here. This object is written with
+     set(…, {merge:true}), so a key it omits keeps its stored value — and
+     `enabled` is the same flag Pause and the e-mail's Unsubscribe link clear.
+     Hard-coding it true meant that opening a paused (or unsubscribed) alert to
+     fix a typo silently resubscribed the reader. The submit handler sets it,
+     once, when the alert is created. */
   function readForm() {
     var topics = [];
     if ($('t-jobs').checked) topics.push('jobs');
@@ -80,20 +123,23 @@
       name: $('a-name').value.trim().slice(0, 120),
       email: $('a-email').value.trim().slice(0, 200),
       frequency: $('a-freq').value,
-      enabled: true,
       criteria: {
         topics: topics,
         text: $('a-text').value.trim().slice(0, 120),
         type: readGroup('type'),
         level: readGroup('level'),
         country: readGroup('country'),
-        characteristics: []
+        // the form has no control for this one, so carry what is stored rather
+        // than blanking a filter the subscriber never saw
+        characteristics: editing ? M.normalise(editing.criteria).characteristics : []
       }
     };
   }
 
   function writeForm(a) {
-    a = a || { criteria: {} };
+    // a NEW alert starts on jobs — the matcher no longer invents that default,
+    // and this is where a default belongs
+    a = a || { criteria: { topics: ['jobs'] } };
     var c = M.normalise(a.criteria);
     $('a-name').value = a.name || '';
     $('a-email').value = a.email || (OAAccounts.user() || {}).email || '';
@@ -127,9 +173,18 @@
       return;
     }
 
-    // the newest postings that would have matched — a real sample, not a mock-up
-    var sample = jobs.filter(function (r) { return M.matchesJob(r, c); }).slice(0, 3);
-    var matching = jobs.filter(function (r) { return M.matchesJob(r, c); }).length;
+    /* The newest postings that would have matched — a real sample, not a
+       mock-up. Sorted the way the MAILER sorts before it renders (addedAt
+       descending, alerts-mailer.mjs), not in the file's display order: that
+       order puts the featured posting first whatever its age, so the preview
+       used to lead with a row a year older than the ones the e-mail would
+       actually have led with. */
+    var hits = jobs.filter(function (r) { return M.matchesJob(r, c); })
+      .sort(function (x, y) {
+        return String(y.addedAt || '').localeCompare(String(x.addedAt || ''));
+      });
+    var sample = hits.slice(0, 3);
+    var matching = hits.length;
 
     var parts = [];
     parts.push('<div class="oa-preview-head"><strong>Subject:</strong> ' +
@@ -150,6 +205,18 @@
           ' postings currently on the site match these filters' +
           (M.isBroad(c) ? ' (no filters set — you will hear about every posting).' : '.') +
           '</p>');
+      } else if (jobsState === 'loading') {
+        parts.push('<p class="oa-hint">Loading the current postings…</p>');
+      } else if (jobsState === 'failed') {
+        // "nothing matches" and "we could not read the postings" are different
+        // things, and telling someone to loosen a filter they have not set is
+        // both false and unactionable
+        parts.push('<p class="oa-hint"><strong>We could not load the current postings, ' +
+          'so there is nothing to sample here.</strong> The alert itself is unaffected — ' +
+          'save it and it will be matched as normal.</p>');
+      } else if (M.isBroad(c)) {
+        parts.push('<p class="oa-hint"><strong>There is no posting on the site right ' +
+          'now.</strong> You will hear from us as soon as one appears.</p>');
       } else {
         parts.push('<p class="oa-hint"><strong>No posting currently on the site matches ' +
           'these filters.</strong> That is allowed — you will simply hear from us when one ' +
@@ -187,6 +254,9 @@
       ].filter(Boolean).join(', '));
     }
     if (c.topics.indexOf('updates') !== -1) bits.push('changes to the website');
+    // only reachable for an alert saved before the no-topic guard worked; say
+    // what it does rather than describing it as a subscription to everything
+    if (!bits.length) return 'nothing selected — this alert will not send. Edit it below.';
     var freq = { immediate: 'as it happens', daily: 'daily', weekly: 'weekly', monthly: 'monthly' };
     return bits.join(' and ') + ' — ' + (freq[a.frequency] || 'daily');
   }
@@ -220,10 +290,16 @@
         if (!b) return;
         if (b.dataset.act === 'edit') {
           editingId = a.id;
+          editing = a;
           writeForm(a);
+          // saving no longer resumes a paused alert, so say which one it is
+          say(a.enabled === false
+            ? 'This alert is paused. Saving your changes will not resume it — ' +
+              'use Resume on its card for that.'
+            : '');
           $('oa-alert-form').scrollIntoView({ block: 'start', behavior: 'smooth' });
         } else if (b.dataset.act === 'toggle') {
-          save(a.id, { enabled: a.enabled === false });
+          toggle(a);
         } else if (b.dataset.act === 'delete') {
           if (confirm('Delete the alert “' + (a.name || 'Untitled') + '”? ' +
                       'You will stop receiving these e-mails.')) remove(a.id);
@@ -242,35 +318,70 @@
     });
   }
 
+  function resetForm() {
+    editingId = null;
+    editing = null;
+    writeForm(null);
+  }
+
   function load() {
+    listFailed = false;
     return coll().then(function (c) { return c.get(); }).then(function (snap) {
       alerts = snap.docs.map(function (d) {
         return Object.assign({ id: d.id }, d.data());
       }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
       renderList();
     }).catch(function (err) {
+      // remembered, not just printed: the unsubscribe banner must not report
+      // "we could not find that alert" when the read is what failed
+      listFailed = true;
       $('oa-alert-list').innerHTML =
         '<p class="oa-form-msg is-err">Could not load your alerts (' +
         esc(err.code || err.message) + ').</p>';
     });
   }
 
-  function save(id, patch) {
+  function write(id, patch) {
     return coll().then(function (c) {
       return id ? c.doc(id).set(patch, { merge: true }) : c.add(patch);
-    }).then(function () {
+    });
+  }
+
+  /* The FORM's save. It is the only path that may reset the composer — a
+     Pause or a Delete on some other card used to run through here and wipe an
+     edit in progress while printing "Saved.", a success message for work that
+     had just been thrown away. */
+  function save(id, patch) {
+    return write(id, patch).then(function () {
       say(id ? 'Saved.' : 'Alert created — you will start receiving it.', 'ok');
-      editingId = null;
-      writeForm(null);
+      resetForm();
       return load();
     }).catch(function (err) {
       say('Could not save that alert (' + (err.code || err.message) + ').', 'err');
     });
   }
 
+  function toggle(a) {
+    var on = a.enabled === false;          // pressing Resume
+    return write(a.id, { enabled: on }).then(function () {
+      say(on ? 'Alert resumed.'
+             : 'Alert paused — you will receive no more e-mails from it.', 'ok');
+      return load();                        // the composer is deliberately left alone
+    }).catch(function (err) {
+      say('Could not change that alert (' + (err.code || err.message) + ').', 'err');
+    });
+  }
+
   function remove(id) {
     return coll().then(function (c) { return c.doc(id).delete(); })
-      .then(function () { say('Alert deleted.', 'ok'); return load(); })
+      .then(function () {
+        say('Alert deleted.', 'ok');
+        // A merge-set on a deleted document RECREATES it, so leaving the
+        // composer in edit mode for it means the next Save resurrects the
+        // alert the reader just confirmed deleting.
+        if (editingId === id) resetForm();
+        return load();
+      })
       .catch(function (err) { say('Could not delete that (' + (err.code || err.message) + ').', 'err'); });
   }
 
@@ -284,19 +395,25 @@
 
     $('oa-needauth-btn').addEventListener('click', function () { OAAccounts.openAuth(); });
 
-    // the postings feed both the filter vocabulary and the preview
+    /* The postings feed both the filter vocabulary and the preview. A failure
+       is NOT the same as an empty catalogue: swallowing it into [] renders the
+       Type / Entry level / Location groups as bare headings with nothing in
+       them and no explanation, so the reader cannot express a filter and is
+       not told why. Remember which happened. */
     var ready = Promise.all([
       fetch('data/jobs.json', { credentials: 'same-origin' })
-        .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
+        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
       fetch('changelog.json', { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : { updates: [] }; })
         .catch(function () { return { updates: [] }; })
     ]).then(function (res) {
+      jobsState = res[0] ? 'ok' : 'failed';
       jobs = res[0] || [];
       window.OA_CHANGELOG = (res[1] && res[1].updates) || [];
       fillChecks('a-type', vocab(function (r) { return r.type; }), 'type');
       fillChecks('a-level', vocab(function (r) { return r.levels; }), 'level');
       fillChecks('a-country', vocab(function (r) { return r.country; }), 'country');
+      show($('a-filters-note'), jobsState === 'failed');
     });
 
     var form = $('oa-alert-form');
@@ -307,8 +424,7 @@
     });
 
     $('a-cancel').addEventListener('click', function () {
-      editingId = null;
-      writeForm(null);
+      resetForm();
       say('');
     });
 
@@ -323,6 +439,17 @@
         say('Tick at least one thing to be e-mailed about, or the alert would never send.', 'err');
         return;
       }
+      if (!editingId) {
+        /* Only on a NEW alert. `enabled` on an edit would resume a paused one;
+           `createdAt` is the first window the mailer sends — without it
+           `since` is empty and the first e-mail carries the whole
+           back-catalogue (see alerts-mailer.mjs), and re-stamping it on an
+           edit would do that all over again. `uid` is what the unsubscribe
+           link in the e-mail footer names. */
+        a.enabled = true;
+        a.createdAt = new Date().toISOString();
+        a.uid = (OAAccounts.user() || {}).uid || '';
+      }
       say('Saving…');
       save(editingId, a);
     });
@@ -330,9 +457,19 @@
     OAAccounts.onChange(function (user) {
       show($('oa-alerts-app'), !!user);
       show($('oa-needauth'), !user);
-      if (!user) { showUnsubNotice('signin'); return; }
+      if (!user) {
+        // another account may sign in on this same page load: leaving the
+        // previous session's editingId behind would label their blank form
+        // "Edit this alert" and write to a document id they never owned
+        editingId = null;
+        editing = null;
+        alerts = [];
+        renderList();
+        showUnsubNotice('signin');
+        return;
+      }
       ready.then(function () {
-        writeForm(null);
+        resetForm();
         return load();
       }).then(handleUnsubscribeLink);
     });
@@ -374,6 +511,10 @@
       msg = '<strong>That alert is already paused.</strong> You are not ' +
         'receiving e-mails from it.';
       host.className = 'oa-note';
+    } else if (kind === 'error') {
+      msg = '<strong>We could not reach your alerts just now,</strong> so we have ' +
+        'not been able to stop that one. Nothing has changed — please reload the ' +
+        'page and try again.';
     } else {
       msg = '<strong>We could not find that alert.</strong> It may already have ' +
         'been deleted, or it may belong to a different account. Your current ' +
@@ -386,6 +527,10 @@
   function handleUnsubscribeLink() {
     var id = unsubTarget();
     if (!id) return;
+    // The list is empty after a failed read too. Reporting that as "we could
+    // not find that alert" tells someone their subscription is gone while it
+    // keeps sending — say what actually happened instead.
+    if (listFailed) { showUnsubNotice('error'); return; }
     var found = null;
     for (var i = 0; i < alerts.length; i++) if (alerts[i].id === id) found = alerts[i];
     if (!found) { showUnsubNotice('missing'); return; }
@@ -396,7 +541,7 @@
         showUnsubNotice('done', found.name);
         return load();
       })
-      .catch(function () { showUnsubNotice('missing'); });
+      .catch(function () { showUnsubNotice('error'); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

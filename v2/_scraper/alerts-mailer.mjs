@@ -25,7 +25,9 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { shell, esc, send, transport, firestore, unsubHeaders, SITE, toPlain } from './_mail.mjs';
+import {
+  shell, esc, safeUrl, headerSafe, send, transport, firestore, unsubHeaders, SITE, toPlain,
+} from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -48,18 +50,30 @@ function unsubscribeUrl(a) {
 }
 const MAX_ROWS = 60;          // an e-mail listing more than this is unreadable
 
+/** The subscriber's address, for the run log. Actions logs of a public
+    repository are world-readable, so a subscription list must not be printed
+    into one in full. */
+function redact(email) {
+  const m = String(email || '').match(/^([^@]{1,2})[^@]*(@.*)$/);
+  return m ? `${m[1]}***${m[2]}` : (email ? '***' : 'no address');
+}
+
 /* --------------------------------------------------------------- rendering */
 
 function jobHtml(r) {
+  // Every field here is submitted through the posting form, so each part is
+  // escaped BEFORE the separators are joined in — the separator is the only
+  // markup in this string. (Escaping the joined result would eat the &middot;.)
   const meta = [
     (r.levels || []).join(', '),
     r.country,
     r.applyBy ? `apply by ${r.applyBy}` : '',
-  ].filter(Boolean).join(' &middot; ');
+  ].filter(Boolean).map(esc).join(' &middot; ');
 
+  const posted = safeUrl(r.postedAtUrl), ad = safeUrl(r.adUrl);
   const links = [
-    r.postedAtUrl ? `<a href="${esc(r.postedAtUrl)}">official advertisement</a>` : '',
-    r.adUrl ? `<a href="${esc(r.adUrl)}">job ad (PDF)</a>` : '',
+    posted ? `<a href="${esc(posted)}">official advertisement</a>` : '',
+    ad ? `<a href="${esc(ad)}">job ad (PDF)</a>` : '',
   ].filter(Boolean).join(' &middot; ');
 
   return `<li style="margin-bottom:14px;">
@@ -91,10 +105,11 @@ export function renderAlertEmail({ alert, jobs, updates }) {
     parts.push(`<p style="margin:${n ? '22px' : '0'} 0 10px;"><strong>What is new on the
       site</strong></p><ul style="padding-left:20px;margin:0 0 18px;">`);
     for (const u of updates) {
+      const uUrl = safeUrl(u.url);
       parts.push(`<li style="margin-bottom:12px;">
         <strong>${esc(u.title)}</strong><br>
         <span style="color:#555;">${esc(u.summary)}</span>
-        ${u.url ? `<br><a href="${esc(u.url)}">Take a look</a>` : ''}
+        ${uUrl ? `<br><a href="${esc(uUrl)}">Take a look</a>` : ''}
       </li>`);
     }
     parts.push('</ul>');
@@ -115,10 +130,17 @@ export function renderAlertEmail({ alert, jobs, updates }) {
 
 /* --------------------------------------------------------------- selftest */
 
-function selftest() {
+async function selftest() {
   let pass = 0;
   const fails = [];
   const ok = (c, w) => { if (c) pass++; else fails.push(w); };
+
+  /** Run something whose only job is to print, without printing. */
+  const quiet = async (fn) => {
+    const real = console.log;
+    console.log = () => {};
+    try { return await fn(); } finally { console.log = real; }
+  };
 
   const rows = [
     { id: '1', institution: 'University of Münster', department: 'Ops', type: 'University',
@@ -211,6 +233,59 @@ function selftest() {
   });
   ok(!evil.includes('<img src=x'), 'a posting cannot inject markup into the e-mail');
 
+  // EVERY field of a posting is submitted through the form, not just the two
+  // that used to be escaped: country, level and the apply-by date are joined
+  // into one meta line and were interpolated raw.
+  const evil2 = renderAlertEmail({
+    alert: { id: 'x', name: 'n' },
+    jobs: [{ ...rows[0], country: '<img src=x onerror=alert(1)>',
+      levels: ['<b>lvl</b>'], applyBy: '"><script>bad()</script>' }],
+    updates: [],
+  });
+  ok(!evil2.includes('<img src=x'), 'a posting country cannot inject markup');
+  ok(!evil2.includes('<b>lvl</b>'), 'a posting level cannot inject markup');
+  ok(!evil2.includes('<script>bad()'), 'a posting apply-by date cannot inject markup');
+  ok(evil2.includes('&middot;'), 'the meta separator survives the escaping');
+
+  // A link in a posting reaches an inbox unreviewed, so only http(s) is put in
+  // an href — escaping cannot make a javascript: or data: URL harmless.
+  const links = renderAlertEmail({
+    alert: { id: 'x', name: 'n' },
+    jobs: [{ ...rows[0], adUrl: 'javascript:alert(1)', postedAtUrl: 'data:text/html,<b>x' }],
+    updates: [],
+  });
+  ok(!/href="javascript:/i.test(links), 'a javascript: job link is not linked');
+  ok(!/href="data:/i.test(links), 'a data: job link is not linked');
+  ok(safeUrl('https://example.org/a') === 'https://example.org/a', 'an https link survives');
+
+  // A header ends at the first newline; an alert name becomes the subject.
+  ok(!/[\r\n]/.test(headerSafe('News\r\nBcc: everyone@example.com')),
+    'a newline cannot be smuggled into a header');
+  ok(headerSafe('News\r\nBcc: x@y.z').includes('Bcc'),
+    'the injected text is folded into the value, not silently dropped');
+
+  // Actions logs of a public repository are world-readable.
+  ok(redact('subscriber@example.com') === 'su***@example.com',
+    'the run log does not print a subscriber address in full');
+  ok(redact('') === 'no address', 'a missing address still reads sensibly');
+
+  // THE CONTRACT THE HIGH-WATER MARK RESTS ON. send() must report false when it
+  // only printed the message — with no transport, or in a dry run. If it ever
+  // returned true there, this mailer would advance lastSentAt over a window it
+  // never delivered, and those postings could never be e-mailed to anyone.
+  const msg = { to: 'a@b.c', subject: 's', html: '<p>x</p>' };
+  const stub = { sendMail: async () => {} };
+  ok(await quiet(() => send(null, msg)) === false, 'no transport is not a send');
+  ok(await quiet(() => send(stub, msg, { dryRun: true })) === false, 'a dry run is not a send');
+  ok(await quiet(() => send(stub, msg)) === true, 'a delivered message reports true');
+
+  // and the guard is applied where the caller cannot forget it
+  let seen = null;
+  await quiet(() => send({ sendMail: async (m) => { seen = m; } },
+    { to: 'a@b.c\r\nBcc: victim@example.com', subject: 'hi\nX-Spoof: 1', html: '<p>x</p>' }));
+  ok(!/[\r\n]/.test(seen.to) && !/[\r\n]/.test(seen.subject),
+    'send() folds newlines out of every header it is given');
+
   const plain = toPlain(html);
   ok(plain.includes('Duke University') && !plain.includes('<'),
     'the plain-text alternative is readable and tag-free');
@@ -227,7 +302,7 @@ function selftest() {
 /* ------------------------------------------------------------------- main */
 
 async function main() {
-  if (argv.has('--selftest')) process.exit(selftest() ? 0 : 1);
+  if (argv.has('--selftest')) process.exit(await selftest() ? 0 : 1);
 
   const db = await firestore();
   if (!db) {
@@ -246,6 +321,12 @@ async function main() {
   const snap = await db.collectionGroup('alerts').get();
   const now = new Date();
   const tx = await transport();
+  // Without a transport NOTHING can be delivered, so the run really is a dry
+  // run — including its Firestore writes. Advancing a mark here would put every
+  // posting in the window permanently behind the high-water mark, so the first
+  // run that CAN send would never see it. (Firebase is normally configured
+  // before the mailbox, and this job fires hourly in between.)
+  const LIVE = !!tx && !DRY;
   if (!tx && !DRY && !SCAN) {
     console.log('::warning::SMTP is not configured — running as a dry run');
   }
@@ -254,7 +335,7 @@ async function main() {
 
   for (const doc of snap.docs) {
     const a = { id: doc.id, ...doc.data() };
-    const label = `${a.name || '(unnamed)'} <${a.email || 'no address'}>`;
+    const label = `${a.name || '(unnamed)'} <${redact(a.email)}>`;
 
     if (a.enabled === false) { skipped++; if (SCAN) console.log(`  paused   ${label}`); continue; }
     if (!a.email) { skipped++; if (SCAN) console.log(`  no addr  ${label}`); continue; }
@@ -265,7 +346,12 @@ async function main() {
       continue;
     }
 
-    const since = a.lastSentAt || a.createdAt || '';
+    // The page stamps createdAt on every alert it saves now, but alerts saved
+    // before it did carry neither mark — and an empty `since` matches every
+    // posting ever imported, so the first digest such a subscriber gets would
+    // be the entire back-catalogue. Cap it at 31 days, mirroring the
+    // change-log cap two lines below.
+    const since = a.lastSentAt || a.createdAt || (M.daysBefore(now, 31) + 'T00:00:00Z');
     const jobs = M.newJobsFor(rows, a.criteria, since)
       .sort((x, y) => String(y.addedAt).localeCompare(String(x.addedAt)));
 
@@ -281,7 +367,7 @@ async function main() {
       // window starts here rather than re-scanning from the last real send.
       skipped++;
       if (SCAN) console.log(`  nothing  ${label}`);
-      else if (!DRY) await doc.ref.update({ lastCheckedAt: now.toISOString() });
+      else if (LIVE) await doc.ref.update({ lastCheckedAt: now.toISOString() });
       continue;
     }
 
@@ -296,31 +382,39 @@ async function main() {
         : 'What is new on Operations Academia');
 
     try {
-      await send(tx, {
+      const delivered = await send(tx, {
         to: a.email,
         subject,
         html,
         headers: unsubHeaders(unsubscribeUrl(a)),
       }, { dryRun: DRY });
 
-      if (!DRY) {
-        // advanced only on success — a failure retries this alert, not the world
-        const patch = {
-          lastSentAt: now.toISOString(),
-          lastCheckedAt: now.toISOString(),
-          lastSentCount: jobs.length + news.length,
-        };
-        // record the newest change-log entry actually sent, so the next window
-        // starts after it rather than at a timestamp
-        const latest = M.latestUpdateDate(news);
-        if (latest) patch.lastUpdateDate = latest;
-        await doc.ref.update(patch);
+      // THE MARK MOVES ONLY BEHIND A REAL DELIVERY. send() returns false when
+      // it merely printed the message (a dry run, or no SMTP configured);
+      // treating that as a send would drop this window on the floor for good.
+      if (!delivered) {
+        skipped++;
+        console.log(`would send ${label}: ${jobs.length} posting(s), ${news.length} update(s)`);
+        continue;
       }
+
+      // advanced only on success — a failure retries this alert, not the world
+      const patch = {
+        lastSentAt: now.toISOString(),
+        lastCheckedAt: now.toISOString(),
+        lastSentCount: jobs.length + news.length,
+      };
+      // record the newest change-log entry actually sent, so the next window
+      // starts after it rather than at a timestamp
+      const latest = M.latestUpdateDate(news);
+      if (latest) patch.lastUpdateDate = latest;
+      await doc.ref.update(patch);
+
       sent++;
       console.log(`sent ${label}: ${jobs.length} posting(s), ${news.length} update(s)`);
     } catch (err) {
       failed++;
-      console.log(`::warning::could not send to ${a.email}: ${err.message}`);
+      console.log(`::warning::could not send to ${redact(a.email)}: ${err.message}`);
     }
   }
 

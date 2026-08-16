@@ -3,6 +3,20 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "whole-site-in-v2",
+   "date": "2026-08-16",
+   "title": "Every page of the site is now in the new version",
+   "summary": "The new site used to hold only the rebuilt pages — job postings, posting a job, e-mail alerts and feedback — while everything else still pointed at the old one. Every remaining page has now been carried across, identical in content and look, so the whole site can be browsed in the new version from home page to footer without ever leaving it.",
+   "url": "https://www.operationsacademia.org/v2/"
+  },
+  {
+   "id": "site-wide-review-fixes",
+   "date": "2026-08-16",
+   "title": "A site-wide review, and dozens of fixes",
+   "summary": "The whole of the new site was reviewed page by page and script by script. Among the fixes: the header's Feedback button no longer covers the navigation menu on smaller laptops; on a phone, signing in and out now works from the menu panel; searching inside a filter box types correctly; printed pages include each posting's details; filters can be combined without the menu closing after every tick; and e-mail alerts are delivered exactly once per posting.",
+   "url": "https://www.operationsacademia.org/v2/jobs.html"
+  },
+  {
    "id": "account-menu-and-profile",
    "date": "2026-08-15",
    "title": "A proper account menu, and a profile with your name on it",

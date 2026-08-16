@@ -101,6 +101,15 @@
                         told about <strong>every</strong> new posting. Otherwise a posting must match
                         <em>every</em> box you fill in, and any of the values you tick inside one.</p>
 
+                        <!-- the Type / Entry level / Location lists are built from the postings
+                             currently on the site; if that file could not be read they are empty,
+                             which must not read as "there are no values" -->
+                        <div class="oa-note is-warn" id="a-filters-note" hidden>
+                          <p><strong>We could not load the current postings,</strong> so the lists
+                          below are empty. Reload the page to try again — an alert saved without
+                          these filters will simply cover every posting.</p>
+                        </div>
+
                         <div class="oa-field">
                           <label for="a-text">Institution or department contains</label>
                           <input type="text" id="a-text" maxlength="120" placeholder="e.g. Dublin">

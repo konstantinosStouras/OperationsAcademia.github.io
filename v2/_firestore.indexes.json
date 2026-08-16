@@ -1,5 +1,14 @@
 {
-  "//": "No composite indexes are needed. Every query the site and its scheduled jobs make is single-field, which Firestore indexes automatically: jobSubmissions by status, feedback by forwarded and by ticket, feedback ordered by createdAt, and an unfiltered collectionGroup read of users/*/alerts. If you add a query that combines a filter with an orderBy on a different field, Firestore will refuse it at runtime and print a link that generates the index — paste the result here and redeploy.",
-  "indexes": [],
+  "//": "One composite index: the feedback inbox lists a status tab newest-first (where('status','==',tab) + orderBy('createdAt','desc')), which Firestore cannot serve from single-field indexes. Everything else the site and its scheduled jobs query is single-field and indexed automatically: jobSubmissions by status, feedback by forwarded and by ticket, feedback ordered by createdAt, and an unfiltered collectionGroup read of users/*/alerts. If you add another query that combines a filter with an orderBy on a different field, Firestore will refuse it at runtime and print a link that generates the index — paste the result here and redeploy (firebase deploy --only firestore:indexes).",
+  "indexes": [
+    {
+      "collectionGroup": "feedback",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
