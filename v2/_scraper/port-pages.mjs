@@ -170,6 +170,14 @@ function sha256(s) {
  * Pure: same input, same output. Exported so the selftest can drive it.
  */
 export function portPage(html, { source }) {
+  /* Line endings are normalised to LF FIRST, and the provenance hash is taken
+     of the normalised source. The live pages were committed with CRLF; `*
+     text=auto` in .gitattributes normalises anything added since to LF. So the
+     bytes a checkout hands this script differ from the bytes it would write,
+     and `--check` would fail on a fresh clone while passing on the machine that
+     ran the port. Normalising both sides makes the transform depend on the
+     page, not on how git happened to check it out. HTML does not care. */
+  html = html.replace(/\r\n/g, '\n');
   let out = html;
 
   // 1. every href/src/data-include
@@ -215,6 +223,7 @@ export function portPage(html, { source }) {
 
 /** The shared footer, with its links pointing inside /v2/. */
 export function portFooter(html) {
+  html = html.replace(/\r\n/g, '\n');   // see portPage
   let out = html.replace(RX_ATTR, (m, pre, val, post) => pre + rewriteValue(val) + post);
 
   /* The live footer's "Feedback" goes to UserVoice, a service the site no
