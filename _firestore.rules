@@ -1,0 +1,354 @@
+rules_version = '2';
+
+// ---------------------------------------------------------------------------
+// Operations Academia — Firestore security rules.
+//
+// DEPLOY THESE BEFORE ANNOUNCING ANYTHING. Until they are published, every
+// write below is refused and the site's forms report that they are not
+// switched on yet (which is the state the code ships in).
+//
+//     firebase deploy --only firestore:rules --project <project-id>
+//
+// The governing idea, taken from /lit/: the browser is never trusted with
+// anything that decides what gets published. A poster may CREATE a submission
+// and may edit or withdraw their OWN, but they cannot set `status` to anything
+// except 'queued'/'withdrawn', cannot write someone else's uid onto it, and
+// cannot mark it featured. The scheduled build runs with the Admin SDK, which
+// bypasses these rules, and re-validates every field again before it reaches a
+// served file (v2/_scraper/jobs-model.mjs).
+// ---------------------------------------------------------------------------
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // The maintainer. Keep in sync with ADMIN_EMAIL in v2/assets/oa-firebase.js
+    // (that one only decides whether an admin panel is DRAWN; this one is the
+    // actual authorisation).
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'kstouras@gmail.com';
+    }
+
+    function str(field, maxLen) {
+      return !(field in request.resource.data)
+        || (request.resource.data[field] is string
+            && request.resource.data[field].size() <= maxLen);
+    }
+
+    function list(field, maxItems) {
+      return !(field in request.resource.data)
+        || (request.resource.data[field] is list
+            && request.resource.data[field].size() <= maxItems);
+    }
+
+    // ---------------------------------------------------------------- jobs
+
+    match /jobSubmissions/{id} {
+
+      function shapeOk() {
+        return str('institution', 200) && str('department', 260)
+            // school and unit are what the form now asks for separately;
+            // `department` is the line they are joined into, and is still what
+            // every posting made before the split carries.
+            && str('school', 200)      && str('unit', 200)
+            && str('country', 80)      && str('type', 40)
+            && str('applyByDate', 20)  && str('applyByNote', 400)
+            && str('comments', 1500)   && str('postedAtUrl', 600)
+            && str('adUrl', 600)       && str('ref', 60)
+            && str('firstName', 100)   && str('lastName', 100)
+            && str('email', 200)       && str('chairName', 160)
+            && str('chairEmail', 200)  && str('note', 1500)
+            && str('source', 40)       && str('authEmail', 200)
+            // the uploaded advert, waiting in Storage for the build to file
+            // it into Drive (oa-jobform.js / build-jobs.mjs)
+            && str('adUploadPath', 400) && str('adUploadName', 200)
+            && str('adUploadType', 100)
+            && list('levels', 8)       && list('characteristics', 12)
+            && request.resource.data.year is int
+            && request.resource.data.year >= 2000
+            && request.resource.data.year <= 2100
+            // the page's sort key; the build derives it from createdAt and
+            // ignores anything on the document — refuse the key so a poster
+            // cannot even try to pin their card to the top
+            && !('postedOn' in request.resource.data)
+            // owner is derived from uid by the build, never client-supplied
+            && !('owner' in request.resource.data);
+      }
+
+      /* A poster cannot promote their own posting. On CREATE that is simply
+         "no featured field". On UPDATE it has to be "featured is UNCHANGED":
+         update() merges, so an already-featured posting carries the field into
+         every request, and refusing the field outright would make the one
+         featured posting the only one its owner could never correct. */
+      function featuredUnchanged() {
+        return ('featured' in request.resource.data) == ('featured' in resource.data)
+            && (!('featured' in request.resource.data)
+                || request.resource.data.featured == resource.data.featured);
+      }
+
+      // Anyone signed in may post. Identity is pinned to the caller and the
+      // status is pinned to 'queued' — the build decides what is published.
+      // createdAt is the server clock, never a client-typed value (create
+      // only — on an update request.resource.data carries the EXISTING stamp,
+      // which rightly stays put): the build treats it as trustworthy (it
+      // becomes addedAt, the e-mail alerts' cursor), so a bogus 1e16 or a
+      // back-dated value must not exist at all.
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'queued'
+                    && request.resource.data.createdAt == request.time
+                    && shapeOk()
+                    && !('featured' in request.resource.data)
+                    && request.resource.data.keys().size() <= 30;
+
+      // A poster may read, correct and withdraw their own posting.
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      // A poster correcting or withdrawing their own posting. `status` back to
+      // 'queued' is what a correction does — including to a posting that had
+      // been withdrawn, which is how one is put back.
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.status in ['queued', 'withdrawn']
+                    && featuredUnchanged()
+                    && shapeOk();
+
+      // MERGING TWO ACCOUNTS hands a posting over to the account its owner is
+      // keeping. A posting is a top-level document owned by a `uid` field, so
+      // without this the rule above (which pins that field) would strand every
+      // posting of a merged-away account: unwithdrawable, uncorrectable, owned
+      // by a sign-in that no longer exists.
+      //
+      // Only the CURRENT owner may hand one over, and `diff().affectedKeys()`
+      // pins everything else — the posting itself cannot be edited under cover
+      // of a merge, not even by its owner, and `featured` is as untouchable
+      // here as it is above. `mergedFrom` records where it came from, so the
+      // change is visible in the document rather than inferred.
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['uid', 'mergedFrom', 'mergedAt'])
+                    && request.resource.data.uid is string
+                    && request.resource.data.uid.size() >= 10
+                    && request.resource.data.uid != resource.data.uid
+                    && request.resource.data.mergedFrom == request.auth.uid;
+
+      allow delete: if isAdmin();
+
+      // The maintainer can hide a posting, feature one, or fix a typo.
+      allow write: if isAdmin();
+    }
+
+    // ---------------------------------------------------------- candidates
+
+    /* A job-market candidate's own profile: the same lifecycle as a job
+       posting (create queued -> the build publishes -> correct or withdraw),
+       plus two optional uploads (CV, research summary) that land in Storage
+       (see _storage.rules, kind 'candidates') and are filed into Drive by the
+       build, exactly like a job advert. `email` is published ONLY when
+       `emailPublic` is true — the old sheet published every address, which is
+       the disclosure the rebuild retires. */
+    match /candidateSubmissions/{id} {
+
+      function candShapeOk() {
+        return str('first', 100)      && str('last', 100)
+            && str('affiliation', 220) && str('position', 160)
+            && str('cvUrl', 600)       && str('rsUrl', 600)
+            && str('webUrl', 600)      && str('email', 200)
+            && str('note', 1500)       && str('source', 40)
+            && str('authEmail', 200)   && str('ref', 60)
+            && str('cvUploadPath', 400) && str('cvUploadName', 200)
+            && str('cvUploadType', 100)
+            && str('rsUploadPath', 400) && str('rsUploadName', 200)
+            && str('rsUploadType', 100)
+            && list('researchAreas', 10) && list('informsDays', 10)
+            && (!('emailPublic' in request.resource.data)
+                || request.resource.data.emailPublic is bool)
+            && request.resource.data.year is int
+            && request.resource.data.year >= 2000
+            && request.resource.data.year <= 2100
+            // derived by the build, never client-supplied
+            && !('postedOn' in request.resource.data)
+            && !('owner' in request.resource.data)
+            && !('featured' in request.resource.data);
+      }
+
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'queued'
+                    && request.resource.data.createdAt == request.time
+                    && candShapeOk()
+                    && request.resource.data.keys().size() <= 30;
+
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      // Correct, or take the profile down; back to 'queued' re-publishes it.
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.status in ['queued', 'withdrawn']
+                    && candShapeOk();
+
+      // account merge hand-over — same shape and reasoning as jobSubmissions
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['uid', 'mergedFrom', 'mergedAt'])
+                    && request.resource.data.uid is string
+                    && request.resource.data.uid.size() >= 10
+                    && request.resource.data.uid != resource.data.uid
+                    && request.resource.data.mergedFrom == request.auth.uid;
+
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ---------------------------------------------------------- placements
+
+    /* A confirmed placement: who, from which PhD, joining where as what.
+       Same lifecycle as the other two, no uploads. */
+    match /placementSubmissions/{id} {
+
+      function plShapeOk() {
+        return str('first', 100)             && str('last', 100)
+            && str('phdInstitution', 220)     && str('undergradInstitution', 220)
+            && str('joiningInstitution', 220) && str('joiningPosition', 160)
+            && str('webUrl', 600)             && str('email', 200)
+            && str('note', 1500)              && str('source', 40)
+            && str('authEmail', 200)          && str('ref', 60)
+            && request.resource.data.year is int
+            && request.resource.data.year >= 2000
+            && request.resource.data.year <= 2100
+            && !('postedOn' in request.resource.data)
+            && !('owner' in request.resource.data)
+            && !('featured' in request.resource.data);
+      }
+
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'queued'
+                    && request.resource.data.createdAt == request.time
+                    && plShapeOk()
+                    && request.resource.data.keys().size() <= 25;
+
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.status in ['queued', 'withdrawn']
+                    && plShapeOk();
+
+      // account merge hand-over — same shape and reasoning as jobSubmissions
+      allow update: if isOwner(resource.data.uid)
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['uid', 'mergedFrom', 'mergedAt'])
+                    && request.resource.data.uid is string
+                    && request.resource.data.uid.size() >= 10
+                    && request.resource.data.uid != resource.data.uid
+                    && request.resource.data.mergedFrom == request.auth.uid;
+
+      allow delete: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------ feedback
+
+    match /feedback/{id} {
+      // Feedback may be left by ANYONE, signed in or not — the point is to
+      // lower the bar for a bug report. Bounded so it cannot be used as free
+      // storage: 5 screenshots, and Firestore's own ~1 MB document ceiling.
+      // hasOnly() pins the document to the fields the page writes and the
+      // mailer reads — before it, any 16 arbitrarily-named keys passed, and
+      // `message` was not even required to exist. NOTE the rules language has
+      // no per-item predicate for lists, so `shots` is bounded in LENGTH only;
+      // the screenshots' data:image shape is enforced where it matters, at
+      // render time in oa-feedback.js's inbox (the stored-XSS fix).
+      allow create: if str('message', 6000)
+                    && str('email', 200)
+                    && str('name', 160)
+                    && str('ticket', 40)
+                    && str('page', 400)
+                    && str('ua', 300)
+                    && list('shots', 5)
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() >= 5
+                    && request.resource.data.status == 'open'
+                    && request.resource.data.forwarded == false
+                    && request.resource.data.keys().hasOnly(
+                         ['ticket', 'message', 'name', 'email', 'shots',
+                          'page', 'ua', 'status', 'forwarded', 'createdAt']);
+
+      // The submitter never reads the collection back; only the maintainer does.
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------- accounts data
+
+    // Every account's own private subtree: profile, e-mail alert
+    // subscriptions, test-e-mail requests. Nobody else can read it, including
+    // other signed-in users. The alerts mailer reads it with the Admin SDK.
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /profiles/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // A contentless public tally so the site can show "N registered users"
+    // without exposing the user list. One document per account holding a
+    // coarse timestamp and nothing else — no e-mail, no name.
+    match /registeredUsers/{uid} {
+      allow read: if true;
+      allow create, update: if isOwner(uid)
+                            && request.resource.data.keys().hasOnly(['t'])
+                            && request.resource.data.t is number;
+      // An account may withdraw its OWN mark, and only its own — which is what
+      // a merge does with the duplicate it removes, so the tally counts people
+      // rather than sign-ins. It can only ever lower the count, never inflate it.
+      allow delete: if isOwner(uid);
+    }
+
+    // ------------------------------------------------------ identity keys
+    //
+    // How the site notices that one person has two accounts. Each session
+    // claims a document per identity it can prove — `orcid:<iD>` and
+    // `email:<sha256 of the lowercased address>` — holding a uid and a coarse
+    // timestamp. A key already claimed by a DIFFERENT uid is the same person
+    // twice, and the site offers to merge them.
+    //
+    // The e-mail address is HASHED, and reads are `get` only, never `list`:
+    // a signed-in visitor can ask "who holds this identity, which I already
+    // know" and cannot enumerate the site's users or their addresses. Nobody
+    // can claim a key for anyone but themselves, and nothing here grants
+    // access to anything — an account's data is still gated on its own uid.
+    //
+    // A claim CAN be taken over by another signed-in account, and that is
+    // deliberate rather than an oversight: it is how the ghost claim left
+    // behind by an account that was merged away heals, and how the merge hands
+    // the identity to the account being kept. Nothing can be proved here about
+    // who really owns an ORCID iD, so the honest statement of what this
+    // collection is worth is: a HINT that two accounts belong together, which
+    // only ever leads to an offer the user has to answer by signing in to the
+    // other account themselves. It is never an authorisation.
+    match /accountKeys/{key} {
+      allow get: if signedIn();
+      allow create, update: if signedIn()
+                            && request.resource.data.keys().hasOnly(['uid', 't'])
+                            && request.resource.data.uid == request.auth.uid
+                            && request.resource.data.t is number;
+      allow list, delete: if false;
+    }
+
+    // Anything not named above is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

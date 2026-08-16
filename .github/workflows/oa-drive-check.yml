@@ -10,7 +10,7 @@ name: OA Drive — check the upload credentials
 #
 # RUN THIS:
 #   - after minting or rotating the refresh token;
-#   - after adding a new market year to v2/data/drive-folders.json (each July);
+#   - after adding a new market year to data/drive-folders.json (each July);
 #   - whenever an upload fails and you want to know whether it is the
 #     credentials, the folder ids, or the file itself.
 #
@@ -44,11 +44,11 @@ jobs:
           node-version: '22'
 
       - name: Offline checks
-        run: node v2/_scraper/selftest.mjs
+        run: node _scraper/selftest.mjs
 
       - name: Write a probe file into each folder, then remove it
         run: |
-          node v2/_scraper/drive-upload.mjs --check \
+          node _scraper/drive-upload.mjs --check \
             ${{ inputs.keep && '--keep' || '' }}
         env:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}

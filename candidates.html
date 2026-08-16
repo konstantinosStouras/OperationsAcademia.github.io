@@ -1,23 +1,22 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
   <head>
-    <link href="images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <title>
       Candidates - OperationsAcademia.org
     </title>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no"> -->
-    <meta content="Matching supply with demand in the Operations job market" name="description">	
-    <meta property="og:title" content="Operations Academia" /> 
+    <meta content="Matching supply with demand in the Operations job market" name="description">
+    <meta property="og:title" content="Operations Academia" />
     <meta property="og:site_name" content="Operations Academia" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.operationsacademia.org" /> 
-    <meta property="og:image" content="images/OA_logo_1200x294.png" /> 
-    <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
-    <link href="assets/css/main.css" rel="stylesheet">
-    <!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+    <meta property="og:url" content="https://www.operationsacademia.org" />
+    <meta property="og:image" content="/images/OA_logo_1200x294.png" />
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-list.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet" type="text/css">
   </head>
   <body class="no-sidebar">
     <div id="page-wrapper">
@@ -27,13 +26,18 @@
         <!-- Header -->
 
         <div class="container" id="header">
-          <a href="index.html" id="logo" onclick=
-          "ga('send', 'pageview', 'logoHeader');"><img alt="Operations Academia Logo" class=
-          "OAlogo" src="images/OperationsAcademiaLogo.png" style=
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class=
+          "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
           "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
 
           <nav id="nav">
           </nav>
+
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
         </div>
       </div>
       <!-- Main Wrapper -->
@@ -45,8 +49,12 @@
           <!-- Main Heading -->
 
           <div class="title-heading">
-            <h2>
-              Job market candidates (2025-2026)
+            <!-- The season is filled in by the script at the foot of this page
+                 from the same market-year rule the build uses (the jobs page's
+                 discipline), so the heading cannot fall a season behind the
+                 data. The literal here is the no-JavaScript fallback. -->
+            <h2 id="oa-cands-heading">
+              Job market candidates (2026-2027)
             </h2>
           </div>
           <!-- Main Content -->
@@ -54,32 +62,28 @@
           <div id="main">
             <div class="row">
               <div class="12u" id="content">
-                <div dir="ltr" style=
-                  "padding:25px 20px">
-				  				<!-- Sponsors -->
+                <div dir="ltr" style="padding:25px 20px">
+                <!-- Sponsors -->
 <div class="sponsor-bar" role="complementary" aria-label="Sponsors">
   <span class="sponsor-lead">Proudly sponsored and supported by</span>
   <div class="sponsor-logos">
     <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/"
-       target="_blank" rel="noopener" aria-label="CUHK Business School – Department of Decisions, Operations and Technology"
-       onclick="ga && ga('send','event','sponsor','click','CUHK DOT jobs');">
-      <img class="logo" data-logo="business-school"
-     src="/images/logos/cuhk_dot_logo.png"
-     alt="CUHK Business School – Department of Decisions, Operations and Technology"
-     loading="lazy" decoding="async">
+       target="_blank" rel="noopener" aria-label="CUHK Business School – Department of Decisions, Operations and Technology">
+      <img src="/images/logos/cuhk_dot_logo.png"
+           alt="CUHK Business School – Department of Decisions, Operations and Technology"
+           loading="lazy" height="40">
     </a>
 
     <a href="https://connect.informs.org/msom/home"
-       target="_blank" rel="noopener" aria-label="INFORMS Manufacturing and Service Operations Management (MSOM) Society"
-       onclick="ga && ga('send','event','sponsor','click','MSOM jobs');">
-      <img class="logo" data-logo="informs"
-     src="/images/logos/informs-msom.png"
-     alt="INFORMS Manufacturing and Service Operations Management (MSOM) Society"
-     loading="lazy" decoding="async">
+       target="_blank" rel="noopener" aria-label="INFORMS Manufacturing and Service Operations Management (MSOM) Society">
+      <img src="/images/logos/informs-msom.png"
+           alt="INFORMS Manufacturing and Service Operations Management (MSOM) Society"
+           loading="lazy" height="20">
     </a>
   </div>
 </div>
-				  <br>
+
+                <br>
                 <br>
                   <div style=
                   "clear:both;padding:25px 20px;background-color:rgb(249,249,249);text-align:justify;border:1px solid rgb(204,204,204)">
@@ -91,64 +95,56 @@
                     <div style=
                     "color:rgb(68,68,68);line-height:21px;display:inline;float:left;margin:5px 10px 0px 0px">
                       <span style="text-align:left"><img border="0" src=
-                      "images/information.png"></span>
+                      "/images/information.png" alt=""></span>
                     </div>
-					<!-- During the process of Candidate profile collection (and before publicly revealing them) -->
-				    <!--  If you are a Candidate applying to <a href="jobs">academic jobs in Operations</a> (broadly defined), <b>you are encouraged to create your Job Market profile below</b>. By doing so, you give the
-                    opportunity for your research to be seen by a <a href="analytics">large group of academics
-                    who daily visit our platform</a>, and invite you directly for an
-                    interview, or even to reach out to start a collaboration. <br>
-					<br>
-					All posted profiles of Job Candidates will be made publicly available four weeks prior to <a href="https://meetings.informs.org/wordpress/seattle2024/">INFORMS
-                    2025 Annual Meeting</a>, i.e. on <b>Monday, 29 September 2025</b>. See also <a href="resources-for-candidates">this page with useful resources for candidates</a>. -->  
-					
-					
-					
-					<!-- After revealing the Candidate profiles -->
-                   The following list consists of Job Market Candidates applying for faculty positions in
-                    Operations (broadly defined); contact them directly to arrange a job interview. We also display the INFORMS 2025 presentation day(s) under the profile of each Candidate. 
-					This should greatly help Faculty of Hiring Committees to easily find Candidates' talks and attend them. 
-		
-					<br>
-					<br>
-					Candidates who have already accepted a placement shall appear on the <a href="placements">Confirmed
-                    Placements page</a>. See also <a href="resources-for-candidates">this page with useful resources for candidates</a>.<br> 
-					
-										
-					<!-- After the market -->
-                   <!--  If you intend to apply to faculty positions listed in our website, please visit
-                    this page in the coming September when you should be able to create your research profile and upload your CV, research statement etc. By doing so, you give the
-                    opportunity for your research to be seen by a <a href="analytics">large group of academics
-                    who daily visit our platform</a>, and invite you directly for an
-                    interview, or even to reach out to start a collaboration. <br>
-					<br>
-					All posted profiles of Job Candidates will be made publicly available two weeks prior to INFORMS
-                    2022 Annual Meeting, i.e. on <b>October 3rd, 2022</b>. See also <a href="resources-for-candidates">this page with useful resources for candidates</a>.
-                     -->
-                    
-
+                    The following list consists of Job Market Candidates applying for faculty
+                    positions in Operations (broadly defined); contact them directly to arrange a
+                    job interview. We also display the INFORMS presentation day(s) under the
+                    profile of each Candidate — this should greatly help Faculty of Hiring
+                    Committees to easily find Candidates' talks and attend them.<br>
                     <br>
-					Creating a Candidate profile is free, but, if you want to say thanks, you can...
-					<br>
-					
-				<br>				
-				<a href="https://www.buymeacoffee.com/kstouras"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book/coffee&emoji=📖&slug=kstouras&button_colour=FFDD00&font_colour=000000&font_family=Lato&outline_colour=000000&coffee_colour=ffffff" /></a>
-                <br>
-					</div>
-                </div>
-				
-				<br>
+                    If you are a Candidate applying to <a href="jobs.html">academic jobs in
+                    Operations</a>, you are encouraged to <a href="post-a-candidate.html">create
+                    your Job Market profile</a> — with your CV and research summary attached —
+                    and it appears here automatically. You can come back to edit it, replace or
+                    remove its files, or take it down at any time. Candidates who have already
+                    accepted a placement shall appear on the <a href="placements.html">Confirmed
+                    Placements page</a>. See also <a href="resources-for-candidates.html">this
+                    page with useful resources for candidates</a>.<br>
+                    <br>
+                    Creating a Candidate profile is free, but, if you want to say thanks, you can...
+                    <br>
 
-                 <div style="text-align:center;">
-                  <a class="button blue" href=
-                  "https://docs.google.com/forms/d/e/1FAIpQLSfQNvqLJzzKN8BAl8hAh_yINvVC2xOu2C7D-yxshj-dUT1mSg/viewform?usp=pp_url&entry.443848523=2026" target="_blank">
-                  Create your Job Market Profile!</a>
+                <br>
+                <a href="https://www.buymeacoffee.com/kstouras"><img alt="Buy me a book or a coffee" src="https://img.buymeacoffee.com/button-api/?text=Buy me a book/coffee&emoji=📖&slug=kstouras&button_colour=FFDD00&font_colour=000000&font_family=Lato&outline_colour=000000&coffee_colour=ffffff" /></a>
+                <br>
+                    </div>
+                </div>
+
+                <div style="text-align:center;">
+                  <a class="button blue" href="post-a-candidate.html">Post your candidacy!</a>
                 </div>
                 <br>
                 <br>
 
-				<div data-type="AwesomeTableView" data-filters="" data-viewID="-O4FOuoyvD6mHL9CF44i"></div>
-				
+                <!-- The reveal announcement (owner, 2026-08-16). Profiles are
+                     collected continuously but shown ALL AT ONCE on the date
+                     the admin set in data/candidates-reveal.json; until then
+                     candidates.json carries no rows, and this panel — filled
+                     from candidates-meta.json — is what the page says instead
+                     of an unexplained empty list. -->
+                <div class="oa-note" id="oa-reveal-note" hidden>
+                  <p><strong>Candidate profiles are revealed all at once on
+                  <span id="oa-reveal-date"></span>.</strong>
+                  <span id="oa-reveal-count"></span>
+                  Post yours now &mdash; it stays private until then, and appears
+                  with everyone else&rsquo;s on the day.</p>
+                </div>
+
+                <!-- The candidates list. Replaces the Awesome Table view that
+                     used to sit here (data-viewID="-O4FOuoyvD6mHL9CF44i"). -->
+                <div id="oa-candidates"></div>
+
               </div>
             </div>
           </div>
@@ -158,27 +154,216 @@
       </div>
       <!-- Footer Wrapper -->
 
-      <!-- Footer: shared include -->
-<div data-include="/partials/footer.html"></div>
-<script src="/assets/js/include-partials.js"></script>
-	
-    <!-- Scripts -->
-    <script src="assets/js/ypo-parakolouthisi.js">
-    </script> 
-    <script src="assets/js/navigationMenu.js">
-    </script> 
-    <script src="assets/js/jquery.min.js">
-    </script> 
-    <script src="assets/js/jquery.dropotron.min.js">
-    </script> 
-    <script src="assets/js/skel.min.js">
-    </script> 
-    <script src="https://awesome-table.com/AwesomeTableInclude.js">
-    </script> 
-    <script src="assets/js/util.js">
-    </script> <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-     
-    <script src="assets/js/main.js">
+            <!-- Footer: shared include -->
+      <div data-include="partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <!-- The site's own script chain, in the order every other page uses it.
+         All three parts are load-bearing and none of them is optional:
+           ypo-parakolouthisi.js defines the global `ga` that the footer's
+             inline onclick handlers call — without it every footer link throws;
+           oa-nav.js fills #nav (it stands in for navigationMenu.js, whose
+             relative hrefs would resolve inside /v2/);
+           jquery + dropotron + skel + util + main.js build the off-canvas
+             panel that IS the navigation below 840px, where main.css hides
+             #header-wrapper outright. Drop them and a phone gets no menu.
+         Awesome Tables is deliberately NOT here. It is a leaf dependency:
+         nothing in the site's own CSS or JS refers to it. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-list.js"></script>
+    <script src="assets/oa-candidateedit.js"></script>
+    <script>
+    (function () {
+      'use strict';
+      var U = window.OAList.safeUrl;
+
+      /* The Universities map deep-links into this page as
+         `?filterE=<University/Institution>` — the candidates leg of the five
+         per-row anchors the old table published (see _AUDIT.md §76). The
+         affiliation filter takes it as its legacyParam, the same way jobs.html
+         honours ?filterA=, so 144 rows' worth of anchors keep working. */
+
+      /* The heading names the CURRENT job market, derived — never typed. This
+         mirrors marketYear/marketLabel in jobs-model.mjs, the same inline copy
+         jobs.html carries (it cannot import the module: no build step). A
+         market year runs 1 July of the previous year to 30 June of its own and
+         is numbered by the year it ends, so the roll is on 1 JULY and
+         getUTCMonth() (0-based) is 6. */
+      (function heading() {
+        var el = document.getElementById('oa-cands-heading');
+        if (!el) return;
+        var d = new Date();
+        var y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+        el.textContent = 'Job market candidates (' + (y - 1) + '-' + y + ')';
+      })();
+
+      /* THE LIST SHOWS ONLY THE MARKET YEAR UNDER WAY — exactly what the
+         heading above names, the same owner decision the jobs page applies
+         (2026-08-16). This mirrors inCurrentMarket() in jobs-model.mjs, which
+         reads only `posted` and `year` and so applies to candidate rows
+         verbatim: a row is in scope when it was POSTED on or after 1 July of
+         the season under way, OR its candidate tagged it for the current
+         market year or later. data/candidates.json itself stays complete (it
+         is the archive previous seasons will live in); the page just stops
+         rendering them. */
+      function inCurrentMarket(row) {
+        var d = new Date();
+        var year = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+        var start = (year - 1) + '-07-01';
+        return String(row.posted || '') >= start || Number(row.year) >= year;
+      }
+
+      function link(url, label) {
+        var u = U(url);
+        if (!u) return null;
+        var a = document.createElement('a');
+        a.href = u;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = label || 'link';
+        return a.outerHTML;
+      }
+
+      /* A mailto for the candidates who OPTED IN to showing their address
+         (build-candidates publishes `email` only then — see
+         candidates-model.mjs). OAList.safeUrl is http(s)-only by design, so
+         the href is built here, gated on the same shape the build validated;
+         a row that somehow carries junk gets no link rather than a repaired
+         one. textContent/encodeURIComponent keep a crafted value inert. */
+      function mailto(email) {
+        email = String(email || '').trim();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return null;
+        var a = document.createElement('a');
+        a.href = 'mailto:' + encodeURIComponent(email);
+        a.textContent = email;
+        return a.outerHTML;
+      }
+
+      /* OAList's own loading/empty strings say "job postings" — it grew up on
+         the jobs page, and its wording is not configurable (a `strings` config
+         is the right fix, noted for oa-list's owner). Until then this page
+         rewrites those strings as the engine renders them, keyed on the EXACT
+         jobs wording so anything unexpected is left alone — and it must be an
+         observer, not a one-off pass, because the engine re-renders on every
+         filter change. Replacing only on a hit cannot loop: a rewritten node
+         no longer matches its key. */
+      (function candidateWording() {
+        var host = document.getElementById('oa-candidates');
+        if (!host || !window.MutationObserver) return;
+        var MAP = {
+          'Loading job postings…': 'Loading candidate profiles…',
+          'No job postings are listed at the moment.': 'No candidate profiles yet.',
+          'Please check back soon — new postings are added as they arrive.':
+            'The new market’s profiles appear here as candidates post them.',
+          'No job postings match these filters.': 'No candidate profiles match these filters.',
+          'Try removing a filter, or clear them all to see every posting.':
+            'Try removing a filter, or clear them all to see every profile.'
+        };
+        function sweep() {
+          var els = host.querySelectorAll('.oa-loading, .oa-empty strong, .oa-empty span, .oa-sr');
+          Array.prototype.forEach.call(els, function (el) {
+            var t = el.textContent;
+            if (MAP[t]) el.textContent = MAP[t];
+            else if (/^\d+ postings match$/.test(t)) {
+              el.textContent = t.replace('postings', 'profiles');
+            }
+          });
+        }
+        new MutationObserver(sweep).observe(host, { childList: true, subtree: true });
+        sweep();
+      })();
+
+      /* The reveal announcement. Meta only — a date and a count; the held
+         profiles themselves are not in any served file, so there is nothing
+         here to leak. A missing/unreadable meta file just leaves the note
+         hidden and the plain empty state stands. */
+      (function revealNote() {
+        fetch('data/candidates-meta.json', { credentials: 'same-origin' })
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (meta) {
+            var at = String(meta.revealAt || '');
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
+            var today = new Date().toISOString().slice(0, 10);
+            if (today >= at) return;                    // revealed — the list speaks
+            var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+              'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('oa-reveal-date').textContent =
+              MONTHS[Number(at.slice(5, 7)) - 1] + ' ' + Number(at.slice(8, 10)) +
+              ', ' + at.slice(0, 4);
+            var n = Number(meta.heldCount) || 0;
+            document.getElementById('oa-reveal-count').textContent = n
+              ? n + (n === 1 ? ' profile has' : ' profiles have') + ' already been filed. '
+              : '';
+            document.getElementById('oa-reveal-note').hidden = false;
+          })
+          .catch(function () { /* no meta — nothing to announce */ });
+      })();
+
+      var cands = OAList.mount({
+        mount: '#oa-candidates',
+        data: 'data/candidates.json',
+        perPage: 10,
+        prepare: function (rows) { return rows.filter(inCurrentMarket); },
+
+        // newest profile first, then by name — mirrors candidateDisplayOrder
+        // in candidates-model.mjs, so the page reads the way the file does.
+        sort: function (a, b) {
+          var d = (b.posted || '').localeCompare(a.posted || '');
+          if (d) return d;
+          return (a.name || '').localeCompare(b.name || '');
+        },
+
+        filters: [
+          { key: 'name',        label: 'Name',             type: 'text',
+            fields: ['name'], placeholder: '' },
+          // `filterE` is the legacy Awesome Table deep link the Universities
+          // map still emits for this page — honoured as the affiliation text.
+          { key: 'affiliation', label: 'Affiliation',      type: 'text',
+            fields: ['affiliation'], placeholder: '', legacyParam: 'filterE' },
+          { key: 'position',    label: 'Current position', field: 'position' },
+          { key: 'area',        label: 'Research area',    field: 'researchAreas' },
+          { key: 'day',         label: 'INFORMS day',      field: 'informsDays' },
+          { key: 'posted',      label: 'Date posted',      derive: 'datePosted' }
+        ],
+
+        // Edit / Take down, drawn only on the profiles the signed-in reader
+        // may change. See assets/oa-candidateedit.js — the rules are the
+        // authorisation.
+        onCard: function (li, r) { window.OACandidateEdit && OACandidateEdit.onCard(li, r); },
+
+        card: {
+          title:    function (r) { return r.name; },
+          subtitle: function (r) {
+            return [r.affiliation, r.position].filter(Boolean).join(' — ');
+          },
+          rows: function (r) {
+            return [
+              { label: 'Research area(s)',  value: (r.researchAreas || []).join(', ') },
+              { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
+              { label: 'CV',                html: link(r.cvUrl, 'link to CV') },
+              { label: 'Research summary',  html: link(r.rsUrl, 'link') },
+              { label: 'Web page',          html: link(r.webUrl, 'link') },
+              // present only when the candidate opted in — the build never
+              // publishes an address otherwise
+              { label: 'Contact',           html: mailto(r.email) }
+            ];
+          }
+        }
+      });
+
+      if (window.OACandidateEdit) OACandidateEdit.attach(cands);
+    })();
     </script>
-  </body>
+</body>
 </html>

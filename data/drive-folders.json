@@ -1,0 +1,30 @@
+{
+ "_note": [
+  "Where uploaded files are filed in the project's own Google Drive (the operations.academia account).",
+  "",
+  "One entry per JOB MARKET YEAR (see marketYear() in _scraper/jobs-model.mjs:",
+  "a market year runs 1 July to 30 June and is numbered by the year it ends).",
+  "The ids are the folders inside 'Current JM' — open each in Drive and copy",
+  "the part of the URL after /folders/.",
+  "",
+  "WHEN THE MARKET ROLLS (1 July): you archive 'Current JM' into",
+  "'Past JM data/<year> JM' and its folders get NEW ids. Add the new year's",
+  "entry here. Nothing falls back to last year's folder on purpose — an",
+  "upload for a season with no entry is REFUSED rather than filed somewhere",
+  "wrong, because a CV quietly landing in the previous season's folder is",
+  "invisible until someone goes looking for it.",
+  "",
+  "RESOURCE KEYS: these folders predate September 2021, so Drive issues them a resourcekey (the ?resourcekey= part of the URL). It is only required when access comes from a LINK rather than from ownership — our token is the owner's, so it should not be needed. It is stored anyway and sent as the X-Goog-Drive-Resource-Keys header, because doing so costs nothing and the failure it prevents is an opaque 404."
+ ],
+ "parents": {
+  "currentJM": "1IcvQ5f3zQLeSa2Ewgddt1RxMo2ZoAVRb"
+ },
+ "byMarketYear": {
+  "2027": {
+   "jobs": "0B_Uo0W8T0JrVfjBsM2pHbU05ZE5NZjRMZklrOFFVVkU0dERMbEhkZG04ZmpDNnktczJ3cHM",
+   "jobsResourceKey": "0-MjLdBjWoxaOhlVnQY5afTQ",
+   "candidates": "0B_Uo0W8T0JrVfk9LdmpCbW1XR1lHQkt2WkJWR0hXa2ZpbWZ6aVVNS3hrUjFQeXJ2cG5sTUk",
+   "candidatesResourceKey": "0-Rr7omI1XWmpDa0dQ1p57FQ"
+  }
+ }
+}

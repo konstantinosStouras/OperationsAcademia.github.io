@@ -6,19 +6,23 @@ name: OA v2 — checks
 on:
   push:
     paths:
-      - 'v2/**'
-      - '.github/workflows/oa-checks.yml'
-      # the live pages are the SOURCE of the ported v2 pages — an edit to one
-      # must fail the port's --check until the port is re-run
       - '*.html'
-      - 'partials/**'
       - 'assets/**'
+      - 'partials/**'
+      - 'data/**'
+      - '_scraper/**'
+      - '_firestore.rules'
+      - '_storage.rules'
+      - '.github/workflows/oa-checks.yml'
   pull_request:
     paths:
-      - 'v2/**'
       - '*.html'
-      - 'partials/**'
       - 'assets/**'
+      - 'partials/**'
+      - 'data/**'
+      - '_scraper/**'
+      - '_firestore.rules'
+      - '_storage.rules'
   workflow_dispatch:
 
 permissions:
@@ -38,26 +42,20 @@ jobs:
       - name: Every script parses
         run: |
           set -e
-          for f in v2/assets/*.js; do node --check "$f"; done
-          for f in v2/_scraper/*.mjs; do node --check "$f"; done
+          for f in assets/oa-*.js; do node --check "$f"; done
+          for f in _scraper/*.mjs; do node --check "$f"; done
           echo "all scripts parse"
 
       - name: The data model, the merge, and the served file
-        run: node v2/_scraper/selftest.mjs
-
-      - name: The ported pages match the live pages they were built from
-        # v2/<page>.html files are GENERATED from the live pages at the root by
-        # port-pages.mjs. --check re-derives every one and fails on drift, so a
-        # live page edited without re-running the port cannot slip through.
-        run: node v2/_scraper/port-pages.mjs --check
+        run: node _scraper/selftest.mjs
 
       - name: No secret ever reaches a served file
         run: |
           set -e
           # The repository is public. data/ is fetched by every visitor, so a
           # submitter's e-mail address landing there would be a disclosure.
-          if grep -rEl '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' v2/data/ ; then
-            echo "::error::an e-mail address is present in v2/data/"
+          if grep -rEl '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' data/ ; then
+            echo "::error::an e-mail address is present in data/"
             exit 1
           fi
           # A pasted Firebase WEB config is fine — those are public by design and
@@ -69,8 +67,8 @@ jobs:
           # string while explaining this very check — a guard that fails on
           # every push teaches people to ignore it, which is worse than not
           # having one.
-          if grep -rlE -- '-----BEGIN [A-Z ]*PRIVATE KEY-----' v2/ ; then
-            echo "::error::private key material is committed under v2/"
+          if grep -rlE --exclude-dir=node_modules --exclude-dir=.git -- '-----BEGIN [A-Z ]*PRIVATE KEY-----' . ; then
+            echo "::error::private key material is committed in the served tree"
             exit 1
           fi
           echo "no e-mail addresses and no private key material in the served files"
@@ -80,4 +78,4 @@ jobs:
           set -e
           npm install --no-save --no-audit --no-fund playwright@1
           npx playwright install --with-deps chromium
-          node v2/_scraper/page-test.mjs
+          node _scraper/page-test.mjs

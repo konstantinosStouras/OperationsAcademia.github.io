@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <title>What's new - OperationsAcademia.org</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="What changed on Operations Academia — new features and site updates, newest first." name="description">
+    <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+  </head>
+  <body class="no-sidebar">
+    <div id="page-wrapper">
+      <div id="header-wrapper">
+        <div class="container" id="header">
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class="OAlogo"
+            src="/images/OperationsAcademiaLogo.png" style="margin-top:5px;" width="100"></a>
+          <nav id="nav"></nav>
+          <div id="oa-headnav">
+            <a class="oa-headbtn" href="feedback.html">
+              <span aria-hidden="true">&#128172;</span> Feedback</a>
+            <div id="oa-account"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="main-wrapper">
+        <div class="container" id="page">
+          <div class="title-heading">
+            <h2>What's new</h2>
+            <p>What changed on Operations Academia, newest first</p>
+          </div>
+
+          <div id="main">
+            <div class="row">
+              <div class="12u" id="content">
+                <div class="oa-form">
+
+                  <section class="oa-panel">
+                    <p class="oa-lede">The site keeps growing. Every update is logged below
+                    &mdash; automatically, from the same record the e-mail digests are sent
+                    from, so this page and your inbox can never disagree about what changed.</p>
+
+                    <div class="oa-note">
+                      <p><strong>Get these by e-mail.</strong> Sign in and subscribe to
+                      <em>site updates</em> &mdash; each change lands in your inbox as it
+                      ships, or batched weekly or monthly.
+                      <a class="button blue oa-wn-sub" href="alerts.html?topic=updates">Subscribe
+                      to site updates</a></p>
+                    </div>
+
+                    <!-- Filled from changelog.json — the single source of truth the
+                         alerts mailer and the alert-form preview also read. To announce
+                         something, add an entry there; it appears here, in the preview
+                         and in subscribers' digests, with nothing else to update. -->
+                    <div id="oa-whatsnew">
+                      <p class="oa-muted" id="oa-wn-loading">Loading the update log&hellip;</p>
+                    </div>
+                  </section>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer: shared include -->
+      <div data-include="partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
+    <script src="assets/oa-firebase.js"></script>
+    <script src="assets/oa-accounts.js"></script>
+    <script>
+    (function () {
+      'use strict';
+
+      /* Render changelog.json, newest first. The DATES are the data's own;
+         nothing here invents or reorders them, so an entry seeded with a past
+         date reads as history and an entry dated today reads as news — the
+         same windowing rule the alerts mailer applies. */
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function fmtDate(iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+        if (!m) return String(iso || '');
+        var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1];
+      }
+
+      // Same-origin page links only; anything else renders as plain text.
+      // changelog.json is the maintainer's file, but the rule costs nothing.
+      function safeHref(u) {
+        u = String(u || '').trim();
+        if (!u) return '';
+        if (/^https?:\/\/(www\.)?operationsacademia\.org(\/|$)/i.test(u)) return u;
+        if (u.charAt(0) === '/' && u.charAt(1) !== '/') return u;
+        return '';
+      }
+
+      fetch('changelog.json', { credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (log) {
+          var host = document.getElementById('oa-whatsnew');
+          var updates = (log && log.updates) || [];
+          if (!updates.length) {
+            host.innerHTML = '<p class="oa-muted">Nothing logged yet.</p>';
+            return;
+          }
+          host.innerHTML = updates.map(function (u) {
+            var href = safeHref(u.url);
+            var title = esc(u.title || '');
+            return '<article class="oa-wn-entry">' +
+              '<p class="oa-wn-date">' + esc(fmtDate(u.date)) + '</p>' +
+              '<h3 class="oa-wn-title">' +
+                (href ? '<a href="' + esc(href) + '">' + title + '</a>' : title) +
+              '</h3>' +
+              '<p class="oa-wn-body">' + esc(u.summary || '') + '</p>' +
+            '</article>';
+          }).join('');
+        })
+        .catch(function () {
+          document.getElementById('oa-whatsnew').innerHTML =
+            '<p class="oa-muted">The update log could not be loaded. ' +
+            'Please reload the page.</p>';
+        });
+    })();
+    </script>
+</body>
+</html>

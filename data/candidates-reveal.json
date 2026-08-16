@@ -1,0 +1,4 @@
+{
+ "//": "The admin's reveal date for candidate profiles (owner decision 2026-08-16): profiles are collected continuously but appear on the Candidates page ALL AT ONCE on this day (UTC). Until then the build writes no profile into candidates.json — held back means not written into a world-readable file, never written-and-hidden. Empty or malformed = not announced yet, hold everything. Edit the date and the next scheduled build applies it.",
+ "revealAt": "2026-10-11"
+}
