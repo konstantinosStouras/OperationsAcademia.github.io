@@ -1134,6 +1134,28 @@ for (const [name, expect] of [
   await f.close();
 }
 
+/* ----------------------------------------------- My postings loads cleanly
+
+   The page's real behaviour is a Firestore read this sandbox cannot make; what
+   a browser CAN prove is that the page boots without a script error and lands
+   a signed-out visitor on the sign-in gate at the same fastpaint speed as the
+   posting page — not on a blank screen. */
+
+{
+  const m = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const t0 = Date.now();
+  await m.goto(BASE + 'my-postings.html', { waitUntil: 'domcontentloaded' });
+  /* The gate paints from the hint immediately; in this sandbox the SDK then
+     fails fast and the page swaps it for the cannot-reach notice — either box
+     is a correct landing, a blank page is the failure being tested for. */
+  await m.waitForSelector('#oa-needauth:not([hidden]), #oa-offline:not([hidden])',
+    { timeout: 4000 });
+  ok(Date.now() - t0 < 4000, 'my postings: a signed-out visitor lands on a message, not a blank page');
+  eq(await m.$eval('#oa-my-list', (n) => n.hidden), true,
+    'my postings: no list is shown to a signed-out visitor');
+  await m.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

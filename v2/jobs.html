@@ -290,7 +290,13 @@
               { label: 'Entry level', value: (r.levels || []).join(', ') },
               { label: 'Apply by',    value: r.applyBy },
               { label: 'Comments on Job Posting', value: r.comments },
-              { label: 'File link',   html: link(r.adUrl, r.adLabel || 'link to Job ad') },
+              /* `adPending`: the poster uploaded the advert but the build has
+                 not filed it into Drive yet. The posting never waits for its
+                 file — it publishes at once and the link replaces this note
+                 at the next update (owner, 2026-08-16). */
+              { label: 'File link',
+                html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad')
+                  : (r.adPending ? '<em>soon to be available</em>' : null) },
               { label: 'Posted online at', html: link(r.postedAtUrl, r.postedAtLabel || 'link') },
               { label: 'Further info', html: link(r.furtherInfoUrl, 'link') }
             ];

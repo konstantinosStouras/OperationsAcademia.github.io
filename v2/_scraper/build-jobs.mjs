@@ -342,11 +342,19 @@ async function main() {
          'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
 
-  const merged =
-    mergeRows(orphans, fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
-      removeRefs);
-  const { added, updated, removed } = merged;
+  const freshVisible = fresh.map((f) => f.row)
+    .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
+
+  const merged = mergeRows(orphans, freshVisible, removeRefs);
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+
+  /* What changed AGAINST THE SERVED FILE — the comparison a reader of this log
+     actually means. mergeRows' own counters compare against the orphan carry,
+     so on a normal run ("every posting has a document") they read "+95 new"
+     when one posting is new and six were edited. Computed once, used for both
+     the log and the admin e-mail, so the two can never tell different
+     stories. */
+  const changes = collectChanges(existing, freshVisible, removeRefs);
 
   const before = serialise(existing);
   const after = serialise(rows);
@@ -354,8 +362,14 @@ async function main() {
   if (before === after) {
     log('the dataset is already up to date — writing nothing.');
   } else {
-    log(`jobs.json: +${added} new, ${updated} updated, ${removed} removed  (${rows.length} total)`);
-    for (const f of fresh) log(`  + ${f.row.ref || f.row.id}  ${f.row.institution}`);
+    log(`jobs.json: +${changes.added} new, ${changes.edits.length} edited, ` +
+        `${changes.takedowns.length} taken down  (${rows.length} total)`);
+    const known = new Set(existing.map((r) => (r.ref ? 'ref:' + r.ref : 'id:' + r.id)));
+    for (const r of freshVisible) {
+      if (!known.has(r.ref ? 'ref:' + r.ref : 'id:' + r.id)) {
+        log(`  + ${r.ref || r.id}  ${r.institution}`);
+      }
+    }
     if (DRY) {
       log('--dry-run: not writing.');
     } else {
@@ -386,8 +400,6 @@ async function main() {
      live, which is the point. */
   if (before !== after && !DRY) {
     try {
-      const changes = collectChanges(
-        existing, fresh.map((f) => f.row), removeRefs);
       if (changes.edits.length || changes.takedowns.length) {
         const mail = await import('./_mail.mjs');
         const tx = await mail.transport();
