@@ -144,9 +144,15 @@ export function missingCredentials(env = process.env) {
 
 /** An access token from the stored refresh token. Short-lived; not cached. */
 export async function accessToken(env = process.env) {
-  const id = env.GDRIVE_CLIENT_ID;
-  const secret = env.GDRIVE_CLIENT_SECRET;
-  const refresh = env.GDRIVE_REFRESH_TOKEN;
+  /* TRIMMED, and this is not defensive noise. A refresh token is copied by
+     hand into a GitHub secret, and PowerShell's Set-Clipboard appends a
+     newline; the secret store preserves it exactly. Google then rejects the
+     value as `invalid_grant` — the same error a REVOKED token gives — so a
+     credential that is byte-perfect apart from one trailing character looks
+     identical to one that has been withdrawn. That cost an hour. */
+  const id = String(env.GDRIVE_CLIENT_ID || '').trim();
+  const secret = String(env.GDRIVE_CLIENT_SECRET || '').trim();
+  const refresh = String(env.GDRIVE_REFRESH_TOKEN || '').trim();
   if (!id || !secret || !refresh) return null;
 
   const res = await fetch(TOKEN_URL, {
@@ -228,7 +234,13 @@ async function check({ keep = false } = {}) {
   const missing = missingCredentials();
   for (const k of CREDENTIAL_VARS) {
     const v = String(process.env[k] || '');
-    console.log(`  ${k}: ${v ? `set (${v.length} characters)` : 'MISSING'}`);
+    const t = v.trim();
+    if (!v) { console.log(`  ${k}: MISSING`); continue; }
+    // Surrounding whitespace is invisible in the settings UI and fatal at the
+    // API, so it is called out rather than silently swallowed.
+    const extra = v.length - t.length;
+    console.log(`  ${k}: set (${t.length} characters` +
+      (extra ? `, plus ${extra} character(s) of surrounding whitespace — trimmed` : '') + ')');
   }
   if (missing.length) {
     console.log(`::error::${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} ` +
