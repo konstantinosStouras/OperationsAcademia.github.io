@@ -121,6 +121,14 @@ class DriveError extends Error {
 
 /* ---------------------------------------------------------------- the client */
 
+export const CREDENTIAL_VARS = ['GDRIVE_CLIENT_ID', 'GDRIVE_CLIENT_SECRET', 'GDRIVE_REFRESH_TOKEN'];
+
+/** Which credentials are missing. Names only — never a value, not even a
+    prefix, because this is printed into a public workflow log. */
+export function missingCredentials(env = process.env) {
+  return CREDENTIAL_VARS.filter((k) => !String(env[k] || '').trim());
+}
+
 /** An access token from the stored refresh token. Short-lived; not cached. */
 export async function accessToken(env = process.env) {
   const id = env.GDRIVE_CLIENT_ID;
@@ -200,10 +208,29 @@ async function check({ keep = false } = {}) {
   const year = marketYear(new Date());
   console.log(`market year ${year}`);
 
+  /* Say WHICH are missing, and where to look. "not all set" sends you to check
+     three things when one is wrong, and the causes are all near-misses that
+     look right in the settings UI. Lengths only, never values — this is a
+     public log. */
+  const missing = missingCredentials();
+  for (const k of CREDENTIAL_VARS) {
+    const v = String(process.env[k] || '');
+    console.log(`  ${k}: ${v ? `set (${v.length} characters)` : 'MISSING'}`);
+  }
+  if (missing.length) {
+    console.log(`::error::${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} ` +
+      'not reaching this workflow. Check, in order: (1) they are under ' +
+      '"Repository secrets" on Settings > Secrets and variables > Actions, not ' +
+      'under "Environment secrets" — a workflow with no `environment:` cannot ' +
+      'see those; (2) they are on the SECRETS tab, not the Variables tab beside ' +
+      'it; (3) the names match exactly, including case; (4) they are on THIS ' +
+      'repository. Nothing was checked.');
+    process.exit(1);
+  }
+
   const token = await accessToken();
   if (!token) {
-    console.log('::error::GDRIVE_CLIENT_ID / GDRIVE_CLIENT_SECRET / GDRIVE_REFRESH_TOKEN ' +
-      'are not all set in this environment — nothing was checked.');
+    console.log('::error::the credentials are set but no access token came back.');
     process.exit(1);
   }
   console.log('credentials: exchanged the refresh token for an access token OK');
