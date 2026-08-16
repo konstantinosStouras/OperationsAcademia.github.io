@@ -9,5 +9,9 @@
   "storage": {
     "//": "The landing strip for uploaded job adverts and CVs — see _storage.rules. Nothing is publicly readable: a file lives here only until the build moves it into the Drive folder for the current job market year.",
     "rules": "_storage.rules"
+  },
+  "functions": {
+    "//": "The instant-publish doorbell (_functions/index.js): a posting change dispatches the GitHub build. Deploy: firebase deploy --only functions (needs the GH_DISPATCH_TOKEN secret first — see _SETUP-INSTANT-PUBLISH.md).",
+    "source": "_functions"
   }
 }

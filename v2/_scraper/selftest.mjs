@@ -18,7 +18,7 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
-  submissionFromRow, composeApplyBy, assignIds,
+  submissionFromRow, composeApplyBy, assignIds, diffRows, collectChanges, renderChangesHtml,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
@@ -858,6 +858,55 @@ function testDriveUpload() {
   ok(body.endsWith('--BOUND--\r\n'), 'and closes the multipart properly');
 }
 
+/* -------------------------------------------- the admin\u2019s change e-mail */
+
+function testChanges() {
+  const a = { id: 'x', ref: 'OA-JOB-1', institution: 'Tulane University',
+    department: 'Freeman School of Business', applyBy: 'November 1, 2026.',
+    levels: ['Assistant Professor'], comments: '', adUrl: '' };
+
+  // an edit is the same posting with different VISIBLE content
+  const edited = { ...a, applyBy: 'December 1, 2026.', adUrl: 'https://drive.google.com/x' };
+  let c = collectChanges([a], [edited], []);
+  eq(c.edits.length, 1, 'a changed posting is an edit');
+  eq(c.edits[0].fields.map((f) => f.field).sort(), ['adUrl', 'applyBy'],
+    'and exactly the changed fields are reported');
+  eq(c.added, 0, 'nothing counted as new');
+
+  // field values render as before -> after
+  const d = diffRows(a, edited);
+  eq(d.find((f) => f.field === 'applyBy').before, 'November 1, 2026.', 'before is kept');
+  eq(d.find((f) => f.field === 'applyBy').after, 'December 1, 2026.', 'after is kept');
+
+  // an identical row is NOT an edit — this is what keeps the build's own
+  // bookkeeping writes (status stamps, cleared upload paths) out of the inbox
+  c = collectChanges([a], [{ ...a }], []);
+  eq(c.edits.length, 0, 'an unchanged posting produces no e-mail');
+
+  // lists compare by content, not identity
+  c = collectChanges([a], [{ ...a, levels: ['Assistant Professor'] }], []);
+  eq(c.edits.length, 0, 'an equal list is not a change');
+
+  // a new posting is counted, never diffed against nothing
+  c = collectChanges([a], [edited, { ...a, id: 'y', ref: 'OA-JOB-2' }], []);
+  eq(c.added, 1, 'a new posting is a count, not a diff');
+
+  // a takedown names the posting that left
+  c = collectChanges([a], [], ['OA-JOB-1']);
+  eq(c.takedowns.length, 1, 'a withdrawn posting is a takedown');
+  eq(c.takedowns[0].before.institution, 'Tulane University', 'and carries what it was');
+
+  // the rendering is complete and escaped
+  const html = renderChangesHtml(collectChanges(
+    [{ ...a, institution: 'A & B <School>' }],
+    [{ ...a, institution: 'A & B <School>', applyBy: 'later' }], []));
+  ok(html.includes('A &amp; B &lt;School&gt;'), 'HTML in a field value is escaped');
+  ok(html.includes('November 1, 2026.') && html.includes('later'),
+    'both sides of the change are shown');
+  ok(!renderChangesHtml({ edits: [], takedowns: [], added: 0 }),
+    'nothing changed renders as nothing');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -867,6 +916,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testSplitFields();
   testCollapseSameDay();
   testAssignIds();
+  testChanges();
   await testPageHeadingRule();
   await testFleetPins();
   await testMigrationRoundTrip();

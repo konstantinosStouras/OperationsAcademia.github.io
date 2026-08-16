@@ -446,6 +446,95 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
   };
 }
 
+/* ------------------------------------------------------- what an edit changed
+
+   The admin is e-mailed a before/after of every change to a published posting
+   (the owner\u2019s request: an edit goes live automatically, and the human
+   finds out rather than having to notice). The diff is computed here, over
+   PUBLIC_FIELDS — the fields a reader can actually see — so an internal
+   bookkeeping write (a status stamp, a cleared upload path) never produces an
+   e-mail claiming the posting changed.                                       */
+
+/** Field-by-field difference between two rows, public fields only. */
+export function diffRows(before, after) {
+  const out = [];
+  for (const k of PUBLIC_FIELDS) {
+    if (k === 'id') continue;
+    const a = before ? before[k] : undefined;
+    const b = after ? after[k] : undefined;
+    const av = Array.isArray(a) ? a.join(', ') : (a === undefined || a === null ? '' : String(a));
+    const bv = Array.isArray(b) ? b.join(', ') : (b === undefined || b === null ? '' : String(b));
+    if (av !== bv) out.push({ field: k, before: av, after: bv });
+  }
+  return out;
+}
+
+/**
+ * Everything a build run changed, against the previously served rows.
+ *
+ *   edits      rows present before AND after whose visible content differs
+ *   takedowns  rows removed because their posting was withdrawn or hidden
+ *   added      count only — new postings already have their own channel (the
+ *              subscriber alerts); the admin e-mail exists for CHANGES
+ */
+export function collectChanges(existingRows, freshRows, removeRefs = []) {
+  const key = (r) => (r.ref ? 'ref:' + r.ref : 'id:' + r.id);
+  const before = new Map();
+  for (const r of existingRows) before.set(key(r), r);
+
+  const edits = [];
+  let added = 0;
+  for (const r of freshRows) {
+    const prev = before.get(key(r));
+    if (!prev) { added++; continue; }
+    const fields = diffRows(prev, r);
+    if (fields.length) edits.push({ before: prev, after: r, fields });
+  }
+
+  const takedowns = [];
+  const gone = new Set(removeRefs.filter(Boolean));
+  for (const r of existingRows) {
+    if (r.ref && gone.has(r.ref)) takedowns.push({ before: r });
+  }
+
+  return { edits, takedowns, added };
+}
+
+/** The admin e-mail body: one section per changed posting, before/after per
+    field. Self-contained HTML (its own escaping) so the model stays free of
+    the mail plumbing. */
+export function renderChangesHtml({ edits, takedowns, added }) {
+  const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const section = (title, row, rowsHtml) =>
+    `<h3 style="margin:18px 0 4px;font-size:16px;">${esc(title)}</h3>
+     <p style="margin:0 0 8px;color:#555;">${esc(row.institution)}${row.department ? ' \u2014 ' + esc(row.department) : ''}
+        ${row.ref ? ' \u00b7 ' + esc(row.ref) : ''}</p>${rowsHtml}`;
+
+  const table = (fields) =>
+    `<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;">
+      <tr style="background:#f2f5f8;"><th align="left">Field</th><th align="left">Before</th><th align="left">After</th></tr>
+      ${fields.map((f) =>
+        `<tr>
+          <td style="border-top:1px solid #e5e9ee;white-space:nowrap;vertical-align:top;"><strong>${esc(f.field)}</strong></td>
+          <td style="border-top:1px solid #e5e9ee;vertical-align:top;color:#a3364a;">${esc(f.before) || '<em>(empty)</em>'}</td>
+          <td style="border-top:1px solid #e5e9ee;vertical-align:top;color:#2e6b4f;">${esc(f.after) || '<em>(empty)</em>'}</td>
+        </tr>`).join('')}
+    </table>`;
+
+  const parts = [];
+  for (const e of edits) parts.push(section('Edited', e.after, table(e.fields)));
+  for (const t of takedowns) {
+    parts.push(section('Taken down', t.before,
+      '<p style="margin:0;color:#a3364a;">This posting was withdrawn or hidden and has been removed from the list.</p>'));
+  }
+  if (added) {
+    parts.push(`<p style="margin:16px 0 0;color:#555;">${added} new posting${added === 1 ? '' : 's'} also published this run (new postings go out via the e-mail alerts; this message covers changes).</p>`);
+  }
+  return parts.join('\n');
+}
+
 /* --------------------------------------------------------- same-day repeats
 
    The Google Form has no edit step, so a poster who wanted to change something

@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
-  marketYear,
+  marketYear, collectChanges, renderChangesHtml,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
@@ -370,6 +370,45 @@ async function main() {
          it. */
       await writeFile(VOCAB, serialiseVocab(buildVocab(rows, { generated: now.toISOString() })));
       log(`wrote ${path.relative(process.cwd(), JOBS)}, jobs-meta.json and vocab.json`);
+    }
+  }
+
+  /* ------------------------------------------ tell the admin what changed
+
+     Every EDIT to a published posting, and every takedown, goes to the admin
+     as a before/after — the owner's request: an edit goes live automatically,
+     and the human finds out rather than having to notice. Computed from the
+     rows (PUBLIC_FIELDS), so bookkeeping writes never produce an e-mail.
+
+     Best-effort by design: with SMTP unset the mail plumbing PRINTS the
+     message into this log instead — the record still exists, just not in an
+     inbox — and a send failure never stops the publish; the change is already
+     live, which is the point. */
+  if (before !== after && !DRY) {
+    try {
+      const changes = collectChanges(
+        existing, fresh.map((f) => f.row), removeRefs);
+      if (changes.edits.length || changes.takedowns.length) {
+        const mail = await import('./_mail.mjs');
+        const tx = await mail.transport();
+        const what = [
+          changes.edits.length && `${changes.edits.length} edited`,
+          changes.takedowns.length && `${changes.takedowns.length} taken down`,
+        ].filter(Boolean).join(', ');
+        await mail.send(tx, {
+          to: process.env.ADMIN_NOTIFY || 'kstouras@gmail.com',
+          subject: `[OA] Job postings changed: ${what}`,
+          html: mail.shell({
+            title: 'Job postings changed',
+            bodyHtml: renderChangesHtml(changes),
+            manageUrl: null,
+          }),
+        });
+        log(`change e-mail: ${what} -> ${process.env.ADMIN_NOTIFY || 'kstouras@gmail.com'}` +
+            (tx ? '' : ' (printed only — SMTP is not configured)'));
+      }
+    } catch (e) {
+      warn(`change e-mail failed (${e.message}) — the changes are live regardless`);
     }
   }
 
