@@ -94,16 +94,24 @@
      The Google Sheet held "Deadline" and "Date posted" as spreadsheet FORMULA
      columns, so their values froze at whatever the last edit computed — every
      row in the export reads "Older posts" regardless of age. Computing them
-     here from the real dates instead means the buckets are always correct.     */
+     here from the real dates instead means the buckets are always correct.
+
+     THE DEADLINE VOCABULARY IS THE VENDOR PAGE'S OWN, and matching it exactly
+     is the point: the live Awesome Table view offers three values and only
+     three — "Closing soon", "Expired", "Until filled" — so a returning visitor
+     finds the same choices in the same words. It used to read "Open" here,
+     which is a fourth word for a list that has never had one.
+
+     "Closing soon" therefore covers EVERY deadline still ahead, not a near
+     window: the vendor page shows no fourth bucket for a posting whose closing
+     date is months out, so a narrower reading would have to invent one.       */
 
   var DERIVE = {
     deadline: function (row) {
-      if (!row.applyByDate) {
-        return /until\s*filled|open\s*until|rolling/i.test(row.applyBy || '')
-          ? 'Until filled'
-          : 'Until filled';
-      }
-      return daysBetween(todayISO(), row.applyByDate) < 0 ? 'Expired' : 'Open';
+      // no closing date on record — the sheet's "Until filled." postings
+      if (!row.applyByDate) return 'Until filled';
+      // a deadline that falls TODAY is still open, hence < 0 rather than <= 0
+      return daysBetween(todayISO(), row.applyByDate) < 0 ? 'Expired' : 'Closing soon';
     },
     datePosted: function (row) {
       if (!row.posted) return 'Older posts';
@@ -116,8 +124,10 @@
     },
   };
 
+  /* The order the values are offered in. Deadline follows the vendor page's
+     list exactly, down to the order the three sit in. */
   var BUCKET_ORDER = {
-    deadline: ['Open', 'Until filled', 'Expired'],
+    deadline: ['Closing soon', 'Expired', 'Until filled'],
     datePosted: ['Last 7 days', 'Last 30 days', 'Last 3 months', 'Older posts'],
   };
 
@@ -285,23 +295,34 @@
       barEl.appendChild(el('div', { class: 'oa-filter-actions' }, [clear]));
     }
 
+    /* A chip is ONE button: clicking anywhere on the blue area drops that value
+       from the filter, and the × is decoration rather than the only target.
+       Reported by the owner — the chip is what reads as the thing to click, and
+       a 9-pixel × is a target nobody should have to hit, least of all on a
+       phone. It is also what stouras.com/lit/ does, so the two sites behave the
+       same way.
+
+       Hence a <button> wrapping two <span>s and not the other way round: a
+       button inside a button is invalid, so making the chip clickable means
+       the × stops being one. */
     function buildChips(f) {
       var box = el('div', { class: 'oa-chips' });
       sel[f.key].forEach(function (v) {
         box.appendChild(
-          el('span', { class: 'oa-chip' }, [
-            el('span', { text: v }),
-            el('button', {
-              type: 'button',
-              'aria-label': 'Remove filter ' + v,
-              text: '×',
-              onclick: function () {
-                sel[f.key]['delete'](v);
-                page = 0;
-                buildBar();
-                apply();
-              },
-            }),
+          el('button', {
+            type: 'button',
+            class: 'oa-chip',
+            title: 'Remove filter “' + v + '”',
+            'aria-label': 'Remove filter ' + v,
+            onclick: function () {
+              sel[f.key]['delete'](v);
+              page = 0;
+              buildBar();
+              apply();
+            },
+          }, [
+            el('span', { class: 'oa-chip-label', text: v }),
+            el('span', { class: 'oa-chip-x', 'aria-hidden': 'true', text: '×' }),
           ])
         );
       });
@@ -540,7 +561,13 @@
         if (raw === null && f.legacyParam) raw = p.get(f.legacyParam);
         if (raw === null) return;
         if (f.type === 'text') sel[f.key] = raw;
-        else raw.split('|').forEach(function (v) { if (v) sel[f.key].add(v); });
+        else raw.split('|').forEach(function (v) {
+          if (!v) return;
+          // a value this filter used to publish under another name, so a link
+          // someone bookmarked or shared still selects what they meant
+          if (f.legacyValues && f.legacyValues[v]) v = f.legacyValues[v];
+          sel[f.key].add(v);
+        });
       });
       var pg = parseInt(p.get('page'), 10);
       if (pg > 1) page = pg - 1;
