@@ -47,7 +47,10 @@ jobs:
           echo "all scripts parse"
 
       - name: The data model, the merge, and the served file
-        run: node _scraper/selftest.mjs
+        run: |
+          node _scraper/selftest.mjs
+          node _scraper/import-sheet.mjs --selftest
+          node _scraper/import-legacy-tables.mjs --selftest
 
       - name: No secret ever reaches a served file
         run: |

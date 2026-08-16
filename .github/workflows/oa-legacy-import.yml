@@ -1,0 +1,81 @@
+name: OA data — import the legacy Awesome Table sheets
+
+# The one-off (re-runnable) import behind universities.json,
+# recent-faculty.json and past-postings.json — the three datasets that
+# replaced the last Awesome Table embeds. It reads the four legacy Google
+# Sheets straight from docs.google.com (the runners can; the build sandbox
+# cannot), discovers every tab by header signature, and commits the sanitised
+# JSON. See _scraper/import-legacy-tables.mjs for what is read and why.
+#
+# These are FROZEN ARCHIVES — no schedule. Dispatch it by hand when the
+# universities sheet gains a school, or if the import ever has to be redone.
+# It also fires once on a push that changes the importer itself, so a fix to
+# the mapping re-imports without a second manual step.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report what would change, write nothing'
+        type: boolean
+        default: false
+  push:
+    paths:
+      - '_scraper/import-legacy-tables.mjs'
+      - '.github/workflows/oa-legacy-import.yml'
+
+permissions:
+  contents: write
+
+# Shares the jobs-data group: everything that writes data/ takes turns.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Offline checks
+        run: |
+          node _scraper/import-legacy-tables.mjs --selftest
+          node _scraper/selftest.mjs
+
+      - name: Read the sheets and rebuild the archives
+        run: node _scraper/import-legacy-tables.mjs --fetch --out-dir data ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Re-check the files we are about to commit
+        run: node _scraper/selftest.mjs
+
+      - name: Commit
+        if: ${{ !inputs.dry_run }}
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "no change — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "OA data: import the legacy Awesome Table sheets"
+
+          # plain fast-forward, with rebase-and-retry — another writer may have
+          # moved the branch on while this run was working
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected — rebasing onto the new tip (attempt $i)"
+            git pull --rebase origin ${{ github.ref_name }} || exit 1
+            sleep $((i * 3))
+          done
+          echo "could not push after 5 attempts"
+          exit 1

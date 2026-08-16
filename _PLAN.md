@@ -344,7 +344,52 @@ nothing is lost for those — but a school with only a PDF and no public URL now
 has to host it somewhere. Options, in increasing cost: leave as is; accept
 Firebase Storage uploads; or accept an e-mailed PDF and upload it yourself.
 
-### 3.5 The remaining five tables — **two to three days each**
+### 3.5 The remaining five tables — **DONE 2026-08-16**
+
+> **All five are now on the site's own stack, and no page loads Awesome
+> Table any more.** Candidates and Placements shipped with their forms
+> (above); the last three shipped together:
+>
+> - **Recent faculty** — `data/recent-faculty.json` (+`-meta`), rebuilt on
+>   OAList with the vendor page's own four filters plus a year picker;
+>   alphabetical by last name as before. The page now points reporters at
+>   `post-a-placement.html` — placements is the live pipeline, this page is
+>   the archive of earlier years.
+> - **Past postings** — `data/past-postings.json` (+`-meta`), the jobs.json
+>   row shape via the same `rowsFromSheets` the sheet sync used, so the two
+>   files cannot drift. The committed archive holds every market ≤ 2025
+>   (`ARCHIVE_MAX_YEAR`) from BOTH legacy sheets — the "Past job postings"
+>   sheet (market 2015; the vendor page's whole content) and the "Job
+>   Postings" sheet's older markets. On top of it, `previous-markets.html`
+>   folds in whatever `data/jobs.json` rows have fallen out of the jobs
+>   page's market window at read time, so each July the newly-past season
+>   appears there by itself with nothing to re-import. (This is the "merge
+>   into /jobs" decision of §4 resolved the other way round: one archive
+>   page, fed by the live file.)
+> - **Universities** — `data/universities.json`, and the one non-card
+>   renderer: a Leaflet + OpenStreetMap map (vendored at `assets/leaflet/`,
+>   engine `assets/oa-uni-map.js`), with the vendor view's search box,
+>   clustered pins and per-school popup linking into the site's own pages.
+>   The tile server is the only third party left in the reading path.
+>
+> The importer is `_scraper/import-legacy-tables.mjs` (CSV files in, or
+> `--fetch` straight from the published sheets — tab discovery by header
+> signature, e-mail redaction, and it refuses to write if an address slips
+> through). `.github/workflows/oa-legacy-import.yml` re-runs it on demand;
+> these are frozen archives, so there is no schedule. The legacy
+> `?filterA=`/`?filterD=`/`?filterE=`/`?filterF=` deep links — the vendor's
+> spreadsheet-column names, which the sheets and jobs.json's "Further info"
+> column emit everywhere — keep selecting what they always selected, pinned
+> by the selftest.
+>
+> One honest caveat: Google Drive's text rendering truncates large sheets
+> (§1's warning), and the build sandbox cannot reach the CSV endpoints, so
+> the first committed archive was cut from partial renderings. The import
+> workflow re-reads every tab from the real endpoints on the runners and
+> commits any rows the renderings hid — run it once after merging (it also
+> fires itself when the importer changes).
+
+The original estimate, kept for the record:
 
 The engine is generic, so each is mostly configuration plus a form:
 

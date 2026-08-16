@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
   <head>
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <title>
@@ -8,17 +7,15 @@
     </title>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no"> -->
-    <meta content="Matching supply with demand in the Operations job market" name="description">	
-    <meta property="og:title" content="Operations Academia" /> 
+    <meta content="Matching supply with demand in the Operations job market" name="description">
+    <meta property="og:title" content="Operations Academia" />
     <meta property="og:site_name" content="Operations Academia" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.operationsacademia.org" /> 
-    <meta property="og:image" content="/images/OA_logo_1200x294.png" /> 
-    <!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+    <meta property="og:url" content="https://www.operationsacademia.org" />
+    <meta property="og:image" content="/images/OA_logo_1200x294.png" />
     <link href="/assets/css/main.css" rel="stylesheet">
+    <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
-    <!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
   </head>
   <body class="no-sidebar">
     <div id="page-wrapper">
@@ -28,8 +25,7 @@
         <!-- Header -->
 
         <div class="container" id="header">
-          <a href="./" id="logo" onclick=
-          "ga('send', 'pageview', 'logoHeader');"><img alt="Operations Academia Logo" class=
+          <a href="./" id="logo"><img alt="Operations Academia Logo" class=
           "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
           "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
 
@@ -65,22 +61,19 @@
                   <div style=
                   "clear:both;padding:25px 20px;background-color:rgb(249,249,249);text-align:justify;border:1px solid rgb(204,204,204)">
                     <div style=
-                    "color:rgb(102,102,102);line-height:20px;font-size:14px;display:inline;margin:5px 10px;float:right">
-                      <br>
-                    </div>
-                    <span style="text-align:left"></span>
-                    <div style=
                     "color:rgb(68,68,68);line-height:21px;display:inline;float:left;margin:5px 10px 0px 0px">
-                      <span style="text-align:left"><img border="0" src=
+                      <span style="text-align:left"><img border="0" alt="" src=
                       "/images/information.png"></span>
                     </div>
                     We display below past job postings made in Operations Research (and related
-                    fields) shown ranked by posting date. The "Job Market Year" of the academic year 2016-2017 is defined to be
-                    "2017" (and similarly for other academic years). Recent PhD graduates who have
-                    accepted an academic placement <a href="recent-faculty.html">are shown in this
-                    page</a>. We welcome your <a href=
-                    "https://operationsacademia.uservoice.com/">suggestions and feedback on how to
-                    improve</a> this effort.<br>
+                    fields), shown ranked by posting date. The "Job Market Year" of the academic
+                    year 2016-2017 is defined to be "2017" (and similarly for other academic
+                    years); postings for the market currently under way are on the
+                    <a href="jobs.html">Job postings</a> page and join this archive when the
+                    season rolls. Recent PhD graduates who have accepted an academic placement
+                    <a href="recent-faculty.html">are shown in this page</a>. We welcome your
+                    <a href="feedback.html">suggestions and feedback on how to improve</a> this
+                    effort.<br>
                     <br>
                     Finally, kindly encourage your colleagues and past PhD Students currently at
                     the level of "Assistant Professor" and of any recent past year to <a href=
@@ -91,7 +84,10 @@
                 <br>
                 <br>
 
-                <div data-type="AwesomeTableView" data-filters="" data-viewID="-O4FTJkB-AhEOsYTAw3b"> </div>
+                <!-- The archive. Replaces the Awesome Table view that used to
+                     sit here (data-viewID="-O4FTJkB-AhEOsYTAw3b"). -->
+                <div id="oa-past"></div>
+
               </div>
             </div>
           </div>
@@ -101,31 +97,165 @@
       </div>
       <!-- Footer Wrapper -->
 
-      <!-- Footer: shared include -->
-<div data-include="partials/footer.html"></div>
-<script src="/assets/js/include-partials.js"></script>
-	
-    <!-- Scripts -->
-    <script src="/assets/js/ypo-parakolouthisi.js">
-    </script> 
-    <script src="assets/oa-nav.js">
-    </script> 
-    <script src="/assets/js/jquery.min.js">
-    </script> 
-    <script src="/assets/js/jquery.dropotron.min.js">
-    </script> 
-    <script src="/assets/js/skel.min.js">
-    </script> 
-    <script src="https://awesome-table.com/AwesomeTableInclude.js">
-    </script> 
-    <script src="/assets/js/util.js">
-    </script> <!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
-     
-    <script src="/assets/js/main.js">
-    </script>
-    <!-- v2: the account chip in the header. Inert until a Firebase project
-         is configured, exactly as on the rebuilt pages. -->
+            <!-- Footer: shared include -->
+      <div data-include="partials/footer.html"></div>
+      <script src="/assets/js/include-partials.js"></script>
+    </div><!-- /#page-wrapper -->
+
+    <!-- The site's own script chain, in the order every page uses it — see
+         jobs.html for why each part is load-bearing. Awesome Tables is
+         deliberately no longer here. -->
+    <script src="/assets/js/ypo-parakolouthisi.js"></script>
+    <script src="assets/oa-nav.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.dropotron.min.js"></script>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- v2 -->
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
-  </body>
+    <script src="assets/oa-list.js"></script>
+    <script>
+    (function () {
+      'use strict';
+      var U = window.OAList.safeUrl;
+
+      /* The market year under way — the same rule as jobs.html, jobs-model.mjs
+         and oa-nav.js (1 July roll, numbered by the year the market ends; the
+         selftest pins the copies together). A row IN the current market
+         belongs to the jobs page; everything else belongs here. */
+      function inCurrentMarket(row) {
+        var d = new Date();
+        var year = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+        var start = (year - 1) + '-07-01';
+        return String(row.posted || '') >= start || Number(row.year) >= year;
+      }
+
+      /* Same own-site link rewrite as jobs.html: a stored link that names this
+         site by its full URL is re-pointed relative, so it keeps working
+         wherever the site is served from. */
+      var OWN_ORIGIN =
+        /^https?:\/\/(?:www\.)?operationsacademia\.org(\/[^?#]*)?((?:[?#].*)?)$/i;
+      var OWN_PAGES = ['universities', 'candidates', 'placements', 'previous-markets',
+        'recent-faculty', 'resources-for-candidates', 'faqs', 'contact', 'jobs'];
+
+      function ownSite(url) {
+        var m = OWN_ORIGIN.exec(String(url || '').trim());
+        if (!m) return url;
+        var slug = (m[1] || '/').replace(/^\/+/, '').replace(/\.html$/i, '');
+        if (!slug || slug === 'index') return './' + (m[2] || '');
+        if (OWN_PAGES.indexOf(slug) === -1) return url;
+        return './' + slug + '.html' + (m[2] || '');
+      }
+
+      function link(url, label) {
+        var u = U(ownSite(url));
+        if (!u) return null;
+        var a = document.createElement('a');
+        a.href = u;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = label || 'link';
+        return a.outerHTML;
+      }
+
+      /* The archive file carries every market up to 2025 (see
+         _scraper/import-legacy-tables.mjs). Markets since then accumulate in
+         data/jobs.json, so the rows that have FALLEN OUT of the jobs page's
+         own window are folded in here at read time — each July the newly-past
+         season appears by itself, with nothing to re-import. */
+      fetch('data/jobs.json', { credentials: 'same-origin' })
+        .then(function (res) { return res.ok ? res.json() : []; })
+        ['catch'](function () { return []; })
+        .then(function (jobs) {
+          var archive = (Array.isArray(jobs) ? jobs : [])
+            .filter(function (r) { return !inCurrentMarket(r); });
+
+          OAList.mount({
+            mount: '#oa-past',
+            data: 'data/past-postings.json',
+            perPage: 10,
+            prepare: function (rows) {
+              var have = {};
+              rows.forEach(function (r) { have[r.id] = true; });
+              archive.forEach(function (r) { if (!have[r.id]) rows.push(r); });
+              return rows;
+            },
+
+            // newest market first, newest posting first within it
+            sort: function (a, b) {
+              return (Number(b.year) || 0) - (Number(a.year) || 0) ||
+                     String(b.posted || '').localeCompare(String(a.posted || ''));
+            },
+
+            /* legacyParam letters are the vendor view's own deep-link names —
+               the spreadsheet columns its filters sat on. The Universities map
+               still links here as ?filterD=<school>. */
+            filters: [
+              { key: 'university', label: 'University/Institution', type: 'text',
+                fields: ['institution', 'department'],
+                placeholder: '', legacyParam: 'filterD' },
+              { key: 'year',    label: 'Job market year', field: 'year',
+                legacyParam: 'filterB' },
+              { key: 'type',    label: 'Type',            field: 'type',
+                legacyParam: 'filterC' },
+              { key: 'level',   label: 'Entry level',     field: 'levels', type: 'one',
+                legacyParam: 'filterF' },
+              { key: 'country', label: 'Location',        field: 'country', sort: 'count',
+                legacyParam: 'filterI' }
+            ],
+
+            card: {
+              title:    function (r) { return r.institution; },
+              subtitle: function (r) { return r.department; },
+              rows: function (r) {
+                return [
+                  { label: 'Job market year', value: r.year ? String(r.year) : '' },
+                  { label: 'Entry level',     value: (r.levels || []).join(', ') },
+                  { label: 'Apply by',        value: r.applyBy },
+                  { label: 'Comments on Job Posting', value: r.comments },
+                  { label: 'File link',
+                    html: link(r.adUrl, r.adLabel || 'link to Job ad') },
+                  { label: 'Posted online at',
+                    html: link(r.postedAtUrl, r.postedAtLabel || 'link') },
+                  { label: 'Further info',    html: link(r.furtherInfoUrl, 'link') }
+                ];
+              }
+            }
+          });
+        });
+
+      /* oa-list.js's own wording already says "job postings" — right for this
+         page — but the empty states describe a LIVE list. Reword the two that
+         would mislead on an archive. */
+      (function reworder() {
+        var host = document.querySelector('#oa-past');
+        if (!host || !window.MutationObserver) return;
+
+        var WORDING = {
+          'Loading job postings…': 'Loading past job postings…',
+          'No job postings are listed at the moment.':
+            'No past job postings are in the archive yet.',
+          'Please check back soon — new postings are added as they arrive.':
+            'Postings join this archive as each job market season ends.',
+          'Try removing a filter, or clear them all to see every posting.':
+            'Try removing a filter, or clear them all to see the whole archive.'
+        };
+
+        function reword() {
+          var nodes = host.querySelectorAll('.oa-loading, .oa-empty strong, .oa-empty span');
+          for (var i = 0; i < nodes.length; i++) {
+            var want = WORDING[nodes[i].textContent];
+            if (want && nodes[i].textContent !== want) nodes[i].textContent = want;
+          }
+        }
+
+        reword();
+        new MutationObserver(reword).observe(host, { childList: true, subtree: true });
+      })();
+    })();
+    </script>
+</body>
 </html>

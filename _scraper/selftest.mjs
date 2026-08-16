@@ -574,9 +574,13 @@ async function testMobileStandards() {
   const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
   const listed = /const MOBILE_PAGES = \[([^\]]*)\]/.exec(pt);
   ok(!!listed, 'page-test.mjs carries the MOBILE_PAGES gate');
-  for (const p of ['jobs.html', 'candidates.html', 'placements.html']) {
+  for (const p of ['jobs.html', 'candidates.html', 'placements.html',
+    'previous-markets.html', 'recent-faculty.html']) {
     ok(listed && listed[1].includes(p), `${p} is under the mobile gate`);
   }
+  // universities.html is a MAP, not a list — it cannot mount OAList, so it has
+  // its own phone block in page-test.mjs instead of a MOBILE_PAGES entry
+  ok(pt.includes('oa-uni-search'), 'the universities map has its own mobile gate');
 
   // the engine rules the standard leans on
   const css = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
@@ -1086,6 +1090,123 @@ async function testPageSpeedWiring() {
     'and preconnects to the CDN');
 }
 
+/* ------------------------------------- the legacy Awesome Table datasets
+
+   universities.json, recent-faculty.json and past-postings.json replaced the
+   site's last three vendor tables (import-legacy-tables.mjs is the writer;
+   its own --selftest covers the mapping). What is pinned HERE is the served
+   files themselves — the same discipline as testServedFile — plus the
+   keep-in-sync points that would fail silently: the pages reading the files,
+   the legacy ?filter deep links, and the vendor script being gone. */
+
+async function testLegacyTables() {
+  const { ARCHIVE_MAX_YEAR } = await import('./import-legacy-tables.mjs');
+  const read = async (name) =>
+    JSON.parse(await readFile(path.join(HERE, '..', 'data', name), 'utf8'));
+
+  for (const name of ['universities.json', 'recent-faculty.json', 'past-postings.json']) {
+    if (!existsSync(path.join(HERE, '..', 'data', name))) {
+      fails.push(`data/${name} is missing`);
+      continue;
+    }
+    const rows = await read(name);
+    ok(Array.isArray(rows) && rows.length > 0, `${name} is a non-empty array`);
+    const ids = new Set();
+    let dup = 0;
+    for (const r of rows) { if (!r.id || ids.has(r.id)) dup++; ids.add(r.id); }
+    eq(dup, 0, `${name}: every row has a unique id`);
+    const blob = JSON.stringify(rows);
+    ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(blob), `${name} contains no e-mail address`);
+    ok(!/javascript:|data:text/i.test(blob), `${name} contains no script URL`);
+  }
+
+  const unis = await read('universities.json');
+  let badUni = 0;
+  for (const r of unis) {
+    if (!r.name || !r.institution) badUni++;
+    if (!(Number.isFinite(r.lat) && Math.abs(r.lat) <= 90 &&
+          Number.isFinite(r.lng) && Math.abs(r.lng) <= 180)) badUni++;
+    if (r.mapUrl && url(r.mapUrl) !== r.mapUrl) badUni++;
+    if (r.facultyUrl && url(r.facultyUrl) !== r.facultyUrl) badUni++;
+  }
+  eq(badUni, 0, 'every university row has a name and plottable coordinates, and safe links');
+
+  const rf = await read('recent-faculty.json');
+  let badRf = 0;
+  for (const r of rf) {
+    if (!r.name || !r.last) badRf++;
+    if (r.posted && !/^\d{4}-\d{2}-\d{2}$/.test(r.posted)) badRf++;
+    if (r.year !== undefined && !(r.year >= 2000 && r.year <= 2100)) badRf++;
+    if (r.webUrl && url(r.webUrl) !== r.webUrl) badRf++;
+  }
+  eq(badRf, 0, 'every recent-faculty row is a named person with sane fields');
+  const rfSorted = [...rf].sort((a, b) =>
+    a.last.localeCompare(b.last, 'en', { sensitivity: 'base' }) ||
+    a.name.localeCompare(b.name));
+  eq(rfSorted.map((r) => r.id), rf.map((r) => r.id),
+    'recent-faculty.json is stored in the page order (alphabetical by last name)');
+
+  const past = await read('past-postings.json');
+  let badPast = 0;
+  for (const r of past) {
+    if (!(r.year >= 2000 && r.year <= ARCHIVE_MAX_YEAR)) badPast++;
+    if (r.posted && !/^\d{4}-\d{2}-\d{2}$/.test(r.posted)) badPast++;
+    if (r.adUrl && url(r.adUrl) !== r.adUrl) badPast++;
+    if (r.postedAtUrl && url(r.postedAtUrl) !== r.postedAtUrl) badPast++;
+    for (const l of r.levels || []) if (!LEVELS.includes(l)) badPast++;
+    if (r.type && !TYPES.includes(r.type)) badPast++;
+  }
+  eq(badPast, 0,
+    `every archived posting is a jobs-shaped row from a market ≤ ${ARCHIVE_MAX_YEAR}`);
+  const pastSorted = [...past].sort((a, b) =>
+    (b.year - a.year) || String(b.posted).localeCompare(String(a.posted)) ||
+    a.institution.localeCompare(b.institution));
+  eq(pastSorted.map((r) => r.id), past.map((r) => r.id),
+    'past-postings.json is stored newest market first');
+
+  /* the pages read the files, and honour the vendor's own deep links —
+     the Universities map and every posting's "Further info" link depend on
+     these staying wired */
+  const rfHtml = await readFile(path.join(HERE, '..', 'recent-faculty.html'), 'utf8');
+  ok(rfHtml.includes("data: 'data/recent-faculty.json'"), 'recent-faculty.html reads its dataset');
+  ok(rfHtml.includes("legacyParam: 'filterE'") && rfHtml.includes("legacyParam: 'filterF'"),
+    'recent-faculty.html honours ?filterE (recent hires) and ?filterF (PhD alumni)');
+
+  const pmHtml = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(pmHtml.includes("data: 'data/past-postings.json'"), 'previous-markets.html reads the archive');
+  ok(pmHtml.includes("fetch('data/jobs.json'"),
+    'previous-markets.html folds in the jobs rows that left the current market');
+  ok(pmHtml.includes("legacyParam: 'filterD'"), 'previous-markets.html honours ?filterD');
+  ok(pmHtml.includes('getUTCMonth() >= 6'),
+    'previous-markets.html carries the market-roll rule the jobs page uses');
+
+  const uniHtml = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
+  ok(uniHtml.includes('assets/leaflet/leaflet.js') && uniHtml.includes('OAUniMap.mount'),
+    'universities.html mounts the vendored map');
+  const uniJs = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
+  ok(uniJs.includes("'filterA'") || uniJs.includes('filterA'),
+    'the map honours the ?filterA deep link every posting’s Further-info column emits');
+  for (const f of ['leaflet.js', 'leaflet.css', 'leaflet.markercluster.js',
+    'MarkerCluster.css', 'MarkerCluster.Default.css', 'images/marker-icon.png']) {
+    ok(existsSync(path.join(HERE, '..', 'assets', 'leaflet', f)), `assets/leaflet/${f} is vendored`);
+  }
+
+  /* the point of the whole change: no served page loads the vendor any more */
+  const { readdirSync } = await import('node:fs');
+  for (const f of readdirSync(path.join(HERE, '..'))) {
+    if (!f.endsWith('.html')) continue;
+    const html = await readFile(path.join(HERE, '..', f), 'utf8');
+    ok(!/awesome-table\.com|AwesomeTableView/i.test(html),
+      `${f} no longer embeds Awesome Table`);
+  }
+
+  // the re-import path stays runnable: the workflow names the importer
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-legacy-import.yml'), 'utf8');
+  ok(wf.includes('import-legacy-tables.mjs --fetch'),
+    'the legacy-import workflow runs the importer');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -1105,6 +1226,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testDriveFolders();
   testDriveUpload();
   await testServedFile();
+  await testLegacyTables();
   await testMobileStandards();
   await testMyPostingsPage();
   await testAccountMerge();
