@@ -1641,13 +1641,37 @@ for (const [name, expect] of [
     links: [...n.querySelectorAll('a')].map((a) => a.getAttribute('href')),
   }));
   ok(pop.title.length > 0, 'universities: the popup names the school');
-  for (const want of ['recent-faculty.html?placement=', 'recent-faculty.html?alma=',
-    'candidates.html?affiliation=', 'jobs.html?institution=', 'previous-markets.html?university=']) {
+  /* Four of the five reach pages of their own. The fifth, the candidates list,
+     is a SECTION of the one-pager — so the popup deep-links the section with
+     the namespaced key that mount reads, rather than candidates.html, which
+     redirects there and would drop the query on the way. */
+  for (const [want, what] of [
+    ['recent-faculty.html?placement=', 'recent hires'],
+    ['recent-faculty.html?alma=', 'PhD alumni'],
+    ['./?c_affiliation=', 'candidates'],
+    ['jobs.html?institution=', 'current openings'],
+    ['previous-markets.html?university=', 'past postings'],
+  ]) {
     ok(pop.links.some((h) => h.startsWith(want)),
-      `universities: the popup links into ${want.split('.html')[0]} pre-filtered`);
+      `universities: the popup links into ${what} pre-filtered`);
   }
-  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?)/.test(h)),
+  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?|\.\/\?)/.test(h)),
     'universities: every popup link is a page of this site or a real URL');
+
+  /* And the deep links WORK: each lands with the school in a filter chip, not
+     merely at a URL that carries it. This is the check the swap needed — a
+     redirect resolves and looks fine while silently discarding the filter. */
+  for (const href of pop.links.filter((h) => !/^https?:/.test(h))) {
+    const d = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await d.goto(BASE + href.replace(/^\.\//, ''), { waitUntil: 'domcontentloaded' });
+    await d.waitForTimeout(3500);
+    // the engine's text filters render as <input type="search">; a filter that
+    // took a value from the URL is simply one carrying it
+    const filtered = await d.evaluate(() =>
+      [...document.querySelectorAll('.oa-filters input')].some((i) => i.value.trim().length > 0));
+    ok(filtered, `universities: ${href.split('?')[0]} opens with the school already filtered`);
+    await d.close();
+  }
 
   // the deep link every posting's Further-info column emits
   const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
@@ -1820,6 +1844,114 @@ for (const pageName of MOBILE_PAGES) {
   eq(await m.$eval('#oa-my-list', (n) => n.hidden), true,
     'my postings: no list is shown to a signed-out visitor');
   await m.close();
+}
+
+/* ------------------------------- three trees, and the seams between them
+
+   The site serves three designs at once: the live one at the root, the 2026
+   rebuild archived at /v2/, and the 2014-2026 site at /v1/. link-check.mjs
+   reads the links; this reads what a BROWSER does with them, which is where
+   the failure a promotion causes actually shows up.
+
+   The named case is the owner's own: the three cards under "Explore the wider
+   market". After the 2026-08-17 swap they still pointed at pages built in the
+   design that had just been archived, so clicking one left the new site
+   without saying so. Nothing 404s when that happens — which is exactly why it
+   needs a test rather than a look.                                          */
+
+{
+  /* -- the three cards land IN the live design, with their data ---------- */
+  const p = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await p.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('#resources .v3-card');
+  const cards = await p.$$eval('#resources .v3-card', (as) => as.map((a) => ({
+    href: a.getAttribute('href'),
+    title: a.querySelector('.v3-h3').textContent.trim(),
+  })));
+  eq(cards.length, 3, 'the resources section offers three cards');
+  await p.close();
+
+  for (const c of cards) {
+    ok(!/^\/?v\d+\//.test(c.href),
+      `"${c.title}" does not point into a version directory (${c.href})`);
+    const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errs = [];
+    q.on('pageerror', (e) => errs.push(e.message));
+    await q.goto(BASE + c.href, { waitUntil: 'domcontentloaded' });
+    await q.waitForTimeout(2500);
+    const seen = await q.evaluate(() => ({
+      live: !!document.querySelector('body.v3 .v3-header .v3-nav'),
+      archived: !!document.querySelector('#header-wrapper, #page-wrapper'),
+      rows: document.querySelectorAll('.oa-card, .leaflet-marker-icon').length,
+      robots: !!document.querySelector('meta[name="robots"]'),
+    }));
+    ok(seen.live, `${c.href}: opens IN the live design`);
+    ok(!seen.archived, `${c.href}: carries none of the archived design's chrome`);
+    ok(!seen.robots, `${c.href}: is indexable — a live page, not an archived one`);
+    ok(seen.rows > 0, `${c.href}: renders its data (${seen.rows} rows/pins)`);
+    eq(errs, [], `${c.href}: no uncaught script error`);
+    await q.close();
+  }
+}
+
+/* -- the archives still work, and say where the reader is ---------------- */
+for (const [url, marker] of [
+  ['v2/', 'ARCHIVED 2026 version'],
+  ['v2/jobs.html', 'ARCHIVED 2026 version'],
+  ['v2/universities.html', 'ARCHIVED 2026 version'],
+  ['v1/', 'ARCHIVED previous version'],
+]) {
+  const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await q.goto(BASE + url, { waitUntil: 'domcontentloaded' });
+  await q.waitForTimeout(3000);
+  const seen = await q.evaluate((m) => ({
+    banner: document.body.textContent.includes(m),
+    wayBack: !!document.querySelector('a[href="/"]'),
+    noindex: /noindex/i.test((document.querySelector('meta[name="robots"]') || {}).content || ''),
+    rows: document.querySelectorAll('.oa-card, .leaflet-marker-icon').length,
+  }), marker);
+  ok(seen.banner, `${url}: says it is an archive`);
+  ok(seen.wayBack, `${url}: offers the way back to the live site`);
+  ok(seen.noindex, `${url}: is noindex, so it never competes with the live page`);
+  if (/jobs|universities/.test(url)) {
+    // the archive reads the SHARED data at the root — a relative path here
+    // would ask for /v2/data/… and paint the "could not be loaded" state
+    ok(seen.rows > 0, `${url}: still reads the shared data (${seen.rows} rows/pins)`);
+  }
+  await q.close();
+}
+
+/* -- the preview stubs, and the addresses the one-pager absorbed --------- */
+for (const [from, to] of [
+  ['v3/', '/'], ['v3/jobs.html', '/jobs.html'], ['v3/post-a-job.html', '/post-a-job.html'],
+]) {
+  const q = await browser.newPage();
+  await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
+  try {
+    await q.waitForURL((u) => new URL(u).pathname === to, { timeout: 8000 });
+    ok(true, `${from}: lands on ${to}`);
+  } catch { ok(false, `${from}: never reached ${to} (stopped at ${q.url()})`); }
+  await q.close();
+}
+
+for (const [from, hash] of [
+  ['candidates.html', '#candidates'], ['placements.html', '#placements'],
+  ['faqs.html', '#faq'], ['contact.html', '#contact'],
+  ['resources-for-candidates.html', '#resources'],
+  ['directors-and-contributors.html', '#about'],
+]) {
+  const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
+  try {
+    await q.waitForURL((u) => new URL(u).hash === hash, { timeout: 8000 });
+    await q.waitForTimeout(600);
+    // it is not enough to arrive at the URL: the section has to be on screen
+    ok(await q.evaluate((h) => {
+      const el = document.getElementById(h.slice(1));
+      return !!el && Math.abs(el.getBoundingClientRect().top) < window.innerHeight;
+    }, hash), `${from}: lands on the ${hash} section itself`);
+  } catch { ok(false, `${from}: never reached ${hash} (stopped at ${q.url()})`); }
+  await q.close();
 }
 
 /* ------------------------------------------------------------------ done */

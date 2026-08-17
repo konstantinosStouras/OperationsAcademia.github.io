@@ -1531,6 +1531,24 @@ async function testLegacyTables() {
   const uniJs = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
   ok(uniJs.includes("'filterA'") || uniJs.includes('filterA'),
     'the map honours the ?filterA deep link every posting’s Further-info column emits');
+
+  /* EVERY link a school's popup offers must land PRE-FILTERED on that school.
+     Four of the five reach pages, and their filter keys are pinned above. The
+     fifth — the candidates list — is a SECTION of the one-pager here, so the
+     engine's default (candidates.html?affiliation=…) would follow a redirect
+     that drops the query and show every candidate instead of the school's.
+     The page names the target; the key it names must be the one the
+     one-pager's candidates mount actually reads, prefix included. */
+  const idxHtml = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const candPrefix = (idxHtml.match(/mount: '#oa-candidates',[\s\S]{0,400}?urlPrefix: '([^']*)'/) || [])[1];
+  ok(candPrefix !== undefined, 'index.html: the candidates mount declares its URL prefix');
+  ok(/candidatesHref: function \(q\) \{ return '\.\/\?/.test(uniHtml),
+    'universities.html names where the candidates list lives, rather than taking the default');
+  ok(candPrefix !== undefined &&
+     uniHtml.includes(`'./?${candPrefix}affiliation=' + q + '#candidates'`),
+    `universities.html deep-links the candidates section on ${candPrefix}affiliation, the key it reads`);
+  ok(/{ key: 'affiliation'/.test(idxHtml),
+    'index.html: and the candidates mount carries an affiliation filter to receive it');
   for (const f of ['leaflet.js', 'leaflet.css', 'leaflet.markercluster.js',
     'MarkerCluster.css', 'MarkerCluster.Default.css', 'images/marker-icon.png']) {
     ok(existsSync(path.join(HERE, '..', 'assets', 'leaflet', f)), `assets/leaflet/${f} is vendored`);

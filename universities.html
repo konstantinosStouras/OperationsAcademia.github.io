@@ -177,7 +177,17 @@
     <script src="assets/leaflet/leaflet.markercluster.js"></script>
     <script src="assets/oa-uni-map.js"></script>
     <script>
-      OAUniMap.mount({ mount: '#oa-uni', data: '/data/universities.json' });
+      OAUniMap.mount({
+        mount: '#oa-uni',
+        data: '/data/universities.json',
+        /* The candidates list is a SECTION of the one-page site, and three
+           list engines share that page's query string, so its filter keys are
+           namespaced. Left to the engine's default this would open
+           candidates.html?affiliation=… — which still resolves, but as a
+           redirect that DROPS the query, landing the reader on every
+           candidate instead of the school's. */
+        candidatesHref: function (q) { return './?c_affiliation=' + q + '#candidates'; },
+      });
     </script>
   </body>
 </html>
