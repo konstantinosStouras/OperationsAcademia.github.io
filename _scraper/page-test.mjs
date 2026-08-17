@@ -796,6 +796,14 @@ for (const [name, expect] of [
       { path: `jobSubmissions/j1`, data: {
           uid: DUP, status: 'queued', ref: 'OA-JOB-260815-ABCD', institution: 'Somewhere',
           featured: true } },
+      // the OTHER two posting kinds — the rules always allowed their
+      // hand-over, and the merge once moved only the jobs, stranding these
+      { path: `candidateSubmissions/c1`, data: {
+          uid: DUP, status: 'queued', ref: 'OA-CAND-260815-EFGH', first: 'Ada',
+          last: 'Lovelace' } },
+      { path: `placementSubmissions/p1`, data: {
+          uid: DUP, status: 'published', ref: 'OA-PLAC-260815-JKLM', first: 'Someone',
+          last: 'Placed' } },
       { path: `registeredUsers/${DUP}`, data: { t: 1 } },
     ],
   };
@@ -827,6 +835,8 @@ for (const [name, expect] of [
       order: {
         copyAlert: window.__fb.at('set', 'alerts/a1'),
         handOver: window.__fb.at('update', 'jobSubmissions/j1'),
+        handCand: window.__fb.at('update', 'candidateSubmissions/c1'),
+        handPlace: window.__fb.at('update', 'placementSubmissions/p1'),
         dropAlert: window.__fb.at('delete', 'alerts/a1'),
         dropProfile: window.__fb.at('delete', 'profiles/'),
         killSignIn: window.__fb.at('deleteUser', ''),
@@ -837,6 +847,8 @@ for (const [name, expect] of [
   // what the reader was told before agreeing to any of it
   ok(/1 e-mail alert/.test(run.holds) && /1 job posting/.test(run.holds),
     'the dialog counts what is actually at stake before asking');
+  ok(/1 candidate profile/.test(run.holds) && /1 placement report/.test(run.holds),
+    'candidate profiles and placement reports are counted too — they are equally at stake');
   ok(/ada@example\.edu/.test(run.into),
     'and names the account being merged into, so it cannot be the wrong one');
   ok(!run.orcidOffered,
@@ -869,6 +881,17 @@ for (const [name, expect] of [
   eq(job.ref, 'OA-JOB-260815-ABCD', 'keeping its reference — the poster was given that number');
   eq(job.featured, true, 'and everything else about it, including what only the maintainer sets');
 
+  // …and so do the candidate profile and the placement report. These share the
+  // job posting's ownership model exactly, so a merge that misses them strands
+  // them under a deleted sign-in: unwithdrawable, uncorrectable, for ever.
+  const cand = run.docs['candidateSubmissions/c1'];
+  eq(cand.uid, KEPT, 'the candidate profile is handed over with the jobs');
+  eq(cand.mergedFrom, DUP, 'stamped like a job posting');
+  eq(cand.status, 'queued', 'its lifecycle state untouched');
+  const place = run.docs['placementSubmissions/p1'];
+  eq(place.uid, KEPT, 'the placement report is handed over with the jobs');
+  eq(place.mergedFrom, DUP, 'stamped like a job posting');
+
   eq(run.docs['accountKeys/orcid:' + ORCID].uid, KEPT,
     'the ORCID identity now points at the account that holds it');
 
@@ -878,6 +901,9 @@ for (const [name, expect] of [
     'the alert is copied before the original is deleted');
   ok(o.handOver > -1 && o.killSignIn > o.handOver,
     'the posting changes hands before the sign-in that owns it is removed');
+  ok(o.handCand > -1 && o.killSignIn > o.handCand &&
+     o.handPlace > -1 && o.killSignIn > o.handPlace,
+    'so do the candidate profile and the placement report');
   ok(o.killSignIn > o.dropProfile && o.killSignIn > o.dropAlert,
     'and the sign-in goes last of all');
 
@@ -903,6 +929,256 @@ for (const [name, expect] of [
     'an ORCID sign-in that duplicates an existing account is told so, and shown the merge');
   eq(noticed.keyUntouched, 'somebody-elses-uid-9',
     'and the first account keeps its claim — the duplicate never overwrites it');
+}
+
+/* ----------------------------------- the same flows, on the /v3/ preview
+
+   The v3 pages vendor their own oa-accounts.js, so the merge and the posting
+   flows are driven AGAIN against them — a fix landed only in the root copy
+   would pass everything above and still leave /v3/ broken.
+
+   The story under test is the owner's own scenario: one person posts a job
+   from each of two accounts, merges the two, and must find BOTH postings on
+   the kept account's My postings page. Then each posting form — job,
+   candidate, placement — is filled in and submitted end to end. */
+{
+  const SHIM = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+
+  const DUP = 'dup-account-uid-0001';
+  const KEPT = 'kept-account-uid-0002';
+  const dupUser = { uid: DUP, email: 'ada.dup@example.edu', displayName: 'Ada Dup',
+                    providerData: [{ providerId: 'password' }] };
+  const keptUser = { uid: KEPT, email: 'ada@example.edu', displayName: 'Ada Lovelace',
+                     providerData: [{ providerId: 'google.com' }] };
+
+  async function onV3(url, seed, drive, { dialogs } = {}) {
+    const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    if (dialogs) q.on('dialog', (d) => d.accept());
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify(seed)};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + url, { waitUntil: 'domcontentloaded' });
+    const out = await drive(q);
+    eq(errors, [], `v3 ${url}: no uncaught script error`);
+    await q.close();
+    return out;
+  }
+
+  /* -- one person, two accounts, one job posting from each ---------------- */
+
+  const seed = {
+    user: dupUser, keptUser,
+    docs: [
+      { path: `profiles/${DUP}`, data: { firstName: 'Ada', lastName: 'Dup' } },
+      { path: `profiles/${KEPT}`, data: { firstName: 'Ada' } },
+      { path: `users/${DUP}/alerts/a1`, data: {
+          name: 'OM jobs', email: 'a@x.edu', frequency: 'weekly', enabled: true,
+          criteria: { topics: ['jobs'] }, lastSentAt: '2026-08-10T00:00:00.000Z' } },
+      { path: 'jobSubmissions/jA', data: {
+          uid: DUP, status: 'queued', ref: 'OA-JOB-260815-AAAA',
+          institution: 'Dup University', department: 'School of Things',
+          createdAt: '2026-08-15T00:00:00.000Z' } },
+      { path: 'jobSubmissions/jB', data: {
+          uid: KEPT, status: 'published', ref: 'OA-JOB-260810-BBBB',
+          institution: 'Kept College', department: 'Ops Group',
+          createdAt: '2026-08-10T00:00:00.000Z' } },
+      { path: 'candidateSubmissions/c1', data: {
+          uid: DUP, status: 'queued', ref: 'OA-CAND-260815-CCCC', first: 'Ada', last: 'Dup' } },
+      { path: 'placementSubmissions/p1', data: {
+          uid: DUP, status: 'queued', ref: 'OA-PLAC-260815-DDDD', first: 'Someone', last: 'Placed' } },
+      { path: `registeredUsers/${DUP}`, data: { t: 1 } },
+    ],
+  };
+
+  const merged = await onV3('v3/my-postings.html', seed, async (q) => {
+    // signed in as the duplicate, My postings shows ITS one posting
+    await q.waitForSelector('.oa-my-card', { timeout: 10000 });
+    const pre = await q.$$eval('.oa-my-card .oa-my-inst', (els) => els.map((e) => e.textContent));
+
+    await q.evaluate(() => window.OAAccounts.openProfile());
+    await q.waitForSelector('#oa-merge-open');
+    await q.click('#oa-merge-open');
+    await q.waitForSelector('#oa-merge .oa-auth-provider[data-provider="google"]');
+    await q.waitForFunction(() =>
+      !/Checking/.test(document.getElementById('oa-merge-holds').textContent),
+      null, { timeout: 8000 });
+    const holds = await q.textContent('#oa-merge-holds');
+    await q.click('#oa-merge .oa-auth-provider[data-provider="google"]');
+    await q.waitForSelector('#oa-merge-step2:not([hidden])', { timeout: 8000 });
+    await q.click('#oa-merge-go');
+    await q.waitForFunction(() => window.__fb.at('deleteUser', '') !== -1, null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+
+    return {
+      pre, holds,
+      docs: await q.evaluate(() => window.__fb.dump()),
+      steps: await q.$$eval('#oa-merge-log li', (lis) => lis.map((li) => li.textContent)),
+    };
+  });
+
+  eq(merged.pre, ['Dup University'],
+    'v3 my-postings: the duplicate sees its own posting before the merge');
+  ok(/1 job posting/.test(merged.holds) && /1 candidate profile/.test(merged.holds) &&
+     /1 placement report/.test(merged.holds),
+    'v3 merge: the dialog counts the job posting, candidate profile and placement report');
+  eq(merged.docs['jobSubmissions/jA'].uid, KEPT,
+    'v3 merge: the duplicate\'s job posting now belongs to the kept account');
+  eq(merged.docs['jobSubmissions/jB'].uid, KEPT,
+    'and the kept account\'s own posting is untouched');
+  eq(merged.docs['candidateSubmissions/c1'].uid, KEPT,
+    'the candidate profile came along');
+  eq(merged.docs['placementSubmissions/p1'].uid, KEPT,
+    'and so did the placement report');
+  ok(merged.steps.some((s) => /Handed over 1 job posting/.test(s)) &&
+     merged.steps.some((s) => /Handed over 1 candidate profile/.test(s)) &&
+     merged.steps.some((s) => /Handed over 1 placement report/.test(s)),
+    'v3 merge: the log names everything that changed hands');
+
+  /* -- the kept account signs in and finds BOTH postings ------------------ */
+
+  const after = await onV3('v3/my-postings.html', {
+    user: keptUser,
+    docs: Object.keys(merged.docs).map((p) => ({ path: p, data: merged.docs[p] })),
+  }, async (q) => {
+    await q.waitForSelector('.oa-my-card', { timeout: 10000 });
+    return q.$$eval('.oa-my-card .oa-my-inst', (els) => els.map((e) => e.textContent).sort());
+  });
+  eq(after, ['Dup University', 'Kept College'],
+    'after the merge, My postings shows BOTH job postings under the kept account');
+
+  /* -- post a job on /v3/ -------------------------------------------------- */
+
+  const posted = await onV3('v3/post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'Test University');
+    await q.fill('#f-school', 'Business School');
+    await q.fill('#f-unit', 'Operations Area');
+    await q.selectOption('#f-type', 'University');
+    await q.fill('#f-country', 'Ireland');
+    // an open name-picker dropdown sits over the checkboxes below it; the
+    // combo closes on any mousedown outside it (oa-combo.js), which fill()
+    // never produces — so produce one
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.check('input[name="levels"][value="Assistant Professor"]');
+    await q.check('#f-untilFilled');
+    await q.fill('#f-firstName', 'Kon');
+    await q.fill('#f-lastName', 'Stouras');
+    await q.fill('#f-email', 'kon@example.edu');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const ref = await q.textContent('#oa-ref');
+    const doc = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
+      return d[k];
+    });
+    return { ref, doc };
+  });
+  ok(/^OA-JOB-\d{6}-[A-Z2-9]{4}$/.test(posted.ref.trim()),
+    'v3 post-a-job: the poster is given a quotable reference');
+  eq(posted.doc.status, 'queued', 'the submission is queued for the build');
+  eq(posted.doc.uid, KEPT, 'and owned by the signed-in poster');
+  eq(posted.doc.department, 'Business School, Operations Area',
+    'school and unit are joined into the published department line');
+
+  /* -- correct it (the edit path), on /v3/ --------------------------------- */
+
+  const editSeed = {
+    user: keptUser,
+    docs: [{ path: 'jobSubmissions/j9', data: {
+      uid: KEPT, status: 'published', ref: 'OA-JOB-260810-EEEE', institution: 'Edit U',
+      school: 'School X', unit: 'Unit Y', department: 'School X, Unit Y', country: 'USA',
+      type: 'University', levels: ['Post-Doc'], applyByDate: '2026-12-01', untilFilled: false,
+      firstName: 'A', lastName: 'B', email: 'a@b.edu', year: 2027,
+      createdAt: '2026-08-10T00:00:00.000Z',
+    } }],
+  };
+  const edited = await onV3('v3/post-a-job.html?edit=j9', editSeed, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
+      null, { timeout: 8000 });
+    const prefill = await q.evaluate(() => ({
+      school: document.getElementById('f-school').value,
+      date: document.getElementById('f-applyByDate').value,
+      btn: document.getElementById('oa-submit').textContent,
+    }));
+    await q.fill('#f-institution', 'Edit University (fixed)');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    return { prefill, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/j9']) };
+  });
+  eq(edited.prefill, { school: 'School X', date: '2026-12-01', btn: 'Save changes' },
+    'v3 edit: the stored posting is loaded back into the form');
+  eq(edited.doc.institution, 'Edit University (fixed)', 'the correction is saved');
+  eq(edited.doc.uid, KEPT, 'the owner is unchanged by an edit');
+  eq(edited.doc.status, 'queued', 'and the build re-publishes it');
+
+  /* -- take one down from My postings -------------------------------------- */
+
+  const down = await onV3('v3/my-postings.html', editSeed, async (q) => {
+    await q.waitForSelector('.oa-my-card', { timeout: 10000 });
+    await q.click('.oa-jobbtn-del');
+    await q.waitForFunction(() =>
+      window.__fb.dump()['jobSubmissions/j9'].status === 'withdrawn', null, { timeout: 8000 });
+    return q.evaluate(() => window.__fb.dump()['jobSubmissions/j9'].status);
+  }, { dialogs: true });
+  eq(down, 'withdrawn', 'v3 my-postings: Take down withdraws, never deletes');
+
+  /* -- post a candidacy on /v3/ -------------------------------------------- */
+
+  const cand = await onV3('v3/post-a-candidate.html', { user: keptUser, docs: [] }, async (q) => {
+    await q.waitForSelector('#oa-cand-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-first', 'Grace');
+    await q.fill('#f-last', 'Hopper');
+    await q.fill('#f-affiliation', 'Test University');
+    await q.selectOption('#f-position', 'PhD Candidate');
+    await q.fill('#f-email', 'grace@example.edu');
+    await q.check('input[name="researchAreas"][value="Supply Chain Management"]');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const ref = await q.textContent('#oa-ref');
+    const doc = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).find((p) => p.startsWith('candidateSubmissions/'));
+      return d[k];
+    });
+    return { ref, doc };
+  });
+  ok(/^OA-CAND-\d{6}-[A-Z2-9]{4}$/.test(cand.ref.trim()),
+    'v3 post-a-candidate: the candidate is given a quotable reference');
+  eq(cand.doc.status, 'queued', 'the profile is queued for the build');
+  eq(cand.doc.uid, KEPT, 'and owned by the signed-in candidate');
+  eq(cand.doc.emailPublic, false,
+    'the e-mail address stays private unless the candidate opted in');
+
+  /* -- report a placement on /v3/ ------------------------------------------ */
+
+  const plac = await onV3('v3/post-a-placement.html', { user: keptUser, docs: [] }, async (q) => {
+    await q.waitForSelector('#oa-placement-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-first', 'New');
+    await q.fill('#f-last', 'Professor');
+    await q.fill('#f-phdInstitution', 'PhD University');
+    await q.fill('#f-joiningInstitution', 'Joining College');
+    await q.fill('#f-joiningPosition', 'Assistant Professor');
+    await q.fill('#f-email', 'reporter@example.edu');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const ref = await q.textContent('#oa-ref');
+    const doc = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).find((p) => p.startsWith('placementSubmissions/'));
+      return d[k];
+    });
+    return { ref, doc };
+  });
+  ok(/^OA-PLAC-\d{6}-[A-Z2-9]{4}$/.test(plac.ref.trim()),
+    'v3 post-a-placement: the reporter is given a quotable reference');
+  eq(plac.doc.status, 'queued', 'the placement is queued for the build');
+  eq(plac.doc.uid, KEPT, 'and owned by the signed-in reporter');
 }
 
 /* ------------------------------------------- the posting form's name pickers

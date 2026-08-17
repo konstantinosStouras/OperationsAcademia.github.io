@@ -658,7 +658,8 @@
       rows +
       '<p class="oa-acct-mergelede">Signed up more than once — with Google and again with ' +
         'ORCID, or with two different e-mail addresses? They are separate accounts, each ' +
-        'holding its own alerts and job postings. Merging moves everything on ' +
+        'holding its own alerts and postings — jobs, candidate profile, placements. ' +
+        'Merging moves everything on ' +
         '<strong>this</strong> account into the one you keep, and removes this one.</p>' +
       '<button type="button" class="oa-mergebtn" id="oa-merge-open">' +
         '&#128260; Merge this account into another of mine&hellip;</button>' +
@@ -932,10 +933,12 @@
      through localStorage: it exports, deletes the duplicate sign-in, and
      imports on the next sign-in. That works there because everything a Lit
      account owns lives under users/{uid}/**, which the account itself can read
-     and re-create. Here it cannot: a JOB POSTING is a top-level
-     jobSubmissions document owned by a `uid` field, the rules pin that field,
-     and once the duplicate sign-in is gone nobody can touch it ever again —
-     the posting would be stranded, unwithdrawable, uncorrectable. So the merge
+     and re-create. Here it cannot: a POSTING — a job, a candidate profile, a
+     placement report — is a top-level document (jobSubmissions /
+     candidateSubmissions / placementSubmissions) owned by a `uid` field, the
+     rules pin that field, and once the duplicate sign-in is gone nobody can
+     touch it ever again — the posting would be stranded, unwithdrawable,
+     uncorrectable. So the merge
      proves BOTH accounts in one sitting: the account you keep signs in on a
      SECOND Firebase app (its own auth instance, so the session you are already
      in is untouched), and while both are live the postings are handed over
@@ -963,6 +966,13 @@
       lines are the only account of what a merge did, and they should read as
       though a person wrote them. */
   function count(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
+
+  /** "a" / "a and b" / "a, b and c" — the holds and about-to-move lines are
+      built from a variable number of parts and still have to read as prose. */
+  function listWords(bits) {
+    if (bits.length <= 1) return bits.join('');
+    return bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1];
+  }
 
   /** Two alerts that would send the same e-mail. Used to skip a copy rather
       than leave the kept account subscribed twice to one thing. */
@@ -1019,21 +1029,38 @@
   /** Everything on THIS account that a merge would move. Read up front so the
       confirmation can say what is actually at stake rather than "your data".
 
-      A failed postings read is REPORTED, not swallowed: an account whose
-      postings we cannot enumerate must never be deleted, or they are stranded
-      under a uid that no longer signs in. */
+      ALL THREE posting collections are surveyed — job postings, candidate
+      profiles and placement reports share the same ownership model (a
+      top-level document pinned to a `uid`), so any one of them missed here
+      is stranded alike when the duplicate sign-in is deleted. A failed read
+      is REPORTED, not swallowed: an account whose postings we cannot
+      enumerate must never be deleted. */
   function surveyAccount(fb) {
     var db = fb.firestore(), uid = state.user.uid;
+
+    function postingsOf(colName) {
+      return db.collection(colName).where('uid', '==', uid).get()
+        .then(function (s) {
+          return {
+            docs: s.docs.map(function (d) { return { id: d.id, data: d.data() }; }),
+            ok: true
+          };
+        })
+        .catch(function () { return { docs: [], ok: false }; });
+    }
+
     return Promise.all([
       db.collection(OAFB.col.users).doc(uid).collection(OAFB.col.alerts).get(),
-      db.collection(OAFB.col.jobSubmissions).where('uid', '==', uid).get()
-        .then(function (s) { return { docs: s.docs, ok: true }; })
-        .catch(function () { return { docs: [], ok: false }; })
+      postingsOf(OAFB.col.jobSubmissions),
+      postingsOf(OAFB.col.candidateSubmissions),
+      postingsOf(OAFB.col.placementSubmissions)
     ]).then(function (r) {
       return {
         alerts: r[0].docs.map(function (d) { return { id: d.id, data: d.data() }; }),
-        jobs: r[1].docs.map(function (d) { return { id: d.id, data: d.data() }; }),
-        jobsOk: r[1].ok
+        jobs: r[1].docs, jobsOk: r[1].ok,
+        cands: r[2].docs, candsOk: r[2].ok,
+        places: r[3].docs, placesOk: r[3].ok,
+        postingsOk: r[1].ok && r[2].ok && r[3].ok
       };
     });
   }
@@ -1126,8 +1153,12 @@
       mine = s;
       var bits = [count(s.alerts.length, 'e-mail alert')];
       if (s.jobsOk) bits.push(count(s.jobs.length, 'job posting'));
-      $('#oa-merge-holds', wrap).textContent = 'Holds ' + bits.join(' and ') + ', plus your details.' +
-        (s.jobsOk ? '' : ' (We could not read its job postings — see below.)');
+      // candidate profiles and placement reports are named only when there
+      // are any — most posters hold none, and "0 of everything" is noise
+      if (s.candsOk && s.cands.length) bits.push(count(s.cands.length, 'candidate profile'));
+      if (s.placesOk && s.places.length) bits.push(count(s.places.length, 'placement report'));
+      $('#oa-merge-holds', wrap).textContent = 'Holds ' + listWords(bits) + ', plus your details.' +
+        (s.postingsOk ? '' : ' (We could not read its postings — see below.)');
     }).catch(function () {
       $('#oa-merge-holds', wrap).textContent =
         'We could not read what this account holds — the merge will still move whatever is there.';
@@ -1155,8 +1186,13 @@
           '<strong>Moving into: ' + esc(user.displayName || user.email || 'your other account') + '</strong>' +
           '<span class="oa-acct-mail">' + esc(user.email || ('signs in with ' + providerSummary(user))) + '</span>' +
           '<span class="oa-merge-holds">' + (mine
-            ? 'About to move ' + count(mine.alerts.length, 'alert') + ' and ' +
-              count(mine.jobs.length, 'job posting') + ' here, then remove the other account.'
+            ? 'About to move ' + listWords(
+                [count(mine.alerts.length, 'alert'), count(mine.jobs.length, 'job posting')]
+                  .concat(mine.cands && mine.cands.length
+                    ? [count(mine.cands.length, 'candidate profile')] : [])
+                  .concat(mine.places && mine.places.length
+                    ? [count(mine.places.length, 'placement report')] : [])) +
+              ' here, then remove the other account.'
             : 'About to move everything here, then remove the other account.') +
           '</span>' +
         '</span>';
@@ -1256,7 +1292,25 @@
     var dupUid = state.user.uid;
     var keptUid = kept.uid;
     var dupProfile = state.profile || {};
-    var out = { alerts: 0, jobs: 0, signInGone: false, deleteError: '' };
+    var out = { alerts: 0, jobs: 0, cands: 0, places: 0, signInGone: false, deleteError: '' };
+
+    /** Hand one collection's documents over to the kept account, as the
+        CURRENT owner — the only account the rules allow to do it. Idempotent:
+        a document already owned by the kept account is skipped, so a re-run
+        after a half-finished merge moves only what is left. */
+    function handOver(colName, docsList) {
+      var moved = 0;
+      var writes = (docsList || []).map(function (j) {
+        if (j.data.uid === keptUid) return null;
+        moved++;
+        return db.collection(colName).doc(j.id).update({
+          uid: keptUid,
+          mergedFrom: dupUid,
+          mergedAt: fb.firestore.FieldValue.serverTimestamp()
+        });
+      }).filter(Boolean);
+      return Promise.all(writes).then(function () { return moved; });
+    }
 
     var alertsCol = db.collection(OAFB.col.users).doc(dupUid).collection(OAFB.col.alerts);
     var keptAlerts = db2.collection(OAFB.col.users).doc(keptUid).collection(OAFB.col.alerts);
@@ -1264,11 +1318,12 @@
     return Promise.resolve(survey || surveyAccount(fb))
       .then(function (s) {
         survey = s;
-        // Refuse rather than strand. If the postings could not be listed we do
-        // not know what would be left behind, and the last step of this merge
-        // deletes the only sign-in that could ever reach them again.
-        if (!survey.jobsOk) {
-          throw new Error('we could not read this account\'s job postings, so nothing was ' +
+        // Refuse rather than strand. If ANY posting collection could not be
+        // listed we do not know what would be left behind, and the last step
+        // of this merge deletes the only sign-in that could ever reach it
+        // again.
+        if (!survey.postingsOk) {
+          throw new Error('we could not read this account\'s postings, so nothing was ' +
             'moved. Reload the page and try again.');
         }
         return keptAlerts.get();
@@ -1304,25 +1359,26 @@
           .then(function () { step('Filled in your details where the other account had none.'); });
       })
 
-      // 3. job postings — the reason both accounts are signed in at once. The
-      //    write happens as the CURRENT owner, which is the only account
-      //    allowed to hand a posting over.
-      .then(function () {
-        var writes = survey.jobs.map(function (j) {
-          if (j.data.uid === keptUid) return null;
-          out.jobs++;
-          return db.collection(OAFB.col.jobSubmissions).doc(j.id).update({
-            uid: keptUid,
-            mergedFrom: dupUid,
-            mergedAt: fb.firestore.FieldValue.serverTimestamp()
-          });
-        }).filter(Boolean);
-        return Promise.all(writes);
+      // 3. postings — the reason both accounts are signed in at once. Job
+      //    postings, candidate profiles and placement reports all hand over
+      //    the same way; _firestore.rules carries an identical merge clause
+      //    for each of the three collections.
+      .then(function () { return handOver(OAFB.col.jobSubmissions, survey.jobs); })
+      .then(function (n) {
+        out.jobs = n;
+        step(n ? 'Handed over ' + count(n, 'job posting') + ' — you can still ' +
+                 'correct or withdraw ' + (n === 1 ? 'it' : 'them') + '.'
+               : 'No job postings needed handing over.');
+        return handOver(OAFB.col.candidateSubmissions, survey.cands);
       })
-      .then(function () {
-        step(out.jobs ? 'Handed over ' + count(out.jobs, 'job posting') + ' — you can still ' +
-                        'correct or withdraw ' + (out.jobs === 1 ? 'it' : 'them') + '.'
-                      : 'No job postings needed handing over.');
+      .then(function (n) {
+        out.cands = n;
+        if (n) step('Handed over ' + count(n, 'candidate profile') + '.');
+        return handOver(OAFB.col.placementSubmissions, survey.places);
+      })
+      .then(function (n) {
+        out.places = n;
+        if (n) step('Handed over ' + count(n, 'placement report') + '.');
       })
 
       // 4. identity keys now belong to the kept account, so the duplicate

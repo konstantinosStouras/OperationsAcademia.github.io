@@ -648,7 +648,7 @@ async function testAccountMerge() {
   ok(/email:<sha256/.test(rules) && /email:' \+ h/.test(accounts),
     'the e-mail identity key is hashed, so the collection is not a list of addresses');
 
-  // The HAND-OVER. A job posting is a top-level document owned by a uid field:
+  // The HAND-OVER. A posting is a top-level document owned by a uid field:
   // without this branch a merged-away account's postings are stranded, and
   // with a loose one the merge becomes a way to edit a posting behind the
   // rules that normally bound it.
@@ -658,6 +658,22 @@ async function testAccountMerge() {
     'and is stamped with the account it came from');
   ok(/allow update: if isOwner\(resource\.data\.uid\)[\s\S]{0,400}?affectedKeys/.test(rules),
     'only the posting\'s current owner may hand it over');
+
+  // ALL THREE posting collections hand over, in the rules AND in the client.
+  // The rules carried the candidate/placement clauses from the start, but the
+  // client only moved jobSubmissions — so a merge quietly stranded the
+  // duplicate's candidate profile and placement reports under a sign-in that
+  // no longer existed. Rules first:
+  eq((rules.match(/affectedKeys\(\)\.hasOnly\(\['uid', 'mergedFrom', 'mergedAt'\]\)/g) || []).length, 3,
+    'the merge clause exists for jobs, candidates AND placements');
+  // …then the client: the survey must enumerate all three (an unread
+  // collection must stop the merge), and the hand-over must move all three.
+  for (const col of ['jobSubmissions', 'candidateSubmissions', 'placementSubmissions']) {
+    ok(accounts.includes(`postingsOf(OAFB.col.${col})`),
+      `the merge survey reads ${col}`);
+    ok(accounts.includes(`handOver(OAFB.col.${col}`),
+      `and the merge hands ${col} over`);
+  }
 
   // The merge deletes the duplicate's alerts. Firebase deleting a SIGN-IN does
   // not delete its Firestore data, and the mailer reads every alert in the
@@ -669,18 +685,36 @@ async function testAccountMerge() {
     'an account can withdraw its own registered-users mark, so the tally counts people');
 
   // Order: nothing is deleted until everything has been copied. Asserted by
-  // position, because a reordering is exactly the edit that would lose data.
+  // the position of the chain's own call sites, because a reordering is
+  // exactly the edit that would lose data.
   const copyAt = accounts.indexOf('keptAlerts.doc(a.id).set(');
-  const handAt = accounts.indexOf('jobSubmissions).doc(j.id).update(');
+  const handAt = accounts.indexOf('return handOver(OAFB.col.jobSubmissions');
   const dropAt = accounts.indexOf('alertsCol.doc(a.id).delete()');
   const killAt = accounts.indexOf('return deleteCurrentSignIn(fb)');
   ok(copyAt > 0 && handAt > copyAt && dropAt > handAt && killAt > dropAt,
     'the merge copies, then hands over, then deletes — in that order');
 
   // A postings list we could not read must stop the merge, or the last step
-  // removes the only sign-in that could ever reach them again.
-  ok(/if \(!survey\.jobsOk\)/.test(accounts),
-    'a merge refuses to run when the postings could not be listed');
+  // removes the only sign-in that could ever reach them again. postingsOk is
+  // the AND over all three collections — jobsOk alone let a merge run while
+  // the candidate/placement reads had failed.
+  ok(/if \(!survey\.postingsOk\)/.test(accounts),
+    'a merge refuses to run when any posting collection could not be listed');
+
+  // The v3 preview vendors its own copy of oa-accounts.js ("keep the LOGIC in
+  // sync" — its header). Presentation may differ; the merge machinery may
+  // not, or the two sites repair duplicate accounts differently. Byte-equality
+  // of the whole merge region is the strongest cheap statement of that.
+  const v3accounts = await readFile(
+    path.join(HERE, '..', 'v3', 'assets', 'oa-accounts.js'), 'utf8');
+  const mergeRegion = (src) => {
+    const from = src.indexOf('var MERGE_APP');
+    const to = src.indexOf('function signOut');
+    return from > 0 && to > from ? src.slice(from, to) : null;
+  };
+  const rootRegion = mergeRegion(accounts), v3Region = mergeRegion(v3accounts);
+  ok(rootRegion && v3Region && rootRegion === v3Region,
+    'the v3 copy carries the SAME merge machinery as the root copy, byte for byte');
 
   // The mailer's high-water marks travel with a copied alert. Without them the
   // alert looks brand new and newJobsFor() with an empty `since` matches the
@@ -688,6 +722,63 @@ async function testAccountMerge() {
   const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
   for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'criteria', 'enabled']) {
     ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
+  }
+}
+
+/* ----------------------------------------- the forms fit their create rules
+
+   Each create rule bounds a submission's number of keys; each form writes a
+   knowable maximum. The two live in different files, and their drifting apart
+   is the bug this guard exists for: the job form grew to 31 keys — 27 always,
+   plus the four adUpload* fields of an UPLOADED advert — while the rule still
+   said 30, so a posting with an attached file, and only that one, was refused
+   as permission-denied and reported as "the site is not accepting postings".
+
+   The inventory is EXTRACTED from each form's source (every need()/urlFields
+   key, `out.x =`, `doc.x =` and upload-slot field), so a field added to a
+   form counts here automatically. It slightly overcounts — updatedAt is
+   written only on the edit path, which has no ceiling — and overcounting is
+   the safe direction for a guard that demands ceiling >= count. */
+
+async function testSubmissionKeyCeilings() {
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+
+  const ceilingOf = (col) => {
+    const m = new RegExp(`match /${col}/\\{id\\} \\{[\\s\\S]*?keys\\(\\)\\.size\\(\\) <= (\\d+)`)
+      .exec(rules);
+    return m ? Number(m[1]) : null;
+  };
+
+  const keysOf = (src) => {
+    const keys = new Set();
+    for (const re of [
+      /\bneed\('f-[A-Za-z]+',\s*'([A-Za-z]+)'/g,        // need('f-x', 'x', …)
+      /\bout\.([A-Za-z]+)\s*=[^=]/g,                    // out.x = …
+      /\[\s*'f-[A-Za-z]+',\s*'([A-Za-z]+)'\s*\]/g,      // the urlFields tuples
+      /\bdoc\.([A-Za-z]+)\s*=[^=]/g,                    // doc.x = … at submit
+    ]) for (const m of src.matchAll(re)) keys.add(m[1]);
+    // the candidate form's two upload slots write their fields dynamically
+    for (const m of src.matchAll(/doc\[prefix \+ '([A-Za-z]+)'\]\s*=/g)) {
+      keys.add('cv' + m[1]);
+      keys.add('rs' + m[1]);
+    }
+    return keys;
+  };
+
+  for (const [file, col] of [
+    ['oa-jobform.js', 'jobSubmissions'],
+    ['oa-candidateform.js', 'candidateSubmissions'],
+    ['oa-placementform.js', 'placementSubmissions'],
+  ]) {
+    const ceiling = ceilingOf(col);
+    ok(ceiling !== null, `${col}: the create rule bounds the number of keys`);
+    for (const dir of [['assets'], ['v3', 'assets']]) {
+      const src = await readFile(path.join(HERE, '..', ...dir, file), 'utf8');
+      const n = keysOf(src).size;
+      ok(n >= 10, `${dir.join('/')}/${file}: the key inventory extracted (${n} keys, sanity floor 10)`);
+      ok(ceiling !== null && n <= ceiling,
+        `${dir.join('/')}/${file} can write ${n} keys; the ${col} create rule allows ${ceiling}`);
+    }
   }
 }
 
@@ -1230,5 +1321,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testMobileStandards();
   await testMyPostingsPage();
   await testAccountMerge();
+  await testSubmissionKeyCeilings();
   process.exit(finish() ? 0 : 1);
 }

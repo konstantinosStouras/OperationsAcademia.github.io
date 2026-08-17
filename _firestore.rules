@@ -102,13 +102,20 @@ service cloud.firestore {
       // which rightly stays put): the build treats it as trustworthy (it
       // becomes addedAt, the e-mail alerts' cursor), so a bogus 1e16 or a
       // back-dated value must not exist at all.
+      // The key ceiling must clear what the form actually writes: 27 keys
+      // always (collect() + ref/uid/authEmail/status/source/createdAt) and 4
+      // more when the advert is UPLOADED rather than linked (adUploadPath/
+      // Name/Type/Size) — 31 in all. At the old ceiling of 30 exactly the
+      // upload case was refused as permission-denied while a link-only
+      // posting sailed through. selftest.mjs pins this arithmetic against
+      // the form source, so a new field fails the build, not the poster.
       allow create: if signedIn()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && shapeOk()
                     && !('featured' in request.resource.data)
-                    && request.resource.data.keys().size() <= 30;
+                    && request.resource.data.keys().size() <= 34;
 
       // A poster may read, correct and withdraw their own posting.
       allow read: if isOwner(resource.data.uid) || isAdmin();
