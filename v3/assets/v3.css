@@ -812,6 +812,26 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 .v3-about-portrait figcaption strong { display: block; color: var(--ink); font-size: 14.5px; }
 .v3-about-portrait figcaption span { display: block; color: var(--mut); margin-top: 3px; }
 .v3-about-portrait figcaption a { display: inline-block; color: var(--brand); margin-top: 5px; }
+/* the profile-icon row under the caption — the same four links as
+   stouras.com's portrait card (e-mail, X, Google Scholar, ORCID), drawn in
+   this site's tokens rather than that site's blue */
+.v3-portrait-links {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+/* figcaption-qualified so these win over the caption's own link rule above */
+figcaption .v3-portrait-links a {
+  display: inline-flex;
+  margin: 0;
+  color: var(--ink-2);
+  transition: color 0.2s ease;
+}
+figcaption .v3-portrait-links a:hover { color: var(--brand); }
+.v3-portrait-links svg { width: 20px; height: 20px; }
 @media (max-width: 800px) {
   .v3-about-grid { grid-template-columns: 1fr; gap: 26px; }
   /* stacked, the heading must still lead the section — the photo follows
