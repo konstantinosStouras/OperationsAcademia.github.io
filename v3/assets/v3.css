@@ -131,6 +131,9 @@ body.v3 ::selection { background: var(--brand); color: var(--on-brand); }
   margin: 0;
 }
 .v3-h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.12; }
+/* the hero's second line: same serif, the site's gray (owner, 2026-08-16 —
+   two lines, line 2 in gray, no full stop, NOT italic) */
+.v3-h1-sub { color: var(--mut); }
 .v3-h2 { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.15; }
 .v3-h3 { font-size: 21px; line-height: 1.3; }
 
