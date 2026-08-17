@@ -245,17 +245,23 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   gap: 22px;
 }
 
+/* THE lockup — one component, identical everywhere it appears (header,
+   footer, mobile sheet, sign-in modal): same mark size, same 9px gap,
+   same two-line wordmark with the first letters flush left */
 .v3-logo {
   display: inline-flex;
   align-items: center;
-  gap: 11px;
+  gap: 9px;
   color: var(--ink) !important;
   text-decoration: none !important;
   white-space: nowrap;
 }
 /* the two-line wordmark: "Operations / Academia.org", both lines in ink,
    only the ".org" quiet — Manrope ExtraBold with a Fraunces suffix */
-.v3-words { display: flex; flex-direction: column; }
+/* text-align pinned left so a centred ancestor (the sign-in modal) can
+   never re-centre one line inside the block — the O of Operations and the
+   A of Academia must sit exactly one below the other everywhere */
+.v3-words { display: flex; flex-direction: column; text-align: left; }
 .v3-w1, .v3-w2 {
   font-family: var(--font-logo);
   font-weight: 800;
@@ -288,11 +294,9 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
     mask: url('oa-mark.png') center / contain no-repeat;
   }
   /* the real monogram is taller than wide (294x400) — beside the two-line
-     wordmark it gets a portrait box; the no-mask letter tile stays square */
+     wordmark it gets a portrait box; the no-mask letter tile stays square.
+     ONE size in every lockup (header, footer, sheet, sign-in modal). */
   .v3-logo .v3-mark { width: 32px; height: 44px; }
-  .v3-sheet .v3-logo .v3-mark { width: 27px; height: 37px; }
-  .v3-logo-foot .v3-mark { width: 40px; height: 55px; }
-  .oa-auth-brand .v3-mark { width: 44px; height: 60px; }
 }
 
 /* the keyword row — the whole point: flat, no dropdowns */
@@ -665,9 +669,7 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-footer a:hover { color: var(--brand); }
 /* the footer carries the HEADER'S OWN lockup (monogram + wordmark), slightly
    larger — one brand top and bottom, both painted by the theme tokens */
-.v3-logo-foot { margin-bottom: 14px; gap: 13px; }
-.v3-logo-foot .v3-mark { width: 42px; height: 42px; }
-.v3-logo-foot .v3-w1, .v3-logo-foot .v3-w2 { font-size: 19px; }
+.v3-logo-foot { margin-bottom: 14px; }
 .v3-footer-legal {
   border-top: 1px solid var(--line-soft);
   padding-top: 22px;
@@ -941,15 +943,9 @@ body.v3 .oa-modal-x {
 body.v3 .oa-modal-x:hover { color: var(--ink); background: var(--bg-3); }
 
 /* v3 auth card layout (markup from the v3 oa-accounts.js) */
+/* the modal carries the SAME .v3-logo lockup as the header and footer,
+   centred as one unit — no per-modal sizes or stacking */
 .oa-auth-brand { text-align: center; margin: 4px 0 18px; }
-.oa-auth-brand .v3-mark {
-  width: 48px; height: 48px; font-size: 21px; border-radius: 14px; margin: 0 auto;
-}
-.oa-auth-brand .oa-auth-wordmark {
-  display: flex; flex-direction: column; align-items: center; margin-top: 10px;
-}
-.oa-auth-brand .oa-auth-wordmark .v3-w1,
-.oa-auth-brand .oa-auth-wordmark .v3-w2 { font-size: 21px; }
 .oa-auth-brand .oa-auth-tag { color: var(--mut); font-size: 14.5px; margin-top: 6px; line-height: 1.5; }
 
 body.v3 .oa-modal-card form label { display: block; font-weight: 600; color: var(--ink); font-size: 14px; margin: 0 0 14px; }
