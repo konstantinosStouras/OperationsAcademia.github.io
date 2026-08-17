@@ -1,23 +1,6 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — accounts (sign in / register / account menu).
 
-   V3 VENDORED COPY — keep the LOGIC in sync with /assets/oa-accounts.js.
-   Only the presentation differs from the root copy (owner, 2026-08-16):
-
-     - the signed-out control is a proper "Sign in" pill;
-     - the signed-in chip greets the person by NAME (owner, 2026-08-17); its
-       menu opens with a "SIGNED IN AS <e-mail>" block and a link to
-       account.html labelled "Your personal area", then the section links;
-     - the sign-in / registration modal is redesigned: brand header, one mode
-       at a time (sign in ⇄ create account), and registration collects the
-       whole profile up front (first/last name, optional affiliation, website
-       and ORCID iD — owner, 2026-08-17; NO confirm-password field) with a
-       Terms/Privacy consent, and a "Back to site" escape;
-     - a successful REGISTRATION lands on account.html (the personal area
-       welcome), while a plain sign-in stays where the reader was;
-     - the off-canvas copy paints into the v3 mobile sheet's static #oa-np
-       host (there is no main.js #navPanel in v3).
-
    Modelled on the /lit/ accounts core, reduced to what OA needs. Loads on every
    page that includes it and paints a header control in #oa-account.
 
@@ -129,31 +112,6 @@
     var s = String((u && (u.uid || u.email)) || ''), h = 0;
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
     return h;
-  }
-
-  /** The picture shown for the SIGNED-IN account: the one they set on their
-      profile, else the one their provider (Google/ORCID) supplied, else
-      nothing — the caller falls back to the initials disc. Only consults the
-      loaded profile for the signed-in user's own account, so a merge dialog
-      can never wear this account's photo on another account's row. */
-  function profilePhoto(u) {
-    var own = u && state.user && u.uid === state.user.uid;
-    var p = own ? state.profile : null;
-    return (p && p.photo) || (u && u.photoURL) || '';
-  }
-
-  /** The avatar disc: the photo when there is one, the initials otherwise
-      (owner, 2026-08-17 — pre-fill from the provider, let the user set their
-      own, fall back to the initials disc we already draw). */
-  function avatarHTML(u, xl) {
-    var cls = 'oa-avatar' + (xl ? ' oa-avatar-xl' : '');
-    var ph = profilePhoto(u);
-    if (ph) {
-      return '<span class="' + cls + '" aria-hidden="true"><img class="oa-avatar-img" ' +
-        'src="' + esc(ph) + '" alt=""></span>';
-    }
-    return '<span class="' + cls + '" aria-hidden="true" style="--oa-hue:' + avatarHue(u) + '">' +
-      esc(initials(u)) + '</span>';
   }
 
   /* ------------------------------------------------------ identity helpers
@@ -290,25 +248,26 @@
     var hue = avatarHue(u);
     host.innerHTML =
       '<div class="oa-acct-wrap">' +
-        // the chip greets the person by NAME (owner, 2026-08-17); the menu it
-        // opens keeps "Your personal area" as its first destination
         '<button type="button" class="oa-acct-chip" id="oa-chip" aria-haspopup="menu" ' +
-          'aria-expanded="false" title="Your personal area">' +
-          avatarHTML(u) +
+          'aria-expanded="false" title="Your account">' +
+          '<span class="oa-avatar" aria-hidden="true" style="--oa-hue:' + hue + '">' +
+            esc(initials(u)) + '</span>' +
           '<span class="oa-acct-name">' + esc(displayName(u)) + '</span>' +
           '<span class="oa-caret" aria-hidden="true"></span>' +
         '</button>' +
         '<div class="oa-acct-menu" id="oa-menu" role="menu" hidden>' +
           '<div class="oa-acct-as">' +
-            '<span class="oa-acct-eyebrow">Signed in as</span>' +
-            '<strong>' + esc(displayName(u)) + '</strong>' +
-            (u.email ? '<span class="oa-acct-mail">' + esc(u.email) + '</span>' : '') +
+            '<span class="oa-avatar oa-avatar-lg" aria-hidden="true" style="--oa-hue:' + hue + '">' +
+              esc(initials(u)) + '</span>' +
+            '<span class="oa-acct-who">' +
+              '<strong>' + esc(displayName(u)) + '</strong>' +
+              '<span class="oa-acct-mail">' + esc(u.email || '') + '</span>' +
+            '</span>' +
           '</div>' +
-          // Relative, like every page in v3 — the links stay inside /v3/.
-          '<div class="oa-acct-group">' +
-            '<a role="menuitem" class="oa-acct-primary" href="account.html">' +
-              '<span class="oa-mi" aria-hidden="true">&#128100;</span>Your personal area</a>' +
-          '</div>' +
+          // Relative, like oa-nav.js and every page in /v2/. These were the
+          // only absolute internal links on the site, and at cutover the
+          // pages move up one directory — /v2/… would then be three dead
+          // links in every signed-in reader's menu.
           '<div class="oa-acct-group">' +
             '<a role="menuitem" href="post-a-job.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
@@ -317,12 +276,11 @@
             '<a role="menuitem" href="alerts.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts</a>' +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
-              '<span class="oa-mi" aria-hidden="true">&#9998;</span>Edit profile</button>' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.profile + '</span>Edit profile</button>' +
             '<a role="menuitem" href="feedback.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.feedback + '</span>Send feedback</a>' +
           '</div>' +
-          '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">' +
-            '<span class="oa-mi" aria-hidden="true">&#8618;</span>Sign out</button>' +
+          '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">Sign out</button>' +
         '</div>' +
       '</div>';
 
@@ -357,11 +315,26 @@
      DOM-ready, which is AFTER this script's first paint — hence the one
      deferred retry. The panel's hideOnClick closes it after a tap for us. */
   function paintPanel() {
-    // v3: the mobile sheet ships a STATIC #oa-np host in its footer — there
-    // is no main.js off-canvas panel to wait for, so no polling either. A v3
-    // page without the sheet simply has no panel copy.
+    var nav = document.querySelector('#navPanel nav');
+    if (!nav) {
+      // Bounded: a page where main.js never built the panel (script blocked)
+      // must not poll for ever. Twenty ticks is five seconds — DOM-ready is
+      // orders of magnitude sooner.
+      paintPanel.tries = (paintPanel.tries || 0) + 1;
+      if (!paintPanel.armed && paintPanel.tries <= 20) {
+        paintPanel.armed = true;
+        setTimeout(function () { paintPanel.armed = false; paintPanel(); }, 250);
+      }
+      return;
+    }
+    paintPanel.tries = 0;
+
     var box = document.getElementById('oa-np');
-    if (!box) return;
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'oa-np';
+      nav.appendChild(box);
+    }
 
     // Not configured, or unreachable: no entry at all. A dead "Sign in" link
     // in the panel would be the same silent no-op the header just fixed.
@@ -380,7 +353,6 @@
     box.innerHTML =
       '<span class="oa-np-as"><strong>' + esc(displayName(u)) + '</strong>' +
         esc(u.email || '') + '</span>' +
-      '<a class="link depth-0" href="account.html">Your personal area</a>' +
       '<a class="link depth-0" href="my-postings.html">My postings</a>' +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
@@ -477,25 +449,18 @@
         // once the profile read landed. On a flat static site that is every
         // navigation.
         writeHint(state.user, displayName(state.user));
-        // A provider sign-in hands us the person's name and picture — seed
-        // them into the profile FIRST (fill-empty, never overwriting typed
-        // values), so a Google account arrives pre-filled and the first-run
-        // prompt below only fires when there was truly nothing to seed.
-        return seedProfileFromUser().then(function () {
-          if (!stillOurs()) return;
-          // A first-run account has no name yet. Ask once, and never again —
-          // being nagged on every visit is what makes a profile prompt hated.
-          // Keyed on the uid: a browser-wide flag meant the SECOND account on
-          // a shared or lab machine was never asked at all, and stayed known
-          // by the left-hand half of its e-mail address for ever.
-          try {
-            if (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)) {
-              localStorage.setItem('oaProfileAsked:' + uid, '1');
-              openProfile(true);
-            }
-          } catch (e) { /* private mode */ }
-          return seedOrcidFromProvider();
-        });
+        // A first-run account has no name yet. Ask once, and never again —
+        // being nagged on every visit is what makes a profile prompt hated.
+        // Keyed on the uid: a browser-wide flag meant the SECOND account on a
+        // shared or lab machine was never asked at all, and stayed known by
+        // the left-hand half of its e-mail address for ever.
+        try {
+          if (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)) {
+            localStorage.setItem('oaProfileAsked:' + uid, '1');
+            openProfile(true);
+          }
+        } catch (e) { /* private mode */ }
+        return seedOrcidFromProvider();
       })
       .then(function () { claimAccountKeys(); })
       .catch(function () { /* rules not deployed yet — the chip still works */ });
@@ -506,37 +471,6 @@
      below able to see that this sign-in and their older Google account are the
      same person. Written exactly once (`orcidSeeded`), so clearing the field
      later is respected rather than undone on the next page load. */
-  /** Pre-fill the profile from what the sign-in provider already told us —
-      Google supplies displayName and photoURL, ORCID a name (owner,
-      2026-08-17). Fill-empty per field: a name or photo the person typed or
-      uploaded themselves is never overwritten. */
-  function seedProfileFromUser() {
-    var u = state.user;
-    if (!u) return Promise.resolve();
-    var p = state.profile || {};
-    var patch = {};
-    if (!p.firstName && !p.lastName && u.displayName) {
-      var parts = String(u.displayName).trim().split(/\s+/);
-      if (parts.length > 1) {
-        patch.firstName = parts.slice(0, -1).join(' ').slice(0, 300);
-        patch.lastName = parts[parts.length - 1].slice(0, 300);
-      } else if (parts[0]) {
-        patch.firstName = parts[0].slice(0, 300);
-      }
-    }
-    if (!p.photo && u.photoURL) patch.photo = String(u.photoURL).slice(0, 2000);
-    if (!Object.keys(patch).length) return Promise.resolve();
-    return OAFB.ready()
-      .then(function (fb) { return profileDoc(fb, u.uid).set(patch, { merge: true }); })
-      .then(function () {
-        if (!state.user || state.user.uid !== u.uid) return;
-        state.profile = Object.assign({}, state.profile || {}, patch);
-        paint();
-        writeHint(state.user, displayName(state.user));
-      })
-      .catch(function () { /* best effort — the profile card can still ask */ });
-  }
-
   function seedOrcidFromProvider() {
     var p = state.profile || {};
     var iD = orcidFromProvider();
@@ -574,15 +508,8 @@
         'aria-labelledby="oa-profile-h">' +
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
         '<div class="oa-profile-head">' +
-          '<div class="oa-photo-side">' +
-            avatarHTML(u, true) +
-            '<div class="oa-photo-row">' +
-              '<button type="button" id="oa-photo-set">' +
-                (profilePhoto(u) ? 'Change photo' : 'Add a photo') + '</button>' +
-              (p.photo ? '<button type="button" id="oa-photo-del">Remove</button>' : '') +
-              '<input type="file" id="oa-photo-file" accept="image/*" hidden>' +
-            '</div>' +
-          '</div>' +
+          '<span class="oa-avatar oa-avatar-xl" aria-hidden="true" style="--oa-hue:' +
+            avatarHue(u) + '">' + esc(initials(u)) + '</span>' +
           '<div>' +
             '<h3 id="oa-profile-h">' + (firstRun ? 'Welcome' : 'My profile') + '</h3>' +
             '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
@@ -629,53 +556,6 @@
     wireOtherAccounts(wrap, close);
     var first = $('#oa-profile-form input', wrap);
     if (first) first.focus();
-
-    /* ---- the profile picture: pick a file, crop square client-side, store a
-       small data URL on the profile doc (~15 KB at 192px — no Storage bucket
-       needed); Remove falls back to the initials disc everywhere. */
-    function savePhoto(data) {
-      var msg = $('#oa-profile-msg', wrap);
-      if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Saving photo…'; }
-      OAFB.ready()
-        .then(function (fb) {
-          return profileDoc(fb, state.user.uid).set({ photo: data }, { merge: true });
-        })
-        .then(function () {
-          state.profile = Object.assign({}, state.profile || {}, { photo: data });
-          paint();
-          openProfile();          // repaint the card with the new picture
-        })
-        .catch(function () {
-          if (msg) {
-            msg.className = 'oa-auth-msg is-err';
-            msg.textContent = 'We could not save the photo just now. Please try again.';
-          }
-        });
-    }
-    var photoFile = $('#oa-photo-file', wrap);
-    var photoSet = $('#oa-photo-set', wrap);
-    if (photoSet) photoSet.addEventListener('click', function () { photoFile.click(); });
-    if (photoFile) photoFile.addEventListener('change', function () {
-      var file = photoFile.files && photoFile.files[0];
-      if (!file) return;
-      var url = URL.createObjectURL(file);
-      var img = new Image();
-      img.onload = function () {
-        var S = 192;
-        var c = document.createElement('canvas');
-        c.width = S; c.height = S;
-        var side = Math.min(img.naturalWidth, img.naturalHeight);
-        c.getContext('2d').drawImage(img,
-          (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2,
-          side, side, 0, 0, S, S);
-        URL.revokeObjectURL(url);
-        savePhoto(c.toDataURL('image/jpeg', 0.85));
-      };
-      img.onerror = function () { URL.revokeObjectURL(url); };
-      img.src = url;
-    });
-    var photoDel = $('#oa-photo-del', wrap);
-    if (photoDel) photoDel.addEventListener('click', function () { savePhoto(''); });
 
     $('#oa-profile-form', wrap).addEventListener('submit', function (e) {
       e.preventDefault();
@@ -752,30 +632,23 @@
         'with ORCID instead, rather than starting you a second account.</span></label>';
   }
 
-  /* The account's OTHER ways in, and the way out of having two of them.
-     The connect rows use the SAME provider pills as the sign-in screen
-     (owner, 2026-08-17) — a familiar button nudges far better than a line of
-     text — and ORCID is offered even before an iD is recorded, because
-     connecting is exactly how the verified iD gets onto the profile. */
+  /* The account's OTHER ways in, and the way out of having two of them. */
   function otherAccountsHTML(p, u) {
     var rows = '';
 
+    if (!hasProvider('oidc.orcid', u) && p.orcid) {
+      rows += '<p class="oa-acct-linkrow">' +
+        '<button type="button" class="oa-linkbtn" id="oa-link-orcid">' +
+          'Enable &ldquo;Continue with ORCID&rdquo; for this account</button>' +
+        '<span class="oa-opt oa-fine">Then the ORCID button on the sign-in screen brings you ' +
+          'straight here, instead of starting a second account.</span></p>';
+    }
     if (!hasProvider('google.com', u)) {
       rows += '<p class="oa-acct-linkrow">' +
-        '<button type="button" class="oa-auth-provider" id="oa-link-google">' +
-          PROVIDER.google.icon + '<span>Connect Google</span></button>' +
+        '<button type="button" class="oa-linkbtn" id="oa-link-google">' +
+          'Enable &ldquo;Continue with Google&rdquo; for this account</button>' +
         '<span class="oa-opt oa-fine">Sign in with Google and land here, rather than in a ' +
           'new account.</span></p>';
-    }
-    if (!hasProvider('oidc.orcid', u)) {
-      rows += '<p class="oa-acct-linkrow">' +
-        '<button type="button" class="oa-auth-provider" id="oa-link-orcid">' +
-          PROVIDER.orcid.icon + '<span>Connect ORCID</span></button>' +
-        '<span class="oa-opt oa-fine">' + (p.orcid
-          ? 'Then the ORCID button on the sign-in screen brings you straight here, ' +
-            'instead of starting a second account.'
-          : 'Connecting records your verified iD on your profile, and the ORCID ' +
-            'button on the sign-in screen then brings you straight here.') + '</span></p>';
     }
 
     return '<div class="oa-acct-other">' +
@@ -813,20 +686,7 @@
     OAFB.ready().then(function (fb) {
       var p = id === 'google.com' ? new fb.auth.GoogleAuthProvider()
                                   : new fb.auth.OAuthProvider(id);
-      return state.user.linkWithPopup(p).then(function (cred) {
-        // A fresh ORCID link just PROVED the iD, so record it verified on the
-        // profile (upgrading any hand-typed, unverified one) — this is what
-        // "connect" adds beyond a second way in, and what lets the duplicate
-        // check recognise this person across accounts.
-        var iD = id === 'oidc.orcid' && orcidFromProvider((cred && cred.user) || state.user);
-        if (!iD) return;
-        var patch = { orcid: iD, orcidVerified: true, orcidSeeded: true };
-        return profileDoc(fb, state.user.uid).set(patch, { merge: true })
-          .then(function () {
-            state.profile = Object.assign({}, state.profile || {}, patch);
-          })
-          .catch(function () { /* best effort — the link itself succeeded */ });
-      });
+      return state.user.linkWithPopup(p);
     }).then(function () {
       msg.className = 'oa-auth-msg is-ok';
       msg.textContent = 'Done — that button now signs in to this account.';
@@ -840,15 +700,8 @@
       }
       msg.className = 'oa-auth-msg is-err';
       if (c === 'auth/credential-already-in-use' || c === 'auth/account-exists-with-different-credential') {
-        // The duplicate the connect buttons exist to prevent already exists —
-        // hand straight over to the merge flow instead of describing it.
         msg.textContent = 'That sign-in already belongs to another Operations Academia ' +
-          'account — opening the merge tool so you can fold the two together.';
-        setTimeout(function () {
-          var card = $('#oa-profile');
-          if (card && card.parentNode) card.parentNode.removeChild(card);
-          openMerge();
-        }, 1600);
+          'account. Sign in to it and merge it into this one instead.';
       } else if (c === 'auth/provider-already-linked') {
         msg.textContent = 'That sign-in is already attached to this account.';
       } else if (c === 'auth/operation-not-allowed') {
@@ -964,113 +817,37 @@
 
     var third = providerButtonsHTML();
 
-    /* Where a brand-new account lands: the personal area welcome — UNLESS the
-       reader is mid-task on a gated page (posting a job, an alert…), where
-       whisking them away would lose the very form they signed up to fill. */
-    function firstRunDestination() {
-      var here = location.pathname;
-      if (/post-a-|alerts|feedback|my-postings/.test(here)) return '';
-      return 'account.html?welcome=1';
-    }
-
     var wrap = document.createElement('div');
     wrap.className = 'oa-modal';
     wrap.id = 'oa-auth';
     wrap.innerHTML =
-      '<div class="oa-modal-card oa-auth-card" role="dialog" aria-modal="true" aria-labelledby="oa-auth-h">' +
+      '<div class="oa-modal-card" role="dialog" aria-modal="true" aria-labelledby="oa-auth-h">' +
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
-
-        '<div class="oa-auth-brand">' +
-          '<span class="v3-logo"><span class="v3-mark" aria-hidden="true">OA</span> ' +
-          '<span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span></span>' +
-          '<p class="oa-auth-tag">Matching supply with demand<br>in the Operations job market</p>' +
-        '</div>' +
-
-        '<h3 id="oa-auth-h">' + (registering ? 'Create your account' : 'Sign in') + '</h3>' +
-
+        '<h3 id="oa-auth-h">' + (registering
+          ? 'Create your Operations Academia account'
+          : 'Sign in to Operations Academia') + '</h3>' +
+        '<p class="oa-modal-lede">An account lets you post a job, subscribe to e-mail ' +
+          'alerts, and manage what you have posted. It is free, and takes a moment.</p>' +
+        (third ? '<div class="oa-auth-providers">' + third + '</div><div class="oa-or">or</div>' : '') +
         '<form id="oa-auth-form">' +
-          // Registration collects the WHOLE profile up front (owner,
-          // 2026-08-17) — the same fields Edit profile manages — so a new
-          // account never starts as the left half of an e-mail address and
-          // the first-run profile prompt has nothing left to ask.
-          (registering
-            ? '<div class="oa-prow">' +
-                '<label>First name' +
-                  '<input type="text" name="firstName" maxlength="80" ' +
-                    'autocomplete="given-name" required></label>' +
-                '<label>Last name' +
-                  '<input type="text" name="lastName" maxlength="80" ' +
-                    'autocomplete="family-name" required></label>' +
-              '</div>' +
-              '<label>Affiliation <span class="oa-opt">(optional)</span>' +
-                '<input type="text" name="affiliation" maxlength="160" ' +
-                  'autocomplete="organization" placeholder="University or company"></label>' +
-              '<label>Website <span class="oa-opt">(optional)</span>' +
-                '<input type="url" name="website" maxlength="300" ' +
-                  'autocomplete="url" placeholder="https://…"></label>'
-            : '') +
-          '<label>E-mail' +
-            '<input type="email" name="email" autocomplete="email" ' +
-              'placeholder="you@university.edu" required></label>' +
-          '<label>Password' +
-            '<input type="password" name="password" minlength="6" required ' +
-              'autocomplete="' + (registering ? 'new-password' : 'current-password') + '" ' +
-              'placeholder="' + (registering ? 'At least 6 characters' : 'Your password') + '"></label>' +
-          (registering
-            ? '<label>ORCID iD <span class="oa-opt">(optional)</span>' +
-                '<input type="text" name="orcid" maxlength="25" autocomplete="off" ' +
-                  'placeholder="0000-0002-1825-0097"></label>' +
-              '<label class="oa-terms-row"><input type="checkbox" name="terms">' +
-                '<span>I agree to the <a href="/terms-and-conditions.html" target="_blank" ' +
-                  'rel="noopener">Terms of Use</a> and <a href="/privacy-policy.html" ' +
-                  'target="_blank" rel="noopener">Privacy Policy</a>.</span></label>'
-            : '') +
+          '<label>E-mail<input type="email" name="email" autocomplete="email" required></label>' +
+          '<label>Password<input type="password" name="password" autocomplete="current-password" ' +
+            'minlength="6" required></label>' +
           '<div class="oa-auth-actions">' +
-            '<button type="submit" class="button blue">' +
-              (registering ? 'Create account' : 'Sign in') + '</button>' +
+            '<button type="submit" class="button blue">Sign in</button>' +
+            '<button type="button" class="oa-linkbtn" id="oa-register">Create an account</button>' +
+            '<button type="button" class="oa-linkbtn" id="oa-reset">Forgot password</button>' +
           '</div>' +
         '</form>' +
-
-        '<div class="oa-auth-links">' +
-          (registering
-            ? '<button type="button" id="oa-mode-signin">Sign in instead</button>'
-            : '<button type="button" id="oa-mode-register">Create account</button>' +
-              '<button type="button" id="oa-reset">Forgot password?</button>') +
-        '</div>' +
-
-        (third
-          ? '<div class="oa-or">or continue with</div>' +
-            '<div class="oa-auth-providers">' + third + '</div>' +
-            (registering
-              // its own class — `oa-opt` is also a jobs-filter dropdown row in
-              // oa-list.css (padded, gray), and the un-padding reset there is
-              // scoped to labels, which this <p> is not
-              ? '<p class="oa-auth-fine">' +
-                  'By continuing with Google or ORCID you agree to the ' +
-                  '<a href="/terms-and-conditions.html" target="_blank" rel="noopener">Terms of Use</a> ' +
-                  'and <a href="/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.</p>'
-              : '')
-          : '') +
-
         '<p class="oa-auth-msg" id="oa-auth-msg" role="alert"></p>' +
-        '<div class="oa-auth-back">' +
-          '<button type="button" id="oa-auth-close">Back to site</button>' +
-        '</div>' +
       '</div>';
     document.body.appendChild(wrap);
 
     function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     $('.oa-modal-x', wrap).addEventListener('click', close);
-    $('#oa-auth-close', wrap).addEventListener('click', close);
     wireModalKeys(wrap, close);
     $('#oa-auth-form', wrap).email.focus();
-
-    // mode switches rebuild the card, so no stale heading, fields or errors
-    var toReg = $('#oa-mode-register', wrap);
-    if (toReg) toReg.addEventListener('click', function () { openAuth('register'); });
-    var toIn = $('#oa-mode-signin', wrap);
-    if (toIn) toIn.addEventListener('click', function () { openAuth(); });
 
     function say(msg, ok) {
       // Scoped to THIS card, and null-safe: close() removes the node now, and
@@ -1081,14 +858,6 @@
       m.className = 'oa-auth-msg' + (ok ? ' is-ok' : msg ? ' is-err' : '');
     }
 
-    /** A brand-new account is greeted in its personal area; an existing one
-        stays exactly where it was. */
-    function finish(isNewUser) {
-      var dest = isNewUser && firstRunDestination();
-      close();
-      if (dest) location.href = dest;
-    }
-
     Array.prototype.forEach.call(wrap.querySelectorAll('.oa-auth-provider'), function (b) {
       b.addEventListener('click', function () {
         say('');
@@ -1097,9 +866,7 @@
           if (b.dataset.provider === 'google') p = new fb.auth.GoogleAuthProvider();
           else p = new fb.auth.OAuthProvider('oidc.orcid');
           return fb.auth().signInWithPopup(p);
-        }).then(function (cred) {
-          finish(!!(cred && cred.additionalUserInfo && cred.additionalUserInfo.isNewUser));
-        }).catch(function (e) { say(friendly(e)); });
+        }).then(close).catch(function (e) { say(friendly(e)); });
       });
     });
 
@@ -1107,71 +874,6 @@
       e.preventDefault();
       var f = e.target;
       say('');
-
-      if (registering) {
-        var first = String(f.firstName.value || '').trim();
-        var last = String(f.lastName.value || '').trim();
-        if (!first || !last) {
-          say('Please give your first and last name.');
-          (first ? f.lastName : f.firstName).focus();
-          return;
-        }
-        if (!f.email.value || !f.password.value) {
-          say('Enter an e-mail address and a password of at least 6 characters.');
-          return;
-        }
-        // same guards as the profile card — this IS the profile, asked earlier
-        var website = String(f.website.value || '').trim();
-        if (website && !/^https?:\/\//i.test(website)) {
-          say('Please give a website address starting with http:// or https://.');
-          f.website.focus();
-          return;
-        }
-        var orcid = '';
-        var typedOrcid = String(f.orcid.value || '').trim();
-        if (typedOrcid) {
-          orcid = normOrcid(typedOrcid);
-          if (!orcid) {
-            say('That does not look like an ORCID iD. It has 16 digits, ' +
-              'like 0000-0002-1825-0097 — copy it from your ORCID record.');
-            f.orcid.focus();
-            return;
-          }
-        }
-        if (!f.terms.checked) {
-          say('Please agree to the Terms of Use and Privacy Policy first.');
-          return;
-        }
-        var prof = {
-          firstName: first.slice(0, 300),
-          lastName: last.slice(0, 300),
-          affiliation: String(f.affiliation.value || '').trim().slice(0, 300),
-          website: website.slice(0, 300)
-        };
-        if (orcid) prof.orcid = orcid;
-        OAFB.ready()
-          .then(function (fb) {
-            return fb.auth().createUserWithEmailAndPassword(f.email.value, f.password.value)
-              .then(function (cred) {
-                var u = cred && cred.user;
-                if (!u) return;
-                // The profile arrives WITH the account: silence the first-run
-                // "add your name" prompt before the Firestore write races the
-                // auth-state profile read, seed the chip's name immediately,
-                // and store the profile. A failed store never blocks the
-                // registration — Edit profile can re-enter it.
-                try { localStorage.setItem('oaProfileAsked:' + u.uid, '1'); } catch (e2) { /* private mode */ }
-                state.profile = prof;
-                writeHint(u, first + ' ' + last);
-                return profileDoc(fb, u.uid).set(prof, { merge: true })
-                  .catch(function () { /* rules not deployed / offline — see above */ });
-              });
-          })
-          .then(function () { finish(true); })
-          .catch(function (err) { say(friendly(err)); });
-        return;
-      }
-
       OAFB.ready()
         .then(function (fb) {
           return fb.auth().signInWithEmailAndPassword(f.email.value, f.password.value);
@@ -1180,8 +882,22 @@
         .catch(function (err) { say(friendly(err)); });
     });
 
-    var reset = $('#oa-reset', wrap);
-    if (reset) reset.addEventListener('click', function () {
+    $('#oa-register').addEventListener('click', function () {
+      var f = $('#oa-auth-form');
+      if (!f.email.value || !f.password.value) {
+        say('Enter an e-mail and a password of at least 6 characters, then press Create an account.');
+        return;
+      }
+      say('');
+      OAFB.ready()
+        .then(function (fb) {
+          return fb.auth().createUserWithEmailAndPassword(f.email.value, f.password.value);
+        })
+        .then(close)
+        .catch(function (err) { say(friendly(err)); });
+    });
+
+    $('#oa-reset').addEventListener('click', function () {
       var f = $('#oa-auth-form');
       if (!f.email.value) { say('Enter your e-mail address first.'); return; }
       OAFB.ready()

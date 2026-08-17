@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- The LIVE site only. The archived designs at /v1/ and /v2/ are deliberately
+     absent: every page in them carries noindex so an archived copy never
+     competes in search with the page that replaced it. The six addresses the
+     one-page site absorbed as sections (candidates, placements, faqs, contact,
+     resources-for-candidates, directors-and-contributors) are absent for the
+     same reason — they redirect, and it is the section they land on that
+     belongs in an index. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.operationsacademia.org/</loc></url>
   <url><loc>https://www.operationsacademia.org/jobs</loc></url>
-  <url><loc>https://www.operationsacademia.org/candidates</loc></url>
-  <url><loc>https://www.operationsacademia.org/placements</loc></url>
   <url><loc>https://www.operationsacademia.org/universities</loc></url>
   <url><loc>https://www.operationsacademia.org/recent-faculty</loc></url>
   <url><loc>https://www.operationsacademia.org/previous-markets</loc></url>
-  <url><loc>https://www.operationsacademia.org/faqs</loc></url>
-  <url><loc>https://www.operationsacademia.org/resources-for-candidates</loc></url>
-  <url><loc>https://www.operationsacademia.org/directors-and-contributors</loc></url>
-  <url><loc>https://www.operationsacademia.org/contact</loc></url>
   <url><loc>https://www.operationsacademia.org/analytics</loc></url>
   <url><loc>https://www.operationsacademia.org/survey</loc></url>
   <url><loc>https://www.operationsacademia.org/survey-faqs</loc></url>
+  <url><loc>https://www.operationsacademia.org/informed_consent_statement</loc></url>
   <url><loc>https://www.operationsacademia.org/privacy-policy</loc></url>
   <url><loc>https://www.operationsacademia.org/terms-and-conditions</loc></url>
-  <url><loc>https://www.operationsacademia.org/informed_consent_statement</loc></url>
   <url><loc>https://www.operationsacademia.org/post-a-job</loc></url>
   <url><loc>https://www.operationsacademia.org/post-a-candidate</loc></url>
   <url><loc>https://www.operationsacademia.org/post-a-placement</loc></url>
   <url><loc>https://www.operationsacademia.org/alerts</loc></url>
   <url><loc>https://www.operationsacademia.org/my-postings</loc></url>
+  <url><loc>https://www.operationsacademia.org/account</loc></url>
   <url><loc>https://www.operationsacademia.org/feedback</loc></url>
   <url><loc>https://www.operationsacademia.org/whats-new</loc></url>
 </urlset>

@@ -76,6 +76,12 @@ and every picker menu on screen. **A new list page must be added to the
 suite is what caught this very feature's first draft dropping the menu's
 Escape-close wiring, so the gate is not a formality.
 
+`MOBILE_PAGES` covers **both designs the site serves**: the live one at the
+root (where the candidates and placements lists are sections of `index.html`
+rather than pages of their own) and the 2026 design archived at `/v2/`, whose
+pages are still served and still have to hold the standard on a phone. A page
+added to one is not automatically in the other — list it where it exists.
+
 Run locally:
 
     node _scraper/selftest.mjs

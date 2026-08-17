@@ -55,6 +55,14 @@ const eq = (a, b, what) =>
 const { server, port } = await serve();
 const BASE = `http://127.0.0.1:${port}/`;
 
+/* The design this suite grew up with is archived at /v2/ since the 2026-08-17
+   swap, and the single-page redesign it was previewing serves the root. Both
+   are SERVED, so both are tested: the checks that assert on the old chrome
+   (#nav, #header-wrapper, #titleBar, #navPanel, window.ga, jQuery) follow
+   their pages down here, and the ones that were driving /v3/ now drive the
+   root. Nothing was dropped in the move — it is the same suite, re-aimed. */
+const V2 = 'v2/';
+
 let chromium;
 try {
   ({ chromium } = await import('playwright'));
@@ -77,7 +85,7 @@ page.on('pageerror', (e) => jsErrors.push(e.message));
 
 /* ------------------------------------------------------------- first paint */
 
-await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card', { timeout: 15000 });
 
 const total = Number((await page.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
@@ -94,7 +102,9 @@ const marketStart = (() => {
   return (y - 1) + '-07-01';
 })();
 const outOfMarket = await page.evaluate(async (start) => {
-  const rows = await (await fetch('data/jobs.json')).json();
+  // absolute: this runs from /v2/jobs.html, where a relative path would ask
+  // for /v2/data/jobs.json. The data files are shared by every version.
+  const rows = await (await fetch('/data/jobs.json')).json();
   const y = Number(start.slice(0, 4)) + 1;
   return {
     shownOld: 0, // the cards carry no year attribute; the fetch re-check below stands in
@@ -203,7 +213,7 @@ eq(await page.$eval('#oaf-institution', (n) => n.value), term, 'the text filter 
    the filter's legacyValues map such a link would land on a filter that
    selects nothing — an empty page with no explanation, which is exactly the
    failure the ?filterA= mapping below already exists to prevent. */
-await page.goto(BASE + 'jobs.html?country=USA', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html?country=USA', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
 const legacyCountry = await page.$$eval('.oa-chip', (ns) => ns.map((n) => n.textContent.trim()));
@@ -214,7 +224,7 @@ ok(legacyRows > 0, 'and still shows the postings it was shared to show');
 
 // the legacy Awesome Table deep link the footer and the "Further info" column
 // still emit must keep working
-await page.goto(BASE + 'jobs.html?filterA=University%20of%20Mannheim',
+await page.goto(BASE + V2 + 'jobs.html?filterA=University%20of%20Mannheim',
   { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
@@ -236,7 +246,7 @@ ok(mannheim.length > 0 && mannheim.every((t) => /Mannheim/.test(t)),
 
 const DEADLINES = ['Closing soon', 'Expired', 'Until filled'];
 
-await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card');
 await page.click('#oaf-deadline');
 await page.waitForTimeout(200);
@@ -271,7 +281,7 @@ eq(await page.evaluate(() => {
 }, 'a posting lands in the bucket the vendor page would have put it in');
 
 // a link shared while the filter said "Open" still selects what it meant
-await page.goto(BASE + 'jobs.html?deadline=Open', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html?deadline=Open', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
 eq(await page.$$eval('.oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
@@ -283,7 +293,7 @@ eq(await page.$$eval('.oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textCont
    other way round — a chip carrying a 9-pixel button — so a click on the blue
    did nothing at all.                                                        */
 
-await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card');
 await page.click('#oaf-type');
 await page.waitForTimeout(200);
@@ -317,7 +327,7 @@ ok(widened > narrowed, `and the list widens again (${narrowed} -> ${widened})`);
    stayed raised after the pointer moved on and two cards read as hovered at
    once — which is the state the owner saw.                                   */
 
-await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card');
 await page.mouse.move(2, 2);
 await page.waitForTimeout(250);
@@ -351,7 +361,7 @@ ok(await page.evaluate(() => document.activeElement.classList.contains('oa-card-
      - the shared footer partial carries inline onclick="ga(...)" handlers, so
        without ypo-parakolouthisi.js every footer link throws.                */
 
-await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card');
 await page.waitForTimeout(800);
 
@@ -395,7 +405,7 @@ eq(await page.evaluate(() => {
    picker button did not close it; and every tick in a multi-select facet
    closed the menu. All three are things only a driven browser can catch.    */
 
-await page.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card');
 
 await page.click('#oaf-country');
@@ -432,7 +442,7 @@ await page.keyboard.press('Escape');
 /* -------------------------------------------------- URL state, edge cases */
 
 // a foreign query parameter survives the list's own URL writing
-await page.goto(BASE + 'jobs.html?utm_source=newsletter&country=USA',
+await page.goto(BASE + V2 + 'jobs.html?utm_source=newsletter&country=USA',
   { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(400);
@@ -440,7 +450,7 @@ ok(page.url().includes('utm_source=newsletter'),
   'a foreign query parameter is not erased from the address bar');
 
 // the Universities map deep-links institutions as ?filterD=
-await page.goto(BASE + 'jobs.html?filterD=University%20of%20Mannheim',
+await page.goto(BASE + V2 + 'jobs.html?filterD=University%20of%20Mannheim',
   { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
@@ -464,13 +474,13 @@ await page.emulateMedia({ media: 'screen' });
 
 /* -------------------------------------------------------- states + mobile */
 
-await page.goto(BASE + 'jobs.html?institution=zzzznotathing', { waitUntil: 'domcontentloaded' });
+await page.goto(BASE + V2 + 'jobs.html?institution=zzzznotathing', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-empty', { timeout: 8000 });
 ok((await page.$eval('.oa-empty', (n) => n.textContent)).includes('No job postings'),
   'a filter that matches nothing explains itself');
 
 const m = await browser.newPage({ viewport: { width: 390, height: 780 } });
-await m.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await m.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await m.waitForSelector('.oa-card');
 await m.click('.oa-card:first-child .oa-card-head');
 await m.waitForTimeout(200);
@@ -530,7 +540,7 @@ for (const [name, expect] of [
   const qErrors = [];
   q.on('pageerror', (e) => qErrors.push(e.message));
   await q.route('**/firebasejs/**', (r) => r.abort());
-  await q.goto(BASE + name, { waitUntil: 'domcontentloaded' });
+  await q.goto(BASE + V2 + name, { waitUntil: 'domcontentloaded' });
   await q.waitForTimeout(2500);
 
   const seen = await q.evaluate((sel) => {
@@ -574,7 +584,7 @@ for (const [name, expect] of [
 {
   const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await q.route('**/firebasejs/**', (r) => r.abort());
-  await q.goto(BASE + 'feedback.html', { waitUntil: 'domcontentloaded' });
+  await q.goto(BASE + V2 + 'feedback.html', { waitUntil: 'domcontentloaded' });
   await q.waitForTimeout(2500);
   const seen = await q.evaluate(() => ({
     disabled: document.getElementById('fb-submit').disabled,
@@ -805,7 +815,7 @@ for (const [name, expect] of [
     await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify(seed)};`);
     await q.route('**/firebasejs/**', (r) =>
       r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
-    await q.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+    await q.goto(BASE + V2 + 'index.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
     const out = await drive(q);
     eq(errors, [], 'merge run: no uncaught script error');
@@ -984,7 +994,7 @@ for (const [name, expect] of [
   const keptUser = { uid: KEPT, email: 'ada@example.edu', displayName: 'Ada Lovelace',
                      providerData: [{ providerId: 'google.com' }] };
 
-  async function onV3(url, seed, drive, { dialogs } = {}) {
+  async function onSite(url, seed, drive, { dialogs } = {}) {
     const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
     const errors = [];
     q.on('pageerror', (e) => errors.push(e.message));
@@ -994,7 +1004,7 @@ for (const [name, expect] of [
       r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
     await q.goto(BASE + url, { waitUntil: 'domcontentloaded' });
     const out = await drive(q);
-    eq(errors, [], `v3 ${url}: no uncaught script error`);
+    eq(errors, [], `${url}: no uncaught script error`);
     await q.close();
     return out;
   }
@@ -1025,7 +1035,7 @@ for (const [name, expect] of [
     ],
   };
 
-  const merged = await onV3('v3/my-postings.html', seed, async (q) => {
+  const merged = await onSite('my-postings.html', seed, async (q) => {
     // signed in as the duplicate, My postings shows ITS one posting
     await q.waitForSelector('.oa-my-card', { timeout: 10000 });
     const pre = await q.$$eval('.oa-my-card .oa-my-inst', (els) => els.map((e) => e.textContent));
@@ -1071,7 +1081,7 @@ for (const [name, expect] of [
 
   /* -- the kept account signs in and finds BOTH postings ------------------ */
 
-  const after = await onV3('v3/my-postings.html', {
+  const after = await onSite('my-postings.html', {
     user: keptUser,
     docs: Object.keys(merged.docs).map((p) => ({ path: p, data: merged.docs[p] })),
   }, async (q) => {
@@ -1083,7 +1093,7 @@ for (const [name, expect] of [
 
   /* -- post a job on /v3/ -------------------------------------------------- */
 
-  const posted = await onV3('v3/post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+  const posted = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-institution', 'Test University');
     await q.fill('#f-school', 'Business School');
@@ -1142,7 +1152,7 @@ for (const [name, expect] of [
       createdAt: '2026-08-10T00:00:00.000Z',
     } }],
   };
-  const edited = await onV3('v3/post-a-job.html?edit=j9', editSeed, async (q) => {
+  const edited = await onSite('post-a-job.html?edit=j9', editSeed, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.waitForFunction(() => document.getElementById('f-institution').value !== '',
       null, { timeout: 8000 });
@@ -1167,7 +1177,7 @@ for (const [name, expect] of [
 
   /* -- take one down from My postings -------------------------------------- */
 
-  const down = await onV3('v3/my-postings.html', editSeed, async (q) => {
+  const down = await onSite('my-postings.html', editSeed, async (q) => {
     await q.waitForSelector('.oa-my-card', { timeout: 10000 });
     await q.click('.oa-jobbtn-del');
     await q.waitForFunction(() =>
@@ -1178,7 +1188,7 @@ for (const [name, expect] of [
 
   /* -- post a candidacy on /v3/ -------------------------------------------- */
 
-  const cand = await onV3('v3/post-a-candidate.html', { user: keptUser, docs: [] }, async (q) => {
+  const cand = await onSite('post-a-candidate.html', { user: keptUser, docs: [] }, async (q) => {
     await q.waitForSelector('#oa-cand-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-first', 'Grace');
     await q.fill('#f-last', 'Hopper');
@@ -1207,7 +1217,7 @@ for (const [name, expect] of [
 
   /* -- report a placement on /v3/ ------------------------------------------ */
 
-  const plac = await onV3('v3/post-a-placement.html', { user: keptUser, docs: [] }, async (q) => {
+  const plac = await onSite('post-a-placement.html', { user: keptUser, docs: [] }, async (q) => {
     await q.waitForSelector('#oa-placement-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-first', 'New');
     await q.fill('#f-last', 'Professor');
@@ -1360,10 +1370,17 @@ for (const [name, expect] of [
     'jobs: Edit opens the form for that posting');
   ok(before, 'jobs: the card was closed before Edit was pressed');
 
-  // the form says it is editing rather than posting
+  /* The form says it is editing rather than posting — in the heading the page
+     ACTUALLY has. This caught the swap's own regression: oa-jobform.js renamed
+     `.title-heading h2`, which only the archived design has, so on the live
+     site the page went on saying "Post a job" while the form held someone's
+     existing posting. */
   await j.waitForTimeout(1200);
-  eq(await j.$eval('.title-heading h2', (n) => n.textContent.trim()), 'Edit a posting',
-    'form: edit mode renames the page');
+  eq(await j.evaluate(() => {
+    const h = document.querySelector('.v3-pa-hero .v3-h1') ||
+      document.querySelector('.title-heading h2');
+    return h ? h.textContent.trim() : 'no-heading';
+  }), 'Edit a posting', 'form: edit mode renames the page');
   eq(await j.$eval('#oa-submit', (n) => n.textContent.trim()), 'Save changes',
     'form: and the button says what it does');
 
@@ -1624,13 +1641,37 @@ for (const [name, expect] of [
     links: [...n.querySelectorAll('a')].map((a) => a.getAttribute('href')),
   }));
   ok(pop.title.length > 0, 'universities: the popup names the school');
-  for (const want of ['recent-faculty.html?placement=', 'recent-faculty.html?alma=',
-    'candidates.html?affiliation=', 'jobs.html?institution=', 'previous-markets.html?university=']) {
+  /* Four of the five reach pages of their own. The fifth, the candidates list,
+     is a SECTION of the one-pager — so the popup deep-links the section with
+     the namespaced key that mount reads, rather than candidates.html, which
+     redirects there and would drop the query on the way. */
+  for (const [want, what] of [
+    ['recent-faculty.html?placement=', 'recent hires'],
+    ['recent-faculty.html?alma=', 'PhD alumni'],
+    ['./?c_affiliation=', 'candidates'],
+    ['jobs.html?institution=', 'current openings'],
+    ['previous-markets.html?university=', 'past postings'],
+  ]) {
     ok(pop.links.some((h) => h.startsWith(want)),
-      `universities: the popup links into ${want.split('.html')[0]} pre-filtered`);
+      `universities: the popup links into ${what} pre-filtered`);
   }
-  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?)/.test(h)),
+  ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?|\.\/\?)/.test(h)),
     'universities: every popup link is a page of this site or a real URL');
+
+  /* And the deep links WORK: each lands with the school in a filter chip, not
+     merely at a URL that carries it. This is the check the swap needed — a
+     redirect resolves and looks fine while silently discarding the filter. */
+  for (const href of pop.links.filter((h) => !/^https?:/.test(h))) {
+    const d = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await d.goto(BASE + href.replace(/^\.\//, ''), { waitUntil: 'domcontentloaded' });
+    await d.waitForTimeout(3500);
+    // the engine's text filters render as <input type="search">; a filter that
+    // took a value from the URL is simply one carrying it
+    const filtered = await d.evaluate(() =>
+      [...document.querySelectorAll('.oa-filters input')].some((i) => i.value.trim().length > 0));
+    ok(filtered, `universities: ${href.split('?')[0]} opens with the school already filtered`);
+    await d.close();
+  }
 
   // the deep link every posting's Further-info column emits
   const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
@@ -1692,14 +1733,19 @@ for (const [name, expect] of [
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
 
-const MOBILE_PAGES = ['jobs.html', 'candidates.html', 'placements.html',
-  'previous-markets.html', 'recent-faculty.html',
-  // the v3 preview: the one-pager (whose jobs teaser has NO filter bar — the
-  // first VISIBLE bar is the candidates mount, reached by the walk below) and
-  // the dedicated jobs page (whose bar carries the sign-in lock; the gate's
-  // programmatic clicks work through pointer-events:none, which is the point
-  // of measuring rather than tapping here)
-  'v3/index.html', 'v3/jobs.html'];
+const MOBILE_PAGES = [
+  // the live site: the one-pager (whose jobs teaser has NO filter bar — the
+  // first VISIBLE bar is the candidates mount, reached by the walk below;
+  // placements is a mount further down the same page), the dedicated jobs
+  // page (whose bar carries the sign-in lock; the gate's programmatic clicks
+  // work through pointer-events:none, which is the point of measuring rather
+  // than tapping here), and the two archive lists rebuilt in this design
+  'index.html', 'jobs.html', 'previous-markets.html', 'recent-faculty.html',
+  // and the archived design, which is still served and still has to hold the
+  // standard on a phone. Its candidates and placements are pages of their own
+  // there; on the live site they are sections of index.html, above.
+  V2 + 'jobs.html', V2 + 'candidates.html', V2 + 'placements.html',
+  V2 + 'previous-markets.html', V2 + 'recent-faculty.html'];
 
 for (const pageName of MOBILE_PAGES) {
   const m = await browser.newPage({
@@ -1798,6 +1844,114 @@ for (const pageName of MOBILE_PAGES) {
   eq(await m.$eval('#oa-my-list', (n) => n.hidden), true,
     'my postings: no list is shown to a signed-out visitor');
   await m.close();
+}
+
+/* ------------------------------- three trees, and the seams between them
+
+   The site serves three designs at once: the live one at the root, the 2026
+   rebuild archived at /v2/, and the 2014-2026 site at /v1/. link-check.mjs
+   reads the links; this reads what a BROWSER does with them, which is where
+   the failure a promotion causes actually shows up.
+
+   The named case is the owner's own: the three cards under "Explore the wider
+   market". After the 2026-08-17 swap they still pointed at pages built in the
+   design that had just been archived, so clicking one left the new site
+   without saying so. Nothing 404s when that happens — which is exactly why it
+   needs a test rather than a look.                                          */
+
+{
+  /* -- the three cards land IN the live design, with their data ---------- */
+  const p = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await p.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('#resources .v3-card');
+  const cards = await p.$$eval('#resources .v3-card', (as) => as.map((a) => ({
+    href: a.getAttribute('href'),
+    title: a.querySelector('.v3-h3').textContent.trim(),
+  })));
+  eq(cards.length, 3, 'the resources section offers three cards');
+  await p.close();
+
+  for (const c of cards) {
+    ok(!/^\/?v\d+\//.test(c.href),
+      `"${c.title}" does not point into a version directory (${c.href})`);
+    const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errs = [];
+    q.on('pageerror', (e) => errs.push(e.message));
+    await q.goto(BASE + c.href, { waitUntil: 'domcontentloaded' });
+    await q.waitForTimeout(2500);
+    const seen = await q.evaluate(() => ({
+      live: !!document.querySelector('body.v3 .v3-header .v3-nav'),
+      archived: !!document.querySelector('#header-wrapper, #page-wrapper'),
+      rows: document.querySelectorAll('.oa-card, .leaflet-marker-icon').length,
+      robots: !!document.querySelector('meta[name="robots"]'),
+    }));
+    ok(seen.live, `${c.href}: opens IN the live design`);
+    ok(!seen.archived, `${c.href}: carries none of the archived design's chrome`);
+    ok(!seen.robots, `${c.href}: is indexable — a live page, not an archived one`);
+    ok(seen.rows > 0, `${c.href}: renders its data (${seen.rows} rows/pins)`);
+    eq(errs, [], `${c.href}: no uncaught script error`);
+    await q.close();
+  }
+}
+
+/* -- the archives still work, and say where the reader is ---------------- */
+for (const [url, marker] of [
+  ['v2/', 'ARCHIVED 2026 version'],
+  ['v2/jobs.html', 'ARCHIVED 2026 version'],
+  ['v2/universities.html', 'ARCHIVED 2026 version'],
+  ['v1/', 'ARCHIVED previous version'],
+]) {
+  const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await q.goto(BASE + url, { waitUntil: 'domcontentloaded' });
+  await q.waitForTimeout(3000);
+  const seen = await q.evaluate((m) => ({
+    banner: document.body.textContent.includes(m),
+    wayBack: !!document.querySelector('a[href="/"]'),
+    noindex: /noindex/i.test((document.querySelector('meta[name="robots"]') || {}).content || ''),
+    rows: document.querySelectorAll('.oa-card, .leaflet-marker-icon').length,
+  }), marker);
+  ok(seen.banner, `${url}: says it is an archive`);
+  ok(seen.wayBack, `${url}: offers the way back to the live site`);
+  ok(seen.noindex, `${url}: is noindex, so it never competes with the live page`);
+  if (/jobs|universities/.test(url)) {
+    // the archive reads the SHARED data at the root — a relative path here
+    // would ask for /v2/data/… and paint the "could not be loaded" state
+    ok(seen.rows > 0, `${url}: still reads the shared data (${seen.rows} rows/pins)`);
+  }
+  await q.close();
+}
+
+/* -- the preview stubs, and the addresses the one-pager absorbed --------- */
+for (const [from, to] of [
+  ['v3/', '/'], ['v3/jobs.html', '/jobs.html'], ['v3/post-a-job.html', '/post-a-job.html'],
+]) {
+  const q = await browser.newPage();
+  await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
+  try {
+    await q.waitForURL((u) => new URL(u).pathname === to, { timeout: 8000 });
+    ok(true, `${from}: lands on ${to}`);
+  } catch { ok(false, `${from}: never reached ${to} (stopped at ${q.url()})`); }
+  await q.close();
+}
+
+for (const [from, hash] of [
+  ['candidates.html', '#candidates'], ['placements.html', '#placements'],
+  ['faqs.html', '#faq'], ['contact.html', '#contact'],
+  ['resources-for-candidates.html', '#resources'],
+  ['directors-and-contributors.html', '#about'],
+]) {
+  const q = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await q.goto(BASE + from, { waitUntil: 'domcontentloaded' });
+  try {
+    await q.waitForURL((u) => new URL(u).hash === hash, { timeout: 8000 });
+    await q.waitForTimeout(600);
+    // it is not enough to arrive at the URL: the section has to be on screen
+    ok(await q.evaluate((h) => {
+      const el = document.getElementById(h.slice(1));
+      return !!el && Math.abs(el.getBoundingClientRect().top) < window.innerHeight;
+    }, hash), `${from}: lands on the ${hash} section itself`);
+  } catch { ok(false, `${from}: never reached ${hash} (stopped at ${q.url()})`); }
+  await q.close();
 }
 
 /* ------------------------------------------------------------------ done */

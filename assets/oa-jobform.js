@@ -555,7 +555,12 @@
     if (!EDIT_ID) return;
 
     document.title = 'Edit a posting - OperationsAcademia.org';
-    var h = document.querySelector('.title-heading h2');
+    // the page heading, in whichever design is serving this page: the live
+    // site heads a page with .v3-pa-hero .v3-h1, the /v2/ archive with
+    // .title-heading h2. Renaming neither would leave the form claiming to
+    // post something new while it is editing one that exists.
+    var h = document.querySelector('.v3-pa-hero .v3-h1') ||
+      document.querySelector('.title-heading h2');
     if (h) h.textContent = 'Edit a posting';
 
     var submit = $('oa-submit');

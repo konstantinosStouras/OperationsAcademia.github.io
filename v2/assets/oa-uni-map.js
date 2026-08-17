@@ -6,7 +6,7 @@
    the only third party in the reading path is the tile server. One global:
    window.OAUniMap.
 
-       OAUniMap.mount({ mount: '#oa-uni', data: 'data/universities.json' });
+       OAUniMap.mount({ mount: '#oa-uni', data: '/data/universities.json' });
 
    What it reproduces from the vendor view, deliberately one-for-one:
      - a search field above the map, filtering the pins as you type;
@@ -58,7 +58,7 @@
      pre-filtering the matching page by the school's institution name. Built
      as DOM, never as an HTML string — the dataset is operator-supplied, but
      this page is public and nothing here should ever be interpretable. */
-  function popupContent(r, cfg) {
+  function popupContent(r) {
     var inst = r.institution || r.name;
     var q = encodeURIComponent(inst);
 
@@ -83,14 +83,7 @@
       row('Faculty', extLink(r.facultyUrl, 'link')),
       row('Recent hires', siteLink('recent-faculty.html?placement=' + q)),
       row('PhD Alumni', siteLink('recent-faculty.html?alma=' + q)),
-      /* Where the candidates list LIVES differs between the designs that
-         serve this map: a page of its own in the /v2/ archive, a section of
-         the one-page site on the live one — where three list engines share
-         the query string, so its filter keys are namespaced (urlPrefix 'c_').
-         The page says which; the default is the page-of-its-own form, so the
-         archive's copy of this engine behaves exactly as it always did. */
-      row('Candidates on the market', siteLink(
-        (cfg && cfg.candidatesHref) ? cfg.candidatesHref(q) : 'candidates.html?affiliation=' + q)),
+      row('Candidates on the market', siteLink('candidates.html?affiliation=' + q)),
       row('Current job openings', siteLink('jobs.html?institution=' + q)),
       row('Past job postings', siteLink('previous-markets.html?university=' + q)),
       row('Campus location', extLink(r.mapUrl, 'map')),
@@ -181,7 +174,7 @@
       cluster.clearLayers();
       shown.forEach(function (r) {
         var m = L.marker([r.lat, r.lng], { title: r.name });
-        m.bindPopup(popupContent(r, cfg), { maxWidth: 320 });
+        m.bindPopup(popupContent(r), { maxWidth: 320 });
         cluster.addLayer(m);
       });
       count.textContent = !rows.length ? ''

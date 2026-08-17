@@ -1,191 +1,1154 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en" data-theme="light">
   <head>
-    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
-    <title>Operations Academia</title>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no"> -->
-    <meta content="Matching supply with demand in the Operations job market" name="description">
-    <link rel="canonical" href="https://www.operationsacademia.org/" />
-    <!-- Open Graph: link previews on Messenger, WhatsApp, Viber, Facebook, LinkedIn, etc. -->
-    <meta property="og:title" content="Operations Academia" />
-    <meta property="og:site_name" content="Operations Academia" />
-    <meta property="og:description" content="Matching supply with demand in the Operations job market — the academic job market hub for Operations Management, Operations Research and Analytics." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.operationsacademia.org/" />
-    <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg" />
-    <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg" />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market." />
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Operations Academia" />
-    <meta name="twitter:description" content="Matching supply with demand in the Operations job market." />
-    <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg" />
-    <!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
-    <link href="/assets/css/main.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Operations Academia</title>
+    <meta name="description" content="Matching supply with demand in the Operations job market — academic job postings, candidates, placements and the annual survey, in one place.">
+    <link rel="canonical" href="https://www.operationsacademia.org/">
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+
+    <!-- Link previews on Messenger, WhatsApp, Viber, Facebook, LinkedIn, etc.
+         Carried over from the design this one replaced: the card is the site's,
+         not a version's, so losing it at a cutover would quietly downgrade
+         every link anyone has ever shared. -->
+    <meta property="og:title" content="Operations Academia">
+    <meta property="og:site_name" content="Operations Academia">
+    <meta property="og:description" content="Matching supply with demand in the Operations job market — the academic job market hub for Operations Management, Operations Research and Analytics.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.operationsacademia.org/">
+    <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
+    <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Operations Academia">
+    <meta name="twitter:description" content="Matching supply with demand in the Operations job market.">
+    <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg">
+
+    <!-- theme before first paint, so neither mode ever flashes the other -->
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('oaV3Theme');
+        if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+        document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
+
+    <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
-    <!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
-	<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
-<script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
-<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
-<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
-<script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
-<!-- <script>
-window.addEventListener("load", function(){
-window.cookieconsent.initialise({
-  "palette": {
-    "popup": {
-      "background": "#edeff5",
-      "text": "#838391"
-    },
-    "button": {
-      "background": "#4b81e8"
-    }
-  },
-  "position": "bottom-left",
-  "content": {
-    "href": "https://www.operationsacademia.org/privacy-policy"
-  }
-})});
-</script> -->
+    <link href="assets/v3.css" rel="stylesheet">
   </head>
-  <body class="homepage">
-    <div id="page-wrapper">
-      <!-- Header Wrapper -->
 
-      <div id="header-wrapper">
-        <!-- Header -->
+  <body class="v3">
+    <a class="v3-skip" href="#jobs">Skip to the job postings</a>
 
-        <div class="container" id="header">
-          <a href="./" id="logo" onclick=
-          "ga('send', 'pageview', 'logoHeader');"><img alt="Operations Academia Logo" class=
-          "OAlogo" src="/images/OperationsAcademiaLogo.png" style=
-          "margin-top:5px;" width="100"></a> <!-- Navigation menu -->
+    <!-- ================================================= header: keywords only -->
+    <header class="v3-header">
+      <div class="v3-header-inner">
+        <a class="v3-logo" href="#top" aria-label="Operations Academia — back to the top">
+          <span class="v3-mark" aria-hidden="true">OA</span>
+          <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
+        </a>
 
-          <nav id="nav">
-          </nav>
+        <nav class="v3-nav" aria-label="Site sections">
+          <a href="#jobs">Jobs</a>
+          <a href="#candidates">Candidates</a>
+          <a href="#placements">Placements</a>
+          <a href="#survey">Survey</a>
+          <a href="#resources">Resources</a>
+          <a href="#faq">FAQ</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </nav>
 
-          <div id="oa-headnav">
-            <a class="oa-headbtn" href="feedback.html">
-              <span aria-hidden="true">&#128172;</span> Feedback</a>
-            <div id="oa-account"></div>
+        <div class="v3-header-actions">
+          <button type="button" class="v3-theme" aria-label="Switch theme">
+            <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+            <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+          </button>
+          <div id="oa-account"></div>
+          <button type="button" class="v3-burger" aria-label="Open the menu" aria-expanded="false" aria-controls="v3-sheet">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- phone / tablet menu -->
+    <div class="v3-sheet-backdrop" aria-hidden="true"></div>
+    <aside class="v3-sheet" id="v3-sheet" aria-label="Menu">
+      <div class="v3-sheet-head">
+        <a class="v3-logo" href="#top">
+          <span class="v3-mark" aria-hidden="true">OA</span>
+        </a>
+        <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
+      </div>
+      <nav aria-label="Site sections">
+        <a href="#jobs">Jobs</a>
+        <a href="#candidates">Candidates</a>
+        <a href="#placements">Placements</a>
+        <a href="#survey">Survey</a>
+        <a href="#resources">Resources</a>
+        <a href="#faq">FAQ</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="v3-sheet-foot">
+        <div id="oa-np"></div>
+        <button type="button" class="v3-theme" aria-label="Switch theme">
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main id="top">
+
+      <!-- ================================================================ hero -->
+      <section class="v3-hero">
+        <div class="v3-container">
+          <span class="v3-kicker">The Operations job market, in one place</span>
+          <h1 class="v3-h1">Matching supply with demand<br>
+          <span class="v3-h1-sub">in the Operations job market</span></h1>
+          <p class="v3-lede">Academic job postings, this market&rsquo;s candidates, confirmed
+          placements and the annual Job Market Survey for Operations Management, Operations
+          Research and Analytics &mdash; posted by the community itself, free, since 2014.</p>
+
+          <div class="v3-cta-row">
+            <a class="v3-btn primary" href="post-a-job.html">Post a job</a>
+            <a class="v3-btn ghost" href="#candidates">Browse the candidates</a>
+            <a class="v3-btn soft" href="survey.html">Take the survey</a>
+          </div>
+
+          <!-- The four figures the site can stand behind (owner, 2026-08-17):
+               reach, then the two things the community itself files, then the
+               years. This market's OPEN-POSTING count was dropped — it reads
+               as a small number early in the season, when the page is trying
+               to say how much is here. Every figure counts up as it scrolls
+               into view (v3.js countUp); the numbers written here are the
+               floors the live files raise once they pass them. -->
+          <div class="v3-stats" id="v3-stats">
+            <div class="v3-stat"><b>200+</b><span>universities have used the site</span></div>
+            <div class="v3-stat"><b data-stat="candidates">700+</b><span>candidates listed</span></div>
+            <div class="v3-stat"><b data-stat="placements">170+</b><span>placements recorded</span></div>
+            <div class="v3-stat"><b>2014</b><span>serving the community since</span></div>
+          </div>
+
+          <div class="v3-sponsors">
+            <span>Proudly sponsored and supported by</span>
+            <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/" target="_blank" rel="noopener" aria-label="CUHK Business School — Department of Decisions, Operations and Technology">
+              <img src="/images/logos/cuhk_dot_logo.png" alt="CUHK Business School — Department of Decisions, Operations and Technology" loading="lazy">
+            </a>
+            <a href="https://connect.informs.org/msom/home" target="_blank" rel="noopener" aria-label="INFORMS MSOM Society">
+              <img src="/images/logos/informs-msom.png" alt="INFORMS Manufacturing and Service Operations Management (MSOM) Society" data-small loading="lazy">
+            </a>
           </div>
         </div>
-      </div>
-      <!-- Main Wrapper -->
+      </section>
 
-      <div id="main-wrapper">
-        <!-- Main -->
+      <!-- ================================================================ jobs -->
+      <!-- Two columns, the reference site's shape (owner, 2026-08-16): the
+           search card on the LEFT with the explore button directly under its
+           filters; the ten most recent postings as a PANEL on the right. The
+           button leads to jobs.html, where the full list lives and the
+           filters nudge a sign-in. -->
+      <section class="v3-section" id="jobs">
+        <div class="v3-container">
+          <div class="v3-jobs-grid">
 
-        <div id="banner-wrapper">
-          <section class="container" id="banner">
-            <div class="row">
-              <div class="12u" id="content">
-                <header class="major">
-                  <h2>
-                    Operations Academia
-                  </h2>
+            <div class="v3-jobs-left v3-reveal">
+              <span class="v3-kicker">Job postings</span>
+              <h2 class="v3-h2" id="oa-jobs-heading">Job postings (2026-2027)</h2>
+              <p class="v3-lede" style="font-size:16.5px">Every academic opening in Operations
+              Research and related fields, posted by verified members of the community &mdash;
+              in one searchable place instead of scattered across INFORMS/MSOM Connect, POMS
+              listings and departmental pages.</p>
 
-                  <p>
-                    Matching supply with demand in the Operations job market
-                  </p>
-                </header>
+              <!-- the launcher: pick a value or two and jump into the full
+                   list. The selects are filled from the live data and already
+                   SHOW their value ("All types") — never a bare placeholder. -->
+              <form class="v3-launcher" id="v3-jobs-launcher">
+                <label class="v3-flabel" for="jl-q">Search</label>
+                <input type="search" id="jl-q" placeholder="Search by university or department&hellip;" autocomplete="off">
+                <div class="v3-launcher-row">
+                  <div>
+                    <label class="v3-flabel" for="jl-type">Type</label>
+                    <select id="jl-type"><option value="">All types</option></select>
+                  </div>
+                  <div>
+                    <label class="v3-flabel" for="jl-level">Entry level</label>
+                    <select id="jl-level"><option value="">All levels</option></select>
+                  </div>
+                  <div>
+                    <label class="v3-flabel" for="jl-country">Location</label>
+                    <select id="jl-country"><option value="">All locations</option></select>
+                  </div>
+                </div>
+                <div class="v3-launcher-actions">
+                  <button type="submit" class="v3-btn primary" id="jl-go">&#128269; Explore all postings</button>
+                  <a class="v3-btn ghost" href="post-a-job.html">Post a job</a>
+                </div>
+                <p class="v3-mut" style="font-size:13.5px;margin:12px 0 0">More filters &mdash;
+                deadline, characteristics, date posted &mdash; are on the
+                <a href="jobs.html">full list</a>. Posting is free, and you can
+                <a href="alerts.html">get new postings by e-mail</a>.</p>
+              </form>
+            </div>
 
-                <ul class="pennants">
-                  <li>
-                    <a class="pennant" href="survey.html"><span class="icon fa-signal"></span></a>
-                    <header>
-                      <h3>
-                        Job market survey
-                      </h3>
-                    </header>
-
-                    <p>
-                      Either as a School or as a past Candidate, share your job market experience
-                      to improve the matching process for all the rest.
-                    </p>
-                  </li>
-
-                  <li>
-                    <a class="pennant" href="jobs.html"><span class=
-                    "icon fas fa-university"></span></a>
-                    <header>
-                      <h3>
-                        Job postings
-                      </h3>
-                    </header>
-
-                    <p>
-                      Reach out to a wider audience for your academic vacancies by posting a job.
-                    </p>
-                  </li>
-
-                  <li>
-                    <a class="pennant" href="candidates.html"><span class=
-                    "icon fa-users"></span></a>
-                    <header>
-                      <h3>
-                        Candidates
-                      </h3>
-                    </header>
-
-                    <p>
-                      Find and hire a candidate, promote your research, or help prospective
-                      universities find you easier.
-                    </p>
-                  </li>
-
-                  <li>
-                    <a class="pennant" href="resources-for-candidates.html"><span class=
-                    "icon fa-chart-line"></span></a>
-                    <header>
-                      <h3>
-                        Resources
-                      </h3>
-                    </header>
-
-                    <p>
-                      Discover job market resources for candidates, previous job postings and
-                      recent faculty members.
-                    </p>
-                  </li>
-                </ul>
+            <div class="v3-jobs-right v3-reveal">
+              <div class="v3-panel">
+                <div class="v3-panel-head">
+                  <h3>&#10022; The ten most recent postings</h3>
+                  <a href="jobs.html">Full list &rarr;</a>
+                </div>
+                <div id="oa-jobs-recent"></div>
+                <div class="v3-panel-foot">
+                  <span class="v3-mut">Updated automatically as postings arrive</span>
+                  <a href="jobs.html" id="v3-jobs-all">Explore all postings &rarr;</a>
+                </div>
               </div>
             </div>
-          </section>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ candidates -->
+      <section class="v3-section" id="candidates">
+        <div class="v3-container">
+          <div class="v3-section-head v3-reveal">
+            <span class="v3-kicker">Candidates</span>
+            <h2 class="v3-h2" id="oa-cands-heading">Job market candidates (2026-2027)</h2>
+            <p class="v3-lede">The candidates applying for faculty positions in Operations this
+            season, with their CV, research summary and INFORMS presentation day(s) &mdash; so
+            hiring committees can find their talks and attend them. Contact a candidate directly
+            to arrange an interview.</p>
+            <div class="v3-section-cta">
+              <a class="v3-btn primary" href="post-a-candidate.html">Create your candidate profile</a>
+              <a class="v3-btn ghost" href="#resources">Resources for candidates</a>
+            </div>
+          </div>
+
+          <!-- profiles are collected continuously but revealed ALL AT ONCE on
+               the date the admin set; until then this note explains the empty
+               list (filled from /data/candidates-meta.json) -->
+          <div class="oa-note" id="oa-reveal-note" hidden>
+            <p><strong>Candidate profiles are revealed all at once on
+            <span id="oa-reveal-date"></span>.</strong>
+            <span id="oa-reveal-count"></span>
+            Post yours now &mdash; it stays private until then, and appears
+            with everyone else&rsquo;s on the day.</p>
+          </div>
+
+          <div id="oa-candidates"></div>
+        </div>
+      </section>
+
+      <!-- ============================================================ placements -->
+      <section class="v3-section" id="placements">
+        <div class="v3-container">
+          <div class="v3-section-head v3-reveal">
+            <span class="v3-kicker">Placements</span>
+            <h2 class="v3-h2">Confirmed placements</h2>
+            <p class="v3-lede">Who went where: candidates who have accepted a position, from which
+            PhD program, joining which institution as what &mdash; the record the whole community
+            learns from, season after season.</p>
+            <div class="v3-section-cta">
+              <a class="v3-btn primary" href="post-a-placement.html">Report a placement</a>
+            </div>
+          </div>
+          <div id="oa-placements"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================ survey -->
+      <section class="v3-section v3-band" id="survey">
+        <div class="v3-container">
+          <div class="v3-section-head v3-reveal">
+            <span class="v3-kicker">Annual survey</span>
+            <h2 class="v3-h2">The Job Market Survey</h2>
+            <p class="v3-lede">The first job market survey ever conducted for candidates in
+            Operations Management and Operations Research. Whether as a school or as a past
+            candidate, sharing your experience improves the matching process for everyone &mdash;
+            and informs PhD candidates, junior faculty, hiring committees and prospective PhD
+            students about the dynamics of our field.</p>
+            <div class="v3-section-cta">
+              <a class="v3-btn primary" href="survey.html">Take the survey</a>
+              <a class="v3-btn ghost" href="survey-faqs.html">Survey FAQs</a>
+              <a class="v3-btn ghost" href="https://docs.google.com/presentation/d/1D5JdUEeCJnivhtjIIriEjeioUzPMP2pHSMKXYxsPl8s/edit?usp=sharing" target="_blank" rel="noopener">See past results</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================== resources -->
+      <section class="v3-section" id="resources">
+        <div class="v3-container">
+          <div class="v3-section-head v3-reveal">
+            <span class="v3-kicker">Resources</span>
+            <h2 class="v3-h2">Explore the wider market</h2>
+            <p class="v3-lede">Everything around the current season: where the jobs have been,
+            who was hired, and the universities that take part.</p>
+          </div>
+
+          <div class="v3-grid v3-reveal" style="margin-bottom:44px">
+            <a class="v3-card" href="universities.html">
+              <h3 class="v3-h3"><span class="v3-ico" aria-hidden="true">&#128506;</span> Universities</h3>
+              <p>An interactive map of the 200+ universities and schools with Operations
+              departments that have used the platform.</p>
+              <span class="v3-card-go">Open the map &rarr;</span>
+            </a>
+            <a class="v3-card" href="recent-faculty.html">
+              <h3 class="v3-h3"><span class="v3-ico" aria-hidden="true">&#127891;</span> Recent faculty</h3>
+              <p>Recently hired junior faculty in Operations, broadly defined &mdash; see where
+              the field&rsquo;s newest colleagues landed.</p>
+              <span class="v3-card-go">Browse recent hires &rarr;</span>
+            </a>
+            <a class="v3-card" href="previous-markets.html">
+              <h3 class="v3-h3"><span class="v3-ico" aria-hidden="true">&#128452;</span> Previous job markets</h3>
+              <p>Past job postings, season by season, back through the site&rsquo;s archive
+              &mdash; useful for spotting hiring patterns.</p>
+              <span class="v3-card-go">Open the archive &rarr;</span>
+            </a>
+          </div>
+
+          <h3 class="v3-h3 v3-reveal" style="margin-bottom:16px">Advice and guides for candidates</h3>
+          <ul class="v3-links v3-reveal">
+            <li><a href="https://theprofessorisin.com/buy-the-book/" target="_blank" rel="noopener">The Professor Is In: The Essential Guide To Turning Your Ph.D. Into a Job</a> &mdash; a recommended read the summer <em>before</em> your job market year.</li>
+            <li><a href="https://gargnikhil.com/files/NikhilGarg_JobMarketAdvice.pdf" target="_blank" rel="noopener">Advice for the Operations Job Market</a> by Nikhil Garg.</li>
+            <li><a href="https://marisacarlos.com/pages/create-simple-academic-website" target="_blank" rel="noopener">Become visible by creating a simple academic website</a> by Marisa Carlos.</li>
+            <li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2502288" target="_blank" rel="noopener">A Guide and Advice for Economists on the U.S. Junior Academic Job Market</a> by John Cawley.</li>
+            <li><a href="https://agtb.wordpress.com/2014/10/09/tips-for-cs-econ-students-on-the-business-school-and-operations-research-job-markets/" target="_blank" rel="noopener">Tips for CS/Econ students on the business school and OR job markets</a> by Jason D. Hartline.</li>
+            <li><a href="https://docs.google.com/presentation/d/1D5JdUEeCJnivhtjIIriEjeioUzPMP2pHSMKXYxsPl8s/edit?usp=sharing" target="_blank" rel="noopener">Annual Job Market Survey in Operations</a> by Konstantinos Stouras and Serguei Netessine.</li>
+            <li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3247794" target="_blank" rel="noopener">Economists (and Economics) in Tech Companies</a> by Susan Athey and Michael Luca &mdash; insights for non-academic paths.</li>
+            <li>Similar efforts in other fields: <a href="https://econjobmarket.org/" target="_blank" rel="noopener">EconJobMarket</a>, <a href="https://cstheory-jobs.org/" target="_blank" rel="noopener">CSTheory-Jobs</a>, <a href="https://sites.google.com/site/marketingphdjobs/2014" target="_blank" rel="noopener">MarketingPhdJobs</a> and <a href="https://www.aeaweb.org/forum/" target="_blank" rel="noopener">EconSpark</a>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ================================================================== FAQ -->
+      <section class="v3-section v3-band" id="faq">
+        <div class="v3-container">
+          <div class="v3-section-head v3-reveal">
+            <span class="v3-kicker">FAQ</span>
+            <h2 class="v3-h2">Frequently asked questions</h2>
+            <p class="v3-lede">The short version of everything people ask us. Anything missing?
+            <a href="#contact">Ask away</a>.</p>
+          </div>
+
+          <div class="v3-faq v3-reveal">
+
+            <div class="v3-faq-item is-open">
+              <button type="button" class="v3-faq-q">What is Operations Academia?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Operations Academia is the academic job-market hub for Operations Management,
+                Operations Research and Analytics. Our vision is to make the search for an
+                academic job in Operations (and related areas) more efficient and transparent
+                &mdash; for PhD candidates, for recently hired faculty, for hiring committees,
+                and for prospective students deciding whether to join the field.</p>
+                <p>In one scrolling page you will find the current
+                <a href="#jobs">academic job postings</a>, this market&rsquo;s
+                <a href="#candidates">candidates</a>, the
+                <a href="#placements">confirmed placements</a>, and the first
+                <a href="#survey">Job Market Survey</a> ever conducted for candidates in our
+                field. Everything is posted by verified members of the academic community, and
+                using the site is free.</p>
+                <p>The site is <a href="https://msomsociety.org/" target="_blank" rel="noopener">supported
+                by the MSOM Society of INFORMS</a>, sponsored by the
+                <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/" target="_blank" rel="noopener">CUHK
+                DOT Department</a>, and was founded in 2014 by
+                <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I.
+                Stouras</a> (University College Dublin), who runs it in his free time.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">How do I post a job?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Sign in (with Google, ORCID, or an e-mail address and password), open
+                <a href="post-a-job.html">Post a job</a> and fill in the form. Your posting
+                appears on the site automatically, normally within an hour, and stays up for the
+                rest of the job-market year. Posting is free.</p>
+                <p>Because the posting is tied to your account, you can come back at any time to
+                correct it, extend the deadline, or withdraw it &mdash; from
+                <a href="my-postings.html">My postings</a> in your personal area. Only the
+                fields marked <em>shown publicly</em> ever appear on the site; your e-mail
+                address is never published.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">How do I create a candidate profile?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>If you are applying to academic jobs in Operations this season, sign in and
+                <a href="post-a-candidate.html">create your job-market profile</a> &mdash; with
+                your CV and research summary attached, your research areas, and the day(s) you
+                present at INFORMS, so hiring committees can find your talk and attend it.</p>
+                <p>Profiles are collected continuously but revealed <strong>all at once</strong>
+                on a set date each season, so no one gains from posting earlier or later. You
+                can edit your profile, replace or remove its files, or take it down at any time;
+                your contact address is shown only if you opt in.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">How do I report a confirmed placement?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Once a candidate has accepted a position, anyone with an account can
+                <a href="post-a-placement.html">report the placement</a>: who, from which PhD
+                program, joining which institution and as what. It appears in the
+                <a href="#placements">Confirmed placements</a> list at the next update, and the
+                person who reported it can correct or withdraw it later.</p>
+                <p>This record is what lets the whole community see, season after season, how
+                supply met demand.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">How up to date is the site?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Continuously. Postings, profiles and placements are submitted by the
+                community and publish automatically, normally within the hour &mdash; there is
+                no third-party service between a poster and the page any more.</p>
+                <p>The lists always show the job-market year under way. A market year runs from
+                1 July to 30 June and is numbered by the year it ends &mdash; so the
+                2026&ndash;2027 market began on 1 July 2026. Previous seasons stay in the
+                <a href="previous-markets.html">archive</a>.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Can I get e-mail alerts?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Yes. Sign in and open <a href="alerts.html">E-mail alerts</a>: you can be
+                told about every new job posting, or only those matching filters you choose
+                (institution, type, entry level, location&hellip;), and about changes to the
+                site itself. You pick the frequency, and every message carries a one-click
+                unsubscribe.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Do all Operations job postings show up here?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>The site carries what the community posts, and after a decade that is most of
+                the widely advertised academic openings in the field. But coverage ultimately
+                depends on schools posting &mdash; so if your department&rsquo;s opening is
+                missing, <a href="post-a-job.html">post it</a> (it takes a few minutes and is
+                free), or send the link to the search committee chair.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Is my personal information published?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>No. Only the fields explicitly marked <em>shown publicly</em> on a form ever
+                appear on the site. E-mail addresses are never published &mdash; a
+                candidate&rsquo;s contact address is shown only if they opt in. Accounts exist
+                so that we know where a posting comes from and can reach its author, nothing
+                more.</p>
+                <p>The details are in the <a href="privacy-policy.html">Privacy Policy</a> and
+                the <a href="terms-and-conditions.html">Terms and Conditions</a>, which you
+                accept by using the site.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">How can I contribute or support this effort?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Share the site with your colleagues and students &mdash; the more of the
+                community that posts, the better the market works for everyone. Post your
+                department&rsquo;s openings, your candidacy, and the placements you know of;
+                <a href="survey.html">fill in the annual survey</a>; and tell us
+                <a href="feedback.html">what to improve</a> or
+                <a href="https://operationsacademia.uservoice.com/" target="_blank" rel="noopener">vote
+                on suggested features</a>.</p>
+                <p>Everything here is free. If you want to say thanks, you can
+                <a href="http://a.co/ev61V45" target="_blank" rel="noopener">donate in books</a> or
+                <a href="https://www.buymeacoffee.com/kstouras" target="_blank" rel="noopener">buy
+                me a book or a coffee</a>.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">How can I contact you?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>This website is managed by Operations researchers in their free time, so
+                please check whether your question is answered above first. Otherwise, write to
+                <a href="mailto:konstantinos.stouras@ucd.ie">konstantinos.stouras@ucd.ie</a> or
+                use the <a href="feedback.html">feedback page</a> (you can attach screenshots
+                there) &mdash; we will get back to you as soon as we can.</p>
+              </div></div></div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ about -->
+      <section class="v3-section" id="about">
+        <div class="v3-container">
+          <div class="v3-about-grid v3-reveal">
+            <figure class="v3-about-portrait">
+              <img src="assets/portrait-konstantinos.jpg" alt="Konstantinos I. Stouras"
+                width="900" height="900" loading="lazy">
+              <figcaption>
+                <!-- the same card as stouras.com's portrait (owner, 2026-08-17),
+                     but in this site's own type and colours -->
+                <a class="v3-portrait-name" href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a>
+                <span>Assistant Professor of Management</span>
+                <a href="http://www.smurfitschool.ie/" target="_blank" rel="noopener">UCD, Michael Smurfit GSB</a>
+                <ul class="v3-portrait-links" aria-label="Profiles">
+                  <li><a href="mailto:kostas.stouras@ucd.ie" title="E-mail me" aria-label="E-mail">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M16.5 12a4.5 4.5.0 11-9 0 4.5 4.5.0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"/></svg>
+                  </a></li>
+                  <li><a href="https://x.com/stourask" target="_blank" rel="noopener" title="X" aria-label="X (Twitter)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/></svg>
+                  </a></li>
+                  <li><a href="https://scholar.google.com/citations?user=FzyFf3kAAAAJ" target="_blank" rel="noopener" title="Google Scholar" aria-label="Google Scholar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M343.759 106.662V79.43L363.524 64h-213.89L20.476 176.274h85.656a82.339 82.339.0 00-.219 6.225c0 20.845 7.22 38.087 21.672 51.861 14.453 13.797 32.252 20.648 53.327 20.648 4.923.0 9.75-.368 14.438-1.024-2.907 6.5-4.374 12.523-4.374 18.142.0 9.875 4.499 20.43 13.467 31.642-39.234 2.67-68.061 9.732-86.437 21.163-10.531 6.5-19 14.704-25.39 24.531-6.391 9.9-9.578 20.515-9.578 31.962.0 9.648 2.062 18.336 6.219 26.062 4.156 7.726 9.578 14.07 16.312 18.984 6.718 4.968 14.469 9.101 23.219 12.469 8.734 3.344 17.406 5.718 26.061 7.062A167.052 167.052.0 00180.555 448c13.469.0 26.953-1.734 40.547-5.187 13.562-3.485 26.28-8.642 38.171-15.493 11.86-6.805 21.515-16.086 28.922-27.718 7.39-11.68 11.094-24.805 11.094-39.336.0-11.016-2.25-21.039-6.75-30.14-4.468-9.073-9.938-16.542-16.452-22.345-6.501-5.813-13-11.155-19.516-15.968-6.5-4.845-12-9.75-16.468-14.813-4.485-5.046-6.735-10.054-6.735-14.984.0-4.921 1.734-9.672 5.216-14.265 3.455-4.61 7.674-9.048 12.61-13.306 4.937-4.25 9.875-8.968 14.796-14.133 4.922-5.147 9.141-11.827 12.61-20.008 3.485-8.18 5.203-17.445 5.203-27.757.0-13.453-2.547-24.46-7.547-33.314-.594-1.022-1.218-1.803-1.875-3.022l56.907-46.672v17.119c-7.393.93-6.624 5.345-6.624 10.635V245.96c0 5.958 4.875 10.834 10.834 10.834h3.989c5.958.0 10.833-4.875 10.833-10.834V117.293c0-5.277.778-9.688-6.561-10.63zm-107.36 222.48c1.14.75 3.704 2.78 7.718 6.038 4.05 3.243 6.797 5.695 8.266 7.414a443.553 443.553.0 016.376 7.547c2.813 3.375 4.718 6.304 5.718 8.734 1 2.477 2.016 5.461 3.047 8.946a38.27 38.27.0 011.485 10.562c0 17.048-6.564 29.68-19.656 37.859-13.125 8.18-28.767 12.274-46.938 12.274-9.187.0-18.203-1.093-27.063-3.196-8.843-2.116-17.311-5.336-25.39-9.601-8.078-4.258-14.577-10.204-19.5-17.797-4.938-7.64-7.407-16.415-7.407-26.25.0-10.32 2.797-19.29 8.422-26.906 5.594-7.625 12.938-13.391 22.032-17.315 9.063-3.946 18.25-6.742 27.562-8.398a157.865 157.865.0 0128.438-2.555c4.47.0 7.936.25 10.405.696.455.219 3.032 2.07 7.735 5.563 4.704 3.462 7.625 5.595 8.75 6.384zm-3.359-100.579c-7.406 8.86-17.734 13.288-30.953 13.288-11.86.0-22.298-4.764-31.266-14.312-9-9.523-15.422-20.328-19.344-32.43-3.937-12.109-5.906-23.984-5.906-35.648.0-13.694 3.596-25.352 10.781-34.976 7.187-9.65 17.5-14.485 30.938-14.485 11.875.0 22.374 5.038 31.437 15.157 9.094 10.085 15.61 21.413 19.517 33.968 3.922 12.54 5.873 24.53 5.873 35.984.0 13.446-3.702 24.61-11.076 33.454z"/></svg>
+                  </a></li>
+                  <li><a href="https://orcid.org/0000-0002-2398-9566" target="_blank" rel="noopener" title="ORCID" aria-label="ORCID">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M336.62 194.538c-7.13-3.328-13.866-5.56-20.253-6.614-6.365-1.095-16.574-1.612-30.71-1.612h-36.704v152.747h37.634c14.673.0 26.081-1.013 34.224-3.017 8.142-2.004 14.921-4.526 20.356-7.626a69.448 69.448.0 0014.942-11.388c14.488-14.714 21.742-33.273 21.742-55.717.0-22.052-7.44-40.052-22.341-53.982-5.498-5.166-11.822-9.444-18.89-12.793zM256 8C119.022 8 8 119.042 8 256s111.022 248 248 248 248-111.042 248-248S392.978 8 256 8zm-82.336 357.513h-29.389V160.148h29.389zM158.95 138.696c-11.14.0-20.213-9.01-20.213-20.212.0-11.118 9.052-20.191 20.213-20.191 11.18.0 20.232 9.052 20.232 20.191a20.194 20.194.0 01-20.232 20.212zm241.386 163.597c-5.29 12.545-12.834 23.581-22.65 33.088-9.982 9.837-21.597 17.194-34.844 22.196-7.75 3.017-14.839 5.063-21.307 6.117-6.49 1.013-18.828 1.509-37.076 1.509h-64.956V160.148h69.233c27.962.0 50.034 4.154 66.32 12.545 16.265 8.37 29.181 20.728 38.792 36.972 9.61 16.265 14.425 34.018 14.425 53.196.023 13.765-2.666 26.908-7.936 39.432z"/></svg>
+                  </a></li>
+                </ul>
+              </figcaption>
+            </figure>
+            <div>
+              <!-- the heading sits in the TEXT column, so nothing stands
+                   above the portrait (owner, 2026-08-17) -->
+              <div class="v3-section-head">
+                <span class="v3-kicker">About</span>
+                <h2 class="v3-h2">A community effort, since 2014</h2>
+              </div>
+              <div class="v3-prose">
+              <p>For years the academic job market in Operations ran on paywalled forums,
+              forwarded emails, and word of mouth. Even candidates who paid for access ended up
+              building their own spreadsheets to track where to apply, and deadlines and required
+              materials were easy to miss. Search committees, meanwhile, saw only the candidates
+              who applied to them, and departments not hiring in a given year had no practical
+              way to follow the work coming out of new PhDs. Operations Academia was built in
+              2014 to close that gap, following the example of the job market platforms already
+              established in Economics and Marketing.</p>
+              <p>The site brings postings, candidate profiles, and records from past markets
+              into one public archive, updated each season and open to everyone. It has since
+              been used by more than 200 universities worldwide, and its placement data has
+              become a shared reference point for departments planning searches and for
+              candidates judging where they stand. It is supported by the
+              <a href="https://msomsociety.org/" target="_blank" rel="noopener">MSOM Society of
+              INFORMS</a> and currently sponsored by the
+              <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/" target="_blank" rel="noopener">CUHK
+              Department of Decisions, Operations and Technology</a>.</p>
+              <p><em>Konstantinos I. Stouras is Assistant Professor of Operations Management at
+              UCD, Michael Smurfit Graduate School of Business and holds a PhD from INSEAD. His research
+              covers innovation, contest design, and the organizational effects of AI. He
+              founded Operations Academia in 2014 and continues to run it in his free time.
+              More at <a href="https://www.stouras.com/" target="_blank" rel="noopener">stouras.com</a>.</em></p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="v3-h3 v3-reveal" style="margin:64px 0 18px">What&rsquo;s new</h3>
+          <ul class="v3-news v3-reveal" id="v3-news">
+            <li><p class="v3-mut">Loading the update log&hellip;</p></li>
+          </ul>
+          <p class="v3-reveal" style="margin:4px 0 0"><a href="whats-new.html">See the full update log &rarr;</a></p>
+
+          <details class="v3-ack v3-reveal" style="margin-top:36px">
+            <summary>Acknowledgements</summary>
+            <div class="v3-ack-body">
+              <p>We are very appreciative of the pioneering works by the
+              <a href="https://econjobmarket.org/about.php" target="_blank" rel="noopener">Econ</a> and
+              <a href="https://sites.google.com/site/marketingphdjobs/2014" target="_blank" rel="noopener">Marketing</a>
+              research communities, which provided useful benchmarks for our initial efforts back
+              in 2014. Furthermore, we gratefully acknowledge the helpful comments and
+              suggestions of Gad Allon, Dimitrios Andritsos, Atalay Atasu, Ioannis Bellos, Maria
+              Besiou, Kostas Bimpikis, Raul O. Chao, Wei Chen, Maxime Cohen, Shiliang Cui,
+              Jean-R&eacute;mi Delteil, Adam Elmachtoub, Yonatan Gur, Ersin Korpeoglu, Nathan
+              Kunz, Simone Marinesi, Hillary Mellema, Ido Naftaly, Serguei Netessine, Alex
+              Nikulkov, Roland L&uuml;thy, Nektarios Oraiopoulos, Ioannis Panageas, Jo&atilde;o
+              Luiz Pianovski Vieira, Christilene Du Plessis, Jochen Schlapp, Ioannis Siskos,
+              Jeeva Somasundaram, L. Beril Toktay, Romain Vialard and Renyu (Philip) Zhang on
+              earlier versions of this website and our Job Market Survey.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- =============================================================== contact -->
+      <section class="v3-section v3-band" id="contact">
+        <div class="v3-container">
+          <div class="v3-contact-card v3-reveal">
+            <span class="v3-kicker">Contact</span>
+            <h3 class="v3-h3">Questions? We are one e-mail away.</h3>
+            <p>This platform is designed and maintained by
+            <a href="https://www.stouras.com/" target="_blank" rel="noopener">Kostas Stouras</a> in his
+            free time. Check the <a href="#faq">FAQ</a> first &mdash; your question may already
+            be answered there.</p>
+            <div class="v3-cta-row" style="justify-content:center">
+              <a class="v3-btn primary" href="mailto:konstantinos.stouras@ucd.ie">konstantinos.stouras@ucd.ie</a>
+              <a class="v3-btn ghost" href="feedback.html">Send feedback</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================================================================ footer -->
+    <footer class="v3-footer">
+      <div class="v3-container">
+        <div class="v3-footer-grid">
+          <div class="v3-footer-brand">
+            <!-- the SAME lockup as the header (owner, 2026-08-17), so top and
+                 bottom carry one brand and both follow the theme -->
+            <a class="v3-logo v3-logo-foot" href="#top" aria-label="Operations Academia — back to the top">
+              <span class="v3-mark" aria-hidden="true">OA</span>
+              <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
+            </a>
+            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            world</a>.<br>
+            Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
+            Sponsored by the
+            <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/" target="_blank" rel="noopener">CUHK DOT Department</a>
+            and the <a href="https://connect.informs.org/msom/home" target="_blank" rel="noopener">INFORMS MSOM Society</a>.</p>
+          </div>
+          <div>
+            <h4>Discover</h4>
+            <ul>
+              <li><a href="#jobs">Job postings</a></li>
+              <li><a href="#candidates">Candidates</a></li>
+              <li><a href="#placements">Placements</a></li>
+              <li><a href="#survey">Survey</a></li>
+              <li><a href="#resources">Resources</a></li>
+              <li><a href="analytics.html">Analytics</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Participate</h4>
+            <ul>
+              <li><a href="post-a-job.html">Post a job</a></li>
+              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
+              <li><a href="post-a-placement.html">Report a placement</a></li>
+              <li><a href="alerts.html">E-mail alerts</a></li>
+              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="v3-footer-legal">
+          <span>&copy; 2014-<span class="js-current-year"></span>
+            <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
+          <span>
+            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy.html">Privacy</a> &nbsp;&middot;&nbsp;
+            <a href="/v2/">Previous design</a> &nbsp;&middot;&nbsp;
+            <a href="/v1/">2014-2026 archive</a>
+          </span>
         </div>
       </div>
-    </div>
-    <!-- Footer Wrapper -->
+    </footer>
 
-      <!-- Footer: shared include -->
-<div data-include="partials/footer.html"></div>
-<script src="/assets/js/include-partials.js"></script>
-	
-    <!-- Scripts -->
-    <script src="/assets/js/ypo-parakolouthisi.js">
-    </script> 
-    <script src="assets/oa-nav.js">
-    </script> 
-    <script src="/assets/js/jquery.min.js">
-    </script> 
-    <script src="/assets/js/jquery.dropotron.min.js">
-    </script> 
-    <script src="/assets/js/skel.min.js">
-    </script> 
-    <script src="/assets/js/util.js">
-    </script> <!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
-     
-    <script src="/assets/js/main.js">
-    </script>
-    <!-- v2: the account chip in the header. Inert until a Firebase project
-         is configured, exactly as on the rebuilt pages. -->
+    <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
+
+    <!-- ================================================================ scripts -->
+    <script src="assets/v3.js"></script>
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-usage.js"></script>
+    <script src="assets/oa-list.js"></script>
+    <script src="assets/oa-jobedit.js"></script>
+    <script src="assets/oa-candidateedit.js"></script>
+    <script src="assets/oa-placementedit.js"></script>
+    <script>
+    (function () {
+      'use strict';
+      var U = window.OAList.safeUrl;
+
+      /* The market year, derived — never typed. Keep in step with
+         _scraper/jobs-model.mjs (marketYear/marketLabel): a market year runs
+         1 July of the previous year to 30 June of its own and is numbered by
+         the year it ends, so the roll is 1 JULY, getUTCMonth() (0-based) 6. */
+      function marketYear() {
+        var d = new Date();
+        return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+      }
+      function marketLabel() { var y = marketYear(); return (y - 1) + '-' + y; }
+      function inCurrentMarket(row) {
+        var start = (marketYear() - 1) + '-07-01';
+        /* An OPEN deadline keeps a posting on the page whatever season it was
+           filed in (owner, 2026-08-17) — applications close on the day named,
+           so today still counts. An empty applyByDate is the ABSENCE of a
+           deadline ("Until filled"), not an open one, so the roll clears it. */
+        var deadline = String(row.applyByDate || '');
+        return (!!deadline && deadline >= new Date().toISOString().slice(0, 10)) ||
+          String(row.posted || '') >= start || Number(row.year) >= marketYear();
+      }
+
+      document.getElementById('oa-jobs-heading').textContent =
+        'Job postings (' + marketLabel() + ')';
+      document.getElementById('oa-cands-heading').textContent =
+        'Job market candidates (' + marketLabel() + ')';
+
+      /* A posting's stored links may name this site by its full URL; re-point
+         them at the ROOT copy of the page (the v3 preview does not duplicate
+         the map or archive pages). Same guard as jobs.html: only a slug that
+         exists is rewritten. */
+      var OWN_ORIGIN =
+        /^https?:\/\/(?:www\.)?operationsacademia\.org(\/[^?#]*)?((?:[?#].*)?)$/i;
+      var OWN_PAGES = ['universities', 'candidates', 'placements', 'previous-markets',
+        'recent-faculty', 'resources-for-candidates', 'faqs', 'contact', 'jobs'];
+      function ownSite(url) {
+        var m = OWN_ORIGIN.exec(String(url || '').trim());
+        if (!m) return url;
+        var slug = (m[1] || '/').replace(/^\/+/, '').replace(/\.html$/i, '');
+        if (!slug || slug === 'index') return '/' + (m[2] || '');
+        if (OWN_PAGES.indexOf(slug) === -1) return url;
+        return '/' + slug + '.html' + (m[2] || '');
+      }
+
+      function link(url, label, rewrite) {
+        var u = U(rewrite ? ownSite(url) : url);
+        if (!u) return null;
+        var a = document.createElement('a');
+        a.href = u;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = label || 'link';
+        return a.outerHTML;
+      }
+
+      function mailto(email) {
+        email = String(email || '').trim();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return null;
+        var a = document.createElement('a');
+        a.href = 'mailto:' + encodeURIComponent(email);
+        a.textContent = email;
+        return a.outerHTML;
+      }
+
+      /* ------------------------------------------- the jobs launcher card
+         One read of the live file feeds both: the launcher's selects (which
+         always SHOW a value — "All types" until a narrower one is picked),
+         and the count on the explore button. */
+      fetch('/data/jobs.json', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data) return;
+          var rows = (Array.isArray(data) ? data : data.rows || []).filter(inCurrentMarket);
+          if (!rows.length) return;
+          var all = document.getElementById('v3-jobs-all');
+          if (all) all.textContent = 'Explore all ' + rows.length + ' postings →';
+
+          // the values the full page's filters offer, so a pick here lands on
+          // exactly the same facet there
+          function fill(id, values) {
+            var sel = document.getElementById(id);
+            if (!sel) return;
+            values.forEach(function (v) {
+              var o = document.createElement('option');
+              o.value = v; o.textContent = v;
+              sel.appendChild(o);
+            });
+          }
+          function counts(read) {
+            var n = Object.create(null);
+            rows.forEach(function (r) {
+              (read(r) || []).forEach(function (v) {
+                v = String(v).trim();
+                if (v) n[v] = (n[v] || 0) + 1;
+              });
+            });
+            return n;
+          }
+          var types = counts(function (r) { return [r.type]; });
+          var levels = counts(function (r) { return r.levels; });
+          var countries = counts(function (r) { return [r.country]; });
+          fill('jl-type', Object.keys(types).sort());
+          fill('jl-level', Object.keys(levels).sort());
+          fill('jl-country', Object.keys(countries).sort(function (a, b) {
+            return countries[b] - countries[a] || a.localeCompare(b);
+          }));
+        }).catch(function () {});
+
+      /* the launcher hands its choice to the full page's own filters */
+      (function launcher() {
+        var form = document.getElementById('v3-jobs-launcher');
+        if (!form) return;
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var p = new URLSearchParams();
+          var q = document.getElementById('jl-q').value.trim();
+          if (q) p.set('institution', q);
+          ['type', 'level', 'country'].forEach(function (k) {
+            var v = document.getElementById('jl-' + k).value;
+            if (v) p.append(k, v);
+          });
+          var qs = p.toString();
+          location.href = 'jobs.html' + (qs ? '?' + qs : '');
+        });
+      })();
+      /* The placements DATASET restarted empty at the 2026 cutover — the
+         ~173 historical placements live in the /v1 archive's records — so the
+         static "170+" stands until the live file grows past it. */
+      fetch('/data/placements.json', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data) return;
+          var rows = Array.isArray(data) ? data : data.rows || [];
+          var el = document.querySelector('[data-stat="placements"]');
+          if (el && rows.length > 170) V3.statTo(el, rows.length.toLocaleString('en-US'));
+        }).catch(function () {});
+
+      /* --------------------------------- candidates stat + reveal note
+         Same rule as placements: the candidates dataset restarted empty at
+         the cutover (and is held back until the reveal date anyway), so the
+         static figure stands until the live file grows past it.
+         That figure is 700+, the owner's own count over the site's whole
+         2014-2026 history (2026-08-17). It is deliberately NOT the 104 in
+         _AUDIT.md §A.2: that is the row count of ONE Google Sheet, which
+         only begins on 2018-08-25 and so misses the first four markets'
+         candidates entirely. The threshold below must stay equal to the
+         number printed in the markup — it is what stops a part-filled live
+         file from REPLACING the historical total with a smaller current
+         one. */
+      fetch('/data/candidates-meta.json', { credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (meta) {
+          var listed = Number(meta.count) || 0;
+          var stat = document.querySelector('[data-stat="candidates"]');
+          if (stat && listed > 700) V3.statTo(stat, listed.toLocaleString('en-US'));
+
+          var at = String(meta.revealAt || '');
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
+          var today = new Date().toISOString().slice(0, 10);
+          if (today >= at) return;                    // revealed — the list speaks
+          var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+            'August', 'September', 'October', 'November', 'December'];
+          document.getElementById('oa-reveal-date').textContent =
+            MONTHS[Number(at.slice(5, 7)) - 1] + ' ' + Number(at.slice(8, 10)) +
+            ', ' + at.slice(0, 4);
+          var n = Number(meta.heldCount) || 0;
+          document.getElementById('oa-reveal-count').textContent = n
+            ? n + (n === 1 ? ' profile has' : ' profiles have') + ' already been filed. '
+            : '';
+          document.getElementById('oa-reveal-note').hidden = false;
+        })
+        .catch(function () { /* no meta — nothing to announce */ });
+
+      /* ---------------------------------------------------- what's new
+         changelog.json is the source of truth; Firestore newsOverrides/{id}
+         lets the ADMIN curate the list in place (owner, 2026-08-17) — an
+         override hides an entry or rewords its title/summary, so only the
+         most important updates show. Signed in as the admin, each item gains
+         ✎ / ✕ controls, like a job posting's own edit tools. The list
+         renders instantly from the JSON and re-renders when the overrides
+         (and admin status) arrive; missing Firestore just means no curation. */
+      (function () {
+        var newsLog = null, overrides = {}, newsAdmin = false;
+        var ADMIN_EMAIL = 'kstouras@gmail.com';   // mirrors _firestore.rules isAdmin()
+
+        function renderNews() {
+          var list = document.getElementById('v3-news');
+          if (!list || !newsLog) return;
+          var updates = (newsLog.updates || []).filter(function (u) {
+            var o = overrides[u.id];
+            return !(o && o.hidden);
+          }).slice(0, 5);
+          list.innerHTML = '';
+          if (!updates.length) {
+            list.innerHTML = '<li><p class="v3-mut">Nothing to announce right now.</p></li>';
+            return;
+          }
+          updates.forEach(function (u) {
+            var o = overrides[u.id] || {};
+            var li = document.createElement('li');
+            var t = document.createElement('time');
+            t.textContent = u.date || '';
+            var s = document.createElement('strong');
+            s.textContent = o.title || u.title || '';
+            var p = document.createElement('p');
+            p.textContent = o.summary || u.summary || '';
+            li.appendChild(t); li.appendChild(s); li.appendChild(p);
+            if (newsAdmin) {
+              var row = document.createElement('p');
+              row.className = 'v3-news-admin';
+              var edit = document.createElement('button');
+              edit.type = 'button'; edit.textContent = '✎ Edit';
+              edit.addEventListener('click', function () { editNews(u, o); });
+              var kill = document.createElement('button');
+              kill.type = 'button'; kill.textContent = '✕ Remove';
+              kill.addEventListener('click', function () {
+                if (!confirm('Remove "' + (o.title || u.title) + '" from What’s new?\n' +
+                  'changelog.json keeps the entry; this only hides it on the site.')) return;
+                saveOverride(u.id, { hidden: true });
+              });
+              row.appendChild(edit); row.appendChild(kill);
+              li.appendChild(row);
+            }
+            list.appendChild(li);
+          });
+        }
+
+        function editNews(u, o) {
+          var title = prompt('Title shown on the site:', o.title || u.title || '');
+          if (title === null) return;
+          var summary = prompt('Summary shown on the site:', o.summary || u.summary || '');
+          if (summary === null) return;
+          saveOverride(u.id, {
+            title: title.trim().slice(0, 300),
+            summary: summary.trim().slice(0, 2000)
+          });
+        }
+
+        function saveOverride(id, patch) {
+          patch.t = Date.now();
+          OAFB.ready().then(function (fb) {
+            return fb.firestore().collection('newsOverrides').doc(id)
+              .set(patch, { merge: true });
+          }).then(function () {
+            overrides[id] = Object.assign({}, overrides[id] || {}, patch);
+            renderNews();
+          }).catch(function () {
+            alert('Could not save — are the updated Firestore rules deployed?');
+          });
+        }
+
+        fetch('/changelog.json', { credentials: 'same-origin' })
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (log) {
+            if (!(log.updates || []).length) throw new Error('empty');
+            newsLog = log;
+            renderNews();
+          })
+          .catch(function () {
+            var list = document.getElementById('v3-news');
+            if (list) list.innerHTML = '<li><p class="v3-mut">The update log could not ' +
+              'be loaded just now.</p></li>';
+          });
+
+        if (window.OAFB && OAFB.enabled) {
+          OAFB.ready().then(function (fb) {
+            fb.firestore().collection('newsOverrides').get().then(function (snap) {
+              snap.forEach(function (d) { overrides[d.id] = d.data(); });
+              renderNews();
+            }).catch(function () { /* rules not deployed — no curation yet */ });
+            fb.auth().onAuthStateChanged(function (u) {
+              var was = newsAdmin;
+              newsAdmin = !!(u && u.email === ADMIN_EMAIL && u.emailVerified);
+              if (newsAdmin !== was) renderNews();
+            });
+          }).catch(function () { /* SDK unreachable */ });
+        }
+      })();
+
+      /* ============================================ the three list engines
+         Mounted LAZILY — each as its section approaches the viewport — so
+         the first paint of the one-pager stays light. Each engine namespaces
+         its URL keys (urlPrefix), so three of them share one address bar. */
+
+      /* The TEN most recent postings — a teaser, not the list. The full,
+         filterable list lives on jobs.html (owner, 2026-08-16). Rendered
+         through the same engine so the cards look and behave identically
+         (expand, edit/take-down for the owner); the engine's filter bar and
+         result bar are simply removed — with no filters and one page they
+         hold nothing. */
+      V3.lazy('#oa-jobs-recent', function () {
+        var jobs = OAList.mount({
+          mount: '#oa-jobs-recent',
+          data: '/data/jobs.json',
+          perPage: 10,
+          urlPrefix: 'r_',          // never collides with candidates/placements
+          strings: {
+            loading: 'Loading the latest postings…',
+            emptyData: 'No job postings are listed at the moment.',
+            emptyDataHint: 'Please check back soon — new postings are added as they arrive.',
+            loadError: 'The job postings could not be loaded.',
+            loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
+            unit: 'postings'
+          },
+          prepare: function (rows) {
+            return rows.filter(inCurrentMarket).sort(function (a, b) {
+              return (b.posted || '').localeCompare(a.posted || '');
+            }).slice(0, 10);
+          },
+          sort: function (a, b) { return (b.posted || '').localeCompare(a.posted || ''); },
+          filters: [],
+          onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+          card: {
+            title:    function (r) { return r.institution; },
+            subtitle: function (r) { return r.department; },
+            badges:   function (r) {
+              var out = [];
+              if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
+              return out;
+            },
+            rows: function (r) {
+              return [
+                { label: 'Entry level', value: (r.levels || []).join(', ') },
+                { label: 'Apply by',    value: r.applyBy },
+                { label: 'Comments on Job Posting', value: r.comments },
+                { label: 'File link',
+                  html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad', true)
+                    : (r.adPending ? '<em>soon to be available</em>' : null) },
+                { label: 'Posted online at', html: link(r.postedAtUrl, r.postedAtLabel || 'link', true) },
+                { label: 'Further info', html: link(r.furtherInfoUrl, 'link', true) }
+              ];
+            }
+          }
+        });
+        if (window.OAJobEdit) OAJobEdit.attach(jobs);
+        // no filters, one fixed page: the bar and the result bar hold nothing
+        var host = document.getElementById('oa-jobs-recent');
+        var bar = host.querySelector('.oa-filters');
+        if (bar) bar.remove();
+        var res = host.querySelector('.oa-resultbar');
+        if (res) res.remove();
+      });
+
+      V3.lazy('#oa-candidates', function () {
+        var cands = OAList.mount({
+          mount: '#oa-candidates',
+          data: '/data/candidates.json',
+          perPage: 10,
+          urlPrefix: 'c_',
+          strings: {
+            loading: 'Loading candidate profiles…',
+            emptyData: 'No candidate profiles yet.',
+            emptyDataHint: 'The new market’s profiles appear here as candidates post them.',
+            emptyFiltered: 'No candidate profiles match these filters.',
+            emptyFilteredHint: 'Try removing a filter, or clear them all to see every profile.',
+            loadError: 'The candidate profiles could not be loaded.',
+            loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
+            unit: 'profiles'
+          },
+          prepare: function (rows) { return rows.filter(inCurrentMarket); },
+          sort: function (a, b) {
+            var d = (b.posted || '').localeCompare(a.posted || '');
+            if (d) return d;
+            return (a.name || '').localeCompare(b.name || '');
+          },
+          filters: [
+            { key: 'name',        label: 'Name',             type: 'text',
+              fields: ['name'], placeholder: 'Search by name…' },
+            { key: 'affiliation', label: 'Affiliation',      type: 'text',
+              fields: ['affiliation'], placeholder: 'Search by affiliation…',
+              legacyParam: 'filterE' },
+            { key: 'position',    label: 'Current position', field: 'position',
+              placeholder: 'All positions' },
+            { key: 'area',        label: 'Research area',    field: 'researchAreas',
+              placeholder: 'All areas' },
+            { key: 'day',         label: 'INFORMS day',      field: 'informsDays',
+              placeholder: 'All days' },
+            { key: 'posted',      label: 'Date posted',      derive: 'datePosted',
+              placeholder: 'Any date' }
+          ],
+          onCard: function (li, r) { window.OACandidateEdit && OACandidateEdit.onCard(li, r); },
+          card: {
+            title:    function (r) { return r.name; },
+            subtitle: function (r) {
+              return [r.affiliation, r.position].filter(Boolean).join(' — ');
+            },
+            rows: function (r) {
+              return [
+                { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') },
+                { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
+                { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
+                { label: 'Research summary',      html: link(r.rsUrl, 'link') },
+                { label: 'Web page',              html: link(r.webUrl, 'link') },
+                { label: 'Contact',               html: mailto(r.email) }
+              ];
+            }
+          }
+        });
+        if (window.OACandidateEdit) OACandidateEdit.attach(cands);
+      });
+
+      V3.lazy('#oa-placements', function () {
+        function joining(r) {
+          var parts = [];
+          if (r.joiningPosition) parts.push(r.joiningPosition);
+          if (r.joiningInstitution) parts.push(r.joiningInstitution);
+          return parts.join(', ');
+        }
+        var placements = OAList.mount({
+          mount: '#oa-placements',
+          data: '/data/placements.json',
+          perPage: 10,
+          urlPrefix: 'p_',
+          strings: {
+            loading: 'Loading placements…',
+            emptyData: 'No confirmed placements reported for this market yet.',
+            emptyDataHint: 'Please check back soon — placements appear here as candidates report them.',
+            emptyFiltered: 'No placements match these filters.',
+            emptyFilteredHint: 'Try removing a filter, or clear them all to see every placement.',
+            loadError: 'The placements could not be loaded.',
+            loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
+            unit: 'placements'
+          },
+          sort: function (a, b) {
+            var y = (Number(b.year) || 0) - (Number(a.year) || 0);
+            if (y) return y;
+            var d = String(b.addedAt || '').localeCompare(String(a.addedAt || ''));
+            if (d) return d;
+            return String(a.last || '').localeCompare(String(b.last || '')) ||
+                   String(a.first || '').localeCompare(String(b.first || ''));
+          },
+          filters: [
+            { key: 'name',    label: 'Candidate',           type: 'text',
+              fields: ['name', 'first', 'last'], placeholder: 'Search by candidate…' },
+            { key: 'year',    label: 'Job market year',     field: 'year',
+              placeholder: 'All years' },
+            { key: 'phd',     label: 'PhD institution',     type: 'text',
+              fields: ['phdInstitution'], placeholder: 'Search by PhD institution…' },
+            { key: 'joining', label: 'Joining institution', type: 'text',
+              fields: ['joiningInstitution'], placeholder: 'Search by joining institution…' }
+          ],
+          onCard: function (li, r) { window.OAPlacementEdit && OAPlacementEdit.onCard(li, r); },
+          card: {
+            title:    function (r) {
+              return r.name || ((r.first || '') + ' ' + (r.last || '')).replace(/^\s+|\s+$/g, '');
+            },
+            subtitle: function (r) { return joining(r); },
+            badges:   function (r) { return []; },
+            rows: function (r) {
+              return [
+                { label: 'PhD institution', value: r.phdInstitution },
+                { label: 'Undergraduate institution', value: r.undergradInstitution },
+                { label: 'Website', html: link(r.webUrl, 'link') },
+                { label: 'Job market year', value: r.year ? String(r.year) : '' }
+              ];
+            }
+          }
+        });
+        if (window.OAPlacementEdit) OAPlacementEdit.attach(placements);
+      });
+    })();
+    </script>
   </body>
 </html>
