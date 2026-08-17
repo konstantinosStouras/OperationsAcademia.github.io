@@ -1385,9 +1385,16 @@ for (const pageName of MOBILE_PAGES) {
   // every root page both are there at the first look, with no scrolling.
   await m.waitForFunction(() => {
     const listed = document.querySelector('.oa-card, .oa-empty');
-    const bar = [...document.querySelectorAll('.oa-filters')]
-      .find((el) => el.offsetParent !== null);
+    const bars = [...document.querySelectorAll('.oa-filters')];
+    const bar = bars.find((el) => el.offsetParent !== null);
     if (listed && bar) return true;
+    // v3 hides a bar whose DATASET is empty (.oa-data-empty — nothing to
+    // search yet). Once the walk has reached the bottom, "every bar hidden
+    // that way" is the page's correct final state, not a missing bar.
+    const atBottom = window.scrollY + window.innerHeight >=
+      document.documentElement.scrollHeight - 4;
+    if (listed && atBottom && bars.length &&
+        bars.every((el) => el.closest('.oa-data-empty'))) return true;
     window.scrollBy(0, window.innerHeight);
     return false;
   }, null, { timeout: 30000, polling: 400 });
@@ -1399,6 +1406,8 @@ for (const pageName of MOBILE_PAGES) {
     // (display:none-in-DOM bars measure as 0×0 and would fail the gutter)
     const bar = [...document.querySelectorAll('.oa-filters')]
       .find((el) => el.offsetParent !== null);
+    // every dataset empty → every bar deliberately hidden → nothing to measure
+    if (!bar) return { barless: true, overflowX: doc.scrollWidth > doc.clientWidth };
     const filters = bar.getBoundingClientRect();
     const search = bar.querySelector('input[type="search"]') ||
       document.querySelector('.oa-filter input[type="search"]');
@@ -1428,6 +1437,7 @@ for (const pageName of MOBILE_PAGES) {
 
   const at = `mobile ${pageName}:`;
   ok(!mob.overflowX, `${at} the page never scrolls sideways`);
+  if (mob.barless) { await m.close(); continue; }
   ok(mob.gutterLeft >= 8, `${at} the filters keep a side gutter (got ${mob.gutterLeft})`);
   ok(mob.cardLeft === null || (mob.cardLeft >= 8 && mob.cardRight >= 8),
     `${at} cards keep the gutter too (got ${mob.cardLeft}/${mob.cardRight})`);

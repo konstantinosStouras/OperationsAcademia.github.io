@@ -43,7 +43,12 @@ page carries `noindex,nofollow` until the owner promotes it.
 - `assets/oa-*.js|css` are VENDORED copies of `/assets/oa-*` with only these
   deliberate differences (keep the rest in sync with root):
   - `oa-list.js`: adds `urlPrefix` (several engines share one page's query
-    string) and `strings` (per-dataset wording) options;
+    string) and `strings` (per-dataset wording) options, and toggles
+    `.oa-data-empty` on the mount when the DATASET is empty — v3.css then
+    hides the filter bar, count and pager until data exists (owner,
+    2026-08-17: nothing to search yet), while an over-filtered search keeps
+    them; `_scraper/page-test.mjs`'s mobile gate accepts an all-bars-hidden
+    page only in that state;
   - `oa-accounts.js`: the redesigned presentation (see its header comment);
   - `oa-jobform.js` / `oa-placementform.js` / `oa-alerts.js`: fetch
     `/data/…` and `/changelog.json` ABSOLUTE, since the pages sit in /v3/;
