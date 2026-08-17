@@ -46,8 +46,10 @@
   --ink: #22272e;
   --ink-2: #454c56;
   --mut: #6e7681;
-  --line: #dde0e4;
-  --line-soft: #e8eaec;
+  /* deepened a notch (owner, 2026-08-17: borders read too faint,
+     especially for older eyes) — every box inherits these */
+  --line: #ccd1d7;
+  --line-soft: #dee1e5;
   --brand: #3a424d;
   --brand-2: #262d36;
   --brand-soft: #e9ebee;
@@ -72,8 +74,8 @@
   --ink: #eef0f2;
   --ink-2: #c5cad1;
   --mut: #8d949e;
-  --line: #2a2f36;
-  --line-soft: #1e2227;
+  --line: #363d47;
+  --line-soft: #282d34;
   --brand: #c6ccd4;
   --brand-2: #dde2e8;
   --brand-soft: rgba(198, 204, 212, 0.13);
@@ -731,7 +733,7 @@ body.v3 .oa-modal-card textarea, body.v3 .oa-modal-card button {
    bar always ends flush, at any width and any number of filters. */
 body.v3 .oa-filters {
   background: var(--bg-2);
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   display: grid;
@@ -760,6 +762,34 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
 }
+/* the About section: circular portrait on the left, the untouched prose on
+   the right, a discrete caption under the photo (owner, 2026-08-17 — the
+   Consulting Edge "methodology born in the field" arrangement) */
+.v3-about-grid {
+  display: grid; grid-template-columns: 250px 1fr; gap: 44px;
+  align-items: start; margin-top: 6px;
+}
+.v3-about-portrait { margin: 0; text-align: center; }
+.v3-about-portrait img {
+  width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+  display: block; margin: 0 auto;
+}
+.v3-about-portrait figcaption { margin-top: 14px; font-size: 13.5px; line-height: 1.5; }
+.v3-about-portrait figcaption strong { display: block; color: var(--ink); font-size: 14.5px; }
+.v3-about-portrait figcaption span { display: block; color: var(--mut); margin-top: 3px; }
+.v3-about-portrait figcaption a { display: inline-block; color: var(--brand); margin-top: 5px; }
+@media (max-width: 800px) {
+  .v3-about-grid { grid-template-columns: 1fr; gap: 26px; }
+  .v3-about-portrait img { width: 170px; height: 170px; }
+}
+
+/* nothing to search yet (owner, 2026-08-17): while a dataset is EMPTY the
+   bar, count and pager stay away — only the empty-state card speaks; the
+   engine flips .oa-data-empty per render, so data arriving brings them back */
+body.v3 .oa-data-empty .oa-filters,
+body.v3 .oa-data-empty .oa-resultbar { display: none; }
+
 body.v3 .oa-filter > label { color: var(--mut); }
 body.v3 .oa-filters input[type='search'],
 body.v3 .oa-pick-btn,
@@ -771,6 +801,14 @@ body.v3 .oa-pick-search {
 }
 body.v3 .oa-filters input[type='search']:focus,
 body.v3 .oa-pick-search:focus { border-color: var(--brand); }
+/* hover makes the control's edge unmistakable before it is clicked */
+@media (hover: hover) and (pointer: fine) {
+  body.v3 .oa-filters input[type='search']:hover,
+  body.v3 .oa-pick-btn:hover,
+  body.v3 .oa-pick-search:hover,
+  .v3-launcher input[type='search']:hover,
+  .v3-launcher select:hover { border-color: var(--mut); }
+}
 body.v3 .oa-pick-btn.is-set { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
 body.v3 .oa-pick-menu {
   background: var(--bg-2);
@@ -798,13 +836,15 @@ body.v3 .oa-pager button:hover:not([disabled]) { border-color: var(--brand); col
 
 body.v3 .oa-card {
   background: var(--bg-2);
-  border: 1px solid var(--line-soft);
+  /* full --line ex-ante, --mut on hover (owner, 2026-08-17: the lines around
+     listed jobs were too discrete to see) */
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  body.v3 .oa-card:hover { border-color: var(--line); box-shadow: var(--shadow-lg); }
+  body.v3 .oa-card:hover { border-color: var(--mut); box-shadow: var(--shadow-lg); }
 }
 body.v3 .oa-card-head { background: none; }
 body.v3 .oa-card-title { color: var(--ink); font-weight: 600; }
@@ -951,6 +991,7 @@ body.v3 .oa-modal-x:hover { color: var(--ink); background: var(--bg-3); }
 body.v3 .oa-modal-card form label { display: block; font-weight: 600; color: var(--ink); font-size: 14px; margin: 0 0 14px; }
 body.v3 .oa-modal-card form input[type='email'],
 body.v3 .oa-modal-card form input[type='password'],
+body.v3 .oa-modal-card form input[type='url'],
 body.v3 .oa-modal-card form input[type='text'] {
   display: block; width: 100%;
   font-size: 16px;
@@ -976,13 +1017,27 @@ body.v3 .oa-auth-actions .button { width: 100%; font-size: 16px; padding: 15px 2
 }
 .oa-auth-back button:hover, .oa-auth-back a:hover { color: var(--ink); }
 
-.oa-terms-row { display: flex; gap: 10px; align-items: flex-start; margin: 2px 0 16px; }
+/* body.v3 .oa-modal-card form label sets display:block, which flattened this
+   flex row and glued the checkbox to its text (owner screenshot, 2026-08-17)
+   — the row needs the same specificity to keep its layout */
+.oa-terms-row,
+body.v3 .oa-modal-card form label.oa-terms-row {
+  display: flex; gap: 11px; align-items: flex-start; margin: 14px 0 18px;
+}
 .oa-terms-row input[type='checkbox'] {
   -webkit-appearance: auto; appearance: auto;
   width: 18px; height: 18px; margin: 3px 0 0; flex: none;
   accent-color: var(--brand);
 }
-.oa-terms-row span { font-size: 14px; color: var(--ink-2); font-weight: 400; }
+.oa-terms-row span { font-size: 14px; color: var(--ink-2); font-weight: 400; line-height: 1.55; }
+
+/* the fine print under the Google/ORCID buttons — plain quiet text on the
+   card, never the gray dropdown-row chrome `oa-opt` carries in oa-list.css */
+.oa-auth-fine {
+  text-align: center; margin: 10px 0 0; padding: 0; background: none;
+  font-size: 12.5px; color: var(--mut); line-height: 1.55;
+}
+.oa-auth-fine a { color: var(--ink-2); }
 
 body.v3 .oa-auth-providers { display: flex; flex-direction: column; gap: 10px; margin: 0 0 4px; }
 body.v3 .oa-auth-provider {
@@ -1164,7 +1219,7 @@ body.v3 .oa-merge-from, body.v3 .oa-merge-into { background: var(--bg-3); border
 
 .v3-launcher {
   background: var(--bg-2);
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 24px 26px;
@@ -1307,7 +1362,7 @@ body.v3 .oa-filter > label {
 
 .v3-panel {
   background: var(--bg-2);
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -1340,12 +1395,13 @@ body.v3 .v3-panel .oa-cards { margin: 0; }
 body.v3 .v3-panel .oa-card {
   margin: 0;
   border: 0; border-radius: 0; box-shadow: none;
-  border-bottom: 1px solid var(--line-soft);
+  /* full --line so the seam between postings is plainly visible */
+  border-bottom: 1px solid var(--line);
 }
 body.v3 .v3-panel .oa-card:last-child { border-bottom: 0; }
 @media (hover: hover) and (pointer: fine) {
   body.v3 .v3-panel .oa-card:hover {
-    box-shadow: none; border-color: var(--line-soft); background: var(--bg-3);
+    box-shadow: none; border-color: var(--line); background: var(--bg-3);
   }
 }
 
