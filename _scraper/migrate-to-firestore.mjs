@@ -36,9 +36,30 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { submissionFromRow, rowFromSubmission, publicRow } from './jobs-model.mjs';
+import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
+
+/**
+ * Which published rows this migration is about.
+ *
+ * NOT the ones that come from the job market tracking SHEET. Those are
+ * rebuilt from the workbook on every run of sync-jobmarket-sheet.mjs, which
+ * is what makes an edit in the sheet — and a row DELETED from it — reach the
+ * site at all. Giving one a document would break both directions: the
+ * document would win over the sheet at the next build (the very trap that
+ * retired the old form-sheet sync), and a posting removed from the sheet
+ * could never leave the site, because its document would keep republishing
+ * it.
+ *
+ * Exported because selftest.mjs asserts the round trip over exactly this set:
+ * the guard and the migration must agree about what is being migrated, or the
+ * guard fails on rows nothing would ever migrate.
+ */
+export function migratable(row) {
+  return !!row && row.source !== SHEET_SOURCE;
+}
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -105,7 +126,12 @@ async function firestore() {
 
 async function main() {
   if (!existsSync(JOBS)) { log('no data/jobs.json — nothing to migrate.'); return; }
-  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  const all = JSON.parse(await readFile(JOBS, 'utf8'));
+  const rows = all.filter(migratable);
+  if (rows.length !== all.length) {
+    log(`${all.length - rows.length} posting(s) come from the job market tracking sheet ` +
+        'and are left alone — the sheet is where they are maintained.');
+  }
   const now = new Date();
 
   /* THE GATE. Check every row round-trips BEFORE writing anything: a migration

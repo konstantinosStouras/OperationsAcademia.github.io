@@ -48,6 +48,43 @@ tree, then rebuild every page the new design was borrowing from the old one —
 a card on the front page that opens a page in the previous design is the
 failure mode, not a missing file.
 
+## Two sources of job postings, and only one of them is the database
+
+`data/jobs.json` is built by `_scraper/build-jobs.mjs` from **both**:
+
+1. **`jobSubmissions` in Firestore** — everything posted through the site's own
+   form. The database is the source of truth for these: they are edited,
+   withdrawn and hidden there, which is why the old form-sheet sync was retired
+   (re-reading a sheet reverted people's edits — see the header of
+   `oa-jobs-sheet-sync.yml`).
+2. **The maintainer's job market TRACKING SHEET** — one Google workbook per
+   market cycle, a tab per kind of position ("2026 Jobs", "2026 NTT/PD"), read
+   daily into `data/jobmarket.json` by `_scraper/sync-jobmarket-sheet.mjs`
+   (`.github/workflows/oa-jobmarket-sheet.yml`). Setup and behaviour:
+   **`_SETUP-JOBMARKET-SHEET.md`**.
+
+The ownership is opposite, and that is the whole design. A posting from the
+tracking sheet is **maintained in the sheet**: it is rebuilt from the workbook
+on every run, an edit there reaches the site, and a row DELETED there comes off
+the site. So those rows are deliberately never copied into Firestore —
+`migratable()` in `migrate-to-firestore.mjs` skips them, because a document
+would win over the sheet at the next build and a deleted row could never leave.
+For the same reason they are excluded from the orphan carry in `build-jobs.mjs`
+(a missing `data/jobmarket.json` still removes nothing — only a file that
+exists and no longer lists a posting does).
+
+**When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
+never by hand-editing `data/`.** That file is rewritten from the workbook every
+morning, so a patched row comes back the next day, exactly as with the country
+spellings below. Columns are matched by header alias and a header it does not
+know is REPORTED in the run's log rather than guessed at; add the alias there.
+
+A sheet that stops being updated looks exactly like a quiet job market from the
+site, so it is made visible deliberately: `stalenessOf`/`shouldWarn` e-mail the
+maintainer once (then weekly) when the sheet has gained nothing for three weeks,
+cannot be read, or reads as empty. Nothing already published is ever removed by
+one of those failures.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

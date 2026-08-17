@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-16T08:44:40.901Z",
+ "generated": "2026-08-17T18:18:55.794Z",
  "universities": [
   {
    "v": "University College London",
@@ -11,10 +11,14 @@
   },
   {
    "v": "University of Virginia",
-   "n": 4
+   "n": 5
   },
   {
    "v": "National University of Singapore",
+   "n": 3
+  },
+  {
+   "v": "University of California Berkeley",
    "n": 3
   },
   {
@@ -58,7 +62,7 @@
    "n": 2
   },
   {
-   "v": "University of California, Berkeley",
+   "v": "University of Kansas",
    "n": 2
   },
   {
@@ -67,6 +71,10 @@
   },
   {
    "v": "University of Utah",
+   "n": 2
+  },
+  {
+   "v": "Utah Valley University",
    "n": 2
   },
   {
@@ -94,6 +102,10 @@
    "n": 1
   },
   {
+   "v": "Clarkson University",
+   "n": 1
+  },
+  {
    "v": "Columbia University",
    "n": 1
   },
@@ -111,6 +123,10 @@
   },
   {
    "v": "Georgetown University",
+   "n": 1
+  },
+  {
+   "v": "Georgia Southern University",
    "n": 1
   },
   {
@@ -158,6 +174,10 @@
    "n": 1
   },
   {
+   "v": "Morgan State University",
+   "n": 1
+  },
+  {
    "v": "Nanyang Technological University",
    "n": 1
   },
@@ -166,7 +186,27 @@
    "n": 1
   },
   {
+   "v": "Penn State",
+   "n": 1
+  },
+  {
+   "v": "Princeton University",
+   "n": 1
+  },
+  {
+   "v": "Rollins College",
+   "n": 1
+  },
+  {
+   "v": "Rutgers Business School–Newark and New Brunswick",
+   "n": 1
+  },
+  {
    "v": "Shanghai University of Finance and Economics",
+   "n": 1
+  },
+  {
+   "v": "St. John's University",
    "n": 1
   },
   {
@@ -206,6 +246,10 @@
    "n": 1
   },
   {
+   "v": "University of California, Davis",
+   "n": 1
+  },
+  {
    "v": "University of Cambridge",
    "n": 1
   },
@@ -214,11 +258,11 @@
    "n": 1
   },
   {
-   "v": "University of Illinois Urbana-Champaign",
+   "v": "University of Houston (Bauer Human-Centered AI Institute)",
    "n": 1
   },
   {
-   "v": "University of Kansas",
+   "v": "University of Illinois Urbana-Champaign",
    "n": 1
   },
   {
@@ -239,6 +283,10 @@
   },
   {
    "v": "University of Texas at Dallas",
+   "n": 1
+  },
+  {
+   "v": "University of Texas at San Antonio",
    "n": 1
   },
   {
@@ -450,6 +498,14 @@
  ],
  "units": [
   {
+   "v": "SCM",
+   "n": 3
+  },
+  {
+   "v": "Business Analytics",
+   "n": 2
+  },
+  {
    "v": "Data Analytics and Decision Sciences (DADS) Area",
    "n": 2
   },
@@ -491,6 +547,14 @@
   },
   {
    "v": "Analytics, Information, and Operations Management Department",
+   "n": 1
+  },
+  {
+   "v": "Artificial Intelligence (AI) and healthcare",
+   "n": 1
+  },
+  {
+   "v": "BA, Information & Operations",
    "n": 1
   },
   {
@@ -598,6 +662,10 @@
    "n": 1
   },
   {
+   "v": "Logistics and SCM",
+   "n": 1
+  },
+  {
    "v": "Loomba Department of Management, Operations Management Group",
    "n": 1
   },
@@ -626,6 +694,10 @@
    "n": 1
   },
   {
+   "v": "MS and IS",
+   "n": 1
+  },
+  {
    "v": "NRF Business of Retail Initiative",
    "n": 1
   },
@@ -634,7 +706,15 @@
    "n": 1
   },
   {
+   "v": "Operations & SCM",
+   "n": 1
+  },
+  {
    "v": "Operations & Technology group",
+   "n": 1
+  },
+  {
+   "v": "Operations and Analytics",
    "n": 1
   },
   {
@@ -643,6 +723,14 @@
   },
   {
    "v": "Operations and Information Management Department",
+   "n": 1
+  },
+  {
+   "v": "Operations and Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Operations and IT Management",
    "n": 1
   },
   {
@@ -670,6 +758,14 @@
    "n": 1
   },
   {
+   "v": "OR & Financial Engineering",
+   "n": 1
+  },
+  {
+   "v": "Strategic Management & Operations",
+   "n": 1
+  },
+  {
    "v": "Supply Chain & Information Systems",
    "n": 1
   },
@@ -687,6 +783,10 @@
   },
   {
    "v": "TBS Education, Information, Operations and Management Sciences Department",
+   "n": 1
+  },
+  {
+   "v": "Technology & OM (TOM)",
    "n": 1
   },
   {
@@ -747,6 +847,12 @@
     "Department of Decision Analytics and Operations"
    ]
   },
+  "Clarkson University": {
+   "schools": [],
+   "units": [
+    "Operations and Information Systems"
+   ]
+  },
   "Columbia University": {
    "schools": [],
    "units": [
@@ -779,6 +885,12 @@
    ],
    "units": [
     "NRF Business of Retail Initiative"
+   ]
+  },
+  "Georgia Southern University": {
+   "schools": [],
+   "units": [
+    "Logistics and SCM"
    ]
   },
   "Georgia State University": {
@@ -882,6 +994,12 @@
     "Supply Chain Management"
    ]
   },
+  "Morgan State University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
   "Nanyang Technological University": {
    "schools": [
     "Nanyang Business School"
@@ -905,11 +1023,41 @@
     "Operations Management"
    ]
   },
+  "Penn State": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Princeton University": {
+   "schools": [],
+   "units": [
+    "OR & Financial Engineering"
+   ]
+  },
+  "Rollins College": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Rutgers Business School–Newark and New Brunswick": {
+   "schools": [],
+   "units": [
+    "MS and IS"
+   ]
+  },
   "Shanghai University of Finance and Economics": {
    "schools": [
     "College of Business"
    ],
    "units": []
+  },
+  "St. John's University": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
+   ]
   },
   "TBS Education": {
    "schools": [],
@@ -1021,13 +1169,20 @@
   "University of California Berkeley": {
    "schools": [],
    "units": [
-    "Department of Industrial Engineering & Operations Research (IEOR)"
+    "Department of Industrial Engineering & Operations Research (IEOR)",
+    "Operations and IT Management"
    ]
   },
   "University of California, Berkeley": {
    "schools": [],
    "units": [
     "Department of Industrial Engineering and Operations Research (IEOR)"
+   ]
+  },
+  "University of California, Davis": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
    ]
   },
   "University of Cambridge": {
@@ -1054,6 +1209,12 @@
     "University of Houston and DISC"
    ]
   },
+  "University of Houston (Bauer Human-Centered AI Institute)": {
+   "schools": [],
+   "units": [
+    "Artificial Intelligence (AI) and healthcare"
+   ]
+  },
   "University of Illinois Urbana-Champaign": {
    "schools": [
     "Gies College of Business"
@@ -1067,7 +1228,8 @@
     "School of Business"
    ],
    "units": [
-    "Analytics, Information, and Operations Management Department"
+    "Analytics, Information, and Operations Management Department",
+    "BA, Information & Operations"
    ]
   },
   "University of Mannheim": {
@@ -1134,6 +1296,12 @@
     "Supply Chain/Operations Management Department"
    ]
   },
+  "University of Texas at San Antonio": {
+   "schools": [],
+   "units": [
+    "Operations and Analytics"
+   ]
+  },
   "University of Utah": {
    "schools": [
     "David Eccles School of Business"
@@ -1148,7 +1316,8 @@
     "Darden School of Business"
    ],
    "units": [
-    "Data Analytics and Decision Sciences (DADS) Area"
+    "Data Analytics and Decision Sciences (DADS) Area",
+    "Technology & OM (TOM)"
    ]
   },
   "University of Wisconsin-Madison": {
@@ -1164,6 +1333,13 @@
     "UNSW Business School - School of Information Systems and Technology Management"
    ],
    "units": []
+  },
+  "Utah Valley University": {
+   "schools": [],
+   "units": [
+    "Operations & SCM",
+    "Strategic Management & Operations"
+   ]
   },
   "Villanova University": {
    "schools": [

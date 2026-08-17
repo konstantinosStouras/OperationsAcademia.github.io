@@ -24,7 +24,15 @@ import {
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
-import { docIdFor, migrationDoc, lostFields } from './migrate-to-firestore.mjs';
+import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
+import {
+  sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
+  inferColumns, resolveColumns, levelsFromRank, typeFromNames, rowsFromTab, collectRows,
+  stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
+  tabsFromHtml, sheetIdsFromHtml, sheetId, sheetCsvUrl, sheetHtmlUrl,
+  emptyRegistry, adoptSheets, activeSheets, rollRegistry,
+  SOURCE as SHEET_SOURCE, SEED_SHEET_ID, STALE_DAYS,
+} from './jobmarket-sheet.mjs';
 import {
   folderFor, isConfigured, auditFolders, isFolderId, isPlaceholder,
   resourceKeyFor, resourceKeyHeader, KINDS,
@@ -1131,7 +1139,13 @@ function testSplitFields() {
    rewrites the site's content while moving it is worse than no migration.   */
 
 async function testMigrationRoundTrip() {
-  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  /* Only what the migration would actually touch. A posting from the job
+     market tracking sheet is rebuilt from the workbook on every sync and is
+     deliberately never given a document (see migratable()), so holding it to
+     the round trip would fail this guard over rows nothing migrates — and the
+     sheet cannot answer every question a submission asks (it has no "type of
+     institution" column, and a row it does not answer publishes without one). */
+  const rows = JSON.parse(await readFile(JOBS, 'utf8')).filter(migratable);
   ok(rows.length > 50, 'there are postings to migrate');
 
   /* The one difference allowed, and it is deliberate: `department` is now
@@ -1185,12 +1199,18 @@ async function testMigrationRoundTrip() {
 }
 
 async function testMigrationDocs() {
-  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  const all = JSON.parse(await readFile(JOBS, 'utf8'));
+  // the migration's own set — a sheet-sourced posting is never given a
+  // document, see migratable()
+  const rows = all.filter(migratable);
 
-  // every row must be addressable as a document id, or it cannot be migrated
-  const unusable = rows.filter((r) => !docIdFor(r)).map((r) => r.id);
+  /* Every row must be addressable as a document id — held to EVERY posting,
+     sheet-sourced or not: the id is also the card's DOM id and the key the
+     page stores its expanded state under, so a value that is not id-shaped is
+     a bug wherever it came from. */
+  const unusable = all.filter((r) => !docIdFor(r)).map((r) => r.id);
   eq(unusable, [], 'every posting id is usable as a Firestore document id');
-  eq(new Set(rows.map(docIdFor)).size, rows.length, 'and they are distinct');
+  eq(new Set(all.map(docIdFor)).size, all.length, 'and they are distinct');
 
   // the gate the migration runs before writing anything
   const bad = [];
@@ -1570,6 +1590,433 @@ async function testLegacyTables() {
     'the legacy-import workflow runs the importer');
 }
 
+/* ------------------------------------------- the job market tracking sheet
+
+   The workbook the maintainer keeps by hand — one per market cycle, a tab per
+   kind of position — read by _scraper/jobmarket-sheet.mjs. Everything below is
+   offline: the parsing, the mapping, the roll-over to next year's workbook and
+   the decision to send the "this sheet has gone quiet" e-mail are all pure
+   functions, precisely so that none of it needs the network to be checked.
+
+   THE FIXTURE IS REAL DATA. The rows are the ones the owner pasted from the
+   "2026 NTT/PD" tab, tabs and all, so a change to the mapping is measured
+   against what the sheet actually holds rather than against a convenient
+   invention.                                                                  */
+
+const JMS_ROWS = [
+  ['9', 'Clarkson University', 'Potsdam, NY', 'USA', '20-Jul-26',
+    'Operations and Information Systems', 'Visiting Assistant Professor', '', '', '',
+    'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179504973', '1'],
+  ['10', 'University of California Berkeley', 'Berkeley, CA', 'USA', '22-Jul-26',
+    'Operations and IT Management', 'Lecturer', '', '', '',
+    'https://business.academickeys.com/job/z8gs65qr/Lecturer', '1'],
+  ['18', 'Princeton University', 'Princeton, NJ', 'USA', '8-Aug-26',
+    'OR & Financial Engineering', 'Postdoctoral Research Associate', '', '', '',
+    'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179521035', ''],
+  ['22', 'Rutgers Business School–Newark and New Brunswick', 'New Jersey ', 'USA', '12-Aug-26',
+    'MS and IS', 'Assistant Professor of Professional Practice', '', '', '',
+    'https://jobs.chronicle.com/job/38018595/', ''],
+];
+
+/* The last column is the one whose meaning is NOT known — the sheet carries a
+   flag there ("1" on some rows, blank on others) that nothing here can safely
+   interpret. It is named as something this pipeline does not recognise on
+   purpose, so the tests below pin the two things that matter: it is REPORTED
+   in the run's log, and its value never reaches a posting. */
+const JMS_HEAD = ['#', 'University', 'City/State', 'Country', 'Date', 'Field', 'Position',
+  '', '', '', 'Link', 'Checked'];
+
+const csvOf = (rows) => rows
+  .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+  .join('\n') + '\n';
+
+function testJobMarketSheetParsing() {
+  // the dates the sheet actually uses, and the ones a person might type
+  eq(sheetDay('20-Jul-26'), '2026-07-20', 'the sheet\'s own date format');
+  eq(sheetDay('8-Aug-26'), '2026-08-08', 'a single-digit day');
+  eq(sheetDay('5-Aug-26'), '2026-08-05', 'and another');
+  eq(sheetDay('2026-07-20'), '2026-07-20', 'ISO');
+  eq(sheetDay('7/20/2026'), '2026-07-20', 'US order, which is what Google writes');
+  eq(sheetDay('20/07/2026'), '2026-07-20',
+    'a first field over 12 can only be a day, so day-first is read as meant');
+  eq(sheetDay('20 July 2026'), '2026-07-20', 'a spelled-out month');
+  eq(sheetDay('July 20, 2026'), '2026-07-20', 'month first');
+  eq(sheetDay('30-Feb-26'), '', 'a day that does not exist is not a date');
+  eq(sheetDay('until filled'), '', 'and neither is prose');
+  eq(sheetDay(''), '', 'nor an empty cell');
+  eq(daysBetween('2026-08-01', '2026-08-15'), 14, 'whole days between two days');
+
+  // which tabs are read, and which are not
+  eq(classifyTab('2026 Jobs'), { year: 2026, kind: 'jobs' }, 'a jobs tab');
+  eq(classifyTab('2026 NTT/PD'), { year: 2026, kind: 'ntt-pd' }, 'an NTT/PD tab');
+  eq(classifyTab('2027 NTT-PD'), { year: 2027, kind: 'ntt-pd' }, 'however it is punctuated');
+  eq(classifyTab('Jobs 2026'), { year: 2026, kind: 'jobs' }, 'whichever way round it is written');
+  eq(classifyTab('2026 NTT/PD Jobs'), { year: 2026, kind: 'ntt-pd' },
+    'a tab naming both kinds is the NTT one — it says so first');
+  eq(classifyTab('Intro'), null, 'the intro tab is not a data tab');
+  eq(classifyTab('Placements'), null, 'nor is a tab with no year');
+  eq(classifyTab(''), null, 'nor an unnamed one');
+  ok(isIntroTab('intro') && isIntroTab('Introduction') && isIntroTab('Read me'),
+    'the intro tab is recognised however it is spelled');
+  ok(!isIntroTab('2026 Jobs'), 'and a data tab is not mistaken for it');
+  ok(conventionalTabs([2026]).includes('2026 Jobs') &&
+     conventionalTabs([2026]).includes('2026 NTT/PD'),
+    'the fallback names cover both kinds of tab');
+
+  // rank -> the five entry levels the site offers
+  eq(levelsFromRank('Visiting Assistant Professor'), ['Visiting Faculty (various levels)'],
+    'a visiting assistant professorship is a VISITING post, not an assistant professorship');
+  eq(levelsFromRank('Postdoctoral Research Associate'), ['Post-Doc'], 'a post-doc');
+  eq(levelsFromRank('Lecturer'), ['Non-tenure track (teaching) position'], 'a lecturer');
+  eq(levelsFromRank('Professor of Practice - Decision & Information Sciences'),
+    ['Non-tenure track (teaching) position'], 'a professor of practice');
+  eq(levelsFromRank('Open-Rank Clinical Professor'), ['Non-tenure track (teaching) position'],
+    'a clinical professorship, whatever its rank');
+  eq(levelsFromRank('Assistant Professor'), ['Assistant Professor'], 'a tenure-track post');
+  eq(levelsFromRank('Open Rank'), ['Other Ranks'], 'an open-rank search');
+  eq(levelsFromRank('non TTAP'), ['Non-tenure track (teaching) position'],
+    'the sheet\'s "non TTAP" is a NON-tenure-track post — it differs from the ' +
+    'tenure-track one by that word alone');
+  eq(levelsFromRank('TTAP'), ['Assistant Professor'], 'while "TTAP" is the tenure-track one');
+  eq(levelsFromRank('Academic General Faculty'), ['Non-tenure track (teaching) position'],
+    'Virginia\'s wording for a teaching post');
+  eq(levelsFromRank('Professional in Residence'), ['Non-tenure track (teaching) position'],
+    'and Utah Valley\'s');
+  eq(levelsFromRank('', 'ntt-pd'), ['Non-tenure track (teaching) position'],
+    'with no rank given, an NTT/PD tab asserts non-tenure-track by its own name');
+  eq(levelsFromRank('', 'jobs'), ['Other Ranks'],
+    'while a jobs tab asserts nothing about the rank');
+  eq(levelsFromRank('Something nobody has heard of'), ['Other Ranks'],
+    'and an unrecognised title is not silently dropped');
+
+  // institution -> type of institution
+  eq(typeFromNames('Rutgers Business School–Newark', 'MS and IS'), 'Business School',
+    'a business school says so in its name');
+  eq(typeFromNames('Clarkson University', 'Operations'), 'University', 'and a university in its');
+  eq(typeFromNames('Rollins College', 'SCM'), 'University', 'as does a college');
+  eq(typeFromNames('INSEAD', 'Technology and Operations Management'), '',
+    'a name that answers neither leaves the type empty rather than guessing');
+  eq(typeFromNames('Some Employer', 'Department of Business Administration'), 'Business School',
+    'the field column can name the school when the institution does not');
+}
+
+function testJobMarketSheetColumns() {
+  const head = mapColumns(JMS_HEAD);
+  eq(head.missing, [], 'the sheet\'s own header row maps the columns it must have');
+  eq(head.index.institution, 1, 'University is the institution');
+  eq(head.index.city, 2, 'City/State is the town');
+  eq(head.index.country, 3, 'Country is the country');
+  eq(head.index.posted, 4, 'Date is the posting date');
+  eq(head.index.area, 5, 'Field is the area');
+  eq(head.index.rank, 6, 'Position is the rank');
+  eq(head.index.link, 10, 'Link is the advertisement');
+
+  /* "Location" is an alias of `city`, and also the word the OLD sheet used for
+     the country. A workbook carrying both must not give the country column to
+     whichever field asked first — exact matches are taken before loose ones. */
+  const both = mapColumns(['University', 'Location', 'Country', 'Date']);
+  eq(both.index.city, 1, 'a sheet with both Location and Country reads Location as the town');
+  eq(both.index.country, 2, 'and Country as the country');
+
+  // a column nobody recognises is REPORTED, never silently read as something
+  const odd = mapColumns(['#', 'University', 'Date', 'Headcount']);
+  eq(odd.unmapped.map((u) => u.header), ['Headcount'],
+    'an unknown column is reported so it can be asked about');
+  eq(odd.missing, [], 'and does not stop the tab being read');
+  eq(mapColumns(['#', 'No', 'S/N']).unmapped, [],
+    'a numbering column is not a field anybody is missing');
+
+  eq(normHeader('Date (MM/DD/YY)'), 'date', 'a header is compared without its parenthetical');
+  eq(mapColumns(['Foo', 'Bar']).missing, ['institution', 'posted'],
+    'a header row that names neither is refused rather than half-read');
+
+  /* NO HEADER AT ALL. A tracking sheet can start straight at the data, so the
+     columns are inferred from evidence — dates parse, countries are countries,
+     links are URLs — and the result must agree with what the header says. */
+  const guess = inferColumns(JMS_ROWS);
+  eq(guess.missing, [], 'a headerless tab still yields the columns it must have');
+  eq(guess.index.posted, 4, 'the date column is the one holding dates');
+  eq(guess.index.country, 3, 'the country column is the one holding countries');
+  eq(guess.index.institution, 1, 'the institution is the first prose column, past the numbering');
+  eq(guess.index.link, 10, 'the link column is the one holding URLs');
+  eq(guess.index.area, 5, 'the area is the prose after the date');
+  eq(guess.index.rank, 6, 'and the rank is the prose after that');
+
+  eq(resolveColumns([JMS_HEAD, ...JMS_ROWS]).at, 0, 'a header row is found where there is one');
+  eq(resolveColumns([JMS_HEAD, ...JMS_ROWS]).inferred, false, 'and inference is not needed');
+  eq(resolveColumns(JMS_ROWS).at, -1, 'with no header, every row is data');
+  eq(resolveColumns(JMS_ROWS).inferred, true, 'and the run says the columns were inferred');
+}
+
+function testJobMarketSheetRows() {
+  const withHead = rowsFromTab(csvOf([JMS_HEAD, ...JMS_ROWS]),
+    { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026 });
+  const headless = rowsFromTab(csvOf(JMS_ROWS),
+    { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026 });
+
+  eq(withHead.rows.length, 4, 'every posting in the fixture is read');
+  eq(withHead.rows.map((r) => r.id), headless.rows.map((r) => r.id),
+    'and a tab with no header row reads exactly the same postings');
+
+  const clarkson = withHead.rows.find((r) => r.institution === 'Clarkson University');
+  eq(clarkson.posted, '2026-07-20', 'the posting date is the sheet\'s date');
+  eq(clarkson.year, 2027,
+    'and the market year is derived from it by the SITE\'s roll rule — a July 2026 ' +
+    'posting belongs to the 2026-2027 market, whatever the tab is called');
+  eq(clarkson.country, 'United States', '"USA" is published as "United States"');
+  eq(clarkson.levels, ['Visiting Faculty (various levels)'], 'the rank becomes an entry level');
+  eq(clarkson.department, 'Operations and Information Systems', 'the field becomes the department');
+  eq(clarkson.comments, 'Visiting Assistant Professor · Potsdam, NY',
+    'the job title as advertised and the town are kept — the row\'s shape has ' +
+    'nowhere else to put them, and dropping them would lose the most useful part');
+  eq(withHead.unmapped.map((u) => u.header), ['Checked'],
+    'a column whose meaning is not known is reported in the run\'s log');
+  ok(!/\bChecked\b|·\s*1\b/.test(clarkson.comments),
+    'and its value is never published as though it meant something');
+  eq(clarkson.source, SHEET_SOURCE, 'every row says where it came from');
+  ok(clarkson.adUrl.startsWith('https://'), 'the advertisement link is carried');
+  eq(clarkson.applyBy, 'Until filled.',
+    'a sheet that gives no deadline reads "Until filled." — which is what the ' +
+    'page\'s own Deadline filter already buckets a dateless posting as, so the ' +
+    'card and the filter say the same thing');
+  eq(clarkson.applyByDate, '', 'and NO date is stored, which is what puts it in that bucket');
+  eq(clarkson.featured, false, 'nothing from the sheet is featured');
+  eq(clarkson.id, '2027-clarkson-university-20260720', 'the id is the site\'s own shape');
+
+  // the deadline column, when the sheet has one
+  const withDeadline = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date', 'Deadline'],
+    ['A School', 'USA', '1-Sep-26', '15-Nov-26'],
+    ['B School', 'USA', '1-Sep-26', 'Until filled'],
+  ]), { minYear: 2026 });
+  eq(withDeadline.rows.find((r) => r.institution === 'A School').applyByDate, '2026-11-15',
+    'a deadline is read as a date');
+  eq(withDeadline.rows.find((r) => r.institution === 'A School').applyBy, 'November 15, 2026',
+    'and shown the way the site writes dates');
+  eq(withDeadline.rows.find((r) => r.institution === 'B School').applyByDate, '',
+    'an open-ended search carries NO date — the page buckets "until filled" on ' +
+    'the date being empty, so a row with both would read as dated');
+
+  // rows that are not postings
+  const messy = rowsFromTab(csvOf([
+    JMS_HEAD,
+    ...JMS_ROWS,
+    ['', 'Total', '', '', '', '', '', '', '', '', '', ''],
+    ['99', '', '', '', '1-Sep-26', '', '', '', '', '', '', ''],
+  ]), { tab: '2026 Jobs', kind: 'jobs', minYear: 2026 });
+  eq(messy.rows.length, 4, 'a legend or total line under the data is not a posting');
+  eq(messy.skipped, 2, 'and the run says how many rows it stepped over');
+
+  // a season the site no longer carries
+  const old = rowsFromTab(csvOf([
+    JMS_HEAD, ['1', 'Ancient University', 'X', 'USA', '20-Jul-19', 'OM', 'Lecturer',
+      '', '', '', '', ''],
+  ]), { minYear: 2026 });
+  eq(old.rows.length, 0, 'a posting from a closed season is not republished');
+
+  // nothing that would be a disclosure, or a script, reaches the dataset
+  const nasty = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date', 'Field', 'Link'],
+    ['A School', 'USA', '1-Sep-26', 'Apply to search@a.edu', 'javascript:alert(1)'],
+    ['B School', 'USA', '2-Sep-26', 'OM', 'https://b.edu/apply?to=chair@b.edu'],
+  ]), { minYear: 2026 });
+  const blob = JSON.stringify(nasty.rows);
+  ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(blob),
+    'an e-mail address in the sheet never reaches the served file');
+  ok(!/javascript:/i.test(blob), 'and neither does a script URL');
+  eq(nasty.rows.find((r) => r.institution === 'B School').adUrl, '',
+    'a link with an address in it is dropped rather than published');
+  eq(nasty.unlinked, 2, 'and both are reported, so nothing goes missing silently');
+
+  /* Two tabs of one workbook, the same school on the same day. jobId carries
+     no department, so without the collapse-then-suffix these would be one row
+     — which is how a real advertisement disappears. */
+  const jobs = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date', 'Field', 'Position'],
+    ['One University', 'USA', '1-Sep-26', 'Operations', 'Assistant Professor'],
+  ]), { tab: '2026 Jobs', kind: 'jobs', minYear: 2026 });
+  const ntt = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date', 'Field', 'Position'],
+    ['One University', 'USA', '1-Sep-26', 'Marketing', 'Lecturer'],
+  ]), { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026 });
+  const both = collectRows([jobs, ntt]);
+  eq(both.rows.length, 2, 'two departments advertising on one day are two postings');
+  eq(new Set(both.rows.map((r) => r.id)).size, 2, 'and they are given distinct ids');
+
+  const same = collectRows([jobs, jobs]);
+  eq(same.rows.length, 1, 'while the SAME posting read twice is one posting');
+
+  // the served projection carries no bookkeeping
+  const text = serialiseSheetRows(withHead.rows);
+  ok(!text.includes('_tab') && !text.includes('_sheet'),
+    'the provenance kept for the log stays out of the served file');
+  ok(text.endsWith('\n'), 'the file ends with a newline, so a rebuild that changes ' +
+    'nothing commits nothing');
+  const meta = buildSheetMeta(withHead.rows, { generated: 'x' });
+  eq(meta.count, 4, 'the meta file counts the postings');
+  eq(meta.newestPosted, '2026-08-12', 'and knows the newest');
+}
+
+function testJobMarketSheetAddedAt() {
+  const now = new Date('2026-08-17T09:00:00Z');
+  const mk = (id, posted) => ({ id, posted, addedAt: '' });
+
+  /* THE FIRST RUN IS A BACKFILL. `addedAt` is the only cursor the e-mail
+     alerts have, so stamping a whole season with "now" would mail every
+     subscriber a hundred postings at once. */
+  const first = stampAddedAt([mk('a', '2026-07-20'), mk('b', '2026-08-16')], [], { now });
+  eq(first.rows[0].addedAt, '2026-07-20T00:00:00Z', 'a backfilled row is dated when it was advertised');
+  eq(first.rows[1].addedAt, '2026-08-16T00:00:00Z', 'every one of them, however recent');
+  ok(first.backfill, 'and the run knows it was a backfill');
+
+  // afterwards, a genuinely new posting is new
+  const existing = [{ id: 'a', posted: '2026-07-20', addedAt: '2026-07-20T00:00:00Z' }];
+  const later = stampAddedAt(
+    [mk('a', '2026-07-20'), mk('c', '2026-08-16'), mk('d', '2026-05-01')], existing, { now });
+  eq(later.rows[0].addedAt, '2026-07-20T00:00:00Z',
+    'a row already in the dataset keeps its stamp — re-reading the sheet must ' +
+    'never re-announce a posting');
+  eq(later.rows[1].addedAt, '2026-08-17T09:00:00Z', 'a new posting is stamped now, and is announced');
+  eq(later.rows[2].addedAt, '2026-05-01T00:00:00Z',
+    'while one advertised months ago is a catch-up, not news');
+  eq(later.fresh, 2, 'the run reports how many it had not seen before');
+}
+
+function testJobMarketSheetStaleness() {
+  const now = new Date('2026-08-17T09:00:00Z');
+
+  eq(stalenessOf({ ok: true, rows: 40, newestPosted: '2026-08-15', now }).stale, false,
+    'a sheet with a posting from two days ago is fine');
+  const quiet = stalenessOf({ ok: true, rows: 40, newestPosted: '2026-07-01', now });
+  ok(quiet.stale && quiet.reason === 'quiet', 'a sheet with nothing new for weeks is not');
+  eq(quiet.days, 47, 'and the message can say how long it has been');
+
+  eq(stalenessOf({ ok: false, error: 'HTTP 403', rows: 0, now }).reason, 'unreadable',
+    'a sheet that cannot be read at all is the most urgent case');
+  eq(stalenessOf({ ok: true, rows: 0, now }).reason, 'empty',
+    'a sheet that reads as empty is reported rather than published');
+  eq(stalenessOf({ ok: true, rows: 5, newestPosted: '', now }).reason, 'undated',
+    'and so is one whose postings carry no usable date');
+
+  // said once, then not again for a week — but a DIFFERENT failure is news
+  const check = stalenessOf({ ok: true, rows: 40, newestPosted: '2026-07-01', now });
+  ok(shouldWarn({}, check, { now }), 'the first warning goes out');
+  ok(!shouldWarn({ lastWarnedAt: '2026-08-16T09:00:00Z', lastReason: 'quiet' }, check, { now }),
+    'and is not repeated the next day');
+  ok(shouldWarn({ lastWarnedAt: '2026-08-01T09:00:00Z', lastReason: 'quiet' }, check, { now }),
+    'but is said again after a week');
+  ok(shouldWarn({ lastWarnedAt: '2026-08-16T09:00:00Z', lastReason: 'quiet' },
+    stalenessOf({ ok: false, error: 'HTTP 403', now }), { now }),
+    'a different kind of failure is new information and goes out at once');
+  ok(!shouldWarn({}, stalenessOf({ ok: true, rows: 40, newestPosted: '2026-08-15', now }), { now }),
+    'a healthy sheet sends nothing');
+}
+
+async function testJobMarketSheetChain() {
+  /* THE ROLL. At the end of a cycle the intro tab links to next year's
+     workbook. The link is a HYPERLINK on ordinary text, so it is not in the
+     CSV export at all — it is read out of the HTML view, where Google wraps an
+     external address in its own redirector. */
+  const NEXT = '1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_-x';
+  const html = `
+    <ul>
+      <li id="sheet-button-0" class="sheet-button">Intro</li>
+      <li id="sheet-button-1514861818" class="sheet-button">2026 NTT/PD</li>
+      <li id="sheet-button-99" class="sheet-button">2026 Jobs</li>
+    </ul>
+    <td>Next year&#39;s sheet is
+      <a href="https://www.google.com/url?q=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F${NEXT}%2Fedit&amp;sa=D">here</a>
+    </td>`;
+
+  eq(tabsFromHtml(html).map((t) => t.name), ['Intro', '2026 NTT/PD', '2026 Jobs'],
+    'the tab names are read from the HTML view — the CSV endpoint cannot list them');
+  eq(sheetIdsFromHtml(html, { exclude: [SEED_SHEET_ID] }), [NEXT],
+    'and so is the link to next year\'s workbook, through Google\'s redirector');
+  eq(sheetIdsFromHtml(html, { exclude: [SEED_SHEET_ID, NEXT] }), [],
+    'a workbook already known is not adopted twice');
+  eq(sheetId('too-short'), '', 'a fragment of a URL is not mistaken for a workbook id');
+  ok(sheetCsvUrl('abc', '2026 NTT/PD').includes('sheet=2026%20NTT%2FPD'),
+    'a tab name with a slash in it is addressed correctly');
+  ok(sheetHtmlUrl('abc').endsWith('/htmlview'), 'the HTML view is where the links are');
+
+  const reg = emptyRegistry();
+  eq(reg.current, SEED_SHEET_ID, 'the registry starts at the workbook in use today');
+  eq(adoptSheets(reg, [NEXT], { from: SEED_SHEET_ID }).length, 1, 'a linked workbook is adopted');
+  eq(adoptSheets(reg, [NEXT], { from: SEED_SHEET_ID }).length, 0, 'and only once');
+  ok(activeSheets(reg).includes(NEXT),
+    'a newly-found workbook is read at once, so nothing waits for a date');
+
+  /* IT BECOMES CURRENT ON EVIDENCE, NEVER ON THE CALENDAR. A workbook created
+     in advance and left empty must not take over, or the site would follow an
+     empty sheet for weeks. */
+  reg.sheets.find((s) => s.id === SEED_SHEET_ID).rows = 120;
+  reg.sheets.find((s) => s.id === SEED_SHEET_ID).newestPosted = '2027-06-02';
+  const empty = reg.sheets.find((s) => s.id === NEXT);
+  eq(rollRegistry(reg), null, 'an empty successor does not take over');
+  eq(reg.current, SEED_SHEET_ID, 'the workbook carrying the market stays current');
+
+  empty.rows = 3;
+  empty.newestPosted = '2027-07-04';
+  ok(rollRegistry(reg), 'once the successor holds a newer posting, it takes over');
+  eq(reg.current, NEXT, 'and becomes the current workbook');
+  eq(reg.previous, SEED_SHEET_ID, 'the one it replaced is remembered');
+  ok(activeSheets(reg).includes(SEED_SHEET_ID),
+    'and is still read — the last postings of a season are filed weeks after the roll');
+}
+
+async function testJobMarketSheetWiring() {
+  /* The pipeline is three files that have to agree: the sync writes the
+     dataset, the build merges it, and the workflow runs the sync. Each link is
+     pinned here because a broken one fails SILENTLY — the site simply stops
+     gaining postings, which looks exactly like a quiet market. */
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/data', 'jobmarket\.json'\)/.test(build) || build.includes("'jobmarket.json'"),
+    'build-jobs.mjs reads the sheet dataset');
+  ok(build.includes('.concat(sheetRows)'),
+    'and merges its rows beside the postings from the database');
+  ok(/!\(sheetPresent && fromSheet\(r\)\)/.test(build),
+    'a posting deleted from the sheet leaves the site — it is not carried as an orphan');
+  ok(build.includes('sheetPresent = existsSync(SHEET)'),
+    'though a MISSING file is not an empty sheet, and removes nothing');
+
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(sync.includes('the dataset was left exactly as it is'),
+    'a workbook that cannot be read writes nothing at all');
+  ok(sync.includes('SHRINK_FLOOR'), 'and a read that comes back suspiciously small is refused');
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-jobmarket-sheet.yml'), 'utf8');
+  ok(wf.includes('sync-jobmarket-sheet.mjs'), 'the workflow runs the sync');
+  ok(wf.includes('node _scraper/selftest.mjs'),
+    'and re-checks the file it is about to commit, like every other writer of data/');
+  ok(/group: oa-jobs-data-/.test(wf),
+    'it shares the data/ concurrency group, so it never races the postings build');
+
+  /* The rows the sheet produces must satisfy the same served-file rules as
+     every other posting — this is the check that would catch a mapping change
+     that starts emitting an unknown entry level or an un-canonical country. */
+  const rows = rowsFromTab(csvOf([JMS_HEAD, ...JMS_ROWS]),
+    { tab: '2026 NTT/PD', kind: 'ntt-pd', minYear: 2026 }).rows;
+  const C = require(path.join(HERE, '..', 'assets', 'oa-countries.js'));
+  for (const r of rows) {
+    ok(!r.type || TYPES.includes(r.type), `sheet row ${r.id}: type is known`);
+    for (const l of r.levels) ok(LEVELS.includes(l), `sheet row ${r.id}: level "${l}" is known`);
+    ok(C.isCanonical(r.country), `sheet row ${r.id}: the country is named the one way`);
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(r.posted), `sheet row ${r.id}: the posting date is ISO`);
+    ok(!r.applyByDate || !/until\s*filled/i.test(r.applyBy),
+      `sheet row ${r.id}: an open-ended deadline carries no date`);
+  }
+
+  // and they merge into the served file like any other posting
+  const merged = mergeRows([], rows, []);
+  eq(merged.rows.length, rows.length, 'the sheet\'s postings merge into the dataset');
+  eq(merged.added, rows.length, 'as additions');
+  const again = mergeRows(merged.rows, rows, []);
+  eq(again.added, 0, 'and re-reading the sheet adds nothing a second time');
+  eq(serialise(merged.rows), serialise(again.rows),
+    'a rebuild that changes nothing produces a byte-identical file');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -1596,5 +2043,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testDerivedMarketYear();
   await testCountries();
   await testSubmissionKeyCeilings();
+  testJobMarketSheetParsing();
+  testJobMarketSheetColumns();
+  testJobMarketSheetRows();
+  testJobMarketSheetAddedAt();
+  testJobMarketSheetStaleness();
+  await testJobMarketSheetChain();
+  await testJobMarketSheetWiring();
   process.exit(finish() ? 0 : 1);
 }

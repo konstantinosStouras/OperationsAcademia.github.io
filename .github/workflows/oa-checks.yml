@@ -57,6 +57,7 @@ jobs:
           node _scraper/selftest.mjs
           node _scraper/import-sheet.mjs --selftest
           node _scraper/import-legacy-tables.mjs --selftest
+          node _scraper/sync-jobmarket-sheet.mjs --selftest
 
       - name: Every link resolves, and no version reaches into another
         run: |

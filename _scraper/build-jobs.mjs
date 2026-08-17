@@ -32,6 +32,7 @@ import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
 } from './jobs-model.mjs';
+import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +40,10 @@ const DATA = path.join(HERE, '..', 'data');
 const JOBS = path.join(DATA, 'jobs.json');
 const META = path.join(DATA, 'jobs-meta.json');
 const VOCAB = path.join(DATA, 'vocab.json');
+/* The maintainer's job market tracking sheet, read by sync-jobmarket-sheet.mjs
+   into rows of exactly this file's shape. It is a SECOND source of postings,
+   beside the database — see the block in main() that merges it. */
+const SHEET = path.join(DATA, 'jobmarket.json');
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -229,13 +234,23 @@ async function main() {
   }
 
   const db = await firestore();
+
+  /* NO DATABASE IS NOT NOTHING TO DO. The postings now have two sources — the
+     submissions in Firestore and the maintainer's tracking sheet — and only
+     the first needs credentials. This used to return here, which would have
+     meant a site with Firebase unconfigured (or a run whose secret had
+     expired) silently stopped publishing the sheet as well. So the run
+     continues with an empty submission set, and says so. */
   if (!db) {
-    log('no Firebase credentials in this environment — nothing to publish.');
-    log('(this is the expected state until the project is set up: v2/_SETUP-FIREBASE.md)');
-    return;
+    if (!existsSync(SHEET)) {
+      log('no Firebase credentials in this environment — nothing to publish.');
+      log('(this is the expected state until the project is set up: v2/_SETUP-FIREBASE.md)');
+      return;
+    }
+    log('no Firebase credentials — publishing the tracking sheet only.');
   }
 
-  const col = db.collection('jobSubmissions');
+  const col = db ? db.collection('jobSubmissions') : null;
 
   /* THE DATABASE IS THE SOURCE OF TRUTH, and data/jobs.json is its projection.
      This used to read only what was newly `queued` and merge it into the file,
@@ -244,18 +259,19 @@ async function main() {
      makes editing work at all — a posting is rebuilt from its document on
      every run, so a correction reaches the page the same way a new posting
      does. */
-  const [liveSnap, pulledSnap] = await Promise.all([
+  const [liveSnap, pulledSnap] = db ? await Promise.all([
     col.where('status', 'in', ['queued', 'published']).get(),
     col.where('status', 'in', ['withdrawn', 'hidden']).get(),
-  ]);
+  ]) : [{ docs: [] }, { docs: [] }];
 
   const live = liveSnap.docs;
   const pulled = pulledSnap.docs;
   const queued = live.filter((d) => d.data().status === 'queued');
 
   if (SCAN) {
+    const sheeted = existsSync(SHEET) ? (await readJson(SHEET, [])).length : 0;
     log(`${live.length} live (${queued.length} of them newly queued), ` +
-        `${pulled.length} withdrawn/hidden`);
+        `${pulled.length} withdrawn/hidden, ${sheeted} from the tracking sheet`);
     for (const d of queued) {
       const v = d.data();
       log(`  queued  ${v.ref || d.id}  ${v.institution} — ${v.department}`);
@@ -286,7 +302,7 @@ async function main() {
      season — each is warned about and the posting publishes WITHOUT its File
      link; the upload stays in Storage and the next run retries. A failure here
      must never stop the postings pipeline. */
-  await transferUploads(db, live, { now });
+  if (db) await transferUploads(db, live, { now });
 
   const fresh = [];
   const rejected = [];
@@ -323,6 +339,34 @@ async function main() {
   const hide = await readJson(path.join(DATA, 'jobs-hidden.json'), {});
   const hidden = new Set([].concat(hide.ids || [], hide.refs || []));
 
+  /* -------------------------------------- the job market tracking sheet
+
+     The maintainer's own workbook, read into rows of this exact shape by
+     sync-jobmarket-sheet.mjs. It is merged here rather than written into
+     jobs.json directly, so that ONE writer produces the served file and the
+     merge, the collapse and the id rules apply to every posting whatever its
+     source.
+
+     Its rows are the sheet's to add AND TO REMOVE: a row deleted from the
+     sheet is gone from data/jobmarket.json, and must therefore leave the site
+     too — otherwise the only way to unlist a sheet posting would be to add it
+     to jobs-hidden.json by hand, which is the kind of parallel bookkeeping
+     that rots. That is why they are excluded from the orphan carry below.
+
+     A MISSING FILE IS NOT AN EMPTY SHEET, though: before the first sync has
+     run — or if the file were ever lost — the sheet's postings are carried
+     like any other orphan rather than deleted. Only a file that EXISTS and no
+     longer lists a posting removes it. */
+  const sheetPresent = existsSync(SHEET);
+  const sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
+  const fromSheet = (r) => r.source === SHEET_SOURCE;
+  if (sheetPresent) {
+    const goneFromSheet = existing.filter(fromSheet).length -
+      existing.filter((r) => fromSheet(r) && sheetRows.some((s) => s.id === r.id)).length;
+    log(`the tracking sheet carries ${sheetRows.length} posting(s)` +
+        (goneFromSheet > 0 ? `; ${goneFromSheet} previously published are no longer in it` : ''));
+  }
+
   /* ORPHANS — rows in the served file that no live document accounts for.
 
      Before the migration has run, that is every posting still only in the
@@ -336,13 +380,17 @@ async function main() {
      opposite of what was intended. The rules reflect this: a poster may
      withdraw their own posting, and only the maintainer may delete outright. */
   const live_ids = new Set(fresh.map((f) => f.row.id));
-  const orphans = existing.filter((r) => !live_ids.has(r.id) && !removeRefs.includes(r.ref));
+  const orphans = existing.filter((r) =>
+    !live_ids.has(r.id) &&
+    !(sheetPresent && fromSheet(r)) &&
+    !removeRefs.includes(r.ref));
   if (orphans.length) {
     warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
          'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
 
   const freshVisible = fresh.map((f) => f.row)
+    .concat(sheetRows)
     .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
 
   const merged = mergeRows(orphans, freshVisible, removeRefs);
