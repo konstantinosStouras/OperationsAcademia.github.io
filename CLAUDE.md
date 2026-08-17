@@ -24,6 +24,30 @@ inherited rather than re-implemented, and add the new page to the
 new rule is needed, add it to `_MOBILE-STANDARDS.md` in the same change that
 first applies it — the file is the living standard, not a snapshot.
 
+## One spelling per country
+
+`assets/oa-countries.js` is the **single definition** of what each country is
+called — a dual-mode file (browser `window.OACountries`, Node `require`), like
+`assets/oa-alert-match.js`. It holds the canonical `LIST` the posting form
+offers, an `ALIASES` table, and `canon()`.
+
+The country is free text on the form and was free text in the spreadsheets the
+archive came from, so one country arrived under several names ("USA"/"UK"/"Hong
+Kong SAR"/"Shenzhen, China"), each becoming its own entry in the jobs page's
+Location filter. Canonical names are the **full** ones: `United States`, not
+`USA`.
+
+**When a new variant turns up, add it to `ALIASES` — never hand-edit the data.**
+`data/jobs.json` is rebuilt from Firestore every morning, so a patched row comes
+back the next day, whereas an alias fixes it permanently and for every past row
+at once. `canon()` never invents: a country it does not recognise is published
+under the name its poster gave it.
+
+It is applied at every ingest (`jobs-model.rowFromSubmission`,
+`import-sheet.mjs`) and on both sides of every comparison in the alert matcher —
+that last one matters, because an alert saved under an old spelling would
+otherwise stop matching silently.
+
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks

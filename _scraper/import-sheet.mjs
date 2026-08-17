@@ -38,7 +38,7 @@ import {
   text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta, mergeRows,
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
   marketYear, marketLabel, marketFloor, MARKET_WINDOW, collapseSameDay,
-  keyOf, isoStamp,
+  keyOf, isoStamp, canonCountry,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab, splitDepartment, joinDepartment } from './vocab.mjs';
 
@@ -230,8 +230,11 @@ export function rowsFromSheets(displayRows, rawRows) {
       pick(row, idx, ['Department', 'School Name, Department/Area/Group Name']), 220));
     const typeRaw = text(pick(row, idx, ['Type', 'Type of Institution']), 40);
     const type = TYPES.includes(typeRaw) ? typeRaw : '';
-    const country = text(
-      pick(row, idx, ['Location', 'Country location of the University']), 60);
+    // one spelling per country: the sheets are free text and gave us "USA",
+    // "UK", "Hong Kong SAR", "Shenzhen, China" … each of which became its own
+    // entry in the Location filter (assets/oa-countries.js)
+    const country = canonCountry(text(
+      pick(row, idx, ['Location', 'Country location of the University']), 60));
     const levels = splitLevels(pick(row, idx, ['Entry level', 'Job entry level']));
 
     // the display tab holds the deadline as prose; the raw tab as a date

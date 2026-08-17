@@ -17,8 +17,17 @@
    --------------------------------------------------------------------------- */
 
 import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 
 import { splitDepartment, joinDepartment } from './vocab.mjs';
+
+/* One spelling per country, shared with the browser (assets/oa-countries.js is
+   a dual-mode file, like oa-alert-match.js). Applied at EVERY ingest below, so
+   a submission that says "USA" is published as "United States" and the jobs
+   page's Location filter has one entry per country rather than one per
+   spelling. Re-exported so the importers use the same function. */
+const require = createRequire(import.meta.url);
+export const { canon: canonCountry } = require('../assets/oa-countries.js');
 
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/jobs.json — which is how submitter and chair
@@ -278,7 +287,7 @@ export function inCurrentMarket(row, now = new Date()) {
  */
 export function rowFromSubmission(doc, { now = new Date() } = {}) {
   const institution = text(doc.institution, MAXLEN.institution);
-  const country = text(doc.country, MAXLEN.country);
+  const country = canonCountry(text(doc.country, MAXLEN.country));
   const levels = pickList(doc.levels, LEVELS);
   const type = TYPES.includes(text(doc.type, 40)) ? text(doc.type, 40) : '';
 

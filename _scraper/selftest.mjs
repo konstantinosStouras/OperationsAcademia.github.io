@@ -13,6 +13,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
@@ -31,6 +32,9 @@ import {
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
+// the dual-mode browser modules (oa-countries.js, oa-alert-match.js) are the
+// SAME files the pages load — required here rather than re-implemented
+const require = createRequire(import.meta.url);
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
 
 let pass = 0;
@@ -813,60 +817,134 @@ async function testDerivedMarketYear() {
   }
 }
 
-/* ------------------------------------------------------- the country picker
+/* ------------------------------------------------------------- countries
 
-   The job form is the ONE form on the site that asks for a country (the
-   candidate and placement forms do not; the jobs and alerts "Location"
-   filters are built from the published rows, so they follow the data by
-   themselves). Its datalist was 34 entries — the countries that happened to
-   have posted before — which read as a closed list to anyone whose country
-   was not on it (owner, 2026-08-17).
+   ONE SPELLING PER COUNTRY (owner, 2026-08-17). The country is free text on
+   the form and was free text in the spreadsheets the archive came from, so one
+   country arrived under several names — 142 rows said "USA", 12 said "UK" and
+   4 "United Kingdom", plus "Hong Kong SAR", "The Netherlands", "Republic of
+   Korea", "Russian Federation", "China (Shanghai)" and "Shenzhen, China".
+   Each was its OWN entry in the jobs page's Location filter, so filtering on
+   United Kingdom showed a quarter of the British postings.
 
-   What is pinned here is not the exact membership but the three things that
-   would break quietly: the two copies drifting apart, an original spelling
-   being "tidied" (which splits that country in the Location filter), and the
-   list losing its order or gaining a duplicate. */
+   assets/oa-countries.js is the one definition, loaded by the browser and
+   required by the build. What is pinned here is every way the fix could come
+   undone: the module's own decisions, the data drifting back, an ingest point
+   that forgets to canonicalise, and — the one that would be silent — an
+   e-mail alert saved under the old spelling quietly matching nothing. */
 
-async function testCountryList() {
-  const read = async (dir) => {
-    const src = await readFile(path.join(HERE, '..', ...dir, 'oa-jobform.js'), 'utf8');
-    const block = (src.match(/var COUNTRIES = \[[\s\S]*?\n  \];/) || [''])[0];
-    return { src, block, list: [...block.matchAll(/'((?:[^'\\]|\\.)*)'/g)]
-      .map((m) => m[1].replace(/\\'/g, "'")) };
-  };
+async function testCountries() {
+  const C = require(path.join(HERE, '..', 'assets', 'oa-countries.js'));
 
-  const root = await read(['assets']);
-  const v3 = await read(['v3', 'assets']);
+  // the list itself
+  ok(C.LIST.length >= 190, `the canonical list covers the world (${C.LIST.length} countries)`);
+  eq(C.LIST, C.LIST.slice().sort((a, b) => a.localeCompare(b, 'en')),
+    'it is alphabetical, so a reader can find their country');
+  eq(new Set(C.LIST).size, C.LIST.length, 'and holds no duplicate');
+  const notCanon = C.LIST.filter((c) => !C.isCanonical(c));
+  eq(notCanon, [], 'every name in the list is its own canonical form');
 
-  ok(root.block && root.list.length >= 190,
-    `the job form offers every country (${root.list.length} of them)`);
-  eq(v3.block, root.block, 'and the v3 copy carries the SAME list, byte for byte');
+  // the full names the owner asked for, and no second spelling of them
+  ok(C.LIST.includes('United States') && !C.LIST.includes('USA'),
+    'the United States is listed under its full name');
+  ok(C.LIST.includes('United Kingdom') && !C.LIST.includes('UK'),
+    'and so is the United Kingdom');
 
-  const sorted = root.list.slice().sort((a, b) => a.localeCompare(b, 'en'));
-  eq(root.list, sorted, 'the list is alphabetical, so a reader can find their country');
-  eq(new Set(root.list).size, root.list.length, 'and holds no duplicate');
-
-  // the site's own spellings — renaming one splits it in the Location filter
-  for (const c of ['USA', 'United Kingdom', 'Hong Kong', 'South Korea', 'Taiwan',
-                   'Netherlands', 'United Arab Emirates', 'New Zealand', 'South Africa']) {
-    ok(root.list.includes(c), `the site's own spelling "${c}" is kept`);
-  }
-  ok(!root.list.includes('United States') && !root.list.includes('UK'),
-    'and no second spelling of one that is already there');
-
-  // a few that were missing entirely — the reason this list was widened
-  for (const c of ['Nigeria', 'Saudi Arabia', 'Poland', 'Argentina', 'Indonesia',
-                   'Colombia', 'Kenya', 'Vietnam', 'Czech Republic', 'Qatar']) {
-    ok(root.list.includes(c), `${c} can now be chosen rather than wondered about`);
+  // every variant the two datasets actually contained
+  for (const [given, want] of [
+    ['USA', 'United States'], ['UK', 'United Kingdom'],
+    ['The Netherlands', 'Netherlands'], ['Hong Kong SAR', 'Hong Kong'],
+    ['Republic of Korea', 'South Korea'], ['Russian Federation', 'Russia'],
+    ['China (Shanghai)', 'China'], ['Shenzhen, China', 'China'],
+  ]) {
+    eq(C.canon(given), want, `"${given}" is published as "${want}"`);
   }
 
-  // the field itself: a datalist is a HINT on a free-text input, so a country
-  // spelled some other way is still postable — that must not become a <select>
-  for (const p of ['post-a-job.html', path.join('v3', 'post-a-job.html')]) {
-    const html = await readFile(path.join(HERE, '..', p), 'utf8');
-    ok(/<input type="text" id="f-country"[^>]*list="oa-countries"/.test(html) &&
-       /<datalist id="oa-countries">/.test(html),
-      `${p}: the country field stays free text with the list as a hint`);
+  // shapes, not just the table: case, punctuation, spacing and the two
+  // qualifier forms the spreadsheets used
+  eq(C.canon('usa'), 'United States', 'the lookup ignores case');
+  eq(C.canon('U.S.A.'), 'United States', 'and punctuation');
+  eq(C.canon('  France  '), 'France', 'and surrounding space');
+  eq(C.canon('Korea, South'), 'South Korea', 'a comma list is understood');
+
+  // …and it NEVER invents one
+  eq(C.canon('Ruritania'), 'Ruritania', 'a country it does not know is left exactly as given');
+  eq(C.canon(''), '', 'and an empty value stays empty');
+  eq(C.canon(null), '', 'as does a missing one');
+
+  /* THE DATA. Both served datasets, and the tallies their filter counts come
+     from, carry canonical names only — this is what would rot if a future
+     import forgot to canonicalise. */
+  for (const [rowsFile, metaFile] of [
+    ['jobs.json', 'jobs-meta.json'],
+    ['past-postings.json', 'past-postings-meta.json'],
+  ]) {
+    const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', rowsFile), 'utf8'));
+    const bad = [...new Set(rows.map((r) => r.country).filter(Boolean))]
+      .filter((c) => !C.isCanonical(c));
+    eq(bad, [], `data/${rowsFile}: every posting names its country the one way`);
+
+    const meta = JSON.parse(await readFile(path.join(HERE, '..', 'data', metaFile), 'utf8'));
+    const badMeta = Object.keys(meta.countries || {}).filter((c) => !C.isCanonical(c));
+    eq(badMeta, [], `data/${metaFile}: and so does the tally the filter counts come from`);
+  }
+
+  /* THE INGEST POINTS. The data is rebuilt from Firestore every day, so a
+     one-off rewrite is worth nothing unless the writers canonicalise too. */
+  const row = rowFromSubmission({
+    institution: 'U', department: 'D', country: 'USA', type: 'University',
+    levels: ['Assistant Professor'], uid: 'u1', ref: 'OA-JOB-1',
+    createdAt: '2026-08-01T10:00:00Z',
+  });
+  eq(row.country, 'United States',
+    'a submission that says "USA" is PUBLISHED as "United States"');
+  const sheet = await readFile(path.join(HERE, 'import-sheet.mjs'), 'utf8');
+  ok(/const country = canonCountry\(text\(/.test(sheet),
+    'and so is a row imported from a spreadsheet');
+
+  /* THE ALERTS — the silent one. A subscription saved when the site said
+     "USA" holds that string for ever; without canonicalising both sides it
+     would simply stop matching, and nobody would see anything wrong. */
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const usRow = { country: 'United States', type: 'University', institution: 'X',
+    department: 'Y', levels: ['Assistant Professor'], characteristics: [] };
+  ok(M.matchesJob(usRow, { topics: ['jobs'], country: ['USA'] }),
+    'an alert saved under the old spelling still matches the postings it asked for');
+  ok(M.matchesJob(usRow, { topics: ['jobs'], country: ['United States'] }),
+    'and so does one saved under the new');
+  ok(!M.matchesJob(usRow, { topics: ['jobs'], country: ['Canada'] }),
+    'while a country the subscriber did not ask for is still excluded');
+  eq(M.normalise({ topics: ['jobs'], country: ['USA', 'UK'] }).country,
+    ['United States', 'United Kingdom'],
+    'and the alerts form ticks the canonical boxes when that alert is opened to edit');
+
+  /* THE PAGES. The form offers the shared list rather than a copy of it, and
+     every page that needs the module loads it BEFORE its consumer. */
+  for (const dir of [[], ['v3']]) {
+    const form = await readFile(path.join(HERE, '..', ...dir, 'assets', 'oa-jobform.js'), 'utf8');
+    ok(/var COUNTRIES = \(window\.OACountries && window\.OACountries\.LIST\) \|\| \[\];/.test(form),
+      `${[...dir, 'oa-jobform.js'].join('/')}: the form offers the shared list, not its own copy`);
+  }
+  for (const [page, consumer] of [
+    ['post-a-job.html', 'oa-jobform.js'],
+    ['alerts.html', 'oa-alert-match.js'],
+    ['jobs.html', 'oa-list.js'],
+    ['previous-markets.html', 'oa-list.js'],
+    [path.join('v3', 'post-a-job.html'), 'oa-jobform.js'],
+    [path.join('v3', 'alerts.html'), 'oa-alert-match.js'],
+    [path.join('v3', 'jobs.html'), 'oa-list.js'],
+  ]) {
+    const html = await readFile(path.join(HERE, '..', page), 'utf8');
+    const at = html.indexOf('oa-countries.js');
+    ok(at !== -1 && at < html.indexOf(consumer),
+      `${page}: loads the countries module before ${consumer}`);
+  }
+
+  // a link shared when the site said "USA" still selects the right country
+  for (const page of ['jobs.html', 'previous-markets.html', path.join('v3', 'jobs.html')]) {
+    const html = await readFile(path.join(HERE, '..', page), 'utf8');
+    ok(/legacyValues: \(window\.OACountries \|\| \{\}\)\.ALIASES/.test(html),
+      `${page}: an old ?country=USA link still selects the United States`);
   }
 }
 
@@ -1467,7 +1545,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testMyPostingsPage();
   await testAccountMerge();
   await testDerivedMarketYear();
-  await testCountryList();
+  await testCountries();
   await testSubmissionKeyCeilings();
   process.exit(finish() ? 0 : 1);
 }

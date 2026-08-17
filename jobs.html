@@ -163,6 +163,7 @@
     <!-- v2 -->
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-countries.js"></script>
     <script src="assets/oa-list.js"></script>
     <script src="assets/oa-jobedit.js"></script>
     <script>
@@ -285,7 +286,10 @@
             legacyValues: { Open: 'Closing soon' } },
           { key: 'type',        label: 'Type',            field: 'type' },
           { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one' },
-          { key: 'country',     label: 'Location',        field: 'country', sort: 'count' },
+          // a link shared or bookmarked when the site said "USA" still selects
+          // the country it now publishes as "United States"
+          { key: 'country',     label: 'Location',        field: 'country', sort: 'count',
+            legacyValues: (window.OACountries || {}).ALIASES },
           { key: 'chars',       label: 'Characteristics', field: 'characteristics', type: 'one' },
           { key: 'posted',      label: 'Date posted',     derive: 'datePosted' }
         ],

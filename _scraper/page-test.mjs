@@ -147,11 +147,22 @@ async function countAfter(fn) {
   return Number(t.split('/')[1].trim().split(' ')[0]);
 }
 
-const usa = await countAfter(async () => {
-  await page.click('#oaf-country');
-  await page.click('.oa-pick-menu .oa-opt:has-text("USA")');
+/* The country is taken FROM the open menu, never hardcoded — the same rule
+   the search term below follows. It used to click "USA", which stopped
+   existing the day the site settled on one spelling per country and began
+   publishing "United States" (assets/oa-countries.js). */
+await page.click('#oaf-country');
+// the option carries its cross-filtered count as a child element, so read the
+// LABEL rather than the whole node ("United States5" is not a country)
+const topCountry = await page.$eval('.oa-pick-menu .oa-opt', (n) => {
+  const c = n.querySelector('.oa-opt-n');
+  return n.textContent.replace(c ? c.textContent : '', '').trim();
 });
-ok(usa > 0 && usa < total, `a location filter narrows the list (${usa} of ${total})`);
+const usa = await countAfter(() => page.click('.oa-pick-menu .oa-opt >> nth=0'));
+ok(usa > 0 && usa < total,
+  `a location filter narrows the list (${usa} of ${total} for "${topCountry}")`);
+ok(!/\bUSA\b|\bUK\b/.test(topCountry),
+  `the Location filter offers whole country names ("${topCountry}"), not abbreviations`);
 
 /* The search term is taken FROM the list on screen, never hardcoded: the
    dataset is the live one and its contents move every time the sheet syncs or
@@ -173,7 +184,11 @@ await page.keyboard.press('Escape');
 /* ------------------------------------------------------------- deep links */
 
 const url = page.url();
-ok(url.includes('country=USA') && url.includes('institution=' + encodeURIComponent(term)),
+// compared as PARSED parameters: a country with a space in it is written
+// "United+States" by URLSearchParams and "United%20States" by
+// encodeURIComponent, and the test is about the state being mirrored at all
+const q = new URL(url).searchParams;
+ok(q.get('country') === topCountry && q.get('institution') === term,
   'filter state is mirrored into the query string');
 
 await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -182,6 +197,20 @@ await page.waitForTimeout(300);
 eq(Number((await page.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim().split(' ')[0]),
   both, 'reloading a filtered URL restores the same result set');
 eq(await page.$eval('#oaf-institution', (n) => n.value), term, 'the text filter is restored');
+
+/* A link shared or bookmarked while the site still said "USA". The country
+   names were canonicalised in 2026-08 ("USA" -> "United States"), and without
+   the filter's legacyValues map such a link would land on a filter that
+   selects nothing — an empty page with no explanation, which is exactly the
+   failure the ?filterA= mapping below already exists to prevent. */
+await page.goto(BASE + 'jobs.html?country=USA', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(300);
+const legacyCountry = await page.$$eval('.oa-chip', (ns) => ns.map((n) => n.textContent.trim()));
+ok(legacyCountry.some((c) => /United States/.test(c)),
+  'an old ?country=USA link still selects the United States');
+const legacyRows = await page.$$eval('.oa-card', (ns) => ns.length);
+ok(legacyRows > 0, 'and still shows the postings it was shared to show');
 
 // the legacy Awesome Table deep link the footer and the "Further info" column
 // still emit must keep working
@@ -371,9 +400,12 @@ await page.waitForSelector('.oa-card');
 
 await page.click('#oaf-country');
 await page.waitForSelector('.oa-pick-menu:not([hidden]) .oa-pick-search');
-await page.type('.oa-pick-menu:not([hidden]) .oa-pick-search', 'usa', { delay: 60 });
+// taken from the live list, like every other value in this file: "usa" was
+// typed here until the site settled on one spelling per country
+const typed = topCountry.slice(0, 4).toLowerCase();
+await page.type('.oa-pick-menu:not([hidden]) .oa-pick-search', typed, { delay: 60 });
 eq(await page.$eval('.oa-pick-menu:not([hidden]) .oa-pick-search', (n) => n.value),
-  'usa', 'typing into the picker search lands in order, not reversed');
+  typed, 'typing into the picker search lands in order, not reversed');
 ok(await page.$$eval('.oa-pick-menu:not([hidden]) .oa-opt:not(.is-empty)', (ns) => ns.length > 0),
   'and the typed query still matches its option');
 
