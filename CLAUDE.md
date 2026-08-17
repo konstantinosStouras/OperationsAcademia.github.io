@@ -38,11 +38,27 @@ For the same reason they are excluded from the orphan carry in `build-jobs.mjs`
 (a missing `data/jobmarket.json` still removes nothing — only a file that
 exists and no longer lists a posting does).
 
+Where the two sources describe the SAME advertisement — a row's id is (market
+year, institution, posting date), with no department in it, so they collide —
+**the site's own posting stands and the sheet's is held back** (`ownIds` in
+`build-jobs.mjs`). The sheet is a one-line note; the posting has the full
+department name, the type, the characteristics and the uploaded advert, and 13
+of them lost all four the first time this ran without that rule.
+
 **When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
 never by hand-editing `data/`.** That file is rewritten from the workbook every
 morning, so a patched row comes back the next day, exactly as with the country
 spellings below. Columns are matched by header alias and a header it does not
 know is REPORTED in the run's log rather than guessed at; add the alias there.
+
+Two things about that workbook are worth knowing before touching the parser,
+because both were bugs found only by opening it: the non-tenure-track tab is
+called **`2026 NTTPD`**, one word (`\bntt\b` matched nothing, so the entire
+list was silently skipped), and the institution column is headed **`School` in
+one tab and `Location` in the other** — where `Location 2` is then the town. A
+header that does not name the institution is therefore resolved from the DATA
+(`withInferred`), while everything the header does name, the deadline above
+all, still comes from the header.
 
 A sheet that stops being updated looks exactly like a quiet job market from the
 site, so it is made visible deliberately: `stalenessOf`/`shouldWarn` e-mail the

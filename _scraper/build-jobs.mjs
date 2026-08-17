@@ -358,12 +358,39 @@ async function main() {
      like any other orphan rather than deleted. Only a file that EXISTS and no
      longer lists a posting removes it. */
   const sheetPresent = existsSync(SHEET);
-  const sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
   const fromSheet = (r) => r.source === SHEET_SOURCE;
+  const allSheetRows = sheetPresent ? await readJson(SHEET, []) : [];
+
+  /* THE SHEET NEVER OVERWRITES A POSTING THE SITE ALREADY HAS.
+
+     The two sources overlap: a school advertising on a given day is often in
+     both the tracking sheet and the site's own postings, and a row's id is
+     (market year, institution, posting date) with no department in it — so the
+     same advertisement lands on the same id from either side, and the merge
+     replaces by id.
+
+     Measured on the real workbook, that cost 13 postings real content: Arizona
+     State's "W. P. Carey School of Business, Department of Information
+     Systems" became "IS", its type went from Business School to University,
+     and its six characteristics and its uploaded advert went with them —
+     because the sheet is a one-line note about a posting, not the posting.
+
+     So where both know a posting, the SITE's copy stands and the sheet's is
+     held back. The sheet fills gaps; it does not rewrite what is already
+     there. (A sheet row already published keeps updating itself, of course —
+     only a NON-sheet row wins this.) */
+  const ownIds = new Set([
+    ...existing.filter((r) => !fromSheet(r)).map((r) => r.id),
+    ...fresh.map((f) => f.row.id),
+  ]);
+  const sheetRows = allSheetRows.filter((r) => !ownIds.has(r.id));
+
   if (sheetPresent) {
+    const held = allSheetRows.length - sheetRows.length;
     const goneFromSheet = existing.filter(fromSheet).length -
       existing.filter((r) => fromSheet(r) && sheetRows.some((s) => s.id === r.id)).length;
-    log(`the tracking sheet carries ${sheetRows.length} posting(s)` +
+    log(`the tracking sheet carries ${allSheetRows.length} posting(s)` +
+        (held ? `; ${held} are already published from another source and left alone` : '') +
         (goneFromSheet > 0 ? `; ${goneFromSheet} previously published are no longer in it` : ''));
   }
 

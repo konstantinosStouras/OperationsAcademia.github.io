@@ -223,8 +223,13 @@ export function classifyTab(name) {
   // part of a word
   const rest = s.replace(/\b20\d{2}\b/g, ' ').replace(/[^A-Za-z/&+\- ]+/g, ' ').trim();
 
-  // NTT/PD first: "2026 NTT/PD Jobs" is an NTT tab that happens to say Jobs
-  if (/\bntt\b|\bpd\b|non.?tenure|post.?doc|teaching|visiting|lecturer/i.test(rest)) {
+  /* NTT/PD first: "2026 NTT/PD Jobs" is an NTT tab that happens to say Jobs.
+     `\bntt` has NO trailing word boundary on purpose — the real workbook names
+     the tab "2026 NTTPD", one word, and `\bntt\b` does not match that. It was
+     not a near miss: the tab was classified as nothing at all, so the whole
+     non-tenure-track list — every posting the owner asked about — was silently
+     skipped while the Jobs tab imported fine. */
+  if (/\bntt|\bpd\b|non.?tenure|post.?doc|teaching|visiting|lecturer/i.test(rest)) {
     return { year: Number(year), kind: 'ntt-pd' };
   }
   if (/\bjobs?\b|postings?|tenure.?track|\btt\b|faculty|positions?/i.test(rest)) {
@@ -249,7 +254,9 @@ export function isIntroTab(name) {
 export function conventionalTabs(years) {
   const out = [];
   for (const y of years) {
-    out.push(`${y} Jobs`, `${y} NTT/PD`, `${y} NTT-PD`, `${y} NTT PD`);
+    // "NTTPD" is the spelling the real workbook uses; the other three are the
+    // ones a person would reasonably type instead
+    out.push(`${y} Jobs`, `${y} NTTPD`, `${y} NTT/PD`, `${y} NTT-PD`, `${y} NTT PD`);
   }
   return out;
 }
@@ -419,9 +426,19 @@ export function mapColumns(head) {
 
 const INFER_SHARE = 0.6;
 
-export function inferColumns(rows, { sample = 40 } = {}) {
+/**
+ * `known` is what a header row already established. Passing it matters: those
+ * columns are ANCHORS, not candidates. Re-deriving a column the header already
+ * named lets a coincidence in the data overrule a stated fact — a tab whose
+ * towns are city-states ("Hong Kong, Hong Kong") has two columns that both
+ * read as countries, and the wrong one wins by a hair.
+ */
+export function inferColumns(rows, { sample = 40, known = {} } = {}) {
   const body = rows.slice(0, sample).filter((r) => r.some((c) => text(c, 200)));
-  if (body.length < 2) return { index: {}, unmapped: [], missing: ['institution', 'posted'] };
+  if (body.length < 2) {
+    return { index: { ...known }, unmapped: [],
+             missing: ['institution', 'posted'].filter((f) => !(f in known)) };
+  }
 
   const width = body.reduce((w, r) => Math.max(w, r.length), 0);
   const col = (i) => body.map((r) => text(r[i], 300));
@@ -441,15 +458,16 @@ export function inferColumns(rows, { sample = 40 } = {}) {
     return at;
   };
 
-  const index = {};
-  const taken = new Set();
+  const index = { ...known };
+  const taken = new Set(Object.values(known).filter((i) => i != null));
   const claim = (field, at) => {
+    if (field in index) return;                      // the header already said
     if (at >= 0 && !taken.has(at)) { index[field] = at; taken.add(at); }
   };
 
-  claim('posted', best((v) => !!sheetDay(v)));
+  claim('posted', best((v) => !!sheetDay(v), INFER_SHARE, taken));
   claim('country', best((v) => COUNTRIES.isCanonical(canonCountry(v)) &&
-                               COUNTRIES.LIST.includes(canonCountry(v))));
+                               COUNTRIES.LIST.includes(canonCountry(v)), INFER_SHARE, taken));
   claim('link', best((v) => !!url(v), 0.4, taken));
 
   /* The institution is the leftmost column of ordinary prose — after any
@@ -485,15 +503,91 @@ export function inferColumns(rows, { sample = 40 } = {}) {
 }
 
 /**
+ * Does this row look like a row of HEADINGS rather than a row of data?
+ *
+ * Without this the scan below can accept a posting as the header. It happened
+ * on the real workbook: a data row carried the note "an expected start date of
+ * July 1, 2027", which contains " date " and so matched the `posted` alias
+ * loosely, while the institution cell "University of Hong Kong" matched
+ * `institution` — two fields, enough to be taken for a header, and the whole
+ * tab then read as nothing. Headings are short, and they are never a URL or a
+ * date.
+ */
+export function headerish(row) {
+  const cells = (row || []).map((c) => text(c, 300)).filter(Boolean);
+  if (cells.length < 3) return false;
+  return cells.every((c) => c.length <= 60 && !/^https?:/i.test(c) && !sheetDay(c));
+}
+
+/**
+ * Fill what the header row could not NAME from the data below it.
+ *
+ * The real workbook needs this. Its two tabs head the institution column
+ * differently — "School" in the NTT/PD tab, but "Location" in the Jobs tab,
+ * where the town is "Location 2" — so in the Jobs tab the word "Location"
+ * means the institution while in the other it means the town. No table of
+ * aliases can tell those apart; only the data can, and `inferColumns` reads it
+ * (the country column is the one holding countries, and the institution is the
+ * prose column before it).
+ *
+ * So a header that does not name the institution is still used for everything
+ * it DOES name — the deadline and the rank, which inference cannot find — and
+ * only the institution and the town are taken from the data.
+ */
+export function withInferred(mapped, body) {
+  if (!mapped.missing.includes('institution')) return mapped;
+
+  /* Everything the header DID name is handed to inference as an anchor — all
+     of it except the two fields being re-derived, so the country column named
+     "Country" stays the country column whatever the town cells happen to say. */
+  const known = { ...mapped.index };
+  delete known.institution;
+  delete known.city;
+
+  const guess = inferColumns(body, { known });
+  const at = guess.index.institution;
+  if (at == null) return mapped;
+
+  const index = { ...mapped.index };
+  // release whatever the header gave that column — "Location" claimed as the
+  // town when it is really the institution
+  for (const [k, v] of Object.entries(index)) if (v === at) delete index[k];
+  index.institution = at;
+  if (index.city == null && guess.index.city != null && guess.index.city !== at) {
+    index.city = guess.index.city;
+  }
+
+  /* Recomputed against the FINAL index, not filtered from the old one: the
+     town column is named by the header ("Location 2") but assigned from the
+     data, so reporting it as a column nobody recognised would send the
+     maintainer looking for a fault that is not there. */
+  const claimed = new Set(Object.values(index));
+  return {
+    index,
+    unmapped: (mapped.unmapped || []).filter((u) => !claimed.has(u.at)),
+    missing: ['institution', 'posted'].filter((f) => !(f in index)),
+    fromData: true,
+  };
+}
+
+/**
  * Where the data starts and what each column is.
  *
- * The header scan comes first and is trusted when it finds one; inference is
- * the fallback, and reports itself so a run's log says which was used.
+ * The header scan comes first and is trusted for what it names; inference
+ * fills the rest, and takes over entirely when there is no header row at all.
+ * Which happened is reported, so a run's log says how it read the tab.
  */
 export function resolveColumns(grid, { limit = 8 } = {}) {
   for (let i = 0; i < Math.min(limit, grid.length); i++) {
+    if (!headerish(grid[i])) continue;
     const m = mapColumns(grid[i]);
-    if (!m.missing.length) return { at: i, inferred: false, ...m };
+    /* A header row must name the DATE — the one column nothing else can stand
+       in for, since it is half a posting's identity. The institution may be
+       missing and still be recoverable from the rows below (see withInferred),
+       so it is not required here. Three known columns in all, so a stray line
+       of prose cannot pass. */
+    if (m.missing.includes('posted') || Object.keys(m.index).length < 3) continue;
+    return { at: i, inferred: false, ...withInferred(m, grid.slice(i + 1)) };
   }
   const guess = inferColumns(grid);
   // no header row was recognised, so every row is data
@@ -534,8 +628,12 @@ export function levelsFromRank(rank, kind = '') {
     return ['Non-tenure track (teaching) position'];
   }
 
+  /* THE JOBS TAB WRITES RANKS AS ABBREVIATIONS — "AP", "AP/Assoc",
+     "AP/Assoc/Full", "Open Rank", "Prof/Assoc/AP" — which is how 89 of its 95
+     postings state the rank, so these are the forms that matter most, not the
+     spelled-out ones. */
   const out = [];
-  if (/assistant professor|\bap\b|\bttap\b|tenure.?track|entry.?level/.test(s)) {
+  if (/assistant professor|\bassistant\b|\bap\b|\bttap\b|tenure.?track|entry.?level/.test(s)) {
     out.push('Assistant Professor');
   }
   /* "Other Ranks" is tested against what is LEFT once the entry-level title is
@@ -544,7 +642,7 @@ export function levelsFromRank(rank, kind = '') {
      Professor", and every entry-level post is also filed under Other Ranks,
      which is precisely the noise the Entry level filter exists to remove. */
   const rest = s.replace(/assistant\s+professors?/g, ' ');
-  if (/open.?rank|all ranks|any rank|associate professor|full professor|\bprofessor\b|chair|\bsenior\b|reader/.test(rest)) {
+  if (/open.?rank|all ranks|any rank|associate professor|full professor|\bprofessor\b|\bassoc\w*\b|\basso\b|\bfull\b|\bprof\b|chair|\bsenior\b|reader/.test(rest)) {
     out.push('Other Ranks');
   }
   return out.length ? out : ['Other Ranks'];

@@ -17,7 +17,7 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { marketYear } from './jobs-model.mjs';
+import { marketYear, inCurrentMarket } from './jobs-model.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -87,21 +87,22 @@ eq(await page.$$eval('.oa-card', (n) => n.length), Math.min(10, total),
 
 /* The page shows only the market year under way, so early in a season the
    list is genuinely short. Assert the SCOPE rather than a count: every
-   rendered row must satisfy the same rule jobs.html filters by. */
-const marketStart = (() => {
-  const d = new Date();
-  const y = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
-  return (y - 1) + '-07-01';
-})();
-const outOfMarket = await page.evaluate(async (start) => {
-  const rows = await (await fetch('data/jobs.json')).json();
-  const y = Number(start.slice(0, 4)) + 1;
-  return {
-    shownOld: 0, // the cards carry no year attribute; the fetch re-check below stands in
-    fileHasOld: rows.some((r) => String(r.posted || '') < start && Number(r.year) < y),
-    inScope: rows.filter((r) => String(r.posted || '') >= start || Number(r.year) >= y).length,
-  };
-}, marketStart);
+   rendered row must satisfy the same rule jobs.html filters by.
+
+   Counted with the MODEL's own predicate rather than a copy of it.
+
+   The copy that used to live here had two of `inCurrentMarket`'s three legs —
+   posted-inside-the-season and tagged-for-the-season — and silently omitted the
+   third, an advertisement whose DEADLINE has not passed yet. That leg is the
+   one the roll turns on (a posting made in May with a September deadline must
+   not vanish on 2 July), so the copy did not merely duplicate the rule, it
+   contradicted it: the page was right and this check was wrong the moment the
+   data contained such a posting. Six arrived with the tracking sheet. */
+const allRows = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+const outOfMarket = {
+  fileHasOld: allRows.some((r) => !inCurrentMarket(r)),
+  inScope: allRows.filter((r) => inCurrentMarket(r)).length,
+};
 eq(total, outOfMarket.inScope,
   'the list carries exactly the current market year\'s postings');
 ok(outOfMarket.fileHasOld,
@@ -1549,12 +1550,11 @@ for (const [name, expect] of [
      from the files, so the fold-in cannot silently stop working */
   const past = JSON.parse(await readFile(path.join(ROOT, 'data', 'past-postings.json'), 'utf8'));
   const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
-  const d = new Date();
-  const yr = d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
-  const start = `${yr - 1}-07-01`;
   const ids = new Set(past.map((r) => r.id));
-  const folded = jobs.filter((r) =>
-    !(String(r.posted || '') >= start || Number(r.year) >= yr) && !ids.has(r.id));
+  // the exact complement of the jobs page, by the model's own predicate — the
+  // two pages partition the dataset, so a copy of the rule that differed from
+  // it would make some posting appear on both pages or on neither
+  const folded = jobs.filter((r) => !inCurrentMarket(r) && !ids.has(r.id));
   const total = Number((await p.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
   eq(total, past.length + folded.length,
     'previous-markets: the archive plus every jobs row that left the current market');

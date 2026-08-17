@@ -27,7 +27,7 @@ import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.m
 import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
 import {
   sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
-  inferColumns, resolveColumns, levelsFromRank, typeFromNames, rowsFromTab, collectRows,
+  inferColumns, resolveColumns, headerish, levelsFromRank, typeFromNames, rowsFromTab, collectRows,
   stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
   tabsFromHtml, sheetIdsFromHtml, sheetId, sheetCsvUrl, sheetHtmlUrl,
   emptyRegistry, adoptSheets, activeSheets, rollRegistry,
@@ -1651,6 +1651,104 @@ function testJobMarketSheetParsing() {
     'the field column can name the school when the institution does not');
 }
 
+/* ------------------------------------------- read from the REAL workbook
+
+   Everything above was written against the rows the owner pasted. These are
+   the things only the workbook itself could tell us, each of which was a bug
+   found by opening it (Drive, 2026-08-17) rather than by reasoning:
+
+     - the NTT/PD tab is called "2026 NTTPD", one word;
+     - its institution column is headed "School", but the Jobs tab heads the
+       SAME column "Location" and its town "Location 2";
+     - the Jobs tab writes ranks as abbreviations — "AP/Assoc/Full" — which is
+       how 89 of its 95 postings state the rank.
+
+   They are pinned here so a future tidy-up cannot quietly undo them.          */
+
+function testJobMarketSheetRealWorkbook() {
+  /* THE TAB NAME. `\bntt\b` does not match "NTTPD", so the tab classified as
+     nothing at all and the entire non-tenure-track list — every posting the
+     owner asked about — was skipped while the Jobs tab imported fine. */
+  eq(classifyTab('2026 NTTPD'), { year: 2026, kind: 'ntt-pd' },
+    'the workbook\'s own tab name, which is NTTPD as one word');
+  eq(classifyTab('2025 NTTPD'), { year: 2025, kind: 'ntt-pd' }, 'in every season');
+  ok(conventionalTabs([2026]).includes('2026 NTTPD'),
+    'and the fallback names try that spelling first');
+  eq(classifyTab('2026 Q&A'), null, 'the workbook\'s Q&A tab is not a data tab');
+  eq(classifyTab('2025 Placements'), null, 'nor is its placements tab');
+  eq(classifyTab('Interview Questions'), null, 'nor a tab with no year at all');
+
+  /* THE HEADER ROW. A row of data must never be taken for the header: one
+     carried the note "an expected start date of July 1, 2027", whose " date "
+     matched the `posted` alias loosely, while "University of Hong Kong"
+     matched `institution` — two fields, enough to be accepted, and the tab
+     then read as nothing at all. */
+  const JOBS_HEAD = ['#', 'Location', 'Location 2', 'Country', 'Date Added',
+    'Job Focus Area', 'Rank', 'Salary', 'Teaching Load', 'Deadline', 'Link',
+    '# of Positions'];
+  const JOBS_ROW = ['1', 'University of Hong Kong', 'Hong Kong', 'Hong Kong', '23-Apr-26',
+    'BA', 'AP/Assoc/Full', '', '', '', 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1',
+    'an expected start date of July 1, 2027'];
+
+  ok(headerish(JOBS_HEAD), 'a row of headings looks like one');
+  ok(!headerish(JOBS_ROW), 'a row of data does not — it carries a URL and a date');
+  ok(!headerish(['DO NOT FILTER OR SORT', '', '']),
+    'and neither does the notice the workbook keeps above its header');
+
+  /* THE AMBIGUOUS HEADER. "Location" is the INSTITUTION in the Jobs tab and
+     the TOWN in the NTT/PD tab, so no table of aliases can tell them apart —
+     only the data can. */
+  const jobs = resolveColumns([JOBS_HEAD, JOBS_ROW, JOBS_ROW, JOBS_ROW]);
+  eq(jobs.at, 0, 'the header row is found');
+  eq(jobs.missing, [], 'and every column it must have is resolved');
+  eq(jobs.index.institution, 1,
+    '"Location" is read as the institution here, because the data says so');
+  eq(jobs.index.city, 2, 'and "Location 2" as the town');
+  eq(jobs.index.posted, 4, 'the date column is the one the header names');
+  eq(jobs.index.deadline, 9,
+    'and so is the deadline — which no amount of looking at the data could find');
+  ok(jobs.fromData, 'the run says the institution came from the data');
+  ok(!jobs.unmapped.some((u) => u.header === 'Location 2'),
+    'a column the header could not name but the data could is NOT reported as ' +
+    'unrecognised — that would send the maintainer hunting for a fault that is not there');
+
+  const ntt = resolveColumns([
+    ['DO NOT FILTER OR SORT', '', ''],
+    ['#', 'School', 'Location', 'Country', 'Date Added', 'Job Focus Area', 'Rank'],
+    ['1', 'Clarkson University', 'Potsdam, NY', 'USA', '20-Jul-26', 'OM', 'Lecturer'],
+  ]);
+  eq(ntt.at, 1, 'the other tab keeps its notice row above the header');
+  eq(ntt.index.institution, 1, 'names its institution column "School"');
+  eq(ntt.index.city, 2, 'and uses "Location" for the town — the opposite of the Jobs tab');
+  ok(!ntt.fromData, 'so its header needs no help from the data');
+
+  /* THE RANKS, as the Jobs tab actually writes them. Every one of these was
+     read as entry-level-only or as nothing before. */
+  eq(levelsFromRank('AP'), ['Assistant Professor'], 'the abbreviation 53 postings use');
+  eq(levelsFromRank('AP/Assoc'), ['Assistant Professor', 'Other Ranks'],
+    'a search open to two ranks is BOTH — filed as entry-level alone it would ' +
+    'be missing from the Other Ranks filter');
+  eq(levelsFromRank('AP/Assoc/Full'), ['Assistant Professor', 'Other Ranks'], 'and to three');
+  eq(levelsFromRank('Prof/Assoc/AP'), ['Assistant Professor', 'Other Ranks'],
+    'however the abbreviations are ordered');
+  eq(levelsFromRank('Assistant/ Associate Professor'), ['Assistant Professor', 'Other Ranks'],
+    'and spelled out, with the spacing the sheet happens to use');
+  eq(levelsFromRank('Assistant/Open rank'), ['Assistant Professor', 'Other Ranks'], 'or mixed');
+  eq(levelsFromRank('Full'), ['Other Ranks'], 'a full professorship is not entry level');
+  eq(levelsFromRank('Assoc/Full'), ['Other Ranks'], 'nor is a senior search');
+  eq(levelsFromRank('Asso/Full'), ['Other Ranks'], 'even with the sheet\'s typo');
+  eq(levelsFromRank('Open Rank'), ['Other Ranks'], 'and an open-rank search stays as it was');
+
+  // the NTT/PD tab's wordier titles, which were already right and must stay so
+  eq(levelsFromRank('Faculty Position (Open Rank), Non-tenure Track'),
+    ['Non-tenure track (teaching) position'],
+    'an open-rank NON-TENURE-TRACK post is not an open-rank professorship');
+  eq(levelsFromRank('Visiting Assistant Teaching Professor'),
+    ['Visiting Faculty (various levels)'], 'a visiting post is visiting first');
+  eq(levelsFromRank('Asst. Lecturer / Asst. Teaching Professor'),
+    ['Non-tenure track (teaching) position'], 'and a teaching post is teaching');
+}
+
 function testJobMarketSheetColumns() {
   const head = mapColumns(JMS_HEAD);
   eq(head.missing, [], 'the sheet\'s own header row maps the columns it must have');
@@ -1929,6 +2027,13 @@ async function testJobMarketSheetWiring() {
     'a posting deleted from the sheet leaves the site — it is not carried as an orphan');
   ok(build.includes('sheetPresent = existsSync(SHEET)'),
     'though a MISSING file is not an empty sheet, and removes nothing');
+  /* The two sources overlap, and a row's id carries no department, so the same
+     advertisement lands on the same id from either side. Measured on the real
+     workbook: 13 postings lost their full department name, their type, their
+     characteristics and their uploaded advert to a one-line sheet note. */
+  ok(build.includes('const ownIds = new Set(') && /sheetRows = allSheetRows\.filter/.test(build),
+    'a posting the site already has from another source is NOT overwritten by ' +
+    'the sheet\'s one-line copy of it');
 
   const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
   ok(sync.includes('the dataset was left exactly as it is'),
@@ -1995,6 +2100,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testCountries();
   await testSubmissionKeyCeilings();
   testJobMarketSheetParsing();
+  testJobMarketSheetRealWorkbook();
   testJobMarketSheetColumns();
   testJobMarketSheetRows();
   testJobMarketSheetAddedAt();
