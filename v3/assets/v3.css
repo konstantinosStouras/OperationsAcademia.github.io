@@ -800,7 +800,29 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 /* the section heading lives INSIDE the text column here, so it needs the
    in-column rhythm, not the section-lead 36px */
 .v3-about-grid .v3-section-head { margin-bottom: 18px; }
-.v3-about-portrait { margin: 0; text-align: center; }
+/* The portrait block is ~341px tall against ~543px of heading + prose, so
+   top-aligning it dumped the whole 202px difference into an empty well under
+   the icon row (352px at 900px wide) and left the photo's centre of gravity
+   153px above the text's — the section read top-heavy (owner, 2026-08-17:
+   "align my picture in the center of the text"). Centring the figure splits
+   that slack evenly (101/101 at the 1120px container, and evenly at every
+   other width by construction) and lands the top of the disc a few px above
+   the first prose line's cap height — the overshoot a round form needs to
+   read as aligned with flat text.
+   align-self HERE, deliberately, rather than align-items:center on the grid:
+   the TEXT column must keep `start`, so that if the prose is ever shorter
+   than the portrait the heading still sits at the very top and nothing can
+   appear above the picture. Inert in the <=800px block: one column per row,
+   each sized to its content.
+   The travel is deliberately UNCAPPED, which is right while the About runs to
+   three paragraphs or fewer — measured, the disc lands in the same place
+   either way (101px down at 1440, 227px at 805). Grown to five paragraphs or
+   more, centring walks the photo down with the text (262px at five, 484px at
+   eight) until it reads as orphaned mid-column; the fix THEN is to cap the
+   travel — `align-self: stretch; display: flex; flex-direction: column;
+   justify-content: center; max-height: 800px` — which holds it at ~230px.
+   Not shipped today because at this length it changes nothing. */
+.v3-about-portrait { margin: 0; text-align: center; align-self: center; }
 .v3-about-portrait img {
   width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
   border: 1px solid var(--line); box-shadow: var(--shadow);
@@ -810,6 +832,21 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 }
 .v3-about-portrait figcaption { margin-top: 14px; font-size: 13.5px; line-height: 1.5; }
 .v3-about-portrait figcaption strong { display: block; color: var(--ink); font-size: 14.5px; }
+/* the name links to stouras.com (owner, 2026-08-17) but must still READ as a
+   name, not as a link in a row of links — ink-coloured and bold like the
+   <strong> it replaced, showing its brand colour + underline only on hover.
+   Two classes deep so it out-ranks the caption's generic 'a' rule below. */
+.v3-about-portrait figcaption .v3-portrait-name {
+  display: block;
+  margin-top: 0;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.v3-about-portrait figcaption .v3-portrait-name:hover {
+  color: var(--brand);
+  text-decoration: underline;
+}
 .v3-about-portrait figcaption span { display: block; color: var(--mut); margin-top: 3px; }
 .v3-about-portrait figcaption a { display: inline-block; color: var(--brand); margin-top: 5px; }
 /* the profile-icon row under the caption — the same four links as
