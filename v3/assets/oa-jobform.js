@@ -18,12 +18,53 @@
 (function () {
   'use strict';
 
+  /* Every country, so a poster never has to wonder whether theirs is missing
+     (owner, 2026-08-17 — the list was 34 entries and stopped at the countries
+     that had posted before). It is a DATALIST, i.e. a hint on a free-text
+     field: a campus in a place not named here can still be typed, exactly as
+     before. Alphabetical, because at this length "most likely first" is no
+     longer a thing a reader can see.
+
+     THE SPELLINGS ARE THE SITE'S OWN and must not be tidied: 'USA' (not
+     'United States') and 'United Kingdom' are what the published rows carry,
+     and the jobs page's Location filter groups by the exact string — so
+     renaming one here would split that country into two filter entries.
+     _scraper/selftest.mjs pins the whole list, both copies of it, and every
+     one of the original 34 spellings. */
   var COUNTRIES = [
-    'USA', 'Canada', 'United Kingdom', 'Ireland', 'France', 'Germany', 'Netherlands',
-    'Belgium', 'Spain', 'Portugal', 'Italy', 'Switzerland', 'Austria', 'Denmark',
-    'Sweden', 'Norway', 'Finland', 'Greece', 'Turkey', 'Israel', 'India', 'China',
-    'Hong Kong', 'Singapore', 'Japan', 'South Korea', 'Taiwan', 'Australia',
-    'New Zealand', 'Brazil', 'Chile', 'Mexico', 'South Africa', 'United Arab Emirates'
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda',
+    'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain',
+    'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda',
+    'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei',
+    'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada',
+    'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia',
+    'Comoros', 'Costa Rica', 'Croatia', 'Cuba', 'Curacao', 'Cyprus', 'Czech Republic',
+    'Democratic Republic of the Congo', 'Denmark', 'Djibouti', 'Dominica',
+    'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador',
+    'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Faroe Islands',
+    'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana',
+    'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guatemala', 'Guinea',
+    'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland',
+    'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Ivory Coast',
+    'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo', 'Kuwait',
+    'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya',
+    'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macau', 'Madagascar', 'Malawi',
+    'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania',
+    'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro',
+    'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
+    'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia',
+    'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestine', 'Panama', 'Papua New Guinea',
+    'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar',
+    'Republic of the Congo', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis',
+    'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino',
+    'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles',
+    'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia',
+    'South Africa', 'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan',
+    'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania',
+    'Thailand', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey',
+    'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates',
+    'United Kingdom', 'Uruguay', 'USA', 'Uzbekistan', 'Vanuatu', 'Vatican City',
+    'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
   ];
 
   var MAX = {
@@ -68,18 +109,41 @@
         dl.appendChild(o);
       });
     }
-    var y = $('f-year');
-    if (y) {
-      var years = jobMarketYears();
-      years.list.forEach(function (v) {
-        var o = document.createElement('option');
-        o.value = String(v);
-        o.textContent = (v - 1) + '\u2013' + v + '  (\u201c' + v + '\u201d)';
-        if (v === years.current) o.selected = true;
-        y.appendChild(o);
-      });
-    }
+    paintYearNote();
   }
+
+  /* ------------------------------------------------------- the market year
+
+     ASKED OF NOBODY (owner, 2026-08-17). "Job market year" was a required
+     dropdown whose answer is a function of the calendar — the academic year
+     2025-2026 is "2026" — so it was a question the site could always answer
+     itself, and posters read it as being about the job rather than about
+     the date. It is derived here and merely STATED on the form.
+
+     A NEW posting takes the season under way. An EDIT keeps the season it was
+     filed in: a correction is not a re-filing, the same reasoning that leaves
+     `createdAt` alone. That also closes a quiet bug in the old form — the
+     dropdown reloaded at its DEFAULT when an older posting was opened for
+     editing, so fixing a typo silently moved it into the current market.
+
+     The value is not decoration: the jobs page shows the market under way
+     (inCurrentMarket in _scraper/jobs-model.mjs) and _firestore.rules requires
+     `year` to be an int in 2000-2100. */
+  var EDIT_YEAR = 0;
+
+  function postingYear() {
+    return (EDIT_ID && EDIT_YEAR) || jobMarketYears().current;
+  }
+
+  function paintYearNote() {
+    var el = $('oa-year-note');
+    if (!el) return;
+    var y = postingYear();
+    el.textContent = (EDIT_ID ? 'Listed under the ' : 'Will be listed under the ') +
+      (y - 1) + '\u2013' + y + ' job market \u2014 worked out from the date, ' +
+      'so there is nothing to choose.';
+  }
+
 
   function checked(name) {
     return Array.prototype.slice
@@ -216,7 +280,7 @@
       setError($('f-chairEmail'), '');
     }
 
-    out.year = parseInt($('f-year').value, 10) || jobMarketYears().current;
+    out.year = postingYear();
     out.applyByNote = String($('f-applyByNote').value || '').trim().slice(0, MAX.applyByNote);
     out.comments = String($('f-comments').value || '').trim().slice(0, MAX.comments);
     out.characteristics = checked('characteristics');
@@ -511,6 +575,9 @@
       var d = $('f-applyByDate');
       if (d) d.disabled = uf.checked;
     }
+
+    EDIT_YEAR = Number(v.year) || 0;
+    paintYearNote();                 // the posting's own season, never today's
 
     EDIT_REF = v.ref || '';
 

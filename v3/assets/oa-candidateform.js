@@ -64,18 +64,36 @@
     return { list: [base - 1, base, base + 1], current: base };
   }
 
-  function fillStaticOptions() {
-    var y = $('f-year');
-    if (y) {
-      var years = jobMarketYears();
-      years.list.forEach(function (v) {
-        var o = document.createElement('option');
-        o.value = String(v);
-        o.textContent = (v - 1) + '–' + v + '  (“' + v + '”)';
-        if (v === years.current) o.selected = true;
-        y.appendChild(o);
-      });
-    }
+  /* ------------------------------------------------------- the market year
+
+     ASKED OF NOBODY (owner, 2026-08-17). "Job market year" was a required
+     dropdown whose answer is a function of the calendar — the academic year
+     2025-2026 is "2026" — so it was a question the site could always answer
+     itself, and posters read it as being about the candidate rather than about
+     the date. It is derived here and merely STATED on the form.
+
+     A NEW profile takes the season under way. An EDIT keeps the season it was
+     filed in: a correction is not a re-filing, the same reasoning that leaves
+     `createdAt` alone. That also closes a quiet bug in the old form — the
+     dropdown reloaded at its DEFAULT when an older profile was opened for
+     editing, so fixing a typo silently moved it into the current market.
+
+     The value is not decoration: the jobs page shows the market under way
+     (inCurrentMarket in _scraper/jobs-model.mjs) and _firestore.rules requires
+     `year` to be an int in 2000-2100. */
+  var EDIT_YEAR = 0;
+
+  function postingYear() {
+    return (EDIT_ID && EDIT_YEAR) || jobMarketYears().current;
+  }
+
+  function paintYearNote() {
+    var el = $('oa-year-note');
+    if (!el) return;
+    var y = postingYear();
+    el.textContent = (EDIT_ID ? 'Listed under the ' : 'Will be listed under the ') +
+      (y - 1) + '\u2013' + y + ' job market \u2014 worked out from the date, ' +
+      'so there is nothing to choose.';
   }
 
   function checked(name) {
@@ -163,7 +181,7 @@
       }
     }
 
-    out.year = parseInt($('f-year').value, 10) || jobMarketYears().current;
+    out.year = postingYear();
     out.note = String($('f-note').value || '').trim().slice(0, MAX.note);
 
     if (firstBad) {
@@ -406,7 +424,8 @@
     set('f-last', v.last);
     set('f-affiliation', v.affiliation);
     set('f-position', v.position);
-    if (v.year) set('f-year', String(v.year));
+    EDIT_YEAR = Number(v.year) || 0;
+    paintYearNote();                 // the profile's own season, never today's
     set('f-cvUrl', v.cvUrl);
     set('f-rsUrl', v.rsUrl);
     set('f-webUrl', v.webUrl);
@@ -549,7 +568,7 @@
     rsSlot = makeSlot('rs', 'research summary');
     enterEditMode();
     wireTakeDown();
-    fillStaticOptions();
+    paintYearNote();
 
     var sent = false;                 // latched once the profile has been written
     var form = $('oa-cand-form');

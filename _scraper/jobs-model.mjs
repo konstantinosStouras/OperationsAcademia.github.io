@@ -214,26 +214,58 @@ export function marketStart(now = new Date()) {
 }
 
 /**
+ * Is this posting still open for applications at `now`?
+ *
+ * The deadline DATE is the only signal. `applyByDate` is empty exactly when
+ * the search is open-ended ("Until filled", per OPEN_ENDED_RX) or no deadline
+ * was given at all — so an empty date is not an open deadline here, it is the
+ * ABSENCE of one, and cannot keep a posting on the page for ever.
+ *
+ * A deadline falling today still counts: applications close at the end of the
+ * day named, not at the midnight before it.
+ */
+export function deadlineOpen(row, now = new Date()) {
+  const day = String(row.applyByDate || '');
+  return !!day && day >= now.toISOString().slice(0, 10);
+}
+
+/**
  * Does this row belong on THE JOBS PAGE, which shows only the market year
  * under way? (Owner decision 2026-08-16, superseding the two-season window:
  * the previous seasons live at /v1 and in the git history, not on the page.)
  *
- * A row qualifies EITHER way it can say so:
+ * A row qualifies ANY way it can say so:
+ *   - its DEADLINE has not passed — the advertisement is still open, and an
+ *     open advertisement is the one thing this page exists to show; or
  *   - it was POSTED inside the current market year (on or after 1 July), or
  *   - its poster TAGGED it for the current market year or a later one.
  *
- * Both legs are needed. Posting date alone would drop a posting filed in May
- * for the season starting in September (the 2028 Kansas row); the tag alone
- * would drop postings still being filed under the previous season's label
- * weeks after the roll (the July Mannheim row) — the poster picks that field
- * by hand and is often a season behind.
+ * All three legs are needed. Posting date alone would drop a posting filed in
+ * May for the season starting in September (the 2028 Kansas row); the tag
+ * alone would drop postings still being filed under the previous season's
+ * label weeks after the roll (the July Mannheim row) — the poster picks that
+ * field by hand and is often a season behind.
+ *
+ * THE DEADLINE LEG IS WHAT THE ROLL TURNS ON (owner, 2026-08-17). Without it,
+ * 1 July swept away every posting of the season just ended even when its
+ * closing date was still weeks away: a job advertised in May 2027 with a
+ * 30 September deadline vanished from the site on 2 July, while applications
+ * were still open. With it, such a posting stays until its date passes, and
+ * a posting with NO fixed deadline is cleared by the roll — which is the
+ * intended asymmetry: an "until filled" advertisement from a season that has
+ * ended is stale by definition, and belongs in the past-market archive.
+ *
+ * That archive is exactly the complement of this predicate
+ * (previous-markets.html filters on `!inCurrentMarket`), so every row is on
+ * one page or the other — never both, never neither.
  *
  * Note MARKET_WINDOW above still governs the SHEET IMPORT's reach, on
  * purpose: the import must capture late filings under the old label so this
  * predicate — not the import's scope — is what decides the page.
  */
 export function inCurrentMarket(row, now = new Date()) {
-  return String(row.posted || '') >= marketStart(now)
+  return deadlineOpen(row, now)
+      || String(row.posted || '') >= marketStart(now)
       || Number(row.year) >= marketYear(now);
 }
 
