@@ -672,7 +672,13 @@
       function marketLabel() { var y = marketYear(); return (y - 1) + '-' + y; }
       function inCurrentMarket(row) {
         var start = (marketYear() - 1) + '-07-01';
-        return String(row.posted || '') >= start || Number(row.year) >= marketYear();
+        /* An OPEN deadline keeps a posting on the page whatever season it was
+           filed in (owner, 2026-08-17) — applications close on the day named,
+           so today still counts. An empty applyByDate is the ABSENCE of a
+           deadline ("Until filled"), not an open one, so the roll clears it. */
+        var deadline = String(row.applyByDate || '');
+        return (!!deadline && deadline >= new Date().toISOString().slice(0, 10)) ||
+          String(row.posted || '') >= start || Number(row.year) >= marketYear();
       }
 
       document.getElementById('oa-jobs-heading').textContent =

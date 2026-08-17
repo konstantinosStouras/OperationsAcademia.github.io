@@ -3,6 +3,20 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "posting-forms-simpler",
+   "date": "2026-08-17",
+   "title": "Posting is simpler: every country listed, and no more \u201cjob market year\u201d to work out",
+   "summary": "The country box on the job form now offers every country in the world, not just the three dozen that had posted before \u2014 and you can still type one that is not listed. The \u201cJob market year\u201d question is gone from the job and candidate forms: the site works the season out from the date and simply tells you which one your posting lands in. (Reporting a placement still asks, because an offer accepted in the spring and reported in the autumn belongs to the market it was accepted in.) Correcting an older posting now also keeps it in its own season instead of quietly moving it to the current one.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
+   "id": "jobs-open-until-deadline",
+   "date": "2026-08-17",
+   "title": "A job posting now stays listed until its deadline passes",
+   "summary": "Job postings used to disappear from the list when the job market year rolled over on 1 July, even when applications were still open \u2014 an advert posted in May with a September deadline vanished in July. Now a posting stays on the job postings page for as long as its closing date has not passed, whichever season it was filed in. Postings with no fixed deadline (\u201cuntil filled\u201d) still move to the past-markets archive when the new market year begins.",
+   "url": "https://www.operationsacademia.org/jobs"
+  },
+  {
    "id": "merge-moves-every-posting",
    "date": "2026-08-17",
    "title": "Merging two accounts now moves every posting you own",

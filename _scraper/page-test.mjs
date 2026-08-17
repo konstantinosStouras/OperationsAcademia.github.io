@@ -17,6 +17,7 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { marketYear } from './jobs-model.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -1066,6 +1067,11 @@ for (const [name, expect] of [
     await q.fill('#f-firstName', 'Kon');
     await q.fill('#f-lastName', 'Stouras');
     await q.fill('#f-email', 'kon@example.edu');
+    const noYearField = await q.evaluate(() => !document.getElementById('f-year'));
+    const yearNote = await q.evaluate(() => {
+      const n = document.getElementById('oa-year-note');
+      return n ? n.textContent : '';
+    });
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     const ref = await q.textContent('#oa-ref');
@@ -1074,7 +1080,7 @@ for (const [name, expect] of [
       const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
       return d[k];
     });
-    return { ref, doc };
+    return { ref, doc, noYearField, yearNote };
   });
   ok(/^OA-JOB-\d{6}-[A-Z2-9]{4}$/.test(posted.ref.trim()),
     'v3 post-a-job: the poster is given a quotable reference');
@@ -1082,6 +1088,12 @@ for (const [name, expect] of [
   eq(posted.doc.uid, KEPT, 'and owned by the signed-in poster');
   eq(posted.doc.department, 'Business School, Operations Area',
     'school and unit are joined into the published department line');
+  eq(posted.doc.year, marketYear(),
+    'the job market year is derived from the date, never asked (the form has no picker)');
+  eq(posted.noYearField, true,
+    'and the form does not ask for it — it states what it worked out instead');
+  ok(posted.yearNote.includes(`${marketYear() - 1}\u2013${marketYear()}`),
+    `the form SAYS which season the posting lands in (${marketYear() - 1}-${marketYear()}), so nothing is hidden`);
 
   /* -- correct it (the edit path), on /v3/ --------------------------------- */
 
@@ -1091,7 +1103,10 @@ for (const [name, expect] of [
       uid: KEPT, status: 'published', ref: 'OA-JOB-260810-EEEE', institution: 'Edit U',
       school: 'School X', unit: 'Unit Y', department: 'School X, Unit Y', country: 'USA',
       type: 'University', levels: ['Post-Doc'], applyByDate: '2026-12-01', untilFilled: false,
-      firstName: 'A', lastName: 'B', email: 'a@b.edu', year: 2027,
+      firstName: 'A', lastName: 'B', email: 'a@b.edu',
+      // deliberately an OLDER season than the one under way: re-stamping it
+      // on save is the bug the derived year had to close
+      year: 2026,
       createdAt: '2026-08-10T00:00:00.000Z',
     } }],
   };
@@ -1115,6 +1130,8 @@ for (const [name, expect] of [
   eq(edited.doc.institution, 'Edit University (fixed)', 'the correction is saved');
   eq(edited.doc.uid, KEPT, 'the owner is unchanged by an edit');
   eq(edited.doc.status, 'queued', 'and the build re-publishes it');
+  eq(edited.doc.year, 2026,
+    'correcting a posting KEEPS its own market year — a typo fix must not move it to this season');
 
   /* -- take one down from My postings -------------------------------------- */
 
@@ -1153,6 +1170,8 @@ for (const [name, expect] of [
   eq(cand.doc.uid, KEPT, 'and owned by the signed-in candidate');
   eq(cand.doc.emailPublic, false,
     'the e-mail address stays private unless the candidate opted in');
+  eq(cand.doc.year, marketYear(),
+    'and its market year is derived from the date, like the job form\u2019s');
 
   /* -- report a placement on /v3/ ------------------------------------------ */
 

@@ -18,7 +18,7 @@ import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
-  submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, marketStart,
+  submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
@@ -476,7 +476,7 @@ async function testFleetPins() {
     "the page's market start is 1 July, the model's own roll day");
   ok(/prepare:\s*function \(rows\) \{ return rows\.filter\(inCurrentMarket\); \}/.test(jobsHtml),
     'and the filter is wired into the list as its prepare step');
-  // the model's own predicate, both legs
+  // the model's own predicate, all three legs
   const NOWM = new Date('2026-08-16T12:00:00Z');
   ok(inCurrentMarket({ posted: '2026-07-20', year: 2026 }, NOWM),
     'posted after the roll counts, whatever the tag says');
@@ -487,6 +487,44 @@ async function testFleetPins() {
   ok(!inCurrentMarket({ posted: '2026-06-30', year: 2026 }, NOWM),
     'the previous season is out — posted before the roll, tagged before it');
   ok(marketStart(NOWM) === '2026-07-01', 'marketStart is 1 July of the season under way');
+
+  /* THE DEADLINE LEG (owner, 2026-08-17). An advertisement whose closing date
+     has not passed stays on the page across the roll; one with no fixed
+     deadline is cleared by it. Read the four together — they are the rule. */
+  ok(deadlineOpen({ applyByDate: '2026-09-30' }, NOWM), 'a future deadline is open');
+  ok(deadlineOpen({ applyByDate: '2026-08-16' }, NOWM),
+    'a deadline falling TODAY is still open — applications close at the end of the day');
+  ok(!deadlineOpen({ applyByDate: '2026-08-15' }, NOWM), 'yesterday is closed');
+  ok(!deadlineOpen({ applyByDate: '' }, NOWM),
+    'an empty date is the ABSENCE of a deadline ("Until filled"), never an open one');
+
+  // the season has rolled (market 2028) and these were filed in the one before
+  const AFTER = new Date('2027-07-02T12:00:00Z');
+  ok(inCurrentMarket({ posted: '2027-05-10', year: 2027, applyByDate: '2027-09-30' }, AFTER),
+    'a posting still open for applications survives the roll');
+  ok(!inCurrentMarket({ posted: '2027-05-10', year: 2027, applyByDate: '' }, AFTER),
+    'an "until filled" posting from the season just ended is cleared by the roll');
+  ok(!inCurrentMarket({ posted: '2027-05-10', year: 2027, applyByDate: '2027-06-01' }, AFTER),
+    'and so is one whose deadline has passed');
+
+  /* The archive is the exact complement, so every row lands on one page or
+     the other. previous-markets.html filters on !inCurrentMarket, and its
+     inline copy has to carry the deadline leg too — without it a posting that
+     is still open would be listed as a PAST market while the jobs page shows
+     it as current. */
+  const pastHtml = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(/!inCurrentMarket\(r\)/.test(pastHtml),
+    'the past-markets archive is the complement of the jobs page');
+  for (const [rel, html] of [
+    ['jobs.html', jobsHtml],
+    ['previous-markets.html', pastHtml],
+    ['v3/jobs.html', await readFile(path.join(HERE, '..', 'v3', 'jobs.html'), 'utf8')],
+    ['v3/index.html', await readFile(path.join(HERE, '..', 'v3', 'index.html'), 'utf8')],
+  ]) {
+    ok(/var deadline = String\(row\.applyByDate \|\| ''\);/.test(html) &&
+       /deadline >= (?:d|new Date\(\))\.toISOString\(\)\.slice\(0, 10\)/.test(html),
+      `${rel}: its inline copy carries the deadline leg, like the model`);
+  }
 
   // candidates.html mirrors the same two inline rules jobs.html does — the
   // derived heading and the current-market filter — pinned the same way.
@@ -722,6 +760,113 @@ async function testAccountMerge() {
   const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
   for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'criteria', 'enabled']) {
     ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
+  }
+}
+
+/* --------------------------------------------------- the derived market year
+
+   "Job market year" was a required dropdown on all three forms. Its answer is
+   a function of the calendar, so on the two forms where the filing date IS the
+   answer it is now derived and merely stated (owner, 2026-08-17).
+
+   The placement form KEEPS its picker deliberately: a placement accepted in
+   the spring and reported after the 1 July roll belongs to the market it was
+   accepted in, which no date on the submission can tell us.
+
+   Two failure modes are pinned here. A form that still asks would be the
+   change not landing; a form that RE-STAMPS the year when an old posting is
+   edited would silently move it into the current market — which is what the
+   defaulted dropdown did, and is why edit mode keeps the stored value. */
+
+async function testDerivedMarketYear() {
+  for (const [page, script, noun] of [
+    ['post-a-job.html', 'oa-jobform.js', 'posting'],
+    ['post-a-candidate.html', 'oa-candidateform.js', 'profile'],
+  ]) {
+    for (const dir of [[], ['v3']]) {
+      const where = [...dir, page].join('/');
+      const html = await readFile(path.join(HERE, '..', ...dir, page), 'utf8');
+      ok(!/id="f-year"/.test(html), `${where}: the year dropdown is gone`);
+      ok(!/Job market year/.test(html), `${where}: and so is the question`);
+      ok(/id="oa-year-note"/.test(html),
+        `${where}: the season is stated instead, so nothing is hidden from the ${noun}`);
+
+      const js = await readFile(
+        path.join(HERE, '..', ...dir, 'assets', script), 'utf8');
+      ok(/out\.year = postingYear\(\);/.test(js),
+        `${where}: the year is derived, not read from the form`);
+      ok(/return \(EDIT_ID && EDIT_YEAR\) \|\| jobMarketYears\(\)\.current;/.test(js),
+        `${where}: an edit keeps the season it was filed in, a new one takes today's`);
+      ok(/EDIT_YEAR = Number\(v\.year\) \|\| 0;/.test(js),
+        `${where}: and the stored season is captured when the document loads`);
+      ok(!/\$\('f-year'\)/.test(js), `${where}: nothing still reads the removed field`);
+    }
+  }
+
+  // the placement form is deliberately untouched — assert that, so a later
+  // tidy-up does not take its picker away along with the other two
+  for (const dir of [[], ['v3']]) {
+    const where = [...dir, 'post-a-placement.html'].join('/');
+    const html = await readFile(path.join(HERE, '..', ...dir, 'post-a-placement.html'), 'utf8');
+    ok(/id="f-year"/.test(html) && /Job market year/.test(html),
+      `${where}: KEEPS its picker — the report date cannot tell us the season`);
+  }
+}
+
+/* ------------------------------------------------------- the country picker
+
+   The job form is the ONE form on the site that asks for a country (the
+   candidate and placement forms do not; the jobs and alerts "Location"
+   filters are built from the published rows, so they follow the data by
+   themselves). Its datalist was 34 entries — the countries that happened to
+   have posted before — which read as a closed list to anyone whose country
+   was not on it (owner, 2026-08-17).
+
+   What is pinned here is not the exact membership but the three things that
+   would break quietly: the two copies drifting apart, an original spelling
+   being "tidied" (which splits that country in the Location filter), and the
+   list losing its order or gaining a duplicate. */
+
+async function testCountryList() {
+  const read = async (dir) => {
+    const src = await readFile(path.join(HERE, '..', ...dir, 'oa-jobform.js'), 'utf8');
+    const block = (src.match(/var COUNTRIES = \[[\s\S]*?\n  \];/) || [''])[0];
+    return { src, block, list: [...block.matchAll(/'((?:[^'\\]|\\.)*)'/g)]
+      .map((m) => m[1].replace(/\\'/g, "'")) };
+  };
+
+  const root = await read(['assets']);
+  const v3 = await read(['v3', 'assets']);
+
+  ok(root.block && root.list.length >= 190,
+    `the job form offers every country (${root.list.length} of them)`);
+  eq(v3.block, root.block, 'and the v3 copy carries the SAME list, byte for byte');
+
+  const sorted = root.list.slice().sort((a, b) => a.localeCompare(b, 'en'));
+  eq(root.list, sorted, 'the list is alphabetical, so a reader can find their country');
+  eq(new Set(root.list).size, root.list.length, 'and holds no duplicate');
+
+  // the site's own spellings — renaming one splits it in the Location filter
+  for (const c of ['USA', 'United Kingdom', 'Hong Kong', 'South Korea', 'Taiwan',
+                   'Netherlands', 'United Arab Emirates', 'New Zealand', 'South Africa']) {
+    ok(root.list.includes(c), `the site's own spelling "${c}" is kept`);
+  }
+  ok(!root.list.includes('United States') && !root.list.includes('UK'),
+    'and no second spelling of one that is already there');
+
+  // a few that were missing entirely — the reason this list was widened
+  for (const c of ['Nigeria', 'Saudi Arabia', 'Poland', 'Argentina', 'Indonesia',
+                   'Colombia', 'Kenya', 'Vietnam', 'Czech Republic', 'Qatar']) {
+    ok(root.list.includes(c), `${c} can now be chosen rather than wondered about`);
+  }
+
+  // the field itself: a datalist is a HINT on a free-text input, so a country
+  // spelled some other way is still postable — that must not become a <select>
+  for (const p of ['post-a-job.html', path.join('v3', 'post-a-job.html')]) {
+    const html = await readFile(path.join(HERE, '..', p), 'utf8');
+    ok(/<input type="text" id="f-country"[^>]*list="oa-countries"/.test(html) &&
+       /<datalist id="oa-countries">/.test(html),
+      `${p}: the country field stays free text with the list as a hint`);
   }
 }
 
@@ -1321,6 +1466,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testMobileStandards();
   await testMyPostingsPage();
   await testAccountMerge();
+  await testDerivedMarketYear();
+  await testCountryList();
   await testSubmissionKeyCeilings();
   process.exit(finish() ? 0 : 1);
 }
