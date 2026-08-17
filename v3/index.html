@@ -122,7 +122,7 @@
                floors the live files raise once they pass them. -->
           <div class="v3-stats" id="v3-stats">
             <div class="v3-stat"><b>200+</b><span>universities have used the site</span></div>
-            <div class="v3-stat"><b data-stat="candidates">100+</b><span>candidates listed</span></div>
+            <div class="v3-stat"><b data-stat="candidates">700+</b><span>candidates listed</span></div>
             <div class="v3-stat"><b data-stat="placements">170+</b><span>placements recorded</span></div>
             <div class="v3-stat"><b>2014</b><span>serving the community since</span></div>
           </div>
@@ -805,16 +805,22 @@
 
       /* --------------------------------- candidates stat + reveal note
          Same rule as placements: the candidates dataset restarted empty at
-         the cutover (and is held back until the reveal date anyway), while
-         the old site listed 104 profiles across the 2018-2026 markets
-         (_AUDIT.md §A.2) — so the static "100+" stands until the live file
-         grows past it. */
+         the cutover (and is held back until the reveal date anyway), so the
+         static figure stands until the live file grows past it.
+         That figure is 700+, the owner's own count over the site's whole
+         2014-2026 history (2026-08-17). It is deliberately NOT the 104 in
+         _AUDIT.md §A.2: that is the row count of ONE Google Sheet, which
+         only begins on 2018-08-25 and so misses the first four markets'
+         candidates entirely. The threshold below must stay equal to the
+         number printed in the markup — it is what stops a part-filled live
+         file from REPLACING the historical total with a smaller current
+         one. */
       fetch('/data/candidates-meta.json', { credentials: 'same-origin' })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (meta) {
           var listed = Number(meta.count) || 0;
           var stat = document.querySelector('[data-stat="candidates"]');
-          if (stat && listed > 100) V3.statTo(stat, listed.toLocaleString('en-US'));
+          if (stat && listed > 700) V3.statTo(stat, listed.toLocaleString('en-US'));
 
           var at = String(meta.revealAt || '');
           if (!/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
