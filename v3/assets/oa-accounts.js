@@ -834,7 +834,7 @@
 
         '<div class="oa-auth-brand">' +
           '<span class="v3-mark" aria-hidden="true">OA</span>' +
-          '<span class="oa-auth-wordmark">Operations Academia</span>' +
+          '<span class="oa-auth-wordmark"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>' +
           '<p class="oa-auth-tag">Matching supply with demand in the Operations job market.</p>' +
         '</div>' +
 
