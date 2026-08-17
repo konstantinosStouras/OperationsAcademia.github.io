@@ -409,6 +409,52 @@ Only after §5 is done and has run for a week.
 
 ---
 
+### 3.6 The job market tracking sheet — **DONE 2026-08-17**
+
+The postings the owner keeps by hand in a Google workbook — one per market
+cycle, a tab per kind of position ("2026 Jobs", "2026 NTT/PD") — are now read
+into the site daily: `_scraper/sync-jobmarket-sheet.mjs` +
+`.github/workflows/oa-jobmarket-sheet.yml` → `data/jobmarket.json`, which
+`build-jobs.mjs` merges beside the Firestore postings. Behaviour and setup:
+`_SETUP-JOBMARKET-SHEET.md`.
+
+**Why this is not the sync that was retired in §3.x.** `oa-jobs-sheet-sync.yml`
+read the old FORM's response sheet, and it had to go because those postings had
+become documents people edit — re-reading the sheet reverted their edits. This
+workbook has the OPPOSITE ownership: it is where these rows are curated, nobody
+edits them on the site, and following it cannot undo anyone's work. The
+consequence is carried through deliberately rather than left implicit: sheet
+rows are never migrated into Firestore (`migratable()`), and a row deleted from
+the workbook comes off the site — otherwise the only way to unlist one would be
+a hand-maintained suppression list, which rots.
+
+Three decisions worth recording, because each could have gone the other way:
+
+- **The market year is derived from each posting's own date**, not from the
+  tab's name. A tab called "2026 Jobs" holds postings from July 2026, which
+  this site files under market year 2027; deriving it means the tab naming and
+  the site's roll rule can never disagree.
+- **Nothing is guessed to fill a field the sheet does not have.** The type of
+  institution is read off the names where they say it ("Rutgers Business
+  School", "Clarkson University") and left EMPTY otherwise, rather than
+  defaulted — a made-up value sits behind a filter a visitor trusts. Columns
+  are matched by header alias, and a header it does not recognise is reported
+  in the log rather than interpreted.
+- **Going quiet is a failure mode, not a state.** A sheet that stops being
+  updated is invisible from the site — it looks like a quiet August — so the
+  sync e-mails the maintainer when the workbook gains nothing for three weeks,
+  cannot be read, or reads as empty. A failed read writes NOTHING; nothing
+  already published is ever removed by one.
+
+Rolling on to next year's workbook is automatic: the intro tab's link is read
+out of the sheet's HTML view (the CSV export cannot see a hyperlink), the new
+workbook is recorded in `data/jobmarket-sheets.json`, and it becomes current on
+EVIDENCE — once it holds a posting newer than anything in the one it replaces —
+never on a date, so a workbook opened in advance and left empty cannot take the
+site with it.
+
+---
+
 ## 4. Things to decide
 
 | Question | My recommendation |
@@ -505,6 +551,7 @@ If you would rather have a standalone repo than a subfolder:
 |---|---|
 | The jobs page is empty | `v2/data/jobs.json` — is it valid JSON? `node v2/_scraper/selftest.mjs` |
 | A posting was submitted but never appeared | Actions → *OA jobs* run log. `node v2/_scraper/build-jobs.mjs --scan` lists what is queued |
+| A posting in the tracking SHEET never appeared | Actions → *OA jobs — read the job market tracking sheet*. The log names every tab it read, every column it did not recognise and every row it stepped over. `_SETUP-JOBMARKET-SHEET.md` |
 | The form says "not accepting postings yet" | the rules were not deployed — `_SETUP-FIREBASE.md` §4 |
 | Sign-in does nothing | the config still has `PASTE_` in it, or the domain is not in Firebase's authorized list |
 | No alert e-mails | `--scan` first: are any actually *due*? Then `--dry-run`. Then check spam. |

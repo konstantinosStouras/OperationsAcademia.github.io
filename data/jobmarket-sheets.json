@@ -1,0 +1,22 @@
+{
+ "generated": "",
+ "current": "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8",
+ "sheets": [
+  {
+   "id": "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8",
+   "from": "seed",
+   "discoveredAt": "",
+   "lastReadAt": "",
+   "rows": 0,
+   "newestPosted": "",
+   "tabs": []
+  }
+ ],
+ "staleness": {
+  "lastCheckedAt": "",
+  "lastWarnedAt": "",
+  "lastReason": "",
+  "newestPosted": ""
+ },
+ "note": "Written by _scraper/sync-jobmarket-sheet.mjs. Committed so the chain of workbooks survives a runner that keeps nothing between runs; edit only to point the sync at a different starting workbook."
+}
