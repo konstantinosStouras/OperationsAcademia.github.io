@@ -530,6 +530,11 @@
     /* ------------------------------------------------------------ render */
 
     function render() {
+      // An empty DATASET has nothing to search (owner, 2026-08-17): the class
+      // hides the filter bar, count and pager (v3.css) until data exists —
+      // an over-filtered search (rows exist, view empty) keeps them all.
+      host.classList.toggle('oa-data-empty', !rows.length);
+
       // result bar
       resEl.innerHTML = '';
       var from = view.length ? page * perPage + 1 : 0;
