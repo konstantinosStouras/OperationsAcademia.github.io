@@ -600,6 +600,46 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-prose { color: var(--ink-2); }
 .v3-prose p { margin: 0 0 16px; }
 
+/* A page made ENTIRELY of prose — the legal texts, the consent statement, the
+   survey's own page — needs more than the About column's two rules: headings
+   to navigate by, lists, and a measure short enough to read at length. It is a
+   MODIFIER, not a replacement: the front page's About column is .v3-prose too
+   and must keep its own width, set by the grid it sits in. */
+.v3-longform { max-width: 74ch; }
+.v3-longform > :first-child { margin-top: 0; }
+.v3-longform h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(21px, 2.4vw, 25px);
+  font-weight: 600; line-height: 1.25;
+  color: var(--ink);
+  margin: 40px 0 14px;
+}
+.v3-longform h3 {
+  font-size: 17px; font-weight: 600; color: var(--ink);
+  margin: 28px 0 10px;
+}
+.v3-longform ul,
+.v3-longform ol { margin: 0 0 16px; padding-left: 22px; }
+.v3-longform li { margin: 0 0 8px; }
+.v3-longform strong { color: var(--ink); font-weight: 600; }
+
+/* Charts published by Google Sheets. They are fixed-size and render in their
+   own light styling whichever theme the reader chose, so they sit on a white
+   card of their own rather than fighting the page's background — and the card
+   scrolls sideways instead of the page when the viewport is narrower than the
+   chart, which is the rule every wide thing on this site follows. */
+.v3-embed {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px;
+  margin-top: 14px;
+}
+.v3-embed iframe { display: block; border: 0; max-width: none; }
+
 .v3-ack {
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
@@ -630,7 +670,10 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
   background: var(--brand);
 }
 .v3-news time { display: block; font-size: 13px; color: var(--mut); margin-bottom: 2px; }
-.v3-news strong { color: var(--ink); font-size: 16px; }
+.v3-news strong { color: var(--ink); font-size: 16px; display: block; }
+/* an entry that names a page links to it; it is still the entry's title, so it
+   reads as the heading it is and only picks up the brand colour on hover */
+.v3-news strong a { color: inherit; }
 .v3-news p { margin: 4px 0 0; color: var(--ink-2); font-size: 14.5px; }
 
 /* --------------------------------------------------------------- contact */
