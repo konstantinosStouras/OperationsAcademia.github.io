@@ -1,15 +1,21 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — usage insights (v3, admin-only readback).
 
-   Records how SIGNED-IN visitors use the site (owner, 2026-08-17): one
-   Firestore doc per browsing session at usageSessions/{uid}__{sid} carrying
-   the page, when the session started, a rolling duration, and the links and
-   buttons clicked (short label + href, capped). Anonymous visitors are never
-   recorded — there is no identity to record against, and the point is to see
-   how ACCOUNTS use the site. The deployed _firestore.rules make each doc
-   writable only by its own visitor and readable ONLY by the admin; the
-   collection is disclosed in the Privacy Policy. Inert until those rules are
-   deployed — every write is best-effort and silently dropped on refusal.
+   Records how visitors use the site (owner, 2026-08-17): one Firestore doc
+   per browsing session at usageSessions/{who}__{sid} carrying the page, when
+   the session started, a rolling duration, the links and buttons clicked
+   (short label + href, capped), and which FORM FIELDS were touched, in what
+   order (field name + focus/change stamps — deliberately NEVER the text
+   typed: that would capture passwords and drafts people chose not to submit,
+   while everything actually submitted already lands in its own collection).
+
+   Signed-in visitors are recorded under their uid; anonymous visitors under
+   a random per-browser id ('anon:…', localStorage), so returning visits
+   correlate without naming anyone. The deployed _firestore.rules pin each
+   doc to its own writer (the doc id embeds the random sid, so nothing else
+   can be touched) and make the collection readable ONLY by the admin; it is
+   disclosed in the Privacy Policy. Inert until those rules are deployed —
+   every write is best-effort and silently dropped on refusal.
 
    Loads on every v3 page after oa-firebase.js; no other file depends on it.
    --------------------------------------------------------------------------- */
@@ -20,27 +26,46 @@
   var sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
   var start = Date.now();
   var clicks = [];
-  var user = null;
+  var fields = [];
+  var user = null;      // Firebase user, or null while anonymous
   var timer = null;
   var pending = false;
 
+  /** The identity a session is filed under: the uid, else a stable random
+      per-browser id so an anonymous visitor's return visits correlate. */
+  function who() {
+    if (user) return user.uid;
+    try {
+      var a = localStorage.getItem('oaUsageAnon');
+      if (!a) {
+        a = 'anon:' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+        localStorage.setItem('oaUsageAnon', a);
+      }
+      return a;
+    } catch (e) {
+      return 'anon:' + sid;               // private mode — session-scoped only
+    }
+  }
+
   function flush() {
-    if (!user || pending) return;
+    if (pending) return;
     pending = true;
+    var id = who();
     var payload = {
-      uid: user.uid,
-      email: user.email || '',
+      uid: id,
+      email: (user && user.email) || '',
       sid: sid,
       page: (location.pathname + location.search).slice(0, 300),
       start: start,
       last: Date.now(),
       dur: Math.round((Date.now() - start) / 1000),
-      clicks: clicks.slice(0, 400)
+      clicks: clicks.slice(0, 400),
+      fields: fields.slice(0, 300)
     };
     OAFB.ready()
       .then(function (fb) {
         return fb.firestore().collection('usageSessions')
-          .doc(user.uid + '__' + sid).set(payload, { merge: true });
+          .doc(id + '__' + sid).set(payload, { merge: true });
       })
       .then(function () { pending = false; })
       .catch(function () { pending = false; /* rules not deployed / offline */ });
@@ -50,7 +75,7 @@
   // interactive elements, short label only — never form VALUES
   document.addEventListener('click', function (e) {
     var el = e.target && e.target.closest && e.target.closest('a, button');
-    if (!el || !user) return;
+    if (!el) return;
     clicks.push({
       t: Date.now(),
       k: el.tagName.toLowerCase(),
@@ -60,11 +85,25 @@
     if (clicks.length > 400) clicks = clicks.slice(-400);
   }, true);
 
+  /** Form INTERACTION, not content: which field, when it was entered, and
+      whether it ended up changed — the order/dwell/abandonment signal. The
+      element's .value is never read, on any field type. */
+  function fieldName(el) {
+    return (el.name || el.id || el.type || el.tagName.toLowerCase()).slice(0, 60);
+  }
+  function markField(e, kind) {
+    var el = e.target;
+    if (!el || !/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+    fields.push({ t: Date.now(), f: fieldName(el), k: kind });
+    if (fields.length > 300) fields = fields.slice(-300);
+  }
+  document.addEventListener('focusin', function (e) { markField(e, 'focus'); }, true);
+  document.addEventListener('change', function (e) { markField(e, 'change'); }, true);
+
   OAFB.ready().then(function (fb) {
     fb.auth().onAuthStateChanged(function (u) {
       user = u || null;
-      if (timer) { clearInterval(timer); timer = null; }
-      if (user) {
+      if (!timer) {
         flush();                                  // session opens
         timer = setInterval(flush, 60000);        // rolling duration
       }

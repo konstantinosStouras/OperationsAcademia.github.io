@@ -131,6 +131,31 @@
     return h;
   }
 
+  /** The picture shown for the SIGNED-IN account: the one they set on their
+      profile, else the one their provider (Google/ORCID) supplied, else
+      nothing — the caller falls back to the initials disc. Only consults the
+      loaded profile for the signed-in user's own account, so a merge dialog
+      can never wear this account's photo on another account's row. */
+  function profilePhoto(u) {
+    var own = u && state.user && u.uid === state.user.uid;
+    var p = own ? state.profile : null;
+    return (p && p.photo) || (u && u.photoURL) || '';
+  }
+
+  /** The avatar disc: the photo when there is one, the initials otherwise
+      (owner, 2026-08-17 — pre-fill from the provider, let the user set their
+      own, fall back to the initials disc we already draw). */
+  function avatarHTML(u, xl) {
+    var cls = 'oa-avatar' + (xl ? ' oa-avatar-xl' : '');
+    var ph = profilePhoto(u);
+    if (ph) {
+      return '<span class="' + cls + '" aria-hidden="true"><img class="oa-avatar-img" ' +
+        'src="' + esc(ph) + '" alt=""></span>';
+    }
+    return '<span class="' + cls + '" aria-hidden="true" style="--oa-hue:' + avatarHue(u) + '">' +
+      esc(initials(u)) + '</span>';
+  }
+
   /* ------------------------------------------------------ identity helpers
 
      An OA account can be reached by three different sign-in methods, and the
@@ -269,8 +294,7 @@
         // opens keeps "Your personal area" as its first destination
         '<button type="button" class="oa-acct-chip" id="oa-chip" aria-haspopup="menu" ' +
           'aria-expanded="false" title="Your personal area">' +
-          '<span class="oa-avatar" aria-hidden="true" style="--oa-hue:' + hue + '">' +
-            esc(initials(u)) + '</span>' +
+          avatarHTML(u) +
           '<span class="oa-acct-name">' + esc(displayName(u)) + '</span>' +
           '<span class="oa-caret" aria-hidden="true"></span>' +
         '</button>' +
@@ -453,18 +477,25 @@
         // once the profile read landed. On a flat static site that is every
         // navigation.
         writeHint(state.user, displayName(state.user));
-        // A first-run account has no name yet. Ask once, and never again —
-        // being nagged on every visit is what makes a profile prompt hated.
-        // Keyed on the uid: a browser-wide flag meant the SECOND account on a
-        // shared or lab machine was never asked at all, and stayed known by
-        // the left-hand half of its e-mail address for ever.
-        try {
-          if (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)) {
-            localStorage.setItem('oaProfileAsked:' + uid, '1');
-            openProfile(true);
-          }
-        } catch (e) { /* private mode */ }
-        return seedOrcidFromProvider();
+        // A provider sign-in hands us the person's name and picture — seed
+        // them into the profile FIRST (fill-empty, never overwriting typed
+        // values), so a Google account arrives pre-filled and the first-run
+        // prompt below only fires when there was truly nothing to seed.
+        return seedProfileFromUser().then(function () {
+          if (!stillOurs()) return;
+          // A first-run account has no name yet. Ask once, and never again —
+          // being nagged on every visit is what makes a profile prompt hated.
+          // Keyed on the uid: a browser-wide flag meant the SECOND account on
+          // a shared or lab machine was never asked at all, and stayed known
+          // by the left-hand half of its e-mail address for ever.
+          try {
+            if (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)) {
+              localStorage.setItem('oaProfileAsked:' + uid, '1');
+              openProfile(true);
+            }
+          } catch (e) { /* private mode */ }
+          return seedOrcidFromProvider();
+        });
       })
       .then(function () { claimAccountKeys(); })
       .catch(function () { /* rules not deployed yet — the chip still works */ });
@@ -475,6 +506,37 @@
      below able to see that this sign-in and their older Google account are the
      same person. Written exactly once (`orcidSeeded`), so clearing the field
      later is respected rather than undone on the next page load. */
+  /** Pre-fill the profile from what the sign-in provider already told us —
+      Google supplies displayName and photoURL, ORCID a name (owner,
+      2026-08-17). Fill-empty per field: a name or photo the person typed or
+      uploaded themselves is never overwritten. */
+  function seedProfileFromUser() {
+    var u = state.user;
+    if (!u) return Promise.resolve();
+    var p = state.profile || {};
+    var patch = {};
+    if (!p.firstName && !p.lastName && u.displayName) {
+      var parts = String(u.displayName).trim().split(/\s+/);
+      if (parts.length > 1) {
+        patch.firstName = parts.slice(0, -1).join(' ').slice(0, 300);
+        patch.lastName = parts[parts.length - 1].slice(0, 300);
+      } else if (parts[0]) {
+        patch.firstName = parts[0].slice(0, 300);
+      }
+    }
+    if (!p.photo && u.photoURL) patch.photo = String(u.photoURL).slice(0, 2000);
+    if (!Object.keys(patch).length) return Promise.resolve();
+    return OAFB.ready()
+      .then(function (fb) { return profileDoc(fb, u.uid).set(patch, { merge: true }); })
+      .then(function () {
+        if (!state.user || state.user.uid !== u.uid) return;
+        state.profile = Object.assign({}, state.profile || {}, patch);
+        paint();
+        writeHint(state.user, displayName(state.user));
+      })
+      .catch(function () { /* best effort — the profile card can still ask */ });
+  }
+
   function seedOrcidFromProvider() {
     var p = state.profile || {};
     var iD = orcidFromProvider();
@@ -512,8 +574,15 @@
         'aria-labelledby="oa-profile-h">' +
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
         '<div class="oa-profile-head">' +
-          '<span class="oa-avatar oa-avatar-xl" aria-hidden="true" style="--oa-hue:' +
-            avatarHue(u) + '">' + esc(initials(u)) + '</span>' +
+          '<div class="oa-photo-side">' +
+            avatarHTML(u, true) +
+            '<div class="oa-photo-row">' +
+              '<button type="button" id="oa-photo-set">' +
+                (profilePhoto(u) ? 'Change photo' : 'Add a photo') + '</button>' +
+              (p.photo ? '<button type="button" id="oa-photo-del">Remove</button>' : '') +
+              '<input type="file" id="oa-photo-file" accept="image/*" hidden>' +
+            '</div>' +
+          '</div>' +
           '<div>' +
             '<h3 id="oa-profile-h">' + (firstRun ? 'Welcome' : 'My profile') + '</h3>' +
             '<p class="oa-modal-lede">Your name is how you appear in the header and on ' +
@@ -560,6 +629,53 @@
     wireOtherAccounts(wrap, close);
     var first = $('#oa-profile-form input', wrap);
     if (first) first.focus();
+
+    /* ---- the profile picture: pick a file, crop square client-side, store a
+       small data URL on the profile doc (~15 KB at 192px — no Storage bucket
+       needed); Remove falls back to the initials disc everywhere. */
+    function savePhoto(data) {
+      var msg = $('#oa-profile-msg', wrap);
+      if (msg) { msg.className = 'oa-auth-msg'; msg.textContent = 'Saving photo…'; }
+      OAFB.ready()
+        .then(function (fb) {
+          return profileDoc(fb, state.user.uid).set({ photo: data }, { merge: true });
+        })
+        .then(function () {
+          state.profile = Object.assign({}, state.profile || {}, { photo: data });
+          paint();
+          openProfile();          // repaint the card with the new picture
+        })
+        .catch(function () {
+          if (msg) {
+            msg.className = 'oa-auth-msg is-err';
+            msg.textContent = 'We could not save the photo just now. Please try again.';
+          }
+        });
+    }
+    var photoFile = $('#oa-photo-file', wrap);
+    var photoSet = $('#oa-photo-set', wrap);
+    if (photoSet) photoSet.addEventListener('click', function () { photoFile.click(); });
+    if (photoFile) photoFile.addEventListener('change', function () {
+      var file = photoFile.files && photoFile.files[0];
+      if (!file) return;
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var S = 192;
+        var c = document.createElement('canvas');
+        c.width = S; c.height = S;
+        var side = Math.min(img.naturalWidth, img.naturalHeight);
+        c.getContext('2d').drawImage(img,
+          (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2,
+          side, side, 0, 0, S, S);
+        URL.revokeObjectURL(url);
+        savePhoto(c.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); };
+      img.src = url;
+    });
+    var photoDel = $('#oa-photo-del', wrap);
+    if (photoDel) photoDel.addEventListener('click', function () { savePhoto(''); });
 
     $('#oa-profile-form', wrap).addEventListener('submit', function (e) {
       e.preventDefault();
