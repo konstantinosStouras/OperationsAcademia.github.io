@@ -762,6 +762,17 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
 }
+/* admin-only curation controls on a What's-new item (drawn only when the
+   admin is signed in — authorisation is the Firestore rules, not this CSS) */
+.v3-news-admin { margin: 8px 0 0; display: flex; gap: 10px; }
+.v3-news-admin button {
+  font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+  color: var(--ink-2); background: var(--bg-3);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 12px; cursor: pointer;
+}
+.v3-news-admin button:hover { border-color: var(--brand); color: var(--brand); }
+
 /* the About section: circular portrait on the left, the untouched prose on
    the right, a discrete caption under the photo (owner, 2026-08-17 — the
    Consulting Edge "methodology born in the field" arrangement) */
