@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "merge-moves-every-posting",
+   "date": "2026-08-17",
+   "title": "Merging two accounts now moves every posting you own",
+   "summary": "If you ended up with two accounts \u2014 say Google once and ORCID another time \u2014 merging them now hands over your candidate profile and your placement reports along with your job postings, so nothing is left behind on the account that is removed. Also fixed: posting a job with the advert file attached (rather than linked) was refused by a too-tight database bound; attached files now go through.",
+   "url": "https://www.operationsacademia.org/my-postings"
+  },
+  {
    "id": "legacy-tables-own-stack",
    "date": "2026-08-16",
    "title": "The Universities map, Past job postings and Recent faculty now run on the site itself",

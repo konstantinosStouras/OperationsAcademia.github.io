@@ -94,6 +94,19 @@
       .sort();
   }
 
+  /** What a QuerySnapshot answers with. The pages use `.docs`, `.size` and
+      `.forEach` interchangeably (my-postings iterates, account.html counts),
+      so the stand-in must carry all three or a page under test fails on a
+      method the real SDK has. */
+  function querySnap(snaps) {
+    return {
+      docs: snaps,
+      size: snaps.length,
+      empty: !snaps.length,
+      forEach: function (fn) { snaps.forEach(fn); }
+    };
+  }
+
   function Col(path) { this.path = path; }
   Col.prototype.doc = function (id) { return new DocRef(this.path + '/' + id); };
   Col.prototype.add = function (data) {
@@ -104,17 +117,16 @@
   };
   Col.prototype.get = function () {
     record('list', this.path);
-    return Promise.resolve({ docs: childrenOf(this.path).map(snapOf) });
+    return Promise.resolve(querySnap(childrenOf(this.path).map(snapOf)));
   };
   Col.prototype.where = function (field, op, value) {
     var self = this;
     return {
       get: function () {
         record('query', self.path + '?' + field + op + value);
-        return Promise.resolve({
-          docs: childrenOf(self.path).map(snapOf)
-            .filter(function (s) { return s.data()[field] === value; })
-        });
+        return Promise.resolve(querySnap(
+          childrenOf(self.path).map(snapOf)
+            .filter(function (s) { return s.data()[field] === value; })));
       }
     };
   };
