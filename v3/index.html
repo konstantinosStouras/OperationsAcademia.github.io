@@ -113,10 +113,17 @@
             <a class="v3-btn soft" href="/survey.html">Take the survey</a>
           </div>
 
+          <!-- The four figures the site can stand behind (owner, 2026-08-17):
+               reach, then the two things the community itself files, then the
+               years. This market's OPEN-POSTING count was dropped — it reads
+               as a small number early in the season, when the page is trying
+               to say how much is here. Every figure counts up as it scrolls
+               into view (v3.js countUp); the numbers written here are the
+               floors the live files raise once they pass them. -->
           <div class="v3-stats" id="v3-stats">
-            <div class="v3-stat"><b data-stat="jobs">&mdash;</b><span>job postings this market</span></div>
-            <div class="v3-stat"><b data-stat="placements">170+</b><span>confirmed placements recorded</span></div>
             <div class="v3-stat"><b>200+</b><span>universities have used the site</span></div>
+            <div class="v3-stat"><b data-stat="candidates">100+</b><span>candidates listed</span></div>
+            <div class="v3-stat"><b data-stat="placements">170+</b><span>placements recorded</span></div>
             <div class="v3-stat"><b>2014</b><span>serving the community since</span></div>
           </div>
 
@@ -723,18 +730,16 @@
         return a.outerHTML;
       }
 
-      /* --------------------------- hero stats + the jobs launcher card
-         One read of the live file feeds all three: the hero stat, the
-         launcher's selects (which always SHOW a value — "All types" until a
-         narrower one is picked), and the count on the explore button. */
+      /* ------------------------------------------- the jobs launcher card
+         One read of the live file feeds both: the launcher's selects (which
+         always SHOW a value — "All types" until a narrower one is picked),
+         and the count on the explore button. */
       fetch('/data/jobs.json', { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
           if (!data) return;
           var rows = (Array.isArray(data) ? data : data.rows || []).filter(inCurrentMarket);
           if (!rows.length) return;
-          var el = document.querySelector('[data-stat="jobs"]');
-          if (el) V3.statTo(el, String(rows.length));
           var all = document.getElementById('v3-jobs-all');
           if (all) all.textContent = 'Explore all ' + rows.length + ' postings →';
 
@@ -795,13 +800,22 @@
           if (!data) return;
           var rows = Array.isArray(data) ? data : data.rows || [];
           var el = document.querySelector('[data-stat="placements"]');
-          if (el && rows.length > 170) V3.statTo(el, String(rows.length));
+          if (el && rows.length > 170) V3.statTo(el, rows.length.toLocaleString('en-US'));
         }).catch(function () {});
 
-      /* ------------------------------------------- candidates reveal note */
+      /* --------------------------------- candidates stat + reveal note
+         Same rule as placements: the candidates dataset restarted empty at
+         the cutover (and is held back until the reveal date anyway), while
+         the old site listed 104 profiles across the 2018-2026 markets
+         (_AUDIT.md §A.2) — so the static "100+" stands until the live file
+         grows past it. */
       fetch('/data/candidates-meta.json', { credentials: 'same-origin' })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (meta) {
+          var listed = Number(meta.count) || 0;
+          var stat = document.querySelector('[data-stat="candidates"]');
+          if (stat && listed > 100) V3.statTo(stat, listed.toLocaleString('en-US'));
+
           var at = String(meta.revealAt || '');
           if (!/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
           var today = new Date().toISOString().slice(0, 10);
