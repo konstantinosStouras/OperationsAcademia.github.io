@@ -833,9 +833,9 @@
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
 
         '<div class="oa-auth-brand">' +
-          '<span class="v3-mark" aria-hidden="true">OA</span>' +
-          '<span class="oa-auth-wordmark">Operations Academia</span>' +
-          '<p class="oa-auth-tag">Matching supply with demand in the Operations job market.</p>' +
+          '<span class="v3-logo"><span class="v3-mark" aria-hidden="true">OA</span> ' +
+          '<span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span></span>' +
+          '<p class="oa-auth-tag">Matching supply with demand<br>in the Operations job market</p>' +
         '</div>' +
 
         '<h3 id="oa-auth-h">' + (registering ? 'Create your account' : 'Sign in') + '</h3>' +
