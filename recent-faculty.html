@@ -21,6 +21,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
@@ -193,7 +198,9 @@
           emptyFilteredHint: 'Try removing a filter, or clear them all to see everyone listed.',
           loadError: 'The recent faculty list could not be loaded.',
           loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
-          unit: 'people'
+          // the screen-reader line reads "210 faculty match" — the page's own
+          // word, and what the previous design reworded the engine's output to
+          unit: 'faculty'
         },
 
         // alphabetical by last name — the order this list has always had

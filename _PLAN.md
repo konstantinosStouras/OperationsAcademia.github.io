@@ -1,16 +1,21 @@
 # Rebuilding Operations Academia
 
-> **THE CUTOVER RAN on 2026-08-16.** The rebuilt site now serves from the
-> repository ROOT (this file moved with it); the old site is archived at
-> `/v1/`, and `/v2/` holds redirect stubs for links shared during the preview.
-> Path references to `v2/…` below are the pre-cutover layout — read them as
-> the root now. Kept as the record of how and why the rebuild was made.
-
-> **`/v3/` is the next preview** (started 2026-08-16, same day): a
-> single-page redesign — flat keyword nav, eased scrolling, new FAQ, new
-> sign-in/personal area, light+dark mode — reading the ROOT's live `data/`
-> and the live Firebase project. See `v3/README.md` for what differs and how
-> it would be promoted. Every v3 page is `noindex` until then.
+> **WHERE THINGS ARE NOW (after the 2026-08-17 swap).** The **single-page
+> redesign serves the ROOT**. The vendor-free rebuild this document plans —
+> which was the root for one day, from the 2026-08-16 cutover — is **archived,
+> working, at `/v2/`**; the 2014-2026 Awesome-Tables site stays at `/v1/`;
+> `/v3/`, where the redesign was previewed, holds redirect stubs.
+>
+> So `v2/…` paths below mean two different things depending on when they were
+> written, and both are now correct again by coincidence: they were the
+> pre-cutover preview layout, and they are the archive layout. What they are
+> NOT is the live site. The architecture this document describes — own forms,
+> own data files, own renderer, Firestore as the submission queue, the
+> workflows that write `data/` — is unchanged by either move: **the redesign
+> swapped the presentation, not the pipeline.** Every engine, every workflow
+> and every data file described below is still exactly what runs.
+>
+> The swap itself is recorded in §5 (Cutover) below.
 
 **What this is:** the plan for replacing the paid *Awesome Tables* vendor, the
 Google Forms and the Google Sheets behind operationsacademia.org with the site's
@@ -463,6 +468,50 @@ Do it on a branch, in this order.
 8. **Watch for a week.** Keep the Google Form and the Sheet untouched. If
    anything is wrong, `git revert` puts the vendor page straight back.
 9. **Then** cancel the Awesome Tables subscription.
+
+### 5b. The second swap — the redesign takes the root (2026-08-17)
+
+Done the day after the first, and worth writing down because it is the shape
+every future promotion will take. The list above is a **move**; this one taught
+that a move is only half of it.
+
+1. **The archive first.** The root pages went to `/v2/` with `git mv`, so the
+   history follows them. `/v2/` was holding redirect stubs from the preview
+   era; they made way for the pages themselves. `_scraper/archive-v2.mjs`
+   then applied the four archive rules — `noindex`, a banner with the way back,
+   absolute paths to the shared substrate, and no page still claiming through
+   its canonical/og:url to be the home page. It has a `--check` mode, so the
+   rules are testable rather than remembered.
+2. **The archive keeps its own chrome.** `v2/assets/oa-*.js|css` are copies,
+   frozen at what that design shipped with, so the root is free to move on.
+   `/assets/css|js|fonts|leaflet` stay at the root — `/v1/` loads them too.
+3. **The promotion, choosing per file.** Four of the vendored copies under
+   `v3/assets/` had drifted from the root originals, so the promotion took the
+   better of each rather than the newer directory wholesale — the redesign's
+   own `oa-accounts.js`/`oa-list.*`/`oa-ui.css`, but the ROOT's
+   `oa-alert-match.js`, whose v3 copy predated "one spelling per country" and
+   would have reinstated a bug where an alert saved under "USA" quietly stops
+   matching. **Never promote an asset directory without diffing it.**
+4. **Then the sweep, which is the real work.** The redesign had been *borrowing*
+   ten pages from the design it replaced — Universities, Recent faculty,
+   Previous job markets, the survey, the survey FAQ, analytics, the update log
+   and both legal texts. After a bare move, a reader clicks a card on the new
+   front page and lands in the old design. Nothing 404s, so nothing looks
+   broken. All ten were rebuilt in the new design; six more pages the one-pager
+   had absorbed as sections kept their decade-old addresses as redirects.
+5. **`_scraper/link-check.mjs` exists because of step 4.** It resolves every
+   internal link in all three trees and fails when one version navigates into
+   another. It is the guard that makes a future promotion checkable instead of
+   careful.
+6. **The tests followed their pages.** `page-test.mjs` gained a `V2` prefix:
+   the checks asserting on the old chrome now drive `/v2/`, and the ones that
+   were driving `/v3/` drive the root. Nothing was dropped — the same suite,
+   re-aimed. It caught a real regression on the way: the posting forms renamed
+   `.title-heading h2` on entering edit mode, a selector only the old design
+   has, so on the live site the page went on saying "Post a job" while the form
+   held someone's existing posting.
+7. **`/v3/` became stubs**, exactly as `/v2/` had been, for the links shared
+   during the preview.
 
 ### Lifting `/v2/` into its own repository instead
 

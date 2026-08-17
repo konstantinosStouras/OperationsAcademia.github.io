@@ -1,29 +1,33 @@
-name: OA v2 — checks
+name: OA — checks
 
-# The offline guard rails for the v2 rebuild. No network, no credentials, so
-# this runs on every push and every pull request.
+# The offline guard rails for the site. No network, no credentials, so this
+# runs on every push and every pull request. It covers all three trees the
+# site serves at once: the live design at the root, the 2026 rebuild archived
+# at /v2/, and the 2014-2026 site at /v1/.
 
 on:
   push:
     paths:
       - '*.html'
       - 'assets/**'
-      - 'partials/**'
       - 'data/**'
       - '_scraper/**'
       - '_firestore.rules'
       - '_storage.rules'
+      - 'v1/**'
+      - 'v2/**'
       - 'v3/**'
       - '.github/workflows/oa-checks.yml'
   pull_request:
     paths:
       - '*.html'
       - 'assets/**'
-      - 'partials/**'
       - 'data/**'
       - '_scraper/**'
       - '_firestore.rules'
       - '_storage.rules'
+      - 'v1/**'
+      - 'v2/**'
       - 'v3/**'
   workflow_dispatch:
 
@@ -53,6 +57,12 @@ jobs:
           node _scraper/selftest.mjs
           node _scraper/import-sheet.mjs --selftest
           node _scraper/import-legacy-tables.mjs --selftest
+
+      - name: Every link resolves, and no version reaches into another
+        run: |
+          set -e
+          node _scraper/link-check.mjs --verbose
+          node _scraper/archive-v2.mjs --check
 
       - name: No secret ever reaches a served file
         run: |

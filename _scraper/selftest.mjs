@@ -519,28 +519,40 @@ async function testFleetPins() {
   const pastHtml = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
   ok(/!inCurrentMarket\(r\)/.test(pastHtml),
     'the past-markets archive is the complement of the jobs page');
+  /* Every page carrying an inline copy of the rule, in BOTH designs the site
+     serves: the live one at the root (whose one-pager holds the jobs teaser,
+     so it carries the rule as well as jobs.html does) and the 2026 design
+     archived at /v2/, whose pages still filter by season. */
   for (const [rel, html] of [
     ['jobs.html', jobsHtml],
     ['previous-markets.html', pastHtml],
-    ['v3/jobs.html', await readFile(path.join(HERE, '..', 'v3', 'jobs.html'), 'utf8')],
-    ['v3/index.html', await readFile(path.join(HERE, '..', 'v3', 'index.html'), 'utf8')],
+    ['index.html', await readFile(path.join(HERE, '..', 'index.html'), 'utf8')],
+    ['v2/jobs.html', await readFile(path.join(HERE, '..', 'v2', 'jobs.html'), 'utf8')],
+    ['v2/previous-markets.html',
+      await readFile(path.join(HERE, '..', 'v2', 'previous-markets.html'), 'utf8')],
   ]) {
     ok(/var deadline = String\(row\.applyByDate \|\| ''\);/.test(html) &&
        /deadline >= (?:d|new Date\(\))\.toISOString\(\)\.slice\(0, 10\)/.test(html),
       `${rel}: its inline copy carries the deadline leg, like the model`);
   }
 
-  // candidates.html mirrors the same two inline rules jobs.html does — the
-  // derived heading and the current-market filter — pinned the same way.
-  const candHtml = await readFile(path.join(HERE, '..', 'candidates.html'), 'utf8');
-  ok(/getUTCMonth\(\)\s*>=\s*6/.test(candHtml),
-    'candidates.html derives its heading season with the July roll');
-  ok(/function inCurrentMarket\(row\)/.test(candHtml) && candHtml.includes("'-07-01'"),
-    'candidates.html filters to the current market with the model\'s own rule');
+  /* The candidates list mirrors the same two inline rules the jobs list does —
+     the derived heading season and the current-market filter. It is a SECTION
+     of the one-pager on the live site and a page of its own in the archive;
+     both copies are pinned. */
+  for (const rel of ['index.html', 'v2/candidates.html']) {
+    const candHtml = await readFile(path.join(HERE, '..', ...rel.split('/')), 'utf8');
+    ok(/getUTCMonth\(\)\s*>=\s*6/.test(candHtml),
+      `${rel}: the candidates list derives its season with the July roll`);
+    ok(/function inCurrentMarket\(row\)/.test(candHtml) && candHtml.includes("'-07-01'"),
+      `${rel}: it filters to the current market with the model's own rule`);
+  }
 
-  // oa-nav.js derives its menu label from the SAME market-roll month as
-  // marketYear() — a third copy of the rule, pinned like jobs.html's.
-  const nav = await readFile(path.join(HERE, '..', 'assets', 'oa-nav.js'), 'utf8');
+  /* oa-nav.js derives its menu label from the SAME market-roll month as
+     marketYear(). It belongs to the archived design — the live site's nav is
+     flat keywords with no season in it — so it is read from /v2/, beside the
+     pages that load it. */
+  const nav = await readFile(path.join(HERE, '..', 'v2', 'assets', 'oa-nav.js'), 'utf8');
   const navRoll = nav.match(/getUTCFullYear\(\)\s*\+\s*\(\s*d\.getUTCMonth\(\)\s*>=\s*(\d+)\s*\?\s*1\s*:\s*0\s*\)/);
   ok(navRoll, 'oa-nav.js derives its season label rather than hard-coding one');
   if (navRoll) eq(Number(navRoll[1]), MARKET_ROLL_MONTH, 'oa-nav.js rolls in the same month as marketYear()');
@@ -647,8 +659,17 @@ async function testMyPostingsPage() {
     'and the account plumbing before it');
   ok(page.indexOf('oa-firebase.js') < page.indexOf('oa-myjobs.js'),
     'in the right order');
-  ok(!/(href|src)=["']\/v2\//.test(page),
-    'no absolute /v2/ links — the page survives the cutover');
+  /* The rule this started as ("no absolute /v2/ links") was written while /v2/
+     was the unpromoted preview and an absolute link into it would break the
+     moment it moved up. It moved up, and then down again to /v2/ as the
+     archive. What still has to hold is the same thing said properly: a live
+     page may open an archive's FRONT DOOR and nothing deeper, so a promotion
+     stays a directory move. The whole-site version of this — every internal
+     link in all three trees, both directions — is _scraper/link-check.mjs. */
+  for (const m of page.matchAll(/(?:href|src)="(\/v\d+\/[^"]*)"/g)) {
+    ok(/^\/v\d+\/(index\.html)?$/.test(m[1]),
+      `my-postings.html links ${m[1]} — a live page may only open an archive's front door`);
+  }
   ok(/id="oa-needauth"/.test(page) && /id="oa-offline"/.test(page),
     'the signed-out and not-configured states both have a box to appear in');
 
@@ -743,20 +764,22 @@ async function testAccountMerge() {
   ok(/if \(!survey\.postingsOk\)/.test(accounts),
     'a merge refuses to run when any posting collection could not be listed');
 
-  // The v3 preview vendors its own copy of oa-accounts.js ("keep the LOGIC in
-  // sync" — its header). Presentation may differ; the merge machinery may
-  // not, or the two sites repair duplicate accounts differently. Byte-equality
-  // of the whole merge region is the strongest cheap statement of that.
-  const v3accounts = await readFile(
-    path.join(HERE, '..', 'v3', 'assets', 'oa-accounts.js'), 'utf8');
+  /* The /v2/ archive keeps its own frozen copy of oa-accounts.js — its pages
+     load it, and a signed-in reader can still merge duplicate accounts from
+     there. Presentation may differ between the two designs; the merge
+     machinery may not, or the same person repairs their duplicate accounts
+     differently depending on which URL they happened to open. Byte-equality of
+     the whole merge region is the cheapest strong statement of that. */
+  const v2accounts = await readFile(
+    path.join(HERE, '..', 'v2', 'assets', 'oa-accounts.js'), 'utf8');
   const mergeRegion = (src) => {
     const from = src.indexOf('var MERGE_APP');
     const to = src.indexOf('function signOut');
     return from > 0 && to > from ? src.slice(from, to) : null;
   };
-  const rootRegion = mergeRegion(accounts), v3Region = mergeRegion(v3accounts);
-  ok(rootRegion && v3Region && rootRegion === v3Region,
-    'the v3 copy carries the SAME merge machinery as the root copy, byte for byte');
+  const rootRegion = mergeRegion(accounts), v2Region = mergeRegion(v2accounts);
+  ok(rootRegion && v2Region && rootRegion === v2Region,
+    'the archived copy carries the SAME merge machinery as the live one, byte for byte');
 
   // The mailer's high-water marks travel with a copied alert. Without them the
   // alert looks brand new and newJobsFor() with an empty `since` matches the
@@ -787,7 +810,7 @@ async function testDerivedMarketYear() {
     ['post-a-job.html', 'oa-jobform.js', 'posting'],
     ['post-a-candidate.html', 'oa-candidateform.js', 'profile'],
   ]) {
-    for (const dir of [[], ['v3']]) {
+    for (const dir of [[], ['v2']]) {
       const where = [...dir, page].join('/');
       const html = await readFile(path.join(HERE, '..', ...dir, page), 'utf8');
       ok(!/id="f-year"/.test(html), `${where}: the year dropdown is gone`);
@@ -809,7 +832,7 @@ async function testDerivedMarketYear() {
 
   // the placement form is deliberately untouched — assert that, so a later
   // tidy-up does not take its picker away along with the other two
-  for (const dir of [[], ['v3']]) {
+  for (const dir of [[], ['v2']]) {
     const where = [...dir, 'post-a-placement.html'].join('/');
     const html = await readFile(path.join(HERE, '..', ...dir, 'post-a-placement.html'), 'utf8');
     ok(/id="f-year"/.test(html) && /Job market year/.test(html),
@@ -920,7 +943,7 @@ async function testCountries() {
 
   /* THE PAGES. The form offers the shared list rather than a copy of it, and
      every page that needs the module loads it BEFORE its consumer. */
-  for (const dir of [[], ['v3']]) {
+  for (const dir of [[], ['v2']]) {
     const form = await readFile(path.join(HERE, '..', ...dir, 'assets', 'oa-jobform.js'), 'utf8');
     ok(/var COUNTRIES = \(window\.OACountries && window\.OACountries\.LIST\) \|\| \[\];/.test(form),
       `${[...dir, 'oa-jobform.js'].join('/')}: the form offers the shared list, not its own copy`);
@@ -930,9 +953,10 @@ async function testCountries() {
     ['alerts.html', 'oa-alert-match.js'],
     ['jobs.html', 'oa-list.js'],
     ['previous-markets.html', 'oa-list.js'],
-    [path.join('v3', 'post-a-job.html'), 'oa-jobform.js'],
-    [path.join('v3', 'alerts.html'), 'oa-alert-match.js'],
-    [path.join('v3', 'jobs.html'), 'oa-list.js'],
+    [path.join('v2', 'post-a-job.html'), 'oa-jobform.js'],
+    [path.join('v2', 'alerts.html'), 'oa-alert-match.js'],
+    [path.join('v2', 'jobs.html'), 'oa-list.js'],
+    [path.join('v2', 'previous-markets.html'), 'oa-list.js'],
   ]) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     const at = html.indexOf('oa-countries.js');
@@ -941,7 +965,8 @@ async function testCountries() {
   }
 
   // a link shared when the site said "USA" still selects the right country
-  for (const page of ['jobs.html', 'previous-markets.html', path.join('v3', 'jobs.html')]) {
+  for (const page of ['jobs.html', 'previous-markets.html',
+    path.join('v2', 'jobs.html'), path.join('v2', 'previous-markets.html')]) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     ok(/legacyValues: \(window\.OACountries \|\| \{\}\)\.ALIASES/.test(html),
       `${page}: an old ?country=USA link still selects the United States`);
@@ -995,7 +1020,7 @@ async function testSubmissionKeyCeilings() {
   ]) {
     const ceiling = ceilingOf(col);
     ok(ceiling !== null, `${col}: the create rule bounds the number of keys`);
-    for (const dir of [['assets'], ['v3', 'assets']]) {
+    for (const dir of [['assets'], ['v2', 'assets']]) {
       const src = await readFile(path.join(HERE, '..', ...dir, file), 'utf8');
       const n = keysOf(src).size;
       ok(n >= 10, `${dir.join('/')}/${file}: the key inventory extracted (${n} keys, sanity floor 10)`);
@@ -1481,14 +1506,20 @@ async function testLegacyTables() {
   /* the pages read the files, and honour the vendor's own deep links —
      the Universities map and every posting's "Further info" link depend on
      these staying wired */
+  /* The data files are written once at the root and read by every version of
+     the site, so the pages name them absolutely — that is the rule
+     archive-v2.mjs enforces for /v2/ and link-check.mjs exempts from the
+     tree boundary. A relative path here would work at the root and break the
+     moment this tree were previewed under a directory, which is exactly how
+     the redesign was built. */
   const rfHtml = await readFile(path.join(HERE, '..', 'recent-faculty.html'), 'utf8');
-  ok(rfHtml.includes("data: 'data/recent-faculty.json'"), 'recent-faculty.html reads its dataset');
+  ok(rfHtml.includes("data: '/data/recent-faculty.json'"), 'recent-faculty.html reads its dataset');
   ok(rfHtml.includes("legacyParam: 'filterE'") && rfHtml.includes("legacyParam: 'filterF'"),
     'recent-faculty.html honours ?filterE (recent hires) and ?filterF (PhD alumni)');
 
   const pmHtml = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
-  ok(pmHtml.includes("data: 'data/past-postings.json'"), 'previous-markets.html reads the archive');
-  ok(pmHtml.includes("fetch('data/jobs.json'"),
+  ok(pmHtml.includes("data: '/data/past-postings.json'"), 'previous-markets.html reads the archive');
+  ok(pmHtml.includes("fetch('/data/jobs.json'"),
     'previous-markets.html folds in the jobs rows that left the current market');
   ok(pmHtml.includes("legacyParam: 'filterD'"), 'previous-markets.html honours ?filterD');
   ok(pmHtml.includes('getUTCMonth() >= 6'),

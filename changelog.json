@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "single-page-redesign-live",
+   "date": "2026-08-17",
+   "title": "A new Operations Academia — one page, light or dark",
+   "summary": "The site has been redesigned. Everything for the market under way now reads as one scrolling page — job postings, candidates, placements, the survey, resources, the FAQ — with a flat keyword bar at the top instead of menus, and a light or dark mode you choose and the site remembers. The full filterable job list has its own page, as does the Universities map, the recent-faculty list and the past-markets archive, all rebuilt in the new look. Nothing moved address: every link you have saved still works, and the previous design is kept, working, at operationsacademia.org/v2/ (with the 2014–2026 site still at /v1/).",
+   "url": "https://www.operationsacademia.org/"
+  },
+  {
    "id": "one-spelling-per-country",
    "date": "2026-08-17",
    "title": "One spelling per country, everywhere on the site",
