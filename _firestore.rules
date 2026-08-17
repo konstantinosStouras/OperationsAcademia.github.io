@@ -346,6 +346,41 @@ service cloud.firestore {
       allow list, delete: if false;
     }
 
+    // ------------------------------------------------ what's-new overrides
+    // The admin curates the public "What's new" list in place (owner,
+    // 2026-08-17): one doc per changelog entry id, carrying {hidden: true}
+    // and/or an edited {title, summary}. The list is public, so reads are
+    // open; only the admin writes. changelog.json stays the source of truth
+    // — an override only masks or rewords its entry on the site.
+    match /newsOverrides/{id} {
+      allow read: if true;
+      allow write: if isAdmin()
+                   && request.resource.data.keys().hasOnly(['hidden', 'title', 'summary', 't'])
+                   && str('title', 300) && str('summary', 2000)
+                   && (!('hidden' in request.resource.data)
+                       || request.resource.data.hidden is bool)
+                   && (!('t' in request.resource.data)
+                       || request.resource.data.t is number);
+    }
+
+    // --------------------------------------------------- usage (admin-only)
+    // Signed-in usage telemetry (owner, 2026-08-17): one doc per signed-in
+    // browsing session — time on site plus the links/buttons clicked —
+    // written by the visitor about THEMSELVES only, and readable by the
+    // admin alone. Disclosed in the Privacy Policy.
+    match /usageSessions/{id} {
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && str('email', 200) && str('sid', 80) && str('page', 300)
+                    && list('clicks', 400);
+      allow update: if signedIn()
+                    && resource.data.uid == request.auth.uid
+                    && request.resource.data.uid == request.auth.uid
+                    && str('email', 200) && str('sid', 80) && str('page', 300)
+                    && list('clicks', 400);
+      allow read, delete: if isAdmin();
+    }
+
     // Anything not named above is closed.
     match /{document=**} {
       allow read, write: if false;
