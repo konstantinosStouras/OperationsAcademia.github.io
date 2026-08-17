@@ -15,8 +15,10 @@
        Terms/Privacy consent, and a "Back to site" escape;
      - a successful REGISTRATION lands on account.html (the personal area
        welcome), while a plain sign-in stays where the reader was;
-     - the off-canvas copy paints into the v3 mobile sheet's static #oa-np
-       host (there is no main.js #navPanel in v3).
+     - the off-canvas copy paints into this design's mobile SHEET, at its
+       static #oa-np host — there is no main.js-built #navPanel here. (The
+       2026 design archived at /v2/ keeps its own copy of this file, which
+       still does the #navPanel dance its pages need.)
 
    Modelled on the /lit/ accounts core, reduced to what OA needs. Loads on every
    page that includes it and paints a header control in #oa-account.
@@ -304,7 +306,9 @@
             '<strong>' + esc(displayName(u)) + '</strong>' +
             (u.email ? '<span class="oa-acct-mail">' + esc(u.email) + '</span>' : '') +
           '</div>' +
-          // Relative, like every page in v3 — the links stay inside /v3/.
+          /* Relative, like every link this design writes: that is what let
+             the whole tree be previewed under a directory before it was
+             promoted to the root, and what will let the next one do the same. */
           '<div class="oa-acct-group">' +
             '<a role="menuitem" class="oa-acct-primary" href="account.html">' +
               '<span class="oa-mi" aria-hidden="true">&#128100;</span>Your personal area</a>' +
