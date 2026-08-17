@@ -715,6 +715,9 @@ body.v3 .oa-filters {
   grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
   gap: 14px 16px;
   align-items: end;
+  /* the card needs its own breathing room: the engine's base padding is
+     4px 0 14px (flush left/right — owner screenshot, 2026-08-17) */
+  padding: 18px 20px 20px;
 }
 body.v3 .oa-filter { width: auto; }
 body.v3 .oa-filters input[type='search'],
@@ -730,7 +733,7 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 @media (max-width: 640px) {
   /* the mobile standard, in grid form: pickers two per row, every text
      search and the Clear button full width */
-  body.v3 .oa-filters { grid-template-columns: 1fr 1fr; gap: 12px; }
+  body.v3 .oa-filters { grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 14px 18px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
 }
