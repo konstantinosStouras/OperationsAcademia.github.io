@@ -338,31 +338,80 @@
 
   /* --------------------------------------------------------------- numbers */
 
-  /** Count a stat up from 0 when it first scrolls into view. `text` may carry
-      a suffix ("200+", "12 yrs") — only the leading integer animates. */
-  function statTo(el, text) {
-    var m = /^(\d[\d,]*)(.*)$/.exec(String(text));
-    if (!m || reduceMotion || !('IntersectionObserver' in window)) {
-      el.textContent = text;
+  /** Count a stat up when it first scrolls into view (owner, 2026-08-17: the
+      hero's numbers should run up fast as the page is scrolled top to bottom).
+
+      `text` may carry a suffix ("200+", "12 yrs") — only the LEADING integer
+      runs, and it keeps the source's own thousands formatting, so a year
+      ("2014") spins as 2014 rather than "2,014".
+
+      Called twice on the same element it CONTINUES from what is on screen
+      instead of dropping back to zero: the hero's figures are authored in the
+      HTML so they animate on the very first paint, and the live files
+      (/data/*.json) land a second later and may raise one of them.
+
+      Opt a number out with data-count="off". */
+
+  var COUNT_MS = 800;                 // fast — over before the eye settles
+
+  function countUp(el, text) {
+    if (!el) return;
+    var str = String(text == null ? el.textContent : text).trim();
+    var m = /^(\d[\d,]*)([\s\S]*)$/.exec(str);
+    var prev = el._v3count;
+    if (prev) {                       // never two runs on one number
+      if (prev.io) prev.io.disconnect();
+      prev.dead = true;
+      el._v3count = null;
+    }
+    if (!m || reduceMotion || el.getAttribute('data-count') === 'off' ||
+        !('IntersectionObserver' in window) || !('requestAnimationFrame' in window)) {
+      el.textContent = str;           // no motion wanted, or none possible
       return;
     }
     var target = parseInt(m[1].replace(/,/g, ''), 10);
     var suffix = m[2] || '';
-    el.textContent = '0' + suffix;
-    var io = new IntersectionObserver(function (entries) {
+    var group = m[1].indexOf(',') !== -1;
+    // start from whatever number is on screen (a run in flight, or a figure
+    // the HTML seeded and a live file has just raised) — never rewind one
+    var seen = /^(\d[\d,]*)/.exec((el.textContent || '').trim());
+    var now = prev ? prev.value
+      : seen ? parseInt(seen[1].replace(/,/g, ''), 10) : 0;
+    var from = now > 0 && now < target ? now : 0;
+    var state = { value: from, dead: false, io: null };
+
+    function show(v) {
+      state.value = v;
+      el.textContent = (group ? v.toLocaleString('en-US') : String(v)) + suffix;
+    }
+
+    el._v3count = state;
+    show(from);
+    state.io = new IntersectionObserver(function (entries) {
       if (!entries.some(function (en) { return en.isIntersecting; })) return;
-      io.disconnect();
-      var t0 = null, dur = 900;
+      state.io.disconnect();
+      var t0 = null;
       function tick(ts) {
+        if (state.dead) return;       // a newer value took this number over
         if (t0 === null) t0 = ts;
-        var t = Math.min(1, (ts - t0) / dur);
-        var v = Math.round(target * (1 - Math.pow(1 - t, 3)));
-        el.textContent = v.toLocaleString('en-US') + suffix;
+        var t = Math.min(1, (ts - t0) / COUNT_MS);
+        show(Math.round(from + (target - from) * (1 - Math.pow(1 - t, 3))));
         if (t < 1) requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-    }, { threshold: 0.4 });
-    io.observe(el);
+    }, { threshold: 0.35 });
+    state.io.observe(el);
+  }
+
+  /* Every hero stat runs, not only the two the live files fill in — the
+     figures written straight into the HTML are wired from their own markup.
+     Called at PARSE time and again from boot(); a number already wired by the
+     first call is left to finish its run rather than started over. */
+  function wireCounts() {
+    $$('.v3-stat b, [data-count]').forEach(function (el) {
+      if (el._v3count || el.getAttribute('data-count') === 'off') return;
+      countUp(el, el.textContent);
+    });
   }
 
   /* ------------------------------------------------------------------ boot */
@@ -378,10 +427,16 @@
     wireFaq();
     wireReveals();
     wireTop();
+    wireCounts();
     $$('.js-current-year').forEach(function (el) {
       el.textContent = String(new Date().getFullYear());
     });
   }
+
+  // The numbers are taken over at PARSE time — this file sits at the end of
+  // the body, after the hero — so they never paint their final value and then
+  // rewind. Everything else waits for the document.
+  wireCounts();
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
@@ -389,7 +444,8 @@
   window.V3 = {
     lazy: lazy,
     scrollToEl: scrollToEl,
-    statTo: statTo,
+    statTo: countUp,          // the live files raise a figure the HTML seeded
+    countUp: countUp,
     theme: { apply: applyTheme, current: currentTheme }
   };
 })();
