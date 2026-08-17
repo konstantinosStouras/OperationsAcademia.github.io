@@ -131,6 +131,9 @@ body.v3 ::selection { background: var(--brand); color: var(--on-brand); }
   margin: 0;
 }
 .v3-h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.12; }
+/* the hero's second line: same serif, the site's gray (owner, 2026-08-16 —
+   two lines, line 2 in gray, no full stop, NOT italic) */
+.v3-h1-sub { color: var(--mut); }
 .v3-h2 { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.15; }
 .v3-h3 { font-size: 21px; line-height: 1.3; }
 
@@ -249,8 +252,11 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   text-decoration: none !important;
   white-space: nowrap;
 }
-/* the brand mark is drawn, not an image, so it is crisp in BOTH themes —
-   the shipped logo PNGs carry a solid background that dies on dark */
+/* THE REAL MONOGRAM (owner, 2026-08-16): the interlocked O-A ligature from
+   the site's own logo, cut to assets/oa-mark.png and used as a CSS MASK —
+   the glyph is painted in the theme's ink, so it is dark on light and light
+   on dark with one asset and no filters. The lettered tile below is the
+   fallback for a browser without mask support. */
 .v3-mark {
   width: 34px; height: 34px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
@@ -258,6 +264,15 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   border-radius: 10px;
   font-family: var(--font-serif);
   font-size: 15px; font-weight: 700; letter-spacing: 0.02em;
+}
+@supports ((mask-image: url('oa-mark.png')) or (-webkit-mask-image: url('oa-mark.png'))) {
+  .v3-mark {
+    background: var(--ink);
+    color: transparent;
+    border-radius: 0;
+    -webkit-mask: url('oa-mark.png') center / contain no-repeat;
+    mask: url('oa-mark.png') center / contain no-repeat;
+  }
 }
 
 /* the keyword row — the whole point: flat, no dropdowns */
@@ -628,8 +643,10 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .v3-footer a { color: var(--ink-2); }
 .v3-footer a:hover { color: var(--brand); }
-.v3-footer-brand img { height: 40px; width: auto; margin-bottom: 12px; }
-[data-theme='dark'] .v3-footer-brand img { filter: brightness(0) invert(0.9); }
+/* the footer carries the HEADER'S OWN lockup (monogram + wordmark), slightly
+   larger — one brand top and bottom, both painted by the theme tokens */
+.v3-logo-foot { font-size: 22px; margin-bottom: 14px; }
+.v3-logo-foot .v3-mark { width: 42px; height: 42px; }
 .v3-footer-legal {
   border-top: 1px solid var(--line-soft);
   padding-top: 22px;
