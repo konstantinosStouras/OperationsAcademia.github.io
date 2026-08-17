@@ -252,8 +252,11 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   text-decoration: none !important;
   white-space: nowrap;
 }
-/* the brand mark is drawn, not an image, so it is crisp in BOTH themes —
-   the shipped logo PNGs carry a solid background that dies on dark */
+/* THE REAL MONOGRAM (owner, 2026-08-16): the interlocked O-A ligature from
+   the site's own logo, cut to assets/oa-mark.png and used as a CSS MASK —
+   the glyph is painted in the theme's ink, so it is dark on light and light
+   on dark with one asset and no filters. The lettered tile below is the
+   fallback for a browser without mask support. */
 .v3-mark {
   width: 34px; height: 34px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
@@ -261,6 +264,15 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   border-radius: 10px;
   font-family: var(--font-serif);
   font-size: 15px; font-weight: 700; letter-spacing: 0.02em;
+}
+@supports ((mask-image: url('oa-mark.png')) or (-webkit-mask-image: url('oa-mark.png'))) {
+  .v3-mark {
+    background: var(--ink);
+    color: transparent;
+    border-radius: 0;
+    -webkit-mask: url('oa-mark.png') center / contain no-repeat;
+    mask: url('oa-mark.png') center / contain no-repeat;
+  }
 }
 
 /* the keyword row — the whole point: flat, no dropdowns */
@@ -631,8 +643,11 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .v3-footer a { color: var(--ink-2); }
 .v3-footer a:hover { color: var(--brand); }
-.v3-footer-brand img { height: 40px; width: auto; margin-bottom: 12px; }
-[data-theme='dark'] .v3-footer-brand img { filter: brightness(0) invert(0.9); }
+/* the footer wordmark asset is the WHITE knockout version — force it to the
+   theme: black in light, its natural white in dark */
+.v3-footer-brand img { height: 40px; width: auto; margin-bottom: 12px;
+  filter: brightness(0); opacity: 0.85; }
+[data-theme='dark'] .v3-footer-brand img { filter: none; opacity: 0.95; }
 .v3-footer-legal {
   border-top: 1px solid var(--line-soft);
   padding-top: 22px;
