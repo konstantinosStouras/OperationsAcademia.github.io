@@ -1,0 +1,142 @@
+name: OA jobs — read the job market tracking sheet
+
+# The maintainer's own job-market workbook — one per market cycle, a tab per
+# kind of position ("2026 Jobs", "2026 NTT/PD") — read into data/jobmarket.json,
+# which oa-jobs-build.yml then merges into the served postings.
+#
+# THIS IS NOT THE RETIRED oa-jobs-sheet-sync.yml. That one read the old Google
+# FORM's response sheet, and was retired because those postings had become
+# documents people could edit and re-reading the sheet reverted their edits.
+# This workbook has the opposite ownership: it is where these postings are
+# curated, nobody edits them on the site, and following it cannot undo anyone's
+# work. See the header of _scraper/jobmarket-sheet.mjs.
+#
+# It needs NO credentials — the workbook has to be readable by anyone with the
+# link — so it works before Firebase or SMTP are set up. With SMTP unset the
+# "this sheet has gone quiet" e-mail is printed into the log instead of sent.
+#
+# Once a day is right: the sheet is updated by hand, in batches, and the daily
+# read is what the whole design is paced around (its staleness rule counts in
+# days, its e-mail repeats weekly). Dispatch it by hand after editing the
+# sheet if you want the site to catch up sooner.
+
+on:
+  schedule:
+    # 06:40 UTC, before the working day and off the hour so this repository
+    # does not queue behind every other :00 job on the runners
+    - cron: '40 6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report what would change, write nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'List the workbooks in scope and stop — fetches nothing'
+        type: boolean
+        default: false
+      no_mail:
+        description: 'Never send the staleness e-mail (print it instead)'
+        type: boolean
+        default: false
+      sheet:
+        description: 'Read THIS workbook id instead of the registry’s'
+        type: string
+        default: ''
+      min_year:
+        description: 'Oldest MARKET year to keep (blank = the site’s own rule)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+# Shares the group with oa-jobs-build.yml: both write data/, so they must never
+# race each other's commit. Overlapping fires queue and coalesce.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # Only for the staleness e-mail. The read itself needs nothing.
+      - name: Install the mailer
+        run: npm install --no-save --no-audit --no-fund nodemailer@6
+
+      - name: Offline checks
+        run: node _scraper/selftest.mjs
+
+      - name: Read the sheet
+        env:
+          # Where "the sheet has stopped being updated" goes. Defaults to the
+          # site's own address (CONTACT in _scraper/_mail.mjs).
+          JOBMARKET_ALERT_TO: ${{ vars.JOBMARKET_ALERT_TO }}
+          # How patient it is, in days, before it says so (default 21).
+          JOBMARKET_STALE_DAYS: ${{ vars.JOBMARKET_STALE_DAYS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          node _scraper/sync-jobmarket-sheet.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.no_mail && '--no-mail' || '' }} \
+            ${{ inputs.sheet && format('--sheet {0}', inputs.sheet) || '' }} \
+            ${{ inputs.min_year && format('--min-year {0}', inputs.min_year) || '' }}
+
+      # The same gate every other writer of data/ runs before committing: a red
+      # selftest must stop the publish rather than ship a broken dataset.
+      - name: Re-check the files we are about to commit
+        run: node _scraper/selftest.mjs
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "no change — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "OA jobs: read the job market tracking sheet"
+
+          # plain fast-forward, with rebase-and-retry — the postings build may
+          # have moved the branch on while this run was working
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected — rebasing onto the new tip (attempt $i)"
+            git pull --rebase origin ${{ github.ref_name }} || exit 1
+            sleep $((i * 3))
+          done
+          echo "could not push after 5 attempts"
+          exit 1
+
+      # The postings only reach the site when oa-jobs-build.yml rebuilds
+      # data/jobs.json from the database AND this dataset. Ringing its doorbell
+      # is what makes a sheet edit visible within minutes of this run rather
+      # than at the next 20-minute tick.
+      - name: Publish what the sheet added
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/dispatches" \
+            -d '{"event_type":"oa-jobs-changed"}' || \
+            echo "::warning::could not ring the build — the next scheduled run picks it up"
