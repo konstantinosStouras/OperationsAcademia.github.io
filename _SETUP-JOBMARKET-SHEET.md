@@ -39,10 +39,16 @@ Optional, both set under *Settings → Secrets and variables → Actions*:
 ## How the sheet is read
 
 **Tabs.** Every tab named for a year is read, and its name says which kind of
-position it holds — `2026 Jobs` (tenure-track) and `2026 NTT/PD`
+position it holds — `2026 Jobs` (tenure-track) and `2026 NTTPD`
 (non-tenure-track and post-docs). Tabs are DISCOVERED, never listed in the
 code, so next year's tabs need no change here. A tab with no year in its name
-(`Intro`, `Placements`) is left alone.
+(`Intro`, `Interview Questions`) is left alone, and so are `Q&A` and
+`Placements` tabs, which are not lists of postings.
+
+The workbook holds **more than one season** — `2025 Jobs` and `2025 NTTPD` are
+read too. Their postings do not appear on the jobs page (it shows the season
+under way); they fill *Previous markets*. The reach is the site's own
+two-season rule, so it moves by itself each July.
 
 **Columns** are matched by their headers, so inserting a column in the middle
 is safe. These are understood, by any of several spellings:
@@ -50,7 +56,7 @@ is safe. These are understood, by any of several spellings:
 | The site's field | Header it looks for |
 | --- | --- |
 | Institution | University, Institution, School, Employer |
-| Town | City, City/State, Location, Town |
+| Town | City, City/State, Location, Town, Location 2 |
 | Country | Country |
 | Date posted | Date, Date posted, Posted, Date added |
 | Field / department | Field, Area, Department, Discipline |
@@ -60,12 +66,28 @@ is safe. These are understood, by any of several spellings:
 | Notes *(optional)* | Notes, Comments, Remarks |
 
 A column it does not recognise is **reported in the workflow log and ignored** —
-never guessed at. If one of your columns matters and is being ignored, say so
-and it will be added to the table above rather than inferred.
+never guessed at. In your workbook that is `Salary`, `Teaching Load`,
+`# of Positions` and the whole interview/flyout/offer tracking block, none of
+which the site has a field for. If one of them matters, say so and it will be
+added to the table above rather than inferred.
 
-If a tab has no header row at all, the columns are worked out from the data
-itself (the date column is the one holding dates, the country column the one
-holding countries, and so on) and the log says it did that.
+**Where the header is ambiguous, the data decides.** Your two tabs head the
+institution column differently — `School` in the NTT/PD tab, but `Location` in
+the Jobs tab, where the town is `Location 2` — so the word "Location" means the
+institution in one tab and the town in the other. No table of aliases can tell
+those apart, so when the header does not name the institution, it is found in
+the data instead (the country column is the one holding countries; the
+institution is the prose column before it). Everything the header *does* name —
+the deadline above all — is still taken from the header. The log says when this
+happened.
+
+If a tab has no header row at all, the same reading is used for every column.
+
+**A link must be the address itself.** Three postings in `2026 Jobs` and 22 in
+`2025 Jobs` have a *hyperlink on words* in the Link column ("Assistant
+Professor of Logistics… — HigherEdJobs"). A spreadsheet export carries the
+words, not the address, so those postings publish with no advert link and are
+counted in the log. Pasting the URL into the cell fixes each one.
 
 **What each posting becomes.** Most of it is a direct copy. Three things are
 derived, and it is worth knowing how:
@@ -91,6 +113,15 @@ record is lost even though the site's own posting form never asked for it.
 **A deadline is not invented.** With no deadline column the posting reads
 "Until filled.", which is what the site's Deadline filter already calls a
 posting with no closing date. Put a date in a `Deadline` column and it is used.
+
+## When the same posting is in both places
+
+A school advertising on a given day is often in your sheet *and* posted through
+the site's own form. Where both know a posting, **the site's copy stands and
+the sheet's is left alone** — the site's has the full department name, the type
+of institution, the teaching characteristics and the uploaded advert, where the
+sheet has a one-line note. The log says how many were held back that way (13,
+the first time it ran against your workbook).
 
 ## Editing, and removing
 

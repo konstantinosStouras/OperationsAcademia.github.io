@@ -1,20 +1,112 @@
 {
- "generated": "2026-08-17T18:18:55.794Z",
+ "generated": "2026-08-17T18:55:54.188Z",
  "universities": [
   {
    "v": "University College London",
    "n": 7
   },
   {
+   "v": "University of Houston",
+   "n": 7
+  },
+  {
+   "v": "University of Virginia",
+   "n": 7
+  },
+  {
+   "v": "National University of Singapore",
+   "n": 6
+  },
+  {
    "v": "Tulane University",
    "n": 5
   },
   {
-   "v": "University of Virginia",
+   "v": "University of Michigan",
    "n": 5
   },
   {
-   "v": "National University of Singapore",
+   "v": "Belmont University",
+   "n": 4
+  },
+  {
+   "v": "Rutgers University",
+   "n": 4
+  },
+  {
+   "v": "University of San Diego",
+   "n": 4
+  },
+  {
+   "v": "University of Texas at Arlington",
+   "n": 4
+  },
+  {
+   "v": "University of Utah",
+   "n": 4
+  },
+  {
+   "v": "Arizona State University",
+   "n": 3
+  },
+  {
+   "v": "Auburn University",
+   "n": 3
+  },
+  {
+   "v": "California State University, Long Beach",
+   "n": 3
+  },
+  {
+   "v": "Chicago Booth",
+   "n": 3
+  },
+  {
+   "v": "Eastern New Mexico University",
+   "n": 3
+  },
+  {
+   "v": "Fayetteville State University",
+   "n": 3
+  },
+  {
+   "v": "HEC Paris",
+   "n": 3
+  },
+  {
+   "v": "Hofstra University",
+   "n": 3
+  },
+  {
+   "v": "Imperial College London",
+   "n": 3
+  },
+  {
+   "v": "Indiana State University",
+   "n": 3
+  },
+  {
+   "v": "KU Leuven",
+   "n": 3
+  },
+  {
+   "v": "Lehigh University",
+   "n": 3
+  },
+  {
+   "v": "MIT Sloan",
+   "n": 3
+  },
+  {
+   "v": "Palm Beach Atlantic University",
+   "n": 3
+  },
+  {
+   "v": "San Diego State University",
+   "n": 3
+  },
+  {
+   "v": "UCL Global Business School for Health",
    "n": 3
   },
   {
@@ -22,7 +114,7 @@
    "n": 3
   },
   {
-   "v": "University of Houston",
+   "v": "University of Kansas",
    "n": 3
   },
   {
@@ -30,23 +122,211 @@
    "n": 3
   },
   {
-   "v": "University of San Diego",
+   "v": "University of Oklahoma",
    "n": 3
+  },
+  {
+   "v": "University of South Carolina",
+   "n": 3
+  },
+  {
+   "v": "University of South Florida",
+   "n": 3
+  },
+  {
+   "v": "University of Tennessee, Knoxville",
+   "n": 3
+  },
+  {
+   "v": "Aalto University",
+   "n": 2
+  },
+  {
+   "v": "Abilene Christian University",
+   "n": 2
+  },
+  {
+   "v": "Air Force Institute of Technology",
+   "n": 2
+  },
+  {
+   "v": "Alabama A&M University",
+   "n": 2
+  },
+  {
+   "v": "American University in the Emirates",
+   "n": 2
+  },
+  {
+   "v": "Augsburg University",
+   "n": 2
+  },
+  {
+   "v": "Augusta University",
+   "n": 2
+  },
+  {
+   "v": "Carnegie Mellon University",
+   "n": 2
+  },
+  {
+   "v": "Cedarville University",
+   "n": 2
+  },
+  {
+   "v": "Chinese University of Hong Kong",
+   "n": 2
   },
   {
    "v": "City University of Hong Kong",
    "n": 2
   },
   {
-   "v": "HEC Paris",
+   "v": "Cornell University",
    "n": 2
   },
   {
-   "v": "Lehigh University",
+   "v": "Depauw University",
+   "n": 2
+  },
+  {
+   "v": "Duke University",
+   "n": 2
+  },
+  {
+   "v": "Eastern Illinois University",
+   "n": 2
+  },
+  {
+   "v": "Fairmont State University",
+   "n": 2
+  },
+  {
+   "v": "FLAME University",
+   "n": 2
+  },
+  {
+   "v": "Georgetown University",
+   "n": 2
+  },
+  {
+   "v": "Georgia State University",
+   "n": 2
+  },
+  {
+   "v": "Grand Valley State University",
+   "n": 2
+  },
+  {
+   "v": "Harvard Business School",
+   "n": 2
+  },
+  {
+   "v": "Henderson State University",
+   "n": 2
+  },
+  {
+   "v": "Houston Christian University",
+   "n": 2
+  },
+  {
+   "v": "Howard University",
+   "n": 2
+  },
+  {
+   "v": "IESE Business School",
+   "n": 2
+  },
+  {
+   "v": "Indiana University Northwest",
+   "n": 2
+  },
+  {
+   "v": "IPADE Business School",
+   "n": 2
+  },
+  {
+   "v": "Judge Business School",
+   "n": 2
+  },
+  {
+   "v": "Kennesaw State University",
+   "n": 2
+  },
+  {
+   "v": "MacEwan University",
+   "n": 2
+  },
+  {
+   "v": "McGill University",
+   "n": 2
+  },
+  {
+   "v": "Miami University",
    "n": 2
   },
   {
    "v": "Michigan State University",
+   "n": 2
+  },
+  {
+   "v": "Middle Georgia State University",
+   "n": 2
+  },
+  {
+   "v": "North Central College",
+   "n": 2
+  },
+  {
+   "v": "Northern State University",
+   "n": 2
+  },
+  {
+   "v": "Ohio State University",
+   "n": 2
+  },
+  {
+   "v": "Oregon State University",
+   "n": 2
+  },
+  {
+   "v": "Pennsylvania State University",
+   "n": 2
+  },
+  {
+   "v": "Seton Hall University",
+   "n": 2
+  },
+  {
+   "v": "Southeastern Louisiana University",
+   "n": 2
+  },
+  {
+   "v": "Spartanburg Methodist College",
+   "n": 2
+  },
+  {
+   "v": "Stanford GSB",
+   "n": 2
+  },
+  {
+   "v": "Stony Brook University",
+   "n": 2
+  },
+  {
+   "v": "TBS Education",
+   "n": 2
+  },
+  {
+   "v": "Temple University",
+   "n": 2
+  },
+  {
+   "v": "Texas A&M University",
+   "n": 2
+  },
+  {
+   "v": "Texas Southern University",
    "n": 2
   },
   {
@@ -62,15 +342,59 @@
    "n": 2
   },
   {
-   "v": "University of Kansas",
+   "v": "UC Berkeley",
    "n": 2
   },
   {
-   "v": "University of South Carolina",
+   "v": "University of Bath",
    "n": 2
   },
   {
-   "v": "University of Utah",
+   "v": "University of Evansville",
+   "n": 2
+  },
+  {
+   "v": "University of Hong Kong",
+   "n": 2
+  },
+  {
+   "v": "University of Houston - Downtown",
+   "n": 2
+  },
+  {
+   "v": "University of Houston (Bauer Human-Centered AI Institute)",
+   "n": 2
+  },
+  {
+   "v": "University of Illinois Urbana-Champaign",
+   "n": 2
+  },
+  {
+   "v": "University of Iowa",
+   "n": 2
+  },
+  {
+   "v": "University of Macau",
+   "n": 2
+  },
+  {
+   "v": "University of Maryland",
+   "n": 2
+  },
+  {
+   "v": "University of Minnesota",
+   "n": 2
+  },
+  {
+   "v": "University of Texas at Dallas",
+   "n": 2
+  },
+  {
+   "v": "University of Wisconsin - Green Bay",
+   "n": 2
+  },
+  {
+   "v": "University of Wisconsin - Madison",
    "n": 2
   },
   {
@@ -78,15 +402,71 @@
    "n": 2
   },
   {
+   "v": "Valdosta State University",
+   "n": 2
+  },
+  {
+   "v": "Villanova University",
+   "n": 2
+  },
+  {
+   "v": "Virginia Tech",
+   "n": 2
+  },
+  {
+   "v": "Xi'an Jiaotong - Liverpool University",
+   "n": 2
+  },
+  {
+   "v": "Abdullah Al Salem University (AASU)",
+   "n": 1
+  },
+  {
+   "v": "Abu Dhabi University",
+   "n": 1
+  },
+  {
+   "v": "Ajman University",
+   "n": 1
+  },
+  {
    "v": "American University of Beirut",
    "n": 1
   },
   {
-   "v": "Arizona State University",
+   "v": "American University of Beirut (School of Business)",
    "n": 1
   },
   {
-   "v": "Auburn University",
+   "v": "American University of Kurdistan",
+   "n": 1
+  },
+  {
+   "v": "American University of Phnom Penh",
+   "n": 1
+  },
+  {
+   "v": "Appalachian State University",
+   "n": 1
+  },
+  {
+   "v": "Arkansas Tech University",
+   "n": 1
+  },
+  {
+   "v": "Augustana University",
+   "n": 1
+  },
+  {
+   "v": "Austin Peay State University",
+   "n": 1
+  },
+  {
+   "v": "Ball State University",
+   "n": 1
+  },
+  {
+   "v": "Baruch College - CUNY",
    "n": 1
   },
   {
@@ -94,7 +474,99 @@
    "n": 1
   },
   {
-   "v": "Carnegie Mellon University",
+   "v": "Bayes Business School",
+   "n": 1
+  },
+  {
+   "v": "Beijing Normal-Hong Kong Baptist University (BNBU)",
+   "n": 1
+  },
+  {
+   "v": "Bellarmine University",
+   "n": 1
+  },
+  {
+   "v": "Bergen Community College",
+   "n": 1
+  },
+  {
+   "v": "Berry College",
+   "n": 1
+  },
+  {
+   "v": "Bilkent University",
+   "n": 1
+  },
+  {
+   "v": "Binghamton University",
+   "n": 1
+  },
+  {
+   "v": "BITS School of Management",
+   "n": 1
+  },
+  {
+   "v": "Black Hills State University",
+   "n": 1
+  },
+  {
+   "v": "Boston College",
+   "n": 1
+  },
+  {
+   "v": "Bradley University",
+   "n": 1
+  },
+  {
+   "v": "Bucknell University",
+   "n": 1
+  },
+  {
+   "v": "Butler University",
+   "n": 1
+  },
+  {
+   "v": "Cal Poly Pomona",
+   "n": 1
+  },
+  {
+   "v": "Cal Poly San Luis Obispo",
+   "n": 1
+  },
+  {
+   "v": "California State University, Bakersfield",
+   "n": 1
+  },
+  {
+   "v": "California State University, Fresno",
+   "n": 1
+  },
+  {
+   "v": "California State University, Sacramento",
+   "n": 1
+  },
+  {
+   "v": "Calvin University",
+   "n": 1
+  },
+  {
+   "v": "Campbellsville University",
+   "n": 1
+  },
+  {
+   "v": "Católica Lisbon",
+   "n": 1
+  },
+  {
+   "v": "Central Washington University",
+   "n": 1
+  },
+  {
+   "v": "Chatham University",
+   "n": 1
+  },
+  {
+   "v": "China Europe International Business School",
    "n": 1
   },
   {
@@ -106,7 +578,47 @@
    "n": 1
   },
   {
+   "v": "Clemson University",
+   "n": 1
+  },
+  {
+   "v": "Coastal Carolina University",
+   "n": 1
+  },
+  {
+   "v": "College of Staten Island",
+   "n": 1
+  },
+  {
+   "v": "Colorado School of Mines",
+   "n": 1
+  },
+  {
+   "v": "Colorado State University",
+   "n": 1
+  },
+  {
+   "v": "Columbia Business School",
+   "n": 1
+  },
+  {
    "v": "Columbia University",
+   "n": 1
+  },
+  {
+   "v": "Concordia University Chicago",
+   "n": 1
+  },
+  {
+   "v": "Cornell SC Johnson School of Business",
+   "n": 1
+  },
+  {
+   "v": "County College of Morris",
+   "n": 1
+  },
+  {
+   "v": "CSU San Marcos",
    "n": 1
   },
   {
@@ -114,7 +626,75 @@
    "n": 1
   },
   {
-   "v": "DePauw University",
+   "v": "CUHK Shenzhen",
+   "n": 1
+  },
+  {
+   "v": "CUNEF University",
+   "n": 1
+  },
+  {
+   "v": "Dakota State University",
+   "n": 1
+  },
+  {
+   "v": "Darla Moore School of Business",
+   "n": 1
+  },
+  {
+   "v": "DeSales University",
+   "n": 1
+  },
+  {
+   "v": "Dongbei University of Finance and Economics",
+   "n": 1
+  },
+  {
+   "v": "Donghua University",
+   "n": 1
+  },
+  {
+   "v": "Emlyon Business School",
+   "n": 1
+  },
+  {
+   "v": "Endicott College",
+   "n": 1
+  },
+  {
+   "v": "ESMT Berlin",
+   "n": 1
+  },
+  {
+   "v": "ESSEC Business School",
+   "n": 1
+  },
+  {
+   "v": "Ewha Womans University",
+   "n": 1
+  },
+  {
+   "v": "Ferris State University",
+   "n": 1
+  },
+  {
+   "v": "Fisher College",
+   "n": 1
+  },
+  {
+   "v": "Florida Gulf Coast University",
+   "n": 1
+  },
+  {
+   "v": "Florida International University",
+   "n": 1
+  },
+  {
+   "v": "Florida Polytechnic University",
+   "n": 1
+  },
+  {
+   "v": "Florida State University",
    "n": 1
   },
   {
@@ -122,7 +702,23 @@
    "n": 1
   },
   {
-   "v": "Georgetown University",
+   "v": "Frankfurt School of Finance and Management",
+   "n": 1
+  },
+  {
+   "v": "Furman University",
+   "n": 1
+  },
+  {
+   "v": "George Mason University",
+   "n": 1
+  },
+  {
+   "v": "Georgia College & State University",
+   "n": 1
+  },
+  {
+   "v": "Georgia Gwinnett College",
    "n": 1
   },
   {
@@ -130,19 +726,63 @@
    "n": 1
   },
   {
-   "v": "Georgia State University",
+   "v": "Georgia Southwestern State University",
    "n": 1
   },
   {
-   "v": "IESE Business School",
+   "v": "Georgia Tech (ISyE)",
    "n": 1
   },
   {
-   "v": "Imperial College London",
+   "v": "Goldey-Beacom College",
+   "n": 1
+  },
+  {
+   "v": "Hainan Bielefeld University of Applied Sciences (BiUH)",
+   "n": 1
+  },
+  {
+   "v": "Hamad Bin Khalifa University (HBKU)",
+   "n": 1
+  },
+  {
+   "v": "HKUST",
+   "n": 1
+  },
+  {
+   "v": "HKUST(GZ)",
+   "n": 1
+  },
+  {
+   "v": "Hong Kong University of Science and Technology (Guangzhou)",
+   "n": 1
+  },
+  {
+   "v": "Hood College",
+   "n": 1
+  },
+  {
+   "v": "IE Business School",
+   "n": 1
+  },
+  {
+   "v": "IIM Ahmedabad",
    "n": 1
   },
   {
    "v": "Indian School of Business",
+   "n": 1
+  },
+  {
+   "v": "Indian School of Business (ISB)",
+   "n": 1
+  },
+  {
+   "v": "Indiana University (Kelley)",
+   "n": 1
+  },
+  {
+   "v": "Indiana University Bloomington",
    "n": 1
   },
   {
@@ -154,7 +794,47 @@
    "n": 1
   },
   {
+   "v": "Institut Mines-Télécom Business School",
+   "n": 1
+  },
+  {
+   "v": "Iowa State University",
+   "n": 1
+  },
+  {
+   "v": "Iowa State University (Ivy)",
+   "n": 1
+  },
+  {
+   "v": "IT University of Copenhagen",
+   "n": 1
+  },
+  {
    "v": "Ivey Business School, Western University",
+   "n": 1
+  },
+  {
+   "v": "James Madison University",
+   "n": 1
+  },
+  {
+   "v": "Johns Hopkins University",
+   "n": 1
+  },
+  {
+   "v": "Johnson & Wales University",
+   "n": 1
+  },
+  {
+   "v": "KAIST",
+   "n": 1
+  },
+  {
+   "v": "KIMEP University",
+   "n": 1
+  },
+  {
+   "v": "Koc University",
    "n": 1
   },
   {
@@ -162,7 +842,19 @@
    "n": 1
   },
   {
-   "v": "KU LEUVEN",
+   "v": "La Salle University",
+   "n": 1
+  },
+  {
+   "v": "LBS",
+   "n": 1
+  },
+  {
+   "v": "Le Moyne College",
+   "n": 1
+  },
+  {
+   "v": "Lenoir-Rhyne University",
    "n": 1
   },
   {
@@ -170,7 +862,31 @@
    "n": 1
   },
   {
-   "v": "McGill University",
+   "v": "Lousiana Tech Univ",
+   "n": 1
+  },
+  {
+   "v": "Marquette University",
+   "n": 1
+  },
+  {
+   "v": "Minnesota State University",
+   "n": 1
+  },
+  {
+   "v": "Missouri Southern State University",
+   "n": 1
+  },
+  {
+   "v": "Missouri State University",
+   "n": 1
+  },
+  {
+   "v": "Monash University",
+   "n": 1
+  },
+  {
+   "v": "Montclair State University",
    "n": 1
   },
   {
@@ -182,7 +898,99 @@
    "n": 1
   },
   {
+   "v": "National University of Singapore (ISEM)",
+   "n": 1
+  },
+  {
+   "v": "Naval Postgraduate School",
+   "n": 1
+  },
+  {
+   "v": "NC State University",
+   "n": 1
+  },
+  {
+   "v": "Neeley School of Business (Texas Christian Univ)",
+   "n": 1
+  },
+  {
+   "v": "Nevada State University",
+   "n": 1
+  },
+  {
+   "v": "New York Institute of Technology",
+   "n": 1
+  },
+  {
+   "v": "New York University (Stern)",
+   "n": 1
+  },
+  {
+   "v": "New York University Abu Dhabi",
+   "n": 1
+  },
+  {
+   "v": "New York University Shanghai",
+   "n": 1
+  },
+  {
+   "v": "Norfolk State University",
+   "n": 1
+  },
+  {
+   "v": "North Carolina A&T State University",
+   "n": 1
+  },
+  {
+   "v": "North Carolina State University",
+   "n": 1
+  },
+  {
+   "v": "North Idaho College",
+   "n": 1
+  },
+  {
+   "v": "Northeastern University",
+   "n": 1
+  },
+  {
+   "v": "Northern Kentucky University",
+   "n": 1
+  },
+  {
+   "v": "Northwestern",
+   "n": 1
+  },
+  {
+   "v": "Northwestern University (IEMS)",
+   "n": 1
+  },
+  {
+   "v": "NTU",
+   "n": 1
+  },
+  {
+   "v": "NYU Stern",
+   "n": 1
+  },
+  {
+   "v": "Oakland University",
+   "n": 1
+  },
+  {
+   "v": "Oklahoma State University",
+   "n": 1
+  },
+  {
    "v": "Özyeğin University",
+   "n": 1
+  },
+  {
+   "v": "Park University",
+   "n": 1
+  },
+  {
+   "v": "Peking University",
    "n": 1
   },
   {
@@ -190,7 +998,31 @@
    "n": 1
   },
   {
+   "v": "Prince Mohammad Bin Fahd University",
+   "n": 1
+  },
+  {
    "v": "Princeton University",
+   "n": 1
+  },
+  {
+   "v": "PSU Behrend",
+   "n": 1
+  },
+  {
+   "v": "Purdue University",
+   "n": 1
+  },
+  {
+   "v": "Purdue University Fort Wayne",
+   "n": 1
+  },
+  {
+   "v": "Queens University of Charlotte",
+   "n": 1
+  },
+  {
+   "v": "Rockhurst University",
    "n": 1
   },
   {
@@ -198,7 +1030,43 @@
    "n": 1
   },
   {
+   "v": "Rowan University",
+   "n": 1
+  },
+  {
    "v": "Rutgers Business School–Newark and New Brunswick",
+   "n": 1
+  },
+  {
+   "v": "Rutgers University (Stats)",
+   "n": 1
+  },
+  {
+   "v": "Sam Houston State University",
+   "n": 1
+  },
+  {
+   "v": "San Bernardino Community College District",
+   "n": 1
+  },
+  {
+   "v": "San José State University",
+   "n": 1
+  },
+  {
+   "v": "Santa Clara University",
+   "n": 1
+  },
+  {
+   "v": "Savannah State University",
+   "n": 1
+  },
+  {
+   "v": "Shandong University of Finance and Economics",
+   "n": 1
+  },
+  {
+   "v": "Shanghai Jiao Tong University",
    "n": 1
   },
   {
@@ -206,15 +1074,107 @@
    "n": 1
   },
   {
+   "v": "Shorter University",
+   "n": 1
+  },
+  {
+   "v": "Singapore Management University",
+   "n": 1
+  },
+  {
+   "v": "SKEMA Business School",
+   "n": 1
+  },
+  {
+   "v": "Smith School of Business",
+   "n": 1
+  },
+  {
+   "v": "Southern Arkansas University",
+   "n": 1
+  },
+  {
+   "v": "Southern Methodist University",
+   "n": 1
+  },
+  {
+   "v": "Southern Methodist University: Cox School of Business",
+   "n": 1
+  },
+  {
+   "v": "Southern Utah University",
+   "n": 1
+  },
+  {
+   "v": "Southwest Minnesota State University",
+   "n": 1
+  },
+  {
+   "v": "St. Cloud State University",
+   "n": 1
+  },
+  {
    "v": "St. John's University",
    "n": 1
   },
   {
-   "v": "TBS Education",
+   "v": "St. Thomas University",
    "n": 1
   },
   {
-   "v": "Temple University",
+   "v": "State University of New York at Geneseo",
+   "n": 1
+  },
+  {
+   "v": "SUNY Korea",
+   "n": 1
+  },
+  {
+   "v": "Syracuse University",
+   "n": 1
+  },
+  {
+   "v": "Technical University of Munich",
+   "n": 1
+  },
+  {
+   "v": "Technical University of Munich (TUM)",
+   "n": 1
+  },
+  {
+   "v": "Tennessee State University",
+   "n": 1
+  },
+  {
+   "v": "Tennessee Tech University",
+   "n": 1
+  },
+  {
+   "v": "Texas A&M International University",
+   "n": 1
+  },
+  {
+   "v": "Texas Christian University",
+   "n": 1
+  },
+  {
+   "v": "Texas State University",
+   "n": 1
+  },
+  {
+   "v": "Texas Tech University",
+   "n": 1
+  },
+  {
+   "v": "The Catholic University of America",
+   "n": 1
+  },
+  {
+   "v": "The College of New Jersey",
+   "n": 1
+  },
+  {
+   "v": "The Hong Kong Polytechnic University (PolyU)",
    "n": 1
   },
   {
@@ -234,6 +1194,42 @@
    "n": 1
   },
   {
+   "v": "Trinity University",
+   "n": 1
+  },
+  {
+   "v": "Tsinghua University",
+   "n": 1
+  },
+  {
+   "v": "TUM School of Management",
+   "n": 1
+  },
+  {
+   "v": "Tusculum University",
+   "n": 1
+  },
+  {
+   "v": "UBC Okanagan",
+   "n": 1
+  },
+  {
+   "v": "UBC Sauder School of Business",
+   "n": 1
+  },
+  {
+   "v": "UCL GBSH",
+   "n": 1
+  },
+  {
+   "v": "UCL School of Management",
+   "n": 1
+  },
+  {
+   "v": "Uni. of Illinois at Urbana-Champaign (Gies)",
+   "n": 1
+  },
+  {
    "v": "United States Naval Academy",
    "n": 1
   },
@@ -242,7 +1238,43 @@
    "n": 1
   },
   {
+   "v": "Universitat Pompeu Fabra",
+   "n": 1
+  },
+  {
+   "v": "University at Buffalo",
+   "n": 1
+  },
+  {
    "v": "University College Dublin",
+   "n": 1
+  },
+  {
+   "v": "University of Alabama",
+   "n": 1
+  },
+  {
+   "v": "University of Alabama - Birmingham",
+   "n": 1
+  },
+  {
+   "v": "University of Alaska Fairbanks",
+   "n": 1
+  },
+  {
+   "v": "University of Alberta",
+   "n": 1
+  },
+  {
+   "v": "University of Arizona",
+   "n": 1
+  },
+  {
+   "v": "University of Bristol",
+   "n": 1
+  },
+  {
+   "v": "University of California Riverside",
    "n": 1
   },
   {
@@ -254,15 +1286,47 @@
    "n": 1
   },
   {
+   "v": "University of Central Arkansas",
+   "n": 1
+  },
+  {
+   "v": "University of Colorado Boulder",
+   "n": 1
+  },
+  {
+   "v": "University of Colorado Denver",
+   "n": 1
+  },
+  {
    "v": "University of Cyprus",
    "n": 1
   },
   {
-   "v": "University of Houston (Bauer Human-Centered AI Institute)",
+   "v": "University of Georgia",
    "n": 1
   },
   {
-   "v": "University of Illinois Urbana-Champaign",
+   "v": "University of Hartford",
+   "n": 1
+  },
+  {
+   "v": "University of Illinois at Urbana-Champaign",
+   "n": 1
+  },
+  {
+   "v": "University of Kentucky",
+   "n": 1
+  },
+  {
+   "v": "University of Leeds, UK",
+   "n": 1
+  },
+  {
+   "v": "University of Maine at Augusta",
+   "n": 1
+  },
+  {
+   "v": "University of Melbourne",
    "n": 1
   },
   {
@@ -270,11 +1334,51 @@
    "n": 1
   },
   {
-   "v": "University of Michigan",
+   "v": "University of Miami (Herbert)",
    "n": 1
   },
   {
-   "v": "University of Minnesota",
+   "v": "University of Michigan - Flint",
+   "n": 1
+  },
+  {
+   "v": "University of Missouri",
+   "n": 1
+  },
+  {
+   "v": "University of Missouri-Kansas City",
+   "n": 1
+  },
+  {
+   "v": "University of Nebraska at Kearney",
+   "n": 1
+  },
+  {
+   "v": "University of Nebraska at Omaha",
+   "n": 1
+  },
+  {
+   "v": "University of Nevada Las Vegas",
+   "n": 1
+  },
+  {
+   "v": "University of New Mexico",
+   "n": 1
+  },
+  {
+   "v": "University of North Carolina at Wilmington",
+   "n": 1
+  },
+  {
+   "v": "University of North Georgia",
+   "n": 1
+  },
+  {
+   "v": "University of North Texas",
+   "n": 1
+  },
+  {
+   "v": "University of Northern Iowa",
    "n": 1
   },
   {
@@ -282,7 +1386,47 @@
    "n": 1
   },
   {
-   "v": "University of Texas at Dallas",
+   "v": "University of Pennsylvania",
+   "n": 1
+  },
+  {
+   "v": "University of Pennsylvania (Wharton)",
+   "n": 1
+  },
+  {
+   "v": "University of Pittsburgh",
+   "n": 1
+  },
+  {
+   "v": "University of South Carolina (Darla Moore)",
+   "n": 1
+  },
+  {
+   "v": "University of South Carolina Aiken",
+   "n": 1
+  },
+  {
+   "v": "University of Southern California",
+   "n": 1
+  },
+  {
+   "v": "University of Stirling",
+   "n": 1
+  },
+  {
+   "v": "University of Tampa",
+   "n": 1
+  },
+  {
+   "v": "University of Tennesse, Knoxville",
+   "n": 1
+  },
+  {
+   "v": "University of Tennessee at Chattanooga",
+   "n": 1
+  },
+  {
+   "v": "University of Texas at El Paso",
    "n": 1
   },
   {
@@ -290,7 +1434,35 @@
    "n": 1
   },
   {
-   "v": "University of Wisconsin-Madison",
+   "v": "University of Vienna",
+   "n": 1
+  },
+  {
+   "v": "University of Virgin Islands",
+   "n": 1
+  },
+  {
+   "v": "University of Waikato",
+   "n": 1
+  },
+  {
+   "v": "University of Warwick",
+   "n": 1
+  },
+  {
+   "v": "University of Washington",
+   "n": 1
+  },
+  {
+   "v": "University of Washington-Tacoma (Milgard School of Business)",
+   "n": 1
+  },
+  {
+   "v": "University of Wisconsin - La Crosse",
+   "n": 1
+  },
+  {
+   "v": "University of Wisconsin-Stout",
    "n": 1
   },
   {
@@ -298,7 +1470,75 @@
    "n": 1
   },
   {
-   "v": "Villanova University",
+   "v": "UT Austin McCombs",
+   "n": 1
+  },
+  {
+   "v": "Utah Tech University",
+   "n": 1
+  },
+  {
+   "v": "Valley City State University",
+   "n": 1
+  },
+  {
+   "v": "Vienna University of Economics and Business",
+   "n": 1
+  },
+  {
+   "v": "VinUniversity",
+   "n": 1
+  },
+  {
+   "v": "Virgina Darden",
+   "n": 1
+  },
+  {
+   "v": "Wake Forest University",
+   "n": 1
+  },
+  {
+   "v": "Washburn University",
+   "n": 1
+  },
+  {
+   "v": "Washington and Lee University",
+   "n": 1
+  },
+  {
+   "v": "Washington University in St. Louis",
+   "n": 1
+  },
+  {
+   "v": "Western Connecticut State University",
+   "n": 1
+  },
+  {
+   "v": "Western Illinois University",
+   "n": 1
+  },
+  {
+   "v": "Western Wyoming Community College",
+   "n": 1
+  },
+  {
+   "v": "Westfield State University",
+   "n": 1
+  },
+  {
+   "v": "Wilson College",
+   "n": 1
+  },
+  {
+   "v": "Wingate University",
+   "n": 1
+  },
+  {
+   "v": "Winona State University",
+   "n": 1
+  },
+  {
+   "v": "Worcester State University",
    "n": 1
   }
  ],
@@ -498,11 +1738,95 @@
  ],
  "units": [
   {
+   "v": "OM",
+   "n": 46
+  },
+  {
    "v": "SCM",
-   "n": 3
+   "n": 37
+  },
+  {
+   "v": "BA",
+   "n": 27
+  },
+  {
+   "v": "IS",
+   "n": 23
+  },
+  {
+   "v": "MIS",
+   "n": 13
   },
   {
    "v": "Business Analytics",
+   "n": 10
+  },
+  {
+   "v": "OM/SCM",
+   "n": 9
+  },
+  {
+   "v": "Operations Management",
+   "n": 8
+  },
+  {
+   "v": "Data Analytics",
+   "n": 7
+  },
+  {
+   "v": "Supply Chain Management",
+   "n": 7
+  },
+  {
+   "v": "AI",
+   "n": 5
+  },
+  {
+   "v": "SCM/Logistics",
+   "n": 5
+  },
+  {
+   "v": "BA/OM",
+   "n": 4
+  },
+  {
+   "v": "Business",
+   "n": 4
+  },
+  {
+   "v": "Logistics and SCM",
+   "n": 4
+  },
+  {
+   "v": "Management Science",
+   "n": 4
+  },
+  {
+   "v": "OM/IS",
+   "n": 4
+  },
+  {
+   "v": "Operations & SCM",
+   "n": 4
+  },
+  {
+   "v": "Decision Sciences",
+   "n": 3
+  },
+  {
+   "v": "ISBA",
+   "n": 3
+  },
+  {
+   "v": "Analytics and Operations",
+   "n": 2
+  },
+  {
+   "v": "Business Statistics",
+   "n": 2
+  },
+  {
+   "v": "Business Technology",
    "n": 2
   },
   {
@@ -530,7 +1854,23 @@
    "n": 2
   },
   {
-   "v": "Management Science",
+   "v": "General Business",
+   "n": 2
+  },
+  {
+   "v": "Information Technology",
+   "n": 2
+  },
+  {
+   "v": "ISOM",
+   "n": 2
+  },
+  {
+   "v": "IT Management",
+   "n": 2
+  },
+  {
+   "v": "Management",
    "n": 2
   },
   {
@@ -538,11 +1878,75 @@
    "n": 2
   },
   {
-   "v": "Operations Management",
+   "v": "MIS and BA",
    "n": 2
   },
   {
-   "v": "Analytics and Operations",
+   "v": "OM/IS (AI)",
+   "n": 2
+  },
+  {
+   "v": "OM/OR",
+   "n": 2
+  },
+  {
+   "v": "Operations and Information Systems",
+   "n": 2
+  },
+  {
+   "v": "OR",
+   "n": 2
+  },
+  {
+   "v": "Production and OM",
+   "n": 2
+  },
+  {
+   "v": "SCM/BA",
+   "n": 2
+  },
+  {
+   "v": "SCM/OM",
+   "n": 2
+  },
+  {
+   "v": "Supply Chain & OM",
+   "n": 2
+  },
+  {
+   "v": "Sustainable Management",
+   "n": 2
+  },
+  {
+   "v": "Technology Management",
+   "n": 2
+  },
+  {
+   "v": "8-Aug-26",
+   "n": 1
+  },
+  {
+   "v": "AI & Business Analytics and Operations Management",
+   "n": 1
+  },
+  {
+   "v": "AI, Analytics, Data-Driven DM",
+   "n": 1
+  },
+  {
+   "v": "AI, Business Analytics",
+   "n": 1
+  },
+  {
+   "v": "AI/ML/DS/Stats",
+   "n": 1
+  },
+  {
+   "v": "Analytics",
+   "n": 1
+  },
+  {
+   "v": "Analytics & Operations",
    "n": 1
   },
   {
@@ -550,7 +1954,35 @@
    "n": 1
   },
   {
+   "v": "Analytics/Business IS",
+   "n": 1
+  },
+  {
+   "v": "Analytics/Ops/SCM",
+   "n": 1
+  },
+  {
+   "v": "Applied Artificial Intelligence",
+   "n": 1
+  },
+  {
+   "v": "Applied Economics and Management",
+   "n": 1
+  },
+  {
    "v": "Artificial Intelligence (AI) and healthcare",
+   "n": 1
+  },
+  {
+   "v": "BA (Marketing or SCM)",
+   "n": 1
+  },
+  {
+   "v": "BA and IS",
+   "n": 1
+  },
+  {
+   "v": "BA and Marketing",
    "n": 1
   },
   {
@@ -558,7 +1990,91 @@
    "n": 1
   },
   {
+   "v": "BA: FinTech, AI, Healthcare",
+   "n": 1
+  },
+  {
+   "v": "BA/AI",
+   "n": 1
+  },
+  {
+   "v": "BA/DS",
+   "n": 1
+  },
+  {
+   "v": "BA/IS/DS",
+   "n": 1
+  },
+  {
+   "v": "BA/MIS",
+   "n": 1
+  },
+  {
+   "v": "BA/OM/OR/Stochastic models/Data-driven/AI",
+   "n": 1
+  },
+  {
+   "v": "BA/OR",
+   "n": 1
+  },
+  {
+   "v": "BA/SCM",
+   "n": 1
+  },
+  {
+   "v": "Business Administration",
+   "n": 1
+  },
+  {
    "v": "Business Analytics Program",
+   "n": 1
+  },
+  {
+   "v": "Business Analytics, AI/ML",
+   "n": 1
+  },
+  {
+   "v": "Business Analytics, OM",
+   "n": 1
+  },
+  {
+   "v": "Business Data Analytics",
+   "n": 1
+  },
+  {
+   "v": "Business Intelligence /DA",
+   "n": 1
+  },
+  {
+   "v": "Business Intelligence & Analytics",
+   "n": 1
+  },
+  {
+   "v": "Business Intelligence and Analytics (IS)",
+   "n": 1
+  },
+  {
+   "v": "Business IS",
+   "n": 1
+  },
+  {
+   "v": "Business IS and Analytics",
+   "n": 1
+  },
+  {
+   "v": "Business IT",
+   "n": 1
+  },
+  {
+   "v": "Business Management",
+   "n": 1
+  },
+  {
+   "v": "Business Math",
+   "n": 1
+  },
+  {
+   "v": "Business Stat/DA/SCM/OM",
    "n": 1
   },
   {
@@ -570,7 +2086,59 @@
    "n": 1
   },
   {
+   "v": "CIS",
+   "n": 1
+  },
+  {
+   "v": "Computer Information Systems",
+   "n": 1
+  },
+  {
+   "v": "CS & Information Technology",
+   "n": 1
+  },
+  {
+   "v": "DA",
+   "n": 1
+  },
+  {
+   "v": "DA/BA./Business Stat",
+   "n": 1
+  },
+  {
+   "v": "DA/Quantitative Methods",
+   "n": 1
+  },
+  {
+   "v": "DADS",
+   "n": 1
+  },
+  {
+   "v": "data analytics and AI",
+   "n": 1
+  },
+  {
+   "v": "data analytics, operations, business",
+   "n": 1
+  },
+  {
+   "v": "Data Science and Analytics Thrust",
+   "n": 1
+  },
+  {
+   "v": "Decision and IIS",
+   "n": 1
+  },
+  {
    "v": "Decision and Information Sciences (DISC)",
+   "n": 1
+  },
+  {
+   "v": "Decision Support, Digital Innovation, or Supply Chain Management",
+   "n": 1
+  },
+  {
+   "v": "Decision, Operations and Technology",
    "n": 1
   },
   {
@@ -579,6 +2147,10 @@
   },
   {
    "v": "Department of Business and Public Administration",
+   "n": 1
+  },
+  {
+   "v": "Department of Data and Systems Engineering",
    "n": 1
   },
   {
@@ -591,6 +2163,10 @@
   },
   {
    "v": "Department of Industrial and Systems Engineering",
+   "n": 1
+  },
+  {
+   "v": "Department of Industrial Engineering",
    "n": 1
   },
   {
@@ -642,11 +2218,91 @@
    "n": 1
   },
   {
+   "v": "Department of Operations and Information Management",
+   "n": 1
+  },
+  {
    "v": "Department of Supply Chain Management",
    "n": 1
   },
   {
+   "v": "Digital Technology",
+   "n": 1
+  },
+  {
+   "v": "DS",
+   "n": 1
+  },
+  {
+   "v": "DS and Analytics",
+   "n": 1
+  },
+  {
+   "v": "DS and Analytics Thrust",
+   "n": 1
+  },
+  {
+   "v": "DS and Analytics/MIS",
+   "n": 1
+  },
+  {
+   "v": "ds/stat and/or applied AI",
+   "n": 1
+  },
+  {
+   "v": "Healthcare",
+   "n": 1
+  },
+  {
+   "v": "Healthcare Operations",
+   "n": 1
+  },
+  {
+   "v": "Healthcare/Sustainability",
+   "n": 1
+  },
+  {
+   "v": "Heathcare (OM included)",
+   "n": 1
+  },
+  {
+   "v": "IE",
+   "n": 1
+  },
+  {
+   "v": "IEMS",
+   "n": 1
+  },
+  {
+   "v": "IEOR",
+   "n": 1
+  },
+  {
+   "v": "IEOR, decision analytics",
+   "n": 1
+  },
+  {
    "v": "Industrial Engineering and Management",
+   "n": 1
+  },
+  {
+   "v": "Information",
+   "n": 1
+  },
+  {
+   "v": "Information and Operations Management",
+   "n": 1
+  },
+  {
+   "v": "Information And Technology Management",
+   "n": 1
+  },
+  {
+   "v": "Information Systems & Analytics",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Business Analytics (AI)",
    "n": 1
   },
   {
@@ -658,15 +2314,127 @@
    "n": 1
   },
   {
+   "v": "Information Systems and Technology",
+   "n": 1
+  },
+  {
+   "v": "Information Systems Engineering",
+   "n": 1
+  },
+  {
+   "v": "Information Technology Management",
+   "n": 1
+  },
+  {
    "v": "Innovation and Information Management",
    "n": 1
   },
   {
-   "v": "Logistics and SCM",
+   "v": "IO/OM/OR",
+   "n": 1
+  },
+  {
+   "v": "IOE",
+   "n": 1
+  },
+  {
+   "v": "IS and AI",
+   "n": 1
+  },
+  {
+   "v": "IS and Technology",
+   "n": 1
+  },
+  {
+   "v": "IS/AI/OR (Health Cluster)",
+   "n": 1
+  },
+  {
+   "v": "IS/Analytics",
+   "n": 1
+  },
+  {
+   "v": "IS/BA",
+   "n": 1
+  },
+  {
+   "v": "IS/BA (AI)",
+   "n": 1
+  },
+  {
+   "v": "IS/Decision Sciences",
+   "n": 1
+  },
+  {
+   "v": "IS/OM/SCM/BA",
+   "n": 1
+  },
+  {
+   "v": "IS/OR/DS",
+   "n": 1
+  },
+  {
+   "v": "ISE",
+   "n": 1
+  },
+  {
+   "v": "ISE (supply chain & logistics tech)",
+   "n": 1
+  },
+  {
+   "v": "ISyE",
+   "n": 1
+  },
+  {
+   "v": "IT",
+   "n": 1
+  },
+  {
+   "v": "IT/OM",
+   "n": 1
+  },
+  {
+   "v": "ITAO",
+   "n": 1
+  },
+  {
+   "v": "ITOM",
+   "n": 1
+  },
+  {
+   "v": "Learning, Optimization, and Decision Analytics",
+   "n": 1
+  },
+  {
+   "v": "Logistics and Supply Chain Management",
+   "n": 1
+  },
+  {
+   "v": "Logistics/Supply Chain",
    "n": 1
   },
   {
    "v": "Loomba Department of Management, Operations Management Group",
+   "n": 1
+  },
+  {
+   "v": "Management (BA)",
+   "n": 1
+  },
+  {
+   "v": "Management (Markets, Innovation, And Design)",
+   "n": 1
+  },
+  {
+   "v": "Management (MIS)",
+   "n": 1
+  },
+  {
+   "v": "Management (Operations & Supply Chain Management)",
+   "n": 1
+  },
+  {
+   "v": "Management and Business Analytics",
    "n": 1
   },
   {
@@ -682,6 +2450,10 @@
    "n": 1
   },
   {
+   "v": "Management Information Systems (MIS)",
+   "n": 1
+  },
+  {
    "v": "Management Science & Operations",
    "n": 1
   },
@@ -690,7 +2462,23 @@
    "n": 1
   },
   {
+   "v": "Marketing and SCM",
+   "n": 1
+  },
+  {
+   "v": "Marketing/AI",
+   "n": 1
+  },
+  {
    "v": "Mathematics",
+   "n": 1
+  },
+  {
+   "v": "MIS, Cybersecurity/AI",
+   "n": 1
+  },
+  {
+   "v": "MIS/BA/AI",
    "n": 1
   },
   {
@@ -698,15 +2486,83 @@
    "n": 1
   },
   {
+   "v": "MS/MIS/Stat",
+   "n": 1
+  },
+  {
+   "v": "Nonprofit Management",
+   "n": 1
+  },
+  {
    "v": "NRF Business of Retail Initiative",
    "n": 1
   },
   {
-   "v": "Operations & Information Systems Department",
+   "v": "OID",
    "n": 1
   },
   {
-   "v": "Operations & SCM",
+   "v": "OIT",
+   "n": 1
+  },
+  {
+   "v": "OM / Tech",
+   "n": 1
+  },
+  {
+   "v": "OM and AI",
+   "n": 1
+  },
+  {
+   "v": "OM and IS",
+   "n": 1
+  },
+  {
+   "v": "OM and SCM",
+   "n": 1
+  },
+  {
+   "v": "OM, SCM, OR, MS, and ISE",
+   "n": 1
+  },
+  {
+   "v": "OM/AI",
+   "n": 1
+  },
+  {
+   "v": "OM/Analytics/Statistics",
+   "n": 1
+  },
+  {
+   "v": "OM/BA",
+   "n": 1
+  },
+  {
+   "v": "OM/BA (AI)",
+   "n": 1
+  },
+  {
+   "v": "OM/DS",
+   "n": 1
+  },
+  {
+   "v": "OM/IS (Healthcare Management)",
+   "n": 1
+  },
+  {
+   "v": "OM/IS (rookie)",
+   "n": 1
+  },
+  {
+   "v": "OM/SCM/MIS/F/AI",
+   "n": 1
+  },
+  {
+   "v": "open disciplinary focus",
+   "n": 1
+  },
+  {
+   "v": "Operations & Information Systems Department",
    "n": 1
   },
   {
@@ -718,7 +2574,19 @@
    "n": 1
   },
   {
+   "v": "Operations and Business Analytics",
+   "n": 1
+  },
+  {
    "v": "Operations and Business Analytics Department",
+   "n": 1
+  },
+  {
+   "v": "Operations and Decision Analytics",
+   "n": 1
+  },
+  {
+   "v": "Operations and Decision Technologies, Operations Management",
    "n": 1
   },
   {
@@ -726,7 +2594,7 @@
    "n": 1
   },
   {
-   "v": "Operations and Information Systems",
+   "v": "Operations and IS",
    "n": 1
   },
   {
@@ -734,7 +2602,31 @@
    "n": 1
   },
   {
+   "v": "Operations and Logistics",
+   "n": 1
+  },
+  {
+   "v": "Operations and Logistics Management.",
+   "n": 1
+  },
+  {
+   "v": "Operations and Project Management (AI focus)",
+   "n": 1
+  },
+  {
+   "v": "Operations and Supply Chain Management",
+   "n": 1
+  },
+  {
    "v": "Operations and Supply Chain Management area",
+   "n": 1
+  },
+  {
+   "v": "Operations Management / Supply Chain Management / Project Management",
+   "n": 1
+  },
+  {
+   "v": "Operations Management & Business Analytics",
    "n": 1
   },
   {
@@ -750,6 +2642,18 @@
    "n": 1
   },
   {
+   "v": "Operations Management, Innovation Management",
+   "n": 1
+  },
+  {
+   "v": "Operations Research",
+   "n": 1
+  },
+  {
+   "v": "Operations Research and AI",
+   "n": 1
+  },
+  {
    "v": "Operations Strategy and Management Science",
    "n": 1
   },
@@ -758,11 +2662,183 @@
    "n": 1
   },
   {
+   "v": "Operations, Technology, and Information Management",
+   "n": 1
+  },
+  {
+   "v": "Optimisation for Decision Support in Disaster Response",
+   "n": 1
+  },
+  {
    "v": "OR & Financial Engineering",
    "n": 1
   },
   {
+   "v": "OR/OM",
+   "n": 1
+  },
+  {
+   "v": "OR/OM/CS/DS/ML/AI",
+   "n": 1
+  },
+  {
+   "v": "OR/OM/DA",
+   "n": 1
+  },
+  {
+   "v": "OR/Stat",
+   "n": 1
+  },
+  {
+   "v": "Organization/Man. Sci.",
+   "n": 1
+  },
+  {
+   "v": "OSC(Empirical Healthcare Focus)",
+   "n": 1
+  },
+  {
+   "v": "OSCM",
+   "n": 1
+  },
+  {
+   "v": "OT/IS",
+   "n": 1
+  },
+  {
+   "v": "Production and Operations Management",
+   "n": 1
+  },
+  {
+   "v": "Production/OM",
+   "n": 1
+  },
+  {
+   "v": "Project and SCM",
+   "n": 1
+  },
+  {
+   "v": "Project Management",
+   "n": 1
+  },
+  {
+   "v": "Quant Methods/Man. Sci.",
+   "n": 1
+  },
+  {
+   "v": "quantitative analytics",
+   "n": 1
+  },
+  {
+   "v": "Reinforcement Learning",
+   "n": 1
+  },
+  {
+   "v": "Science and Innovation",
+   "n": 1
+  },
+  {
+   "v": "SCM (second position)",
+   "n": 1
+  },
+  {
+   "v": "SCM (sourcing focus)",
+   "n": 1
+  },
+  {
+   "v": "SCM (Tech focus)",
+   "n": 1
+  },
+  {
+   "v": "SCM and IT",
+   "n": 1
+  },
+  {
+   "v": "SCM and Logistics",
+   "n": 1
+  },
+  {
+   "v": "SCM and Marketing",
+   "n": 1
+  },
+  {
+   "v": "SCM and OM",
+   "n": 1
+  },
+  {
+   "v": "SCM, distribution/MKT",
+   "n": 1
+  },
+  {
+   "v": "SCM/Analytics/OM",
+   "n": 1
+  },
+  {
+   "v": "SCM/BA/Stat/",
+   "n": 1
+  },
+  {
+   "v": "SCM/Management",
+   "n": 1
+  },
+  {
+   "v": "SCM/OM/BA",
+   "n": 1
+  },
+  {
+   "v": "SCM/OM/Business Stat",
+   "n": 1
+  },
+  {
+   "v": "SCM/OM/Healthcare OM",
+   "n": 1
+  },
+  {
+   "v": "SCM/Quantitative Analysis",
+   "n": 1
+  },
+  {
+   "v": "SCM/Stat/Econ Management",
+   "n": 1
+  },
+  {
+   "v": "Services Management",
+   "n": 1
+  },
+  {
+   "v": "simulation, sustainability, AI + X",
+   "n": 1
+  },
+  {
+   "v": "Sports Analytics",
+   "n": 1
+  },
+  {
+   "v": "Stat, Analytics and SCM",
+   "n": 1
+  },
+  {
+   "v": "Statistics",
+   "n": 1
+  },
+  {
+   "v": "Statistics, Big Data, OR",
+   "n": 1
+  },
+  {
+   "v": "Statistics, Operations, and Data Science",
+   "n": 1
+  },
+  {
+   "v": "Statistics/Data Analytics",
+   "n": 1
+  },
+  {
    "v": "Strategic Management & Operations",
+   "n": 1
+  },
+  {
+   "v": "Supply Chain & Analytics",
    "n": 1
   },
   {
@@ -774,7 +2850,7 @@
    "n": 1
   },
   {
-   "v": "Supply Chain Management",
+   "v": "Supply Chain, Logistics, Sustainable Transport, and Economics",
    "n": 1
   },
   {
@@ -782,7 +2858,23 @@
    "n": 1
   },
   {
+   "v": "Sustainability",
+   "n": 1
+  },
+  {
+   "v": "Sustainable SCM",
+   "n": 1
+  },
+  {
    "v": "TBS Education, Information, Operations and Management Sciences Department",
+   "n": 1
+  },
+  {
+   "v": "Technological innovation",
+   "n": 1
+  },
+  {
+   "v": "Technology",
    "n": 1
   },
   {
@@ -790,7 +2882,19 @@
    "n": 1
   },
   {
+   "v": "Technology & Operations",
+   "n": 1
+  },
+  {
    "v": "The research group of Prof. Yiming Zhang",
+   "n": 1
+  },
+  {
+   "v": "Transport and Logistics Management",
+   "n": 1
+  },
+  {
+   "v": "Transportation/Logistics",
    "n": 1
   },
   {
@@ -799,10 +2903,87 @@
   }
  ],
  "byUniversity": {
+  "Aalto University": {
+   "schools": [],
+   "units": [
+    "Production/OM",
+    "SCM"
+   ]
+  },
+  "Abdullah Al Salem University (AASU)": {
+   "schools": [],
+   "units": [
+    "SCM/Logistics"
+   ]
+  },
+  "Abilene Christian University": {
+   "schools": [],
+   "units": [
+    "IS",
+    "Operations and Information Systems"
+   ]
+  },
+  "Abu Dhabi University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Air Force Institute of Technology": {
+   "schools": [],
+   "units": [
+    "Logistics and SCM",
+    "SCM and Logistics"
+   ]
+  },
+  "Ajman University": {
+   "schools": [],
+   "units": [
+    "Data Analytics"
+   ]
+  },
+  "Alabama A&M University": {
+   "schools": [],
+   "units": [
+    "MIS",
+    "SCM/Logistics"
+   ]
+  },
+  "American University in the Emirates": {
+   "schools": [],
+   "units": [
+    "Business Intelligence /DA",
+    "Logistics/Supply Chain"
+   ]
+  },
   "American University of Beirut": {
    "schools": [],
    "units": [
     "Industrial Engineering and Management"
+   ]
+  },
+  "American University of Beirut (School of Business)": {
+   "schools": [],
+   "units": [
+    "OM/Analytics/Statistics"
+   ]
+  },
+  "American University of Kurdistan": {
+   "schools": [],
+   "units": [
+    "BA/MIS"
+   ]
+  },
+  "American University of Phnom Penh": {
+   "schools": [],
+   "units": [
+    "MIS"
+   ]
+  },
+  "Appalachian State University": {
+   "schools": [],
+   "units": [
+    "CIS"
    ]
   },
   "Arizona State University": {
@@ -810,13 +2991,61 @@
     "W. P. Carey School of Business"
    ],
    "units": [
-    "Department of Information Systems"
+    "Department of Information Systems",
+    "Learning, Optimization, and Decision Analytics",
+    "SCM"
+   ]
+  },
+  "Arkansas Tech University": {
+   "schools": [],
+   "units": [
+    "OM/SCM"
    ]
   },
   "Auburn University": {
    "schools": [],
    "units": [
-    "Department of Industrial and Systems Engineering"
+    "BA",
+    "Department of Industrial and Systems Engineering",
+    "IS/BA"
+   ]
+  },
+  "Augsburg University": {
+   "schools": [],
+   "units": [
+    "Management Information Systems (MIS)",
+    "MIS"
+   ]
+  },
+  "Augusta University": {
+   "schools": [],
+   "units": [
+    "MIS",
+    "OM and SCM"
+   ]
+  },
+  "Augustana University": {
+   "schools": [],
+   "units": [
+    "Business"
+   ]
+  },
+  "Austin Peay State University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Ball State University": {
+   "schools": [],
+   "units": [
+    "ISOM"
+   ]
+  },
+  "Baruch College - CUNY": {
+   "schools": [],
+   "units": [
+    "OR/OM/DA"
    ]
   },
   "Baruch College, The City University of New York (CUNY)": {
@@ -827,11 +3056,190 @@
     "Loomba Department of Management, Operations Management Group"
    ]
   },
+  "Bayes Business School": {
+   "schools": [],
+   "units": [
+    "OM/AI"
+   ]
+  },
+  "Beijing Normal-Hong Kong Baptist University (BNBU)": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Bellarmine University": {
+   "schools": [],
+   "units": [
+    "IS and AI"
+   ]
+  },
+  "Belmont University": {
+   "schools": [],
+   "units": [
+    "BA",
+    "SCM"
+   ]
+  },
+  "Bergen Community College": {
+   "schools": [],
+   "units": [
+    "Information Technology"
+   ]
+  },
+  "Berry College": {
+   "schools": [],
+   "units": [
+    "OM/SCM"
+   ]
+  },
+  "Bilkent University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Binghamton University": {
+   "schools": [],
+   "units": [
+    "MIS"
+   ]
+  },
+  "BITS School of Management": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Black Hills State University": {
+   "schools": [],
+   "units": [
+    "BA/OM"
+   ]
+  },
+  "Boston College": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Bradley University": {
+   "schools": [],
+   "units": [
+    "MIS, Cybersecurity/AI"
+   ]
+  },
+  "Bucknell University": {
+   "schools": [],
+   "units": [
+    "Management (Markets, Innovation, And Design)"
+   ]
+  },
+  "Butler University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Cal Poly Pomona": {
+   "schools": [],
+   "units": [
+    "Computer Information Systems"
+   ]
+  },
+  "Cal Poly San Luis Obispo": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "California State University, Bakersfield": {
+   "schools": [],
+   "units": [
+    "MIS/BA/AI"
+   ]
+  },
+  "California State University, Fresno": {
+   "schools": [],
+   "units": [
+    "IS/Decision Sciences"
+   ]
+  },
+  "California State University, Long Beach": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "California State University, Sacramento": {
+   "schools": [],
+   "units": [
+    "AI"
+   ]
+  },
+  "Calvin University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Campbellsville University": {
+   "schools": [],
+   "units": [
+    "Business IT"
+   ]
+  },
   "Carnegie Mellon University": {
    "schools": [
     "Heinz College of Information Systems and Public Policy"
    ],
-   "units": []
+   "units": [
+    "Business Technology"
+   ]
+  },
+  "Católica Lisbon": {
+   "schools": [],
+   "units": [
+    "IS/OR/DS"
+   ]
+  },
+  "Cedarville University": {
+   "schools": [],
+   "units": [
+    "OM",
+    "Statistics"
+   ]
+  },
+  "Central Washington University": {
+   "schools": [],
+   "units": [
+    "Information Technology Management"
+   ]
+  },
+  "Chatham University": {
+   "schools": [],
+   "units": [
+    "Sustainable Management"
+   ]
+  },
+  "Chicago Booth": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "China Europe International Business School": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Chinese University of Hong Kong": {
+   "schools": [],
+   "units": [
+    "Decision, Operations and Technology",
+    "OM/IS"
+   ]
   },
   "City St. George's, University of London": {
    "schools": [
@@ -853,16 +3261,113 @@
     "Operations and Information Systems"
    ]
   },
+  "Clemson University": {
+   "schools": [],
+   "units": [
+    "DS and Analytics/MIS"
+   ]
+  },
+  "Coastal Carolina University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "College of Staten Island": {
+   "schools": [],
+   "units": [
+    "Healthcare/Sustainability"
+   ]
+  },
+  "Colorado School of Mines": {
+   "schools": [],
+   "units": [
+    "BA/OR"
+   ]
+  },
+  "Colorado State University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Columbia Business School": {
+   "schools": [],
+   "units": [
+    "OM/SCM"
+   ]
+  },
   "Columbia University": {
    "schools": [],
    "units": [
     "Department of Industrial Engineering and Operations Research"
    ]
   },
+  "Concordia University Chicago": {
+   "schools": [],
+   "units": [
+    "Data Analytics"
+   ]
+  },
+  "Cornell SC Johnson School of Business": {
+   "schools": [],
+   "units": [
+    "Services Management"
+   ]
+  },
+  "Cornell University": {
+   "schools": [],
+   "units": [
+    "Applied Economics and Management",
+    "Operations, Technology, and Information Management"
+   ]
+  },
+  "County College of Morris": {
+   "schools": [],
+   "units": [
+    "AI"
+   ]
+  },
+  "CSU San Marcos": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
   "CUHK Business School": {
    "schools": [],
    "units": [
     "Department of Decisions, Operations and Technology"
+   ]
+  },
+  "CUHK Shenzhen": {
+   "schools": [],
+   "units": [
+    "OR/OM/CS/DS/ML/AI"
+   ]
+  },
+  "CUNEF University": {
+   "schools": [],
+   "units": [
+    "Operations Management"
+   ]
+  },
+  "Dakota State University": {
+   "schools": [],
+   "units": [
+    "Production and OM"
+   ]
+  },
+  "Darla Moore School of Business": {
+   "schools": [],
+   "units": [
+    "OSC(Empirical Healthcare Focus)"
+   ]
+  },
+  "Depauw University": {
+   "schools": [],
+   "units": [
+    "BA"
    ]
   },
   "DePauw University": {
@@ -873,10 +3378,155 @@
     "Business Analytics Program"
    ]
   },
+  "DeSales University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Dongbei University of Finance and Economics": {
+   "schools": [],
+   "units": [
+    "SCM/OM/BA"
+   ]
+  },
+  "Donghua University": {
+   "schools": [],
+   "units": [
+    "Operations and Logistics"
+   ]
+  },
+  "Duke University": {
+   "schools": [],
+   "units": [
+    "Decision Sciences",
+    "Operations Management"
+   ]
+  },
+  "Eastern Illinois University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Eastern New Mexico University": {
+   "schools": [],
+   "units": [
+    "8-Aug-26",
+    "OM",
+    "Production and OM"
+   ]
+  },
+  "Emlyon Business School": {
+   "schools": [],
+   "units": [
+    "Supply Chain & OM"
+   ]
+  },
+  "Endicott College": {
+   "schools": [],
+   "units": [
+    "Business"
+   ]
+  },
+  "ESMT Berlin": {
+   "schools": [],
+   "units": [
+    "Technological innovation"
+   ]
+  },
+  "ESSEC Business School": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Ewha Womans University": {
+   "schools": [],
+   "units": [
+    "AI & Business Analytics and Operations Management"
+   ]
+  },
+  "Fairmont State University": {
+   "schools": [],
+   "units": [
+    "IS",
+    "IT Management"
+   ]
+  },
+  "Fayetteville State University": {
+   "schools": [],
+   "units": [
+    "Healthcare",
+    "ISBA",
+    "SCM"
+   ]
+  },
+  "Ferris State University": {
+   "schools": [],
+   "units": [
+    "DA"
+   ]
+  },
+  "Fisher College": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "FLAME University": {
+   "schools": [],
+   "units": [
+    "BA",
+    "OM"
+   ]
+  },
+  "Florida Gulf Coast University": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
+   ]
+  },
+  "Florida International University": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "Florida Polytechnic University": {
+   "schools": [],
+   "units": [
+    "BA/DS"
+   ]
+  },
+  "Florida State University": {
+   "schools": [],
+   "units": [
+    "IS/Analytics"
+   ]
+  },
   "Frankfurt School of Finance & Management": {
    "schools": [],
    "units": [
     "Management Department"
+   ]
+  },
+  "Frankfurt School of Finance and Management": {
+   "schools": [],
+   "units": [
+    "BA/OM"
+   ]
+  },
+  "Furman University": {
+   "schools": [],
+   "units": [
+    "data analytics, operations, business"
+   ]
+  },
+  "George Mason University": {
+   "schools": [],
+   "units": [
+    "Operations Management"
    ]
   },
   "Georgetown University": {
@@ -884,7 +3534,20 @@
     "McDonough School of Business"
    ],
    "units": [
-    "NRF Business of Retail Initiative"
+    "NRF Business of Retail Initiative",
+    "Sustainability"
+   ]
+  },
+  "Georgia College & State University": {
+   "schools": [],
+   "units": [
+    "Logistics and SCM"
+   ]
+  },
+  "Georgia Gwinnett College": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
    ]
   },
   "Georgia Southern University": {
@@ -893,25 +3556,135 @@
     "Logistics and SCM"
    ]
   },
+  "Georgia Southwestern State University": {
+   "schools": [],
+   "units": [
+    "SCM/OM/Business Stat"
+   ]
+  },
   "Georgia State University": {
    "schools": [
     "Robinson College of Business"
    ],
    "units": [
-    "Department of Management"
+    "Department of Management",
+    "Operations & SCM"
+   ]
+  },
+  "Georgia Tech (ISyE)": {
+   "schools": [],
+   "units": [
+    "ISyE"
+   ]
+  },
+  "Goldey-Beacom College": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Grand Valley State University": {
+   "schools": [],
+   "units": [
+    "Management (BA)",
+    "Management (MIS)"
+   ]
+  },
+  "Hainan Bielefeld University of Applied Sciences (BiUH)": {
+   "schools": [],
+   "units": [
+    "Production and Operations Management"
+   ]
+  },
+  "Hamad Bin Khalifa University (HBKU)": {
+   "schools": [],
+   "units": [
+    "OM, SCM, OR, MS, and ISE"
+   ]
+  },
+  "Harvard Business School": {
+   "schools": [],
+   "units": [
+    "OM",
+    "Operations Management, Innovation Management"
    ]
   },
   "HEC Paris": {
    "schools": [],
    "units": [
+    "AI",
     "Information Systems and Operations Management",
     "Information Systems and Operations Management Department"
+   ]
+  },
+  "Henderson State University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "HKUST": {
+   "schools": [],
+   "units": [
+    "ISOM"
+   ]
+  },
+  "HKUST(GZ)": {
+   "schools": [],
+   "units": [
+    "DS and Analytics Thrust"
+   ]
+  },
+  "Hofstra University": {
+   "schools": [],
+   "units": [
+    "IS",
+    "ISBA"
+   ]
+  },
+  "Hong Kong University of Science and Technology (Guangzhou)": {
+   "schools": [],
+   "units": [
+    "Data Science and Analytics Thrust"
+   ]
+  },
+  "Hood College": {
+   "schools": [],
+   "units": [
+    "CS & Information Technology"
+   ]
+  },
+  "Houston Christian University": {
+   "schools": [],
+   "units": [
+    "Business Data Analytics",
+    "OM"
+   ]
+  },
+  "Howard University": {
+   "schools": [],
+   "units": [
+    "BA",
+    "open disciplinary focus"
+   ]
+  },
+  "IE Business School": {
+   "schools": [],
+   "units": [
+    "Operations and Business Analytics"
    ]
   },
   "IESE Business School": {
    "schools": [],
    "units": [
+    "OM",
     "Operations, Information and Technology Department"
+   ]
+  },
+  "IIM Ahmedabad": {
+   "schools": [],
+   "units": [
+    "Management"
    ]
   },
   "Imperial College London": {
@@ -919,13 +3692,46 @@
     "Imperial Business School"
    ],
    "units": [
-    "Analytics and Operations"
+    "Analytics and Operations",
+    "BA/OM",
+    "OM"
    ]
   },
   "Indian School of Business": {
    "schools": [],
    "units": [
     "Operations Management group"
+   ]
+  },
+  "Indian School of Business (ISB)": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Indiana State University": {
+   "schools": [],
+   "units": [
+    "BA",
+    "Business Analytics"
+   ]
+  },
+  "Indiana University (Kelley)": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "Indiana University Bloomington": {
+   "schools": [],
+   "units": [
+    "Operations and Decision Technologies, Operations Management"
+   ]
+  },
+  "Indiana University Northwest": {
+   "schools": [],
+   "units": [
+    "MIS"
    ]
   },
   "Institut Mines-Télécom": {
@@ -942,10 +3748,91 @@
     "Department of Management, Marketing and Strategy"
    ]
   },
+  "Institut Mines-Télécom Business School": {
+   "schools": [],
+   "units": [
+    "Supply Chain, Logistics, Sustainable Transport, and Economics"
+   ]
+  },
+  "Iowa State University": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
+   ]
+  },
+  "Iowa State University (Ivy)": {
+   "schools": [],
+   "units": [
+    "IS/BA (AI)"
+   ]
+  },
+  "IPADE Business School": {
+   "schools": [],
+   "units": [
+    "OM and IS",
+    "Operations Management"
+   ]
+  },
+  "IT University of Copenhagen": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
   "Ivey Business School, Western University": {
    "schools": [],
    "units": [
     "Management Science"
+   ]
+  },
+  "James Madison University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Johns Hopkins University": {
+   "schools": [],
+   "units": [
+    "Operations Management & Business Analytics"
+   ]
+  },
+  "Johnson & Wales University": {
+   "schools": [],
+   "units": [
+    "Supply Chain & OM"
+   ]
+  },
+  "Judge Business School": {
+   "schools": [],
+   "units": [
+    "OM / Tech",
+    "OT/IS"
+   ]
+  },
+  "KAIST": {
+   "schools": [],
+   "units": [
+    "Organization/Man. Sci."
+   ]
+  },
+  "Kennesaw State University": {
+   "schools": [],
+   "units": [
+    "DS and Analytics",
+    "IS"
+   ]
+  },
+  "KIMEP University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Koc University": {
+   "schools": [],
+   "units": [
+    "OM/IS"
    ]
   },
   "Korea Advanced Institute of Science and Technology (KAIST)": {
@@ -956,18 +3843,50 @@
     "Operations Strategy and Management Science"
    ]
   },
+  "KU Leuven": {
+   "schools": [],
+   "units": [
+    "Information Systems Engineering",
+    "Operations Management"
+   ]
+  },
   "KU LEUVEN": {
    "schools": [
     "Faculty of Economics and Business"
    ],
    "units": []
   },
+  "La Salle University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "LBS": {
+   "schools": [],
+   "units": [
+    "OM/OR"
+   ]
+  },
+  "Le Moyne College": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
   "Lehigh University": {
    "schools": [
     "College of Business"
    ],
    "units": [
-    "Department of Decision and Technology Analytics"
+    "Department of Decision and Technology Analytics",
+    "OM"
+   ]
+  },
+  "Lenoir-Rhyne University": {
+   "schools": [],
+   "units": [
+    "OM"
    ]
   },
   "London Business School": {
@@ -976,12 +3895,39 @@
     "Management Science & Operations"
    ]
   },
+  "Lousiana Tech Univ": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "MacEwan University": {
+   "schools": [],
+   "units": [
+    "Management Science",
+    "SCM/Logistics"
+   ]
+  },
+  "Marquette University": {
+   "schools": [],
+   "units": [
+    "OSCM"
+   ]
+  },
   "McGill University": {
    "schools": [
     "Desautels Faculty of Management"
    ],
    "units": [
+    "OM",
     "Operations Management Area"
+   ]
+  },
+  "Miami University": {
+   "schools": [],
+   "units": [
+    "Information Systems and Technology",
+    "IS"
    ]
   },
   "Michigan State University": {
@@ -992,6 +3938,51 @@
    "units": [
     "Department of Supply Chain Management",
     "Supply Chain Management"
+   ]
+  },
+  "Middle Georgia State University": {
+   "schools": [],
+   "units": [
+    "Management",
+    "SCM"
+   ]
+  },
+  "Minnesota State University": {
+   "schools": [],
+   "units": [
+    "MIS and BA"
+   ]
+  },
+  "Missouri Southern State University": {
+   "schools": [],
+   "units": [
+    "Data Analytics"
+   ]
+  },
+  "Missouri State University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "MIT Sloan": {
+   "schools": [],
+   "units": [
+    "OM",
+    "Operations Management",
+    "OR/Stat"
+   ]
+  },
+  "Monash University": {
+   "schools": [],
+   "units": [
+    "OR/OM"
+   ]
+  },
+  "Montclair State University": {
+   "schools": [],
+   "units": [
+    "Business Statistics"
    ]
   },
   "Morgan State University": {
@@ -1011,8 +4002,165 @@
     "NUS Business School"
    ],
    "units": [
+    "Analytics & Operations",
+    "Analytics and Operations",
     "Department of Analytics and Operations",
-    "Department of Industrial Systems Engineering and Management"
+    "Department of Industrial Systems Engineering and Management",
+    "IS"
+   ]
+  },
+  "National University of Singapore (ISEM)": {
+   "schools": [],
+   "units": [
+    "simulation, sustainability, AI + X"
+   ]
+  },
+  "Naval Postgraduate School": {
+   "schools": [],
+   "units": [
+    "Operations Research"
+   ]
+  },
+  "NC State University": {
+   "schools": [],
+   "units": [
+    "ITAO"
+   ]
+  },
+  "Neeley School of Business (Texas Christian Univ)": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Nevada State University": {
+   "schools": [],
+   "units": [
+    "SCM/Quantitative Analysis"
+   ]
+  },
+  "New York Institute of Technology": {
+   "schools": [],
+   "units": [
+    "MS/MIS/Stat"
+   ]
+  },
+  "New York University (Stern)": {
+   "schools": [],
+   "units": [
+    "OM and AI"
+   ]
+  },
+  "New York University Abu Dhabi": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "New York University Shanghai": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Norfolk State University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "North Carolina A&T State University": {
+   "schools": [],
+   "units": [
+    "Business IS and Analytics"
+   ]
+  },
+  "North Carolina State University": {
+   "schools": [],
+   "units": [
+    "Operations & SCM"
+   ]
+  },
+  "North Central College": {
+   "schools": [],
+   "units": [
+    "OM",
+    "SCM/BA/Stat/"
+   ]
+  },
+  "North Idaho College": {
+   "schools": [],
+   "units": [
+    "Business"
+   ]
+  },
+  "Northeastern University": {
+   "schools": [],
+   "units": [
+    "SCM and IT"
+   ]
+  },
+  "Northern Kentucky University": {
+   "schools": [],
+   "units": [
+    "Information Systems & Analytics"
+   ]
+  },
+  "Northern State University": {
+   "schools": [],
+   "units": [
+    "BA and IS",
+    "quantitative analytics"
+   ]
+  },
+  "Northwestern": {
+   "schools": [],
+   "units": [
+    "Science and Innovation"
+   ]
+  },
+  "Northwestern University (IEMS)": {
+   "schools": [],
+   "units": [
+    "IEMS"
+   ]
+  },
+  "NTU": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "NYU Stern": {
+   "schools": [],
+   "units": [
+    "Technology"
+   ]
+  },
+  "Oakland University": {
+   "schools": [],
+   "units": [
+    "Quant Methods/Man. Sci."
+   ]
+  },
+  "Ohio State University": {
+   "schools": [],
+   "units": [
+    "BA/OM",
+    "OM/BA (AI)"
+   ]
+  },
+  "Oklahoma State University": {
+   "schools": [],
+   "units": [
+    "MIS"
+   ]
+  },
+  "Oregon State University": {
+   "schools": [],
+   "units": [
+    "Business Analytics",
+    "Business IS"
    ]
   },
   "Özyeğin University": {
@@ -1023,10 +4171,41 @@
     "Operations Management"
    ]
   },
+  "Palm Beach Atlantic University": {
+   "schools": [],
+   "units": [
+    "Data Analytics"
+   ]
+  },
+  "Park University": {
+   "schools": [],
+   "units": [
+    "Stat, Analytics and SCM"
+   ]
+  },
+  "Peking University": {
+   "schools": [],
+   "units": [
+    "OM & IS"
+   ]
+  },
   "Penn State": {
    "schools": [],
    "units": [
     "SCM"
+   ]
+  },
+  "Pennsylvania State University": {
+   "schools": [],
+   "units": [
+    "SCM (sourcing focus)",
+    "SCM (Tech focus)"
+   ]
+  },
+  "Prince Mohammad Bin Fahd University": {
+   "schools": [],
+   "units": [
+    "Information Technology"
    ]
   },
   "Princeton University": {
@@ -1035,10 +4214,46 @@
     "OR & Financial Engineering"
    ]
   },
+  "PSU Behrend": {
+   "schools": [],
+   "units": [
+    "Project and SCM"
+   ]
+  },
+  "Purdue University": {
+   "schools": [],
+   "units": [
+    "Heathcare (OM included)"
+   ]
+  },
+  "Purdue University Fort Wayne": {
+   "schools": [],
+   "units": [
+    "MIS and BA"
+   ]
+  },
+  "Queens University of Charlotte": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Rockhurst University": {
+   "schools": [],
+   "units": [
+    "Business Intelligence & Analytics"
+   ]
+  },
   "Rollins College": {
    "schools": [],
    "units": [
     "SCM"
+   ]
+  },
+  "Rowan University": {
+   "schools": [],
+   "units": [
+    "SCM/Logistics"
    ]
   },
   "Rutgers Business School–Newark and New Brunswick": {
@@ -1047,11 +4262,157 @@
     "MS and IS"
    ]
   },
+  "Rutgers University": {
+   "schools": [],
+   "units": [
+    "AI/ML/DS/Stats",
+    "IE",
+    "SCM",
+    "SCM (second position)"
+   ]
+  },
+  "Rutgers University (Stats)": {
+   "schools": [],
+   "units": [
+    "Reinforcement Learning"
+   ]
+  },
+  "Sam Houston State University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "San Bernardino Community College District": {
+   "schools": [],
+   "units": [
+    "Business Math"
+   ]
+  },
+  "San Diego State University": {
+   "schools": [],
+   "units": [
+    "AI",
+    "Decision Support, Digital Innovation, or Supply Chain Management",
+    "ds/stat and/or applied AI"
+   ]
+  },
+  "San José State University": {
+   "schools": [],
+   "units": [
+    "BA and Marketing"
+   ]
+  },
+  "Santa Clara University": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "Savannah State University": {
+   "schools": [],
+   "units": [
+    "General Business"
+   ]
+  },
+  "Seton Hall University": {
+   "schools": [],
+   "units": [
+    "IT Management",
+    "SCM/BA"
+   ]
+  },
+  "Shandong University of Finance and Economics": {
+   "schools": [],
+   "units": [
+    "Statistics, Big Data, OR"
+   ]
+  },
+  "Shanghai Jiao Tong University": {
+   "schools": [],
+   "units": [
+    "BA/OM/OR/Stochastic models/Data-driven/AI"
+   ]
+  },
   "Shanghai University of Finance and Economics": {
    "schools": [
     "College of Business"
    ],
    "units": []
+  },
+  "Shorter University": {
+   "schools": [],
+   "units": [
+    "General Business"
+   ]
+  },
+  "Singapore Management University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "SKEMA Business School": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Smith School of Business": {
+   "schools": [],
+   "units": [
+    "Digital Technology"
+   ]
+  },
+  "Southeastern Louisiana University": {
+   "schools": [],
+   "units": [
+    "SCM",
+    "Supply Chain Management"
+   ]
+  },
+  "Southern Arkansas University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Southern Methodist University": {
+   "schools": [],
+   "units": [
+    "IT/OM"
+   ]
+  },
+  "Southern Methodist University: Cox School of Business": {
+   "schools": [],
+   "units": [
+    "ITOM"
+   ]
+  },
+  "Southern Utah University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Southwest Minnesota State University": {
+   "schools": [],
+   "units": [
+    "Business Technology"
+   ]
+  },
+  "Spartanburg Methodist College": {
+   "schools": [],
+   "units": [
+    "Business Stat/DA/SCM/OM",
+    "Statistics/Data Analytics"
+   ]
+  },
+  "St. Cloud State University": {
+   "schools": [],
+   "units": [
+    "SCM/OM/Healthcare OM"
+   ]
   },
   "St. John's University": {
    "schools": [],
@@ -1059,10 +4420,61 @@
     "Business Analytics"
    ]
   },
+  "St. Thomas University": {
+   "schools": [],
+   "units": [
+    "SCM/Stat/Econ Management"
+   ]
+  },
+  "Stanford GSB": {
+   "schools": [],
+   "units": [
+    "OIT",
+    "OM"
+   ]
+  },
+  "State University of New York at Geneseo": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Stony Brook University": {
+   "schools": [],
+   "units": [
+    "OM/DS",
+    "Operations and Decision Analytics"
+   ]
+  },
+  "SUNY Korea": {
+   "schools": [],
+   "units": [
+    "Technology Management"
+   ]
+  },
+  "Syracuse University": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
+   ]
+  },
   "TBS Education": {
    "schools": [],
    "units": [
+    "IO/OM/OR",
     "TBS Education, Information, Operations and Management Sciences Department"
+   ]
+  },
+  "Technical University of Munich": {
+   "schools": [],
+   "units": [
+    "Operations Research and AI"
+   ]
+  },
+  "Technical University of Munich (TUM)": {
+   "schools": [],
+   "units": [
+    "Technology Management"
    ]
   },
   "Temple University": {
@@ -1070,7 +4482,64 @@
     "Fox School of Business"
    ],
    "units": [
-    "Operations and Supply Chain Management area"
+    "Operations and Supply Chain Management area",
+    "Statistics, Operations, and Data Science"
+   ]
+  },
+  "Tennessee State University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Tennessee Tech University": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "Texas A&M International University": {
+   "schools": [],
+   "units": [
+    "Transportation/Logistics"
+   ]
+  },
+  "Texas A&M University": {
+   "schools": [],
+   "units": [
+    "Information and Operations Management",
+    "IS"
+   ]
+  },
+  "Texas Christian University": {
+   "schools": [],
+   "units": [
+    "Analytics/Business IS"
+   ]
+  },
+  "Texas Southern University": {
+   "schools": [],
+   "units": [
+    "MIS",
+    "Operations and Logistics Management."
+   ]
+  },
+  "Texas State University": {
+   "schools": [],
+   "units": [
+    "Analytics"
+   ]
+  },
+  "Texas Tech University": {
+   "schools": [],
+   "units": [
+    "Marketing and SCM"
+   ]
+  },
+  "The Catholic University of America": {
+   "schools": [],
+   "units": [
+    "Business"
    ]
   },
   "The Chinese University of Hong Kong, Shenzhen": {
@@ -1082,10 +4551,22 @@
     "The research group of Prof. Yiming Zhang"
    ]
   },
+  "The College of New Jersey": {
+   "schools": [],
+   "units": [
+    "OM/SCM"
+   ]
+  },
   "The Hong Kong Polytechnic University": {
    "schools": [],
    "units": [
     "Department of Logistics and Maritime Studies"
+   ]
+  },
+  "The Hong Kong Polytechnic University (PolyU)": {
+   "schools": [],
+   "units": [
+    "SCM/OM"
    ]
   },
   "The Ohio State University": {
@@ -1125,6 +4606,18 @@
     "Department of Information Systems and Operations Management"
    ]
   },
+  "Trinity University": {
+   "schools": [],
+   "units": [
+    "BA/SCM"
+   ]
+  },
+  "Tsinghua University": {
+   "schools": [],
+   "units": [
+    "OM/IS"
+   ]
+  },
   "Tulane University": {
    "schools": [
     "A.B. Freeman School of Business",
@@ -1134,6 +4627,63 @@
     "Management Science",
     "Management Science Department",
     "Management Sciences Area"
+   ]
+  },
+  "TUM School of Management": {
+   "schools": [],
+   "units": [
+    "OM/SCM/MIS/F/AI"
+   ]
+  },
+  "Tusculum University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "UBC Okanagan": {
+   "schools": [],
+   "units": [
+    "Operations and Supply Chain Management"
+   ]
+  },
+  "UBC Sauder School of Business": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "UC Berkeley": {
+   "schools": [],
+   "units": [
+    "IEOR",
+    "IEOR, decision analytics"
+   ]
+  },
+  "UCL GBSH": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "UCL Global Business School for Health": {
+   "schools": [],
+   "units": [
+    "Operations and Project Management (AI focus)",
+    "SCM",
+    "Sustainable SCM"
+   ]
+  },
+  "UCL School of Management": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Uni. of Illinois at Urbana-Champaign (Gies)": {
+   "schools": [],
+   "units": [
+    "OM&IS (AI)"
    ]
   },
   "United States Naval Academy": {
@@ -1147,6 +4697,18 @@
     "School of Business and Economics"
    ],
    "units": []
+  },
+  "Universitat Pompeu Fabra": {
+   "schools": [],
+   "units": [
+    "OM/OR"
+   ]
+  },
+  "University at Buffalo": {
+   "schools": [],
+   "units": [
+    "SCM and OM"
+   ]
   },
   "University College Dublin": {
    "schools": [
@@ -1166,11 +4728,60 @@
     "Operations & Technology group"
    ]
   },
+  "University of Alabama": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "University of Alabama - Birmingham": {
+   "schools": [],
+   "units": [
+    "SCM, distribution/MKT"
+   ]
+  },
+  "University of Alaska Fairbanks": {
+   "schools": [],
+   "units": [
+    "Business Administration"
+   ]
+  },
+  "University of Alberta": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "University of Arizona": {
+   "schools": [],
+   "units": [
+    "MIS"
+   ]
+  },
+  "University of Bath": {
+   "schools": [],
+   "units": [
+    "OM",
+    "Operations Management / Supply Chain Management / Project Management"
+   ]
+  },
+  "University of Bristol": {
+   "schools": [],
+   "units": [
+    "AI, Business Analytics"
+   ]
+  },
   "University of California Berkeley": {
    "schools": [],
    "units": [
     "Department of Industrial Engineering & Operations Research (IEOR)",
     "Operations and IT Management"
+   ]
+  },
+  "University of California Riverside": {
+   "schools": [],
+   "units": [
+    "IS"
    ]
   },
   "University of California, Berkeley": {
@@ -1191,6 +4802,24 @@
    ],
    "units": []
   },
+  "University of Central Arkansas": {
+   "schools": [],
+   "units": [
+    "Logistics and SCM"
+   ]
+  },
+  "University of Colorado Boulder": {
+   "schools": [],
+   "units": [
+    "SCM/Analytics/OM"
+   ]
+  },
+  "University of Colorado Denver": {
+   "schools": [],
+   "units": [
+    "IS and Technology"
+   ]
+  },
   "University of Cyprus": {
    "schools": [
     "School Economics and Management"
@@ -1199,20 +4828,68 @@
     "Department of Business and Public Administration"
    ]
   },
+  "University of Evansville": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of Georgia": {
+   "schools": [],
+   "units": [
+    "MIS"
+   ]
+  },
+  "University of Hartford": {
+   "schools": [],
+   "units": [
+    "BA (Marketing or SCM)"
+   ]
+  },
+  "University of Hong Kong": {
+   "schools": [],
+   "units": [
+    "BA",
+    "Department of Data and Systems Engineering"
+   ]
+  },
   "University of Houston": {
    "schools": [
     "C. T. Bauer College of Business"
    ],
    "units": [
+    "Decision and IIS",
     "Decision and Information Sciences (DISC)",
     "Department of Decision and Information Sciences",
+    "ISE (supply chain & logistics tech)",
+    "OM",
+    "OM/SCM",
     "University of Houston and DISC"
+   ]
+  },
+  "University of Houston - Downtown": {
+   "schools": [],
+   "units": [
+    "MIS"
    ]
   },
   "University of Houston (Bauer Human-Centered AI Institute)": {
    "schools": [],
    "units": [
-    "Artificial Intelligence (AI) and healthcare"
+    "Artificial Intelligence (AI) and healthcare",
+    "Business Analytics"
+   ]
+  },
+  "University of Houston-Downtown": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of Illinois at Urbana-Champaign": {
+   "schools": [],
+   "units": [
+    "IS/OM/SCM/BA"
    ]
   },
   "University of Illinois Urbana-Champaign": {
@@ -1220,7 +4897,15 @@
     "Gies College of Business"
    ],
    "units": [
+    "AI, Analytics, Data-Driven DM",
     "Department of Business Administration"
+   ]
+  },
+  "University of Iowa": {
+   "schools": [],
+   "units": [
+    "BA",
+    "Business Analytics"
    ]
   },
   "University of Kansas": {
@@ -1229,7 +4914,33 @@
    ],
    "units": [
     "Analytics, Information, and Operations Management Department",
-    "BA, Information & Operations"
+    "BA, Information & Operations",
+    "OM"
+   ]
+  },
+  "University of Kentucky": {
+   "schools": [],
+   "units": [
+    "SCM and Marketing"
+   ]
+  },
+  "University of Leeds, UK": {
+   "schools": [],
+   "units": [
+    "Optimisation for Decision Support in Disaster Response"
+   ]
+  },
+  "University of Macau": {
+   "schools": [],
+   "units": [
+    "Business Intelligence and Analytics (IS)",
+    "DS"
+   ]
+  },
+  "University of Maine at Augusta": {
+   "schools": [],
+   "units": [
+    "Business Management"
    ]
   },
   "University of Mannheim": {
@@ -1242,6 +4953,19 @@
     "Operations Management"
    ]
   },
+  "University of Maryland": {
+   "schools": [],
+   "units": [
+    "OM/IS (AI)",
+    "SCM"
+   ]
+  },
+  "University of Melbourne": {
+   "schools": [],
+   "units": [
+    "SCM/Management"
+   ]
+  },
   "University of Miami": {
    "schools": [
     "Miami Herbert Business School"
@@ -1250,18 +4974,96 @@
     "Department of Management Science"
    ]
   },
+  "University of Miami (Herbert)": {
+   "schools": [],
+   "units": [
+    "BA: FinTech, AI, Healthcare"
+   ]
+  },
   "University of Michigan": {
    "schools": [
     "Stephen M. Ross School of Business"
    ],
-   "units": []
+   "units": [
+    "Information",
+    "IOE",
+    "Sports Analytics",
+    "Technology & Operations"
+   ]
+  },
+  "University of Michigan - Flint": {
+   "schools": [],
+   "units": [
+    "OM/SCM"
+   ]
   },
   "University of Minnesota": {
    "schools": [
     "Carlson School of Management"
    ],
    "units": [
+    "OM/SCM",
     "Supply Chain and Operations"
+   ]
+  },
+  "University of Missouri": {
+   "schools": [],
+   "units": [
+    "Analytics/Ops/SCM"
+   ]
+  },
+  "University of Missouri-Kansas City": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of Nebraska at Kearney": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of Nebraska at Omaha": {
+   "schools": [],
+   "units": [
+    "Nonprofit Management"
+   ]
+  },
+  "University of Nevada Las Vegas": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of New Mexico": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "University of North Carolina at Wilmington": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of North Georgia": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
+   ]
+  },
+  "University of North Texas": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "University of Northern Iowa": {
+   "schools": [],
+   "units": [
+    "BA"
    ]
   },
   "University of Notre Dame": {
@@ -1272,12 +5074,39 @@
     "Department of IT, Analytics, and Operations"
    ]
   },
+  "University of Oklahoma": {
+   "schools": [],
+   "units": [
+    "IS",
+    "SCM"
+   ]
+  },
+  "University of Pennsylvania": {
+   "schools": [],
+   "units": [
+    "OID"
+   ]
+  },
+  "University of Pennsylvania (Wharton)": {
+   "schools": [],
+   "units": [
+    "OM/IS (rookie)"
+   ]
+  },
+  "University of Pittsburgh": {
+   "schools": [],
+   "units": [
+    "Department of Industrial Engineering"
+   ]
+  },
   "University of San Diego": {
    "schools": [
     "The Knauss School of Business",
     "The Knauss School of Business at the University of San Diego"
    ],
-   "units": []
+   "units": [
+    "OM/BA"
+   ]
   },
   "University of South Carolina": {
    "schools": [
@@ -1285,7 +5114,78 @@
    ],
    "units": [
     "Department of Management Science",
+    "IT",
     "Management Science Department"
+   ]
+  },
+  "University of South Carolina (Darla Moore)": {
+   "schools": [],
+   "units": [
+    "OM&SCM"
+   ]
+  },
+  "University of South Carolina Aiken": {
+   "schools": [],
+   "units": [
+    "Management Science"
+   ]
+  },
+  "University of South Florida": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "University of Southern California": {
+   "schools": [],
+   "units": [
+    "ISE"
+   ]
+  },
+  "University of Stirling": {
+   "schools": [],
+   "units": [
+    "Project Management"
+   ]
+  },
+  "University of Tampa": {
+   "schools": [],
+   "units": [
+    "Information And Technology Management"
+   ]
+  },
+  "University of Tennesse, Knoxville": {
+   "schools": [],
+   "units": [
+    "Business Analytics, OM"
+   ]
+  },
+  "University of Tennessee - Knoxville": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "University of Tennessee at Chattanooga": {
+   "schools": [],
+   "units": [
+    "Logistics and Supply Chain Management"
+   ]
+  },
+  "University of Tennessee, Knoxville": {
+   "schools": [],
+   "units": [
+    "Business Analytics, AI/ML",
+    "SCM"
+   ]
+  },
+  "University of Texas at Arlington": {
+   "schools": [],
+   "units": [
+    "AI",
+    "Business Statistics",
+    "ISBA",
+    "OM"
    ]
   },
   "University of Texas at Dallas": {
@@ -1293,7 +5193,14 @@
     "Naveen Jindal School of Management"
    ],
    "units": [
+    "OM/IS (Healthcare Management)",
     "Supply Chain/Operations Management Department"
+   ]
+  },
+  "University of Texas at El Paso": {
+   "schools": [],
+   "units": [
+    "Information Systems and Business Analytics (AI)"
    ]
   },
   "University of Texas at San Antonio": {
@@ -1308,7 +5215,21 @@
    ],
    "units": [
     "Department of Operations & Info Systems",
-    "Operations & Information Systems Department"
+    "Operations & Information Systems Department",
+    "Operations & SCM",
+    "Operations and IS"
+   ]
+  },
+  "University of Vienna": {
+   "schools": [],
+   "units": [
+    "OR"
+   ]
+  },
+  "University of Virgin Islands": {
+   "schools": [],
+   "units": [
+    "Decision Sciences"
    ]
   },
   "University of Virginia": {
@@ -1317,7 +5238,52 @@
    ],
    "units": [
     "Data Analytics and Decision Sciences (DADS) Area",
+    "Decision Sciences",
+    "OM",
     "Technology & OM (TOM)"
+   ]
+  },
+  "University of Waikato": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
+   ]
+  },
+  "University of Warwick": {
+   "schools": [],
+   "units": [
+    "Applied Artificial Intelligence"
+   ]
+  },
+  "University of Washington": {
+   "schools": [],
+   "units": [
+    "Marketing/AI"
+   ]
+  },
+  "University of Washington-Tacoma (Milgard School of Business)": {
+   "schools": [],
+   "units": [
+    "SCM/BA"
+   ]
+  },
+  "University of Wisconsin - Green Bay": {
+   "schools": [],
+   "units": [
+    "SCM & Logistics",
+    "Sustainable Management"
+   ]
+  },
+  "University of Wisconsin - La Crosse": {
+   "schools": [],
+   "units": [
+    "OM/SCM"
+   ]
+  },
+  "University of Wisconsin - Madison": {
+   "schools": [],
+   "units": [
+    "Department of Operations and Information Management"
    ]
   },
   "University of Wisconsin-Madison": {
@@ -1328,11 +5294,29 @@
     "Operations and Information Management Department"
    ]
   },
+  "University of Wisconsin-Stout": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
   "UNSW Sydney": {
    "schools": [
     "UNSW Business School - School of Information Systems and Technology Management"
    ],
    "units": []
+  },
+  "UT Austin McCombs": {
+   "schools": [],
+   "units": [
+    "IS/AI/OR (Health Cluster)"
+   ]
+  },
+  "Utah Tech University": {
+   "schools": [],
+   "units": [
+    "BA/IS/DS"
+   ]
   },
   "Utah Valley University": {
    "schools": [],
@@ -1341,12 +5325,134 @@
     "Strategic Management & Operations"
    ]
   },
+  "Valdosta State University": {
+   "schools": [],
+   "units": [
+    "BA"
+   ]
+  },
+  "Valley City State University": {
+   "schools": [],
+   "units": [
+    "data analytics and AI"
+   ]
+  },
+  "Vienna University of Economics and Business": {
+   "schools": [],
+   "units": [
+    "Transport and Logistics Management"
+   ]
+  },
   "Villanova University": {
    "schools": [
     "Villanova School of Business"
    ],
    "units": [
+    "BA/AI",
     "Management and Operations Area"
+   ]
+  },
+  "VinUniversity": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
+   ]
+  },
+  "Virgina Darden": {
+   "schools": [],
+   "units": [
+    "DADS"
+   ]
+  },
+  "Virginia Tech": {
+   "schools": [],
+   "units": [
+    "Healthcare Operations",
+    "OR"
+   ]
+  },
+  "Wake Forest University": {
+   "schools": [],
+   "units": [
+    "Business Analytics"
+   ]
+  },
+  "Washburn University": {
+   "schools": [],
+   "units": [
+    "DA/Quantitative Methods"
+   ]
+  },
+  "Washington and Lee University": {
+   "schools": [],
+   "units": [
+    "Data Analytics"
+   ]
+  },
+  "Washington University in St. Louis": {
+   "schools": [],
+   "units": [
+    "SCM/OM"
+   ]
+  },
+  "Western Connecticut State University": {
+   "schools": [],
+   "units": [
+    "OM"
+   ]
+  },
+  "Western Illinois University": {
+   "schools": [],
+   "units": [
+    "Supply Chain & Analytics"
+   ]
+  },
+  "Western Wyoming Community College": {
+   "schools": [],
+   "units": [
+    "IS"
+   ]
+  },
+  "Westfield State University": {
+   "schools": [],
+   "units": [
+    "Management (Operations & Supply Chain Management)"
+   ]
+  },
+  "Wilson College": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Wingate University": {
+   "schools": [],
+   "units": [
+    "DA/BA./Business Stat"
+   ]
+  },
+  "Winona State University": {
+   "schools": [],
+   "units": [
+    "MIS"
+   ]
+  },
+  "Worcester State University": {
+   "schools": [],
+   "units": [
+    "Management and Business Analytics"
+   ]
+  },
+  "Xi'an Jiaotong - Liverpool University": {
+   "schools": [],
+   "units": [
+    "SCM"
+   ]
+  },
+  "Xi'an Jiaotong-Liverpool University": {
+   "schools": [],
+   "units": [
+    "Supply Chain Management"
    ]
   }
  }

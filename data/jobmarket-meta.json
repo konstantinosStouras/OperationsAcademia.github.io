@@ -1,23 +1,57 @@
 {
- "generated": "2026-08-17T18:18:55.715Z",
- "count": 16,
- "newestPosted": "2026-08-15",
- "oldestPosted": "2026-07-20",
+ "generated": "2026-08-17T18:54:43.696Z",
+ "count": 466,
+ "newestPosted": "2026-08-17",
+ "oldestPosted": "2025-07-03",
  "years": {
-  "2027": 16
+  "2026": 377,
+  "2027": 89
  },
  "countries": {
-  "United States": 16
+  "United States": 357,
+  "China": 23,
+  "United Kingdom": 17,
+  "Canada": 7,
+  "France": 6,
+  "Singapore": 6,
+  "Germany": 5,
+  "India": 5,
+  "United Arab Emirates": 5,
+  "Spain": 4,
+  "South Korea": 3,
+  "Turkey": 3,
+  "Australia": 2,
+  "Austria": 2,
+  "Belgium": 2,
+  "Finland": 2,
+  "Hong Kong": 2,
+  "Lebanon": 2,
+  "MEX": 2,
+  "Cambodia": 1,
+  "Chile": 1,
+  "Denmark": 1,
+  "Iraq": 1,
+  "Kazakhstan": 1,
+  "Kuwait": 1,
+  "Portugal": 1,
+  "Qatar": 1,
+  "Saudi Arabia": 1,
+  "Vietnam": 1
  },
  "levels": {
-  "Non-tenure track (teaching) position": 13,
-  "Visiting Faculty (various levels)": 2,
-  "Post-Doc": 1
+  "Assistant Professor": 299,
+  "Other Ranks": 178,
+  "Non-tenure track (teaching) position": 45,
+  "Post-Doc": 11,
+  "Visiting Faculty (various levels)": 10
  },
  "sheets": [
   "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8"
  ],
  "tabs": [
-  "2026 NTT/PD"
+  "2026 Jobs",
+  "2026 NTTPD",
+  "2025 Jobs",
+  "2025 NTTPD"
  ]
 }
