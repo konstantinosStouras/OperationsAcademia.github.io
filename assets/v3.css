@@ -692,15 +692,8 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 }
 .v3-top.is-shown { opacity: 1; pointer-events: auto; transform: none; }
 
-/* v3 preview ribbon — this is a TESTING copy of the site */
-.v3-ribbon {
-  position: fixed; left: 14px; bottom: 14px; z-index: 110;
-  background: var(--ink); color: var(--bg);
-  font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
-  padding: 7px 13px; border-radius: 999px;
-  opacity: 0.82;
-}
-.v3-ribbon a { color: inherit !important; text-decoration: underline !important; }
+/* The preview ribbon that used to sit here went with the preview: this design
+   is the site now, and a badge calling it a testing copy would be a lie. */
 
 /* ==========================================================================
    OA LIST ENGINE — retinted with the tokens (both themes).

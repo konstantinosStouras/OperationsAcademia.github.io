@@ -1,5 +1,16 @@
 /* ---------------------------------------------------------------------------
-   Operations Academia — filterable card list engine.
+   Operations Academia — filterable card list engine.  (v3 vendored copy)
+
+   KEEP IN SYNC with /assets/oa-list.js. This copy adds two options the
+   one-page v3 site needs and nothing else:
+
+     urlPrefix: 'c_'   several engines share ONE page, so each namespaces the
+                       query-string keys it owns (c_area, c_page, …). Default
+                       '' — byte-identical behaviour to the root engine, and
+                       the jobs mount keeps '' so legacy ?filterA= links work.
+     strings: {...}    the loading/empty/error wording, so the candidates and
+                       placements mounts do not need the MutationObserver
+                       rewording hack the separate pages used.
 
    Replaces Awesome Table. Vanilla ES5-compatible JS, no build step, no CDN, no
    jQuery. One global: window.OAList.
@@ -172,6 +183,24 @@
 
     var perPage = cfg.perPage || 10;
     var filters = cfg.filters || [];
+    // v3: several engines share one page — each namespaces its URL keys.
+    var prefix = cfg.urlPrefix || '';
+    // v3: per-dataset wording for the states the engine paints itself.
+    var STR = {
+      loading: 'Loading job postings…',
+      emptyFiltered: 'No job postings match these filters.',
+      emptyFilteredHint: 'Try removing a filter, or clear them all to see every posting.',
+      emptyData: 'No job postings are listed at the moment.',
+      emptyDataHint: 'Please check back soon — new postings are added as they arrive.',
+      loadError: 'The job postings could not be loaded.',
+      loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
+      unit: 'postings'
+    };
+    if (cfg.strings) {
+      for (var sk in cfg.strings) {
+        if (Object.prototype.hasOwnProperty.call(cfg.strings, sk)) STR[sk] = cfg.strings[sk];
+      }
+    }
     var rows = [];
     var view = [];
     var page = 0;
@@ -201,7 +230,7 @@
     host.appendChild(listEl);
     host.appendChild(liveEl);
 
-    listEl.appendChild(el('li', { class: 'oa-loading', text: 'Loading job postings…' }));
+    listEl.appendChild(el('li', { class: 'oa-loading', text: STR.loading }));
 
     /* --------------------------------------------------------- filtering */
 
@@ -501,6 +530,11 @@
     /* ------------------------------------------------------------ render */
 
     function render() {
+      // An empty DATASET has nothing to search (owner, 2026-08-17): the class
+      // hides the filter bar, count and pager (v3.css) until data exists —
+      // an over-filtered search (rows exist, view empty) keeps them all.
+      host.classList.toggle('oa-data-empty', !rows.length);
+
       // result bar
       resEl.innerHTML = '';
       var from = view.length ? page * perPage + 1 : 0;
@@ -536,12 +570,12 @@
         listEl.appendChild(
           rows.length
             ? el('li', { class: 'oa-empty' }, [
-                el('strong', { text: 'No job postings match these filters.' }),
-                el('span', { text: 'Try removing a filter, or clear them all to see every posting.' }),
+                el('strong', { text: STR.emptyFiltered }),
+                el('span', { text: STR.emptyFilteredHint }),
               ])
             : el('li', { class: 'oa-empty' }, [
-                el('strong', { text: 'No job postings are listed at the moment.' }),
-                el('span', { text: 'Please check back soon — new postings are added as they arrive.' }),
+                el('strong', { text: STR.emptyData }),
+                el('span', { text: STR.emptyDataHint }),
               ])
         );
       } else {
@@ -549,7 +583,7 @@
           listEl.appendChild(card(r));
         });
       }
-      liveEl.textContent = view.length + ' postings match';
+      liveEl.textContent = view.length + ' ' + STR.unit + ' match';
       var clear = barEl.querySelector('.oa-clear');
       if (clear) clear.disabled = !anySelected();
     }
@@ -632,21 +666,21 @@
       // the page painted.
       var p = new URLSearchParams(location.search);
       filters.forEach(function (f) {
-        p['delete'](f.key);
+        p['delete'](prefix + f.key);
         if (f.legacyParam) p['delete'](f.legacyParam);
       });
-      p['delete']('page');
+      p['delete'](prefix + 'page');
       filters.forEach(function (f) {
         if (f.type === 'text') {
-          if (sel[f.key]) p.set(f.key, sel[f.key]);
+          if (sel[f.key]) p.set(prefix + f.key, sel[f.key]);
         } else {
           // one parameter PER value rather than a "a|b" join: a facet value is
           // free text off the posting form, and one containing a pipe used to
           // round-trip as two values that match nothing at all
-          sel[f.key].forEach(function (v) { p.append(f.key, v); });
+          sel[f.key].forEach(function (v) { p.append(prefix + f.key, v); });
         }
       });
-      if (page > 0) p.set('page', String(page + 1));
+      if (page > 0) p.set(prefix + 'page', String(page + 1));
       var qs = p.toString();
       var url = location.pathname + (qs ? '?' + qs : '') + location.hash;
       history.replaceState(null, '', url);
@@ -665,7 +699,7 @@
       filters.forEach(function (f) {
         // ?filterA= is the legacy Awesome Table deep link the footer and the
         // "Further info" column still emit — honour it as the text filter.
-        var all = p.getAll(f.key);
+        var all = p.getAll(prefix + f.key);
         if (!all.length && f.legacyParam) all = p.getAll(f.legacyParam);
         if (!all.length) return;
         if (f.type === 'text') { sel[f.key] = all[0]; return; }
@@ -688,7 +722,7 @@
           all[0].split('|').forEach(add);
         }
       });
-      var pg = parseInt(p.get('page'), 10);
+      var pg = parseInt(p.get(prefix + 'page'), 10);
       if (pg > 1) page = pg - 1;
     }
 
@@ -711,8 +745,8 @@
         listEl.innerHTML = '';
         listEl.appendChild(
           el('li', { class: 'oa-empty' }, [
-            el('strong', { text: 'The job postings could not be loaded.' }),
-            el('span', { text: 'Please reload the page, or let us know if it keeps happening.' }),
+            el('strong', { text: STR.loadError }),
+            el('span', { text: STR.loadErrorHint }),
           ])
         );
         if (window.console) console.error('OAList: failed to load ' + cfg.data, err);

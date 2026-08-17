@@ -2,7 +2,7 @@
    Operations Academia — shared UI for the parts that are new in v2:
    the account control, modals, and the site's own forms.
 
-   Follows main.css: Source Sans Pro, #3B7DBC, links #0645ad, body #222.
+   Follows main.css: Source Sans Pro, var(--brand), links var(--brand), body #222.
    Form controls are set at 15px rather than the site's 16pt body size, which is
    far too large for a 19-field form.
    --------------------------------------------------------------------------- */
@@ -42,19 +42,19 @@
 .oa-acct-btn,
 .oa-acct-chip {
   padding: 4px 12px;
-  border: 1px solid #3b7dbc;
+  border: 1px solid var(--brand);
   border-radius: 3px;
   background: #fff;
   font: inherit;
   font-weight: 600;
-  color: #3b7dbc;
+  color: var(--brand);
   line-height: 1.4;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .oa-acct-btn:hover,
-.oa-acct-chip:hover { background: #3b7dbc; color: #fff; }
+.oa-acct-chip:hover { background: var(--brand); color: #fff; }
 
 .oa-acct-off {
   /* the state shown when sign-in is not configured or unreachable: same box as
@@ -149,7 +149,7 @@
 }
 
 .oa-acct-menu a:hover,
-.oa-acct-menu button:hover { background: #f2f6fb; text-decoration: none; }
+.oa-acct-menu button:hover { background: var(--brand-soft); text-decoration: none; }
 
 /* sign out is the one destructive item, so it sits below a rule of its own */
 .oa-acct-out {
@@ -273,7 +273,7 @@
   cursor: pointer;
 }
 
-.oa-mergebtn:hover { background: #f5f7fa; border-color: #b9c6d4; }
+.oa-mergebtn:hover { background: var(--brand-soft); border-color: var(--line); }
 
 .oa-merge-card { max-width: 520px; }
 
@@ -387,7 +387,7 @@
   cursor: pointer;
 }
 
-.oa-auth-provider:hover { background: #f5f7fa; }
+.oa-auth-provider:hover { background: var(--brand-soft); }
 
 .oa-or {
   margin: 14px 0;
@@ -410,7 +410,7 @@
   background: none;
   font: inherit;
   font-size: 14px;
-  color: #0645ad;
+  color: var(--brand);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -539,7 +539,7 @@
 .oa-form input[type='text']:focus,
 .oa-modal-card input[type='password']:focus {
   outline: none;
-  border-color: #3b7dbc;
+  border-color: var(--brand);
   background-color: #fff;   /* not the shorthand: it would drop the select's chevron */
   box-shadow: 0 0 0 3px rgba(59, 125, 188, 0.18);
 }
@@ -580,12 +580,12 @@
 .oa-check input[type='radio'] { border-radius: 50%; }
 
 .oa-check input[type='checkbox']:hover,
-.oa-check input[type='radio']:hover { border-color: #3b7dbc; }
+.oa-check input[type='radio']:hover { border-color: var(--brand); }
 
 .oa-check input[type='checkbox']:checked,
 .oa-check input[type='radio']:checked {
-  border-color: #3b7dbc;
-  background: #3b7dbc;
+  border-color: var(--brand);
+  background: var(--brand);
 }
 
 .oa-check input[type='checkbox']:checked::after {
@@ -613,7 +613,7 @@
 
 .oa-check input[type='checkbox']:focus-visible,
 .oa-check input[type='radio']:focus-visible {
-  outline: 2px solid #3b7dbc;
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 
@@ -748,7 +748,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   cursor: pointer;
 }
 
-.oa-tab.is-on { border-color: #3b7dbc; background: #3b7dbc; color: #fff; }
+.oa-tab.is-on { border-color: var(--brand); background: var(--brand); color: #fff; }
 
 .oa-fb-card {
   margin: 0 0 14px;
@@ -824,7 +824,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   cursor: pointer;
 }
 
-.oa-alert-actions button:hover { background: #f2f6fb; border-color: #3b7dbc; }
+.oa-alert-actions button:hover { background: var(--brand-soft); border-color: var(--brand); }
 .oa-alert-actions button.is-danger:hover { background: #fdf2f1; border-color: #b3261e; color: #b3261e; }
 
 /* the live example e-mail */
@@ -895,13 +895,13 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-done-actions .button { line-height: 2.6em; font-size: 15px; }
 
 .button.oa-btn-ghost {
-  border-color: #3b7dbc;
+  border-color: var(--brand);
   background: #fff;
-  color: #3b7dbc !important;   /* beats `.button { color: #343e49 !important }` */
+  color: var(--brand) !important;   /* beats `.button { color: #343e49 !important }` */
 }
 
-.button.oa-btn-ghost:hover { background: #eef4fa; border-color: #4b8dcc; }
-.button.oa-btn-ghost:active { background: #dceafa; }
+.button.oa-btn-ghost:hover { background: var(--brand-soft); border-color: var(--brand); }
+.button.oa-btn-ghost:active { background: var(--brand-soft); }
 
 @media screen and (max-width: 480px) {
   .oa-done-actions { flex-direction: column; }
@@ -994,18 +994,18 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-headbtn:hover,
 #oa-headnav .oa-acct-btn:hover,
 #oa-headnav .oa-acct-chip:hover {
-  border-color: #3b7dbc;
-  color: #3b7dbc !important;
-  background: #f6f9fd;
+  border-color: var(--brand);
+  color: var(--brand) !important;
+  background: var(--brand-soft);
   box-shadow: 0 1px 3px rgba(59, 125, 188, 0.18);
 }
 
-.oa-headbtn.is-on { border-color: #3b7dbc; color: #3b7dbc !important; }
+.oa-headbtn.is-on { border-color: var(--brand); color: var(--brand) !important; }
 
 /* the account pill carries an avatar, so it is padded tighter on the left and
    keeps the site's blue for its own label */
 #oa-headnav .oa-acct-chip { padding: 0 12px 0 4px; gap: 8px; }
-#oa-headnav .oa-acct-btn { color: #3b7dbc !important; border-color: #3b7dbc; }
+#oa-headnav .oa-acct-btn { color: var(--brand) !important; border-color: var(--brand); }
 
 .oa-acct-name {
   min-width: 0;
@@ -1025,9 +1025,9 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 
 .oa-acct-chip[aria-expanded="true"] {
-  border-color: #3b7dbc;
-  background: #f6f9fd;
-  color: #3b7dbc !important;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand) !important;
 }
 
 /* -------------------------------------------------------------- the avatar */
@@ -1138,7 +1138,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   box-sizing: border-box;
   margin-top: 4px;
   padding: 22px 18px;
-  border: 2px dashed #cfd8e3;
+  border: 2px dashed var(--line);
   border-radius: 6px;
   background: #fafbfd;
   font: inherit;
@@ -1149,12 +1149,12 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 
 .oa-drop:hover, .oa-drop:focus-visible {
-  border-color: #3b7dbc;
-  background: #f2f6fb;
+  border-color: var(--brand);
+  background: var(--brand-soft);
   outline: none;
 }
 
-.oa-drop.is-over { border-color: #3b7dbc; background: #e8f1fb; }
+.oa-drop.is-over { border-color: var(--brand); background: var(--brand-soft); }
 .oa-drop-icon { font-size: 22px; line-height: 1; }
 .oa-drop-text strong { display: block; color: #313a45; }
 .oa-drop-text .oa-muted { font-size: 13px; }
@@ -1182,7 +1182,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   text-decoration: none !important;
 }
 
-.oa-contacts a:hover { border-color: #3b7dbc; background: #f7fafd; }
+.oa-contacts a:hover { border-color: var(--brand); background: var(--brand-soft); }
 
 .oa-contacts strong {
   display: block;
@@ -1237,7 +1237,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   height: 54px;
   margin: 0 auto 14px;
   border-radius: 50%;
-  background: #f2f6fb;
+  background: var(--brand-soft);
   font-size: 24px;
   line-height: 54px;
 }
@@ -1304,7 +1304,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 
 .oa-combo-opt.is-active,
-.oa-combo-opt:hover { background: #eaf3fb; }
+.oa-combo-opt:hover { background: var(--brand-soft); }
 
 .oa-combo-name { flex: 1 1 auto; }
 
@@ -1319,7 +1319,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-combo-opt.is-pref .oa-combo-name { font-weight: 600; }
 
 /* the "type something new" row */
-.oa-combo-add { border-top: 1px solid #eef1f4; color: #2f6ea8; }
+.oa-combo-add { border-top: 1px solid #eef1f4; color: var(--brand-2); }
 .oa-combo-plus {
   flex: 0 0 auto;
   font-weight: 700;
@@ -1339,7 +1339,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-combo-hint { border-bottom: 1px solid #eef1f4; }
 
 /* the read-back of what the two name fields will be published as */
-.oa-derived { margin: -8px 0 18px; color: #4a6b8a; }
+.oa-derived { margin: -8px 0 18px; color: var(--mut); }
 .oa-derived:empty { display: none; }
 
 /* ------------------------------------------------------ the advert uploader
@@ -1367,19 +1367,19 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-file-btn {
   flex: 0 0 auto;
   padding: 8px 14px;
-  border: 1px solid #3b7dbc;
+  border: 1px solid var(--brand);
   border-radius: 4px;
   background: #fff;
-  color: #2f6ea8;
+  color: var(--brand-2);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
 }
 
-.oa-file:hover .oa-file-btn { background: #eaf3fb; }
+.oa-file:hover .oa-file-btn { background: var(--brand-soft); }
 
 .oa-file input[type='file']:focus-visible + .oa-file-btn {
-  outline: 2px solid #3b7dbc;
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 
@@ -1414,7 +1414,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-wn-entry {
   margin: 0 0 22px;
   padding: 2px 0 2px 16px;
-  border-left: 3px solid #3b7dbc;
+  border-left: 3px solid var(--brand);
 }
 
 .oa-wn-date {
@@ -1427,7 +1427,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 
 .oa-wn-title { margin: 0 0 6px; font-size: 17px; line-height: 1.35; }
-.oa-wn-title a { color: #2f6ea8; text-decoration: none; }
+.oa-wn-title a { color: var(--brand-2); text-decoration: none; }
 .oa-wn-title a:hover { text-decoration: underline; }
 
 .oa-wn-body {
