@@ -183,6 +183,7 @@
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
     <script src="assets/oa-usage.js"></script>
+    <script src="assets/oa-countries.js"></script>
     <script src="assets/oa-list.js"></script>
     <script src="assets/oa-jobedit.js"></script>
     <script>
@@ -302,7 +303,10 @@
             placeholder: 'All types' },
           { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one',
             placeholder: 'All levels' },
+          // a link shared or bookmarked when the site said "USA" still selects
+          // the country it now publishes as "United States"
           { key: 'country',     label: 'Location',        field: 'country', sort: 'count',
+            legacyValues: (window.OACountries || {}).ALIASES,
             placeholder: 'All locations' },
           { key: 'chars',       label: 'Characteristics', field: 'characteristics', type: 'one',
             placeholder: 'All characteristics' },

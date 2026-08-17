@@ -116,6 +116,7 @@
     <!-- v2 -->
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
+    <script src="assets/oa-countries.js"></script>
     <script src="assets/oa-list.js"></script>
     <script>
     (function () {
@@ -210,6 +211,8 @@
               { key: 'level',   label: 'Entry level',     field: 'levels', type: 'one',
                 legacyParam: 'filterF' },
               { key: 'country', label: 'Location',        field: 'country', sort: 'count',
+                // as on the jobs page: an old "USA" link still works
+                legacyValues: (window.OACountries || {}).ALIASES,
                 legacyParam: 'filterI' }
             ],
 

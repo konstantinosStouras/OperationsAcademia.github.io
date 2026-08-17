@@ -20,52 +20,17 @@
 
   /* Every country, so a poster never has to wonder whether theirs is missing
      (owner, 2026-08-17 — the list was 34 entries and stopped at the countries
-     that had posted before). It is a DATALIST, i.e. a hint on a free-text
-     field: a campus in a place not named here can still be typed, exactly as
-     before. Alphabetical, because at this length "most likely first" is no
-     longer a thing a reader can see.
+     that had posted before). THE LIST ITSELF LIVES IN assets/oa-countries.js:
+     one definition, shared with the build (which canonicalises what is posted,
+     so "USA" is published as "United States") and with the e-mail alert
+     matcher — so the names this form offers and the names the site publishes
+     cannot drift apart.
 
-     THE SPELLINGS ARE THE SITE'S OWN and must not be tidied: 'USA' (not
-     'United States') and 'United Kingdom' are what the published rows carry,
-     and the jobs page's Location filter groups by the exact string — so
-     renaming one here would split that country into two filter entries.
-     _scraper/selftest.mjs pins the whole list, both copies of it, and every
-     one of the original 34 spellings. */
-  var COUNTRIES = [
-    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda',
-    'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain',
-    'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda',
-    'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei',
-    'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada',
-    'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia',
-    'Comoros', 'Costa Rica', 'Croatia', 'Cuba', 'Curacao', 'Cyprus', 'Czech Republic',
-    'Democratic Republic of the Congo', 'Denmark', 'Djibouti', 'Dominica',
-    'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador',
-    'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Faroe Islands',
-    'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana',
-    'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guatemala', 'Guinea',
-    'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland',
-    'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Ivory Coast',
-    'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo', 'Kuwait',
-    'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya',
-    'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macau', 'Madagascar', 'Malawi',
-    'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania',
-    'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro',
-    'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
-    'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia',
-    'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestine', 'Panama', 'Papua New Guinea',
-    'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar',
-    'Republic of the Congo', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis',
-    'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino',
-    'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles',
-    'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia',
-    'South Africa', 'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan',
-    'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania',
-    'Thailand', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey',
-    'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates',
-    'United Kingdom', 'Uruguay', 'USA', 'Uzbekistan', 'Vanuatu', 'Vatican City',
-    'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
-  ];
+     It is a DATALIST, i.e. a hint on a free-text field: a campus in a place
+     not named here can still be typed, and is published under whatever name
+     its poster gave it. With the countries file absent the field simply
+     offers no suggestions, which is what it did before any list existed. */
+  var COUNTRIES = (window.OACountries && window.OACountries.LIST) || [];
 
   var MAX = {
     institution: 160, department: 220, school: 160, unit: 160, country: 60, applyByNote: 300,

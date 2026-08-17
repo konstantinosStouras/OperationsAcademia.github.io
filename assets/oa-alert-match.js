@@ -15,12 +15,36 @@
    Written in ES5 so it needs no transpiling for either consumer.
    --------------------------------------------------------------------------- */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.OAAlertMatch = factory();
-}(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory(require('./oa-countries.js'));
+  } else {
+    root.OAAlertMatch = factory(root.OACountries);
+  }
+}(typeof self !== 'undefined' ? self : this, function (OACountries) {
   'use strict';
 
   var TOPICS = ['jobs', 'updates', 'candidates', 'news'];
+
+  /* ONE SPELLING PER COUNTRY, on both sides of every comparison.
+
+     The site published "USA" for years and now publishes "United States"
+     (assets/oa-countries.js). An alert saved under the old spelling holds
+     `criteria.country: ['USA']`, and a plain string comparison against the new
+     rows would quietly match nothing — the subscriber would simply stop
+     receiving the e-mails they asked for, with nothing to see anywhere.
+
+     Canonicalising inside normalise() fixes that everywhere at once, because
+     normalise() is also what the alerts PAGE reads a stored alert through: the
+     country boxes it ticks when the subscriber opens their alert to edit it
+     are the canonical ones, so saving does not silently drop a filter either.
+
+     Falls back to the identity when the countries file is not on the page, so
+     a page that has not added the script tag behaves exactly as it did. */
+  function canonCountry(v) {
+    return (OACountries && OACountries.canon)
+      ? OACountries.canon(v)
+      : String(v == null ? '' : v);
+  }
 
   /** Case- and diacritic-insensitive, so "Munster" finds "Münster". */
   function fold(s) {
@@ -55,7 +79,7 @@
       text: String(c.text || '').trim().slice(0, 120),
       type: arr(c.type).map(String),
       level: arr(c.level).map(String),
-      country: arr(c.country).map(String),
+      country: arr(c.country).map(canonCountry),
       characteristics: arr(c.characteristics).map(String)
     };
   }
@@ -100,7 +124,7 @@
           fold(row.department).indexOf(needle) === -1) return false;
     }
     if (n.type.length && n.type.indexOf(row.type) === -1) return false;
-    if (n.country.length && n.country.indexOf(row.country) === -1) return false;
+    if (n.country.length && n.country.indexOf(canonCountry(row.country)) === -1) return false;
     if (n.level.length && !overlaps(arr(row.levels), n.level)) return false;
     if (n.characteristics.length && !overlaps(arr(row.characteristics), n.characteristics)) {
       return false;

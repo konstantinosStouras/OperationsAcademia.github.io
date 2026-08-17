@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "one-spelling-per-country",
+   "date": "2026-08-17",
+   "title": "One spelling per country, everywhere on the site",
+   "summary": "The same country used to appear several times in the Location filter, because postings and the imported archive spelled it differently \u2014 \u201cUSA\u201d, \u201cUK\u201d, \u201cHong Kong SAR\u201d, \u201cThe Netherlands\u201d, \u201cShenzhen, China\u201d. Filtering on the United Kingdom therefore showed only a quarter of the British postings. Every country is now published under one full name (\u201cUnited States\u201d, \u201cUnited Kingdom\u201d), across the current postings and the whole past-markets archive, and new postings are tidied the same way as they arrive. Links you had already saved, and e-mail alerts you set up under the old spelling, keep working unchanged.",
+   "url": "https://www.operationsacademia.org/jobs"
+  },
+  {
    "id": "posting-forms-simpler",
    "date": "2026-08-17",
    "title": "Posting is simpler: every country listed, and no more \u201cjob market year\u201d to work out",
