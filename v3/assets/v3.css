@@ -643,11 +643,10 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .v3-footer a { color: var(--ink-2); }
 .v3-footer a:hover { color: var(--brand); }
-/* the footer wordmark asset is the WHITE knockout version — force it to the
-   theme: black in light, its natural white in dark */
-.v3-footer-brand img { height: 40px; width: auto; margin-bottom: 12px;
-  filter: brightness(0); opacity: 0.85; }
-[data-theme='dark'] .v3-footer-brand img { filter: none; opacity: 0.95; }
+/* the footer carries the HEADER'S OWN lockup (monogram + wordmark), slightly
+   larger — one brand top and bottom, both painted by the theme tokens */
+.v3-logo-foot { font-size: 22px; margin-bottom: 14px; }
+.v3-logo-foot .v3-mark { width: 42px; height: 42px; }
 .v3-footer-legal {
   border-top: 1px solid var(--line-soft);
   padding-top: 22px;
