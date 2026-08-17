@@ -364,20 +364,22 @@ service cloud.firestore {
     }
 
     // --------------------------------------------------- usage (admin-only)
-    // Signed-in usage telemetry (owner, 2026-08-17): one doc per signed-in
-    // browsing session — time on site plus the links/buttons clicked —
-    // written by the visitor about THEMSELVES only, and readable by the
-    // admin alone. Disclosed in the Privacy Policy.
+    // Usage telemetry (owner, 2026-08-17): one doc per browsing session —
+    // time on site, the links/buttons clicked, and which form FIELDS were
+    // touched (never their content) — for signed-in AND anonymous visitors,
+    // readable by the admin alone. A signed-in session is pinned to its own
+    // uid; an anonymous one writes under a random 'anon:…' id with no auth,
+    // which is safe because the doc id embeds the session's random sid (a
+    // stranger cannot name another session's doc) and the shape is bounded.
+    // Disclosed in the Privacy Policy.
     match /usageSessions/{id} {
-      allow create: if signedIn()
-                    && request.resource.data.uid == request.auth.uid
+      allow create, update: if request.resource.data.uid is string
+                    && request.resource.data.sid is string
+                    && id == request.resource.data.uid + '__' + request.resource.data.sid
                     && str('email', 200) && str('sid', 80) && str('page', 300)
-                    && list('clicks', 400);
-      allow update: if signedIn()
-                    && resource.data.uid == request.auth.uid
-                    && request.resource.data.uid == request.auth.uid
-                    && str('email', 200) && str('sid', 80) && str('page', 300)
-                    && list('clicks', 400);
+                    && list('clicks', 400) && list('fields', 300)
+                    && ((signedIn() && request.resource.data.uid == request.auth.uid)
+                        || request.resource.data.uid.matches('anon:[a-z0-9]+'));
       allow read, delete: if isAdmin();
     }
 
