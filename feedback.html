@@ -100,6 +100,22 @@
 
                 <div class="oa-form">
 
+                  <!-- ============================ postings awaiting review -->
+                  <!-- Above the feedback inbox deliberately: a queued posting is
+                       not on the site until it is approved, so it is the thing
+                       most worth doing first. Admin-only, and the panel being
+                       drawn grants nothing — jobReviews is admin-read in the
+                       rules, so a non-admin browser that reached this markup
+                       still cannot load a single document. -->
+                  <section class="oa-panel" id="oa-review" hidden>
+                    <h3 class="oa-panel-h">&#128203; Job postings to review</h3>
+                    <p class="oa-hint">Crawled from the job market tracking sheet and
+                      held back until you approve them &mdash; <span id="oa-review-count">nothing</span>
+                      waiting. Correct anything that is wrong before approving; your
+                      edits are kept and re-applied every time the sheet is re-read.</p>
+                    <div id="oa-review-list"></div>
+                  </section>
+
                   <!-- ===================================== maintainer inbox -->
                   <section class="oa-panel" id="oa-inbox" hidden>
                     <h3 class="oa-panel-h">&#128229; Feedback inbox</h3>
@@ -283,6 +299,7 @@
     <script src="assets/oa-firebase.js"></script>
     <script src="assets/oa-accounts.js"></script>
     <script src="assets/oa-usage.js"></script>
+    <script src="assets/oa-jobreview.js"></script>
     <script src="assets/oa-feedback.js"></script>
   </body>
 </html>

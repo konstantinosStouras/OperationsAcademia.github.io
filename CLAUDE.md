@@ -127,6 +127,35 @@ maintainer once (then weekly) when the sheet has gained nothing for three weeks,
 cannot be read, or reads as empty. Nothing already published is ever removed by
 one of those failures.
 
+## The HigherEdJobs postings are checked against their own ads
+
+The tracking sheet has no deadline column for most rows, so they reach the site
+as "Until filled." — the ingest's default for an empty cell, not something
+anyone checked. Where the posting links to **higheredjobs.com** the ad states
+its closing date in a field of its own, so it is read:
+`_scraper/higheredjobs.mjs` (pure: parse an ad, decide what it changes) +
+`_scraper/higheredjobs-verify.mjs` (fetch, cache, apply) +
+`.github/workflows/oa-higheredjobs-verify.yml` (daily, after the sheet read).
+What each ad said is cached in `data/higheredjobs.json`.
+
+**`validThrough` in the page's schema.org block is NOT the deadline** — it is
+when HigherEdJobs stops listing the ad, ~18 months out (a post closing on
+20 Aug 2026 carries `2028-02-06`). Only the fields in `DEADLINE_FIELDS` may be
+read; two selftests pin that this stays true. When an employer labels the
+closing date some new way, **add the label to `DEADLINE_FIELDS` — never
+hand-edit `data/`**, exactly as with the country aliases: `jobmarket.json` is
+rebuilt from the workbook every morning, so the sheet sync re-applies the cache
+on every read and a patched row would come back the next day.
+
+**A deadline the maintainer typed into the sheet is never overwritten.** The
+pass only fills a row that had none; a disagreement is reported as a warning
+naming both dates, so the sheet is corrected at the source. An ad that cannot
+be read changes nothing — this is an enrichment and must never fail a run.
+
+Local runs: `node _scraper/higheredjobs-verify.mjs --apply-only` (re-apply the
+committed cache) or `--scan`. A real read needs egress to higheredjobs.com,
+which this build environment denies (403), so it happens on the runners.
+
 ## The frozen archives, and how the maintainer edits them
 
 `data/past-postings.json`, `data/recent-faculty.json` and
@@ -176,6 +205,54 @@ stands down wherever `oa-jobedit.js` has drawn.
 `firebase deploy` — it needs an interactive login — so after any change to
 `_firestore.rules`, run `firebase deploy --only firestore:rules` from the
 repository root. See `_SETUP-FIREBASE.md` §4.
+## Nothing from the tracking sheet publishes itself
+
+A posting crawled from the job market workbook is **queued for the maintainer,
+not published on sight**. It appears at the top of `feedback.html` (admin-only,
+above the feedback inbox), every field editable; approving it puts it on the
+site at the next build, rejecting keeps it off for good.
+
+The reason is that the pipeline **derives** things the sheet never said — the
+market year, the type of institution, the canonical country, the entry level,
+and the closing date read off the HigherEdJobs advertisement. Those reached
+visitors before anyone had looked at them.
+
+    _scraper/jobreview.mjs         what is publishable, and what an edit is (pure)
+    assets/oa-jobreview.js         the panel on feedback.html
+    _scraper/jobreview-mailer.mjs  one e-mail per queued posting
+    oa-jobreview-mail.yml          runs it every 15 minutes
+
+**The queue is a Firestore collection (`jobReviews`), never a file under
+`data/`.** Everything in `data/` is served by Pages to anyone who asks — CI even
+checks that no e-mail address reaches it — so a posting "not yet public" cannot
+sit there in any form. `data/jobmarket.json` therefore becomes what it always
+claimed to be: the **approved** postings, and nothing else.
+
+Three rules worth keeping:
+
+- **Absence means withhold.** A row with no queue document is never published.
+  Expressed that way round — rather than "a rejection means withhold" — so a
+  queue that fails to write cannot leak a posting onto the site.
+- **An unreachable queue changes nothing.** Without it there is no way to know
+  what was approved, and both answers are wrong: publishing everything defeats
+  the gate, publishing nothing deletes every posting on the site. So
+  `data/jobmarket.json` is left exactly as it is, the same rule the sync
+  already applies to a workbook it cannot read.
+- **An edit is a correction laid on top, never a rewrite of the row.** The sheet
+  stays the source of truth; `edits` is re-applied on every build, so the
+  workbook can be re-read every morning without discarding the maintainer's
+  work. Same shape as the HigherEdJobs cache and `rowOverrides`.
+
+`EDITABLE` in `jobreview.mjs`, the `FIELDS` list in `oa-jobreview.js` and the key
+list in `_firestore.rules` must agree — **selftest.mjs pins all three together**.
+`id`, `year`, `posted` and `source` are deliberately NOT editable: they tie the
+posting to its sheet row, and changing one would make the next sync queue it
+again as new. Correct those in the workbook.
+
+**It is inert until `_firestore.rules` is redeployed** (`firebase deploy --only
+firestore:rules`) — until then the panel says permission-denied — and the
+e-mail half is inert until `SMTP_*` is set, which stamps nothing, so the
+postings are announced once it exists.
 
 ## Mobile standards for tables and lists — MUST consult
 
@@ -357,6 +434,8 @@ and "what I am e-mailed" cannot mean different things.
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks
+    node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
+    node _scraper/jobreview-mailer.mjs --selftest      # the review-queue e-mail
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "postings-reviewed-before-publishing",
+   "date": "2026-08-18",
+   "title": "Job postings are checked by a human before they appear",
+   "summary": "Postings gathered automatically from the job market tracking sheet no longer go straight onto the site. Each one now waits for the maintainer, who checks it against the advertisement and corrects anything wrong before it is published \u2014 the closing date, the school or department name, the country, the type of position. The site derives several of those from the posting rather than being told them outright, so this is the step that makes sure what you read is what the employer actually advertised. Postings you already see are unaffected once re-approved, and nothing else about the jobs page changes.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "posting-form-cascade",
    "date": "2026-08-18",
    "title": "Posting a job: the university, school and department boxes now follow each other",
@@ -15,6 +22,13 @@
    "title": "One spelling per university, school and department",
    "summary": "The same department used to appear several times over, because postings spelled it differently \u2014 Tulane's was listed as \u201cFreeman School of Business, Management Science\u201d, \u201cFreeman School of Business, Management Sciences Area\u201d and \u201cA.B. Freeman School of Business, Management Science Department\u201d, among others, so five postings of one department read as five different places. Every posting now names its university, school and department the one way \u2014 the school's full official name, and the department without the \u201cDepartment\u201d, \u201cArea\u201d or \u201cgroup\u201d each school words differently \u2014 across the current postings and the whole past-markets archive. Older archive entries that packed the university, school and department into a single line have been split into the three, so they now merge with the postings from the same place. New postings are tidied the same way as they arrive, and the posting form offers the spelling the site already uses.",
    "url": "https://www.operationsacademia.org/previous-markets"
+  },
+  {
+   "id": "higheredjobs-deadlines",
+   "date": "2026-08-18",
+   "title": "Closing dates, read from the advertisement",
+   "summary": "Postings that link to HigherEdJobs now show the closing date the advertisement itself states, instead of the catch-all \u201cUntil filled.\u201d The tracking sheet the maintainer keeps has no deadline column for most rows, so the site had nothing better to say; the advertisement does say, in a field of its own, and it is now read daily and kept up to date. Postings genuinely left open still read \u201cUntil filled.\u201d, and the Deadline filter on the jobs page \u2014 Closing soon, Expired, Until filled \u2014 sorts them accordingly.",
+   "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "single-page-redesign-live",

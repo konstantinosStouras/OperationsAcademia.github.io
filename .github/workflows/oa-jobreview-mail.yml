@@ -1,0 +1,86 @@
+name: OA jobs — tell the maintainer a posting is waiting
+
+# Postings crawled from the job market tracking sheet are queued for review
+# rather than published on sight (see _scraper/jobreview.mjs). This mails the
+# maintainer about each one, ONE E-MAIL PER POSTING, and stamps `mailedAt` so
+# nothing is announced twice.
+#
+# Every 15 minutes rather than once a day: the sheet is read each morning, but
+# the queue also gains a posting whenever a row is edited into existence, and
+# "immediately" is what was asked for. A run with an empty queue costs one
+# Firestore query and sends nothing.
+#
+# A no-op until FIREBASE_SERVICE_ACCOUNT is set, and a no-op that SAYS SO until
+# SMTP_* is set — the postings simply stay unannounced and are mailed once it
+# exists, because `mailedAt` is only stamped after a send succeeds.
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Render the e-mails and print them, send nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'List what would be mailed and stop'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-jobreview-mail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Is Firebase configured?
+        id: gate
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          # Until the project exists this job has nothing to do. Checking first
+          # saves an npm install on every scheduled fire.
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Firebase is not configured yet — nothing to do. See _SETUP-FIREBASE.md"
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+        if: steps.gate.outputs.ready == 'true'
+
+      # Runs even when the gate is closed: it needs neither credentials nor the
+      # network, and it is the check that would catch a broken renderer before
+      # the first real posting is ever queued.
+      - name: Offline checks
+        run: node _scraper/jobreview-mailer.mjs --selftest
+
+      - name: Announce what is waiting
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # Where "a posting is waiting" goes. Defaults to CONTACT in _mail.mjs.
+          JOBREVIEW_ALERT_TO: ${{ vars.JOBREVIEW_ALERT_TO }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          ALERTS_FROM: ${{ vars.ALERTS_FROM }}
+        run: |
+          node _scraper/jobreview-mailer.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}

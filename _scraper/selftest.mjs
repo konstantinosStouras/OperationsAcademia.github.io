@@ -41,6 +41,15 @@ import {
   folderFor, isConfigured, auditFolders, isFolderId, isPlaceholder,
   resourceKeyFor, resourceKeyHeader, KINDS,
 } from './drive-folders.mjs';
+import {
+  parseAd, cacheEntry, needFetch, applyVerified, deadlineOf, labelledFields,
+  isHigherEdJobsUrl, jobCodeOf, detailsUrl, hejDate, DEADLINE_FIELDS,
+} from './higheredjobs.mjs';
+import {
+  COLLECTION as REVIEW_COL, EDITABLE, DOC_KEYS, PENDING, APPROVED, REJECTED,
+  queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
+  needMail, changedKeys,
+} from './jobreview.mjs';
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -3197,6 +3206,394 @@ async function testJobMarketSheetWiring() {
     'a rebuild that changes nothing produces a byte-identical file');
 }
 
+/* ------------------------------------------------ the HigherEdJobs postings */
+
+/** A page in the shape HigherEdJobs actually serves: the summary block at the
+    top, the employer's own description below with its markup double-encoded
+    inside the JSON-LD string, and — the trap — a `validThrough` eighteen
+    months past the closing date. Trimmed from the real advertisement for
+    JobCode 179529368 (Utah Valley University), which closes on 20 August 2026
+    and is listed until 6 February 2028. */
+const HEJ_AD = `<!doctype html><html><head>
+<script type="application/ld+json">
+{ "@context":"http://schema.org/", "@type":"JobPosting",
+  "title":"Faculty - Lecturer, Non-Tenure Track - Strategic Management &amp;amp; Operations",
+  "description":"&lt;center&gt;&lt;b&gt;Faculty - Lecturer&lt;/b&gt;&lt;/center&gt;&lt;br&gt;&lt;b&gt;Salary:&lt;/b&gt; Depends on Qualifications&lt;br&gt;&lt;br&gt;&lt;b&gt;Job Type:&lt;/b&gt; FT Faculty&lt;br&gt;&lt;br&gt;&lt;b&gt;Job Number:&lt;/b&gt; FY2706368&lt;br&gt;&lt;br&gt;&lt;b&gt;Closing:&lt;/b&gt; 8/20/2026 11:59 PM Mountain&lt;br&gt;&lt;br&gt;&lt;b&gt;Location:&lt;/b&gt; Main Campus - Orem&lt;br&gt;",
+  "datePosted":"2026-08-15 15:46:07.45",
+  "validThrough":"2028-02-06 23:59:59.9",
+  "hiringOrganization":{"@type":"Organization","name":"Utah Valley University"},
+  "jobLocation":{"@type":"Place","address":{"@type":"PostalAddress",
+    "addressLocality":"Orem","addressRegion":"UT","addressCountry":"US"}},
+  "employmentType":"FULL_TIME" }
+</script></head><body>
+<h1 id="jobtitle-header"> Faculty - Lecturer, Non-Tenure Track - Strategic Management &amp; Operations</h1>
+<div id="jobLocation">
+  <div class="job-inst"><a href="http://www.uvu.edu/" target="_blank">Utah Valley University</a></div>
+  <div class="job-loc"><span class="at">in</span> Orem, UT </div>
+</div>
+<div class="job-info">
+  <strong>Type:</strong> Full-Time <br>
+  <strong>Posted:</strong> 2 days ago <br>
+  <strong>Application Due:</strong> 08/20/2026 <br>
+  <strong>Category:</strong> <a class="job-cat" href="/faculty/search.cfm?JobCat=46">Management</a> <br>
+</div></body></html>`;
+
+function testHigherEdJobsParsing() {
+  const ad = parseAd(HEJ_AD, { jobCode: '179529368' });
+
+  ok(ad.ok, 'a HigherEdJobs advertisement parses');
+  eq(ad.applyByDate, '2026-08-20', 'the deadline is the page\'s own "Application Due"');
+
+  /* THE ONE THAT MATTERS. `validThrough` is when the ADVERTISEMENT stops being
+     listed — HigherEdJobs sets it ~18 months out — and reading it as the
+     deadline would publish "6 February 2028" for a search that closes in five
+     days. Worse than the "Until filled." it replaced, because it looks
+     specific. It must never appear anywhere in a parse. */
+  ok(!JSON.stringify(ad).includes('2028'),
+    'and never schema.org validThrough, which is when the AD expires');
+  ok(!DEADLINE_FIELDS.some((f) => /valid\s*through/i.test(f)),
+    'validThrough is not in the list of fields a deadline may come from');
+
+  eq(ad.title, 'Faculty - Lecturer, Non-Tenure Track - Strategic Management & Operations',
+    'the title is read from the page heading, entities decoded');
+  eq(ad.institution, 'Utah Valley University', 'and the employer from the page');
+  eq(ad.location, 'Orem, UT', 'and where the post is');
+  eq(ad.posted, '2026-08-15',
+    'the posting date comes from the timestamp, not from "2 days ago" — ' +
+    'relative text is only true on the day it was fetched');
+
+  /* Labels are read from the MARKUP, not from flattened text. Flattened, this
+     page reads "... Salary: Depends on Qualifications Job Type: FT Faculty
+     ...", where no rule can tell where the salary ends and no "Type" lookup
+     can avoid matching the tail of "Job Type". */
+  eq(ad.salary, 'Depends on Qualifications', 'a value is not truncated by the next label');
+  eq(ad.type, 'Full-Time', 'and "Type" is not answered with "Job Type"');
+  eq(ad.jobType, 'FT Faculty', 'which is a field of its own');
+  eq(ad.jobNumber, 'FY2706368', 'read out of the description\'s double-encoded markup');
+  eq(ad.category, 'Management', 'with the markup inside a value stripped');
+
+  // dates: US order, always, because that is the only order this site writes
+  eq(hejDate('08/20/2026'), '2026-08-20', 'a US date is read as written');
+  eq(hejDate('5/6/2026'), '2026-05-06',
+    'an ambiguous one is NOT guessed at — this site writes month first');
+  eq(hejDate('August 20, 2026'), '2026-08-20', 'a date written out in words is read too');
+  eq(hejDate('rolling'), '', 'and prose is not forced into a date');
+
+  // an open-ended search is reported as one, with no date
+  const open = parseAd(HEJ_AD.replace('08/20/2026', 'Open until filled'));
+  eq(open.applyByDate, '', 'a search that stays open carries no deadline date');
+  ok(/until filled/i.test(open.applyByProse), 'though what it said is kept');
+
+  // a page in a shape this does not know changes nothing rather than half-read
+  eq(parseAd('<html><body><p>Something else entirely</p></body></html>').ok, false,
+    'an unrecognised page does not parse');
+  ok(parseAd('<html><body>This job is no longer available.</body></html>').gone,
+    'and a listing that has come down is recognised as gone');
+
+  // urls: host-validated, and keyed by JobCode alone
+  const link = 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529368&Title=Faculty%20-%20Lecturer';
+  ok(isHigherEdJobsUrl(link), 'a HigherEdJobs link is recognised');
+  ok(!isHigherEdJobsUrl('https://evil.example.com/www.higheredjobs.com/?JobCode=1'),
+    'and a look-alike host is not — the hostname is checked, not the string');
+  eq(jobCodeOf(link), '179529368', 'the JobCode is the advertisement\'s identity');
+  eq(detailsUrl('179529368'),
+    'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529368',
+    'and the Title parameter is decoration, dropped from the page fetched');
+}
+
+function testHigherEdJobsApply() {
+  const cache = {
+    generated: '', ads: {
+      179529368: cacheEntry(parseAd(HEJ_AD, { jobCode: '179529368' }),
+        { jobCode: '179529368', checkedAt: '2026-08-18T00:00:00Z', via: 'page' }),
+    },
+  };
+  const link = 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529368&Title=x';
+
+  /* A posting the sheet left open-ended takes the advertisement's deadline —
+     the whole point of the pass. Both fields move together: the page buckets a
+     posting as open-ended on the DATE being empty, so a date shown on the card
+     while the filter still called it "Until filled" would be the worst of
+     both. */
+  const openEnded = [{ id: 'a', adUrl: link, applyBy: 'Until filled.', applyByDate: '' }];
+  const got = applyVerified(openEnded, cache, { today: '2026-08-18' });
+  eq(got.rows[0].applyByDate, '2026-08-20', 'an open-ended posting takes the ad\'s deadline');
+  eq(got.rows[0].applyBy, longDate('2026-08-20'), 'shown the way the site writes a date');
+  eq(got.changed.length, 1, 'and the correction is reported');
+
+  const again = applyVerified(got.rows, cache, { today: '2026-08-18' });
+  eq(serialise(again.rows), serialise(got.rows), 're-applying is a no-op');
+  eq(again.changed.length, 0, 'and reports nothing the second time');
+
+  /* A DEADLINE THE MAINTAINER TYPED IS NEVER OVERWRITTEN. The tracking sheet
+     is their own record and a typed date is a decision; silently replacing it
+     every morning would fight them. The disagreement is reported so the SHEET
+     can be corrected, which fixes it at the source. */
+  const typed = [{ id: 'b', adUrl: link, applyBy: 'September 1, 2026', applyByDate: '2026-09-01' }];
+  const kept = applyVerified(typed, cache, { today: '2026-08-18' });
+  eq(kept.rows[0].applyByDate, '2026-09-01', 'a deadline from the sheet wins over the ad');
+  eq(kept.changed.length, 0, 'nothing is changed behind the maintainer');
+  eq(kept.conflicts.length, 1, 'but the disagreement is reported');
+
+  // an advertisement that could not be read changes nothing at all
+  const unread = { ads: { 179529368: { status: 'unreadable', applyByDate: '' } } };
+  eq(serialise(applyVerified(openEnded, unread, {}).rows), serialise(openEnded),
+    'an unreadable advertisement leaves the posting exactly as it was');
+  eq(serialise(applyVerified(openEnded, null, {}).rows), serialise(openEnded),
+    'and so does a missing cache');
+
+  // a posting that is not advertised on HigherEdJobs is not touched
+  const elsewhere = [{ id: 'c', adUrl: 'https://jobs.chronicle.com/job/1', applyBy: 'Until filled.', applyByDate: '' }];
+  eq(serialise(applyVerified(elsewhere, cache, {}).rows), serialise(elsewhere),
+    'a posting advertised elsewhere is left alone');
+
+  /* A LISTING THAT HAS COME DOWN KEEPS THE DATE IT STATED. A closed search
+     still had a closing date, and that is the true thing to show about it —
+     dropping it would return the posting to "Until filled.", the one statement
+     now known to be wrong. */
+  const gone = cacheEntry({ ok: false, gone: true }, {
+    jobCode: '179529368', checkedAt: '2026-09-01T00:00:00Z',
+    previous: cache.ads['179529368'], via: 'page',
+  });
+  eq(gone.applyByDate, '2026-08-20', 'a gone listing keeps the deadline it stated');
+  eq(applyVerified(openEnded, { ads: { 179529368: gone } }, {}).rows[0].applyByDate,
+    '2026-08-20', 'and the posting still shows it');
+
+  /* WHAT IS FETCHED, AND WHAT IS LEFT ALONE. */
+  const row = { id: 'a', adUrl: link, posted: '2026-08-15' };
+  eq(needFetch([row], { ads: {} }, { today: '2026-08-18' }).length, 1,
+    'an advertisement never read is read');
+  eq(needFetch([row], cache, { today: '2026-08-18', ttlDays: 7 }).length, 0,
+    'one read a moment ago is left alone');
+  eq(needFetch([row], cache, { today: '2026-08-18', ttlDays: 7, force: true }).length, 1,
+    '--force reads it anyway');
+  eq(needFetch([row], cache, { today: '2026-09-30', ttlDays: 7 }).length, 0,
+    'one whose deadline has passed is frozen — the search is over');
+  eq(needFetch([row], {
+    ads: { 179529368: { ...cache.ads['179529368'], via: 'report' } },
+  }, { today: '2026-09-30', ttlDays: 7 }).length, 1,
+    'but one not read from the PAGE is always re-read, however old — a ' +
+    'stand-in exists to be replaced by the advertisement itself');
+}
+
+async function testHigherEdJobsWiring() {
+  /* Three files have to agree, and a broken link between them fails SILENTLY:
+     the postings simply keep saying "Until filled.", which is what they said
+     before anyone noticed. */
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(sync.includes('applyVerified'),
+    'the sheet sync re-applies what the advertisements said');
+  ok(sync.includes('higheredjobs.json'), 'reading it from the committed cache');
+  /* THE POINT OF DOING IT THERE. data/jobmarket.json is rebuilt from the
+     workbook every morning, so a deadline merely written into the file once
+     would be reverted by the next run — the same reason a country spelling is
+     fixed in oa-countries.js and not in the dataset. */
+  ok(/rebuilt from the sheet each morning/.test(sync),
+    'and says why: a one-off patch of the dataset would not survive the next read');
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-higheredjobs-verify.yml'), 'utf8');
+  ok(wf.includes('higheredjobs-verify.mjs'), 'the workflow runs the check');
+  ok(wf.includes('node _scraper/selftest.mjs'),
+    'and re-checks the files it is about to commit, like every other writer of data/');
+  ok(/group: oa-jobs-data-/.test(wf),
+    'it shares the data/ concurrency group, so it never races the sheet read or the build');
+  ok(wf.includes('--apply-only'),
+    'and a rejected push re-applies onto the new tip rather than pushing over it');
+
+  /* The cache is data/, so it must survive a round trip like every other file
+     there — and the served postings must still satisfy the served-file rules
+     after the pass has touched them. */
+  if (existsSync(path.join(HERE, '..', 'data', 'higheredjobs.json'))) {
+    const cache = JSON.parse(
+      await readFile(path.join(HERE, '..', 'data', 'higheredjobs.json'), 'utf8'));
+    ok(cache && typeof cache.ads === 'object', 'the committed cache has the shape it should');
+    for (const [code, ad] of Object.entries(cache.ads)) {
+      ok(/^\d{4,12}$/.test(code), `cache ${code}: keyed by JobCode`);
+      ok(['ok', 'gone', 'unreadable'].includes(ad.status), `cache ${code}: a known status`);
+      ok(!ad.applyByDate || /^\d{4}-\d{2}-\d{2}$/.test(ad.applyByDate),
+        `cache ${code}: the deadline is ISO`);
+      ok(jobCodeOf(ad.url) === code, `cache ${code}: its url names the same advertisement`);
+    }
+
+    const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'jobmarket.json'), 'utf8'));
+    const applied = applyVerified(rows, cache, {});
+    eq(serialise(applied.rows), serialise(rows),
+      'the committed postings already carry what the advertisements said');
+    for (const r of applied.rows) {
+      ok(!r.applyByDate || !/until\s*filled/i.test(r.applyBy),
+        `${r.id}: a dated posting does not also say "until filled"`);
+      ok(!r.applyByDate || r.applyBy === longDate(r.applyByDate),
+        `${r.id}: the date shown and the date filtered on are the same date`);
+    }
+  }
+}
+
+
+/* ------------------------------------------------ the posting review queue */
+
+const RV_ROW = {
+  id: '2027-example-university-20260815', year: 2027, posted: '2026-08-15',
+  institution: 'Example University', department: 'Operations', school: '', unit: 'Operations',
+  type: 'University', levels: ['Assistant Professor'],
+  applyBy: 'Until filled.', applyByDate: '', comments: 'Lecturer · Orem, UT',
+  country: 'United States', adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1',
+  adLabel: 'link to Job ad', postedAtUrl: '', postedAtLabel: 'link',
+  furtherInfoUrl: '', characteristics: [], featured: false,
+  source: 'jobmarket-sheet', addedAt: '2026-08-15T00:00:00Z', owner: '',
+  _tab: '2026 Jobs', _sheet: 'abc',
+};
+
+function testReviewQueue() {
+  /* THE GATE ITSELF. A row the queue has never seen is NOT publishable — the
+     rule is "absence means withhold", never "a rejection means withhold", so a
+     queue that failed to write cannot leak a posting onto the site. */
+  const fresh = partition([RV_ROW], [], { now: '2026-08-18T00:00:00Z' });
+  eq(fresh.publish.length, 0, 'a posting the queue has not seen is not published');
+  eq(fresh.queue.length, 1, 'it is queued for the maintainer instead');
+  eq(fresh.queue[0].status, PENDING, 'as pending');
+  eq(fresh.queue[0].rowId, RV_ROW.id, 'keyed by the row it came from');
+  ok(!('_tab' in fresh.queue[0].row) && !('_sheet' in fresh.queue[0].row),
+    'the pipeline\'s own provenance keys are not carried into the queue');
+
+  // and every key it writes is one the rules allow
+  for (const k of Object.keys(fresh.queue[0])) {
+    ok(DOC_KEYS.includes(k), `queue document key "${k}" is one the rules allow`);
+  }
+
+  const approved = [{ rowId: RV_ROW.id, status: APPROVED, row: RV_ROW, edits: {} }];
+  const live = partition([RV_ROW], approved, {});
+  eq(live.publish.length, 1, 'an approved posting is published');
+  eq(live.queue.length, 0, 'and is not queued again');
+
+  /* A REJECTION IS REMEMBERED. Without this the next sync would queue it
+     again, and the maintainer would be asked every morning about a posting
+     they have already turned down. */
+  const no = partition([RV_ROW], [{ rowId: RV_ROW.id, status: REJECTED, row: RV_ROW }], {});
+  eq(no.publish.length, 0, 'a rejected posting stays off the site');
+  eq(no.queue.length, 0, 'and is never re-queued');
+
+  /* THE SHEET KEEPS MOVING UNDER THE QUEUE. A posting queued on Monday whose
+     department is corrected on Tuesday must show Tuesday's department when it
+     is finally reviewed — while staying pending, with the maintainer's own
+     edits untouched. */
+  const queued = queueDoc(RV_ROW, { now: '2026-08-18T00:00:00Z' });
+  queued.edits = { comments: 'mine' };
+  const moved = { ...RV_ROW, department: 'Operations and Analytics' };
+  const split = partition([moved], [queued], {});
+  eq(split.refresh.length, 1, 'a queued posting catches up with the sheet');
+  eq(split.refresh[0].row.department, 'Operations and Analytics', 'taking the new content');
+  eq(split.refresh[0].status, PENDING, 'while staying pending');
+  eq(split.refresh[0].edits.comments, 'mine', 'and keeping what the maintainer typed');
+  eq(refreshQueued(queued, RV_ROW), null, 'an unchanged sheet refreshes nothing');
+}
+
+function testReviewEdits() {
+  /* An edit is sanitised exactly as an ingest would sanitise it: a browser is
+     not the authority on what a posting may contain. */
+  eq(cleanEdit('country', 'USA'), 'United States',
+    'an edited country is canonicalised, so an edit cannot re-fork the Location filter');
+  eq(cleanEdit('adUrl', 'javascript:alert(1)'), '',
+    'a javascript: URL is refused');
+  eq(cleanEdit('adUrl', 'https://example.org/x'), 'https://example.org/x',
+    'a real URL is kept');
+  eq(cleanEdit('type', 'Not A Type'), undefined, 'an unknown institution type is dropped');
+  eq(cleanEdit('type', 'University'), 'University', 'a known one is kept');
+  eq(cleanEdit('levels', ['Assistant Professor', 'Nonsense']), ['Assistant Professor'],
+    'an unknown entry level is dropped from the list');
+  eq(cleanEdit('applyByDate', '20/08/2026'), undefined, 'a non-ISO closing date is refused');
+  eq(cleanEdit('applyByDate', '2026-08-20'), '2026-08-20', 'an ISO one is kept');
+  eq(cleanEdit('id', 'something-else'), undefined,
+    'the row id is not editable — it is what ties the posting to its sheet row');
+  eq(cleanEdit('year', 2030), undefined, 'nor is the market year, which the site derives');
+  eq(cleanEdits({ institution: 'X', id: 'y', bogus: 1 }), { institution: 'X' },
+    'unknown keys are dropped rather than published');
+
+  /* THE TWO DEADLINE FIELDS MOVE TOGETHER, for the same reason as in the
+     HigherEdJobs apply: the page buckets a posting as open-ended on the DATE
+     being empty, so a date on the card with "Until filled" in the filter would
+     be the worst of both. */
+  const dated = applyEdits(RV_ROW, { applyByDate: '2026-09-30' });
+  eq(dated.applyByDate, '2026-09-30', 'an edited closing date is taken');
+  eq(dated.applyBy, longDate('2026-09-30'), 'and the line shown follows it');
+
+  const opened = applyEdits({ ...RV_ROW, applyBy: 'September 30, 2026', applyByDate: '2026-09-30' },
+    { applyBy: 'Until filled.' });
+  eq(opened.applyByDate, '', 'saying "until filled" clears the date');
+
+  const both = applyEdits(RV_ROW, { applyByDate: '2026-09-30', applyBy: 'By 30 September' });
+  eq(both.applyBy, 'By 30 September', 'but an explicit line the maintainer typed wins');
+
+  eq(applyEdits(RV_ROW, {}).institution, 'Example University',
+    'an approved posting with no edits is the sheet row itself');
+  eq(changedKeys(RV_ROW, { institution: 'Example University', department: 'Other' }),
+    ['department'], 'only fields that differ count as edited');
+}
+
+async function testReviewWiring() {
+  /* The three places that must agree on what may be edited: the pure module,
+     the browser panel, and the rules. A field in one and not the others is
+     either refused by the database or silently dropped — both look to the
+     maintainer like an edit that did not save. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  const block = rules.slice(rules.indexOf('match /jobReviews/'));
+
+  for (const f of EDITABLE) {
+    ok(block.includes(`'${f.key}'`), `_firestore.rules allows editing ${f.key}`);
+    ok(panel.includes(`key: '${f.key}'`), `the review panel offers ${f.key}`);
+  }
+  for (const k of ['id', 'year', 'posted', 'source', 'addedAt']) {
+    ok(!EDITABLE.some((f) => f.key === k),
+      `${k} is NOT editable — it is the posting's identity, corrected in the sheet`);
+  }
+
+  /* A QUEUED POSTING IS NOT PUBLIC, which is the whole reason the queue is a
+     Firestore collection rather than a file under data/. Everything in data/
+     is served to anyone who asks. */
+  ok(/match \/jobReviews\/\{id\}[\s\S]*?allow read: if isAdmin\(\)/.test(rules),
+    'jobReviews is admin-read — a queued posting is not public');
+  ok(!existsSync(path.join(HERE, '..', 'data', 'jobreviews.json')),
+    'and no queue file is committed under data/, which is world-readable');
+
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(sync.includes('partition('), 'the sheet sync applies the review gate');
+  ok(sync.includes('rows = existing'),
+    'and an unreachable queue leaves the published file exactly as it is — ' +
+    'publishing everything would defeat the gate, publishing nothing would ' +
+    'delete every posting on the site');
+  ok(sync.includes('sheetRows'),
+    'staleness is measured on the WHOLE sheet, not the approved subset, so a ' +
+    'busy workbook with a full queue is not reported as gone quiet');
+
+  /* A posting under review is not in the APPROVED file, so dating rows
+     against that file alone would re-date every queued posting every morning —
+     and once the file is empty, which is the state the gate starts in, every
+     row would read as new on every run. The queue's own copy of the row is the
+     other half of "already known". */
+  ok(/const known = existing\.concat\(/.test(sync),
+    'rows are dated against the published file AND the review queue');
+  ok(sync.indexOf('const queue = await loadReviewQueue();') < sync.indexOf('stampAddedAt('),
+    'which means the queue is read before the rows are dated');
+
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(build.includes("where('status', '==', 'approved')"),
+    'the build publishes an approval without waiting for the next sheet read');
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-jobreview-mail.yml'), 'utf8');
+  ok(wf.includes('jobreview-mailer.mjs'), 'the workflow runs the mailer');
+  ok(wf.includes('--selftest'), 'and checks it offline first');
+
+  const html = await readFile(path.join(HERE, '..', 'feedback.html'), 'utf8');
+  ok(html.includes('id="oa-review"'), 'the feedback page carries the review panel');
+  ok(html.includes('oa-jobreview.js'), 'and loads the script that fills it');
+  ok(html.indexOf('id="oa-review"') < html.indexOf('id="oa-inbox"'),
+    'with the queue ABOVE the feedback inbox — a posting that is not on the ' +
+    'site yet is the thing most worth doing first');
+  ok(panel.includes('OAAccounts.isAdmin()'), 'the panel is drawn for the maintainer only');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -3241,5 +3638,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testRefLessTakedown();
   await testSheetMirrors();
   await testJobMarketSheetWiring();
+  testHigherEdJobsParsing();
+  testHigherEdJobsApply();
+  await testHigherEdJobsWiring();
+  testReviewQueue();
+  testReviewEdits();
+  await testReviewWiring();
   process.exit(finish() ? 0 : 1);
 }
