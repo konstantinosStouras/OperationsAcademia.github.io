@@ -3274,6 +3274,31 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
   ok(await h.evaluate(() => !!document.documentElement.style.getPropertyValue('--oa-chip-w')),
     'and hands the stylesheet the width to reserve');
 
+  /* THE BAND WHERE THE NAME IS HIDDEN BUT THE WINDOW IS STILL WIDE.
+     oa-ui.css hides .oa-acct-name from 841px to 980px, while v3.css's own
+     narrow breakpoint is 900 — so a chip at 940px is an avatar and its
+     padding. Measuring THAT and remembering it as "the chip's width" would
+     under-reserve every wider window afterwards, which is the shift this whole
+     block exists to prevent. The measurement asks whether the name is
+     displayed rather than repeating a number; this pins the outcome. */
+  const band = await browser.newPage({ viewport: { width: 940, height: 900 } });
+  await band.route('**/firebasejs/**', async (route) => {
+    await new Promise((r) => setTimeout(r, SDK_DELAY));
+    await route.fulfill({ status: 200, contentType: 'application/javascript', body: stub });
+  });
+  await band.goto(BASE, { waitUntil: 'load' });
+  await band.waitForTimeout(900);
+  const narrow = await band.evaluate(() => {
+    const n = document.querySelector('.oa-acct-name');
+    let hint = null;
+    try { hint = JSON.parse(localStorage.getItem('oaAuthHint') || 'null'); } catch { /* none */ }
+    return { nameShown: !!(n && getComputedStyle(n).display !== 'none'),
+      remembered: (hint && hint.w) || 0 };
+  });
+  ok(!narrow.nameShown, 'at 940px the chip is an avatar, with no name beside it');
+  eq(narrow.remembered, 0, 'and its width is not remembered as the chip width');
+  await band.close();
+
   await h.close();
 
   /* …and a signed-out reader gets the signed-out reserve, not the chip's.

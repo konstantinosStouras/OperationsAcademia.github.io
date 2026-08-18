@@ -33,7 +33,7 @@
            value is written into a style before anything else runs, and the
            only honest thing to do with a number that is not a plausible chip
            width is to ignore it. */
-        if (typeof h.w === 'number' && h.w > 0 && h.w < 600) {
+        if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
           el.style.setProperty('--oa-chip-w', h.w + 'px');
         }
       } catch (e) { /* private mode — the reserve is an optimisation */ }
@@ -197,11 +197,17 @@
     <script defer src="assets/oa-jobedit.js"></script>
     <script defer src="assets/oa-rowedit.js"></script>
     <script>
-    /* The external scripts above are DEFERRED, so they execute at the end of
-       parsing rather than in the middle of it. This block reads what they
-       define (OAList, V3, OAAccounts), so it waits for the same moment they
-       finish — which is exactly the order it had when everything ran
-       synchronously here. */
+    /* The external scripts above are DEFERRED, so they execute after the
+       document has been parsed — which is AFTER an inline script like this one
+       would otherwise run. This block reads what they define (OAList, V3,
+       OAAccounts), so it waits for DOMContentLoaded, the first moment they are
+       all guaranteed to have executed.
+
+       One consequence worth knowing: each of those modules dispatches on
+       document.readyState, and under `defer` that reads 'interactive', so they
+       now boot BEFORE this block instead of after it. Nothing here depends on
+       running first — but something added here that does would be a bug, not a
+       preference. */
     document.addEventListener('DOMContentLoaded', function () {
       'use strict';
       var U = window.OAList.safeUrl;

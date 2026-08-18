@@ -377,11 +377,14 @@
     var seen = /^(\d[\d,]*)/.exec((el.textContent || '').trim());
     var now = prev ? prev.value
       : seen ? parseInt(seen[1].replace(/,/g, ''), 10) : 0;
-    /* A figure the HTML already seeded AT its target ("200+", "2014") has
-       nothing to count up to, and `now < target` made that case fall through
-       to 0 — so the hero painted "0+ universities" and held it until the
-       observer fired behind the script chain. Start from what is there. */
-    var from = now > 0 && now <= target ? now : 0;
+    /* Deliberately `<`, not `<=`: a figure the HTML seeded AT its target is
+       the ordinary case here (index.html writes "200+", "700+", "2014"), and
+       it is the one the count-up animation exists FOR — starting it at the
+       target would paint the final number and animate nothing. The reported
+       symptom, a hero holding "0+ universities", was never this line: it was
+       the observer firing behind seven synchronous scripts, which deferring
+       them and taking the counters over at parse time is what fixes. */
+    var from = now > 0 && now < target ? now : 0;
     var state = { value: from, dead: false, io: null };
 
     function show(v) {

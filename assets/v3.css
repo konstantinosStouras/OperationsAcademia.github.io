@@ -1313,14 +1313,18 @@ body.v3 #oa-account { position: static; height: auto; font-family: var(--font-sa
    MINIMUM, never a fixed width: over-reserving would push the burger about,
    and a chip wider than its reserve simply grows into the row it is in.
 
-   Scoped to the wide header. Below 900px the name is hidden and the chip is an
-   avatar and its padding — a fixed, name-independent size — so the desktop
-   measurement must not be applied there. */
-@media (min-width: 901px) {
+   Scoped to the header that SHOWS THE NAME, which is 981px and up — not 901,
+   the breakpoint this file uses elsewhere. oa-ui.css is loaded on these pages
+   too and hides .oa-acct-name from 841px to 980px, so a chip between 901 and
+   980 is an avatar and its padding: a fixed, name-independent size, whose
+   reserve is a constant and whose width must never be confused with the
+   measured one. oa-accounts.js measures by asking whether the name is actually
+   displayed rather than by repeating a number, so the two cannot drift. */
+@media (min-width: 981px) {
   html[data-oa-auth='in'] body.v3 #oa-account { min-width: var(--oa-chip-w, 168px); }
   html[data-oa-auth='out'] body.v3 #oa-account { min-width: 92px; }
 }
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   html[data-oa-auth='in'] body.v3 #oa-account { min-width: 40px; }
 }
 

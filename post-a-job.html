@@ -31,7 +31,7 @@
            value is written into a style before anything else runs, and the
            only honest thing to do with a number that is not a plausible chip
            width is to ignore it. */
-        if (typeof h.w === 'number' && h.w > 0 && h.w < 600) {
+        if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
           el.style.setProperty('--oa-chip-w', h.w + 'px');
         }
       } catch (e) { /* private mode — the reserve is an optimisation */ }

@@ -494,10 +494,19 @@
       Only where the name is SHOWN — the narrow header paints an avatar and its
       padding, a fixed size that has nothing to do with the name, and storing
       that would under-reserve the wide header, which is the shift this is here
-      to prevent. The media query is the one v3.css reserves against; keep the
-      two in step. */
+      to prevent.
+
+      ASK THE NAME, do not guess a breakpoint. This used to test
+      `(min-width: 901px)`, which is the breakpoint v3.css uses — but oa-ui.css
+      is loaded on these pages too and hides .oa-acct-name from 841px all the
+      way to 980px, so between 901 and 980 the guard passed while the chip was
+      avatar-only, and the width remembered from a laptop at 975px would
+      under-reserve every wider window afterwards. A computed style cannot
+      drift from the stylesheets the way a copied number can. */
   function measureChip(chip) {
-    if (!chip || !window.matchMedia || !matchMedia('(min-width: 901px)').matches) return;
+    if (!chip) return;
+    var nameEl = $('.oa-acct-name', chip);
+    if (!nameEl || getComputedStyle(nameEl).display === 'none') return;
     var take = function () {
       if (!document.body.contains(chip)) return;   // a later paint replaced it
       rememberChipWidth(chip.getBoundingClientRect().width);
@@ -791,7 +800,14 @@
         patch.firstName = parts[0].slice(0, 300);
       }
     }
-    if (!p.photo && u.photoURL) patch.photo = String(u.photoURL).slice(0, 2000);
+    /* ONCE, and remembered — exactly as seedOrcidFromProvider does it. Testing
+       `!p.photo` alone cannot tell "never seeded" from "the user pressed
+       Remove", so a Google or ORCID account had its provider picture written
+       straight back on the next page load and Remove could never stick. */
+    if (!p.photo && !p.photoSeeded && u.photoURL) {
+      patch.photo = String(u.photoURL).slice(0, 2000);
+      patch.photoSeeded = true;
+    }
     if (!Object.keys(patch).length) return Promise.resolve();
     return OAFB.ready()
       .then(function (fb) { return profileDoc(fb, u.uid).set(patch, { merge: true }); })
@@ -909,6 +925,14 @@
         })
         .then(function () {
           state.profile = Object.assign({}, state.profile || {}, { photo: data });
+          /* The picture the NEXT page load paints from is derived from the
+             profile, so it has to be re-derived here as well — every other
+             writer of state.profile does it (loadProfile, seedProfileFromUser,
+             the form submit). Without it, Remove left the old face in
+             localStorage and the next navigation painted it again for the
+             length of a Firestore read; a newly-added picture flashed as
+             initials for the same window. */
+          writeHint(state.user, displayName(state.user));
           paint();
           openProfile();          // repaint the card with the new picture
         })
@@ -2153,6 +2177,15 @@
   }
 
   function boot() {
+    /* THE ARCHIVE CANNOT CLEAR WHAT IT DOES NOT KNOW ABOUT. /v2/ is frozen, is
+       served from this same origin, and its own sign-out removes only the hint
+       key it was written against — so a sign-out performed there would leave
+       this account's photograph sitting in localStorage indefinitely. No hint
+       means nobody is signed in, and a picture with nobody to belong to is
+       deleted on the next visit to a live page. */
+    try {
+      if (!readHint() && localStorage.getItem(PHOTO_KEY)) localStorage.removeItem(PHOTO_KEY);
+    } catch (e) { /* private mode */ }
     paint();
     if (!window.OAFB || !OAFB.enabled) { state.resolved = true; return; }
 
