@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "one-spelling-per-school",
+   "date": "2026-08-18",
+   "title": "One spelling per university, school and department",
+   "summary": "The same department used to appear several times over, because postings spelled it differently \u2014 Tulane's was listed as \u201cFreeman School of Business, Management Science\u201d, \u201cFreeman School of Business, Management Sciences Area\u201d and \u201cA.B. Freeman School of Business, Management Science Department\u201d, among others, so five postings of one department read as five different places. Every posting now names its university, school and department the one way \u2014 the school's full official name, and the department without the \u201cDepartment\u201d, \u201cArea\u201d or \u201cgroup\u201d each school words differently \u2014 across the current postings and the whole past-markets archive. Older archive entries that packed the university, school and department into a single line have been split into the three, so they now merge with the postings from the same place. New postings are tidied the same way as they arrive, and the posting form offers the spelling the site already uses.",
+   "url": "https://www.operationsacademia.org/previous-markets"
+  },
+  {
    "id": "single-page-redesign-live",
    "date": "2026-08-17",
    "title": "A new Operations Academia — one page, light or dark",

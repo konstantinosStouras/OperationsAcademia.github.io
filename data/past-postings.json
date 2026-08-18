@@ -4,8 +4,8 @@
   "year": 2025,
   "posted": "2025-07-14",
   "institution": "University of San Diego",
-  "department": "The Knauss School of Business",
-  "school": "The Knauss School of Business",
+  "department": "Knauss School of Business",
+  "school": "Knauss School of Business",
   "unit": "",
   "type": "University",
   "levels": [
@@ -33,9 +33,9 @@
   "year": 2025,
   "posted": "2025-03-20",
   "institution": "Technical University of Munich",
-  "department": "Department of Computer Science",
+  "department": "Computer Science",
   "school": "",
-  "unit": "Department of Computer Science",
+  "unit": "Computer Science",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -63,9 +63,9 @@
   "year": 2025,
   "posted": "2025-03-09",
   "institution": "University of Wisconsin-Madison",
-  "department": "Wisconsin School of Business, Department of Operations and Information Management",
+  "department": "Wisconsin School of Business, Operations and Information Management",
   "school": "Wisconsin School of Business",
-  "unit": "Department of Operations and Information Management",
+  "unit": "Operations and Information Management",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -124,9 +124,9 @@
   "year": 2025,
   "posted": "2025-01-30",
   "institution": "Harvard University",
-  "department": "Climate & Sustainability Impact Lab, Digital Data Design Institute",
+  "department": "Climate and Sustainability Impact Lab, Digital Data Design Institute",
   "school": "",
-  "unit": "Climate & Sustainability Impact Lab, Digital Data Design Institute",
+  "unit": "Climate and Sustainability Impact Lab, Digital Data Design Institute",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -155,9 +155,9 @@
   "year": 2025,
   "posted": "2025-01-08",
   "institution": "University of Utah, David Eccles School of Business",
-  "department": "Department of Operations & Information Systems",
+  "department": "Operations and Information Systems",
   "school": "",
-  "unit": "Department of Operations & Information Systems",
+  "unit": "Operations and Information Systems",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -187,9 +187,9 @@
   "year": 2025,
   "posted": "2024-11-21",
   "institution": "University of Houston",
-  "department": "C.T. Bauer College of Business, Department of Decision and Information Sciences",
-  "school": "C.T. Bauer College of Business",
-  "unit": "Department of Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business, Decision and Information Sciences",
+  "school": "C. T. Bauer College of Business",
+  "unit": "Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -220,9 +220,9 @@
   "year": 2025,
   "posted": "2024-11-09",
   "institution": "University of Houston",
-  "department": "C.T. Bauer College of Business, Department of Decision and Information Sciences",
-  "school": "C.T. Bauer College of Business",
-  "unit": "Department of Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business, Decision and Information Sciences",
+  "school": "C. T. Bauer College of Business",
+  "unit": "Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -314,9 +314,9 @@
   "year": 2025,
   "posted": "2024-10-21",
   "institution": "University of Wisconsin-Madison",
-  "department": "Wisconsin School of Business, Operations and Information Management Department",
+  "department": "Wisconsin School of Business, Operations and Information Management",
   "school": "Wisconsin School of Business",
-  "unit": "Operations and Information Management Department",
+  "unit": "Operations and Information Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -347,9 +347,9 @@
   "year": 2025,
   "posted": "2024-10-18",
   "institution": "Columbia University",
-  "department": "Department of Industrial Engineering and Operations Research",
+  "department": "Industrial Engineering and Operations Research",
   "school": "",
-  "unit": "Department of Industrial Engineering and Operations Research",
+  "unit": "Industrial Engineering and Operations Research",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -379,9 +379,9 @@
   "year": 2025,
   "posted": "2024-10-17",
   "institution": "University of Oklahoma",
-  "department": "Michael F. Price College of Business, Division of Marketing, Supply Chain Management, and Healthcare",
+  "department": "Michael F. Price College of Business, Marketing, Supply Chain Management, and Healthcare",
   "school": "Michael F. Price College of Business",
-  "unit": "Division of Marketing, Supply Chain Management, and Healthcare",
+  "unit": "Marketing, Supply Chain Management, and Healthcare",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -412,9 +412,9 @@
   "year": 2025,
   "posted": "2024-10-15",
   "institution": "United States Military Academy - West Point",
-  "department": "United States Military Academy - Department of Systems Engineering",
+  "department": "United States Military Academy, Systems Engineering",
   "school": "United States Military Academy",
-  "unit": "Department of Systems Engineering",
+  "unit": "Systems Engineering",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -444,9 +444,9 @@
   "year": 2025,
   "posted": "2024-10-15",
   "institution": "Washington University in St. Louis",
-  "department": "Olin Business School, The Boeing Center for Supply Chain Innovation",
+  "department": "Olin Business School, Boeing Center for Supply Chain Innovation",
   "school": "Olin Business School",
-  "unit": "The Boeing Center for Supply Chain Innovation",
+  "unit": "Boeing Center for Supply Chain Innovation",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -477,9 +477,9 @@
   "year": 2025,
   "posted": "2024-10-11",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Department of Management Science",
+  "department": "Miami Herbert Business School, Management Science",
   "school": "Miami Herbert Business School",
-  "unit": "Department of Management Science",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -511,9 +511,9 @@
   "year": 2025,
   "posted": "2024-10-10",
   "institution": "City University of Hong Kong",
-  "department": "College of Business, Department of Management Sciences",
+  "department": "College of Business, Management Science",
   "school": "College of Business",
-  "unit": "Department of Management Sciences",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -579,9 +579,9 @@
   "year": 2025,
   "posted": "2024-10-03",
   "institution": "NYU Shanghai",
-  "department": "Business, Operations & Business Analytics",
+  "department": "Business, Operations and Business Analytics",
   "school": "",
-  "unit": "Business, Operations & Business Analytics",
+  "unit": "Business, Operations and Business Analytics",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -610,9 +610,9 @@
   "year": 2025,
   "posted": "2024-10-03",
   "institution": "The University of Sydney",
-  "department": "Discipline of Business Analytics",
+  "department": "Business Analytics",
   "school": "",
-  "unit": "Discipline of Business Analytics",
+  "unit": "Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -641,9 +641,9 @@
   "year": 2025,
   "posted": "2024-10-02",
   "institution": "University of Oklahoma",
-  "department": "Michael F. Price College of Business, Division of Marketing and Supply Chain Management",
+  "department": "Michael F. Price College of Business, Marketing and Supply Chain Management",
   "school": "Michael F. Price College of Business",
-  "unit": "Division of Marketing and Supply Chain Management",
+  "unit": "Marketing and Supply Chain Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -675,9 +675,9 @@
   "year": 2025,
   "posted": "2024-09-26",
   "institution": "ESSEC Business School",
-  "department": "Operations Management group",
+  "department": "Operations Management",
   "school": "",
-  "unit": "Operations Management group",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -740,9 +740,9 @@
   "year": 2025,
   "posted": "2024-09-26",
   "institution": "Stony Brook University",
-  "department": "College of Business - Operations and Decision Analytics",
-  "school": "College of Business - Operations and Decision Analytics",
-  "unit": "",
+  "department": "College of Business, Operations and Decision Analytics",
+  "school": "College of Business",
+  "unit": "Operations and Decision Analytics",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -770,10 +770,10 @@
   "id": "2025-ozyegin-university-20240923",
   "year": 2025,
   "posted": "2024-09-23",
-  "institution": "Ozyegin University",
-  "department": "Faculty of Business-Operations Management",
-  "school": "Faculty of Business-Operations Management",
-  "unit": "",
+  "institution": "Özyeğin University",
+  "department": "Faculty of Business, Operations Management",
+  "school": "Faculty of Business",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -869,9 +869,9 @@
   "year": 2025,
   "posted": "2024-09-20",
   "institution": "Indiana University",
-  "department": "Kelley School of Business - Operations and Decision Technologies Department",
-  "school": "Kelley School of Business - Operations and Decision Technologies",
-  "unit": "Department",
+  "department": "Kelley School of Business, Operations and Decision Technologies",
+  "school": "Kelley School of Business",
+  "unit": "Operations and Decision Technologies",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -899,13 +899,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2025-ucla-20240920",
+  "id": "2025-university-of-california-los-angeles-20240920",
   "year": 2025,
   "posted": "2024-09-20",
-  "institution": "UCLA",
-  "department": "Anderson School of Management, Decisions, Operations and Technology Management (DOTM)",
+  "institution": "University of California, Los Angeles",
+  "department": "Anderson School of Management, Decisions, Operations and Technology Management",
   "school": "Anderson School of Management",
-  "unit": "Decisions, Operations and Technology Management (DOTM)",
+  "unit": "Decisions, Operations and Technology Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -935,9 +935,9 @@
   "year": 2025,
   "posted": "2024-09-20",
   "institution": "University of Cincinnati",
-  "department": "Lindner College of Business; Department of Operations, Business Analytics & Information Systems (OBAIS)",
+  "department": "Lindner College of Business, Operations, Business Analytics and Information Systems",
   "school": "Lindner College of Business",
-  "unit": "Department of Operations, Business Analytics & Information Systems (OBAIS)",
+  "unit": "Operations, Business Analytics and Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -966,9 +966,9 @@
   "year": 2025,
   "posted": "2024-09-20",
   "institution": "University of Nebraska - Lincoln",
-  "department": "College of Business, Supply Chain Management & Analytics Department",
+  "department": "College of Business, Supply Chain Management and Analytics",
   "school": "College of Business",
-  "unit": "Supply Chain Management & Analytics Department",
+  "unit": "Supply Chain Management and Analytics",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -998,9 +998,9 @@
   "year": 2025,
   "posted": "2024-09-20",
   "institution": "York University",
-  "department": "Schulich School of Business, Operations Management and Information Systems Area",
+  "department": "Schulich School of Business, Operations Management and Information Systems",
   "school": "Schulich School of Business",
-  "unit": "Operations Management and Information Systems Area",
+  "unit": "Operations Management and Information Systems",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -1031,9 +1031,9 @@
   "year": 2025,
   "posted": "2024-09-19",
   "institution": "University of Chicago",
-  "department": "Booth School of Business, Operations Management Area",
+  "department": "Booth School of Business, Operations Management",
   "school": "Booth School of Business",
-  "unit": "Operations Management Area",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1064,9 +1064,9 @@
   "year": 2025,
   "posted": "2024-09-18",
   "institution": "Georgetown University",
-  "department": "McDonough School of Business, Operations and Analytics Area",
+  "department": "McDonough School of Business, Operations and Analytics",
   "school": "McDonough School of Business",
-  "unit": "Operations and Analytics Area",
+  "unit": "Operations and Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1096,9 +1096,9 @@
   "year": 2025,
   "posted": "2024-09-18",
   "institution": "University of Texas at Austin",
-  "department": "McCombs School of Business: Information, Risk, and Operations Management",
-  "school": "McCombs School of Business: Information",
-  "unit": "Risk, and Operations Management",
+  "department": "McCombs School of Business, Information, Risk, and Operations Management",
+  "school": "McCombs School of Business",
+  "unit": "Information, Risk, and Operations Management",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1124,9 +1124,9 @@
   "year": 2025,
   "posted": "2024-09-17",
   "institution": "University of Colorado Boulder",
-  "department": "Leeds School of Business, Operations Management Area",
+  "department": "Leeds School of Business, Operations Management",
   "school": "Leeds School of Business",
-  "unit": "Operations Management Area",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1156,9 +1156,9 @@
   "year": 2025,
   "posted": "2024-09-16",
   "institution": "Wake Forest University",
-  "department": "School of Business, Operations Area",
+  "department": "School of Business, Operations",
   "school": "School of Business",
-  "unit": "Operations Area",
+  "unit": "Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1188,9 +1188,9 @@
   "year": 2025,
   "posted": "2024-09-13",
   "institution": "The Pennsylvania State University",
-  "department": "Smeal College of Business, Department of Supply Chain and Information Systems",
+  "department": "Smeal College of Business, Supply Chain and Information Systems",
   "school": "Smeal College of Business",
-  "unit": "Department of Supply Chain and Information Systems",
+  "unit": "Supply Chain and Information Systems",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1221,9 +1221,9 @@
   "year": 2025,
   "posted": "2024-09-11",
   "institution": "Bucknell University",
-  "department": "Freeman College of Management, Department of Analytics and Operations Management",
+  "department": "Freeman College of Management, Analytics and Operations Management",
   "school": "Freeman College of Management",
-  "unit": "Department of Analytics and Operations Management",
+  "unit": "Analytics and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1281,9 +1281,9 @@
   "year": 2025,
   "posted": "2024-09-09",
   "institution": "University of South Carolina",
-  "department": "Darla Moore School of Business, Department of Management Science",
+  "department": "Darla Moore School of Business, Management Science",
   "school": "Darla Moore School of Business",
-  "unit": "Department of Management Science",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1313,9 +1313,9 @@
   "year": 2025,
   "posted": "2024-09-05",
   "institution": "Arizona State University",
-  "department": "W. P. Carey School of Business, Department of Information Systems",
+  "department": "W. P. Carey School of Business, Information Systems",
   "school": "W. P. Carey School of Business",
-  "unit": "Department of Information Systems",
+  "unit": "Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1346,9 +1346,9 @@
   "year": 2025,
   "posted": "2024-09-05",
   "institution": "Texas A&M University",
-  "department": "Department of Information and Operations Management (INFO) at Mays Business School",
-  "school": "Department of Information and Operations Management (INFO) at Mays Business School",
-  "unit": "",
+  "department": "Mays Business School, Information and Operations Management",
+  "school": "Mays Business School",
+  "unit": "Information and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1379,9 +1379,9 @@
   "year": 2025,
   "posted": "2024-09-05",
   "institution": "The Hong Kong Polytechnic University",
-  "department": "Department of Logistics and Maritime Studies",
+  "department": "Logistics and Maritime Studies",
   "school": "",
-  "unit": "Department of Logistics and Maritime Studies",
+  "unit": "Logistics and Maritime Studies",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1409,9 +1409,9 @@
   "year": 2025,
   "posted": "2024-08-31",
   "institution": "Shanghai University of Finance and Economics",
-  "department": "College of Business, Department of Operations Management",
+  "department": "College of Business, Operations Management",
   "school": "College of Business",
-  "unit": "Department of Operations Management",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1467,13 +1467,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2025-frankfurt-school-of-finance-management-20240828",
+  "id": "2025-frankfurt-school-of-finance-and-management-20240828",
   "year": 2025,
   "posted": "2024-08-28",
-  "institution": "Frankfurt School of Finance & Management",
-  "department": "Management Department",
+  "institution": "Frankfurt School of Finance and Management",
+  "department": "Management",
   "school": "",
-  "unit": "Management Department",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1501,9 +1501,9 @@
   "year": 2025,
   "posted": "2024-08-27",
   "institution": "IE Business School",
-  "department": "Operations & Business Analytics Area",
+  "department": "Operations and Business Analytics",
   "school": "",
-  "unit": "Operations & Business Analytics Area",
+  "unit": "Operations and Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1534,9 +1534,9 @@
   "year": 2025,
   "posted": "2024-08-26",
   "institution": "Nova School of Business and Economics",
-  "department": "Operations Management area",
+  "department": "Operations Management",
   "school": "",
-  "unit": "Operations Management area",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1569,9 +1569,9 @@
   "year": 2025,
   "posted": "2024-08-25",
   "institution": "University of Toronto",
-  "department": "Scarborough and Rotman School of Management, Department of Management",
+  "department": "Scarborough and Rotman School of Management, Management",
   "school": "Scarborough and Rotman School of Management",
-  "unit": "Department of Management",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1602,9 +1602,9 @@
   "year": 2025,
   "posted": "2024-08-23",
   "institution": "Frankfurt School of Finance and Management",
-  "department": "Technology & Operations Area",
+  "department": "Technology and Operations Management",
   "school": "",
-  "unit": "Technology & Operations Area",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1634,9 +1634,9 @@
   "year": 2025,
   "posted": "2024-08-19",
   "institution": "National University of Singapore",
-  "department": "NUS Business School, The Department of Analytics and Operations",
+  "department": "NUS Business School, Analytics and Operations",
   "school": "NUS Business School",
-  "unit": "The Department of Analytics and Operations",
+  "unit": "Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1667,9 +1667,9 @@
   "year": 2025,
   "posted": "2024-08-19",
   "institution": "Naval Postgraduate School",
-  "department": "Department of Operations Research",
+  "department": "Operations Research",
   "school": "",
-  "unit": "Department of Operations Research",
+  "unit": "Operations Research",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -1699,9 +1699,9 @@
   "year": 2025,
   "posted": "2024-08-19",
   "institution": "Tulane University",
-  "department": "A. B. Freeman School of Business / Management Sciecne",
-  "school": "A. B. Freeman School of Business / Management Sciecne",
-  "unit": "",
+  "department": "A. B. Freeman School of Business, Management Science",
+  "school": "A. B. Freeman School of Business",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -1729,9 +1729,9 @@
   "year": 2025,
   "posted": "2024-08-14",
   "institution": "Boston College",
-  "department": "Carroll School of Management, Business Analytics Department",
+  "department": "Carroll School of Management, Business Analytics",
   "school": "Carroll School of Management",
-  "unit": "Business Analytics Department",
+  "unit": "Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1793,9 +1793,9 @@
   "year": 2025,
   "posted": "2024-08-13",
   "institution": "University of Alberta",
-  "department": "Alberta School of Business, Department of Accounting and Business Analytics",
+  "department": "Alberta School of Business, Accounting and Business Analytics",
   "school": "Alberta School of Business",
-  "unit": "Department of Accounting and Business Analytics",
+  "unit": "Accounting and Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1826,9 +1826,9 @@
   "year": 2025,
   "posted": "2024-08-12",
   "institution": "University of Michigan",
-  "department": "Ross School of Business Technology & Operations Department",
-  "school": "Ross School of Business Technology & Operations",
-  "unit": "Department",
+  "department": "Stephen M. Ross School of Business, Technology and Operations Management",
+  "school": "Stephen M. Ross School of Business",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1892,9 +1892,9 @@
   "year": 2025,
   "posted": "2024-08-07",
   "institution": "Duke University",
-  "department": "Fuqua School of Business, Operations Management group",
+  "department": "Fuqua School of Business, Operations Management",
   "school": "Fuqua School of Business",
-  "unit": "Operations Management group",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1925,9 +1925,9 @@
   "year": 2025,
   "posted": "2024-08-07",
   "institution": "IESE",
-  "department": "IESE Business School, Operations, Information and Technology Department",
+  "department": "IESE Business School, Operations, Information and Technology",
   "school": "IESE Business School",
-  "unit": "Operations, Information and Technology Department",
+  "unit": "Operations, Information and Technology",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1959,9 +1959,9 @@
   "year": 2025,
   "posted": "2024-08-07",
   "institution": "University of Chicago",
-  "department": "Booth School of Business, Operations Management Area",
+  "department": "Booth School of Business, Operations Management",
   "school": "Booth School of Business",
-  "unit": "Operations Management Area",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1993,9 +1993,9 @@
   "year": 2025,
   "posted": "2024-08-05",
   "institution": "Indian School of Business",
-  "department": "Indian School of Business, Operations Management Department",
+  "department": "Indian School of Business, Operations Management",
   "school": "Indian School of Business",
-  "unit": "Operations Management Department",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2025,9 +2025,9 @@
   "year": 2025,
   "posted": "2024-08-01",
   "institution": "Imperial College London",
-  "department": "Imperial College Business School, Analytics & Operations Group",
+  "department": "Imperial College Business School, Analytics and Operations",
   "school": "Imperial College Business School",
-  "unit": "Analytics & Operations Group",
+  "unit": "Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2058,9 +2058,9 @@
   "year": 2025,
   "posted": "2024-07-30",
   "institution": "The Chinese University of Hong Kong, Shenzhen",
-  "department": "School of Management and Economics, Area of Operations Management",
+  "department": "School of Management and Economics, Operations Management",
   "school": "School of Management and Economics",
-  "unit": "Area of Operations Management",
+  "unit": "Operations Management",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -2117,13 +2117,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-wisconsin-milwaukee-sheldon-b-luba-20150210",
+  "id": "2015-university-of-wisconsin-milwaukee-20150210",
   "year": 2015,
   "posted": "2015-02-10",
-  "institution": "University of Wisconsin-Milwaukee (Sheldon B. Lubar School of Business), Supply Chain, Operations Management & Business Statistics Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Wisconsin-Milwaukee",
+  "department": "Sheldon B. Lubar School of Business, Supply Chain, Operations Management and Business Statistics",
+  "school": "Sheldon B. Lubar School of Business",
+  "unit": "Supply Chain, Operations Management and Business Statistics",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2143,12 +2143,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-western-university-ivey-business-school-20150205",
+  "id": "2015-western-university-20150205",
   "year": 2015,
   "posted": "2015-02-05",
-  "institution": "Western University (Ivey Business School)",
-  "department": "",
-  "school": "",
+  "institution": "Western University",
+  "department": "Ivey Business School",
+  "school": "Ivey Business School",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2169,13 +2169,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-california-los-angeles-ucla-anders-20150202",
+  "id": "2015-university-of-california-los-angeles-20150202",
   "year": 2015,
   "posted": "2015-02-02",
-  "institution": "University of California, Los Angeles (UCLA, Anderson School of Management), Decisions, Operations and Technology Management (DOTM)",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of California, Los Angeles",
+  "department": "Anderson School of Management, Decisions, Operations and Technology Management",
+  "school": "Anderson School of Management",
+  "unit": "Decisions, Operations and Technology Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2195,13 +2195,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-stevens-institute-of-technology-wesley-j-howe-sc-20141217",
+  "id": "2015-stevens-institute-of-technology-20141217",
   "year": 2015,
   "posted": "2014-12-17",
-  "institution": "Stevens Institute of Technology (Wesley J. Howe School of Technology Management), Operations Management Area",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Stevens Institute of Technology",
+  "department": "Wesley J. Howe School of Technology Management, Operations Management",
+  "school": "Wesley J. Howe School of Technology Management",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2221,13 +2221,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-ecole-des-hautes-etudes-commerciales-hec-paris-d-20141215",
+  "id": "2015-ecole-des-hautes-etudes-commerciales-hec-paris-20141215",
   "year": 2015,
   "posted": "2014-12-15",
-  "institution": "École des Hautes Études commerciales (HEC) Paris, Department of Operations Management and Information Technology",
-  "department": "",
+  "institution": "École des Hautes Études commerciales (HEC) Paris",
+  "department": "Operations Management and Information Technology",
   "school": "",
-  "unit": "",
+  "unit": "Operations Management and Information Technology",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2273,12 +2273,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-koc-university-college-of-administrative-science-20141123",
+  "id": "2015-koc-university-20141123",
   "year": 2015,
   "posted": "2014-11-23",
-  "institution": "Koç University, College of Administrative Sciences and Economics (CASE)",
-  "department": "",
-  "school": "",
+  "institution": "Koç University",
+  "department": "College of Administrative Sciences and Economics (CASE)",
+  "school": "College of Administrative Sciences and Economics (CASE)",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2300,13 +2300,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-florida-international-university-college-of-busi-20141117",
+  "id": "2015-florida-international-university-20141117",
   "year": 2015,
   "posted": "2014-11-17",
-  "institution": "Florida International University (College of Business Administration), Decision Sciences and Information Systems Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Florida International University",
+  "department": "College of Business Administration, Decision Sciences and Information Systems",
+  "school": "College of Business Administration",
+  "unit": "Decision Sciences and Information Systems",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2326,13 +2326,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-calgary-haskayne-school-of-busines-20141113",
+  "id": "2015-university-of-calgary-20141113",
   "year": 2015,
   "posted": "2014-11-13",
-  "institution": "University of Calgary (Haskayne School of Business), Operations and Supply Chain Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Calgary",
+  "department": "Haskayne School of Business, Operations and Supply Chain Management",
+  "school": "Haskayne School of Business",
+  "unit": "Operations and Supply Chain Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2353,13 +2353,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-universite-catholique-de-louvain-louvain-school-20141105",
+  "id": "2015-universite-catholique-de-louvain-20141105",
   "year": 2015,
   "posted": "2014-11-05",
-  "institution": "Université catholique de Louvain (Louvain School of Management), Center for Operations Research and Econometrics (CORE)",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Université catholique de Louvain",
+  "department": "Louvain School of Management, Center for Operations Research and Econometrics",
+  "school": "Louvain School of Management",
+  "unit": "Center for Operations Research and Econometrics",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2381,13 +2381,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-pennsylvania-the-wharton-school-op-20141105",
+  "id": "2015-university-of-pennsylvania-20141105",
   "year": 2015,
   "posted": "2014-11-05",
-  "institution": "University of Pennsylvania (The Wharton School), Operations and Information Management (OPIM) Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Pennsylvania",
+  "department": "Wharton School, Operations and Information Management",
+  "school": "Wharton School",
+  "unit": "Operations and Information Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2408,13 +2408,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-toledo-college-of-business-and-inn-20141031",
+  "id": "2015-university-of-toledo-20141031",
   "year": 2015,
   "posted": "2014-10-31",
-  "institution": "University of Toledo (College of Business and Innovation), Information, Operations and Technology Management Department.",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Toledo",
+  "department": "College of Business and Innovation, Information, Operations and Technology Management",
+  "school": "College of Business and Innovation",
+  "unit": "Information, Operations and Technology Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2434,13 +2434,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-southern-california-usc-marshall-s-20141028",
+  "id": "2015-university-of-southern-california-20141028",
   "year": 2015,
   "posted": "2014-10-28",
-  "institution": "University of Southern California (USC, Marshall School of Business), Department of Data Sciences and Operations",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Southern California",
+  "department": "Marshall School of Business, Data Sciences and Operations",
+  "school": "Marshall School of Business",
+  "unit": "Data Sciences and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2461,13 +2461,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-american-university-of-beirut-suliman-s-olayan-s-20141025",
+  "id": "2015-american-university-of-beirut-20141025",
   "year": 2015,
   "posted": "2014-10-25",
-  "institution": "American University of Beirut (Suliman S. Olayan School of Business), Business Information and Decision Systems (BIDS) Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "American University of Beirut",
+  "department": "Suliman S. Olayan School of Business, Business Information and Decision Systems",
+  "school": "Suliman S. Olayan School of Business",
+  "unit": "Business Information and Decision Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2489,13 +2489,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-queen-s-university-queen-s-school-of-business-ma-20141023",
+  "id": "2015-queen-s-university-20141023",
   "year": 2015,
   "posted": "2014-10-23",
-  "institution": "Queen's University (Queen's School of Business), Management Science and Operations Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Queen's University",
+  "department": "Queen's School of Business, Management Science and Operations Management",
+  "school": "Queen's School of Business",
+  "unit": "Management Science and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2515,13 +2515,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-baruch-college-the-city-university-of-new-york-c-20141022",
+  "id": "2015-baruch-college-the-city-university-of-new-york-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "Baruch College, The City University of New York (CUNY, Zicklin School of Business), Department of Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Baruch College, The City University of New York",
+  "department": "Zicklin School of Business, Management",
+  "school": "Zicklin School of Business",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2542,13 +2542,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-florida-state-university-college-of-business-mar-20141022",
+  "id": "2015-florida-state-university-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "Florida State University (College of Business), Marketing Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Florida State University",
+  "department": "College of Business, Marketing",
+  "school": "College of Business",
+  "unit": "Marketing",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2568,13 +2568,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-lehigh-university-college-of-business-economics-20141022",
+  "id": "2015-lehigh-university-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "Lehigh University (College of Business & Economics), Department of Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Lehigh University",
+  "department": "College of Business and Economics, Management",
+  "school": "College of Business and Economics",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2594,13 +2594,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-shanghai-university-of-finance-and-economics-suf-20141022",
+  "id": "2015-shanghai-university-of-finance-and-economics-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "Shanghai University of Finance and Economics (SUFE, School of International Business Administration), Department of Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Shanghai University of Finance and Economics",
+  "department": "School of International Business Administration, Operations Management",
+  "school": "School of International Business Administration",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2621,13 +2621,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-michigan-dearborn-college-of-busin-20141022",
+  "id": "2015-university-of-michigan-dearborn-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "University of Michigan-Dearborn (College of Business), Decision Sciences/Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Michigan-Dearborn",
+  "department": "College of Business, Decision Sciences/Operations Management",
+  "school": "College of Business",
+  "unit": "Decision Sciences/Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2647,13 +2647,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-notre-dame-mendoza-college-of-busi-20141022",
+  "id": "2015-university-of-notre-dame-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "University of Notre Dame (Mendoza College of Business), Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Notre Dame",
+  "department": "Mendoza College of Business, Management",
+  "school": "Mendoza College of Business",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -2673,13 +2673,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-richmond-robins-school-of-business-20141022",
+  "id": "2015-university-of-richmond-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "University of Richmond (Robins School of Business), Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Richmond",
+  "department": "Robins School of Business, Management",
+  "school": "Robins School of Business",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2700,13 +2700,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-tennessee-college-of-business-admi-20141022",
+  "id": "2015-university-of-tennessee-20141022",
   "year": 2015,
   "posted": "2014-10-22",
-  "institution": "University of Tennessee (College of Business Administration), Department of Business Analytics & Statistics",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Tennessee",
+  "department": "College of Business Administration, Business Analytics and Statistics",
+  "school": "College of Business Administration",
+  "unit": "Business Analytics and Statistics",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2726,13 +2726,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-boston-college-carroll-school-of-management-oper-20141021",
+  "id": "2015-boston-college-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "Boston College (Carroll School of Management), Operations Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Boston College",
+  "department": "Carroll School of Management, Operations Management",
+  "school": "Carroll School of Management",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2753,13 +2753,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-cornell-university-samuel-curtis-johnson-graduat-20141021",
+  "id": "2015-cornell-university-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "Cornell University (Samuel Curtis Johnson Graduate School of Management), Operations Management group",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Cornell University",
+  "department": "Samuel Curtis Johnson Graduate School of Management, Operations Management",
+  "school": "Samuel Curtis Johnson Graduate School of Management",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2780,12 +2780,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-cornell-university-cornell-tech-samuel-curtis-jo-20141021",
+  "id": "2015-cornell-university-cornell-tech-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "Cornell University/ Cornell Tech (Samuel Curtis Johnson Graduate School of Management)",
-  "department": "",
-  "school": "",
+  "institution": "Cornell University/ Cornell Tech",
+  "department": "Samuel Curtis Johnson Graduate School of Management",
+  "school": "Samuel Curtis Johnson Graduate School of Management",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2806,12 +2806,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-mcgill-university-desautels-faculty-of-managemen-20141021",
+  "id": "2015-mcgill-university-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "McGill University (Desautels Faculty of Management)",
-  "department": "",
-  "school": "",
+  "institution": "McGill University",
+  "department": "Desautels Faculty of Management",
+  "school": "Desautels Faculty of Management",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2833,12 +2833,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-memorial-university-of-newfoundland-faculty-of-b-20141021",
+  "id": "2015-memorial-university-of-newfoundland-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "Memorial University of Newfoundland, Faculty of Business Administration",
-  "department": "",
-  "school": "",
+  "institution": "Memorial University of Newfoundland",
+  "department": "Faculty of Business Administration",
+  "school": "Faculty of Business Administration",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2859,13 +2859,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-providence-college-school-of-business-department-20141021",
+  "id": "2015-providence-college-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "Providence College (School of Business), Department of Finance",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Providence College",
+  "department": "School of Business, Finance",
+  "school": "School of Business",
+  "unit": "Finance",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2885,13 +2885,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-texas-christian-university-neeley-school-of-busi-20141021",
+  "id": "2015-texas-christian-university-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "Texas Christian University (Neeley School of Business), Department of Information Systems & Supply Chain Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Texas Christian University",
+  "department": "Neeley School of Business, Information Systems and Supply Chain Management",
+  "school": "Neeley School of Business",
+  "unit": "Information Systems and Supply Chain Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2911,13 +2911,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-rochester-w-e-simon-graduate-schoo-20141021",
+  "id": "2015-university-of-rochester-20141021",
   "year": 2015,
   "posted": "2014-10-21",
-  "institution": "University of Rochester (W. E. Simon Graduate School of Business Administration), Operations Management and/or Economics of Information Systems Areas",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Rochester",
+  "department": "W. E. Simon Graduate School of Business Administration, Operations Management and/or Economics of Information Systems",
+  "school": "W. E. Simon Graduate School of Business Administration",
+  "unit": "Operations Management and/or Economics of Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2937,13 +2937,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-wisconsin-madison-wisconsin-school-20141019",
+  "id": "2015-university-of-wisconsin-madison-20141019",
   "year": 2015,
   "posted": "2014-10-19",
-  "institution": "University of Wisconsin-Madison (Wisconsin School of Business), Operations and Information Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Wisconsin-Madison",
+  "department": "Wisconsin School of Business, Operations and Information Management",
+  "school": "Wisconsin School of Business",
+  "unit": "Operations and Information Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2989,13 +2989,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-tennessee-college-of-business-admi-20141017",
+  "id": "2015-university-of-tennessee-20141017",
   "year": 2015,
   "posted": "2014-10-17",
-  "institution": "University of Tennessee (College of Business Administration), Department of Business Analytics & Statistics",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Tennessee",
+  "department": "College of Business Administration, Business Analytics and Statistics",
+  "school": "College of Business Administration",
+  "unit": "Business Analytics and Statistics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3015,13 +3015,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-michigan-ross-school-of-business-i-20141015",
+  "id": "2015-university-of-michigan-20141015",
   "year": 2015,
   "posted": "2014-10-15",
-  "institution": "University of Michigan (Ross School of Business), Interdisciplinary Position (Management & Organizations, Strategy and Technology & Operations)",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Michigan",
+  "department": "Stephen M. Ross School of Business, Interdisciplinary Position (Management and Organizations, Strategy and Technology and Operations)",
+  "school": "Stephen M. Ross School of Business",
+  "unit": "Interdisciplinary Position (Management and Organizations, Strategy and Technology and Operations)",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3041,13 +3041,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-the-university-of-hong-kong-hku-school-of-busine-20141013",
+  "id": "2015-the-university-of-hong-kong-hku-20141013",
   "year": 2015,
   "posted": "2014-10-13",
-  "institution": "The University of Hong Kong (HKU), School of Business, Information and Innovation Management Group",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "The University of Hong Kong (HKU)",
+  "department": "School of Business, Information and Innovation Management",
+  "school": "School of Business",
+  "unit": "Information and Innovation Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3068,12 +3068,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-universite-libre-de-bruxelles-solvay-brussels-sc-20141013",
+  "id": "2015-universite-libre-de-bruxelles-20141013",
   "year": 2015,
   "posted": "2014-10-13",
-  "institution": "Universite libre de Bruxelles (Solvay Brussels School of Economics and Management)",
-  "department": "",
-  "school": "",
+  "institution": "Universite libre de Bruxelles",
+  "department": "Solvay Brussels School of Economics and Management",
+  "school": "Solvay Brussels School of Economics and Management",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -3094,13 +3094,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-california-san-diego-ucsd-rady-sch-20141013",
+  "id": "2015-university-of-california-san-diego-20141013",
   "year": 2015,
   "posted": "2014-10-13",
-  "institution": "University of California, San Diego (UCSD, Rady School of Management), Innovation, Technology & Operations",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of California, San Diego",
+  "department": "Rady School of Management, Innovation, Technology and Operations",
+  "school": "Rady School of Management",
+  "unit": "Innovation, Technology and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3120,13 +3120,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-california-los-angeles-ucla-anders-20141011",
+  "id": "2015-university-of-california-los-angeles-20141011",
   "year": 2015,
   "posted": "2014-10-11",
-  "institution": "University of California, Los Angeles (UCLA, Anderson School of Management), Decisions, Operations and Technology Management (DOTM)",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of California, Los Angeles",
+  "department": "Anderson School of Management, Decisions, Operations and Technology Management",
+  "school": "Anderson School of Management",
+  "unit": "Decisions, Operations and Technology Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3146,12 +3146,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-western-university-ivey-business-school-20141010",
+  "id": "2015-western-university-20141010",
   "year": 2015,
   "posted": "2014-10-10",
-  "institution": "Western University (Ivey Business School)",
-  "department": "",
-  "school": "",
+  "institution": "Western University",
+  "department": "Ivey Business School",
+  "school": "Ivey Business School",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -3172,13 +3172,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-fudan-university-school-of-management-management-20141009",
+  "id": "2015-fudan-university-20141009",
   "year": 2015,
   "posted": "2014-10-09",
-  "institution": "Fudan University (School of Management), Management Science Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Fudan University",
+  "department": "School of Management, Management Science",
+  "school": "School of Management",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3199,13 +3199,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-boston-university-bu-school-of-management-operat-20141008",
+  "id": "2015-boston-university-20141008",
   "year": 2015,
   "posted": "2014-10-08",
-  "institution": "Boston University (BU, School of Management), Operations and Technology Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Boston University",
+  "department": "School of Management, Operations and Technology Management",
+  "school": "School of Management",
+  "unit": "Operations and Technology Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3225,13 +3225,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-singapore-management-university-lee-kong-chian-s-20141008",
+  "id": "2015-singapore-management-university-20141008",
   "year": 2015,
   "posted": "2014-10-08",
-  "institution": "Singapore Management University (Lee Kong Chian School of Business), Department of Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Singapore Management University",
+  "department": "Lee Kong Chian School of Business, Operations Management",
+  "school": "Lee Kong Chian School of Business",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -3251,13 +3251,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-california-berkeley-haas-school-of-20141008",
+  "id": "2015-university-of-california-berkeley-20141008",
   "year": 2015,
   "posted": "2014-10-08",
-  "institution": "University of California, Berkeley (Haas School of Business) Operations & Information Technology Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of California, Berkeley",
+  "department": "Haas School of Business, Operations and Information Technology Management",
+  "school": "Haas School of Business",
+  "unit": "Operations and Information Technology Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3277,13 +3277,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-miami-school-of-business-administr-20141008",
+  "id": "2015-university-of-miami-20141008",
   "year": 2015,
   "posted": "2014-10-08",
-  "institution": "University of Miami (School of Business Administration), Department of Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Miami",
+  "department": "School of Business Administration, Management",
+  "school": "School of Business Administration",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3303,13 +3303,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-auckland-business-school-departmen-20141007",
+  "id": "2015-university-of-auckland-20141007",
   "year": 2015,
   "posted": "2014-10-07",
-  "institution": "University of Auckland (Business School), Department of Information Systems and Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Auckland",
+  "department": "Business School, Information Systems and Operations Management",
+  "school": "Business School",
+  "unit": "Information Systems and Operations Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -3329,13 +3329,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-carnegie-mellon-university-tepper-school-of-busi-20141001",
+  "id": "2015-carnegie-mellon-university-20141001",
   "year": 2015,
   "posted": "2014-10-01",
-  "institution": "Carnegie Mellon University (Tepper School of Business), Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Carnegie Mellon University",
+  "department": "Tepper School of Business, Operations Management",
+  "school": "Tepper School of Business",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3355,13 +3355,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-pompeu-fabra-university-department-of-economics-20141001",
+  "id": "2015-pompeu-fabra-university-20141001",
   "year": 2015,
   "posted": "2014-10-01",
-  "institution": "Pompeu Fabra University, Department of Economics and Business",
-  "department": "",
+  "institution": "Pompeu Fabra University",
+  "department": "Economics and Business",
   "school": "",
-  "unit": "",
+  "unit": "Economics and Business",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3381,13 +3381,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-michigan-ross-school-of-business-t-20140930",
+  "id": "2015-university-of-michigan-20140930",
   "year": 2015,
   "posted": "2014-09-30",
-  "institution": "University of Michigan (Ross School of Business), Technology & Operations department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Michigan",
+  "department": "Stephen M. Ross School of Business, Technology and Operations Management",
+  "school": "Stephen M. Ross School of Business",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3407,13 +3407,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-binghamton-university-school-of-management-opera-20140927",
+  "id": "2015-binghamton-university-20140927",
   "year": 2015,
   "posted": "2014-09-27",
-  "institution": "Binghamton University (School of Management), Operations and Business Analytics",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Binghamton University",
+  "department": "School of Management, Operations and Business Analytics",
+  "school": "School of Management",
+  "unit": "Operations and Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3433,13 +3433,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-erasmus-university-rotterdam-school-of-managemen-20140927",
+  "id": "2015-erasmus-university-20140927",
   "year": 2015,
   "posted": "2014-09-27",
-  "institution": "Erasmus University (Rotterdam School of Management, RSM), Technology and Operations Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Erasmus University",
+  "department": "Rotterdam School of Management, Technology and Operations Management",
+  "school": "Rotterdam School of Management",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3459,13 +3459,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-california-state-polytechnic-university-pomona-t-20140926",
+  "id": "2015-california-state-polytechnic-university-pomona-20140926",
   "year": 2015,
   "posted": "2014-09-26",
-  "institution": "California State Polytechnic University Pomona, Technology and Operations Management Department",
-  "department": "",
+  "institution": "California State Polytechnic University Pomona",
+  "department": "Technology and Operations Management",
   "school": "",
-  "unit": "",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3485,12 +3485,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-ozyegin-university-graduate-school-of-business-20140924",
+  "id": "2015-ozyegin-university-20140924",
   "year": 2015,
   "posted": "2014-09-24",
-  "institution": "Ozyegin University (Graduate School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "Özyeğin University",
+  "department": "Graduate School of Business",
+  "school": "Graduate School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -3514,10 +3514,10 @@
   "id": "2015-ecole-des-hautes-etudes-commerciales-hec-de-mont-20140923",
   "year": 2015,
   "posted": "2014-09-23",
-  "institution": "École des Hautes Études commerciales (HEC) de Montréal, Department of Logistics and Operations Management",
-  "department": "",
+  "institution": "École des Hautes Études commerciales (HEC) de Montréal",
+  "department": "Logistics and Operations Management",
   "school": "",
-  "unit": "",
+  "unit": "Logistics and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3563,13 +3563,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-columbia-university-graduate-school-of-business-20140922",
+  "id": "2015-columbia-university-20140922",
   "year": 2015,
   "posted": "2014-09-22",
-  "institution": "Columbia University (Graduate School of Business), Decision, Risk, and Operations Division",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Columbia University",
+  "department": "Graduate School of Business, Decision, Risk, and Operations",
+  "school": "Graduate School of Business",
+  "unit": "Decision, Risk, and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3589,12 +3589,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-the-chinese-university-of-hong-kong-cuhk-busines-20140919",
+  "id": "2015-the-chinese-university-of-hong-kong-20140919",
   "year": 2015,
   "posted": "2014-09-19",
-  "institution": "The Chinese University of Hong Kong (CUHK Business School)",
-  "department": "",
-  "school": "",
+  "institution": "The Chinese University of Hong Kong",
+  "department": "CUHK Business School",
+  "school": "CUHK Business School",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -3616,13 +3616,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-north-carolina-chapel-hill-unc-ken-20140919",
+  "id": "2015-university-of-north-carolina-chapel-hill-20140919",
   "year": 2015,
   "posted": "2014-09-19",
-  "institution": "University of North Carolina-Chapel Hill (UNC, Kenan-Flagler Business School), Operations Area",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of North Carolina-Chapel Hill",
+  "department": "Kenan-Flagler Business School, Operations",
+  "school": "Kenan-Flagler Business School",
+  "unit": "Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3643,13 +3643,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-texas-at-dallas-naveen-jindal-scho-20140917",
+  "id": "2015-university-of-texas-at-dallas-20140917",
   "year": 2015,
   "posted": "2014-09-17",
-  "institution": "University of Texas at Dallas (Naveen Jindal School of Management), Information Systems and Operations Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Texas at Dallas",
+  "department": "Naveen Jindal School of Management, Information Systems and Operations Management",
+  "school": "Naveen Jindal School of Management",
+  "unit": "Information Systems and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3670,13 +3670,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-mannheim-business-school-chair-of-20140916",
+  "id": "2015-university-of-mannheim-20140916",
   "year": 2015,
   "posted": "2014-09-16",
-  "institution": "University of Mannheim (Business School), Chair of Production Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Mannheim",
+  "department": "Business School, Chair of Production Management",
+  "school": "Business School",
+  "unit": "Chair of Production Management",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -3699,10 +3699,10 @@
   "id": "2015-institut-europeen-d-administration-des-affaires-20140915",
   "year": 2015,
   "posted": "2014-09-15",
-  "institution": "Institut Européen d'Administration des Affaires (INSEAD), Technology and Operations Management (TOM) Area",
-  "department": "",
+  "institution": "Institut Européen d'Administration des Affaires (INSEAD)",
+  "department": "Technology and Operations Management",
   "school": "",
-  "unit": "",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3723,13 +3723,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-penn-state-university-smeal-college-of-business-20140915",
+  "id": "2015-the-pennsylvania-state-university-20140915",
   "year": 2015,
   "posted": "2014-09-15",
-  "institution": "Penn State University (Smeal College of Business) Supply Chain & Information Systems Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "The Pennsylvania State University",
+  "department": "Smeal College of Business, Supply Chain and Information Systems",
+  "school": "Smeal College of Business",
+  "unit": "Supply Chain and Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3750,13 +3750,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-college-london-ucl-department-of-mana-20140915",
+  "id": "2015-university-college-london-ucl-20140915",
   "year": 2015,
   "posted": "2014-09-15",
-  "institution": "University College London (UCL), Department of Management Science & Innovation",
-  "department": "",
+  "institution": "University College London (UCL)",
+  "department": "Management Science and Innovation",
   "school": "",
-  "unit": "",
+  "unit": "Management Science and Innovation",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3776,13 +3776,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-wisconsin-madison-wisconsin-school-20140912",
+  "id": "2015-university-of-wisconsin-madison-20140912",
   "year": 2015,
   "posted": "2014-09-12",
-  "institution": "University of Wisconsin-Madison (Wisconsin School of Business), Operations and Information Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "University of Wisconsin-Madison",
+  "department": "Wisconsin School of Business, Operations and Information Management",
+  "school": "Wisconsin School of Business",
+  "unit": "Operations and Information Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3803,13 +3803,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-washington-university-in-st-louis-olin-business-20140912",
+  "id": "2015-washington-university-in-st-louis-20140912",
   "year": 2015,
   "posted": "2014-09-12",
-  "institution": "Washington University in St. Louis (Olin Business School), Operations & Manufacturing Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Washington University in St. Louis",
+  "department": "Olin Business School, Operations and Manufacturing Management",
+  "school": "Olin Business School",
+  "unit": "Operations and Manufacturing Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3829,13 +3829,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-ecole-polytechnique-federale-de-lausanne-epfl-co-20140911",
+  "id": "2015-ecole-polytechnique-federale-de-lausanne-epfl-20140911",
   "year": 2015,
   "posted": "2014-09-11",
-  "institution": "École polytechnique fédérale de Lausanne (EPFL), College of Management CDM, Chair of Technology & Operations Management TOM",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "École polytechnique fédérale de Lausanne (EPFL)",
+  "department": "College of Management CDM, Chair of Technology and Operations Management TOM",
+  "school": "College of Management CDM",
+  "unit": "Chair of Technology and Operations Management TOM",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -3881,13 +3881,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-indiana-university-kelley-school-of-business-ope-20140910",
+  "id": "2015-indiana-university-20140910",
   "year": 2015,
   "posted": "2014-09-10",
-  "institution": "Indiana University (Kelley School of Business), Operations and Decision Technologies Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Indiana University",
+  "department": "Kelley School of Business, Operations and Decision Technologies",
+  "school": "Kelley School of Business",
+  "unit": "Operations and Decision Technologies",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -3907,13 +3907,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-the-university-of-alabama-culverhouse-college-of-20140909",
+  "id": "2015-the-university-of-alabama-20140909",
   "year": 2015,
   "posted": "2014-09-09",
-  "institution": "The University of Alabama (Culverhouse College of Commerce), Department of Information Systems, Statistics, and Management Science",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "The University of Alabama",
+  "department": "Culverhouse College of Commerce, Information Systems, Statistics, and Management Science",
+  "school": "Culverhouse College of Commerce",
+  "unit": "Information Systems, Statistics, and Management Science",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -3933,13 +3933,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-emory-university-goizueta-business-school-inform-20140908",
+  "id": "2015-emory-university-20140908",
   "year": 2015,
   "posted": "2014-09-08",
-  "institution": "Emory University (Goizueta Business School), Information Systems & Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Emory University",
+  "department": "Goizueta Business School, Information Systems and Operations Management",
+  "school": "Goizueta Business School",
+  "unit": "Information Systems and Operations Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -3959,13 +3959,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-katholieke-universiteit-ku-leuven-research-cente-20140908",
+  "id": "2015-katholieke-universiteit-ku-leuven-20140908",
   "year": 2015,
   "posted": "2014-09-08",
-  "institution": "Katholieke Universiteit (KU) Leuven, Research Center for Operations Management",
-  "department": "",
+  "institution": "Katholieke Universiteit (KU) Leuven",
+  "department": "Research Center for Operations Management",
   "school": "",
-  "unit": "",
+  "unit": "Research Center for Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3985,13 +3985,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-clemson-university-college-of-business-and-behav-20140907",
+  "id": "2015-clemson-university-20140907",
   "year": 2015,
   "posted": "2014-09-07",
-  "institution": "Clemson University (College of Business and Behavioral Science), Management Department",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Clemson University",
+  "department": "College of Business and Behavioral Science, Management",
+  "school": "College of Business and Behavioral Science",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -4011,12 +4011,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-new-york-university-nyu-leonard-n-stern-school-o-20140905",
+  "id": "2015-new-york-university-20140905",
   "year": 2015,
   "posted": "2014-09-05",
-  "institution": "New York University (NYU, Leonard N. Stern School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "New York University",
+  "department": "Leonard N. Stern School of Business",
+  "school": "Leonard N. Stern School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4067,10 +4067,10 @@
   "id": "2015-hong-kong-university-of-science-and-technology-h-20140904",
   "year": 2015,
   "posted": "2014-09-04",
-  "institution": "Hong Kong University of Science and Technology (HKUST), Business School, Department of Information Systems, Business Statistics and Operations Management (ISOM)",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Hong Kong University of Science and Technology (HKUST)",
+  "department": "Business School, Information Systems, Business Statistics and Operations Management",
+  "school": "Business School",
+  "unit": "Information Systems, Business Statistics and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -4090,13 +4090,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-waterloo-department-of-management-20140904",
+  "id": "2015-university-of-waterloo-20140904",
   "year": 2015,
   "posted": "2014-09-04",
-  "institution": "University of Waterloo, Department of Management Sciences",
-  "department": "",
+  "institution": "University of Waterloo",
+  "department": "Management Science",
   "school": "",
-  "unit": "",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -4144,12 +4144,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-texas-a-m-university-mays-business-school-20140902",
+  "id": "2015-texas-a-m-university-20140902",
   "year": 2015,
   "posted": "2014-09-02",
-  "institution": "Texas A&M University (Mays Business School)",
-  "department": "",
-  "school": "",
+  "institution": "Texas A&M University",
+  "department": "Mays Business School",
+  "school": "Mays Business School",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4171,13 +4171,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-indian-school-of-business-isb-operations-20140829",
+  "id": "2015-indian-school-of-business-isb-20140829",
   "year": 2015,
   "posted": "2014-08-29",
-  "institution": "Indian School of Business (ISB), Operations",
-  "department": "",
+  "institution": "Indian School of Business (ISB)",
+  "department": "Operations",
   "school": "",
-  "unit": "",
+  "unit": "Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -4198,12 +4198,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-national-university-of-singapore-business-school-20140826",
+  "id": "2015-national-university-of-singapore-20140826",
   "year": 2015,
   "posted": "2014-08-26",
-  "institution": "National University of Singapore, Business School",
-  "department": "",
-  "school": "",
+  "institution": "National University of Singapore",
+  "department": "NUS Business School",
+  "school": "NUS Business School",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4224,13 +4224,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-simon-fraser-university-beedie-school-of-busines-20140820",
+  "id": "2015-simon-fraser-university-20140820",
   "year": 2015,
   "posted": "2014-08-20",
-  "institution": "Simon Fraser University (Beedie School of Business), Technology and Operations Management",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Simon Fraser University",
+  "department": "Beedie School of Business, Technology and Operations Management",
+  "school": "Beedie School of Business",
+  "unit": "Technology and Operations Management",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -4250,12 +4250,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-duke-university-the-fuqua-school-of-business-20140819",
+  "id": "2015-duke-university-20140819",
   "year": 2015,
   "posted": "2014-08-19",
-  "institution": "Duke University (The Fuqua School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "Duke University",
+  "department": "Fuqua School of Business",
+  "school": "Fuqua School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4276,12 +4276,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-washington-foster-school-of-busine-20140810",
+  "id": "2015-university-of-washington-20140810",
   "year": 2015,
   "posted": "2014-08-10",
-  "institution": "University of Washington (Foster School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "University of Washington",
+  "department": "Foster School of Business",
+  "school": "Foster School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4303,12 +4303,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-northwestern-university-kellogg-school-of-manage-20140724",
+  "id": "2015-northwestern-university-20140724",
   "year": 2015,
   "posted": "2014-07-24",
-  "institution": "Northwestern University (Kellogg School of Management)",
-  "department": "",
-  "school": "",
+  "institution": "Northwestern University",
+  "department": "Kellogg School of Management",
+  "school": "Kellogg School of Management",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4330,12 +4330,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-chicago-booth-school-20140724",
+  "id": "2015-university-of-chicago-20140724",
   "year": 2015,
   "posted": "2014-07-24",
-  "institution": "University of Chicago (Booth School)",
-  "department": "",
-  "school": "",
+  "institution": "University of Chicago",
+  "department": "Booth School of Business",
+  "school": "Booth School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4387,10 +4387,10 @@
   "id": "2015-institut-europeen-d-administration-des-affaires-20140711",
   "year": 2015,
   "posted": "2014-07-11",
-  "institution": "Institut Européen d'Administration des Affaires (INSEAD), Humanitarian Research Group (HRG), Social Innovation Center",
-  "department": "",
+  "institution": "Institut Européen d'Administration des Affaires (INSEAD)",
+  "department": "Humanitarian Research Group (HRG), Social Innovation Center",
   "school": "",
-  "unit": "",
+  "unit": "Humanitarian Research Group (HRG), Social Innovation Center",
   "type": "Business School",
   "levels": [],
   "applyBy": "August 31, 2014",
@@ -4408,12 +4408,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-college-dublin-school-of-business-20140704",
+  "id": "2015-university-college-dublin-20140704",
   "year": 2015,
   "posted": "2014-07-04",
-  "institution": "University College Dublin (School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "University College Dublin",
+  "department": "School of Business",
+  "school": "School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4434,13 +4434,13 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-stanford-university-graduate-school-of-business-20140605",
+  "id": "2015-stanford-university-20140605",
   "year": 2015,
   "posted": "2014-06-05",
-  "institution": "Stanford University (Graduate School of Business), Operations, Information and Technology (OIT) area",
-  "department": "",
-  "school": "",
-  "unit": "",
+  "institution": "Stanford University",
+  "department": "Graduate School of Business, Operations, Information and Technology",
+  "school": "Graduate School of Business",
+  "unit": "Operations, Information and Technology",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -4461,12 +4461,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-university-of-colorado-boulder-leeds-school-of-b-20140512",
+  "id": "2015-university-of-colorado-boulder-20140512",
   "year": 2015,
   "posted": "2014-05-12",
-  "institution": "University of Colorado Boulder (Leeds School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "University of Colorado Boulder",
+  "department": "Leeds School of Business",
+  "school": "Leeds School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -4511,12 +4511,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-carnegie-mellon-university-tepper-school-of-busi-20140428",
+  "id": "2015-carnegie-mellon-university-20140428",
   "year": 2015,
   "posted": "2014-04-28",
-  "institution": "Carnegie Mellon University (Tepper School of Business)",
-  "department": "",
-  "school": "",
+  "institution": "Carnegie Mellon University",
+  "department": "Tepper School of Business",
+  "school": "Tepper School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
