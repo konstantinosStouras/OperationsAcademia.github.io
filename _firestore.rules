@@ -475,6 +475,40 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // -------------------------------------------- the job review queue
+    // Postings crawled from the maintainer's tracking sheet, held back until
+    // they are approved. UNLIKE rowOverrides above, this is NOT public-read:
+    // a queued posting is by definition not yet public, and data/ is served to
+    // anyone who asks, which is exactly why the queue lives here instead of in
+    // a committed file. The maintainer reads and writes it; nobody else can do
+    // either. The pipeline writes through the Admin SDK, which is not subject
+    // to these rules.
+    match /jobReviews/{id} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+                   && id == request.resource.data.rowId
+                   && str('rowId', 200)
+                   && request.resource.data.status in
+                        ['pending', 'approved', 'rejected']
+                   && request.resource.data.keys().hasOnly([
+                        'rowId', 'status', 'row', 'edits',
+                        'queuedAt', 'reviewedAt', 'mailedAt', 'note',
+                      ])
+                   && str('queuedAt', 40) && str('reviewedAt', 40)
+                   && str('mailedAt', 40) && str('note', 1000)
+                   && (!('row' in request.resource.data)
+                       || request.resource.data.row is map)
+                   && (!('edits' in request.resource.data)
+                       || (request.resource.data.edits is map
+                           && request.resource.data.edits.keys().hasOnly([
+                                'institution', 'department', 'school', 'unit',
+                                'type', 'levels', 'country',
+                                'applyBy', 'applyByDate', 'comments',
+                                'adUrl', 'postedAtUrl', 'furtherInfoUrl',
+                              ])));
+      allow delete: if isAdmin();
+    }
+
     // --------------------------------------------------- usage (admin-only)
     // Usage telemetry (owner, 2026-08-17): one doc per browsing session —
     // time on site, the links/buttons clicked, and which form FIELDS were

@@ -1,0 +1,224 @@
+#!/usr/bin/env node
+/* ---------------------------------------------------------------------------
+   Operations Academia — tell the maintainer a posting is waiting for them.
+
+       jobReviews (Firestore)  ->  THIS  ->  one e-mail per queued posting
+                                                       |
+                                          the maintainer approves it at
+                                          operationsacademia.org/feedback
+
+   ONE E-MAIL PER POSTING, by the owner's choice: a queued posting is a single
+   decision to make, and a digest of six turns six decisions into one thing to
+   scroll. `mailedAt` on the document is the high-water mark, so nothing is
+   ever announced twice and a run that dies half-way resumes rather than
+   repeats.
+
+   IT IS A NO-OP UNTIL IT IS CONFIGURED, exactly like alerts-mailer.mjs and
+   feedback-mailer.mjs: without FIREBASE_SERVICE_ACCOUNT there is no queue to
+   read, and without SMTP_* there is nowhere to send. Both states say so and
+   exit 0, so the workflow can be scheduled before either exists.
+
+   THE WRITE ORDER IS DELIBERATE: the e-mail is sent FIRST and `mailedAt`
+   stamped after. The failure that matters is a posting nobody hears about; a
+   duplicate e-mail after a crash between the two is a nuisance, and the
+   nuisance is the right way round.
+
+   Modes:
+     --scan       list what would be mailed, send nothing, write nothing
+     --dry-run    render the e-mails and print them, send nothing
+     --selftest   offline checks, no network, no credentials
+   --------------------------------------------------------------------------- */
+
+import { COLLECTION, needMail, applyEdits } from './jobreview.mjs';
+import {
+  shell, esc, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
+} from './_mail.mjs';
+
+const argv = process.argv.slice(2);
+const has = (f) => argv.includes(f);
+
+const SCAN = has('--scan');
+const DRY = has('--dry-run');
+
+const log = (...a) => console.log(...a);
+const warn = (...a) => console.log('::warning::' + a.join(' '));
+
+/** Where "a posting is waiting" goes. The maintainer's own address, which is
+    also the one the review page is gated on. */
+const TO = process.env.JOBREVIEW_ALERT_TO || CONTACT;
+
+/* ---------------------------------------------------------------- rendering */
+
+/** The row as it would be published, so the e-mail shows what approving would
+    actually put on the site rather than the raw sheet row. */
+function shown(doc) {
+  return applyEdits(doc.row || {}, doc.edits);
+}
+
+function line(label, value) {
+  if (!value) return '';
+  return '<tr><th style="text-align:left;padding:3px 12px 3px 0;vertical-align:top;' +
+    'font-weight:600;color:#5a5f6b;white-space:nowrap">' + esc(label) +
+    '</th><td style="padding:3px 0;vertical-align:top">' + esc(value) + '</td></tr>';
+}
+
+export function renderReviewEmail(doc, { site = SITE } = {}) {
+  const r = shown(doc);
+  const title = [r.institution, r.department].filter(Boolean).join(' — ');
+  const reviewUrl = site + '/feedback';
+
+  const ad = /^https?:\/\//i.test(String(r.adUrl || '')) ? r.adUrl : '';
+
+  const bodyHtml =
+    '<p>A job posting has been read from your tracking sheet and is waiting for ' +
+    'you to approve it. <strong>It is not on the site yet.</strong></p>' +
+    '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
+      line('Institution', r.institution) +
+      line('School / dept', r.department) +
+      line('Type', r.type) +
+      line('Entry level', (r.levels || []).join(', ')) +
+      line('Country', r.country) +
+      line('Advertised', r.posted) +
+      line('Market year', r.year ? String(r.year) : '') +
+      line('Apply by', r.applyBy) +
+      line('Comments', r.comments) +
+    '</table>' +
+    (ad ? '<p><a href="' + esc(ad) + '">Open the advertisement</a></p>' : '') +
+    '<p><a href="' + esc(reviewUrl) + '" style="display:inline-block;background:#426394;' +
+      'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
+      'Review it on the site</a></p>' +
+    '<p style="color:#5a5f6b;font-size:13px">You can correct any field before ' +
+    'approving. Approving publishes it at the next build (up to 20 minutes); ' +
+    'rejecting keeps it off the site for good.</p>';
+
+  return {
+    subject: 'Job posting to approve: ' + (title || r.id || 'untitled'),
+    html: shell({ title: 'A posting is waiting for you', bodyHtml, manageUrl: reviewUrl }),
+  };
+}
+
+/* -------------------------------------------------------------------- main */
+
+async function main() {
+  const db = await firestore();
+  if (!db) {
+    log('no Firebase credentials in this environment — nothing to do.');
+    log('(this is the expected state until the project is set up: _SETUP-FIREBASE.md)');
+    return 0;
+  }
+
+  const snap = await db.collection(COLLECTION).where('status', '==', 'pending').get();
+  const docs = snap.docs.map((d) => d.data()).filter((d) => d && d.rowId);
+  const due = needMail(docs);
+
+  log(`${docs.length} posting(s) awaiting review, ${due.length} not yet announced.`);
+
+  if (!due.length) return 0;
+
+  if (SCAN) {
+    for (const d of due) {
+      const r = shown(d);
+      log(`  ${d.rowId}  ${r.institution || ''}${r.department ? ' — ' + r.department : ''}`);
+    }
+    log('--scan: sent nothing, wrote nothing.');
+    return 0;
+  }
+
+  const tx = await transport();
+  if (!tx && !DRY) {
+    warn('SMTP is not configured — the postings stay unannounced and will be ' +
+         'mailed once it is. See _SETUP-EMAIL.md');
+    return 0;
+  }
+
+  let sent = 0;
+  for (const doc of due) {
+    const { subject, html } = renderReviewEmail(doc);
+
+    if (DRY) {
+      log(`--- ${doc.rowId}\nTo: ${TO}\nSubject: ${subject}\n${toPlain(html)}\n`);
+      continue;
+    }
+
+    try {
+      await send(tx, { from: fromAddress(), to: TO, subject, html, text: toPlain(html) });
+    } catch (e) {
+      /* Left unstamped on purpose, so the next run tries it again — the
+         failure that matters is a posting nobody hears about. */
+      warn(`could not e-mail about ${doc.rowId}: ${e.message}`);
+      continue;
+    }
+
+    try {
+      await db.collection(COLLECTION).doc(doc.rowId)
+        .set({ mailedAt: new Date().toISOString() }, { merge: true });
+    } catch (e) {
+      warn(`e-mailed about ${doc.rowId} but could not stamp it (${e.message}) — ` +
+           'it may be announced twice');
+    }
+    sent++;
+  }
+
+  if (DRY) log(`--dry-run: would have sent ${due.length} e-mail(s).`);
+  else log(`sent ${sent} e-mail(s) to ${TO}.`);
+  return 0;
+}
+
+/* ---------------------------------------------------------------- selftest */
+
+function selftest() {
+  let pass = 0; const fails = [];
+  const ok = (c, what) => { if (c) pass++; else fails.push(what); };
+
+  const doc = {
+    rowId: 'x', status: 'pending', queuedAt: '2026-08-18T00:00:00Z', mailedAt: '',
+    row: {
+      id: 'x', institution: 'Example University', department: 'Operations',
+      posted: '2026-08-15', year: 2027, applyBy: 'Until filled.', applyByDate: '',
+      levels: ['Assistant Professor'], country: 'United States',
+      adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1',
+    },
+    edits: {},
+  };
+
+  const mail = renderReviewEmail(doc, { site: 'https://example.org' });
+  ok(/Example University/.test(mail.subject), 'the subject names the posting');
+  ok(/not on the site yet/i.test(mail.html), 'the body says it is not published');
+  ok(mail.html.includes('https://example.org/feedback'), 'and links to the review page');
+
+  /* The e-mail must show what APPROVING would publish, not the raw sheet row —
+     otherwise a correction already typed in the browser is invisible in the
+     one place the decision is actually made. */
+  const edited = { ...doc, edits: { institution: 'Corrected University' } };
+  ok(renderReviewEmail(edited).subject.includes('Corrected University'),
+    'an edit already made is what the e-mail shows');
+
+  // only pending-and-unmailed, oldest first
+  const queue = [
+    { rowId: 'b', status: 'pending', queuedAt: '2026-08-17T00:00:00Z', mailedAt: '' },
+    { rowId: 'a', status: 'pending', queuedAt: '2026-08-16T00:00:00Z', mailedAt: '' },
+    { rowId: 'c', status: 'pending', queuedAt: '2026-08-15T00:00:00Z', mailedAt: 'x' },
+    { rowId: 'd', status: 'approved', queuedAt: '2026-08-14T00:00:00Z', mailedAt: '' },
+  ];
+  const due = needMail(queue).map((d) => d.rowId);
+  ok(JSON.stringify(due) === JSON.stringify(['a', 'b']),
+    'only unmailed pending postings are due, oldest first');
+
+  console.log(fails.length
+    ? `jobreview-mailer selftest: ${pass} passed, ${fails.length} FAILED\n  ` + fails.join('\n  ')
+    : `jobreview-mailer selftest: ${pass} checks passed.`);
+  return fails.length === 0;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  if (has('--selftest')) {
+    process.exit(selftest() ? 0 : 1);
+  } else {
+    try {
+      process.exit(await main());
+    } catch (e) {
+      console.log('::error::' + (e.stack || e.message));
+      process.exit(1);
+    }
+  }
+}

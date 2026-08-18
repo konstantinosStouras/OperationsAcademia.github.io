@@ -36,6 +36,7 @@ import {
   specMatches,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
+import { COLLECTION as REVIEW_COL, applyEdits } from './jobreview.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -414,8 +415,47 @@ async function main() {
      lists a posting removes it, and for the same reason a missing file claims
      nothing and hands nothing over. */
   const sheetPresent = existsSync(SHEET);
-  const sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
+  let sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
   const fromSheet = (r) => r.source === SHEET_SOURCE;
+
+  /* APPROVALS REACH THE SITE HERE, not at the next sheet read.
+     data/jobmarket.json is written once a day by sync-jobmarket-sheet.mjs and
+     holds the postings the maintainer had approved AT THAT TIME. This job runs
+     every 20 minutes, so consulting the queue directly is what turns "approve"
+     in the browser into a posting on the page within one build instead of up
+     to a day later. The sync remains the thing that QUEUES; this only reads
+     what has since been approved.
+
+     Non-fatal by construction: no database, or a failed read, simply leaves
+     the committed file as the answer — which is the last approved set, never
+     more. */
+  if (db) {
+    try {
+      const snap = await db.collection(REVIEW_COL).where('status', '==', 'approved').get();
+      const byId = new Map(sheetRows.map((r) => [r.id, r]));
+      let added = 0, edited = 0;
+      for (const d of snap.docs) {
+        const v = d.data() || {};
+        if (!v.row || !v.row.id) continue;
+        const row = applyEdits(v.row, v.edits);
+        if (byId.has(row.id)) {
+          if (JSON.stringify(byId.get(row.id)) !== JSON.stringify(row)) edited++;
+        } else {
+          added++;
+        }
+        byId.set(row.id, row);
+      }
+      if (added || edited) {
+        sheetRows = Array.from(byId.values());
+        log(`the review queue publishes ${added} newly-approved posting(s)` +
+            (edited ? ` and ${edited} edited one(s)` : '') +
+            ' ahead of the next sheet read');
+      }
+    } catch (e) {
+      warn(`could not read the review queue (${e.message}) — ` +
+           'publishing what the last sheet read approved');
+    }
+  }
   const sheetIds = new Set(sheetRows.map((r) => r.id));
 
   /* ---------------------------------------- an editing handle on every row
