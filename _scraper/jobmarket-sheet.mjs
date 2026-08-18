@@ -47,7 +47,7 @@
 import { createRequire } from 'node:module';
 
 import {
-  text, url, jobId, canonCountry, canonPlace, longDate, marketYear,
+  text, url, jobId, canonCountry, canonPlace, longDate, marketYear, universitiesLink,
   displayOrder, collapseSameDay, isoStamp, publicRow, LEVELS, OPEN_ENDED_RX,
 } from './jobs-model.mjs';
 import { parseCsv, redactEmails } from './import-sheet.mjs';
@@ -695,8 +695,11 @@ export function rowsFromTab(csv, {
       adLabel: 'link to Job ad',
       postedAtUrl: '',
       postedAtLabel: 'link',
-      furtherInfoUrl:
-        `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
+      /* from the CANONICAL name, like every other writer of this link: built
+         from the sheet's own spelling it asks the Universities page for a
+         university under a name the row itself no longer uses, and lands on
+         nothing (jobs-model.universitiesLink) */
+      furtherInfoUrl: universitiesLink(place.institution || institution),
       characteristics: [],
       featured: false,
       source: SOURCE,

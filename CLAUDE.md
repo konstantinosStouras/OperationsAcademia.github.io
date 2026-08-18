@@ -233,10 +233,20 @@ whose job is taking apart a value that names more than one thing. Run over
 columns that are already separate it invents: Rutgers' "School of
 Business-Camden" became a department called "Camden, Operations Management".
 
+**The site's own links follow the name.** Every posting carries a "Further
+info" link into the Universities page, built from its institution
+(`jobs-model.universitiesLink`). Canonicalising a name left six of them asking
+for the spelling the posting was made under, four landing on nothing — so a
+STORED link that is one of ours is regenerated (`ownUniversitiesLink`), while a
+link the poster actually gave is never touched. `jobmarket-sheet.mjs` builds it
+from the canonical name for the same reason.
+
 **A rename can move a name a saved e-mail alert watches for.** An alert holds
 free text, not a name, so nothing can canonicalise it the way `canonCountry`
 does. Instead the site's own text search (`assets/oa-list.js`) and the alert
-matcher (`assets/oa-alert-match.js`) fold punctuation, read "&" as "and", try
+matcher (`assets/oa-alert-match.js`) — and the Universities map
+(`assets/oa-uni-map.js`), where those links land — fold punctuation, read "&"
+as "and", try
 the needle's own canonical form ("SCM" → "Supply Chain Management") and match an
 ALL-CAPS needle against the initials of the words in the field ("IEOR" finds
 "Industrial Engineering and Operations Research", whose acronym the canon

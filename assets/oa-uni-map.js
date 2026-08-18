@@ -23,12 +23,16 @@
 (function () {
   'use strict';
 
-  // Diacritic-insensitive fold — the same rule as oa-list.js, so searching
-  // "munster" finds Münster on every page alike.
+  /* Diacritic- AND punctuation-insensitive — the same rule as oa-list.js, so
+     searching "munster" finds Münster on every page alike, and a posting's
+     "Further info" link still lands on its university after the site tidied
+     the spelling ("University of California Berkeley" finding "University of
+     California, Berkeley"). Both sides are folded the same way, so it only
+     ever finds MORE. Keep it in step with oa-list.js and oa-alert-match.js. */
   function fold(s) {
     s = String(s === null || s === undefined ? '' : s).toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return s;
+    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
   }
 
   function safeUrl(u) {

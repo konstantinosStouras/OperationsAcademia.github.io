@@ -17,6 +17,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
+  universitiesLink, ownUniversitiesLink,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
@@ -1362,6 +1363,45 @@ function testVocab() {
     'the directory alone can put a university on the list, with no postings behind it');
 }
 
+/* ------------------------------- the site's own link follows the name
+
+   Every posting carries a "Further info" link into the Universities page,
+   generated from its institution. Canonicalising the name left six of them
+   still asking for the spelling the posting was made under, four of which
+   landed on nothing — a dead link on a live card. Ours is ours to regenerate;
+   a link the poster actually gave is not. */
+
+async function testFurtherInfoLink() {
+  ok(ownUniversitiesLink('https://www.operationsacademia.org/universities?filterA=Penn%20State'),
+    'the site\'s own Universities link is recognised as ours');
+  ok(!ownUniversitiesLink('https://www.tulane.edu/jobs'),
+    'and a link the poster gave is not');
+  ok(!ownUniversitiesLink(''), 'nor is nothing');
+
+  const made = rowFromSubmission({ ...GOOD, institution: 'Penn State',
+    furtherInfoUrl: universitiesLink('Penn State') });
+  eq(made.furtherInfoUrl, universitiesLink('The Pennsylvania State University'),
+    'a stored link of ours is regenerated from the name the site publishes');
+
+  const theirs = rowFromSubmission({ ...GOOD, institution: 'Penn State',
+    furtherInfoUrl: 'https://www.psu.edu/careers' });
+  eq(theirs.furtherInfoUrl, 'https://www.psu.edu/careers', 'and theirs is left alone');
+
+  /* the served file, row by row: every one of our links names its own row */
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  const wrong = rows.filter((r) => ownUniversitiesLink(r.furtherInfoUrl) &&
+    r.furtherInfoUrl !== universitiesLink(r.institution)).map((r) => r.id);
+  eq(wrong, [], 'data/jobs.json: no posting links to a university under a name it does not use');
+
+  /* the three pages that read those links fold a search the same way, or a
+     link that works on one lands on nothing on another */
+  const RULE = "replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')";
+  for (const f of ['oa-list.js', 'oa-alert-match.js', 'oa-uni-map.js']) {
+    const src = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
+    ok(src.includes(RULE), `${f}: folds a search the same way as the other pages`);
+  }
+}
+
 /* ------------------------- naming rules the cascade leans on, and only it
 
    assets/oa-schools.js is master's, and testSchools() above covers what it
@@ -2510,6 +2550,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testMerge();
   testMarketYear();
   testVocab();
+  await testFurtherInfoLink();
   testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();

@@ -145,6 +145,16 @@ export function slug(s, n = 48) {
     .replace(/-+$/, '');
 }
 
+/** The site's own "Further info" link for a university. */
+export function universitiesLink(institution) {
+  return `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`;
+}
+
+/** True when a stored link is one WE generated, and so ours to regenerate. */
+export function ownUniversitiesLink(v) {
+  return /^https?:\/\/(www\.)?operationsacademia\.org\/universities\?filterA=/i.test(String(v ?? ''));
+}
+
 export function jobId(row) {
   return `${row.year}-${slug(row.institution)}-${String(row.posted || '').replace(/-/g, '')}`;
 }
@@ -397,8 +407,15 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     adLabel: text(doc.adLabel, MAXLEN.adLabel) || 'link to Job ad',
     postedAtUrl: url(doc.postedAtUrl),
     postedAtLabel: text(doc.postedAtLabel, MAXLEN.postedAtLabel) || 'link',
-    furtherInfoUrl: url(doc.furtherInfoUrl) ||
-      `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
+    /* The poster's own link, or ours — and OURS FOLLOWS THE NAME. This is the
+       site's "Further info" link into the Universities page, generated from
+       the institution; a stored one that still names the spelling a posting
+       was made under stops finding the university the moment the name is
+       canonicalised (six postings, four of them landing on nothing). A link
+       the poster actually gave is never touched. */
+    furtherInfoUrl: ownUniversitiesLink(doc.furtherInfoUrl)
+      ? universitiesLink(institution)
+      : (url(doc.furtherInfoUrl) || universitiesLink(institution)),
     characteristics: pickList(doc.characteristics, CHARACTERISTICS),
     featured: doc.featured === true,
     source: text(doc.source, 40) || 'oa-form',
