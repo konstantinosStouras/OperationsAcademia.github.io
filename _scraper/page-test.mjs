@@ -2808,9 +2808,28 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
     for (const theme of ['light', 'dark']) {
       try {
         await t.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
-        await t.waitForTimeout(250);
         await t.evaluate((v) => document.documentElement.setAttribute('data-theme', v), theme);
-        await t.waitForTimeout(150);
+        /* WAIT FOR THE DESIGN TO BE IN FORCE, not for a stopwatch and not for
+           `body.v3` — that class is in the HTML, so waiting for it returns at
+           once. Every page links a Google Fonts stylesheet, which cannot load
+           in CI, and until the cascade settles the body paints a default grey
+           that is neither theme. Measured then, every muted line on the page
+           reads as a dark-theme failure: 14 of them the first time, all
+           artefacts, with the numbers moving between runs — which is what a
+           transient looks like.
+
+           So the wait asserts the thing itself: the body is painting the
+           theme's own --bg. Nothing downstream can be measured before that. */
+        await t.waitForFunction(() => {
+          const want = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+          if (!want) return false;
+          const probe = document.createElement('span');
+          probe.style.color = want;
+          document.body.appendChild(probe);
+          const resolved = getComputedStyle(probe).color;
+          probe.remove();
+          return getComputedStyle(document.body).backgroundColor === resolved;
+        }, { timeout: 8000 });
       } catch { continue; }               // a redirect stub navigates away
       let rows = [];
       try {

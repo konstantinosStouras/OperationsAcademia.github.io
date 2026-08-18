@@ -588,6 +588,18 @@ Two things this turned up beyond the reports:
   Leaflet's stylesheets stay verbatim copies, so both corrections live in
   `oa-ui.css`, specific enough to win despite loading first.
 
+Two traps this hit, both worth knowing before adding a rule:
+
+* **Specificity AND load order.** The Leaflet attribution override sat in
+  `oa-ui.css` at the same specificity as Leaflet's own rule
+  (`.leaflet-container .leaflet-control-attribution`), and `leaflet.css` loads
+  AFTER it — so the fix silently did nothing and the guard went on reporting
+  1.6:1. Map chrome belongs in `assets/oa-uni-map.css`, which loads after all
+  three Leaflet stylesheets.
+* **`--on-brand`, not `#fff`, on anything filled with `var(--brand)`.** The
+  checkbox tick and radio dot were fixed white on a brand-filled box, and
+  `--brand` is LIGHT in dark theme — a white tick on a near-white box.
+
 **`page-test.mjs` measures it, and measuring is the point.** It walks one page
 per kind of chrome in BOTH themes and reads what the browser actually paints,
 compositing backgrounds rather than taking the first painted layer — a pill on
@@ -595,6 +607,15 @@ compositing backgrounds rather than taking the first painted layer — a pill on
 reading that layer alone reports a perfectly readable button at 1:1. Nothing is
 exempt. **When you add a rule that paints a background, give it a colour in the
 same change.**
+
+**And it waits for the theme to be PAINTED, not for a stopwatch.** Every page
+links a Google Fonts stylesheet that cannot load in CI, and until the cascade
+settles the body shows a default grey that is neither theme; measured then,
+every muted line reads as a dark-theme failure. A fixed delay reported 14 of
+them, all artefacts, with the numbers moving between runs — which is what a
+transient looks like. Waiting for `body.v3` does not help either: that class is
+in the HTML. The wait asserts the thing itself — the body is painting the
+theme's own `--bg` — and nothing downstream may be measured before it does.
 
 ## Deploying Firebase rules — ALWAYS name the project
 
