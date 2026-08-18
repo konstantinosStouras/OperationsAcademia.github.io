@@ -524,13 +524,21 @@ Four decisions worth recording:
    is published: a posting's id and permalink are built from its institution,
    and an earlier attempt to canonicalise those renamed KAIST and Baruch and
    would have rewritten ids across the whole archive.
-5. **A directory row's three names are already in three columns**, so they are
-   canonicalised one by one and never through `canonPlace()`, whose job is
-   taking apart a value that names more than one thing. Run over columns that
-   are already separate it invents: Rutgers' campus and Clemson's college
-   became departments called "Camden, Operations Management" and "Computing
-   and Applied Sciences, Industrial Engineering", both of them offered by the
-   form.
+5. **Three names already in three columns go through `canonColumns()`.**
+   `canonPlace()` takes apart a value that names more than one thing, which is
+   right for the archive's single column and a guess anywhere else. Over the
+   Universities directory's columns it made departments out of Rutgers' campus
+   and half of Clemson's college ("Camden, Operations Management", "Computing
+   and Applied Sciences, Industrial Engineering"), both offered by the form;
+   and over the posting form's own three boxes it read "University of
+   California, Los Angeles (UCLA)" — typed into the University box, the others
+   still empty — as a university and a department, so the posting published
+   under "University of California" with a department called "Los Angeles",
+   while Berkeley, one word shorter, was left alone. Worse, the two outcomes
+   were coupled: a plain university with no department is properly refused,
+   and only the mangled one got through. `canonColumns` keeps the curated
+   fused pairs and drops the separator guesswork, which across every name in
+   the committed data fires three times and is wrong twice.
 6. **Two findings looked at and left alone.** `splitLegacyInstitution()` reads
    "University of California, Los Angeles (UCLA)" as a university and a
    department, which would merge it with Berkeley — but it cannot be reached

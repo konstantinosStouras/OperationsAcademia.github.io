@@ -227,11 +227,18 @@ College, The City University of New York (CUNY)" is deliberately published
 whole. The directory lists one university under several names; the picker must
 not offer half its schools from one entry and half from the other.
 
-**A directory row's three names are already in three columns**, so
-`buildVocab` canonicalises them one by one and never through `canonPlace()`,
-whose job is taking apart a value that names more than one thing. Run over
-columns that are already separate it invents: Rutgers' "School of
-Business-Camden" became a department called "Camden, Operations Management".
+**Three names already in three columns go through `canonColumns()`, never
+`canonPlace()`.** `canonPlace` takes apart a value that names more than one
+thing — right for the archive's single column, and a guess anywhere else. Over
+the posting form's three boxes it read "University of California, Los Angeles
+(UCLA)" as a university and a department, publishing under "University of
+California" (Berkeley, one word shorter, was left alone); over the Universities
+directory's columns it made departments called "Camden, Operations Management"
+out of Rutgers' campus and "Computing and Applied Sciences, Industrial
+Engineering" out of half of Clemson's college. `canonColumns` keeps the
+CURATED fused pairs — a name somebody wrote down as naming both really does —
+and drops the separator guesswork, which across every name in the data fires
+three times and is wrong twice.
 
 **The site's own links follow the name.** Every posting carries a "Further
 info" link into the Universities page, built from its institution

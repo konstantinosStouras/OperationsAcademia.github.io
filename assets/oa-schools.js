@@ -482,10 +482,40 @@
     var p = place || {};
     var given = { institution: clean(p.institution), school: clean(p.school), unit: clean(p.unit) };
     if (given.institution && !given.school && !given.unit) given = splitLegacyInstitution(given.institution);
+    return assemble(given, splitFused(spell(given.school)));
+  }
 
+  /**
+   * The same, for three names that are ALREADY in three fields — a posting
+   * form's boxes, the Universities directory's columns.
+   *
+   * TWO THINGS canonPlace() does that a set of columns must not have done to
+   * it, because both are guesses about a value that names more than one thing
+   * and a form with three boxes has already said which is which:
+   *
+   *   - the LEGACY INSTITUTION split. "University of California, Los Angeles
+   *     (UCLA)" typed into the University box, with the others still empty,
+   *     was read as a university and a department and posted under "University
+   *     of California" with a department called "Los Angeles". Berkeley, one
+   *     word shorter, was left alone.
+   *   - the SEPARATOR split of the school box. Across every name in the data
+   *     it fires three times and is wrong twice: Rutgers' "School of
+   *     Business-Camden" (a campus, and a separately accredited school) and
+   *     Clemson's "College of Engineering, Computing and Applied Sciences" (a
+   *     comma inside one college's name) both lost their tail to an invented
+   *     department. The CURATED pairs are kept — a name somebody has written
+   *     down as naming both really does name both.
+   */
+  function canonColumns(place) {
+    var p = place || {};
+    var given = { institution: clean(p.institution), school: clean(p.school), unit: clean(p.unit) };
+    var known = BY_FUSED[fold(spell(given.school))];
+    return assemble(given, known || { school: given.school, unit: '' });
+  }
+
+  /** The three names canonicalised, with whatever the school field gave up. */
+  function assemble(given, fused) {
     var institution = canonInstitution(given.institution);
-
-    var fused = splitFused(spell(given.school));
     var school = canonSchool(fused.school, institution);
 
     var unit = canonUnit(given.unit);
@@ -520,6 +550,7 @@
     canonSchool: canonSchool,
     canonUnit: canonUnit,
     canonPlace: canonPlace,
+    canonColumns: canonColumns,
     splitFused: splitFused,
     splitLegacyInstitution: splitLegacyInstitution,
     isCanonicalSchool: isCanonicalSchool,

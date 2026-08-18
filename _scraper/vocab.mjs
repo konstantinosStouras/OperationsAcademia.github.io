@@ -58,8 +58,7 @@ import { createRequire } from 'node:module';
    been through an ingest. */
 const require = createRequire(import.meta.url);
 export const SCHOOLS = require('../assets/oa-schools.js');
-const { canonPlace, canonInstitution, canonSchool, canonUnit,
-        institutionKey, fold: nameFold } = SCHOOLS;
+const { canonPlace, canonColumns, institutionKey, fold: nameFold } = SCHOOLS;
 
 /* --------------------------------------------------- school vs. unit
 
@@ -282,12 +281,11 @@ function partOf(r, w) {
      column too ("McDonough School of Business, Operations and Information
      Management Area"), which would publish the school twice on the card. */
   if (r.unit === undefined && r.department !== undefined && r.school !== undefined) {
-    const institution = canonInstitution(r.institution);
-    const school = canonSchool(tidy(r.school), institution);
     let unit = tidy(r.department);
     const lead = unit.split(',')[0];
-    if (school && nameFold(lead) === nameFold(school)) unit = tidy(unit.slice(lead.length + 1));
-    return { institution, school, unit: canonUnit(unit), w };
+    if (r.school && nameFold(lead) === nameFold(r.school)) unit = tidy(unit.slice(lead.length + 1));
+    const place = canonColumns({ institution: r.institution, school: r.school, unit });
+    return { institution: place.institution, school: place.school, unit: place.unit, w };
   }
 
   /* A POSTING has been through canonPlace() at ingest already; running it

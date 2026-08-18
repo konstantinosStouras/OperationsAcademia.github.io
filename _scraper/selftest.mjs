@@ -1111,10 +1111,31 @@ async function testSchools() {
     ok(/canonPlace\(\{ institution/.test(src), `${file}: and so is a row read from a spreadsheet`);
   }
 
-  // the form applies it too, so a poster's own preview reads as it will publish
+  /* The form applies it too, so a poster's own preview reads as it will
+     publish — through canonCOLUMNS, because a form with three boxes has
+     already said which name is which (see canonColumns' own header). */
   const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
-  ok(/window\.OASchools\.canonPlace/.test(form),
+  ok(/S\.canonColumns/.test(form),
     'oa-jobform.js: the form canonicalises what the poster typed');
+  ok(!/canonPlace\(\{/.test(form) && !/OASchools\.canonPlace/.test(form),
+    'and never through canonPlace, which would take a university apart');
+
+  /* what that distinction is worth, measured on the names it decides */
+  eq(S.canonColumns({ institution: 'University of California, Los Angeles (UCLA)', school: '', unit: '' }),
+    { institution: 'University of California, Los Angeles (UCLA)', school: '', unit: '' },
+    'a university typed into the University box stays that university');
+  eq(S.canonPlace({ institution: 'University of California, Los Angeles (UCLA)' }).institution,
+    'University of California',
+    'while the archive\'s one-column value is still taken apart');
+  eq(S.canonColumns({ institution: 'Rutgers University', school: 'School of Business-Camden', unit: 'Operations Management' }),
+    { institution: 'Rutgers University', school: 'School of Business-Camden', unit: 'Operations Management' },
+    'a campus in a school name is not a department');
+  eq(S.canonColumns({ institution: 'Clemson University', school: 'College of Engineering, Computing and Applied Sciences', unit: 'Industrial Engineering' }).school,
+    'College of Engineering, Computing and Applied Sciences',
+    'nor is half a college name');
+  eq(S.canonColumns({ institution: 'X', school: 'Ross School of Business Technology and Operations', unit: '' }),
+    { institution: 'X', school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
+    'but a pair somebody wrote down as naming both still names both');
   const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
   ok(page.indexOf('oa-schools.js') !== -1 &&
      page.indexOf('oa-schools.js') < page.indexOf('oa-jobform.js'),
@@ -1476,13 +1497,13 @@ async function testCascadeWiring() {
     'oa-jobform.js drives the cascade from byUniversity and bySchool');
   ok(/var S = window\.OASchools;/.test(form) && /if \(!S\) return;/.test(form),
     'and the three lists still work on a page that never loaded oa-schools.js');
-  ok(/S\.canonPlace\(\{/.test(form),
+  ok(/S\.canonColumns\(\{/.test(form),
     'the fields are put into the published spelling by the SAME canon the submission uses');
   ok(!/'f-institution', 'f-school'\].forEach\(function \(id\) \{\n\s*var el = \$\(id\);\n\s*if \(el\) el\.dispatchEvent\(new Event\('change'/.test(form),
     'and an edit does not settle the INSTITUTION, whose spelling a permalink is built from');
   ok(/publishAs: S \? S\.canonUnit : null/.test(form),
     'a name not on the list is offered as it will be published');
-  ok(form.indexOf('if (!val(school) && !val(unit)) return;') !== -1,
+  ok(/canonColumns\(\{/.test(form) && !/canonPlace\(\{/.test(form),
     'but a lone institution is not read as one of the archive’s fused one-column values');
 
   for (const page of ['post-a-job.html']) {

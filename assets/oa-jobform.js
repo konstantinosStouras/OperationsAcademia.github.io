@@ -183,7 +183,15 @@
        spelling posts under the published one. The build canonicalises again —
        this is what makes the poster's own preview and their My postings page
        read the way the posting will. */
-    var place = (window.OASchools ? window.OASchools.canonPlace : function (v) { return v; })({
+    /* canonCOLUMNS, not canonPlace: this form has three boxes, so it says
+       which name is which. canonPlace() is for the archive's single column,
+       and over three boxes it read "University of California, Los Angeles
+       (UCLA)" with the others empty as a university and a department — posting
+       it under the wrong university, with a department called "Los Angeles",
+       while a poster who wrote a plain university name and no department was
+       properly asked for one. */
+    var S = window.OASchools;
+    var place = (S && S.canonColumns ? S.canonColumns : function (v) { return v; })({
       institution: out.institution,
       school: String($('f-school').value || '').trim(),
       unit: String($('f-unit').value || '').trim()
@@ -559,7 +567,7 @@
 
     /* Keep the derived department line and its preview in step, and let the
        name fields settle into the spelling the SITE publishes — the same
-       canonPlace() this posting will go through when it is republished.
+       canonColumns() this posting will go through when it is republished.
 
        `change` is fired on the first two only, NEVER on the department: that
        is what fills an EMPTY school from an unambiguous department, and doing
@@ -835,7 +843,7 @@
 
      A spelling the site already publishes under another name is not a second
      school (assets/oa-schools.js): the fields are put into the published
-     spelling as the poster leaves them, which is the same canonPlace() the
+     spelling as the poster leaves them, which is the same canonColumns() the
      submission goes through — so the preview, the posting and everyone else's
      postings agree.
 
@@ -974,16 +982,14 @@
           } : null);
         }
 
-        /* The names, as they will be published. It is the SAME canonPlace()
+        /* The names, as they will be published. It is the SAME canonColumns()
            the submission goes through (see out.school above), run as the
            poster leaves a field so that what they read back is what everybody
            else will read.
 
-           The university is canonicalised on its own until a school or a
-           department has been given, because canonPlace() reads a lone
-           institution as one of the archive's fused one-column values and
-           takes it apart — right at ingest, wrong under a poster who has
-           simply not reached the next field yet. */
+           canonCOLUMNS, because this form has three boxes and says which
+           name is which; canonPlace() is for the archive's single column and
+           would read a lone university as a university and a department. */
         /* The one university the typed text can only be the beginning of.
            Nothing, when it could be several — "University of" is not a name —
            and nothing under four letters, which is a keystroke rather than an
@@ -1019,9 +1025,8 @@
                      onlyUniversityStartingWith(typed) ||
                      S.canonInstitution(typed);
           if (name && name !== typed) inst.value = name;
-          if (!val(school) && !val(unit)) return;
 
-          var place = S.canonPlace({
+          var place = S.canonColumns({
             institution: inst.value, school: school.value, unit: unit.value,
           });
           if (place.school !== val(school) || place.unit !== val(unit)) {
