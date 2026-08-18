@@ -781,7 +781,14 @@ body.v3 .oa-filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
   gap: 14px 16px;
-  align-items: end;
+  /* START, not end, and the chips are why. A filter with values chosen is a
+     TALLER grid item — label, control, then the chips under it — and with the
+     items aligned to the bottom of the row that extra height pushed the
+     control UPWARDS, so a "2 selected" box floated above the untouched boxes
+     beside it and the bar read as broken (owner, from a screenshot). Aligned
+     to the top, every label starts on one line and every control sits on one
+     baseline whatever is chosen; the chips simply hang below. */
+  align-items: start;
   /* the card needs its own breathing room: the engine's base padding is
      4px 0 14px (flush left/right — owner screenshot, 2026-08-17) */
   padding: 18px 20px 20px;
@@ -791,11 +798,34 @@ body.v3 .oa-filters input[type='search'],
 body.v3 .oa-pick-btn { width: 100%; height: 44px; }
 /* Clear always CLOSES its row — it stretches from wherever it lands to the
    bar's right edge, so no row ever trails off into dead space */
-body.v3 .oa-filter-actions { margin-left: 0; align-self: end; grid-column: auto / -1; }
+/* Clear has no label of its own, so top-aligning the row would leave it a
+   label's height above the controls it belongs with. It gets that height back
+   as an empty block — the same 13px/1.6 line plus the 3px margin .oa-filter's
+   label uses — rather than being bottom-aligned, which is what used to drag it
+   below the chips whenever a filter had any. */
+/* Clear closes its row and now sits on the controls' baseline: the cell is a
+   column like every other filter, and the empty label buildBar() puts above
+   the button reserves exactly one label's height — see the note there. */
+body.v3 .oa-filter-actions {
+  margin-left: 0;
+  align-self: start;
+  grid-column: auto / -1;
+  flex-direction: column;
+  align-items: stretch;
+}
+body.v3 .oa-filter-actions .oa-label-spacer { display: block; }
 body.v3 .oa-clear { width: 100%; height: 44px; }
 @media (min-width: 1000px) {
   /* the free-text searches are the primary way in — give them room */
   body.v3 .oa-filter:not(.oa-pick) { grid-column: span 2; }
+  /* ...but Clear is not one of them. It carries .oa-filter as well now (for the
+     label spacer), so it started matching the rule above — specificity (0,3,1),
+     declared later — and stopped stretching to the bar's right edge, which is
+     the one thing that rule above IT exists to guarantee. Restated here at the
+     same specificity and after it, rather than by taking .oa-filter off the
+     cell, because the spacer has to be styled as a label to be the right
+     height. */
+  body.v3 .oa-filter.oa-filter-actions { grid-column: auto / -1; }
 }
 @media (max-width: 640px) {
   /* the mobile standard, in grid form: pickers two per row, every text
@@ -961,6 +991,7 @@ body.v3 .oa-pick-menu {
 body.v3 .oa-opt { color: var(--ink-2); }
 body.v3 .oa-opt:hover { background: var(--brand-soft); }
 body.v3 .oa-opt-n { color: var(--mut); background: var(--bg-3); border-radius: 999px; }
+body.v3 .oa-filter-hint { color: var(--mut); }
 body.v3 .oa-chip { background: var(--brand); color: var(--on-brand); border-radius: 999px; }
 body.v3 .oa-chip:hover { background: var(--brand-2); }
 body.v3 .oa-clear {
@@ -1470,7 +1501,11 @@ body.v3 .oa-merge-from, body.v3 .oa-merge-into { background: var(--bg-3); border
 
 /* the engine's own filter labels, where the full bar IS shown (jobs.html,
    candidates, placements): the reference site's small-caps look */
-body.v3 .oa-filter > label {
+body.v3 .oa-filter > label,
+/* the Clear cell's height spacer, which only does its job if it is the same
+   height as a real label — this sheet shrinks labels to 11.5px, so leaving the
+   spacer on the base sheet's 13px put Clear 2.4px below the controls */
+body.v3 .oa-filter > .oa-label-spacer {
   text-transform: uppercase;
   letter-spacing: 0.09em;
   font-size: 11.5px;

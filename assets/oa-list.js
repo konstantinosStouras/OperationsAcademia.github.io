@@ -192,15 +192,33 @@
       .filter(Boolean);
   }
 
-  function matches(row, f, chosen) {
+  /* One term against one row. */
+  function textHit(row, f, term) {
+    var needle = fold(term);
+    if (!needle) return true;
+    var acr = ACRONYM.test(String(term).trim()) ? String(term).trim().toLowerCase() : '';
+    return asArray(f.fields || [f.field]).some(function (name) {
+      if (fold(row[name]).indexOf(needle) !== -1) return true;
+      return !!acr && initials(row[name]).indexOf(acr) !== -1;
+    });
+  }
+
+  function matches(row, f, chosen, draft) {
     if (f.type === 'text') {
-      var needle = fold(chosen);
-      var acr = ACRONYM.test(String(chosen).trim()) ? String(chosen).trim().toLowerCase() : '';
-      if (!needle) return true;
-      return asArray(f.fields || [f.field]).some(function (name) {
-        if (fold(row[name]).indexOf(needle) !== -1) return true;
-        return !!acr && initials(row[name]).indexOf(acr) !== -1;
-      });
+      /* SEVERAL TERMS, AND THEY ARE OR'd — which is the only reading that can
+         return anything. A posting has ONE institution, so "columbia" AND
+         "insead" is empty by construction; what a reader typing both means is
+         "either of these". The half-typed word in the box counts as one more
+         term, so the list narrows as it always did while a term is being
+         added rather than freezing until Enter.
+
+         A single term behaves exactly as before, which is what keeps every
+         saved link and every other list page unchanged. */
+      var terms = [];
+      if (chosen) chosen.forEach(function (t) { terms.push(t); });
+      if (draft) terms.push(draft);
+      if (!terms.length) return true;
+      return terms.some(function (t) { return textHit(row, f, t); });
     }
     if (!chosen || !chosen.size) return true;
     var vals = valuesOf(row, f);
@@ -239,12 +257,18 @@
     var page = 0;
     var expanded = {};
 
-    // state: text filters hold a string, value filters hold a Set
+    /* EVERY filter's selection is a Set, text ones included — a text filter now
+       holds the terms that have been committed with Enter, exactly as a picker
+       holds the values that have been ticked, so chips, Clear, the URL and the
+       cross-filter counts all treat the two the same. */
     var sel = {};
+    // what is typed but not yet committed, per text filter
+    var drafts = {};
     // pending debounce per text filter, so a rebuild can cancel it (below)
     var textTimers = {};
     filters.forEach(function (f) {
-      sel[f.key] = f.type === 'text' ? '' : new Set();
+      sel[f.key] = new Set();
+      drafts[f.key] = '';
     });
 
     host.className = 'oa-list';
@@ -273,7 +297,7 @@
         for (var i = 0; i < filters.length; i++) {
           var f = filters[i];
           if (f.key === skipKey) continue;
-          if (!matches(r, f, sel[f.key])) return false;
+          if (!matches(r, f, sel[f.key], drafts[f.key])) return false;
         }
         return true;
       });
@@ -317,7 +341,7 @@
 
     function anySelected() {
       return filters.some(function (f) {
-        return f.type === 'text' ? !!sel[f.key] : sel[f.key].size > 0;
+        return sel[f.key].size > 0 || !!drafts[f.key];
       });
     }
 
@@ -337,19 +361,69 @@
           var input = el('input', {
             id: id,
             type: 'search',
-            value: sel[f.key],
+            value: drafts[f.key],
             placeholder: f.placeholder || '',
             autocomplete: 'off',
           });
+          var textChips = buildChips(f);
+          /* Only while something is being typed: a permanent instruction is
+             noise once the reader has understood it, and this one has to earn
+             its space in a bar that is already seven controls wide. */
+          var hint = el('p', { class: 'oa-filter-hint', text: 'Press Enter to add it as a filter' });
+          hint.hidden = !drafts[f.key];
+
           input.addEventListener('input', function () {
+            hint.hidden = !input.value.trim();
             clearTimeout(textTimers[f.key]);
             textTimers[f.key] = setTimeout(function () {
-              sel[f.key] = input.value;
+              drafts[f.key] = input.value;
               page = 0;
               apply();
             }, 140);
           });
+
+          /* ENTER COMMITS THE TERM. The box empties and the word becomes a
+             chip, so the next one can be typed straight away — the reader
+             collects institutions rather than replacing one with the next.
+             Nothing is lost by not pressing it: the draft filters live and is
+             carried in the URL either way. */
+          input.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            var term = input.value.trim();
+            /* The pending debounce is cancelled here, so this handler now owns
+               whatever the box says — INCLUDING when it says nothing. Returning
+               early on an empty box stranded the last debounced word in
+               drafts[key]: the list stayed filtered by a term shown in no chip
+               and in no box, and syncUrl kept putting it in the address bar.
+               Erasing the box and pressing Enter now means what it looks like. */
+            clearTimeout(textTimers[f.key]);
+            if (!term) {
+              if (drafts[f.key]) {
+                drafts[f.key] = '';
+                page = 0;
+                apply();
+              }
+              return;
+            }
+            // the same term twice is one chip, not two that filter identically
+            sel[f.key].add(term);
+            drafts[f.key] = '';
+            input.value = '';
+            hint.hidden = true;
+            page = 0;
+            /* Only the chips are redrawn, never the whole bar: rebuilding it
+               would throw away this very input and take the keyboard with it,
+               which is the same reason picking a facet value refreshes chips
+               alone (see below). */
+            refreshChips(f, textChips);
+            apply();
+            input.focus();
+          });
+
           wrap.appendChild(input);
+          wrap.appendChild(hint);
+          wrap.appendChild(textChips);
         } else {
           // Picking a value used to call buildBar(), which emptied this very
           // node — tearing down the menu the reader was standing in, so a
@@ -375,7 +449,8 @@
         text: 'Clear filters',
         onclick: function () {
           filters.forEach(function (f) {
-            sel[f.key] = f.type === 'text' ? '' : new Set();
+            sel[f.key] = new Set();
+            drafts[f.key] = '';
           });
           page = 0;
           buildBar();
@@ -383,7 +458,20 @@
         },
       });
       clear.disabled = !anySelected();
-      barEl.appendChild(el('div', { class: 'oa-filter-actions' }, [clear]));
+      /* The empty <label> is a SPACER, and a real one on purpose. Clear has no
+         label of its own, so in a top-aligned bar it would sit a label's
+         height above the controls it belongs with. Reserving that height with
+         a hard-coded pixel value means guessing at type the stylesheet owns —
+         and getting it wrong silently, which is what a first attempt did. A
+         node styled by the same rules as a real label is always exactly the
+         right height, whatever the design later does to it. It is a <span>
+         rather than a <label> so that anything enumerating this bar's labels —
+         a screen reader, or the test that pins their names — still sees only
+         the real ones. */
+      barEl.appendChild(el('div', { class: 'oa-filter oa-filter-actions' }, [
+        el('span', { 'aria-hidden': 'true', class: 'oa-label-spacer', html: '&nbsp;' }),
+        clear,
+      ]));
     }
 
     /* A chip is ONE button: clicking anywhere on the blue area drops that value
@@ -397,7 +485,15 @@
        button inside a button is invalid, so making the chip clickable means
        the × stops being one. */
     function buildChips(f) {
-      var box = el('div', { class: 'oa-chips' });
+      return refreshChips(f, el('div', { class: 'oa-chips' }));
+    }
+
+    /* Refill an EXISTING chips node rather than replacing it, so a caller can
+       hold on to its reference — the text filter's Enter handler does, because
+       rebuilding the bar there would throw away the input the reader is still
+       typing in. */
+    function refreshChips(f, box) {
+      box.innerHTML = '';
       sel[f.key].forEach(function (v) {
         box.appendChild(
           el('button', {
@@ -705,7 +801,13 @@
       p['delete'](prefix + 'page');
       filters.forEach(function (f) {
         if (f.type === 'text') {
-          if (sel[f.key]) p.set(prefix + f.key, sel[f.key]);
+          /* One parameter per term, like a facet — a shared link carries every
+             institution the reader collected, not just the last one. The
+             half-typed draft goes too: a link copied mid-search must find what
+             the sender was looking at, and it comes back as a chip, which is
+             the only unambiguous thing to restore it as. */
+          sel[f.key].forEach(function (v) { p.append(prefix + f.key, v); });
+          if (drafts[f.key]) p.append(prefix + f.key, drafts[f.key]);
         } else {
           // one parameter PER value rather than a "a|b" join: a facet value is
           // free text off the posting form, and one containing a pipe used to
@@ -735,7 +837,14 @@
         var all = p.getAll(prefix + f.key);
         if (!all.length && f.legacyParam) all = p.getAll(f.legacyParam);
         if (!all.length) return;
-        if (f.type === 'text') { sel[f.key] = all[0]; return; }
+        /* Text and facet read the same way now. A legacy ?filterA= deep link
+           (the universities map's "Further info" column still emits one) lands
+           as a chip, which is strictly better than the bare text it used to
+           set: the reader can see what is filtering the list and remove it. */
+        if (f.type === 'text') {
+          all.forEach(function (v) { if (v) sel[f.key].add(String(v).trim()); });
+          return;
+        }
         var add = function (v) {
           if (!v) return;
           // a value this filter used to publish under another name, so a link

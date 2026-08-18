@@ -349,6 +349,32 @@ holds the approved rows and nothing else writes it. That is why
 header. If that cadence changes, change the panel's and the e-mail's promise
 with it.
 
+## A text search holds SEVERAL terms
+
+Every `type: 'text'` filter in `assets/oa-list.js` takes more than one term:
+typing filters live as it always did, and **Enter banks the term as a chip** so
+the next one can be typed straight away. `sel[key]` is a `Set` for text filters
+and pickers alike, with the half-typed word kept beside it in `drafts[key]`.
+
+**The terms are OR'd, and that is the only reading that returns anything.** A
+posting has ONE institution, so "columbia" AND "insead" is empty by
+construction; a reader typing both means "either". A single term behaves
+exactly as before, which is what keeps every saved link working.
+
+The URL carries **one parameter per term** (`?institution=utah&institution=princeton`),
+so a multi-term search is shareable, and a legacy `?filterA=` deep link — the
+universities map still emits one per school — lands as a chip the reader can
+see and remove rather than as bare text in the box.
+
+**Chips must never move the control above them.** The v3 bar is a grid; its
+items were bottom-aligned, so a filter carrying chips was a taller cell and
+pushed its own control upwards, leaving "2 selected" floating above the boxes
+beside it. The items are top-aligned instead, and the Clear button — which has
+no label of its own — gets that height back from an empty `.oa-label-spacer`
+styled by the same rule as a real label, rather than from a pixel value that
+would silently drift when the type changes. `page-test.mjs` measures the
+baseline per row and fails if any control leaves it.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
