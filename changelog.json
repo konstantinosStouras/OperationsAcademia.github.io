@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "schools-of-the-world",
+   "date": "2026-08-18",
+   "title": "Every operations school in the world, in the posting forms",
+   "summary": "The university, school and department boxes used to offer only the places that had already advertised here \u2014 63 universities \u2014 so everybody else typed their name from scratch and the site slowly collected six spellings of one department. All three forms (a job, a candidate, a confirmed placement) now open on a directory of the world\u2019s operations and supply chain schools: 302 universities, 227 schools and 189 departments, and the list is alphabetical, narrowing as you type. A university\u2019s business school and its industrial engineering school stay separate, each with its own departments, and a school that had arrived under a long name from one source and a short one from another \u2014 \u201cSloan School of Management\u201d beside \u201cMIT Sloan School of Management\u201d \u2014 is now one entry rather than two. Two smaller things went with it: the dropdown was unreadable in the dark theme, white text on a white card, and is not any more; and adding a spelling now corrects the postings already on the site instead of leaving one school under two names.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
    "id": "posting-form-cascade",
    "date": "2026-08-18",
    "title": "Posting a job: the university, school and department boxes now follow each other",

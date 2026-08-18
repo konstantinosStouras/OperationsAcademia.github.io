@@ -1097,8 +1097,8 @@
   "year": 2026,
   "posted": "2026-02-06",
   "institution": "Georgia State University",
-  "department": "Robinson College of Business, Management",
-  "school": "Robinson College of Business",
+  "department": "J. Mack Robinson College of Business, Management",
+  "school": "J. Mack Robinson College of Business",
   "unit": "Management",
   "type": "University",
   "levels": [
@@ -1920,9 +1920,9 @@
   "year": 2026,
   "posted": "2025-10-07",
   "institution": "Baruch College, The City University of New York (CUNY)",
-  "department": "Zicklin School of Business, Loomba Department of Management, Operations Management",
+  "department": "Zicklin School of Business, Management",
   "school": "Zicklin School of Business",
-  "unit": "Loomba Department of Management, Operations Management",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2290,8 +2290,8 @@
   "year": 2026,
   "posted": "2025-09-29",
   "institution": "University of Minnesota",
-  "department": "Carlson School of Management, Supply Chain and Operations",
-  "school": "Carlson School of Management",
+  "department": "Curtis L. Carlson School of Management, Supply Chain and Operations",
+  "school": "Curtis L. Carlson School of Management",
   "unit": "Supply Chain and Operations",
   "type": "Business School",
   "levels": [
@@ -2386,10 +2386,10 @@
   "owner": ""
  },
  {
-  "id": "2026-university-of-illinois-urbana-champaign-20250925",
+  "id": "2026-university-of-illinois-at-urbana-champaign-20250925",
   "year": 2026,
   "posted": "2025-09-25",
-  "institution": "University of Illinois Urbana-Champaign",
+  "institution": "University of Illinois at Urbana-Champaign",
   "department": "Gies College of Business, Business Administration",
   "school": "Gies College of Business",
   "unit": "Business Administration",
@@ -2406,7 +2406,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Illinois%20Urbana-Champaign",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Illinois%20at%20Urbana-Champaign",
   "characteristics": [
    "Research seminars",
    "PhD",

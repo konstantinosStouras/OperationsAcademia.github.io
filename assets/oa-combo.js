@@ -70,6 +70,21 @@
     return 5;
   }
 
+  /* A–Z, the way a reader reads it: accents fold onto their base letter so
+     "École" sits between "Duke" and "Emory" rather than after "Zhejiang", and
+     digits compare as numbers ("Section 2" before "Section 10").
+
+     It is the ONLY tie-break, which is the point: with nothing typed every
+     option scores the same, so the list opens in plain alphabetical order.
+     It used to open most-posted-first — right for a list of ten, unreadable
+     for a list of three hundred, where the reader knows the name they want
+     and is looking for it, not browsing. */
+  function cmpName(a, b) {
+    return String(a).localeCompare(String(b), 'en', {
+      sensitivity: 'base', numeric: true,
+    });
+  }
+
   var uid = 0;
 
   /**
@@ -83,7 +98,11 @@
    *   publishAs fn      — what a name not on the list will be published as,
    *                       so the "new name" row offers that and not a promise
    *   max       number      — options rendered at once (the list is scrollable;
-   *                           this is about DOM size, not about hiding values)
+   *                           this is about DOM size, not about hiding values).
+   *                           Generous BECAUSE the list is alphabetical: a cap
+   *                           that cut it at 60 would end it in the C's, and
+   *                           the reader looking for Yale would be told to
+   *                           keep typing with no way of knowing it is there.
    */
   function attach(input, opts) {
     if (!input || input.__oaCombo) return null;
@@ -132,7 +151,7 @@
       options: [],
       counts: {},
       scope: { label: '', values: [], other: '', more: '' },
-      max: opts.max || 60,
+      max: opts.max || 400,
       open: false,
       active: -1,
       rows: [],
@@ -188,8 +207,7 @@
       }
       out.sort(function (a, b) {
         if (b.s !== a.s) return b.s - a.s;     // how well it matches
-        if (b.n !== a.n) return b.n - a.n;     // then how often it is used
-        return a.v.localeCompare(b.v);
+        return cmpName(a.v, b.v);              // then alphabetically
       });
       return out;
     }

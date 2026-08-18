@@ -263,6 +263,79 @@ It also has a third level: `byUniversity[uni].bySchool[school]`, and a
 top-level `bySchool` for the case where the university is not known yet. See
 the next section.
 
+## A list worth opening: which schools EXIST
+
+`assets/oa-schools.js` above says what a place is CALLED. `assets/oa-institutions.js`
+says which places exist — a seed of the world's operations and supply chain schools
+(178 records: a university, its business school, and the department doing operations
+there), in the same dual-mode shape.
+
+**It canonicalises nothing.** Two `canon()`s would be two answers to one question and
+the disagreement would be silent, so a spelling that needs fixing is fixed in
+`oa-schools.js` and a place that is missing is added to `oa-institutions.js`. Every
+seeded row goes through `canonColumns()` on the way into the vocabulary, so a seeded
+place and a place that has actually posted land on ONE spelling and ONE entry.
+
+The seed is what the posting forms offer beyond the site's own history: without it
+they could only ever list places that had already advertised here — 63 universities
+— so a first-time poster from Bilkent, Cranfield, VinUniversity or Kühne Logistics
+met a blank list and typed their name from scratch. It joins through the SAME
+`directory` argument `data/universities.json` uses (`institutionSeed()` in
+`build-jobs.mjs`), so it inherits everything that already applies to those rows,
+and the count `n` still counts POSTINGS ONLY: a seeded name nobody has posted from
+carries `n: 0` and claims nothing.
+
+**A university's business school and its industrial engineering school are
+different schools, not duplicates.** Departments hang off a (university, school)
+pair, which is what `byUniversity[u].bySchool` is for. The seed's source is a
+BUSINESS-school directory — one university, one school — so a second school comes
+from the site's own directory beside it; the selftest asserts the requirement on the
+BUILT vocabulary, where it actually has to hold, not on the seed.
+
+**Two hand-compiled sources name one school long and short.** "Sloan School of
+Management" and "MIT Sloan School of Management" were two rows in Toronto's, MIT's
+and twenty other universities' school lists, with the postings on one and the
+departments on the other. That is settled in `SCOPED_SCHOOL_ALIASES` — scoped
+because most of these short forms are generic and a global "College of Business"
+alias would rename every university's. The name kept is the FULL OFFICIAL one,
+except where the longer string is a parenthetical acronym, a campus note or two
+names fused with a slash; where a school has been RENAMED, the current name wins.
+The selftest pins that no university offers one school under two names, and that
+each university is offered once.
+
+**An alias added today reaches yesterday's postings.** A posting with no document
+behind it is carried from the previous `data/jobs.json` unchanged, so it never went
+back through an ingest to hear about a new alias — the site published one school
+under two names for ever, and the selftest's "every posting names its place the one
+way" guard went red, which by design stops the build committing anything at all.
+`healPlace` (`jobs-model.mjs`) is applied to every carried row in `build-jobs.mjs`;
+it is pure and idempotent, so a run with no new alias changes nothing. The `id`
+deliberately FOLLOWS the institution name, as it did when Penn State became The
+Pennsylvania State University.
+
+`data/past-postings.json` has no daily build to heal it, so it gets a mode of its
+own: **`node _scraper/import-legacy-tables.mjs --heal-names`** (offline, no sheets)
+— run it after adding an alias. The importer applies `healPlace` on write too,
+which it did not before: it never canonicalised at all, so a re-import would
+silently have undone the archive's spellings.
+
+The picker (`assets/oa-combo.js`, dual-mode so its ordering is unit-tested) opens
+**alphabetically** — accents folded onto their base letter, so École sits between
+Duke and Emory — and narrows as you type. The usage count still labels a row but no
+longer orders one: count-first reads as no order at all once the list is three
+hundred names long, where the reader knows the name they want and is looking for
+it. The render cap went with it (60 → 400): an alphabetical list cut at 60 ends in
+the C's and tells the reader to keep typing without their being able to tell
+whether their university is there at all.
+
+**Anything that paints its own ground must name its own ink.** The picker's panel
+set `background: #fff` and no colour, so under the dark theme it inherited `--ink`
+and drew near-white names on white — 1.65:1, an invisible list rather than a
+contrast near-miss. Its surfaces are theme tokens now, each keeping its old light
+value as a fallback for the frozen archives, and `page-test.mjs` measures the
+rendered ratio in BOTH themes (a fix that only darkened the panel would trade one
+broken theme for the other).
+
 ## The posting form's three name fields cascade
 
 `post-a-job.html` asks for the university, the school and the department
@@ -361,7 +434,9 @@ and "what I am e-mailed" cannot mean different things.
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules
     node _scraper/page-test.mjs     # Playwright browser checks, incl. the
-                                    # 390px mobile gate over every list page
+                                    # 390px mobile gate over every list page,
+                                    # the picker's alphabetical order and its
+                                    # measured contrast in BOTH themes
                                     # (PW_CHROMIUM=<path> pins the browser)
 
 All four run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs

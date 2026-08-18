@@ -63,7 +63,20 @@
     /* the Universities directory's own second name for it; dropAcronym will
        not touch a mixed-case "(CityU)", because that is the shape of the
        "(Shenzhen)" that marks a genuinely different campus */
-    'City University of Hong Kong (CityU)': 'City University of Hong Kong'
+    'City University of Hong Kong (CityU)': 'City University of Hong Kong',
+
+    /* ONE UNIVERSITY, WRITTEN TWO WAYS. institutionKey folds away a trailing
+       acronym and a leading "The", which is enough for most of the directory's
+       second names — but not for a name whose PARTS were reordered, or where
+       one spelling drops the "at". The seed of the world's operations schools
+       (assets/oa-institutions.js) writes Baruch the other way round, and the
+       two Illinois campuses arrived under both of their own house styles, so
+       the picker offered each place twice with the postings on one row and the
+       departments on the other. */
+    'City University of New York, Baruch College':
+      'Baruch College, The City University of New York (CUNY)',
+    'University of Illinois Urbana-Champaign': 'University of Illinois at Urbana-Champaign',
+    'University of Illinois Chicago': 'University of Illinois at Chicago'
   };
 
   /* ---------------------------------------------------------------- schools
@@ -99,7 +112,67 @@
      told apart. Keyed by university, then by the name as posted. */
   var SCOPED_SCHOOL_ALIASES = {
     'National University of Singapore': { 'Business School': 'NUS Business School' },
-    'Özyeğin University': { 'School of Business': 'Faculty of Business' }
+    'Özyeğin University': { 'School of Business': 'Faculty of Business' },
+
+    /* ONE SCHOOL, WRITTEN TWO WAYS. The site's own Universities directory and
+       the seed of the world's operations schools (assets/oa-institutions.js)
+       were compiled by different hands, so a school arrived under its short
+       name from one and its full one from the other — MIT's "Sloan School of
+       Management" beside "MIT Sloan School of Management", Berkeley's "Haas"
+       beside "Walter A. Haas", Toronto's "Rotman" beside "Joseph L. Rotman" —
+       and the picker listed both, which is precisely the duplication the
+       vocabulary exists to end.
+
+       The name kept is the FULL OFFICIAL one, as with universities, EXCEPT
+       where the longer string is not a fuller name but a parenthetical
+       acronym ("(HBS)"), a campus note, or two names fused with a slash;
+       where a school has been renamed, the CURRENT name wins (Purdue's
+       Krannert became the Mitchell E. Daniels, Jr. School of Business in
+       2023; Miami's School of Business Administration became Miami Herbert
+       in 2019).
+
+       They are SCOPED because most of these short forms are generic — a
+       global "College of Business" alias would rename every university's. */
+    'Binghamton University': { 'SUNY (School of Management)': 'School of Management' },
+    'Clemson University': { 'College of Business': 'Wilbur O. and Ann Powers College of Business' },
+    'Erasmus University Rotterdam': { 'Rotterdam School of Management (RSM)': 'Rotterdam School of Management' },
+    'Georgia State University': { 'Robinson College of Business': 'J. Mack Robinson College of Business' },
+    'Harvard University': { 'Harvard Business School (HBS)': 'Harvard Business School' },
+    'Lehigh University': { 'College of Business and Economics': 'College of Business' },
+    'Massachusetts Institute of Technology': { 'Sloan School of Management': 'MIT Sloan School of Management' },
+    'Nanyang Technological University': { 'Nanyang Business School (NBS)': 'Nanyang Business School' },
+    'Purdue University': {
+      'Krannert School of Management': 'Mitchell E. Daniels, Jr. School of Business',
+      'Mitchell E. Daniels, Jr. School of Business / Krannert School of Management':
+        'Mitchell E. Daniels, Jr. School of Business'
+    },
+    'Rice University': { 'Jones Graduate School Of Business': 'Jesse H. Jones Graduate School of Business' },
+    'Southern Methodist University': { 'Cox School of Business': 'Edwin L. Cox School of Business' },
+    'Stanford University': { 'Graduate School of Business (GSB)': 'Graduate School of Business' },
+    'Temple University': { 'Fox School of Business and Management': 'Fox School of Business' },
+    'The Chinese University of Hong Kong': { 'CUHK Business School (Hong Kong)': 'CUHK Business School' },
+    'The Ohio State University': { 'Fisher College of Business': 'Max M. Fisher College of Business' },
+    'Tilburg University': {
+      'School of Economics and Management': 'Tilburg School of Economics and Management',
+      '(TiSEM) School of Economics and Management (incl. Econometrics and Operations Research depts.)':
+        'Tilburg School of Economics and Management'
+    },
+    'University of California, Berkeley': { 'Haas School of Business': 'Walter A. Haas School of Business' },
+    'University of California, Riverside': {
+      'School of Business Administration, A. Gary Anderson Graduate School of Management': 'School of Business'
+    },
+    'University of Mannheim': { 'Mannheim Business School': 'Business School' },
+    'University of Miami': {
+      'School of Business Administration': 'Miami Herbert Business School',
+      'School of Business Administration / Herbert Business School': 'Miami Herbert Business School'
+    },
+    'University of Minnesota': { 'Carlson School of Management': 'Curtis L. Carlson School of Management' },
+    'University of Nebraska - Lincoln': { 'College of Business Administration': 'College of Business' },
+    'University of New South Wales': { 'Business School': 'UNSW Business School' },
+    'University of Oregon': { 'Lundquist College of Business': 'Charles H. Lundquist College of Business' },
+    'University of Southern California': { 'Marshall School of Business (incl. Leventhal)': 'Marshall School of Business' },
+    'University of Toronto': { 'Rotman School of Management': 'Joseph L. Rotman School of Management' },
+    'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' }
   };
 
   var SCHOOL_ALIASES = {
@@ -128,6 +201,13 @@
     'Operations and IT Management': 'Operations and Information Technology Management',
     'University of Houston and DISC': 'Decision and Information Sciences',
     'DISC': 'Decision and Information Sciences',
+    /* A NAMED department with its area appended — Baruch's box says "Loomba
+       Department of Management, Operations Management", where the department
+       is the Narendra Paul Loomba Department of Management and Operations
+       Management is a group inside it. The wrapper rules cannot see this
+       (the wrapper is in the MIDDLE), and the bare field name is Management. */
+    'Loomba Department of Management, Operations Management': 'Management',
+    'Management, Operations Management': 'Management',
     'SCM': 'Supply Chain Management',
     'Logistics and SCM': 'Logistics and Supply Chain Management',
     'Operations and SCM': 'Operations and Supply Chain Management',
@@ -195,7 +275,15 @@
     }));
   }
 
-  var LEADING_UNIT = /^(the\s+)?(department|dept|division|discipline|area|group|office|programme|program)\s+(of|for|in)\s+/i;
+  /* "School of" is here BECAUSE this runs on the department field only
+     (canonUnitCore, never canonSchool): Australian and New Zealand
+     universities call their departments Schools, so UNSW's department box
+     says "School of Information Systems and Technology Management" where an
+     American one says "Department of …" and a British one says nothing. The
+     wrapper is how a university happens to organise itself — the field name
+     is what the site publishes, and the school it sits under is the
+     neighbouring box already. */
+  var LEADING_UNIT = /^(the\s+)?(department|dept|division|discipline|area|group|office|programme|program|school|faculty)\s+(of|for|in)\s+/i;
   var TRAILING_UNIT = /\s+(departments?|dept|divisions?|disciplines?|areas?|groups?|units?|programmes?|programs?)$/i;
 
   /** "Department of Operations Management", "Operations Management Area" and
@@ -230,9 +318,17 @@
 
   var BY_INSTITUTION = tableOf([], INSTITUTION_ALIASES);
   var BY_SCOPED_SCHOOL = Object.create(null);
+  /* Indexed BOTH ways: under the name as written, and under institutionKey —
+     the "same university however it is written" identity. The directory lists
+     one university under several names ("Massachusetts Institute of Technology"
+     and "…(MIT)"), and a table entry that matched only one of them would
+     silently apply to half a university's postings. */
+  var SCOPED_KEYED = {};
   for (var uni in SCOPED_SCHOOL_ALIASES) {
     if (!Object.prototype.hasOwnProperty.call(SCOPED_SCHOOL_ALIASES, uni)) continue;
-    BY_SCOPED_SCHOOL[fold(uni)] = tableOf([], SCOPED_SCHOOL_ALIASES[uni]);
+    var table = tableOf([], SCOPED_SCHOOL_ALIASES[uni]);
+    BY_SCOPED_SCHOOL[fold(uni)] = table;
+    SCOPED_KEYED[institutionKey(uni)] = table;
   }
   var BY_SCHOOL = tableOf(SCHOOL_LIST, SCHOOL_ALIASES);
   var BY_UNIT = tableOf([], UNIT_ALIASES);
@@ -277,14 +373,20 @@
     var s = spell(v);
     if (!s) return '';
 
-    var scoped = institution ? BY_SCOPED_SCHOOL[fold(canonInstitution(institution))] : null;
-    if (scoped && scoped[fold(s)]) return scoped[fold(s)];
+    var scoped = institution
+      ? (BY_SCOPED_SCHOOL[fold(canonInstitution(institution))]
+         || SCOPED_KEYED[institutionKey(institution)])
+      : null;
 
-    var hit = BY_SCHOOL[fold(s)];
-    if (hit) return hit;
-
+    /* BOTH tables are asked twice: as written, then with a leading "The"
+       dropped. The bare retry used to reach only the global table, so a
+       scoped entry missed the one spelling that carried it — "The Fox School
+       of Business and Management" went on standing beside "Fox School of
+       Business" in Temple's list with the alias sitting right there. */
     var bare = clean(s.replace(/^the\s+/i, ''));
-    hit = BY_SCHOOL[fold(bare)];
+    var hit = (scoped && (scoped[fold(s)] || scoped[fold(bare)]))
+           || BY_SCHOOL[fold(s)]
+           || BY_SCHOOL[fold(bare)];
     if (hit) return hit;
 
     return bare || s;

@@ -1284,6 +1284,30 @@ for (const [name, expect] of [
   const all = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
   ok(all > 10, 'form: the university picker opens with the published vocabulary');
 
+  /* ALPHABETICAL, ON SCREEN. The list used to open most-posted-first, which
+     reads as no order at all once it is three hundred names long: the reader
+     knows the university they want and is looking for it, not browsing. Only
+     a browser can see this, because the order is the product of the score,
+     the comparator and the render cap together. */
+  const opened = await f.$$eval(
+    '.oa-combo-list:not([hidden]) .oa-combo-opt:not(.oa-combo-add) .oa-combo-name',
+    (n) => n.map((x) => x.textContent.trim()));
+  const az = opened.slice().sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+  eq(opened.findIndex((v, i) => v !== az[i]), -1,
+    'form: with nothing typed the picker opens in alphabetical order');
+  ok(opened.length > 250,
+    `form: and renders the whole list (${opened.length}), not a top-N that ends in the C's`);
+  ok(/^A/i.test(opened[0]) && /^[U-Z]/i.test(opened[opened.length - 1]),
+    'form: so it runs from the start of the alphabet to the end');
+
+  /* AND THE SEED IS IN IT. A first-time poster from a university nobody has
+     posted from used to meet a blank list; these four are in the seed of the
+     world's operations schools and in no posting on the site. */
+  for (const uni of ['Bilkent University', 'Cranfield University', 'VinUniversity',
+    'Kühne Logistics University']) {
+    ok(opened.some((v) => v === uni), `form: offers ${uni}, which has never posted here`);
+  }
+
   await f.fill('#f-institution', 'tul');
   await f.waitForTimeout(200);
   const narrowed = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt .oa-combo-name',
@@ -1591,6 +1615,68 @@ for (const [name, expect] of [
   });
   eq(fold.filter((x) => x.off > 0), [], 'form: the open picker is never off the screen on a phone');
   await f.setViewportSize({ width: 1280, height: 1000 });
+
+  /* ------------------------------------------- THE PICKER IN THE DARK THEME
+
+     The reported bug, and the only place it can be proved: with the dark
+     theme on, the dropdown painted a white card and inherited the page's
+     near-white ink — measured at 1.65:1, which is not a contrast NEAR-miss
+     but an invisible list. Static CSS cannot show it, because the failure is
+     the INTERACTION of a background named here and a colour inherited from
+     three files away; so the browser is asked what it actually paints.
+
+     WCAG AA for body text is 4.5:1, and it is asserted in BOTH themes: a fix
+     that only darkened the panel would have traded one broken theme for the
+     other. */
+  const contrast = async (theme) => {
+    await f.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    await f.click('#f-institution');
+    await f.fill('#f-institution', '');
+    await f.waitForTimeout(250);
+    const read = await f.evaluate(() => {
+      const list = document.querySelector('.oa-combo-list:not([hidden])');
+      if (!list) return null;
+      const name = list.querySelector('.oa-combo-opt .oa-combo-name');
+      const count = list.querySelector('.oa-combo-opt .oa-combo-n');
+      const head = list.querySelector('.oa-combo-group');
+      /* the ground the text is drawn ON: the panel's own, since the rows are
+         transparent until hovered */
+      const ground = getComputedStyle(list).backgroundColor;
+      const of = (el) => (el ? getComputedStyle(el).color : null);
+      return { ground, name: of(name), count: of(count), head: of(head) };
+    });
+    await f.keyboard.press('Escape');
+    return read;
+  };
+
+  const lum = (css) => {
+    const [r, g, b] = css.match(/[\d.]+/g).slice(0, 3).map(Number).map((v) => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (fg, bg) => {
+    const a = lum(fg), b = lum(bg);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  };
+
+  for (const theme of ['dark', 'light']) {
+    const c = await contrast(theme);
+    ok(c, `form (${theme}): the picker opens`);
+    if (!c) continue;
+    ok(!/^rgba\(0, 0, 0, 0\)$/.test(c.ground),
+      `form (${theme}): the picker paints its own ground, so the page cannot show through`);
+    const nameRatio = ratio(c.name, c.ground);
+    ok(nameRatio >= 4.5,
+      `form (${theme}): a university name reads at ${nameRatio.toFixed(2)}:1 against the panel (AA is 4.5)`);
+    for (const [what, css] of [['the posting count', c.count], ['the group heading', c.head]]) {
+      if (!css) continue;
+      const r = ratio(css, c.ground);
+      ok(r >= 4.5, `form (${theme}): ${what} reads at ${r.toFixed(2)}:1`);
+    }
+  }
+  await f.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
 
   eq(formErrors, [], 'form: no uncaught script errors');
   await f.close();

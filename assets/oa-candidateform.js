@@ -576,12 +576,49 @@
 
   /* ------------------------------------------------------------------- boot */
 
+
+  /* ------------------------------------------------------ the shared vocabulary
+
+     "Current affiliation" is ONE free-text box, deliberately: a candidate
+     writes "Wharton, University of Pennsylvania" — a school and a university
+     together — and the candidates page, the alert matcher and the published
+     `affiliation` field have always carried it as one string. So this offers
+     the university names the site already publishes (data/vocab.json, which
+     the posting form reads too) WITHOUT splitting the field: pick one and it
+     is spelled the way every other page spells it; keep typing and whatever
+     you write is what publishes.
+
+     A HINT, never a restriction, and entirely optional — without oa-combo.js
+     on the page, or if the fetch fails, the field is an ordinary text input
+     and the form works exactly as it did. */
+
+  function wireVocab() {
+    if (!window.OACombo) return;
+    var el = $('f-affiliation');
+    if (!el) return;
+
+    /* one entry per university however the vocabulary spells it, the job
+       form's rule — institutionKey groups, canonInstitution publishes */
+    var S = window.OASchools;
+    var combo = OACombo.attach(el, {
+      options: [],
+      key: S ? function (v) { return S.institutionKey(v); } : null,
+      publishAs: S ? S.canonInstitution : null,
+    });
+
+    fetch('data/vocab.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (v) { if (v) combo.setOptions(v.universities || []); })
+      .catch(function () { /* an ordinary text input; that is fine */ });
+  }
+
   function boot() {
     cvSlot = makeSlot('cv', 'CV');
     rsSlot = makeSlot('rs', 'research summary');
     enterEditMode();
     wireTakeDown();
     paintYearNote();
+    wireVocab();
 
     var sent = false;                 // latched once the profile has been written
     var form = $('oa-cand-form');
