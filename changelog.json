@@ -13,7 +13,7 @@
    "id": "single-page-redesign-live",
    "date": "2026-08-17",
    "title": "A new Operations Academia — one page, light or dark",
-   "summary": "The site has been redesigned. Everything for the market under way now reads as one scrolling page — job postings, candidates, placements, the survey, resources, the FAQ — with a flat keyword bar at the top instead of menus, and a light or dark mode you choose and the site remembers. The full filterable job list has its own page, as does the Universities map, the recent-faculty list and the past-markets archive, all rebuilt in the new look. Nothing moved address: every link you have saved still works, and the previous design is kept, working, at operationsacademia.org/v2/ (with the 2014–2026 site still at /v1/).",
+   "summary": "The site has been redesigned. Everything for the market under way now reads as one scrolling page — job postings, candidates, placements, the survey, resources, the FAQ — with a flat keyword bar at the top instead of menus, and a light or dark mode you choose and the site remembers. The full filterable job list has its own page, as does the Universities map, the recent-faculty list and the past-markets archive, all rebuilt in the new look. Nothing moved address: every link you have saved still works, and the 2014–2026 site is still at /v1/.",
    "url": "https://www.operationsacademia.org/"
   },
   {
@@ -91,14 +91,14 @@
    "date": "2026-08-16",
    "title": "Every page of the site is now in the new version",
    "summary": "The new site used to hold only the rebuilt pages — job postings, posting a job, e-mail alerts and feedback — while everything else still pointed at the old one. Every remaining page has now been carried across, identical in content and look, so the whole site can be browsed in the new version from home page to footer without ever leaving it.",
-   "url": "https://www.operationsacademia.org/v2/"
+   "url": "https://www.operationsacademia.org/"
   },
   {
    "id": "site-wide-review-fixes",
    "date": "2026-08-16",
    "title": "A site-wide review, and dozens of fixes",
    "summary": "The whole of the new site was reviewed page by page and script by script. Among the fixes: the header's Feedback button no longer covers the navigation menu on smaller laptops; on a phone, signing in and out now works from the menu panel; searching inside a filter box types correctly; printed pages include each posting's details; filters can be combined without the menu closing after every tick; and e-mail alerts are delivered exactly once per posting.",
-   "url": "https://www.operationsacademia.org/v2/jobs.html"
+   "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "merge-duplicate-accounts",
