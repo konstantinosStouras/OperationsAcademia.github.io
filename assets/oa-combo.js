@@ -346,6 +346,7 @@
 
       if (state.active >= state.rows.length) state.active = state.rows.length - 1;
       paintActive();
+      place();
     }
 
     function paintActive() {
@@ -370,6 +371,28 @@
       }
     }
 
+    /* MEASURED AFTER OPENING, NEVER GUESSED FROM POSITION
+       (_MOBILE-STANDARDS.md rule 6). The panel hangs under the field, and on a
+       phone the field is halfway down the screen: 422px of list under it ran
+       61px past the fold, and a field near the bottom put the whole thing
+       off-screen. So it takes whichever side has more room, and never grows
+       past what that side has. */
+    function place() {
+      if (!state.open) return;
+      list.style.maxHeight = '';
+      list.classList.remove('is-above');
+
+      var cap = parseFloat(window.getComputedStyle(list).maxHeight) || 300;
+      var box = input.getBoundingClientRect();
+      var below = window.innerHeight - box.bottom - 12;
+      var above = box.top - 12;
+      var up = below < Math.min(cap, list.scrollHeight) && above > below;
+
+      if (up) list.classList.add('is-above');
+      var room = Math.max(140, Math.min(cap, up ? above : below));
+      list.style.maxHeight = room + 'px';
+    }
+
     function open() {
       if (state.open) return;
       state.open = true;
@@ -377,6 +400,9 @@
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       render();
+      place();
+      window.addEventListener('resize', place);
+      window.addEventListener('scroll', place, true);
     }
 
     function close() {
@@ -384,8 +410,12 @@
       state.open = false;
       state.active = -1;
       list.hidden = true;
+      list.classList.remove('is-above');
+      list.style.maxHeight = '';
       input.setAttribute('aria-expanded', 'false');
       input.removeAttribute('aria-activedescendant');
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
     }
 
     function take(value) {

@@ -984,14 +984,40 @@
            institution as one of the archive's fused one-column values and
            takes it apart — right at ingest, wrong under a poster who has
            simply not reached the next field yet. */
+        /* The one university the typed text can only be the beginning of.
+           Nothing, when it could be several — "University of" is not a name —
+           and nothing under four letters, which is a keystroke rather than an
+           intention. */
+        var uniNames = Object.keys(byUniversity);
+
+        function onlyUniversityStartingWith(typed) {
+          var f = S.fold(typed);
+          if (f.length < 4) return '';
+          var hit = '', i;
+          for (i = 0; i < uniNames.length; i++) {
+            if (S.fold(uniNames[i]).indexOf(f) !== 0) continue;
+            if (hit) return '';
+            hit = uniNames[i];
+          }
+          return hit;
+        }
+
         function snapPlace() {
-          /* The published spelling first, the canon second. canonInstitution()
-             leaves a university it has no alias for exactly as typed, so
-             "tulane university" would have been posted in lower case and
-             offered ever after as a second Tulane — the very duplication this
-             is here to end. The vocabulary knows how the site spells it. */
+          /* The published spelling first, the one university the typed text
+             begins second, the canon last.
+
+             canonInstitution() leaves a university it has no alias for exactly
+             as typed, so "tulane university" would have been posted in lower
+             case and offered ever after as a second Tulane. And "tulane" on
+             its own — a poster who saw the one matching row and tabbed on —
+             matched nothing at all: the cascade quietly went away, the school
+             list opened at every school on the site, and the posting was filed
+             under a university nobody else uses. Both are the duplication this
+             is here to end, and the vocabulary knows how the site spells it. */
           var typed = val(inst);
-          var name = uniIndex[keyInst(typed)] || S.canonInstitution(typed);
+          var name = uniIndex[keyInst(typed)] ||
+                     onlyUniversityStartingWith(typed) ||
+                     S.canonInstitution(typed);
           if (name && name !== typed) inst.value = name;
           if (!val(school) && !val(unit)) return;
 

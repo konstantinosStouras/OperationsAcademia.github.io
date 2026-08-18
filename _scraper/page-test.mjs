@@ -1295,6 +1295,44 @@ for (const [name, expect] of [
   await f.waitForTimeout(150);
   eq(await f.inputValue('#f-institution'), 'Tulane University', 'form: choosing fills the field');
 
+  /* A NEAR MISS still finds the university. "tulane" — a poster who saw the
+     one matching row and moved on — used to match nothing: the cascade
+     quietly went away, the school list opened at every school on the site,
+     and the posting was filed under a university nobody else uses. */
+  for (const [typed, becomes] of [
+    ['tulane', 'Tulane University'],
+    ['Tulane Univ', 'Tulane University'],
+    ['tulane university', 'Tulane University'],
+  ]) {
+    await f.fill('#f-institution', typed);
+    await f.evaluate(() => {
+      const el = document.getElementById('f-institution');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    });
+    await f.waitForTimeout(120);
+    eq(await f.inputValue('#f-institution'), becomes,
+      `form: "${typed}" is the one university it can only be the beginning of`);
+  }
+  for (const typed of ['University of', 'Wibble Institute']) {
+    await f.fill('#f-institution', typed);
+    await f.evaluate(() => {
+      const el = document.getElementById('f-institution');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    });
+    await f.waitForTimeout(120);
+    eq(await f.inputValue('#f-institution'), typed,
+      `form: "${typed}" could be several universities or none, so it is left alone`);
+  }
+  await f.fill('#f-institution', 'Tulane University');
+  await f.evaluate(() => {
+    const el = document.getElementById('f-institution');
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.blur();
+  });
+  await f.waitForTimeout(120);
+
   // the chosen university's own schools lead the next list
   await f.click('#f-school');
   await f.waitForTimeout(250);
@@ -1490,6 +1528,13 @@ for (const [name, expect] of [
      it.                                                                      */
 
   await f.setViewportSize({ width: 390, height: 780 });
+  // close whatever is open: a panel with room above it now opens UPWARDS, over
+  // the fields above, so a stale one covers the field this block wants
+  await f.evaluate(() => {
+    const open = document.activeElement;
+    if (open && open.blur) open.blur();
+  });
+  await f.waitForTimeout(100);
   await f.evaluate(() => document.getElementById('f-institution').scrollIntoView({ block: 'center' }));
   await f.click('#f-institution');
   await f.waitForTimeout(300);
@@ -1513,6 +1558,38 @@ for (const [name, expect] of [
   ok(phone.rightEdge <= phone.viewport && phone.width <= phone.viewport - 28,
     `form: and inside it (${phone.width}px wide, right edge ${phone.rightEdge} of ${phone.viewport})`);
   eq(phone.sideways, 0, 'form: the open picker does not make the page scroll sideways');
+
+  /* …and ON SCREEN, which is the half of rule 6 a height cap does not give:
+     the panel hangs under the field, and on a phone the field is halfway down,
+     so 422px of list ran 61px past the fold — and a field near the bottom put
+     the whole thing out of sight. It opens upwards when there is more room
+     above, measured after opening. */
+  const fold = await f.evaluate(async () => {
+    const out = [];
+    for (const id of ['f-institution', 'f-school', 'f-unit']) {
+      const el = document.getElementById(id);
+      el.scrollIntoView({ block: 'center' });
+      el.focus();
+      el.dispatchEvent(new Event('click', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 150));
+      const list = document.querySelector('.oa-combo-list:not([hidden])');
+      const r = list.getBoundingClientRect();
+      out.push({ id, off: Math.round(Math.max(0, r.bottom - window.innerHeight) + Math.max(0, -r.top)) });
+      el.blur();
+    }
+    // the worst case: the field at the very bottom of the screen
+    const last = document.getElementById('f-unit');
+    last.scrollIntoView({ block: 'end' });
+    last.focus();
+    last.dispatchEvent(new Event('click', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const r = list.getBoundingClientRect();
+    out.push({ id: 'f-unit at the fold', off: Math.round(Math.max(0, r.bottom - window.innerHeight) + Math.max(0, -r.top)) });
+    last.blur();
+    return out;
+  });
+  eq(fold.filter((x) => x.off > 0), [], 'form: the open picker is never off the screen on a phone');
   await f.setViewportSize({ width: 1280, height: 1000 });
 
   eq(formErrors, [], 'form: no uncaught script errors');

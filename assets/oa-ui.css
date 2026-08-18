@@ -1293,6 +1293,14 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
 .oa-combo-list[hidden] { display: none; }
 
+/* opened upwards, when there is more room above the field than below it
+   (assets/oa-combo.js measures; this only says where it goes) */
+.oa-combo-list.is-above {
+  top: auto;
+  bottom: calc(100% + 2px);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.14);
+}
+
 .oa-combo-opt {
   display: flex;
   align-items: baseline;

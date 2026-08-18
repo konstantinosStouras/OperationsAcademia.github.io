@@ -76,6 +76,12 @@ marked global.
     because a form is not a list page and nothing measured it —
     `page-test.mjs` now opens it at 390px and measures all three.
 
+    A height cap is only half of rule 6: the panel hangs under its field, and
+    on a phone a field is halfway down the screen, so 422px of list ran 61px
+    past the fold and a field near the bottom put the whole thing out of
+    sight. It now **measures after opening** and takes whichever side has more
+    room, growing no further than that side allows.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and

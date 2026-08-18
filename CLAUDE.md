@@ -199,6 +199,13 @@ rules follow, both pinned in `page-test.mjs`:
 
 - changing the university **re-scopes the lists, never clears the fields**.
   What the poster typed is theirs;
+- a NEAR MISS still finds the university: on leaving the field, text that can
+  only be the beginning of one university becomes that university ("tulane" →
+  "Tulane University"). Without it the cascade quietly went away — the school
+  list opened at every school on the site and the posting was filed under a
+  name nobody else uses — and the only thing on screen that said so was the
+  absence of a heading. Text that could be several universities, or none, is
+  left exactly as typed;
 - the fields are put into the published spelling as the poster leaves them, by
   the same `canonPlace()` the submission goes through — so what they read back
   is what everybody else will read. The one exception: a lone institution with
