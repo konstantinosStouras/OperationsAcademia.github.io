@@ -23,7 +23,11 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #5a6673;
+  /* Follows the page's own ink: this label sits on the PAGE background, which
+     is near-black in dark mode, so a fixed dark grey would be nearly invisible
+     there. Near-black in light mode, near-white in dark, and the fallback
+     covers a page that does not load the theme's variables at all. */
+  color: var(--ink, #22303c);
 }
 
 .oa-uni-bar input[type='search'] {
@@ -48,7 +52,8 @@
 }
 
 .oa-uni-count {
-  color: #5a6673;
+  /* on the page background too — see the note on .oa-uni-bar label */
+  color: var(--ink, #22303c);
   font-size: 13px;
 }
 
@@ -67,7 +72,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  color: #5a6673;
+  color: #22303c;
   text-align: center;
   font-size: 15px;
 }
@@ -85,22 +90,40 @@
   margin: 0;
 }
 
+/* EVERY WORD ON THE POPUP IS BLACK, and that is not a style preference but a
+   consequence of what the popup IS. Leaflet's card is white in both themes —
+   nothing in this repository restyles it — so text on it can never take its
+   colour from the page, which is near-black in dark mode. The label grey and
+   the link colour below were both chosen for a light page and were what made
+   this card read as washed out. */
 .oa-uni-pop td {
   padding: 2px 10px 2px 0;
   font-size: 12.5px;
   line-height: 1.45;
-  color: #38424c;
+  color: #22303c;
   vertical-align: top;
   border: 0;
 }
 
 .oa-uni-pop .oa-uni-poplabel {
-  color: #5a6673;
+  color: #22303c;
   white-space: nowrap;
 }
 
+/* THE LINKS NEED THE EXTRA SPECIFICITY, which is the whole reason this card
+   went grey. The redesign sets `body.v3 a { color: var(--brand) }` — one class
+   and two elements — which outweighs a bare `.oa-uni-pop a`, so in dark mode
+   every "link" on this white card was painted --brand #c6ccd4: a pale grey
+   meant for a near-black page. `.leaflet-popup .oa-uni-pop a` is two classes
+   and wins on either theme.
+
+   Underlined deliberately: black and undecorated, these would be
+   indistinguishable from the plain text beside them — body.v3 a also clears
+   the underline, so it has to be put back here or the affordance goes with
+   the colour. */
+.leaflet-popup .oa-uni-pop a,
 .oa-uni-pop a {
-  color: #2f6ea8;
+  color: #22303c;
   text-decoration: underline;
 }
 

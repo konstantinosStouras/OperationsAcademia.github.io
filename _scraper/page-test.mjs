@@ -2106,6 +2106,48 @@ for (const [pageName, dataset, patch] of [
   ok(pop.links.every((h) => /^(https?:\/\/|[a-z-]+\.html\?|\.\/\?)/.test(h)),
     'universities: every popup link is a page of this site or a real URL');
 
+  /* NOTHING ON THE POPUP IS GREY, IN EITHER THEME.
+     Leaflet's card is white in both, and nothing in this repository restyles
+     it, so text on it can never take its colour from the page. It did: the
+     redesign's `body.v3 a { color: var(--brand) }` outweighed a bare
+     `.oa-uni-pop a`, and in dark mode --brand is #c6ccd4 — a pale grey chosen
+     for a near-black page — so every "link" on the white card was washed out.
+
+     Measured as CONTRAST against the card's own background rather than
+     against a list of allowed hex values: the latter passes a colour that is
+     legal and unreadable, which is the whole failure being pinned. 4.5:1 is
+     the WCAG AA threshold for body text. */
+  for (const theme of ['light', 'dark']) {
+    await p.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    const worst = await p.$eval('.leaflet-popup .oa-uni-pop', (n) => {
+      const lum = (c) => {
+        const [r, g, b] = c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number)
+          .map((v) => (v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      // the nearest ancestor that actually paints — Leaflet's card
+      let bgEl = n, bg = '';
+      while (bgEl && !bg) {
+        const c = getComputedStyle(bgEl).backgroundColor;
+        if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) bg = c;
+        bgEl = bgEl.parentElement;
+      }
+      const L2 = lum(bg || 'rgb(255,255,255)');
+      let low = { ratio: 99, text: '' };
+      for (const el of n.querySelectorAll('td, th, a, h3')) {
+        if (!el.textContent.trim()) continue;
+        const L1 = lum(getComputedStyle(el).color);
+        const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+        if (ratio < low.ratio) low = { ratio, text: el.textContent.trim().slice(0, 24) };
+      }
+      return low;
+    });
+    ok(worst.ratio >= 4.5,
+      `universities: popup text is readable in ${theme} mode ` +
+      `(worst ${worst.ratio.toFixed(1)}:1 on "${worst.text}")`);
+  }
+  await p.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+
   /* And the deep links WORK: each lands with the school in a filter chip, not
      merely at a URL that carries it. This is the check the swap needed — a
      redirect resolves and looks fine while silently discarding the filter. */
