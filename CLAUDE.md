@@ -401,7 +401,10 @@ that is still unreviewed pushes the mark past it — and publishing that older
 entry later would then reach nobody, silently and for ever. The digest stops the
 day before the oldest entry waiting: publish it or remove it and everything
 behind it goes out on the next run, in the order it was written. Delayed, never
-lost. **A decision read that FAILS is caught**, not left to reject: it withholds
+lost — including for a subscriber who has never had an update digest, whose
+31-day first-window cap is measured back from the END of the window rather than
+from NOW, so an entry held longer than a month does not slide out of it while it
+waits. **A decision read that FAILS is caught**, not left to reject: it withholds
 everything since the gate (the safe direction) rather than killing the job
 digests too, which have nothing to do with the update log.
 

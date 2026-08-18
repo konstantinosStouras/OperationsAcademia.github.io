@@ -472,10 +472,16 @@ async function main() {
     const jobs = M.newJobsFor(rows, a.criteria, since)
       .sort((x, y) => String(y.addedAt).localeCompare(String(x.addedAt)));
 
-    // The change-log window is tracked by the DATE OF THE LAST ENTRY SENT, not
-    // by the send timestamp — see newUpdatesFor. On a first-ever send, cap it
-    // at 31 days so a new subscriber is not posted the whole back-catalogue.
-    const sinceUpdate = a.lastUpdateDate || M.daysBefore(now, 31);
+    /* The change-log window is tracked by the DATE OF THE LAST ENTRY SENT, not
+       by the send timestamp — see newUpdatesFor. On a first-ever send, cap it
+       at 31 days so a new subscriber is not posted the whole back-catalogue.
+       That cap is measured back from the END of the window rather than from
+       NOW, which matters only under a hold: an entry that waits more than a
+       month for review would otherwise slide out of a never-yet-sent
+       subscriber's first window while it waited, and reach them never. With
+       nothing held `until` IS today, so this is the behaviour it always had. */
+    const sinceUpdate = a.lastUpdateDate ||
+      M.daysBefore(new Date(Date.parse(until + 'T00:00:00Z') || now.getTime()), 31);
     const news = M.newUpdatesFor(updates, a.criteria, sinceUpdate, until);
 
     if (!jobs.length && !news.length) {

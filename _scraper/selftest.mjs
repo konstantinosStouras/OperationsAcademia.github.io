@@ -3614,6 +3614,32 @@ async function testNewsReview() {
   ok(News.applied(before, { title: '' }).title === 'before',
     'and an empty override is not an edit — it falls back to the entry itself');
 
+  /* THE FILE ITSELF. Nothing validated changelog.json before, and the gate
+     gives that teeth: an entry with no usable `id` cannot be reviewed (the
+     document is keyed on it), and two entries sharing one would be decided
+     together — one Remove taking down a second entry nobody touched. A
+     malformed entry now fails CI, where it is a one-line fix, instead of
+     stalling the announcements silently. */
+  const shipped = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
+  const entries = shipped.updates || [];
+  ok(entries.length > 0, 'changelog.json carries entries');
+  const ids = new Set();
+  for (const u of entries) {
+    ok(typeof u.id === 'string' && u.id.trim().length > 0,
+      `every change-log entry has an id — "${u.title || '(untitled)'}" does not`);
+    ok(!ids.has(u.id), `and it is unique — "${u.id}" is used twice`);
+    ids.add(u.id);
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(String(u.date || '')),
+      `every entry has a yyyy-mm-dd date — "${u.id}" has "${u.date}"`);
+    ok(typeof u.title === 'string' && u.title.trim().length > 0,
+      `and a title — "${u.id}" has none`);
+  }
+  /* AND THE GATE READS IT THE SAME WAY THE PAGES DO. If publicUpdates dropped
+     an entry the pages render, the mailer would announce a different list. */
+  eq(News.publicUpdates(entries, {}).length,
+    entries.filter((u) => String(u.date) < News.REVIEW_FROM).length,
+    'every pre-gate entry is public, and every entry since it is not');
+
   /* ------------------------------------------------------- every consumer */
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-news.js'), 'utf8');
   ok(js.includes('module.exports = factory()'),

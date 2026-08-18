@@ -2365,6 +2365,34 @@ for (const [pageName, listSel] of [
     ['Publish/Edit/Remove', 'Edit/Remove', 'Edit/Remove'],
     `${pageName}: every entry can be edited and removed; only the new one published`);
 
+  /* THE PANEL STAYS OPEN ACROSS A RE-RENDER. render() rebuilds the <details>,
+     so without remembering the state it snapped shut on every one — and
+     pressing Edit on a removed entry re-renders, which made that button read
+     as dead: the editor opened inside a panel that had just folded up. */
+  await p.click('.v3-news-bin summary');
+  ok(await p.$eval('.v3-news-bin', (n) => n.open),
+    `${pageName}: the removed panel opens when clicked`);
+  await p.click('.v3-news-bin .v3-news-admin button:has-text("Edit")');
+  ok(await p.$eval('.v3-news-bin', (n) => n.open) &&
+     await p.isVisible('.v3-news-bin .v3-news-edit textarea'),
+    `${pageName}: and Edit inside it opens the form without folding the panel away`);
+  await p.click('.v3-news-bin .v3-news-edit button:has-text("Cancel")');
+
+  /* THE INLINE EDITOR KEEPS WHAT IS TYPED across a re-render — the list
+     re-renders on its own when the decisions land, and on a FAILED save,
+     which is exactly when losing a paragraph just written would hurt most. */
+  await p.click(`${listSel} > li .v3-news-admin button:has-text("Edit")`);
+  ok(await p.isVisible(`${listSel} .v3-news-edit textarea`),
+    `${pageName}: Edit opens a real form, not a prompt() line`);
+  await p.fill(`${listSel} .v3-news-edit textarea`, 'A summary still being written');
+  await p.evaluate(([log]) => window.OANews.__setForTest(null, true, log), [LOG]);
+  await p.waitForTimeout(200);
+  eq(await p.inputValue(`${listSel} .v3-news-edit textarea`), 'A summary still being written',
+    `${pageName}: and a re-render mid-edit keeps it`);
+  await p.click(`${listSel} .v3-news-edit button:has-text("Cancel")`);
+  ok(!(await p.$(`${listSel} .v3-news-edit`)),
+    `${pageName}: Cancel closes it, changing nothing`);
+
   /* AN EDIT IS SHOWN, not noted beside the entry. */
   await p.evaluate(([log]) => window.OANews.__setForTest(
     { settled: { status: 'approved', title: 'Reworded by hand' } }, false, log), [LOG]);
