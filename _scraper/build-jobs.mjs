@@ -899,7 +899,8 @@ async function main() {
    already uses. Importing this file used to RUN the build. */
 /* `pathToFileURL`, not a template string: a raw path and a file URL are not the
    same text the moment the path holds a space or anything else a URL escapes
-   (this repository already carries a directory called `back up`). Compared as
+   (this repository carried a directory called `back up` until it was renamed
+   `_backup`, and a checkout path can hold a space anywhere). Compared as
    strings, the two differ, main() is never called, and the process exits 0
    having printed nothing — a scheduled publish that goes green while
    publishing nothing, which is the worst failure available to it.

@@ -25,7 +25,24 @@
         would walk an archive reader into pages the archive does not have);
      3. the head gains `noindex` — the archive must not compete with the
         live pages in search — and a slim banner says where the reader is,
-        with the way back. Everything else is byte-for-byte the old page.
+        with the way back. Everything else is byte-for-byte the old page;
+     4. the page's canonical and `og:url` are re-pointed at its OWN /v1/
+        address, and its `og:image` is absolutised. THIS RULE WAS MISSING
+        UNTIL 2026-08-18 and it cost the live site its link preview. Left
+        alone, all 17 archived pages went on declaring `og:url` = the home
+        page — so eighteen served files, seventeen of them carrying
+        `noindex,nofollow`, claimed one Open Graph identity, and a crawler
+        that reached any of them attached a refusal to the address of the
+        page people actually share. archive-v2.mjs' rule 5 says the same
+        thing about /v2/ and was written on promotion day; nobody backported
+        it two days. Because this script is retired (below), the committed
+        archive was patched directly to what the rule produces — the rule
+        lives here so a revival cannot lose it again.
+
+   NONE OF THAT CONTRADICTS "verbatim". The promise is about the page's
+   CONTENT — its tables, its forms, its prose. An address is not content: a
+   copy that sits under /v1/ and still calls itself the root is not a faithful
+   record, it is a broken one.
 
    The navigation menu needs NO rewrite: navigationMenu.js writes relative,
    extension-less hrefs ("jobs"), and GitHub Pages resolves /v1/jobs to
@@ -62,8 +79,11 @@ const BANNER = [
 
 function sha(s) { return createHash('sha256').update(s).digest('hex').slice(0, 16); }
 
+const SITE = 'https://www.operationsacademia.org';
+
 export function archivePage(html, { source }) {
   let out = html.replace(/\r\n/g, '\n');
+  const self = SITE + '/v1/' + path.basename(source);
 
   // 1. root-relative assets and images, wherever they are referenced
   out = out.replace(/(\b(?:href|src)\s*=\s*")(?!\/|[a-z][a-z0-9+.-]*:|\/\/|#)(assets\/|images\/)/gi,
@@ -79,6 +99,20 @@ export function archivePage(html, { source }) {
       '<meta name="robots" content="noindex,nofollow">\n    $1');
   }
   out = out.replace(/(<body[^>]*>)/i, '$1\n    ' + BANNER);
+
+  // 4. the page's own address, not the root's, and an og:image a crawler on
+  //    /v1/ can actually fetch (a relative one resolves to /v1/images/…)
+  out = out
+    .replace(/(<link rel="canonical" href=")[^"]*(")/i, `$1${self}$2`)
+    .replace(/(<meta property="og:url" content=")[^"]*(")/i, `$1${self}$2`)
+    .replace(/(<meta (?:property="og:image(?::secure_url)?"|name="twitter:image") content=")(?!https?:)([^"]*)(")/gi,
+      (_m, a, v, z) => {
+        let f = v.trim().replace(/^\/+/, '');
+        // one page of the 2014 site wrote the filename with no extension at all
+        if (!/\.(png|jpe?g|gif|webp)$/i.test(f)) f += '.png';
+        if (!f.startsWith('images/')) f = 'images/' + f;
+        return a + SITE + '/' + f + z;
+      });
 
   return '<!DOCTYPE html>\n' +
     '<!-- ARCHIVED copy of ' + source + ' (source sha256:' + sha(html) + ') made by\n' +
