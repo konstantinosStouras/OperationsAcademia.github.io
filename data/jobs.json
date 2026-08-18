@@ -4,9 +4,9 @@
   "year": 2026,
   "posted": "2025-08-06",
   "institution": "CUHK Business School",
-  "department": "Department of Decisions, Operations and Technology",
+  "department": "Decisions, Operations and Technology",
   "school": "",
-  "unit": "Department of Decisions, Operations and Technology",
+  "unit": "Decisions, Operations and Technology",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -39,9 +39,9 @@
   "year": 2027,
   "posted": "2026-08-15",
   "institution": "Utah Valley University",
-  "department": "Strategic Management & Operations",
+  "department": "Strategic Management and Operations",
   "school": "",
-  "unit": "Strategic Management & Operations",
+  "unit": "Strategic Management and Operations",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -66,9 +66,9 @@
   "year": 2027,
   "posted": "2026-08-13",
   "institution": "Utah Valley University",
-  "department": "Operations & SCM",
+  "department": "Operations and Supply Chain Management",
   "school": "",
-  "unit": "Operations & SCM",
+  "unit": "Operations and Supply Chain Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -93,9 +93,9 @@
   "year": 2027,
   "posted": "2026-08-12",
   "institution": "Rutgers Business School–Newark and New Brunswick",
-  "department": "MS and IS",
+  "department": "Management Science and Information Systems",
   "school": "",
-  "unit": "MS and IS",
+  "unit": "Management Science and Information Systems",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -147,9 +147,9 @@
   "year": 2027,
   "posted": "2026-08-12",
   "institution": "University of Kansas",
-  "department": "BA, Information & Operations",
+  "department": "Analytics, Information and Operations Management",
   "school": "",
-  "unit": "BA, Information & Operations",
+  "unit": "Analytics, Information and Operations Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -202,14 +202,14 @@
   "owner": ""
  },
  {
-  "id": "2027-penn-state-20260811",
+  "id": "2027-the-pennsylvania-state-university-20260811",
   "year": 2027,
   "posted": "2026-08-11",
-  "institution": "Penn State",
-  "department": "SCM",
+  "institution": "The Pennsylvania State University",
+  "department": "Supply Chain Management",
   "school": "",
-  "unit": "SCM",
-  "type": "",
+  "unit": "Supply Chain Management",
+  "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
@@ -233,9 +233,9 @@
   "year": 2027,
   "posted": "2026-08-10",
   "institution": "The Ohio State University",
-  "department": "Max M. Fisher College of Business, Department of Operations and Business Analytics",
+  "department": "Max M. Fisher College of Business, Operations and Business Analytics",
   "school": "Max M. Fisher College of Business",
-  "unit": "Department of Operations and Business Analytics",
+  "unit": "Operations and Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -267,9 +267,9 @@
   "year": 2027,
   "posted": "2026-08-08",
   "institution": "Princeton University",
-  "department": "OR & Financial Engineering",
+  "department": "Operations Research and Financial Engineering",
   "school": "",
-  "unit": "OR & Financial Engineering",
+  "unit": "Operations Research and Financial Engineering",
   "type": "University",
   "levels": [
    "Post-Doc"
@@ -294,9 +294,9 @@
   "year": 2028,
   "posted": "2026-08-06",
   "institution": "University of Kansas",
-  "department": "School of Business, Analytics, Information, and Operations Management Department",
+  "department": "School of Business, Analytics, Information and Operations Management",
   "school": "School of Business",
-  "unit": "Analytics, Information, and Operations Management Department",
+  "unit": "Analytics, Information and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -326,9 +326,9 @@
   "year": 2027,
   "posted": "2026-08-05",
   "institution": "Rollins College",
-  "department": "SCM",
+  "department": "Supply Chain Management",
   "school": "",
-  "unit": "SCM",
+  "unit": "Supply Chain Management",
   "type": "University",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -407,9 +407,9 @@
   "year": 2027,
   "posted": "2026-08-05",
   "institution": "University of Virginia",
-  "department": "Technology & OM (TOM)",
+  "department": "Technology and Operations Management",
   "school": "",
-  "unit": "Technology & OM (TOM)",
+  "unit": "Technology and Operations Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -434,9 +434,9 @@
   "year": 2027,
   "posted": "2026-07-30",
   "institution": "Georgia Southern University",
-  "department": "Logistics and SCM",
+  "department": "Logistics and Supply Chain Management",
   "school": "",
-  "unit": "Logistics and SCM",
+  "unit": "Logistics and Supply Chain Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -461,9 +461,9 @@
   "year": 2027,
   "posted": "2026-07-30",
   "institution": "Morgan State University",
-  "department": "SCM",
+  "department": "Supply Chain Management",
   "school": "",
-  "unit": "SCM",
+  "unit": "Supply Chain Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -488,9 +488,9 @@
   "year": 2027,
   "posted": "2026-07-30",
   "institution": "National University of Singapore",
-  "department": "NUS Business School, Department of Analytics and Operations",
+  "department": "NUS Business School, Analytics and Operations",
   "school": "NUS Business School",
-  "unit": "Department of Analytics and Operations",
+  "unit": "Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -522,9 +522,9 @@
   "year": 2026,
   "posted": "2026-07-28",
   "institution": "McGill University",
-  "department": "Desautels Faculty of Management, Operations Management Area",
+  "department": "Desautels Faculty of Management, Operations Management",
   "school": "Desautels Faculty of Management",
-  "unit": "Operations Management Area",
+  "unit": "Operations Management",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -582,10 +582,10 @@
   "id": "2027-university-of-california-berkeley-20260722",
   "year": 2027,
   "posted": "2026-07-22",
-  "institution": "University of California Berkeley",
-  "department": "Operations and IT Management",
+  "institution": "University of California, Berkeley",
+  "department": "Operations and Information Technology Management",
   "school": "",
-  "unit": "Operations and IT Management",
+  "unit": "Operations and Information Technology Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -610,9 +610,9 @@
   "year": 2027,
   "posted": "2026-07-20",
   "institution": "Clarkson University",
-  "department": "Operations & Information Systems",
+  "department": "Operations and Information Systems",
   "school": "",
-  "unit": "Operations & Information Systems",
+  "unit": "Operations and Information Systems",
   "type": "University",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -699,7 +699,7 @@
   "id": "2027-ku-leuven-20260702",
   "year": 2027,
   "posted": "2026-07-02",
-  "institution": "KU LEUVEN",
+  "institution": "KU Leuven",
   "department": "Faculty of Economics and Business",
   "school": "Faculty of Economics and Business",
   "unit": "",
@@ -733,9 +733,9 @@
   "year": 2026,
   "posted": "2026-04-28",
   "institution": "University of Houston",
-  "department": "University of Houston and DISC",
+  "department": "Decision and Information Sciences",
   "school": "",
-  "unit": "University of Houston and DISC",
+  "unit": "Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -767,9 +767,9 @@
   "year": 2026,
   "posted": "2026-04-08",
   "institution": "Tulane University",
-  "department": "A.B. Freeman School of Business, Management Science Department",
-  "school": "A.B. Freeman School of Business",
-  "unit": "Management Science Department",
+  "department": "A. B. Freeman School of Business, Management Science",
+  "school": "A. B. Freeman School of Business",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -800,8 +800,8 @@
   "year": 2026,
   "posted": "2026-04-07",
   "institution": "Tulane University",
-  "department": "A.B. Freeman School of Business",
-  "school": "A.B. Freeman School of Business",
+  "department": "A. B. Freeman School of Business",
+  "school": "A. B. Freeman School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -833,9 +833,9 @@
   "year": 2026,
   "posted": "2026-04-07",
   "institution": "Tulane University",
-  "department": "A.B. Freeman School of Business, Management Science Department",
-  "school": "A.B. Freeman School of Business",
-  "unit": "Management Science Department",
+  "department": "A. B. Freeman School of Business, Management Science",
+  "school": "A. B. Freeman School of Business",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -866,8 +866,8 @@
   "year": 2027,
   "posted": "2026-04-07",
   "institution": "Tulane University",
-  "department": "A.B. Freeman School of Business",
-  "school": "A.B. Freeman School of Business",
+  "department": "A. B. Freeman School of Business",
+  "school": "A. B. Freeman School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -895,13 +895,13 @@
   "owner": ""
  },
  {
-  "id": "2026-institut-mines-telecom-business-school-20260319",
+  "id": "2026-institut-mines-telecom-20260319",
   "year": 2026,
   "posted": "2026-03-19",
-  "institution": "Institut Mines-Telecom Business School",
-  "department": "Department of Management, Marketing and Strategy",
+  "institution": "Institut Mines-Télécom",
+  "department": "Management, Marketing and Strategy",
   "school": "",
-  "unit": "Department of Management, Marketing and Strategy",
+  "unit": "Management, Marketing and Strategy",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -932,9 +932,9 @@
   "year": 2026,
   "posted": "2026-02-24",
   "institution": "Tilburg University",
-  "department": "Tilburg School of Economics and Management, Department of Information Systems and Operations Management",
+  "department": "Tilburg School of Economics and Management, Information Systems and Operations Management",
   "school": "Tilburg School of Economics and Management",
-  "unit": "Department of Information Systems and Operations Management",
+  "unit": "Information Systems and Operations Management",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -997,8 +997,8 @@
   "year": 2026,
   "posted": "2026-02-23",
   "institution": "University College London",
-  "department": "Business School for Health",
-  "school": "Business School for Health",
+  "department": "UCL Global Business School for Health",
+  "school": "UCL Global Business School for Health",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -1029,8 +1029,8 @@
   "year": 2026,
   "posted": "2026-02-10",
   "institution": "University College London",
-  "department": "Business School for Health",
-  "school": "Business School for Health",
+  "department": "UCL Global Business School for Health",
+  "school": "UCL Global Business School for Health",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -1061,9 +1061,9 @@
   "year": 2026,
   "posted": "2026-02-09",
   "institution": "University of Utah",
-  "department": "David Eccles School of Business, Department of Operations & Info Systems",
+  "department": "David Eccles School of Business, Operations and Information Systems",
   "school": "David Eccles School of Business",
-  "unit": "Department of Operations & Info Systems",
+  "unit": "Operations and Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1097,9 +1097,9 @@
   "year": 2026,
   "posted": "2026-02-06",
   "institution": "Georgia State University",
-  "department": "Robinson College of Business, Department of Management",
+  "department": "Robinson College of Business, Management",
   "school": "Robinson College of Business",
-  "unit": "Department of Management",
+  "unit": "Management",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -1131,9 +1131,9 @@
   "year": 2026,
   "posted": "2026-02-03",
   "institution": "HEC Paris",
-  "department": "Information Systems and Operations Management Department",
+  "department": "Information Systems and Operations Management",
   "school": "",
-  "unit": "Information Systems and Operations Management Department",
+  "unit": "Information Systems and Operations Management",
   "type": "Business School",
   "levels": [
    "Post-Doc"
@@ -1165,9 +1165,9 @@
   "year": 2026,
   "posted": "2026-01-27",
   "institution": "University of Cyprus",
-  "department": "School Economics and Management, Department of Business and Public Administration",
+  "department": "School Economics and Management, Business and Public Administration",
   "school": "School Economics and Management",
-  "unit": "Department of Business and Public Administration",
+  "unit": "Business and Public Administration",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1234,9 +1234,9 @@
   "year": 2026,
   "posted": "2026-01-11",
   "institution": "The Hong Kong Polytechnic University",
-  "department": "Department of Logistics and Maritime Studies",
+  "department": "Logistics and Maritime Studies",
   "school": "",
-  "unit": "Department of Logistics and Maritime Studies",
+  "unit": "Logistics and Maritime Studies",
   "type": "University",
   "levels": [
    "Other Ranks"
@@ -1325,9 +1325,9 @@
   "year": 2026,
   "posted": "2025-12-03",
   "institution": "TBS Education",
-  "department": "TBS Education, Information, Operations and Management Sciences Department",
+  "department": "Information, Operations and Management Sciences",
   "school": "",
-  "unit": "TBS Education, Information, Operations and Management Sciences Department",
+  "unit": "Information, Operations and Management Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1359,9 +1359,9 @@
   "year": 2026,
   "posted": "2025-11-20",
   "institution": "Villanova University",
-  "department": "Villanova School of Business, Management and Operations Area",
+  "department": "Villanova School of Business, Management and Operations",
   "school": "Villanova School of Business",
-  "unit": "Management and Operations Area",
+  "unit": "Management and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1392,9 +1392,9 @@
   "year": 2026,
   "posted": "2025-11-18",
   "institution": "City University of Hong Kong",
-  "department": "College of Business, Department of Decision Analytics and Operations",
+  "department": "College of Business, Decision Analytics and Operations",
   "school": "College of Business",
-  "unit": "Department of Decision Analytics and Operations",
+  "unit": "Decision Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -1426,8 +1426,8 @@
   "year": 2026,
   "posted": "2025-11-13",
   "institution": "University College London",
-  "department": "Global Business School for Health",
-  "school": "Global Business School for Health",
+  "department": "UCL Global Business School for Health",
+  "school": "UCL Global Business School for Health",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -1458,9 +1458,9 @@
   "year": 2026,
   "posted": "2025-11-06",
   "institution": "Auburn University",
-  "department": "Department of Industrial and Systems Engineering",
+  "department": "Industrial and Systems Engineering",
   "school": "",
-  "unit": "Department of Industrial and Systems Engineering",
+  "unit": "Industrial and Systems Engineering",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -1491,9 +1491,9 @@
   "year": 2026,
   "posted": "2025-11-04",
   "institution": "The Pennsylvania State University",
-  "department": "Supply Chain & Information Systems Department",
+  "department": "Supply Chain and Information Systems",
   "school": "",
-  "unit": "Supply Chain & Information Systems Department",
+  "unit": "Supply Chain and Information Systems",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -1526,9 +1526,9 @@
   "year": 2026,
   "posted": "2025-10-29",
   "institution": "Lehigh University",
-  "department": "College of Business, Department of Decision and Technology Analytics",
+  "department": "College of Business, Decision and Technology Analytics",
   "school": "College of Business",
-  "unit": "Department of Decision and Technology Analytics",
+  "unit": "Decision and Technology Analytics",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -1559,9 +1559,9 @@
   "year": 2026,
   "posted": "2025-10-24",
   "institution": "University of South Carolina",
-  "department": "Darla Moore School of Business, Department of Management Science",
+  "department": "Darla Moore School of Business, Management Science",
   "school": "Darla Moore School of Business",
-  "unit": "Department of Management Science",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -1592,10 +1592,10 @@
   "id": "2026-university-of-california-berkeley-20251023",
   "year": 2026,
   "posted": "2025-10-23",
-  "institution": "University of California Berkeley",
-  "department": "Department of Industrial Engineering and Operations Research (IEOR)",
+  "institution": "University of California, Berkeley",
+  "department": "Industrial Engineering and Operations Research",
   "school": "",
-  "unit": "Department of Industrial Engineering and Operations Research (IEOR)",
+  "unit": "Industrial Engineering and Operations Research",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1622,9 +1622,9 @@
   "year": 2026,
   "posted": "2025-10-22",
   "institution": "Korea Advanced Institute of Science and Technology (KAIST)",
-  "department": "College of Business, Operations Strategy and Management Science Group",
+  "department": "College of Business, Operations Strategy and Management Science",
   "school": "College of Business",
-  "unit": "Operations Strategy and Management Science Group",
+  "unit": "Operations Strategy and Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1656,9 +1656,9 @@
   "year": 2026,
   "posted": "2025-10-22",
   "institution": "University of California, Berkeley",
-  "department": "Department of Industrial Engineering and Operations Research (IEOR)",
+  "department": "Industrial Engineering and Operations Research",
   "school": "",
-  "unit": "Department of Industrial Engineering and Operations Research (IEOR)",
+  "unit": "Industrial Engineering and Operations Research",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1688,9 +1688,9 @@
   "year": 2026,
   "posted": "2025-10-21",
   "institution": "Arizona State University",
-  "department": "W. P. Carey School of Business, Department of Information Systems",
+  "department": "W. P. Carey School of Business, Information Systems",
   "school": "W. P. Carey School of Business",
-  "unit": "Department of Information Systems",
+  "unit": "Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1722,9 +1722,9 @@
   "year": 2026,
   "posted": "2025-10-21",
   "institution": "The University of Texas at Dallas",
-  "department": "Naveen Jindal School of Management/Healthcare Management Area",
-  "school": "Naveen Jindal School of Management/Healthcare Management Area",
-  "unit": "",
+  "department": "Naveen Jindal School of Management, Healthcare Management",
+  "school": "Naveen Jindal School of Management",
+  "unit": "Healthcare Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1790,8 +1790,8 @@
   "year": 2026,
   "posted": "2025-10-17",
   "institution": "University of San Diego",
-  "department": "The Knauss School of Business at the University of San Diego",
-  "school": "The Knauss School of Business at the University of San Diego",
+  "department": "Knauss School of Business",
+  "school": "Knauss School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -1819,9 +1819,9 @@
   "year": 2026,
   "posted": "2025-10-13",
   "institution": "Columbia University",
-  "department": "Department of Industrial Engineering and Operations Research",
+  "department": "Industrial Engineering and Operations Research",
   "school": "",
-  "unit": "Department of Industrial Engineering and Operations Research",
+  "unit": "Industrial Engineering and Operations Research",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -1885,9 +1885,9 @@
   "year": 2026,
   "posted": "2025-10-10",
   "institution": "Temple University",
-  "department": "Fox School of Business, Operations and Supply Chain Management area",
+  "department": "Fox School of Business, Operations and Supply Chain Management",
   "school": "Fox School of Business",
-  "unit": "Operations and Supply Chain Management area",
+  "unit": "Operations and Supply Chain Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -1920,9 +1920,9 @@
   "year": 2026,
   "posted": "2025-10-07",
   "institution": "Baruch College, The City University of New York (CUNY)",
-  "department": "Zicklin School of Business, Loomba Department of Management, Operations Management Group",
+  "department": "Zicklin School of Business, Loomba Department of Management, Operations Management",
   "school": "Zicklin School of Business",
-  "unit": "Loomba Department of Management, Operations Management Group",
+  "unit": "Loomba Department of Management, Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -1954,9 +1954,9 @@
   "year": 2026,
   "posted": "2025-10-07",
   "institution": "University of Virginia",
-  "department": "Darden School of Business, Data Analytics and Decision Sciences (DADS) Area",
+  "department": "Darden School of Business, Data Analytics and Decision Sciences",
   "school": "Darden School of Business",
-  "unit": "Data Analytics and Decision Sciences (DADS) Area",
+  "unit": "Data Analytics and Decision Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2018,9 +2018,9 @@
   "year": 2026,
   "posted": "2025-10-05",
   "institution": "University of Virginia",
-  "department": "Darden School of Business, Data Analytics and Decision Sciences (DADS) Area",
+  "department": "Darden School of Business, Data Analytics and Decision Sciences",
   "school": "Darden School of Business",
-  "unit": "Data Analytics and Decision Sciences (DADS) Area",
+  "unit": "Data Analytics and Decision Sciences",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -2049,8 +2049,8 @@
   "year": 2026,
   "posted": "2025-10-04",
   "institution": "Michigan State University",
-  "department": "The Eli Broad College of Business, Supply Chain Management",
-  "school": "The Eli Broad College of Business",
+  "department": "Eli Broad College of Business, Supply Chain Management",
+  "school": "Eli Broad College of Business",
   "unit": "Supply Chain Management",
   "type": "Business School",
   "levels": [
@@ -2084,8 +2084,8 @@
   "year": 2026,
   "posted": "2025-10-03",
   "institution": "Özyeğin University",
-  "department": "School of Business, Operations Management",
-  "school": "School of Business",
+  "department": "Faculty of Business, Operations Management",
+  "school": "Faculty of Business",
   "unit": "Operations Management",
   "type": "Business School",
   "levels": [
@@ -2118,9 +2118,9 @@
   "year": 2026,
   "posted": "2025-10-03",
   "institution": "University of Texas at Dallas",
-  "department": "Naveen Jindal School of Management, Supply Chain/Operations Management Department",
+  "department": "Naveen Jindal School of Management, Supply Chain and Operations Management",
   "school": "Naveen Jindal School of Management",
-  "unit": "Supply Chain/Operations Management Department",
+  "unit": "Supply Chain and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2153,9 +2153,9 @@
   "year": 2026,
   "posted": "2025-10-02",
   "institution": "Michigan State University",
-  "department": "The Eli Broad College of Business, Department of Supply Chain Management",
-  "school": "The Eli Broad College of Business",
-  "unit": "Department of Supply Chain Management",
+  "department": "Eli Broad College of Business, Supply Chain Management",
+  "school": "Eli Broad College of Business",
+  "unit": "Supply Chain Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2188,9 +2188,9 @@
   "year": 2026,
   "posted": "2025-10-02",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Department of Management Science",
+  "department": "Miami Herbert Business School, Management Science",
   "school": "Miami Herbert Business School",
-  "unit": "Department of Management Science",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2223,9 +2223,9 @@
   "year": 2026,
   "posted": "2025-10-02",
   "institution": "University of Utah",
-  "department": "David Eccles School of Business, Operations & Information Systems Department",
+  "department": "David Eccles School of Business, Operations and Information Systems",
   "school": "David Eccles School of Business",
-  "unit": "Operations & Information Systems Department",
+  "unit": "Operations and Information Systems",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2258,8 +2258,8 @@
   "year": 2026,
   "posted": "2025-09-29",
   "institution": "University College London",
-  "department": "Global Business School for Health",
-  "school": "Global Business School for Health",
+  "department": "UCL Global Business School for Health",
+  "school": "UCL Global Business School for Health",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2290,9 +2290,9 @@
   "year": 2026,
   "posted": "2025-09-29",
   "institution": "University of Minnesota",
-  "department": "Carlson School of Management, Supply Chain and Operations Department",
+  "department": "Carlson School of Management, Supply Chain and Operations",
   "school": "Carlson School of Management",
-  "unit": "Supply Chain and Operations Department",
+  "unit": "Supply Chain and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2321,9 +2321,9 @@
   "year": 2026,
   "posted": "2025-09-26",
   "institution": "City University of Hong Kong",
-  "department": "College of Business, Department of Decision Analytics and Operations",
+  "department": "College of Business, Decision Analytics and Operations",
   "school": "College of Business",
-  "unit": "Department of Decision Analytics and Operations",
+  "unit": "Decision Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2356,9 +2356,9 @@
   "year": 2026,
   "posted": "2025-09-26",
   "institution": "Lehigh University",
-  "department": "College of Business, Department of Decision and Technology Analytics",
+  "department": "College of Business, Decision and Technology Analytics",
   "school": "College of Business",
-  "unit": "Department of Decision and Technology Analytics",
+  "unit": "Decision and Technology Analytics",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -2390,9 +2390,9 @@
   "year": 2026,
   "posted": "2025-09-25",
   "institution": "University of Illinois Urbana-Champaign",
-  "department": "Gies College of Business, Department of Business Administration",
+  "department": "Gies College of Business, Business Administration",
   "school": "Gies College of Business",
-  "unit": "Department of Business Administration",
+  "unit": "Business Administration",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2492,9 +2492,9 @@
   "year": 2026,
   "posted": "2025-09-23",
   "institution": "The Ohio State University",
-  "department": "Max M. Fisher College of Business, Operations and Business Analytics Department",
+  "department": "Max M. Fisher College of Business, Operations and Business Analytics",
   "school": "Max M. Fisher College of Business",
-  "unit": "Operations and Business Analytics Department",
+  "unit": "Operations and Business Analytics",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -2527,9 +2527,9 @@
   "year": 2026,
   "posted": "2025-09-23",
   "institution": "University of Houston",
-  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business, Decision and Information Sciences",
   "school": "C. T. Bauer College of Business",
-  "unit": "Department of Decision and Information Sciences",
+  "unit": "Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2562,9 +2562,9 @@
   "year": 2026,
   "posted": "2025-09-23",
   "institution": "University of Houston",
-  "department": "Decision and Information Sciences (DISC)",
+  "department": "Decision and Information Sciences",
   "school": "",
-  "unit": "Decision and Information Sciences (DISC)",
+  "unit": "Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2629,9 +2629,9 @@
   "year": 2026,
   "posted": "2025-09-18",
   "institution": "National University of Singapore",
-  "department": "Department of Industrial Systems Engineering and Management",
+  "department": "Industrial Systems Engineering and Management",
   "school": "",
-  "unit": "Department of Industrial Systems Engineering and Management",
+  "unit": "Industrial Systems Engineering and Management",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -2663,8 +2663,8 @@
   "year": 2026,
   "posted": "2025-09-18",
   "institution": "University of San Diego",
-  "department": "The Knauss School of Business at the University of San Diego",
-  "school": "The Knauss School of Business at the University of San Diego",
+  "department": "Knauss School of Business",
+  "school": "Knauss School of Business",
   "unit": "",
   "type": "University",
   "levels": [
@@ -2693,9 +2693,9 @@
   "year": 2026,
   "posted": "2025-09-16",
   "institution": "London Business School",
-  "department": "Management Science & Operations",
+  "department": "Management Science and Operations",
   "school": "",
-  "unit": "Management Science & Operations",
+  "unit": "Management Science and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2726,8 +2726,8 @@
   "year": 2026,
   "posted": "2025-09-13",
   "institution": "University College London",
-  "department": "Global Business School for Health",
-  "school": "Global Business School for Health",
+  "department": "UCL Global Business School for Health",
+  "school": "UCL Global Business School for Health",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2827,9 +2827,9 @@
   "year": 2026,
   "posted": "2025-09-04",
   "institution": "Tulane University",
-  "department": "A.B. Freeman School of Business, Management Science Department",
-  "school": "A.B. Freeman School of Business",
-  "unit": "Management Science Department",
+  "department": "A. B. Freeman School of Business, Management Science",
+  "school": "A. B. Freeman School of Business",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -2859,8 +2859,8 @@
   "year": 2026,
   "posted": "2025-09-03",
   "institution": "University College London",
-  "department": "Global Business School for Health",
-  "school": "Global Business School for Health",
+  "department": "UCL Global Business School for Health",
+  "school": "UCL Global Business School for Health",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -2893,9 +2893,9 @@
   "year": 2026,
   "posted": "2025-09-02",
   "institution": "Institut Mines-Télécom",
-  "department": "Institut Mines-Télécom Business School, Department of Management, Marketing and Strategy (MMS)",
+  "department": "Institut Mines-Télécom Business School, Management, Marketing and Strategy",
   "school": "Institut Mines-Télécom Business School",
-  "unit": "Department of Management, Marketing and Strategy (MMS)",
+  "unit": "Management, Marketing and Strategy",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2925,9 +2925,9 @@
   "year": 2026,
   "posted": "2025-08-30",
   "institution": "Imperial College London",
-  "department": "Imperial Business School, Analytics and Operations group",
-  "school": "Imperial Business School",
-  "unit": "Analytics and Operations group",
+  "department": "Imperial College Business School, Analytics and Operations",
+  "school": "Imperial College Business School",
+  "unit": "Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2960,9 +2960,9 @@
   "year": 2026,
   "posted": "2025-08-27",
   "institution": "University College London",
-  "department": "The UCL School of Management, Operations & Technology group",
-  "school": "The UCL School of Management",
-  "unit": "Operations & Technology group",
+  "department": "UCL School of Management, Operations and Technology",
+  "school": "UCL School of Management",
+  "unit": "Operations and Technology",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2995,9 +2995,9 @@
   "year": 2026,
   "posted": "2025-08-22",
   "institution": "University of South Carolina",
-  "department": "Darla Moore School of Business, Management Science Department",
+  "department": "Darla Moore School of Business, Management Science",
   "school": "Darla Moore School of Business",
-  "unit": "Management Science Department",
+  "unit": "Management Science",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3025,13 +3025,13 @@
   "owner": ""
  },
  {
-  "id": "2026-frankfurt-school-of-finance-management-20250821",
+  "id": "2026-frankfurt-school-of-finance-and-management-20250821",
   "year": 2026,
   "posted": "2025-08-21",
-  "institution": "Frankfurt School of Finance & Management",
-  "department": "Management Department",
+  "institution": "Frankfurt School of Finance and Management",
+  "department": "Management",
   "school": "",
-  "unit": "Management Department",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3096,9 +3096,9 @@
   "year": 2026,
   "posted": "2025-08-19",
   "institution": "University of Wisconsin-Madison",
-  "department": "Wisconsin School of Business, Operations and Information Management Department",
+  "department": "Wisconsin School of Business, Operations and Information Management",
   "school": "Wisconsin School of Business",
-  "unit": "Operations and Information Management Department",
+  "unit": "Operations and Information Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3131,9 +3131,9 @@
   "year": 2026,
   "posted": "2025-08-17",
   "institution": "University College Dublin",
-  "department": "UCD Michael Smurfit Graduate School of Business, Management Area",
+  "department": "UCD Michael Smurfit Graduate School of Business, Management",
   "school": "UCD Michael Smurfit Graduate School of Business",
-  "unit": "Management Area",
+  "unit": "Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3165,9 +3165,9 @@
   "year": 2026,
   "posted": "2025-08-16",
   "institution": "IESE Business School",
-  "department": "Operations, Information and Technology Department",
+  "department": "Operations, Information and Technology",
   "school": "",
-  "unit": "Operations, Information and Technology Department",
+  "unit": "Operations, Information and Technology",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3199,9 +3199,9 @@
   "year": 2026,
   "posted": "2025-08-15",
   "institution": "The Chinese University of Hong Kong, Shenzhen",
-  "department": "Operations Management Division, The School of Management and Economics",
+  "department": "Operations Management",
   "school": "",
-  "unit": "Operations Management Division, The School of Management and Economics",
+  "unit": "Operations Management",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -3234,8 +3234,8 @@
   "year": 2026,
   "posted": "2025-08-14",
   "institution": "University of San Diego",
-  "department": "The Knauss School of Business",
-  "school": "The Knauss School of Business",
+  "department": "Knauss School of Business",
+  "school": "Knauss School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -3264,9 +3264,9 @@
   "year": 2026,
   "posted": "2025-08-13",
   "institution": "University of Notre Dame",
-  "department": "Mendoza College of Business, Department of IT, Analytics, and Operations",
+  "department": "Mendoza College of Business, IT, Analytics, and Operations",
   "school": "Mendoza College of Business",
-  "unit": "Department of IT, Analytics, and Operations",
+  "unit": "IT, Analytics, and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3298,9 +3298,9 @@
   "year": 2026,
   "posted": "2025-08-07",
   "institution": "Indian School of Business",
-  "department": "Operations Management group",
+  "department": "Operations Management",
   "school": "",
-  "unit": "Operations Management group",
+  "unit": "Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3331,9 +3331,9 @@
   "year": 2026,
   "posted": "2025-08-05",
   "institution": "DePauw University",
-  "department": "School of Business and Leadership, Business Analytics Program",
+  "department": "School of Business and Leadership, Business Analytics",
   "school": "School of Business and Leadership",
-  "unit": "Business Analytics Program",
+  "unit": "Business Analytics",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3360,9 +3360,9 @@
   "year": 2026,
   "posted": "2025-07-08",
   "institution": "National University of Singapore",
-  "department": "NUS Business School, Department of Analytics and Operations",
+  "department": "NUS Business School, Analytics and Operations",
   "school": "NUS Business School",
-  "unit": "Department of Analytics and Operations",
+  "unit": "Analytics and Operations",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3394,9 +3394,9 @@
   "year": 2026,
   "posted": "2025-06-21",
   "institution": "HEC Paris",
-  "department": "Information Systems and Operations Management Department",
+  "department": "Information Systems and Operations Management",
   "school": "",
-  "unit": "Information Systems and Operations Management Department",
+  "unit": "Information Systems and Operations Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3463,9 +3463,9 @@
   "year": 2026,
   "posted": "2025-06-05",
   "institution": "The Hong Kong Polytechnic University",
-  "department": "Department of Logistics and Maritime Studies",
+  "department": "Logistics and Maritime Studies",
   "school": "",
-  "unit": "Department of Logistics and Maritime Studies",
+  "unit": "Logistics and Maritime Studies",
   "type": "University",
   "levels": [
    "Other Ranks"

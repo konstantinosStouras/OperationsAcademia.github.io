@@ -469,7 +469,9 @@ Tulane offered *both* "A.B. Freeman School of Business" and "Freeman School of
 Business" — one school, posted twice, spelled twice — and the department box
 offered every department on the site rather than that school's.
 
-**They are now connected.** `data/vocab.json` gained a third level,
+The first half is `assets/oa-schools.js` (the same day, in parallel): one
+spelling per place, canonicalised at every ingest. **This is the second half:
+the three fields now CASCADE.** `data/vocab.json` gained a third level,
 `byUniversity[uni].bySchool[school]`, and a top-level `bySchool` for the
 university-not-yet-known case; `assets/oa-combo.js` gained `setScope()`, which
 offers a scope under a heading ("Schools at Tulane University") while typing
@@ -477,45 +479,40 @@ still searches the whole site under a second one ("Elsewhere on the site").
 The scope is a HINT: a school opening a department tomorrow must stay
 postable, so nothing is ever removed from reach.
 
-**One spelling per place** is the other half, and it is deliberately narrower
-than the country rule. A school has no closed list to canon() against, so what
-is pinned is the IDENTITY of a name — `assets/oa-names.js`, the second
-dual-mode module after `oa-countries.js`. Its `key()` folds away case,
-punctuation, a leading "The", a leading run of donor initials ("A.B."),
-"&"/"and", a plural "s" and a trailing "Department"/"Area"/"Group". Every merge
-it makes in the committed data is real (six groups); the guards that stop it
-merging two different places — a state is not a plural, initials INSIDE a name
-are kept — are pinned in the selftest, because they are the rules that could
-silently move postings between universities.
+Four decisions worth recording:
 
-Three decisions worth recording:
-
-1. **The Universities directory wins the spelling.** `data/universities.json`
-   (imported from the owner's own universities sheet) is curated and barely
-   moves, so anchoring on it keeps the offered spelling stable rather than
-   flipping the day a posting tips the count. To change what the form offers,
-   change the sheet and dispatch the legacy import. It is also a SOURCE: its
-   254 rows are what let the cascade work for a university that has never
-   posted here.
-2. **`institution` is never rewritten on a published posting.** A posting's id
-   and its permalink are derived from it (`jobs-model.jobId`), so renaming one
-   would break links already out in the world. The form snaps what is being
-   typed now, which is where consistency is cheap; `canonicaliseNames` touches
-   only `school`, `unit` and the line they compose (12 rows on the day it
-   shipped).
+1. **The vocabulary reads the Universities directory too.**
+   `data/universities.json` — imported from the owner's own universities sheet
+   — carries 254 curated (institution, school, department) rows, which is what
+   lets the cascade work for a university that has never posted here. Directory
+   rows carry NO posting count, so "4 postings" stays a count of postings, and
+   they are put through `canonPlace()` inside `buildVocab` because a directory
+   row has never been through an ingest. `data/past-postings.json` is
+   deliberately NOT a source: its legacy rows never separated the institution
+   from the school and the department, so feeding it in would put the very mess
+   this ends into the university picker.
+2. **The form shows what it will submit.** `oa-jobform.js` already
+   canonicalised the three names into the submission; it now writes them back
+   into the fields as the poster leaves them, so the preview, the posting and
+   everybody else's postings agree. The one exception is a lone institution
+   with no school or department yet — `canonPlace()` reads that as one of the
+   archive's fused one-column values and takes it apart, which is right at
+   ingest and wrong under a poster who has simply not reached the next field.
 3. **A rename can move a name a saved e-mail alert was watching for.** An
    alert holds free text, not a name, so nothing can canonicalise it the way
    `canonCountry` does. The fix is on the other side: the site's own text
    search and the alert matcher now fold punctuation and read "&" as "and"
-   (one rule, pinned in both files), which is strictly more forgiving. That
-   leaves exactly one of the twelve renames unreachable by an alert holding
-   the old words — "Management Sciences Area" → "Management Science
-   Department" — which is accepted rather than papered over.
-
-`data/past-postings.json` is deliberately NOT a vocabulary source: its legacy
-rows never separated the institution from the school and the department, so
-feeding it in would put the very mess the vocabulary exists to end into the
-university picker.
+   (one rule, pinned in both files), which is strictly more forgiving and
+   keeps "what I see on the site" and "what I am e-mailed" the same question.
+   It rescues the "&"-versus-"and" renames; a rename that genuinely changes
+   the words ("Management Sciences Area" → "Management Science") is beyond any
+   fold, and is accepted rather than papered over.
+4. **`canonUnit()` had to become idempotent.** A department ending in its own
+   acronym — "Engineering Management, Information, and Systems Department
+   (EMIS)", from the directory — lost the acronym but kept the wrapper word,
+   because the wrapper was only stripped while it was last. It now strips to a
+   fixed point. Nothing in the postings hit it; the directory did, the first
+   time anything canonicalised it.
 
 ---
 

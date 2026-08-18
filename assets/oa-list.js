@@ -69,9 +69,8 @@
      only ever finds MORE — no search that worked before stops working.
 
      It matters beyond tidiness: one department is written both ways across the
-     postings, and the vocabulary (assets/oa-names.js) now publishes whichever
-     spelling the Universities directory uses. A reader who bookmarked
-     ?filterA=<the other one> must still find it. */
+     postings, and assets/oa-schools.js now publishes one of them. A reader who
+     bookmarked ?filterA=<the other one> must still find it. */
   function fold(s) {
     s = String(s === null || s === undefined ? '' : s).toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');

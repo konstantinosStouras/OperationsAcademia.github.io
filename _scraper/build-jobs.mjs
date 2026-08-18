@@ -33,7 +33,7 @@ import {
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
-import { buildVocab, canonicaliseNames, serialiseVocab } from './vocab.mjs';
+import { buildVocab, serialiseVocab } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -407,28 +407,22 @@ async function main() {
     .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
 
   const merged = mergeRows(orphans, freshVisible, removeRefs);
-  const publishable = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+  const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
-  /* -------------------------------------------- one spelling per place
+  /* ------------------------------------- the form's option lists
 
-     The form's option lists come from the postings themselves plus the site's
-     own Universities directory, so a name a poster entered today is offered to
-     the next poster tomorrow with nobody curating a list — and a university's
-     schools, and each school's departments, are offered as a cascade.
+     Built from the postings themselves plus the site's own Universities
+     directory, so a name a poster entered today is offered to the next poster
+     tomorrow with nobody curating a list — and a university's schools, and
+     each school's departments, are offered as a cascade rather than as three
+     flat lists of everything.
 
-     Built here rather than at write time because the postings are also passed
-     through it: "Freeman School of Business" and "A.B. Freeman School of
-     Business" are one school, and the site should not show both. Only the two
-     name parts and the line they compose are touched, never `institution` —
-     a posting's id and permalink are derived from that. */
+     The names are already one-spelling-per-place: every posting went through
+     oa-schools.js's canonPlace() at ingest, and buildVocab puts the directory
+     rows — which have never been through an ingest — through the same
+     function. */
   const directory = await readJson(DIRECTORY, []);
-  const vocab = buildVocab(publishable, { generated: now.toISOString(), directory });
-  const named = canonicaliseNames(publishable, vocab);
-  const rows = named.rows;
-  for (const c of named.changed) log(`  ~ ${c.id}  ${c.from}  ->  ${c.to}`);
-  if (named.changed.length) {
-    log(`${named.changed.length} posting(s) renamed to the spelling the site publishes`);
-  }
+  const vocab = buildVocab(rows, { generated: now.toISOString(), directory });
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
      the FILE stays complete: it is the projection of every live document, the

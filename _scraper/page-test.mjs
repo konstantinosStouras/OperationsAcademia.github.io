@@ -1128,8 +1128,10 @@ for (const [name, expect] of [
     'v3 post-a-job: the poster is given a quotable reference');
   eq(posted.doc.status, 'queued', 'the submission is queued for the build');
   eq(posted.doc.uid, KEPT, 'and owned by the signed-in poster');
-  eq(posted.doc.department, 'Business School, Operations Area',
-    'school and unit are joined into the published department line');
+  eq(posted.doc.department, 'Business School, Operations',
+    'school and unit are joined into the published department line — under the ' +
+    'canonical names (assets/oa-schools.js), so "Operations Area" is posted as ' +
+    'the department the site already publishes under');
   eq(posted.doc.year, marketYear(),
     'the job market year is derived from the date, never asked (the form has no picker)');
   eq(posted.noYearField, true,
@@ -1291,7 +1293,7 @@ for (const [name, expect] of [
 
   /* ------------------------------------------------- the cascade, as reported
 
-     The bug: choosing Tulane offered BOTH "A.B. Freeman School of Business" and
+     The bug: choosing Tulane offered BOTH "A. B. Freeman School of Business" and
      "Freeman School of Business" — one school, posted twice, spelled twice —
      and the department field offered every department on the site. What must
      happen instead is one school under a heading naming the university, and
@@ -1309,14 +1311,14 @@ for (const [name, expect] of [
   });
   eq(scoped.heading, 'Schools at Tulane University',
     'form: the school list says whose schools it is offering');
-  eq(scoped.inScope, ['A.B. Freeman School of Business'],
+  eq(scoped.inScope, ['A. B. Freeman School of Business'],
     'form: one school, not the two spellings it was posted under');
   eq(scoped.others, 0,
     'form: and browsing does not bury it under every school on the site');
 
   await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
   await f.waitForTimeout(150);
-  eq(await f.inputValue('#f-school'), 'A.B. Freeman School of Business',
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
     'form: choosing a school fills the field');
 
   await f.click('#f-unit');
@@ -1329,9 +1331,9 @@ for (const [name, expect] of [
         .map((n) => n.textContent),
     };
   });
-  eq(dept.heading, 'Departments in A.B. Freeman School of Business',
+  eq(dept.heading, 'Departments in A. B. Freeman School of Business',
     'form: the department list narrows to the school that was chosen');
-  eq(dept.inScope, ['Management Science Department'],
+  eq(dept.inScope, ['Management Science'],
     'form: to ITS departments — one, not the three spellings it was posted under');
 
   // typing still reaches the whole site: a scope narrows, it never hides
@@ -1357,28 +1359,37 @@ for (const [name, expect] of [
   await f.evaluate(() => document.getElementById('f-school')
     .dispatchEvent(new Event('change', { bubbles: true })));
   await f.waitForTimeout(150);
-  eq(await f.inputValue('#f-school'), 'A.B. Freeman School of Business',
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
     'form: and the field is put into the spelling the site publishes');
 
   /* A department the site has only ever seen in one school names its school. */
   await f.fill('#f-school', '');
-  await f.fill('#f-unit', 'Management Science Department');
+  await f.fill('#f-unit', 'Management Science');
   await f.evaluate(() => document.getElementById('f-unit')
     .dispatchEvent(new Event('change', { bubbles: true })));
   await f.waitForTimeout(150);
-  eq(await f.inputValue('#f-school'), 'A.B. Freeman School of Business',
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
     'form: choosing a department fills in the school it sits in');
 
-  /* A university nobody has posted from has no scope to impose, and what is
-     typed there is left exactly as typed. */
+  /* A university nobody has posted from still gets the site's spelling rules
+     (oa-schools.js: "Area" is a house word, not part of the name) — and a name
+     the site has never heard of is left exactly as typed. Both are what the
+     submission itself will carry, which is why the field is put right where
+     the poster can see it rather than quietly on the way out. */
   await f.fill('#f-institution', 'Wibble University');
   await f.fill('#f-school', '');
   await f.fill('#f-unit', 'Operations Area');
   await f.evaluate(() => document.getElementById('f-unit')
     .dispatchEvent(new Event('change', { bubbles: true })));
   await f.waitForTimeout(150);
-  eq(await f.inputValue('#f-unit'), 'Operations Area',
-    'form: a university the site has never seen is not corrected against other universities');
+  eq(await f.inputValue('#f-unit'), 'Operations',
+    'form: the field shows the department as it will be published');
+  await f.fill('#f-unit', 'Wibble Studies');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Wibble Studies',
+    'form: and a name nobody has ever posted is never invented away');
   await f.fill('#f-institution', 'Tulane University');
   await f.fill('#f-unit', '');
 

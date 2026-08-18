@@ -21,11 +21,10 @@
    searches everything, under a second heading, because the scope is a HINT and
    not a restriction: a university opens a school, a school opens a department,
    and neither must be unpostable. The scope is never a filter over the options
-   list either — a university's own spelling of a name ("Operations Management
-   group") is not always the one the whole site uses most ("Operations
-   Management Area"), so scope values are offered as given and matched to the
-   options list by name IDENTITY (assets/oa-names.js) purely to read the
-   posting count off it.
+   list either: its values are offered as given and matched to the options list
+   only to read the posting count off it — through `key`, so a caller that
+   knows more about its names than this file does (the posting form knows
+   assets/oa-schools.js) can say when two spellings are one place.
 
    ACCESSIBILITY. The pattern is the ARIA 1.2 combobox: the input owns
    `role=combobox`, `aria-expanded` and `aria-activedescendant`; the list is a
@@ -67,13 +66,6 @@
     return 5;
   }
 
-  /* Two spellings of one place are one name — the rule the vocabulary was
-     built with (assets/oa-names.js). Falls back to the plain fold if that file
-     is not on the page, which only costs a duplicate row in the list. */
-  function nameKey(v) {
-    return (window.OANames && window.OANames.key) ? window.OANames.key(v) : fold(v);
-  }
-
   var uid = 0;
 
   /**
@@ -82,6 +74,8 @@
    *   options   [{ v, n }] or ['a','b'] — v is the value, n its usage count
    *   scope     { label, values, other, more } — the names that belong under
    *             what has already been chosen (see setScope)
+   *   key       fn      — when two spellings are the same name; defaults to
+   *                       the plain fold, which is right for a plain list
    *   max       number      — options rendered at once (the list is scrollable;
    *                           this is about DOM size, not about hiding values)
    */
@@ -107,6 +101,12 @@
     input.setAttribute('aria-controls', list.id);
     input.setAttribute('aria-autocomplete', 'list');
     input.setAttribute('autocomplete', 'off');
+
+    /* The caller's idea of when two spellings are one name — the posting form
+       passes oa-schools.js's canon so a scope offering "Management Science"
+       finds the count of a posting that said "Management Science Department".
+       Without one, a name is itself. */
+    var nameKey = typeof opts.key === 'function' ? opts.key : fold;
 
     var state = {
       options: [],
@@ -396,5 +396,5 @@
     return input.__oaCombo;
   }
 
-  window.OACombo = { attach: attach, fold: fold, score: score, key: nameKey };
+  window.OACombo = { attach: attach, fold: fold, score: score };
 })();

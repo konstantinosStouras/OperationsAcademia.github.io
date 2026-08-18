@@ -41,22 +41,24 @@
    a school can open a department tomorrow and the form must not make that
    unpostable.
 
-   ONE SPELLING PER PLACE. Names are grouped by assets/oa-names.js's key(), so
-   "A.B. Freeman School of Business" and "Freeman School of Business" are one
-   entry rather than two, and the spelling OFFERED is one somebody actually
-   wrote: the directory's, where it knows the name, else the most-posted one.
+   ONE SPELLING PER PLACE is assets/oa-schools.js's job, not this file's: every
+   name is put through its canonPlace() on the way in, so the lists offer what
+   the postings are published under and a directory row spelled differently
+   joins the same entry rather than starting a second one.
 
    Everything here is PURE and needs no network, so the selftest covers it.
    --------------------------------------------------------------------------- */
 
 import { createRequire } from 'node:module';
 
-/* One spelling per university, school and department — shared with the
-   browser, exactly as jobs-model.mjs shares oa-countries.js. key() decides
-   when two spellings are one place; it is never displayed. */
+/* One spelling per university, school and department (assets/oa-schools.js),
+   the same module jobs-model.mjs canonicalises every posting with. Used here
+   so the option lists, the cascade and the postings all name a place
+   identically — including the Universities directory, whose rows have never
+   been through an ingest. */
 const require = createRequire(import.meta.url);
-export const NAMES = require('../assets/oa-names.js');
-export const nameKey = NAMES.key;
+export const SCHOOLS = require('../assets/oa-schools.js');
+const { canonPlace, fold: nameFold } = SCHOOLS;
 
 /* --------------------------------------------------- school vs. unit
 
@@ -167,26 +169,22 @@ export function joinDepartment(school, unit) {
 /* ------------------------------------------------------------- the vocabulary */
 
 /** Case- and punctuation-insensitive identity, so "Operations Management" and
-    "operations management " are one entry rather than two. The LOOSER identity
-    that also folds away "The", donor initials, "&"/"and", plurals and a
-    trailing "Department"/"Area"/"Group" is nameKey (assets/oa-names.js). */
+    "operations management " are one entry rather than two. Names reach the
+    tally already canonicalised (assets/oa-schools.js), so this is only the
+    last-ditch fold that keeps two spellings of one canonical name together. */
 export function vocabKey(s) {
   return String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 /**
- * Which spelling of a name the site publishes, among the ones it has seen.
- *
- * The DIRECTORY WINS where it knows the name — data/universities.json is
- * curated and barely moves, so anchoring on it is what keeps the offered
- * spelling stable instead of flipping the day a posting tips the count. After
- * that: the most-posted spelling, then the most-written, then the fullest
- * ("Department" over "Dept"), then alphabetical so the result never depends on
- * the order rows arrive in.
+ * Which spelling to offer, among the ones that survived canonPlace() as one
+ * name. Usually there is only one — that is the point of canonicalising on the
+ * way in — so this is a tie-break, not a policy: the most-posted spelling, then
+ * the most-written, then the fullest, then alphabetical, so the result never
+ * depends on the order rows arrive in.
  */
 function pickForm(forms) {
   return [...forms.entries()].sort((a, b) =>
-    (b[1].dir - a[1].dir) ||
     (b[1].w - a[1].w) ||
     (b[1].c - a[1].c) ||
     (b[0].length - a[0].length) ||
@@ -195,23 +193,22 @@ function pickForm(forms) {
 
 /**
  * Group spellings of one name, count the POSTINGS behind each (directory rows
- * carry no count) and keep one spelling per place. Returns a Map keyed by
- * nameKey so a caller can look a raw value up; `n` is a posting count, which
- * is what the form's "4 postings" note means.
+ * carry no count) and keep one spelling per place. Returns a Map keyed by the
+ * fold so a caller can look a raw value up; `n` is a posting count, which is
+ * what the form's "4 postings" note means.
  */
 function tally(items) {
   const by = new Map();
   for (const it of items) {
     const v = tidy(it.v);
     if (!v) continue;
-    const k = nameKey(v);
+    const k = nameFold(v);
     if (!k) continue;
     const e = by.get(k) || { n: 0, forms: new Map() };
     e.n += it.w;
-    const f = e.forms.get(v) || { w: 0, c: 0, dir: false };
+    const f = e.forms.get(v) || { w: 0, c: 0 };
     f.w += it.w;
     f.c += 1;
-    f.dir = f.dir || !!it.dir;
     e.forms.set(v, f);
     by.set(k, e);
   }
@@ -229,23 +226,31 @@ function listOf(t) {
 
 /** The spelling `t` keeps for a raw value, or the value tidied if it is new. */
 function formOf(t, v) {
-  const k = nameKey(v);
+  const k = nameFold(v);
   const hit = k && t.get(k);
   return hit ? hit.v : tidy(v);
 }
 
-/** One (institution, school, unit) triple, however the row spells them. */
-function partOf(r, w, dir) {
+/**
+ * One (institution, school, unit) triple, in the spelling the site publishes.
+ *
+ * A posting has been through canonPlace() at ingest already; a DIRECTORY row
+ * has not, and it names its department in `department` beside its own `school`
+ * field. Running everything through canonPlace() here is what makes the
+ * directory's "Management Science Department" the same entry as a posting's
+ * "Management Science" instead of a second one — and it is idempotent, so
+ * doing it to a posting again costs nothing.
+ */
+function partOf(r, w) {
   const split = (r.school !== undefined || r.unit !== undefined)
     ? { school: tidy(r.school), unit: tidy(r.unit) }
     : splitDepartment(r.department);
-  // the directory names the unit in `department`; only split when it is alone
-  if (dir && r.school !== undefined) {
-    split.school = tidy(r.school);
-    split.unit = split.school ? tidy(r.department) : splitDepartment(r.department).unit;
-    if (!split.school) split.school = splitDepartment(r.department).school;
+  // the directory has no `unit`: its department sits in `department`
+  if (r.unit === undefined && r.department !== undefined && r.school !== undefined) {
+    split.unit = tidy(r.department);
   }
-  return { institution: tidy(r.institution), school: split.school, unit: split.unit, w, dir };
+  const place = canonPlace({ institution: r.institution, school: split.school, unit: split.unit });
+  return { institution: place.institution, school: place.school, unit: place.unit, w };
 }
 
 const sortNames = (a, b) => a.localeCompare(b);
@@ -277,13 +282,13 @@ function fromPairs(pairs) {
  */
 export function buildVocab(rows, { generated = '', directory = [] } = {}) {
   const parts = [
-    ...rows.map((r) => partOf(r, 1, false)),
-    ...directory.map((r) => partOf(r, 0, true)),
+    ...rows.map((r) => partOf(r, 1)),
+    ...directory.map((r) => partOf(r, 0)),
   ];
 
-  const universities = tally(parts.map((p) => ({ v: p.institution, w: p.w, dir: p.dir })));
-  const schools = tally(parts.map((p) => ({ v: p.school, w: p.w, dir: p.dir })));
-  const units = tally(parts.map((p) => ({ v: p.unit, w: p.w, dir: p.dir })));
+  const universities = tally(parts.map((p) => ({ v: p.institution, w: p.w })));
+  const schools = tally(parts.map((p) => ({ v: p.school, w: p.w })));
+  const units = tally(parts.map((p) => ({ v: p.unit, w: p.w })));
 
   /* every school's departments, across the site: the fallback the form uses
      when the university is one nobody has posted from yet */
@@ -298,7 +303,7 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
   const grouped = new Map();
   for (const p of parts) {
     if (!p.institution) continue;
-    const k = nameKey(p.institution);
+    const k = nameFold(p.institution);
     if (!grouped.has(k)) grouped.set(k, []);
     grouped.get(k).push(p);
   }
@@ -306,8 +311,8 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
   const byUniversity = {};
   for (const [k, own] of grouped) {
     const name = universities.get(k).v;
-    const ownSchools = tally(own.map((p) => ({ v: p.school, w: p.w, dir: p.dir })));
-    const ownUnits = tally(own.map((p) => ({ v: p.unit, w: p.w, dir: p.dir })));
+    const ownSchools = tally(own.map((p) => ({ v: p.school, w: p.w })));
+    const ownUnits = tally(own.map((p) => ({ v: p.unit, w: p.w })));
 
     /* '' is a real key: the departments posted at this university WITHOUT a
        school, which is what the form offers while the school field is empty */
@@ -334,51 +339,6 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
     byUniversity: Object.fromEntries(Object.entries(byUniversity).sort((a, b) => sortNames(a[0], b[0]))),
     bySchool: fromPairs(bySchool),
   };
-}
-
-/**
- * One spelling per place, applied to the postings themselves.
- *
- * The vocabulary decides which spelling the form OFFERS; this is what stops
- * the site from showing the other one on a card that was posted before the
- * lists existed. It rewrites nothing but the two name parts and the published
- * line they compose, and only where the spelling actually changes.
- *
- * `institution` is deliberately LEFT ALONE: a posting's id, its permalink and
- * its Universities-page link are all derived from it (jobs-model.jobId,
- * rowFromSubmission), so renaming one would break links that are already out
- * in the world. The university picker still offers a single spelling — that is
- * what keeps the next posting consistent.
- *
- * Pure, and idempotent: running it twice changes nothing the second time.
- */
-export function canonicaliseNames(rows, vocab) {
-  const byUni = new Map();
-  for (const [name, e] of Object.entries(vocab.byUniversity || {})) {
-    byUni.set(nameKey(name), {
-      schools: NAMES.index(e.schools || []),
-      units: NAMES.index(e.units || []),
-    });
-  }
-  const allSchools = NAMES.index((vocab.schools || []).map((o) => o.v));
-  const allUnits = NAMES.index((vocab.units || []).map((o) => o.v));
-
-  const changed = [];
-  const out = rows.map((row) => {
-    const own = byUni.get(nameKey(row.institution)) || null;
-    const school = NAMES.canon(row.school, (own && own.schools) || allSchools);
-    const unit = NAMES.canon(row.unit, (own && own.units) || allUnits);
-    if (school === tidy(row.school) && unit === tidy(row.unit)) return row;
-
-    changed.push({
-      id: row.id || row.ref || '',
-      from: joinDepartment(row.school, row.unit),
-      to: joinDepartment(school, unit),
-    });
-    return { ...row, school, unit, department: joinDepartment(school, unit) };
-  });
-
-  return { rows: out, changed };
 }
 
 /** Stable JSON with a trailing newline, so a diff shows the names that changed. */

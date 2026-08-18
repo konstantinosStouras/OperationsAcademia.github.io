@@ -122,57 +122,102 @@ otherwise stop matching silently.
 
 ## One spelling per university, school and department
 
-`assets/oa-names.js` is the **second dual-mode file** after `oa-countries.js`
-(browser `window.OANames`, Node `require`), and it answers a narrower question:
-a country has a closed list to `canon()` against, a school never can — a
-university may open a department tomorrow, so the posting form has to stay a
-free-text field. What is pinned instead is the **identity** of a name, `key()`:
-whether two spellings are the same place.
+`assets/oa-schools.js` is the **single definition** of what each university,
+school and department is called — the same dual-mode shape as
+`assets/oa-countries.js` (browser `window.OASchools`, Node `require`), and held
+to the same rules.
 
-It folds away case, punctuation, a leading "The", a **leading** run of donor
-initials ("A.B. Freeman"), "&" versus "and", a plural "s" and a trailing
-"Department"/"Area"/"Group". It is deliberately lossy and **never displayed** —
-the name a reader sees is always a spelling somebody actually wrote.
+The three names were free text on the old form and packed into ONE column in
+the sheets the archive came from, so one department arrived under half a dozen
+names. Tulane's was posted as "Freeman School of Business", "Freeman School of
+Business, Management Science", "…, Management Sciences Area", "A.B. Freeman
+School of Business, Management Science Department" and "A. B. Freeman School of
+Business / Management Sciecne" — five entries in every filter for one place.
 
-**When a merge is wrong, or two spellings are not merged that should be, fix
-`key()` and add the case to `testNames()` — never hand-edit `data/`.**
-`data/vocab.json` and `data/jobs.json` are both rebuilt every morning. The
-guards that stop `key()` merging two DIFFERENT places (a state is not a plural;
-initials inside a name are kept, so "Texas A&M" survives) are the dangerous
-half, and every one of them is pinned in the selftest.
+What is canonical:
 
-**Which spelling is offered:** the one `data/universities.json` uses, where the
-Universities directory knows the name; otherwise the most-posted one. So the
-place to correct a spelling the whole site shows is the **owner's universities
-sheet** — edit it and dispatch `oa-legacy-import.yml`. The directory is also a
-vocabulary SOURCE beside the postings: it is what lets the form cascade for a
-university that has never posted here.
+* the **full official name** of the university and the school ("A. B. Freeman
+  School of Business"), as with countries;
+* the **bare field name** of the department — "Management Science", never
+  "Management Science Department", "Management Sciences Area", "Department of
+  Management Science" or "…group". The wrapper word is how one school happens
+  to organise itself and is exactly what differs between two people describing
+  the same unit; the school it sits under is the neighbouring field already.
 
-**`institution` is never rewritten on a published posting.** Its id and its
-permalink are derived from it (`jobs-model.jobId`), so `canonicaliseNames()`
-touches only `school`, `unit` and the `department` line they compose. The form
-snaps what is being typed now, which is where the consistency is won.
+`canonPlace({institution, school, unit})` does all three at once, because WHICH
+of the three a name belongs in is part of what it decides: a department fused
+into the school field is moved across ("Kelley School of Business - Operations
+and Decision Technologies"), and a legacy archive row that packs all three into
+the university field is taken apart ("University of Pennsylvania (The Wharton
+School), Operations and Information Management (OPIM) Department"). It is pure
+and idempotent, so every writer can apply it on every rebuild.
+
+**When a new variant turns up, add it to `INSTITUTION_ALIASES` /
+`SCHOOL_ALIASES` / `UNIT_ALIASES` — never hand-edit the data**, for the reason
+the country table gives: `data/jobs.json` is rebuilt from Firestore every
+morning. `canon()` never invents — a school it has never seen is published
+under the name its poster gave it, and a comma that is part of a name is left
+alone ("University of California, Berkeley", "The Chinese University of Hong
+Kong, Shenzhen", "Bayes Business School, Faculty of Management").
+
+It is applied at every ingest — `jobs-model.rowFromSubmission`,
+`import-sheet.mjs`, `jobmarket-sheet.mjs` — and in the posting form itself
+(`assets/oa-jobform.js`), so a poster's own preview and their My postings page
+read the way the posting will publish. `data/vocab.json`, the list the form
+offers, is built from the canonical rows, so the next poster is offered the
+spelling the site already uses.
+
+It also has a third level: `byUniversity[uni].bySchool[school]`, and a
+top-level `bySchool` for the case where the university is not known yet. See
+the next section.
 
 ## The posting form's three name fields cascade
 
 `post-a-job.html` asks for the university, the school and the department
 separately, and the three are connected: choosing a university narrows the
 school list to that university's schools, and choosing a school narrows the
-department list to that school's departments (`data/vocab.json`'s
-`byUniversity[uni].bySchool[school]`, driven by `setScope()` in
-`assets/oa-combo.js`).
+department list to that school's departments. The lists come from
+`data/vocab.json` (`byUniversity[uni].bySchool[school]`, plus a top-level
+`bySchool`), and the picker renders a scope under its own heading —
+`setScope()` in `assets/oa-combo.js`.
+
+**The vocabulary has a second source: `data/universities.json`**, the site's
+own Universities directory. Its 254 curated (institution, school, department)
+rows are what let the cascade work for a university that has never posted here
+— they add names and, more importantly, they say which department sits in
+which school. They carry NO posting count (the "4 postings" note stays a count
+of postings), and they are put through `canonPlace()` like everything else,
+since a directory row has never been through an ingest. `data/past-postings.json`
+is deliberately NOT a source: its legacy rows never separated the institution
+from the school and the department, so feeding it in would put the very mess
+the vocabulary ends into the university picker.
 
 **A scope is a HINT, never a restriction.** Typing searches the whole site
 under a second heading, and a name nobody has posted before is still offered as
 a new one — a school that opens a department tomorrow must stay postable. Two
-rules follow from that, and both are pinned in `page-test.mjs`:
+rules follow, both pinned in `page-test.mjs`:
 
-- a field is only ever put right against a name the **chosen university (or
-  school) already uses** — the site's most-common spelling says nothing about
-  a university it has never seen, so "Operations Area" typed at a new
-  university stays "Operations Area";
-- changing the university above **re-scopes the lists, never clears the
-  fields**. What the poster typed is theirs.
+- changing the university **re-scopes the lists, never clears the fields**.
+  What the poster typed is theirs;
+- the fields are put into the published spelling as the poster leaves them, by
+  the same `canonPlace()` the submission goes through — so what they read back
+  is what everybody else will read. The one exception: a lone institution with
+  no school or department yet is canonicalised on its own, because
+  `canonPlace()` reads a lone institution as one of the archive's fused
+  one-column values and takes it apart.
+
+Two smaller conveniences: a department the site has only ever seen in one
+school fills that school in above it, and `assets/oa-combo.js` takes its idea
+of "the same name" from its caller (`key`), so the picker itself needs no name
+rules of its own.
+
+**A rename can move a name a saved e-mail alert watches for.** An alert holds
+free text, not a name, so nothing can canonicalise it the way `canonCountry`
+does. Instead the site's own text search (`assets/oa-list.js`) and the alert
+matcher (`assets/oa-alert-match.js`) fold punctuation and read "&" as "and" —
+ONE rule, both files, strictly more forgiving. Keep them in step: an alert that
+matched what the site shows must go on matching it.
+
 
 ## Tests that must stay green
 

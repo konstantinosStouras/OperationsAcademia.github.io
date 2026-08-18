@@ -178,8 +178,19 @@
        but a posting with NEITHER has nothing under the institution name, so
        the requirement is on the line they are joined into. The error is put on
        the department field, which is the one a poster is most likely to mean. */
-    out.school = String($('f-school').value || '').trim().slice(0, MAX.school);
-    out.unit = String($('f-unit').value || '').trim().slice(0, MAX.unit);
+    /* One spelling per university, school and department (oa-schools.js), so
+       a poster who types a name the site already publishes under another
+       spelling posts under the published one. The build canonicalises again —
+       this is what makes the poster's own preview and their My postings page
+       read the way the posting will. */
+    var place = (window.OASchools ? window.OASchools.canonPlace : function (v) { return v; })({
+      institution: out.institution,
+      school: String($('f-school').value || '').trim(),
+      unit: String($('f-unit').value || '').trim()
+    });
+    if (place.institution) out.institution = place.institution.slice(0, MAX.institution);
+    out.school = String(place.school || '').slice(0, MAX.school);
+    out.unit = String(place.unit || '').slice(0, MAX.unit);
     out.department = [out.school, out.unit].filter(Boolean).join(', ').slice(0, MAX.department);
     var unitEl = $('f-unit');
     setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');
@@ -814,11 +825,11 @@
      are never CLEARED when the university changes: what the poster typed is
      theirs, only the lists under it move.
 
-     A spelling that differs only in punctuation, a leading "The", donor
-     initials or a trailing "Department" is the same place (assets/oa-names.js),
-     so it is snapped to the spelling the site publishes rather than added as a
-     new name — which is the whole point of the exercise: one Freeman School of
-     Business, not two.
+     A spelling the site already publishes under another name is not a second
+     school (assets/oa-schools.js): the fields are put into the published
+     spelling as the poster leaves them, which is the same canonPlace() the
+     submission goes through — so the preview, the posting and everyone else's
+     postings agree.
 
      Entirely optional: if the fetch fails the fields stay ordinary text
      inputs and the form works exactly as it did.                            */
@@ -846,10 +857,20 @@
 
     if (!window.OACombo) return;
 
+    /* When two spellings are one name — the site's own rule, so a scope
+       offering "Management Science" reads the count off an option list entry
+       that was posted as "Management Science Department". Without the module
+       the pickers still work; a variant simply looks like a second name. */
+    var S = window.OASchools;
+    var val = function (el) { return String(el.value || '').trim(); };
+    var keyInst = S ? function (v) { return S.fold(S.canonInstitution(v)); } : null;
+    var keySchool = S ? function (v) { return S.fold(S.canonSchool(v, val(inst))); } : null;
+    var keyUnit = S ? function (v) { return S.fold(S.canonUnit(v)); } : null;
+
     var combos = {
-      inst: OACombo.attach(inst, { options: [] }),
-      school: OACombo.attach(school, { options: [] }),
-      unit: OACombo.attach(unit, { options: [] }),
+      inst: OACombo.attach(inst, { options: [], key: keyInst }),
+      school: OACombo.attach(school, { options: [], key: keySchool }),
+      unit: OACombo.attach(unit, { options: [], key: keyUnit }),
     };
 
     fetch('data/vocab.json', { cache: 'no-cache' })
@@ -862,30 +883,41 @@
 
         /* The cascade needs to know when two spellings are one place; without
            that file the three lists still work, they simply do not narrow. */
-        var NAMES = window.OANames;
-        if (!NAMES) return;
+        if (!S) return;
 
         var byUniversity = v.byUniversity || {};
         var bySchool = v.bySchool || {};
-        var uniIndex = NAMES.index(byUniversity);
-        var schoolIndex = NAMES.index(bySchool);
+
+        /** A key -> name index over an array of names or an object's keys. */
+        function index(names, key) {
+          var list = Object.prototype.toString.call(names) === '[object Array]'
+            ? names : Object.keys(names || {});
+          var out = {};
+          for (var i = 0; i < list.length; i++) {
+            var k = key(list[i]);
+            if (k && !(k in out)) out[k] = list[i];
+          }
+          return out;
+        }
+
+        var uniIndex = index(byUniversity, keyInst);
+        var schoolIndex = index(bySchool, keySchool);
 
         /** The university the institution field names, however it is spelled. */
         function chosenUniversity() {
-          var name = uniIndex[NAMES.key(inst.value)];
+          var name = uniIndex[keyInst(inst.value)];
           return name ? { name: name, own: byUniversity[name] || {} } : null;
         }
 
         /** The school the school field names, within a university. */
         function chosenSchool(uni) {
-          var typed = String(school.value || '').trim();
-          if (!typed) return null;
+          if (!val(school)) return null;
           if (uni) {
-            var own = NAMES.index(uni.own.bySchool || {});
-            var hit = own[NAMES.key(typed)];
-            if (hit) return { name: hit, units: (uni.own.bySchool || {})[hit] || [] };
+            var own = uni.own.bySchool || {};
+            var hit = index(own, keySchool)[keySchool(school.value)];
+            if (hit) return { name: hit, units: own[hit] || [] };
           }
-          var site = schoolIndex[NAMES.key(typed)];
+          var site = schoolIndex[keySchool(school.value)];
           if (site) return { name: site, units: bySchool[site] || [] };
           return null;
         }
@@ -918,63 +950,43 @@
           } : null);
         }
 
-        /* One spelling per place. A poster who types "Freeman School of
-           Business" at Tulane is not naming a second school, so the field is
-           put right rather than the site gaining a duplicate.
+        /* The names, as they will be published. It is the SAME canonPlace()
+           the submission goes through (see out.school above), run as the
+           poster leaves a field so that what they read back is what everybody
+           else will read.
 
-           ONLY WITHIN WHAT THEY HAVE ALREADY NAMED, though — the spelling has
-           to be one the chosen university (or the chosen school) already uses.
-           The site's own most-common spelling is NOT evidence about a
-           university nobody has posted from: typing "Operations Area" at a
-           university the site has never seen must stay "Operations Area", not
-           become the "Operations Department" that some other university calls
-           its own. Never invents, exactly like oa-countries' canon(). */
-        function snap(field, known) {
-          var typed = String(field.value || '').trim();
-          if (!typed || !known.length) return;
-          var name = NAMES.canon(typed, NAMES.index(known));
-          if (name && name !== typed) {
-            field.value = name;
+           The university is canonicalised on its own until a school or a
+           department has been given, because canonPlace() reads a lone
+           institution as one of the archive's fused one-column values and
+           takes it apart — right at ingest, wrong under a poster who has
+           simply not reached the next field yet. */
+        function snapPlace() {
+          var name = S.canonInstitution(inst.value);
+          if (name && name !== val(inst)) inst.value = name;
+          if (!val(school) && !val(unit)) return;
+
+          var place = S.canonPlace({
+            institution: inst.value, school: school.value, unit: unit.value,
+          });
+          if (place.school !== val(school) || place.unit !== val(unit)) {
+            school.value = place.school;
+            unit.value = place.unit;
             sync();
           }
         }
 
-        /* The university field snaps against the whole list, because THAT list
-           is the site's record of which universities exist — unlike a school,
-           where the site's most-common spelling says nothing about a university
-           it has never seen. It reaches only what is being typed now: a
-           published posting's institution is never rewritten, since its id and
-           its permalink are built from it. */
-        function snapInstitution() {
-          var typed = String(inst.value || '').trim();
-          if (!typed) return;
-          var name = uniIndex[NAMES.key(typed)];
-          if (name && name !== typed) inst.value = name;
-        }
-
-        function snapSchool() {
-          var uni = chosenUniversity();
-          snap(school, uni ? (uni.own.schools || []) : []);
-        }
-
-        function snapUnit() {
-          var uni = chosenUniversity();
-          var mine = chosenSchool(uni);
-          snap(unit, mine ? mine.units : (uni ? (uni.own.units || []) : []));
-        }
-
         /* A department names its school, when the site has only ever seen it
-           in one of them: picking "Department of Analytics and Operations" at
-           NUS fills in the NUS Business School above it. Only ever fills an
-           EMPTY field — a poster who named a school is never overruled. */
+           in one of them: choosing "Analytics and Operations" at NUS fills in
+           the NUS Business School above it. Only ever fills an EMPTY field —
+           a poster who named a school is never overruled. */
         function inferSchool() {
-          var typed = String(unit.value || '').trim();
-          if (!typed || String(school.value || '').trim()) return;
+          if (!val(unit) || val(school)) return;
           var uni = chosenUniversity();
           if (!uni) return;
           var own = uni.own.bySchool || {};
+          var k = keyUnit(unit.value);
           var hits = Object.keys(own).filter(function (s) {
-            return s && own[s].some(function (u) { return NAMES.same(u, typed); });
+            return s && own[s].some(function (u) { return keyUnit(u) === k; });
           });
           if (hits.length !== 1) return;
           school.value = hits[0];
@@ -982,11 +994,11 @@
         }
 
         inst.addEventListener('input', rescope);
-        inst.addEventListener('change', function () { snapInstitution(); rescope(); });
+        inst.addEventListener('change', function () { snapPlace(); rescope(); });
         school.addEventListener('input', rescope);
-        school.addEventListener('change', function () { snapSchool(); rescope(); });
+        school.addEventListener('change', function () { snapPlace(); rescope(); });
         unit.addEventListener('change', function () {
-          snapUnit();
+          snapPlace();
           inferSchool();
           rescope();
         });
