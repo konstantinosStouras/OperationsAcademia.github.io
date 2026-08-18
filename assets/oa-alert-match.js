@@ -46,11 +46,21 @@
       : String(v == null ? '' : v);
   }
 
-  /** Case- and diacritic-insensitive, so "Munster" finds "Münster". */
+  /* Case-, diacritic- AND punctuation-insensitive, so "Munster" finds
+     "Münster" and "Operations and Information Systems" finds the department
+     the site spells "Operations & Information Systems".
+
+     IT IS THE SAME FOLD assets/oa-list.js applies to the jobs page's own text
+     filter, deliberately: an alert that matched what the site shows must go on
+     matching it. And it is the free-text half of the problem canonCountry
+     solves above — a subscriber whose alert holds the spelling the site used to
+     publish must not silently stop being e-mailed, and the vocabulary
+     (assets/oa-names.js) now publishes ONE spelling per department. Both sides
+     are folded the same way, so it only ever finds MORE. */
   function fold(s) {
     s = String(s == null ? '' : s).toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    return s;
+    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
   }
 
   function arr(v) {

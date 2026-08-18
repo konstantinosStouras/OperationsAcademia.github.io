@@ -546,9 +546,17 @@
 
     EDIT_REF = v.ref || '';
 
-    // keep the derived department line and its preview in step
-    var school = $('f-school');
-    if (school) school.dispatchEvent(new Event('input', { bubbles: true }));
+    /* Keep the derived department line and its preview in step — and fire
+       `change` too, so the name fields show the spelling the SITE publishes
+       rather than the one this document happens to store (the build puts a
+       posting's school and department into the vocabulary's spelling; the
+       document it came from is never rewritten). */
+    ['f-institution', 'f-school', 'f-unit'].forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
   }
 
   function enterEditMode() {
@@ -793,9 +801,24 @@
 
      The three name fields offer what the site has already published, so the
      same school arrives spelled the same way each time. The list is
-     data/vocab.json, rebuilt from the postings by every writer of jobs.json —
-     so a name a poster adds today is offered to the next poster, with nobody
-     maintaining a list.
+     data/vocab.json, rebuilt from the postings AND from the site's own
+     Universities directory by every writer of jobs.json — so a name a poster
+     adds today is offered to the next poster, with nobody maintaining a list.
+
+     THEY CASCADE. Choosing a university narrows the school field to that
+     university's schools; choosing one of those narrows the department field to
+     that school's departments. Each is a HINT and not a restriction: typing
+     searches the whole site under a second heading, and a name nobody has
+     posted before is still offered as a new one. That is what keeps a school
+     that opens a department tomorrow postable — and it is also why the fields
+     are never CLEARED when the university changes: what the poster typed is
+     theirs, only the lists under it move.
+
+     A spelling that differs only in punctuation, a leading "The", donor
+     initials or a trailing "Department" is the same place (assets/oa-names.js),
+     so it is snapped to the spelling the site publishes rather than added as a
+     new name — which is the whole point of the exercise: one Freeman School of
+     Business, not two.
 
      Entirely optional: if the fetch fails the fields stay ordinary text
      inputs and the form works exactly as it did.                            */
@@ -825,10 +848,8 @@
 
     var combos = {
       inst: OACombo.attach(inst, { options: [] }),
-      school: OACombo.attach(school, {
-        options: [], hint: 'Schools already posted at this university are listed first.' }),
-      unit: OACombo.attach(unit, {
-        options: [], hint: 'Departments already posted at this university are listed first.' }),
+      school: OACombo.attach(school, { options: [] }),
+      unit: OACombo.attach(unit, { options: [] }),
     };
 
     fetch('data/vocab.json', { cache: 'no-cache' })
@@ -839,18 +860,137 @@
         combos.school.setOptions(v.schools || []);
         combos.unit.setOptions(v.units || []);
 
-        /* Choosing a university floats that university's own schools and
-           departments to the top of the other two lists. A HINT, never a
-           restriction — a school can open a new department, and the form must
-           not make that unpostable. */
-        function prefer() {
-          var e = (v.byUniversity || {})[String(inst.value || '').trim()] || { schools: [], units: [] };
-          combos.school.setPreferred(e.schools || []);
-          combos.unit.setPreferred(e.units || []);
+        /* The cascade needs to know when two spellings are one place; without
+           that file the three lists still work, they simply do not narrow. */
+        var NAMES = window.OANames;
+        if (!NAMES) return;
+
+        var byUniversity = v.byUniversity || {};
+        var bySchool = v.bySchool || {};
+        var uniIndex = NAMES.index(byUniversity);
+        var schoolIndex = NAMES.index(bySchool);
+
+        /** The university the institution field names, however it is spelled. */
+        function chosenUniversity() {
+          var name = uniIndex[NAMES.key(inst.value)];
+          return name ? { name: name, own: byUniversity[name] || {} } : null;
         }
-        inst.addEventListener('change', prefer);
-        inst.addEventListener('input', prefer);
-        prefer();
+
+        /** The school the school field names, within a university. */
+        function chosenSchool(uni) {
+          var typed = String(school.value || '').trim();
+          if (!typed) return null;
+          if (uni) {
+            var own = NAMES.index(uni.own.bySchool || {});
+            var hit = own[NAMES.key(typed)];
+            if (hit) return { name: hit, units: (uni.own.bySchool || {})[hit] || [] };
+          }
+          var site = schoolIndex[NAMES.key(typed)];
+          if (site) return { name: site, units: bySchool[site] || [] };
+          return null;
+        }
+
+        /* The lists under the two fields, redrawn whenever what is above them
+           changes. Order matters: a school's departments are more specific
+           than a university's, and a university's are better than nothing. */
+        function rescope() {
+          var uni = chosenUniversity();
+          var schools = uni ? (uni.own.schools || []) : [];
+
+          combos.school.setScope(schools.length ? {
+            label: 'Schools at ' + uni.name,
+            values: schools,
+            other: 'Elsewhere on the site',
+            more: 'Type to search every school the site knows.',
+          } : null);
+
+          var mine = chosenSchool(uni);
+          var units = mine ? mine.units : (uni ? (uni.own.units || []) : []);
+          var label = mine
+            ? 'Departments in ' + mine.name
+            : (uni ? 'Departments at ' + uni.name : '');
+
+          combos.unit.setScope(units.length ? {
+            label: label,
+            values: units,
+            other: 'Elsewhere on the site',
+            more: 'Type to search every department the site knows.',
+          } : null);
+        }
+
+        /* One spelling per place. A poster who types "Freeman School of
+           Business" at Tulane is not naming a second school, so the field is
+           put right rather than the site gaining a duplicate.
+
+           ONLY WITHIN WHAT THEY HAVE ALREADY NAMED, though — the spelling has
+           to be one the chosen university (or the chosen school) already uses.
+           The site's own most-common spelling is NOT evidence about a
+           university nobody has posted from: typing "Operations Area" at a
+           university the site has never seen must stay "Operations Area", not
+           become the "Operations Department" that some other university calls
+           its own. Never invents, exactly like oa-countries' canon(). */
+        function snap(field, known) {
+          var typed = String(field.value || '').trim();
+          if (!typed || !known.length) return;
+          var name = NAMES.canon(typed, NAMES.index(known));
+          if (name && name !== typed) {
+            field.value = name;
+            sync();
+          }
+        }
+
+        /* The university field snaps against the whole list, because THAT list
+           is the site's record of which universities exist — unlike a school,
+           where the site's most-common spelling says nothing about a university
+           it has never seen. It reaches only what is being typed now: a
+           published posting's institution is never rewritten, since its id and
+           its permalink are built from it. */
+        function snapInstitution() {
+          var typed = String(inst.value || '').trim();
+          if (!typed) return;
+          var name = uniIndex[NAMES.key(typed)];
+          if (name && name !== typed) inst.value = name;
+        }
+
+        function snapSchool() {
+          var uni = chosenUniversity();
+          snap(school, uni ? (uni.own.schools || []) : []);
+        }
+
+        function snapUnit() {
+          var uni = chosenUniversity();
+          var mine = chosenSchool(uni);
+          snap(unit, mine ? mine.units : (uni ? (uni.own.units || []) : []));
+        }
+
+        /* A department names its school, when the site has only ever seen it
+           in one of them: picking "Department of Analytics and Operations" at
+           NUS fills in the NUS Business School above it. Only ever fills an
+           EMPTY field — a poster who named a school is never overruled. */
+        function inferSchool() {
+          var typed = String(unit.value || '').trim();
+          if (!typed || String(school.value || '').trim()) return;
+          var uni = chosenUniversity();
+          if (!uni) return;
+          var own = uni.own.bySchool || {};
+          var hits = Object.keys(own).filter(function (s) {
+            return s && own[s].some(function (u) { return NAMES.same(u, typed); });
+          });
+          if (hits.length !== 1) return;
+          school.value = hits[0];
+          sync();
+        }
+
+        inst.addEventListener('input', rescope);
+        inst.addEventListener('change', function () { snapInstitution(); rescope(); });
+        school.addEventListener('input', rescope);
+        school.addEventListener('change', function () { snapSchool(); rescope(); });
+        unit.addEventListener('change', function () {
+          snapUnit();
+          inferSchool();
+          rescope();
+        });
+        rescope();
       })
       .catch(function () { /* the fields are plain text inputs; that is fine */ });
   }

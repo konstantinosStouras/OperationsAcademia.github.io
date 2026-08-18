@@ -1289,6 +1289,99 @@ for (const [name, expect] of [
     (n) => n.textContent);
   ok(/Freeman/i.test(firstSchool), 'form: schools already used at that university lead');
 
+  /* ------------------------------------------------- the cascade, as reported
+
+     The bug: choosing Tulane offered BOTH "A.B. Freeman School of Business" and
+     "Freeman School of Business" — one school, posted twice, spelled twice —
+     and the department field offered every department on the site. What must
+     happen instead is one school under a heading naming the university, and
+     then that school's own departments.                                       */
+
+  const scoped = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      heading: open.querySelector('.oa-combo-group')
+        ? open.querySelector('.oa-combo-group').textContent : '',
+      inScope: [...open.querySelectorAll('.oa-combo-opt.is-pref .oa-combo-name')]
+        .map((n) => n.textContent),
+      others: [...open.querySelectorAll('.oa-combo-opt:not(.is-pref):not(.oa-combo-add)')].length,
+    };
+  });
+  eq(scoped.heading, 'Schools at Tulane University',
+    'form: the school list says whose schools it is offering');
+  eq(scoped.inScope, ['A.B. Freeman School of Business'],
+    'form: one school, not the two spellings it was posted under');
+  eq(scoped.others, 0,
+    'form: and browsing does not bury it under every school on the site');
+
+  await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A.B. Freeman School of Business',
+    'form: choosing a school fills the field');
+
+  await f.click('#f-unit');
+  await f.waitForTimeout(250);
+  const dept = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      heading: open.querySelector('.oa-combo-group').textContent,
+      inScope: [...open.querySelectorAll('.oa-combo-opt.is-pref .oa-combo-name')]
+        .map((n) => n.textContent),
+    };
+  });
+  eq(dept.heading, 'Departments in A.B. Freeman School of Business',
+    'form: the department list narrows to the school that was chosen');
+  eq(dept.inScope, ['Management Science Department'],
+    'form: to ITS departments — one, not the three spellings it was posted under');
+
+  // typing still reaches the whole site: a scope narrows, it never hides
+  await f.fill('#f-unit', 'supply chain');
+  await f.waitForTimeout(200);
+  const past = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      headings: [...open.querySelectorAll('.oa-combo-group')].map((n) => n.textContent),
+      options: open.querySelectorAll('.oa-combo-opt:not(.oa-combo-add)').length,
+    };
+  });
+  ok(past.options > 0 && past.headings.includes('Elsewhere on the site'),
+    'form: typing searches past the scope, under a heading that says so');
+
+  /* A spelling that differs only in punctuation or a leading initial is the
+     same school — so it is put right, not added as a second one. */
+  await f.fill('#f-unit', '');
+  await f.fill('#f-school', 'freeman school of business');
+  await f.waitForTimeout(200);
+  const addRows = await f.$$eval('.oa-combo-add', (n) => n.length);
+  eq(addRows, 0, 'form: a variant spelling is not offered as a new name');
+  await f.evaluate(() => document.getElementById('f-school')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A.B. Freeman School of Business',
+    'form: and the field is put into the spelling the site publishes');
+
+  /* A department the site has only ever seen in one school names its school. */
+  await f.fill('#f-school', '');
+  await f.fill('#f-unit', 'Management Science Department');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A.B. Freeman School of Business',
+    'form: choosing a department fills in the school it sits in');
+
+  /* A university nobody has posted from has no scope to impose, and what is
+     typed there is left exactly as typed. */
+  await f.fill('#f-institution', 'Wibble University');
+  await f.fill('#f-school', '');
+  await f.fill('#f-unit', 'Operations Area');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Operations Area',
+    'form: a university the site has never seen is not corrected against other universities');
+  await f.fill('#f-institution', 'Tulane University');
+  await f.fill('#f-unit', '');
+
   // a name nobody has posted before is offered rather than refused
   await f.fill('#f-school', 'Wibble School of Widgets');
   await f.waitForTimeout(200);

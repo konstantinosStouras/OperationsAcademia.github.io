@@ -62,11 +62,20 @@
     return n;
   }
 
-  // Diacritic-insensitive fold, so "Münster" is found by typing "munster".
+  /* Diacritic-insensitive, so "Münster" is found by typing "munster", and
+     punctuation-insensitive, so a search for "Operations and Information
+     Systems" finds the department the site spells "Operations & Information
+     Systems". Both sides of every comparison are folded the same way, so this
+     only ever finds MORE — no search that worked before stops working.
+
+     It matters beyond tidiness: one department is written both ways across the
+     postings, and the vocabulary (assets/oa-names.js) now publishes whichever
+     spelling the Universities directory uses. A reader who bookmarked
+     ?filterA=<the other one> must still find it. */
   function fold(s) {
     s = String(s === null || s === undefined ? '' : s).toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return s;
+    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
   }
 
   function asArray(v) {

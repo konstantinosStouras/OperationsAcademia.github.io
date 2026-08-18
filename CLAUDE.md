@@ -120,6 +120,60 @@ It is applied at every ingest (`jobs-model.rowFromSubmission`,
 that last one matters, because an alert saved under an old spelling would
 otherwise stop matching silently.
 
+## One spelling per university, school and department
+
+`assets/oa-names.js` is the **second dual-mode file** after `oa-countries.js`
+(browser `window.OANames`, Node `require`), and it answers a narrower question:
+a country has a closed list to `canon()` against, a school never can — a
+university may open a department tomorrow, so the posting form has to stay a
+free-text field. What is pinned instead is the **identity** of a name, `key()`:
+whether two spellings are the same place.
+
+It folds away case, punctuation, a leading "The", a **leading** run of donor
+initials ("A.B. Freeman"), "&" versus "and", a plural "s" and a trailing
+"Department"/"Area"/"Group". It is deliberately lossy and **never displayed** —
+the name a reader sees is always a spelling somebody actually wrote.
+
+**When a merge is wrong, or two spellings are not merged that should be, fix
+`key()` and add the case to `testNames()` — never hand-edit `data/`.**
+`data/vocab.json` and `data/jobs.json` are both rebuilt every morning. The
+guards that stop `key()` merging two DIFFERENT places (a state is not a plural;
+initials inside a name are kept, so "Texas A&M" survives) are the dangerous
+half, and every one of them is pinned in the selftest.
+
+**Which spelling is offered:** the one `data/universities.json` uses, where the
+Universities directory knows the name; otherwise the most-posted one. So the
+place to correct a spelling the whole site shows is the **owner's universities
+sheet** — edit it and dispatch `oa-legacy-import.yml`. The directory is also a
+vocabulary SOURCE beside the postings: it is what lets the form cascade for a
+university that has never posted here.
+
+**`institution` is never rewritten on a published posting.** Its id and its
+permalink are derived from it (`jobs-model.jobId`), so `canonicaliseNames()`
+touches only `school`, `unit` and the `department` line they compose. The form
+snaps what is being typed now, which is where the consistency is won.
+
+## The posting form's three name fields cascade
+
+`post-a-job.html` asks for the university, the school and the department
+separately, and the three are connected: choosing a university narrows the
+school list to that university's schools, and choosing a school narrows the
+department list to that school's departments (`data/vocab.json`'s
+`byUniversity[uni].bySchool[school]`, driven by `setScope()` in
+`assets/oa-combo.js`).
+
+**A scope is a HINT, never a restriction.** Typing searches the whole site
+under a second heading, and a name nobody has posted before is still offered as
+a new one — a school that opens a department tomorrow must stay postable. Two
+rules follow from that, and both are pinned in `page-test.mjs`:
+
+- a field is only ever put right against a name the **chosen university (or
+  school) already uses** — the site's most-common spelling says nothing about
+  a university it has never seen, so "Operations Area" typed at a new
+  university stays "Operations Area";
+- changing the university above **re-scopes the lists, never clears the
+  fields**. What the poster typed is theirs.
+
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks

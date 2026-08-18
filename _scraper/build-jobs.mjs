@@ -33,7 +33,7 @@ import {
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
-import { buildVocab, serialiseVocab } from './vocab.mjs';
+import { buildVocab, canonicaliseNames, serialiseVocab } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -44,6 +44,11 @@ const VOCAB = path.join(DATA, 'vocab.json');
    into rows of exactly this file's shape. It is a SECOND source of postings,
    beside the database — see the block in main() that merges it. */
 const SHEET = path.join(DATA, 'jobmarket.json');
+/* The site's own Universities directory (data/universities.json, imported from
+   the maintainer's universities sheet by import-legacy-tables.mjs). The posting
+   form's cascading pickers read it through vocab.json: it is what knows which
+   school a department sits in at a university that has never posted here. */
+const DIRECTORY = path.join(DATA, 'universities.json');
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -53,6 +58,14 @@ const SCAN = argv.has('--scan');
 
 const log = (...a) => console.log(...a);
 const warn = (...a) => console.log('::warning::' + a.join(' '));
+
+/** Two vocabularies with the same names in them — `generated` aside, which
+    moves on every run and would otherwise commit an identical file daily. */
+function sameVocab(a, b) {
+  if (!a || !b) return false;
+  const bare = (v) => JSON.stringify({ ...v, generated: '' });
+  return bare(a) === bare(b);
+}
 
 async function readJson(file, fallback) {
   if (!existsSync(file)) return fallback;
@@ -394,7 +407,28 @@ async function main() {
     .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
 
   const merged = mergeRows(orphans, freshVisible, removeRefs);
-  const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+  const publishable = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+
+  /* -------------------------------------------- one spelling per place
+
+     The form's option lists come from the postings themselves plus the site's
+     own Universities directory, so a name a poster entered today is offered to
+     the next poster tomorrow with nobody curating a list — and a university's
+     schools, and each school's departments, are offered as a cascade.
+
+     Built here rather than at write time because the postings are also passed
+     through it: "Freeman School of Business" and "A.B. Freeman School of
+     Business" are one school, and the site should not show both. Only the two
+     name parts and the line they compose are touched, never `institution` —
+     a posting's id and permalink are derived from that. */
+  const directory = await readJson(DIRECTORY, []);
+  const vocab = buildVocab(publishable, { generated: now.toISOString(), directory });
+  const named = canonicaliseNames(publishable, vocab);
+  const rows = named.rows;
+  for (const c of named.changed) log(`  ~ ${c.id}  ${c.from}  ->  ${c.to}`);
+  if (named.changed.length) {
+    log(`${named.changed.length} posting(s) renamed to the spelling the site publishes`);
+  }
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
      the FILE stays complete: it is the projection of every live document, the
@@ -436,13 +470,24 @@ async function main() {
         META,
         JSON.stringify(buildMeta(rows, { generated: now.toISOString() }), null, 1) + '\n'
       );
-      /* The form's option lists come from the postings themselves, so a name
-         a poster entered today is offered to the next poster tomorrow with
-         nobody curating a list. Rewritten with the dataset, never apart from
-         it. */
-      await writeFile(VOCAB, serialiseVocab(buildVocab(rows, { generated: now.toISOString() })));
-      log(`wrote ${path.relative(process.cwd(), JOBS)}, jobs-meta.json and vocab.json`);
+      log(`wrote ${path.relative(process.cwd(), JOBS)} and jobs-meta.json`);
     }
+  }
+
+  /* vocab.json is written on ITS OWN diff, not with jobs.json: it also reads
+     the Universities directory, which the legacy import can change on a day no
+     posting moved. `generated` is ignored in the comparison, so an unchanged
+     vocabulary commits nothing. */
+  const vocabText = serialiseVocab(vocab);
+  if (sameVocab(await readJson(VOCAB, null), vocab)) {
+    log('the posting form\'s vocabulary is unchanged.');
+  } else if (DRY) {
+    log('--dry-run: not writing vocab.json.');
+  } else {
+    await writeFile(VOCAB, vocabText);
+    log(`wrote ${path.relative(process.cwd(), VOCAB)} ` +
+        `(${vocab.universities.length} universities, ${vocab.schools.length} schools, ` +
+        `${vocab.units.length} departments)`);
   }
 
   /* ------------------------------------------ tell the admin what changed

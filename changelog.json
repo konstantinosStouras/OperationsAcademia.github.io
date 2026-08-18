@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "posting-form-cascade",
+   "date": "2026-08-18",
+   "title": "Posting a job: the university, school and department fields now follow each other",
+   "summary": "The three name boxes on the job form are connected. Choose your university and the school box offers that university\u2019s schools; choose one of those and the department box offers that school\u2019s departments \u2014 so a posting takes a few seconds and lands under the same names as everybody else\u2019s. The lists themselves are tidier: one school posted under two names (\u201cA.B. Freeman School of Business\u201d and \u201cFreeman School of Business\u201d) or one department under three (\u201cManagement Science\u201d, \u201cManagement Science Department\u201d, \u201cManagement Sciences Area\u201d) is now offered once, and typing a variant of a name your university already uses quietly puts it right. They also reach further: every university, school and department in the site\u2019s own Universities directory is offered, so a university posting here for the first time gets the same help. Nothing is closed off \u2014 typing searches every name on the site, and a school or department nobody has posted before is still accepted with one click.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
    "id": "single-page-redesign-live",
    "date": "2026-08-17",
    "title": "A new Operations Academia — one page, light or dark",

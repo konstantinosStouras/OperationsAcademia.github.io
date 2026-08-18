@@ -460,6 +460,65 @@ site with it.
 
 ---
 
+### 3.8 The posting form's three name fields cascade — **DONE 2026-08-18**
+
+The form asks for the university, the school and the department separately
+(§3.5), and each field offered a flat list of everything the site had ever
+published. Two consequences, both reported from the form itself: choosing
+Tulane offered *both* "A.B. Freeman School of Business" and "Freeman School of
+Business" — one school, posted twice, spelled twice — and the department box
+offered every department on the site rather than that school's.
+
+**They are now connected.** `data/vocab.json` gained a third level,
+`byUniversity[uni].bySchool[school]`, and a top-level `bySchool` for the
+university-not-yet-known case; `assets/oa-combo.js` gained `setScope()`, which
+offers a scope under a heading ("Schools at Tulane University") while typing
+still searches the whole site under a second one ("Elsewhere on the site").
+The scope is a HINT: a school opening a department tomorrow must stay
+postable, so nothing is ever removed from reach.
+
+**One spelling per place** is the other half, and it is deliberately narrower
+than the country rule. A school has no closed list to canon() against, so what
+is pinned is the IDENTITY of a name — `assets/oa-names.js`, the second
+dual-mode module after `oa-countries.js`. Its `key()` folds away case,
+punctuation, a leading "The", a leading run of donor initials ("A.B."),
+"&"/"and", a plural "s" and a trailing "Department"/"Area"/"Group". Every merge
+it makes in the committed data is real (six groups); the guards that stop it
+merging two different places — a state is not a plural, initials INSIDE a name
+are kept — are pinned in the selftest, because they are the rules that could
+silently move postings between universities.
+
+Three decisions worth recording:
+
+1. **The Universities directory wins the spelling.** `data/universities.json`
+   (imported from the owner's own universities sheet) is curated and barely
+   moves, so anchoring on it keeps the offered spelling stable rather than
+   flipping the day a posting tips the count. To change what the form offers,
+   change the sheet and dispatch the legacy import. It is also a SOURCE: its
+   254 rows are what let the cascade work for a university that has never
+   posted here.
+2. **`institution` is never rewritten on a published posting.** A posting's id
+   and its permalink are derived from it (`jobs-model.jobId`), so renaming one
+   would break links already out in the world. The form snaps what is being
+   typed now, which is where consistency is cheap; `canonicaliseNames` touches
+   only `school`, `unit` and the line they compose (12 rows on the day it
+   shipped).
+3. **A rename can move a name a saved e-mail alert was watching for.** An
+   alert holds free text, not a name, so nothing can canonicalise it the way
+   `canonCountry` does. The fix is on the other side: the site's own text
+   search and the alert matcher now fold punctuation and read "&" as "and"
+   (one rule, pinned in both files), which is strictly more forgiving. That
+   leaves exactly one of the twelve renames unreachable by an alert holding
+   the old words — "Management Sciences Area" → "Management Science
+   Department" — which is accepted rather than papered over.
+
+`data/past-postings.json` is deliberately NOT a vocabulary source: its legacy
+rows never separated the institution from the school and the department, so
+feeding it in would put the very mess the vocabulary exists to end into the
+university picker.
+
+---
+
 ## 4. Things to decide
 
 | Question | My recommendation |
@@ -467,6 +526,7 @@ site with it.
 | Keep the Google Form running in parallel during the transition? | **Yes, for one job market year.** Two intake paths is a nuisance but a broken intake in September is worse. The v2 form links to the Google form while Firebase is unconfigured, so this is already the behaviour. |
 | Auto-publish, or review? | You chose **auto-publish for signed-in users**. Worth revisiting after a term: it removes your bottleneck, but the old `OK` column was doing real work — several rows in the raw tab never made it to the display tab. |
 | Keep `/previous-markets` as a separate page? | **No.** It is the same data. A "Job market year" filter on `/jobs` does the job and halves the maintenance. |
+| Split the candidate form's "Current affiliation" the way the job form's three fields are split? | **Worth doing while it is free.** It is one free-text box ("Wharton, University of Pennsylvania") and `data/candidates.json` is empty today, so nothing has to be migrated; every profile posted from now on makes it more expensive, and until then a candidate's university cannot be matched to a posting's. |
 | A "Featured" posting — how does one become featured? | Currently only you can set it (the rules forbid a poster from doing so). If it is ever to be sold or granted, that needs a deliberate mechanism. |
 | The 49 job submissions that were never published (§1)? | **Look at them before cutover.** Some schools may believe their posting has been live for months. |
 | Replace the dead Universal Analytics with GA4, or drop analytics? | **Decide deliberately.** It has measured nothing since July 2023, but ~40 inline handlers depend on the `ga` global existing, so it cannot simply be deleted without touching every page. |

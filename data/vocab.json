@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-17T18:18:55.794Z",
+ "generated": "2026-08-18T01:11:54.568Z",
  "universities": [
   {
    "v": "University College London",
@@ -18,7 +18,7 @@
    "n": 3
   },
   {
-   "v": "University of California Berkeley",
+   "v": "University of California, Berkeley",
    "n": 3
   },
   {
@@ -67,6 +67,10 @@
   },
   {
    "v": "University of South Carolina",
+   "n": 2
+  },
+  {
+   "v": "University of Texas at Dallas",
    "n": 2
   },
   {
@@ -162,7 +166,7 @@
    "n": 1
   },
   {
-   "v": "KU LEUVEN",
+   "v": "KU Leuven",
    "n": 1
   },
   {
@@ -182,7 +186,7 @@
    "n": 1
   },
   {
-   "v": "Özyeğin University",
+   "v": "Ozyegin University",
    "n": 1
   },
   {
@@ -223,10 +227,6 @@
   },
   {
    "v": "The University of Hong Kong",
-   "n": 1
-  },
-  {
-   "v": "The University of Texas at Dallas",
    "n": 1
   },
   {
@@ -282,10 +282,6 @@
    "n": 1
   },
   {
-   "v": "University of Texas at Dallas",
-   "n": 1
-  },
-  {
    "v": "University of Texas at San Antonio",
    "n": 1
   },
@@ -300,6 +296,714 @@
   {
    "v": "Villanova University",
    "n": 1
+  },
+  {
+   "v": "Aalto University",
+   "n": 0
+  },
+  {
+   "v": "Air Force Institute of Technology",
+   "n": 0
+  },
+  {
+   "v": "Alfaisal University (AU)",
+   "n": 0
+  },
+  {
+   "v": "Binghamton University",
+   "n": 0
+  },
+  {
+   "v": "Boston College",
+   "n": 0
+  },
+  {
+   "v": "Boston University",
+   "n": 0
+  },
+  {
+   "v": "Brandeis University",
+   "n": 0
+  },
+  {
+   "v": "Bucknell University",
+   "n": 0
+  },
+  {
+   "v": "California State Polytechnic University Pomona",
+   "n": 0
+  },
+  {
+   "v": "California State University, East Bay",
+   "n": 0
+  },
+  {
+   "v": "Case Western Reserve University",
+   "n": 0
+  },
+  {
+   "v": "Cass Business School",
+   "n": 0
+  },
+  {
+   "v": "City University of Hong Kong (CityU)",
+   "n": 0
+  },
+  {
+   "v": "City University of New York (CUNY)",
+   "n": 0
+  },
+  {
+   "v": "Clemson University",
+   "n": 0
+  },
+  {
+   "v": "College of William and Mary",
+   "n": 0
+  },
+  {
+   "v": "Concordia University",
+   "n": 0
+  },
+  {
+   "v": "Copenhagen Business School",
+   "n": 0
+  },
+  {
+   "v": "Cornell University",
+   "n": 0
+  },
+  {
+   "v": "Cornell University/ Cornell Tech",
+   "n": 0
+  },
+  {
+   "v": "Dartmouth College",
+   "n": 0
+  },
+  {
+   "v": "Duke University",
+   "n": 0
+  },
+  {
+   "v": "Durham University",
+   "n": 0
+  },
+  {
+   "v": "EBS University",
+   "n": 0
+  },
+  {
+   "v": "École Polytechnique Fédérale de Lausanne (EPFL)",
+   "n": 0
+  },
+  {
+   "v": "Eindhoven University of Technology (TU/e)",
+   "n": 0
+  },
+  {
+   "v": "Emory University",
+   "n": 0
+  },
+  {
+   "v": "Erasmus University Rotterdam",
+   "n": 0
+  },
+  {
+   "v": "ESMT Berlin",
+   "n": 0
+  },
+  {
+   "v": "ESSEC Business School",
+   "n": 0
+  },
+  {
+   "v": "Ewha School of Business",
+   "n": 0
+  },
+  {
+   "v": "Florida International University",
+   "n": 0
+  },
+  {
+   "v": "Florida State University",
+   "n": 0
+  },
+  {
+   "v": "Fudan University",
+   "n": 0
+  },
+  {
+   "v": "George Mason University",
+   "n": 0
+  },
+  {
+   "v": "Georgia Institute of Technology",
+   "n": 0
+  },
+  {
+   "v": "Harvard Kennedy School",
+   "n": 0
+  },
+  {
+   "v": "Harvard University",
+   "n": 0
+  },
+  {
+   "v": "HEC Montréal",
+   "n": 0
+  },
+  {
+   "v": "Hull University Business School",
+   "n": 0
+  },
+  {
+   "v": "IE Business School",
+   "n": 0
+  },
+  {
+   "v": "IE University",
+   "n": 0
+  },
+  {
+   "v": "Indian Institute of Technology (IIT) Bombay",
+   "n": 0
+  },
+  {
+   "v": "Indian School of Business (ISB)",
+   "n": 0
+  },
+  {
+   "v": "Indiana University",
+   "n": 0
+  },
+  {
+   "v": "INSEAD",
+   "n": 0
+  },
+  {
+   "v": "Iowa State University (College of Business)",
+   "n": 0
+  },
+  {
+   "v": "Johns Hopkins University",
+   "n": 0
+  },
+  {
+   "v": "Koç University",
+   "n": 0
+  },
+  {
+   "v": "Kogod School of Business",
+   "n": 0
+  },
+  {
+   "v": "Lingnan University",
+   "n": 0
+  },
+  {
+   "v": "London Business School (LBS)",
+   "n": 0
+  },
+  {
+   "v": "Loyola University Chicago",
+   "n": 0
+  },
+  {
+   "v": "Massachusetts Institute of Technology (MIT)",
+   "n": 0
+  },
+  {
+   "v": "McMaster University",
+   "n": 0
+  },
+  {
+   "v": "MEF University",
+   "n": 0
+  },
+  {
+   "v": "Memorial University of Newfoundland",
+   "n": 0
+  },
+  {
+   "v": "Mississippi State University",
+   "n": 0
+  },
+  {
+   "v": "Missouri University of Science and Technology",
+   "n": 0
+  },
+  {
+   "v": "Montclair State University",
+   "n": 0
+  },
+  {
+   "v": "National Chiao Tung University",
+   "n": 0
+  },
+  {
+   "v": "National University of Singapore (NUS)",
+   "n": 0
+  },
+  {
+   "v": "Naval Postgraduate School",
+   "n": 0
+  },
+  {
+   "v": "NC State University",
+   "n": 0
+  },
+  {
+   "v": "New York University (NYU)",
+   "n": 0
+  },
+  {
+   "v": "New York University Shanghai",
+   "n": 0
+  },
+  {
+   "v": "Northeastern University",
+   "n": 0
+  },
+  {
+   "v": "Northwestern University",
+   "n": 0
+  },
+  {
+   "v": "Nova School of Business and Economics",
+   "n": 0
+  },
+  {
+   "v": "Oklahoma State University",
+   "n": 0
+  },
+  {
+   "v": "Oregon State University",
+   "n": 0
+  },
+  {
+   "v": "Pompeu Fabra University",
+   "n": 0
+  },
+  {
+   "v": "Pontificia Universidad Catolica de Chile (PUC)",
+   "n": 0
+  },
+  {
+   "v": "Providence College",
+   "n": 0
+  },
+  {
+   "v": "Purdue University",
+   "n": 0
+  },
+  {
+   "v": "Qatar University",
+   "n": 0
+  },
+  {
+   "v": "Queen's University",
+   "n": 0
+  },
+  {
+   "v": "Rensselaer Polytechnic Institute (RPI)",
+   "n": 0
+  },
+  {
+   "v": "Rice University",
+   "n": 0
+  },
+  {
+   "v": "Rutgers University",
+   "n": 0
+  },
+  {
+   "v": "Sabanci University",
+   "n": 0
+  },
+  {
+   "v": "Saint Mary's College of California",
+   "n": 0
+  },
+  {
+   "v": "San Francisco State University (SFSU)",
+   "n": 0
+  },
+  {
+   "v": "San Jose State University",
+   "n": 0
+  },
+  {
+   "v": "Santa Clara University",
+   "n": 0
+  },
+  {
+   "v": "Shanghai University of Finance and Economics (SUFE)",
+   "n": 0
+  },
+  {
+   "v": "Simon Fraser University",
+   "n": 0
+  },
+  {
+   "v": "Singapore Management University (SMU)",
+   "n": 0
+  },
+  {
+   "v": "Singapore University of Technology and Design (SUTD)",
+   "n": 0
+  },
+  {
+   "v": "Skolkovo Institute of Science and Technology (Skoltech)",
+   "n": 0
+  },
+  {
+   "v": "Southern Methodist University",
+   "n": 0
+  },
+  {
+   "v": "Southern University of Science and Technology (SUSTech)",
+   "n": 0
+  },
+  {
+   "v": "SRM University",
+   "n": 0
+  },
+  {
+   "v": "St.Gallen Institute of Management in Asia (SGI)",
+   "n": 0
+  },
+  {
+   "v": "Stanford University",
+   "n": 0
+  },
+  {
+   "v": "Stevens Institute of Technology",
+   "n": 0
+  },
+  {
+   "v": "Stony Brook University",
+   "n": 0
+  },
+  {
+   "v": "Technical University of Munich",
+   "n": 0
+  },
+  {
+   "v": "TED University",
+   "n": 0
+  },
+  {
+   "v": "Texas A&M University",
+   "n": 0
+  },
+  {
+   "v": "Texas Christian University",
+   "n": 0
+  },
+  {
+   "v": "The Chinese University of Hong Kong",
+   "n": 0
+  },
+  {
+   "v": "The Chinese University of Hong Kong (CUHK Business School)",
+   "n": 0
+  },
+  {
+   "v": "The Chinese University of Hong Kong (CUHK)",
+   "n": 0
+  },
+  {
+   "v": "The Hong Kong University of Science and Technology",
+   "n": 0
+  },
+  {
+   "v": "The Hong Kong University of Science and Technology (HKUST)",
+   "n": 0
+  },
+  {
+   "v": "The University of Alabama",
+   "n": 0
+  },
+  {
+   "v": "The University of Hong Kong (HKU)",
+   "n": 0
+  },
+  {
+   "v": "The University of Melbourne",
+   "n": 0
+  },
+  {
+   "v": "The University of Michigan-Flint",
+   "n": 0
+  },
+  {
+   "v": "The University of Texas at Austin",
+   "n": 0
+  },
+  {
+   "v": "TOBB University of Economics and Technology",
+   "n": 0
+  },
+  {
+   "v": "Universidad de Chile",
+   "n": 0
+  },
+  {
+   "v": "Universidad Torcuato di Tella",
+   "n": 0
+  },
+  {
+   "v": "Université catholique de Louvain",
+   "n": 0
+  },
+  {
+   "v": "Universite libre de Bruxelles",
+   "n": 0
+  },
+  {
+   "v": "University at Buffalo - The State University of New York",
+   "n": 0
+  },
+  {
+   "v": "University College Dublin (UCD)",
+   "n": 0
+  },
+  {
+   "v": "University of Alberta",
+   "n": 0
+  },
+  {
+   "v": "University of Auckland",
+   "n": 0
+  },
+  {
+   "v": "University of British Columbia",
+   "n": 0
+  },
+  {
+   "v": "University of Calgary",
+   "n": 0
+  },
+  {
+   "v": "University of California, Irvine",
+   "n": 0
+  },
+  {
+   "v": "University of California, Los Angeles (UCLA)",
+   "n": 0
+  },
+  {
+   "v": "University of California, Merced",
+   "n": 0
+  },
+  {
+   "v": "University of California, Riverside",
+   "n": 0
+  },
+  {
+   "v": "University of California, San Diego (UCSD)",
+   "n": 0
+  },
+  {
+   "v": "University of Chicago",
+   "n": 0
+  },
+  {
+   "v": "University of Cincinnati",
+   "n": 0
+  },
+  {
+   "v": "University of Colorado Boulder",
+   "n": 0
+  },
+  {
+   "v": "University of Connecticut",
+   "n": 0
+  },
+  {
+   "v": "University of Dayton",
+   "n": 0
+  },
+  {
+   "v": "University of Florida",
+   "n": 0
+  },
+  {
+   "v": "University of Glasgow",
+   "n": 0
+  },
+  {
+   "v": "University of Illinois at Chicago",
+   "n": 0
+  },
+  {
+   "v": "University of Illinois at Urbana-Champaign",
+   "n": 0
+  },
+  {
+   "v": "University of Kentucky",
+   "n": 0
+  },
+  {
+   "v": "University of Louisville",
+   "n": 0
+  },
+  {
+   "v": "University of Maryland",
+   "n": 0
+  },
+  {
+   "v": "University of Massachusetts Amherst",
+   "n": 0
+  },
+  {
+   "v": "University of Massachusetts Boston",
+   "n": 0
+  },
+  {
+   "v": "University of Michigan-Dearborn",
+   "n": 0
+  },
+  {
+   "v": "University of Nebraska - Lincoln",
+   "n": 0
+  },
+  {
+   "v": "University of Nevada",
+   "n": 0
+  },
+  {
+   "v": "University of New South Wales",
+   "n": 0
+  },
+  {
+   "v": "University of North Carolina (UNC) Chapel Hill",
+   "n": 0
+  },
+  {
+   "v": "University of Oregon",
+   "n": 0
+  },
+  {
+   "v": "University of Oxford",
+   "n": 0
+  },
+  {
+   "v": "University of Pennsylvania",
+   "n": 0
+  },
+  {
+   "v": "University of Pittsburgh",
+   "n": 0
+  },
+  {
+   "v": "University of Portland",
+   "n": 0
+  },
+  {
+   "v": "University of Richmond",
+   "n": 0
+  },
+  {
+   "v": "University of Rochester",
+   "n": 0
+  },
+  {
+   "v": "University of Southern California (USC)",
+   "n": 0
+  },
+  {
+   "v": "University of Southern Mississippi",
+   "n": 0
+  },
+  {
+   "v": "University of Tennessee",
+   "n": 0
+  },
+  {
+   "v": "University of Toledo",
+   "n": 0
+  },
+  {
+   "v": "University of Toronto",
+   "n": 0
+  },
+  {
+   "v": "University of Toronto Mississauga (UTM)",
+   "n": 0
+  },
+  {
+   "v": "University of Toronto Scarborough (UTSC)",
+   "n": 0
+  },
+  {
+   "v": "University of Toulouse",
+   "n": 0
+  },
+  {
+   "v": "University of Washington",
+   "n": 0
+  },
+  {
+   "v": "University of Waterloo",
+   "n": 0
+  },
+  {
+   "v": "University of West Florida",
+   "n": 0
+  },
+  {
+   "v": "University of Wisconsin-Milwaukee",
+   "n": 0
+  },
+  {
+   "v": "Vanderbilt University",
+   "n": 0
+  },
+  {
+   "v": "Virginia Commonwealth University (VCU)",
+   "n": 0
+  },
+  {
+   "v": "Virginia Tech",
+   "n": 0
+  },
+  {
+   "v": "Vrije Universiteit Amsterdam",
+   "n": 0
+  },
+  {
+   "v": "Wageningen University",
+   "n": 0
+  },
+  {
+   "v": "Washington University in St. Louis",
+   "n": 0
+  },
+  {
+   "v": "Wayne State University",
+   "n": 0
+  },
+  {
+   "v": "Weber State University",
+   "n": 0
+  },
+  {
+   "v": "Western University",
+   "n": 0
+  },
+  {
+   "v": "Wilfrid Laurier University",
+   "n": 0
+  },
+  {
+   "v": "WU Vienna",
+   "n": 0
+  },
+  {
+   "v": "Yale University",
+   "n": 0
   }
  ],
  "schools": [
@@ -308,11 +1012,11 @@
    "n": 6
   },
   {
-   "v": "Darden School of Business",
-   "n": 4
+   "v": "A.B. Freeman School of Business",
+   "n": 5
   },
   {
-   "v": "Freeman School of Business",
+   "v": "Darden School of Business",
    "n": 4
   },
   {
@@ -348,12 +1052,12 @@
    "n": 2
   },
   {
-   "v": "The Knauss School of Business at the University of San Diego",
+   "v": "The Eli Broad College of Business",
    "n": 2
   },
   {
-   "v": "A.B. Freeman School of Business",
-   "n": 1
+   "v": "The Knauss School of Business at the University of San Diego",
+   "n": 2
   },
   {
    "v": "Bayes Business School, Faculty of Management",
@@ -369,10 +1073,6 @@
   },
   {
    "v": "Desautels Faculty of Management",
-   "n": 1
-  },
-  {
-   "v": "Eli Broad College of Business",
    "n": 1
   },
   {
@@ -456,10 +1156,6 @@
    "n": 1
   },
   {
-   "v": "The Eli Broad College of Business",
-   "n": 1
-  },
-  {
    "v": "The Knauss School of Business",
    "n": 1
   },
@@ -494,15 +1190,567 @@
   {
    "v": "Zicklin School of Business",
    "n": 1
+  },
+  {
+   "v": "Alberta School of Business",
+   "n": 0
+  },
+  {
+   "v": "Anderson School of Management",
+   "n": 0
+  },
+  {
+   "v": "Beedie School of Business",
+   "n": 0
+  },
+  {
+   "v": "Booth School of Business",
+   "n": 0
+  },
+  {
+   "v": "Carey Business School",
+   "n": 0
+  },
+  {
+   "v": "Carl H. Lindner College of Business",
+   "n": 0
+  },
+  {
+   "v": "Carroll School of Management",
+   "n": 0
+  },
+  {
+   "v": "Charles H. Lundquist College of Business",
+   "n": 0
+  },
+  {
+   "v": "Cockrell School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "College of Administrative Sciences and Economics (CASE)",
+   "n": 0
+  },
+  {
+   "v": "College of Business Administration",
+   "n": 0
+  },
+  {
+   "v": "College of Business and Economics",
+   "n": 0
+  },
+  {
+   "v": "College of Business and Innovation",
+   "n": 0
+  },
+  {
+   "v": "College of Engineering",
+   "n": 0
+  },
+  {
+   "v": "College of Engineering, Computing and Applied Sciences",
+   "n": 0
+  },
+  {
+   "v": "College of Management",
+   "n": 0
+  },
+  {
+   "v": "College of Management of Technology (CMT)",
+   "n": 0
+  },
+  {
+   "v": "Columbia Business School",
+   "n": 0
+  },
+  {
+   "v": "Cornell Tech",
+   "n": 0
+  },
+  {
+   "v": "CUHK Business School",
+   "n": 0
+  },
+  {
+   "v": "CUHK(SZ)",
+   "n": 0
+  },
+  {
+   "v": "Culverhouse College of Commerce",
+   "n": 0
+  },
+  {
+   "v": "Curtis L. Carlson School of Management",
+   "n": 0
+  },
+  {
+   "v": "DeGroote School of Business",
+   "n": 0
+  },
+  {
+   "v": "Department of Management Science & Engineering (MS&E)",
+   "n": 0
+  },
+  {
+   "v": "EBS Business School",
+   "n": 0
+  },
+  {
+   "v": "Econometric Institute",
+   "n": 0
+  },
+  {
+   "v": "Edwin L. Cox School of Business",
+   "n": 0
+  },
+  {
+   "v": "Faculty of Business",
+   "n": 0
+  },
+  {
+   "v": "Faculty of Business Administration",
+   "n": 0
+  },
+  {
+   "v": "Faculty of Economics and Business (FEB)",
+   "n": 0
+  },
+  {
+   "v": "Faculty of Engineering",
+   "n": 0
+  },
+  {
+   "v": "Faculty of Engineering and Natural Sciences (FENS)",
+   "n": 0
+  },
+  {
+   "v": "Feliciano School of Business",
+   "n": 0
+  },
+  {
+   "v": "Foster School of Business",
+   "n": 0
+  },
+  {
+   "v": "Freeman College of Management",
+   "n": 0
+  },
+  {
+   "v": "Gatton College of Business and Economics",
+   "n": 0
+  },
+  {
+   "v": "Goizueta Business School",
+   "n": 0
+  },
+  {
+   "v": "Graduate School of Business",
+   "n": 0
+  },
+  {
+   "v": "Graduate School of Business (GSB)",
+   "n": 0
+  },
+  {
+   "v": "Graduate School of Engineering and Management",
+   "n": 0
+  },
+  {
+   "v": "H. Milton Stewart School of Industrial & Systems Engineering",
+   "n": 0
+  },
+  {
+   "v": "Haas School of Business",
+   "n": 0
+  },
+  {
+   "v": "Harvard Business School (HBS)",
+   "n": 0
+  },
+  {
+   "v": "Haskayne School of Business",
+   "n": 0
+  },
+  {
+   "v": "Heller School for Social Policy and Management",
+   "n": 0
+  },
+  {
+   "v": "HKUST School of Business and Management",
+   "n": 0
+  },
+  {
+   "v": "Imperial College Business School",
+   "n": 0
+  },
+  {
+   "v": "Ira A. Fulton Schools of Engineering",
+   "n": 0
+  },
+  {
+   "v": "Isenberg School of Management",
+   "n": 0
+  },
+  {
+   "v": "Ivey Business School",
+   "n": 0
+  },
+  {
+   "v": "J. B. Speed School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "J. Mack Robinson College of Business",
+   "n": 0
+  },
+  {
+   "v": "John B. Goddard School of Business & Economics",
+   "n": 0
+  },
+  {
+   "v": "John Molson School of Business",
+   "n": 0
+  },
+  {
+   "v": "Jones Graduate School Of Business",
+   "n": 0
+  },
+  {
+   "v": "Joseph M. Katz Graduate School of Business",
+   "n": 0
+  },
+  {
+   "v": "Kelley School of Business",
+   "n": 0
+  },
+  {
+   "v": "Kellogg School of Management",
+   "n": 0
+  },
+  {
+   "v": "Kenan-Flagler Business School",
+   "n": 0
+  },
+  {
+   "v": "Krannert School of Management",
+   "n": 0
+  },
+  {
+   "v": "Lally School of Management",
+   "n": 0
+  },
+  {
+   "v": "Lazaridis School of Business & Economics",
+   "n": 0
+  },
+  {
+   "v": "Leavey School of Business",
+   "n": 0
+  },
+  {
+   "v": "Lee Kong Chian School of Business",
+   "n": 0
+  },
+  {
+   "v": "Leeds School of Business",
+   "n": 0
+  },
+  {
+   "v": "Leonard N. Stern School of Business",
+   "n": 0
+  },
+  {
+   "v": "Louvain School of Management",
+   "n": 0
+  },
+  {
+   "v": "Lucas College and Graduate School of Business",
+   "n": 0
+  },
+  {
+   "v": "Lyle School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "Marshall School of Business",
+   "n": 0
+  },
+  {
+   "v": "Mays Business School",
+   "n": 0
+  },
+  {
+   "v": "McCombs School of Business",
+   "n": 0
+  },
+  {
+   "v": "McCormick School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "Michael Smurfit Graduate Business School",
+   "n": 0
+  },
+  {
+   "v": "Mike Ilitch School of Business",
+   "n": 0
+  },
+  {
+   "v": "MIT Sloan School of Management",
+   "n": 0
+  },
+  {
+   "v": "Nanyang Business School (NBS)",
+   "n": 0
+  },
+  {
+   "v": "Neeley School of Business",
+   "n": 0
+  },
+  {
+   "v": "Olin Business School",
+   "n": 0
+  },
+  {
+   "v": "Owen Graduate School of Management",
+   "n": 0
+  },
+  {
+   "v": "Poole College of Management",
+   "n": 0
+  },
+  {
+   "v": "Questrom School of Business",
+   "n": 0
+  },
+  {
+   "v": "Quinlan School of Business",
+   "n": 0
+  },
+  {
+   "v": "Rady School of Management",
+   "n": 0
+  },
+  {
+   "v": "Raymond A. Mason School of Business",
+   "n": 0
+  },
+  {
+   "v": "Robert Pamplin Jr. School of Business Administration (PSOBA)",
+   "n": 0
+  },
+  {
+   "v": "Robins School of Business",
+   "n": 0
+  },
+  {
+   "v": "Rotman School of Management",
+   "n": 0
+  },
+  {
+   "v": "Rotterdam School of Management (RSM)",
+   "n": 0
+  },
+  {
+   "v": "Saïd Business School",
+   "n": 0
+  },
+  {
+   "v": "Samuel Curtis Johnson Graduate School of Management",
+   "n": 0
+  },
+  {
+   "v": "Sauder School of Business",
+   "n": 0
+  },
+  {
+   "v": "Scheller College of Business",
+   "n": 0
+  },
+  {
+   "v": "School of Business Administration",
+   "n": 0
+  },
+  {
+   "v": "School of Business Administration, A. Gary Anderson Graduate School of Management",
+   "n": 0
+  },
+  {
+   "v": "School of Business-Camden",
+   "n": 0
+  },
+  {
+   "v": "School of Business, Analytics",
+   "n": 0
+  },
+  {
+   "v": "School of Computing Science",
+   "n": 0
+  },
+  {
+   "v": "School of Economics and Management",
+   "n": 0
+  },
+  {
+   "v": "School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "School of Engineering and Applied Science",
+   "n": 0
+  },
+  {
+   "v": "School of Industrial Engineering",
+   "n": 0
+  },
+  {
+   "v": "School of Industrial Engineering and Management",
+   "n": 0
+  },
+  {
+   "v": "School of Information",
+   "n": 0
+  },
+  {
+   "v": "School of Information Management and Engineering (SIME)",
+   "n": 0
+  },
+  {
+   "v": "School of Information Systems",
+   "n": 0
+  },
+  {
+   "v": "School of International Business Administration",
+   "n": 0
+  },
+  {
+   "v": "School of Management",
+   "n": 0
+  },
+  {
+   "v": "School of Mechanical & Materials Engineering",
+   "n": 0
+  },
+  {
+   "v": "School of Operations Research and Information Engineering (ORIE)",
+   "n": 0
+  },
+  {
+   "v": "School of Science and Engineering",
+   "n": 0
+  },
+  {
+   "v": "Sheldon B. Lubar School of Business",
+   "n": 0
+  },
+  {
+   "v": "Smeal College of Business",
+   "n": 0
+  },
+  {
+   "v": "Smith School of Business",
+   "n": 0
+  },
+  {
+   "v": "Solvay Brussels School of Economics and Management",
+   "n": 0
+  },
+  {
+   "v": "Suliman S. Olayan School of Business",
+   "n": 0
+  },
+  {
+   "v": "SUNY (School of Management)",
+   "n": 0
+  },
+  {
+   "v": "Tepper School of Business",
+   "n": 0
+  },
+  {
+   "v": "Thayer School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "The David D. Reh School of Business",
+   "n": 0
+  },
+  {
+   "v": "The Fu Foundation School of Engineering and Applied Science",
+   "n": 0
+  },
+  {
+   "v": "The Fuqua School of Business",
+   "n": 0
+  },
+  {
+   "v": "The Paul Merage School of Business",
+   "n": 0
+  },
+  {
+   "v": "The Robert H. Smith School of Business",
+   "n": 0
+  },
+  {
+   "v": "The School of Economics and Business Administration",
+   "n": 0
+  },
+  {
+   "v": "Toulouse Business School",
+   "n": 0
+  },
+  {
+   "v": "Tuck School of Business",
+   "n": 0
+  },
+  {
+   "v": "TUM School of Management",
+   "n": 0
+  },
+  {
+   "v": "UNSW Business School",
+   "n": 0
+  },
+  {
+   "v": "Vienna University of Economics and Business",
+   "n": 0
+  },
+  {
+   "v": "Volgenau School of Engineering",
+   "n": 0
+  },
+  {
+   "v": "W. E. Simon Graduate School of Business Administration",
+   "n": 0
+  },
+  {
+   "v": "Weatherhead School of Management",
+   "n": 0
+  },
+  {
+   "v": "Wesley J. Howe School of Technology Management",
+   "n": 0
+  },
+  {
+   "v": "Wharton School",
+   "n": 0
   }
  ],
  "units": [
+  {
+   "v": "Management Science Department",
+   "n": 5
+  },
+  {
+   "v": "Operations Management",
+   "n": 4
+  },
   {
    "v": "SCM",
    "n": 3
   },
   {
-   "v": "Business Analytics",
+   "v": "Business Analytics Department",
    "n": 2
   },
   {
@@ -522,27 +1770,31 @@
    "n": 2
   },
   {
+   "v": "Department of Industrial Engineering and Operations Research (IEOR)",
+   "n": 2
+  },
+  {
    "v": "Department of Logistics and Maritime Studies",
    "n": 2
   },
   {
-   "v": "Department of Management Science",
+   "v": "Department of Management Sciences",
    "n": 2
   },
   {
-   "v": "Management Science",
+   "v": "Information Systems and Operations Management Department",
    "n": 2
   },
   {
-   "v": "Management Science Department",
+   "v": "Management Department",
    "n": 2
   },
   {
-   "v": "Operations Management",
+   "v": "Operations & Information Systems Department",
    "n": 2
   },
   {
-   "v": "Analytics and Operations",
+   "v": "Analytics and Operations group",
    "n": 1
   },
   {
@@ -594,15 +1846,7 @@
    "n": 1
   },
   {
-   "v": "Department of Industrial Engineering & Operations Research (IEOR)",
-   "n": 1
-  },
-  {
    "v": "Department of Industrial Engineering and Operations Research",
-   "n": 1
-  },
-  {
-   "v": "Department of Industrial Engineering and Operations Research (IEOR)",
    "n": 1
   },
   {
@@ -650,15 +1894,7 @@
    "n": 1
   },
   {
-   "v": "Information Systems and Operations Management",
-   "n": 1
-  },
-  {
-   "v": "Information Systems and Operations Management Department",
-   "n": 1
-  },
-  {
-   "v": "Innovation and Information Management",
+   "v": "Innovation and Information Management Area",
    "n": 1
   },
   {
@@ -674,19 +1910,7 @@
    "n": 1
   },
   {
-   "v": "Management Area",
-   "n": 1
-  },
-  {
-   "v": "Management Department",
-   "n": 1
-  },
-  {
-   "v": "Management Science & Operations",
-   "n": 1
-  },
-  {
-   "v": "Management Sciences Area",
+   "v": "Management Science and Operations",
    "n": 1
   },
   {
@@ -702,10 +1926,6 @@
    "n": 1
   },
   {
-   "v": "Operations & Information Systems Department",
-   "n": 1
-  },
-  {
    "v": "Operations & SCM",
    "n": 1
   },
@@ -718,7 +1938,7 @@
    "n": 1
   },
   {
-   "v": "Operations and Business Analytics Department",
+   "v": "Operations and Business Analytics",
    "n": 1
   },
   {
@@ -726,7 +1946,7 @@
    "n": 1
   },
   {
-   "v": "Operations and Information Systems",
+   "v": "Operations and Information Technology Department",
    "n": 1
   },
   {
@@ -734,11 +1954,7 @@
    "n": 1
   },
   {
-   "v": "Operations and Supply Chain Management area",
-   "n": 1
-  },
-  {
-   "v": "Operations Management Area",
+   "v": "Operations and Supply Chain Management Department",
    "n": 1
   },
   {
@@ -746,15 +1962,7 @@
    "n": 1
   },
   {
-   "v": "Operations Management group",
-   "n": 1
-  },
-  {
-   "v": "Operations Strategy and Management Science",
-   "n": 1
-  },
-  {
-   "v": "Operations, Information and Technology Department",
+   "v": "Operations Strategy and Management Science Group",
    "n": 1
   },
   {
@@ -766,11 +1974,11 @@
    "n": 1
   },
   {
-   "v": "Supply Chain & Information Systems",
+   "v": "Supply Chain & Information Systems Department",
    "n": 1
   },
   {
-   "v": "Supply Chain and Operations",
+   "v": "Supply Chain and Operations Department",
    "n": 1
   },
   {
@@ -796,48 +2004,745 @@
   {
    "v": "University of Houston and DISC",
    "n": 1
+  },
+  {
+   "v": "Accounting & Financial Management Area, Business Analytics group",
+   "n": 0
+  },
+  {
+   "v": "Area of Health Policy and Management",
+   "n": 0
+  },
+  {
+   "v": "Area of Operations and Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Business Analytics and Operations area",
+   "n": 0
+  },
+  {
+   "v": "Business Area, Statistics/Operations Management",
+   "n": 0
+  },
+  {
+   "v": "Business Information and Decision Systems (BIDS) Department",
+   "n": 0
+  },
+  {
+   "v": "Center for Operations Research and Econometrics (CORE)",
+   "n": 0
+  },
+  {
+   "v": "Center for Transportation & Logistics",
+   "n": 0
+  },
+  {
+   "v": "Decision Sciences and Information Systems Department",
+   "n": 0
+  },
+  {
+   "v": "Decision Sciences Department",
+   "n": 0
+  },
+  {
+   "v": "Decision Sciences/Operations Management",
+   "n": 0
+  },
+  {
+   "v": "Decision, Operations and Information Technologies (DO&IT) Department",
+   "n": 0
+  },
+  {
+   "v": "Decision, Risk, and Operations (DRO) Division",
+   "n": 0
+  },
+  {
+   "v": "Decisions, Operations and Technology Management (DOTM)",
+   "n": 0
+  },
+  {
+   "v": "Department of Accounting, Operations and Information Systems",
+   "n": 0
+  },
+  {
+   "v": "Department of Business Administration/Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Business Analytics & Statistics",
+   "n": 0
+  },
+  {
+   "v": "Department of Business Management/Operations and Supply Chain",
+   "n": 0
+  },
+  {
+   "v": "Department of Computing and Decision Sciences",
+   "n": 0
+  },
+  {
+   "v": "Department of Data Sciences and Operations",
+   "n": 0
+  },
+  {
+   "v": "Department of Decision Sciences and Managerial Economics",
+   "n": 0
+  },
+  {
+   "v": "Department of Economics and Business",
+   "n": 0
+  },
+  {
+   "v": "Department of Finance",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial and Enterprise Systems Engineering",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial and Operations Engineering",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial and Systems Engineering (ISE)",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial and Systems Engineering (ISyE)",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial Engineering",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial Engineering and Innovation Sciences",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial Engineering and Logistics Management (IELM)",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial Engineering and Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Industrial Systems Engineering and Management (ISEM)",
+   "n": 0
+  },
+  {
+   "v": "Department of Information and Service Economy",
+   "n": 0
+  },
+  {
+   "v": "Department of Information Systems & Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Information Systems and Operations",
+   "n": 0
+  },
+  {
+   "v": "Department of Information Systems, Business Statistics and Operations Management (ISOM)",
+   "n": 0
+  },
+  {
+   "v": "Department of Information Systems, Statistics, and Management Science",
+   "n": 0
+  },
+  {
+   "v": "Department of Information, Operations, and Management Sciences",
+   "n": 0
+  },
+  {
+   "v": "Department of Logistics and Operations Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Management & Marketing",
+   "n": 0
+  },
+  {
+   "v": "Department of Management and International Business",
+   "n": 0
+  },
+  {
+   "v": "Department of Management Science and Information Systems",
+   "n": 0
+  },
+  {
+   "v": "Department of Management, Information and Supply Chain Management Group",
+   "n": 0
+  },
+  {
+   "v": "Department of Management, Operations Management group",
+   "n": 0
+  },
+  {
+   "v": "Department of Marketing & Supply Chain",
+   "n": 0
+  },
+  {
+   "v": "Department of Marketing and Decision Sciences",
+   "n": 0
+  },
+  {
+   "v": "Department of Marketing and Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Mathematics, Analytics and Optimization Group",
+   "n": 0
+  },
+  {
+   "v": "Department of Mechanical & Industrial Engineering",
+   "n": 0
+  },
+  {
+   "v": "Department of MIS, OM and Decision Sciences",
+   "n": 0
+  },
+  {
+   "v": "Department of Operational Sciences",
+   "n": 0
+  },
+  {
+   "v": "Department of Operations",
+   "n": 0
+  },
+  {
+   "v": "Department of Operations & Information Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Operations & Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Operations and Quantitative Methods",
+   "n": 0
+  },
+  {
+   "v": "Department of Operations Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Operations Research",
+   "n": 0
+  },
+  {
+   "v": "Department of Supply Chain and Business Technology Management",
+   "n": 0
+  },
+  {
+   "v": "Department of Supply Chain Management & Analytics",
+   "n": 0
+  },
+  {
+   "v": "Department of Systems Engineering and Engineering Management (SEEM)",
+   "n": 0
+  },
+  {
+   "v": "Engineering Management and Systems Engineering Department",
+   "n": 0
+  },
+  {
+   "v": "Engineering Management, Information, and Systems Department (EMIS)",
+   "n": 0
+  },
+  {
+   "v": "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab",
+   "n": 0
+  },
+  {
+   "v": "Grado Department of Industrial and Systems Engineering (ISE)",
+   "n": 0
+  },
+  {
+   "v": "Industrial Engineering and Management Sciences (IEMS) Department",
+   "n": 0
+  },
+  {
+   "v": "Industrial Engineering and Operations Research",
+   "n": 0
+  },
+  {
+   "v": "Industrial Engineering Department",
+   "n": 0
+  },
+  {
+   "v": "Information and Decision Sciences (IDS) Department",
+   "n": 0
+  },
+  {
+   "v": "Information and Innovation Management",
+   "n": 0
+  },
+  {
+   "v": "Information and Operations Management (INFO) Department",
+   "n": 0
+  },
+  {
+   "v": "Information Management & Business Analytics Department",
+   "n": 0
+  },
+  {
+   "v": "Information Systems and Analytics (ISA) Department",
+   "n": 0
+  },
+  {
+   "v": "Information Systems and Operations Management (ISOM) Department",
+   "n": 0
+  },
+  {
+   "v": "Information Systems Department",
+   "n": 0
+  },
+  {
+   "v": "Information Technology & Operations Management (ITOM) Department",
+   "n": 0
+  },
+  {
+   "v": "Information Technology, Analytics, and Operations (ITAO) Department",
+   "n": 0
+  },
+  {
+   "v": "Information, and Operations Management Department",
+   "n": 0
+  },
+  {
+   "v": "Information, Operations and Management Sciences Area",
+   "n": 0
+  },
+  {
+   "v": "Information, Operations and Technology Management Department",
+   "n": 0
+  },
+  {
+   "v": "Information, Risk, and Operations Management (IROM) Department",
+   "n": 0
+  },
+  {
+   "v": "Informaton Technology & Operatons Management (ITOM) Division",
+   "n": 0
+  },
+  {
+   "v": "Innovation, Technology & Operations",
+   "n": 0
+  },
+  {
+   "v": "Institute for Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Institute of Communication, Culture, Information and Technology (ICCIT)",
+   "n": 0
+  },
+  {
+   "v": "Management and Marketing Department",
+   "n": 0
+  },
+  {
+   "v": "Management Science and Operations Management Department",
+   "n": 0
+  },
+  {
+   "v": "Management Science, Information Systems, Financial Information, and Computer Science Department",
+   "n": 0
+  },
+  {
+   "v": "Managerial Sciences",
+   "n": 0
+  },
+  {
+   "v": "Managerial Sciences Department, Marketing Area",
+   "n": 0
+  },
+  {
+   "v": "Marketing Department",
+   "n": 0
+  },
+  {
+   "v": "McDonough School of Business, Operations and Information Management Area",
+   "n": 0
+  },
+  {
+   "v": "Mechanical and Industrial Engineering (MIE) Department",
+   "n": 0
+  },
+  {
+   "v": "Operations & Information Technology Management Department",
+   "n": 0
+  },
+  {
+   "v": "Operations & Technology Management (OTM) group",
+   "n": 0
+  },
+  {
+   "v": "Operations and Decision Sciences (ODS) Department",
+   "n": 0
+  },
+  {
+   "v": "Operations and Decision Technologies Department",
+   "n": 0
+  },
+  {
+   "v": "Operations and Logistics Division",
+   "n": 0
+  },
+  {
+   "v": "Operations and Management Science Department",
+   "n": 0
+  },
+  {
+   "v": "Operations and Manufacturing Management Department",
+   "n": 0
+  },
+  {
+   "v": "Operations and Technology Management Department",
+   "n": 0
+  },
+  {
+   "v": "Operations Department",
+   "n": 0
+  },
+  {
+   "v": "Operations Management & Business Analytics Area",
+   "n": 0
+  },
+  {
+   "v": "Operations Management & Information Technology Area",
+   "n": 0
+  },
+  {
+   "v": "Operations Management and Information Systems group",
+   "n": 0
+  },
+  {
+   "v": "Operations Management and Quantitative Methods Area",
+   "n": 0
+  },
+  {
+   "v": "Operations Management and Statistics Department",
+   "n": 0
+  },
+  {
+   "v": "Operations Research & Industrial Engineering (ORIE) Program",
+   "n": 0
+  },
+  {
+   "v": "Operations Research and Financial Engineering (ORFE) Department",
+   "n": 0
+  },
+  {
+   "v": "Operations Research and Information Engineering",
+   "n": 0
+  },
+  {
+   "v": "Operations Research and Logistics Department",
+   "n": 0
+  },
+  {
+   "v": "Operations Research and Statistics Group",
+   "n": 0
+  },
+  {
+   "v": "Operations, Business Analytics, and Information Systems Department",
+   "n": 0
+  },
+  {
+   "v": "Operations, Information and Decisions (OID) Department",
+   "n": 0
+  },
+  {
+   "v": "Operations, SCM and ITM Area",
+   "n": 0
+  },
+  {
+   "v": "Production, Technology & Operations Management Department",
+   "n": 0
+  },
+  {
+   "v": "Quantitative Analysis (QA) Area",
+   "n": 0
+  },
+  {
+   "v": "Quantitative Methods area",
+   "n": 0
+  },
+  {
+   "v": "Research Center for Operations Management",
+   "n": 0
+  },
+  {
+   "v": "School of Information Systems & Technology Management",
+   "n": 0
+  },
+  {
+   "v": "Supply Chain and Logistics Management",
+   "n": 0
+  },
+  {
+   "v": "Supply Chain Management & Analytics Department",
+   "n": 0
+  },
+  {
+   "v": "Supply Chain, Operations Management & Business Statistics Department",
+   "n": 0
+  },
+  {
+   "v": "Systems Engineering and Operations Research (SEOR)",
+   "n": 0
+  },
+  {
+   "v": "Technology & Operations department",
+   "n": 0
+  },
+  {
+   "v": "Technology and Operations Management (TOM) Area",
+   "n": 0
+  },
+  {
+   "v": "Technology and Operations Management Department",
+   "n": 0
+  },
+  {
+   "v": "The Operations Group of the Division of Strategy, Entrepreneurship, and Operations",
+   "n": 0
+  },
+  {
+   "v": "The School of Management and Economics (SME)",
+   "n": 0
   }
  ],
  "byUniversity": {
-  "American University of Beirut": {
-   "schools": [],
+  "Aalto University": {
+   "schools": [
+    "School of Business"
+   ],
    "units": [
+    "Department of Information and Service Economy"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Department of Information and Service Economy"
+    ]
+   }
+  },
+  "Air Force Institute of Technology": {
+   "schools": [
+    "Graduate School of Engineering and Management"
+   ],
+   "units": [
+    "Department of Operational Sciences"
+   ],
+   "bySchool": {
+    "Graduate School of Engineering and Management": [
+     "Department of Operational Sciences"
+    ]
+   }
+  },
+  "Alfaisal University (AU)": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "American University of Beirut": {
+   "schools": [
+    "Suliman S. Olayan School of Business"
+   ],
+   "units": [
+    "Business Information and Decision Systems (BIDS) Department",
     "Industrial Engineering and Management"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Industrial Engineering and Management"
+    ],
+    "Suliman S. Olayan School of Business": [
+     "Business Information and Decision Systems (BIDS) Department"
+    ]
+   }
   },
   "Arizona State University": {
    "schools": [
+    "Ira A. Fulton Schools of Engineering",
     "W. P. Carey School of Business"
    ],
    "units": [
-    "Department of Information Systems"
-   ]
+    "Department of Information Systems",
+    "Department of Supply Chain Management"
+   ],
+   "bySchool": {
+    "W. P. Carey School of Business": [
+     "Department of Information Systems",
+     "Department of Supply Chain Management"
+    ]
+   }
   },
   "Auburn University": {
    "schools": [],
    "units": [
     "Department of Industrial and Systems Engineering"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial and Systems Engineering"
+    ]
+   }
   },
   "Baruch College, The City University of New York (CUNY)": {
    "schools": [
     "Zicklin School of Business"
    ],
    "units": [
+    "Department of Management, Operations Management group",
     "Loomba Department of Management, Operations Management Group"
-   ]
+   ],
+   "bySchool": {
+    "Zicklin School of Business": [
+     "Department of Management, Operations Management group",
+     "Loomba Department of Management, Operations Management Group"
+    ]
+   }
+  },
+  "Binghamton University": {
+   "schools": [
+    "School of Management",
+    "SUNY (School of Management)"
+   ],
+   "units": [
+    "Business Analytics and Operations area",
+    "Operations and Business Analytics"
+   ],
+   "bySchool": {
+    "School of Management": [
+     "Operations and Business Analytics"
+    ],
+    "SUNY (School of Management)": [
+     "Business Analytics and Operations area"
+    ]
+   }
+  },
+  "Boston College": {
+   "schools": [
+    "Carroll School of Management"
+   ],
+   "units": [
+    "Business Analytics Department"
+   ],
+   "bySchool": {
+    "Carroll School of Management": [
+     "Business Analytics Department"
+    ]
+   }
+  },
+  "Boston University": {
+   "schools": [
+    "Questrom School of Business"
+   ],
+   "units": [
+    "Information Systems Department",
+    "Operations and Technology Management Department"
+   ],
+   "bySchool": {
+    "Questrom School of Business": [
+     "Information Systems Department",
+     "Operations and Technology Management Department"
+    ]
+   }
+  },
+  "Brandeis University": {
+   "schools": [
+    "Heller School for Social Policy and Management"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "Bucknell University": {
+   "schools": [
+    "Freeman College of Management"
+   ],
+   "units": [
+    "Accounting & Financial Management Area, Business Analytics group"
+   ],
+   "bySchool": {
+    "Freeman College of Management": [
+     "Accounting & Financial Management Area, Business Analytics group"
+    ]
+   }
+  },
+  "California State Polytechnic University Pomona": {
+   "schools": [],
+   "units": [
+    "Technology and Operations Management Department"
+   ],
+   "bySchool": {
+    "": [
+     "Technology and Operations Management Department"
+    ]
+   }
+  },
+  "California State University, East Bay": {
+   "schools": [
+    "College of Business and Economics"
+   ],
+   "units": [
+    "Department of Management"
+   ],
+   "bySchool": {
+    "College of Business and Economics": [
+     "Department of Management"
+    ]
+   }
   },
   "Carnegie Mellon University": {
    "schools": [
-    "Heinz College of Information Systems and Public Policy"
+    "Heinz College of Information Systems and Public Policy",
+    "Tepper School of Business"
    ],
-   "units": []
+   "units": [
+    "Operations Management Group"
+   ],
+   "bySchool": {
+    "Tepper School of Business": [
+     "Operations Management Group"
+    ]
+   }
+  },
+  "Case Western Reserve University": {
+   "schools": [
+    "Weatherhead School of Management"
+   ],
+   "units": [
+    "Department of Operations"
+   ],
+   "bySchool": {
+    "Weatherhead School of Management": [
+     "Department of Operations"
+    ]
+   }
+  },
+  "Cass Business School": {
+   "schools": [],
+   "units": [
+    "Department of Management"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Management"
+    ]
+   }
   },
   "City St. George's, University of London": {
    "schools": [
     "Bayes Business School, Faculty of Management"
    ],
-   "units": []
+   "units": [],
+   "bySchool": {}
   },
   "City University of Hong Kong": {
    "schools": [
@@ -845,25 +2750,174 @@
    ],
    "units": [
     "Department of Decision Analytics and Operations"
-   ]
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Department of Decision Analytics and Operations"
+    ]
+   }
+  },
+  "City University of Hong Kong (CityU)": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Department of Management Sciences"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Department of Management Sciences"
+    ]
+   }
+  },
+  "City University of New York (CUNY)": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Clarkson University": {
-   "schools": [],
+   "schools": [
+    "The David D. Reh School of Business"
+   ],
    "units": [
-    "Operations and Information Systems"
-   ]
+    "Operations & Information Systems"
+   ],
+   "bySchool": {
+    "": [
+     "Operations & Information Systems"
+    ],
+    "The David D. Reh School of Business": [
+     "Operations & Information Systems"
+    ]
+   }
+  },
+  "Clemson University": {
+   "schools": [
+    "College of Business",
+    "College of Engineering, Computing and Applied Sciences"
+   ],
+   "units": [
+    "Department of Industrial Engineering",
+    "Management Department"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Management Department"
+    ],
+    "College of Engineering, Computing and Applied Sciences": [
+     "Department of Industrial Engineering"
+    ]
+   }
+  },
+  "College of William and Mary": {
+   "schools": [
+    "Raymond A. Mason School of Business"
+   ],
+   "units": [
+    "Operations Management & Information Technology Area"
+   ],
+   "bySchool": {
+    "Raymond A. Mason School of Business": [
+     "Operations Management & Information Technology Area"
+    ]
+   }
   },
   "Columbia University": {
+   "schools": [
+    "Columbia Business School",
+    "The Fu Foundation School of Engineering and Applied Science"
+   ],
+   "units": [
+    "Decision, Risk, and Operations (DRO) Division",
+    "Department of Industrial Engineering and Operations Research",
+    "Department of Industrial Engineering and Operations Research (IEOR)"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial Engineering and Operations Research"
+    ],
+    "Columbia Business School": [
+     "Decision, Risk, and Operations (DRO) Division"
+    ],
+    "The Fu Foundation School of Engineering and Applied Science": [
+     "Department of Industrial Engineering and Operations Research (IEOR)"
+    ]
+   }
+  },
+  "Concordia University": {
+   "schools": [
+    "John Molson School of Business"
+   ],
+   "units": [
+    "Department of Supply Chain and Business Technology Management"
+   ],
+   "bySchool": {
+    "John Molson School of Business": [
+     "Department of Supply Chain and Business Technology Management"
+    ]
+   }
+  },
+  "Copenhagen Business School": {
    "schools": [],
    "units": [
-    "Department of Industrial Engineering and Operations Research"
-   ]
+    "Department of Operations Management"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Operations Management"
+    ]
+   }
+  },
+  "Cornell University": {
+   "schools": [
+    "Cornell Tech",
+    "Samuel Curtis Johnson Graduate School of Management",
+    "School of Operations Research and Information Engineering (ORIE)"
+   ],
+   "units": [
+    "Operations Management group",
+    "Operations Research and Information Engineering"
+   ],
+   "bySchool": {
+    "Cornell Tech": [
+     "Operations Research and Information Engineering"
+    ],
+    "Samuel Curtis Johnson Graduate School of Management": [
+     "Operations Management group"
+    ]
+   }
+  },
+  "Cornell University/ Cornell Tech": {
+   "schools": [
+    "Samuel Curtis Johnson Graduate School of Management"
+   ],
+   "units": [],
+   "bySchool": {}
   },
   "CUHK Business School": {
    "schools": [],
    "units": [
     "Department of Decisions, Operations and Technology"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Department of Decisions, Operations and Technology"
+    ]
+   }
+  },
+  "Dartmouth College": {
+   "schools": [
+    "Thayer School of Engineering",
+    "Tuck School of Business"
+   ],
+   "units": [
+    "Operations and Management Science Department"
+   ],
+   "bySchool": {
+    "Tuck School of Business": [
+     "Operations and Management Science Department"
+    ]
+   }
   },
   "DePauw University": {
    "schools": [
@@ -871,62 +2925,413 @@
    ],
    "units": [
     "Business Analytics Program"
-   ]
+   ],
+   "bySchool": {
+    "School of Business and Leadership": [
+     "Business Analytics Program"
+    ]
+   }
+  },
+  "Duke University": {
+   "schools": [
+    "The Fuqua School of Business"
+   ],
+   "units": [
+    "Operations Management Area"
+   ],
+   "bySchool": {
+    "The Fuqua School of Business": [
+     "Operations Management Area"
+    ]
+   }
+  },
+  "Durham University": {
+   "schools": [
+    "Business School"
+   ],
+   "units": [
+    "Department of Management & Marketing"
+   ],
+   "bySchool": {
+    "Business School": [
+     "Department of Management & Marketing"
+    ]
+   }
+  },
+  "EBS University": {
+   "schools": [
+    "EBS Business School"
+   ],
+   "units": [
+    "Institute for Supply Chain Management"
+   ],
+   "bySchool": {
+    "EBS Business School": [
+     "Institute for Supply Chain Management"
+    ]
+   }
+  },
+  "École Polytechnique Fédérale de Lausanne (EPFL)": {
+   "schools": [
+    "College of Management of Technology (CMT)"
+   ],
+   "units": [
+    "Technology & Operations Management (TOM) Area"
+   ],
+   "bySchool": {
+    "College of Management of Technology (CMT)": [
+     "Technology & Operations Management (TOM) Area"
+    ]
+   }
+  },
+  "Eindhoven University of Technology (TU/e)": {
+   "schools": [
+    "School of Industrial Engineering"
+   ],
+   "units": [
+    "Department of Industrial Engineering and Innovation Sciences"
+   ],
+   "bySchool": {
+    "School of Industrial Engineering": [
+     "Department of Industrial Engineering and Innovation Sciences"
+    ]
+   }
+  },
+  "Emory University": {
+   "schools": [
+    "Goizueta Business School"
+   ],
+   "units": [
+    "Information Systems & Operations Management"
+   ],
+   "bySchool": {
+    "Goizueta Business School": [
+     "Information Systems & Operations Management"
+    ]
+   }
+  },
+  "Erasmus University Rotterdam": {
+   "schools": [
+    "Econometric Institute",
+    "Rotterdam School of Management (RSM)"
+   ],
+   "units": [
+    "Area of Operations and Supply Chain Management",
+    "Technology and Operations Management Department"
+   ],
+   "bySchool": {
+    "Econometric Institute": [
+     "Area of Operations and Supply Chain Management"
+    ],
+    "Rotterdam School of Management (RSM)": [
+     "Technology and Operations Management Department"
+    ]
+   }
+  },
+  "ESMT Berlin": {
+   "schools": [],
+   "units": [
+    "Management Science Department"
+   ],
+   "bySchool": {
+    "": [
+     "Management Science Department"
+    ]
+   }
+  },
+  "ESSEC Business School": {
+   "schools": [],
+   "units": [
+    "Operations Management Department"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management Department"
+    ]
+   }
+  },
+  "Ewha School of Business": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "Florida International University": {
+   "schools": [
+    "College of Business Administration"
+   ],
+   "units": [
+    "Decision Sciences and Information Systems Department"
+   ],
+   "bySchool": {
+    "College of Business Administration": [
+     "Decision Sciences and Information Systems Department"
+    ]
+   }
+  },
+  "Florida State University": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Marketing Department"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Marketing Department"
+    ]
+   }
   },
   "Frankfurt School of Finance & Management": {
    "schools": [],
    "units": [
     "Management Department"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Management Department"
+    ]
+   }
+  },
+  "Fudan University": {
+   "schools": [
+    "School of Management"
+   ],
+   "units": [
+    "Management Science Department"
+   ],
+   "bySchool": {
+    "School of Management": [
+     "Management Science Department"
+    ]
+   }
+  },
+  "George Mason University": {
+   "schools": [
+    "School of Business",
+    "Volgenau School of Engineering"
+   ],
+   "units": [
+    "Information Systems and Operations Management (ISOM) Area",
+    "Systems Engineering and Operations Research (SEOR)"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Information Systems and Operations Management (ISOM) Area"
+    ],
+    "Volgenau School of Engineering": [
+     "Systems Engineering and Operations Research (SEOR)"
+    ]
+   }
   },
   "Georgetown University": {
    "schools": [
     "McDonough School of Business"
    ],
    "units": [
+    "McDonough School of Business, Operations and Information Management Area",
     "NRF Business of Retail Initiative"
-   ]
+   ],
+   "bySchool": {
+    "McDonough School of Business": [
+     "McDonough School of Business, Operations and Information Management Area",
+     "NRF Business of Retail Initiative"
+    ]
+   }
+  },
+  "Georgia Institute of Technology": {
+   "schools": [
+    "H. Milton Stewart School of Industrial & Systems Engineering",
+    "Scheller College of Business"
+   ],
+   "units": [
+    "Operations Management Area"
+   ],
+   "bySchool": {
+    "Scheller College of Business": [
+     "Operations Management Area"
+    ]
+   }
   },
   "Georgia Southern University": {
    "schools": [],
    "units": [
     "Logistics and SCM"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Logistics and SCM"
+    ]
+   }
   },
   "Georgia State University": {
    "schools": [
+    "J. Mack Robinson College of Business",
     "Robinson College of Business"
    ],
    "units": [
-    "Department of Management"
-   ]
+    "Department of Management",
+    "Managerial Sciences"
+   ],
+   "bySchool": {
+    "J. Mack Robinson College of Business": [
+     "Managerial Sciences"
+    ],
+    "Robinson College of Business": [
+     "Department of Management"
+    ]
+   }
+  },
+  "Harvard Kennedy School": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "Harvard University": {
+   "schools": [
+    "Harvard Business School (HBS)"
+   ],
+   "units": [
+    "Technology & Operations Management Unit"
+   ],
+   "bySchool": {
+    "Harvard Business School (HBS)": [
+     "Technology & Operations Management Unit"
+    ]
+   }
+  },
+  "HEC Montréal": {
+   "schools": [],
+   "units": [
+    "Decision Sciences Department",
+    "Department of Logistics and Operations Management"
+   ],
+   "bySchool": {
+    "": [
+     "Decision Sciences Department",
+     "Department of Logistics and Operations Management"
+    ]
+   }
   },
   "HEC Paris": {
    "schools": [],
    "units": [
-    "Information Systems and Operations Management",
     "Information Systems and Operations Management Department"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Information Systems and Operations Management Department"
+    ]
+   }
+  },
+  "Hull University Business School": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "IE Business School": {
+   "schools": [],
+   "units": [
+    "Operations & Technology Area"
+   ],
+   "bySchool": {
+    "": [
+     "Operations & Technology Area"
+    ]
+   }
+  },
+  "IE University": {
+   "schools": [
+    "Faculty of Business"
+   ],
+   "units": [],
+   "bySchool": {}
   },
   "IESE Business School": {
    "schools": [],
    "units": [
-    "Operations, Information and Technology Department"
-   ]
+    "Operations, Information and Technology Department",
+    "Production, Technology & Operations Management Department"
+   ],
+   "bySchool": {
+    "": [
+     "Operations, Information and Technology Department",
+     "Production, Technology & Operations Management Department"
+    ]
+   }
   },
   "Imperial College London": {
    "schools": [
-    "Imperial Business School"
+    "Imperial Business School",
+    "Imperial College Business School"
    ],
    "units": [
-    "Analytics and Operations"
-   ]
+    "Analytics and Operations group"
+   ],
+   "bySchool": {
+    "Imperial Business School": [
+     "Analytics and Operations group"
+    ],
+    "Imperial College Business School": [
+     "Analytics and Operations group"
+    ]
+   }
+  },
+  "Indian Institute of Technology (IIT) Bombay": {
+   "schools": [],
+   "units": [
+    "Industrial Engineering and Operations Research"
+   ],
+   "bySchool": {
+    "": [
+     "Industrial Engineering and Operations Research"
+    ]
+   }
   },
   "Indian School of Business": {
    "schools": [],
    "units": [
     "Operations Management group"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management group"
+    ]
+   }
+  },
+  "Indian School of Business (ISB)": {
+   "schools": [],
+   "units": [
+    "Operations Management group"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management group"
+    ]
+   }
+  },
+  "Indiana University": {
+   "schools": [
+    "Kelley School of Business"
+   ],
+   "units": [
+    "Operations and Decision Technologies Department"
+   ],
+   "bySchool": {
+    "Kelley School of Business": [
+     "Operations and Decision Technologies Department"
+    ]
+   }
+  },
+  "INSEAD": {
+   "schools": [],
+   "units": [
+    "Technology and Operations Management (TOM) Area"
+   ],
+   "bySchool": {
+    "": [
+     "Technology and Operations Management (TOM) Area"
+    ]
+   }
   },
   "Institut Mines-Télécom": {
    "schools": [
@@ -934,47 +3339,188 @@
    ],
    "units": [
     "Department of Management, Marketing and Strategy (MMS)"
-   ]
+   ],
+   "bySchool": {
+    "Institut Mines-Télécom Business School": [
+     "Department of Management, Marketing and Strategy (MMS)"
+    ]
+   }
   },
   "Institut Mines-Telecom Business School": {
    "schools": [],
    "units": [
     "Department of Management, Marketing and Strategy"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Department of Management, Marketing and Strategy"
+    ]
+   }
+  },
+  "Iowa State University (College of Business)": {
+   "schools": [],
+   "units": [
+    "Supply Chain and Information Systems Department"
+   ],
+   "bySchool": {
+    "": [
+     "Supply Chain and Information Systems Department"
+    ]
+   }
   },
   "Ivey Business School, Western University": {
    "schools": [],
    "units": [
     "Management Science"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Management Science"
+    ]
+   }
+  },
+  "Johns Hopkins University": {
+   "schools": [
+    "Carey Business School"
+   ],
+   "units": [
+    "Operations Management & Business Analytics Area"
+   ],
+   "bySchool": {
+    "Carey Business School": [
+     "Operations Management & Business Analytics Area"
+    ]
+   }
+  },
+  "Koç University": {
+   "schools": [
+    "College of Administrative Sciences and Economics (CASE)"
+   ],
+   "units": [
+    "Operations Management and Information Systems group"
+   ],
+   "bySchool": {
+    "College of Administrative Sciences and Economics (CASE)": [
+     "Operations Management and Information Systems group"
+    ]
+   }
+  },
+  "Kogod School of Business": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Korea Advanced Institute of Science and Technology (KAIST)": {
    "schools": [
     "College of Business"
    ],
    "units": [
-    "Operations Strategy and Management Science"
-   ]
-  },
-  "KU LEUVEN": {
-   "schools": [
-    "Faculty of Economics and Business"
+    "Operations Strategy and Management Science Group"
    ],
-   "units": []
+   "bySchool": {
+    "College of Business": [
+     "Operations Strategy and Management Science Group"
+    ]
+   }
+  },
+  "KU Leuven": {
+   "schools": [
+    "Faculty of Economics and Business",
+    "Faculty of Economics and Business (FEB)"
+   ],
+   "units": [
+    "Research Center for Operations Management"
+   ],
+   "bySchool": {
+    "Faculty of Economics and Business (FEB)": [
+     "Research Center for Operations Management"
+    ]
+   }
   },
   "Lehigh University": {
    "schools": [
-    "College of Business"
+    "College of Business",
+    "College of Business & Economics"
    ],
    "units": [
-    "Department of Decision and Technology Analytics"
-   ]
+    "Department of Decision and Technology Analytics",
+    "Department of Management"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Department of Decision and Technology Analytics"
+    ],
+    "College of Business & Economics": [
+     "Department of Management"
+    ]
+   }
+  },
+  "Lingnan University": {
+   "schools": [
+    "Faculty of Business"
+   ],
+   "units": [
+    "Department of Computing and Decision Sciences"
+   ],
+   "bySchool": {
+    "Faculty of Business": [
+     "Department of Computing and Decision Sciences"
+    ]
+   }
   },
   "London Business School": {
    "schools": [],
    "units": [
     "Management Science & Operations"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Management Science & Operations"
+    ]
+   }
+  },
+  "London Business School (LBS)": {
+   "schools": [],
+   "units": [
+    "Management Science and Operations"
+   ],
+   "bySchool": {
+    "": [
+     "Management Science and Operations"
+    ]
+   }
+  },
+  "Loyola University Chicago": {
+   "schools": [
+    "Quinlan School of Business"
+   ],
+   "units": [
+    "Information Systems and Operations Management (ISOM) Department"
+   ],
+   "bySchool": {
+    "Quinlan School of Business": [
+     "Information Systems and Operations Management (ISOM) Department"
+    ]
+   }
+  },
+  "Massachusetts Institute of Technology (MIT)": {
+   "schools": [
+    "MIT Sloan School of Management"
+   ],
+   "units": [
+    "Center for Transportation & Logistics",
+    "Operations Management Group",
+    "Operations Research and Statistics Group"
+   ],
+   "bySchool": {
+    "": [
+     "Center for Transportation & Logistics"
+    ],
+    "MIT Sloan School of Management": [
+     "Operations Management Group",
+     "Operations Research and Statistics Group"
+    ]
+   }
   },
   "McGill University": {
    "schools": [
@@ -982,29 +3528,133 @@
    ],
    "units": [
     "Operations Management Area"
-   ]
+   ],
+   "bySchool": {
+    "Desautels Faculty of Management": [
+     "Operations Management Area"
+    ]
+   }
+  },
+  "McMaster University": {
+   "schools": [
+    "DeGroote School of Business"
+   ],
+   "units": [
+    "Area of Health Policy and Management"
+   ],
+   "bySchool": {
+    "DeGroote School of Business": [
+     "Area of Health Policy and Management"
+    ]
+   }
+  },
+  "MEF University": {
+   "schools": [
+    "Faculty of Engineering"
+   ],
+   "units": [
+    "Department of Industrial Engineering"
+   ],
+   "bySchool": {
+    "Faculty of Engineering": [
+     "Department of Industrial Engineering"
+    ]
+   }
+  },
+  "Memorial University of Newfoundland": {
+   "schools": [
+    "Faculty of Business Administration"
+   ],
+   "units": [],
+   "bySchool": {}
   },
   "Michigan State University": {
    "schools": [
-    "Eli Broad College of Business",
     "The Eli Broad College of Business"
    ],
    "units": [
     "Department of Supply Chain Management",
     "Supply Chain Management"
-   ]
+   ],
+   "bySchool": {
+    "The Eli Broad College of Business": [
+     "Department of Supply Chain Management",
+     "Supply Chain Management"
+    ]
+   }
+  },
+  "Mississippi State University": {
+   "schools": [],
+   "units": [
+    "Department of Industrial and Systems Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial and Systems Engineering"
+    ]
+   }
+  },
+  "Missouri University of Science and Technology": {
+   "schools": [],
+   "units": [
+    "Engineering Management and Systems Engineering Department"
+   ],
+   "bySchool": {
+    "": [
+     "Engineering Management and Systems Engineering Department"
+    ]
+   }
+  },
+  "Montclair State University": {
+   "schools": [
+    "Feliciano School of Business"
+   ],
+   "units": [
+    "Information Management & Business Analytics Department"
+   ],
+   "bySchool": {
+    "Feliciano School of Business": [
+     "Information Management & Business Analytics Department"
+    ]
+   }
   },
   "Morgan State University": {
    "schools": [],
    "units": [
     "SCM"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "SCM"
+    ]
+   }
   },
   "Nanyang Technological University": {
    "schools": [
-    "Nanyang Business School"
+    "Nanyang Business School",
+    "Nanyang Business School (NBS)"
    ],
-   "units": []
+   "units": [
+    "Informaton Technology & Operatons Management (ITOM) Division"
+   ],
+   "bySchool": {
+    "Nanyang Business School (NBS)": [
+     "Informaton Technology & Operatons Management (ITOM) Division"
+    ]
+   }
+  },
+  "National Chiao Tung University": {
+   "schools": [
+    "College of Management"
+   ],
+   "units": [
+    "Department of Industrial Engineering and Management"
+   ],
+   "bySchool": {
+    "College of Management": [
+     "Department of Industrial Engineering and Management"
+    ]
+   }
   },
   "National University of Singapore": {
    "schools": [
@@ -1013,57 +3663,572 @@
    "units": [
     "Department of Analytics and Operations",
     "Department of Industrial Systems Engineering and Management"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial Systems Engineering and Management"
+    ],
+    "NUS Business School": [
+     "Department of Analytics and Operations"
+    ]
+   }
   },
-  "Özyeğin University": {
+  "National University of Singapore (NUS)": {
    "schools": [
+    "NUS Business School"
+   ],
+   "units": [
+    "Department of Analytics and Operations",
+    "Department of Industrial Systems Engineering and Management (ISEM)"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial Systems Engineering and Management (ISEM)"
+    ],
+    "NUS Business School": [
+     "Department of Analytics and Operations"
+    ]
+   }
+  },
+  "Naval Postgraduate School": {
+   "schools": [],
+   "units": [
+    "Department of Operations Research"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Operations Research"
+    ]
+   }
+  },
+  "NC State University": {
+   "schools": [
+    "Poole College of Management"
+   ],
+   "units": [
+    "Department of Business Management/Operations and Supply Chain"
+   ],
+   "bySchool": {
+    "Poole College of Management": [
+     "Department of Business Management/Operations and Supply Chain"
+    ]
+   }
+  },
+  "New York University (NYU)": {
+   "schools": [
+    "Leonard N. Stern School of Business"
+   ],
+   "units": [
+    "Department of Information, Operations, and Management Sciences"
+   ],
+   "bySchool": {
+    "Leonard N. Stern School of Business": [
+     "Department of Information, Operations, and Management Sciences"
+    ]
+   }
+  },
+  "New York University Shanghai": {
+   "schools": [],
+   "units": [
+    "Business Area, Statistics/Operations Management"
+   ],
+   "bySchool": {
+    "": [
+     "Business Area, Statistics/Operations Management"
+    ]
+   }
+  },
+  "Northeastern University": {
+   "schools": [
+    "College of Engineering"
+   ],
+   "units": [
+    "Mechanical and Industrial Engineering (MIE) Department"
+   ],
+   "bySchool": {
+    "College of Engineering": [
+     "Mechanical and Industrial Engineering (MIE) Department"
+    ]
+   }
+  },
+  "Northwestern University": {
+   "schools": [
+    "Kellogg School of Management",
+    "McCormick School of Engineering"
+   ],
+   "units": [
+    "Industrial Engineering and Management Sciences (IEMS) Department",
+    "Operations Department"
+   ],
+   "bySchool": {
+    "Kellogg School of Management": [
+     "Operations Department"
+    ],
+    "McCormick School of Engineering": [
+     "Industrial Engineering and Management Sciences (IEMS) Department"
+    ]
+   }
+  },
+  "Nova School of Business and Economics": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "Oklahoma State University": {
+   "schools": [
+    "School of Industrial Engineering and Management"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "Oregon State University": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Supply Chain and Logistics Management"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Supply Chain and Logistics Management"
+    ]
+   }
+  },
+  "Ozyegin University": {
+   "schools": [
+    "Graduate School of Business",
     "School of Business"
    ],
    "units": [
     "Operations Management"
-   ]
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Operations Management"
+    ]
+   }
   },
   "Penn State": {
    "schools": [],
    "units": [
     "SCM"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "SCM"
+    ]
+   }
   },
-  "Princeton University": {
+  "Pompeu Fabra University": {
    "schools": [],
    "units": [
+    "Department of Economics and Business"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Economics and Business"
+    ]
+   }
+  },
+  "Pontificia Universidad Catolica de Chile (PUC)": {
+   "schools": [
+    "School of Management"
+   ],
+   "units": [
+    "Management Science"
+   ],
+   "bySchool": {
+    "School of Management": [
+     "Management Science"
+    ]
+   }
+  },
+  "Princeton University": {
+   "schools": [
+    "School of Engineering and Applied Science"
+   ],
+   "units": [
+    "Operations Research and Financial Engineering (ORFE) Department",
     "OR & Financial Engineering"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "OR & Financial Engineering"
+    ],
+    "School of Engineering and Applied Science": [
+     "Operations Research and Financial Engineering (ORFE) Department"
+    ]
+   }
+  },
+  "Providence College": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [
+    "Department of Finance"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Department of Finance"
+    ]
+   }
+  },
+  "Purdue University": {
+   "schools": [
+    "Krannert School of Management"
+   ],
+   "units": [
+    "Operations Management Area",
+    "Quantitative Methods area"
+   ],
+   "bySchool": {
+    "Krannert School of Management": [
+     "Operations Management Area",
+     "Quantitative Methods area"
+    ]
+   }
+  },
+  "Qatar University": {
+   "schools": [
+    "College of Engineering"
+   ],
+   "units": [
+    "Department of Mechanical & Industrial Engineering"
+   ],
+   "bySchool": {
+    "College of Engineering": [
+     "Department of Mechanical & Industrial Engineering"
+    ]
+   }
+  },
+  "Queen's University": {
+   "schools": [
+    "Smith School of Business"
+   ],
+   "units": [
+    "Management Science and Operations Management Department"
+   ],
+   "bySchool": {
+    "Smith School of Business": [
+     "Management Science and Operations Management Department"
+    ]
+   }
+  },
+  "Rensselaer Polytechnic Institute (RPI)": {
+   "schools": [
+    "Lally School of Management",
+    "School of Engineering"
+   ],
+   "units": [
+    "Department of Industrial and Systems Engineering (ISE)",
+    "Supply Chain Management and Analytics group"
+   ],
+   "bySchool": {
+    "Lally School of Management": [
+     "Supply Chain Management and Analytics group"
+    ],
+    "School of Engineering": [
+     "Department of Industrial and Systems Engineering (ISE)"
+    ]
+   }
+  },
+  "Rice University": {
+   "schools": [
+    "Jones Graduate School Of Business"
+   ],
+   "units": [
+    "Operations Management group"
+   ],
+   "bySchool": {
+    "Jones Graduate School Of Business": [
+     "Operations Management group"
+    ]
+   }
   },
   "Rollins College": {
    "schools": [],
    "units": [
     "SCM"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "SCM"
+    ]
+   }
   },
   "Rutgers Business School–Newark and New Brunswick": {
    "schools": [],
    "units": [
     "MS and IS"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "MS and IS"
+    ]
+   }
+  },
+  "Rutgers University": {
+   "schools": [
+    "School of Business-Camden"
+   ],
+   "units": [
+    "Operations Management"
+   ],
+   "bySchool": {
+    "School of Business-Camden": [
+     "Operations Management"
+    ]
+   }
+  },
+  "Sabanci University": {
+   "schools": [
+    "Faculty of Engineering and Natural Sciences (FENS)"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "Saint Mary's College of California": {
+   "schools": [
+    "The School of Economics and Business Administration"
+   ],
+   "units": [
+    "Department of Operations and Quantitative Methods"
+   ],
+   "bySchool": {
+    "The School of Economics and Business Administration": [
+     "Department of Operations and Quantitative Methods"
+    ]
+   }
+  },
+  "San Francisco State University (SFSU)": {
+   "schools": [],
+   "units": [
+    "Decision Sciences Department"
+   ],
+   "bySchool": {
+    "": [
+     "Decision Sciences Department"
+    ]
+   }
+  },
+  "San Jose State University": {
+   "schools": [
+    "Lucas College and Graduate School of Business"
+   ],
+   "units": [
+    "Department of Marketing and Decision Sciences"
+   ],
+   "bySchool": {
+    "Lucas College and Graduate School of Business": [
+     "Department of Marketing and Decision Sciences"
+    ]
+   }
+  },
+  "Santa Clara University": {
+   "schools": [
+    "Leavey School of Business"
+   ],
+   "units": [
+    "Information Systems and Analytics (ISA) Department"
+   ],
+   "bySchool": {
+    "Leavey School of Business": [
+     "Information Systems and Analytics (ISA) Department"
+    ]
+   }
   },
   "Shanghai University of Finance and Economics": {
    "schools": [
     "College of Business"
    ],
-   "units": []
+   "units": [],
+   "bySchool": {}
+  },
+  "Shanghai University of Finance and Economics (SUFE)": {
+   "schools": [
+    "School of Information Management and Engineering (SIME)",
+    "School of International Business Administration"
+   ],
+   "units": [
+    "Management Science, Information Systems, Financial Information, and Computer Science Department",
+    "Operations Management Department"
+   ],
+   "bySchool": {
+    "School of Information Management and Engineering (SIME)": [
+     "Management Science, Information Systems, Financial Information, and Computer Science Department"
+    ],
+    "School of International Business Administration": [
+     "Operations Management Department"
+    ]
+   }
+  },
+  "Simon Fraser University": {
+   "schools": [
+    "Beedie School of Business"
+   ],
+   "units": [
+    "Technology and Operations Management Area"
+   ],
+   "bySchool": {
+    "Beedie School of Business": [
+     "Technology and Operations Management Area"
+    ]
+   }
+  },
+  "Singapore Management University (SMU)": {
+   "schools": [
+    "Lee Kong Chian School of Business",
+    "School of Information Systems"
+   ],
+   "units": [
+    "Department of Operations Management",
+    "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab"
+   ],
+   "bySchool": {
+    "Lee Kong Chian School of Business": [
+     "Department of Operations Management"
+    ],
+    "School of Information Systems": [
+     "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab"
+    ]
+   }
+  },
+  "Singapore University of Technology and Design (SUTD)": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "Skolkovo Institute of Science and Technology (Skoltech)": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "Southern Methodist University": {
+   "schools": [
+    "Edwin L. Cox School of Business",
+    "Lyle School of Engineering"
+   ],
+   "units": [
+    "Engineering Management, Information, and Systems Department (EMIS)",
+    "Information Technology & Operations Management (ITOM) Department"
+   ],
+   "bySchool": {
+    "Edwin L. Cox School of Business": [
+     "Information Technology & Operations Management (ITOM) Department"
+    ],
+    "Lyle School of Engineering": [
+     "Engineering Management, Information, and Systems Department (EMIS)"
+    ]
+   }
+  },
+  "Southern University of Science and Technology (SUSTech)": {
+   "schools": [
+    "School of Business, Analytics"
+   ],
+   "units": [
+    "Information, and Operations Management Department"
+   ],
+   "bySchool": {
+    "School of Business, Analytics": [
+     "Information, and Operations Management Department"
+    ]
+   }
+  },
+  "SRM University": {
+   "schools": [],
+   "units": [
+    "Operation and Supply Chain Management group"
+   ],
+   "bySchool": {
+    "": [
+     "Operation and Supply Chain Management group"
+    ]
+   }
   },
   "St. John's University": {
    "schools": [],
    "units": [
     "Business Analytics"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Business Analytics"
+    ]
+   }
+  },
+  "St.Gallen Institute of Management in Asia (SGI)": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
+  },
+  "Stanford University": {
+   "schools": [
+    "Department of Management Science & Engineering (MS&E)",
+    "Graduate School of Business (GSB)"
+   ],
+   "units": [
+    "Operations and Information Technology Department"
+   ],
+   "bySchool": {
+    "Graduate School of Business (GSB)": [
+     "Operations and Information Technology Department"
+    ]
+   }
+  },
+  "Stevens Institute of Technology": {
+   "schools": [
+    "Wesley J. Howe School of Technology Management"
+   ],
+   "units": [
+    "Operations Management Area"
+   ],
+   "bySchool": {
+    "Wesley J. Howe School of Technology Management": [
+     "Operations Management Area"
+    ]
+   }
+  },
+  "Stony Brook University": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Operations Management Area"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Operations Management Area"
+    ]
+   }
   },
   "TBS Education": {
    "schools": [],
    "units": [
     "TBS Education, Information, Operations and Management Sciences Department"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "TBS Education, Information, Operations and Management Sciences Department"
+    ]
+   }
+  },
+  "Technical University of Munich": {
+   "schools": [
+    "TUM School of Management"
+   ],
+   "units": [
+    "Department of Operations & Supply Chain Management"
+   ],
+   "bySchool": {
+    "TUM School of Management": [
+     "Department of Operations & Supply Chain Management"
+    ]
+   }
+  },
+  "TED University": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "Temple University": {
    "schools": [
@@ -1071,37 +4236,178 @@
    ],
    "units": [
     "Operations and Supply Chain Management area"
-   ]
+   ],
+   "bySchool": {
+    "Fox School of Business": [
+     "Operations and Supply Chain Management area"
+    ]
+   }
+  },
+  "Texas A&M University": {
+   "schools": [
+    "Mays Business School"
+   ],
+   "units": [
+    "Information and Operations Management (INFO) Department"
+   ],
+   "bySchool": {
+    "Mays Business School": [
+     "Information and Operations Management (INFO) Department"
+    ]
+   }
+  },
+  "Texas Christian University": {
+   "schools": [
+    "Neeley School of Business"
+   ],
+   "units": [
+    "Department of Information Systems & Supply Chain Management"
+   ],
+   "bySchool": {
+    "Neeley School of Business": [
+     "Department of Information Systems & Supply Chain Management"
+    ]
+   }
+  },
+  "The Chinese University of Hong Kong": {
+   "schools": [
+    "CUHK Business School"
+   ],
+   "units": [
+    "Department of Decision Sciences and Managerial Economics"
+   ],
+   "bySchool": {
+    "CUHK Business School": [
+     "Department of Decision Sciences and Managerial Economics"
+    ]
+   }
+  },
+  "The Chinese University of Hong Kong (CUHK Business School)": {
+   "schools": [],
+   "units": [
+    "Department of Decision Sciences and Managerial Economics"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Decision Sciences and Managerial Economics"
+    ]
+   }
+  },
+  "The Chinese University of Hong Kong (CUHK)": {
+   "schools": [
+    "Faculty of Engineering"
+   ],
+   "units": [
+    "Department of Systems Engineering and Engineering Management (SEEM)"
+   ],
+   "bySchool": {
+    "Faculty of Engineering": [
+     "Department of Systems Engineering and Engineering Management (SEEM)"
+    ]
+   }
   },
   "The Chinese University of Hong Kong, Shenzhen": {
    "schools": [
+    "CUHK(SZ)",
     "School of Management and Economics"
    ],
    "units": [
     "Operations Management Division, The School of Management and Economics",
-    "The research group of Prof. Yiming Zhang"
-   ]
+    "The research group of Prof. Yiming Zhang",
+    "The School of Management and Economics (SME)"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management Division, The School of Management and Economics"
+    ],
+    "CUHK(SZ)": [
+     "The School of Management and Economics (SME)"
+    ],
+    "School of Management and Economics": [
+     "The research group of Prof. Yiming Zhang"
+    ]
+   }
   },
   "The Hong Kong Polytechnic University": {
    "schools": [],
    "units": [
     "Department of Logistics and Maritime Studies"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Department of Logistics and Maritime Studies"
+    ]
+   }
+  },
+  "The Hong Kong University of Science and Technology": {
+   "schools": [
+    "HKUST School of Business and Management"
+   ],
+   "units": [
+    "Department of Information Systems, Business Statistics and Operations Management (ISOM)"
+   ],
+   "bySchool": {
+    "HKUST School of Business and Management": [
+     "Department of Information Systems, Business Statistics and Operations Management (ISOM)"
+    ]
+   }
+  },
+  "The Hong Kong University of Science and Technology (HKUST)": {
+   "schools": [],
+   "units": [
+    "Department of Industrial Engineering and Logistics Management (IELM)"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial Engineering and Logistics Management (IELM)"
+    ]
+   }
   },
   "The Ohio State University": {
    "schools": [
     "Max M. Fisher College of Business"
    ],
    "units": [
+    "Department of Management Sciences",
     "Department of Operations and Business Analytics",
     "Operations and Business Analytics Department"
-   ]
+   ],
+   "bySchool": {
+    "Max M. Fisher College of Business": [
+     "Department of Management Sciences",
+     "Department of Operations and Business Analytics",
+     "Operations and Business Analytics Department"
+    ]
+   }
   },
   "The Pennsylvania State University": {
-   "schools": [],
+   "schools": [
+    "Smeal College of Business"
+   ],
    "units": [
-    "Supply Chain & Information Systems"
-   ]
+    "Supply Chain & Information Systems Department"
+   ],
+   "bySchool": {
+    "": [
+     "Supply Chain & Information Systems Department"
+    ],
+    "Smeal College of Business": [
+     "Supply Chain & Information Systems Department"
+    ]
+   }
+  },
+  "The University of Alabama": {
+   "schools": [
+    "Culverhouse College of Commerce"
+   ],
+   "units": [
+    "Department of Information Systems, Statistics, and Management Science"
+   ],
+   "bySchool": {
+    "Culverhouse College of Commerce": [
+     "Department of Information Systems, Statistics, and Management Science"
+    ]
+   }
   },
   "The University of Hong Kong": {
    "schools": [
@@ -1109,44 +4415,177 @@
    ],
    "units": [
     "Innovation and Information Management"
-   ]
-  },
-  "The University of Texas at Dallas": {
-   "schools": [
-    "Naveen Jindal School of Management/Healthcare Management Area"
    ],
-   "units": []
+   "bySchool": {
+    "Faculty of Business and Economics": [
+     "Innovation and Information Management"
+    ]
+   }
+  },
+  "The University of Hong Kong (HKU)": {
+   "schools": [
+    "Faculty of Business and Economics",
+    "School of Business"
+   ],
+   "units": [
+    "Information and Innovation Management",
+    "Innovation and Information Management Area"
+   ],
+   "bySchool": {
+    "Faculty of Business and Economics": [
+     "Information and Innovation Management"
+    ],
+    "School of Business": [
+     "Innovation and Information Management Area"
+    ]
+   }
+  },
+  "The University of Melbourne": {
+   "schools": [
+    "Faculty of Business and Economics"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "The University of Michigan-Flint": {
+   "schools": [
+    "School of Management"
+   ],
+   "units": [
+    "Management and Marketing Department"
+   ],
+   "bySchool": {
+    "School of Management": [
+     "Management and Marketing Department"
+    ]
+   }
+  },
+  "The University of Texas at Austin": {
+   "schools": [
+    "Cockrell School of Engineering",
+    "McCombs School of Business"
+   ],
+   "units": [
+    "Information, Risk, and Operations Management (IROM) Department",
+    "Operations Research & Industrial Engineering (ORIE) Program"
+   ],
+   "bySchool": {
+    "Cockrell School of Engineering": [
+     "Operations Research & Industrial Engineering (ORIE) Program"
+    ],
+    "McCombs School of Business": [
+     "Information, Risk, and Operations Management (IROM) Department"
+    ]
+   }
   },
   "Tilburg University": {
    "schools": [
+    "School of Economics and Management",
     "Tilburg School of Economics and Management"
    ],
    "units": [
-    "Department of Information Systems and Operations Management"
-   ]
+    "Department of Information Systems and Operations Management",
+    "Department of Management, Information and Supply Chain Management Group"
+   ],
+   "bySchool": {
+    "School of Economics and Management": [
+     "Department of Management, Information and Supply Chain Management Group"
+    ],
+    "Tilburg School of Economics and Management": [
+     "Department of Information Systems and Operations Management"
+    ]
+   }
+  },
+  "TOBB University of Economics and Technology": {
+   "schools": [],
+   "units": [
+    "Department of Business Administration"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Business Administration"
+    ]
+   }
   },
   "Tulane University": {
    "schools": [
-    "A.B. Freeman School of Business",
-    "Freeman School of Business"
+    "A.B. Freeman School of Business"
    ],
    "units": [
-    "Management Science",
-    "Management Science Department",
-    "Management Sciences Area"
-   ]
+    "Management Science Department"
+   ],
+   "bySchool": {
+    "A.B. Freeman School of Business": [
+     "Management Science Department"
+    ]
+   }
   },
   "United States Naval Academy": {
    "schools": [],
    "units": [
     "Mathematics"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Mathematics"
+    ]
+   }
+  },
+  "Universidad de Chile": {
+   "schools": [],
+   "units": [
+    "Industrial Engineering Department"
+   ],
+   "bySchool": {
+    "": [
+     "Industrial Engineering Department"
+    ]
+   }
   },
   "Universidad de los Andes": {
    "schools": [
     "School of Business and Economics"
    ],
-   "units": []
+   "units": [],
+   "bySchool": {}
+  },
+  "Universidad Torcuato di Tella": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "Université catholique de Louvain": {
+   "schools": [
+    "Louvain School of Management"
+   ],
+   "units": [
+    "Center for Operations Research and Econometrics (CORE)"
+   ],
+   "bySchool": {
+    "Louvain School of Management": [
+     "Center for Operations Research and Econometrics (CORE)"
+    ]
+   }
+  },
+  "Universite libre de Bruxelles": {
+   "schools": [
+    "Solvay Brussels School of Economics and Management"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "University at Buffalo - The State University of New York": {
+   "schools": [],
+   "units": [
+    "Department of Industrial and Systems Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial and Systems Engineering"
+    ]
+   }
   },
   "University College Dublin": {
    "schools": [
@@ -1154,7 +4593,26 @@
    ],
    "units": [
     "Management Area"
-   ]
+   ],
+   "bySchool": {
+    "UCD Michael Smurfit Graduate School of Business": [
+     "Management Area"
+    ]
+   }
+  },
+  "University College Dublin (UCD)": {
+   "schools": [
+    "Michael Smurfit Graduate Business School",
+    "School of Mechanical & Materials Engineering"
+   ],
+   "units": [
+    "Operations Management Group"
+   ],
+   "bySchool": {
+    "Michael Smurfit Graduate Business School": [
+     "Operations Management Group"
+    ]
+   }
   },
   "University College London": {
    "schools": [
@@ -1164,32 +4622,218 @@
    ],
    "units": [
     "Operations & Technology group"
-   ]
+   ],
+   "bySchool": {
+    "The UCL School of Management": [
+     "Operations & Technology group"
+    ]
+   }
   },
-  "University of California Berkeley": {
-   "schools": [],
+  "University of Alberta": {
+   "schools": [
+    "Alberta School of Business"
+   ],
    "units": [
-    "Department of Industrial Engineering & Operations Research (IEOR)",
-    "Operations and IT Management"
-   ]
+    "Department of Accounting, Operations and Information Systems"
+   ],
+   "bySchool": {
+    "Alberta School of Business": [
+     "Department of Accounting, Operations and Information Systems"
+    ]
+   }
+  },
+  "University of Auckland": {
+   "schools": [
+    "Business School"
+   ],
+   "units": [
+    "Department of Information Systems and Operations Management"
+   ],
+   "bySchool": {
+    "Business School": [
+     "Department of Information Systems and Operations Management"
+    ]
+   }
+  },
+  "University of British Columbia": {
+   "schools": [
+    "Sauder School of Business"
+   ],
+   "units": [
+    "Operations and Logistics Division"
+   ],
+   "bySchool": {
+    "Sauder School of Business": [
+     "Operations and Logistics Division"
+    ]
+   }
+  },
+  "University of Calgary": {
+   "schools": [
+    "Haskayne School of Business"
+   ],
+   "units": [
+    "Operations and Supply Chain Management Department"
+   ],
+   "bySchool": {
+    "Haskayne School of Business": [
+     "Operations and Supply Chain Management Department"
+    ]
+   }
   },
   "University of California, Berkeley": {
-   "schools": [],
+   "schools": [
+    "Haas School of Business"
+   ],
    "units": [
-    "Department of Industrial Engineering and Operations Research (IEOR)"
-   ]
+    "Department of Industrial Engineering and Operations Research (IEOR)",
+    "Operations & Information Technology Management Department",
+    "Operations and IT Management"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial Engineering and Operations Research (IEOR)",
+     "Operations and IT Management"
+    ],
+    "Haas School of Business": [
+     "Operations & Information Technology Management Department"
+    ]
+   }
   },
   "University of California, Davis": {
    "schools": [],
    "units": [
     "Business Analytics"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Business Analytics"
+    ]
+   }
+  },
+  "University of California, Irvine": {
+   "schools": [
+    "The Paul Merage School of Business"
+   ],
+   "units": [
+    "Operations and Decision Technologies Department"
+   ],
+   "bySchool": {
+    "The Paul Merage School of Business": [
+     "Operations and Decision Technologies Department"
+    ]
+   }
+  },
+  "University of California, Los Angeles (UCLA)": {
+   "schools": [
+    "Anderson School of Management"
+   ],
+   "units": [
+    "Decisions, Operations and Technology Management (DOTM)"
+   ],
+   "bySchool": {
+    "Anderson School of Management": [
+     "Decisions, Operations and Technology Management (DOTM)"
+    ]
+   }
+  },
+  "University of California, Merced": {
+   "schools": [
+    "School of Engineering"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "University of California, Riverside": {
+   "schools": [
+    "School of Business Administration, A. Gary Anderson Graduate School of Management"
+   ],
+   "units": [
+    "Operations and Supply Chain Management Area"
+   ],
+   "bySchool": {
+    "School of Business Administration, A. Gary Anderson Graduate School of Management": [
+     "Operations and Supply Chain Management Area"
+    ]
+   }
+  },
+  "University of California, San Diego (UCSD)": {
+   "schools": [
+    "Rady School of Management"
+   ],
+   "units": [
+    "Innovation, Technology & Operations"
+   ],
+   "bySchool": {
+    "Rady School of Management": [
+     "Innovation, Technology & Operations"
+    ]
+   }
   },
   "University of Cambridge": {
    "schools": [
     "Judge Business School"
    ],
-   "units": []
+   "units": [
+    "Operations & Technology Management group"
+   ],
+   "bySchool": {
+    "Judge Business School": [
+     "Operations & Technology Management group"
+    ]
+   }
+  },
+  "University of Chicago": {
+   "schools": [
+    "Booth School of Business"
+   ],
+   "units": [
+    "Operations Management Area"
+   ],
+   "bySchool": {
+    "Booth School of Business": [
+     "Operations Management Area"
+    ]
+   }
+  },
+  "University of Cincinnati": {
+   "schools": [
+    "Carl H. Lindner College of Business"
+   ],
+   "units": [
+    "Operations, Business Analytics, and Information Systems Department"
+   ],
+   "bySchool": {
+    "Carl H. Lindner College of Business": [
+     "Operations, Business Analytics, and Information Systems Department"
+    ]
+   }
+  },
+  "University of Colorado Boulder": {
+   "schools": [
+    "Leeds School of Business"
+   ],
+   "units": [
+    "The Operations Group of the Division of Strategy, Entrepreneurship, and Operations"
+   ],
+   "bySchool": {
+    "Leeds School of Business": [
+     "The Operations Group of the Division of Strategy, Entrepreneurship, and Operations"
+    ]
+   }
+  },
+  "University of Connecticut": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [
+    "Operations and Information Management Department"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Operations and Information Management Department"
+    ]
+   }
   },
   "University of Cyprus": {
    "schools": [
@@ -1197,7 +4841,43 @@
    ],
    "units": [
     "Department of Business and Public Administration"
-   ]
+   ],
+   "bySchool": {
+    "School Economics and Management": [
+     "Department of Business and Public Administration"
+    ]
+   }
+  },
+  "University of Dayton": {
+   "schools": [
+    "School of Business Administration"
+   ],
+   "units": [
+    "Department of MIS, OM and Decision Sciences"
+   ],
+   "bySchool": {
+    "School of Business Administration": [
+     "Department of MIS, OM and Decision Sciences"
+    ]
+   }
+  },
+  "University of Florida": {
+   "schools": [],
+   "units": [
+    "Department of Industrial and Systems Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial and Systems Engineering"
+    ]
+   }
+  },
+  "University of Glasgow": {
+   "schools": [
+    "School of Computing Science"
+   ],
+   "units": [],
+   "bySchool": {}
   },
   "University of Houston": {
    "schools": [
@@ -1207,13 +4887,57 @@
     "Decision and Information Sciences (DISC)",
     "Department of Decision and Information Sciences",
     "University of Houston and DISC"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Decision and Information Sciences (DISC)",
+     "University of Houston and DISC"
+    ],
+    "C. T. Bauer College of Business": [
+     "Department of Decision and Information Sciences"
+    ]
+   }
   },
   "University of Houston (Bauer Human-Centered AI Institute)": {
    "schools": [],
    "units": [
     "Artificial Intelligence (AI) and healthcare"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Artificial Intelligence (AI) and healthcare"
+    ]
+   }
+  },
+  "University of Illinois at Chicago": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Information and Decision Sciences (IDS) Department"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Information and Decision Sciences (IDS) Department"
+    ]
+   }
+  },
+  "University of Illinois at Urbana-Champaign": {
+   "schools": [
+    "Gies College of Business"
+   ],
+   "units": [
+    "Department of Business Administration",
+    "Department of Industrial and Enterprise Systems Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial and Enterprise Systems Engineering"
+    ],
+    "Gies College of Business": [
+     "Department of Business Administration"
+    ]
+   }
   },
   "University of Illinois Urbana-Champaign": {
    "schools": [
@@ -1221,7 +4945,12 @@
    ],
    "units": [
     "Department of Business Administration"
-   ]
+   ],
+   "bySchool": {
+    "Gies College of Business": [
+     "Department of Business Administration"
+    ]
+   }
   },
   "University of Kansas": {
    "schools": [
@@ -1230,7 +4959,41 @@
    "units": [
     "Analytics, Information, and Operations Management Department",
     "BA, Information & Operations"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "BA, Information & Operations"
+    ],
+    "School of Business": [
+     "Analytics, Information, and Operations Management Department"
+    ]
+   }
+  },
+  "University of Kentucky": {
+   "schools": [
+    "Gatton College of Business and Economics"
+   ],
+   "units": [
+    "Department of Marketing & Supply Chain"
+   ],
+   "bySchool": {
+    "Gatton College of Business and Economics": [
+     "Department of Marketing & Supply Chain"
+    ]
+   }
+  },
+  "University of Louisville": {
+   "schools": [
+    "J. B. Speed School of Engineering"
+   ],
+   "units": [
+    "Department of Industrial Engineering"
+   ],
+   "bySchool": {
+    "J. B. Speed School of Engineering": [
+     "Department of Industrial Engineering"
+    ]
+   }
   },
   "University of Mannheim": {
    "schools": [
@@ -1240,44 +5003,301 @@
     "Chair of Production Management",
     "Chair of Supply Chain Management",
     "Operations Management"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Operations Management"
+    ],
+    "Business School": [
+     "Chair of Production Management",
+     "Chair of Supply Chain Management"
+    ]
+   }
+  },
+  "University of Maryland": {
+   "schools": [
+    "The Robert H. Smith School of Business"
+   ],
+   "units": [
+    "Decision, Operations and Information Technologies (DO&IT) Department"
+   ],
+   "bySchool": {
+    "The Robert H. Smith School of Business": [
+     "Decision, Operations and Information Technologies (DO&IT) Department"
+    ]
+   }
+  },
+  "University of Massachusetts Amherst": {
+   "schools": [
+    "Isenberg School of Management"
+   ],
+   "units": [
+    "Department of Operations & Information Management"
+   ],
+   "bySchool": {
+    "Isenberg School of Management": [
+     "Department of Operations & Information Management"
+    ]
+   }
+  },
+  "University of Massachusetts Boston": {
+   "schools": [],
+   "units": [
+    "Department of Management Science and Information Systems"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Management Science and Information Systems"
+    ]
+   }
   },
   "University of Miami": {
    "schools": [
-    "Miami Herbert Business School"
+    "Miami Herbert Business School",
+    "School of Business Administration"
    ],
    "units": [
+    "Department of Management",
     "Department of Management Science"
-   ]
+   ],
+   "bySchool": {
+    "Miami Herbert Business School": [
+     "Department of Management Science"
+    ],
+    "School of Business Administration": [
+     "Department of Management"
+    ]
+   }
   },
   "University of Michigan": {
    "schools": [
+    "School of Information",
     "Stephen M. Ross School of Business"
    ],
-   "units": []
+   "units": [
+    "Department of Industrial and Operations Engineering",
+    "Technology & Operations department"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial and Operations Engineering"
+    ],
+    "Stephen M. Ross School of Business": [
+     "Technology & Operations department"
+    ]
+   }
+  },
+  "University of Michigan-Dearborn": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Decision Sciences/Operations Management"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Decision Sciences/Operations Management"
+    ]
+   }
   },
   "University of Minnesota": {
    "schools": [
-    "Carlson School of Management"
+    "Carlson School of Management",
+    "Curtis L. Carlson School of Management",
+    "School of Science and Engineering"
    ],
    "units": [
-    "Supply Chain and Operations"
-   ]
+    "Department of Industrial and Systems Engineering (ISyE)",
+    "Supply Chain and Operations Department"
+   ],
+   "bySchool": {
+    "Carlson School of Management": [
+     "Supply Chain and Operations Department"
+    ],
+    "Curtis L. Carlson School of Management": [
+     "Supply Chain and Operations Department"
+    ],
+    "School of Science and Engineering": [
+     "Department of Industrial and Systems Engineering (ISyE)"
+    ]
+   }
+  },
+  "University of Nebraska - Lincoln": {
+   "schools": [
+    "College of Business Administration"
+   ],
+   "units": [
+    "Supply Chain Management & Analytics Department"
+   ],
+   "bySchool": {
+    "College of Business Administration": [
+     "Supply Chain Management & Analytics Department"
+    ]
+   }
+  },
+  "University of Nevada": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Managerial Sciences Department, Marketing Area"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Managerial Sciences Department, Marketing Area"
+    ]
+   }
+  },
+  "University of New South Wales": {
+   "schools": [
+    "UNSW Business School"
+   ],
+   "units": [
+    "School of Information Systems & Technology Management"
+   ],
+   "bySchool": {
+    "UNSW Business School": [
+     "School of Information Systems & Technology Management"
+    ]
+   }
+  },
+  "University of North Carolina (UNC) Chapel Hill": {
+   "schools": [
+    "Kenan-Flagler Business School"
+   ],
+   "units": [
+    "Operations Area"
+   ],
+   "bySchool": {
+    "Kenan-Flagler Business School": [
+     "Operations Area"
+    ]
+   }
   },
   "University of Notre Dame": {
    "schools": [
     "Mendoza College of Business"
    ],
    "units": [
-    "Department of IT, Analytics, and Operations"
-   ]
+    "Department of IT, Analytics, and Operations",
+    "Information Technology, Analytics, and Operations (ITAO) Department"
+   ],
+   "bySchool": {
+    "Mendoza College of Business": [
+     "Department of IT, Analytics, and Operations",
+     "Information Technology, Analytics, and Operations (ITAO) Department"
+    ]
+   }
+  },
+  "University of Oregon": {
+   "schools": [
+    "Charles H. Lundquist College of Business"
+   ],
+   "units": [
+    "Department of Operations and Business Analytics"
+   ],
+   "bySchool": {
+    "Charles H. Lundquist College of Business": [
+     "Department of Operations and Business Analytics"
+    ]
+   }
+  },
+  "University of Oxford": {
+   "schools": [
+    "Saïd Business School"
+   ],
+   "units": [
+    "Management Science Department"
+   ],
+   "bySchool": {
+    "Saïd Business School": [
+     "Management Science Department"
+    ]
+   }
+  },
+  "University of Pennsylvania": {
+   "schools": [
+    "Wharton School"
+   ],
+   "units": [
+    "Operations, Information and Decisions (OID) Department"
+   ],
+   "bySchool": {
+    "Wharton School": [
+     "Operations, Information and Decisions (OID) Department"
+    ]
+   }
+  },
+  "University of Pittsburgh": {
+   "schools": [
+    "Joseph M. Katz Graduate School of Business"
+   ],
+   "units": [
+    "Business Analytics and Operations Area",
+    "Department of Industrial Engineering"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Industrial Engineering"
+    ],
+    "Joseph M. Katz Graduate School of Business": [
+     "Business Analytics and Operations Area"
+    ]
+   }
+  },
+  "University of Portland": {
+   "schools": [
+    "Robert Pamplin Jr. School of Business Administration (PSOBA)"
+   ],
+   "units": [
+    "Operations & Technology Management (OTM) group"
+   ],
+   "bySchool": {
+    "Robert Pamplin Jr. School of Business Administration (PSOBA)": [
+     "Operations & Technology Management (OTM) group"
+    ]
+   }
+  },
+  "University of Richmond": {
+   "schools": [
+    "Robins School of Business"
+   ],
+   "units": [
+    "Management Department"
+   ],
+   "bySchool": {
+    "Robins School of Business": [
+     "Management Department"
+    ]
+   }
+  },
+  "University of Rochester": {
+   "schools": [
+    "W. E. Simon Graduate School of Business Administration"
+   ],
+   "units": [
+    "Operations Management Area"
+   ],
+   "bySchool": {
+    "W. E. Simon Graduate School of Business Administration": [
+     "Operations Management Area"
+    ]
+   }
   },
   "University of San Diego": {
    "schools": [
+    "School of Business",
     "The Knauss School of Business",
     "The Knauss School of Business at the University of San Diego"
    ],
-   "units": []
+   "units": [
+    "Operations, SCM and ITM Area"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Operations, SCM and ITM Area"
+    ]
+   }
   },
   "University of South Carolina": {
    "schools": [
@@ -1286,21 +5306,140 @@
    "units": [
     "Department of Management Science",
     "Management Science Department"
-   ]
+   ],
+   "bySchool": {
+    "Darla Moore School of Business": [
+     "Department of Management Science",
+     "Management Science Department"
+    ]
+   }
+  },
+  "University of Southern California (USC)": {
+   "schools": [
+    "Marshall School of Business"
+   ],
+   "units": [
+    "Department of Data Sciences and Operations"
+   ],
+   "bySchool": {
+    "Marshall School of Business": [
+     "Department of Data Sciences and Operations"
+    ]
+   }
+  },
+  "University of Southern Mississippi": {
+   "schools": [
+    "College of Business"
+   ],
+   "units": [
+    "Department of Management and International Business"
+   ],
+   "bySchool": {
+    "College of Business": [
+     "Department of Management and International Business"
+    ]
+   }
+  },
+  "University of Tennessee": {
+   "schools": [
+    "College of Business Administration"
+   ],
+   "units": [
+    "Department of Business Analytics & Statistics"
+   ],
+   "bySchool": {
+    "College of Business Administration": [
+     "Department of Business Analytics & Statistics"
+    ]
+   }
   },
   "University of Texas at Dallas": {
    "schools": [
-    "Naveen Jindal School of Management"
+    "Naveen Jindal School of Management",
+    "Naveen Jindal School of Management/Healthcare Management Area"
    ],
    "units": [
     "Supply Chain/Operations Management Department"
-   ]
+   ],
+   "bySchool": {
+    "Naveen Jindal School of Management": [
+     "Supply Chain/Operations Management Department"
+    ]
+   }
   },
   "University of Texas at San Antonio": {
    "schools": [],
    "units": [
     "Operations and Analytics"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Operations and Analytics"
+    ]
+   }
+  },
+  "University of Toledo": {
+   "schools": [
+    "College of Business and Innovation"
+   ],
+   "units": [
+    "Information, Operations and Technology Management Department"
+   ],
+   "bySchool": {
+    "College of Business and Innovation": [
+     "Information, Operations and Technology Management Department"
+    ]
+   }
+  },
+  "University of Toronto": {
+   "schools": [
+    "Rotman School of Management"
+   ],
+   "units": [
+    "Operations Management and Statistics Department"
+   ],
+   "bySchool": {
+    "Rotman School of Management": [
+     "Operations Management and Statistics Department"
+    ]
+   }
+  },
+  "University of Toronto Mississauga (UTM)": {
+   "schools": [],
+   "units": [
+    "Department of Management",
+    "Institute of Communication, Culture, Information and Technology (ICCIT)"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Management",
+     "Institute of Communication, Culture, Information and Technology (ICCIT)"
+    ]
+   }
+  },
+  "University of Toronto Scarborough (UTSC)": {
+   "schools": [],
+   "units": [
+    "Department of Management"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Management"
+    ]
+   }
+  },
+  "University of Toulouse": {
+   "schools": [
+    "Toulouse Business School"
+   ],
+   "units": [
+    "Information, Operations and Management Sciences Area"
+   ],
+   "bySchool": {
+    "Toulouse Business School": [
+     "Information, Operations and Management Sciences Area"
+    ]
+   }
   },
   "University of Utah": {
    "schools": [
@@ -1309,7 +5448,13 @@
    "units": [
     "Department of Operations & Info Systems",
     "Operations & Information Systems Department"
-   ]
+   ],
+   "bySchool": {
+    "David Eccles School of Business": [
+     "Department of Operations & Info Systems",
+     "Operations & Information Systems Department"
+    ]
+   }
   },
   "University of Virginia": {
    "schools": [
@@ -1317,8 +5462,43 @@
    ],
    "units": [
     "Data Analytics and Decision Sciences (DADS) Area",
-    "Technology & OM (TOM)"
-   ]
+    "Quantitative Analysis (QA) Area",
+    "Technology & OM (TOM)",
+    "Technology & Operations Management Area"
+   ],
+   "bySchool": {
+    "": [
+     "Technology & OM (TOM)"
+    ],
+    "Darden School of Business": [
+     "Data Analytics and Decision Sciences (DADS) Area",
+     "Quantitative Analysis (QA) Area",
+     "Technology & Operations Management Area"
+    ]
+   }
+  },
+  "University of Washington": {
+   "schools": [
+    "Foster School of Business"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "University of Waterloo": {
+   "schools": [],
+   "units": [
+    "Department of Management Sciences"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Management Sciences"
+    ]
+   }
+  },
+  "University of West Florida": {
+   "schools": [],
+   "units": [],
+   "bySchool": {}
   },
   "University of Wisconsin-Madison": {
    "schools": [
@@ -1326,20 +5506,58 @@
    ],
    "units": [
     "Operations and Information Management Department"
-   ]
+   ],
+   "bySchool": {
+    "Wisconsin School of Business": [
+     "Operations and Information Management Department"
+    ]
+   }
+  },
+  "University of Wisconsin-Milwaukee": {
+   "schools": [
+    "Sheldon B. Lubar School of Business"
+   ],
+   "units": [
+    "Supply Chain, Operations Management & Business Statistics Department"
+   ],
+   "bySchool": {
+    "Sheldon B. Lubar School of Business": [
+     "Supply Chain, Operations Management & Business Statistics Department"
+    ]
+   }
   },
   "UNSW Sydney": {
    "schools": [
     "UNSW Business School - School of Information Systems and Technology Management"
    ],
-   "units": []
+   "units": [],
+   "bySchool": {}
   },
   "Utah Valley University": {
    "schools": [],
    "units": [
     "Operations & SCM",
     "Strategic Management & Operations"
-   ]
+   ],
+   "bySchool": {
+    "": [
+     "Operations & SCM",
+     "Strategic Management & Operations"
+    ]
+   }
+  },
+  "Vanderbilt University": {
+   "schools": [
+    "Owen Graduate School of Management"
+   ],
+   "units": [
+    "Operations Management and Quantitative Methods Area"
+   ],
+   "bySchool": {
+    "Owen Graduate School of Management": [
+     "Operations Management and Quantitative Methods Area"
+    ]
+   }
   },
   "Villanova University": {
    "schools": [
@@ -1347,7 +5565,655 @@
    ],
    "units": [
     "Management and Operations Area"
-   ]
+   ],
+   "bySchool": {
+    "Villanova School of Business": [
+     "Management and Operations Area"
+    ]
+   }
+  },
+  "Virginia Commonwealth University (VCU)": {
+   "schools": [
+    "School of Business"
+   ],
+   "units": [
+    "Department of Supply Chain Management & Analytics"
+   ],
+   "bySchool": {
+    "School of Business": [
+     "Department of Supply Chain Management & Analytics"
+    ]
+   }
+  },
+  "Virginia Tech": {
+   "schools": [],
+   "units": [
+    "Grado Department of Industrial and Systems Engineering (ISE)"
+   ],
+   "bySchool": {
+    "": [
+     "Grado Department of Industrial and Systems Engineering (ISE)"
+    ]
+   }
+  },
+  "Vrije Universiteit Amsterdam": {
+   "schools": [],
+   "units": [
+    "Department of Mathematics, Analytics and Optimization Group"
+   ],
+   "bySchool": {
+    "": [
+     "Department of Mathematics, Analytics and Optimization Group"
+    ]
+   }
+  },
+  "Wageningen University": {
+   "schools": [],
+   "units": [
+    "Operations Research and Logistics Department"
+   ],
+   "bySchool": {
+    "": [
+     "Operations Research and Logistics Department"
+    ]
+   }
+  },
+  "Washington University in St. Louis": {
+   "schools": [
+    "Olin Business School"
+   ],
+   "units": [
+    "Operations and Manufacturing Management Department"
+   ],
+   "bySchool": {
+    "Olin Business School": [
+     "Operations and Manufacturing Management Department"
+    ]
+   }
+  },
+  "Wayne State University": {
+   "schools": [
+    "Mike Ilitch School of Business"
+   ],
+   "units": [
+    "Department of Marketing and Supply Chain Management"
+   ],
+   "bySchool": {
+    "Mike Ilitch School of Business": [
+     "Department of Marketing and Supply Chain Management"
+    ]
+   }
+  },
+  "Weber State University": {
+   "schools": [
+    "John B. Goddard School of Business & Economics"
+   ],
+   "units": [
+    "Department of Business Administration/Supply Chain Management"
+   ],
+   "bySchool": {
+    "John B. Goddard School of Business & Economics": [
+     "Department of Business Administration/Supply Chain Management"
+    ]
+   }
+  },
+  "Western University": {
+   "schools": [
+    "Ivey Business School"
+   ],
+   "units": [],
+   "bySchool": {}
+  },
+  "Wilfrid Laurier University": {
+   "schools": [
+    "Lazaridis School of Business & Economics"
+   ],
+   "units": [
+    "Operations and Decision Sciences (ODS) Department"
+   ],
+   "bySchool": {
+    "Lazaridis School of Business & Economics": [
+     "Operations and Decision Sciences (ODS) Department"
+    ]
+   }
+  },
+  "WU Vienna": {
+   "schools": [
+    "Vienna University of Economics and Business"
+   ],
+   "units": [
+    "Department of Information Systems and Operations"
+   ],
+   "bySchool": {
+    "Vienna University of Economics and Business": [
+     "Department of Information Systems and Operations"
+    ]
+   }
+  },
+  "Yale University": {
+   "schools": [
+    "School of Management"
+   ],
+   "units": [
+    "Operations Management group"
+   ],
+   "bySchool": {
+    "School of Management": [
+     "Operations Management group"
+    ]
+   }
   }
+ },
+ "bySchool": {
+  "A.B. Freeman School of Business": [
+   "Management Science Department"
+  ],
+  "Alberta School of Business": [
+   "Department of Accounting, Operations and Information Systems"
+  ],
+  "Anderson School of Management": [
+   "Decisions, Operations and Technology Management (DOTM)"
+  ],
+  "Beedie School of Business": [
+   "Technology and Operations Management Department"
+  ],
+  "Booth School of Business": [
+   "Operations Management"
+  ],
+  "Business School": [
+   "Chair of Production Management",
+   "Chair of Supply Chain Management",
+   "Department of Information Systems and Operations Management",
+   "Department of Management & Marketing"
+  ],
+  "C. T. Bauer College of Business": [
+   "Department of Decision and Information Sciences"
+  ],
+  "Carey Business School": [
+   "Operations Management & Business Analytics Area"
+  ],
+  "Carl H. Lindner College of Business": [
+   "Operations, Business Analytics, and Information Systems Department"
+  ],
+  "Carlson School of Management": [
+   "Supply Chain and Operations Department"
+  ],
+  "Carroll School of Management": [
+   "Business Analytics Department"
+  ],
+  "Charles H. Lundquist College of Business": [
+   "Department of Operations and Business Analytics"
+  ],
+  "Cockrell School of Engineering": [
+   "Operations Research & Industrial Engineering (ORIE) Program"
+  ],
+  "College of Administrative Sciences and Economics (CASE)": [
+   "Operations Management and Information Systems group"
+  ],
+  "College of Business": [
+   "Decision Sciences/Operations Management",
+   "Department of Decision Analytics and Operations",
+   "Department of Decision and Technology Analytics",
+   "Department of Management and International Business",
+   "Department of Management Sciences",
+   "Information and Decision Sciences (IDS) Department",
+   "Management Department",
+   "Managerial Sciences Department, Marketing Area",
+   "Marketing Department",
+   "Operations Management",
+   "Operations Strategy and Management Science Group",
+   "Supply Chain and Logistics Management"
+  ],
+  "College of Business Administration": [
+   "Decision Sciences and Information Systems Department",
+   "Department of Business Analytics & Statistics",
+   "Supply Chain Management & Analytics Department"
+  ],
+  "College of Business and Economics": [
+   "Department of Management"
+  ],
+  "College of Business and Innovation": [
+   "Information, Operations and Technology Management Department"
+  ],
+  "College of Engineering": [
+   "Department of Mechanical & Industrial Engineering",
+   "Mechanical and Industrial Engineering (MIE) Department"
+  ],
+  "College of Engineering, Computing and Applied Sciences": [
+   "Department of Industrial Engineering"
+  ],
+  "College of Management": [
+   "Department of Industrial Engineering and Management"
+  ],
+  "College of Management of Technology (CMT)": [
+   "Technology and Operations Management (TOM) Area"
+  ],
+  "Columbia Business School": [
+   "Decision, Risk, and Operations (DRO) Division"
+  ],
+  "Cornell Tech": [
+   "Operations Research and Information Engineering"
+  ],
+  "CUHK Business School": [
+   "Department of Decision Sciences and Managerial Economics"
+  ],
+  "CUHK(SZ)": [
+   "The School of Management and Economics (SME)"
+  ],
+  "Culverhouse College of Commerce": [
+   "Department of Information Systems, Statistics, and Management Science"
+  ],
+  "Curtis L. Carlson School of Management": [
+   "Supply Chain and Operations Department"
+  ],
+  "Darden School of Business": [
+   "Data Analytics and Decision Sciences (DADS) Area",
+   "Quantitative Analysis (QA) Area",
+   "Technology and Operations Management Department"
+  ],
+  "Darla Moore School of Business": [
+   "Department of Management Sciences",
+   "Management Science Department"
+  ],
+  "David Eccles School of Business": [
+   "Department of Operations & Info Systems",
+   "Operations & Information Systems Department"
+  ],
+  "DeGroote School of Business": [
+   "Area of Health Policy and Management"
+  ],
+  "Desautels Faculty of Management": [
+   "Operations Management"
+  ],
+  "EBS Business School": [
+   "Institute for Supply Chain Management"
+  ],
+  "Econometric Institute": [
+   "Area of Operations and Supply Chain Management"
+  ],
+  "Edwin L. Cox School of Business": [
+   "Information Technology & Operations Management (ITOM) Department"
+  ],
+  "Faculty of Business": [
+   "Department of Computing and Decision Sciences"
+  ],
+  "Faculty of Business and Economics": [
+   "Information and Innovation Management",
+   "Innovation and Information Management Area"
+  ],
+  "Faculty of Economics and Business (FEB)": [
+   "Research Center for Operations Management"
+  ],
+  "Faculty of Engineering": [
+   "Department of Industrial Engineering",
+   "Department of Systems Engineering and Engineering Management (SEEM)"
+  ],
+  "Feliciano School of Business": [
+   "Information Management & Business Analytics Department"
+  ],
+  "Fox School of Business": [
+   "Operations and Supply Chain Management Department"
+  ],
+  "Freeman College of Management": [
+   "Accounting & Financial Management Area, Business Analytics group"
+  ],
+  "Gatton College of Business and Economics": [
+   "Department of Marketing & Supply Chain"
+  ],
+  "Gies College of Business": [
+   "Department of Business Administration"
+  ],
+  "Goizueta Business School": [
+   "Information Systems and Operations Management Department"
+  ],
+  "Graduate School of Business (GSB)": [
+   "Operations and Information Technology Department"
+  ],
+  "Graduate School of Engineering and Management": [
+   "Department of Operational Sciences"
+  ],
+  "Haas School of Business": [
+   "Operations & Information Technology Management Department"
+  ],
+  "Harvard Business School (HBS)": [
+   "Technology and Operations Management Department"
+  ],
+  "Haskayne School of Business": [
+   "Operations and Supply Chain Management Department"
+  ],
+  "HKUST School of Business and Management": [
+   "Department of Information Systems, Business Statistics and Operations Management (ISOM)"
+  ],
+  "Imperial Business School": [
+   "Analytics and Operations group"
+  ],
+  "Imperial College Business School": [
+   "Analytics and Operations group"
+  ],
+  "Institut Mines-Télécom Business School": [
+   "Department of Management, Marketing and Strategy (MMS)"
+  ],
+  "Isenberg School of Management": [
+   "Department of Operations & Information Management"
+  ],
+  "J. B. Speed School of Engineering": [
+   "Department of Industrial Engineering"
+  ],
+  "J. Mack Robinson College of Business": [
+   "Managerial Sciences"
+  ],
+  "John B. Goddard School of Business & Economics": [
+   "Department of Business Administration/Supply Chain Management"
+  ],
+  "John Molson School of Business": [
+   "Department of Supply Chain and Business Technology Management"
+  ],
+  "Jones Graduate School Of Business": [
+   "Operations Management"
+  ],
+  "Joseph M. Katz Graduate School of Business": [
+   "Business Analytics and Operations area"
+  ],
+  "Judge Business School": [
+   "Operations and Technology Management Department"
+  ],
+  "Kelley School of Business": [
+   "Operations and Decision Technologies Department"
+  ],
+  "Kellogg School of Management": [
+   "Operations Department"
+  ],
+  "Kenan-Flagler Business School": [
+   "Operations Department"
+  ],
+  "Krannert School of Management": [
+   "Operations Management",
+   "Quantitative Methods area"
+  ],
+  "Lally School of Management": [
+   "Supply Chain Management & Analytics Department"
+  ],
+  "Lazaridis School of Business & Economics": [
+   "Operations and Decision Sciences (ODS) Department"
+  ],
+  "Leavey School of Business": [
+   "Information Systems and Analytics (ISA) Department"
+  ],
+  "Lee Kong Chian School of Business": [
+   "Department of Operations Management"
+  ],
+  "Leeds School of Business": [
+   "The Operations Group of the Division of Strategy, Entrepreneurship, and Operations"
+  ],
+  "Leonard N. Stern School of Business": [
+   "Department of Information, Operations, and Management Sciences"
+  ],
+  "Louvain School of Management": [
+   "Center for Operations Research and Econometrics (CORE)"
+  ],
+  "Lucas College and Graduate School of Business": [
+   "Department of Marketing and Decision Sciences"
+  ],
+  "Lyle School of Engineering": [
+   "Engineering Management, Information, and Systems Department (EMIS)"
+  ],
+  "Marshall School of Business": [
+   "Department of Data Sciences and Operations"
+  ],
+  "Max M. Fisher College of Business": [
+   "Department of Management Sciences",
+   "Department of Operations and Business Analytics",
+   "Operations and Business Analytics"
+  ],
+  "Mays Business School": [
+   "Information and Operations Management (INFO) Department"
+  ],
+  "McCombs School of Business": [
+   "Information, Risk, and Operations Management (IROM) Department"
+  ],
+  "McCormick School of Engineering": [
+   "Industrial Engineering and Management Sciences (IEMS) Department"
+  ],
+  "McDonough School of Business": [
+   "McDonough School of Business, Operations and Information Management Area",
+   "NRF Business of Retail Initiative"
+  ],
+  "Mendoza College of Business": [
+   "Department of IT, Analytics, and Operations",
+   "Information Technology, Analytics, and Operations (ITAO) Department"
+  ],
+  "Miami Herbert Business School": [
+   "Department of Management Sciences"
+  ],
+  "Michael Smurfit Graduate Business School": [
+   "Operations Management"
+  ],
+  "Mike Ilitch School of Business": [
+   "Department of Marketing and Supply Chain Management"
+  ],
+  "MIT Sloan School of Management": [
+   "Operations Management",
+   "Operations Research and Statistics Group"
+  ],
+  "Nanyang Business School (NBS)": [
+   "Informaton Technology & Operatons Management (ITOM) Division"
+  ],
+  "Naveen Jindal School of Management": [
+   "Supply Chain/Operations Management Department"
+  ],
+  "Neeley School of Business": [
+   "Department of Information Systems & Supply Chain Management"
+  ],
+  "NUS Business School": [
+   "Department of Analytics and Operations"
+  ],
+  "Olin Business School": [
+   "Operations and Manufacturing Management Department"
+  ],
+  "Owen Graduate School of Management": [
+   "Operations Management and Quantitative Methods Area"
+  ],
+  "Poole College of Management": [
+   "Department of Business Management/Operations and Supply Chain"
+  ],
+  "Questrom School of Business": [
+   "Information Systems Department",
+   "Operations and Technology Management Department"
+  ],
+  "Quinlan School of Business": [
+   "Information Systems and Operations Management (ISOM) Department"
+  ],
+  "Rady School of Management": [
+   "Innovation, Technology & Operations"
+  ],
+  "Raymond A. Mason School of Business": [
+   "Operations Management & Information Technology Area"
+  ],
+  "Robert Pamplin Jr. School of Business Administration (PSOBA)": [
+   "Operations & Technology Management (OTM) group"
+  ],
+  "Robins School of Business": [
+   "Management Department"
+  ],
+  "Robinson College of Business": [
+   "Department of Management"
+  ],
+  "Rotman School of Management": [
+   "Operations Management and Statistics Department"
+  ],
+  "Rotterdam School of Management (RSM)": [
+   "Technology and Operations Management Department"
+  ],
+  "Saïd Business School": [
+   "Management Science Department"
+  ],
+  "Samuel Curtis Johnson Graduate School of Management": [
+   "Operations Management"
+  ],
+  "Sauder School of Business": [
+   "Operations and Logistics Division"
+  ],
+  "Scheller College of Business": [
+   "Operations Management"
+  ],
+  "School Economics and Management": [
+   "Department of Business and Public Administration"
+  ],
+  "School of Business": [
+   "Analytics, Information, and Operations Management Department",
+   "Department of Finance",
+   "Department of Information and Service Economy",
+   "Department of Supply Chain Management & Analytics",
+   "Information Systems and Operations Management (ISOM) Department",
+   "Innovation and Information Management Area",
+   "Operations and Information Management Department",
+   "Operations Management",
+   "Operations, SCM and ITM Area"
+  ],
+  "School of Business Administration": [
+   "Department of Management",
+   "Department of MIS, OM and Decision Sciences"
+  ],
+  "School of Business Administration, A. Gary Anderson Graduate School of Management": [
+   "Operations and Supply Chain Management Department"
+  ],
+  "School of Business and Leadership": [
+   "Business Analytics Program"
+  ],
+  "School of Business-Camden": [
+   "Operations Management"
+  ],
+  "School of Business, Analytics": [
+   "Information, and Operations Management Department"
+  ],
+  "School of Economics and Management": [
+   "Department of Management, Information and Supply Chain Management Group"
+  ],
+  "School of Engineering": [
+   "Department of Industrial and Systems Engineering (ISE)"
+  ],
+  "School of Engineering and Applied Science": [
+   "Operations Research and Financial Engineering (ORFE) Department"
+  ],
+  "School of Industrial Engineering": [
+   "Department of Industrial Engineering and Innovation Sciences"
+  ],
+  "School of Information Management and Engineering (SIME)": [
+   "Management Science, Information Systems, Financial Information, and Computer Science Department"
+  ],
+  "School of Information Systems": [
+   "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab"
+  ],
+  "School of International Business Administration": [
+   "Operations Management"
+  ],
+  "School of Management": [
+   "Management and Marketing Department",
+   "Management Science Department",
+   "Operations and Business Analytics",
+   "Operations Management"
+  ],
+  "School of Management and Economics": [
+   "The research group of Prof. Yiming Zhang"
+  ],
+  "School of Science and Engineering": [
+   "Department of Industrial and Systems Engineering (ISyE)"
+  ],
+  "Sheldon B. Lubar School of Business": [
+   "Supply Chain, Operations Management & Business Statistics Department"
+  ],
+  "Smeal College of Business": [
+   "Supply Chain & Information Systems Department"
+  ],
+  "Smith School of Business": [
+   "Management Science and Operations Management Department"
+  ],
+  "Stephen M. Ross School of Business": [
+   "Technology & Operations department"
+  ],
+  "Suliman S. Olayan School of Business": [
+   "Business Information and Decision Systems (BIDS) Department"
+  ],
+  "SUNY (School of Management)": [
+   "Business Analytics and Operations area"
+  ],
+  "Tepper School of Business": [
+   "Operations Management"
+  ],
+  "The David D. Reh School of Business": [
+   "Operations & Information Systems Department"
+  ],
+  "The Eli Broad College of Business": [
+   "Department of Supply Chain Management",
+   "Supply Chain Management"
+  ],
+  "The Fu Foundation School of Engineering and Applied Science": [
+   "Department of Industrial Engineering and Operations Research (IEOR)"
+  ],
+  "The Fuqua School of Business": [
+   "Operations Management"
+  ],
+  "The Paul Merage School of Business": [
+   "Operations and Decision Technologies Department"
+  ],
+  "The Robert H. Smith School of Business": [
+   "Decision, Operations and Information Technologies (DO&IT) Department"
+  ],
+  "The School of Economics and Business Administration": [
+   "Department of Operations and Quantitative Methods"
+  ],
+  "The UCL School of Management": [
+   "Operations & Technology group"
+  ],
+  "Tilburg School of Economics and Management": [
+   "Department of Information Systems and Operations Management"
+  ],
+  "Toulouse Business School": [
+   "Information, Operations and Management Sciences Area"
+  ],
+  "Tuck School of Business": [
+   "Operations and Management Science Department"
+  ],
+  "TUM School of Management": [
+   "Department of Operations & Supply Chain Management"
+  ],
+  "UCD Michael Smurfit Graduate School of Business": [
+   "Management Department"
+  ],
+  "UNSW Business School": [
+   "School of Information Systems & Technology Management"
+  ],
+  "Vienna University of Economics and Business": [
+   "Department of Information Systems and Operations"
+  ],
+  "Villanova School of Business": [
+   "Management and Operations Area"
+  ],
+  "Volgenau School of Engineering": [
+   "Systems Engineering and Operations Research (SEOR)"
+  ],
+  "W. E. Simon Graduate School of Business Administration": [
+   "Operations Management"
+  ],
+  "W. P. Carey School of Business": [
+   "Department of Information Systems",
+   "Department of Supply Chain Management"
+  ],
+  "Weatherhead School of Management": [
+   "Department of Operations"
+  ],
+  "Wesley J. Howe School of Technology Management": [
+   "Operations Management"
+  ],
+  "Wharton School": [
+   "Operations, Information and Decisions (OID) Department"
+  ],
+  "Wisconsin School of Business": [
+   "Operations and Information Management Department"
+  ],
+  "Zicklin School of Business": [
+   "Department of Management, Operations Management group",
+   "Loomba Department of Management, Operations Management Group"
+  ]
  }
 }

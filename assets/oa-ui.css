@@ -1315,8 +1315,24 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   font-variant-numeric: tabular-nums;
 }
 
-/* a value already used at the chosen university */
+/* a value already used at the chosen university (or in the chosen school) */
 .oa-combo-opt.is-pref .oa-combo-name { font-weight: 600; }
+
+/* the heading over one group: "Schools at Tulane University", then
+   "Elsewhere on the site" once a search reaches past it */
+.oa-combo-group {
+  position: sticky;
+  top: -4px;
+  margin: 0;
+  padding: 6px 12px 4px;
+  background: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7480;
+}
+.oa-combo-group + .oa-combo-opt { padding-top: 4px; }
 
 /* the "type something new" row */
 .oa-combo-add { border-top: 1px solid #eef1f4; color: var(--brand-2); }
@@ -1326,7 +1342,6 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   line-height: 1;
 }
 
-.oa-combo-hint,
 .oa-combo-more,
 .oa-combo-empty {
   margin: 0;
@@ -1335,8 +1350,6 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   line-height: 1.45;
   color: #77808a;
 }
-
-.oa-combo-hint { border-bottom: 1px solid #eef1f4; }
 
 /* the read-back of what the two name fields will be published as */
 .oa-derived { margin: -8px 0 18px; color: var(--mut); }

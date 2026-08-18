@@ -503,8 +503,13 @@ replacing the file, so postings made through /v2/post-a-job.html survive.`);
   await writeFile(outPath, serialise(final));
   await writeFile(outPath.replace(/jobs\.json$/, 'jobs-meta.json'),
     JSON.stringify(buildMeta(out, { generated: new Date().toISOString() }), null, 1) + '\n');
+  /* The same vocabulary build-jobs.mjs writes, directory and all — a
+     half-built one here would drop the posting form's cascade the first time
+     this (retired) path were ever run again. */
+  const dirFile = outPath.replace(/jobs\.json$/, 'universities.json');
+  const directory = existsSync(dirFile) ? JSON.parse(await readFile(dirFile, 'utf8')) : [];
   await writeFile(outPath.replace(/jobs\.json$/, 'vocab.json'),
-    serialiseVocab(buildVocab(out, { generated: new Date().toISOString() })));
+    serialiseVocab(buildVocab(out, { generated: new Date().toISOString(), directory })));
   console.log(`wrote ${outPath} (${out.length} postings)`);
 }
 

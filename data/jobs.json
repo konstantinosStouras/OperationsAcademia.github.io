@@ -610,9 +610,9 @@
   "year": 2027,
   "posted": "2026-07-20",
   "institution": "Clarkson University",
-  "department": "Operations and Information Systems",
+  "department": "Operations & Information Systems",
   "school": "",
-  "unit": "Operations and Information Systems",
+  "unit": "Operations & Information Systems",
   "type": "University",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -767,9 +767,9 @@
   "year": 2026,
   "posted": "2026-04-08",
   "institution": "Tulane University",
-  "department": "Freeman School of Business, Management Science",
-  "school": "Freeman School of Business",
-  "unit": "Management Science",
+  "department": "A.B. Freeman School of Business, Management Science Department",
+  "school": "A.B. Freeman School of Business",
+  "unit": "Management Science Department",
   "type": "Business School",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -800,8 +800,8 @@
   "year": 2026,
   "posted": "2026-04-07",
   "institution": "Tulane University",
-  "department": "Freeman School of Business",
-  "school": "Freeman School of Business",
+  "department": "A.B. Freeman School of Business",
+  "school": "A.B. Freeman School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -833,9 +833,9 @@
   "year": 2026,
   "posted": "2026-04-07",
   "institution": "Tulane University",
-  "department": "Freeman School of Business, Management Sciences Area",
-  "school": "Freeman School of Business",
-  "unit": "Management Sciences Area",
+  "department": "A.B. Freeman School of Business, Management Science Department",
+  "school": "A.B. Freeman School of Business",
+  "unit": "Management Science Department",
   "type": "Business School",
   "levels": [
    "Visiting Faculty (various levels)"
@@ -866,8 +866,8 @@
   "year": 2027,
   "posted": "2026-04-07",
   "institution": "Tulane University",
-  "department": "Freeman School of Business",
-  "school": "Freeman School of Business",
+  "department": "A.B. Freeman School of Business",
+  "school": "A.B. Freeman School of Business",
   "unit": "",
   "type": "Business School",
   "levels": [
@@ -1491,9 +1491,9 @@
   "year": 2026,
   "posted": "2025-11-04",
   "institution": "The Pennsylvania State University",
-  "department": "Supply Chain & Information Systems",
+  "department": "Supply Chain & Information Systems Department",
   "school": "",
-  "unit": "Supply Chain & Information Systems",
+  "unit": "Supply Chain & Information Systems Department",
   "type": "University",
   "levels": [
    "Assistant Professor",
@@ -1593,9 +1593,9 @@
   "year": 2026,
   "posted": "2025-10-23",
   "institution": "University of California Berkeley",
-  "department": "Department of Industrial Engineering & Operations Research (IEOR)",
+  "department": "Department of Industrial Engineering and Operations Research (IEOR)",
   "school": "",
-  "unit": "Department of Industrial Engineering & Operations Research (IEOR)",
+  "unit": "Department of Industrial Engineering and Operations Research (IEOR)",
   "type": "University",
   "levels": [
    "Assistant Professor"
@@ -1622,9 +1622,9 @@
   "year": 2026,
   "posted": "2025-10-22",
   "institution": "Korea Advanced Institute of Science and Technology (KAIST)",
-  "department": "College of Business, Operations Strategy and Management Science",
+  "department": "College of Business, Operations Strategy and Management Science Group",
   "school": "College of Business",
-  "unit": "Operations Strategy and Management Science",
+  "unit": "Operations Strategy and Management Science Group",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2049,8 +2049,8 @@
   "year": 2026,
   "posted": "2025-10-04",
   "institution": "Michigan State University",
-  "department": "Eli Broad College of Business, Supply Chain Management",
-  "school": "Eli Broad College of Business",
+  "department": "The Eli Broad College of Business, Supply Chain Management",
+  "school": "The Eli Broad College of Business",
   "unit": "Supply Chain Management",
   "type": "Business School",
   "levels": [
@@ -2290,9 +2290,9 @@
   "year": 2026,
   "posted": "2025-09-29",
   "institution": "University of Minnesota",
-  "department": "Carlson School of Management, Supply Chain and Operations",
+  "department": "Carlson School of Management, Supply Chain and Operations Department",
   "school": "Carlson School of Management",
-  "unit": "Supply Chain and Operations",
+  "unit": "Supply Chain and Operations Department",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2925,9 +2925,9 @@
   "year": 2026,
   "posted": "2025-08-30",
   "institution": "Imperial College London",
-  "department": "Imperial Business School, Analytics and Operations",
+  "department": "Imperial Business School, Analytics and Operations group",
   "school": "Imperial Business School",
-  "unit": "Analytics and Operations",
+  "unit": "Analytics and Operations group",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3394,9 +3394,9 @@
   "year": 2026,
   "posted": "2025-06-21",
   "institution": "HEC Paris",
-  "department": "Information Systems and Operations Management",
+  "department": "Information Systems and Operations Management Department",
   "school": "",
-  "unit": "Information Systems and Operations Management",
+  "unit": "Information Systems and Operations Management Department",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
