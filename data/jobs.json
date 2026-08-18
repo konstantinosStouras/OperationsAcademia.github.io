@@ -116,13 +116,12 @@
   "owner": ""
  },
  {
-  "id": "2027-university-of-houston-bauer-human-centered-ai-in-20260812",
+  "id": "2027-university-of-houston-20260812",
   "year": 2027,
   "posted": "2026-08-12",
-  "institution": "University of Houston (Bauer Human-Centered AI Institute)",
-  "department": "Artificial Intelligence (AI) and healthcare",
-  "school": "",
-  "unit": "Artificial Intelligence (AI) and healthcare",
+  "institution": "University of Houston",
+  "department": "Bauer Human-Centered AI Institute",
+  "school": "Bauer Human-Centered AI Institute",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -135,7 +134,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston%20(Bauer%20Human-Centered%20AI%20Institute)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -552,13 +551,13 @@
   "owner": ""
  },
  {
-  "id": "2027-university-of-texas-at-san-antonio-20260726",
+  "id": "2027-ut-san-antonio-20260726",
   "year": 2027,
   "posted": "2026-07-26",
-  "institution": "University of Texas at San Antonio",
-  "department": "Operations and Analytics",
-  "school": "",
-  "unit": "Operations and Analytics",
+  "institution": "UT San Antonio",
+  "department": "Carlos Alvarez College of Business, Operations and Analytics Department",
+  "school": "Carlos Alvarez College of Business",
+  "unit": "Operations and Analytics Department",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -571,7 +570,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Texas%20at%20San%20Antonio",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=UT%20San%20Antonio",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -2118,9 +2117,9 @@
   "year": 2026,
   "posted": "2025-10-03",
   "institution": "University of Texas at Dallas",
-  "department": "Naveen Jindal School of Management, Supply Chain and Operations Management",
+  "department": "Naveen Jindal School of Management, Operations Management Area",
   "school": "Naveen Jindal School of Management",
-  "unit": "Supply Chain and Operations Management",
+  "unit": "Operations Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2188,9 +2187,9 @@
   "year": 2026,
   "posted": "2025-10-02",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Management Science",
+  "department": "Miami Herbert Business School, Management Area",
   "school": "Miami Herbert Business School",
-  "unit": "Management Science",
+  "unit": "Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2754,13 +2753,12 @@
   "owner": ""
  },
  {
-  "id": "2026-city-st-george-s-university-of-london-20250911",
+  "id": "2026-university-of-london-20250911",
   "year": 2026,
   "posted": "2025-09-11",
-  "institution": "City St. George's, University of London",
-  "department": "Bayes Business School, Faculty of Management",
-  "school": "Bayes Business School, Faculty of Management",
-  "unit": "",
+  "institution": "University of London",
+  "department": "Bayes Business School",
+  "school": "Bayes Business School",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -2773,7 +2771,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://www.citystgeorges.ac.uk/about/jobs/apply/details.html?jobId=5846&jobTitle=Lecturer%20in%20Analytics",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20St.%20George's%2C%20University%20of%20London",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20London",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -2792,9 +2790,9 @@
   "year": 2026,
   "posted": "2025-09-10",
   "institution": "The University of Hong Kong",
-  "department": "Faculty of Business and Economics, Innovation and Information Management",
+  "department": "Faculty of Business and Economics, Information and Innovation Management",
   "school": "Faculty of Business and Economics",
-  "unit": "Innovation and Information Management",
+  "unit": "Information and Innovation Management",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3131,9 +3129,9 @@
   "year": 2026,
   "posted": "2025-08-17",
   "institution": "University College Dublin",
-  "department": "UCD Michael Smurfit Graduate School of Business, Management",
-  "school": "UCD Michael Smurfit Graduate School of Business",
-  "unit": "Management",
+  "department": "Michael Smurfit Graduate Business School, Management Area",
+  "school": "Michael Smurfit Graduate Business School",
+  "unit": "Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor"

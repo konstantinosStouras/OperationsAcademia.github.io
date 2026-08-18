@@ -392,9 +392,16 @@ Pennsylvania State University.
 
 `data/past-postings.json` has no daily build to heal it, so it gets a mode of its
 own: **`node _scraper/import-legacy-tables.mjs --heal-names`** (offline, no sheets)
-— run it after adding an alias. The importer applies `healPlace` on write too,
-which it did not before: it never canonicalised at all, so a re-import would
-silently have undone the archive's spellings.
+— run it after adding an alias; it covers all three files the importer writes.
+
+**A heal mode is not enough on its own, because `data/` is rewritten from the
+sheets.** The importer must canonicalise ON WRITE as well, and originally it
+canonicalised nothing at all. Healing only `past-postings.json` there was
+caught by CI within the hour: the import job ran `--fetch`, wrote 254 raw
+`universities.json` rows, and the selftest's "the map names every place the way
+the site does" guard went red on 213 of them. All three write paths are now
+healed and pinned by name in `selftest.mjs` — a heal that the next dispatch
+undoes is not a fix.
 
 The picker (`assets/oa-combo.js`, dual-mode so its ordering is unit-tested) opens
 **alphabetically** — accents folded onto their base letter, so École sits between
@@ -412,6 +419,61 @@ contrast near-miss. Its surfaces are theme tokens now, each keeping its old ligh
 value as a fallback for the frozen archives, and `page-test.mjs` measures the
 rendered ratio in BOTH themes (a fix that only darkened the panel would trade one
 broken theme for the other).
+
+**Where a school names its own unit, that name wins.** The bare-field-name rule
+above is right in general — "Department", "Area" and "group" are exactly what
+differs between two people naming one unit — and wrong for six schools the owner
+ruled on (2026-08-18), where the wrapper IS the name: UT Dallas has an Operations
+Management **Area**, Purdue a Supply Chain and Operations Management **Faculty**,
+Yale an Operations **Department**, Emory an Information Systems **&** Operations
+Management. `SCOPED_UNIT_ALIASES` keys them by university (safe for the same
+reason the school table is: no other school at those six carries the name, which
+the selftest asserts) and the answer is **TERMINAL** — returned exactly as
+written, never put back through the rule that would undo it, and never through
+`spell()`, which turns " & " into " and ". The lookup asks three ways — as
+written, as `spell()` rewrites it, and as the generic rule would leave it —
+because listing every wrapper a source might use is the losing game the bare-name
+rule exists to avoid. Everywhere else the generic rule is untouched, which is the
+whole safety argument for scoping it. `canonUnit(v, institution)` takes the
+university, so `assemble` and the posting form's picker both pass it; a
+`canonUnit` asked without one still answers the generic way, which is why
+`isCanonicalUnit` consults the scoped names directly.
+
+**A substring check is blind to a reordering, and it cost two duplicates.**
+"Michael Smurfit Graduate Business School" and "UCD Michael Smurfit Graduate
+School of Business" contain neither one another, nor do "Olin Business School"
+and "Olin School of Business" — so both went on being offered twice through a
+green suite. The selftest now compares names TWO ways: substring, and the
+DISTINCTIVE WORDS as a set, dropping the generic ones ("school", "of",
+"business") and the university's own name and initials. Department pairs that
+are one group or two — only the owner can say — are named in `AWAITING_OWNER`
+in `selftest.mjs` rather than silently tolerated: a new pair fails the build, a
+listed one is reported by `node _scraper/selftest.mjs --open`, and an entry is
+deleted when it is ruled on (the answer going into `SCOPED_UNIT_ALIASES`).
+
+**One spelling per place means EVERY dataset, not just the postings** (owner,
+2026-08-18: "let's use the same consistent University Name, School Name,
+Department Name, across the entire website"). `data/jobs.json` and
+`data/past-postings.json` had been canonical for a while; the two datasets
+`import-legacy-tables.mjs` writes had never been canonicalised at all — 213 of
+the map's 254 rows and 9 faculty placements named their place some other way,
+and the map is where a reader LANDS from every posting's "Further info" link.
+So `--heal-names` covers all three files it writes, and `sync-jobmarket-sheet.mjs`
+has a mode of the same name for the workbook's own postings. Each is offline and
+idempotent; the selftest asserts all four datasets together.
+
+Two rules the map heal follows: its `name` and `schoolDept` are DERIVED (the
+three names joined) and are rebuilt with them, unless the sheet said something
+of its own ("TBC"); and its **`id` never moves**, because the maintainer's
+read-time corrections are stored against it (`rowOverrides`,
+`<dataset>__<rowId>`) and a renamed id orphans every correction already made.
+
+**A duplicate key in an object literal is silent.** Adding a second
+`'Stanford University'` to `SCOPED_SCHOOL_ALIASES` did not merge or warn —
+JavaScript kept the last and dropped the earlier rule, so an alias that had
+worked for weeks stopped and the only symptom was Stanford listed twice.
+`testNoDuplicateKeys` reads the tables from the SOURCE, because by the time the
+module has evaluated the evidence is gone.
 
 ## The posting form's three name fields cascade
 
@@ -503,6 +565,64 @@ dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
 matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
+
+## Anything that paints its own ground must name its own ink
+
+Three reports in one morning (2026-08-18) were all the same fault: the
+vocabulary dropdown drew near-white names on a white card, the "Your changes
+have been saved" panel showed a heading and then two invisible lines, and the
+"Choose a file…" button was white on white. Each was a rule that set a
+`background` and left `color` to be inherited — fine when it was written,
+because there was only one theme, and wrong the moment `[data-theme='dark']`
+put a near-white `--ink` on the page around it.
+
+`assets/oa-ui.css` predated the palette and hardcoded ~130 light values.
+They are now theme tokens, each **keeping its old value as the `var()`
+fallback** — that is what lets `/v1/` and `/v2/`, which define none of them,
+go on rendering exactly as they did. Only the semantic panels keep fixed
+colours (success green, warning amber, the status pills), and those name a
+colour for everything inside them.
+
+Two things this turned up beyond the reports:
+
+* **`--mut` missed AA on every surface it is used on** — 4.03:1 on `--bg-3`,
+  4.29:1 on `--bg` — so the footer, the result counts and every hint on the
+  site were a hair under readable. It is `#646c78` now, the smallest change
+  that clears 4.5:1 everywhere.
+* **The map's vendored Leaflet chrome**: the attribution box kept a near-white
+  ground in dark theme under our flipped link colour (1.56:1), and the cluster
+  badge wrote white on its own pale circles (1.36–2.24:1, in BOTH themes).
+  Leaflet's stylesheets stay verbatim copies, so both corrections live in
+  `oa-ui.css`, specific enough to win despite loading first.
+
+Two traps this hit, both worth knowing before adding a rule:
+
+* **Specificity AND load order.** The Leaflet attribution override sat in
+  `oa-ui.css` at the same specificity as Leaflet's own rule
+  (`.leaflet-container .leaflet-control-attribution`), and `leaflet.css` loads
+  AFTER it — so the fix silently did nothing and the guard went on reporting
+  1.6:1. Map chrome belongs in `assets/oa-uni-map.css`, which loads after all
+  three Leaflet stylesheets.
+* **`--on-brand`, not `#fff`, on anything filled with `var(--brand)`.** The
+  checkbox tick and radio dot were fixed white on a brand-filled box, and
+  `--brand` is LIGHT in dark theme — a white tick on a near-white box.
+
+**`page-test.mjs` measures it, and measuring is the point.** It walks one page
+per kind of chrome in BOTH themes and reads what the browser actually paints,
+compositing backgrounds rather than taking the first painted layer — a pill on
+`rgba(198, 204, 212, 0.13)` is not light, it is 13% light over near-black, and
+reading that layer alone reports a perfectly readable button at 1:1. Nothing is
+exempt. **When you add a rule that paints a background, give it a colour in the
+same change.**
+
+**And it waits for the theme to be PAINTED, not for a stopwatch.** Every page
+links a Google Fonts stylesheet that cannot load in CI, and until the cascade
+settles the body shows a default grey that is neither theme; measured then,
+every muted line reads as a dark-theme failure. A fixed delay reported 14 of
+them, all artefacts, with the numbers moving between runs — which is what a
+transient looks like. Waiting for `body.v3` does not help either: that class is
+in the HTML. The wait asserts the thing itself — the body is painting the
+theme's own `--bg` — and nothing downstream may be measured before it does.
 
 ## Deploying Firebase rules — ALWAYS name the project
 

@@ -81,13 +81,12 @@
   "owner": ""
  },
  {
-  "id": "2027-university-of-houston-bauer-human-centered-ai-in-20260812",
+  "id": "2027-university-of-houston-20260812",
   "year": 2027,
   "posted": "2026-08-12",
-  "institution": "University of Houston (Bauer Human-Centered AI Institute)",
-  "department": "Artificial Intelligence (AI) and healthcare",
-  "school": "",
-  "unit": "Artificial Intelligence (AI) and healthcare",
+  "institution": "University of Houston",
+  "department": "Bauer Human-Centered AI Institute",
+  "school": "Bauer Human-Centered AI Institute",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -100,7 +99,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston%20(Bauer%20Human-Centered%20AI%20Institute)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Houston",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -351,13 +350,13 @@
   "owner": ""
  },
  {
-  "id": "2027-university-of-texas-at-san-antonio-20260726",
+  "id": "2027-ut-san-antonio-20260726",
   "year": 2027,
   "posted": "2026-07-26",
-  "institution": "University of Texas at San Antonio",
-  "department": "Operations and Analytics",
-  "school": "",
-  "unit": "Operations and Analytics",
+  "institution": "UT San Antonio",
+  "department": "Carlos Alvarez College of Business, Operations and Analytics Department",
+  "school": "Carlos Alvarez College of Business",
+  "unit": "Operations and Analytics Department",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -370,7 +369,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Texas%20at%20San%20Antonio",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=UT%20San%20Antonio",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",

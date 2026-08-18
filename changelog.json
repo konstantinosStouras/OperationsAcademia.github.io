@@ -3,6 +3,27 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "readable-in-dark-mode",
+   "date": "2026-08-18",
+   "title": "Dark mode: the parts that could not be read",
+   "summary": "In dark mode several things on the site were drawing pale text on a pale panel \u2014 the university dropdown on the posting form, the \u201cChoose a file\u2026\u201d button, and the confirmation panel after saving a posting, whose message was invisible under a heading you could read. All of them are fixed, and the whole site was measured page by page in both modes rather than one report at a time: muted text (the footer, result counts, dates and hints) was very slightly too faint everywhere and is now a shade darker, and the Universities map\u2019s cluster numbers and attribution line are legible too. A check now measures every kind of page in both modes on each change, so this cannot quietly come back.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
+   "id": "one-spelling-everywhere",
+   "date": "2026-08-18",
+   "title": "One spelling per university, school and department \u2014 on every page",
+   "summary": "The job postings had been tidied so that one department reads as one place; the Universities map and the recent-faculty list had not, and the map is where every posting\u2019s \u201cFurther info\u201d link lands. 213 of the map\u2019s 254 entries and 9 faculty placements now name their university, school and department exactly the way the postings do, so a school reads the same wherever you meet it and the links between the pages find each other. Nine more schools were listed twice and are now listed once, including Cornell\u2019s SC Johnson College, Stanford\u2019s Graduate School of Business and UCD\u2019s Smurfit school; and each department is named the way its own school names it \u2014 UT Dallas\u2019s Operations Management Area, Yale\u2019s Operations Department, Stanford\u2019s Operations, Information, and Technology (OIT) area.",
+   "url": "https://www.operationsacademia.org/universities"
+  },
+  {
+   "id": "schools-named-as-they-name-themselves",
+   "date": "2026-08-18",
+   "title": "Each school\u2019s department is listed the way that school names it",
+   "summary": "Six schools were listed with two names for one group \u2014 Yale\u2019s \u201cOperations\u201d beside \u201cOperations Management\u201d, Miami Herbert\u2019s \u201cManagement\u201d beside \u201cManagement Science\u201d \u2014 so one department read as two. Each now appears once, under the name its own school uses: Emory\u2019s Information Systems & Operations Management, Purdue\u2019s Supply Chain and Operations Management Faculty, UT Dallas\u2019s Operations Management Area, UCD Smurfit\u2019s and Miami Herbert\u2019s Management Area, and Yale\u2019s Operations Department. Two schools listed twice were merged with them \u2014 UCD Smurfit and Washington University\u2019s Olin, each of which had arrived with its words in a different order from two sources. The postings already on the site were renamed to match, so a search finds all of a department\u2019s postings together rather than half of them.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
    "id": "schools-of-the-world",
    "date": "2026-08-18",
    "title": "Every operations school in the world, in the posting forms",

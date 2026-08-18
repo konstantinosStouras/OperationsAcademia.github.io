@@ -51,7 +51,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { marketFloor, isoStamp } from './jobs-model.mjs';
+import { marketFloor, isoStamp, healPlace } from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
   sheetCsvUrl, sheetHtmlUrl, sheetEditUrl, sheetId,
@@ -647,7 +647,51 @@ async function main() {
   else log(`done. ${rows.length} postings from the sheet${wrote ? ' (file updated)' : ''}.`);
 }
 
+/* ---------------------------------------------------------- --heal-names
+
+   The workbook's postings are canonicalised HERE, at ingest (canonPlace in
+   jobmarket-sheet.mjs), and the file is rewritten from the workbook every
+   morning — so an alias added to oa-schools.js today reaches them on the next
+   sync and hand-editing data/ would be undone by it. That is the rule, and it
+   has one gap: until that sync runs, data/jobmarket.json still names a place
+   the old way, build-jobs.mjs republishes it, and the selftest's "every
+   posting names its place the one way" guard goes red — which by design stops
+   the build committing ANYTHING.
+
+   So this re-applies the very same canon to the committed file, offline, with
+   no workbook and no credentials: the same answer the next sync will produce,
+   just sooner. Run it after adding an alias, exactly like the legacy
+   importer's mode of the same name.                                         */
+async function healNames() {
+  const rows = await readJson(ROWS_FILE, null);
+  if (!Array.isArray(rows)) {
+    console.error(`::error::${ROWS_FILE} is missing or unreadable — nothing to heal`);
+    return false;
+  }
+  const healed = rows.map(healPlace);
+  const changed = healed.filter((r, i) => r !== rows[i]);
+  if (!changed.length) {
+    log('data/jobmarket.json: every posting already names its place the one way');
+    return true;
+  }
+  for (const r of changed.slice(0, 10)) log(`  ${r.id}: ${r.institution} — ${r.department}`);
+  if (DRY) { log(`--dry-run: ${changed.length} posting(s) would be renamed`); return true; }
+  await writeFile(ROWS_FILE, serialiseSheetRows(healed));
+  /* the meta's `sheets` and `tabs` say WHICH WORKBOOK these postings came from,
+     and only a real sync knows that — rebuilding the meta from scratch here
+     emptied both, throwing away the provenance to record a rename. Carried. */
+  const meta = await readJson(META_FILE, {});
+  await writeFile(META_FILE, JSON.stringify(buildSheetMeta(healed, {
+    generated: isoStamp(new Date()),
+    sheets: meta.sheets || [],
+    tabs: meta.tabs || [],
+  }), null, 1) + '\n');
+  log(`data/jobmarket.json: renamed ${changed.length} posting(s)`);
+  return true;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
+  if (has('--heal-names')) process.exit(await healNames() ? 0 : 1);
   if (has('--selftest')) {
     /* The WHOLE suite, not runSelftest()'s three-suite subset — which does not
        include a single check of this pipeline, so the flag would print a
