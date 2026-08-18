@@ -8,22 +8,22 @@
      belongs in an index. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.operationsacademia.org/</loc></url>
-  <url><loc>https://www.operationsacademia.org/jobs</loc></url>
-  <url><loc>https://www.operationsacademia.org/universities</loc></url>
-  <url><loc>https://www.operationsacademia.org/recent-faculty</loc></url>
-  <url><loc>https://www.operationsacademia.org/previous-markets</loc></url>
-  <url><loc>https://www.operationsacademia.org/analytics</loc></url>
-  <url><loc>https://www.operationsacademia.org/survey</loc></url>
-  <url><loc>https://www.operationsacademia.org/survey-faqs</loc></url>
-  <url><loc>https://www.operationsacademia.org/informed_consent_statement</loc></url>
-  <url><loc>https://www.operationsacademia.org/privacy-policy</loc></url>
-  <url><loc>https://www.operationsacademia.org/terms-and-conditions</loc></url>
-  <url><loc>https://www.operationsacademia.org/post-a-job</loc></url>
-  <url><loc>https://www.operationsacademia.org/post-a-candidate</loc></url>
-  <url><loc>https://www.operationsacademia.org/post-a-placement</loc></url>
-  <url><loc>https://www.operationsacademia.org/alerts</loc></url>
-  <url><loc>https://www.operationsacademia.org/my-postings</loc></url>
-  <url><loc>https://www.operationsacademia.org/account</loc></url>
-  <url><loc>https://www.operationsacademia.org/feedback</loc></url>
-  <url><loc>https://www.operationsacademia.org/whats-new</loc></url>
+  <url><loc>https://www.operationsacademia.org/jobs.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/universities.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/recent-faculty.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/previous-markets.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/analytics.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/survey.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/survey-faqs.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/informed_consent_statement.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/privacy-policy.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/terms-and-conditions.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/post-a-job.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/post-a-candidate.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/post-a-placement.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/alerts.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/my-postings.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/account.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/feedback.html</loc></url>
+  <url><loc>https://www.operationsacademia.org/whats-new.html</loc></url>
 </urlset>

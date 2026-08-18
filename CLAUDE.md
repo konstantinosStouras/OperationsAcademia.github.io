@@ -16,7 +16,7 @@ scheduled for retirement). `_AUDIT.md` records the content audit.
 |---|---|
 | **root** | The live site: the single-page redesign, promoted 2026-08-17. |
 | **`/v2/`** | The 2026 vendor-free rebuild — the root between the 16th and the 17th. Archived, working, `noindex`. |
-| **`/v1/`** | The 2014-2026 Awesome-Tables site. Archived verbatim, `noindex`. Do not edit: it is a historical record. |
+| **`/v1/`** | The 2014-2026 Awesome-Tables site. Archived verbatim, `noindex`. Do not edit: it is a historical record — with the one exception argued under "A link nobody can preview" below, where its pages' own ADDRESSES were re-pointed at themselves. |
 | **`/v3/`** | Redirect stubs only. The redesign was previewed here before promotion. |
 
 Three rules hold this together, and **`node _scraper/link-check.mjs` enforces
@@ -863,6 +863,156 @@ transient looks like. Waiting for `body.v3` does not help either: that class is
 in the HTML. The wait asserts the thing itself — the body is painting the
 theme's own `--bg` — and nothing downstream may be measured before it does.
 
+## A link nobody can preview is a link nobody clicks
+
+Somebody pasted this site's address into WhatsApp beside `stouras.com/lit`. The
+other one drew a card — picture, title, a sentence. This one drew the hostname
+twice and nothing else. Both are static sites on GitHub Pages and both had a
+complete Open Graph block in the home page's `<head>`, which is why it had gone
+unnoticed for months: **a preview that fails reports nothing to anybody.**
+
+Two defects, and the second is the interesting one.
+
+**Twenty-four of the twenty-five live pages carried no preview metadata at
+all** — including `jobs.html`, the page people actually send each other. That
+was a REGRESSION: before the rebuild, sixteen sub-pages carried `og:*` tags.
+They were defective tags, but nothing noticed them leaving.
+
+**And sixty-eight served files that were NOT the home page declared the home
+page's address.** Facebook's crawler family — which serves WhatsApp, Messenger,
+Facebook, LinkedIn and Viber — keys a preview on **`og:url`, not on the address
+that was pasted.** Seventeen archived pages under `/v1/`, every one of them
+`noindex,nofollow`, gave `og:url` as `https://www.operationsacademia.org`; and
+fifty-one old copies under a directory called `back up` gave it as
+`http://operationsacademia.org`, the plain-http apex form of the same place.
+Sixty-nine served files, counting the real one, for one address.
+
+Both halves of that had a cause worth remembering:
+
+* **A directory is served unless its name starts with an underscore.** Pages
+  runs Jekyll, Jekyll publishes anything not prefixed `_`, and `back up` was
+  therefore a public, un-noindexed, fully-crawlable copy of the site — while
+  `link-check.mjs` skipped it under a comment calling it "a directory with
+  nothing served in it". It is `_backup/` now, which is the entire fix, and the
+  belief the comment expressed is true for the first time. **Do not add a
+  `.nojekyll` file to this repository.** It is the one change that would undo
+  this silently: it turns Jekyll off, and with it the underscore rule that is
+  the only thing keeping `_backup/`, `_scraper/` and `_functions/` off the web.
+  `share-check.mjs` would still catch the duplicate `og:url` on the next push,
+  which is the point of having it — but nothing would catch the rest.
+* **`archive-v2.mjs`'s rule 5 was never backported to `/v1/`.** That rule —
+  "no page still CLAIMS to be the root", re-pointing an archived page's
+  canonical and `og:url` at its own address — was written on promotion day for
+  the archive made *that* day. The archive made two days earlier never got it.
+  `archive-v1.mjs` is retired and cannot be re-run, so the rule is recorded in
+  its `archivePage()` for a future revival and the committed archive was
+  patched to what the rule produces. **That is not a breach of "do not edit
+  `/v1/`":** the verbatim promise is about a page's CONTENT. An address is not
+  content, and a copy under `/v1/` that still calls itself the root is not a
+  faithful record — it is a broken one.
+
+### What every live page carries now, and why each tag is there
+
+One block, directly under the `<title>` and **above every stylesheet,
+preconnect and script** — Slackbot reads the first 32 KB of a document and
+WhatsApp's parser gives up sooner, so a fat head above the tags is a documented
+way to lose a card. Every word of it is DEFINED in the `PAGES` table in
+`_scraper/share-check.mjs` and the check fails any page that disagrees with
+it — so the table is the single source of truth by ENFORCEMENT rather than
+by generation: nothing writes the pages from it, and a page edited by hand
+goes red until the table agrees.
+
+* `og:*` is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram, Slack,
+  Discord, Signal, Viber and iMessage. It is RDFa: **`property=`, never
+  `name=`** — backwards, it is invisible and nothing warns.
+* `twitter:card` is the one preview tag with **no Open Graph equivalent**, so
+  `og:*` alone can never yield X's large card. `twitter:*` is `name=`.
+* `og:image:width` / `height` decide whether the **first** person to share a
+  link sees the big card: Meta lays the card out from the declared numbers
+  before it has finished downloading the file. They must match the file's real
+  pixels, which is why `share-check.mjs` reads the JPEG's own SOFn header
+  rather than trusting the tag.
+* **Exactly one `og:image`.** Several are legal Open Graph and WhatsApp
+  handles them badly.
+* Under 300 KB, absolute `https`, no redirect, a file this repository actually
+  has. WhatsApp silently drops a heavier thumbnail and the card degrades to
+  plain text.
+* `<meta name="description">` as well as `og:description`, because WeChat and
+  Google read that one and not the Open Graph one.
+* `og:locale` is **`en_GB`**, not `en_IE`. Facebook honours only the locales on
+  its own published list and `en_IE` is not one of them — an unsupported value
+  is ignored rather than rejected, so it fails silently, which is this whole
+  section's theme. `stouras.com` uses the same value.
+* `<link rel="image_src">` + the `itemprop` trio hand the **square** thumbnail
+  to the clients that centre-crop to 1:1 (QQ in practice, WeChat's desktop
+  client and WeCom possibly). See `_scraper/make-share-images.mjs`: one asset
+  cannot serve both shapes, because a 1200×630 card centre-cropped to a square
+  keeps the middle of the logo and none of the tagline.
+
+**The six section stubs deliberately carry NOTHING** — so "every page previews" means every page a reader would send, not literally every file.
+
+**The six section stubs deliberately carry NOTHING.** `candidates.html`,
+`placements.html`, `faqs.html`, `contact.html`,
+`directors-and-contributors.html` and `resources-for-candidates.html` are
+`noindex` meta-refreshes whose canonical is a *fragment* of the home page. Any
+`og:url` they carried would resolve to the home page's Open Graph identity —
+the sixty-eight-claimants defect, recreated six times over. `card: false` in
+`PAGES`, each with its reason. That is the shape `stouras.com`'s redirect
+stubs have, and the reason its cards never broke.
+
+**Two things went with it.** `/v2/` had the same defect one layer down: sixteen
+of its pages gave `og:image` as `/images/OA_logo_1200x294.png` — a PATH, which
+Open Graph does not accept and a crawler therefore ignores — and one gave
+`OA_logo_1200x294`, with no directory and no extension, inherited from the 2014
+site. That is now rule 3b of `archive-v2.mjs`, which is not retired and was
+simply re-run. And **`sitemap.xml` listed every page extensionless** while its
+canonical and `og:url` named the `.html` form; Pages serves both, so nothing
+404'd — it was just two addresses for one page, which is the same split as the
+main defect wearing different clothes. The sitemap now names what the pages
+name, and `share-check.mjs` fails if the two part company again.
+
+**robots.txt now names the preview crawlers explicitly.** They were already
+allowed by the wildcard; the Sharing Debugger has a bug — 2014, and back in
+2024 — where it answers 403 and blames `robots.txt` on a site whose only rule
+is a permissive wildcard. Naming them removes that failure mode for nothing.
+
+### What the check cannot see, and what to do about it
+
+`share-check.mjs` proves the tags are right. It cannot prove a crawler can
+REACH the page, and three things that produce **exactly** this symptom live
+outside the repository:
+
+1. **the Pages edge answering `facebookexternalhit` with a 403** — a
+   documented, recurring, per-host GitHub Pages failure, which is precisely the
+   shape of "one Pages site works and another does not";
+2. **a Meta-side domain flag** — a job-board-shaped domain that mails postings
+   is exactly the profile their integrity systems over-trigger on;
+3. **a cached FAILED scrape** — Facebook keys the object on `og:url` and holds
+   it until something re-scrapes; a URL nobody reshares can hold a failure
+   indefinitely, and WhatsApp then pins it per device for days.
+
+**All three are answered by one paste** into
+<https://developers.facebook.com/tools/debug/>: read **Response Code** and
+**Time Scraped**, then press *Scrape Again* two or three times. Do that after
+any change here, and do it before concluding that a fix did not work — testing
+on a handset that has already cached the old card proves nothing.
+
+### WeChat, honestly
+
+Mobile WeChat **does not unfurl a pasted link at all**, whatever the `<head>`
+says. Tencent withdrew that in April 2017 for any page without a signed JS-SDK
+integration, which needs a WeChat-verified Official Account and an ICP-filed
+domain — neither available to a GitHub Pages site on a `.org` hosted outside
+China. What DOES read these tags: the **desktop** WeChat client, **WeCom**, and
+"share to WeChat" from a mobile browser. Those are what the square thumbnail
+and the `<title>` are for — WeChat's fallback leans on `<title>` and drops
+`og:description` even where it crawls, which is why every page's `<title>` was
+made to stand on its own. There is no WeChat sharing debugger and no cache
+purge; the only reliable way to force a re-read is to change the URL
+(`?v=2`). Worth knowing separately: for readers **inside** mainland China,
+GitHub Pages is unreliable and the Google Fonts these pages load are blocked,
+so a card is not the binding constraint there.
+
 ## Deploying Firebase rules — ALWAYS name the project
 
     firebase deploy --only firestore:rules --project operations-academia
@@ -899,6 +1049,12 @@ change committed here is not live until someone runs that command by hand.
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks
+    node _scraper/share-check.mjs   # every page previews properly when shared:
+                                    # the whole block present, og:url agreeing
+                                    # with the canonical, exactly one og:image
+                                    # whose declared size matches the file's
+                                    # real pixels, and NO TWO SERVED FILES
+                                    # claiming one og:url
     node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
     node _scraper/jobreview-mailer.mjs --selftest      # the review-queue e-mail
     node _scraper/link-check.mjs    # every internal link resolves, and no
@@ -910,7 +1066,7 @@ change committed here is not live until someone runs that command by hand.
                                     # measured contrast in BOTH themes
                                     # (PW_CHROMIUM=<path> pins the browser)
 
-All four run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs
+All five run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs
 build also runs the selftest AFTER writing `data/` and refuses to commit on
 a failure, so a red selftest silently stops publishing — fix it promptly.
 

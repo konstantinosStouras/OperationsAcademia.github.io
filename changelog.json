@@ -3,6 +3,12 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "link-previews-that-work",
+   "date": "2026-08-18",
+   "title": "Sharing a link to the site now shows a proper card",
+   "summary": "Paste a page of Operations Academia into WhatsApp, Messenger, LinkedIn, Slack, Telegram or Signal and you now get a picture, a title and a sentence describing that page \u2014 the job postings, the universities map, a form, whichever one you sent. Only the front page carried any of that before; the other twenty-three produced a bare link. Two things that can spoil a preview were also put right: sixty-eight old copies of the site, including the 2014-2026 archive, were declaring the front page\u2019s address as their own, and a folder of backups turned out to be public. Whether that is what had been spoiling the front page\u2019s own preview we cannot prove from here \u2014 that answer lives inside Facebook \u2014 but it was wrong either way."
+  },
+  {
    "id": "postings-that-never-reached-the-site",
    "date": "2026-08-18",
    "title": "Postings that said \u201cLive\u201d but were not on the site",

@@ -6,16 +6,21 @@
     <title>Operations Academia</title>
     <meta name="description" content="Matching supply with demand in the Operations job market — academic job postings, candidates, placements and the annual survey, in one place.">
     <link rel="canonical" href="https://www.operationsacademia.org/">
-    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
 
-    <!-- Link previews on Messenger, WhatsApp, Viber, Facebook, LinkedIn, etc.
-         Carried over from the design this one replaced: the card is the site's,
-         not a version's, so losing it at a cutover would quietly downgrade
-         every link anyone has ever shared. -->
-    <meta property="og:title" content="Operations Academia">
-    <meta property="og:site_name" content="Operations Academia">
-    <meta property="og:description" content="Matching supply with demand in the Operations job market — the academic job market hub for Operations Management, Operations Research and Analytics.">
+    <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
+         og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
+         Slack, Discord, Signal, Viber and iMessage; twitter:* by X, whose
+         twitter:card is the one preview tag with no Open Graph equivalent.
+         The image_src / itemprop trio offers the SQUARE thumbnail to the
+         Chinese clients, which centre-crop a card to 1:1 and would keep only
+         the middle of the wide one. There is EXACTLY ONE og:image on purpose:
+         several are legal Open Graph and WhatsApp handles them badly.
+         Kept honest by _scraper/share-check.mjs — read its header first. -->
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Operations Academia">
+    <meta property="og:locale" content="en_GB">
+    <meta property="og:title" content="Operations Academia">
+    <meta property="og:description" content="Matching supply with demand in the Operations job market — the academic job market hub for Operations Management, Operations Research and Analytics.">
     <meta property="og:url" content="https://www.operationsacademia.org/">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
@@ -25,8 +30,15 @@
     <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Operations Academia">
-    <meta name="twitter:description" content="Matching supply with demand in the Operations job market.">
+    <meta name="twitter:description" content="Matching supply with demand in the Operations job market — the academic job market hub for Operations Management, Operations Research and Analytics.">
     <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg">
+    <meta name="twitter:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
+    <link rel="image_src" href="https://www.operationsacademia.org/images/share-square.jpg">
+    <meta itemprop="name" content="Operations Academia">
+    <meta itemprop="description" content="Matching supply with demand in the Operations job market — academic job postings, candidates, placements and the annual survey, in one place.">
+    <meta itemprop="image" content="https://www.operationsacademia.org/images/share-square.jpg">
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+
 
     <!-- theme before first paint, so neither mode ever flashes the other -->
     <script>

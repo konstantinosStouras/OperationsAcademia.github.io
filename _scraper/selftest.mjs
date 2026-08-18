@@ -3614,8 +3614,9 @@ async function testRemovalSafety() {
   eq(new Set([a.row.id, b.row.id]).size, 2, 'so two postings never share an id');
 
   /* (5) THE ENTRY-POINT GUARD. A raw path and a file URL are not the same text
-     once the path holds a space, and this repository already carries a
-     directory called `back up`. Compared as strings, main() is never called
+     once the path holds a space — this repository carried a directory called
+     `back up` until it was renamed `_backup`, and a checkout path can hold a
+     space anywhere. Compared as strings, main() is never called
      and the process exits 0 having published nothing. */
   for (const f of ['build-jobs.mjs', 'migrate-to-firestore.mjs']) {
     const src = await readFile(path.join(HERE, f), 'utf8');

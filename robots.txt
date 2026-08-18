@@ -1,4 +1,52 @@
 User-agent: *
 Disallow:
 
+# The link-preview crawlers, named. They are already covered by the wildcard
+# above, and naming them anyway is not superstition: the Facebook Sharing
+# Debugger has a long-standing bug — first reported in 2014, back again in
+# 2024 — where it answers 403 and blames robots.txt on a site whose only rule
+# is a permissive wildcard. An explicit group removes that failure mode, and
+# it costs nothing. Meta alone dispatches three separate agents for one
+# WhatsApp share (WhatsApp, facebookexternalhit, Facebot), so allowing one of
+# them is not enough.
+#
+# meta-externalagent is deliberately NOT listed: it is Meta's AI-training
+# crawler, a different thing from the preview fetchers, and it is left to the
+# wildcard rather than singled out for encouragement.
+
+# ONE THING TO REMEMBER ABOUT THE GROUPS BELOW: a named User-agent group
+# REPLACES the wildcard for that agent, it does not add to it. Any future rule
+# added to `User-agent: *` therefore has to be repeated here, or these ten
+# crawlers will silently not be subject to it.
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /
+
+User-agent: Slack-ImgProxy
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
 Sitemap: https://www.operationsacademia.org/sitemap.xml
