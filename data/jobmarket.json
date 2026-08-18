@@ -85,9 +85,9 @@
   "year": 2027,
   "posted": "2026-08-12",
   "institution": "University of Houston",
-  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business",
   "school": "C. T. Bauer College of Business",
-  "unit": "Department of Decision and Information Sciences",
+  "unit": "",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -358,7 +358,7 @@
   "department": "Carlos Alvarez College of Business, Operations and Analytics Department",
   "school": "Carlos Alvarez College of Business",
   "unit": "Operations and Analytics Department",
-  "type": "University",
+  "type": "",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
