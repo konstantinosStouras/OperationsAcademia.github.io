@@ -3,3 +3,13 @@
 # install of playwright) — which git sees as a file, so the slashed form let
 # `git add -A` commit it.
 node_modules
+
+# Throwaway probe scripts a local run may leave behind (they must live in the
+# repo root so node_modules resolves, which is why they are ignored here).
+_probe.mjs
+_t[0-9]*.mjs
+
+# Isolated git worktrees a review run creates for its agents (checkouts of
+# this repository, inside this repository). Tooling scratch, removed when the
+# run ends — never content.
+.claude/worktrees/

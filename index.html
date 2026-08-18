@@ -875,9 +875,15 @@
         function renderNews() {
           var list = document.getElementById('v3-news');
           if (!list || !newsLog) return;
+          /* THE MAINTAINER SEES WHAT THEY HAVE HIDDEN, faded and carrying
+             Restore. Filtering it out for everybody made Remove a ONE-WAY
+             DOOR: the entry left the page, so there was nothing left to press
+             to bring it back, and the only way to undo a mis-click was the
+             Firestore console. (The archives' own overrides — assets/
+             oa-rowedit.js — work the same way, for the same reason.) */
           var updates = (newsLog.updates || []).filter(function (u) {
             var o = overrides[u.id];
-            return !(o && o.hidden);
+            return newsAdmin || !(o && o.hidden);
           }).slice(0, 5);
           list.innerHTML = '';
           if (!updates.length) {
@@ -887,6 +893,7 @@
           updates.forEach(function (u) {
             var o = overrides[u.id] || {};
             var li = document.createElement('li');
+            if (o.hidden) li.className = 'v3-news-hidden';
             var t = document.createElement('time');
             t.textContent = u.date || '';
             var s = document.createElement('strong');
@@ -901,13 +908,26 @@
               edit.type = 'button'; edit.textContent = '✎ Edit';
               edit.addEventListener('click', function () { editNews(u, o); });
               var kill = document.createElement('button');
-              kill.type = 'button'; kill.textContent = '✕ Remove';
-              kill.addEventListener('click', function () {
-                if (!confirm('Remove "' + (o.title || u.title) + '" from What’s new?\n' +
-                  'changelog.json keeps the entry; this only hides it on the site.')) return;
-                saveOverride(u.id, { hidden: true });
-              });
+              kill.type = 'button';
+              if (o.hidden) {
+                kill.textContent = '↩ Restore';
+                kill.addEventListener('click', function () {
+                  saveOverride(u.id, { hidden: false });
+                });
+              } else {
+                kill.textContent = '✕ Remove';
+                kill.addEventListener('click', function () {
+                  if (!confirm('Remove "' + (o.title || u.title) + '" from What’s new?\n' +
+                    'changelog.json keeps the entry; this only hides it on the site.')) return;
+                  saveOverride(u.id, { hidden: true });
+                });
+              }
               row.appendChild(edit); row.appendChild(kill);
+              if (o.hidden) {
+                var said = document.createElement('span');
+                said.textContent = 'Hidden — only you can see this.';
+                row.appendChild(said);
+              }
               li.appendChild(row);
             }
             list.appendChild(li);

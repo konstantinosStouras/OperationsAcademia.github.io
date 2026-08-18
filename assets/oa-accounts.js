@@ -1978,8 +1978,15 @@
         CDN, an ad blocker. Pages use this to say so instead of offering a
         control that cannot work. */
     failed: function () { return state.failed; },
+    /* `emailVerified` is not belt-and-braces here: isAdmin() in
+       _firestore.rules requires `token.email_verified == true`, so without it
+       this said yes where the database says no — a page drawing maintainer
+       controls that every write then bounces. Every other client gate
+       (oa-jobedit.js, oa-candidateedit.js, oa-placementedit.js,
+       oa-rowedit.js, index.html's news curation) already checked it; this one
+       was the odd one out. */
     isAdmin: function () {
-      return !!(state.user && window.OAFB &&
+      return !!(state.user && window.OAFB && state.user.emailVerified &&
         (state.user.email || '').toLowerCase() === String(OAFB.adminEmail).toLowerCase());
     },
 

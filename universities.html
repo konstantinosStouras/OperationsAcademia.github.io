@@ -175,10 +175,40 @@
     <script src="assets/leaflet/leaflet.js"></script>
     <script src="assets/leaflet/leaflet.markercluster.js"></script>
     <script src="assets/oa-uni-map.js"></script>
+    <script src="assets/oa-rowedit.js"></script>
     <script>
-      OAUniMap.mount({
+      /* data/universities.json is a FROZEN ARCHIVE — written once from the
+         maintainer's Google Sheet by _scraper/import-legacy-tables.mjs, and
+         its workflow has no schedule. So this map was read-only for everybody,
+         the maintainer included. `rowOverrides` corrects a school AT READ TIME
+         (assets/oa-rowedit.js): the committed file stays the source of truth,
+         an override reaches every visitor, and re-running the import cannot
+         undo a correction. Signed in as the maintainer, every pin's popup
+         gains Edit and Take down.
+
+         ADDING a school is still done upstream, in the sheet: two places that
+         can both create the same row would list it twice as soon as the import
+         next ran. */
+      /* An ADMIN-ONLY module must never be a hard dependency of a PUBLIC page.
+         assets/oa-rowedit.js failing to load — a content blocker with a broad
+         asset filter, a transient 5xx on that one file — used to throw before
+         OAList.mount ever ran, so every reader got an empty container with no
+         message at all. The stand-in does what having no overrides does: it
+         hands the rows back untouched and draws nothing. */
+      var RowEdit = window.OARowEdit || {
+        signature: function () { return ''; },
+        apply: function (dataset, rows) { return rows; },
+        own: function () {},
+        onCard: function () { return function () {}; },
+        onPopup: function () { return function () {}; },
+        attach: function () {},
+      };
+
+      var uniMap = OAUniMap.mount({
         mount: '#oa-uni',
         data: '/data/universities.json',
+        prepare: function (rows) { return RowEdit.apply('universities', rows); },
+        onPopup: function (node, row) { RowEdit.onPopup('universities')(node, row); },
         /* The candidates list is a SECTION of the one-page site, and three
            list engines share that page's query string, so its filter keys are
            namespaced. Left to the engine's default this would open
@@ -186,6 +216,21 @@
            redirect that DROPS the query, landing the reader on every
            candidate instead of the school's. */
         candidatesHref: function (q) { return './?c_affiliation=' + q + '#candidates'; },
+      });
+
+      /* Redraw only when something a visitor would see has actually changed.
+         `attach` calls back when the overrides land and again when the sign-in
+         state resolves, and on the ordinary visit both say "nothing" — but a
+         redraw re-fits the map's bounds, which visibly jumps the view of
+         somebody already reading it. */
+      var uniSig = RowEdit.signature('universities');
+      RowEdit.attach('universities', {
+        onChange: function () {
+          var now = RowEdit.signature('universities');
+          if (now === uniSig) return;
+          uniSig = now;
+          if (uniMap && uniMap.refresh) uniMap.refresh();
+        },
       });
     </script>
   </body>

@@ -71,7 +71,49 @@ the site. So those rows are deliberately never copied into Firestore —
 would win over the sheet at the next build and a deleted row could never leave.
 For the same reason they are excluded from the orphan carry in `build-jobs.mjs`
 (a missing `data/jobmarket.json` still removes nothing — only a file that
-exists and no longer lists a posting does).
+exists and no longer lists a posting does). Both of those worries are now
+answered rather than avoided — see the next section — but they are answered by
+the BUILD, on the sheet's own terms, not by a migration; `migratable()` still
+skips these rows.
+
+### …and the maintainer can edit both, through the same form
+
+A posting's Edit and Take down controls are drawn only where the page can name
+a `jobSubmissions` DOCUMENT for the row (`docIdFor` in `assets/oa-jobedit.js`),
+so the tracking sheet's postings — which had none by design — carried no
+controls at all: the maintainer could edit every posting on the site EXCEPT the
+ones the sheet publishes. **Every workbook row now gets a MIRROR**: an inert
+document (`status: 'sheet'`, a value no query in the pipeline reads) created and
+refreshed from the workbook by `syncSheetMirrors` in `build-jobs.mjs`, whose
+only job is to be an editing handle. `sheetMirrorDoc`/`mirrorDiffers`/
+`unclaimedSheetRows` in `jobs-model.mjs` are the pure half.
+
+**Saving an edit is the hand-over, and the status is the whole of it.**
+`post-a-job.html` sets `status: 'queued'` on every edit it saves — it always
+has — so a mirror simply becomes an ordinary live submission, and a status
+other than `sheet` means the maintainer has taken the posting over:
+`build-jobs.mjs` then publishes the document and DROPS the workbook's row
+(`unclaimedSheetRows`, applied before the merge — left in, the sheet row
+arrives last and wins, which would make an edit look saved and change nothing).
+The workbook stops maintaining that one posting, and the run says so.
+
+**What the workbook KEEPS is existence.** A row deleted there takes its posting
+off the site whether or not a document exists for it — the property that made
+copying these rows into the database unsafe in the first place, kept by pinning
+each mirror to its row with `sheetId`. So `migratable()` still refuses them:
+mirrors are the sheet's own, not a migration.
+
+**Taking a posting down is keyed on the id as well as the reference.** `ref` is
+issued by the FORM and by nothing else, so the 94 postings from the legacy
+import and the 16 from the workbook have none — today that is every row in
+`data/jobs.json`. Keyed on `ref` alone, the takedown removed nothing: the row
+was carried on as an ORPHAN, the button said "Taken down", and the posting
+stayed on the site for ever. `removalSpecs` (jobs-model.mjs) and the `{ id }` spec in
+`mergeRows`/`mergeCandidateRows`/`mergePlacementRows` are the fix, in all three
+pipelines. It also decides WHOSE WORD to take: an id is honoured only on a
+document the build itself wrote, and a reference only for the account that
+published the row — both are printed in `data/jobs.json`, so an unscoped
+removal is a signed-in stranger taking down somebody else's posting.
 
 **When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
 never by hand-editing `data/`.** That file is rewritten from the workbook every
@@ -84,6 +126,56 @@ site, so it is made visible deliberately: `stalenessOf`/`shouldWarn` e-mail the
 maintainer once (then weekly) when the sheet has gained nothing for three weeks,
 cannot be read, or reads as empty. Nothing already published is ever removed by
 one of those failures.
+
+## The frozen archives, and how the maintainer edits them
+
+`data/past-postings.json`, `data/recent-faculty.json` and
+`data/universities.json` are written ONCE by `_scraper/import-legacy-tables.mjs`
+from Google Sheets and committed — `.github/workflows/oa-legacy-import.yml` has
+no schedule. They have no Firestore backing and never will, so the three pages
+that render them (`previous-markets.html`, `recent-faculty.html`, and the
+Leaflet map on `universities.html`) were read-only for EVERYBODY, the
+maintainer included: correcting a school's name meant editing a spreadsheet and
+dispatching a workflow by hand.
+
+**`assets/oa-rowedit.js` corrects a row AT READ TIME**, from a public-read,
+admin-write Firestore collection `rowOverrides` (`<dataset>__<rowId>`). It is
+the `newsOverrides` pattern already shipped on `/whats-new`, generalised: the
+committed JSON stays the source of truth, an override MASKS or REWORDS one of
+its rows, the correction reaches every visitor, and **re-running the import
+cannot undo it** — the overlay is applied on top of whatever the import
+produces. One module serves all three: `apply()` for the rows a page renders,
+`onCard()` for an OAList card, `onPopup()` for a map pin (`assets/oa-uni-map.js`
+gained `prepare`/`onPopup`/`refresh` hooks for exactly this).
+
+**It is deliberately NOT an add path.** An override only ever changes a row that
+already exists. A school the archive does not carry is added upstream, in the
+sheet the import reads — two places that can both create the same row is the
+parallel bookkeeping `build-jobs.mjs` warns about, and it rots: the import would
+later publish the school itself and the site would list it twice.
+
+**Hiding is never a one-way door.** A row the maintainer takes down is hidden
+from every visitor but still shown TO THEM, faded and carrying Restore — filter
+it out for everybody and there is nothing left on the page to press to bring it
+back. `newsOverrides` had exactly that shape (and no `allow delete`, because
+`request.resource` is null on a delete so an `allow write` condition errors and
+evaluates false); both were fixed together.
+
+**Adding a field to the editor means adding it to the rules in the same
+change** — `selftest.mjs` pins every key `oa-rowedit.js` can write against the
+`hasOnly` list in `_firestore.rules`, so a field with no rule fails the build
+rather than the maintainer's save.
+
+`previous-markets.html` carries TWO kinds of row and therefore two editors: the
+postings folded in from `data/jobs.json` are real submissions and get the FULL
+form (`oa-jobedit.js`), and it is the ONLY page that reaches them — the jobs
+page and the one-pager both filter to the market under way. `oa-rowedit.js`
+stands down wherever `oa-jobedit.js` has drawn.
+
+**None of this is live until the rules are deployed.** No workflow runs
+`firebase deploy` — it needs an interactive login — so after any change to
+`_firestore.rules`, run `firebase deploy --only firestore:rules` from the
+repository root. See `_SETUP-FIREBASE.md` §4.
 
 ## Mobile standards for tables and lists — MUST consult
 

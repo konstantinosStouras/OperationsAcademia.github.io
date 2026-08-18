@@ -66,8 +66,15 @@ const FROZEN_BREAKAGE = new Set([
   'v1/survey-faqs.html|informed-consent-statement',
 ]);
 
-/* Directories with nothing served in them. "back up" is exactly what it says. */
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'back up', '_functions', '_scraper']);
+/* Directories with nothing served in them. "back up" is exactly what it says.
+
+   Every DOT-directory is skipped by the walk below rather than named here:
+   `.git` was, and the same reasoning covers whatever tooling puts beside it.
+   A review run checks its agents out into `.claude/worktrees/`, which is a
+   copy of this whole repository INSIDE it — descending into one made this
+   check report the archive's own pages as live-site failures. Nothing served
+   by GitHub Pages lives under a leading dot. */
+const SKIP_DIRS = new Set(['node_modules', 'back up', '_functions', '_scraper']);
 
 const problems = [];
 let links = 0;
@@ -76,7 +83,7 @@ let pages = 0;
 function walk(dir, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (e.isDirectory()) {
-      if (SKIP_DIRS.has(e.name)) continue;
+      if (e.name.charAt(0) === '.' || SKIP_DIRS.has(e.name)) continue;
       walk(path.join(dir, e.name), out);
     } else if (e.name.endsWith('.html')) {
       out.push(path.join(dir, e.name));

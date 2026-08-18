@@ -766,6 +766,15 @@
             doc.status = 'queued';
             doc.updatedAt = new Date().toISOString();
             delete doc.uid;
+            /* `applyByText` is a VERBATIM override of the Apply-by line, carried
+               by a handful of postings the migration could not recompose (see
+               jobs-model.mjs). It is not a field this form shows, so an edit
+               left it in place and the published line went on reading the OLD
+               deadline however the date and the note were changed — the one
+               way a save could look like it worked and change nothing. The
+               form has just composed that line from its own fields, so the
+               override is retired with the edit that supersedes it. */
+            doc.applyByText = '';
             return col.doc(EDIT_ID).update(doc).then(function () { return EDIT_REF; });
           }
 

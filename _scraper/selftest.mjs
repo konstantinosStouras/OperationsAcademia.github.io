@@ -22,10 +22,13 @@ import {
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
+  MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
+  removalSpecs, buildOwned, ownerTag, specMatches,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey } from './vocab.mjs';
 import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
+import { syncSheetMirrors } from './build-jobs.mjs';
 import {
   sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
   inferColumns, resolveColumns, levelsFromRank, typeFromNames, rowsFromTab, collectRows,
@@ -2511,6 +2514,623 @@ async function testJobMarketSheetChain() {
     'and is still read — the last postings of a season are filed weeks after the roll');
 }
 
+/* ------------------------------ the tracking sheet's editing handles (mirrors)
+
+   THE BUG THIS PINS. Edit and Take down are drawn only where the page can name
+   a document for a row (oa-jobedit.js docIdFor), and the postings the workbook
+   publishes deliberately had none — so a signed-in maintainer saw the controls
+   on the 94 postings that came through the form or the legacy import and on
+   none of the 16 the workbook had added. A mirror is the document that was
+   missing; these checks hold the three properties the fix rests on. */
+/* ---------------------------------- taking down a posting that has no reference
+
+   THE BUG THIS PINS, and it applied to every posting the site serves. `ref` is
+   the number the FORM issues; the 94 postings the legacy import migrated and
+   the 16 the tracking sheet publishes have none — 110 of 110 rows in
+   data/jobs.json carry `ref: ''`. Both the merge and the change report keyed a
+   takedown on `ref` alone, so the maintainer pressing Take down marked the
+   document hidden, was told "Taken down", and the posting stayed on the site
+   for ever, with nothing anywhere saying why. */
+/* ------------------ the mirror lifecycle, against a stand-in collection
+
+   syncSheetMirrors is the only part of the fix that WRITES, so it is driven
+   here end to end rather than pattern-matched: a collection object with the
+   three methods it uses, and every operation recorded in the order it was
+   issued. What is being checked is what cannot be seen from the page — that a
+   quiet run writes nothing at all, that a document the maintainer has taken
+   over is never rewritten (the workbook reverting an edit is the exact failure
+   that retired the old form-sheet sync), and that an id already in use is
+   probed rather than overwritten, because for this collection an overwrite
+   means somebody else's advertisement. */
+function fakeCollection(seed = {}) {
+  const docs = new Map(Object.entries(seed));
+  const ops = [];
+  return {
+    docs, ops,
+    doc(id) {
+      return {
+        async get() {
+          ops.push(['get', id]);
+          return { exists: docs.has(id), id, data: () => docs.get(id) };
+        },
+        async set(v) { ops.push(['set', id]); docs.set(id, v); },
+        async delete() { ops.push(['delete', id]); docs.delete(id); },
+      };
+    },
+  };
+}
+
+/* ------------------------- the frozen archives' overrides (assets/oa-rowedit.js)
+
+   data/past-postings.json, data/recent-faculty.json and data/universities.json
+   are written once by the legacy import and committed — their workflow has no
+   schedule — so those three pages had no write path at all and were read-only
+   for everybody, the maintainer included. `rowOverrides` corrects a row at
+   read time, the `newsOverrides` pattern generalised.
+
+   The browser half is checked in page-test.mjs. What is pinned HERE is the
+   agreement between the three files that have to say the same thing: a field
+   the editor can write must be a field the rules accept (or the save is a
+   permission-denied the maintainer cannot debug), a dataset it offers must be
+   one the rules name AND a file that exists, and every page must actually load
+   it — a page that does not is silently read-only again, which is the exact
+   bug being fixed. */
+async function testRowOverrides() {
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-rowedit.js'), 'utf8');
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+
+  const block = rules.slice(rules.indexOf('match /rowOverrides/'));
+  ok(block, 'the rules carry a rowOverrides block');
+  ok(/allow read: if true;/.test(block.slice(0, 400)),
+    'an override reaches EVERY visitor — a correction is not a maintainer-only view');
+  ok(/allow write: if isAdmin\(\)/.test(block.slice(0, 900)),
+    'and only the maintainer writes one');
+  /* WITHOUT A DELETE, HIDING IS A ONE-WAY DOOR: `request.resource` is null on
+     a delete, so an `allow write` condition that reads request.resource.data
+     errors and evaluates false. */
+  ok(/allow delete: if isAdmin\(\);/.test(block.slice(0, 3000)),
+    'and can delete one, so hiding a row is not a one-way door');
+
+  const allowed = new Set(
+    (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
+      .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
+  ok(allowed.size > 10, 'the rules enumerate the fields an override may carry');
+  /* AND NOTHING BEYOND WHAT THE EDITOR WRITES. `levels`/`characteristics` were
+     allowed and never read: dead keys, bounded only by item COUNT, so each
+     element could be an arbitrary string — a megabyte of nothing in a document
+     every visitor to the page downloads. */
+  for (const dead of ['levels', 'characteristics']) {
+    ok(!allowed.has(dead), `an override may not carry ${dead} — nothing reads it`);
+  }
+  for (const k of ['dataset', 'rowId', 'hidden', 't']) {
+    ok(allowed.has(k), `an override may carry ${k}`);
+  }
+
+  /* Every field the editor offers, per dataset, taken from the module itself
+     rather than restated here — a field added there without a rule would be
+     refused at save time with nothing on screen explaining why. */
+  const specs = js.slice(js.indexOf('var DATASETS'), js.indexOf('var COLLECTION'));
+  for (const key of (specs.match(/key: '([^']+)'/g) || []).map((m) => m.slice(6, -1))) {
+    ok(allowed.has(key), `oa-rowedit.js may write "${key}", and the rules allow it`);
+  }
+
+  /* AND EVERY FIELD save() PUTS ON THE DOCUMENT ITSELF. `dataset`, `rowId`,
+     `hidden` and `t` are written there rather than declared in DATASETS, so
+     deriving the list from DATASETS alone left that half unchecked: adding one
+     bookkeeping field — `updatedBy`, say — would make the rules' hasOnly()
+     refuse EVERY Edit, Take down and Restore on all three pages, with CI green
+     and the module telling the maintainer to redeploy rules that are already
+     deployed. Derived, not restated, so it cannot drift. */
+  const saveBody = js.slice(js.indexOf('function save('), js.indexOf('/* ------', js.indexOf('function save(')));
+  const written = new Set((saveBody.match(/\bdoc\.([A-Za-z_$][\w$]*)\s*=/g) || [])
+    .map((m) => m.replace(/^doc\./, '').replace(/\s*=$/, '')));
+  ok(written.size >= 3, 'the checks below read the fields save() writes from the source');
+  for (const key of written) {
+    ok(allowed.has(key), `oa-rowedit.js's save() writes "${key}", and the rules allow it`);
+  }
+  for (const k of ['dataset', 'rowId', 't']) {
+    ok(written.has(k), `save() still writes ${k} — the rules pin the document id to it`);
+  }
+
+  /* THE EDITOR RECORDS ONLY WHAT CHANGED. Writing every field would PIN every
+     field: a correction made today would mask tomorrow's upstream fix for ever,
+     with nothing on the page saying why. */
+  ok(js.includes("if (got !== asText(base[f.key])) patch[f.key] = got;"),
+    'an override carries only the fields that differ from the file');
+  ok(js.includes('{ replace: true }') && js.includes('ref.set(doc, { merge: true })'),
+    'and a correction REPLACES the override, so a field corrected back stops being one');
+  ok(js.includes('var base = row._oaBase || row;'),
+    'a row with no override yet is its own base, so a first correction pins nothing else');
+
+  /* THE EDITOR ONLY ACTS ON ROWS THE DATASET OWNS. previous-markets.html
+     renders the archive AND the postings folded in from data/jobs.json; an
+     override against one of those is read by nothing, so Take down would empty
+     the card and leave the posting on the site. */
+  ok(js.includes('function isOwn(dataset, row)'),
+    'the editor knows which rows belong to its dataset');
+  /* AT EVERY ENTRY POINT, not just declared. Removing the CALL is a one-token
+     change that reinstates the whole failure; the declaration surviving proves
+     nothing. (page-test.mjs drives the behaviour itself.) */
+  eq((js.match(/!isOwn\(dataset, row\)/g) || []).length, 2,
+    'and asks before drawing on a card and before drawing on a map pin');
+  ok(js.includes('isOwn(dataset, r) ? s.rows[r && r.id] : null'),
+    'and before overlaying a value onto a row that is not its own');
+  const pm = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(/RowEdit\.own\('past-postings',/.test(pm),
+    'and previous-markets.html names the archive\'s own rows, because it mixes two populations');
+
+  const datasets = ['past-postings', 'recent-faculty', 'universities'];
+  for (const d of datasets) {
+    ok(specs.includes(`'${d}'`) || specs.includes(`${d}:`),
+      `oa-rowedit.js offers the ${d} archive`);
+    ok(block.includes(`'${d}'`), `and the rules name ${d} as a dataset`);
+    ok(existsSync(path.join(HERE, '..', 'data', d + '.json')),
+      `and data/${d}.json is the file it corrects`);
+  }
+
+  /* THE PAGES. A page that does not load the module is silently read-only —
+     which is the bug, not a smaller version of it. */
+  for (const [page, dataset] of [
+    ['previous-markets.html', 'past-postings'],
+    ['recent-faculty.html', 'recent-faculty'],
+    ['universities.html', 'universities'],
+  ]) {
+    const html = await readFile(path.join(HERE, '..', page), 'utf8');
+    ok(html.includes('assets/oa-rowedit.js'), `${page} loads the archive editor`);
+    ok(html.includes(`RowEdit.attach('${dataset}'`), `${page} loads its overrides`);
+    ok(html.includes(`RowEdit.apply('${dataset}'`), `${page} applies them to what it renders`);
+    ok(html.includes(`RowEdit.onCard('${dataset}')`) ||
+       html.includes(`RowEdit.onPopup('${dataset}')`),
+      `${page} draws the maintainer's controls`);
+    /* AND IT IS A SOFT DEPENDENCY. This is a PUBLIC page and the module is
+       admin-only: if it fails to load, the page must render exactly what it
+       renders for a visitor with no overrides — not an empty container. */
+    ok(html.includes('window.OARowEdit || {'),
+      `${page} still renders its data if the admin module never loads`);
+  }
+
+  /* previous-markets.html carries TWO kinds of row — the archive's own, and the
+     postings folded in from data/jobs.json, which are real submissions. Those
+     get the FULL form, and this is the ONLY page that reaches them: the jobs
+     page and the one-pager both filter to the market under way. */
+  const past = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(past.includes('assets/oa-jobedit.js') && past.includes('OAJobEdit.attach'),
+    'previous-markets.html gives a real posting the full editor — the only page that can');
+
+  /* The map is not an OAList page, so its half rides on hooks of its own. */
+  const map = await readFile(path.join(HERE, '..', 'assets', 'oa-uni-map.js'), 'utf8');
+  ok(map.includes('cfg.prepare'), 'the map lets a page correct the dataset before it is drawn');
+  ok(map.includes('cfg.onPopup'), 'and add controls to a pin');
+  ok(map.includes('refresh:'), 'and redraw when a correction arrives late');
+
+  /* THE SAME ONE-WAY DOOR, on the feature this pattern came from. */
+  const news = rules.slice(rules.indexOf('match /newsOverrides/'));
+  ok(/allow delete: if isAdmin\(\);/.test(news.slice(0, 1600)),
+    'newsOverrides can be deleted too — hiding an update is no longer permanent');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  ok(home.includes('Restore'), 'and the home page offers the maintainer a way back');
+  /* THE HOME PAGE ALONE IS NOT A WAY BACK. It shows the newest five and cuts
+     AFTER filtering, so a hidden entry pushed out of the top five by a newer
+     one — which this repo's keep-in-sync rule makes routine — is off that page
+     for the maintainer too. Only the full list can guarantee the way back. */
+  const newsPage = await readFile(path.join(HERE, '..', 'whats-new.html'), 'utf8');
+  ok(newsPage.includes('newsAdmin || !(o && o.hidden)'),
+    'the full What\'s-new list shows the maintainer what they have hidden');
+  ok(newsPage.includes('data-restore'), 'and offers Restore there, where nothing can fall off');
+  const css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(/\.v3-news-hidden\s*\{/.test(css),
+    'and a hidden entry actually LOOKS withdrawn — the class was set with no rule behind it');
+}
+
+/* --------------------------------- what a takedown must NOT reach, and when
+
+   Five ways the removal machinery went wrong, each one reproduced before it
+   was fixed. They are grouped because they share a cause: a row's id is
+   DERIVED on every build, and a document's word about which row it is was
+   taken at face value. */
+async function testRemovalSafety() {
+  const row = (id, over = {}) => ({
+    id, year: 2026, posted: '2026-04-07', institution: 'Tulane University',
+    department: 'Ops', school: '', unit: 'Ops', type: 'University',
+    levels: ['Assistant Professor'], applyBy: 'Until filled.', applyByDate: '',
+    comments: '', country: 'United States', adUrl: '', adLabel: '',
+    postedAtUrl: '', postedAtLabel: '', furtherInfoUrl: '', characteristics: [],
+    featured: false, source: 'sheet-import', addedAt: '2026-04-07T00:00:00Z',
+    owner: '', ref: '', ...over,
+  });
+
+  /* (1) A MERGED ACCOUNT'S WITHDRAWAL. Merging moves a posting to a new uid
+     WITHOUT republishing it, so the served row still carries the tag of the
+     account merged away. Scoped to the new uid alone, the poster's next
+     withdrawal matched nothing at all. */
+  const oldUid = 'uid-before-the-merge-0001';
+  const newUid = 'uid-after-the-merge-00002';
+  const published = row('p-1', { ref: 'OA-JOB-1', owner: ownerTag(oldUid) });
+  let r = removalSpecs([{ id: 'doc-1',
+    data: () => ({ uid: newUid, mergedFrom: oldUid, ref: 'OA-JOB-1', status: 'withdrawn' }) }]);
+  ok(r.specs.some((x) => specMatches(x, published)),
+    'a poster who merged their accounts can still withdraw a posting made under the old one');
+  eq(mergeRows([published], [], r.specs).removed, 1, 'and the row actually goes');
+
+  /* …without widening it. The tag is PUBLISHED, so a document may not simply
+     name one — and `mergedFrom` is trusted ONLY because the rules pin it to
+     the account merge (`mergedFromUnchanged`). `accountKeys` maps an e-mail
+     to a raw uid for anyone signed in, so without that rule this scoping is
+     defeated by the very field it relies on. */
+  const rules0 = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(rules0.includes('function mergedFromUnchanged()'),
+    'the rules pin mergedFrom, which is the only reason the build may read it');
+  eq((rules0.match(/&& mergedFromUnchanged\(\)/g) || []).length, 3,
+    'on all three posting collections\' correct/withdraw path');
+  eq((rules0.match(/&& !\('mergedFrom' in request\.resource\.data\)/g) || []).length, 3,
+    'and a new posting may not carry it at all');
+  r = removalSpecs([{ id: 'doc-2',
+    data: () => ({ uid: 'a-stranger-uid-000000001', ref: 'OA-JOB-1',
+                   owner: ownerTag(oldUid), status: 'withdrawn' }) }]);
+  eq(mergeRows([published], [], r.specs).removed, 0,
+    'while quoting somebody else’s owner tag still removes nothing');
+
+  /* (2) THE SAME-DAY SIBLING. Two Tulane postings on one day are `X` and
+     `X-2`, and which is which is decided among the rows built THAT RUN — so
+     taking one down renames the survivor onto the id the hidden document
+     names. The survivor must not be deleted by it. */
+  const hidden = { id: '2026-tulane-university-20260407',
+                   data: () => ({ uid: null, status: 'hidden',
+                                  publishedId: '2026-tulane-university-20260407' }) };
+  const survivor = row('2026-tulane-university-20260407', { department: 'Finance' });
+  const specs = removalSpecs([hidden]).specs;
+  ok(specs.some((x) => specMatches(x, survivor)),
+    'the hidden document does name the id the survivor was renumbered onto');
+  // which is exactly why the build filters those specs out before the merge
+  const builtIds = new Set([survivor.id]);
+  const applicable = specs.filter((x) => !x.id || !builtIds.has(x.id));
+  eq(applicable.length, 0, 'so a takedown naming a row still being published is set aside');
+  eq(mergeRows([survivor], [survivor], applicable).rows.length, 1,
+    'and the sibling that is still advertised stays on the site');
+
+  /* (3) A WITHDRAWAL IS RETIRED ONLY WHEN IT WORKED. `removed` takes the
+     document out of the query that finds it, so stamping one whose row is
+     still published makes the failure permanent AND silent. */
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/const mine = removeSpecs\.filter\(\(x\) => x\.docId === d\.id\)/.test(build),
+    'the stamp asks whether THIS document’s row is still published');
+  ok(/stillThere\.push/.test(build) &&
+     /did not reach their posting and are left to/.test(build.replace(/\s+/g, ' ')),
+    'and leaves it to retry, saying so, rather than marking it done');
+
+  /* (4) A PINNED ID IS CLAIMED BEFORE THE DERIVED ONES. Overwriting an id
+     AFTER assignIds could drop it onto one already handed out this run, and
+     mergeRows keys by id — the second row silently replaced the first. */
+  const a = { key: 'zzz-random-doc-id', row: row('', { institution: 'KU Leuven', posted: '2026-07-02' }) };
+  const b = { key: '2027-ku-leuven-20260702',
+              fixedId: '2027-ku-leuven-20260702',
+              row: row('', { institution: 'KU Leuven', posted: '2026-07-02', department: 'Other' }) };
+  assignIds([a, b]);
+  eq(b.row.id, '2027-ku-leuven-20260702', 'the workbook’s own id is kept');
+  ok(a.row.id !== b.row.id, 'and the derived one is made to avoid it');
+  eq(new Set([a.row.id, b.row.id]).size, 2, 'so two postings never share an id');
+
+  /* (5) THE ENTRY-POINT GUARD. A raw path and a file URL are not the same text
+     once the path holds a space, and this repository already carries a
+     directory called `back up`. Compared as strings, main() is never called
+     and the process exits 0 having published nothing. */
+  for (const f of ['build-jobs.mjs', 'migrate-to-firestore.mjs']) {
+    const src = await readFile(path.join(HERE, f), 'utf8');
+    ok(src.includes('pathToFileURL(process.argv[1]).href'),
+      `${f} compares file URLs, so a path with a space still runs the build`);
+    ok(!/`file:\/\/\$\{process\.argv\[1\]\}`/.test(src),
+      `${f} no longer builds that URL by hand`);
+  }
+}
+
+async function testMirrorLifecycle() {
+  /* The sync REPORTS what it wrote, and one of its reports is a GitHub Actions
+     `::warning::` annotation — which on a passing selftest would put a warning
+     on the run for a case the test deliberately provokes. So the whole
+     exercise runs with the log held. */
+  const realLog = console.log;
+  console.log = () => {};
+  try {
+    await runMirrorLifecycle();
+  } finally {
+    console.log = realLog;
+  }
+}
+
+async function runMirrorLifecycle() {
+  const now = new Date('2026-08-18T00:00:00Z');
+  const mk = (id, over = {}) => ({
+    id, year: 2027, posted: '2026-08-15', institution: 'Utah Valley University',
+    department: 'Operations & SCM', school: '', unit: 'Operations & SCM',
+    type: 'University', levels: ['Non-tenure track (teaching) position'],
+    applyBy: 'Until filled.', applyByDate: '', comments: '', country: 'United States',
+    adUrl: '', adLabel: '', postedAtUrl: '', postedAtLabel: '', furtherInfoUrl: '',
+    characteristics: [], featured: false, source: SHEET_SOURCE,
+    addedAt: '2026-08-15T00:00:00Z', owner: '', ...over,
+  });
+
+  // A FIRST RUN gives every workbook row a handle.
+  const rows = [mk('row-a'), mk('row-b', { comments: 'b' })];
+  let col = fakeCollection();
+  let r = await syncSheetMirrors(col, rows, [], new Set(), { now });
+  eq(r.created, 2, 'a first run gives every workbook posting an editing handle');
+  eq(col.docs.get('row-a').status, MIRROR_STATUS, 'and the handle is inert');
+  eq(col.docs.get('row-a').sheetId, 'row-a', 'pinned to the row it stands for');
+  eq(col.docs.get('row-a').uid, null, 'and owned by nobody, so no poster can read it');
+
+  // A QUIET RUN writes nothing: the mirrors are already what the workbook says.
+  const mirrorDocs = [...col.docs].map(([id, v]) => ({ id, data: () => v }));
+  col = fakeCollection(Object.fromEntries(col.docs));
+  r = await syncSheetMirrors(col, rows, mirrorDocs, new Set(), { now: new Date() });
+  eq(r, { created: 0, refreshed: 0, deleted: 0, skipped: 0 },
+    'a run that changes nothing writes nothing — not even a fresh timestamp');
+  eq(col.ops.length, 0, 'and issues no operation at all');
+
+  // THE WORKBOOK STILL MAINTAINS AN UNTOUCHED POSTING.
+  const edited = [mk('row-a', { comments: 'now with a note' }), rows[1]];
+  r = await syncSheetMirrors(col, edited, mirrorDocs, new Set(), { now });
+  eq(r.refreshed, 1, 'a posting changed in the workbook is refreshed');
+  eq(col.docs.get('row-a').comments, 'now with a note', 'with what the workbook now says');
+
+  /* THE HAND-OVER. Once the maintainer has taken a posting over, the workbook
+     must never write to it again — this is the whole point, and getting it
+     wrong reverts their edit on the next build with nothing to show for it. */
+  col = fakeCollection(Object.fromEntries(col.docs));
+  r = await syncSheetMirrors(col, edited, mirrorDocs, new Set(['row-a']), { now });
+  eq(col.ops.filter(([, id]) => id === 'row-a').length, 0,
+    'a posting the maintainer took over is never written by the sheet again');
+  eq(r.refreshed, 0, 'so the workbook reverts nothing');
+
+  // A ROW THAT LEFT THE WORKBOOK takes its handle with it.
+  col = fakeCollection(Object.fromEntries(col.docs));
+  r = await syncSheetMirrors(col, [rows[1]], mirrorDocs, new Set(), { now });
+  eq(r.deleted, 1, 'a handle is removed when its row leaves the workbook');
+  ok(!col.docs.has('row-a'), 'so no Edit button is drawn on a posting that has gone');
+
+  /* AN ID ALREADY IN USE IS PROBED, NEVER OVERWRITTEN. The handle's id is the
+     row's own id, which is also what a migrated posting's document is keyed on,
+     so a blind write here would replace a real advertisement. */
+  col = fakeCollection({ 'row-c': { status: 'published', institution: 'Somebody else' } });
+  r = await syncSheetMirrors(col, [mk('row-c')], [], new Set(), { now });
+  eq(r.created, 0, 'an id already in use is not claimed');
+  eq(r.skipped, 1, 'it is reported instead');
+  eq(col.docs.get('row-c').institution, 'Somebody else',
+    'and the document that was there is untouched');
+
+  // An id Firestore could not carry is skipped rather than mangled.
+  col = fakeCollection();
+  r = await syncSheetMirrors(col, [mk('bad/id')], [], new Set(), { now });
+  eq(r.created, 0, 'an id that is not usable as a document id is skipped');
+  eq(r.skipped, 1, 'and reported');
+}
+
+async function testRefLessTakedown() {
+  const row = (id, over = {}) => ({
+    id, year: 2026, posted: '2025-09-01', institution: 'Somewhere', department: 'Ops',
+    school: '', unit: 'Ops', type: 'University', levels: ['Assistant Professor'],
+    applyBy: 'Until filled.', applyByDate: '', comments: '', country: 'United States',
+    adUrl: '', adLabel: '', postedAtUrl: '', postedAtLabel: '', furtherInfoUrl: '',
+    characteristics: [], featured: false, source: 'sheet-import',
+    addedAt: '2025-09-01T00:00:00Z', owner: '', ref: '', ...over,
+  });
+
+  const served = [row('a-1'), row('a-2')];
+
+  // what the build did BEFORE: nothing at all
+  eq(mergeRows(served, [], ['']).removed, 0,
+    'an empty reference removes nothing — which is what every served row had');
+
+  // and what it does now
+  const out = mergeRows(served, [], [{ id: 'a-1' }]);
+  eq(out.removed, 1, 'a posting with no reference is taken down by its id');
+  eq(out.rows.map((r) => r.id), ['a-2'], 'and only that one leaves');
+
+  // a reference still works exactly as it did, so nothing regresses
+  const withRef = [row('b-1', { ref: 'OA-JOB-1' }), row('b-2')];
+  eq(mergeRows(withRef, [], ['OA-JOB-1']).rows.map((r) => r.id), ['b-2'],
+    'a posting that HAS a reference is still taken down by it');
+  // and an id that names nothing is simply not found
+  eq(mergeRows(served, [], [{ id: 'not-a-row' }]).removed, 0,
+    'an id that matches no row removes nothing');
+
+  /* THE REPORT HAS TO AGREE WITH THE FILE. The admin is e-mailed every
+     takedown; keyed on `ref` alone it reported none of them, so a posting
+     could come off the site with no record that it had. */
+  const ch = collectChanges(served, [], [], ['a-1']);
+  eq(ch.takedowns.length, 1, 'and the change e-mail reports it');
+  eq(ch.takedowns[0].before.id, 'a-1', 'naming the posting that went');
+  eq(collectChanges(served, [], [], []).takedowns.length, 0,
+    'while a run that took nothing down still reports nothing');
+
+  /* EVERY read of `sheetId` is guarded, not most of them. The one left
+     unguarded — the withdrawn documents handed to sheetHandover — was enough
+     on its own to delete a workbook posting: the row is treated as handed
+     over and dropped, while the document publishes nothing, and `stranded`
+     cannot report it because the row was never claimed. */
+  const build0 = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  eq((build0.match(/buildOwned\(d\.data\(\)\)/g) || []).length, 3,
+    'every place the build reads a document\'s sheetId asks whose word it is');
+  ok(!/pulledSheetIds: pulled\.map\(\(d\) => d\.data\(\)\.sheetId\)/.test(build0),
+    'including the withdrawn documents the hand-over reads');
+
+  /* The build must collect those ids from the documents it pulled — by
+     publishedId, by sheetId and by the document's own id, which for a migrated
+     posting IS the row id (migrate-to-firestore.mjs). */
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/removalSpecs\(pulled\)/.test(build),
+    'build-jobs.mjs keys takedowns on the id as well as the reference');
+  ok(/!applicable\.some\(\(x\) => specMatches\(x, r\)\)\)/.test(build),
+    'so a taken-down posting is no longer carried on as an orphan');
+  ok(/const builtIds = new Set\(freshVisible/.test(build),
+    'a takedown never takes a row a live document just built — a renumbered same-day sibling');
+  /* AND THE MERGE IS GIVEN THE FILTERED SET. Declaring `applicable` and then
+     handing `removeSpecs` to mergeRows — the obvious-looking variable, still in
+     scope three lines either side — reinstates the silent deletion with every
+     other check in this file green. The argument is the whole guard. */
+  ok(/mergeRows\(orphans, freshVisible, applicable\)/.test(build),
+    'and the merge is handed the filtered set, which is where that guard actually bites');
+  ok(!/mergeRows\(orphans, freshVisible, removeSpecs\)/.test(build),
+    'never the unfiltered one');
+  ok(/stillThere\.push/.test(build),
+    'and a withdrawal that did not reach its posting is left to retry, never marked done');
+
+  /* WHOSE WORD THE BUILD TAKES. Every one of these ids is published in
+     data/jobs.json and data/jobmarket.json, so an unscoped removal is a
+     signed-in stranger deleting somebody else's advertisement. */
+  const mine = { data: () => ({ uid: 'attacker-uid-1234567890', status: 'withdrawn',
+                                publishedId: 'victims-row', sheetId: 'a-workbook-row' }),
+                 id: 'random-doc-id' };
+  let r = removalSpecs([mine]);
+  eq([...r.ids], [],
+    'a row id named by a submission a BROWSER made is never honoured');
+  eq(r.specs, [], 'so it asks for no removal at all');
+
+  const theirs = { data: () => ({ uid: 'attacker-uid-1234567890', status: 'withdrawn',
+                                  ref: 'OA-JOB-SOMEBODY-ELSE' }), id: 'random-doc-id' };
+  r = removalSpecs([theirs]);
+  eq(r.specs.length, 1, 'a reference is still honoured');
+  eq(r.specs[0].ref, 'OA-JOB-SOMEBODY-ELSE', 'as itself');
+  ok(r.specs[0].owner, 'but SCOPED TO ITS OWNER — mergeRows keys ref:<owner>:<ref>');
+  eq(r.specs[0].owner, ownerTag('attacker-uid-1234567890'),
+    'by the same owner tag the published row carries');
+  /* and therefore it cannot reach a row somebody else published */
+  const victimRow = { id: 'v', ref: 'OA-JOB-SOMEBODY-ELSE', owner: ownerTag('the-real-owner-uid') };
+  eq(mergeRows([victimRow], [], r.specs).removed, 0,
+    'so withdrawing under a stolen reference removes nothing');
+  eq(mergeRows([victimRow], [], removalSpecs([{ id: 'x',
+    data: () => ({ uid: 'the-real-owner-uid', ref: 'OA-JOB-SOMEBODY-ELSE' }) }]).specs).removed, 1,
+    'while the account that published it still takes its own posting down');
+
+  /* A document the BUILD wrote — the migration's, and the mirrors — carries no
+     uid, which the rules make impossible for a browser to produce. Those are
+     the only ids the build takes at their word. */
+  r = removalSpecs([{ id: '2026-somewhere-20250901',
+                      data: () => ({ uid: null, status: 'hidden', sheetId: 'a-workbook-row' }) }]);
+  ok(r.ids.has('2026-somewhere-20250901'), 'the migration\'s own document id is honoured');
+  ok(r.ids.has('a-workbook-row'), 'and the mirror\'s sheetId');
+  ok(!buildOwned({ uid: 'x' }), 'a submission with a uid is a browser\'s, never the build\'s');
+  ok(buildOwned({ uid: null }), 'and one without is the build\'s');
+  /* The rules are what make that true, so they are pinned here too. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(rules.includes('request.resource.data.uid == request.auth.uid'),
+    'a browser cannot create a submission without a uid');
+  ok(rules.includes('request.resource.data.uid == resource.data.uid'),
+    'nor clear the uid on one it owns');
+}
+
+async function testSheetMirrors() {
+  const row = {
+    id: '2027-utah-valley-university-20260815',
+    year: 2027, posted: '2026-08-15',
+    institution: 'Utah Valley University', department: 'Operations & SCM',
+    school: '', unit: 'Operations & SCM', type: 'University',
+    levels: ['Non-tenure track (teaching) position'],
+    applyBy: 'Until filled.', applyByDate: '', comments: '', country: 'United States',
+    adUrl: 'https://example.org/ad', adLabel: 'link to Job ad',
+    postedAtUrl: '', postedAtLabel: 'link', furtherInfoUrl: '',
+    characteristics: [], featured: false, source: SHEET_SOURCE,
+    addedAt: '2026-08-15T00:00:00Z', owner: '',
+  };
+
+  const now = new Date('2026-08-18T00:00:00Z');
+  const doc = sheetMirrorDoc(row, { now });
+
+  eq(doc.status, MIRROR_STATUS, 'a mirror is inert — its status is one no query in the build reads');
+  eq(doc.sheetId, row.id, 'and it names the workbook row it stands for');
+  eq(doc.uid, null, 'a mirror belongs to nobody, so no poster can read or write it');
+  eq(doc.institution, row.institution, 'it carries the posting itself, so the form opens filled in');
+  ok(!['queued', 'published', 'withdrawn', 'hidden'].includes(doc.status),
+    'and it can never be picked up by the publish, the takedown or the stamping queries');
+
+  /* THE HAND-OVER IS THE STATUS AND NOTHING ELSE. post-a-job.html sets
+     'queued' on every edit it saves — it always has — so the mirror becomes an
+     ordinary live submission with no new field to remember and nothing that
+     can disagree with itself. */
+  const back = rowFromSubmission({ ...doc, status: 'queued' }, { now });
+  ok(back, 'once the maintainer saves, the same document publishes as a posting');
+  eq(back.institution, row.institution, 'and reproduces the row it mirrored');
+  eq(back.applyBy, row.applyBy, 'including the deadline line, rebuilt from its parts');
+
+  /* Every committed workbook posting must round-trip, or taking one over would
+     quietly rewrite it. The ONE that does not is the honest case: a row whose
+     `type` the workbook left blank cannot become a submission at all, so it
+     stays the workbook's until the maintainer fills that in — which the form
+     requires them to do. */
+  const committed = JSON.parse(await readFile(JOBS, 'utf8')).filter((r) => r.source === SHEET_SOURCE);
+  for (const r of committed) {
+    const m = sheetMirrorDoc(r, { now });
+    const out = rowFromSubmission({ ...m, status: 'queued' }, { now });
+    if (!r.type) {
+      ok(!out, `sheet row ${r.id}: a posting the workbook left untyped cannot publish from a document`);
+      continue;
+    }
+    ok(out, `sheet row ${r.id}: its mirror publishes`);
+    if (!out) continue;
+    for (const k of ['institution', 'department', 'country', 'type', 'applyBy', 'applyByDate']) {
+      eq(out[k], r[k], `sheet row ${r.id}: ${k} survives the hand-over`);
+    }
+    eq(out.levels.join('|'), (r.levels || []).join('|'),
+      `sheet row ${r.id}: the entry levels survive the hand-over`);
+  }
+
+  /* REFRESH ONLY ON A REAL CHANGE. Comparing whole documents would rewrite
+     every mirror on every run — `mirroredAt` moves each time — which is a
+     Firestore write per posting per build and a log that says nothing. */
+  ok(!mirrorDiffers(doc, sheetMirrorDoc(row, { now: new Date('2027-01-01T00:00:00Z') })),
+    'a mirror is not rewritten just because the clock moved');
+  ok(mirrorDiffers(doc, sheetMirrorDoc({ ...row, comments: 'now with a note' }, { now })),
+    'but it is rewritten the moment the workbook changes the posting');
+
+  /* THE MERGE. The workbook's copy of a taken-over row has to be dropped
+     BEFORE the merge: it used to arrive last, and last wins. */
+  const rows = [row, { ...row, id: 'other' }];
+  eq(unclaimedSheetRows(rows, new Set([row.id])).map((r) => r.id), ['other'],
+    'the workbook does not re-publish a posting the maintainer has taken over');
+  eq(unclaimedSheetRows(rows, new Set()).length, 2,
+    'and publishes every row nobody has touched, exactly as before');
+  eq(unclaimedSheetRows(rows, []).length, 2, 'an empty claim set changes nothing');
+
+  /* THE WHOLE DECISION, as build-jobs.mjs makes it — the same function, not a
+     restatement of it. Four states a workbook row can be in, and the fourth is
+     the one that can lose a posting. */
+  const A = row.id, B = 'other';
+
+  // 1. nobody has touched either: the workbook publishes both, as it always did
+  let h = sheetHandover({ sheetRows: rows });
+  eq(h.rows.map((r) => r.id), [A, B], 'an untouched workbook publishes every row itself');
+  eq(h.stranded, [], 'and strands nothing');
+
+  // 2. the maintainer edited A, and the document built its row
+  h = sheetHandover({ sheetRows: rows, builtSheetIds: [A], claimedSheetIds: [A] });
+  eq(h.rows.map((r) => r.id), [B], 'an edited posting is published from its document');
+  eq(h.stranded, [], 'nothing is stranded when the hand-over worked');
+
+  // 3. the maintainer took A down: no row from either side, deliberately
+  h = sheetHandover({ sheetRows: rows, pulledSheetIds: [A], claimedSheetIds: [A] });
+  eq(h.rows.map((r) => r.id), [B], 'a posting taken down is published by neither');
+  eq(h.stranded, [], 'and a takedown is not a stranding');
+
+  /* 4. THE ONE THAT MATTERS. A has a document — the maintainer took it over —
+     but it built no row: an edit cleared a required field, or the document
+     could not be read. Dropping A here (which "every row that HAS a document"
+     would do) means the posting vanishes from the site with nothing to
+     replace it. */
+  h = sheetHandover({ sheetRows: rows, claimedSheetIds: [A] });
+  eq(h.rows.map((r) => r.id), [A, B],
+    'a hand-over that could not be built falls back to the workbook — no posting is lost');
+  eq(h.stranded, [A], 'and the run says which posting that happened to');
+
+  // and a row the workbook has DROPPED is not stranded — it is meant to be gone
+  h = sheetHandover({ sheetRows: [rows[1]], claimedSheetIds: [A] });
+  eq(h.stranded, [], 'a posting the workbook no longer carries is not reported as stranded');
+  eq(h.rows.map((r) => r.id), [B], 'and does not come back');
+
+  /* And the rules have to allow the write the button makes. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(/allow write: if isAdmin\(\);/.test(rules),
+    'the maintainer may write any posting document — the buttons are only a UI hint');
+}
+
 async function testJobMarketSheetWiring() {
   /* The pipeline is three files that have to agree: the sync writes the
      dataset, the build merges it, and the workflow runs the sync. Each link is
@@ -2519,8 +3139,21 @@ async function testJobMarketSheetWiring() {
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
   ok(/data', 'jobmarket\.json'\)/.test(build) || build.includes("'jobmarket.json'"),
     'build-jobs.mjs reads the sheet dataset');
-  ok(build.includes('.concat(sheetRows)'),
+  ok(build.includes('.concat(handover.rows)'),
     'and merges its rows beside the postings from the database');
+  ok(build.includes('sheetHandover({'),
+    'the hand-over decision is one function, exercised directly by the checks above');
+  /* THE HAND-OVER. A workbook row the maintainer has edited or taken down
+     publishes from its document instead, so the workbook's own copy must be
+     dropped BEFORE the merge — left in, it arrives last and wins, which makes
+     an edit look saved and change nothing. */
+  ok(build.includes('claimedSheetIds'),
+    'a posting the maintainer took over is published from its document, not the workbook');
+  ok(/if \(sid && sheetPresent && !sheetIds\.has\(sid\)\)/.test(build),
+    'and still leaves the site when its row leaves the workbook — the sheet keeps saying ' +
+    'which postings exist');
+  ok(build.includes('syncSheetMirrors'),
+    'every workbook row gets an editing handle, so the maintainer can edit those postings too');
   ok(/!\(sheetPresent && fromSheet\(r\)\)/.test(build),
     'a posting deleted from the sheet leaves the site — it is not carried as an orphan');
   ok(build.includes('sheetPresent = existsSync(SHEET)'),
@@ -2602,6 +3235,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testJobMarketSheetAddedAt();
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
+  await testRowOverrides();
+  await testRemovalSafety();
+  await testMirrorLifecycle();
+  await testRefLessTakedown();
+  await testSheetMirrors();
   await testJobMarketSheetWiring();
   process.exit(finish() ? 0 : 1);
 }

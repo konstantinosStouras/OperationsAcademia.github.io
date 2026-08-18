@@ -212,14 +212,21 @@
          full here. Overrides are best-effort: if Firestore is unreachable or
          its rules are not deployed, the raw log renders, which is what this
          page did before there was any curation at all. */
-      var newsLog = null, overrides = {};
+      /* AND THIS IS WHERE A HIDDEN ENTRY IS PUT BACK. The front page shows the
+         newest five, and it applies that cut AFTER filtering — so the moment a
+         hidden entry is pushed out of the top five by a newer one (which this
+         repo's own keep-in-sync rule makes routine), it is off that page for
+         the maintainer too. Only the full list can guarantee a way back, so
+         the controls live here as well: the maintainer sees what they have
+         hidden, faded, with Restore. */
+      var newsLog = null, overrides = {}, newsAdmin = false;
 
       function render() {
         var host = document.getElementById('oa-whatsnew');
         if (!host || !newsLog) return;
         var updates = (newsLog.updates || []).filter(function (u) {
           var o = overrides[u.id];
-          return !(o && o.hidden);
+          return newsAdmin || !(o && o.hidden);
         });
         if (!updates.length) {
           host.innerHTML = '<li><p class="v3-mut">Nothing logged yet.</p></li>';
@@ -229,14 +236,41 @@
           var o = overrides[u.id] || {};
           var href = safeHref(u.url);
           var title = esc(o.title || u.title || '');
-          return '<li>' +
+          return '<li' + (o.hidden ? ' class="v3-news-hidden"' : '') + '>' +
             '<time>' + esc(fmtDate(u.date)) + '</time>' +
             '<strong>' +
               (href ? '<a href="' + esc(href) + '">' + title + '</a>' : title) +
             '</strong>' +
             '<p>' + esc(o.summary || u.summary || '') + '</p>' +
+            (newsAdmin && o.hidden
+              ? '<p class="v3-news-admin"><button type="button" data-restore="' +
+                esc(u.id) + '">\u21a9 Restore</button>' +
+                '<span>Hidden \u2014 only you can see this.</span></p>'
+              : '') +
           '</li>';
         }).join('');
+
+        Array.prototype.forEach.call(host.querySelectorAll('[data-restore]'),
+          function (b) {
+            b.addEventListener('click', function () { restore(b.getAttribute('data-restore')); });
+          });
+      }
+
+      /* Restoring writes `hidden: false` rather than deleting the document,
+         so an edited title or summary on the same entry survives being put
+         back. (`newsOverrides` allows a delete too, which is what makes this
+         reversible at all — see _firestore.rules.) */
+      function restore(id) {
+        OAFB.ready().then(function (fb) {
+          return fb.firestore().collection('newsOverrides').doc(id)
+            .set({ hidden: false, t: Date.now() }, { merge: true });
+        }).then(function () {
+          overrides[id] = overrides[id] || {};
+          overrides[id].hidden = false;
+          render();
+        })['catch'](function () {
+          window.alert('Could not restore it \u2014 are the updated Firestore rules deployed?');
+        });
       }
 
       fetch('/changelog.json', { credentials: 'same-origin' })
@@ -255,6 +289,16 @@
           snap.forEach(function (d) { overrides[d.id] = d.data(); });
           render();
         })['catch'](function () { /* rules not deployed — no curation yet */ });
+
+        OAFB.ready().then(function (fb) {
+          fb.auth().onAuthStateChanged(function (u) {
+            var was = newsAdmin;
+            newsAdmin = !!(u && u.email &&
+              u.email.toLowerCase() === String(OAFB.adminEmail || '').toLowerCase() &&
+              u.emailVerified);
+            if (newsAdmin !== was) render();
+          });
+        })['catch'](function () { /* SDK unreachable */ });
       }
     })();
     </script>

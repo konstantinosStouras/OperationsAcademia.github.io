@@ -1874,6 +1874,90 @@ for (const [name, expect] of [
   await p.close();
 }
 
+/* ------------------------------- Edit / Take down on the FROZEN ARCHIVES
+
+   data/past-postings.json, data/recent-faculty.json and
+   data/universities.json are written once by the legacy import and committed,
+   so those three pages had no write path at all — the maintainer saw exactly
+   the read-only page an anonymous visitor did. assets/oa-rowedit.js corrects a
+   row AT READ TIME from Firestore `rowOverrides`.
+
+   The override map comes from a read CI cannot make, so it is injected. What
+   is checked is what unit tests cannot see: that a visitor gets nothing, that
+   the maintainer's controls land on the right rows, and — the part that has to
+   be true for everybody, not just the maintainer — that a hidden row is gone
+   from the page and an edited value is what the card actually shows.         */
+
+/* previous-markets.html is opened on a season only the ARCHIVE covers: its
+   default view is all postings folded in from data/jobs.json, which belong to
+   the job editor and which this one refuses to touch. */
+for (const [pageName, dataset, patch] of [
+  ['previous-markets.html?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
+  ['recent-faculty.html', 'recent-faculty', { name: 'Corrected Person Name' }],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push(pageName + ': ' + e.message));
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(400);
+
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), 0,
+    `${dataset}: a visitor who is not signed in sees no Edit or Take down`);
+
+  /* The victim is the row the page ACTUALLY renders first, taken from the card
+     itself — the file's first row is not the page's, which sorts. */
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  const cards = await p.$$eval('.oa-card', (n) => n.length);
+  /* "1 - 10 / 93" when nothing is filtered, "1 - 10 / 93 (of 243)" when
+     something is — so read the number right after the slash, not the last one
+     on the line, which is the unfiltered corpus. */
+  const total = (t) => Number((String(t).match(/\/\s*(\d+)/) || [0, 0])[1]);
+  const totalBefore = total(await p.$eval('.oa-count', (n) => n.textContent));
+  ok(totalBefore > 0, `${dataset}: the results line carries a total to compare against`);
+
+  await p.evaluate((d) => window.OARowEdit.__setForTest(d, { ready: true, admin: true }),
+    dataset);
+  await p.waitForTimeout(300);
+
+  eq(await p.$$eval('.oa-card', (n) => n.length), cards,
+    `${dataset}: the maintainer sees the same rows as everyone else`);
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), cards,
+    `${dataset}: and gains the controls on every one of them`);
+  eq(await p.$$eval('.oa-card .oa-card-actions .oa-jobbtn', (n) =>
+    n.slice(0, 2).map((x) => x.textContent)),
+    ['Edit', 'Take down'], `${dataset}: both controls, in that order`);
+  // the card head is itself a button; the controls must not be inside it
+  eq(await p.$$eval('.oa-card-head .oa-jobbtn', (n) => n.length), 0,
+    `${dataset}: the controls are not nested inside the card toggle`);
+
+  /* A TAKEN-DOWN ROW IS GONE FOR EVERYBODY — the point of a read-time overlay,
+     and the half a signed-out visitor must also get. */
+  await p.evaluate(([d, id]) => window.OARowEdit.__setForTest(d, {
+    ready: true, admin: false, rows: { [id]: { hidden: true } },
+  }), [dataset, victim]);
+  await p.waitForTimeout(300);
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), 0,
+    `${dataset}: a signed-out visitor still sees no controls`);
+  ok(!(await p.$(`[id="job-${victim}"]`)),
+    `${dataset}: the taken-down row is gone from the page`);
+  eq(total(await p.$eval('.oa-count', (n) => n.textContent)), totalBefore - 1,
+    `${dataset}: and the count says one fewer`);
+
+  /* AN EDIT SHOWS. The overlay is applied to the row the card renders from, so
+     the corrected value is what a reader sees — not a note beside it. */
+  await p.evaluate(([d, id, o]) => window.OARowEdit.__setForTest(d, {
+    ready: true, admin: false, rows: { [id]: o },
+  }), [dataset, victim, patch]);
+  await p.waitForTimeout(300);
+  eq(total(await p.$eval('.oa-count', (n) => n.textContent)), totalBefore,
+    `${dataset}: correcting a row it had hidden brings it back`);
+  eq(await p.$eval(`[id="job-${victim}"] .oa-card-title`,
+    (n) => n.textContent.trim()), Object.values(patch)[0],
+    `${dataset}: and the corrected value is what the card shows`);
+
+  await p.close();
+}
+
 /* --------------------------------------------------- the Universities map
 
    Not an OAList page — a Leaflet map over data/universities.json, vendored
@@ -2010,6 +2094,293 @@ for (const [name, expect] of [
    creates it. Candidates and placements ship with empty datasets until
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
+
+/* --------- the archive editor never offers itself on a real job posting
+
+   previous-markets.html renders TWO populations from one list: the frozen
+   archive, and the postings folded in at read time from data/jobs.json. Those
+   second ones are real submissions, and an override against one is read by
+   NOTHING — no build applies rowOverrides to data/jobs.json — so Take down
+   there emptied the card and left the posting on the site. Measured: every
+   card on page one is a folded-in posting, so this was not an edge case but
+   the default view.
+
+   Standing down when the job editor has drawn is not the guard, because the
+   two race; this is. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/own: ' + e.message));
+  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(600);
+
+  const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  const past = JSON.parse(await readFile(path.join(ROOT, 'data', 'past-postings.json'), 'utf8'));
+  const archiveIds = new Set(past.map((r) => r.id));
+  const folded = new Set(jobs.map((r) => r.id).filter((id) => !archiveIds.has(id)));
+  ok(folded.size > 0, 'previous-markets: the page really does fold in live postings');
+
+  // the maintainer, with the job editor not yet resolved — the first second of
+  // every visit, and for ever if that read fails
+  await p.evaluate(() => window.OARowEdit.__setForTest('past-postings',
+    { ready: true, admin: true }));
+  await p.waitForTimeout(400);
+
+  const drawnOn = await p.$$eval('.oa-card-actions',
+    (ns) => ns.map((n) => n.closest('.oa-card').id.replace(/^job-/, '')));
+  eq(drawnOn.filter((id) => folded.has(id)), [],
+    'the archive editor draws on no posting that belongs to data/jobs.json');
+
+  /* …and it DOES draw on the archive's own rows. Filtering to a season only
+     the archive covers brings them onto the first page. */
+  const p2 = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p2.on('pageerror', (e) => jsErrors.push('overrides/own2: ' + e.message));
+  await p2.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p2.waitForSelector('.oa-card');
+  await p2.waitForTimeout(600);
+  await p2.evaluate(() => window.OARowEdit.__setForTest('past-postings',
+    { ready: true, admin: true }));
+  await p2.waitForTimeout(400);
+  const shown2 = await p2.$$eval('.oa-card', (n) => n.length);
+  ok(shown2 > 0, 'previous-markets: the archive-only season shows rows');
+  eq(await p2.$$eval('.oa-card-actions', (n) => n.length), shown2,
+    'and every one of the archive\'s own rows carries the controls');
+
+  /* AND AN OVERRIDE THAT ALREADY EXISTS against a folded-in posting — written
+     before this guard, or by mistake — is INERT rather than half-applied. It
+     must not hide the row, because nothing on this page could then put it
+     back: the archive editor no longer offers itself there, and the job editor
+     knows nothing about rowOverrides. */
+  /* A folded-in posting that is actually ON this page — `folded` also holds
+     the current-market rows, which previous-markets deliberately excludes, and
+     only the first ten of what is left are rendered. */
+  const stale = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  ok(folded.has(stale), 'the card under test really is one of the folded-in postings');
+  await p.evaluate((id) => window.OARowEdit.__setForTest('past-postings', {
+    ready: true, admin: false, rows: { [id]: { hidden: true, institution: 'Should Not Show' } },
+  }), stale);
+  await p.waitForTimeout(400);
+  ok(await p.$(`[id="job-${stale}"]`),
+    'an override against a posting the archive does not own does not hide it');
+  ok(!(await p.$$eval('.oa-card-title', (n) => n.map((x) => x.textContent)))
+      .includes('Should Not Show'),
+    'nor rewrite it — it is inert, not half-applied');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/own')), [],
+    'no uncaught errors on either view');
+  await p.close();
+  await p2.close();
+}
+
+/* ------------- a taken-down row stays visible to the maintainer, whoever
+   owns the card, and the admin-only module is never a hard dependency
+
+   previous-markets.html carries TWO decorators, and which of them ends up
+   owning a card is a matter of timing — oa-jobedit reads the WHOLE
+   jobSubmissions collection, oa-rowedit a small filtered query. The fade, the
+   note and Restore are the ONLY trace an override leaves on the page, so if
+   they are skipped whenever the other decorator got there first, a row the
+   maintainer took down looks completely ordinary to them while being invisible
+   to everybody else — with no way back.                                     */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/hidden: ' + e.message));
+  /* A season only the ARCHIVE covers, so every card is a row this editor owns
+     — the folded-in postings from data/jobs.json are another editor's, and it
+     refuses to touch them (the block above). */
+  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(600);
+
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+
+  // the OTHER decorator owns this card, and the row is hidden by an override
+  await p.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({
+      ready: true, admin: true, byId: { [id]: id }, byRef: {},
+    });
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: true, rows: { [id]: { hidden: true } },
+    });
+  }, victim);
+  await p.waitForTimeout(400);
+
+  const card = `[id="job-${victim}"]`;
+  ok(await p.$(card), 'the maintainer still sees a row they took down');
+  ok(await p.$eval(card, (n) => n.classList.contains('oa-card-gone')),
+    'and it is marked as taken down even though the other editor owns the card');
+  eq(await p.$$eval(card + ' .oa-rowedit-restore', (n) => n.map((x) => x.textContent)),
+    ['Restore'], 'with a way to put it back');
+  ok(/only you/i.test(await p.$eval(card + ' .oa-card-note', (n) => n.textContent)),
+    'and a sentence saying only they can see it');
+
+  // and a visitor gets none of it: the row is simply not there
+  await p.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({ ready: true, admin: false, byId: {}, byRef: {} });
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: false, rows: { [id]: { hidden: true } },
+    });
+  }, victim);
+  await p.waitForTimeout(400);
+  ok(!(await p.$(card)), 'while a visitor does not see it at all');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/hidden')), [],
+    'no uncaught errors either way');
+  await p.close();
+}
+
+/* THE ADMIN-ONLY MODULE IS A SOFT DEPENDENCY. These are PUBLIC pages; a
+   content blocker with a broad asset filter, or a transient 5xx on one file,
+   must not cost every reader the list. The module is aborted at the network
+   and the page has to render exactly what it renders with no overrides. */
+
+for (const [pageName, sel, least] of [
+  ['previous-markets.html', '.oa-card', 1],
+  ['recent-faculty.html', '.oa-card', 1],
+  ['universities.html', 'img.leaflet-marker-icon', 1],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const errs = [];
+  p.on('pageerror', (e) => errs.push(e.message));
+  await p.route('**/oa-rowedit.js', (r) => r.abort());
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector(sel, { timeout: 15000 }).catch(() => {});
+  await p.waitForTimeout(600);
+  ok(await p.$$eval(sel, (n) => n.length) >= least,
+    `${pageName} still renders its data when the admin-only module never loads`);
+  eq(errs, [], `${pageName} raises no error over the missing module`);
+  await p.close();
+}
+
+/* ----------------------- an override is DATA, never markup and never a scheme
+
+   `rowOverrides` is PUBLIC-READ: whatever it holds is rendered for every
+   visitor, on three pages, so an override that could carry markup or a
+   `javascript:` URL would be stored XSS on the whole site the moment the
+   maintainer's account was ever compromised — and a wrong-looking paste would
+   break the page long before that. The rules bound the LENGTH of each field;
+   nothing there can bound its CONTENT, so the property has to hold at render
+   time, and this is where it is pinned.
+
+   It holds today because the card renderer uses textContent for a plain value
+   and the one innerHTML it does use receives an anchor that was BUILT AS DOM —
+   href through OAList.safeUrl, label through textContent — and serialised. All
+   three are one edit away from not holding. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/xss: ' + e.message));
+  // an archive season, so the row is one this editor owns (see above)
+  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(400);
+
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  const MARKUP = '<img src=x onerror="window.__xss=1">Somewhere';
+
+  await p.evaluate(([id, markup]) => {
+    window.__xss = 0;
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: false,
+      rows: { [id]: {
+        institution: markup,
+        comments: markup,
+        adUrl: 'javascript:window.__xss=1',
+      } },
+    });
+  }, [victim, MARKUP]);
+  await p.waitForTimeout(400);
+
+  const card = `[id="job-${victim}"]`;
+  eq(await p.$eval(card + ' .oa-card-title', (n) => n.textContent), MARKUP,
+    'an override that looks like markup is shown as the text it is');
+  eq(await p.$$eval(card + ' img', (n) => n.length), 0,
+    'and is never parsed into an element');
+
+  // open the card so its detail rows render, then look at what they hold
+  await p.click(card + ' .oa-card-head');
+  await p.waitForTimeout(200);
+  eq(await p.$$eval(card + ' .oa-card-body img', (n) => n.length), 0,
+    'the same is true of every field in the body');
+  eq(await p.$$eval(card + ' a', (as) =>
+    as.filter((a) => /^javascript:|^data:/i.test(a.getAttribute('href') || '')).length), 0,
+    'and a javascript: URL never becomes a link');
+  eq(await p.evaluate(() => window.__xss), 0, 'nothing an override carries executes');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/xss')), [],
+    'and the page raises no error over it');
+  await p.close();
+}
+
+/* ------------------------------- Edit / Take down on the universities map
+
+   The map is not an OAList page, so its half of the archive editing lives on
+   its own hooks: `prepare` overlays the maintainer's corrections onto the
+   dataset before it is drawn, and `onPopup` adds the controls to a pin's
+   popup. The overrides come from a Firestore read CI cannot make, so they are
+   injected here exactly as on the two archive lists.                        */
+
+{
+  const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('universities/edit: ' + e.message));
+  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
+
+  const openPopup = async () => {
+    await p.$eval('img.leaflet-marker-icon', (n) =>
+      n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await p.waitForSelector('.leaflet-popup .oa-uni-pop', { timeout: 5000 });
+  };
+
+  await openPopup();
+  eq(await p.$$eval('.leaflet-popup .oa-uni-admin', (n) => n.length), 0,
+    'universities: a visitor who is not signed in gets no controls on a pin');
+
+  await p.evaluate(() =>
+    window.OARowEdit.__setForTest('universities', { ready: true, admin: true }));
+  await p.waitForTimeout(400);
+  await openPopup();
+  eq(await p.$$eval('.leaflet-popup .oa-uni-admin .oa-jobbtn', (n) =>
+    n.map((x) => x.textContent)), ['Edit', 'Take down'],
+    'universities: the maintainer gets both controls on a pin, in that order');
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
+    'universities: and the map still carries the whole dataset');
+
+  /* A CORRECTION IS WHAT EVERY VISITOR SEES. `institution` is the field every
+     link on a popup filters by, so an override has to reach the links too —
+     not only the heading. */
+  const victim = unis.find((r) => isFinite(r.lat) && isFinite(r.lng));
+  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
+    ready: true, admin: false,
+    rows: { [v]: { institution: 'Corrected School', name: 'Corrected School' } },
+  }), victim.id);
+  await p.waitForTimeout(500);
+  await p.fill('#oa-uni-search', 'Corrected School');
+  await p.waitForTimeout(400);
+  eq(await p.$$eval('img.leaflet-marker-icon', (n) => n.length), 1,
+    'universities: the corrected school is findable by its new name');
+  await openPopup();
+  eq(await p.$eval('.leaflet-popup .oa-uni-pop h3', (n) => n.textContent), 'Corrected School',
+    'universities: and the popup names it that way');
+  ok(await p.$$eval('.leaflet-popup .oa-uni-pop a', (ns) =>
+    ns.some((a) => (a.getAttribute('href') || '').includes('Corrected%20School'))),
+    'universities: every link on the popup follows the corrected name');
+
+  // A TAKEN-DOWN SCHOOL LEAVES THE MAP, for everybody.
+  await p.fill('#oa-uni-search', '');
+  await p.waitForTimeout(400);
+  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
+    ready: true, admin: false, rows: { [v]: { hidden: true } },
+  }), victim.id);
+  await p.waitForTimeout(500);
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length - 1} universities`,
+    'universities: a taken-down school is off the map for every visitor');
+
+  await p.close();
+}
 
 const MOBILE_PAGES = [
   // the live site: the one-pager (whose jobs teaser has NO filter bar — the
