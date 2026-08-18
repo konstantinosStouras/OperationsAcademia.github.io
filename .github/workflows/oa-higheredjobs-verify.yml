@@ -1,0 +1,128 @@
+name: OA jobs — check the HigherEdJobs postings against their ads
+
+# Most of the postings the tracking sheet carries link to higheredjobs.com, and
+# the sheet has no deadline column for them — so they reach the site as
+# "Until filled.", which is the ingest's default for an empty cell rather than
+# something anyone checked. The advertisement states the deadline in a field of
+# its own. This reads it, caches what it read in data/higheredjobs.json, and
+# puts it onto the postings.
+#
+# It never overwrites a deadline the maintainer typed into the sheet: a
+# disagreement is reported as a warning in this run's log so the SHEET can be
+# corrected, which fixes it at the source. See the header of
+# _scraper/higheredjobs-verify.mjs.
+#
+# No credentials of any kind: the advertisements are public pages.
+
+on:
+  schedule:
+    # 07:20 UTC — after oa-jobmarket-sheet.yml (06:40) has read the workbook,
+    # so a posting added this morning is checked the same morning, and off the
+    # hour so this repository does not queue behind every other :00 job.
+    - cron: '20 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Fetch and report, write nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'List the ads that would be read and stop — fetches nothing'
+        type: boolean
+        default: false
+      force:
+        description: 'Re-read every ad, ignoring the freshness rule'
+        type: boolean
+        default: false
+      limit:
+        description: 'Read at most this many ads (blank = 60)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+# Shares the group with oa-jobmarket-sheet.yml and oa-jobs-build.yml: all three
+# write data/, so they must never race each other's commit. Overlapping fires
+# queue and coalesce.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Offline checks
+        run: |
+          node _scraper/selftest.mjs
+          node _scraper/higheredjobs-verify.mjs --selftest
+
+      - name: Read the advertisements
+        run: |
+          node _scraper/higheredjobs-verify.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.force && '--force' || '' }} \
+            ${{ inputs.limit && format('--limit {0}', inputs.limit) || '' }}
+
+      # The same gate every other writer of data/ runs before committing: a red
+      # selftest must stop the publish rather than ship a broken dataset.
+      - name: Re-check the files we are about to commit
+        run: node _scraper/selftest.mjs
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "no change — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "OA jobs: check the HigherEdJobs postings against their ads"
+
+          # plain fast-forward, with rebase-and-retry — the sheet sync or the
+          # postings build may have moved the branch on while this run worked.
+          # After a rebase the dataset under us is FRESHER than the one this run
+          # read, so the cache is re-applied to it rather than the run's own
+          # copy being pushed over it.
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected — rebasing onto the new tip (attempt $i)"
+            git pull --rebase origin ${{ github.ref_name }} || exit 1
+            node _scraper/higheredjobs-verify.mjs --apply-only
+            if [ -n "$(git status --porcelain data)" ]; then
+              git add data
+              git commit --amend --no-edit
+            fi
+            sleep $((i * 3))
+          done
+          echo "could not push after 5 attempts"
+          exit 1
+
+      # The postings only reach the site when oa-jobs-build.yml rebuilds
+      # data/jobs.json. Ringing its doorbell is what makes a corrected deadline
+      # visible within minutes rather than at the next scheduled build.
+      - name: Publish what changed
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/dispatches" \
+            -d '{"event_type":"oa-jobs-changed"}' || \
+            echo "::warning::could not ring the build — the next scheduled run picks it up"

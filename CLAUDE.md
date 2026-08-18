@@ -85,6 +85,35 @@ maintainer once (then weekly) when the sheet has gained nothing for three weeks,
 cannot be read, or reads as empty. Nothing already published is ever removed by
 one of those failures.
 
+## The HigherEdJobs postings are checked against their own ads
+
+The tracking sheet has no deadline column for most rows, so they reach the site
+as "Until filled." — the ingest's default for an empty cell, not something
+anyone checked. Where the posting links to **higheredjobs.com** the ad states
+its closing date in a field of its own, so it is read:
+`_scraper/higheredjobs.mjs` (pure: parse an ad, decide what it changes) +
+`_scraper/higheredjobs-verify.mjs` (fetch, cache, apply) +
+`.github/workflows/oa-higheredjobs-verify.yml` (daily, after the sheet read).
+What each ad said is cached in `data/higheredjobs.json`.
+
+**`validThrough` in the page's schema.org block is NOT the deadline** — it is
+when HigherEdJobs stops listing the ad, ~18 months out (a post closing on
+20 Aug 2026 carries `2028-02-06`). Only the fields in `DEADLINE_FIELDS` may be
+read; two selftests pin that this stays true. When an employer labels the
+closing date some new way, **add the label to `DEADLINE_FIELDS` — never
+hand-edit `data/`**, exactly as with the country aliases: `jobmarket.json` is
+rebuilt from the workbook every morning, so the sheet sync re-applies the cache
+on every read and a patched row would come back the next day.
+
+**A deadline the maintainer typed into the sheet is never overwritten.** The
+pass only fills a row that had none; a disagreement is reported as a warning
+naming both dates, so the sheet is corrected at the source. An ad that cannot
+be read changes nothing — this is an enrichment and must never fail a run.
+
+Local runs: `node _scraper/higheredjobs-verify.mjs --apply-only` (re-apply the
+committed cache) or `--scan`. A real read needs egress to higheredjobs.com,
+which this build environment denies (403), so it happens on the runners.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
@@ -123,6 +152,7 @@ otherwise stop matching silently.
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks
+    node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

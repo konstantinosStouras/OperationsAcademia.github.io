@@ -59,6 +59,7 @@ import {
   rowsFromTab, collectRows, stampAddedAt, serialiseSheetRows, buildSheetMeta,
   stalenessOf, shouldWarn, emptyRegistry, adoptSheets, activeSheets, rollRegistry,
 } from './jobmarket-sheet.mjs';
+import { applyVerified, emptyCache } from './higheredjobs.mjs';
 import { shell, esc, send, transport, toPlain, SITE, CONTACT } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -66,6 +67,7 @@ const DATA = path.join(HERE, '..', 'data');
 const ROWS_FILE = path.join(DATA, 'jobmarket.json');
 const META_FILE = path.join(DATA, 'jobmarket-meta.json');
 const REG_FILE = path.join(DATA, 'jobmarket-sheets.json');
+const VERIFIED_FILE = path.join(DATA, 'higheredjobs.json');
 
 const argv = process.argv.slice(2);
 const has = (f) => argv.includes(f);
@@ -158,6 +160,19 @@ async function readRowsStrict() {
   const rows = JSON.parse(await readFile(ROWS_FILE, 'utf8'));
   if (!Array.isArray(rows)) throw new Error('data/jobmarket.json is not an array');
   return rows;
+}
+
+/** The verified-advertisement cache, or an empty one. Unlike the dataset
+    above this is READ LENIENTLY: it is an enrichment, and a missing or
+    malformed cache must leave the sheet's own rows untouched rather than stop
+    the read of the workbook. */
+async function readVerifiedCache() {
+  try {
+    const cache = JSON.parse(await readFile(VERIFIED_FILE, 'utf8'));
+    return (cache && cache.ads) ? cache : emptyCache();
+  } catch {
+    return emptyCache();
+  }
 }
 
 /* ------------------------------------------------------------ one workbook */
@@ -381,6 +396,27 @@ async function main() {
       const stamped = stampAddedAt(collected.rows, existing, { now });
       rows = stamped.rows;
       fresh = stamped.fresh;
+
+      /* What the advertisements themselves say about their deadlines, read by
+         higheredjobs-verify.mjs and committed in data/higheredjobs.json.
+         RE-APPLIED HERE, on every read of the workbook, and that is the point:
+         this file is rebuilt from the sheet each morning, so a deadline merely
+         written into data/ once would be reverted by the next run — the same
+         reason a country spelling is fixed in oa-countries.js rather than in
+         the dataset. It only fills a row the sheet left open-ended, and it is
+         wholly non-fatal: no cache, or an unreadable one, simply means the
+         rows stay as the sheet wrote them. */
+      const verified = applyVerified(rows, await readVerifiedCache(),
+        { today: isoStamp(now).slice(0, 10) });
+      rows = verified.rows;
+      if (verified.changed.length) {
+        log(`${verified.changed.length} posting(s) took the deadline their ` +
+            'HigherEdJobs advertisement states');
+      }
+      for (const c of verified.conflicts) {
+        warn(`${c.id}: the sheet says ${c.sheet}, the advertisement says ${c.ad} — ` +
+             'the sheet wins; correct it there if the advertisement is right');
+      }
       if (stamped.backfill && fresh) {
         log(`first run: ${fresh} posting(s) were dated from the day they were advertised, ` +
             'so the backfill announces nothing by e-mail.');

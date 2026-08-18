@@ -458,6 +458,63 @@ EVIDENCE — once it holds a posting newer than anything in the one it replaces 
 never on a date, so a workbook opened in advance and left empty cannot take the
 site with it.
 
+### 3.6b The HigherEdJobs deadlines — **DONE 2026-08-18**
+
+The tracking sheet has no deadline column for most of its rows, so the ingest's
+default applies and they reach the site as "Until filled." That default is
+right — the jobs page ALREADY buckets an undated posting that way, so saying
+nothing would drop a line the card is expected to have — but for the postings
+advertised on higheredjobs.com it is also **checkable**, because the ad states
+its closing date in a field of its own. Nine of the sixteen sheet postings are
+such ads.
+
+So they are read: `_scraper/higheredjobs.mjs` (pure — parse an ad, decide what
+it changes) + `_scraper/higheredjobs-verify.mjs` (fetch, cache, apply) +
+`.github/workflows/oa-higheredjobs-verify.yml` (daily at 07:20 UTC, after the
+06:40 sheet read, sharing the `oa-jobs-data-*` concurrency group). What each ad
+said is committed in `data/higheredjobs.json`.
+
+Four decisions worth recording:
+
+- **The cache is RE-APPLIED by the sheet sync, not written into `data/` once.**
+  `data/jobmarket.json` is rebuilt from the workbook every morning, so a
+  deadline patched into the file would be reverted by the next run — the same
+  reason a country spelling is fixed in `oa-countries.js` and not in the
+  dataset. The apply is a pure function called from both writers.
+- **A deadline the maintainer TYPED is never overwritten.** The sheet is their
+  record and a typed date is a decision. A disagreement is reported as a
+  warning naming both dates, so the SHEET gets corrected — which fixes it at
+  the source and for good. The pass only ever fills a row that had no date.
+- **schema.org `validThrough` is not a deadline, and this is the whole reason
+  the parser is a file rather than a regex.** Every ad carries a JobPosting
+  block whose `validThrough` looks exactly like one; it is when HigherEdJobs
+  stops LISTING the ad, set ~18 months out. The Utah Valley lecturer post
+  closing on 20 August 2026 carries `validThrough: 2028-02-06`. Publishing
+  that would be worse than the "Until filled." it replaced, because it looks
+  specific. `DEADLINE_FIELDS` is the closed list of what may be read, a
+  selftest pins that `validThrough` is not in it, and a second pins that no
+  parse mentions 2028.
+- **Labels are read from the markup, never from flattened text.** Flattened,
+  the page reads "… Salary: Depends on Qualifications Job Type: FT Faculty …",
+  where no rule can tell where the salary ends ("Qualifications" is a
+  capitalised word hard against the next label) and a "Type" lookup matches
+  the tail of "Job Type". The bold tag says exactly where each label starts.
+  Both failures were observed before this was changed, and both are pinned.
+
+A listing that has come DOWN keeps the date it stated: a closed search still
+closed on a date, and dropping it would return the posting to "Until filled.",
+the one statement now known to be wrong. An ad that cannot be read changes
+nothing at all — the pass is an enrichment and must never be why a run fails.
+
+**Note on this build environment.** Its egress policy denies higheredjobs.com
+(403 at the proxy), exactly as it denies docs.google.com for the sheet sync, so
+the ads are read on the runners. The committed cache was seeded with the two
+advertisements that could be established offline: JobCode 179529368 from the
+ad's own HTML, and 179527182 from corroborated reports of it. The second is
+stamped `via: "report"` rather than `via: "page"`, and `needFetch` always
+re-reads anything not read from the page itself — a stand-in exists to be
+replaced by the source.
+
 ---
 
 ## 4. Things to decide

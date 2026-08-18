@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "higheredjobs-deadlines",
+   "date": "2026-08-18",
+   "title": "Closing dates, read from the advertisement",
+   "summary": "Postings that link to HigherEdJobs now show the closing date the advertisement itself states, instead of the catch-all \u201cUntil filled.\u201d The tracking sheet the maintainer keeps has no deadline column for most rows, so the site had nothing better to say; the advertisement does say, in a field of its own, and it is now read daily and kept up to date. Postings genuinely left open still read \u201cUntil filled.\u201d, and the Deadline filter on the jobs page \u2014 Closing soon, Expired, Until filled \u2014 sorts them accordingly.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "single-page-redesign-live",
    "date": "2026-08-17",
    "title": "A new Operations Academia — one page, light or dark",
