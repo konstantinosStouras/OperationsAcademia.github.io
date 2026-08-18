@@ -195,7 +195,16 @@
          down. */
       var base = null, live = null, list = null;
 
+      /* `attach` calls back when the overrides land AND when the sign-in
+         state resolves — which on the ordinary visit (no overrides, not
+         the maintainer) is "nothing changed", twice. Re-rendering anyway
+         costs a visible redraw a second after first paint, for nothing. */
+      var sig = OARowEdit.signature('recent-faculty');
+
       function refresh() {
+        var now = OARowEdit.signature('recent-faculty');
+        if (now === sig && list) return;
+        sig = now;
         if (list && list.rerender) list.rerender();
         if (!base || !live) return;
         var next = OARowEdit.apply('recent-faculty', base);

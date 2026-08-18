@@ -121,6 +121,11 @@
    * had exactly that shape; this is the same fix.)
    */
   function apply(dataset, rows) {
+    var spec = DATASETS[dataset];
+    // A dataset this module does not know has no overrides and no editor, so
+    // it is handed back untouched rather than thrown on — a page that mounts
+    // the wrong name renders its data and simply gets no controls.
+    if (!spec) return (rows || []).slice();
     var s = st(dataset);
     var out = [];
     for (var i = 0; i < (rows || []).length; i++) {
@@ -130,7 +135,6 @@
       if (o.hidden && !s.admin) continue;
       var copy = {};
       for (var k in r) if (Object.prototype.hasOwnProperty.call(r, k)) copy[k] = r[k];
-      var spec = DATASETS[dataset];
       for (var j = 0; j < spec.fields.length; j++) {
         var key = spec.fields[j].key;
         if (Object.prototype.hasOwnProperty.call(o, key)) copy[key] = o[key];
@@ -164,6 +168,7 @@
   /** The OAList `onCard` hook for a dataset. */
   function onCard(dataset) {
     return function (li, row) {
+      if (!DATASETS[dataset]) return;
       var s = st(dataset);
       /* Another decorator may own this row — on previous-markets.html the
          postings folded in from data/jobs.json are real submissions, and
@@ -195,6 +200,7 @@
   /** The map's `onPopup` hook — the twin of `onCard`, for a Leaflet popup. */
   function onPopup(dataset) {
     return function (node, row) {
+      if (!DATASETS[dataset]) return;
       var s = st(dataset);
       if (!node || !s.ready || !s.admin) return;
       if (node.querySelector('.oa-uni-admin')) return;
@@ -228,6 +234,7 @@
 
   function edit(dataset, row) {
     var spec = DATASETS[dataset];
+    if (!spec) return;
     var s = st(dataset);
     var o = s.rows[row.id] || {};
     var patch = {};
@@ -281,6 +288,7 @@
 
   function hide(dataset, row, btn) {
     var spec = DATASETS[dataset];
+    if (!spec) return;
     if (!window.confirm(
       'Take this ' + spec.label + ' down?\n\n' + spec.name(row) + '\n\n' +
       'It stops appearing on the site straight away. Nothing is deleted — the ' +
@@ -365,8 +373,24 @@
     });
   }
 
+  /**
+   * A cheap, exact fingerprint of everything that changes what a page shows.
+   *
+   * `attach` calls back when the overrides land and again when the sign-in
+   * state resolves, which for the overwhelmingly common visit — no overrides,
+   * not the maintainer — means "nothing changed" twice. Acting on it anyway
+   * costs a full re-render a second after first paint, and on the map a
+   * `fitBounds` that visibly jumps the view somebody may already be reading.
+   * So a page holds the last fingerprint and does nothing when it matches.
+   */
+  function signature(dataset) {
+    var s = st(dataset);
+    return (s.admin ? 'a' : '-') + '|' + JSON.stringify(s.rows);
+  }
+
   window.OARowEdit = {
     apply: apply,
+    signature: signature,
     onCard: onCard,
     onPopup: onPopup,
     attach: attach,

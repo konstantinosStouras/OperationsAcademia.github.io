@@ -204,8 +204,19 @@
         candidatesHref: function (q) { return './?c_affiliation=' + q + '#candidates'; },
       });
 
+      /* Redraw only when something a visitor would see has actually changed.
+         `attach` calls back when the overrides land and again when the sign-in
+         state resolves, and on the ordinary visit both say "nothing" — but a
+         redraw re-fits the map's bounds, which visibly jumps the view of
+         somebody already reading it. */
+      var uniSig = OARowEdit.signature('universities');
       OARowEdit.attach('universities', {
-        onChange: function () { if (uniMap && uniMap.refresh) uniMap.refresh(); },
+        onChange: function () {
+          var now = OARowEdit.signature('universities');
+          if (now === uniSig) return;
+          uniSig = now;
+          if (uniMap && uniMap.refresh) uniMap.refresh();
+        },
       });
     </script>
   </body>
