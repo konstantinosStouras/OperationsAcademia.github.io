@@ -462,7 +462,22 @@ async function main() {
           'probably been renamed, or the workbook\'s sharing changed.');
       failed.push({ id: registry.current, error: 'the read came back suspiciously small' });
     } else {
-      const stamped = stampAddedAt(collected.rows, existing, { now });
+      /* The review queue is read BEFORE the rows are dated, because it is
+         half of the answer to "have we seen this posting before".
+
+         `stampAddedAt` gives a row the date it first appeared, and takes its
+         baseline from what is already published. With the gate in place that
+         baseline is the APPROVED file, which a posting under review is by
+         definition not in — so a queued posting would be re-dated every
+         morning, and once the file is empty (the state the gate starts in)
+         every row would read as new on every run. The queue's own copy of the
+         row carries the date it was first seen, so the two together are the
+         real "already known" set. */
+      const queue = await loadReviewQueue();
+      const known = existing.concat(
+        (queue.docs || []).map((d) => d.row).filter((r) => r && r.id));
+
+      const stamped = stampAddedAt(collected.rows, known, { now });
       rows = stamped.rows;
       fresh = stamped.fresh;
 
@@ -503,7 +518,6 @@ async function main() {
          alone would e-mail the maintainer that their sheet had gone quiet
          while it was in fact busy and their own queue was the holdup. */
       sheetRows = rows;
-      const queue = await loadReviewQueue();
 
       if (!queue.ok) {
         /* NO QUEUE IS NOT AN EMPTY QUEUE. Without it there is no way to know

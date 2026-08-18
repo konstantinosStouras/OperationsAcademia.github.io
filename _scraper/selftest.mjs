@@ -3566,6 +3566,16 @@ async function testReviewWiring() {
     'staleness is measured on the WHOLE sheet, not the approved subset, so a ' +
     'busy workbook with a full queue is not reported as gone quiet');
 
+  /* A posting under review is not in the APPROVED file, so dating rows
+     against that file alone would re-date every queued posting every morning —
+     and once the file is empty, which is the state the gate starts in, every
+     row would read as new on every run. The queue's own copy of the row is the
+     other half of "already known". */
+  ok(/const known = existing\.concat\(/.test(sync),
+    'rows are dated against the published file AND the review queue');
+  ok(sync.indexOf('const queue = await loadReviewQueue();') < sync.indexOf('stampAddedAt('),
+    'which means the queue is read before the rows are dated');
+
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
   ok(build.includes("where('status', '==', 'approved')"),
     'the build publishes an approval without waiting for the next sheet read');
