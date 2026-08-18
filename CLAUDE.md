@@ -354,6 +354,39 @@ matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
 
+## Deploying Firebase rules — ALWAYS name the project
+
+    firebase deploy --only firestore:rules --project operations-academia
+
+The Firebase CLI resolves its target from, in order: `--project`, the
+`FIREBASE_PROJECT` env var, **the "active project" it remembers PER DIRECTORY
+in its own global config**, and only then the default alias in `.firebaserc`.
+The remembered one wins over `.firebaserc`, is invisible in the repository, and
+survives between sessions.
+
+**That is not hypothetical here.** `firebase deploy --only firestore:rules` run
+in this folder published THIS repository's rules into the `stouras-answerarena`
+database and printed "Deploy complete!". These rules end in a deny-all
+catch-all and name none of that app's collections, so every read and write in
+it was refused until its own rules were re-published. Nothing warned, at either
+end. (The sibling `konstantinosStouras.github.io` holds six more Firebase
+projects; the same thing had already happened once from `lab/search-v2`.)
+
+So `check-project.mjs` runs as a **`predeploy` hook on every deployable section
+of `firebase.json`** — `firestore`, `storage` and `functions`, because
+`firebase deploy` with no `--only` runs all three. The CLI exports
+`GCLOUD_PROJECT` to a predeploy hook, so the target is knowable before anything
+is uploaded; a mismatch exits non-zero, which aborts the deploy. Run it
+standalone to see where this folder would deploy: `node check-project.mjs`.
+
+It reads the expected project from `.firebaserc`, never a literal, so there is
+one place for that truth. `selftest.mjs` fails if a deployable section is left
+un-hooked or if the guard starts hardcoding an id — and the guard is the net,
+not the practice: **pass `--project` yourself.**
+
+**Nothing in CI deploys rules.** It needs an interactive login, so a rules
+change committed here is not live until someone runs that command by hand.
+
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks

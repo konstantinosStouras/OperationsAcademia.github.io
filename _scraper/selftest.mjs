@@ -2575,6 +2575,55 @@ function fakeCollection(seed = {}) {
    one the rules name AND a file that exists, and every page must actually load
    it — a page that does not is silently read-only again, which is the exact
    bug being fixed. */
+/* --------------------------- a deploy can only reach THIS project's database
+
+   THE INCIDENT. The Firebase CLI resolves its target from, in order:
+   --project, FIREBASE_PROJECT, the "active project" it remembers PER
+   DIRECTORY in its own global config, and only then the default alias in
+   .firebaserc. The remembered one wins over .firebaserc, is invisible in the
+   repository, and survives between sessions — so `firebase deploy --only
+   firestore:rules` run HERE published THIS repository's rules into the
+   `stouras-answerarena` database and printed "Deploy complete!". These rules
+   end in a deny-all catch-all and name none of that app's collections, so
+   every read and write in it was refused until its own rules were
+   re-published. Nothing warned, at either end.
+
+   check-project.mjs is the guard: the CLI exports GCLOUD_PROJECT to a
+   predeploy hook, so the target is knowable before anything is uploaded, and
+   a mismatch exits non-zero, which aborts the deploy. (The sibling
+   konstantinosStouras.github.io carries the same guard in each of its six
+   Firebase folders, checked by its own tools/deploy-guard-selftest.mjs.) */
+async function testDeployGuard() {
+  const root = path.join(HERE, '..');
+  const guard = await readFile(path.join(root, 'check-project.mjs'), 'utf8');
+
+  ok(guard.includes('GCLOUD_PROJECT'),
+    'the guard reads the project the CLI is actually deploying to');
+  ok(guard.includes('process.exit(1)'),
+    'and exits non-zero on a mismatch, which is what aborts the deploy');
+  /* Compared against .firebaserc rather than a literal: a hardcoded id is a
+     second place for the truth to live, and it would go stale in silence. */
+  ok(guard.includes('.firebaserc'),
+    'taking the expected project from .firebaserc, not from a literal');
+  const rc = JSON.parse(await readFile(path.join(root, '.firebaserc'), 'utf8'));
+  const project = rc.projects.default;
+  eq(project, 'operations-academia', 'which is this site\'s own project');
+  ok(!guard.includes(`'${project}'`), 'and the guard does not hardcode it');
+
+  /* EVERY DEPLOYABLE SECTION, not just the rules. `firebase deploy` with no
+     --only runs all of them, so a guard on `firestore` alone still lets this
+     repository's Storage rules and its Function land in another project. */
+  const cfg = JSON.parse(await readFile(path.join(root, 'firebase.json'), 'utf8'));
+  for (const section of ['firestore', 'functions', 'hosting', 'storage', 'database']) {
+    if (!cfg[section] || typeof cfg[section] !== 'object') continue;
+    const pre = [].concat(cfg[section].predeploy || []);
+    ok(pre.some((c) => String(c).includes('check-project.mjs')),
+      `the ${section} deploy runs the guard first`);
+  }
+  ok(cfg.firestore && cfg.storage && cfg.functions,
+    'and all three of this repository\'s deployable sections are still configured');
+}
+
 async function testRowOverrides() {
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-rowedit.js'), 'utf8');
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
@@ -3235,6 +3284,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testJobMarketSheetAddedAt();
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
+  await testDeployGuard();
   await testRowOverrides();
   await testRemovalSafety();
   await testMirrorLifecycle();
