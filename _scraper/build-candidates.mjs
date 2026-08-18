@@ -39,7 +39,7 @@ import {
   CANDIDATE_PUBLIC_FIELDS, INFORMS_DAYS,
   revealGate,
 } from './candidates-model.mjs';
-import { marketYear, inCurrentMarket, ownerTag } from './jobs-model.mjs';
+import { marketYear, inCurrentMarket, ownerTag, removalSpecs } from './jobs-model.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -324,16 +324,19 @@ async function main() {
   assignCandidateIds(fresh);
 
   const existing = await readCandidatesStrict(CANDS);
-  const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
-  /* Takedowns are keyed on the id as well as the reference. `ref` is issued by
-     the FORM, so an imported row has none and the maintainer hiding one used
-     to change nothing at all — the row was carried on as an orphan. See the
-     long note in build-jobs.mjs; this is the same fix in the twin pipeline. */
-  const removeIds = new Set();
-  for (const d of pulled) {
-    const v = d.data();
-    for (const k of [v.publishedId, d.id]) if (k) removeIds.add(String(k));
-  }
+  /* Takedowns are keyed on the id as well as the reference — `ref` is issued
+     by the FORM, so an imported row has none and hiding one used to change
+     nothing at all. `removalSpecs` decides whose word to take: a reference is
+     scoped to its owner, and an id is honoured only on a document the build
+     itself wrote, because both are published and either one unscoped is a
+     signed-in stranger taking down somebody else's row. The long note is in
+     jobs-model.mjs; this is the same fix in the twin pipeline. */
+  const { specs: removeSpecs, ids: removeIds } = removalSpecs(pulled);
+
+  /* ONE predicate for "this run takes that row down" — a reference is only a
+     takedown for the account that published the row. */
+  const isRemoved = (r) => removeIds.has(r.id) ||
+    removeSpecs.some((x) => x.ref && x.ref === r.ref && (x.owner || '') === (r.owner || ''));
 
 
   // The maintainer's committed suppression list, same shape as
@@ -347,7 +350,7 @@ async function main() {
      a profile down is a STATUS CHANGE, never a document delete. */
   const liveIds = new Set(fresh.map((f) => f.row.id));
   const orphans = existing.filter((r) =>
-    !liveIds.has(r.id) && !removeIds.has(r.id) && !removeRefs.includes(r.ref));
+    !liveIds.has(r.id) && !isRemoved(r));
   if (orphans.length) {
     warn(`${orphans.length} profile(s) in candidates.json have no document — carried unchanged.`);
   }
@@ -355,7 +358,7 @@ async function main() {
   const merged = mergeCandidateRows(
     orphans,
     fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
-    removeRefs.concat([...removeIds].map((id) => ({ id }))));
+    removeSpecs);
   const { added, updated, removed } = merged;
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 

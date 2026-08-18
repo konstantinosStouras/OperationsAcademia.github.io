@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
-  MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover,
+  MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
@@ -400,7 +400,10 @@ async function main() {
      they are and only costs the maintainer the buttons until the next run. */
   const sheetDocs = new Map();   // sheet row id -> the document that stands for it
   for (const d of [...live, ...pulled]) {
-    const sid = d.data().sheetId;
+    // `sheetId` is honoured only where the build wrote it — see `buildOwned`
+    // in jobs-model.mjs. A submission a browser made carries a uid, and a
+    // sheetId on one is a stranger claiming a workbook row's identity.
+    const sid = buildOwned(d.data()) ? d.data().sheetId : '';
     if (sid) sheetDocs.set(sid, d);
   }
   /* Two different questions, and they are NOT the same set.
@@ -467,7 +470,7 @@ async function main() {
        these rows into the database unsafe in the first place, kept here rather
        than given up. The document is left alone, so putting the row back in
        the workbook brings the maintainer's edit back with it. */
-    const sid = d.data().sheetId;
+    const sid = buildOwned(d.data()) ? d.data().sheetId : '';
     if (sid && sheetPresent && !sheetIds.has(sid)) {
       goneFromSheetDocs.push(sid);
       continue;
@@ -497,28 +500,30 @@ async function main() {
   for (const f of fresh) if (f.sheetId) f.row.id = f.sheetId;
 
   const existing = await readJobsStrict(JOBS);
-  const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
-
   /* WHAT A TAKEDOWN IS KEYED ON, and why it is not only the reference.
 
      `ref` is the number the FORM issues. Nothing else does: the 94 postings the
      legacy import migrated and the 16 the tracking sheet publishes have none —
-     which today is every single row in data/jobs.json. So `removeRefs` was
+     which today is every single row in data/jobs.json. So the removal set was
      empty for all of them, the row was carried on as an ORPHAN (a row no live
      document accounts for is preserved, deliberately), and Take down marked
      the document hidden, said "Taken down", and left the posting on the site
      for ever.
 
-     The id is what those postings are addressable by — it IS the document id
-     for a migrated posting (migrate-to-firestore.mjs) and the `sheetId` for one
-     from the workbook, and the build stamps `publishedId` on everything it
-     publishes — so all three are collected. Each is a row id by construction,
-     so none of them can name a posting other than its own. */
-  const removeIds = new Set();
-  for (const d of pulled) {
-    const v = d.data();
-    for (const k of [v.publishedId, v.sheetId, d.id]) if (k) removeIds.add(String(k));
-  }
+     `removalSpecs` (jobs-model.mjs) decides whose word to take: a reference is
+     scoped to its owner, and an id is honoured only on a document the build
+     itself wrote. Both halves matter — the ids and the references alike are
+     published in data/jobs.json, so an unscoped removal is a signed-in
+     stranger deleting somebody else's advertisement. */
+  const { specs: removeSpecs, ids: removeIds } = removalSpecs(pulled);
+
+  /* ONE predicate for "this run takes that row down", used by the orphan carry
+     and by the change e-mail alike. Keeping them apart is how the report came
+     to say something the file did not: a reference is only a takedown for the
+     account that published the row, so a set of bare references over-reports
+     every one it cannot match. */
+  const isRemoved = (r) => removeIds.has(r.id) ||
+    removeSpecs.some((x) => x.ref && x.ref === r.ref && (x.owner || '') === (r.owner || ''));
 
   // The maintainer's committed suppression list, honoured by every writer of
   // this file (see data/jobs-hidden.json). A posting listed here is withheld
@@ -567,8 +572,7 @@ async function main() {
   const orphans = existing.filter((r) =>
     !live_ids.has(r.id) &&
     !(sheetPresent && fromSheet(r)) &&
-    !removeIds.has(r.id) &&
-    !removeRefs.includes(r.ref));
+    !isRemoved(r));
   if (orphans.length) {
     warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
          'unchanged. Run migrate-to-firestore.mjs to make them editable.');
@@ -610,8 +614,7 @@ async function main() {
         'workbook — taken off the site with the rest of its removals');
   }
 
-  const merged = mergeRows(orphans, freshVisible,
-    removeRefs.concat([...removeIds].map((id) => ({ id }))));
+  const merged = mergeRows(orphans, freshVisible, removeSpecs);
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
@@ -630,7 +633,8 @@ async function main() {
      when one posting is new and six were edited. Computed once, used for both
      the log and the admin e-mail, so the two can never tell different
      stories. */
-  const changes = collectChanges(existing, freshVisible, removeRefs, removeIds);
+  const changes = collectChanges(existing, freshVisible, [],
+    existing.filter(isRemoved).map((r) => r.id));
 
   const before = serialise(existing);
   const after = serialise(rows);

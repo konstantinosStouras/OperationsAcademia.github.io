@@ -37,7 +37,7 @@ import {
   publicPlacementRow, assignPlacementIds, placementId, placementOrder,
   collapseSamePerson, samePersonKey, joiningLine, PLACEMENT_PUBLIC_FIELDS,
 } from './placements-model.mjs';
-import { marketYear, keyOf } from './jobs-model.mjs';
+import { marketYear, keyOf, removalSpecs } from './jobs-model.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -181,16 +181,19 @@ async function main() {
   assignPlacementIds(fresh);
 
   const existing = await readPlacementsStrict(PLACEMENTS);
-  const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
-  /* Takedowns are keyed on the id as well as the reference. `ref` is issued by
-     the FORM, so an imported row has none and the maintainer hiding one used
-     to change nothing at all — the row was carried on as an orphan. See the
-     long note in build-jobs.mjs; this is the same fix in the twin pipeline. */
-  const removeIds = new Set();
-  for (const d of pulled) {
-    const v = d.data();
-    for (const k of [v.publishedId, d.id]) if (k) removeIds.add(String(k));
-  }
+  /* Takedowns are keyed on the id as well as the reference — `ref` is issued
+     by the FORM, so an imported row has none and hiding one used to change
+     nothing at all. `removalSpecs` decides whose word to take: a reference is
+     scoped to its owner, and an id is honoured only on a document the build
+     itself wrote, because both are published and either one unscoped is a
+     signed-in stranger taking down somebody else's row. The long note is in
+     jobs-model.mjs; this is the same fix in the twin pipeline. */
+  const { specs: removeSpecs, ids: removeIds } = removalSpecs(pulled);
+
+  /* ONE predicate for "this run takes that row down" — a reference is only a
+     takedown for the account that published the row. */
+  const isRemoved = (r) => removeIds.has(r.id) ||
+    removeSpecs.some((x) => x.ref && x.ref === r.ref && (x.owner || '') === (r.owner || ''));
 
 
   /* The maintainer's take-down list, honoured if it ever exists. The file is
@@ -209,7 +212,7 @@ async function main() {
      its row orphaned and therefore preserved, the opposite of the intent. */
   const liveIds = new Set(fresh.map((f) => f.row.id));
   const orphans = existing.filter((r) =>
-    !liveIds.has(r.id) && !removeIds.has(r.id) && !removeRefs.includes(r.ref));
+    !liveIds.has(r.id) && !isRemoved(r));
   if (orphans.length) {
     warn(`${orphans.length} placement(s) in placements.json have no document yet — carried unchanged.`);
   }
@@ -217,7 +220,7 @@ async function main() {
   const merged = mergePlacementRows(
     orphans,
     fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
-    removeRefs.concat([...removeIds].map((id) => ({ id }))));
+    removeSpecs);
   const { added, updated, removed } = merged;
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 

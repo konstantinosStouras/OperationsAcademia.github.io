@@ -22,6 +22,7 @@ import {
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
+  removalSpecs, buildOwned, ownerTag,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
@@ -2229,11 +2230,55 @@ async function testRefLessTakedown() {
      publishedId, by sheetId and by the document's own id, which for a migrated
      posting IS the row id (migrate-to-firestore.mjs). */
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
-  ok(/removeIds/.test(build), 'build-jobs.mjs keys takedowns on the id as well as the reference');
-  ok(/!removeIds\.has\(r\.id\)/.test(build),
+  ok(/removalSpecs\(pulled\)/.test(build),
+    'build-jobs.mjs keys takedowns on the id as well as the reference');
+  ok(/!isRemoved\(r\)\)/.test(build),
     'so a taken-down posting is no longer carried on as an orphan');
-  ok(/v\.publishedId, v\.sheetId, d\.id/.test(build),
-    'and it looks for that id everywhere a published row can be named from its document');
+  ok(/existing\.filter\(isRemoved\)/.test(build),
+    'and the change e-mail reports exactly the rows the file lost, not every reference asked for');
+
+  /* WHOSE WORD THE BUILD TAKES. Every one of these ids is published in
+     data/jobs.json and data/jobmarket.json, so an unscoped removal is a
+     signed-in stranger deleting somebody else's advertisement. */
+  const mine = { data: () => ({ uid: 'attacker-uid-1234567890', status: 'withdrawn',
+                                publishedId: 'victims-row', sheetId: 'a-workbook-row' }),
+                 id: 'random-doc-id' };
+  let r = removalSpecs([mine]);
+  eq([...r.ids], [],
+    'a row id named by a submission a BROWSER made is never honoured');
+  eq(r.specs, [], 'so it asks for no removal at all');
+
+  const theirs = { data: () => ({ uid: 'attacker-uid-1234567890', status: 'withdrawn',
+                                  ref: 'OA-JOB-SOMEBODY-ELSE' }), id: 'random-doc-id' };
+  r = removalSpecs([theirs]);
+  eq(r.specs.length, 1, 'a reference is still honoured');
+  eq(r.specs[0].ref, 'OA-JOB-SOMEBODY-ELSE', 'as itself');
+  ok(r.specs[0].owner, 'but SCOPED TO ITS OWNER — mergeRows keys ref:<owner>:<ref>');
+  eq(r.specs[0].owner, ownerTag('attacker-uid-1234567890'),
+    'by the same owner tag the published row carries');
+  /* and therefore it cannot reach a row somebody else published */
+  const victimRow = { id: 'v', ref: 'OA-JOB-SOMEBODY-ELSE', owner: ownerTag('the-real-owner-uid') };
+  eq(mergeRows([victimRow], [], r.specs).removed, 0,
+    'so withdrawing under a stolen reference removes nothing');
+  eq(mergeRows([victimRow], [], removalSpecs([{ id: 'x',
+    data: () => ({ uid: 'the-real-owner-uid', ref: 'OA-JOB-SOMEBODY-ELSE' }) }]).specs).removed, 1,
+    'while the account that published it still takes its own posting down');
+
+  /* A document the BUILD wrote — the migration's, and the mirrors — carries no
+     uid, which the rules make impossible for a browser to produce. Those are
+     the only ids the build takes at their word. */
+  r = removalSpecs([{ id: '2026-somewhere-20250901',
+                      data: () => ({ uid: null, status: 'hidden', sheetId: 'a-workbook-row' }) }]);
+  ok(r.ids.has('2026-somewhere-20250901'), 'the migration\'s own document id is honoured');
+  ok(r.ids.has('a-workbook-row'), 'and the mirror\'s sheetId');
+  ok(!buildOwned({ uid: 'x' }), 'a submission with a uid is a browser\'s, never the build\'s');
+  ok(buildOwned({ uid: null }), 'and one without is the build\'s');
+  /* The rules are what make that true, so they are pinned here too. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(rules.includes('request.resource.data.uid == request.auth.uid'),
+    'a browser cannot create a submission without a uid');
+  ok(rules.includes('request.resource.data.uid == resource.data.uid'),
+    'nor clear the uid on one it owns');
 }
 
 async function testSheetMirrors() {

@@ -590,6 +590,61 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
 /** The status of a mirror: inert, and outside every query the build makes. */
 export const MIRROR_STATUS = 'sheet';
 
+/* --------------------------------------------------- WHOSE WORD TO TAKE
+
+   THE RULE, and it is a security boundary, not a tidiness one: a field that
+   NAMES A PUBLISHED ROW — `sheetId`, `publishedId`, and the document's own id
+   — is honoured only on a document THE BUILD ITSELF WROTE. Anything else is a
+   string a signed-in stranger chose.
+
+   `uid` is what tells them apart, and the security rules make it decisive: a
+   create is refused unless `uid == request.auth.uid` (a non-empty string), an
+   update is refused unless `uid` is unchanged, and the account-merge branch
+   demands a uid at least ten characters long. So a document a browser made
+   ALWAYS carries a real uid, and only the Admin SDK — the migration, and
+   `sheetMirrorDoc` here — can produce one with none.
+
+   Without this, both halves of the takedown and hand-over machinery are a
+   privilege escalation. Any signed-in account could post a submission
+   carrying `publishedId: '<somebody else's row id>'`, withdraw it, and have
+   the next build delete that posting; or carry `sheetId: '<a workbook row
+   id>'` and have the build publish THEIR content in place of the workbook's.
+   Both ids are readable straight out of the served data/jobs.json and
+   data/jobmarket.json. */
+
+/** Does this submission's own word about which row it is count? */
+export function buildOwned(doc) {
+  return !!doc && !doc.uid;
+}
+
+/**
+ * The removal specs a set of withdrawn/hidden documents may ask for.
+ *
+ * A REFERENCE is scoped to its owner — `{ ref, owner }`, which mergeRows keys
+ * as `ref:<owner>:<ref>`, exactly the contract mergeRows documents and that
+ * this build was quietly not honouring: it passed bare reference strings,
+ * which delete a row whoever posted it, and `ref` is published in
+ * data/jobs.json for anyone to copy.
+ *
+ * An ID is taken only from a build-written document (see `buildOwned`), where
+ * it is the migration's own document id, the mirror's `sheetId`, or the
+ * `publishedId` this build stamped. That is the only way a ref-less row — the
+ * legacy import's and the workbook's, which is every row served today — can be
+ * addressed at all.
+ */
+export function removalSpecs(docs = []) {
+  const out = [];
+  const ids = new Set();
+  for (const d of docs) {
+    const v = (d && (typeof d.data === 'function' ? d.data() : d.data)) || {};
+    if (v.ref) out.push({ ref: v.ref, owner: ownerTag(v.uid) || text(v.owner, 64) });
+    if (!buildOwned(v)) continue;
+    for (const k of [v.publishedId, v.sheetId, d && d.id]) if (k) ids.add(String(k));
+  }
+  for (const id of ids) out.push({ id });
+  return { specs: out, ids };
+}
+
 /**
  * The inert document that gives the maintainer an editing handle on a row the
  * job market tracking sheet publishes.
