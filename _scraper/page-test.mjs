@@ -1811,6 +1811,65 @@ for (const [pageName, dataset, patch] of [
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
 
+/* ----------------------- an override is DATA, never markup and never a scheme
+
+   `rowOverrides` is PUBLIC-READ: whatever it holds is rendered for every
+   visitor, on three pages, so an override that could carry markup or a
+   `javascript:` URL would be stored XSS on the whole site the moment the
+   maintainer's account was ever compromised — and a wrong-looking paste would
+   break the page long before that. The rules bound the LENGTH of each field;
+   nothing there can bound its CONTENT, so the property has to hold at render
+   time, and this is where it is pinned.
+
+   It holds today because the card renderer uses textContent for a plain value
+   and the one innerHTML it does use receives an anchor that was BUILT AS DOM —
+   href through OAList.safeUrl, label through textContent — and serialised. All
+   three are one edit away from not holding. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/xss: ' + e.message));
+  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(400);
+
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  const MARKUP = '<img src=x onerror="window.__xss=1">Somewhere';
+
+  await p.evaluate(([id, markup]) => {
+    window.__xss = 0;
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: false,
+      rows: { [id]: {
+        institution: markup,
+        comments: markup,
+        adUrl: 'javascript:window.__xss=1',
+      } },
+    });
+  }, [victim, MARKUP]);
+  await p.waitForTimeout(400);
+
+  const card = `[id="job-${victim}"]`;
+  eq(await p.$eval(card + ' .oa-card-title', (n) => n.textContent), MARKUP,
+    'an override that looks like markup is shown as the text it is');
+  eq(await p.$$eval(card + ' img', (n) => n.length), 0,
+    'and is never parsed into an element');
+
+  // open the card so its detail rows render, then look at what they hold
+  await p.click(card + ' .oa-card-head');
+  await p.waitForTimeout(200);
+  eq(await p.$$eval(card + ' .oa-card-body img', (n) => n.length), 0,
+    'the same is true of every field in the body');
+  eq(await p.$$eval(card + ' a', (as) =>
+    as.filter((a) => /^javascript:|^data:/i.test(a.getAttribute('href') || '')).length), 0,
+    'and a javascript: URL never becomes a link');
+  eq(await p.evaluate(() => window.__xss), 0, 'nothing an override carries executes');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/xss')), [],
+    'and the page raises no error over it');
+  await p.close();
+}
+
 /* ------------------------------- Edit / Take down on the universities map
 
    The map is not an OAList page, so its half of the archive editing lives on
