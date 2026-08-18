@@ -66,7 +66,14 @@ const FROZEN_BREAKAGE = new Set([
   'v1/survey-faqs.html|informed-consent-statement',
 ]);
 
-/* Directories with nothing served in them. "back up" is exactly what it says.
+/* Directories with nothing served in them. `_backup` is exactly what it says —
+   and it is spelled with the leading underscore for a reason. It was `back up`,
+   which Jekyll happily published, so GitHub Pages was serving 51 old copies of
+   this site's pages to anyone who asked for them: not linked from anywhere, not
+   noindexed, and every one of them declaring `og:url` = the home page. This
+   check believed the directory was unserved, which is what let that sit. A
+   leading underscore makes the belief true, the same way it does for
+   `_scraper` and `_functions` below.
 
    Every DOT-directory is skipped by the walk below rather than named here:
    `.git` was, and the same reasoning covers whatever tooling puts beside it.
@@ -74,7 +81,7 @@ const FROZEN_BREAKAGE = new Set([
    copy of this whole repository INSIDE it — descending into one made this
    check report the archive's own pages as live-site failures. Nothing served
    by GitHub Pages lives under a leading dot. */
-const SKIP_DIRS = new Set(['node_modules', 'back up', '_functions', '_scraper']);
+const SKIP_DIRS = new Set(['node_modules', '_backup', '_functions', '_scraper']);
 
 const problems = [];
 let links = 0;

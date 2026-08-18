@@ -21,6 +21,14 @@
         one directory, so a relative `data/jobs.json` would ask for
         /v2/data/jobs.json and 404 — the list would render its "could not be
         loaded" state and nothing would say why.
+        AN og:image IS THE SAME PROBLEM WITH NO SYMPTOM. Open Graph requires a
+        FULL absolute URL; a crawler given `/images/OA_logo_1200x294.png` — a
+        path, not a URL — ignores it, and the card comes out without a picture
+        while the page itself looks perfectly healthy. Fifteen of these pages
+        carried exactly that, and one carried `OA_logo_1200x294` with no
+        directory and no extension at all, inherited from the 2014 site. So
+        og:image, og:image:secure_url and twitter:image are given the site's
+        own origin here, the same as /v1/ was on 2026-08-18.
      4. The archive's OWN chrome stays relative: v2/assets/oa-*.js|css are this
         design's copies, deliberately frozen at what it shipped with, so the
         root is free to move on. Its page-to-page links stay relative too, so a
@@ -89,6 +97,16 @@ function patchHtml(file, src) {
 
   // 3. shared, root-served things
   for (const [re, to] of SHARED) out = out.replace(re, to);
+
+  // 3b. an og:image is a URL, not a path (see rule 3 above)
+  out = out.replace(
+    /(<meta (?:property="og:image(?::secure_url)?"|name="twitter:image") content=")(?!https?:)([^"]*)(")/gi,
+    (_m, a, v, z) => {
+      let f = v.trim().replace(/^\/+/, '');
+      if (!/\.(png|jpe?g|gif|webp)$/i.test(f)) f += '.png';   // the extensionless one
+      if (!f.startsWith('images/')) f = 'images/' + f;
+      return a + SITE + '/' + f + z;
+    });
 
   // 5. the page's own address, not the root's
   const self = SITE + '/v2/' + path.basename(file);

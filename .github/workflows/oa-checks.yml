@@ -12,6 +12,10 @@ on:
       - 'assets/**'
       - 'data/**'
       - '_scraper/**'
+      # share-check.mjs measures the real pixels of every og:image against the
+      # numbers the pages declare, so a card regenerated at a new size has to
+      # run the checks even when no HTML moved.
+      - 'images/**'
       - '_firestore.rules'
       - '_storage.rules'
       - 'v1/**'
@@ -24,6 +28,10 @@ on:
       - 'assets/**'
       - 'data/**'
       - '_scraper/**'
+      # share-check.mjs measures the real pixels of every og:image against the
+      # numbers the pages declare, so a card regenerated at a new size has to
+      # run the checks even when no HTML moved.
+      - 'images/**'
       - '_firestore.rules'
       - '_storage.rules'
       - 'v1/**'
@@ -80,6 +88,14 @@ jobs:
           set -e
           node _scraper/link-check.mjs --verbose
           node _scraper/archive-v2.mjs --check
+
+      # A preview that does not render tells nobody anything — which is how
+      # twenty-four of twenty-five pages lost their card, and how sixty-eight
+      # served files that were not the home page came to declare the home
+      # page's address, without a single check going red. See the file's own
+      # header.
+      - name: Every page previews properly when somebody shares it
+        run: node _scraper/share-check.mjs --verbose
 
       - name: No secret ever reaches a served file
         run: |

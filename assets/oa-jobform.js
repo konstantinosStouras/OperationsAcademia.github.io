@@ -589,7 +589,7 @@
   function enterEditMode() {
     if (!EDIT_ID) return;
 
-    document.title = 'Edit a posting - OperationsAcademia.org';
+    document.title = 'Edit a posting — Operations Academia';
     // the page heading, in whichever design is serving this page: the live
     // site heads a page with .v3-pa-hero .v3-h1, the /v2/ archive with
     // .title-heading h2. Renaming neither would leave the form claiming to

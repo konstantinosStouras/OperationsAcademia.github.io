@@ -95,7 +95,24 @@
       first frame, before Firebase has said a word. Both are optional and both
       are re-derived from the truth (the Firestore profile) as soon as it
       lands, so a stale one is corrected within the same page load. */
+  /** Keep the pre-paint reserve in step with what is actually painted.
+
+      The snippet in every page's <head> stamps this attribute once, from the
+      hint, before the first paint — which is the whole point of it. But it is
+      then a statement about a page that goes on living: sign out at a wide
+      window and the chip becomes a 96px "Sign in" button while the attribute
+      still says 'in', so the stylesheet holds a 186px floor open and the
+      button floats 90px in from the edge with a hole beside it. The same
+      shape appears when the hint says signed-in and Firebase says otherwise —
+      an expired or revoked session. Whoever changes the answer says so. */
+  function stampAuthState(signedIn) {
+    try {
+      document.documentElement.setAttribute('data-oa-auth', signedIn ? 'in' : 'out');
+    } catch (e) { /* nothing sane to do */ }
+  }
+
   function writeHint(u, name) {
+    stampAuthState(!!u);
     try {
       if (u) {
         var prev = readHint();
@@ -411,6 +428,10 @@
     }
 
     var u = state.user || (!state.resolved ? readHint() : null);
+    /* …and the reserve follows the control, not the other way round: the head
+       stamped its guess from the hint before any of this ran, and this is the
+       first moment anything KNOWS. */
+    if (state.resolved || u) stampAuthState(!!u);
     if (!u) {
       host.innerHTML = '<button type="button" class="oa-acct-btn" id="oa-signin">Sign in</button>';
       $('#oa-signin').addEventListener('click', openAuth);
