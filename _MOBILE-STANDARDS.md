@@ -67,6 +67,21 @@ marked global.
    kept, hover-only effects gated on `(hover: hover) and (pointer: fine)` so
    a tap does not leave a stuck hover state.
 
+10. **A panel that opens over the page is a list too.** The posting form's
+    name picker (`assets/oa-combo.js`) is not a table and not part of the
+    shared engine, but it opens exactly the kind of panel rule 6 is about, so
+    it holds the same three rules on a phone: `50vh` and
+    `calc(100vw - 28px)`, 42px rows, and long names wrapping rather than
+    widening the page. It shipped as a 300px panel of 33px rows precisely
+    because a form is not a list page and nothing measured it —
+    `page-test.mjs` now opens it at 390px and measures all three.
+
+    A height cap is only half of rule 6: the panel hangs under its field, and
+    on a phone a field is halfway down the screen, so 422px of list ran 61px
+    past the fold and a field near the bottom put the whole thing out of
+    sight. It now **measures after opening** and takes whichever side has more
+    room, growing no further than that side allows.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and

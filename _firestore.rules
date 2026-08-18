@@ -38,6 +38,26 @@ service cloud.firestore {
         && request.auth.token.email == 'kstouras@gmail.com';
     }
 
+    /* `mergedFrom` records the account a posting was handed over FROM, and the
+       scheduled build reads it: a poster who merged their accounts still
+       carries the OLD account's owner tag on their published row until it is
+       republished, so a withdrawal has to be matched against both
+       (`removalSpecs` in _scraper/jobs-model.mjs). That makes the field
+       load-bearing, and it is therefore pinned to the merge that writes it —
+       the ordinary correct/withdraw path may not introduce or change it.
+
+       Without this, the scoping the build does is defeated by the thing it
+       relies on: any signed-in account could look a victim's raw uid up
+       through `accountKeys` (readable one-at-a-time to anyone signed in),
+       name it as `mergedFrom` on a submission carrying the victim's published
+       `ref`, withdraw it, and have the next build take the victim's posting
+       off the site. */
+    function mergedFromUnchanged() {
+      return ('mergedFrom' in request.resource.data) == ('mergedFrom' in resource.data)
+          && (!('mergedFrom' in request.resource.data)
+              || request.resource.data.mergedFrom == resource.data.mergedFrom);
+    }
+
     function str(field, maxLen) {
       return !(field in request.resource.data)
         || (request.resource.data[field] is string
@@ -115,6 +135,8 @@ service cloud.firestore {
                     && request.resource.data.createdAt == request.time
                     && shapeOk()
                     && !('featured' in request.resource.data)
+                    // the account merge writes this; a new posting never does
+                    && !('mergedFrom' in request.resource.data)
                     && request.resource.data.keys().size() <= 34;
 
       // A poster may read, correct and withdraw their own posting.
@@ -127,6 +149,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && featuredUnchanged()
+                    && mergedFromUnchanged()
                     && shapeOk();
 
       // MERGING TWO ACCOUNTS hands a posting over to the account its owner is
@@ -193,6 +216,7 @@ service cloud.firestore {
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && candShapeOk()
+                    && !('mergedFrom' in request.resource.data)
                     && request.resource.data.keys().size() <= 30;
 
       allow read: if isOwner(resource.data.uid) || isAdmin();
@@ -201,6 +225,7 @@ service cloud.firestore {
       allow update: if isOwner(resource.data.uid)
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
+                    && mergedFromUnchanged()
                     && candShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions
@@ -242,6 +267,7 @@ service cloud.firestore {
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && plShapeOk()
+                    && !('mergedFrom' in request.resource.data)
                     && request.resource.data.keys().size() <= 25;
 
       allow read: if isOwner(resource.data.uid) || isAdmin();
@@ -249,6 +275,7 @@ service cloud.firestore {
       allow update: if isOwner(resource.data.uid)
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
+                    && mergedFromUnchanged()
                     && plShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions
@@ -368,6 +395,84 @@ service cloud.firestore {
                        || request.resource.data.hidden is bool)
                    && (!('t' in request.resource.data)
                        || request.resource.data.t is number);
+      /* WITHOUT THIS, HIDING AN ENTRY IS A ONE-WAY DOOR. `allow write` cannot
+         cover a delete: `request.resource` is null on one, so
+         `request.resource.data.keys()` errors and the condition is false. The
+         list then filters the hidden entry out for everybody, the maintainer
+         included, leaving nothing on the page to press to bring it back — the
+         only way out was the Firestore console. (index.html now also shows the
+         maintainer what they have hidden, so there is something to press.) */
+      allow delete: if isAdmin();
+    }
+
+    // ---------------------------------------------- the archives' overrides
+    //
+    // WHY THIS EXISTS. Three datasets on this site have no write path at all:
+    // data/past-postings.json, data/recent-faculty.json and
+    // data/universities.json are FROZEN ARCHIVES, written once by
+    // _scraper/import-legacy-tables.mjs from Google Sheets and committed —
+    // .github/workflows/oa-legacy-import.yml has no schedule. So the pages
+    // that render them (previous-markets.html, recent-faculty.html, the map on
+    // universities.html) were read-only for everybody, the maintainer
+    // included: the only way to correct a school's name or take an old row off
+    // the site was to edit a spreadsheet and dispatch a workflow by hand.
+    //
+    // This is the `newsOverrides` pattern above, generalised: the committed
+    // JSON stays the source of truth and an override MASKS or REWORDS one of
+    // its rows at read time. The list is public, so reads are open and an
+    // override reaches every visitor, not only the maintainer; only the
+    // maintainer writes. `dataset` is a field rather than only a doc-id prefix
+    // because the pages query by it (a page reads its own dataset's overrides
+    // and nothing else).
+    //
+    // DELIBERATELY NOT AN ADD PATH. An override only ever changes a row that
+    // already exists — `rowId` names one. A school the archive does not carry
+    // is added upstream, in the Google Sheet the import reads, because two
+    // places that can both create the same row is the parallel bookkeeping
+    // build-jobs.mjs warns about, and it rots: the import would later publish
+    // the school itself and the site would list it twice.
+    match /rowOverrides/{id} {
+      allow read: if true;
+      allow write: if isAdmin()
+                   && id == request.resource.data.dataset + '__' + request.resource.data.rowId
+                   && request.resource.data.dataset in
+                        ['past-postings', 'recent-faculty', 'universities']
+                   && str('dataset', 40) && str('rowId', 200)
+                   && request.resource.data.keys().hasOnly([
+                        'dataset', 'rowId', 'hidden', 't',
+                        // the job-shaped archive (past postings)
+                        'institution', 'department', 'school', 'unit', 'type',
+                        'country', 'applyBy', 'comments',
+                        'adUrl', 'postedAtUrl', 'furtherInfoUrl',
+                        // recently-hired faculty
+                        'name', 'last', 'placement', 'almaMater', 'undergrad', 'webUrl',
+                        // the universities map
+                        'schoolDept', 'address', 'lat', 'lng', 'mapUrl', 'facultyUrl',
+                      ])
+                   && str('institution', 220) && str('department', 260)
+                   && str('school', 200)      && str('unit', 200)
+                   && str('type', 40)         && str('country', 80)
+                   && str('applyBy', 400)     && str('comments', 1500)
+                   && str('adUrl', 600)       && str('postedAtUrl', 600)
+                   && str('furtherInfoUrl', 600)
+                   && str('name', 220)        && str('last', 120)
+                   && str('placement', 220)   && str('almaMater', 220)
+                   && str('undergrad', 220)   && str('webUrl', 600)
+                   && str('schoolDept', 320)  && str('address', 320)
+                   && str('mapUrl', 600)      && str('facultyUrl', 600)
+                   && (!('lat' in request.resource.data)
+                       || (request.resource.data.lat is number
+                           && request.resource.data.lat >= -90
+                           && request.resource.data.lat <= 90))
+                   && (!('lng' in request.resource.data)
+                       || (request.resource.data.lng is number
+                           && request.resource.data.lng >= -180
+                           && request.resource.data.lng <= 180))
+                   && (!('hidden' in request.resource.data)
+                       || request.resource.data.hidden is bool)
+                   && (!('t' in request.resource.data)
+                       || request.resource.data.t is number);
+      allow delete: if isAdmin();
     }
 
     // --------------------------------------------------- usage (admin-only)

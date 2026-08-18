@@ -71,7 +71,49 @@ the site. So those rows are deliberately never copied into Firestore —
 would win over the sheet at the next build and a deleted row could never leave.
 For the same reason they are excluded from the orphan carry in `build-jobs.mjs`
 (a missing `data/jobmarket.json` still removes nothing — only a file that
-exists and no longer lists a posting does).
+exists and no longer lists a posting does). Both of those worries are now
+answered rather than avoided — see the next section — but they are answered by
+the BUILD, on the sheet's own terms, not by a migration; `migratable()` still
+skips these rows.
+
+### …and the maintainer can edit both, through the same form
+
+A posting's Edit and Take down controls are drawn only where the page can name
+a `jobSubmissions` DOCUMENT for the row (`docIdFor` in `assets/oa-jobedit.js`),
+so the tracking sheet's postings — which had none by design — carried no
+controls at all: the maintainer could edit every posting on the site EXCEPT the
+ones the sheet publishes. **Every workbook row now gets a MIRROR**: an inert
+document (`status: 'sheet'`, a value no query in the pipeline reads) created and
+refreshed from the workbook by `syncSheetMirrors` in `build-jobs.mjs`, whose
+only job is to be an editing handle. `sheetMirrorDoc`/`mirrorDiffers`/
+`unclaimedSheetRows` in `jobs-model.mjs` are the pure half.
+
+**Saving an edit is the hand-over, and the status is the whole of it.**
+`post-a-job.html` sets `status: 'queued'` on every edit it saves — it always
+has — so a mirror simply becomes an ordinary live submission, and a status
+other than `sheet` means the maintainer has taken the posting over:
+`build-jobs.mjs` then publishes the document and DROPS the workbook's row
+(`unclaimedSheetRows`, applied before the merge — left in, the sheet row
+arrives last and wins, which would make an edit look saved and change nothing).
+The workbook stops maintaining that one posting, and the run says so.
+
+**What the workbook KEEPS is existence.** A row deleted there takes its posting
+off the site whether or not a document exists for it — the property that made
+copying these rows into the database unsafe in the first place, kept by pinning
+each mirror to its row with `sheetId`. So `migratable()` still refuses them:
+mirrors are the sheet's own, not a migration.
+
+**Taking a posting down is keyed on the id as well as the reference.** `ref` is
+issued by the FORM and by nothing else, so the 94 postings from the legacy
+import and the 16 from the workbook have none — today that is every row in
+`data/jobs.json`. Keyed on `ref` alone, the takedown removed nothing: the row
+was carried on as an ORPHAN, the button said "Taken down", and the posting
+stayed on the site for ever. `removalSpecs` (jobs-model.mjs) and the `{ id }` spec in
+`mergeRows`/`mergeCandidateRows`/`mergePlacementRows` are the fix, in all three
+pipelines. It also decides WHOSE WORD to take: an id is honoured only on a
+document the build itself wrote, and a reference only for the account that
+published the row — both are printed in `data/jobs.json`, so an unscoped
+removal is a signed-in stranger taking down somebody else's posting.
 
 **When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
 never by hand-editing `data/`.** That file is rewritten from the workbook every
@@ -114,6 +156,55 @@ Local runs: `node _scraper/higheredjobs-verify.mjs --apply-only` (re-apply the
 committed cache) or `--scan`. A real read needs egress to higheredjobs.com,
 which this build environment denies (403), so it happens on the runners.
 
+## The frozen archives, and how the maintainer edits them
+
+`data/past-postings.json`, `data/recent-faculty.json` and
+`data/universities.json` are written ONCE by `_scraper/import-legacy-tables.mjs`
+from Google Sheets and committed — `.github/workflows/oa-legacy-import.yml` has
+no schedule. They have no Firestore backing and never will, so the three pages
+that render them (`previous-markets.html`, `recent-faculty.html`, and the
+Leaflet map on `universities.html`) were read-only for EVERYBODY, the
+maintainer included: correcting a school's name meant editing a spreadsheet and
+dispatching a workflow by hand.
+
+**`assets/oa-rowedit.js` corrects a row AT READ TIME**, from a public-read,
+admin-write Firestore collection `rowOverrides` (`<dataset>__<rowId>`). It is
+the `newsOverrides` pattern already shipped on `/whats-new`, generalised: the
+committed JSON stays the source of truth, an override MASKS or REWORDS one of
+its rows, the correction reaches every visitor, and **re-running the import
+cannot undo it** — the overlay is applied on top of whatever the import
+produces. One module serves all three: `apply()` for the rows a page renders,
+`onCard()` for an OAList card, `onPopup()` for a map pin (`assets/oa-uni-map.js`
+gained `prepare`/`onPopup`/`refresh` hooks for exactly this).
+
+**It is deliberately NOT an add path.** An override only ever changes a row that
+already exists. A school the archive does not carry is added upstream, in the
+sheet the import reads — two places that can both create the same row is the
+parallel bookkeeping `build-jobs.mjs` warns about, and it rots: the import would
+later publish the school itself and the site would list it twice.
+
+**Hiding is never a one-way door.** A row the maintainer takes down is hidden
+from every visitor but still shown TO THEM, faded and carrying Restore — filter
+it out for everybody and there is nothing left on the page to press to bring it
+back. `newsOverrides` had exactly that shape (and no `allow delete`, because
+`request.resource` is null on a delete so an `allow write` condition errors and
+evaluates false); both were fixed together.
+
+**Adding a field to the editor means adding it to the rules in the same
+change** — `selftest.mjs` pins every key `oa-rowedit.js` can write against the
+`hasOnly` list in `_firestore.rules`, so a field with no rule fails the build
+rather than the maintainer's save.
+
+`previous-markets.html` carries TWO kinds of row and therefore two editors: the
+postings folded in from `data/jobs.json` are real submissions and get the FULL
+form (`oa-jobedit.js`), and it is the ONLY page that reaches them — the jobs
+page and the one-pager both filter to the market under way. `oa-rowedit.js`
+stands down wherever `oa-jobedit.js` has drawn.
+
+**None of this is live until the rules are deployed.** No workflow runs
+`firebase deploy` — it needs an interactive login — so after any change to
+`_firestore.rules`, run `firebase deploy --only firestore:rules` from the
+repository root. See `_SETUP-FIREBASE.md` §4.
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
@@ -196,6 +287,101 @@ read the way the posting will publish. `data/vocab.json`, the list the form
 offers, is built from the canonical rows, so the next poster is offered the
 spelling the site already uses.
 
+It also has a third level: `byUniversity[uni].bySchool[school]`, and a
+top-level `bySchool` for the case where the university is not known yet. See
+the next section.
+
+## The posting form's three name fields cascade
+
+`post-a-job.html` asks for the university, the school and the department
+separately, and the three are connected: choosing a university narrows the
+school list to that university's schools, and choosing a school narrows the
+department list to that school's departments. The lists come from
+`data/vocab.json` (`byUniversity[uni].bySchool[school]`, plus a top-level
+`bySchool`), and the picker renders a scope under its own heading —
+`setScope()` in `assets/oa-combo.js`.
+
+**The vocabulary has a second source: `data/universities.json`**, the site's
+own Universities directory. Its 254 curated (institution, school, department)
+rows are what let the cascade work for a university that has never posted here
+— they add names and, more importantly, they say which department sits in
+which school. They carry NO posting count (the "4 postings" note stays a count
+of postings), and they are put through `canonPlace()` like everything else,
+since a directory row has never been through an ingest. `data/past-postings.json`
+is deliberately NOT a source: its legacy rows never separated the institution
+from the school and the department, so feeding it in would put the very mess
+the vocabulary ends into the university picker.
+
+**A scope is a HINT, never a restriction.** Typing searches the whole site
+under a second heading, and a name nobody has posted before is still offered as
+a new one — a school that opens a department tomorrow must stay postable. Two
+rules follow, both pinned in `page-test.mjs`:
+
+- changing the university **re-scopes the lists, never clears the fields**.
+  What the poster typed is theirs;
+- a NEAR MISS still finds the university: on leaving the field, text that can
+  only be the beginning of one university becomes that university ("tulane" →
+  "Tulane University"). Without it the cascade quietly went away — the school
+  list opened at every school on the site and the posting was filed under a
+  name nobody else uses — and the only thing on screen that said so was the
+  absence of a heading. Text that could be several universities, or none, is
+  left exactly as typed;
+- the fields are put into the published spelling as the poster leaves them, by
+  the same `canonPlace()` the submission goes through — so what they read back
+  is what everybody else will read. The one exception: a lone institution with
+  no school or department yet is canonicalised on its own, because
+  `canonPlace()` reads a lone institution as one of the archive's fused
+  one-column values and takes it apart.
+
+Two smaller conveniences: a department the site has only ever seen in one
+school fills that school in above it, and `assets/oa-combo.js` takes its idea
+of "the same name" from its caller (`key`), so the picker itself needs no name
+rules of its own.
+
+**Grouping is not publishing.** `institutionKey()` in `assets/oa-schools.js`
+answers "is this the same university?" — a trailing acronym and a leading "The"
+folded away — and is used ONLY where names are grouped: `data/vocab.json` and
+the form reading it back. `canonInstitution()` goes on publishing each posting's
+own name, because its id and its permalink are built from it, and "Baruch
+College, The City University of New York (CUNY)" is deliberately published
+whole. The directory lists one university under several names; the picker must
+not offer half its schools from one entry and half from the other.
+
+**Three names already in three columns go through `canonColumns()`, never
+`canonPlace()`.** `canonPlace` takes apart a value that names more than one
+thing — right for the archive's single column, and a guess anywhere else. Over
+the posting form's three boxes it read "University of California, Los Angeles
+(UCLA)" as a university and a department, publishing under "University of
+California" (Berkeley, one word shorter, was left alone); over the Universities
+directory's columns it made departments called "Camden, Operations Management"
+out of Rutgers' campus and "Computing and Applied Sciences, Industrial
+Engineering" out of half of Clemson's college. `canonColumns` keeps the
+CURATED fused pairs — a name somebody wrote down as naming both really does —
+and drops the separator guesswork, which across every name in the data fires
+three times and is wrong twice.
+
+**The site's own links follow the name.** Every posting carries a "Further
+info" link into the Universities page, built from its institution
+(`jobs-model.universitiesLink`). Canonicalising a name left six of them asking
+for the spelling the posting was made under, four landing on nothing — so a
+STORED link that is one of ours is regenerated (`ownUniversitiesLink`), while a
+link the poster actually gave is never touched. `jobmarket-sheet.mjs` builds it
+from the canonical name for the same reason.
+
+**A rename can move a name a saved e-mail alert watches for.** An alert holds
+free text, not a name, so nothing can canonicalise it the way `canonCountry`
+does. Instead the site's own text search (`assets/oa-list.js`) and the alert
+matcher (`assets/oa-alert-match.js`) — and the Universities map
+(`assets/oa-uni-map.js`), where those links land — fold punctuation, read "&"
+as "and", try
+the needle's own canonical form ("SCM" → "Supply Chain Management") and match an
+ALL-CAPS needle against the initials of the words in the field ("IEOR" finds
+"Industrial Engineering and Operations Research", whose acronym the canon
+dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
+matched what the site shows must go on matching it, and "what I see on the site"
+and "what I am e-mailed" cannot mean different things.
+
+
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks
@@ -210,6 +396,18 @@ spelling the site already uses.
 All four run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs
 build also runs the selftest AFTER writing `data/` and refuses to commit on
 a failure, so a red selftest silently stops publishing — fix it promptly.
+
+`page-test.mjs` skips itself with a friendly message when Playwright is not
+installed, which is right on a laptop and wrong in CI — there it exits 1
+instead (`process.env.CI`), because the workflow installs the browser two
+steps earlier and the only thing a skip could mean is that the install broke.
+A guard that reports green while running none of its checks is worse than no
+guard. For the same reason the CI step does not use `playwright install
+--with-deps`: that runs `apt-get` on every run whether or not the browser is
+cached, and on 2026-08-18 a failing-over Ubuntu mirror hung it until the job
+cap killed three runs of the same commit. The libraries ship with the runner
+image; the apt call is kept bounded and best-effort, and the browser launch is
+what proves it.
 
 `page-test.mjs` drives BOTH served designs: the checks that assert on the old
 chrome (`#nav`, `#header-wrapper`, `#titleBar`, `#navPanel`, `window.ga`,

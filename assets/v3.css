@@ -816,6 +816,13 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 
 /* admin-only curation controls on a What's-new item (drawn only when the
    admin is signed in — authorisation is the Firestore rules, not this CSS) */
+/* An entry the maintainer has hidden. Only they are shown it — the list
+   filters it out for everybody else — so it reads as withdrawn rather than
+   published, and carries Restore. */
+.v3-news-hidden { opacity: 0.55; }
+.v3-news-hidden strong { text-decoration: line-through; }
+.v3-news-admin span { color: #a3364a; font-size: 12px; align-self: center; }
+
 .v3-news-admin { margin: 8px 0 0; display: flex; gap: 10px; }
 .v3-news-admin button {
   font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;

@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "posting-form-cascade",
+   "date": "2026-08-18",
+   "title": "Posting a job: the university, school and department boxes now follow each other",
+   "summary": "The three name boxes on the job form are connected. Choose your university and the school box offers that university\u2019s schools; choose one of those and the department box offers that school\u2019s departments \u2014 so a posting takes a few seconds and lands under the names everybody else uses. They reach further than the postings, too: every university, school and department in the site\u2019s own Universities directory is offered, so a university posting here for the first time gets the same help, and choosing a department the site has only ever seen in one school fills that school in above it. Nothing is closed off \u2014 typing searches every name on the site, and a school or department nobody has posted before is still accepted with one click. Searching got better in the same change: a search for \u201cIEOR\u201d or \u201cSCM\u201d now finds the department the site spells out in full, on the site and in the e-mail alerts alike, so an alert you set up under an older spelling keeps reaching you.",
+   "url": "https://www.operationsacademia.org/post-a-job"
+  },
+  {
    "id": "one-spelling-per-school",
    "date": "2026-08-18",
    "title": "One spelling per university, school and department",

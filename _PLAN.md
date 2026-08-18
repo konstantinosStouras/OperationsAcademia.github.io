@@ -515,6 +515,161 @@ stamped `via: "report"` rather than `via: "page"`, and `needFetch` always
 re-reads anything not read from the page itself — a stand-in exists to be
 replaced by the source.
 
+### 3.8 The maintainer can edit everything — **DONE 2026-08-18**
+
+Reported from the live site: signed in as the owner, the jobs page showed Edit
+and Take down on some cards and not others. It was not a rendering quirk. Three
+distinct failures sat behind it, and fixing them properly reached every dataset
+on the site.
+
+**(a) The tracking sheet's postings had no editing handle — 16 of the 25 cards
+on the page.** A control is drawn only where `docIdFor` (`assets/oa-jobedit.js`)
+can name a `jobSubmissions` document, and the workbook's rows deliberately had
+none. They now get a **mirror**: an inert document, `status: 'sheet'` — a value
+no query in the pipeline reads — created and refreshed from the workbook by
+`syncSheetMirrors` in `build-jobs.mjs`. Saving an edit sets `status: 'queued'`,
+which `post-a-job.html` has always done, and that alone is the hand-over: the
+build then publishes the document and drops the workbook's row. The workbook
+keeps deciding which postings EXIST (each mirror is pinned to its row by
+`sheetId`), which is the property §1's design was protecting; the mirrors take
+nothing away from it. The 16 documents appear on the first build that runs with
+`FIREBASE_SERVICE_ACCOUNT` set.
+
+**(b) Take down did nothing, on all 110 rows.** Removal was keyed on the
+form-issued `ref`, and no published row has one — the legacy import and the
+workbook do not issue them. The document was marked hidden, the button said
+"Taken down", the orphan carry republished the row verbatim, and the change
+e-mail reported nothing. `removalSpecs` (and a `{ id }` spec in `mergeRows`) fixes
+it in all three pipelines, scoping each removal to whoever may ask for it. Only the maintainer was ever affected: every
+published row's `uid` is null, so no poster has ever owned one.
+
+**(c) The three frozen archives were read-only for everybody.**
+`data/past-postings.json`, `data/recent-faculty.json` and
+`data/universities.json` are written once by the legacy import and have no
+Firestore backing at all. `assets/oa-rowedit.js` corrects a row **at read
+time** from a public-read, admin-write `rowOverrides` collection — the
+`newsOverrides` pattern generalised. The committed file stays the source of
+truth, the correction reaches every visitor, and re-running the import cannot
+undo it. Deliberately not an add path: a school the archive lacks is added
+upstream, in the sheet, or the import would publish it a second time.
+
+Two smaller things fell out of it. `newsOverrides` had no `allow delete` (a
+delete carries no `request.resource`, so the write rule errors and refuses), so
+hiding a What's-new entry was permanent — both overlays now show the maintainer
+what they have hidden, with Restore. And `OAAccounts.isAdmin()` omitted the
+`emailVerified` check the rules require, so the feedback inbox could draw for a
+session every write would then bounce.
+
+**None of it is live until `firebase deploy --only firestore:rules` is run from
+the repository root.** No workflow can do it — the CLI needs an interactive
+login. `_SETUP-FIREBASE.md` §4 said `cd v2`, which has been wrong since the
+promotion; it now says the root and says the step is one a human has to
+remember.
+
+Still open, deliberately: there is no admin queue for submissions that fail
+validation (`build-jobs.mjs` warns and leaves them queued, reachable only from
+the Firebase console); `my-postings.html` is uid-scoped with no maintainer
+branch; `accountKeys` denies `list`/`delete` to the admin as well as everyone
+else; and `data/candidates.json` and `data/placements.json` are empty, so the
+candidate and placement editors — whose admin branches are correct — cannot be
+exercised end to end yet.
+
+---
+
+### 3.8 The posting form's three name fields cascade — **DONE 2026-08-18**
+
+The form asks for the university, the school and the department separately
+(§3.5), and each field offered a flat list of everything the site had ever
+published. Two consequences, both reported from the form itself: choosing
+Tulane offered *both* "A.B. Freeman School of Business" and "Freeman School of
+Business" — one school, posted twice, spelled twice — and the department box
+offered every department on the site rather than that school's.
+
+The first half is `assets/oa-schools.js` (the same day, in parallel): one
+spelling per place, canonicalised at every ingest. **This is the second half:
+the three fields now CASCADE.** `data/vocab.json` gained a third level,
+`byUniversity[uni].bySchool[school]`, and a top-level `bySchool` for the
+university-not-yet-known case; `assets/oa-combo.js` gained `setScope()`, which
+offers a scope under a heading ("Schools at Tulane University") while typing
+still searches the whole site under a second one ("Elsewhere on the site").
+The scope is a HINT: a school opening a department tomorrow must stay
+postable, so nothing is ever removed from reach.
+
+Four decisions worth recording:
+
+1. **The vocabulary reads the Universities directory too.**
+   `data/universities.json` — imported from the owner's own universities sheet
+   — carries 254 curated (institution, school, department) rows, which is what
+   lets the cascade work for a university that has never posted here. Directory
+   rows carry NO posting count, so "4 postings" stays a count of postings, and
+   each of their three names is canonicalised inside `buildVocab` (one by one —
+   see 5) because a directory row has never been through an ingest.
+   `data/past-postings.json` is
+   deliberately NOT a source: its legacy rows never separated the institution
+   from the school and the department, so feeding it in would put the very mess
+   this ends into the university picker.
+2. **The form shows what it will submit.** `oa-jobform.js` already
+   canonicalised the three names into the submission; it now writes them back
+   into the fields as the poster leaves them, so the preview, the posting and
+   everybody else's postings agree. The one exception is a lone institution
+   with no school or department yet — `canonPlace()` reads that as one of the
+   archive's fused one-column values and takes it apart, which is right at
+   ingest and wrong under a poster who has simply not reached the next field.
+3. **A rename can move a name a saved e-mail alert was watching for.** An
+   alert holds free text, not a name, so nothing can canonicalise it the way
+   `canonCountry` does. The fix is on the other side: the site's own text
+   search and the alert matcher now fold punctuation and read "&" as "and"
+   (one rule, pinned in both files), which is strictly more forgiving and
+   keeps "what I see on the site" and "what I am e-mailed" the same question.
+   A fold alone rescued only the "&"-versus-"and" renames, and thirteen
+   free-text alerts measured silent against the canonicalised postings — "SCM",
+   "IEOR", "DADS", "Penn State", "Management Sciences Area" — so the matcher
+   also tries the needle's own canonical form ("SCM" → "Supply Chain
+   Management") and reads an ALL-CAPS needle as an acronym to be matched
+   against the initials of the words in the field ("IEOR" finds "Industrial
+   Engineering and Operations Research", whose acronym the canon dropped).
+   Twelve of the thirteen are rescued. The thirteenth is "IT Management", now
+   published as "Information Technology Management": no fold, canon or acronym
+   reaches it, and it is recorded here rather than papered over.
+4. **Grouping a university is not naming it.** The directory lists one
+   university under several names ("City University of Hong Kong (CityU)"
+   beside "City University of Hong Kong"), and the picker offered each as its
+   own university with its own schools — so half a university's schools were
+   invisible from the other half. `institutionKey()` folds a trailing acronym
+   and a leading "The" for GROUPING only, and deliberately does not touch what
+   is published: a posting's id and permalink are built from its institution,
+   and an earlier attempt to canonicalise those renamed KAIST and Baruch and
+   would have rewritten ids across the whole archive.
+5. **Three names already in three columns go through `canonColumns()`.**
+   `canonPlace()` takes apart a value that names more than one thing, which is
+   right for the archive's single column and a guess anywhere else. Over the
+   Universities directory's columns it made departments out of Rutgers' campus
+   and half of Clemson's college ("Camden, Operations Management", "Computing
+   and Applied Sciences, Industrial Engineering"), both offered by the form;
+   and over the posting form's own three boxes it read "University of
+   California, Los Angeles (UCLA)" — typed into the University box, the others
+   still empty — as a university and a department, so the posting published
+   under "University of California" with a department called "Los Angeles",
+   while Berkeley, one word shorter, was left alone. Worse, the two outcomes
+   were coupled: a plain university with no department is properly refused,
+   and only the mangled one got through. `canonColumns` keeps the curated
+   fused pairs and drops the separator guesswork, which across every name in
+   the committed data fires three times and is wrong twice.
+6. **Two findings looked at and left alone.** `splitLegacyInstitution()` reads
+   "University of California, Los Angeles (UCLA)" as a university and a
+   department, which would merge it with Berkeley — but it cannot be reached
+   from the posting form, which refuses a posting with neither a school nor a
+   department, so it only ever sees the legacy rows it was written for. And one
+   CUHK-Shenzhen row loses its school to a UNIT_ALIASES entry ("Operations
+   Management Division, The School of Management and Economics" → "Operations
+   Management"); the school is a sibling row's, and reshaping that table is the
+   naming module's business rather than the cascade's.
+7. **`canonUnit()` had to become idempotent.** A department ending in its own
+   acronym — "Engineering Management, Information, and Systems Department
+   (EMIS)", from the directory — lost the acronym but kept the wrapper word,
+   because the wrapper was only stripped while it was last. It now strips to a
+   fixed point. Nothing in the postings hit it; the directory did, the first
+   time anything canonicalised it.
 ---
 
 ## 4. Things to decide
@@ -524,6 +679,7 @@ replaced by the source.
 | Keep the Google Form running in parallel during the transition? | **Yes, for one job market year.** Two intake paths is a nuisance but a broken intake in September is worse. The v2 form links to the Google form while Firebase is unconfigured, so this is already the behaviour. |
 | Auto-publish, or review? | You chose **auto-publish for signed-in users**. Worth revisiting after a term: it removes your bottleneck, but the old `OK` column was doing real work — several rows in the raw tab never made it to the display tab. |
 | Keep `/previous-markets` as a separate page? | **No.** It is the same data. A "Job market year" filter on `/jobs` does the job and halves the maintenance. |
+| Split the candidate form's "Current affiliation" the way the job form's three fields are split? | **Worth doing while it is free.** It is one free-text box ("Wharton, University of Pennsylvania") and `data/candidates.json` is empty today, so nothing has to be migrated; every profile posted from now on makes it more expensive, and until then a candidate's university cannot be matched to a posting's. |
 | A "Featured" posting — how does one become featured? | Currently only you can set it (the rules forbid a poster from doing so). If it is ever to be sold or granted, that needs a deliberate mechanism. |
 | The 49 job submissions that were never published (§1)? | **Look at them before cutover.** Some schools may believe their posting has been live for months. |
 | Replace the dead Universal Analytics with GA4, or drop analytics? | **Decide deliberately.** It has measured nothing since July 2023, but ~40 inline handlers depend on the `ga` global existing, so it cannot simply be deleted without touching every page. |

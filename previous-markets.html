@@ -168,6 +168,8 @@
     <script src="assets/oa-usage.js"></script>
     <script src="assets/oa-countries.js"></script>
     <script src="assets/oa-list.js"></script>
+    <script src="assets/oa-jobedit.js"></script>
+    <script src="assets/oa-rowedit.js"></script>
     <script>
     (function () {
       'use strict';
@@ -231,7 +233,54 @@
           var archive = (Array.isArray(jobs) ? jobs : [])
             .filter(function (r) { return !inCurrentMarket(r); });
 
-          OAList.mount({
+          /* TWO KINDS OF ROW ON ONE PAGE, so two editors — each card gets the
+             right one. The postings folded in from data/jobs.json are real
+             submissions with a document behind them, so oa-jobedit.js gives
+             those the FULL form (and, for the maintainer, every one of them:
+             they are off the jobs page's own window, so this is the only place
+             they can be reached from). The archive's own rows have no document
+             and never will — data/past-postings.json is written once by the
+             legacy import — so oa-rowedit.js corrects those at read time
+             instead. oa-jobedit runs first and oa-rowedit stands down wherever
+             it drew. */
+          /* An ADMIN-ONLY module must never be a hard dependency of a PUBLIC page.
+             assets/oa-rowedit.js failing to load — a content blocker with a broad
+             asset filter, a transient 5xx on that one file — used to throw before
+             OAList.mount ever ran, so every reader got an empty container with no
+             message at all. The stand-in does what having no overrides does: it
+             hands the rows back untouched and draws nothing. */
+          var RowEdit = window.OARowEdit || {
+            signature: function () { return ''; },
+            apply: function (dataset, rows) { return rows; },
+        own: function () {},
+            onCard: function () { return function () {}; },
+            onPopup: function () { return function () {}; },
+            attach: function () {},
+          };
+
+          var base = null, live = null, list = null;
+
+          /* `attach` calls back when the overrides land AND when the sign-in
+             state resolves — which on the ordinary visit (no overrides, not
+             the maintainer) is "nothing changed", twice. Re-rendering anyway
+             costs a visible redraw a second after first paint, for nothing. */
+          var sig = RowEdit.signature('past-postings');
+
+          function refresh() {
+            var now = RowEdit.signature('past-postings');
+            if (now === sig && list) return;
+            sig = now;
+            if (list && list.rerender) list.rerender();
+            if (!base || !live) return;
+            var next = RowEdit.apply('past-postings', base);
+            live.length = 0;
+            for (var i = 0; i < next.length; i++) live.push(next[i]);
+            if (list && list.reload) list.reload();
+          }
+
+          RowEdit.attach('past-postings', { onChange: refresh });
+
+          list = OAList.mount({
             mount: '#oa-past',
             data: '/data/past-postings.json',
             perPage: 10,
@@ -246,10 +295,22 @@
               unit: 'postings'
             },
             prepare: function (rows) {
+              /* THE ARCHIVE'S OWN ROWS, named before the postings from
+                 data/jobs.json are folded in beside them. Those are real
+                 submissions and an override against one is read by nothing, so
+                 the archive editor must not offer itself on them — see `own`
+                 in assets/oa-rowedit.js. */
+              RowEdit.own('past-postings', rows.map(function (r) { return r.id; }));
+
               var have = {};
               rows.forEach(function (r) { have[r.id] = true; });
               archive.forEach(function (r) { if (!have[r.id]) rows.push(r); });
-              return rows;
+              /* Keep BOTH: the file as served (so a correction can be undone
+                 without another fetch) and the array the engine holds (so a
+                 late override can rewrite it in place). */
+              base = rows.slice();
+              live = RowEdit.apply('past-postings', rows);
+              return live;
             },
 
             // newest market first, newest posting first within it
@@ -294,8 +355,15 @@
                   { label: 'Further info', html: link(r.furtherInfoUrl, 'link') }
                 ];
               }
+            },
+
+            onCard: function (li, r) {
+              if (window.OAJobEdit) OAJobEdit.onCard(li, r);
+              RowEdit.onCard('past-postings')(li, r);
             }
           });
+
+          if (window.OAJobEdit) OAJobEdit.attach(list);
         });
     })();
     </script>

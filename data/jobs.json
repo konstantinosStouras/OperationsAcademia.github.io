@@ -221,7 +221,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Penn%20State",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Pennsylvania%20State%20University",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -598,7 +598,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%20Berkeley",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%2C%20Berkeley",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -716,7 +716,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://www.kuleuven.be/personeel/jobsite/jobs/60640174?lang=en",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KU%20LEUVEN",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KU%20Leuven",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -914,7 +914,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://institutminestelecom.recruitee.com/o/pd-en-supply-chain-logistique-cdd-12-mois?lang=en",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Institut%20Mines-Telecom%20Business%20School",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Institut%20Mines-T%C3%A9l%C3%A9com",
   "characteristics": [
    "Research seminars",
    "Masters",
@@ -1608,7 +1608,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://apptrkr.com/6659403",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%20Berkeley",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20California%2C%20Berkeley",
   "characteristics": [
    "MBA"
   ],
@@ -3044,7 +3044,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Frankfurt%20School%20of%20Finance%20%26%20Management",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Frankfurt%20School%20of%20Finance%20and%20Management",
   "characteristics": [
    "Research seminars",
    "PhD",

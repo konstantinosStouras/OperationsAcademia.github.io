@@ -145,6 +145,16 @@ export function slug(s, n = 48) {
     .replace(/-+$/, '');
 }
 
+/** The site's own "Further info" link for a university. */
+export function universitiesLink(institution) {
+  return `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`;
+}
+
+/** True when a stored link is one WE generated, and so ours to regenerate. */
+export function ownUniversitiesLink(v) {
+  return /^https?:\/\/(www\.)?operationsacademia\.org\/universities\?filterA=/i.test(String(v ?? ''));
+}
+
 export function jobId(row) {
   return `${row.year}-${slug(row.institution)}-${String(row.posted || '').replace(/-/g, '')}`;
 }
@@ -397,8 +407,15 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     adLabel: text(doc.adLabel, MAXLEN.adLabel) || 'link to Job ad',
     postedAtUrl: url(doc.postedAtUrl),
     postedAtLabel: text(doc.postedAtLabel, MAXLEN.postedAtLabel) || 'link',
-    furtherInfoUrl: url(doc.furtherInfoUrl) ||
-      `https://www.operationsacademia.org/universities?filterA=${encodeURIComponent(institution)}`,
+    /* The poster's own link, or ours — and OURS FOLLOWS THE NAME. This is the
+       site's "Further info" link into the Universities page, generated from
+       the institution; a stored one that still names the spelling a posting
+       was made under stops finding the university the moment the name is
+       canonicalised (six postings, four of them landing on nothing). A link
+       the poster actually gave is never touched. */
+    furtherInfoUrl: ownUniversitiesLink(doc.furtherInfoUrl)
+      ? universitiesLink(institution)
+      : (url(doc.furtherInfoUrl) || universitiesLink(institution)),
     characteristics: pickList(doc.characteristics, CHARACTERISTICS),
     featured: doc.featured === true,
     source: text(doc.source, 40) || 'oa-form',
@@ -488,7 +505,26 @@ export function composeApplyBy({ untilFilled, applyByDate, applyByNote }) {
 export function assignIds(entries) {
   const ordered = entries.slice().sort((a, b) => String(a.key).localeCompare(String(b.key)));
   const seen = new Set();
+
+  /* A PINNED ID IS NOT OURS TO DERIVE, so it is claimed first and the derived
+     ones are then made to avoid it. A posting taken over from the tracking
+     sheet keeps the id the workbook gave it — only the workbook knows which of
+     two postings from one school on one day is the `-2`, and the id is the
+     row's identity: its `addedAt` continuity, the anchor a card links to, the
+     cursor the e-mail alerts read.
+
+     Claiming it AFTER the derivation, which is what this did at first, is a
+     way to lose a posting: the pinned id could land on one already handed to
+     another row this run, and mergeRows keys by id, so the second silently
+     replaced the first — the very failure this function exists to prevent. */
   for (const e of ordered) {
+    if (!e.fixedId) continue;
+    e.row.id = e.fixedId;
+    seen.add(e.fixedId);
+  }
+
+  for (const e of ordered) {
+    if (e.fixedId) continue;
     const base = jobId(e.row);
     let id = base, n = 2;
     while (seen.has(id)) id = `${base}-${n++}`;
@@ -574,6 +610,229 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
   };
 }
 
+/* -------------------------------------------- the tracking sheet's own rows
+
+   THE MAINTAINER COULD NOT EDIT THE POSTINGS THE TRACKING SHEET PUBLISHES.
+   Every control on a card — Edit, Take down — is drawn only when the page can
+   name a `jobSubmissions` DOCUMENT for that row (oa-jobedit.js docIdFor), and
+   the sheet's rows deliberately had none: they are maintained in the workbook,
+   so migrate-to-firestore.mjs skips them. The consequence was invisible in the
+   code and obvious on the page — a signed-in maintainer saw Edit on the 94
+   postings that came through the form or the legacy import, and nothing at all
+   on the 16 the sheet had added.
+
+   The fix is a MIRROR: an inert document per sheet row, carrying the same
+   submission the row would have come from, whose only job is to be an editing
+   handle. It is inert because of its status — `sheet`, a value no query in the
+   pipeline reads, so a mirror publishes nothing, alerts nobody and is never
+   stamped. The build refreshes it from the workbook on every run, so the sheet
+   goes on maintaining the posting exactly as before.
+
+   THE MOMENT THE MAINTAINER SAVES AN EDIT the document's status becomes
+   'queued' (post-a-job.html does that for every edit, and always has), and
+   that ONE fact is the whole hand-over: a status other than `sheet` means the
+   maintainer has taken the posting over, so build-jobs.mjs publishes the
+   document and drops the workbook's row. Nothing new has to be remembered, and
+   nothing can disagree with itself.
+
+   What the sheet KEEPS is existence. A row deleted from the workbook takes its
+   posting off the site whether or not a document exists for it — which is the
+   property migrate-to-firestore.mjs's comment worried about losing, and the
+   reason the mirrors are pinned to the sheet by `sheetId` rather than left to
+   stand on their own. */
+
+/** The status of a mirror: inert, and outside every query the build makes. */
+export const MIRROR_STATUS = 'sheet';
+
+/* --------------------------------------------------- WHOSE WORD TO TAKE
+
+   THE RULE, and it is a security boundary, not a tidiness one: a field that
+   NAMES A PUBLISHED ROW — `sheetId`, `publishedId`, and the document's own id
+   — is honoured only on a document THE BUILD ITSELF WROTE. Anything else is a
+   string a signed-in stranger chose.
+
+   `uid` is what tells them apart, and the security rules make it decisive: a
+   create is refused unless `uid == request.auth.uid` (a non-empty string), an
+   update is refused unless `uid` is unchanged, and the account-merge branch
+   demands a uid at least ten characters long. So a document a browser made
+   ALWAYS carries a real uid, and only the Admin SDK — the migration, and
+   `sheetMirrorDoc` here — can produce one with none.
+
+   Without this, both halves of the takedown and hand-over machinery are a
+   privilege escalation. Any signed-in account could post a submission
+   carrying `publishedId: '<somebody else's row id>'`, withdraw it, and have
+   the next build delete that posting; or carry `sheetId: '<a workbook row
+   id>'` and have the build publish THEIR content in place of the workbook's.
+   Both ids are readable straight out of the served data/jobs.json and
+   data/jobmarket.json. */
+
+/** Does this submission's own word about which row it is count? */
+export function buildOwned(doc) {
+  return !!doc && !doc.uid;
+}
+
+/**
+ * Does a removal spec name this row? ONE definition, because three places ask
+ * — the merge that drops the row, the orphan carry that must not re-add it,
+ * and the stamp that retires the document. They disagreed once, and the result
+ * was a document marked `removed` for a row still on the site: the withdrawal
+ * could then never be retried, because that stamp is what takes the document
+ * out of the query that finds it.
+ */
+export function specMatches(spec, row) {
+  if (!spec || !row) return false;
+  if (typeof spec === 'string') return !!row.ref && row.ref === spec;
+  if (spec.ref) return !!row.ref && row.ref === spec.ref && (spec.owner || '') === (row.owner || '');
+  if (spec.id) return row.id === spec.id;
+  return false;
+}
+
+/**
+ * The removal specs a set of withdrawn/hidden documents may ask for.
+ *
+ * A REFERENCE is scoped to its owner — `{ ref, owner }`, which mergeRows keys
+ * as `ref:<owner>:<ref>`, exactly the contract mergeRows documents and that
+ * this build was quietly not honouring: it passed bare reference strings,
+ * which delete a row whoever posted it, and `ref` is published in
+ * data/jobs.json for anyone to copy.
+ *
+ * An ID is taken only from a build-written document (see `buildOwned`), where
+ * it is the migration's own document id, the mirror's `sheetId`, or the
+ * `publishedId` this build stamped. That is the only way a ref-less row — the
+ * legacy import's and the workbook's, which is every row served today — can be
+ * addressed at all.
+ */
+export function removalSpecs(docs = []) {
+  const out = [];
+  const ids = new Set();
+  for (const d of docs) {
+    const v = (d && (typeof d.data === 'function' ? d.data() : d.data)) || {};
+    const docId = (d && d.id) || '';
+
+    /* WHICH OWNER TAG THE ROW WILL BE CARRYING. Not simply this document's,
+       because MERGING TWO ACCOUNTS moves a posting to a new uid WITHOUT
+       republishing it — the rules allow exactly that (`affectedKeys` limited
+       to uid/mergedFrom/mergedAt) — so until the next build the served row
+       still carries the tag of the account the poster merged AWAY. Scoped to
+       the new uid alone, their next withdrawal matched nothing, removed
+       nothing, and was then stamped `removed`, which retires the document from
+       the query that finds it: the posting could never be taken down again.
+
+       `owner` on the document is deliberately NOT trusted unless the build
+       wrote it. It is a tag, the tags are published in data/jobs.json, and a
+       browser can put anything in that field — trusting it would hand back the
+       very hole the scoping exists to close.
+
+       `mergedFrom` is trusted for one reason and one only: THE RULES PIN IT.
+       `mergedFromUnchanged()` in _firestore.rules lets the account-merge
+       branch write it and refuses it everywhere else, so no ordinary correct
+       or withdraw can introduce or change it. It is NOT trusted because a raw
+       uid is hard to come by — that was the first reasoning here and it was
+       wrong: `accountKeys` is readable one document at a time by anyone
+       signed in, and it maps an e-mail to exactly that uid. Without the rule,
+       naming a victim's uid as `mergedFrom` on a submission carrying their
+       published `ref` takes their posting off the site.
+
+       So: REDEPLOY THE RULES. Until they are published this field is only as
+       good as the browser that wrote it. */
+    const owners = new Set();
+    if (v.uid) {
+      owners.add(ownerTag(v.uid));
+      if (v.mergedFrom) owners.add(ownerTag(v.mergedFrom));
+    } else {
+      owners.add(text(v.owner, 64));       // build-written: it carries the tag itself
+    }
+    if (v.ref) for (const o of owners) out.push({ ref: v.ref, owner: o, docId });
+
+    if (!buildOwned(v)) continue;
+    for (const k of [v.publishedId, v.sheetId, docId]) {
+      if (!k) continue;
+      ids.add(String(k));
+      out.push({ id: String(k), docId });
+    }
+  }
+  return { specs: out, ids };
+}
+
+/**
+ * The inert document that gives the maintainer an editing handle on a row the
+ * job market tracking sheet publishes.
+ *
+ * `sheetId` is the pin: it names the workbook row this mirror stands for, and
+ * it survives the hand-over, so a posting the maintainer has edited still
+ * disappears when its row leaves the workbook.
+ */
+export function sheetMirrorDoc(row, { now = new Date() } = {}) {
+  return {
+    ...submissionFromRow(row, { uid: null, status: MIRROR_STATUS }),
+    sheetId: row.id,
+    mirroredAt: now.toISOString(),
+  };
+}
+
+/* Everything on a mirror EXCEPT the housekeeping stamp. Comparing the whole
+   document would rewrite all 16 of them on every run — `mirroredAt` moves
+   every time — which is a Firestore write per row per build, and a change log
+   that says nothing. */
+const MIRROR_VOLATILE = new Set(['mirroredAt']);
+
+/** Has the workbook changed this posting since the mirror was written? */
+export function mirrorDiffers(stored, fresh) {
+  const keys = new Set([...Object.keys(stored || {}), ...Object.keys(fresh || {})]);
+  for (const k of keys) {
+    if (MIRROR_VOLATILE.has(k)) continue;
+    if (JSON.stringify((stored || {})[k]) !== JSON.stringify((fresh || {})[k])) return true;
+  }
+  return false;
+}
+
+/**
+ * Which of the workbook's rows the build should publish itself.
+ *
+ * `claimed` is the set of sheet ids whose document the maintainer has taken
+ * over — edited, or taken down. Those rows are published FROM THE DOCUMENT (or
+ * not at all, when it was taken down), so the workbook's own copy is dropped
+ * here rather than left to win the merge by arriving last.
+ */
+export function unclaimedSheetRows(sheetRows, claimed) {
+  const owned = claimed instanceof Set ? claimed : new Set(claimed || []);
+  return (sheetRows || []).filter((r) => !owned.has(r.id));
+}
+
+/**
+ * THE HAND-OVER DECISION, whole and pure: given what the documents produced,
+ * which of the workbook's rows the build still publishes itself.
+ *
+ *   builtSheetIds   sheet ids whose document BUILT a row this run
+ *   pulledSheetIds  sheet ids whose document was taken down (no row, on purpose)
+ *   claimedSheetIds every sheet id that has a document at all
+ *
+ * The distinction between the last two and the first is the one that matters,
+ * and it is not cosmetic. Dropping the workbook's copy for every row that HAS
+ * a document loses a posting whenever a taken-over document fails to build — a
+ * bad edit that cleared a required field, an unreadable document, a Firestore
+ * hiccup: no row from the document, no row from the workbook, and the posting
+ * simply disappears with a warning in a log nobody reads. A hand-over that
+ * cannot publish falls back to the workbook, and is REPORTED as `stranded`.
+ */
+export function sheetHandover({
+  sheetRows = [], builtSheetIds = [], pulledSheetIds = [], claimedSheetIds = [],
+} = {}) {
+  const built = builtSheetIds instanceof Set ? builtSheetIds : new Set(builtSheetIds);
+  const pulled = pulledSheetIds instanceof Set ? pulledSheetIds : new Set(pulledSheetIds);
+  const claimed = claimedSheetIds instanceof Set ? claimedSheetIds : new Set(claimedSheetIds);
+
+  const publishedFromDoc = new Set([...built, ...pulled]);
+  const present = new Set(sheetRows.map((r) => r.id));
+  return {
+    publishedFromDoc,
+    rows: unclaimedSheetRows(sheetRows, publishedFromDoc),
+    // only a row the workbook STILL carries can be stranded; one it has dropped
+    // is meant to be gone, and its document is meant to publish nothing
+    stranded: [...claimed].filter((id) => !publishedFromDoc.has(id) && present.has(id)),
+  };
+}
+
 /* ------------------------------------------------------- what an edit changed
 
    The admin is e-mailed a before/after of every change to a published posting
@@ -608,7 +867,7 @@ export function diffRows(before, after) {
  *   added      count only — new postings already have their own channel (the
  *              subscriber alerts); the admin e-mail exists for CHANGES
  */
-export function collectChanges(existingRows, freshRows, removeRefs = []) {
+export function collectChanges(existingRows, freshRows, removeRefs = [], removeIds = []) {
   const key = (r) => (r.ref ? 'ref:' + r.ref : 'id:' + r.id);
   const before = new Map();
   for (const r of existingRows) before.set(key(r), r);
@@ -622,10 +881,17 @@ export function collectChanges(existingRows, freshRows, removeRefs = []) {
     if (fields.length) edits.push({ before: prev, after: r, fields });
   }
 
+  /* A TAKEDOWN IS NOT ALWAYS A REFERENCE. `ref` is the number the FORM issues,
+     so every posting that came from the legacy import or the tracking sheet has
+     none — which is every row served today — and keying the report on it alone
+     reported nothing while the build removed the row. The id is what those are
+     taken down by (the callers derive them with `removalSpecs` above), so both
+     are read here. */
   const takedowns = [];
-  const gone = new Set(removeRefs.filter(Boolean));
+  const goneRefs = new Set(removeRefs.filter(Boolean));
+  const goneIds = new Set([...(removeIds || [])].filter(Boolean));
   for (const r of existingRows) {
-    if (r.ref && gone.has(r.ref)) takedowns.push({ before: r });
+    if ((r.ref && goneRefs.has(r.ref)) || goneIds.has(r.id)) takedowns.push({ before: r });
   }
 
   return { edits, takedowns, added };
@@ -786,6 +1052,14 @@ export function keyOf(row) {
  * A `remove` entry is either `{ ref, owner }` — a WITHDRAWAL, which may only
  * take down a row the same account published — or a bare reference string,
  * which is the maintainer's committed take-down list (data/jobs-hidden.json)
+ *
+ * …and a THIRD shape, `{ id }`, which is how a row with NO reference is taken
+ * down. `ref` is issued by the form and by nothing else, so every posting from
+ * the legacy import and from the tracking sheet has none — today that is every
+ * row served. Keyed on references alone this loop matched nothing at all and
+ * the row was carried on as an orphan, so the takedown reported success and
+ * changed nothing. A caller must build its specs with `removalSpecs`, which
+ * decides whose word to take for each shape.
  * and is trusted to reach a row whoever posted it.
  *
  * Returns { rows, added, updated, removed } with rows in display order.
@@ -816,9 +1090,17 @@ export function mergeRows(existing, fresh, remove = []) {
   for (const spec of remove) {
     if (!spec) continue;
     if (typeof spec === 'string') {
-      for (const [k, r] of [...by]) if (r.ref === spec) { by.delete(k); removed++; }
+      for (const [k, r] of [...by]) if (specMatches(spec, r)) { by.delete(k); removed++; }
     } else if (spec.ref) {
       if (by.delete('ref:' + (spec.owner || '') + ':' + spec.ref)) removed++;
+    } else if (spec.id) {
+      /* TAKING DOWN A POSTING THAT HAS NO REFERENCE. Every row served today is
+         one: `ref` is issued by the form, and the 94 postings from the legacy
+         import and the 16 from the tracking sheet never went through it. Keyed
+         on `ref` alone this loop matched nothing, the row was carried on as an
+         orphan, and Take down looked like it had worked and changed nothing.
+         `keyOf` keys a ref-less row by its id, which is what this deletes. */
+      if (by.delete('id:' + spec.id)) removed++;
     }
   }
 

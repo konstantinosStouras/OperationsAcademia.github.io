@@ -23,12 +23,16 @@
 (function () {
   'use strict';
 
-  // Diacritic-insensitive fold — the same rule as oa-list.js, so searching
-  // "munster" finds Münster on every page alike.
+  /* Diacritic- AND punctuation-insensitive — the same rule as oa-list.js, so
+     searching "munster" finds Münster on every page alike, and a posting's
+     "Further info" link still lands on its university after the site tidied
+     the spelling ("University of California Berkeley" finding "University of
+     California, Berkeley"). Both sides are folded the same way, so it only
+     ever finds MORE. Keep it in step with oa-list.js and oa-alert-match.js. */
   function fold(s) {
     s = String(s === null || s === undefined ? '' : s).toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return s;
+    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
   }
 
   function safeUrl(u) {
@@ -165,9 +169,21 @@
       : L.layerGroup());
     cluster.addTo(map);
 
-    var rows = [];
+    var base = [];      // the file, exactly as it was served
+    var rows = [];      // what is drawn — `base` after cfg.prepare, if any
     var shown = [];
     var timer = null;
+
+    /* A page may correct the dataset before it is drawn (universities.html
+       overlays the maintainer's `rowOverrides` — see assets/oa-rowedit.js).
+       The engine keeps the file it fetched, so the overlay can arrive LATE —
+       Firestore resolves after this fetch as often as not — and be applied
+       without going back to the network. */
+    function prepared(list) {
+      if (typeof cfg.prepare !== 'function') return list.slice();
+      var out = cfg.prepare(list.slice());
+      return (out || []).filter(function (r) { return r && isFinite(r.lat) && isFinite(r.lng); });
+    }
 
     function bounds(list) {
       var b = L.latLngBounds([]);
@@ -175,20 +191,35 @@
       return b;
     }
 
-    function draw(q) {
+    function draw(q, opts) {
+      var keepView = !!(opts && opts.keepView);
       var needle = fold(q);
       shown = rows.filter(function (r) { return matchesQuery(r, needle); });
+      /* Close before clearing. A popup whose marker is about to leave the
+         cluster is no longer Leaflet's to auto-close, so it lingers in the DOM
+         and the next pin opens a SECOND one beside it. */
+      map.closePopup();
       cluster.clearLayers();
       shown.forEach(function (r) {
         var m = L.marker([r.lat, r.lng], { title: r.name });
-        m.bindPopup(popupContent(r, cfg), { maxWidth: 320 });
+        var pop = popupContent(r, cfg);
+        // A page may add its own controls to a popup — the maintainer's Edit
+        // and Take down on universities.html. The hook is the map's twin of
+        // OAList's `onCard`, and like it, drawing a button is never authority.
+        if (typeof cfg.onPopup === 'function') {
+          try { cfg.onPopup(pop, r); } catch (e) { if (window.console) console.error(e); }
+        }
+        m.bindPopup(pop, { maxWidth: 320 });
         cluster.addLayer(m);
       });
       count.textContent = !rows.length ? ''
         : needle
           ? shown.length + ' of ' + rows.length + ' universities'
           : rows.length + ' universities';
-      if (shown.length) {
+      /* A SEARCH frames what it found; a REDRAW must not. Re-fitting on a
+         redraw undoes a viewport the reader chose deliberately — and every
+         correction made from a pin causes one. */
+      if (shown.length && !keepView) {
         map.fitBounds(bounds(shown).pad(0.1), { maxZoom: needle ? 8 : 17 });
       }
     }
@@ -219,9 +250,10 @@
         return res.json();
       })
       .then(function (data) {
-        rows = (Array.isArray(data) ? data : []).filter(function (r) {
+        base = (Array.isArray(data) ? data : []).filter(function (r) {
           return r && isFinite(r.lat) && isFinite(r.lng);
         });
+        rows = prepared(base);
         input.value = readUrl();
         draw(input.value);
         if (!rows.length) fail('No universities could be loaded. Please reload the page, or let us know if it keeps happening.');
@@ -234,6 +266,17 @@
     return {
       rows: function () { return rows.slice(); },
       shown: function () { return shown.slice(); },
+      /** Re-run cfg.prepare over the file as served, and redraw IN PLACE —
+          the reader's viewport is kept. (The popup closes: its marker is
+          destroyed by the redraw, and reopening one on a marker the cluster
+          has not finished placing leaves two popups on screen. Keeping the
+          VIEW is what makes correcting a run of schools workable; the reader
+          is still looking at the same place.) */
+      refresh: function () {
+        if (!base.length) return;
+        rows = prepared(base);
+        draw(input.value, { keepView: true });
+      },
       map: map,
     };
   }

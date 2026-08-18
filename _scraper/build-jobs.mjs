@@ -26,11 +26,13 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
+  MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
+  specMatches,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
@@ -44,6 +46,11 @@ const VOCAB = path.join(DATA, 'vocab.json');
    into rows of exactly this file's shape. It is a SECOND source of postings,
    beside the database — see the block in main() that merges it. */
 const SHEET = path.join(DATA, 'jobmarket.json');
+/* The site's own Universities directory (data/universities.json, imported from
+   the maintainer's universities sheet by import-legacy-tables.mjs). The posting
+   form's cascading pickers read it through vocab.json: it is what knows which
+   school a department sits in at a university that has never posted here. */
+const DIRECTORY = path.join(DATA, 'universities.json');
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -53,6 +60,14 @@ const SCAN = argv.has('--scan');
 
 const log = (...a) => console.log(...a);
 const warn = (...a) => console.log('::warning::' + a.join(' '));
+
+/** Two vocabularies with the same names in them — `generated` aside, which
+    moves on every run and would otherwise commit an identical file daily. */
+function sameVocab(a, b) {
+  if (!a || !b) return false;
+  const bare = (v) => JSON.stringify({ ...v, generated: '' });
+  return bare(a) === bare(b);
+}
 
 async function readJson(file, fallback) {
   if (!existsSync(file)) return fallback;
@@ -222,6 +237,82 @@ async function transferUploads(db, live, { now }) {
 
 /* ---------------------------------------------------------------------- main */
 
+/* ------------------------------------------- the tracking sheet's mirrors
+
+   Keeps one inert document per workbook row, so the maintainer has an Edit
+   button on every posting the site shows. See jobs-model.mjs above
+   `sheetMirrorDoc` for what a mirror is and why the status alone carries the
+   hand-over.
+
+   THREE RULES, and the reasoning for each:
+
+   CREATE only where nothing exists. The document id is the row's own id — the
+   same convention migrate-to-firestore.mjs uses, so a posting that is later
+   migrated is the same document rather than a second one — and an id is
+   reused only after a `get()` proves it free. A blind `set()` would overwrite
+   whatever happened to share the id, which for this collection means somebody
+   else's advertisement.
+
+   REFRESH only a mirror. The workbook goes on maintaining a posting nobody has
+   edited, so a mirror is rewritten whenever the row moved under it. A document
+   with any other status has been taken over and is never touched: that is the
+   hand-over, and rewriting it would be the sheet reverting the maintainer's
+   own edit — exactly the failure that retired the old form-sheet sync.
+
+   DELETE a mirror whose row has left the workbook. Nothing published depends
+   on it (an unedited row publishes from the sheet), so it is pure litter, and
+   leaving it would put an Edit button on a posting that is no longer there. */
+export async function syncSheetMirrors(col, sheetRows, mirrorDocs, claimed, { now = new Date() } = {}) {
+  const mirrors = new Map();
+  for (const d of mirrorDocs) mirrors.set(d.data().sheetId || d.id, d);
+
+  let created = 0, refreshed = 0, deleted = 0, skipped = 0;
+
+  for (const row of sheetRows) {
+    if (claimed.has(row.id)) continue;                 // taken over; not ours to touch
+    const id = String(row.id || '');
+    // Firestore ids may not contain '/', which a row id never does (it is a
+    // slug and a date) — checked rather than assumed, as the migration does.
+    if (!/^[A-Za-z0-9._~-]+$/.test(id)) { skipped++; continue; }
+
+    const fresh = sheetMirrorDoc(row, { now });
+    const have = mirrors.get(row.id);
+
+    if (have) {
+      if (mirrorDiffers(have.data(), fresh)) {
+        await col.doc(have.id).set(fresh);
+        refreshed++;
+      }
+      continue;
+    }
+
+    /* Nothing mirrors this row yet. The id may still be in use by a document
+       no query above returned — one already stamped `removed`, say — so it is
+       probed before it is claimed. */
+    const existing = await col.doc(id).get();
+    if (existing.exists) { skipped++; continue; }
+    await col.doc(id).set(fresh);
+    created++;
+  }
+
+  const rowIds = new Set(sheetRows.map((r) => r.id));
+  for (const [sid, d] of mirrors) {
+    if (rowIds.has(sid)) continue;
+    await col.doc(d.id).delete();
+    deleted++;
+  }
+
+  if (created || refreshed || deleted) {
+    log(`the tracking sheet's edit handles: +${created} new, ${refreshed} refreshed, ` +
+        `${deleted} removed`);
+  }
+  if (skipped) {
+    warn(`${skipped} of the tracking sheet's postings could not be given an edit handle ` +
+         '(their id is already a document, or is not usable as one)');
+  }
+  return { created, refreshed, deleted, skipped };
+}
+
 async function main() {
   if (argv.has('--selftest')) {
     /* The WHOLE suite, not runSelftest()'s three-suite subset — running this
@@ -259,10 +350,16 @@ async function main() {
      makes editing work at all — a posting is rebuilt from its document on
      every run, so a correction reaches the page the same way a new posting
      does. */
-  const [liveSnap, pulledSnap] = db ? await Promise.all([
+  /* The third read is the tracking sheet's MIRRORS — the inert documents that
+     give the maintainer an Edit button on a posting the workbook publishes
+     (jobs-model.mjs, `sheetMirrorDoc`). They are deliberately outside the two
+     queries above: a mirror publishes nothing and is never stamped, so it can
+     only ever be read HERE, to decide whether it still matches the workbook. */
+  const [liveSnap, pulledSnap, mirrorSnap] = db ? await Promise.all([
     col.where('status', 'in', ['queued', 'published']).get(),
     col.where('status', 'in', ['withdrawn', 'hidden']).get(),
-  ]) : [{ docs: [] }, { docs: [] }];
+    col.where('status', '==', MIRROR_STATUS).get(),
+  ]) : [{ docs: [] }, { docs: [] }, { docs: [] }];
 
   const live = liveSnap.docs;
   const pulled = pulledSnap.docs;
@@ -285,6 +382,69 @@ async function main() {
 
   const now = new Date();
 
+  /* ------------------------------------------ the job market tracking sheet
+
+     Read BEFORE the submissions are turned into rows, because two decisions
+     below need it: which of the workbook's rows the maintainer has taken over
+     (those publish from their document instead), and which documents stand for
+     a row the workbook no longer carries (those publish not at all — the sheet
+     keeps saying which postings EXIST, whoever edits them).
+
+     A MISSING FILE IS NOT AN EMPTY SHEET: before the first sync has run — or
+     if the file were ever lost — the sheet's postings are carried like any
+     other orphan rather than deleted. Only a file that EXISTS and no longer
+     lists a posting removes it, and for the same reason a missing file claims
+     nothing and hands nothing over. */
+  const sheetPresent = existsSync(SHEET);
+  const sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
+  const fromSheet = (r) => r.source === SHEET_SOURCE;
+  const sheetIds = new Set(sheetRows.map((r) => r.id));
+
+  /* ---------------------------------------- an editing handle on every row
+
+     WHY THIS EXISTS: the Edit and Take down controls are drawn only where the
+     page can name a document (oa-jobedit.js docIdFor), so the postings the
+     workbook publishes — which had no document by design — carried no controls
+     at all, and the maintainer could edit every posting on the site EXCEPT
+     those. A mirror is an inert document (status `sheet`) that fixes precisely
+     that and nothing else; the full reasoning is in jobs-model.mjs above
+     `sheetMirrorDoc`.
+
+     Non-fatal by construction: a failure here leaves the postings exactly as
+     they are and only costs the maintainer the buttons until the next run. */
+  const sheetDocs = new Map();   // sheet row id -> the document that stands for it
+  for (const d of [...live, ...pulled]) {
+    // `sheetId` is honoured only where the build wrote it — see `buildOwned`
+    // in jobs-model.mjs. A submission a browser made carries a uid, and a
+    // sheetId on one is a stranger claiming a workbook row's identity.
+    const sid = buildOwned(d.data()) ? d.data().sheetId : '';
+    if (sid) sheetDocs.set(sid, d);
+  }
+  /* Two different questions, and they are NOT the same set.
+
+     `claimedSheetIds` — every workbook row that has a document of its own —
+     answers "is this mirror still the sheet's to refresh?". It must be the
+     WIDE set: a document the maintainer has taken over is never written by the
+     workbook again, whatever state it is in.
+
+     Which rows the workbook still PUBLISHES is answered later, from the rows
+     that were actually built (`publishedFromDoc` below). The two were one set
+     at first, and that was a way to lose a posting: a taken-over document that
+     failed to build — an edit that cleared a required field, an unreadable
+     document, a Firestore hiccup — produced no row, while its workbook copy
+     had already been dropped, and the posting simply vanished from the site
+     with only a warning in the log. A hand-over that cannot publish falls back
+     to the workbook instead. */
+  const claimedSheetIds = new Set(sheetDocs.keys());
+  if (db && sheetPresent) {
+    try {
+      await syncSheetMirrors(col, sheetRows, mirrorSnap.docs, claimedSheetIds, { now });
+    } catch (e) {
+      warn(`the tracking sheet's edit handles could not be refreshed (${e.message}) — ` +
+           'the postings publish regardless');
+    }
+  }
+
   /* -------------------------------------------- file the uploaded adverts
 
      A posting can carry an advert the poster uploaded to the Storage landing
@@ -306,6 +466,7 @@ async function main() {
 
   const fresh = [];
   const rejected = [];
+  const goneFromSheetDocs = [];
   for (const d of live) {
     let row = null;
     try {
@@ -317,8 +478,24 @@ async function main() {
       warn(`submission ${d.data().ref || d.id} could not be read (${e.message}) — skipped`);
       continue;
     }
-    if (row) fresh.push({ id: d.id, key: d.id, row, queued: d.data().status === 'queued' });
-    else rejected.push({ id: d.id, ref: d.data().ref || d.id });
+    /* A document the maintainer took over from the workbook still belongs to
+       the workbook for one purpose: EXISTENCE. A row deleted there takes its
+       posting off the site, edited or not — the property that made copying
+       these rows into the database unsafe in the first place, kept here rather
+       than given up. The document is left alone, so putting the row back in
+       the workbook brings the maintainer's edit back with it. */
+    const sid = buildOwned(d.data()) ? d.data().sheetId : '';
+    if (sid && sheetPresent && !sheetIds.has(sid)) {
+      goneFromSheetDocs.push(sid);
+      continue;
+    }
+    if (row) {
+      // `fixedId` is honoured by assignIds BEFORE it derives the others, so a
+      // taken-over workbook posting keeps the workbook's own id without ever
+      // colliding with a row this run derived.
+      fresh.push({ id: d.id, key: d.id, row, sheetId: sid || '', fixedId: sid || '',
+                   queued: d.data().status === 'queued' });
+    } else rejected.push({ id: d.id, ref: d.data().ref || d.id });
   }
 
   for (const r of rejected) {
@@ -331,7 +508,22 @@ async function main() {
   assignIds(fresh);
 
   const existing = await readJobsStrict(JOBS);
-  const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
+  /* WHAT A TAKEDOWN IS KEYED ON, and why it is not only the reference.
+
+     `ref` is the number the FORM issues. Nothing else does: the 94 postings the
+     legacy import migrated and the 16 the tracking sheet publishes have none —
+     which today is every single row in data/jobs.json. So the removal set was
+     empty for all of them, the row was carried on as an ORPHAN (a row no live
+     document accounts for is preserved, deliberately), and Take down marked
+     the document hidden, said "Taken down", and left the posting on the site
+     for ever.
+
+     `removalSpecs` (jobs-model.mjs) decides whose word to take: a reference is
+     scoped to its owner, and an id is honoured only on a document the build
+     itself wrote. Both halves matter — the ids and the references alike are
+     published in data/jobs.json, so an unscoped removal is a signed-in
+     stranger deleting somebody else's advertisement. */
+  const { specs: removeSpecs } = removalSpecs(pulled);
 
   // The maintainer's committed suppression list, honoured by every writer of
   // this file (see data/jobs-hidden.json). A posting listed here is withheld
@@ -357,14 +549,74 @@ async function main() {
      run — or if the file were ever lost — the sheet's postings are carried
      like any other orphan rather than deleted. Only a file that EXISTS and no
      longer lists a posting removes it. */
-  const sheetPresent = existsSync(SHEET);
-  const sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
-  const fromSheet = (r) => r.source === SHEET_SOURCE;
   if (sheetPresent) {
     const goneFromSheet = existing.filter(fromSheet).length -
       existing.filter((r) => fromSheet(r) && sheetRows.some((s) => s.id === r.id)).length;
     log(`the tracking sheet carries ${sheetRows.length} posting(s)` +
         (goneFromSheet > 0 ? `; ${goneFromSheet} previously published are no longer in it` : ''));
+  }
+
+  /* THE HAND-OVER. A row the maintainer has taken over publishes from its
+     DOCUMENT, so the workbook's own copy is dropped here — rather than left to
+     win the merge by arriving last, which is what it used to do and what would
+     have made an edit look saved and change nothing.
+
+     Dropped only where the document ACTUALLY ACCOUNTS FOR THE ROW, though:
+     because it built one, or because it was deliberately taken down. Anything
+     else — a document that failed to build, or one whose row the workbook has
+     since dropped — leaves the workbook's copy in place, so the site keeps the
+     posting it had rather than losing it to a bad edit. */
+  const handover = sheetHandover({
+    sheetRows,
+    builtSheetIds: fresh.map((f) => f.sheetId).filter(Boolean),
+    /* `buildOwned` HERE TOO. This was the one read of `sheetId` the provenance
+       guard had been left off, and it is enough on its own: a withdrawn
+       document naming a workbook row makes sheetHandover treat that row as
+       handed over, so the workbook's copy is dropped — while the document
+       publishes nothing, because every OTHER read of sheetId is guarded. The
+       posting simply disappears, and `stranded` cannot even report it, since
+       the row was never claimed. */
+    pulledSheetIds: pulled.map((d) => (buildOwned(d.data()) ? d.data().sheetId : ''))
+      .filter(Boolean),
+    claimedSheetIds,
+  });
+  const { publishedFromDoc, stranded } = handover;
+
+  const freshVisible = fresh.map((f) => f.row)
+    .concat(handover.rows)
+    .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
+
+  if (stranded.length) {
+    warn(`${stranded.length} posting(s) the maintainer had taken over could not be built from ` +
+         'their document — the tracking sheet\'s own copy is published instead, so nothing ' +
+         `is lost: ${stranded.slice(0, 5).join(', ')}`);
+  }
+  if (publishedFromDoc.size) {
+    log(`${publishedFromDoc.size} of the tracking sheet's postings are maintained here now ` +
+        '(the maintainer edited or took them down); the workbook still decides whether they exist');
+  }
+  if (goneFromSheetDocs.length) {
+    log(`${goneFromSheetDocs.length} posting(s) the maintainer had edited are no longer in the ` +
+        'workbook — taken off the site with the rest of its removals');
+  }
+
+  /* A REMOVAL MUST NEVER TAKE A ROW SOMETHING ELSE JUST BUILT.
+
+     Row ids are DERIVED — year, institution slug, posting date — and the `-2`
+     that separates two postings from one school on one day is assigned among
+     the rows built THAT RUN. So the moment one of a same-day pair is taken
+     down, the survivor stops being `X-2` and becomes `X` … which is exactly
+     the id the hidden document names. Reproduced end to end: taking down one
+     Tulane posting deleted the OTHER one, silently and for good.
+
+     A live document accounts for the row it built, so an id one of them now
+     occupies is not a takedown, whatever a withdrawn document says about it. */
+  const builtIds = new Set(freshVisible.map((r) => r.id));
+  const applicable = removeSpecs.filter((x) => !x.id || !builtIds.has(x.id));
+  const shadowed = removeSpecs.filter((x) => x.id && builtIds.has(x.id));
+  if (shadowed.length) {
+    log(`${shadowed.length} takedown(s) name an id a posting still being published now ` +
+        'carries — a same-day sibling was renumbered; they are left alone');
   }
 
   /* ORPHANS — rows in the served file that no live document accounts for.
@@ -383,18 +635,33 @@ async function main() {
   const orphans = existing.filter((r) =>
     !live_ids.has(r.id) &&
     !(sheetPresent && fromSheet(r)) &&
-    !removeRefs.includes(r.ref));
+    !applicable.some((x) => specMatches(x, r)));
   if (orphans.length) {
     warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
          'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
 
-  const freshVisible = fresh.map((f) => f.row)
-    .concat(sheetRows)
-    .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
-
-  const merged = mergeRows(orphans, freshVisible, removeRefs);
+  const merged = mergeRows(orphans, freshVisible, applicable);
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+
+  /* ------------------------------------- the form's option lists
+
+     Built from the postings themselves plus the site's own Universities
+     directory, so a name a poster entered today is offered to the next poster
+     tomorrow with nobody curating a list — and a university's schools, and
+     each school's departments, are offered as a cascade rather than as three
+     flat lists of everything.
+
+     The names are already one-spelling-per-place: every posting went through
+     oa-schools.js's canonPlace() at ingest, and buildVocab puts the directory
+     rows — which have never been through an ingest — through the same
+     function. */
+  const directory = await readJson(DIRECTORY, null);
+  if (!Array.isArray(directory) || !directory.length) {
+    warn(`${path.relative(process.cwd(), DIRECTORY)} is missing or unreadable — the ` +
+         'posting form will only offer the universities that have posted here.');
+  }
+  const vocab = buildVocab(rows, { generated: now.toISOString(), directory });
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
      the FILE stays complete: it is the projection of every live document, the
@@ -412,7 +679,8 @@ async function main() {
      when one posting is new and six were edited. Computed once, used for both
      the log and the admin e-mail, so the two can never tell different
      stories. */
-  const changes = collectChanges(existing, freshVisible, removeRefs);
+  const changes = collectChanges(existing, freshVisible, [],
+    existing.filter((r) => applicable.some((x) => specMatches(x, r))).map((r) => r.id));
 
   const before = serialise(existing);
   const after = serialise(rows);
@@ -436,13 +704,24 @@ async function main() {
         META,
         JSON.stringify(buildMeta(rows, { generated: now.toISOString() }), null, 1) + '\n'
       );
-      /* The form's option lists come from the postings themselves, so a name
-         a poster entered today is offered to the next poster tomorrow with
-         nobody curating a list. Rewritten with the dataset, never apart from
-         it. */
-      await writeFile(VOCAB, serialiseVocab(buildVocab(rows, { generated: now.toISOString() })));
-      log(`wrote ${path.relative(process.cwd(), JOBS)}, jobs-meta.json and vocab.json`);
+      log(`wrote ${path.relative(process.cwd(), JOBS)} and jobs-meta.json`);
     }
+  }
+
+  /* vocab.json is written on ITS OWN diff, not with jobs.json: it also reads
+     the Universities directory, which the legacy import can change on a day no
+     posting moved. `generated` is ignored in the comparison, so an unchanged
+     vocabulary commits nothing. */
+  const vocabText = serialiseVocab(vocab);
+  if (sameVocab(await readJson(VOCAB, null), vocab)) {
+    log('the posting form\'s vocabulary is unchanged.');
+  } else if (DRY) {
+    log('--dry-run: not writing vocab.json.');
+  } else {
+    await writeFile(VOCAB, vocabText);
+    log(`wrote ${path.relative(process.cwd(), VOCAB)} ` +
+        `(${vocab.universities.length} universities, ${vocab.schools.length} schools, ` +
+        `${vocab.units.length} departments)`);
   }
 
   /* ------------------------------------------ tell the admin what changed
@@ -499,9 +778,27 @@ async function main() {
       publishedId: f.row.id,
     }]);
   }
+
+  /* A WITHDRAWAL IS RETIRED ONLY ONCE IT HAS ACTUALLY TAKEN EFFECT. `removed`
+     takes the document out of the `withdrawn`/`hidden` query — it is the only
+     handle the build has on that removal — so stamping one whose row is still
+     published makes the failure PERMANENT, and silent: no later run can
+     retry, and nothing anywhere says why the posting is still there. It used
+     to be stamped unconditionally, which is what turned an owner-tag mismatch
+     from one bad build into a posting that could never be taken down. */
+  const stillThere = [];
   for (const d of pulled) {
     if (d.data().status !== 'withdrawn') continue;   // 'hidden' stays hidden
+    const mine = removeSpecs.filter((x) => x.docId === d.id);
+    if (mine.length && rows.some((r) => mine.some((x) => specMatches(x, r)))) {
+      stillThere.push(d.data().ref || d.id);
+      continue;
+    }
     writes.push([d.id, { status: 'removed', removedAt: new Date() }]);
+  }
+  if (stillThere.length) {
+    warn(`${stillThere.length} withdrawal(s) did not reach their posting and are left to ` +
+         `retry rather than marked done: ${stillThere.slice(0, 5).join(', ')}`);
   }
   for (let i = 0; i < writes.length; i += 400) {
     const batch = db.batch();
@@ -511,9 +808,24 @@ async function main() {
   if (writes.length) log(`stamped ${writes.length} submission(s) in Firestore`);
 }
 
-main().catch((err) => {
-  // A build failure must not wedge the workflow into a red state forever; the
-  // next scheduled run retries from the same queue.
-  console.error('build-jobs failed:', err);
-  process.exit(1);
-});
+/* Run only as the entry point, so the selftest can import syncSheetMirrors and
+   drive it against a stand-in collection — the same guard migrate-to-firestore
+   already uses. Importing this file used to RUN the build. */
+/* `pathToFileURL`, not a template string: a raw path and a file URL are not the
+   same text the moment the path holds a space or anything else a URL escapes
+   (this repository already carries a directory called `back up`). Compared as
+   strings, the two differ, main() is never called, and the process exits 0
+   having printed nothing — a scheduled publish that goes green while
+   publishing nothing, which is the worst failure available to it.
+
+   The argv[1] guard is for `node -e`, where there is no entry script at all:
+   pathToFileURL(undefined) throws, and this file is IMPORTED by the selftest
+   as well as run. */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    // A build failure must not wedge the workflow into a red state forever; the
+    // next scheduled run retries from the same queue.
+    console.error('build-jobs failed:', err);
+    process.exit(1);
+  });
+}

@@ -67,6 +67,17 @@ let chromium;
 try {
   ({ chromium } = await import('playwright'));
 } catch {
+  /* Locally this is a convenience: the rest of the suite still runs on a
+     machine with no browser installed. In CI it never is — the workflow
+     installs Playwright two steps earlier, so a failed import means that
+     install broke, and exiting 0 here would report a green run in which none
+     of these checks ran at all. A check whose absence is invisible is not a
+     check, so in CI a missing browser is a FAILURE and says which one it is. */
+  if (process.env.CI) {
+    console.log('::error::playwright is not installed — the browser checks did not run');
+    server.close();
+    process.exit(1);
+  }
   console.log('playwright is not installed — skipping the browser checks');
   server.close();
   process.exit(0);
@@ -1284,6 +1295,44 @@ for (const [name, expect] of [
   await f.waitForTimeout(150);
   eq(await f.inputValue('#f-institution'), 'Tulane University', 'form: choosing fills the field');
 
+  /* A NEAR MISS still finds the university. "tulane" — a poster who saw the
+     one matching row and moved on — used to match nothing: the cascade
+     quietly went away, the school list opened at every school on the site,
+     and the posting was filed under a university nobody else uses. */
+  for (const [typed, becomes] of [
+    ['tulane', 'Tulane University'],
+    ['Tulane Univ', 'Tulane University'],
+    ['tulane university', 'Tulane University'],
+  ]) {
+    await f.fill('#f-institution', typed);
+    await f.evaluate(() => {
+      const el = document.getElementById('f-institution');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    });
+    await f.waitForTimeout(120);
+    eq(await f.inputValue('#f-institution'), becomes,
+      `form: "${typed}" is the one university it can only be the beginning of`);
+  }
+  for (const typed of ['University of', 'Wibble Institute']) {
+    await f.fill('#f-institution', typed);
+    await f.evaluate(() => {
+      const el = document.getElementById('f-institution');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    });
+    await f.waitForTimeout(120);
+    eq(await f.inputValue('#f-institution'), typed,
+      `form: "${typed}" could be several universities or none, so it is left alone`);
+  }
+  await f.fill('#f-institution', 'Tulane University');
+  await f.evaluate(() => {
+    const el = document.getElementById('f-institution');
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.blur();
+  });
+  await f.waitForTimeout(120);
+
   // the chosen university's own schools lead the next list
   await f.click('#f-school');
   await f.waitForTimeout(250);
@@ -1291,7 +1340,120 @@ for (const [name, expect] of [
     (n) => n.textContent);
   ok(/Freeman/i.test(firstSchool), 'form: schools already used at that university lead');
 
-  // a name nobody has posted before is offered rather than refused
+  /* ------------------------------------------------- the cascade, as reported
+
+     The bug: choosing Tulane offered BOTH "A. B. Freeman School of Business" and
+     "Freeman School of Business" — one school, posted twice, spelled twice —
+     and the department field offered every department on the site. What must
+     happen instead is one school under a heading naming the university, and
+     then that school's own departments.                                       */
+
+  const scoped = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      heading: open.querySelector('.oa-combo-group')
+        ? open.querySelector('.oa-combo-group').textContent : '',
+      inScope: [...open.querySelectorAll('.oa-combo-opt.is-pref .oa-combo-name')]
+        .map((n) => n.textContent),
+      others: [...open.querySelectorAll('.oa-combo-opt:not(.is-pref):not(.oa-combo-add)')].length,
+    };
+  });
+  eq(scoped.heading, 'Schools at Tulane University',
+    'form: the school list says whose schools it is offering');
+  eq(scoped.inScope, ['A. B. Freeman School of Business'],
+    'form: one school, not the two spellings it was posted under');
+  eq(scoped.others, 0,
+    'form: and browsing does not bury it under every school on the site');
+
+  await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
+    'form: choosing a school fills the field');
+
+  await f.click('#f-unit');
+  await f.waitForTimeout(250);
+  const dept = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      heading: open.querySelector('.oa-combo-group').textContent,
+      inScope: [...open.querySelectorAll('.oa-combo-opt.is-pref .oa-combo-name')]
+        .map((n) => n.textContent),
+    };
+  });
+  eq(dept.heading, 'Departments in A. B. Freeman School of Business',
+    'form: the department list narrows to the school that was chosen');
+  eq(dept.inScope, ['Management Science'],
+    'form: to ITS departments — one, not the three spellings it was posted under');
+
+  // typing still reaches the whole site: a scope narrows, it never hides
+  await f.fill('#f-unit', 'supply chain');
+  await f.waitForTimeout(200);
+  const past = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      headings: [...open.querySelectorAll('.oa-combo-group')].map((n) => n.textContent),
+      options: open.querySelectorAll('.oa-combo-opt:not(.oa-combo-add)').length,
+    };
+  });
+  ok(past.options > 0 && past.headings.includes('Elsewhere on the site'),
+    'form: typing searches past the scope, under a heading that says so');
+
+  /* A spelling that differs only in punctuation or a leading initial is the
+     same school — so it is put right, not added as a second one. */
+  await f.fill('#f-unit', '');
+  await f.fill('#f-school', 'freeman school of business');
+  await f.waitForTimeout(200);
+  const addRows = await f.$$eval('.oa-combo-add', (n) => n.length);
+  eq(addRows, 0, 'form: a variant spelling is not offered as a new name');
+  await f.evaluate(() => document.getElementById('f-school')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
+    'form: and the field is put into the spelling the site publishes');
+
+  /* A department the site has only ever seen in one school names its school. */
+  await f.fill('#f-school', '');
+  await f.fill('#f-unit', 'Management Science');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
+    'form: choosing a department fills in the school it sits in');
+
+  /* A university nobody has posted from still gets the site's spelling rules
+     (oa-schools.js: "Area" is a house word, not part of the name) — and a name
+     the site has never heard of is left exactly as typed. Both are what the
+     submission itself will carry, which is why the field is put right where
+     the poster can see it rather than quietly on the way out. */
+  await f.fill('#f-institution', 'Wibble University');
+  await f.fill('#f-school', '');
+  await f.fill('#f-unit', 'Operations Area');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Operations',
+    'form: the field shows the department as it will be published');
+  await f.fill('#f-unit', 'Wibble Studies');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Wibble Studies',
+    'form: and a name nobody has ever posted is never invented away');
+  await f.fill('#f-institution', 'Tulane University');
+  await f.fill('#f-unit', '');
+
+  /* A name nobody has posted before is offered rather than refused — and it
+     is offered AS IT WILL BE PUBLISHED. "Widgets Group" would be posted as
+     "Widgets" (a house word is not part of a name, oa-schools.js), and a row
+     that promised the words typed would be promising something the
+     submission then tidies away. */
+  await f.fill('#f-unit', 'Wibble Widgets Group');
+  await f.waitForTimeout(200);
+  const publishAs = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
+  ok(publishAs.length === 1 && /“Wibble Widgets” — a name not on the list yet/.test(publishAs[0]),
+    `form: a new name is offered as it will be published (${JSON.stringify(publishAs)})`);
+  await f.fill('#f-unit', '');
+
   await f.fill('#f-school', 'Wibble School of Widgets');
   await f.waitForTimeout(200);
   const add = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
@@ -1301,7 +1463,49 @@ for (const [name, expect] of [
   await f.waitForTimeout(150);
   eq(await f.inputValue('#f-school'), 'Wibble School of Widgets', 'form: a new name is accepted');
 
-  // keyboard: Enter takes the highlighted option and must NOT submit the form
+  /* keyboard: every row is reachable — ArrowDown used to move off "nothing"
+     onto the first row and then stick there for ever, so with a scope in force
+     (one row in it, the rest under "Elsewhere on the site") no key sequence
+     reached the rest of the site at all. And the row it highlights must be
+     VISIBLE: a sticky group heading sits exactly where the list scrolls to. */
+  await f.fill('#f-school', 'school of business');
+  await f.waitForTimeout(250);
+  const rowCount = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
+  ok(rowCount > 5, `form: a search reaches past the scope (${rowCount} rows to walk)`);
+  const walked = [];
+  for (let i = 0; i < 4; i += 1) {
+    await f.keyboard.press('ArrowDown');
+    walked.push(await f.$eval('.oa-combo-list:not([hidden])',
+      (l) => [...l.querySelectorAll('.oa-combo-opt')].indexOf(l.querySelector('.oa-combo-opt.is-active'))));
+  }
+  eq(walked, [0, 1, 2, 3], 'form: ArrowDown walks down the list rather than sticking on the first row');
+  const up = [];
+  for (let i = 0; i < 2; i += 1) {
+    await f.keyboard.press('ArrowUp');
+    up.push(await f.$eval('.oa-combo-list:not([hidden])',
+      (l) => [...l.querySelectorAll('.oa-combo-opt')].indexOf(l.querySelector('.oa-combo-opt.is-active'))));
+  }
+  eq(up, [2, 1], 'form: and ArrowUp climbs it one row at a time, not two');
+
+  for (let i = 0; i < 10; i += 1) await f.keyboard.press('ArrowDown');
+  const visible = await f.evaluate(() => {
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const el = list.querySelector('.oa-combo-opt.is-active');
+    if (!el) return 'no active row';
+    const r = el.getBoundingClientRect();
+    /* geometry, not hit-testing: the list can sit below the fold, where
+       elementFromPoint answers null for reasons that have nothing to do with
+       the heading. The heading is sticky, so its rect is where it is PAINTED. */
+    const head = [...list.querySelectorAll('.oa-combo-group')]
+      .map((h) => h.getBoundingClientRect())
+      .find((h) => h.bottom > r.top && h.top < r.bottom);
+    return head ? `covered by a heading (row ${r.top}-${r.bottom}, heading ${head.top}-${head.bottom})` : true;
+  });
+  eq(visible, true, 'form: the highlighted row is not hidden behind the sticky group heading');
+  await f.keyboard.press('Escape');
+  await f.fill('#f-school', 'Wibble School of Widgets');   // back to where the block above left it
+
+  // Enter takes the highlighted option and must NOT submit the form
   await f.fill('#f-unit', 'oper');
   await f.waitForTimeout(200);
   await f.keyboard.press('ArrowDown');
@@ -1315,6 +1519,78 @@ for (const [name, expect] of [
     'form: the published line joins school and unit');
   ok((await f.textContent('#f-department-preview')).includes(unit),
     'form: the poster is shown what will appear under the institution name');
+
+  /* ---------------------------------------------- the picker on a phone
+
+     _MOBILE-STANDARDS.md rules 3, 5 and 6, over the one list on this site the
+     shared engine does not draw. It shipped as a 300px panel of 33px rows —
+     a mouse's list — because the form is not a list page and nothing measured
+     it.                                                                      */
+
+  await f.setViewportSize({ width: 390, height: 780 });
+  // close whatever is open: a panel with room above it now opens UPWARDS, over
+  // the fields above, so a stale one covers the field this block wants
+  await f.evaluate(() => {
+    const open = document.activeElement;
+    if (open && open.blur) open.blur();
+  });
+  await f.waitForTimeout(100);
+  await f.evaluate(() => document.getElementById('f-institution').scrollIntoView({ block: 'center' }));
+  await f.click('#f-institution');
+  await f.waitForTimeout(300);
+  const phone = await f.evaluate(() => {
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const r = list.getBoundingClientRect();
+    const row = list.querySelector('.oa-combo-opt').getBoundingClientRect();
+    return {
+      rightEdge: Math.round(r.right),
+      width: Math.round(r.width),
+      height: Math.round(r.height),
+      row: Math.round(row.height),
+      halfViewport: Math.round(window.innerHeight / 2),
+      viewport: window.innerWidth,
+      sideways: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  });
+  ok(phone.row >= 40, `form: an option is a thumb-sized target (${phone.row}px)`);
+  ok(phone.height <= phone.halfViewport + 1,
+    `form: the panel stays within half the screen (${phone.height}px of ${phone.halfViewport}px)`);
+  ok(phone.rightEdge <= phone.viewport && phone.width <= phone.viewport - 28,
+    `form: and inside it (${phone.width}px wide, right edge ${phone.rightEdge} of ${phone.viewport})`);
+  eq(phone.sideways, 0, 'form: the open picker does not make the page scroll sideways');
+
+  /* …and ON SCREEN, which is the half of rule 6 a height cap does not give:
+     the panel hangs under the field, and on a phone the field is halfway down,
+     so 422px of list ran 61px past the fold — and a field near the bottom put
+     the whole thing out of sight. It opens upwards when there is more room
+     above, measured after opening. */
+  const fold = await f.evaluate(async () => {
+    const out = [];
+    for (const id of ['f-institution', 'f-school', 'f-unit']) {
+      const el = document.getElementById(id);
+      el.scrollIntoView({ block: 'center' });
+      el.focus();
+      el.dispatchEvent(new Event('click', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 150));
+      const list = document.querySelector('.oa-combo-list:not([hidden])');
+      const r = list.getBoundingClientRect();
+      out.push({ id, off: Math.round(Math.max(0, r.bottom - window.innerHeight) + Math.max(0, -r.top)) });
+      el.blur();
+    }
+    // the worst case: the field at the very bottom of the screen
+    const last = document.getElementById('f-unit');
+    last.scrollIntoView({ block: 'end' });
+    last.focus();
+    last.dispatchEvent(new Event('click', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const r = list.getBoundingClientRect();
+    out.push({ id: 'f-unit at the fold', off: Math.round(Math.max(0, r.bottom - window.innerHeight) + Math.max(0, -r.top)) });
+    last.blur();
+    return out;
+  });
+  eq(fold.filter((x) => x.off > 0), [], 'form: the open picker is never off the screen on a phone');
+  await f.setViewportSize({ width: 1280, height: 1000 });
 
   eq(formErrors, [], 'form: no uncaught script errors');
   await f.close();
@@ -1598,6 +1874,90 @@ for (const [name, expect] of [
   await p.close();
 }
 
+/* ------------------------------- Edit / Take down on the FROZEN ARCHIVES
+
+   data/past-postings.json, data/recent-faculty.json and
+   data/universities.json are written once by the legacy import and committed,
+   so those three pages had no write path at all — the maintainer saw exactly
+   the read-only page an anonymous visitor did. assets/oa-rowedit.js corrects a
+   row AT READ TIME from Firestore `rowOverrides`.
+
+   The override map comes from a read CI cannot make, so it is injected. What
+   is checked is what unit tests cannot see: that a visitor gets nothing, that
+   the maintainer's controls land on the right rows, and — the part that has to
+   be true for everybody, not just the maintainer — that a hidden row is gone
+   from the page and an edited value is what the card actually shows.         */
+
+/* previous-markets.html is opened on a season only the ARCHIVE covers: its
+   default view is all postings folded in from data/jobs.json, which belong to
+   the job editor and which this one refuses to touch. */
+for (const [pageName, dataset, patch] of [
+  ['previous-markets.html?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
+  ['recent-faculty.html', 'recent-faculty', { name: 'Corrected Person Name' }],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push(pageName + ': ' + e.message));
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(400);
+
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), 0,
+    `${dataset}: a visitor who is not signed in sees no Edit or Take down`);
+
+  /* The victim is the row the page ACTUALLY renders first, taken from the card
+     itself — the file's first row is not the page's, which sorts. */
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  const cards = await p.$$eval('.oa-card', (n) => n.length);
+  /* "1 - 10 / 93" when nothing is filtered, "1 - 10 / 93 (of 243)" when
+     something is — so read the number right after the slash, not the last one
+     on the line, which is the unfiltered corpus. */
+  const total = (t) => Number((String(t).match(/\/\s*(\d+)/) || [0, 0])[1]);
+  const totalBefore = total(await p.$eval('.oa-count', (n) => n.textContent));
+  ok(totalBefore > 0, `${dataset}: the results line carries a total to compare against`);
+
+  await p.evaluate((d) => window.OARowEdit.__setForTest(d, { ready: true, admin: true }),
+    dataset);
+  await p.waitForTimeout(300);
+
+  eq(await p.$$eval('.oa-card', (n) => n.length), cards,
+    `${dataset}: the maintainer sees the same rows as everyone else`);
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), cards,
+    `${dataset}: and gains the controls on every one of them`);
+  eq(await p.$$eval('.oa-card .oa-card-actions .oa-jobbtn', (n) =>
+    n.slice(0, 2).map((x) => x.textContent)),
+    ['Edit', 'Take down'], `${dataset}: both controls, in that order`);
+  // the card head is itself a button; the controls must not be inside it
+  eq(await p.$$eval('.oa-card-head .oa-jobbtn', (n) => n.length), 0,
+    `${dataset}: the controls are not nested inside the card toggle`);
+
+  /* A TAKEN-DOWN ROW IS GONE FOR EVERYBODY — the point of a read-time overlay,
+     and the half a signed-out visitor must also get. */
+  await p.evaluate(([d, id]) => window.OARowEdit.__setForTest(d, {
+    ready: true, admin: false, rows: { [id]: { hidden: true } },
+  }), [dataset, victim]);
+  await p.waitForTimeout(300);
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), 0,
+    `${dataset}: a signed-out visitor still sees no controls`);
+  ok(!(await p.$(`[id="job-${victim}"]`)),
+    `${dataset}: the taken-down row is gone from the page`);
+  eq(total(await p.$eval('.oa-count', (n) => n.textContent)), totalBefore - 1,
+    `${dataset}: and the count says one fewer`);
+
+  /* AN EDIT SHOWS. The overlay is applied to the row the card renders from, so
+     the corrected value is what a reader sees — not a note beside it. */
+  await p.evaluate(([d, id, o]) => window.OARowEdit.__setForTest(d, {
+    ready: true, admin: false, rows: { [id]: o },
+  }), [dataset, victim, patch]);
+  await p.waitForTimeout(300);
+  eq(total(await p.$eval('.oa-count', (n) => n.textContent)), totalBefore,
+    `${dataset}: correcting a row it had hidden brings it back`);
+  eq(await p.$eval(`[id="job-${victim}"] .oa-card-title`,
+    (n) => n.textContent.trim()), Object.values(patch)[0],
+    `${dataset}: and the corrected value is what the card shows`);
+
+  await p.close();
+}
+
 /* --------------------------------------------------- the Universities map
 
    Not an OAList page — a Leaflet map over data/universities.json, vendored
@@ -1734,6 +2094,293 @@ for (const [name, expect] of [
    creates it. Candidates and placements ship with empty datasets until
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
+
+/* --------- the archive editor never offers itself on a real job posting
+
+   previous-markets.html renders TWO populations from one list: the frozen
+   archive, and the postings folded in at read time from data/jobs.json. Those
+   second ones are real submissions, and an override against one is read by
+   NOTHING — no build applies rowOverrides to data/jobs.json — so Take down
+   there emptied the card and left the posting on the site. Measured: every
+   card on page one is a folded-in posting, so this was not an edge case but
+   the default view.
+
+   Standing down when the job editor has drawn is not the guard, because the
+   two race; this is. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/own: ' + e.message));
+  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(600);
+
+  const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  const past = JSON.parse(await readFile(path.join(ROOT, 'data', 'past-postings.json'), 'utf8'));
+  const archiveIds = new Set(past.map((r) => r.id));
+  const folded = new Set(jobs.map((r) => r.id).filter((id) => !archiveIds.has(id)));
+  ok(folded.size > 0, 'previous-markets: the page really does fold in live postings');
+
+  // the maintainer, with the job editor not yet resolved — the first second of
+  // every visit, and for ever if that read fails
+  await p.evaluate(() => window.OARowEdit.__setForTest('past-postings',
+    { ready: true, admin: true }));
+  await p.waitForTimeout(400);
+
+  const drawnOn = await p.$$eval('.oa-card-actions',
+    (ns) => ns.map((n) => n.closest('.oa-card').id.replace(/^job-/, '')));
+  eq(drawnOn.filter((id) => folded.has(id)), [],
+    'the archive editor draws on no posting that belongs to data/jobs.json');
+
+  /* …and it DOES draw on the archive's own rows. Filtering to a season only
+     the archive covers brings them onto the first page. */
+  const p2 = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p2.on('pageerror', (e) => jsErrors.push('overrides/own2: ' + e.message));
+  await p2.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p2.waitForSelector('.oa-card');
+  await p2.waitForTimeout(600);
+  await p2.evaluate(() => window.OARowEdit.__setForTest('past-postings',
+    { ready: true, admin: true }));
+  await p2.waitForTimeout(400);
+  const shown2 = await p2.$$eval('.oa-card', (n) => n.length);
+  ok(shown2 > 0, 'previous-markets: the archive-only season shows rows');
+  eq(await p2.$$eval('.oa-card-actions', (n) => n.length), shown2,
+    'and every one of the archive\'s own rows carries the controls');
+
+  /* AND AN OVERRIDE THAT ALREADY EXISTS against a folded-in posting — written
+     before this guard, or by mistake — is INERT rather than half-applied. It
+     must not hide the row, because nothing on this page could then put it
+     back: the archive editor no longer offers itself there, and the job editor
+     knows nothing about rowOverrides. */
+  /* A folded-in posting that is actually ON this page — `folded` also holds
+     the current-market rows, which previous-markets deliberately excludes, and
+     only the first ten of what is left are rendered. */
+  const stale = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  ok(folded.has(stale), 'the card under test really is one of the folded-in postings');
+  await p.evaluate((id) => window.OARowEdit.__setForTest('past-postings', {
+    ready: true, admin: false, rows: { [id]: { hidden: true, institution: 'Should Not Show' } },
+  }), stale);
+  await p.waitForTimeout(400);
+  ok(await p.$(`[id="job-${stale}"]`),
+    'an override against a posting the archive does not own does not hide it');
+  ok(!(await p.$$eval('.oa-card-title', (n) => n.map((x) => x.textContent)))
+      .includes('Should Not Show'),
+    'nor rewrite it — it is inert, not half-applied');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/own')), [],
+    'no uncaught errors on either view');
+  await p.close();
+  await p2.close();
+}
+
+/* ------------- a taken-down row stays visible to the maintainer, whoever
+   owns the card, and the admin-only module is never a hard dependency
+
+   previous-markets.html carries TWO decorators, and which of them ends up
+   owning a card is a matter of timing — oa-jobedit reads the WHOLE
+   jobSubmissions collection, oa-rowedit a small filtered query. The fade, the
+   note and Restore are the ONLY trace an override leaves on the page, so if
+   they are skipped whenever the other decorator got there first, a row the
+   maintainer took down looks completely ordinary to them while being invisible
+   to everybody else — with no way back.                                     */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/hidden: ' + e.message));
+  /* A season only the ARCHIVE covers, so every card is a row this editor owns
+     — the folded-in postings from data/jobs.json are another editor's, and it
+     refuses to touch them (the block above). */
+  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(600);
+
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+
+  // the OTHER decorator owns this card, and the row is hidden by an override
+  await p.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({
+      ready: true, admin: true, byId: { [id]: id }, byRef: {},
+    });
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: true, rows: { [id]: { hidden: true } },
+    });
+  }, victim);
+  await p.waitForTimeout(400);
+
+  const card = `[id="job-${victim}"]`;
+  ok(await p.$(card), 'the maintainer still sees a row they took down');
+  ok(await p.$eval(card, (n) => n.classList.contains('oa-card-gone')),
+    'and it is marked as taken down even though the other editor owns the card');
+  eq(await p.$$eval(card + ' .oa-rowedit-restore', (n) => n.map((x) => x.textContent)),
+    ['Restore'], 'with a way to put it back');
+  ok(/only you/i.test(await p.$eval(card + ' .oa-card-note', (n) => n.textContent)),
+    'and a sentence saying only they can see it');
+
+  // and a visitor gets none of it: the row is simply not there
+  await p.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({ ready: true, admin: false, byId: {}, byRef: {} });
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: false, rows: { [id]: { hidden: true } },
+    });
+  }, victim);
+  await p.waitForTimeout(400);
+  ok(!(await p.$(card)), 'while a visitor does not see it at all');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/hidden')), [],
+    'no uncaught errors either way');
+  await p.close();
+}
+
+/* THE ADMIN-ONLY MODULE IS A SOFT DEPENDENCY. These are PUBLIC pages; a
+   content blocker with a broad asset filter, or a transient 5xx on one file,
+   must not cost every reader the list. The module is aborted at the network
+   and the page has to render exactly what it renders with no overrides. */
+
+for (const [pageName, sel, least] of [
+  ['previous-markets.html', '.oa-card', 1],
+  ['recent-faculty.html', '.oa-card', 1],
+  ['universities.html', 'img.leaflet-marker-icon', 1],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const errs = [];
+  p.on('pageerror', (e) => errs.push(e.message));
+  await p.route('**/oa-rowedit.js', (r) => r.abort());
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector(sel, { timeout: 15000 }).catch(() => {});
+  await p.waitForTimeout(600);
+  ok(await p.$$eval(sel, (n) => n.length) >= least,
+    `${pageName} still renders its data when the admin-only module never loads`);
+  eq(errs, [], `${pageName} raises no error over the missing module`);
+  await p.close();
+}
+
+/* ----------------------- an override is DATA, never markup and never a scheme
+
+   `rowOverrides` is PUBLIC-READ: whatever it holds is rendered for every
+   visitor, on three pages, so an override that could carry markup or a
+   `javascript:` URL would be stored XSS on the whole site the moment the
+   maintainer's account was ever compromised — and a wrong-looking paste would
+   break the page long before that. The rules bound the LENGTH of each field;
+   nothing there can bound its CONTENT, so the property has to hold at render
+   time, and this is where it is pinned.
+
+   It holds today because the card renderer uses textContent for a plain value
+   and the one innerHTML it does use receives an anchor that was BUILT AS DOM —
+   href through OAList.safeUrl, label through textContent — and serialised. All
+   three are one edit away from not holding. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/xss: ' + e.message));
+  // an archive season, so the row is one this editor owns (see above)
+  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(400);
+
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  const MARKUP = '<img src=x onerror="window.__xss=1">Somewhere';
+
+  await p.evaluate(([id, markup]) => {
+    window.__xss = 0;
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: false,
+      rows: { [id]: {
+        institution: markup,
+        comments: markup,
+        adUrl: 'javascript:window.__xss=1',
+      } },
+    });
+  }, [victim, MARKUP]);
+  await p.waitForTimeout(400);
+
+  const card = `[id="job-${victim}"]`;
+  eq(await p.$eval(card + ' .oa-card-title', (n) => n.textContent), MARKUP,
+    'an override that looks like markup is shown as the text it is');
+  eq(await p.$$eval(card + ' img', (n) => n.length), 0,
+    'and is never parsed into an element');
+
+  // open the card so its detail rows render, then look at what they hold
+  await p.click(card + ' .oa-card-head');
+  await p.waitForTimeout(200);
+  eq(await p.$$eval(card + ' .oa-card-body img', (n) => n.length), 0,
+    'the same is true of every field in the body');
+  eq(await p.$$eval(card + ' a', (as) =>
+    as.filter((a) => /^javascript:|^data:/i.test(a.getAttribute('href') || '')).length), 0,
+    'and a javascript: URL never becomes a link');
+  eq(await p.evaluate(() => window.__xss), 0, 'nothing an override carries executes');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/xss')), [],
+    'and the page raises no error over it');
+  await p.close();
+}
+
+/* ------------------------------- Edit / Take down on the universities map
+
+   The map is not an OAList page, so its half of the archive editing lives on
+   its own hooks: `prepare` overlays the maintainer's corrections onto the
+   dataset before it is drawn, and `onPopup` adds the controls to a pin's
+   popup. The overrides come from a Firestore read CI cannot make, so they are
+   injected here exactly as on the two archive lists.                        */
+
+{
+  const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('universities/edit: ' + e.message));
+  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
+
+  const openPopup = async () => {
+    await p.$eval('img.leaflet-marker-icon', (n) =>
+      n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await p.waitForSelector('.leaflet-popup .oa-uni-pop', { timeout: 5000 });
+  };
+
+  await openPopup();
+  eq(await p.$$eval('.leaflet-popup .oa-uni-admin', (n) => n.length), 0,
+    'universities: a visitor who is not signed in gets no controls on a pin');
+
+  await p.evaluate(() =>
+    window.OARowEdit.__setForTest('universities', { ready: true, admin: true }));
+  await p.waitForTimeout(400);
+  await openPopup();
+  eq(await p.$$eval('.leaflet-popup .oa-uni-admin .oa-jobbtn', (n) =>
+    n.map((x) => x.textContent)), ['Edit', 'Take down'],
+    'universities: the maintainer gets both controls on a pin, in that order');
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
+    'universities: and the map still carries the whole dataset');
+
+  /* A CORRECTION IS WHAT EVERY VISITOR SEES. `institution` is the field every
+     link on a popup filters by, so an override has to reach the links too —
+     not only the heading. */
+  const victim = unis.find((r) => isFinite(r.lat) && isFinite(r.lng));
+  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
+    ready: true, admin: false,
+    rows: { [v]: { institution: 'Corrected School', name: 'Corrected School' } },
+  }), victim.id);
+  await p.waitForTimeout(500);
+  await p.fill('#oa-uni-search', 'Corrected School');
+  await p.waitForTimeout(400);
+  eq(await p.$$eval('img.leaflet-marker-icon', (n) => n.length), 1,
+    'universities: the corrected school is findable by its new name');
+  await openPopup();
+  eq(await p.$eval('.leaflet-popup .oa-uni-pop h3', (n) => n.textContent), 'Corrected School',
+    'universities: and the popup names it that way');
+  ok(await p.$$eval('.leaflet-popup .oa-uni-pop a', (ns) =>
+    ns.some((a) => (a.getAttribute('href') || '').includes('Corrected%20School'))),
+    'universities: every link on the popup follows the corrected name');
+
+  // A TAKEN-DOWN SCHOOL LEAVES THE MAP, for everybody.
+  await p.fill('#oa-uni-search', '');
+  await p.waitForTimeout(400);
+  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
+    ready: true, admin: false, rows: { [v]: { hidden: true } },
+  }), victim.id);
+  await p.waitForTimeout(500);
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length - 1} universities`,
+    'universities: a taken-down school is off the map for every visitor');
+
+  await p.close();
+}
 
 const MOBILE_PAGES = [
   // the live site: the one-pager (whose jobs teaser has NO filter bar — the

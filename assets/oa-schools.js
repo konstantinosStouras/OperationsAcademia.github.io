@@ -59,7 +59,11 @@
     'Penn State University': 'The Pennsylvania State University',
     'UCLA': 'University of California, Los Angeles',
     'Institut Mines-Telecom Business School': 'Institut Mines-Télécom',
-    'Institut Mines-Télécom Business School': 'Institut Mines-Télécom'
+    'Institut Mines-Télécom Business School': 'Institut Mines-Télécom',
+    /* the Universities directory's own second name for it; dropAcronym will
+       not touch a mixed-case "(CityU)", because that is the shape of the
+       "(Shenzhen)" that marks a genuinely different campus */
+    'City University of Hong Kong (CityU)': 'City University of Hong Kong'
   };
 
   /* ---------------------------------------------------------------- schools
@@ -213,7 +217,7 @@
 
   /* fold(name) -> the name we publish, for every canonical name and alias. */
   function tableOf(list, aliases) {
-    var by = {}, i;
+    var by = Object.create(null), i;
     for (i = 0; i < list.length; i++) by[fold(list[i])] = list[i];
     for (var a in aliases) {
       if (Object.prototype.hasOwnProperty.call(aliases, a)) by[fold(a)] = aliases[a];
@@ -225,7 +229,7 @@
   }
 
   var BY_INSTITUTION = tableOf([], INSTITUTION_ALIASES);
-  var BY_SCOPED_SCHOOL = {};
+  var BY_SCOPED_SCHOOL = Object.create(null);
   for (var uni in SCOPED_SCHOOL_ALIASES) {
     if (!Object.prototype.hasOwnProperty.call(SCOPED_SCHOOL_ALIASES, uni)) continue;
     BY_SCOPED_SCHOOL[fold(uni)] = tableOf([], SCOPED_SCHOOL_ALIASES[uni]);
@@ -240,6 +244,30 @@
     var s = spell(v);
     if (!s) return '';
     return BY_INSTITUTION[fold(s)] || s;
+  }
+
+  /**
+   * The same university, however it is written — an identity for GROUPING,
+   * never a name to publish.
+   *
+   * The Universities directory lists one university under several names:
+   * "City University of Hong Kong (CityU)" beside "City University of Hong
+   * Kong", "The University of Hong Kong (HKU)" beside "University of Hong Kong
+   * (HKU)". The posting form offered each as its own university, with its own
+   * schools, so half of a university's schools were invisible from the other
+   * half of it.
+   *
+   * A trailing acronym and a leading "The" are exactly what one writer adds
+   * and the next leaves out — the same two rules canonUnit and canonSchool
+   * already apply — but they must not decide what the site PUBLISHES: a
+   * posting's id and its permalink are built from its institution, and
+   * "Baruch College, The City University of New York (CUNY)" is deliberately
+   * published whole. So this is a separate function, used where names are
+   * grouped (data/vocab.json, and the posting form reading it back).
+   */
+  function institutionKey(v) {
+    var s = dropAcronym(canonInstitution(v));
+    return fold(s).replace(/^the /, '');
   }
 
   /** The one name this school is published under. The university is optional
@@ -275,9 +303,16 @@
 
   /** The wrapper-free field name, alias table consulted again once the
       wrapper is off ("Department of Operations and Info Systems" reaches
-      "Operations and Info Systems" only after stripping). */
+      "Operations and Info Systems" only after stripping).
+
+      Stripped REPEATEDLY, because each pass can uncover the other's work:
+      "Engineering Management, Information, and Systems Department (EMIS)"
+      ends in the acronym, so the wrapper is not last until the acronym has
+      gone. One pass left it canonicalising to something that was not itself
+      canonical — which is exactly what "safe to run twice" must not mean. */
   function canonUnitCore(v) {
-    var s = dropAcronym(stripWrapper(v));
+    var s = clean(v), prev = null;
+    while (s && s !== prev) { prev = s; s = dropAcronym(stripWrapper(s)); }
     if (!s || EMPTY_UNITS.indexOf(fold(s)) !== -1) return '';
     var hit = BY_UNIT[fold(s)];
     if (hit && fold(hit) !== fold(s)) return canonUnitCore(hit);
@@ -299,7 +334,7 @@
      Faculty of Management" must both survive untouched.                      */
   var SEPARATORS = [' - ', ' – ', ' — ', ' / ', '/', ': ', ', ', '-'];
 
-  var BY_FUSED = {};
+  var BY_FUSED = Object.create(null);
   for (var fk in FUSED_SCHOOLS) {
     if (Object.prototype.hasOwnProperty.call(FUSED_SCHOOLS, fk)) BY_FUSED[fold(fk)] = FUSED_SCHOOLS[fk];
   }
@@ -447,10 +482,40 @@
     var p = place || {};
     var given = { institution: clean(p.institution), school: clean(p.school), unit: clean(p.unit) };
     if (given.institution && !given.school && !given.unit) given = splitLegacyInstitution(given.institution);
+    return assemble(given, splitFused(spell(given.school)));
+  }
 
+  /**
+   * The same, for three names that are ALREADY in three fields — a posting
+   * form's boxes, the Universities directory's columns.
+   *
+   * TWO THINGS canonPlace() does that a set of columns must not have done to
+   * it, because both are guesses about a value that names more than one thing
+   * and a form with three boxes has already said which is which:
+   *
+   *   - the LEGACY INSTITUTION split. "University of California, Los Angeles
+   *     (UCLA)" typed into the University box, with the others still empty,
+   *     was read as a university and a department and posted under "University
+   *     of California" with a department called "Los Angeles". Berkeley, one
+   *     word shorter, was left alone.
+   *   - the SEPARATOR split of the school box. Across every name in the data
+   *     it fires three times and is wrong twice: Rutgers' "School of
+   *     Business-Camden" (a campus, and a separately accredited school) and
+   *     Clemson's "College of Engineering, Computing and Applied Sciences" (a
+   *     comma inside one college's name) both lost their tail to an invented
+   *     department. The CURATED pairs are kept — a name somebody has written
+   *     down as naming both really does name both.
+   */
+  function canonColumns(place) {
+    var p = place || {};
+    var given = { institution: clean(p.institution), school: clean(p.school), unit: clean(p.unit) };
+    var known = BY_FUSED[fold(spell(given.school))];
+    return assemble(given, known || { school: given.school, unit: '' });
+  }
+
+  /** The three names canonicalised, with whatever the school field gave up. */
+  function assemble(given, fused) {
     var institution = canonInstitution(given.institution);
-
-    var fused = splitFused(spell(given.school));
     var school = canonSchool(fused.school, institution);
 
     var unit = canonUnit(given.unit);
@@ -481,9 +546,11 @@
     UNIT_ALIASES: UNIT_ALIASES,
     fold: fold,
     canonInstitution: canonInstitution,
+    institutionKey: institutionKey,
     canonSchool: canonSchool,
     canonUnit: canonUnit,
     canonPlace: canonPlace,
+    canonColumns: canonColumns,
     splitFused: splitFused,
     splitLegacyInstitution: splitLegacyInstitution,
     isCanonicalSchool: isCanonicalSchool,
