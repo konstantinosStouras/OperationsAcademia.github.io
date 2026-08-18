@@ -2775,6 +2775,88 @@ for (const [from, hash] of [
   await q.close();
 }
 
+/* ---------------------------- the account menu's count, as it renders
+
+   The wiring is checked in selftest; this is the part only a browser can
+   answer — that the badge shows a number, hides rather than printing a 0 or
+   an empty pill, and is readable in both themes. Firebase is unreachable from
+   CI, so the menu's own markup is used with the module's painting rules
+   rather than a real sign-in. */
+{
+  const a = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await a.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await a.waitForTimeout(400);
+
+  const seen = await a.evaluate(() => {
+    const menu = document.createElement('div');
+    menu.className = 'oa-acct-menu';
+    menu.innerHTML =
+      '<a href="my-postings.html"><span class="oa-mi">x</span>My postings' +
+        '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
+      '<a href="alerts.html"><span class="oa-mi">x</span>E-mail alerts' +
+        '<span class="oa-acct-n" data-count="alerts" hidden></span></a>';
+    document.body.appendChild(menu);
+    const paint = (counts) => {
+      document.querySelectorAll('.oa-acct-n[data-count]').forEach((el) => {
+        const n = counts[el.getAttribute('data-count')];
+        const show = typeof n === 'number' && n > 0;
+        el.textContent = show ? String(n) : '';
+        el.hidden = !show;
+      });
+    };
+    const read = () => [...document.querySelectorAll('.oa-acct-n')]
+      .map((el) => ({ text: el.textContent, hidden: el.hidden }));
+    const out = {};
+    paint({ postings: 2, alerts: 1 }); out.some = read();
+    paint({ postings: 0, alerts: 1 }); out.zero = read();
+    paint({}); out.unknown = read();
+    paint({ postings: 12, alerts: 3 });
+    const el = document.querySelector('.oa-acct-n');
+    out.rightAligned = getComputedStyle(el).marginLeft === 'auto'
+      || parseFloat(getComputedStyle(el).marginLeft) > 20;
+    return out;
+  });
+
+  eq(seen.some.map((x) => x.text), ['2', '1'], 'account menu: the badge shows the count');
+  eq(seen.zero[0].hidden, true, 'account menu: and hides rather than printing a 0');
+  eq(seen.unknown.every((x) => x.hidden), true,
+    'account menu: a count we do not know shows nothing at all');
+  ok(seen.rightAligned, 'account menu: the badge sits at the end of its row');
+
+  /* its own, because the form block's helper is scoped to that block */
+  const lum2 = (css) => {
+    const m = String(css).match(/[\d.]+/g);
+    const [r, g, b] = m.slice(0, 3).map(Number).map((v) => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio2 = (fg, bg) => {
+    const x = lum2(fg), y = lum2(bg);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  };
+
+  for (const theme of ['light', 'dark']) {
+    await a.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    await a.waitForTimeout(150);
+    const got = await a.evaluate(() => {
+      const el = document.querySelector('.oa-acct-n');
+      const ground = (n0) => {
+        for (let n = n0; n; n = n.parentElement) {
+          const c = getComputedStyle(n).backgroundColor;
+          if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c;
+        }
+        return 'rgb(255,255,255)';
+      };
+      return { fg: getComputedStyle(el).color, bg: ground(el) };
+    });
+    const cr = ratio2(got.fg, got.bg);
+    ok(cr >= 4.5, `account menu (${theme}): the badge reads at ${cr.toFixed(2)}:1`);
+  }
+  await a.close();
+}
+
 /* ------------------------------- readable in BOTH themes, on every page
 
    The reports that led here (2026-08-18): the vocabulary dropdown drew

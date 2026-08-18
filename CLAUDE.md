@@ -566,6 +566,29 @@ matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
 
+## The account menu counts what it links to
+
+"My postings" and "E-mail alerts" read the same whether you had none or a
+dozen, so each carries its number now — the shape `/lit/`'s account menu uses.
+
+A menu is on EVERY page of a static site, so a read per page per visitor is a
+real cost. Three rules keep it cheap, and `testAccountCounts` pins all three:
+
+* **Paint from the cache first.** The count is remembered per account in
+  `localStorage` beside the name hint, so the badge lands with the menu.
+* **Refresh once per SESSION, not per page** (`sessionStorage`), using a
+  `count()` aggregate — one read whatever the collection holds.
+* **An exact count is free where the data is already loaded.** `oa-myjobs.js`
+  and `oa-alerts.js` call `OAAccounts.setCount()` from the list they just
+  fetched, which costs nothing and is what keeps the badge honest the moment a
+  posting is taken down.
+
+**A count we do not KNOW shows nothing** — no badge is honest, a `0` is not —
+and zero shows nothing either, since an empty pill beside "My postings" reads
+as a fault rather than as "none yet". The cache is keyed to its own uid, a read
+that lands after a sign-out is dropped, and signing out forgets it: a shared
+machine must not show the next person the last one's numbers.
+
 ## A same-day collapse is keyed on the ADVERTISEMENT, not just the day
 
 `collapseSameDay` folds repeat submissions of one posting together — same

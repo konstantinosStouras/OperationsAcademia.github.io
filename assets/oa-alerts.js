@@ -336,6 +336,9 @@
         return Object.assign({ id: d.id }, d.data());
       }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
       renderList();
+      /* the account menu's badge, from the list we already have — no read,
+         and exact the moment an alert is added or deleted */
+      if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('alerts', alerts.length);
     }).catch(function (err) {
       // remembered, not just printed: the unsubscribe banner must not report
       // "we could not find that alert" when the read is what failed

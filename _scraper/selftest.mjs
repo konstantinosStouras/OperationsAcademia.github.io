@@ -1784,6 +1784,51 @@ async function testScopedUnits() {
   }
 }
 
+/* ------------------------------- the count beside "My postings"
+
+   The menu named the pages but not how much was in them, so "My postings"
+   read the same whether you had none or a dozen. The number is what tells a
+   reader the page is worth opening — the shape /lit/'s account menu already
+   uses.
+
+   Cheap by construction, and these checks are what keep it that way: the
+   badge paints from a cache, refreshes ONCE PER SESSION rather than per page
+   (a menu on a static site is on every page), and the two pages that already
+   hold the real list correct it for nothing.                                */
+
+async function testAccountCounts() {
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+
+  ok(/data-count="postings"/.test(acct) && /data-count="alerts"/.test(acct),
+    'the account menu carries a count beside My postings and E-mail alerts');
+  ok(/setCount: setCount/.test(acct),
+    'and exports setCount, so a page holding the list can correct it');
+
+  /* the honest-number rules, both of them */
+  ok(/typeof n === 'number' && n > 0/.test(acct),
+    'a count is shown only when we KNOW it and it is more than zero');
+  ok(/COUNT_SESSION/.test(acct) && /sessionStorage/.test(acct),
+    'and refreshed once per session, not once per page');
+  ok(/ref\.count === 'function'/.test(acct),
+    'using a count() aggregate — one read whatever the collection holds');
+
+  /* signing out must not leave the next person the last one's numbers */
+  ok(/removeItem\(COUNT_KEY\)/.test(acct),
+    'signing out forgets the counts');
+
+  /* and the account it belongs to is checked, so a cache cannot cross accounts */
+  ok(/all\.uid === uid/.test(acct), 'the cache is keyed to its own account');
+  ok(/state\.user\.uid !== uid/.test(acct),
+    'and a read that lands after a sign-out is dropped');
+
+  for (const [file, what, n] of [['assets/oa-myjobs.js', 'postings', 'docs.length'],
+    ['assets/oa-alerts.js', 'alerts', 'alerts.length']]) {
+    const js = await readFile(path.join(HERE, '..', file), 'utf8');
+    ok(new RegExp(`setCount\\('${what}', ${n.replace('.', '\\.')}\\)`).test(js),
+      `${file} corrects the ${what} count from the list it already loaded`);
+  }
+}
+
 /* --------------------------- the same names on the map and the faculty list
 
    "Let's use the same consistent University Name, School Name, Department
@@ -4203,6 +4248,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();
+  await testAccountCounts();
   await testEveryDatasetNamesPlacesTheSameWay();
   await testNoDuplicateKeys();
   await testScopedUnits();
