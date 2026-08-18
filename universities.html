@@ -176,10 +176,25 @@
     <script src="assets/leaflet/leaflet.js"></script>
     <script src="assets/leaflet/leaflet.markercluster.js"></script>
     <script src="assets/oa-uni-map.js"></script>
+    <script src="assets/oa-rowedit.js"></script>
     <script>
-      OAUniMap.mount({
+      /* data/universities.json is a FROZEN ARCHIVE — written once from the
+         maintainer's Google Sheet by _scraper/import-legacy-tables.mjs, and
+         its workflow has no schedule. So this map was read-only for everybody,
+         the maintainer included. `rowOverrides` corrects a school AT READ TIME
+         (assets/oa-rowedit.js): the committed file stays the source of truth,
+         an override reaches every visitor, and re-running the import cannot
+         undo a correction. Signed in as the maintainer, every pin's popup
+         gains Edit and Take down.
+
+         ADDING a school is still done upstream, in the sheet: two places that
+         can both create the same row would list it twice as soon as the import
+         next ran. */
+      var uniMap = OAUniMap.mount({
         mount: '#oa-uni',
         data: '/data/universities.json',
+        prepare: function (rows) { return OARowEdit.apply('universities', rows); },
+        onPopup: function (node, row) { OARowEdit.onPopup('universities')(node, row); },
         /* The candidates list is a SECTION of the one-page site, and three
            list engines share that page's query string, so its filter keys are
            namespaced. Left to the engine's default this would open
@@ -187,6 +202,10 @@
            redirect that DROPS the query, landing the reader on every
            candidate instead of the school's. */
         candidatesHref: function (q) { return './?c_affiliation=' + q + '#candidates'; },
+      });
+
+      OARowEdit.attach('universities', {
+        onChange: function () { if (uniMap && uniMap.refresh) uniMap.refresh(); },
       });
     </script>
   </body>

@@ -165,9 +165,21 @@
       : L.layerGroup());
     cluster.addTo(map);
 
-    var rows = [];
+    var base = [];      // the file, exactly as it was served
+    var rows = [];      // what is drawn — `base` after cfg.prepare, if any
     var shown = [];
     var timer = null;
+
+    /* A page may correct the dataset before it is drawn (universities.html
+       overlays the maintainer's `rowOverrides` — see assets/oa-rowedit.js).
+       The engine keeps the file it fetched, so the overlay can arrive LATE —
+       Firestore resolves after this fetch as often as not — and be applied
+       without going back to the network. */
+    function prepared(list) {
+      if (typeof cfg.prepare !== 'function') return list.slice();
+      var out = cfg.prepare(list.slice());
+      return (out || []).filter(function (r) { return r && isFinite(r.lat) && isFinite(r.lng); });
+    }
 
     function bounds(list) {
       var b = L.latLngBounds([]);
@@ -181,7 +193,14 @@
       cluster.clearLayers();
       shown.forEach(function (r) {
         var m = L.marker([r.lat, r.lng], { title: r.name });
-        m.bindPopup(popupContent(r, cfg), { maxWidth: 320 });
+        var pop = popupContent(r, cfg);
+        // A page may add its own controls to a popup — the maintainer's Edit
+        // and Take down on universities.html. The hook is the map's twin of
+        // OAList's `onCard`, and like it, drawing a button is never authority.
+        if (typeof cfg.onPopup === 'function') {
+          try { cfg.onPopup(pop, r); } catch (e) { if (window.console) console.error(e); }
+        }
+        m.bindPopup(pop, { maxWidth: 320 });
         cluster.addLayer(m);
       });
       count.textContent = !rows.length ? ''
@@ -219,9 +238,10 @@
         return res.json();
       })
       .then(function (data) {
-        rows = (Array.isArray(data) ? data : []).filter(function (r) {
+        base = (Array.isArray(data) ? data : []).filter(function (r) {
           return r && isFinite(r.lat) && isFinite(r.lng);
         });
+        rows = prepared(base);
         input.value = readUrl();
         draw(input.value);
         if (!rows.length) fail('No universities could be loaded. Please reload the page, or let us know if it keeps happening.');
@@ -234,6 +254,12 @@
     return {
       rows: function () { return rows.slice(); },
       shown: function () { return shown.slice(); },
+      /** Re-run cfg.prepare over the file as served, and redraw. */
+      refresh: function () {
+        if (!base.length) return;
+        rows = prepared(base);
+        draw(input.value);
+      },
       map: map,
     };
   }

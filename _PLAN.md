@@ -458,6 +458,65 @@ EVIDENCE — once it holds a posting newer than anything in the one it replaces 
 never on a date, so a workbook opened in advance and left empty cannot take the
 site with it.
 
+### 3.8 The maintainer can edit everything — **DONE 2026-08-18**
+
+Reported from the live site: signed in as the owner, the jobs page showed Edit
+and Take down on some cards and not others. It was not a rendering quirk. Three
+distinct failures sat behind it, and fixing them properly reached every dataset
+on the site.
+
+**(a) The tracking sheet's postings had no editing handle — 16 of the 25 cards
+on the page.** A control is drawn only where `docIdFor` (`assets/oa-jobedit.js`)
+can name a `jobSubmissions` document, and the workbook's rows deliberately had
+none. They now get a **mirror**: an inert document, `status: 'sheet'` — a value
+no query in the pipeline reads — created and refreshed from the workbook by
+`syncSheetMirrors` in `build-jobs.mjs`. Saving an edit sets `status: 'queued'`,
+which `post-a-job.html` has always done, and that alone is the hand-over: the
+build then publishes the document and drops the workbook's row. The workbook
+keeps deciding which postings EXIST (each mirror is pinned to its row by
+`sheetId`), which is the property §1's design was protecting; the mirrors take
+nothing away from it. The 16 documents appear on the first build that runs with
+`FIREBASE_SERVICE_ACCOUNT` set.
+
+**(b) Take down did nothing, on all 110 rows.** Removal was keyed on the
+form-issued `ref`, and no published row has one — the legacy import and the
+workbook do not issue them. The document was marked hidden, the button said
+"Taken down", the orphan carry republished the row verbatim, and the change
+e-mail reported nothing. `removeIds` (and a `{ id }` spec in `mergeRows`) fixes
+it in all three pipelines. Only the maintainer was ever affected: every
+published row's `uid` is null, so no poster has ever owned one.
+
+**(c) The three frozen archives were read-only for everybody.**
+`data/past-postings.json`, `data/recent-faculty.json` and
+`data/universities.json` are written once by the legacy import and have no
+Firestore backing at all. `assets/oa-rowedit.js` corrects a row **at read
+time** from a public-read, admin-write `rowOverrides` collection — the
+`newsOverrides` pattern generalised. The committed file stays the source of
+truth, the correction reaches every visitor, and re-running the import cannot
+undo it. Deliberately not an add path: a school the archive lacks is added
+upstream, in the sheet, or the import would publish it a second time.
+
+Two smaller things fell out of it. `newsOverrides` had no `allow delete` (a
+delete carries no `request.resource`, so the write rule errors and refuses), so
+hiding a What's-new entry was permanent — both overlays now show the maintainer
+what they have hidden, with Restore. And `OAAccounts.isAdmin()` omitted the
+`emailVerified` check the rules require, so the feedback inbox could draw for a
+session every write would then bounce.
+
+**None of it is live until `firebase deploy --only firestore:rules` is run from
+the repository root.** No workflow can do it — the CLI needs an interactive
+login. `_SETUP-FIREBASE.md` §4 said `cd v2`, which has been wrong since the
+promotion; it now says the root and says the step is one a human has to
+remember.
+
+Still open, deliberately: there is no admin queue for submissions that fail
+validation (`build-jobs.mjs` warns and leaves them queued, reachable only from
+the Firebase console); `my-postings.html` is uid-scoped with no maintainer
+branch; `accountKeys` denies `list`/`delete` to the admin as well as everyone
+else; and `data/candidates.json` and `data/placements.json` are empty, so the
+candidate and placement editors — whose admin branches are correct — cannot be
+exercised end to end yet.
+
 ---
 
 ## 4. Things to decide

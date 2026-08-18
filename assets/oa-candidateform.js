@@ -539,7 +539,15 @@
       OAAccounts.whenSignedIn(function () {
         OAFB.ready().then(function (fb) {
           return fb.firestore().collection(col()).doc(EDIT_ID).update({
-            status: 'withdrawn',
+            /* WHO took it down. 'hidden' is the maintainer, 'withdrawn' is
+               the owner — the card buttons have always drawn that distinction
+               (oa-candidateedit.js), and the build reads it: a withdrawal is
+               stamped 'removed' once applied, while 'hidden' STAYS hidden and
+               is re-applied on every run. Recorded as 'withdrawn' here, a
+               maintainer's take-down was un-done the moment the owner's next
+               edit re-queued the document — and nothing said who had done
+               either. */
+            status: OAAccounts.isAdmin() ? 'hidden' : 'withdrawn',
             updatedAt: new Date().toISOString()
           });
         }).then(function () {

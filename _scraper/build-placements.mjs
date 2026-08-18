@@ -182,6 +182,16 @@ async function main() {
 
   const existing = await readPlacementsStrict(PLACEMENTS);
   const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
+  /* Takedowns are keyed on the id as well as the reference. `ref` is issued by
+     the FORM, so an imported row has none and the maintainer hiding one used
+     to change nothing at all — the row was carried on as an orphan. See the
+     long note in build-jobs.mjs; this is the same fix in the twin pipeline. */
+  const removeIds = new Set();
+  for (const d of pulled) {
+    const v = d.data();
+    for (const k of [v.publishedId, d.id]) if (k) removeIds.add(String(k));
+  }
+
 
   /* The maintainer's take-down list, honoured if it ever exists. The file is
      NOT shipped — data/placements-hidden.json is created only when first
@@ -198,7 +208,8 @@ async function main() {
      a STATUS CHANGE, never deleting its document — a deleted document leaves
      its row orphaned and therefore preserved, the opposite of the intent. */
   const liveIds = new Set(fresh.map((f) => f.row.id));
-  const orphans = existing.filter((r) => !liveIds.has(r.id) && !removeRefs.includes(r.ref));
+  const orphans = existing.filter((r) =>
+    !liveIds.has(r.id) && !removeIds.has(r.id) && !removeRefs.includes(r.ref));
   if (orphans.length) {
     warn(`${orphans.length} placement(s) in placements.json have no document yet — carried unchanged.`);
   }
@@ -206,7 +217,7 @@ async function main() {
   const merged = mergePlacementRows(
     orphans,
     fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
-    removeRefs);
+    removeRefs.concat([...removeIds].map((id) => ({ id }))));
   const { added, updated, removed } = merged;
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 

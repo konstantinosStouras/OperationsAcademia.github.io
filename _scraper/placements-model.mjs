@@ -296,6 +296,14 @@ export function mergePlacementRows(existing, fresh, remove = []) {
       for (const [k, r] of [...by]) if (r.ref === spec) { by.delete(k); removed++; }
     } else if (spec.ref) {
       if (by.delete('ref:' + (spec.owner || '') + ':' + spec.ref)) removed++;
+    } else if (spec.id) {
+      /* Taking down a row that has NO reference — an imported one, or any row
+         whose document the maintainer hid. `ref` is issued by the form and by
+         nothing else, so keyed on it alone this loop matched nothing and the
+         row was carried on as an orphan: the takedown said it had worked and
+         changed nothing. jobs-model's keyOf keys a ref-less row by its id.
+         (The same fix, and the same reasoning, as in mergeRows.) */
+      if (by.delete('id:' + spec.id)) removed++;
     }
   }
 

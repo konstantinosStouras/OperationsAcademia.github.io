@@ -1596,6 +1596,84 @@ for (const [name, expect] of [
   await p.close();
 }
 
+/* ------------------------------- Edit / Take down on the FROZEN ARCHIVES
+
+   data/past-postings.json, data/recent-faculty.json and
+   data/universities.json are written once by the legacy import and committed,
+   so those three pages had no write path at all — the maintainer saw exactly
+   the read-only page an anonymous visitor did. assets/oa-rowedit.js corrects a
+   row AT READ TIME from Firestore `rowOverrides`.
+
+   The override map comes from a read CI cannot make, so it is injected. What
+   is checked is what unit tests cannot see: that a visitor gets nothing, that
+   the maintainer's controls land on the right rows, and — the part that has to
+   be true for everybody, not just the maintainer — that a hidden row is gone
+   from the page and an edited value is what the card actually shows.         */
+
+for (const [pageName, dataset, patch] of [
+  ['previous-markets.html', 'past-postings', { institution: 'Corrected Institution Name' }],
+  ['recent-faculty.html', 'recent-faculty', { name: 'Corrected Person Name' }],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push(pageName + ': ' + e.message));
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(400);
+
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), 0,
+    `${dataset}: a visitor who is not signed in sees no Edit or Take down`);
+
+  /* The victim is the row the page ACTUALLY renders first, taken from the card
+     itself — the file's first row is not the page's, which sorts. */
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  const cards = await p.$$eval('.oa-card', (n) => n.length);
+  const total = (t) => Number(String(t).split('/').pop().replace(/\D/g, ''));
+  const totalBefore = total(await p.$eval('.oa-count', (n) => n.textContent));
+  ok(totalBefore > 0, `${dataset}: the results line carries a total to compare against`);
+
+  await p.evaluate((d) => window.OARowEdit.__setForTest(d, { ready: true, admin: true }),
+    dataset);
+  await p.waitForTimeout(300);
+
+  eq(await p.$$eval('.oa-card', (n) => n.length), cards,
+    `${dataset}: the maintainer sees the same rows as everyone else`);
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), cards,
+    `${dataset}: and gains the controls on every one of them`);
+  eq(await p.$$eval('.oa-card .oa-card-actions .oa-jobbtn', (n) =>
+    n.slice(0, 2).map((x) => x.textContent)),
+    ['Edit', 'Take down'], `${dataset}: both controls, in that order`);
+  // the card head is itself a button; the controls must not be inside it
+  eq(await p.$$eval('.oa-card-head .oa-jobbtn', (n) => n.length), 0,
+    `${dataset}: the controls are not nested inside the card toggle`);
+
+  /* A TAKEN-DOWN ROW IS GONE FOR EVERYBODY — the point of a read-time overlay,
+     and the half a signed-out visitor must also get. */
+  await p.evaluate(([d, id]) => window.OARowEdit.__setForTest(d, {
+    ready: true, admin: false, rows: { [id]: { hidden: true } },
+  }), [dataset, victim]);
+  await p.waitForTimeout(300);
+  eq(await p.$$eval('.oa-card-actions', (n) => n.length), 0,
+    `${dataset}: a signed-out visitor still sees no controls`);
+  ok(!(await p.$(`[id="job-${victim}"]`)),
+    `${dataset}: the taken-down row is gone from the page`);
+  eq(total(await p.$eval('.oa-count', (n) => n.textContent)), totalBefore - 1,
+    `${dataset}: and the count says one fewer`);
+
+  /* AN EDIT SHOWS. The overlay is applied to the row the card renders from, so
+     the corrected value is what a reader sees — not a note beside it. */
+  await p.evaluate(([d, id, o]) => window.OARowEdit.__setForTest(d, {
+    ready: true, admin: false, rows: { [id]: o },
+  }), [dataset, victim, patch]);
+  await p.waitForTimeout(300);
+  eq(total(await p.$eval('.oa-count', (n) => n.textContent)), totalBefore,
+    `${dataset}: correcting a row it had hidden brings it back`);
+  eq(await p.$eval(`[id="job-${victim}"] .oa-card-title`,
+    (n) => n.textContent.trim()), Object.values(patch)[0],
+    `${dataset}: and the corrected value is what the card shows`);
+
+  await p.close();
+}
+
 /* --------------------------------------------------- the Universities map
 
    Not an OAList page — a Leaflet map over data/universities.json, vendored
@@ -1732,6 +1810,74 @@ for (const [name, expect] of [
    creates it. Candidates and placements ship with empty datasets until
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
+
+/* ------------------------------- Edit / Take down on the universities map
+
+   The map is not an OAList page, so its half of the archive editing lives on
+   its own hooks: `prepare` overlays the maintainer's corrections onto the
+   dataset before it is drawn, and `onPopup` adds the controls to a pin's
+   popup. The overrides come from a Firestore read CI cannot make, so they are
+   injected here exactly as on the two archive lists.                        */
+
+{
+  const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('universities/edit: ' + e.message));
+  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
+
+  const openPopup = async () => {
+    await p.$eval('img.leaflet-marker-icon', (n) =>
+      n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await p.waitForSelector('.leaflet-popup .oa-uni-pop', { timeout: 5000 });
+  };
+
+  await openPopup();
+  eq(await p.$$eval('.leaflet-popup .oa-uni-admin', (n) => n.length), 0,
+    'universities: a visitor who is not signed in gets no controls on a pin');
+
+  await p.evaluate(() =>
+    window.OARowEdit.__setForTest('universities', { ready: true, admin: true }));
+  await p.waitForTimeout(400);
+  await openPopup();
+  eq(await p.$$eval('.leaflet-popup .oa-uni-admin .oa-jobbtn', (n) =>
+    n.map((x) => x.textContent)), ['Edit', 'Take down'],
+    'universities: the maintainer gets both controls on a pin, in that order');
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
+    'universities: and the map still carries the whole dataset');
+
+  /* A CORRECTION IS WHAT EVERY VISITOR SEES. `institution` is the field every
+     link on a popup filters by, so an override has to reach the links too —
+     not only the heading. */
+  const victim = unis.find((r) => isFinite(r.lat) && isFinite(r.lng));
+  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
+    ready: true, admin: false,
+    rows: { [v]: { institution: 'Corrected School', name: 'Corrected School' } },
+  }), victim.id);
+  await p.waitForTimeout(500);
+  await p.fill('#oa-uni-search', 'Corrected School');
+  await p.waitForTimeout(400);
+  eq(await p.$$eval('img.leaflet-marker-icon', (n) => n.length), 1,
+    'universities: the corrected school is findable by its new name');
+  await openPopup();
+  eq(await p.$eval('.leaflet-popup .oa-uni-pop h3', (n) => n.textContent), 'Corrected School',
+    'universities: and the popup names it that way');
+  ok(await p.$$eval('.leaflet-popup .oa-uni-pop a', (ns) =>
+    ns.some((a) => (a.getAttribute('href') || '').includes('Corrected%20School'))),
+    'universities: every link on the popup follows the corrected name');
+
+  // A TAKEN-DOWN SCHOOL LEAVES THE MAP, for everybody.
+  await p.fill('#oa-uni-search', '');
+  await p.waitForTimeout(400);
+  await p.evaluate((v) => window.OARowEdit.__setForTest('universities', {
+    ready: true, admin: false, rows: { [v]: { hidden: true } },
+  }), victim.id);
+  await p.waitForTimeout(500);
+  eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length - 1} universities`,
+    'universities: a taken-down school is off the map for every visitor');
+
+  await p.close();
+}
 
 const MOBILE_PAGES = [
   // the live site: the one-pager (whose jobs teaser has NO filter bar — the

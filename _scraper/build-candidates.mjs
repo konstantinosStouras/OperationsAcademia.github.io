@@ -325,6 +325,16 @@ async function main() {
 
   const existing = await readCandidatesStrict(CANDS);
   const removeRefs = pulled.map((d) => d.data().ref).filter(Boolean);
+  /* Takedowns are keyed on the id as well as the reference. `ref` is issued by
+     the FORM, so an imported row has none and the maintainer hiding one used
+     to change nothing at all — the row was carried on as an orphan. See the
+     long note in build-jobs.mjs; this is the same fix in the twin pipeline. */
+  const removeIds = new Set();
+  for (const d of pulled) {
+    const v = d.data();
+    for (const k of [v.publishedId, d.id]) if (k) removeIds.add(String(k));
+  }
+
 
   // The maintainer's committed suppression list, same shape as
   // data/jobs-hidden.json ({refs:[], ids:[]}). Absent until first needed.
@@ -336,7 +346,8 @@ async function main() {
      was withdrawn or hidden. The consequence is the same as for jobs: taking
      a profile down is a STATUS CHANGE, never a document delete. */
   const liveIds = new Set(fresh.map((f) => f.row.id));
-  const orphans = existing.filter((r) => !liveIds.has(r.id) && !removeRefs.includes(r.ref));
+  const orphans = existing.filter((r) =>
+    !liveIds.has(r.id) && !removeIds.has(r.id) && !removeRefs.includes(r.ref));
   if (orphans.length) {
     warn(`${orphans.length} profile(s) in candidates.json have no document — carried unchanged.`);
   }
@@ -344,7 +355,7 @@ async function main() {
   const merged = mergeCandidateRows(
     orphans,
     fresh.map((f) => f.row).filter((r) => !hidden.has(r.ref) && !hidden.has(r.id)),
-    removeRefs);
+    removeRefs.concat([...removeIds].map((id) => ({ id }))));
   const { added, updated, removed } = merged;
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 

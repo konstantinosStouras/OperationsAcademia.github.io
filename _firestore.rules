@@ -368,6 +368,86 @@ service cloud.firestore {
                        || request.resource.data.hidden is bool)
                    && (!('t' in request.resource.data)
                        || request.resource.data.t is number);
+      /* WITHOUT THIS, HIDING AN ENTRY IS A ONE-WAY DOOR. `allow write` cannot
+         cover a delete: `request.resource` is null on one, so
+         `request.resource.data.keys()` errors and the condition is false. The
+         list then filters the hidden entry out for everybody, the maintainer
+         included, leaving nothing on the page to press to bring it back — the
+         only way out was the Firestore console. (index.html now also shows the
+         maintainer what they have hidden, so there is something to press.) */
+      allow delete: if isAdmin();
+    }
+
+    // ---------------------------------------------- the archives' overrides
+    //
+    // WHY THIS EXISTS. Three datasets on this site have no write path at all:
+    // data/past-postings.json, data/recent-faculty.json and
+    // data/universities.json are FROZEN ARCHIVES, written once by
+    // _scraper/import-legacy-tables.mjs from Google Sheets and committed —
+    // .github/workflows/oa-legacy-import.yml has no schedule. So the pages
+    // that render them (previous-markets.html, recent-faculty.html, the map on
+    // universities.html) were read-only for everybody, the maintainer
+    // included: the only way to correct a school's name or take an old row off
+    // the site was to edit a spreadsheet and dispatch a workflow by hand.
+    //
+    // This is the `newsOverrides` pattern above, generalised: the committed
+    // JSON stays the source of truth and an override MASKS or REWORDS one of
+    // its rows at read time. The list is public, so reads are open and an
+    // override reaches every visitor, not only the maintainer; only the
+    // maintainer writes. `dataset` is a field rather than only a doc-id prefix
+    // because the pages query by it (a page reads its own dataset's overrides
+    // and nothing else).
+    //
+    // DELIBERATELY NOT AN ADD PATH. An override only ever changes a row that
+    // already exists — `rowId` names one. A school the archive does not carry
+    // is added upstream, in the Google Sheet the import reads, because two
+    // places that can both create the same row is the parallel bookkeeping
+    // build-jobs.mjs warns about, and it rots: the import would later publish
+    // the school itself and the site would list it twice.
+    match /rowOverrides/{id} {
+      allow read: if true;
+      allow write: if isAdmin()
+                   && id == request.resource.data.dataset + '__' + request.resource.data.rowId
+                   && request.resource.data.dataset in
+                        ['past-postings', 'recent-faculty', 'universities']
+                   && str('dataset', 40) && str('rowId', 200)
+                   && request.resource.data.keys().hasOnly([
+                        'dataset', 'rowId', 'hidden', 't',
+                        // the job-shaped archive (past postings)
+                        'institution', 'department', 'school', 'unit', 'type',
+                        'country', 'applyBy', 'comments',
+                        'adUrl', 'postedAtUrl', 'furtherInfoUrl',
+                        'levels', 'characteristics',
+                        // recently-hired faculty
+                        'name', 'last', 'placement', 'almaMater', 'undergrad', 'webUrl',
+                        // the universities map
+                        'schoolDept', 'address', 'lat', 'lng', 'mapUrl', 'facultyUrl',
+                      ])
+                   && str('institution', 220) && str('department', 260)
+                   && str('school', 200)      && str('unit', 200)
+                   && str('type', 40)         && str('country', 80)
+                   && str('applyBy', 400)     && str('comments', 1500)
+                   && str('adUrl', 600)       && str('postedAtUrl', 600)
+                   && str('furtherInfoUrl', 600)
+                   && str('name', 220)        && str('last', 120)
+                   && str('placement', 220)   && str('almaMater', 220)
+                   && str('undergrad', 220)   && str('webUrl', 600)
+                   && str('schoolDept', 320)  && str('address', 320)
+                   && str('mapUrl', 600)      && str('facultyUrl', 600)
+                   && list('levels', 8)       && list('characteristics', 12)
+                   && (!('lat' in request.resource.data)
+                       || (request.resource.data.lat is number
+                           && request.resource.data.lat >= -90
+                           && request.resource.data.lat <= 90))
+                   && (!('lng' in request.resource.data)
+                       || (request.resource.data.lng is number
+                           && request.resource.data.lng >= -180
+                           && request.resource.data.lng <= 180))
+                   && (!('hidden' in request.resource.data)
+                       || request.resource.data.hidden is bool)
+                   && (!('t' in request.resource.data)
+                       || request.resource.data.t is number);
+      allow delete: if isAdmin();
     }
 
     // --------------------------------------------------- usage (admin-only)

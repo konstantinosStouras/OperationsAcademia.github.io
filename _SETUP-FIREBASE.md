@@ -183,14 +183,30 @@ depends on ORCID: it merges any two accounts, whatever they sign in with.
 npm install -g firebase-tools
 firebase login
 
-cd v2                      # the config lives here, beside the rules
-firebase deploy --only firestore:rules --project operations-academia
+cd <this repository>       # the ROOT: the config lives here, beside the rules
+firebase deploy --only firestore:rules
 ```
 
-`v2/firebase.json` already points the CLI at `_firestore.rules`, so that is the
-whole command. (It must be run from `v2/` — the CLI refuses paths outside its
-config's own directory. `v2/.firebaserc` holds a `PASTE_PROJECT_ID` placeholder
-you can fill in to drop the `--project` flag.)
+`firebase.json` at the repository ROOT already points the CLI at
+`_firestore.rules`, and `.firebaserc` already names the project
+(`operations-academia`), so that is the whole command — no `--project` flag.
+
+**These paths moved with the 2026-08-17 promotion.** The config used to live in
+`v2/` and this page used to say `cd v2`; it does not any more, and running the
+old command deploys nothing (or the wrong thing). The CLI refuses any path
+outside its own config's directory, which is why the config sits at the root
+beside the rules rather than next to the pages that read them.
+
+**DEPLOYING IS A STEP SOMEBODY HAS TO REMEMBER.** No workflow runs
+`firebase deploy` — nothing in CI can, since it needs an interactive login —
+so a rules change committed here is NOT live until this command is run by
+hand. Every feature the rules gate stays inert in the meantime, which is the
+designed failure (a refused write says so) but is indistinguishable from a bug
+if you have forgotten the step. **Run it after every change to
+`_firestore.rules`.** The rules currently in the repository and not yet
+deployed at the time of writing include the 34-key posting ceiling, the
+`newsOverrides` and `usageSessions` blocks, and the `rowOverrides` block that
+makes the frozen archives editable at all.
 
 Firestore must exist first: Firestore
 Database → **Create database** → production mode → a region near your readers
@@ -209,6 +225,8 @@ What the rules do:
 | `profiles/{uid}` | the owner only |
 | `registeredUsers/{uid}` | world-readable but contentless (one coarse timestamp), owner-write only; an account may delete **its own** mark, which is what a merge does with the duplicate it removes |
 | `accountKeys/{key}` | one document per identity (`orcid:<iD>`, `email:<sha256>`) saying which uid holds it; readable one-at-a-time by anyone signed in, never listable, writable only for yourself. It is how the site notices one person has two accounts |
+| `newsOverrides/{id}` | world-readable; only the maintainer writes or deletes one. Curates the "What's new" list in place — `changelog.json` stays the source of truth and an override hides or rewords one entry |
+| `rowOverrides/{id}` | world-readable; only the maintainer writes or deletes one. The same idea over the three FROZEN ARCHIVES — `data/past-postings.json`, `data/recent-faculty.json`, `data/universities.json` — which are written once by the legacy import and have no other write path. Each document is `<dataset>__<rowId>` and carries only the fields it changes, or `hidden: true`. It is deliberately NOT an add path: a school the archive does not carry is added upstream, in the sheet the import reads |
 | everything else | closed |
 
 `jobSubmissions` carries a **second** `allow update`, for the account merge. A
