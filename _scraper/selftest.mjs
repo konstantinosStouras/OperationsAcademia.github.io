@@ -1438,6 +1438,10 @@ async function testCascadeWiring() {
     'and the three lists still work on a page that never loaded oa-schools.js');
   ok(/S\.canonPlace\(\{/.test(form),
     'the fields are put into the published spelling by the SAME canon the submission uses');
+  ok(!/'f-institution', 'f-school'\].forEach\(function \(id\) \{\n\s*var el = \$\(id\);\n\s*if \(el\) el\.dispatchEvent\(new Event\('change'/.test(form),
+    'and an edit does not settle the INSTITUTION, whose spelling a permalink is built from');
+  ok(/publishAs: S \? S\.canonUnit : null/.test(form),
+    'a name not on the list is offered as it will be published');
   ok(form.indexOf('if (!val(school) && !val(unit)) return;') !== -1,
     'but a lone institution is not read as one of the archive’s fused one-column values');
 

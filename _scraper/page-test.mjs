@@ -1393,7 +1393,18 @@ for (const [name, expect] of [
   await f.fill('#f-institution', 'Tulane University');
   await f.fill('#f-unit', '');
 
-  // a name nobody has posted before is offered rather than refused
+  /* A name nobody has posted before is offered rather than refused — and it
+     is offered AS IT WILL BE PUBLISHED. "Widgets Group" would be posted as
+     "Widgets" (a house word is not part of a name, oa-schools.js), and a row
+     that promised the words typed would be promising something the
+     submission then tidies away. */
+  await f.fill('#f-unit', 'Wibble Widgets Group');
+  await f.waitForTimeout(200);
+  const publishAs = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
+  ok(publishAs.length === 1 && /“Wibble Widgets” — a name not on the list yet/.test(publishAs[0]),
+    `form: a new name is offered as it will be published (${JSON.stringify(publishAs)})`);
+  await f.fill('#f-unit', '');
+
   await f.fill('#f-school', 'Wibble School of Widgets');
   await f.waitForTimeout(200);
   const add = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));

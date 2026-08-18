@@ -76,6 +76,8 @@
    *             what has already been chosen (see setScope)
    *   key       fn      — when two spellings are the same name; defaults to
    *                       the plain fold, which is right for a plain list
+   *   publishAs fn      — what a name not on the list will be published as,
+   *                       so the "new name" row offers that and not a promise
    *   max       number      — options rendered at once (the list is scrollable;
    *                           this is about DOM size, not about hiding values)
    */
@@ -118,6 +120,9 @@
        finds the count of a posting that said "Management Science Department".
        Without one, a name is itself. */
     var nameKey = typeof opts.key === 'function' ? opts.key : fold;
+    var publishAs = typeof opts.publishAs === 'function'
+      ? opts.publishAs
+      : function (v) { return v; };
 
     var state = {
       options: [],
@@ -307,6 +312,7 @@
          trailing "Department" is NOT a new name, so it is not offered as one —
          the row it matches is already in the list above. */
       if (typed && !exact) {
+        var asPublished = String(publishAs(typed) || typed).trim() || typed;
         var add = document.createElement('div');
         add.className = 'oa-combo-opt oa-combo-add';
         add.id = id + '-opt-' + state.rows.length;
@@ -315,9 +321,9 @@
         add.innerHTML = '<span class="oa-combo-plus" aria-hidden="true">+</span>';
         var t = document.createElement('span');
         t.className = 'oa-combo-name';
-        t.textContent = 'Use “' + typed + '” — a name not on the list yet';
+        t.textContent = 'Use “' + asPublished + '” — a name not on the list yet';
         add.appendChild(t);
-        add.__value = typed;
+        add.__value = asPublished;
         group = null;
         list.appendChild(add);
         state.rows.push(add);

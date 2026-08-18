@@ -569,10 +569,13 @@
       var el = $(id);
       if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    ['f-institution', 'f-school'].forEach(function (id) {
-      var el = $(id);
-      if (el) el.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    /* …and on the SCHOOL only. Not the institution: a posting's id and its
+       permalink are built from it (jobs-model.jobId), so settling it here
+       would move an existing posting's address because its owner opened the
+       form. What they type themselves is another matter — that is a new
+       spelling, and it settles like any other. */
+    var schoolEl = $('f-school');
+    if (schoolEl) schoolEl.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   function enterEditMode() {
@@ -874,10 +877,16 @@
     var keySchool = S ? function (v) { return S.fold(S.canonSchool(v, val(inst))); } : null;
     var keyUnit = S ? function (v) { return S.fold(S.canonUnit(v)); } : null;
 
+    /* What a name the site has never seen will be published as — so the
+       "not on the list yet" row offers "Widgets" where "Widgets Group" was
+       typed, rather than promising a name the submission would then tidy. */
     var combos = {
-      inst: OACombo.attach(inst, { options: [], key: keyInst }),
-      school: OACombo.attach(school, { options: [], key: keySchool }),
-      unit: OACombo.attach(unit, { options: [], key: keyUnit }),
+      inst: OACombo.attach(inst, { options: [], key: keyInst,
+        publishAs: S ? S.canonInstitution : null }),
+      school: OACombo.attach(school, { options: [], key: keySchool,
+        publishAs: S ? function (v) { return S.canonSchool(v, val(inst)); } : null }),
+      unit: OACombo.attach(unit, { options: [], key: keyUnit,
+        publishAs: S ? S.canonUnit : null }),
     };
 
     fetch('data/vocab.json', { cache: 'no-cache' })
