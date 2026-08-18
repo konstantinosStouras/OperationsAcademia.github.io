@@ -3515,21 +3515,200 @@ async function testRowOverrides() {
 
   /* THE SAME ONE-WAY DOOR, on the feature this pattern came from. */
   const news = rules.slice(rules.indexOf('match /newsOverrides/'));
-  ok(/allow delete: if isAdmin\(\);/.test(news.slice(0, 1600)),
-    'newsOverrides can be deleted too — hiding an update is no longer permanent');
-  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
-  ok(home.includes('Restore'), 'and the home page offers the maintainer a way back');
-  /* THE HOME PAGE ALONE IS NOT A WAY BACK. It shows the newest five and cuts
-     AFTER filtering, so a hidden entry pushed out of the top five by a newer
-     one — which this repo's keep-in-sync rule makes routine — is off that page
-     for the maintainer too. Only the full list can guarantee the way back. */
-  const newsPage = await readFile(path.join(HERE, '..', 'whats-new.html'), 'utf8');
-  ok(newsPage.includes('newsAdmin || !(o && o.hidden)'),
-    'the full What\'s-new list shows the maintainer what they have hidden');
-  ok(newsPage.includes('data-restore'), 'and offers Restore there, where nothing can fall off');
+  ok(/allow delete: if isAdmin\(\);/.test(news.slice(0, 2400)),
+    'newsOverrides can be deleted too — a decision is not permanent');
+}
+
+/* ------------------------------ the What's-new list (assets/oa-news.js)
+
+   THREE THINGS THE OWNER ASKED FOR (2026-08-18), and they are only correct
+   together:
+
+     • a removed entry LEAVES the list — it used to stay on the page struck
+       through, which is the clutter Remove was pressed to be rid of;
+     • …and removing is still not a one-way door, so the removed ones sit in a
+       collapsed panel below the list, drawn for the maintainer alone;
+     • a NEW entry is not public on sight: changelog.json is committed by
+       whoever ships a change, and the entry reached visitors AND the e-mail
+       digests the moment it landed.
+
+   The rules of that gate are pure and live in assets/oa-news.js, which the two
+   pages, the alerts preview and the mailer all read through — the two pages
+   used to carry a renderer each and had already drifted, and the mailer read
+   the raw log, so an entry taken off the site was still e-mailed. What is
+   pinned here is the gate itself, the agreement between the module and the
+   rules about which keys a decision may carry, and that every consumer really
+   goes through it. */
+async function testNewsReview() {
+  const News = require(path.join(HERE, '..', 'assets', 'oa-news.js'));
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const block = rules.slice(rules.indexOf('match /newsOverrides/'));
+
+  ok(/allow read: if true;/.test(block.slice(0, 400)),
+    'a decision reaches EVERY visitor — the list is public, not a maintainer view');
+  ok(/allow write: if isAdmin\(\)/.test(block.slice(0, 900)),
+    'and only the maintainer makes one');
+
+  /* EVERY KEY THE MODULE WRITES, taken from the module itself rather than
+     restated here. A key with no rule is a permission-denied at save time and
+     a maintainer told to redeploy rules that are already deployed. */
+  const allowed = new Set(
+    (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
+      .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
+  for (const key of News.DOC_KEYS) {
+    ok(allowed.has(key), `oa-news.js may write "${key}", and the rules allow it`);
+  }
+  eq([...allowed].sort(), [...News.DOC_KEYS].sort(),
+    'and the rules allow nothing the module does not write');
+  /* The three statuses are a closed set on both sides: a status the rules do
+     not name is refused, and one the module does not know reads as "nothing
+     was decided", which would put a removed entry back on the site. */
+  for (const s of [News.APPROVED, News.PENDING, News.REMOVED]) {
+    ok(block.slice(0, 1600).includes(`'${s}'`), `the rules name the "${s}" status`);
+  }
+
+  /* -------------------------------------------------------------- the gate */
+  const e = (id, date) => ({ id, date, title: id, summary: 's', url: '' });
+  const before = e('before', '2026-08-01');       // predates the gate
+  const after = e('after', '2026-09-01');         // does not
+
+  ok(News.statusOf(after, undefined) === News.PENDING,
+    'ABSENCE MEANS WITHHOLD: an entry nobody has reviewed is not public');
+  ok(News.statusOf(before, undefined) === News.APPROVED,
+    'but the gate arriving is not a reason to retract what was already on the site');
+  ok(News.REVIEW_FROM > '2026-08-17' && News.REVIEW_FROM < '2026-09-01',
+    'and that cut is the day the gate shipped, not an arbitrary date');
+  ok(News.statusOf(after, { status: News.APPROVED }) === News.APPROVED,
+    'publishing one puts it on the site');
+  ok(News.statusOf(before, { status: News.REMOVED }) === News.REMOVED,
+    'and removing one takes it off, however old it is');
+
+  /* THE DOCUMENTS WRITTEN BEFORE THE GATE said `hidden`, and they are read
+     rather than migrated — nothing has to be run against the database, and a
+     removal made from a page served out of an old cache still means removal. */
+  ok(News.statusOf(before, { hidden: true }) === News.REMOVED,
+    'a pre-gate {hidden:true} document still reads as removed');
+  ok(News.statusOf(after, { hidden: false }) === News.APPROVED,
+    'and a pre-gate restore still reads as published');
+  ok(News.patchFor(News.REMOVED).hidden === true &&
+     News.patchFor(News.APPROVED).hidden === false,
+    'and a new decision keeps `hidden` in step, so an old page cannot disagree');
+
+  /* WHAT IS PUBLIC IS WHAT IS PUBLISHED — the one list the mailer sends from
+     and the alert preview shows, so neither can announce something nobody has
+     reviewed or resurrect something taken down. */
+  const log = [after, e('draft', '2026-09-02'), before, e('gone', '2026-08-02')];
+  const docs = { after: { status: News.APPROVED }, gone: { status: News.REMOVED } };
+  eq(News.publicUpdates(log, docs).map((u) => u.id), ['after', 'before'],
+    'publicUpdates carries the published entries, newest first, and nothing else');
+  const split = News.partition(log, docs);
+  eq([split.approved.length, split.pending.length, split.removed.length], [2, 1, 1],
+    'and partition accounts for every entry exactly once');
+
+  /* AN EDIT IS A REWORDING LAID OVER THE ENTRY, never a rewrite of
+     changelog.json — which the mailer also reads, and which is the record of
+     what was actually shipped. */
+  const worded = News.applied(before, { title: 'Reworded' });
+  ok(worded.title === 'Reworded' && worded.summary === 's',
+    'an edited title is shown and the rest of the entry is left alone');
+  ok(News.applied(before, { title: '' }).title === 'before',
+    'and an empty override is not an edit — it falls back to the entry itself');
+
+  /* THE FILE ITSELF. Nothing validated changelog.json before, and the gate
+     gives that teeth: an entry with no usable `id` cannot be reviewed (the
+     document is keyed on it), and two entries sharing one would be decided
+     together — one Remove taking down a second entry nobody touched. A
+     malformed entry now fails CI, where it is a one-line fix, instead of
+     stalling the announcements silently. */
+  const shipped = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
+  const entries = shipped.updates || [];
+  ok(entries.length > 0, 'changelog.json carries entries');
+  const ids = new Set();
+  for (const u of entries) {
+    ok(typeof u.id === 'string' && u.id.trim().length > 0,
+      `every change-log entry has an id — "${u.title || '(untitled)'}" does not`);
+    ok(!ids.has(u.id), `and it is unique — "${u.id}" is used twice`);
+    ids.add(u.id);
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(String(u.date || '')),
+      `every entry has a yyyy-mm-dd date — "${u.id}" has "${u.date}"`);
+    ok(typeof u.title === 'string' && u.title.trim().length > 0,
+      `and a title — "${u.id}" has none`);
+  }
+  /* AND THE GATE READS IT THE SAME WAY THE PAGES DO. If publicUpdates dropped
+     an entry the pages render, the mailer would announce a different list. */
+  eq(News.publicUpdates(entries, {}).length,
+    entries.filter((u) => String(u.date) < News.REVIEW_FROM).length,
+    'every pre-gate entry is public, and every entry since it is not');
+
+  /* ------------------------------------------------------- every consumer */
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-news.js'), 'utf8');
+  ok(js.includes('module.exports = factory()'),
+    'oa-news.js is dual-mode, so the page and the mailer cannot drift apart');
+
+  for (const [page, how] of [
+    ['index.html', "OANews.mount({ list: '#v3-news'"],
+    ['whats-new.html', "OANews.mount({ list: '#oa-whatsnew'"],
+  ]) {
+    const html = await readFile(path.join(HERE, '..', page), 'utf8');
+    ok(html.includes('assets/oa-news.js'), `${page} loads the What's-new module`);
+    ok(html.includes(how), `${page} renders its list through it`);
+    ok(!/collection\('newsOverrides'\)/.test(html),
+      `${page} reaches the decisions through the module, not around it — ` +
+      'a page with its own reader is a page that drifts');
+  }
+
+  /* THE ALERTS PREVIEW promises "this is the e-mail you will get", so it has
+     to read the log the way the mailer does. It showed the newest two entries
+     straight from changelog.json. */
+  const alertsJs = await readFile(path.join(HERE, '..', 'assets', 'oa-alerts.js'), 'utf8');
+  ok(alertsJs.includes('OANews.publicUpdates') || alertsJs.includes('News.publicUpdates'),
+    'the alert preview previews only what has actually been published');
+  const alertsHtml = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  ok(alertsHtml.includes('assets/oa-news.js'), 'and alerts.html loads the module it needs');
+
+  /* AND THE MAILER, which is the half that cannot be taken back. */
+  const mailer = await readFile(path.join(HERE, '..', '_scraper', 'alerts-mailer.mjs'), 'utf8');
+  ok(mailer.includes("'oa-news.js'"), 'the mailer reads the same decisions');
+  ok(mailer.includes('News.publicUpdates('),
+    'and sends only published entries — an e-mail cannot be recalled');
+  ok(/catch \(err\) \{[\s\S]{0,400}decisions = \{\}/.test(mailer),
+    'a decision read that fails withholds rather than killing the job digests too');
+  /* AND THE WINDOW FLOOR IS FROZEN, in BOTH branches an alert can take. A hold
+     can outlast the 31-day cap a never-yet-sent subscriber's window starts at,
+     and a floor that slides with the clock drops the held entry on the very day
+     it is published — the run that should have delivered it. */
+  ok(/const floor = \(!a\.lastUpdateDate/.test(mailer),
+    'the update window floor is computed once per alert');
+  ok(/idle\.lastUpdateDate = floor/.test(mailer),
+    'and persisted when the run sends nothing…');
+  ok(/if \(floor\) patch\.lastUpdateDate = floor;/.test(mailer),
+    '…and when it sends, where a real send date then overrides it');
+
+  /* AND THE ARCHIVE IS NOT A SIDE DOOR. /v2/ is served, and both its
+     What's-new page and its alerts preview read /changelog.json straight —
+     the SHARED file, so they would have shown an entry nobody had reviewed
+     yet, in full, on a page anyone can open. An archive keeps its own frozen
+     assets by design, so rather than carry a copy of the gate there, neither
+     reads the live log any more. */
+  for (const page of ['v2/whats-new.html', 'v2/assets/oa-alerts.js']) {
+    const src = await readFile(path.join(HERE, '..', page), 'utf8');
+    ok(!/fetch\('\/changelog\.json'/.test(src),
+      `${page} does not serve the live update log — it cannot judge what is public`);
+  }
+
+  /* THE STATES HAVE TO LOOK LIKE SOMETHING. Each was set with no rule behind
+     it once already (.v3-news-hidden), which is invisible until someone looks. */
   const css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
-  ok(/\.v3-news-hidden\s*\{/.test(css),
-    'and a hidden entry actually LOOKS withdrawn — the class was set with no rule behind it');
+  for (const cls of ['v3-news-pending', 'v3-news-removed', 'v3-news-note', 'v3-news-bin']) {
+    ok(css.includes('.' + cls), `.${cls} is drawn, not just set`);
+  }
+  /* AND THEY HAVE TO WIN. `.v3-news li` and `.v3-news li::before` are (0,1,2),
+     so a bare `.v3-news-pending::before` never paints — the same specificity
+     trap the Leaflet attribution fix fell into. */
+  ok(css.includes('.v3-news li.v3-news-pending::before'),
+    'the pending mark outranks the rule it is overriding');
+  ok(!css.includes('.v3-news-hidden'),
+    'and the old hidden-in-place styling is gone with the behaviour it drew');
 }
 
 /* --------------------------------- what a takedown must NOT reach, and when
@@ -4492,6 +4671,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testJobMarketSheetChain();
   await testDeployGuard();
   await testRowOverrides();
+  await testNewsReview();
   await testRemovalSafety();
   await testMirrorLifecycle();
   await testRefLessTakedown();

@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "whats-new-reviewed-and-tidy",
+   "date": "2026-08-18",
+   "title": "\u201cWhat\u2019s new\u201d is reviewed before it is published, and a removed update really goes",
+   "summary": "Two changes to this update list. An update taken down now leaves the list at once, instead of staying on the page struck through \u2014 so the list only ever shows what is current. Nothing is lost: the removed ones sit in a collapsed panel under the list that only the maintainer sees, one click from being put back. And a newly logged update is no longer public the moment it is written: it waits to be reviewed, and until then it is on nobody\u2019s screen and in nobody\u2019s inbox. Your site-updates digest carries only updates that have actually been published, in the order they were written.",
+   "url": "https://www.operationsacademia.org/whats-new.html"
+  },
+  {
    "id": "link-previews-that-work",
    "date": "2026-08-18",
    "title": "Sharing a link to the site now shows a proper card",

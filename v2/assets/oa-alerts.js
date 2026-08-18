@@ -229,7 +229,15 @@
       }
     }
 
-    if (M.wantsUpdates(c)) {
+    /* THE ARCHIVE DOES NOT PREVIEW THE LIVE UPDATE LOG (2026-08-18). The
+       entries are reviewed before they are published now — an entry the
+       maintainer has not published yet is on nobody's screen — and that
+       decision is read through assets/oa-news.js on the LIVE site. This is a
+       frozen archive with its own frozen assets, so rather than carry a copy
+       of the gate it simply stops showing entries it cannot judge: an
+       unreviewed entry must not be visible here either. The section itself is
+       dropped when there is nothing to show, so it never reads as broken. */
+    if (M.wantsUpdates(c) && (window.OA_CHANGELOG || []).length) {
       parts.push('<p><strong>What is new on the site</strong></p><ul>');
       (window.OA_CHANGELOG || []).slice(0, 2).forEach(function (e) {
         parts.push('<li><strong>' + esc(e.title) + '</strong><br>' +
@@ -408,9 +416,8 @@
     var ready = Promise.all([
       fetch('/data/jobs.json', { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-      fetch('/changelog.json', { credentials: 'same-origin' })
-        .then(function (r) { return r.ok ? r.json() : { updates: [] }; })
-        .catch(function () { return { updates: [] }; })
+      // the update log is NOT read here any more — see the preview above
+      Promise.resolve({ updates: [] })
     ]).then(function (res) {
       jobsState = res[0] ? 'ok' : 'failed';
       jobs = res[0] || [];

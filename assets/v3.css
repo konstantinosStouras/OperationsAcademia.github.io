@@ -879,14 +879,69 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 
 /* admin-only curation controls on a What's-new item (drawn only when the
    admin is signed in — authorisation is the Firestore rules, not this CSS) */
-/* An entry the maintainer has hidden. Only they are shown it — the list
-   filters it out for everybody else — so it reads as withdrawn rather than
-   published, and carries Restore. */
-.v3-news-hidden { opacity: 0.55; }
-.v3-news-hidden strong { text-decoration: line-through; }
-.v3-news-admin span { color: #a3364a; font-size: 12px; align-self: center; }
 
-.v3-news-admin { margin: 8px 0 0; display: flex; gap: 10px; }
+/* AN ENTRY WAITING FOR REVIEW. Nobody but the maintainer can see it, so it
+   reads as a draft: a hollow dot instead of the brand one, and a rule down the
+   side in the "not settled yet" colour.
+
+   Each of these carries `.v3-news li` because that is what it is overriding —
+   `.v3-news li` and `.v3-news li::before` are (0,1,2), so a bare
+   `.v3-news-pending::before` at (0,1,1) loses to them and paints nothing. */
+.v3-news li.v3-news-pending { border-left-color: var(--gold); }
+.v3-news li.v3-news-pending::before {
+  background: var(--bg-2); box-shadow: inset 0 0 0 2px var(--gold);
+}
+.v3-news li.v3-news-pending time::after {
+  content: 'Not published yet';
+  margin-left: 8px; color: var(--gold); font-weight: 600;
+}
+
+/* AN ENTRY THE MAINTAINER HAS REMOVED. It is off the list entirely — that is
+   what Remove now means — so this is how it looks inside the collapsed
+   "Removed updates" panel, the only place it is drawn at all. */
+.v3-news li.v3-news-removed { opacity: 0.7; }
+.v3-news li.v3-news-removed strong { text-decoration: line-through; }
+.v3-news li.v3-news-removed::before { background: var(--mut); }
+
+/* The note above the list: what is waiting, and the button that clears it. */
+.v3-news-note {
+  margin: 0 0 18px; padding: 12px 16px;
+  border: 1px solid var(--warn-line); border-radius: var(--radius);
+  background: var(--warn-bg); color: var(--ink-2); font-size: 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.v3-news-note strong { color: var(--ink); }
+.v3-news-note button {
+  font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+  color: var(--on-brand); background: var(--brand);
+  border: 1px solid var(--brand); border-radius: 999px;
+  padding: 5px 14px; cursor: pointer;
+}
+.v3-news-note button:hover { background: var(--brand-2); border-color: var(--brand-2); }
+
+/* The way back. A removed entry leaves the list — that is what Remove is for
+   — so the only thing that can make it reversible is somewhere else to find
+   it, collapsed and out of the way, drawn for the maintainer alone. */
+.v3-news-bin { margin: 22px 0 0; }
+.v3-news-bin .v3-news { margin-top: 10px; }
+.v3-news-panel:empty { display: none; }
+
+/* The inline editor: a browser prompt() shows a paragraph as one unscrollable
+   line, which is how "editing" a summary turns into retyping it. */
+.v3-news-edit { margin: 10px 0 0; display: grid; gap: 8px; max-width: 640px; }
+.v3-news-edit input, .v3-news-edit textarea {
+  font-family: var(--font-sans); font-size: 14px;
+  color: var(--ink); background: var(--bg-2);
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 11px;
+  width: 100%; resize: vertical;
+}
+.v3-news-edit input:focus, .v3-news-edit textarea:focus {
+  outline: none; border-color: var(--brand);
+}
+
+.v3-news-admin span { color: var(--err); font-size: 12px; align-self: center; }
+
+.v3-news-admin { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .v3-news-admin button {
   font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
   color: var(--ink-2); background: var(--bg-3);

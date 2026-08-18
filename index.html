@@ -723,6 +723,7 @@
     <script defer src="assets/oa-jobedit.js"></script>
     <script defer src="assets/oa-candidateedit.js"></script>
     <script defer src="assets/oa-placementedit.js"></script>
+    <script defer src="assets/oa-news.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
@@ -913,130 +914,16 @@
         .catch(function () { /* no meta — nothing to announce */ });
 
       /* ---------------------------------------------------- what's new
-         changelog.json is the source of truth; Firestore newsOverrides/{id}
-         lets the ADMIN curate the list in place (owner, 2026-08-17) — an
-         override hides an entry or rewords its title/summary, so only the
-         most important updates show. Signed in as the admin, each item gains
-         ✎ / ✕ controls, like a job posting's own edit tools. The list
-         renders instantly from the JSON and re-renders when the overrides
-         (and admin status) arrive; missing Firestore just means no curation. */
-      (function () {
-        var newsLog = null, overrides = {}, newsAdmin = false;
-        var ADMIN_EMAIL = 'kstouras@gmail.com';   // mirrors _firestore.rules isAdmin()
-
-        function renderNews() {
-          var list = document.getElementById('v3-news');
-          if (!list || !newsLog) return;
-          /* THE MAINTAINER SEES WHAT THEY HAVE HIDDEN, faded and carrying
-             Restore. Filtering it out for everybody made Remove a ONE-WAY
-             DOOR: the entry left the page, so there was nothing left to press
-             to bring it back, and the only way to undo a mis-click was the
-             Firestore console. (The archives' own overrides — assets/
-             oa-rowedit.js — work the same way, for the same reason.) */
-          var updates = (newsLog.updates || []).filter(function (u) {
-            var o = overrides[u.id];
-            return newsAdmin || !(o && o.hidden);
-          }).slice(0, 5);
-          list.innerHTML = '';
-          if (!updates.length) {
-            list.innerHTML = '<li><p class="v3-mut">Nothing to announce right now.</p></li>';
-            return;
-          }
-          updates.forEach(function (u) {
-            var o = overrides[u.id] || {};
-            var li = document.createElement('li');
-            if (o.hidden) li.className = 'v3-news-hidden';
-            var t = document.createElement('time');
-            t.textContent = u.date || '';
-            var s = document.createElement('strong');
-            s.textContent = o.title || u.title || '';
-            var p = document.createElement('p');
-            p.textContent = o.summary || u.summary || '';
-            li.appendChild(t); li.appendChild(s); li.appendChild(p);
-            if (newsAdmin) {
-              var row = document.createElement('p');
-              row.className = 'v3-news-admin';
-              var edit = document.createElement('button');
-              edit.type = 'button'; edit.textContent = '✎ Edit';
-              edit.addEventListener('click', function () { editNews(u, o); });
-              var kill = document.createElement('button');
-              kill.type = 'button';
-              if (o.hidden) {
-                kill.textContent = '↩ Restore';
-                kill.addEventListener('click', function () {
-                  saveOverride(u.id, { hidden: false });
-                });
-              } else {
-                kill.textContent = '✕ Remove';
-                kill.addEventListener('click', function () {
-                  if (!confirm('Remove "' + (o.title || u.title) + '" from What’s new?\n' +
-                    'changelog.json keeps the entry; this only hides it on the site.')) return;
-                  saveOverride(u.id, { hidden: true });
-                });
-              }
-              row.appendChild(edit); row.appendChild(kill);
-              if (o.hidden) {
-                var said = document.createElement('span');
-                said.textContent = 'Hidden — only you can see this.';
-                row.appendChild(said);
-              }
-              li.appendChild(row);
-            }
-            list.appendChild(li);
-          });
-        }
-
-        function editNews(u, o) {
-          var title = prompt('Title shown on the site:', o.title || u.title || '');
-          if (title === null) return;
-          var summary = prompt('Summary shown on the site:', o.summary || u.summary || '');
-          if (summary === null) return;
-          saveOverride(u.id, {
-            title: title.trim().slice(0, 300),
-            summary: summary.trim().slice(0, 2000)
-          });
-        }
-
-        function saveOverride(id, patch) {
-          patch.t = Date.now();
-          OAFB.ready().then(function (fb) {
-            return fb.firestore().collection('newsOverrides').doc(id)
-              .set(patch, { merge: true });
-          }).then(function () {
-            overrides[id] = Object.assign({}, overrides[id] || {}, patch);
-            renderNews();
-          }).catch(function () {
-            alert('Could not save — are the updated Firestore rules deployed?');
-          });
-        }
-
-        fetch('/changelog.json', { credentials: 'same-origin', cache: 'no-cache' })
-          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-          .then(function (log) {
-            if (!(log.updates || []).length) throw new Error('empty');
-            newsLog = log;
-            renderNews();
-          })
-          .catch(function () {
-            var list = document.getElementById('v3-news');
-            if (list) list.innerHTML = '<li><p class="v3-mut">The update log could not ' +
-              'be loaded just now.</p></li>';
-          });
-
-        if (window.OAFB && OAFB.enabled) {
-          OAFB.ready().then(function (fb) {
-            fb.firestore().collection('newsOverrides').get().then(function (snap) {
-              snap.forEach(function (d) { overrides[d.id] = d.data(); });
-              renderNews();
-            }).catch(function () { /* rules not deployed — no curation yet */ });
-            fb.auth().onAuthStateChanged(function (u) {
-              var was = newsAdmin;
-              newsAdmin = !!(u && u.email === ADMIN_EMAIL && u.emailVerified);
-              if (newsAdmin !== was) renderNews();
-            });
-          }).catch(function () { /* SDK unreachable */ });
-        }
-      })();
+         The newest five entries of the update log. changelog.json is the
+         source of truth for WHAT was announced; Firestore newsOverrides/{id}
+         holds the maintainer's decision about each one — pending until they
+         publish it, removed when they take it down, reworded where they gave
+         it different words. All of that, and the controls that drive it, live
+         in assets/oa-news.js, which whats-new.html and the alerts preview read
+         through as well: the two lists used to carry a renderer each and had
+         already drifted, and the mailer read the raw log, so an entry taken
+         off the site was still e-mailed. */
+      OANews.mount({ list: '#v3-news', limit: 5, dates: 'short' });
 
       /* ============================================ the three list engines
          Mounted LAZILY — each as its section approaches the viewport — so

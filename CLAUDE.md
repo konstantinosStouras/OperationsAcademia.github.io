@@ -349,6 +349,73 @@ holds the approved rows and nothing else writes it. That is why
 header. If that cadence changes, change the panel's and the e-mail's promise
 with it.
 
+## Nothing on "What's new" publishes itself either
+
+`changelog.json` says WHAT was announced. Firestore `newsOverrides/{changelog
+id}` says what the maintainer has DONE about it — and **an entry with no
+document is withheld**, exactly as in the job-review queue above.
+
+    status: 'approved'   published — every visitor sees it
+    status: 'pending'    not reviewed yet — only the maintainer sees it
+    status: 'removed'    taken down — it leaves the list entirely
+    title / summary      an optional rewording, applied wherever it is shown
+
+Three rules the owner asked for (2026-08-18), and they only work together:
+
+* **A removed entry LEAVES the list** — for the maintainer too. It used to stay
+  on the page struck through, carrying "Hidden — only you can see this", which
+  is exactly the clutter Remove was pressed to be rid of.
+* **And removing is still not a one-way door.** Filtering it out for everybody
+  was what made Remove irreversible before: nothing was left on the page to
+  press, and the only way back was the Firestore console. So the removed
+  entries go into a **collapsed disclosure below the list**, drawn only for the
+  maintainer. The list is clean and the door stays open.
+* **A new entry is not public on sight.** `changelog.json` is committed by
+  whoever ships a change, and the entry reached visitors AND the e-mail digests
+  the moment it landed. Now it waits, flagged for the maintainer, with Publish
+  (and **Publish all N** — a change here routinely ships two or three entries,
+  and a gate that can only be cleared one at a time does not get cleared).
+
+**The gate arriving is not a reason to retract.** The 35 entries already on the
+site have no document, and the whole log would have gone pending on the first
+load. An entry dated before `REVIEW_FROM` is approved by default — a DATE
+rather than a list of ids, so nothing has to be backfilled and no list has to be
+maintained. Back-dating stays safe for the same reason it already was: the
+mailer windows by date, so a back-dated entry precedes every subscriber's
+window and reaches nobody.
+
+**One file, four consumers: `assets/oa-news.js`** (dual-mode, like
+`oa-alert-match.js`). The front page's newest-five list, `whats-new.html`, the
+alerts preview and `_scraper/alerts-mailer.mjs` all read the decisions through
+it. That is not tidiness: the two pages carried a renderer each and had already
+drifted — the front page could edit an entry and the full log could not, one
+read the admin address from a literal and the other from `OAFB.adminEmail` —
+and the mailer read the raw log, so **an entry taken off the site was still
+e-mailed**. `/v2/` keeps its own frozen assets, so rather than carry a copy of
+the gate its alerts preview simply stopped reading the live log at all.
+
+**The mailer holds the STREAM at the oldest unreviewed entry**
+(`updateWindowEnd`, pure and unit-tested). Each alert's window is a high-water
+mark on the DATE of the newest entry sent, so sending an entry dated after one
+that is still unreviewed pushes the mark past it — and publishing that older
+entry later would then reach nobody, silently and for ever. The digest stops the
+day before the oldest entry waiting: publish it or remove it and everything
+behind it goes out on the next run, in the order it was written. Delayed, never
+lost — including for a subscriber who has never had an update digest, whose
+31-day first-window cap is measured back from the END of the window rather than
+from NOW, so an entry held longer than a month does not slide out of it while it
+waits. **A decision read that FAILS is caught**, not left to reject: it withholds
+everything since the gate (the safe direction) rather than killing the job
+digests too, which have nothing to do with the update log.
+
+`DOC_KEYS` in `oa-news.js` and the `hasOnly()` list in `_firestore.rules` are
+pinned against each other by `testNewsReview()` in `selftest.mjs`, both ways —
+a key with no rule is a permission-denied at save time and a maintainer told to
+redeploy rules that are already deployed. The browser half (what a visitor sees,
+what the maintainer sees, that a removed entry is off the list AND in the panel)
+is measured in `page-test.mjs`. **Inert until the rules are redeployed**:
+`firebase deploy --only firestore:rules --project operations-academia`.
+
 ## What "immediate" costs, and where the waiting used to be
 
 A posting is decided in Firestore and served from `data/` by GitHub Pages, so

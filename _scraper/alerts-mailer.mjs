@@ -34,6 +34,9 @@ const require = createRequire(import.meta.url);
 
 // the one matcher, shared with the browser
 const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+// and the one answer to "may this update be shown to anyone yet?", shared with
+// the two What's-new lists and the alert preview — see the header of that file
+const News = require(path.join(HERE, '..', 'assets', 'oa-news.js'));
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -49,6 +52,39 @@ function unsubscribeUrl(a) {
     (a.uid ? `&u=${encodeURIComponent(a.uid)}` : '');
 }
 const MAX_ROWS = 60;          // an e-mail listing more than this is unreadable
+
+/** yyyy-mm-dd, the day before the one given. '' for anything unparseable. */
+function dayBefore(iso) {
+  const t = Date.parse(String(iso || '') + 'T00:00:00Z');
+  return Number.isNaN(t) ? '' : new Date(t - 86400000).toISOString().slice(0, 10);
+}
+
+/**
+ * The last day an update digest may reach: today, or the day before the oldest
+ * entry still waiting for review, whichever is earlier.
+ *
+ * Pure, because it is the one piece of the review gate that decides whether an
+ * announcement is DELAYED or LOST. The per-alert window is a high-water mark on
+ * the DATE of the newest entry sent, so an entry sent from after an unreviewed
+ * one would move that mark past it — and the older entry, once published, would
+ * then be behind every subscriber's window and reach nobody, with nothing
+ * anywhere to say so. Stopping short delays instead: publish or remove the one
+ * that is waiting and the rest go out on the next run, in the order they were
+ * written.
+ *
+ * A REMOVED entry deliberately does not hold the stream — removing one is a
+ * decision, not a pause, and it is one of the two ways to release the hold. The
+ * consequence, stated rather than hidden: an entry removed and later RESTORED
+ * goes back on the site but is not re-announced, its date being behind the
+ * windows that moved on meanwhile. That is the right way round — many
+ * subscribers will already have been e-mailed it before it came down, and
+ * nothing here can tell which, so silence beats sending some of them a
+ * duplicate.
+ */
+function updateWindowEnd(today, oldestPending) {
+  const before = dayBefore(oldestPending);
+  return before && before < today ? before : today;
+}
 
 /** The subscriber's address, for the run log. Actions logs of a public
     repository are world-readable, so a subscription list must not be printed
@@ -198,6 +234,80 @@ async function selftest() {
   ok(M.daysBefore(new Date('2026-08-15T00:00:00Z'), 31) === '2026-07-15',
     'a first-ever send is capped rather than posting the back-catalogue');
 
+  /* ------------------------------- what may be announced at all (oa-news.js)
+
+     An e-mail cannot be recalled, so the review gate has to hold HERE as well
+     as on the page: an entry the maintainer has not published, or has taken
+     down, must not reach an inbox. These are the mailer's own use of the
+     module; the decision rules themselves are pinned in _scraper/selftest.mjs. */
+  const REVIEWED = [
+    { id: 'old', date: '2026-08-01', title: 'Before the gate', summary: 'S' },
+    { id: 'live', date: '2026-08-25', title: 'Published', summary: 'S' },
+    { id: 'draft', date: '2026-08-26', title: 'Waiting', summary: 'S' },
+    { id: 'gone', date: '2026-08-27', title: 'Taken down', summary: 'S' },
+  ];
+  const DECIDED = { live: { status: 'approved' }, gone: { status: 'removed' } };
+  const sendable = News.publicUpdates(REVIEWED, DECIDED).map((e) => e.id);
+  ok(sendable.join(',') === 'live,old',
+    'only published entries are e-mailed — an unreviewed one and a removed one are not');
+  ok(News.publicUpdates(REVIEWED, {}).map((e) => e.id).join(',') === 'old',
+    'and with no decisions readable, nothing since the review gate goes out');
+
+  /* THE ORDER MATTERS, because the per-alert mark is a DATE. Sending the entry
+     of the 25th while the 26th is still unreviewed is fine; sending one dated
+     AFTER an unreviewed entry would move the mark past it, and publishing that
+     entry later would then reach nobody at all. */
+  ok(updateWindowEnd('2026-08-30', '2026-08-26') === '2026-08-25',
+    'the digest stops the day before the oldest entry still waiting for review');
+  ok(updateWindowEnd('2026-08-30', '') === '2026-08-30',
+    'with nothing waiting it runs to today');
+  ok(updateWindowEnd('2026-08-30', '2026-09-10') === '2026-08-30',
+    'an entry waiting with a FUTURE date holds nothing back — it was not due anyway');
+  ok(updateWindowEnd('2026-08-30', '2026-08-30') === '2026-08-29',
+    'and one waiting since today holds back today');
+  const QUEUED = [
+    { id: 'before', date: '2026-08-25', title: 'Published, and older', summary: 'S' },
+    { id: 'draft', date: '2026-08-26', title: 'Waiting', summary: 'S' },
+    { id: 'after', date: '2026-08-28', title: 'Published, but newer', summary: 'S' },
+  ];
+  const QDECIDED = { before: { status: 'approved' }, after: { status: 'approved' } };
+  const qEnd = updateWindowEnd('2026-08-30', '2026-08-26');
+  const qSent = M.newUpdatesFor(News.publicUpdates(QUEUED, QDECIDED), UP, '2026-08-20', qEnd)
+    .map((e) => e.id);
+  ok(qSent.join(',') === 'before',
+    'a published entry DATED AFTER an unreviewed one waits for it; one dated before goes now');
+
+  /* AND A LONG HOLD MUST NOT QUIETLY DROP IT. A subscriber who has never had an
+     update digest has no `lastUpdateDate`, so their window floor is a 31-day
+     cap — and while it slid with the clock, an entry held longer than a month
+     fell out of it on the very day it was published: skipped on that run and on
+     every run after, with nothing in the log saying so. Freezing the floor the
+     first time it is computed is what fixes it, and this is that timeline,
+     played out day by day the way the run does it. */
+  const HELD = [{ id: 'x', date: '2026-08-26', title: 'Waited a long time', summary: 'S' }];
+  const windowFor = (day, decided, storedFloor) => {
+    const pending = News.partition(HELD, decided).pending;
+    const oldest = pending.reduce((m, e) => (!m || e.date < m ? e.date : m), '');
+    const end = updateWindowEnd(day, oldest);
+    const from = storedFloor ||
+      M.daysBefore(new Date(Date.parse(end + 'T00:00:00Z')), 31);
+    return { from, end, sent: M.newUpdatesFor(HELD, UP, from, end).map((e) => e.id) };
+  };
+  // day 1 of the hold: nothing sent, and the floor is frozen where it stood
+  const w1 = windowFor('2026-08-27', {});
+  ok(w1.sent.length === 0 && w1.end === '2026-08-25',
+    'while the entry waits, the window stops short of it and nothing goes out');
+  const frozen = w1.from;
+  // a month later it is published — WITHOUT the frozen floor it is already lost
+  const slid = windowFor('2026-09-27', { x: { status: News.APPROVED } });
+  ok(slid.sent.length === 0,
+    'a floor measured from today would have skipped it — the bug this pins');
+  const kept = windowFor('2026-09-27', { x: { status: News.APPROVED } }, frozen);
+  ok(kept.sent.join(',') === 'x',
+    'the frozen floor still covers it, so a month-long hold delays and does not lose');
+  ok(M.latestUpdateDate(HELD) === '2026-08-26',
+    'and the mark then advances to the entry itself, so it is not sent twice');
+
   // due-ness
   const now = new Date('2026-08-15T12:00:00Z');
   ok(M.isDue('daily', null, now), 'a never-sent alert is due');
@@ -316,10 +426,57 @@ async function main() {
     readFile(path.join(HERE, '..', 'changelog.json'), 'utf8').then(JSON.parse)
       .catch(() => ({ updates: [] })),
   ]);
-  const updates = changelog.updates || [];
+  /* WHAT MAY BE SENT is not the whole change log. An entry the maintainer has
+     not published yet must not be announced — an e-mail is the one thing that
+     cannot be recalled, so a digest would defeat the review gate outright —
+     and one they have taken down must not be announced either.
+     assets/oa-news.js is the same decision the site's own lists make.
+
+     A READ FAILURE IS NOT AN EMPTY SET OF DECISIONS. Without them everything
+     since the gate reads as unreviewed, which is the safe direction (nothing
+     new goes out) rather than the wrong one, and older entries still reach a
+     subscriber whose window covers them. It is caught, not left to reject:
+     letting it kill the run would stop the JOB digests too, and those have
+     nothing to do with the update log. */
+  let decisions = {};
+  try {
+    const dsnap = await db.collection(News.COLLECTION).get();
+    dsnap.forEach((d) => { decisions[d.id] = d.data(); });
+  } catch (err) {
+    decisions = {};
+    console.log('::warning::could not read the What\'s-new decisions ' +
+      `(${err.code || err.message}) — only updates from before the review gate ` +
+      'will be sent this run');
+  }
+  const all = changelog.updates || [];
+  const split = News.partition(all, decisions);
+  const updates = News.publicUpdates(all, decisions);
+  if (split.pending.length || split.removed.length) {
+    console.log(`${split.pending.length} change-log entr` +
+      `${split.pending.length === 1 ? 'y is' : 'ies are'} waiting for review and ` +
+      `${split.removed.length} removed — neither is e-mailed.`);
+  }
+
+  /* AND THE ONES AFTER IT WAIT THEIR TURN. The window per subscriber is a
+     high-water mark on the DATE of the newest entry sent (see newUpdatesFor),
+     so sending an entry dated after one that is still unreviewed would push
+     the mark past it — and publishing that older entry later would then reach
+     nobody, silently, for ever. So the send stops the day before the oldest
+     entry still waiting: publish it or remove it, and everything behind it
+     goes out on the next run. Nothing is lost either way, and the order the
+     entries are announced in is the order they were written. */
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const oldestPending = split.pending.reduce(
+    (m, e) => (!m || e.date < m ? e.date : m), '');
+  const until = updateWindowEnd(today, oldestPending);
+  if (until !== today) {
+    console.log(`update digests stop at ${until} — ` +
+      `"${split.pending[split.pending.length - 1].title}" (${oldestPending}) ` +
+      'is still waiting for review.');
+  }
 
   const snap = await db.collectionGroup('alerts').get();
-  const now = new Date();
   const tx = await transport();
   // Without a transport NOTHING can be delivered, so the run really is a dry
   // run — including its Firestore writes. Advancing a mark here would put every
@@ -355,19 +512,36 @@ async function main() {
     const jobs = M.newJobsFor(rows, a.criteria, since)
       .sort((x, y) => String(y.addedAt).localeCompare(String(x.addedAt)));
 
-    // The change-log window is tracked by the DATE OF THE LAST ENTRY SENT, not
-    // by the send timestamp — see newUpdatesFor. On a first-ever send, cap it
-    // at 31 days so a new subscriber is not posted the whole back-catalogue.
-    const sinceUpdate = a.lastUpdateDate || M.daysBefore(now, 31);
-    const news = M.newUpdatesFor(updates, a.criteria, sinceUpdate,
-      now.toISOString().slice(0, 10));
+    /* The change-log window is tracked by the DATE OF THE LAST ENTRY SENT, not
+       by the send timestamp — see newUpdatesFor. On a first-ever send it is
+       capped at 31 days so a new subscriber is not posted the whole
+       back-catalogue, and THAT FLOOR IS FROZEN THE FIRST TIME IT IS COMPUTED
+       rather than left to slide with the clock.
+
+       Sliding is what loses a held entry, and only measuring the cap from the
+       window end does not save it: while the entry waits the window is frozen
+       and nothing is sent, but the DAY IT IS PUBLISHED the hold lifts, the
+       window end jumps to today, and a floor of "today minus 31 days" has by
+       then moved past the entry's own date — so it is skipped on that run and
+       on every run after it, silently. Freezing the floor on first sight keeps
+       the entry inside the window however long it waits, and costs one extra
+       field on an alert that has never had an update digest. */
+    const sinceUpdate = a.lastUpdateDate ||
+      M.daysBefore(new Date(Date.parse(until + 'T00:00:00Z') || now.getTime()), 31);
+    // persisted below, in whichever branch this alert takes
+    const floor = (!a.lastUpdateDate && M.wantsUpdates(a.criteria)) ? sinceUpdate : '';
+    const news = M.newUpdatesFor(updates, a.criteria, sinceUpdate, until);
 
     if (!jobs.length && !news.length) {
       // NOTHING NEW IS NOT A SEND. Advance the mark anyway, so tomorrow's
       // window starts here rather than re-scanning from the last real send.
       skipped++;
       if (SCAN) console.log(`  nothing  ${label}`);
-      else if (LIVE) await doc.ref.update({ lastCheckedAt: now.toISOString() });
+      else if (LIVE) {
+        const idle = { lastCheckedAt: now.toISOString() };
+        if (floor) idle.lastUpdateDate = floor;   // freeze the floor, see above
+        await doc.ref.update(idle);
+      }
       continue;
     }
 
@@ -405,7 +579,10 @@ async function main() {
         lastSentCount: jobs.length + news.length,
       };
       // record the newest change-log entry actually sent, so the next window
-      // starts after it rather than at a timestamp
+      // starts after it rather than at a timestamp. The frozen floor is written
+      // first and only stands when nothing was sent — a real send always knows
+      // a later date than the floor does.
+      if (floor) patch.lastUpdateDate = floor;
       const latest = M.latestUpdateDate(news);
       if (latest) patch.lastUpdateDate = latest;
       await doc.ref.update(patch);
