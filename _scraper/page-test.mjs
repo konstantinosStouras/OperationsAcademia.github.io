@@ -3274,6 +3274,33 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
   ok(await h.evaluate(() => !!document.documentElement.style.getPropertyValue('--oa-chip-w')),
     'and hands the stylesheet the width to reserve');
 
+  /* SIGNING OUT GIVES THE SPACE BACK. The reserve is stamped on <html> by the
+     head snippet, before the first paint, from what the last visit
+     remembered — so it is a guess about a page that then goes on living. Sign
+     out and the chip becomes a 96px "Sign in" button; if the attribute still
+     said 'in', the stylesheet would hold the chip's 186px floor open and the
+     button would float ~90px in from the edge with a hole beside it. The same
+     shape appears whenever the hint says signed-in and Firebase says
+     otherwise (an expired session). */
+  await h.evaluate(() => {
+    const btn = document.getElementById('oa-signout');
+    if (btn) btn.click();
+  });
+  await h.waitForSelector('#oa-signin', { timeout: 5000 }).catch(() => {});
+  const afterOut = await h.evaluate(() => {
+    const host = document.getElementById('oa-account');
+    const btn = document.getElementById('oa-signin');
+    const tog = document.querySelector('.v3-theme');
+    return { attr: document.documentElement.getAttribute('data-oa-auth'),
+      hasButton: !!btn,
+      slack: btn ? Math.round(host.getBoundingClientRect().right - btn.getBoundingClientRect().right) : -1,
+      togAbove: !!tog };
+  });
+  eq(afterOut.attr, 'out', 'signing out says so on <html>, so the reserve follows the control');
+  ok(afterOut.hasButton, 'and the signed-out button is painted');
+  ok(afterOut.slack <= 2,
+    `with no reserved hole beside it (${afterOut.slack}px of slack)`);
+
   /* THE BAND WHERE THE NAME IS HIDDEN BUT THE WINDOW IS STILL WIDE.
      oa-ui.css hides .oa-acct-name from 841px to 980px, while v3.css's own
      narrow breakpoint is 900 — so a chip at 940px is an avatar and its
