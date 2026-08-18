@@ -27,9 +27,10 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
 
 import {
-  rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
+  rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
@@ -52,6 +53,23 @@ const SHEET = path.join(DATA, 'jobmarket.json');
    form's cascading pickers read it through vocab.json: it is what knows which
    school a department sits in at a university that has never posted here. */
 const DIRECTORY = path.join(DATA, 'universities.json');
+
+/* The world's operations and supply chain schools, as a directory. A curated
+   MODULE rather than rows in data/universities.json, because that file is
+   rebuilt wholesale from the maintainer's sheet by import-legacy-tables.mjs —
+   rows added to it by hand would vanish the next time it is dispatched. */
+const require = createRequire(import.meta.url);
+
+function institutionSeed() {
+  try {
+    return require('../assets/oa-institutions.js').directoryRows();
+  } catch (e) {
+    // never a reason to fail a publish: without it the form simply offers less
+    warn('assets/oa-institutions.js could not be read (' + e.message + ') — the '
+       + 'posting form will offer only the site\'s own Universities directory.');
+    return [];
+  }
+}
 
 const argv = new Set(process.argv.slice(2));
 const DRY = argv.has('--dry-run');
@@ -681,7 +699,21 @@ async function main() {
          'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
 
-  const merged = mergeRows(orphans, freshVisible, applicable);
+  /* A CARRIED ROW STILL HEARS ABOUT A RENAME. `orphans` are published from
+     the previous data/jobs.json rather than rebuilt from a document, so an
+     alias added to oa-schools.js today would never reach them — the site
+     would list one school under two names for ever, AND the selftest's
+     "every posting names its place the one way" guard would go red, which by
+     design stops the build committing anything. healPlace is pure and
+     idempotent, so a run with no new alias changes nothing. */
+  const healed = orphans.map(healPlace);
+  const renamed = healed.filter((r, i) => r !== orphans[i]);
+  if (renamed.length) {
+    log(`${renamed.length} carried posting(s) renamed to the site's current spelling: ` +
+        renamed.slice(0, 5).map((r) => r.institution).join(', '));
+  }
+
+  const merged = mergeRows(healed, freshVisible, applicable);
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
   /* ------------------------------------- the form's option lists
@@ -701,7 +733,21 @@ async function main() {
     warn(`${path.relative(process.cwd(), DIRECTORY)} is missing or unreadable — the ` +
          'posting form will only offer the universities that have posted here.');
   }
-  const vocab = buildVocab(rows, { generated: now.toISOString(), directory });
+
+  /* A SECOND directory, beside the site's own: the operations and supply chain
+     schools of the world (assets/oa-institutions.js, 178 of them). The site's
+     Universities directory is a curated list of the places the maintainer has
+     mapped, which is why a first-time poster from Bilkent, Cranfield, VinUniversity
+     or Kühne Logistics still met a blank page — none of them is in it.
+
+     It joins through the SAME `directory` argument, so it inherits everything
+     that already applies to those rows: canonColumns() names each place the way
+     the site publishes it, a place that is in both lists is one entry, and a
+     seeded row counts for NOTHING — the "4 postings" note stays a posting count.
+     Nothing else in the pipeline needs to know it exists. */
+  const seeded = [...(Array.isArray(directory) ? directory : []), ...institutionSeed()];
+
+  const vocab = buildVocab(rows, { generated: now.toISOString(), directory: seeded });
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
      the FILE stays complete: it is the projection of every live document, the

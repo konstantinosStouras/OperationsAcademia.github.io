@@ -53,7 +53,7 @@ import {
   parseCsv, redactEmails, anchor, normHeader, header, pick, arg,
 } from './import-sheet.mjs';
 import { rowsFromSheets, stampAddedAt } from './import-sheet.mjs';
-import { text, url, day, slug, buildMeta, keyOf } from './jobs-model.mjs';
+import { text, url, day, slug, buildMeta, keyOf, healPlace } from './jobs-model.mjs';
 
 /* ------------------------------------------------------------- the sheets */
 
@@ -406,6 +406,7 @@ function guardNoEmail(name, rows) {
 
 async function main() {
   if (process.argv.includes('--selftest')) process.exit(selftest() ? 0 : 1);
+  if (process.argv.includes('--heal-names')) process.exit(await healNames(arg('--out-dir', 'data')) ? 0 : 1);
 
   const outDir = arg('--out-dir', 'data');
   const dry = process.argv.includes('--dry-run');
@@ -495,8 +496,52 @@ of the DISPLAY tabs instead.`);
     for (const r of rows) years[r.year] = (years[r.year] || 0) + 1;
     console.log(`past postings: ${rows.length} rows, markets ${JSON.stringify(years)}`);
     const meta = buildMeta(rows, { generated: newestPosted(rows) });
-    await write('past-postings.json', rows, meta);
+    await write('past-postings.json', rows.map(healPlace), meta);
   }
+}
+
+/* ------------------------------------------------------- --heal-names
+
+   THE ARCHIVE IS WRITTEN ONCE AND NEVER REBUILT, which is what makes it an
+   archive and also what let its names fall behind: assets/oa-schools.js gains
+   an alias whenever a new spelling turns up, data/jobs.json hears about it on
+   the next daily build (build-jobs.mjs heals the rows it carries), and
+   past-postings.json — with no daily build of its own — did not. So one
+   school stood under two names across the two files, and the selftest's
+   "every posting names its place the one way" guard went red over a file
+   nothing could fix.
+
+   This mode applies the SAME pure, idempotent healPlace to the committed
+   archive, no network and no sheets: run it after adding an alias. The
+   importer applies it on write too, so a re-import cannot undo it — which it
+   silently would have, since the importer never canonicalised at all and the
+   archive's canonical spellings had been applied out of band.             */
+async function healNames(outDir) {
+  const file = path.join(outDir, 'past-postings.json');
+  if (!existsSync(file)) {
+    console.error(`::error::${file} is not there — nothing to heal`);
+    return false;
+  }
+  const rows = JSON.parse(await readFile(file, 'utf8'));
+  const healed = rows.map(healPlace);
+  const changed = healed.filter((r, i) => r !== rows[i]);
+  if (!changed.length) {
+    console.log('past-postings.json: every posting already names its place the one way');
+    return true;
+  }
+  for (const r of changed.slice(0, 10)) {
+    console.log(`  ${r.id}: ${r.institution} — ${r.department}`);
+  }
+  if (process.argv.includes('--dry-run')) {
+    console.log(`--dry-run: ${changed.length} posting(s) would be renamed`);
+    return true;
+  }
+  guardNoEmail('past-postings.json', healed);
+  await writeFile(file, serialiseRows(healed));
+  await writeFile(file.replace(/\.json$/, '-meta.json'),
+    JSON.stringify(buildMeta(healed, { generated: newestPosted(healed) }), null, 1) + '\n');
+  console.log(`past-postings.json: renamed ${changed.length} posting(s)`);
+  return true;
 }
 
 /* --------------------------------------------------------------- selftest */

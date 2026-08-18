@@ -298,6 +298,50 @@ export function inCurrentMarket(row, now = new Date()) {
       || Number(row.year) >= marketYear(now);
 }
 
+/* --------------------------------------------- healing a row that is carried
+
+   A posting with no document behind it is carried from the previous
+   data/jobs.json unchanged — which is right for its content, and wrong for
+   its NAMES. `assets/oa-schools.js` gains an alias whenever a new spelling
+   turns up ("Rotman School of Management" is Toronto's Joseph L. Rotman),
+   and a carried row never went back through an ingest to hear about it. So
+   the site published one school under two names for ever, and — worse — the
+   selftest's "every posting names its place the one way" guard went red,
+   which by design STOPS the build committing anything at all.
+
+   Re-canonicalising on the way through is the fix, and it is safe because
+   canonPlace is pure and idempotent: a row already canonical comes back
+   identical, so a run with no new alias writes nothing.
+
+   The `department` line is rebuilt with it (the card and the filters read
+   that, not the two parts), and a "Further info" link the site generated is
+   regenerated — the poster's own link is never touched, exactly as
+   `ownUniversitiesLink` decides elsewhere. The `id` deliberately FOLLOWS the
+   name: it is derived from the institution slug, so leaving it would strand
+   the row under a name no longer on the site — the same call the canon made
+   when Penn State became The Pennsylvania State University.                 */
+export function healPlace(row) {
+  const place = canonPlace({
+    institution: row.institution,
+    school: row.school || '',
+    unit: row.unit || '',
+  });
+  const department = joinDepartment(place.school, place.unit);
+  if (place.institution === row.institution
+      && place.school === (row.school || '')
+      && place.unit === (row.unit || '')
+      && department === (row.department || '')) return row;
+
+  const healed = { ...row, ...place, department };
+  if (!row.school) delete healed.school;
+  if (!row.unit) delete healed.unit;
+  if (ownUniversitiesLink(row.furtherInfoUrl)) {
+    healed.furtherInfoUrl = universitiesLink(place.institution);
+  }
+  if (row.id && row.id === jobId(row)) healed.id = jobId(healed);
+  return healed;
+}
+
 /* ------------------------------------------------------------- the mapping */
 
 /**

@@ -481,7 +481,20 @@
       .filter(Boolean);
     if (!fields.length) return;
 
-    var combos = fields.map(function (el) { return OACombo.attach(el, { options: [] }); });
+    /* One entry per university however the vocabulary spells it — the job
+       form's rule (institutionKey, not the canon), so "Baruch College, The
+       City University of New York (CUNY)" and "Baruch College" are one row
+       rather than two, and the published name goes on being each posting's
+       own. Without oa-schools.js the pickers still work; a variant simply
+       looks like a second name. */
+    var S = window.OASchools;
+    var combos = fields.map(function (el) {
+      return OACombo.attach(el, {
+        options: [],
+        key: S ? function (v) { return S.institutionKey(v); } : null,
+        publishAs: S ? S.canonInstitution : null,
+      });
+    });
 
     fetch('data/vocab.json', { cache: 'no-cache' })
       .then(function (r) { return r.ok ? r.json() : null; })

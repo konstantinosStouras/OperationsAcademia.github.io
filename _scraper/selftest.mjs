@@ -1501,6 +1501,19 @@ async function testCascadeWiring() {
   const combo = await readFile(path.join(HERE, '..', 'assets', 'oa-combo.js'), 'utf8');
   ok(/function setScope\(/.test(combo) && /oa-combo-group/.test(combo),
     'oa-combo.js offers a scope under its own heading');
+
+  /* ALPHABETICAL, AND THE WHOLE LIST. The picker used to rank by posting
+     count and render 60 rows: right for the ten names it opened with, wrong
+     for three hundred, where the reader knows the name they are looking for.
+     A count-first order with a low cap is the worst pair of the two — the
+     list ends in the C's and says "keep typing" to somebody who cannot tell
+     whether their university is there at all. */
+  ok(!/return b\.n - a\.n;/.test(combo),
+    'oa-combo.js no longer orders the list by how often a name has been posted');
+  ok(/function cmpName\(/.test(combo) && /sensitivity: 'base'/.test(combo),
+    'and sorts A-Z with accents folded onto their base letter');
+  ok(/max: opts\.max \|\| ([1-9]\d\d+)/.test(combo),
+    'rendering enough rows that an alphabetical list reaches the end of the alphabet');
   ok(/var nameKey = typeof opts\.key === 'function' \? opts\.key : fold;/.test(combo),
     'and takes its idea of "the same name" from the caller, so it needs no name rules of its own');
 
@@ -1589,6 +1602,118 @@ async function testRenamedNamesStillFound() {
     'alerts.html: loads the names module before the matcher');
 }
 
+/* -------------------------------------------- the seed of the world's schools
+
+   assets/oa-institutions.js says which places EXIST; assets/oa-schools.js says
+   what each is CALLED. Two canon()s would be two answers to one question and
+   the disagreement would be silent, so the seed holds no naming rules at all
+   and every one of its rows goes through canonColumns on the way into the
+   vocabulary.                                                                */
+
+async function testInstitutionSeed() {
+  const I = require(path.join(HERE, '..', 'assets', 'oa-institutions.js'));
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+
+  ok(I.LIST.length > 150, `the seed carries ${I.LIST.length} schools`);
+  ok(typeof I.canon !== 'function' && !I.ALIASES,
+    'and no canon of its own — oa-schools.js is the single definition of a name');
+
+  /* the rows the build feeds buildVocab: three names, three columns */
+  const rows = I.directoryRows();
+  ok(rows.length >= I.LIST.length, `directoryRows() yields ${rows.length} (institution, school, department) rows`);
+  eq(rows.filter((r) => !r.institution).length, 0, 'every seeded row names its university');
+  eq(rows.filter((r) => typeof r.school !== 'string' || typeof r.department !== 'string').length, 0,
+    'and carries both other columns, even when empty');
+
+  /* The source is a BUSINESS-SCHOOL directory — one university, one school —
+     so a second school for a university comes from the site's own directory
+     beside it. The seed must therefore never be the only source consulted,
+     and it never is: build-jobs.mjs concatenates it with universities.json.
+     (The cascade that keeps two schools apart is tested on the built
+     vocabulary, in testVocabFile, which is where it actually has to hold.) */
+  /* A university that IS its own school carries neither (Kühne Logistics
+     University), which is legitimate: it still adds the university to the
+     picker, which is the whole point of the seed. What is not legitimate is
+     a school with no university to hang it on. */
+  eq(I.LIST.filter((r) => !r.u).length, 0, 'every seeded record names its university');
+  ok(I.LIST.filter((r) => r.s || (r.d || []).length).length > I.LIST.length * 0.95,
+    'and all but a handful name a school, a department, or both');
+
+  /* alphabetical, accents folded — the order the file is read and edited in */
+  const names = I.LIST.map((r) => r.u);
+  const sorted = names.slice().sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+  eq(names.findIndex((n, i) => n !== sorted[i]), -1, 'the seed is written in alphabetical order');
+
+  /* and it publishes nothing of its own: every name it contributes is the
+     name oa-schools.js would publish, or the vocabulary would list a place
+     twice — once as the seed spells it, once as the site does */
+  const odd = rows.filter((r) => {
+    const p = S.canonColumns({ institution: r.institution, school: r.school, unit: r.department });
+    return p.institution !== S.canonInstitution(r.institution);
+  }).slice(0, 5);
+  eq(odd, [], 'every seeded university name is stable under the canon');
+}
+
+/* ------------------------------------------ all three forms offer the list
+
+   The owner's request was for the university, school and department lists in
+   the JOB form, the CANDIDATE form and the PLACEMENT form. The job form has
+   three cascading boxes; the placement form has three institution boxes; the
+   candidate form has ONE free-text "Current affiliation" — deliberately, since
+   a candidate writes "Wharton, University of Pennsylvania" and the published
+   field, the card and the alert matcher have always carried that as one
+   string. So it gets the picker WITHOUT being split.                        */
+
+async function testFormsOfferVocab() {
+  const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
+  for (const page of ['post-a-job.html', 'post-a-candidate.html', 'post-a-placement.html']) {
+    const html = await read(page);
+    const combo = html.indexOf('oa-combo.js');
+    ok(combo !== -1, `${page}: loads the picker`);
+    const schools = html.indexOf('oa-schools.js');
+    ok(schools !== -1 && schools < combo,
+      `${page}: loads the names module first, so two spellings group as one name`);
+  }
+  for (const [file, what] of [['assets/oa-jobform.js', 'job'],
+    ['assets/oa-candidateform.js', 'candidate'], ['assets/oa-placementform.js', 'placement']]) {
+    const js = await read(file);
+    ok(/vocab\.json/.test(js), `the ${what} form fetches data/vocab.json`);
+    ok(/institutionKey/.test(js), `and groups its universities the site's way`);
+  }
+}
+
+/* ---------------------------------------------------- the picker in the dark
+
+   The reported bug: with the dark theme on, the dropdown drew a white card and
+   inherited `--ink` for its text — near-white on white. It was not a contrast
+   NEAR-miss, it was an invisible list, and it happened because the panel named
+   a colour for its background and none for its ink.
+
+   The rule this pins is the general one: anything that paints its own ground
+   must name its own ink, and both must come from the theme.                  */
+
+async function testPickerTheme() {
+  const css = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+  const block = (sel) => {
+    const at = css.indexOf(sel + ' {');
+    return at === -1 ? '' : css.slice(at, css.indexOf('}', at));
+  };
+
+  for (const sel of ['.oa-combo-list', '.oa-combo-group']) {
+    const b = block(sel);
+    ok(b, `oa-ui.css declares ${sel}`);
+    ok(!/background:\s*#/.test(b), `${sel} takes its background from the theme, not a fixed colour`);
+  }
+  ok(/color:\s*var\(--ink/.test(block('.oa-combo-list')),
+    'and the panel names its own ink, so it cannot inherit the page\'s');
+
+  /* the fallbacks matter: /v1/ and /v2/ are frozen trees that may load this
+     file without v3.css's tokens, and must go on rendering as they did */
+  for (const m of block('.oa-combo-list').match(/var\(--[a-z0-9-]+[^)]*\)/g) || []) {
+    ok(/,\s*\S/.test(m), `${m} keeps a fallback for a page with no theme tokens`);
+  }
+}
+
 /* ------------------------------------------- the served vocabulary file
 
    data/vocab.json is what the posting form fetches, and nothing else on the
@@ -1598,6 +1723,7 @@ async function testRenamedNamesStillFound() {
    deterministic and that the two files are in step.                          */
 
 async function testVocabFile() {
+  const S0 = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
   const read = async (name) =>
     JSON.parse(await readFile(path.join(HERE, '..', 'data', name), 'utf8'));
   const v = await read('vocab.json');
@@ -1608,13 +1734,34 @@ async function testVocabFile() {
     ok(v[key] !== undefined, `vocab.json carries ${key}`);
   }
 
-  const rebuilt = buildVocab(jobs, { generated: v.generated, directory });
+  /* TWO directories, exactly as build-jobs.mjs feeds them: the site's own
+     Universities page, and the seed of the world's operations and supply chain
+     schools (assets/oa-institutions.js) that lets a first-time poster from a
+     university nobody has posted from find their school already listed. */
+  const seed = require(path.join(HERE, '..', 'assets', 'oa-institutions.js'));
+  const rebuilt = buildVocab(jobs, {
+    generated: v.generated,
+    directory: [...directory, ...seed.directoryRows()],
+  });
   eq(serialiseVocab(rebuilt), serialiseVocab(v),
-    'vocab.json is exactly what the postings and the Universities directory rebuild');
+    'vocab.json is exactly what the postings and the two directories rebuild');
+
+  /* the seed's whole point: a place with no posting is offered anyway. Every
+     one of its universities is on the list, and carries no posting count it
+     did not earn. */
+  const offered = new Map(v.universities.map((o) => [S0.institutionKey(o.v), o]));
+  const missing = seed.universities().filter((u) => !offered.has(S0.institutionKey(u)));
+  eq(missing, [], 'every seeded university is offered by the posting form');
+  const jobUnis = new Set(jobs.map((r) => S0.institutionKey(r.institution || '')));
+  const invented = seed.universities()
+    .filter((u) => !jobUnis.has(S0.institutionKey(u)))
+    .filter((u) => (offered.get(S0.institutionKey(u)) || {}).n !== 0)
+    .slice(0, 5);
+  eq(invented, [], 'and a seeded university nobody has posted from counts for nothing');
 
   /* the spelling the form offers is the spelling the site publishes: the
      analogue of testCountries' isCanonical pass over the served data */
-  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  const S = S0;
   eq(v.schools.filter((o) => !S.isCanonicalSchool(o.v)).map((o) => o.v), [],
     'every school the form offers is the one the site publishes');
   eq(v.units.filter((o) => !S.isCanonicalUnit(o.v)).map((o) => o.v), [],
@@ -1631,6 +1778,48 @@ async function testVocabFile() {
     '/v2/ still finds byUniversity[x].schools and .units');
   ok(v.universities.every((o) => typeof o.v === 'string' && typeof o.n === 'number'),
     'and the three flat lists are still {v, n}');
+
+  /* A UNIVERSITY'S TWO SCHOOLS ARE TWO SCHOOLS — the one thing the merge must
+     never do (the owner's words: a university may have a business school and
+     an industrial engineering school; they have different departments and are
+     not duplicates). Auburn is the canonical case: Supply Chain Management
+     under Harbert, Industrial and Systems Engineering outside it. */
+  const twoSchools = Object.entries(v.byUniversity)
+    .filter(([, e]) => Object.keys(e.bySchool).filter(Boolean).length > 1);
+  ok(twoSchools.length > 20,
+    `${twoSchools.length} universities keep more than one school, each with its own departments`);
+  const split = twoSchools.filter(([, e]) => {
+    const lists = Object.entries(e.bySchool).filter(([k]) => k).map(([, l]) => l.join('|'));
+    return new Set(lists).size > 1;
+  });
+  ok(split.length > 10, 'and their department lists differ, so the cascade is really narrowing');
+
+  /* …AND NO UNIVERSITY LISTS ONE SCHOOL TWICE, which is the other half of the
+     same request. Two hand-compiled sources name a school long and short —
+     "Sloan School of Management" and "MIT Sloan School of Management" — and
+     the picker showed both with the postings on one row and the departments
+     on the other. oa-schools.js's scoped aliases are where that is settled. */
+  const dupSchools = [];
+  for (const [u, e] of Object.entries(v.byUniversity)) {
+    const names = Object.keys(e.bySchool).filter(Boolean);
+    for (let i = 0; i < names.length; i++) {
+      for (let j = i + 1; j < names.length; j++) {
+        const a = S.fold(names[i]), b = S.fold(names[j]);
+        if (a.includes(b) || b.includes(a)) dupSchools.push(`${u}: ${names[i]} / ${names[j]}`);
+      }
+    }
+  }
+  eq(dupSchools, [], 'and no university offers one school under two names');
+
+  /* the same, one level up: one place, one row in the university picker */
+  const byKey = new Map();
+  const dupUnis = [];
+  for (const o of v.universities) {
+    const k = S.institutionKey(o.v);
+    if (byKey.has(k)) dupUnis.push(`${byKey.get(k)} / ${o.v}`);
+    else byKey.set(k, o.v);
+  }
+  eq(dupUnis, [], 'and each university is offered once');
 
   /* internal consistency: every name in the cascade is a name the flat lists
      offer, or the picker would show a scope value with no posting count */
@@ -3025,8 +3214,14 @@ async function testRefLessTakedown() {
      handing `removeSpecs` to mergeRows — the obvious-looking variable, still in
      scope three lines either side — reinstates the silent deletion with every
      other check in this file green. The argument is the whole guard. */
-  ok(/mergeRows\(orphans, freshVisible, applicable\)/.test(build),
+  ok(/mergeRows\(\w+, freshVisible, applicable\)/.test(build),
     'and the merge is handed the filtered set, which is where that guard actually bites');
+  /* The carried rows reach it through healPlace, so an alias added to
+     oa-schools.js renames them instead of turning the "one way" guard below
+     red — which, since the build runs this file before committing, would stop
+     the site publishing anything at all. */
+  ok(/orphans\.map\(healPlace\)/.test(build) && /mergeRows\(healed,/.test(build),
+    'and the postings it carries are re-canonicalised on the way through');
   ok(!/mergeRows\(orphans, freshVisible, removeSpecs\)/.test(build),
     'never the unfiltered one');
   ok(/stillThere\.push/.test(build),
@@ -3654,6 +3849,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();
+  await testInstitutionSeed();
+  await testFormsOfferVocab();
+  await testPickerTheme();
   await testVocabFile();
   testSplitFields();
   testCollapseSameDay();
