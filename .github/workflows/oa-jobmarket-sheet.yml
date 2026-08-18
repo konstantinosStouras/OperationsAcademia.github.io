@@ -15,16 +15,25 @@ name: OA jobs — read the job market tracking sheet
 # link — so it works before Firebase or SMTP are set up. With SMTP unset the
 # "this sheet has gone quiet" e-mail is printed into the log instead of sent.
 #
-# Once a day is right: the sheet is updated by hand, in batches, and the daily
-# read is what the whole design is paced around (its staleness rule counts in
-# days, its e-mail repeats weekly). Dispatch it by hand after editing the
-# sheet if you want the site to catch up sooner.
+# EVERY HALF HOUR, and it used to be once a day. The daily read was right when
+# this job only READ the sheet: the workbook is updated by hand, in batches,
+# and the whole design is paced in days (the staleness rule counts them, its
+# e-mail repeats weekly). It is no longer the only thing this job does. Since
+# the review gate, sync-jobmarket-sheet.mjs is also what PUBLISHES a posting
+# the maintainer has approved — data/jobmarket.json holds the approved rows and
+# nothing else writes it — so on a daily schedule an approval sat invisible for
+# up to twenty-four hours, while the panel promised the next build. Approving
+# something is an act with an expectation attached; reading a spreadsheet is
+# not.
+#
+# It costs about thirteen requests to Google per run and writes nothing at all
+# when nothing has changed, which is the state it is in almost every time.
 
 on:
   schedule:
-    # 06:40 UTC, before the working day and off the hour so this repository
-    # does not queue behind every other :00 job on the runners
-    - cron: '40 6 * * *'
+    # :10 and :40, off the hour so this repository does not queue behind every
+    # other :00 job on the runners
+    - cron: '10,40 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:

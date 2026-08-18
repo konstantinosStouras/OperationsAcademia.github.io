@@ -216,10 +216,15 @@ export function applyEdits(row, edits) {
  * is expressed as "absence means withhold" rather than "presence of a
  * rejection means withhold" so that a queue that fails to write cannot leak a
  * posting onto the site.
+ *
+ * `published` is the one exception, and it is about the gate ARRIVING rather
+ * than about what it does: pass the ids the site is already showing and they
+ * are grandfathered in (see below) instead of being retracted.
  */
-export function partition(rows, docs, { now = '' } = {}) {
+export function partition(rows, docs, { now = '', published = null } = {}) {
   const byId = new Map();
   for (const d of docs || []) if (d && d.rowId) byId.set(d.rowId, d);
+  const live = published instanceof Set ? published : new Set(published || []);
 
   const publish = [];
   const queue = [];
@@ -231,7 +236,26 @@ export function partition(rows, docs, { now = '' } = {}) {
     const doc = byId.get(row.id);
 
     if (!doc) {
-      queue.push(queueDoc(row, { now }));
+      /* ALREADY PUBLIC IS ALREADY REVIEWED, in the only sense that matters:
+         people can read it on the site today, and alerts about it have gone
+         out. The gate exists to stop a posting reaching visitors before the
+         maintainer has seen what the pipeline DERIVED for it, which cannot be
+         undone by taking sixteen live postings down on the morning the queue
+         first answers. So a row the site is already showing enters the queue
+         approved, with the reason written into it — visible in the list,
+         editable, and still rejectable, which takes it down.
+
+         Anything the site is NOT already showing is queued pending, which is
+         the whole of the gate for every posting from here on. */
+      const fresh = queueDoc(row, { now });
+      if (live.has(row.id)) {
+        fresh.status = APPROVED;
+        fresh.reviewedAt = now;
+        fresh.note = 'Published before the review gate existed, so it was kept on the site. '
+          + 'Reject it to take it down.';
+        publish.push(row);
+      }
+      queue.push(fresh);
       continue;
     }
 

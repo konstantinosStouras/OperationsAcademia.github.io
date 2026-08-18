@@ -51,7 +51,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { marketFloor, isoStamp } from './jobs-model.mjs';
+import { marketFloor, isoStamp, healPlace } from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
   sheetCsvUrl, sheetHtmlUrl, sheetEditUrl, sheetId,
@@ -292,6 +292,7 @@ async function readWorkbook(id, { minYear, now }) {
   }
 
   const perTab = [];
+  const dead = [];
   let readAny = false;
 
   for (const t of wanted) {
@@ -303,13 +304,38 @@ async function readWorkbook(id, { minYear, now }) {
     }
     readAny = true;
     const out = rowsFromTab(got.body, {
-      tab: t.name, kind: t.kind, sheetId: id, minYear,
+      /* A tab is named for the year its cycle OPENS, and a cycle opening in
+         year Y is the site's market year Y+1 — the same arithmetic minTabYear
+         does above, read the other way round. */
+      tab: t.name, kind: t.kind, sheetId: id, minYear, cycleYear: t.year + 1,
     });
     perTab.push({ tab: t.name, kind: t.kind, ...out });
 
     if (out.missing.length) {
       notes.push(`tab "${t.name}": no institution/date columns could be found — ` +
                  'the tab was read but nothing in it could be used');
+    }
+    for (const r of out.repaired || []) {
+      notes.push(`tab "${t.name}": its ${r.field} column is headed "${r.header}", which ` +
+                 `names something else — column ${r.at + 1} was read as the ${r.field} ` +
+                 'from its own rows instead');
+    }
+
+    /* A TAB THAT HOLDS ROWS AND YIELDS NO POSTING IS A FAULT, not a quiet
+       tab. This is the state that hid for four months: "2026 Jobs" reported
+       0 postings and 94 skipped rows every morning, in a log nobody reads,
+       while the site showed none of the season's jobs. It is an error
+       annotation AND a reason to write, below.
+
+       SKIPPED ROWS ARE THE SIGNAL, because they are what says the tab had
+       something in it: a row was recognisable as a posting and could not be
+       used. A tab whose columns are unrecognisable reports no skips at all,
+       and when its NAME was guessed — the tab strip could not be read, so the
+       usual names are tried and most do not exist — that is the expected
+       state, not a fault. Flagging those would e-mail the maintainer every
+       half hour about "2027 NTT-PD", a tab nobody has ever made. */
+    if (!out.rows.length && (out.skipped || (out.missing.length && !t.guessed))) {
+      dead.push({ tab: t.name, skipped: out.skipped });
     }
     for (const u of out.unmapped) {
       notes.push(`tab "${t.name}": column "${u.header}" is not one this pipeline knows ` +
@@ -329,12 +355,12 @@ async function readWorkbook(id, { minYear, now }) {
      nor a single tab. That is the state that must never write. */
   if (!readAny) {
     return { ok: false, id, rows: [], tabs: tabs.map((t) => t.name), links, newestPosted: '',
-             notes, error: page.ok ? 'no tab could be read' : (page.error || 'unreachable') };
+             notes, dead, error: page.ok ? 'no tab could be read' : (page.error || 'unreachable') };
   }
 
   const rows = [].concat(...perTab.map((p) => p.rows));
   return {
-    ok: true, id, rows, links, notes,
+    ok: true, id, rows, links, notes, dead,
     tabs: (wanted.length ? wanted : tabs).map((t) => t.name),
     newestPosted: rows.reduce((m, r) => (r.posted > m ? r.posted : m), ''),
   };
@@ -355,6 +381,12 @@ export function renderStaleEmail(check, { sheets = [], now = new Date() } = {}) 
                  changed — it has to be readable by anyone with the link.`,
     empty: `The job market sheet was read, but <strong>no posting could be taken from it</strong>.
             Its tabs may have been renamed, or its columns rearranged.`,
+    'unread-tab': `The job market sheet is being updated, but
+            <strong>${esc((check.tabs || []).join(', '))}</strong> gave no posting at all.
+            The usual cause is a column heading: the pipeline finds the school and the
+            date by name, and a tab that heads one of them differently — or that has had
+            a column inserted above its headings — reads as empty however full it is.
+            Everything on the other tabs is unaffected.`,
     undated: `The job market sheet was read, but <strong>no posting in it carries a usable
               date</strong>, and a posting without one cannot be published.`,
   }[check.reason] || esc(check.detail);
@@ -434,6 +466,18 @@ async function main() {
   }
 
   const failed = results.filter((r) => !r.ok);
+
+  /* Tabs that were read and gave nothing. Loud, because the alternative is
+     what actually happened: a season's worth of postings missing from the
+     site with nothing anywhere saying so. */
+  const dead = [].concat(...results.map((r) => (r.dead || [])
+    .map((d) => ({ ...d, sheet: r.id }))));
+  for (const d of dead) {
+    err(`tab "${d.tab}" was read but yielded NO posting` +
+        (d.skipped ? ` — all ${d.skipped} of its rows were skipped` : '') +
+        '. Its columns have probably been renamed; see the warnings above.');
+  }
+
   const existing = await readRowsStrict();
 
   /* ------------------------------------------------- decide whether to write
@@ -529,7 +573,13 @@ async function main() {
              'data/jobmarket.json was left exactly as it is');
         rows = existing;
       } else {
-        const split = partition(rows, queue.docs, { now: isoStamp(now) });
+        const split = partition(rows, queue.docs, {
+          now: isoStamp(now),
+          /* What the site is showing right now. Postings already public are
+             grandfathered rather than retracted the first morning the queue
+             answers — see partition(). */
+          published: new Set(existing.map((r) => r.id)),
+        });
         rows = split.publish;
 
         if (split.queue.length || split.refresh.length) {
@@ -602,6 +652,7 @@ async function main() {
     error: failed.map((f) => `${f.id}: ${f.error}`).join('; '),
     rows: rows.length,
     newestPosted,
+    deadTabs: dead.map((d) => d.tab),
     now,
     days: Number(process.env.JOBMARKET_STALE_DAYS) || STALE_DAYS,
   });
@@ -647,7 +698,51 @@ async function main() {
   else log(`done. ${rows.length} postings from the sheet${wrote ? ' (file updated)' : ''}.`);
 }
 
+/* ---------------------------------------------------------- --heal-names
+
+   The workbook's postings are canonicalised HERE, at ingest (canonPlace in
+   jobmarket-sheet.mjs), and the file is rewritten from the workbook every
+   morning — so an alias added to oa-schools.js today reaches them on the next
+   sync and hand-editing data/ would be undone by it. That is the rule, and it
+   has one gap: until that sync runs, data/jobmarket.json still names a place
+   the old way, build-jobs.mjs republishes it, and the selftest's "every
+   posting names its place the one way" guard goes red — which by design stops
+   the build committing ANYTHING.
+
+   So this re-applies the very same canon to the committed file, offline, with
+   no workbook and no credentials: the same answer the next sync will produce,
+   just sooner. Run it after adding an alias, exactly like the legacy
+   importer's mode of the same name.                                         */
+async function healNames() {
+  const rows = await readJson(ROWS_FILE, null);
+  if (!Array.isArray(rows)) {
+    console.error(`::error::${ROWS_FILE} is missing or unreadable — nothing to heal`);
+    return false;
+  }
+  const healed = rows.map(healPlace);
+  const changed = healed.filter((r, i) => r !== rows[i]);
+  if (!changed.length) {
+    log('data/jobmarket.json: every posting already names its place the one way');
+    return true;
+  }
+  for (const r of changed.slice(0, 10)) log(`  ${r.id}: ${r.institution} — ${r.department}`);
+  if (DRY) { log(`--dry-run: ${changed.length} posting(s) would be renamed`); return true; }
+  await writeFile(ROWS_FILE, serialiseSheetRows(healed));
+  /* the meta's `sheets` and `tabs` say WHICH WORKBOOK these postings came from,
+     and only a real sync knows that — rebuilding the meta from scratch here
+     emptied both, throwing away the provenance to record a rename. Carried. */
+  const meta = await readJson(META_FILE, {});
+  await writeFile(META_FILE, JSON.stringify(buildSheetMeta(healed, {
+    generated: isoStamp(new Date()),
+    sheets: meta.sheets || [],
+    tabs: meta.tabs || [],
+  }), null, 1) + '\n');
+  log(`data/jobmarket.json: renamed ${changed.length} posting(s)`);
+  return true;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
+  if (has('--heal-names')) process.exit(await healNames() ? 0 : 1);
   if (has('--selftest')) {
     /* The WHOLE suite, not runSelftest()'s three-suite subset — which does not
        include a single check of this pipeline, so the flag would print a

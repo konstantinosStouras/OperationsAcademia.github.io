@@ -374,11 +374,21 @@ const COUNTER_HEADER = /^(#|no|nr|num|number|s\/n|sn|index|id|count|item)$/;
  * is not claimed twice, and EXACT matches are taken before loose ones across
  * every field — otherwise a sheet with both "Location" and "Country" would
  * give "Location" (an alias of `city`) to whichever field asked first.
+ *
+ * `pinned` lets a caller settle a field itself — the one repair for a header
+ * that names a column WRONGLY, which no reading of its words can undo.
  */
-export function mapColumns(head) {
+export function mapColumns(head, { pinned = null } = {}) {
   const cells = (head || []).map(normHeader);
   const index = {};
   const taken = new Set();
+
+  /* A column the CALLER has already settled from the data (see repairColumns).
+     It is claimed before the header is read, so the header's own words cannot
+     take it, and the field is not looked for a second time. */
+  for (const [field, at] of Object.entries(pinned || {})) {
+    if (Number.isInteger(at) && at >= 0 && !taken.has(at)) { index[field] = at; taken.add(at); }
+  }
 
   for (const pass of ['exact', 'loose']) {
     for (const [field, aliases] of Object.entries(COLUMNS)) {
@@ -484,17 +494,200 @@ export function inferColumns(rows, { sample = 40 } = {}) {
   return { index, unmapped: [], missing, inferred: true };
 }
 
+/* ------------------------------------------- a header that names one column
+                                                wrongly
+
+   THE FAILURE THIS ANSWERS, because it cost a season of postings. The
+   crowdsourced workbook's "2026 Jobs" tab — the tab its own contributors
+   created when the 2026-2027 market opened — heads its first column
+   "Location" where every other tab heads it "School". `institution` is a
+   REQUIRED field and no alias of it reads "location", so that row was not
+   accepted as the header. The scan moved on to the next row, which was a
+   posting, and took THAT as the header: "University of Hong Kong" begins with
+   an alias of `institution`, and a comment reading "an expected start date of
+   July 1, 2027" contains an alias of `posted`. Both required fields were
+   satisfied by prose. The date was then read out of a comment column that is
+   empty on almost every row, so every row lacked a date and all 89 postings
+   were skipped. The tab reported "0 posting(s), 94 row(s) skipped" every
+   morning for four months and the site simply never showed the market.
+
+   Two rules come out of it, and they are separate on purpose:
+
+     1. A ROW OF POSTINGS IS NEVER A HEADER, however many aliases its prose
+        happens to contain (`looksLikeData`).
+     2. A HEADER THAT NAMES MOST OF ITS COLUMNS IS REPAIRED, NOT DISCARDED:
+        what it did name is kept, and the one field it named wrongly is
+        settled from the DATA underneath it (`repairColumns`).
+
+   The second is deliberately narrow. It runs only for a field without which
+   nothing can be published at all, only when the header did not name it, and
+   only on evidence from the rows themselves — and the alternative outcome, in
+   every case where it fires, is the tab publishing nothing. It cannot change
+   a tab whose header is right, because a header that names its required
+   fields never reaches it. */
+
+/** How much of a header must be recognisable before its remaining column is
+    worth settling from the data. Three is enough to tell a header row from a
+    line of prose that happens to contain an alias. */
+const REPAIR_MIN_NAMED = 3;
+
+/** The share of a column's values that must name an institution before that
+    column is read as one. Measured over the tab above: 92% of the school
+    column, 0% of the two beside it. */
+const INSTITUTION_SHARE = 0.5;
+
+/**
+ * Does this row hold DATA rather than the names of columns?
+ *
+ * Refused outright: a link and a date. A column is never NAMED after one, and
+ * a posting almost always carries both. Two long sentences are weaker
+ * evidence and are counted rather than trusted alone, so a header keeping a
+ * wordy label ("Comment (virtual or onsite)") is not thrown away.
+ */
+export function looksLikeData(row) {
+  const cells = (row || []).map((c) => text(c, 300)).filter(Boolean);
+  let sentences = 0;
+  for (const c of cells) {
+    if (/^(https?:\/\/|www\.)/i.test(c)) return true;
+    if (sheetDay(c)) return true;
+    if (c.length > 60) sentences++;
+  }
+  return sentences >= 2;
+}
+
+/** The values of one column of the sample, empties dropped. */
+function columnValues(body, at, { sample = 40 } = {}) {
+  return body.slice(0, sample).map((r) => text(r[at], 300)).filter(Boolean);
+}
+
+/** The share of a column's values for which `pred` holds, or 0 when the
+    column is too empty to be evidence of anything. */
+function columnShare(body, at, pred) {
+  const vals = columnValues(body, at);
+  if (vals.length < 3) return 0;
+  return vals.filter(pred).length / vals.length;
+}
+
+/**
+ * Which column names institutions, read off the rows themselves.
+ *
+ * The names state what they are — "University of Hong Kong", "Rutgers
+ * Business School", "Air Force Institute of Technology" — which is the same
+ * evidence `typeFromNames` reads to answer what KIND of institution a posting
+ * is from, so the two cannot disagree about what an institution name looks
+ * like. Not every school says so ("KU Leuven", "ESMT Berlin", "Stanford GSB"
+ * — seven of the ninety rows measured), so it is a share of the column and
+ * never a test of one cell.
+ */
+export function institutionColumn(body, { reserved = new Set() } = {}) {
+  const width = body.reduce((w, r) => Math.max(w, (r || []).length), 0);
+  let at = -1, top = INSTITUTION_SHARE;
+  for (let i = 0; i < width; i++) {
+    if (reserved.has(i)) continue;
+    /* Both patterns are written for lower-cased text — that is how
+       typeFromNames applies them — so a raw cell must be folded first or
+       "University of Hong Kong" matches nothing. */
+    const s = columnShare(body, i, (v) => {
+      const t = v.toLowerCase();
+      return UNIVERSITY.test(t) || BUSINESS_SCHOOL.test(t);
+    });
+    if (s > top) { top = s; at = i; }
+  }
+  return at;
+}
+
+/** Which column holds the dates — the same evidence inferColumns reads. */
+export function dateColumn(body, { reserved = new Set() } = {}) {
+  const width = body.reduce((w, r) => Math.max(w, (r || []).length), 0);
+  let at = -1, top = INFER_SHARE;
+  for (let i = 0; i < width; i++) {
+    if (reserved.has(i)) continue;
+    const s = columnShare(body, i, (v) => !!sheetDay(v));
+    if (s > top) { top = s; at = i; }
+  }
+  return at;
+}
+
+/**
+ * A header row that named its columns, one of them wrongly: settle the
+ * required field it left unnamed from the data, then let the header map
+ * everything else AROUND that column.
+ *
+ * Re-reading the header is what makes the repair minimal rather than a second
+ * guess at the whole layout. Pinning the school column of the tab above frees
+ * the word the header used for it, and the tab's SECOND "Location" — until
+ * then an unclaimed duplicate — is then read as the town, which is what it
+ * holds. Everything the header named already (the deadline, the link, the
+ * notes) is untouched; whole-tab inference would have lost all three.
+ */
+export function repairColumns(head, body) {
+  const first = mapColumns(head);
+  if (!first.missing.length) return first;
+  if (Object.keys(first.index).length < REPAIR_MIN_NAMED) return first;
+
+  const pinned = {};
+  const repaired = [];
+
+  /* WHICH COLUMNS ARE OFF LIMITS. Only the OTHER required field, because the
+     column being looked for is usually one the header has already given away:
+     the tab that motivated this heads its school column "Location", so `city`
+     holds it and reserving everything the header named would look everywhere
+     except the one place the school names are. An optional field may
+     therefore be displaced — and is put back by the header re-read below,
+     which is how the tab's second "Location" ends up as the town.
+
+     What makes that safe is the size of the gap rather than the rule: a
+     column is only read as the institution when most of its values NAME an
+     institution, and a column of towns, countries, ranks, dates, links or
+     areas scores zero. */
+  const required = new Set(['institution', 'posted']);
+  const reservedFor = (field) => new Set(
+    Object.entries(first.index)
+      .filter(([f]) => required.has(f) && f !== field)
+      .map(([, at]) => at));
+
+  if (first.missing.includes('institution')) {
+    const at = institutionColumn(body, { reserved: reservedFor('institution') });
+    if (at >= 0) { pinned.institution = at; repaired.push({ field: 'institution', at }); }
+  }
+  if (first.missing.includes('posted')) {
+    const reserved = reservedFor('posted');
+    for (const at of Object.values(pinned)) reserved.add(at);
+    const at = dateColumn(body, { reserved });
+    if (at >= 0) { pinned.posted = at; repaired.push({ field: 'posted', at }); }
+  }
+  if (!repaired.length) return first;
+
+  const out = mapColumns(head, { pinned });
+  return { ...out, repaired: repaired.map((r) => ({ ...r, header: text(head[r.at], 120) })) };
+}
+
 /**
  * Where the data starts and what each column is.
  *
- * The header scan comes first and is trusted when it finds one; inference is
- * the fallback, and reports itself so a run's log says which was used.
+ * The header scan comes first and is trusted when it finds one; a header that
+ * names a required column wrongly is repaired from the data; inference over
+ * the whole tab is the last fallback, and reports itself so a run's log says
+ * which was used.
  */
 export function resolveColumns(grid, { limit = 8 } = {}) {
+  let best = null;
+
   for (let i = 0; i < Math.min(limit, grid.length); i++) {
+    if (looksLikeData(grid[i])) continue;
+
     const m = mapColumns(grid[i]);
     if (!m.missing.length) return { at: i, inferred: false, ...m };
+
+    const named = Object.keys(m.index).length;
+    if (!best || named > best.named) best = { at: i, named, ...m };
   }
+
+  if (best) {
+    const fixed = repairColumns(grid[best.at], grid.slice(best.at + 1));
+    if (!fixed.missing.length) return { at: best.at, inferred: false, ...fixed };
+  }
+
   const guess = inferColumns(grid);
   // no header row was recognised, so every row is data
   return { at: -1, ...guess };
@@ -603,13 +796,14 @@ const HAS_EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
  * a whole retired season.
  */
 export function rowsFromTab(csv, {
-  tab = '', kind = '', sheetId: id = '', minYear = 0,
+  tab = '', kind = '', sheetId: id = '', minYear = 0, cycleYear = 0,
 } = {}) {
   const grid = parseCsv(csv);
   const head = resolveColumns(grid);
   if (head.missing.length) {
     return { rows: [], skipped: 0, unmapped: head.unmapped || [], missing: head.missing,
-             unlinked: 0, headerAt: head.at, inferred: !!head.inferred };
+             unlinked: 0, headerAt: head.at, inferred: !!head.inferred,
+             repaired: head.repaired || [] };
   }
 
   const { index } = head;
@@ -630,11 +824,25 @@ export function rowsFromTab(csv, {
       continue;
     }
 
-    /* The market year is derived from the posting's own date by the SITE's
-       roll rule, never from the tab's name: a tab called "2026 Jobs" holds
-       postings from July 2026 on, which the site files under market year 2027.
-       Deriving it keeps the two definitions from ever disagreeing. */
-    const year = marketYear(new Date(`${posted}T12:00:00Z`));
+    /* WHICH SEASON A POSTING BELONGS TO. The site's own roll rule reads it off
+       the posting's date — a job advertised from 1 July 2026 belongs to market
+       year 2027 — and that is right for all but one case, which the tracking
+       sheet produces every spring: a school advertising EARLY for the season
+       after next. Twenty-four of the 2026 Jobs tab's eighty-nine postings are
+       dated April to June 2026, the two oldest saying so in their own comment
+       ("an expected start date of July 1, 2027"). By date alone all
+       twenty-four file under the season that has just closed, which is the one
+       page they are of no use on.
+
+       The tab settles it, because naming the cycle is the whole reason it
+       exists — this one was created, by the sheet's own contributors, when
+       they agreed the 2026-2027 market had opened. So the tab's cycle is a
+       FLOOR on the market year, never a ceiling: it can carry a posting
+       forward into the season its tab was made for, and can never push one
+       back into a season that has closed. A row added late to an old tab
+       therefore keeps the later year its date gives it, and nothing already
+       published moves. */
+    const year = Math.max(marketYear(new Date(`${posted}T12:00:00Z`)), cycleYear || 0);
     if (minYear && year < minYear) { skipped++; continue; }
 
     const area = text(redactEmails(cell(raw, index, 'area')), 220);
@@ -716,7 +924,7 @@ export function rowsFromTab(csv, {
   }
 
   return { rows, skipped, unmapped: head.unmapped || [], missing: [], unlinked,
-           headerAt: head.at, inferred: !!head.inferred };
+           headerAt: head.at, inferred: !!head.inferred, repaired: head.repaired || [] };
 }
 
 /**
@@ -826,7 +1034,8 @@ function tally(rows, get) {
  * a day of postings not arriving.
  */
 export function stalenessOf({
-  ok = true, error = '', rows = 0, newestPosted = '', now = new Date(), days = STALE_DAYS,
+  ok = true, error = '', rows = 0, newestPosted = '', deadTabs = [],
+  now = new Date(), days = STALE_DAYS,
 } = {}) {
   if (!ok) {
     return { stale: true, reason: 'unreadable', days: null, newestPosted,
@@ -839,6 +1048,17 @@ export function stalenessOf({
   if (!newestPosted) {
     return { stale: true, reason: 'undated', days: null, newestPosted,
              detail: 'no posting in the sheet carries a usable date' };
+  }
+
+  /* A tab that was read and gave nothing, while the rest of the workbook is
+     healthy. Checked BEFORE the age test on purpose: this is the failure that
+     looks most like a quiet market from the outside — postings are being
+     added and none of them arrive — and it is the one a person has to fix. */
+  if (deadTabs.length) {
+    return { stale: true, reason: 'unread-tab', days: null, newestPosted,
+             tabs: deadTabs.slice(),
+             detail: `no posting could be taken from ${deadTabs.length === 1
+               ? `the tab "${deadTabs[0]}"` : `the tabs ${deadTabs.map((t) => `"${t}"`).join(', ')}`}` };
   }
 
   const age = daysBetween(newestPosted, now.toISOString().slice(0, 10));

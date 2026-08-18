@@ -117,15 +117,72 @@ removal is a signed-in stranger taking down somebody else's posting.
 
 **When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
 never by hand-editing `data/`.** That file is rewritten from the workbook every
-morning, so a patched row comes back the next day, exactly as with the country
-spellings below. Columns are matched by header alias and a header it does not
-know is REPORTED in the run's log rather than guessed at; add the alias there.
+half hour, so a patched row comes back within the hour, exactly as with the
+country spellings below. Columns are matched by header alias and a header it
+does not know is REPORTED in the run's log rather than guessed at; add the alias
+there.
+
+**It is not the maintainer's workbook.** "OM Job Market" is owned by
+`omjobmarket2023@gmail.com` and crowdsourced — contributors add their own
+postings and, when a season opens, their own tabs. So a heading cannot be
+corrected at the source, and the pipeline has to be able to read a tab that
+names a column wrongly.
+
+### A header that names one column wrongly, and the four months it cost
+
+The "2026 Jobs" tab — created by the sheet's contributors when the 2026-2027
+market opened — heads its school column **"Location"**, the same word it uses
+for the town beside it. Every other tab heads it "School". `institution` is
+required and no alias reads "location", so that row was refused as a header;
+the scan moved to the next row and took a POSTING as one, because "University
+of Hong Kong" begins with an alias of `institution` and a comment reading "an
+expected start date of July 1, 2027" contains an alias of `posted`. Both
+required fields were satisfied by prose. The date was then read out of a
+comment column empty on almost every row, so every row was skipped. The tab
+logged `"2026 Jobs": 0 posting(s), 94 row(s) skipped` every morning and the
+site simply never showed the season — 22 postings on the jobs page where the
+sheet held 89.
+
+Three rules came out of it, and they are separate on purpose:
+
+1. **A row of postings is never a header** (`looksLikeData`), however many
+   aliases its prose contains. A link or a date is decisive — a column is not
+   NAMED after either — and two long sentences are counted rather than trusted,
+   so a wordy label survives.
+2. **A header that names most of its columns is repaired, not discarded**
+   (`repairColumns`). The one required field it failed to name is settled from
+   the DATA — the institution column is the one whose values NAME institutions,
+   read with the same `UNIVERSITY`/`BUSINESS_SCHOOL` patterns `typeFromNames`
+   uses, as a SHARE of the column (measured on the live tab: 92% of the school
+   column, 0% of the two beside it, with "KU Leuven", "ESMT Berlin" and
+   "Stanford GSB" among the 8% that name nothing). Then the header is re-read
+   AROUND that column, which is what makes the repair minimal: the tab's second
+   "Location" becomes the town, and the deadline, the link and the notes — all
+   of which whole-tab inference would have lost — are kept. It fires only for a
+   field without which nothing publishes, only when the header did not name it,
+   and never on a tab whose header is right.
+3. **A tab that is read and yields nothing is an error, not a quiet tab.** It
+   is a `::error::` annotation AND a `stalenessOf` reason of its own
+   (`unread-tab`), checked BEFORE the age test: from outside it looks exactly
+   like a quiet market, every other signal says the sheet is healthy, and it is
+   the one failure here a person has to go and fix.
+
+**Which season a posting belongs to: the tab is a FLOOR.** The site's roll rule
+reads the market year off the posting's date, which is right except for a
+school advertising early — 24 of that tab's 89 postings are dated April to June
+2026, two saying "an expected start date of July 1, 2027" in their own comment,
+and by date alone all 24 file under the season that has just closed, which is
+the one page they are of no use on. The tab settles it (`cycleYear`), because
+naming the cycle is the whole reason it exists. A floor and never a ceiling: it
+can carry a posting forward into the season its tab was made for and can never
+push one back into a closed season, so a row added late to an old tab keeps the
+later year its date gives it and nothing already published moves.
 
 A sheet that stops being updated looks exactly like a quiet job market from the
 site, so it is made visible deliberately: `stalenessOf`/`shouldWarn` e-mail the
 maintainer once (then weekly) when the sheet has gained nothing for three weeks,
-cannot be read, or reads as empty. Nothing already published is ever removed by
-one of those failures.
+cannot be read, reads as empty, or has a tab that gave nothing. Nothing already
+published is ever removed by one of those failures.
 
 ## The HigherEdJobs postings are checked against their own ads
 
@@ -253,6 +310,44 @@ again as new. Correct those in the workbook.
 firestore:rules`) — until then the panel says permission-denied — and the
 e-mail half is inert until `SMTP_*` is set, which stamps nothing, so the
 postings are announced once it exists.
+
+### The gate arriving is not a reason to retract
+
+Sixteen of the sheet's postings were on the site before the queue existed, and
+the first morning it answered they would all have had no document and therefore
+come DOWN — off the jobs page, after e-mail alerts about them had gone out.
+Already public is already reviewed in the only sense that matters here, so
+`partition(rows, docs, { published })` takes the ids the site is showing and
+enters those rows APPROVED, with the reason written into the document's `note`.
+Rejecting one still takes it down. Everything the site is not already showing is
+queued pending, which is the whole of the gate for every posting from here on.
+
+### A season is not six postings
+
+The queue's unit of work is a market, not a posting: the "2026 Jobs" tab alone
+opens with 89, and a whole workbook in scope holds several hundred across two
+seasons. Three things follow, and each of them is what keeps the gate from
+becoming the bug it was built to prevent — postings not on the site:
+
+- **The panel approves a page at once.** `approveAll` in `assets/oa-jobreview.js`
+  does exactly what the per-card path does, edits included, one write at a time
+  with the failures counted rather than thrown. A gate that can only be cleared
+  89 times does not get cleared.
+- **The queue is split by market year**, newest season first and selected by
+  default, which is what makes "approve everything here" safe to press: a
+  posting approved from a closed season is correct and lands on Previous
+  markets, and is not what someone clearing this queue in September is doing.
+- **A burst is one e-mail.** One per posting is the owner's choice and right for
+  the market ticking over; 89 of them is a mail bomb from the site's own address
+  that the provider would cut off half way. Above `BURST` (12) the mailer sends
+  a single list instead, stamping `mailedAt` per document so the two paths share
+  one high-water mark.
+
+**Approving publishes at the next SHEET READ**, because `data/jobmarket.json`
+holds the approved rows and nothing else writes it. That is why
+`oa-jobmarket-sheet.yml` runs every half hour rather than daily — see its
+header. If that cadence changes, change the panel's and the e-mail's promise
+with it.
 
 ## A text search holds SEVERAL terms
 
@@ -418,9 +513,16 @@ Pennsylvania State University.
 
 `data/past-postings.json` has no daily build to heal it, so it gets a mode of its
 own: **`node _scraper/import-legacy-tables.mjs --heal-names`** (offline, no sheets)
-— run it after adding an alias. The importer applies `healPlace` on write too,
-which it did not before: it never canonicalised at all, so a re-import would
-silently have undone the archive's spellings.
+— run it after adding an alias; it covers all three files the importer writes.
+
+**A heal mode is not enough on its own, because `data/` is rewritten from the
+sheets.** The importer must canonicalise ON WRITE as well, and originally it
+canonicalised nothing at all. Healing only `past-postings.json` there was
+caught by CI within the hour: the import job ran `--fetch`, wrote 254 raw
+`universities.json` rows, and the selftest's "the map names every place the way
+the site does" guard went red on 213 of them. All three write paths are now
+healed and pinned by name in `selftest.mjs` — a heal that the next dispatch
+undoes is not a fix.
 
 The picker (`assets/oa-combo.js`, dual-mode so its ordering is unit-tested) opens
 **alphabetically** — accents folded onto their base letter, so École sits between
@@ -438,6 +540,61 @@ contrast near-miss. Its surfaces are theme tokens now, each keeping its old ligh
 value as a fallback for the frozen archives, and `page-test.mjs` measures the
 rendered ratio in BOTH themes (a fix that only darkened the panel would trade one
 broken theme for the other).
+
+**Where a school names its own unit, that name wins.** The bare-field-name rule
+above is right in general — "Department", "Area" and "group" are exactly what
+differs between two people naming one unit — and wrong for six schools the owner
+ruled on (2026-08-18), where the wrapper IS the name: UT Dallas has an Operations
+Management **Area**, Purdue a Supply Chain and Operations Management **Faculty**,
+Yale an Operations **Department**, Emory an Information Systems **&** Operations
+Management. `SCOPED_UNIT_ALIASES` keys them by university (safe for the same
+reason the school table is: no other school at those six carries the name, which
+the selftest asserts) and the answer is **TERMINAL** — returned exactly as
+written, never put back through the rule that would undo it, and never through
+`spell()`, which turns " & " into " and ". The lookup asks three ways — as
+written, as `spell()` rewrites it, and as the generic rule would leave it —
+because listing every wrapper a source might use is the losing game the bare-name
+rule exists to avoid. Everywhere else the generic rule is untouched, which is the
+whole safety argument for scoping it. `canonUnit(v, institution)` takes the
+university, so `assemble` and the posting form's picker both pass it; a
+`canonUnit` asked without one still answers the generic way, which is why
+`isCanonicalUnit` consults the scoped names directly.
+
+**A substring check is blind to a reordering, and it cost two duplicates.**
+"Michael Smurfit Graduate Business School" and "UCD Michael Smurfit Graduate
+School of Business" contain neither one another, nor do "Olin Business School"
+and "Olin School of Business" — so both went on being offered twice through a
+green suite. The selftest now compares names TWO ways: substring, and the
+DISTINCTIVE WORDS as a set, dropping the generic ones ("school", "of",
+"business") and the university's own name and initials. Department pairs that
+are one group or two — only the owner can say — are named in `AWAITING_OWNER`
+in `selftest.mjs` rather than silently tolerated: a new pair fails the build, a
+listed one is reported by `node _scraper/selftest.mjs --open`, and an entry is
+deleted when it is ruled on (the answer going into `SCOPED_UNIT_ALIASES`).
+
+**One spelling per place means EVERY dataset, not just the postings** (owner,
+2026-08-18: "let's use the same consistent University Name, School Name,
+Department Name, across the entire website"). `data/jobs.json` and
+`data/past-postings.json` had been canonical for a while; the two datasets
+`import-legacy-tables.mjs` writes had never been canonicalised at all — 213 of
+the map's 254 rows and 9 faculty placements named their place some other way,
+and the map is where a reader LANDS from every posting's "Further info" link.
+So `--heal-names` covers all three files it writes, and `sync-jobmarket-sheet.mjs`
+has a mode of the same name for the workbook's own postings. Each is offline and
+idempotent; the selftest asserts all four datasets together.
+
+Two rules the map heal follows: its `name` and `schoolDept` are DERIVED (the
+three names joined) and are rebuilt with them, unless the sheet said something
+of its own ("TBC"); and its **`id` never moves**, because the maintainer's
+read-time corrections are stored against it (`rowOverrides`,
+`<dataset>__<rowId>`) and a renamed id orphans every correction already made.
+
+**A duplicate key in an object literal is silent.** Adding a second
+`'Stanford University'` to `SCOPED_SCHOOL_ALIASES` did not merge or warn —
+JavaScript kept the last and dropped the earlier rule, so an alias that had
+worked for weeks stopped and the only symptom was Stanford listed twice.
+`testNoDuplicateKeys` reads the tables from the SOURCE, because by the time the
+module has evaluated the evidence is gone.
 
 ## The posting form's three name fields cascade
 
@@ -529,6 +686,108 @@ dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
 matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
+
+## The account menu counts what it links to
+
+"My postings" and "E-mail alerts" read the same whether you had none or a
+dozen, so each carries its number now — the shape `/lit/`'s account menu uses.
+
+A menu is on EVERY page of a static site, so a read per page per visitor is a
+real cost. Three rules keep it cheap, and `testAccountCounts` pins all three:
+
+* **Paint from the cache first.** The count is remembered per account in
+  `localStorage` beside the name hint, so the badge lands with the menu.
+* **Refresh once per SESSION, not per page** (`sessionStorage`), using a
+  `count()` aggregate — one read whatever the collection holds.
+* **An exact count is free where the data is already loaded.** `oa-myjobs.js`
+  and `oa-alerts.js` call `OAAccounts.setCount()` from the list they just
+  fetched, which costs nothing and is what keeps the badge honest the moment a
+  posting is taken down.
+
+**A count we do not KNOW shows nothing** — no badge is honest, a `0` is not —
+and zero shows nothing either, since an empty pill beside "My postings" reads
+as a fault rather than as "none yet". The cache is keyed to its own uid, a read
+that lands after a sign-out is dropped, and signing out forgets it: a shared
+machine must not show the next person the last one's numbers.
+
+## A same-day collapse is keyed on the ADVERTISEMENT, not just the day
+
+`collapseSameDay` folds repeat submissions of one posting together — same
+market year, institution, department and date, keeping the fullest. That key
+assumes a department advertises at most one post a day, and Houston's Bauer
+College disproves it: two rows on 2025-09-23, one for Assistant/Associate/Full
+"until filled" and one for Assistant only closing 15 October, each with its own
+ad link.
+
+They had survived only BY ACCIDENT — one of them omitted its school, so the two
+`department` lines differed. The moment canonicalisation put both under the
+same department, the collapse silently dropped a real advertisement, exactly
+the failure `normKey`'s own comment records from a truncated key.
+
+So a row joins an existing slot only when it does not CONTRADICT it about which
+advertisement it is (`adKey`/`sameAdvertisement`). A missing link contradicts
+nothing, which keeps the repeat-submission case the function exists for; and a
+row pointing only at our own home page — what a sheet row carries when it names
+no ad — names nothing. **Anything that makes two postings' names agree can turn
+them into one, so a naming change is also a check on the row count.**
+
+## Anything that paints its own ground must name its own ink
+
+Three reports in one morning (2026-08-18) were all the same fault: the
+vocabulary dropdown drew near-white names on a white card, the "Your changes
+have been saved" panel showed a heading and then two invisible lines, and the
+"Choose a file…" button was white on white. Each was a rule that set a
+`background` and left `color` to be inherited — fine when it was written,
+because there was only one theme, and wrong the moment `[data-theme='dark']`
+put a near-white `--ink` on the page around it.
+
+`assets/oa-ui.css` predated the palette and hardcoded ~130 light values.
+They are now theme tokens, each **keeping its old value as the `var()`
+fallback** — that is what lets `/v1/` and `/v2/`, which define none of them,
+go on rendering exactly as they did. Only the semantic panels keep fixed
+colours (success green, warning amber, the status pills), and those name a
+colour for everything inside them.
+
+Two things this turned up beyond the reports:
+
+* **`--mut` missed AA on every surface it is used on** — 4.03:1 on `--bg-3`,
+  4.29:1 on `--bg` — so the footer, the result counts and every hint on the
+  site were a hair under readable. It is `#646c78` now, the smallest change
+  that clears 4.5:1 everywhere.
+* **The map's vendored Leaflet chrome**: the attribution box kept a near-white
+  ground in dark theme under our flipped link colour (1.56:1), and the cluster
+  badge wrote white on its own pale circles (1.36–2.24:1, in BOTH themes).
+  Leaflet's stylesheets stay verbatim copies, so both corrections live in
+  `oa-ui.css`, specific enough to win despite loading first.
+
+Two traps this hit, both worth knowing before adding a rule:
+
+* **Specificity AND load order.** The Leaflet attribution override sat in
+  `oa-ui.css` at the same specificity as Leaflet's own rule
+  (`.leaflet-container .leaflet-control-attribution`), and `leaflet.css` loads
+  AFTER it — so the fix silently did nothing and the guard went on reporting
+  1.6:1. Map chrome belongs in `assets/oa-uni-map.css`, which loads after all
+  three Leaflet stylesheets.
+* **`--on-brand`, not `#fff`, on anything filled with `var(--brand)`.** The
+  checkbox tick and radio dot were fixed white on a brand-filled box, and
+  `--brand` is LIGHT in dark theme — a white tick on a near-white box.
+
+**`page-test.mjs` measures it, and measuring is the point.** It walks one page
+per kind of chrome in BOTH themes and reads what the browser actually paints,
+compositing backgrounds rather than taking the first painted layer — a pill on
+`rgba(198, 204, 212, 0.13)` is not light, it is 13% light over near-black, and
+reading that layer alone reports a perfectly readable button at 1:1. Nothing is
+exempt. **When you add a rule that paints a background, give it a colour in the
+same change.**
+
+**And it waits for the theme to be PAINTED, not for a stopwatch.** Every page
+links a Google Fonts stylesheet that cannot load in CI, and until the cascade
+settles the body shows a default grey that is neither theme; measured then,
+every muted line reads as a dark-theme failure. A fixed delay reported 14 of
+them, all artefacts, with the numbers moving between runs — which is what a
+transient looks like. Waiting for `body.v3` does not help either: that class is
+in the HTML. The wait asserts the thing itself — the body is painting the
+theme's own `--bg` — and nothing downstream may be measured before it does.
 
 ## Deploying Firebase rules — ALWAYS name the project
 

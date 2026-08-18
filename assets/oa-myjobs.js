@@ -188,6 +188,12 @@
       show($('oa-my-loading'), false);
       show(list, docs.length > 0);
       show($('oa-my-empty'), docs.length === 0);
+
+      /* The account menu's badge, corrected from the list we just loaded — no
+         extra read, and exact the moment a posting is taken down. The badge
+         counts what this page LISTS (pending, live and taken down alike), so
+         clicking through never shows a different number of cards. */
+      if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('postings', docs.length);
     }).catch(function (err) {
       loadedFor = null;   // a retry on the next auth event is fine
       show($('oa-my-loading'), false);

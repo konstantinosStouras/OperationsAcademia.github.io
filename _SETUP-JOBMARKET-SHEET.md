@@ -5,7 +5,7 @@ the site automatically. This is how it is wired, what you have to do, and what
 happens when something goes wrong.
 
     the tracking workbook
-        |  .github/workflows/oa-jobmarket-sheet.yml   (06:40 UTC, daily)
+        |  .github/workflows/oa-jobmarket-sheet.yml   (:10 and :40, hourly)
         |  _scraper/sync-jobmarket-sheet.mjs
         v
     data/jobmarket.json
@@ -67,12 +67,26 @@ If a tab has no header row at all, the columns are worked out from the data
 itself (the date column is the one holding dates, the country column the one
 holding countries, and so on) and the log says it did that.
 
+**A tab that heads a column with the wrong word is repaired, not refused.** The
+"2026 Jobs" tab heads its school column "Location", which everywhere else means
+the town — so nothing on it could be published, and for four months nothing was
+(89 postings, none of them on the site). Now, when a header names everything
+except the school or the date, that one column is worked out from the rows
+underneath it — the school column is the one whose values name schools — and the
+rest of the header is read around it, so your Deadline, Link and Notes columns
+still do what they say. The log names the column it had to work out. Nothing is
+guessed on a tab whose headers are right.
+
 **What each posting becomes.** Most of it is a direct copy. Three things are
 derived, and it is worth knowing how:
 
 - **Market year** — from the posting's own date, by the site's rule (the season
-  rolls on 1 July). A posting dated 20 July 2026 is in the 2026-2027 market,
-  whatever the tab is called. Only the current season shows on the jobs page;
+  rolls on 1 July). A posting dated 20 July 2026 is in the 2026-2027 market. The
+  tab it sits on can only carry it FORWARD: a job advertised in April 2026 on
+  the "2026 Jobs" tab belongs to the 2026-2027 market that tab was made for,
+  rather than to the season that has just closed — 24 of that tab's postings
+  are exactly that. It can never push a posting back into a closed season.
+  Only the current season shows on the jobs page;
   the rest is on *Previous markets*.
 - **Entry level** — from the rank you typed. "Visiting Assistant Professor" is
   a *Visiting* post (not an assistant professorship), "Lecturer", "Instructor",
@@ -131,6 +145,10 @@ happens:
 - **"could not be read"** — usually the sharing was changed back to private.
 - **"read but held no postings"** — the tabs were renamed to something with no
   year in it, or the columns were rearranged past recognition.
+- **"no posting could be taken from the tab …"** — one tab gave nothing while
+  the rest of the workbook was fine. This is the one that hides: everything
+  else looks healthy, the sheet is plainly being updated, and a whole season is
+  missing from the site. Usually a column heading.
 
 In every one of those cases **nothing already published is removed**. The site
 keeps what it has and simply stops gaining postings, which is exactly why the

@@ -264,6 +264,10 @@
     // The off-canvas copy first: it must follow every state change even on a
     // page without #oa-account, and even down the early-return branches below.
     paintPanel();
+    /* paint() REPLACES the menu's markup, so the badges have to be written
+       back after every one of its branches — hence the deferral rather than a
+       call beside the markup itself. Cheap: it reads localStorage, no network. */
+    if (state.user) setTimeout(function () { paintCounts(readCounts(state.user.uid)); }, 0);
 
     var host = $('#oa-account');
     if (!host) return;
@@ -317,9 +321,11 @@
             '<a role="menuitem" href="post-a-job.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
             '<a role="menuitem" href="my-postings.html">' +
-              '<span class="oa-mi" aria-hidden="true">' + ICON.mine + '</span>My postings</a>' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.mine + '</span>My postings' +
+              '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
             '<a role="menuitem" href="alerts.html">' +
-              '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts</a>' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts' +
+              '<span class="oa-acct-n" data-count="alerts" hidden></span></a>' +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
               '<span class="oa-mi" aria-hidden="true">&#9998;</span>Edit profile</button>' +
             '<a role="menuitem" href="feedback.html">' +
@@ -451,6 +457,112 @@
      greet everyone by the left-hand half of their address. Stored at
      profiles/{uid}, which the deployed rules already make owner-only — no
      rules change is needed to switch this on. */
+
+  /* ---------------------------------------------- how many of each you have
+
+     The menu says "My postings" and "E-mail alerts"; how MANY is the thing a
+     reader actually wants from a menu, and the number is what tells them the
+     page is worth opening at all.
+
+     Three rules, because a menu is on every page of a static site and a read
+     per page per visitor is a real cost:
+
+       1. PAINT FROM THE CACHE FIRST. The count is remembered per account in
+          localStorage beside the name hint, so the badge is there in the same
+          frame as the menu rather than appearing a second later.
+       2. REFRESH ONCE PER SESSION, not per page. A count() aggregate is a
+          single read whatever the collection holds; sessionStorage keeps a
+          walk around the site to one of them.
+       3. AN EXACT COUNT IS FREE WHERE THE DATA IS ALREADY LOADED. The
+          postings and alerts pages hold the real list, so they call
+          OAAccounts.setCount() and the cache is corrected with no read at all
+          — which is also what keeps the badge honest the moment you take a
+          posting down.
+
+     A count we do not KNOW shows nothing: no badge is honest, a 0 is not.
+     Zero is also nothing to show — an empty badge beside "My postings" reads
+     as a fault rather than as "none yet". */
+
+  var COUNT_KEY = 'oa-acct-counts';
+  var COUNT_SESSION = 'oa-acct-counts-fresh';
+
+  function readCounts(uid) {
+    if (!uid) return {};
+    try {
+      var all = JSON.parse(localStorage.getItem(COUNT_KEY) || 'null');
+      return (all && all.uid === uid && all.n) || {};
+    } catch (e) { return {}; }
+  }
+
+  function writeCounts(uid, counts) {
+    if (!uid) return;
+    try {
+      localStorage.setItem(COUNT_KEY, JSON.stringify({ uid: uid, n: counts }));
+    } catch (e) { /* private mode — the cache is an optimisation */ }
+  }
+
+  function paintCounts(counts) {
+    var nodes = document.querySelectorAll('.oa-acct-n[data-count]');
+    Array.prototype.forEach.call(nodes, function (el) {
+      var n = counts[el.getAttribute('data-count')];
+      var show = typeof n === 'number' && n > 0;
+      el.textContent = show ? String(n) : '';
+      el.hidden = !show;
+    });
+  }
+
+  /** Exported: a page that has just loaded the real list corrects the cache. */
+  function setCount(what, n) {
+    var u = state.user;
+    if (!u || typeof n !== 'number' || n < 0) return;
+    var counts = readCounts(u.uid);
+    if (counts[what] === n) return;
+    counts[what] = n;
+    writeCounts(u.uid, counts);
+    paintCounts(counts);
+  }
+
+  /** One read per collection, and only once per session. */
+  function countOf(ref) {
+    /* count() is an aggregate — one read whatever the collection holds. An
+       older SDK without it falls back to fetching the documents, which is
+       what the pages themselves do anyway. */
+    if (typeof ref.count === 'function') {
+      return ref.count().get().then(function (snap) {
+        var d = snap && typeof snap.data === 'function' ? snap.data() : null;
+        return d && typeof d.count === 'number' ? d.count : null;
+      });
+    }
+    return ref.get().then(function (snap) { return snap ? snap.size : null; });
+  }
+
+  function loadCounts(u) {
+    if (!u) return;
+    var uid = u.uid;
+    paintCounts(readCounts(uid));
+
+    var fresh = false;
+    try { fresh = sessionStorage.getItem(COUNT_SESSION) === uid; } catch (e) { /* ignore */ }
+    if (fresh) return;
+
+    OAFB.ready().then(function (fb) {
+      var db = fb.firestore();
+      return Promise.all([
+        countOf(db.collection(OAFB.col.jobSubmissions).where('uid', '==', uid))
+          .catch(function () { return null; }),
+        countOf(db.collection(OAFB.col.users).doc(uid).collection(OAFB.col.alerts))
+          .catch(function () { return null; }),
+      ]);
+    }).then(function (r) {
+      if (!state.user || state.user.uid !== uid) return;   // signed out mid-flight
+      var counts = readCounts(uid);
+      if (typeof r[0] === 'number') counts.postings = r[0];
+      if (typeof r[1] === 'number') counts.alerts = r[1];
+      writeCounts(uid, counts);
+      paintCounts(counts);
+      try { sessionStorage.setItem(COUNT_SESSION, uid); } catch (e) { /* ignore */ }
+    }).catch(function () { /* no badge is the honest answer; never show a 0 */ });
+  }
 
   var PROFILE_FIELDS = ['firstName', 'lastName', 'affiliation', 'website'];
 
@@ -1852,6 +1964,9 @@
     state.user = null;
     state.profile = null;
     queue.length = 0;
+    /* the counts belong to the account that is leaving; a shared machine must
+       not show the next person how many postings the last one had */
+    try { localStorage.removeItem(COUNT_KEY); sessionStorage.removeItem(COUNT_SESSION); } catch (e) { /* ignore */ }
     paint();
     notify(null);
     if (!window.OAFB || !OAFB.enabled) return;
@@ -1905,6 +2020,7 @@
 
         if (u) {
           loadProfile(u);
+          loadCounts(u);
           // Public, contentless tally so the site can show a registered-user
           // count without anyone being able to read the user list. Same shape
           // as /lit/'s registeredUsers/{uid}: a coarse timestamp, nothing else.
@@ -1953,6 +2069,8 @@
 
   window.OAAccounts = {
     openAuth: openAuth,
+    /** A page holding the real list corrects the menu's badge, for free. */
+    setCount: setCount,
     openProfile: openProfile,
     openMerge: openMerge,
     profile: function () { return state.profile; },

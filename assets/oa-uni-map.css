@@ -210,3 +210,30 @@
   color: #a3364a;
   font-size: 12px;
 }
+
+/* ------------------------------------------------- the map's own chrome
+
+   THE MAP'S SURFACES STAY LIGHT IN BOTH THEMES, and deliberately so: the tiles
+   are light, so the popup card is light and its text is fixed dark (the rules
+   above, and the guard in page-test that pins them). These two Leaflet-owned
+   controls were the only ones not following that rule.
+
+   The attribution box keeps Leaflet's near-white ground, so the fix is its
+   INK: our own `a` colour flips to near-white with the page and was landing on
+   that white box at 1.6:1. It is pinned dark, exactly like the popup.
+
+   The cluster badge writes its count in white on a 60%-opacity green, yellow
+   or orange circle — 1.53:1, 1.36:1 and 2.24:1, i.e. unreadable in EITHER
+   theme, not just dark. Near-black on those same three reads at 10.8, 12.2
+   and 7.4, so the label darkens rather than the badge changing colour, which
+   would lose the small/medium/large signal.
+
+   Both live HERE and not in oa-ui.css: Leaflet's own rule for the attribution
+   box is `.leaflet-container .leaflet-control-attribution` — the SAME
+   specificity an override would have — and leaflet.css loads after oa-ui.css,
+   so an override there lost on order and silently did nothing. This file
+   loads after all three Leaflet stylesheets. */
+.leaflet-container .leaflet-control-attribution,
+.leaflet-container .leaflet-control-attribution a { color: #22303c; }
+
+.leaflet-container .marker-cluster div { color: #1b1f24; }

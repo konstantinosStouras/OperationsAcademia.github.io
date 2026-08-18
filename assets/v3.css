@@ -45,7 +45,13 @@
   --bg-3: #eff0f2;
   --ink: #22272e;
   --ink-2: #454c56;
-  --mut: #6e7681;
+  /* darkened a notch (2026-08-18): at #6e7681 muted text missed the AA floor
+     on every surface it is used on — 4.03:1 on --bg-3, 4.29:1 on --bg, 4.44:1
+     on the drop-zone — so the footer, the result counts, the timestamps and
+     every hint on the site were a hair under readable. #646c78 clears 4.5:1
+     on all of them (4.65 / 4.95 / 5.31) and is the smallest change that does.
+     The dark theme's --mut was already fine at 5.8-6.3:1. */
+  --mut: #646c78;
   /* deepened a notch (owner, 2026-08-17: borders read too faint,
      especially for older eyes) — every box inherits these */
   --line: #ccd1d7;

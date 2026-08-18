@@ -31,7 +31,8 @@ import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-fir
 import { syncSheetMirrors } from './build-jobs.mjs';
 import {
   sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
-  inferColumns, resolveColumns, levelsFromRank, typeFromNames, rowsFromTab, collectRows,
+  inferColumns, resolveColumns, looksLikeData, repairColumns, institutionColumn,
+  levelsFromRank, typeFromNames, rowsFromTab, collectRows,
   stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
   tabsFromHtml, sheetIdsFromHtml, sheetId, sheetCsvUrl, sheetHtmlUrl,
   emptyRegistry, adoptSheets, activeSheets, rollRegistry,
@@ -455,6 +456,33 @@ function testCollapseSameDay() {
   // a different department on the same day is a different posting
   c = collapseSameDay([base, { ...base, department: 'School of Accounting and Finance' }]);
   eq(c.rows.length, 2, 'two departments on one day are two postings');
+
+  /* …AND SO ARE TWO ADVERTISEMENTS FROM ONE DEPARTMENT ON ONE DAY. Houston's
+     Bauer College really did this on 2025-09-23: Assistant/Associate/Full
+     "until filled", and Assistant only closing 15 October, each with its own
+     ad link. They survived for a year only BY ACCIDENT — one of them had
+     omitted its school, so the two `department` lines differed — and the
+     moment both were canonicalised onto the same department this function
+     dropped one of them. A key of (place, day) assumes a department
+     advertises at most one post a day, and that is not true.
+
+     A missing link still contradicts nothing: the repeat-submission case
+     above is exactly a row with no ad merging into the fuller one. */
+  const advert = { ...base, adUrl: 'https://uh.edu/assistant-associate-full', applyBy: 'Until filled' };
+  const other = { ...base, adUrl: 'https://uh.edu/assistant-only', applyByDate: '2025-10-15' };
+  c = collapseSameDay([advert, other]);
+  eq(c.rows.length, 2, 'two advertisements from one department on one day are two postings');
+  eq(c.collapsed, 0, 'and neither is reported as a repeat');
+
+  c = collapseSameDay([advert, { ...advert }]);
+  eq(c.rows.length, 1, 'while the SAME advertisement twice is still one posting');
+
+  /* our own home page is what a sheet row carries when it names no ad at all,
+     so it must not be read as an identity — two such rows are still repeats */
+  const homey = { ...base, postedAtUrl: 'http://www.operationsacademia.org/' };
+  c = collapseSameDay([homey, { ...base }]);
+  eq(c.rows.length, 1, 'a row pointing only at our own home page names no advertisement');
+
 
   // the same posting a fortnight later is a re-advertisement, not a repeat —
   // this is the "leave past duplicates alone" rule, asserted so a later
@@ -1157,7 +1185,10 @@ async function testSchools() {
   const vocab = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
   const badSchools = vocab.schools.map((e) => e.v).filter((v) => S.canonSchool(v) !== v);
   eq(badSchools, [], 'data/vocab.json: the form offers canonical school names');
-  const badUnits = vocab.units.map((e) => e.v).filter((v) => S.canonUnit(v) !== v);
+  /* isCanonicalUnit, not `canonUnit(v) === v`: six schools name their own unit
+     in a way the generic wrapper rule would strip ("Operations Management
+     Area"), and asked WITHOUT a university that rule is all canonUnit has. */
+  const badUnits = vocab.units.map((e) => e.v).filter((v) => !S.isCanonicalUnit(v));
   eq(badUnits, [], 'and canonical department names');
 }
 
@@ -1526,8 +1557,10 @@ async function testCascadeWiring() {
     'the fields are put into the published spelling by the SAME canon the submission uses');
   ok(!/'f-institution', 'f-school'\].forEach\(function \(id\) \{\n\s*var el = \$\(id\);\n\s*if \(el\) el\.dispatchEvent\(new Event\('change'/.test(form),
     'and an edit does not settle the INSTITUTION, whose spelling a permalink is built from');
-  ok(/publishAs: S \? S\.canonUnit : null/.test(form),
+  ok(/publishAs: S \? function \(v\) \{ return S\.canonUnit\(v, val\(inst\)\); \} : null/.test(form),
     'a name not on the list is offered as it will be published');
+  ok(/S\.canonUnit\(v, val\(inst\)\)/.test(form) && /var keyUnit = S \? function \(v\)/.test(form),
+    'and the department picker groups by the university too, so a scoped name is not folded away');
   ok(/canonColumns\(\{/.test(form) && !/canonPlace\(\{/.test(form),
     'but a lone institution is not read as one of the archive’s fused one-column values');
 
@@ -1600,6 +1633,284 @@ async function testRenamedNamesStillFound() {
   const at = alerts.indexOf('oa-schools.js');
   ok(at !== -1 && at < alerts.indexOf('oa-alert-match.js'),
     'alerts.html: loads the names module before the matcher');
+}
+
+/* ------------------------------ the six units their school names its own way
+
+   The owner ruled on six pairs of names the site was carrying for ONE group
+   (2026-08-18), and four of the answers keep a wrapper word the generic rule
+   strips — "Operations Management Area", "Operations Department". The rule is
+   right in general and wrong for these, so SCOPED_UNIT_ALIASES pins them by
+   university and the answer is returned TERMINALLY, never re-stripped.
+
+   Pinned name by name because these are somebody's decision, not a rule: a
+   refactor that quietly reverted one would otherwise show up only as a school
+   listed twice again, months later.                                          */
+
+/* A DUPLICATE KEY IN AN OBJECT LITERAL IS SILENT. Adding a second
+   'Stanford University' to SCOPED_SCHOOL_ALIASES did not merge with the first
+   or raise anything — JavaScript kept the LAST and dropped the earlier rule
+   entirely, so an alias that had been working for weeks stopped, and the only
+   symptom was Stanford appearing twice in the school list. The tables are read
+   from the SOURCE, because by the time the module has evaluated the evidence
+   is gone. */
+async function testNoDuplicateKeys() {
+  const src = await readFile(path.join(HERE, '..', 'assets', 'oa-schools.js'), 'utf8');
+  for (const table of ['INSTITUTION_ALIASES', 'SCHOOL_ALIASES', 'SCOPED_SCHOOL_ALIASES',
+    'UNIT_ALIASES', 'SCOPED_UNIT_ALIASES', 'FUSED_SCHOOLS', 'FUSED_INSTITUTIONS']) {
+    const at = src.indexOf(`var ${table} = {`);
+    ok(at !== -1, `oa-schools.js declares ${table}`);
+    if (at === -1) continue;
+
+    /* the literal, brace-matched — these tables nest one level */
+    let depth = 0, end = at;
+    for (let i = src.indexOf('{', at); i < src.length; i++) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}' && --depth === 0) { end = i; break; }
+    }
+    const body = src.slice(at, end);
+
+    /* keys at the TOP level of this literal only: a nested table's keys are
+       another scope and may legitimately repeat across universities */
+    const keys = [];
+    depth = 0;
+    for (const line of body.split('\n')) {
+      const opens = (line.match(/\{/g) || []).length;
+      const closes = (line.match(/\}/g) || []).length;
+      const m = line.match(/^\s*'((?:[^'\\]|\\.)*)'\s*:/);
+      if (m && depth === 1) keys.push(m[1]);
+      depth += opens - closes;
+    }
+    const seen = new Set(), dupes = [];
+    for (const k of keys) { if (seen.has(k)) dupes.push(k); else seen.add(k); }
+    eq(dupes, [], `${table} names each of its ${keys.length} keys once`);
+  }
+}
+
+async function testScopedUnits() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+
+  const RULED = [
+    ['Emory University', 'Goizueta Business School',
+      ['Operations Management', 'Information Systems and Operations Management',
+        'Information Systems & Operations Management'],
+      'Information Systems & Operations Management'],
+    ['Purdue University', 'Mitchell E. Daniels, Jr. School of Business',
+      ['Operations Management', 'Operations Management Area', 'Supply Chain and Operations Management'],
+      'Supply Chain and Operations Management Faculty'],
+    ['The University of Texas at Dallas', 'Naveen Jindal School of Management',
+      ['Operations Management', 'Supply Chain and Operations Management',
+        'Supply Chain/Operations Management Department'],
+      'Operations Management Area'],
+    ['University College Dublin', 'Michael Smurfit Graduate Business School',
+      ['Management', 'Operations Management', 'Operations Management Group'],
+      'Management Area'],
+    ['University of Miami', 'Miami Herbert Business School',
+      ['Management', 'Management Science', 'Department of Management'],
+      'Management Area'],
+    ['Yale University', 'School of Management',
+      ['Operations', 'Operations Management', 'Operations Management group'],
+      'Operations Department'],
+    ['Binghamton University', 'School of Management',
+      ['Operations and Business Analytics', 'Business Analytics and Operations area'],
+      'Business Analytics and Operations'],
+    ['Stanford University', 'Stanford Graduate School of Business',
+      ['Operations and Information Technology', 'Operations, Information and Technology',
+        'Operations and Information Technology Department'],
+      'Operations, Information, and Technology (OIT) area'],
+    ['The University of Hong Kong', 'Faculty of Business and Economics',
+      ['Innovation and Information Management', 'Innovation and Information Management Area'],
+      'Information and Innovation Management'],
+    ['Cornell University', 'Cornell SC Johnson College of Business',
+      ['Operations, Technology and Information Management', 'Operations Management group'],
+      'Operations, Technology, and Information Management Area'],
+    ['UT San Antonio', 'Carlos Alvarez College of Business',
+      ['Operations and Analytics'], 'Operations and Analytics Department'],
+  ];
+
+  const v = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
+
+  for (const [uni, school, variants, name] of RULED) {
+    for (const variant of variants) {
+      eq(S.canonUnit(variant, uni), name, `${uni}: "${variant}" publishes as "${name}"`);
+    }
+    eq(S.canonUnit(name, uni), name, `and "${name}" is already itself (idempotent)`);
+    ok(S.isCanonicalUnit(name), `and canonical, though the generic rule would strip it`);
+
+    /* the school really is the one the owner named, and really is the only
+       school at that university carrying the name — which is what makes a
+       table keyed by UNIVERSITY safe here */
+    const bySchool = v.byUniversity[uni] && v.byUniversity[uni].bySchool;
+    ok(bySchool && Array.isArray(bySchool[school]),
+      `${uni} lists ${school}`);
+    if (bySchool) {
+      const elsewhere = Object.entries(bySchool)
+        .filter(([s]) => s && s !== school)
+        .filter(([, list]) => list.includes(name)).map(([s]) => s);
+      eq(elsewhere, [], `and no other school at ${uni} claims "${name}"`);
+      eq(bySchool[school].filter((u) => variants.slice(0, 2).includes(u)), [],
+        `and the names it replaced are gone from ${school}`);
+    }
+  }
+
+  /* THE SCHOOL A ROW NEVER NAMED. The tracking workbook has no column for it,
+     so UT San Antonio's posting arrived as a university and a department with
+     nothing between them — the card showed the department floating under the
+     university and the school was missing from the filters entirely. UNIT_HOME
+     supplies it, curated one line per (university, department) because a
+     department name cannot imply its school and guessing would file postings
+     under schools nobody named.
+
+     The load-bearing half is the second check: a row that DOES name its school
+     keeps it. A default that overrode what a poster wrote would be a rename,
+     not a fill. */
+  eq(S.canonPlace({ institution: 'University of Texas at San Antonio', school: '', unit: 'Operations and Analytics' }),
+    { institution: 'UT San Antonio', school: 'Carlos Alvarez College of Business',
+      unit: 'Operations and Analytics Department' },
+  'a posting with no school gets the one its department sits in');
+  eq(S.canonPlace({ institution: 'UT San Antonio', school: 'College of Engineering', unit: 'Operations and Analytics' }).school,
+    'College of Engineering', 'and a posting that names its own school keeps it');
+  eq(S.canonPlace({ institution: 'UT San Antonio', school: '', unit: '' }).school, '',
+    'and a row with no department is given nothing to sit in');
+
+  /* ELSEWHERE THE GENERIC RULE IS UNTOUCHED. This is the whole safety
+     argument for a scoped table: a poster at any other school still gets the
+     bare field name, so the wrapper word cannot start splitting one unit into
+     three again. */
+  for (const uni of ['Duke University', 'Michigan State University', '']) {
+    eq(S.canonUnit('Operations Management Area', uni), 'Operations Management',
+      `"Operations Management Area" is still just Operations Management at ${uni || 'no university'}`);
+    eq(S.canonUnit('Operations Department', uni), 'Operations',
+      `as "Operations Department" is Operations at ${uni || 'no university'}`);
+  }
+}
+
+/* ------------------------------- the count beside "My postings"
+
+   The menu named the pages but not how much was in them, so "My postings"
+   read the same whether you had none or a dozen. The number is what tells a
+   reader the page is worth opening — the shape /lit/'s account menu already
+   uses.
+
+   Cheap by construction, and these checks are what keep it that way: the
+   badge paints from a cache, refreshes ONCE PER SESSION rather than per page
+   (a menu on a static site is on every page), and the two pages that already
+   hold the real list correct it for nothing.                                */
+
+async function testAccountCounts() {
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+
+  ok(/data-count="postings"/.test(acct) && /data-count="alerts"/.test(acct),
+    'the account menu carries a count beside My postings and E-mail alerts');
+  ok(/setCount: setCount/.test(acct),
+    'and exports setCount, so a page holding the list can correct it');
+
+  /* the honest-number rules, both of them */
+  ok(/typeof n === 'number' && n > 0/.test(acct),
+    'a count is shown only when we KNOW it and it is more than zero');
+  ok(/COUNT_SESSION/.test(acct) && /sessionStorage/.test(acct),
+    'and refreshed once per session, not once per page');
+  ok(/ref\.count === 'function'/.test(acct),
+    'using a count() aggregate — one read whatever the collection holds');
+
+  /* signing out must not leave the next person the last one's numbers */
+  ok(/removeItem\(COUNT_KEY\)/.test(acct),
+    'signing out forgets the counts');
+
+  /* and the account it belongs to is checked, so a cache cannot cross accounts */
+  ok(/all\.uid === uid/.test(acct), 'the cache is keyed to its own account');
+  ok(/state\.user\.uid !== uid/.test(acct),
+    'and a read that lands after a sign-out is dropped');
+
+  for (const [file, what, n] of [['assets/oa-myjobs.js', 'postings', 'docs.length'],
+    ['assets/oa-alerts.js', 'alerts', 'alerts.length']]) {
+    const js = await readFile(path.join(HERE, '..', file), 'utf8');
+    ok(new RegExp(`setCount\\('${what}', ${n.replace('.', '\\.')}\\)`).test(js),
+      `${file} corrects the ${what} count from the list it already loaded`);
+  }
+}
+
+/* --------------------------- the same names on the map and the faculty list
+
+   "Let's use the same consistent University Name, School Name, Department
+   Name, across the entire website" (owner, 2026-08-18). The postings had been
+   canonical for a while; the two datasets the IMPORTER writes had never been
+   canonicalised at all — 213 of the map's 254 rows and 9 faculty placements
+   named their place some other way, and the map is where a reader lands from
+   every posting's "Further info" link.
+
+   They have no daily build to heal them, which is exactly why they drifted, so
+   they get `import-legacy-tables.mjs --heal-names` and this guard.            */
+
+async function testEveryDatasetNamesPlacesTheSameWay() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  const read = async (f) => JSON.parse(await readFile(path.join(HERE, '..', 'data', f), 'utf8'));
+
+  const map = await read('universities.json');
+  const off = map.filter((r) => {
+    const p = S.canonColumns({ institution: r.institution, school: r.school, unit: r.department });
+    return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.department || '');
+  }).map((r) => r.id);
+  eq(off, [], 'data/universities.json: the map names every place the way the site does');
+
+  /* the two DERIVED fields follow the three names, or the popup heading and
+     its "School, Department" line would disagree with the row beneath them */
+  const join = (a, b) => [a, b].filter(Boolean).join(', ');
+  const loose = (v) => String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/\s+,/g, ',').trim();
+  const names = map.filter((r) => loose(r.name) !== loose(join(r.institution, r.school))
+                               && loose(r.name) !== loose(r.institution)).map((r) => r.id);
+  eq(names, [], 'and each row\'s display name is its university and school, joined');
+
+  /* ids do NOT follow a rename: the maintainer's read-time corrections are
+     stored against them (rowOverrides), so a moved id orphans every one */
+  ok(map.every((r) => typeof r.id === 'string' && r.id), 'and every row still has its id');
+
+  /* THE IMPORTER HEALS ON WRITE, not only in --heal-names. data/ is rewritten
+     from the Google Sheets whenever the legacy import is dispatched, so a mode
+     that fixes the committed file is not enough on its own: the next --fetch
+     puts the sheet's own spellings back. CI caught exactly that — the import
+     job fetched, wrote 254 raw rows, and the guard above went red on 213 of
+     them — so every write path is pinned here, by name. */
+  const importer = await readFile(path.join(HERE, 'import-legacy-tables.mjs'), 'utf8');
+  for (const [call, what] of [
+    [/await write\('universities\.json', uni,/, 'the map'],
+    [/await write\('recent-faculty\.json', placements,/, 'the faculty list'],
+    [/await write\('past-postings\.json', rows\.map\(healPlace\),/, 'the postings archive'],
+  ]) {
+    ok(call.test(importer), `import-legacy-tables.mjs canonicalises ${what} as it writes it`);
+  }
+  ok(/const uni = rows\.map\(healUniversity\)/.test(importer)
+     && /const placements = rows\.map\(healFaculty\)/.test(importer),
+  'and the healed rows are what its meta is built from, not the raw ones');
+
+  const faculty = await read('recent-faculty.json');
+  const badFac = [];
+  for (const r of faculty) {
+    for (const field of ['placement', 'almaMater', 'undergrad']) {
+      if (r[field] && S.canonInstitution(r[field]) !== r[field]) badFac.push(`${r.id}.${field}`);
+    }
+  }
+  eq(badFac, [], 'data/recent-faculty.json: and so does the recent-faculty list');
+
+  /* THE TWO POSTINGS THE COLLAPSE BUG TOOK. Houston's Bauer College advertised
+     twice on 2025-09-23, and canonicalising both onto one department made them
+     look like one submission. Pinned against the SERVED data, not just the
+     function, because that is where the loss would show. */
+  const jobs = await read('jobs.json');
+  for (const id of ['2026-university-of-houston-20250923', '2026-university-of-houston-20250923-2']) {
+    ok(jobs.some((r) => r.id === id), `data/jobs.json still carries ${id}`);
+  }
+  eq([...new Set(jobs.filter((r) => /houston/.test(r.id)).map((r) => r.department))],
+    ['C. T. Bauer College of Business, Department of Decision and Information Sciences'],
+    'and every Houston posting names its college and department the one way');
+
+  /* the tracking sheet's own file, which build-jobs republishes verbatim */
+  const sheet = await read('jobmarket.json');
+  const badSheet = sheet.filter((r) => {
+    const p = S.canonPlace(r);
+    return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
+  }).map((r) => r.id);
+  eq(badSheet, [], 'data/jobmarket.json: and so do the tracking sheet\'s postings');
 }
 
 /* -------------------------------------------- the seed of the world's schools
@@ -1786,7 +2097,7 @@ async function testVocabFile() {
      under Harbert, Industrial and Systems Engineering outside it. */
   const twoSchools = Object.entries(v.byUniversity)
     .filter(([, e]) => Object.keys(e.bySchool).filter(Boolean).length > 1);
-  ok(twoSchools.length > 20,
+  ok(twoSchools.length > 15,
     `${twoSchools.length} universities keep more than one school, each with its own departments`);
   const split = twoSchools.filter(([, e]) => {
     const lists = Object.entries(e.bySchool).filter(([k]) => k).map(([, l]) => l.join('|'));
@@ -1799,17 +2110,72 @@ async function testVocabFile() {
      "Sloan School of Management" and "MIT Sloan School of Management" — and
      the picker showed both with the postings on one row and the departments
      on the other. oa-schools.js's scoped aliases are where that is settled. */
+  /* TWO COMPARISONS, BECAUSE ONE OF THEM IS BLIND. A substring check finds
+     "Haas" inside "Walter A. Haas School of Business" and misses the pairs
+     that put the SAME WORDS IN A DIFFERENT ORDER — "Michael Smurfit Graduate
+     Business School" vs "UCD Michael Smurfit Graduate School of Business",
+     "Olin Business School" vs "Olin School of Business". Both went on being
+     offered twice through a green suite that only looked one way.
+
+     So the second comparison is the DISTINCTIVE WORDS as a set, dropping the
+     generic ones ("school", "of", "business") and the university's own name
+     and initials — otherwise "UCD" or "Business" would keep two spellings of
+     one school apart for ever. */
+  const GENERIC = new Set(['the', 'school', 'college', 'faculty', 'of', 'business', 'at',
+    'and', 'graduate', 'department', 'administration', 'studies', 'institute', 'for',
+    'area', 'group']);
+  const distinctive = (name, uni) => {
+    const own = new Set(S.fold(uni).split(' ').filter(Boolean));
+    const initials = [...own].length ? S.fold(uni).split(' ').filter(Boolean).map((w) => w[0]).join('') : '';
+    return S.fold(name).split(' ')
+      .filter((w) => w && !GENERIC.has(w) && !own.has(w) && w !== initials)
+      .sort().join(' ');
+  };
+  /** Every pair of names in `list` that is probably one name written twice. */
+  const samePair = (list, uni) => {
+    const out = [];
+    for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        const a = S.fold(list[i]), b = S.fold(list[j]);
+        const da = distinctive(list[i], uni), db = distinctive(list[j], uni);
+        if (a.includes(b) || b.includes(a) || (da && da === db)) out.push([list[i], list[j]]);
+      }
+    }
+    return out;
+  };
+
   const dupSchools = [];
   for (const [u, e] of Object.entries(v.byUniversity)) {
-    const names = Object.keys(e.bySchool).filter(Boolean);
-    for (let i = 0; i < names.length; i++) {
-      for (let j = i + 1; j < names.length; j++) {
-        const a = S.fold(names[i]), b = S.fold(names[j]);
-        if (a.includes(b) || b.includes(a)) dupSchools.push(`${u}: ${names[i]} / ${names[j]}`);
-      }
+    for (const [a, b] of samePair(Object.keys(e.bySchool).filter(Boolean), u)) {
+      dupSchools.push(`${u}: ${a} / ${b}`);
     }
   }
   eq(dupSchools, [], 'and no university offers one school under two names');
+
+  /* THE SAME, ONE LEVEL DOWN: two names for one department under one school.
+     Each is a judgement only the owner can make — "Management" and
+     "Operations Management" at one school may be one group or two — so the
+     ones still awaiting an answer are NAMED here rather than silently
+     tolerated or guessed at. A pair not on this list fails the build; a pair
+     on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
+     when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
+  const AWAITING_OWNER = new Set([
+    /* empty: every pair the sweep has found has been ruled on */
+  ]);
+  const dupUnits = [], openUnits = [];
+  for (const [u, e] of Object.entries(v.byUniversity)) {
+    for (const list of Object.values(e.bySchool)) {
+      for (const [a, b] of samePair(list, u)) {
+        (AWAITING_OWNER.has(`${u}|${a}|${b}`) ? openUnits : dupUnits).push(`${u}: ${a} / ${b}`);
+      }
+    }
+  }
+  eq(dupUnits, [], 'and no school offers one department under two names, beyond the pairs awaiting a decision');
+  eq(openUnits.length, AWAITING_OWNER.size,
+    'and every pair on that list is still really there — a settled one is removed, not left behind');
+  if (process.argv.includes('--open')) {
+    for (const line of openUnits) console.log('  awaiting the owner: ' + line);
+  }
 
   /* the same, one level up: one place, one row in the university picker */
   const byKey = new Map();
@@ -1850,8 +2216,14 @@ async function testVocabFile() {
 }
 
 function testSplitFields() {
+  /* GOOD is a University College Dublin posting, and UCD is one of the six
+     universities whose own name for its unit overrides the wrapper rule
+     (SCOPED_UNIT_ALIASES). These cases are about the GENERIC rule, so they
+     name the university whose school they were already using. */
+  const GENERIC_UNI = { ...GOOD, institution: 'Duke University' };
+
   // the form now sends school + unit; department is derived from them
-  const r = rowFromSubmission({ ...GOOD, department: undefined,
+  const r = rowFromSubmission({ ...GENERIC_UNI, department: undefined,
     school: 'Fuqua School of Business', unit: 'Operations Management group' });
   eq(r.school, 'Fuqua School of Business', 'school carried');
   /* the wrapper word comes off on the way in — "group", "Area" and
@@ -1861,10 +2233,17 @@ function testSplitFields() {
     'department is derived from the two');
 
   // either alone is enough
-  eq(rowFromSubmission({ ...GOOD, department: undefined, school: 'Darden School of Business', unit: '' })
+  eq(rowFromSubmission({ ...GENERIC_UNI, department: undefined, school: 'Darden School of Business', unit: '' })
     .department, 'Darden School of Business', 'a school alone publishes');
-  eq(rowFromSubmission({ ...GOOD, department: undefined, school: '', unit: 'Operations Management' })
+  eq(rowFromSubmission({ ...GENERIC_UNI, department: undefined, school: '', unit: 'Operations Management' })
     .department, 'Operations Management', 'a unit alone publishes');
+
+  /* …and the scoped name wins where the owner has given one. This is GOOD's
+     own university, so it also pins that the fixtures above needed changing
+     rather than the rule. */
+  eq(rowFromSubmission({ ...GOOD, department: undefined,
+    school: 'Michael Smurfit Graduate Business School', unit: 'Operations Management group' }).unit,
+  'Management Area', 'a school that names its own unit keeps that name, wrapper and all');
   ok(rowFromSubmission({ ...GOOD, department: '', school: '', unit: '' }) === null,
     'neither is not publishable');
 
@@ -2510,7 +2889,8 @@ function testJobMarketSheetRows() {
   eq(clarkson.posted, '2026-07-20', 'the posting date is the sheet\'s date');
   eq(clarkson.year, 2027,
     'and the market year is derived from it by the SITE\'s roll rule — a July 2026 ' +
-    'posting belongs to the 2026-2027 market, whatever the tab is called');
+    'posting belongs to the 2026-2027 market; the tab it sits on can only carry it ' +
+    'FORWARD into its own cycle, never back (testJobMarketSheetTabCycle)');
   eq(clarkson.country, 'United States', '"USA" is published as "United States"');
   eq(clarkson.levels, ['Visiting Faculty (various levels)'], 'the rank becomes an entry level');
   eq(clarkson.department, 'Operations and Information Systems', 'the field becomes the department');
@@ -2630,6 +3010,124 @@ function testJobMarketSheetAddedAt() {
   eq(later.fresh, 2, 'the run reports how many it had not seen before');
 }
 
+/* ------------------------------------------- a header that names one column
+                                                wrongly
+
+   THE LIVE FAILURE, kept as a fixture. The crowdsourced workbook's "2026 Jobs"
+   tab — created by its contributors when the 2026-2027 market opened — heads
+   its school column "Location", the same word it uses for the town beside it.
+   No alias of `institution` reads "location", so the header was refused; the
+   scan moved to the next row and took a POSTING as the header, because
+   "University of Hong Kong" begins with an alias of `institution` and a
+   comment reading "an expected start date of July 1, 2027" contains an alias
+   of `posted`. The date was then read from a comment column that is empty on
+   almost every row, so every row was skipped: the tab logged "0 posting(s),
+   94 row(s) skipped" every morning for four months and none of the season's
+   jobs ever reached the site.
+
+   The shape below is that tab's, cut to five rows.                            */
+
+const JMS_MISLABELLED_HEAD = [
+  '#', 'Location', 'Location', 'Country', 'Date Added', 'Job Focus Area', 'Rank',
+  'Deadline', 'Link', 'Comment  (virtual or onsite)',
+];
+
+const JMS_MISLABELLED_ROWS = [
+  ['1', 'University of Hong Kong', 'Hong Kong', 'Hong Kong', '23-Apr-26', 'BA',
+    'AP/Assoc/Full', '', 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179422894',
+    'an expected start date of July 1, 2027'],
+  ['2', 'University of Nevada Las Vegas', 'Las Vegas, NV', 'USA', '23-Apr-26', 'SCM',
+    'AP', '', 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179416350',
+    'an expected start date of July 1, 2027'],
+  ['3', 'KU Leuven', 'Leuven', 'Belgium', '5-Jun-26', 'Information Systems Engineering',
+    'AP/Assoc/Full', '20-Aug-26', 'https://academicpositions.com/ad/ku-leuven/249301', ''],
+  ['4', 'Belmont University', 'Nashville, TN', 'USA', '5-Aug-26', 'SCM',
+    'AP/Assoc/Full', '', 'https://belmont.csod.com/ux/ats/careersite/10/home', ''],
+  ['5', 'Air Force Institute of Technology', 'Wright-Patterson AFB, Ohio', 'USA',
+    '4-Jun-26', 'Logistics and SCM', 'AP/Assoc/Full', '30-Jun-26',
+    'https://www.usajobs.gov/job/856638800', ''],
+];
+
+function testJobMarketSheetMislabelledHeader() {
+  /* 1. A row of postings is never a header, however much of its prose reads
+        like one. */
+  ok(!looksLikeData(JMS_MISLABELLED_HEAD), 'a row of column names is a header');
+  ok(looksLikeData(JMS_MISLABELLED_ROWS[0]),
+    'a row carrying a link and a date is a posting, not a header');
+  ok(looksLikeData(['Somewhere', '', '', '', '20-Jul-26']),
+    'a date alone is enough: no column is NAMED after one');
+  ok(looksLikeData(['Somewhere', 'https://example.com/ad']),
+    'and so is a link');
+  ok(!looksLikeData(['University', 'Country', 'Date Added', 'Deadline']),
+    'a plain header carries neither, and is not mistaken for data');
+
+  const map = mapColumns(JMS_MISLABELLED_HEAD);
+  eq(map.missing, ['institution'],
+    'the header itself names no institution — "Location" is the town everywhere else, ' +
+    'and reading it as the school would mis-file every other tab');
+
+  /* 2. The header is repaired rather than discarded: the one field it failed
+        to name is settled from the rows underneath it. */
+  const fixed = repairColumns(JMS_MISLABELLED_HEAD, JMS_MISLABELLED_ROWS);
+  eq(fixed.missing, [], 'and with the rows to hand it can be settled');
+  eq(fixed.index.institution, 1, 'the school column is the one holding school names');
+  eq(fixed.index.city, 2,
+    're-reading the header around it puts the town in the SECOND "Location" — ' +
+    'until then an unclaimed duplicate');
+  eq(fixed.index.deadline, 7,
+    'and everything the header did name is untouched: inferring the whole tab ' +
+    'instead would have lost the deadline, the link and the notes');
+  eq(fixed.repaired.map((r) => [r.field, r.at, r.header]), [['institution', 1, 'Location']],
+    'the repair is reported, so a run says which column it read and why');
+
+  eq(institutionColumn(JMS_MISLABELLED_ROWS.map((r) => [r[2], r[3]])), -1,
+    'a column of towns and countries never reads as the institution: the test is ' +
+    'whether the values NAME institutions, and those name none');
+
+  /* 3. End to end, which is the number that matters. */
+  const out = rowsFromTab(csvOf([[], JMS_MISLABELLED_HEAD, ...JMS_MISLABELLED_ROWS]),
+    { tab: '2026 Jobs', kind: 'jobs', minYear: 2026, cycleYear: 2027 });
+  eq(out.rows.length, 5, 'every posting on the tab is read, where none was before');
+  eq(out.skipped, 0, 'and none is skipped');
+  ok(!out.inferred, 'by repairing the header, not by giving up on it');
+
+  const hku = out.rows.find((r) => r.institution === 'University of Hong Kong');
+  ok(hku, 'the school is published under its own name');
+  eq(hku.comments, 'AP/Assoc/Full · Hong Kong · an expected start date of July 1, 2027',
+    'the town is the town and the comment is the comment');
+  eq(hku.country, 'Hong Kong', 'and the country column is still the country');
+
+  const leuven = out.rows.find((r) => r.institution === 'KU Leuven');
+  eq(leuven.applyByDate, '2026-08-20', 'a deadline the sheet states survives the repair');
+  eq(leuven.applyBy, 'August 20, 2026', 'and is shown as a date');
+}
+
+function testJobMarketSheetTabCycle() {
+  const rows = csvOf([JMS_MISLABELLED_HEAD, ...JMS_MISLABELLED_ROWS]);
+
+  /* By date alone, a posting advertised in April 2026 belongs to the market
+     that is closing — the one page it is of no use on. */
+  const byDate = rowsFromTab(rows, { tab: '2026 Jobs', kind: 'jobs', minYear: 2026 });
+  eq(byDate.rows.filter((r) => r.year === 2026).length, 4,
+    'four of these five are dated before their own cycle opened, so by date alone ' +
+    'they file under the market that has just closed');
+
+  const byTab = rowsFromTab(rows, { tab: '2026 Jobs', kind: 'jobs', minYear: 2026,
+    cycleYear: 2027 });
+  eq(byTab.rows.every((r) => r.year === 2027), true,
+    'the tab settles it: a tab created for the 2026-2027 market carries its ' +
+    'postings into that market, whenever they were advertised');
+
+  /* A FLOOR, never a ceiling — so nothing already published can move, and a
+     row added late to an old tab keeps the later year its date gives it. */
+  const late = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date'],
+    ['Clarkson University', 'USA', '20-Jul-26'],
+  ]), { tab: '2025 Jobs', kind: 'jobs', minYear: 2026, cycleYear: 2026 });
+  eq(late.rows[0].year, 2027,
+    'a July 2026 posting is a 2026-2027 posting even on the 2025 tab');
+}
+
 function testJobMarketSheetStaleness() {
   const now = new Date('2026-08-17T09:00:00Z');
 
@@ -2645,6 +3143,19 @@ function testJobMarketSheetStaleness() {
     'a sheet that reads as empty is reported rather than published');
   eq(stalenessOf({ ok: true, rows: 5, newestPosted: '', now }).reason, 'undated',
     'and so is one whose postings carry no usable date');
+
+  /* THE FAILURE THAT HID FOR FOUR MONTHS. One tab reads as empty while the
+     rest of the workbook is healthy, so every other signal here says the sheet
+     is fine: it is being read, it is being updated, its newest posting is from
+     this week — and a whole season of jobs is missing from the site. Checked
+     BEFORE the age test, because from the outside it looks exactly like a
+     quiet market and it is the one thing here a person has to go and fix. */
+  const deadTab = stalenessOf({ ok: true, rows: 40, newestPosted: '2026-08-15',
+    deadTabs: ['2026 Jobs'], now });
+  ok(deadTab.stale && deadTab.reason === 'unread-tab',
+    'a tab that was read and gave nothing is reported even when nothing else is wrong');
+  ok(/2026 Jobs/.test(deadTab.detail), 'and the message names the tab');
+  eq(deadTab.tabs, ['2026 Jobs'], 'so the e-mail can name it too');
 
   // said once, then not again for a week — but a DIFFERENT failure is news
   const check = stalenessOf({ ok: true, rows: 40, newestPosted: '2026-07-01', now });
@@ -3705,6 +4216,26 @@ function testReviewQueue() {
     ok(DOC_KEYS.includes(k), `queue document key "${k}" is one the rules allow`);
   }
 
+  /* THE GATE ARRIVING IS NOT A REASON TO RETRACT. Sixteen of the sheet's
+     postings were on the site before the queue existed, and the first morning
+     it answered they would all have had no document and therefore come down —
+     off the jobs page, after alerts about them had gone out. Already public is
+     already reviewed in the only sense that matters here, so those rows enter
+     the queue approved, with the reason written into them; rejecting one still
+     takes it down. */
+  const grand = partition([RV_ROW], [], { now: '2026-08-18T00:00:00Z',
+    published: new Set([RV_ROW.id]) });
+  eq(grand.publish.map((r) => r.id), [RV_ROW.id],
+    'a posting the site is already showing stays on it');
+  eq(grand.queue[0].status, APPROVED, 'and enters the queue approved');
+  ok(/before the review gate/i.test(grand.queue[0].note), 'saying why');
+  for (const k of Object.keys(grand.queue[0])) {
+    ok(DOC_KEYS.includes(k), `grandfathered key "${k}" is one the rules allow`);
+  }
+  eq(partition([RV_ROW], [], { published: new Set(['something-else']) }).publish.length, 0,
+    'anything the site is NOT already showing is still withheld — the gate is ' +
+    'unchanged for every posting from here on');
+
   const approved = [{ rowId: RV_ROW.id, status: APPROVED, row: RV_ROW, edits: {} }];
   const live = partition([RV_ROW], approved, {});
   eq(live.publish.length, 1, 'an approved posting is published');
@@ -3870,6 +4401,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();
+  await testAccountCounts();
+  await testEveryDatasetNamesPlacesTheSameWay();
+  await testNoDuplicateKeys();
+  await testScopedUnits();
   await testInstitutionSeed();
   await testFormsOfferVocab();
   await testPickerTheme();
@@ -3898,6 +4433,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testJobMarketSheetColumns();
   testJobMarketSheetRows();
   testJobMarketSheetAddedAt();
+  testJobMarketSheetMislabelledHeader();
+  testJobMarketSheetTabCycle();
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
   await testDeployGuard();

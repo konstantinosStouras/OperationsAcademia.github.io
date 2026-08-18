@@ -89,6 +89,56 @@ if (process.env.PW_CHROMIUM) launch.executablePath = process.env.PW_CHROMIUM;
 launch.proxy = { server: 'http://127.0.0.1:1', bypass: '<-loopback>,127.0.0.1,localhost' };
 
 const browser = await chromium.launch(launch);
+
+/* ------------------------------------------------ measuring contrast, ONCE
+
+   THREE separate copies of this had accumulated in this file, each with its
+   own idea of what an element is painted on, and that is exactly how a naive
+   one crept back in: the account badge sits on `--brand-soft`, which in dark
+   theme is `rgba(198, 204, 212, 0.13)`. Read as a layer it looks like a LIGHT
+   ground under light ink and measures 1.02:1; what is actually painted is 13%
+   light over near-black, and the text reads at 8.11:1. The check failed a
+   badge nobody could fault.
+
+   So there is one implementation, it runs IN THE PAGE, and it COMPOSITES:
+   every translucent layer over the one behind it until an opaque one is
+   reached. `contrastOf(page, selector)` answers for one element; the audit
+   near the end of this file walks a whole page with the same arithmetic. */
+const CONTRAST_IN_PAGE = `(sel) => {
+  const parse = (css) => {
+    const m = String(css).match(/[\\d.]+/g);
+    if (!m || m.length < 3) return null;
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  };
+  const over = (top, bot) => ({
+    r: top.r * top.a + bot.r * (1 - top.a),
+    g: top.g * top.a + bot.g * (1 - top.a),
+    b: top.b * top.a + bot.b * (1 - top.a), a: 1,
+  });
+  const lum = (c) => {
+    const f = (v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  };
+  const el = document.querySelector(sel);
+  if (!el) return null;
+  const stack = [];
+  for (let n = el; n; n = n.parentElement) {
+    const c = parse(getComputedStyle(n).backgroundColor);
+    if (c && c.a > 0) { stack.push(c); if (c.a === 1) break; }
+  }
+  let bg = stack.length && stack[stack.length - 1].a === 1
+    ? stack.pop() : { r: 255, g: 255, b: 255, a: 1 };
+  while (stack.length) bg = over(stack.pop(), bg);
+  const fg = over(parse(getComputedStyle(el).color), bg);
+  const L1 = lum(fg), L2 = lum(bg);
+  return +(((Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)).toFixed(2));
+}`;
+
+/** The contrast the browser actually paints for the first `sel`, or null. */
+async function contrastOf(page, sel) {
+  return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
+}
+
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const jsErrors = [];
@@ -1676,7 +1726,51 @@ for (const [name, expect] of [
       ok(r >= 4.5, `form (${theme}): ${what} reads at ${r.toFixed(2)}:1`);
     }
   }
-  await f.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
+  /* THE CONFIRMATION PANEL, same rule (reported 2026-08-18: the body text
+     under "Your changes have been saved." was unreadable in dark mode). It
+     paints a green card and had named a colour for its HEADING only, so every
+     other line inherited the page's near-white ink onto near-white green —
+     the paragraph at 1.55:1, the link at 1.52:1, and the "Post another job"
+     button at 1.52:1 in BOTH themes. Measured element by element, because
+     that button proves a panel can be right at a glance and still have one
+     line nobody can read. */
+  for (const theme of ['dark', 'light']) {
+    await f.evaluate((t) => {
+      document.documentElement.setAttribute('data-theme', t);
+      const done = document.getElementById('oa-done');
+      if (done) done.hidden = false;
+    }, theme);
+    await f.waitForTimeout(250);   // the tokens flip on the next style pass
+    const rows = await f.evaluate(() => {
+      const done = document.getElementById('oa-done');
+      if (!done) return [];
+      const ground = (el) => {
+        for (let n = el; n; n = n.parentElement) {
+          const bg = getComputedStyle(n).backgroundColor;
+          if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg)) return bg;
+        }
+        return 'rgb(255,255,255)';
+      };
+      return [...done.querySelectorAll('h3,p,a,button,.oa-ticket')]
+        .filter((el) => el.textContent.trim().length > 3)
+        .map((el) => ({
+          what: el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).trim().split(/\s+/)[0] : ''),
+          fg: getComputedStyle(el).color,
+          bg: ground(el),
+        }));
+    });
+    ok(rows.length > 2, `form (${theme}): the confirmation panel has lines to read`);
+    for (const r of rows) {
+      const cr = ratio(r.fg, r.bg);
+      ok(cr >= 4.5, `form (${theme}): the confirmation panel's ${r.what} reads at ${cr.toFixed(2)}:1`);
+    }
+  }
+
+  await f.evaluate(() => {
+    document.documentElement.setAttribute('data-theme', 'light');
+    const done = document.getElementById('oa-done');
+    if (done) done.hidden = true;
+  });
 
   eq(formErrors, [], 'form: no uncaught script errors');
   await f.close();
@@ -2890,6 +2984,180 @@ for (const [from, hash] of [
     }, hash), `${from}: lands on the ${hash} section itself`);
   } catch { ok(false, `${from}: never reached ${hash} (stopped at ${q.url()})`); }
   await q.close();
+}
+
+/* ---------------------------- the account menu's count, as it renders
+
+   The wiring is checked in selftest; this is the part only a browser can
+   answer — that the badge shows a number, hides rather than printing a 0 or
+   an empty pill, and is readable in both themes. Firebase is unreachable from
+   CI, so the menu's own markup is used with the module's painting rules
+   rather than a real sign-in. */
+{
+  const a = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await a.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await a.waitForTimeout(400);
+
+  const seen = await a.evaluate(() => {
+    const menu = document.createElement('div');
+    menu.className = 'oa-acct-menu';
+    menu.innerHTML =
+      '<a href="my-postings.html"><span class="oa-mi">x</span>My postings' +
+        '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
+      '<a href="alerts.html"><span class="oa-mi">x</span>E-mail alerts' +
+        '<span class="oa-acct-n" data-count="alerts" hidden></span></a>';
+    document.body.appendChild(menu);
+    const paint = (counts) => {
+      document.querySelectorAll('.oa-acct-n[data-count]').forEach((el) => {
+        const n = counts[el.getAttribute('data-count')];
+        const show = typeof n === 'number' && n > 0;
+        el.textContent = show ? String(n) : '';
+        el.hidden = !show;
+      });
+    };
+    const read = () => [...document.querySelectorAll('.oa-acct-n')]
+      .map((el) => ({ text: el.textContent, hidden: el.hidden }));
+    const out = {};
+    paint({ postings: 2, alerts: 1 }); out.some = read();
+    paint({ postings: 0, alerts: 1 }); out.zero = read();
+    paint({}); out.unknown = read();
+    paint({ postings: 12, alerts: 3 });
+    const el = document.querySelector('.oa-acct-n');
+    out.rightAligned = getComputedStyle(el).marginLeft === 'auto'
+      || parseFloat(getComputedStyle(el).marginLeft) > 20;
+    return out;
+  });
+
+  eq(seen.some.map((x) => x.text), ['2', '1'], 'account menu: the badge shows the count');
+  eq(seen.zero[0].hidden, true, 'account menu: and hides rather than printing a 0');
+  eq(seen.unknown.every((x) => x.hidden), true,
+    'account menu: a count we do not know shows nothing at all');
+  ok(seen.rightAligned, 'account menu: the badge sits at the end of its row');
+
+  for (const theme of ['light', 'dark']) {
+    await a.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    await a.waitForTimeout(150);
+    const cr = await contrastOf(a, '.oa-acct-n');
+    ok(cr >= 4.5, `account menu (${theme}): the badge reads at ${cr}:1`);
+  }
+  await a.close();
+}
+
+/* ------------------------------- readable in BOTH themes, on every page
+
+   The reports that led here (2026-08-18): the vocabulary dropdown drew
+   near-white names on a white card; the "Your changes have been saved" panel
+   showed a heading and then two invisible lines; the "Choose a file…" button
+   was white on white. Every one of them was the same fault — a rule that
+   PAINTS ITS OWN GROUND and never names its ink, so the element inherited a
+   theme colour meant for a page it was no longer sitting on.
+
+   One fix at a time would have found them one report at a time, so this walks
+   every page in both themes and measures what the browser actually paints.
+   Backgrounds are COMPOSITED rather than read a layer at a time: a pill on
+   `rgba(198, 204, 212, 0.13)` is not light, it is 13% light over near-black,
+   and reading the layer alone reports a perfectly readable button at 1:1.
+
+   The floor is WCAG AA — 4.5:1, or 3:1 for large text.                      */
+
+/* One page per KIND of chrome, not all 25: the one-pager, a filtered list, a
+   form (the three share every panel), the feedback page's own cards, and the
+   map with its vendored Leaflet controls. The whole set was walked once by
+   hand to find the offenders; this is what keeps them gone without adding a
+   minute to every CI run. */
+const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
+  'feedback.html', 'universities.html'];
+
+{
+  const t = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const seen = new Set();
+  let measured = 0;
+  for (const pageName of THEME_PAGES) {
+    for (const theme of ['light', 'dark']) {
+      try {
+        await t.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+        await t.evaluate((v) => document.documentElement.setAttribute('data-theme', v), theme);
+        /* WAIT FOR THE DESIGN TO BE IN FORCE, not for a stopwatch and not for
+           `body.v3` — that class is in the HTML, so waiting for it returns at
+           once. Every page links a Google Fonts stylesheet, which cannot load
+           in CI, and until the cascade settles the body paints a default grey
+           that is neither theme. Measured then, every muted line on the page
+           reads as a dark-theme failure: 14 of them the first time, all
+           artefacts, with the numbers moving between runs — which is what a
+           transient looks like.
+
+           So the wait asserts the thing itself: the body is painting the
+           theme's own --bg. Nothing downstream can be measured before that. */
+        await t.waitForFunction(() => {
+          const want = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+          if (!want) return false;
+          const probe = document.createElement('span');
+          probe.style.color = want;
+          document.body.appendChild(probe);
+          const resolved = getComputedStyle(probe).color;
+          probe.remove();
+          return getComputedStyle(document.body).backgroundColor === resolved;
+        }, { timeout: 8000 });
+      } catch { continue; }               // a redirect stub navigates away
+      let rows = [];
+      try {
+        rows = await t.evaluate(() => {
+          const parse = (css) => { const m = String(css).match(/[\d.]+/g);
+            if (!m || m.length < 3) return null;
+            return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 }; };
+          const over = (top, bot) => ({ r: top.r*top.a + bot.r*(1-top.a),
+            g: top.g*top.a + bot.g*(1-top.a), b: top.b*top.a + bot.b*(1-top.a), a: 1 });
+          const lum = (c) => { const f = (v) => { const x = v/255;
+              return x <= 0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4); };
+            return 0.2126*f(c.r) + 0.7152*f(c.g) + 0.0722*f(c.b); };
+          const ground = (el) => {
+            const stack = [];
+            for (let n = el; n; n = n.parentElement) {
+              const c = parse(getComputedStyle(n).backgroundColor);
+              if (c && c.a > 0) { stack.push(c); if (c.a === 1) break; }
+            }
+            let out = stack.length && stack[stack.length-1].a === 1
+              ? stack.pop() : { r: 255, g: 255, b: 255, a: 1 };
+            while (stack.length) out = over(stack.pop(), out);
+            return out;
+          };
+          const out = [];
+          for (const el of document.querySelectorAll('body *')) {
+            if (el.closest('[hidden]') || el.closest('script,style,svg,noscript')) continue;
+            const own = [...el.childNodes].filter((n) => n.nodeType === 3)
+              .map((n) => n.textContent).join(' ').trim();
+            if (own.length < 3) continue;
+            const cs = getComputedStyle(el);
+            if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.4) continue;
+            const r = el.getBoundingClientRect();
+            if (r.width < 2 || r.height < 2) continue;
+            const fg = parse(cs.color); if (!fg || fg.a === 0) continue;
+            const bg = ground(el);
+            const lf = lum(over(fg, bg)), lb = lum(bg);
+            const size = parseFloat(cs.fontSize), bold = Number(cs.fontWeight) >= 700;
+            const floor = (size >= 24 || (size >= 18.66 && bold)) ? 3 : 4.5;
+            const ratio = (Math.max(lf, lb) + 0.05) / (Math.min(lf, lb) + 0.05);
+            if (ratio < floor) {
+              out.push({ sel: el.tagName.toLowerCase() + (typeof el.className === 'string' && el.className.trim()
+                ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''),
+              ratio: +ratio.toFixed(2), floor, txt: own.replace(/\s+/g, ' ').slice(0, 40) });
+            }
+          }
+          return out;
+        });
+      } catch { continue; }
+      measured += 1;
+      for (const r of rows) {
+        const key = `${theme}|${r.sel}|${r.ratio}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        ok(false, `${pageName} (${theme}): ${r.sel} reads at ${r.ratio}:1, needs ${r.floor} — ${JSON.stringify(r.txt)}`);
+      }
+    }
+  }
+  ok(measured >= THEME_PAGES.length, `theme audit ran over ${measured} page/theme pairs`);
+  if (!seen.size) ok(true, 'every page reads at AA contrast in BOTH themes');
+  await t.close();
 }
 
 /* ------------------------------------------------------------------ done */
