@@ -43,7 +43,11 @@
   min-width: 0;
 }
 
-.oa-filter > label {
+/* The spacer in the actions cell is styled as a label without BEING one, so a
+   reader (or a test) enumerating this bar's labels sees only real ones. */
+.oa-filter > label,
+.oa-filter > .oa-label-spacer {
+  display: block;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.6;
@@ -198,6 +202,16 @@
    is what the bottom-aligned Clear button would otherwise line up against */
 .oa-chips:empty { margin-top: 0; }
 
+/* Shown only while a term is being typed — see buildBar(). */
+.oa-filter-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #555;
+}
+
+.oa-filter-hint[hidden] { display: none; }
+
 .oa-chip {
   display: inline-flex;
   align-items: center;
@@ -249,7 +263,16 @@
   align-self: flex-end;
   align-items: flex-end;
   margin-left: auto;
+  /* it carries .oa-filter too, for the label spacer's sake — but not that
+     class's fixed column width */
+  width: auto;
 }
+
+/* The spacer only earns its height where the bar TOP-aligns its items and
+   Clear would otherwise ride above the controls (the v3 grid). In this
+   bottom-aligned base layout there is nothing to correct, so it is not
+   rendered at all. */
+.oa-filter-actions .oa-label-spacer { display: none; }
 
 .oa-clear {
   height: 35px;

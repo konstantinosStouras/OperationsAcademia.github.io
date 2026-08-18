@@ -1701,6 +1701,95 @@ for (const [name, expect] of [
   eq(await j.$$eval('.oa-card-actions', (n) => n.length), 0,
     'jobs: a visitor who is not signed in sees no Edit or Take down');
 
+  /* ------------------------------ the filter bar: several terms, one row --
+     Owner, from three screenshots: the search takes ONE institution at a
+     time, and a filter with values chosen knocked the bar out of line.
+
+     THE BAR IS SIGN-IN GATED on this page (.v3-lock puts pointer-events:none
+     over it until an account resolves), and these checks are about the bar,
+     not the gate — which has its own coverage. So the lock is lifted here,
+     and lifted again before each interaction because auth resolving late
+     re-applies it. */
+  const unlock = () => j.evaluate(() => {
+    const w = document.querySelector('.v3-lock');
+    if (w) w.classList.remove('is-locked');
+    const c = document.getElementById('v3-lock-card');
+    if (c) c.remove();
+  });
+  await unlock();
+
+  eq(await j.$eval('.oa-filters label[for="oaf-institution"]', (n) => n.textContent),
+    'University search', 'jobs: the search says what it searches');
+  eq(await j.$eval('#oaf-institution', (n) => n.placeholder), 'University/School name',
+    'jobs: and the box says what to type into it');
+
+  const bar = () => j.$eval('.oa-resultbar', (n) => n.textContent.trim());
+
+  // typing filters live, exactly as it always did
+  await unlock();
+  await j.fill('#oaf-institution', 'utah');
+  await j.waitForTimeout(320);
+  const oneTerm = await bar();
+  ok(/\b(\d+) \/ \1\b/.test(oneTerm.replace(/\s+/g, ' ')) || oneTerm.includes('of'),
+    'jobs: a half-typed term still narrows the list as you type');
+
+  // Enter banks it as a chip and empties the box for the next one
+  await j.press('#oaf-institution', 'Enter');
+  await j.waitForTimeout(320);
+  eq(await j.$eval('#oaf-institution', (n) => n.value), '',
+    'jobs: Enter clears the box, so the next institution can be typed straight away');
+  eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
+    (ns) => ns.map((n) => n.textContent)), ['utah'],
+    'jobs: and the term it banked is shown as a chip under the field');
+
+  /* SEVERAL TERMS ARE OR'd, which is the only reading that returns anything:
+     a posting has ONE institution, so "utah" AND "princeton" is empty by
+     construction. Counted rather than asserted as a number so the check does
+     not depend on which postings happen to be listed. */
+  const afterOne = Number((await bar()).match(/\/\s*(\d+)/)[1]);
+  await unlock();
+  await j.fill('#oaf-institution', 'princeton');
+  await j.press('#oaf-institution', 'Enter');
+  await j.waitForTimeout(320);
+  const afterTwo = Number((await bar()).match(/\/\s*(\d+)/)[1]);
+  ok(afterTwo > afterOne,
+    `jobs: a second term WIDENS the search (${afterOne} -> ${afterTwo}), it does not replace it`);
+  eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
+    (ns) => ns.map((n) => n.textContent)), ['utah', 'princeton'],
+    'jobs: both terms are shown, each removable on its own');
+
+  // and the whole search survives being shared
+  const shared = new URL(j.url()).searchParams.getAll('institution');
+  eq(shared, ['utah', 'princeton'], 'jobs: every term is carried in the address bar');
+
+  /* EVERY CONTROL ON ONE BASELINE, chips or no chips. The bar is a grid whose
+     items were bottom-aligned, so a filter carrying chips — a taller cell —
+     pushed its own control UP, and "2 selected" floated above the untouched
+     boxes beside it. Measured as distinct top edges per row: with the chips
+     present there must still be exactly one baseline per row of the bar. */
+  const rows = await j.$$eval(
+    '.oa-filters input[type=search], .oa-filters .oa-pick-btn, .oa-filters .oa-clear',
+    (ns) => {
+      const tops = ns.map((n) => Math.round(n.getBoundingClientRect().top));
+      const byRow = {};
+      tops.forEach((t) => {
+        const key = Object.keys(byRow).find((k) => Math.abs(Number(k) - t) < 6);
+        byRow[key === undefined ? t : key] = true;
+      });
+      return { tops, lines: Object.keys(byRow).length };
+    });
+  const barRows = await j.$eval('.oa-filters', (n) =>
+    new Set([...n.children].map((c) => Math.round(c.getBoundingClientRect().top))).size);
+  eq(rows.lines, barRows,
+    `jobs: every control sits on its row's baseline even with chips showing ` +
+    `(${rows.tops.join(', ')})`);
+
+  await unlock();
+  await j.click('.oa-clear');
+  await j.waitForTimeout(320);
+  eq(await j.$$eval('.oa-chip', (ns) => ns.length), 0,
+    'jobs: Clear filters drops the banked terms too');
+
   // one posting becomes editable, as it would be for the poster who made it
   const firstId = await j.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
   await j.evaluate((id) => {
@@ -2155,10 +2244,13 @@ for (const [pageName, dataset, patch] of [
     const d = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     await d.goto(BASE + href.replace(/^\.\//, ''), { waitUntil: 'domcontentloaded' });
     await d.waitForTimeout(3500);
-    // the engine's text filters render as <input type="search">; a filter that
-    // took a value from the URL is simply one carrying it
+    /* A filter that took a value from the URL is one showing it — as a CHIP
+       now that a text search holds several terms, or in the box for a page
+       whose engine still carries a single one. Either is the filter landing;
+       what would fail is neither. */
     const filtered = await d.evaluate(() =>
-      [...document.querySelectorAll('.oa-filters input')].some((i) => i.value.trim().length > 0));
+      document.querySelectorAll('.oa-filters .oa-chip').length > 0
+      || [...document.querySelectorAll('.oa-filters input')].some((i) => i.value.trim().length > 0));
     ok(filtered, `universities: ${href.split('?')[0]} opens with the school already filtered`);
     await d.close();
   }

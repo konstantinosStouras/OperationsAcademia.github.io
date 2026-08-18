@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "jobs-search-several-universities",
+   "date": "2026-08-18",
+   "title": "Search the job postings for several universities at once",
+   "summary": "The job postings search now takes more than one name. Type a university or school and press Enter and it becomes a tag under the box, so you can add another \u2014 the list then shows postings from any of them, rather than making you search one at a time. Each tag can be removed on its own, and the address bar carries them all, so a search you share or bookmark comes back exactly as you left it. The box itself now says what it searches: University/School name. The filter bar also stays in line when tags are showing, instead of nudging the control above them out of place.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "schools-of-the-world",
    "date": "2026-08-18",
    "title": "Every operations school in the world, in the posting forms",
