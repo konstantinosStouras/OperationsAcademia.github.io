@@ -178,8 +178,19 @@
        but a posting with NEITHER has nothing under the institution name, so
        the requirement is on the line they are joined into. The error is put on
        the department field, which is the one a poster is most likely to mean. */
-    out.school = String($('f-school').value || '').trim().slice(0, MAX.school);
-    out.unit = String($('f-unit').value || '').trim().slice(0, MAX.unit);
+    /* One spelling per university, school and department (oa-schools.js), so
+       a poster who types a name the site already publishes under another
+       spelling posts under the published one. The build canonicalises again —
+       this is what makes the poster's own preview and their My postings page
+       read the way the posting will. */
+    var place = (window.OASchools ? window.OASchools.canonPlace : function (v) { return v; })({
+      institution: out.institution,
+      school: String($('f-school').value || '').trim(),
+      unit: String($('f-unit').value || '').trim()
+    });
+    if (place.institution) out.institution = place.institution.slice(0, MAX.institution);
+    out.school = String(place.school || '').slice(0, MAX.school);
+    out.unit = String(place.unit || '').slice(0, MAX.unit);
     out.department = [out.school, out.unit].filter(Boolean).join(', ').slice(0, MAX.department);
     var unitEl = $('f-unit');
     setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');

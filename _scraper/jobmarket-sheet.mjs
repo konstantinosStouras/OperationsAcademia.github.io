@@ -47,11 +47,11 @@
 import { createRequire } from 'node:module';
 
 import {
-  text, url, jobId, canonCountry, longDate, marketYear,
+  text, url, jobId, canonCountry, canonPlace, longDate, marketYear,
   displayOrder, collapseSameDay, isoStamp, publicRow, LEVELS, OPEN_ENDED_RX,
 } from './jobs-model.mjs';
 import { parseCsv, redactEmails } from './import-sheet.mjs';
-import { splitDepartment } from './vocab.mjs';
+import { splitDepartment, joinDepartment } from './vocab.mjs';
 
 const require = createRequire(import.meta.url);
 const COUNTRIES = require('../assets/oa-countries.js');
@@ -653,7 +653,10 @@ export function rowsFromTab(csv, {
        EMPTY, so a row carrying both would read as dated. */
     const openEnded = OPEN_ENDED_RX.test(deadlineProse);
 
-    const { school, unit } = splitDepartment(area);
+    /* One spelling per university, school and department — the same canon the
+       form and the other importer apply, so a row this workbook contributes
+       merges with the postings around it instead of adding a spelling. */
+    const place = canonPlace({ institution, ...splitDepartment(area) });
 
     /* What the sheet knows that the site's own shape has no field for: the job
        title as advertised (five entry levels cannot carry "Professor of
@@ -670,11 +673,11 @@ export function rowsFromTab(csv, {
       id: '',
       year,
       posted,
-      institution,
-      department: area,
-      school,
-      unit,
-      type: typeFromNames(institution, area),
+      institution: place.institution || institution,
+      department: joinDepartment(place.school, place.unit) || area,
+      school: place.school,
+      unit: place.unit,
+      type: typeFromNames(place.institution || institution, area),
       levels: levelsFromRank(rank, kind),
       /* No deadline column, or an empty cell, reads as "Until filled." — the
          same rule import-sheet.mjs applies to the other spreadsheet, and not a

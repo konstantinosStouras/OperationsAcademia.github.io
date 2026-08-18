@@ -29,6 +29,16 @@ import { splitDepartment, joinDepartment } from './vocab.mjs';
 const require = createRequire(import.meta.url);
 export const { canon: canonCountry } = require('../assets/oa-countries.js');
 
+/* One spelling per university, school and department, on exactly the same
+   terms (assets/oa-schools.js). Applied at EVERY ingest below, so "Freeman
+   School of Business, Management Sciences Area" and "A.B. Freeman School of
+   Business, Management Science Department" are one department in the filters
+   rather than two — and the archive's fused one-column rows are taken apart
+   into the three fields the form now asks for. Re-exported so the importers
+   use the same function. */
+export const { canonPlace, canonSchool, canonUnit, canonInstitution } =
+  require('../assets/oa-schools.js');
+
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/jobs.json — which is how submitter and chair
     e-mail addresses stay out of a public repository.
@@ -286,7 +296,6 @@ export function inCurrentMarket(row, now = new Date()) {
  * AGAIN because the client is not trusted with what reaches a served file.
  */
 export function rowFromSubmission(doc, { now = new Date() } = {}) {
-  const institution = text(doc.institution, MAXLEN.institution);
   const country = canonCountry(text(doc.country, MAXLEN.country));
   const levels = pickList(doc.levels, LEVELS);
   const type = TYPES.includes(text(doc.type, 40)) ? text(doc.type, 40) : '';
@@ -301,8 +310,17 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
   const parts = given
     ? { school: text(doc.school, MAXLEN.school), unit: text(doc.unit, MAXLEN.unit) }
     : splitDepartment(text(doc.department, MAXLEN.department));
-  const school = text(parts.school, MAXLEN.school);
-  const unit = text(parts.unit, MAXLEN.unit);
+
+  /* …and then all three names are canonicalised together, because which of
+     the three a name belongs in is part of what canon() decides. */
+  const place = canonPlace({
+    institution: text(doc.institution, MAXLEN.institution),
+    school: parts.school,
+    unit: parts.unit,
+  });
+  const institution = text(place.institution, MAXLEN.institution);
+  const school = text(place.school, MAXLEN.school);
+  const unit = text(place.unit, MAXLEN.unit);
   const department = text(joinDepartment(school, unit), MAXLEN.department);
 
   // the minimum a card needs to be worth rendering

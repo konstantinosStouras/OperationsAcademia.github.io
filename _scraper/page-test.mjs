@@ -1128,8 +1128,10 @@ for (const [name, expect] of [
     'v3 post-a-job: the poster is given a quotable reference');
   eq(posted.doc.status, 'queued', 'the submission is queued for the build');
   eq(posted.doc.uid, KEPT, 'and owned by the signed-in poster');
-  eq(posted.doc.department, 'Business School, Operations Area',
-    'school and unit are joined into the published department line');
+  eq(posted.doc.department, 'Business School, Operations',
+    'school and unit are joined into the published department line — under the ' +
+    'canonical names (assets/oa-schools.js), so "Operations Area" is posted as ' +
+    'the department the site already publishes under');
   eq(posted.doc.year, marketYear(),
     'the job market year is derived from the date, never asked (the form has no picker)');
   eq(posted.noYearField, true,
