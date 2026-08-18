@@ -1293,6 +1293,14 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
 .oa-combo-list[hidden] { display: none; }
 
+/* opened upwards, when there is more room above the field than below it
+   (assets/oa-combo.js measures; this only says where it goes) */
+.oa-combo-list.is-above {
+  top: auto;
+  bottom: calc(100% + 2px);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.14);
+}
+
 .oa-combo-opt {
   display: flex;
   align-items: baseline;
@@ -1315,8 +1323,24 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   font-variant-numeric: tabular-nums;
 }
 
-/* a value already used at the chosen university */
+/* a value already used at the chosen university (or in the chosen school) */
 .oa-combo-opt.is-pref .oa-combo-name { font-weight: 600; }
+
+/* the heading over one group: "Schools at Tulane University", then
+   "Elsewhere on the site" once a search reaches past it */
+.oa-combo-group {
+  position: sticky;
+  top: -4px;
+  margin: 0;
+  padding: 6px 12px 4px;
+  background: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7480;
+}
+.oa-combo-group + .oa-combo-opt { padding-top: 4px; }
 
 /* the "type something new" row */
 .oa-combo-add { border-top: 1px solid #eef1f4; color: var(--brand-2); }
@@ -1326,7 +1350,6 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   line-height: 1;
 }
 
-.oa-combo-hint,
 .oa-combo-more,
 .oa-combo-empty {
   margin: 0;
@@ -1336,7 +1359,44 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: #77808a;
 }
 
-.oa-combo-hint { border-bottom: 1px solid #eef1f4; }
+/* said aloud, not drawn: the count and whose list it is, for anyone who
+   cannot see the panel (assets/oa-combo.js announces into it) */
+.oa-combo-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* On a phone the panel obeys the list rules (_MOBILE-STANDARDS.md): it stays
+   on screen (rule 6: 50vh, never wider than the viewport), its rows are thumb
+   -sized (rule 3: 42px) and a long name wraps rather than widening the page
+   (rule 5). 300px of 33px rows is a mouse's list. */
+@media screen and (max-width: 640px) {
+  .oa-combo-list {
+    max-height: 50vh;
+    max-width: calc(100vw - 28px);
+  }
+
+  .oa-combo-opt {
+    min-height: 42px;
+    align-items: center;
+    padding: 9px 12px;
+    font-size: 16px;
+  }
+
+  .oa-combo-name { overflow-wrap: anywhere; }
+
+  .oa-combo-group,
+  .oa-combo-more,
+  .oa-combo-empty { font-size: 13px; }
+}
 
 /* the read-back of what the two name fields will be published as */
 .oa-derived { margin: -8px 0 18px; color: var(--mut); }

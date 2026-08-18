@@ -17,13 +17,14 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
+  universitiesLink, ownUniversitiesLink,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
-import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
+import { splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey } from './vocab.mjs';
 import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
 import {
   sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
@@ -1110,10 +1111,31 @@ async function testSchools() {
     ok(/canonPlace\(\{ institution/.test(src), `${file}: and so is a row read from a spreadsheet`);
   }
 
-  // the form applies it too, so a poster's own preview reads as it will publish
+  /* The form applies it too, so a poster's own preview reads as it will
+     publish — through canonCOLUMNS, because a form with three boxes has
+     already said which name is which (see canonColumns' own header). */
   const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
-  ok(/window\.OASchools\.canonPlace/.test(form),
+  ok(/S\.canonColumns/.test(form),
     'oa-jobform.js: the form canonicalises what the poster typed');
+  ok(!/canonPlace\(\{/.test(form) && !/OASchools\.canonPlace/.test(form),
+    'and never through canonPlace, which would take a university apart');
+
+  /* what that distinction is worth, measured on the names it decides */
+  eq(S.canonColumns({ institution: 'University of California, Los Angeles (UCLA)', school: '', unit: '' }),
+    { institution: 'University of California, Los Angeles (UCLA)', school: '', unit: '' },
+    'a university typed into the University box stays that university');
+  eq(S.canonPlace({ institution: 'University of California, Los Angeles (UCLA)' }).institution,
+    'University of California',
+    'while the archive\'s one-column value is still taken apart');
+  eq(S.canonColumns({ institution: 'Rutgers University', school: 'School of Business-Camden', unit: 'Operations Management' }),
+    { institution: 'Rutgers University', school: 'School of Business-Camden', unit: 'Operations Management' },
+    'a campus in a school name is not a department');
+  eq(S.canonColumns({ institution: 'Clemson University', school: 'College of Engineering, Computing and Applied Sciences', unit: 'Industrial Engineering' }).school,
+    'College of Engineering, Computing and Applied Sciences',
+    'nor is half a college name');
+  eq(S.canonColumns({ institution: 'X', school: 'Ross School of Business Technology and Operations', unit: '' }),
+    { institution: 'X', school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
+    'but a pair somebody wrote down as naming both still names both');
   const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
   ok(page.indexOf('oa-schools.js') !== -1 &&
      page.indexOf('oa-schools.js') < page.indexOf('oa-jobform.js'),
@@ -1247,6 +1269,383 @@ function testVocab() {
   const given = buildVocab([{ institution: 'X', school: 'S', unit: 'U', department: 'ignored' }]);
   eq(given.schools[0].v, 'S', 'an explicit school is used as given');
   eq(given.units[0].v, 'U', 'an explicit unit is used as given');
+
+  /* ------------------------------------------------- the cascade
+
+     The reported bug, as a fixture: one Tulane school posted under two
+     spellings and one department under three, which the form offered as five
+     separate names. It is ONE school with ONE department, and the department
+     is offered under the school it sits in.
+
+     The spellings come from oa-schools.js, which every posting is already
+     canonicalised by at ingest — the vocabulary re-applies it so a DIRECTORY
+     row, which has never been through an ingest, joins the same entry rather
+     than starting a second one.                                              */
+
+  const tulane = buildVocab([
+    { institution: 'Tulane University', school: 'Freeman School of Business', unit: 'Management Science' },
+    { institution: 'Tulane University', school: 'Freeman School of Business', unit: 'Management Sciences Area' },
+    { institution: 'Tulane University', school: 'A.B. Freeman School of Business', unit: 'Management Science Department' },
+    { institution: 'Tulane University', school: 'Freeman School of Business', unit: '' },
+  ], { directory: [
+    { institution: 'Tulane University', school: 'A. B. Freeman School of Business',
+      department: 'Management Science Department' },
+    { institution: 'Aalto University', school: 'School of Business',
+      department: 'Department of Information and Service Economy' },
+  ] });
+
+  eq(tulane.byUniversity['Tulane University'].schools, ['A. B. Freeman School of Business'],
+    'one school, under the spelling the site publishes');
+  eq(tulane.byUniversity['Tulane University'].units, ['Management Science'],
+    'and one department');
+  eq(tulane.byUniversity['Tulane University'].bySchool,
+    { 'A. B. Freeman School of Business': ['Management Science'] },
+    'which the cascade files under its school');
+  eq(tulane.bySchool['A. B. Freeman School of Business'], ['Management Science'],
+    'and offers again when the school is known but the university is not');
+
+  eq(tulane.universities.find((u) => u.v === 'Tulane University').n, 4,
+    'the count is of postings — all four, however they were spelled');
+  eq(tulane.universities.find((u) => u.v === 'Aalto University').n, 0,
+    'a university the directory names but nobody has posted from counts none');
+  eq(tulane.byUniversity['Aalto University'].bySchool,
+    { 'School of Business': ['Information and Service Economy'] },
+    'and still cascades, which is the whole point of reading the directory');
+
+  /* A department posted with NO school is a real case, and the form offers it
+     while the school field is empty — so it is filed under '' rather than
+     dropped or attached to a school nobody named. */
+  const loose = buildVocab([
+    { institution: 'X University', school: '', unit: 'Operations Management' },
+    { institution: 'X University', school: 'Y School of Business', unit: 'Decision Sciences' },
+  ]);
+  eq(loose.byUniversity['X University'].bySchool,
+    { '': ['Operations Management'], 'Y School of Business': ['Decision Sciences'] },
+    'a department posted without a school is filed under no school, not under one');
+  eq(loose.byUniversity['X University'].units, ['Decision Sciences', 'Operations Management'],
+    'and the university still offers both');
+
+  /* A DIRECTORY row's three names are already in three columns, so they are
+     canonicalised one by one. Running canonPlace() over them takes apart
+     values that are whole: Rutgers' campus and Clemson's college became
+     departments called "Camden, Operations Management" and "Computing and
+     Applied Sciences, Industrial Engineering", and the form offered both. */
+  const columns = buildVocab([], { directory: [
+    { institution: 'Rutgers University', school: 'School of Business-Camden',
+      department: 'Operations Management' },
+    { institution: 'Clemson University',
+      school: 'College of Engineering, Computing and Applied Sciences',
+      department: 'Industrial Engineering' },
+  ] });
+  eq(columns.byUniversity['Rutgers University'].bySchool,
+    { 'School of Business-Camden': ['Operations Management'] },
+    'a campus in a school name is not a department');
+  eq(columns.byUniversity['Clemson University'].bySchool,
+    { 'College of Engineering, Computing and Applied Sciences': ['Industrial Engineering'] },
+    'nor is half a college name');
+
+  /* ------------------------------- what must never take the build down
+
+     buildVocab runs inside the daily build before anything is written, so a
+     row it cannot digest stops the site publishing at all. Each of these was
+     a real crash or a real malformed name, not a hypothetical. */
+
+  // a name in a script fold() does not know still has an identity of its own
+  const script = buildVocab([
+    { institution: '香港中文大學', school: '', unit: 'Operations Management' },
+    { institution: 'Πανεπιστήμιο Πειραιώς', school: '', unit: 'Operations' },
+  ]);
+  eq(script.universities.map((u) => u.v).sort(),
+    ['Πανεπιστήμιο Πειραιώς', '香港中文大學'],
+    'a university named in a non-Latin script is offered, not dropped and not fatal');
+  eq(script.byUniversity['香港中文大學'].units, ['Operations Management'],
+    'and it cascades like any other');
+
+  // a directory that is not a list of rows is no directory at all
+  eq(buildVocab([{ institution: 'X University', school: '', unit: 'Operations' }],
+    { directory: { not: 'a list' } }).universities, [{ v: 'X University', n: 1 }],
+    'a directory that is not a list is ignored rather than fatal');
+
+  // a directory row that repeats its school in the department field
+  const repeated = buildVocab([], { directory: [{
+    institution: 'Georgetown University',
+    school: 'McDonough School of Business',
+    department: 'McDonough School of Business, Operations and Information Management Area',
+  }] });
+  eq(repeated.byUniversity['Georgetown University'].bySchool,
+    { 'McDonough School of Business': ['Operations and Information Management'] },
+    'a department that repeats its school is offered without it — or the card would name the school twice');
+
+  // a directory row for a place nobody has posted from is still offered
+  const empty = buildVocab([], { directory: [
+    { institution: 'Aalto University', school: 'School of Business', department: 'Marketing' },
+  ] });
+  eq(empty.universities, [{ v: 'Aalto University', n: 0 }],
+    'the directory alone can put a university on the list, with no postings behind it');
+}
+
+/* ------------------------------- the site's own link follows the name
+
+   Every posting carries a "Further info" link into the Universities page,
+   generated from its institution. Canonicalising the name left six of them
+   still asking for the spelling the posting was made under, four of which
+   landed on nothing — a dead link on a live card. Ours is ours to regenerate;
+   a link the poster actually gave is not. */
+
+async function testFurtherInfoLink() {
+  ok(ownUniversitiesLink('https://www.operationsacademia.org/universities?filterA=Penn%20State'),
+    'the site\'s own Universities link is recognised as ours');
+  ok(!ownUniversitiesLink('https://www.tulane.edu/jobs'),
+    'and a link the poster gave is not');
+  ok(!ownUniversitiesLink(''), 'nor is nothing');
+
+  const made = rowFromSubmission({ ...GOOD, institution: 'Penn State',
+    furtherInfoUrl: universitiesLink('Penn State') });
+  eq(made.furtherInfoUrl, universitiesLink('The Pennsylvania State University'),
+    'a stored link of ours is regenerated from the name the site publishes');
+
+  const theirs = rowFromSubmission({ ...GOOD, institution: 'Penn State',
+    furtherInfoUrl: 'https://www.psu.edu/careers' });
+  eq(theirs.furtherInfoUrl, 'https://www.psu.edu/careers', 'and theirs is left alone');
+
+  /* the served file, row by row: every one of our links names its own row */
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  const wrong = rows.filter((r) => ownUniversitiesLink(r.furtherInfoUrl) &&
+    r.furtherInfoUrl !== universitiesLink(r.institution)).map((r) => r.id);
+  eq(wrong, [], 'data/jobs.json: no posting links to a university under a name it does not use');
+
+  /* the three pages that read those links fold a search the same way, or a
+     link that works on one lands on nothing on another */
+  const RULE = "replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')";
+  for (const f of ['oa-list.js', 'oa-alert-match.js', 'oa-uni-map.js']) {
+    const src = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
+    ok(src.includes(RULE), `${f}: folds a search the same way as the other pages`);
+  }
+}
+
+/* ------------------------- naming rules the cascade leans on, and only it
+
+   assets/oa-schools.js is master's, and testSchools() above covers what it
+   publishes. These are the three things the CASCADE asked of it — each one a
+   bug the Universities directory found the first time anything canonicalised
+   its rows. */
+
+function testNamesForTheCascade() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+
+  /* 1. GROUPING is not PUBLISHING. institutionKey merges the directory's
+     several names for one university; canonInstitution must go on publishing
+     each posting's own name, because its id and permalink are built from it. */
+  const same = (a, b) => S.institutionKey(a) === S.institutionKey(b);
+  ok(same('The University of Texas at Dallas', 'University of Texas at Dallas'),
+    'a leading "The" does not make two universities');
+  ok(same('The University of Hong Kong (HKU)', 'University of Hong Kong (HKU)'),
+    'nor does it beside an acronym');
+  ok(same('The Chinese University of Hong Kong (CUHK)', 'The Chinese University of Hong Kong'),
+    'and a trailing acronym does not either');
+  ok(!same('The Chinese University of Hong Kong', 'The Chinese University of Hong Kong, Shenzhen'),
+    'while a campus that really is a different place stays one');
+  ok(!same('University of Houston', 'University of Hong Kong'),
+    'and two universities are two universities');
+
+  eq(S.canonInstitution('Baruch College, The City University of New York (CUNY)'),
+    'Baruch College, The City University of New York (CUNY)',
+    'the published name keeps everything it was published with');
+  eq(S.canonInstitution('Korea Advanced Institute of Science and Technology (KAIST)'),
+    'Korea Advanced Institute of Science and Technology (KAIST)', 'acronym and all');
+
+  /* 2. canonUnit has to be idempotent, or the vocabulary offers a name the
+     ingest would not publish. A department ending in its own acronym lost the
+     acronym but kept the wrapper word, because the wrapper is only stripped
+     while it is last. */
+  const twice = (v) => S.canonUnit(S.canonUnit(v));
+  for (const v of [
+    'Engineering Management, Information, and Systems Department (EMIS)',
+    'Department of Industrial Engineering and Operations Research (IEOR)',
+    'Operations Management Area',
+  ]) {
+    eq(twice(v), S.canonUnit(v), `canonUnit is idempotent: ${v}`);
+  }
+
+  /* 3. A lookup table must not answer for Object.prototype: "constructor"
+     came back as the source of Object, and went on to become a posting's id. */
+  for (const key of ['constructor', 'Constructor', 'toString', 'valueOf']) {
+    ok(typeof S.canonUnit(key) === 'string' && !/native code/.test(S.canonUnit(key)),
+      `canonUnit("${key}") is a name, not a prototype`);
+    ok(typeof S.canonInstitution(key) === 'string',
+      `canonInstitution("${key}") is a name, not a prototype`);
+  }
+}
+
+/* ------------------------------------------ the cascade is actually wired
+
+   The narrowing lives in three files that have to agree — the vocabulary's
+   third level, the picker's scope, and the form that joins them — and a break
+   in any of them shows up as a form that quietly stops narrowing rather than
+   as an error anybody sees. The behaviour is driven in page-test.mjs; this is
+   the part a browser is not needed for. */
+
+async function testCascadeWiring() {
+  const combo = await readFile(path.join(HERE, '..', 'assets', 'oa-combo.js'), 'utf8');
+  ok(/function setScope\(/.test(combo) && /oa-combo-group/.test(combo),
+    'oa-combo.js offers a scope under its own heading');
+  ok(/var nameKey = typeof opts\.key === 'function' \? opts\.key : fold;/.test(combo),
+    'and takes its idea of "the same name" from the caller, so it needs no name rules of its own');
+
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  ok(/setScope\(/.test(form) && /bySchool/.test(form),
+    'oa-jobform.js drives the cascade from byUniversity and bySchool');
+  ok(/var S = window\.OASchools;/.test(form) && /if \(!S\) return;/.test(form),
+    'and the three lists still work on a page that never loaded oa-schools.js');
+  ok(/S\.canonColumns\(\{/.test(form),
+    'the fields are put into the published spelling by the SAME canon the submission uses');
+  ok(!/'f-institution', 'f-school'\].forEach\(function \(id\) \{\n\s*var el = \$\(id\);\n\s*if \(el\) el\.dispatchEvent\(new Event\('change'/.test(form),
+    'and an edit does not settle the INSTITUTION, whose spelling a permalink is built from');
+  ok(/publishAs: S \? S\.canonUnit : null/.test(form),
+    'a name not on the list is offered as it will be published');
+  ok(/canonColumns\(\{/.test(form) && !/canonPlace\(\{/.test(form),
+    'but a lone institution is not read as one of the archive’s fused one-column values');
+
+  for (const page of ['post-a-job.html']) {
+    const html = await readFile(path.join(HERE, '..', page), 'utf8');
+    const at = html.indexOf('oa-schools.js');
+    ok(at !== -1 && at < html.indexOf('oa-combo.js'),
+      `${page}: loads the names module before the picker`);
+  }
+}
+
+/* --------------------------------- a renamed department keeps its readers
+
+   Publishing one spelling per place MOVES a name: the site now says
+   "Operations & Information Systems" where a posting said "Operations and
+   Information Systems". A saved e-mail alert holds free text, not a name, so
+   nothing can canonicalise it the way canonCountry does for countries — the
+   text search itself has to be the forgiving side, on BOTH the site and the
+   e-mails, or a subscriber quietly stops hearing from us. */
+
+async function testRenamedNamesStillFound() {
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+
+  /* Against the REAL served postings, not an invented row: an invented one is
+     how this guard first shipped asserting on a department no posting carries
+     and that oa-schools.js would never publish. */
+  const jobs = JSON.parse(await readFile(JOBS, 'utf8'));
+  const matches = (text) => jobs.filter((r) => M.matchesJob(r, { topics: ['jobs'], text })).length;
+
+  /* Each of these is a phrase the site published BEFORE the names were
+     canonicalised, taken from the old file, and each one matched nothing
+     afterwards. An alert holds free text, so nothing can rewrite what the
+     subscriber saved — the search has to be the forgiving side. */
+  const was = [
+    ['Operations and Information Systems', 'an "and" the site now writes as "&"'],
+    ['SCM', 'an abbreviation the site now spells out'],
+    ['Penn State', 'a university under the name it was posted as'],
+    ['IEOR', 'an acronym the site no longer prints, but the initials still spell'],
+    ['DADS', 'and another'],
+    ['TOM', 'and a three-letter one'],
+    ['Management Sciences Area', 'a department with the house word it was posted with'],
+  ];
+  for (const [text, why] of was) {
+    ok(matches(text) > 0, `an alert saved as "${text}" still matches — ${why}`);
+  }
+
+  ok(matches('Marketing') > 0, 'an ordinary word still matches');
+  ok(matches('Wibble') === 0, 'a word nobody has posted still matches nothing');
+  ok(matches('Systems Operations') === 0, 'and it is a substring search, not a bag of words');
+  ok(matches('ZZQX') === 0, 'an acronym that spells no initials matches nothing');
+
+  /* The jobs page and the e-mails must read a search the same way, or "what I
+     see on the site" and "what I am e-mailed" mean different things — the
+     reason oa-alert-match.js carries that comment over its own fold. Both
+     rules, pinned in both files. */
+  const RULES = [
+    ["replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')", 'folds a search'],
+    ['var ACRONYM = /^[A-Z]{2,6}$/;', 'takes an all-caps needle for an acronym'],
+    ['function initials(s) {', 'and matches it against the initials'],
+  ];
+  for (const f of ['oa-list.js', 'oa-alert-match.js']) {
+    const src = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
+    for (const [rule, what] of RULES) {
+      ok(src.includes(rule), `${f}: ${what} the same way as the other side`);
+    }
+  }
+
+  /* and the page that runs the matcher has the names module it now asks */
+  const alerts = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  const at = alerts.indexOf('oa-schools.js');
+  ok(at !== -1 && at < alerts.indexOf('oa-alert-match.js'),
+    'alerts.html: loads the names module before the matcher');
+}
+
+/* ------------------------------------------- the served vocabulary file
+
+   data/vocab.json is what the posting form fetches, and nothing else on the
+   site reads it — so a shape mistake shows up as a form that quietly stops
+   narrowing rather than as an error anybody sees. It is REBUILT here from the
+   committed sources and compared, which also pins that the build is
+   deterministic and that the two files are in step.                          */
+
+async function testVocabFile() {
+  const read = async (name) =>
+    JSON.parse(await readFile(path.join(HERE, '..', 'data', name), 'utf8'));
+  const v = await read('vocab.json');
+  const jobs = await read('jobs.json');
+  const directory = await read('universities.json');
+
+  for (const key of ['universities', 'schools', 'units', 'byUniversity', 'bySchool']) {
+    ok(v[key] !== undefined, `vocab.json carries ${key}`);
+  }
+
+  const rebuilt = buildVocab(jobs, { generated: v.generated, directory });
+  eq(serialiseVocab(rebuilt), serialiseVocab(v),
+    'vocab.json is exactly what the postings and the Universities directory rebuild');
+
+  /* the spelling the form offers is the spelling the site publishes: the
+     analogue of testCountries' isCanonical pass over the served data */
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  eq(v.schools.filter((o) => !S.isCanonicalSchool(o.v)).map((o) => o.v), [],
+    'every school the form offers is the one the site publishes');
+  eq(v.units.filter((o) => !S.isCanonicalUnit(o.v)).map((o) => o.v), [],
+    'and every department is');
+  eq(v.universities.filter((o) => S.canonInstitution(o.v) !== o.v).map((o) => o.v), [],
+    'and every university');
+
+  /* THE ARCHIVE READS THIS FILE TOO. /v2/ ships its own frozen oa-combo.js and
+     oa-jobform.js, which read universities/schools/units and byUniversity's
+     schools/units. Those four keys are therefore load-bearing for a tree
+     nobody edits any more — bySchool was ADDED beside them, never instead. */
+  const anyUni = Object.keys(v.byUniversity)[0];
+  ok(Array.isArray(v.byUniversity[anyUni].schools) && Array.isArray(v.byUniversity[anyUni].units),
+    '/v2/ still finds byUniversity[x].schools and .units');
+  ok(v.universities.every((o) => typeof o.v === 'string' && typeof o.n === 'number'),
+    'and the three flat lists are still {v, n}');
+
+  /* internal consistency: every name in the cascade is a name the flat lists
+     offer, or the picker would show a scope value with no posting count */
+  const N = { key: (x) => S.fold(x) };
+  const known = (list) => new Set(list.map((o) => N.key(o.v)));
+  const schools = known(v.schools), units = known(v.units);
+  let loose = 0;
+  for (const e of Object.values(v.byUniversity)) {
+    for (const s of e.schools) if (!schools.has(N.key(s))) loose++;
+    for (const u of e.units) if (!units.has(N.key(u))) loose++;
+    for (const [s, list] of Object.entries(e.bySchool)) {
+      if (s && !schools.has(N.key(s))) loose++;
+      for (const u of list) if (!units.has(N.key(u))) loose++;
+    }
+  }
+  eq(loose, 0, 'every school and department in the cascade is on the list the form offers');
+
+  /* the university picker offers each place once — the bug in the report:
+     "A.B. Freeman School of Business" and "Freeman School of Business" both
+     on Tulane's list, from one school posted twice */
+  const dup = (list) => list.length - new Set(list.map((x) => N.key(x.v || x))).size;
+  eq(dup(v.universities), 0, 'no university is offered under two spellings');
+  eq(dup(v.schools), 0, 'no school is');
+  eq(dup(v.units), 0, 'nor any department');
+  const twice = Object.entries(v.byUniversity)
+    .filter(([, e]) => dup(e.schools) || dup(e.units)).map(([name]) => name);
+  eq(twice, [], 'and no university lists one of its own twice');
 }
 
 function testSplitFields() {
@@ -2172,6 +2571,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testMerge();
   testMarketYear();
   testVocab();
+  await testFurtherInfoLink();
+  testNamesForTheCascade();
+  await testCascadeWiring();
+  await testRenamedNamesStillFound();
+  await testVocabFile();
   testSplitFields();
   testCollapseSameDay();
   testAssignIds();

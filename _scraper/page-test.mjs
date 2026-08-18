@@ -1295,6 +1295,44 @@ for (const [name, expect] of [
   await f.waitForTimeout(150);
   eq(await f.inputValue('#f-institution'), 'Tulane University', 'form: choosing fills the field');
 
+  /* A NEAR MISS still finds the university. "tulane" — a poster who saw the
+     one matching row and moved on — used to match nothing: the cascade
+     quietly went away, the school list opened at every school on the site,
+     and the posting was filed under a university nobody else uses. */
+  for (const [typed, becomes] of [
+    ['tulane', 'Tulane University'],
+    ['Tulane Univ', 'Tulane University'],
+    ['tulane university', 'Tulane University'],
+  ]) {
+    await f.fill('#f-institution', typed);
+    await f.evaluate(() => {
+      const el = document.getElementById('f-institution');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    });
+    await f.waitForTimeout(120);
+    eq(await f.inputValue('#f-institution'), becomes,
+      `form: "${typed}" is the one university it can only be the beginning of`);
+  }
+  for (const typed of ['University of', 'Wibble Institute']) {
+    await f.fill('#f-institution', typed);
+    await f.evaluate(() => {
+      const el = document.getElementById('f-institution');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    });
+    await f.waitForTimeout(120);
+    eq(await f.inputValue('#f-institution'), typed,
+      `form: "${typed}" could be several universities or none, so it is left alone`);
+  }
+  await f.fill('#f-institution', 'Tulane University');
+  await f.evaluate(() => {
+    const el = document.getElementById('f-institution');
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.blur();
+  });
+  await f.waitForTimeout(120);
+
   // the chosen university's own schools lead the next list
   await f.click('#f-school');
   await f.waitForTimeout(250);
@@ -1302,7 +1340,120 @@ for (const [name, expect] of [
     (n) => n.textContent);
   ok(/Freeman/i.test(firstSchool), 'form: schools already used at that university lead');
 
-  // a name nobody has posted before is offered rather than refused
+  /* ------------------------------------------------- the cascade, as reported
+
+     The bug: choosing Tulane offered BOTH "A. B. Freeman School of Business" and
+     "Freeman School of Business" — one school, posted twice, spelled twice —
+     and the department field offered every department on the site. What must
+     happen instead is one school under a heading naming the university, and
+     then that school's own departments.                                       */
+
+  const scoped = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      heading: open.querySelector('.oa-combo-group')
+        ? open.querySelector('.oa-combo-group').textContent : '',
+      inScope: [...open.querySelectorAll('.oa-combo-opt.is-pref .oa-combo-name')]
+        .map((n) => n.textContent),
+      others: [...open.querySelectorAll('.oa-combo-opt:not(.is-pref):not(.oa-combo-add)')].length,
+    };
+  });
+  eq(scoped.heading, 'Schools at Tulane University',
+    'form: the school list says whose schools it is offering');
+  eq(scoped.inScope, ['A. B. Freeman School of Business'],
+    'form: one school, not the two spellings it was posted under');
+  eq(scoped.others, 0,
+    'form: and browsing does not bury it under every school on the site');
+
+  await f.click('.oa-combo-list:not([hidden]) .oa-combo-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
+    'form: choosing a school fills the field');
+
+  await f.click('#f-unit');
+  await f.waitForTimeout(250);
+  const dept = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      heading: open.querySelector('.oa-combo-group').textContent,
+      inScope: [...open.querySelectorAll('.oa-combo-opt.is-pref .oa-combo-name')]
+        .map((n) => n.textContent),
+    };
+  });
+  eq(dept.heading, 'Departments in A. B. Freeman School of Business',
+    'form: the department list narrows to the school that was chosen');
+  eq(dept.inScope, ['Management Science'],
+    'form: to ITS departments — one, not the three spellings it was posted under');
+
+  // typing still reaches the whole site: a scope narrows, it never hides
+  await f.fill('#f-unit', 'supply chain');
+  await f.waitForTimeout(200);
+  const past = await f.evaluate(() => {
+    const open = document.querySelector('.oa-combo-list:not([hidden])');
+    return {
+      headings: [...open.querySelectorAll('.oa-combo-group')].map((n) => n.textContent),
+      options: open.querySelectorAll('.oa-combo-opt:not(.oa-combo-add)').length,
+    };
+  });
+  ok(past.options > 0 && past.headings.includes('Elsewhere on the site'),
+    'form: typing searches past the scope, under a heading that says so');
+
+  /* A spelling that differs only in punctuation or a leading initial is the
+     same school — so it is put right, not added as a second one. */
+  await f.fill('#f-unit', '');
+  await f.fill('#f-school', 'freeman school of business');
+  await f.waitForTimeout(200);
+  const addRows = await f.$$eval('.oa-combo-add', (n) => n.length);
+  eq(addRows, 0, 'form: a variant spelling is not offered as a new name');
+  await f.evaluate(() => document.getElementById('f-school')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
+    'form: and the field is put into the spelling the site publishes');
+
+  /* A department the site has only ever seen in one school names its school. */
+  await f.fill('#f-school', '');
+  await f.fill('#f-unit', 'Management Science');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-school'), 'A. B. Freeman School of Business',
+    'form: choosing a department fills in the school it sits in');
+
+  /* A university nobody has posted from still gets the site's spelling rules
+     (oa-schools.js: "Area" is a house word, not part of the name) — and a name
+     the site has never heard of is left exactly as typed. Both are what the
+     submission itself will carry, which is why the field is put right where
+     the poster can see it rather than quietly on the way out. */
+  await f.fill('#f-institution', 'Wibble University');
+  await f.fill('#f-school', '');
+  await f.fill('#f-unit', 'Operations Area');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Operations',
+    'form: the field shows the department as it will be published');
+  await f.fill('#f-unit', 'Wibble Studies');
+  await f.evaluate(() => document.getElementById('f-unit')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Wibble Studies',
+    'form: and a name nobody has ever posted is never invented away');
+  await f.fill('#f-institution', 'Tulane University');
+  await f.fill('#f-unit', '');
+
+  /* A name nobody has posted before is offered rather than refused — and it
+     is offered AS IT WILL BE PUBLISHED. "Widgets Group" would be posted as
+     "Widgets" (a house word is not part of a name, oa-schools.js), and a row
+     that promised the words typed would be promising something the
+     submission then tidies away. */
+  await f.fill('#f-unit', 'Wibble Widgets Group');
+  await f.waitForTimeout(200);
+  const publishAs = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
+  ok(publishAs.length === 1 && /“Wibble Widgets” — a name not on the list yet/.test(publishAs[0]),
+    `form: a new name is offered as it will be published (${JSON.stringify(publishAs)})`);
+  await f.fill('#f-unit', '');
+
   await f.fill('#f-school', 'Wibble School of Widgets');
   await f.waitForTimeout(200);
   const add = await f.$$eval('.oa-combo-add .oa-combo-name', (n) => n.map((x) => x.textContent));
@@ -1312,7 +1463,49 @@ for (const [name, expect] of [
   await f.waitForTimeout(150);
   eq(await f.inputValue('#f-school'), 'Wibble School of Widgets', 'form: a new name is accepted');
 
-  // keyboard: Enter takes the highlighted option and must NOT submit the form
+  /* keyboard: every row is reachable — ArrowDown used to move off "nothing"
+     onto the first row and then stick there for ever, so with a scope in force
+     (one row in it, the rest under "Elsewhere on the site") no key sequence
+     reached the rest of the site at all. And the row it highlights must be
+     VISIBLE: a sticky group heading sits exactly where the list scrolls to. */
+  await f.fill('#f-school', 'school of business');
+  await f.waitForTimeout(250);
+  const rowCount = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
+  ok(rowCount > 5, `form: a search reaches past the scope (${rowCount} rows to walk)`);
+  const walked = [];
+  for (let i = 0; i < 4; i += 1) {
+    await f.keyboard.press('ArrowDown');
+    walked.push(await f.$eval('.oa-combo-list:not([hidden])',
+      (l) => [...l.querySelectorAll('.oa-combo-opt')].indexOf(l.querySelector('.oa-combo-opt.is-active'))));
+  }
+  eq(walked, [0, 1, 2, 3], 'form: ArrowDown walks down the list rather than sticking on the first row');
+  const up = [];
+  for (let i = 0; i < 2; i += 1) {
+    await f.keyboard.press('ArrowUp');
+    up.push(await f.$eval('.oa-combo-list:not([hidden])',
+      (l) => [...l.querySelectorAll('.oa-combo-opt')].indexOf(l.querySelector('.oa-combo-opt.is-active'))));
+  }
+  eq(up, [2, 1], 'form: and ArrowUp climbs it one row at a time, not two');
+
+  for (let i = 0; i < 10; i += 1) await f.keyboard.press('ArrowDown');
+  const visible = await f.evaluate(() => {
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const el = list.querySelector('.oa-combo-opt.is-active');
+    if (!el) return 'no active row';
+    const r = el.getBoundingClientRect();
+    /* geometry, not hit-testing: the list can sit below the fold, where
+       elementFromPoint answers null for reasons that have nothing to do with
+       the heading. The heading is sticky, so its rect is where it is PAINTED. */
+    const head = [...list.querySelectorAll('.oa-combo-group')]
+      .map((h) => h.getBoundingClientRect())
+      .find((h) => h.bottom > r.top && h.top < r.bottom);
+    return head ? `covered by a heading (row ${r.top}-${r.bottom}, heading ${head.top}-${head.bottom})` : true;
+  });
+  eq(visible, true, 'form: the highlighted row is not hidden behind the sticky group heading');
+  await f.keyboard.press('Escape');
+  await f.fill('#f-school', 'Wibble School of Widgets');   // back to where the block above left it
+
+  // Enter takes the highlighted option and must NOT submit the form
   await f.fill('#f-unit', 'oper');
   await f.waitForTimeout(200);
   await f.keyboard.press('ArrowDown');
@@ -1326,6 +1519,78 @@ for (const [name, expect] of [
     'form: the published line joins school and unit');
   ok((await f.textContent('#f-department-preview')).includes(unit),
     'form: the poster is shown what will appear under the institution name');
+
+  /* ---------------------------------------------- the picker on a phone
+
+     _MOBILE-STANDARDS.md rules 3, 5 and 6, over the one list on this site the
+     shared engine does not draw. It shipped as a 300px panel of 33px rows —
+     a mouse's list — because the form is not a list page and nothing measured
+     it.                                                                      */
+
+  await f.setViewportSize({ width: 390, height: 780 });
+  // close whatever is open: a panel with room above it now opens UPWARDS, over
+  // the fields above, so a stale one covers the field this block wants
+  await f.evaluate(() => {
+    const open = document.activeElement;
+    if (open && open.blur) open.blur();
+  });
+  await f.waitForTimeout(100);
+  await f.evaluate(() => document.getElementById('f-institution').scrollIntoView({ block: 'center' }));
+  await f.click('#f-institution');
+  await f.waitForTimeout(300);
+  const phone = await f.evaluate(() => {
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const r = list.getBoundingClientRect();
+    const row = list.querySelector('.oa-combo-opt').getBoundingClientRect();
+    return {
+      rightEdge: Math.round(r.right),
+      width: Math.round(r.width),
+      height: Math.round(r.height),
+      row: Math.round(row.height),
+      halfViewport: Math.round(window.innerHeight / 2),
+      viewport: window.innerWidth,
+      sideways: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  });
+  ok(phone.row >= 40, `form: an option is a thumb-sized target (${phone.row}px)`);
+  ok(phone.height <= phone.halfViewport + 1,
+    `form: the panel stays within half the screen (${phone.height}px of ${phone.halfViewport}px)`);
+  ok(phone.rightEdge <= phone.viewport && phone.width <= phone.viewport - 28,
+    `form: and inside it (${phone.width}px wide, right edge ${phone.rightEdge} of ${phone.viewport})`);
+  eq(phone.sideways, 0, 'form: the open picker does not make the page scroll sideways');
+
+  /* …and ON SCREEN, which is the half of rule 6 a height cap does not give:
+     the panel hangs under the field, and on a phone the field is halfway down,
+     so 422px of list ran 61px past the fold — and a field near the bottom put
+     the whole thing out of sight. It opens upwards when there is more room
+     above, measured after opening. */
+  const fold = await f.evaluate(async () => {
+    const out = [];
+    for (const id of ['f-institution', 'f-school', 'f-unit']) {
+      const el = document.getElementById(id);
+      el.scrollIntoView({ block: 'center' });
+      el.focus();
+      el.dispatchEvent(new Event('click', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 150));
+      const list = document.querySelector('.oa-combo-list:not([hidden])');
+      const r = list.getBoundingClientRect();
+      out.push({ id, off: Math.round(Math.max(0, r.bottom - window.innerHeight) + Math.max(0, -r.top)) });
+      el.blur();
+    }
+    // the worst case: the field at the very bottom of the screen
+    const last = document.getElementById('f-unit');
+    last.scrollIntoView({ block: 'end' });
+    last.focus();
+    last.dispatchEvent(new Event('click', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const r = list.getBoundingClientRect();
+    out.push({ id: 'f-unit at the fold', off: Math.round(Math.max(0, r.bottom - window.innerHeight) + Math.max(0, -r.top)) });
+    last.blur();
+    return out;
+  });
+  eq(fold.filter((x) => x.off > 0), [], 'form: the open picker is never off the screen on a phone');
+  await f.setViewportSize({ width: 1280, height: 1000 });
 
   eq(formErrors, [], 'form: no uncaught script errors');
   await f.close();

@@ -62,11 +62,42 @@
     return n;
   }
 
-  // Diacritic-insensitive fold, so "Münster" is found by typing "munster".
+  /* Diacritic-insensitive, so "Münster" is found by typing "munster", and
+     punctuation-insensitive, so a search for "Operations and Information
+     Systems" finds the department the site spells "Operations & Information
+     Systems". Both sides of every comparison are folded the same way, so this
+     only ever finds MORE — no search that worked before stops working.
+
+     It matters beyond tidiness: one department is written both ways across the
+     postings, and assets/oa-schools.js now publishes one of them. A reader who
+     bookmarked ?filterA=<the other one> must still find it. */
   function fold(s) {
     s = String(s === null || s === undefined ? '' : s).toLowerCase();
     if (s.normalize) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return s;
+    return s.replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '');
+  }
+
+  /* An ALL-CAPS needle is an acronym, and the site no longer prints acronyms:
+     "Department of Industrial Engineering & Operations Research (IEOR)" is
+     published as "Industrial Engineering and Operations Research", so a reader
+     — or an alert — asking for IEOR found nothing at all. The initials of the
+     words that remain are exactly what was dropped, so they are matched too.
+     Skips the joining words an acronym skips ("and", "of", "the", "for",
+     "in"), and only ever finds MORE. */
+  var ACRONYM = /^[A-Z]{2,6}$/;
+  var JOINERS = ' and of the for in a an at on to ';
+
+  function initials(s) {
+    var words = String(s == null ? '' : s)
+      .replace(/&/g, ' and ')
+      .split(/[^A-Za-z0-9]+/);
+    var out = '', i;
+    for (i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (!w || JOINERS.indexOf(' ' + w.toLowerCase() + ' ') !== -1) continue;
+      out += w.charAt(0).toLowerCase();
+    }
+    return out;
   }
 
   function asArray(v) {
@@ -164,9 +195,11 @@
   function matches(row, f, chosen) {
     if (f.type === 'text') {
       var needle = fold(chosen);
+      var acr = ACRONYM.test(String(chosen).trim()) ? String(chosen).trim().toLowerCase() : '';
       if (!needle) return true;
       return asArray(f.fields || [f.field]).some(function (name) {
-        return fold(row[name]).indexOf(needle) !== -1;
+        if (fold(row[name]).indexOf(needle) !== -1) return true;
+        return !!acr && initials(row[name]).indexOf(acr) !== -1;
       });
     }
     if (!chosen || !chosen.size) return true;
