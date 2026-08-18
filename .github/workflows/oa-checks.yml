@@ -128,6 +128,12 @@ jobs:
           # registry a second time — a release landing between the two calls
           # would key the cache to a version this job never ran.
           echo "version=$(node -p "require('./node_modules/playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+          # $ImageOS ("ubuntu24") is an environment VARIABLE the hosted runner
+          # sets, not a workflow context: `${{ env.ImageOS }}` in the key below
+          # expands to nothing, which is how the first run keyed itself
+          # `ms-playwright-Linux--1.62.1`. Read it here, where the shell can
+          # actually see it, so the key says what it claims to.
+          echo "image=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
 
       - name: The browser build that version pins
         uses: actions/cache@v4
@@ -140,7 +146,7 @@ jobs:
           # then save both — a cache that grows without ever paying for
           # itself. A key that never hits is not silent breakage either; it
           # just costs the download this step already knows how to survive.
-          key: ms-playwright-${{ runner.os }}-${{ env.ImageOS }}-${{ steps.pw.outputs.version }}
+          key: ms-playwright-${{ runner.os }}-${{ steps.pw.outputs.image }}-${{ steps.pw.outputs.version }}
 
       - name: The browser it drives
         timeout-minutes: 10
@@ -153,11 +159,17 @@ jobs:
           # over and the fallback never answered, nine minutes of silence
           # until the job cap killed the run. The GitHub runner image already
           # ships Chrome, Chromium, Edge and Firefox, so Chromium's libraries
-          # are installed as those packages' own dependencies. The apt run is
-          # kept, bounded and best-effort, because it costs little when the
-          # mirrors are healthy; the authoritative check that the browser can
-          # RUN is the launch in the next step, which fails loudly and names
-          # any library that is genuinely missing.
+          # come with them: on the first run under this file apt reported
+          # every one of them — libnss3, libgbm1, libatk*, libcups2t64,
+          # libdrm2, libxkbcommon0 … — as "already the newest version", and
+          # the only thing it actually installed was 21 MB of FONT packages
+          # for scripts this site does not use (Japanese, Chinese, Thai,
+          # Cyrillic, Unifont). That is the whole of what --with-deps was
+          # buying, at the price of an apt-get that can hang for ever. So it
+          # is kept, bounded and best-effort — it costs ~30s when the mirrors
+          # are healthy — and the authoritative check that the browser can RUN
+          # is the launch in the next step, which fails loudly and names any
+          # library that is genuinely missing.
           timeout 120 npx playwright install-deps chromium ||
             echo "::warning::playwright install-deps did not finish — continuing; the launch below is the real test"
           for attempt in 1 2; do
