@@ -89,6 +89,56 @@ if (process.env.PW_CHROMIUM) launch.executablePath = process.env.PW_CHROMIUM;
 launch.proxy = { server: 'http://127.0.0.1:1', bypass: '<-loopback>,127.0.0.1,localhost' };
 
 const browser = await chromium.launch(launch);
+
+/* ------------------------------------------------ measuring contrast, ONCE
+
+   THREE separate copies of this had accumulated in this file, each with its
+   own idea of what an element is painted on, and that is exactly how a naive
+   one crept back in: the account badge sits on `--brand-soft`, which in dark
+   theme is `rgba(198, 204, 212, 0.13)`. Read as a layer it looks like a LIGHT
+   ground under light ink and measures 1.02:1; what is actually painted is 13%
+   light over near-black, and the text reads at 8.11:1. The check failed a
+   badge nobody could fault.
+
+   So there is one implementation, it runs IN THE PAGE, and it COMPOSITES:
+   every translucent layer over the one behind it until an opaque one is
+   reached. `contrastOf(page, selector)` answers for one element; the audit
+   near the end of this file walks a whole page with the same arithmetic. */
+const CONTRAST_IN_PAGE = `(sel) => {
+  const parse = (css) => {
+    const m = String(css).match(/[\\d.]+/g);
+    if (!m || m.length < 3) return null;
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  };
+  const over = (top, bot) => ({
+    r: top.r * top.a + bot.r * (1 - top.a),
+    g: top.g * top.a + bot.g * (1 - top.a),
+    b: top.b * top.a + bot.b * (1 - top.a), a: 1,
+  });
+  const lum = (c) => {
+    const f = (v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  };
+  const el = document.querySelector(sel);
+  if (!el) return null;
+  const stack = [];
+  for (let n = el; n; n = n.parentElement) {
+    const c = parse(getComputedStyle(n).backgroundColor);
+    if (c && c.a > 0) { stack.push(c); if (c.a === 1) break; }
+  }
+  let bg = stack.length && stack[stack.length - 1].a === 1
+    ? stack.pop() : { r: 255, g: 255, b: 255, a: 1 };
+  while (stack.length) bg = over(stack.pop(), bg);
+  const fg = over(parse(getComputedStyle(el).color), bg);
+  const L1 = lum(fg), L2 = lum(bg);
+  return +(((Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)).toFixed(2));
+}`;
+
+/** The contrast the browser actually paints for the first `sel`, or null. */
+async function contrastOf(page, sel) {
+  return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
+}
+
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const jsErrors = [];
@@ -2823,36 +2873,11 @@ for (const [from, hash] of [
     'account menu: a count we do not know shows nothing at all');
   ok(seen.rightAligned, 'account menu: the badge sits at the end of its row');
 
-  /* its own, because the form block's helper is scoped to that block */
-  const lum2 = (css) => {
-    const m = String(css).match(/[\d.]+/g);
-    const [r, g, b] = m.slice(0, 3).map(Number).map((v) => {
-      const c = v / 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const ratio2 = (fg, bg) => {
-    const x = lum2(fg), y = lum2(bg);
-    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
-  };
-
   for (const theme of ['light', 'dark']) {
     await a.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
     await a.waitForTimeout(150);
-    const got = await a.evaluate(() => {
-      const el = document.querySelector('.oa-acct-n');
-      const ground = (n0) => {
-        for (let n = n0; n; n = n.parentElement) {
-          const c = getComputedStyle(n).backgroundColor;
-          if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c;
-        }
-        return 'rgb(255,255,255)';
-      };
-      return { fg: getComputedStyle(el).color, bg: ground(el) };
-    });
-    const cr = ratio2(got.fg, got.bg);
-    ok(cr >= 4.5, `account menu (${theme}): the badge reads at ${cr.toFixed(2)}:1`);
+    const cr = await contrastOf(a, '.oa-acct-n');
+    ok(cr >= 4.5, `account menu (${theme}): the badge reads at ${cr}:1`);
   }
   await a.close();
 }
