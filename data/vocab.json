@@ -2194,10 +2194,6 @@
    "n": 0
   },
   {
-   "v": "McDonough School of Business, Operations and Information Management",
-   "n": 0
-  },
-  {
    "v": "Mechanical and Industrial Engineering",
    "n": 0
   },
@@ -2963,13 +2959,13 @@
     "McDonough School of Business"
    ],
    "units": [
-    "McDonough School of Business, Operations and Information Management",
-    "NRF Business of Retail Initiative"
+    "NRF Business of Retail Initiative",
+    "Operations and Information Management"
    ],
    "bySchool": {
     "McDonough School of Business": [
-     "McDonough School of Business, Operations and Information Management",
-     "NRF Business of Retail Initiative"
+     "NRF Business of Retail Initiative",
+     "Operations and Information Management"
     ]
    }
   },
@@ -5804,8 +5800,8 @@
    "Industrial Engineering and Management Sciences"
   ],
   "McDonough School of Business": [
-   "McDonough School of Business, Operations and Information Management",
-   "NRF Business of Retail Initiative"
+   "NRF Business of Retail Initiative",
+   "Operations and Information Management"
   ],
   "Mendoza College of Business": [
    "Information Technology, Analytics, and Operations",

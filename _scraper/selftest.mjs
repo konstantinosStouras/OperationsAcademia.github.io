@@ -1303,6 +1303,38 @@ function testVocab() {
   eq(loose.byUniversity['X University'].units, ['Decision Sciences', 'Operations Management'],
     'and the university still offers both');
 
+  /* ------------------------------- what must never take the build down
+
+     buildVocab runs inside the daily build before anything is written, so a
+     row it cannot digest stops the site publishing at all. Each of these was
+     a real crash or a real malformed name, not a hypothetical. */
+
+  // a name in a script fold() does not know still has an identity of its own
+  const script = buildVocab([
+    { institution: '香港中文大學', school: '', unit: 'Operations Management' },
+    { institution: 'Πανεπιστήμιο Πειραιώς', school: '', unit: 'Operations' },
+  ]);
+  eq(script.universities.map((u) => u.v).sort(),
+    ['Πανεπιστήμιο Πειραιώς', '香港中文大學'],
+    'a university named in a non-Latin script is offered, not dropped and not fatal');
+  eq(script.byUniversity['香港中文大學'].units, ['Operations Management'],
+    'and it cascades like any other');
+
+  // a directory that is not a list of rows is no directory at all
+  eq(buildVocab([{ institution: 'X University', school: '', unit: 'Operations' }],
+    { directory: { not: 'a list' } }).universities, [{ v: 'X University', n: 1 }],
+    'a directory that is not a list is ignored rather than fatal');
+
+  // a directory row that repeats its school in the department field
+  const repeated = buildVocab([], { directory: [{
+    institution: 'Georgetown University',
+    school: 'McDonough School of Business',
+    department: 'McDonough School of Business, Operations and Information Management Area',
+  }] });
+  eq(repeated.byUniversity['Georgetown University'].bySchool,
+    { 'McDonough School of Business': ['Operations and Information Management'] },
+    'a department that repeats its school is offered without it — or the card would name the school twice');
+
   // a directory row for a place nobody has posted from is still offered
   const empty = buildVocab([], { directory: [
     { institution: 'Aalto University', school: 'School of Business', department: 'Marketing' },

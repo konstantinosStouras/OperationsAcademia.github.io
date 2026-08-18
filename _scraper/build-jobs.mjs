@@ -421,7 +421,11 @@ async function main() {
      oa-schools.js's canonPlace() at ingest, and buildVocab puts the directory
      rows — which have never been through an ingest — through the same
      function. */
-  const directory = await readJson(DIRECTORY, []);
+  const directory = await readJson(DIRECTORY, null);
+  if (!Array.isArray(directory) || !directory.length) {
+    warn(`${path.relative(process.cwd(), DIRECTORY)} is missing or unreadable — the ` +
+         'posting form will only offer the universities that have posted here.');
+  }
   const vocab = buildVocab(rows, { generated: now.toISOString(), directory });
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but

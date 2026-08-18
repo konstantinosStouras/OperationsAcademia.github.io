@@ -192,9 +192,25 @@ function pickForm(forms) {
 }
 
 /**
+ * The identity a name is grouped under.
+ *
+ * fold() keeps only [a-z0-9], so a name written in a script it does not know —
+ * 香港中文大學, Πανεπιστήμιο, МГУ — folds to NOTHING. Dropping those is not an
+ * option: a university whose name the form cannot offer is the same bug this
+ * file exists to end, and one arriving in a submission used to take the whole
+ * daily build down with it (the tally dropped the name, the tree did not, and
+ * the lookup between them found nothing). So the tidied name stands in for its
+ * own fold, which groups it with itself and nothing else.
+ */
+function keyOf(v) {
+  const s = tidy(v);
+  return nameFold(s) || s.toLowerCase();
+}
+
+/**
  * Group spellings of one name, count the POSTINGS behind each (directory rows
- * carry no count) and keep one spelling per place. Returns a Map keyed by the
- * fold so a caller can look a raw value up; `n` is a posting count, which is
+ * carry no count) and keep one spelling per place. Returns a Map keyed by
+ * keyOf so a caller can look a raw value up; `n` is a posting count, which is
  * what the form's "4 postings" note means.
  */
 function tally(items) {
@@ -202,7 +218,7 @@ function tally(items) {
   for (const it of items) {
     const v = tidy(it.v);
     if (!v) continue;
-    const k = nameFold(v);
+    const k = keyOf(v);
     if (!k) continue;
     const e = by.get(k) || { n: 0, forms: new Map() };
     e.n += it.w;
@@ -226,7 +242,7 @@ function listOf(t) {
 
 /** The spelling `t` keeps for a raw value, or the value tidied if it is new. */
 function formOf(t, v) {
-  const k = nameFold(v);
+  const k = keyOf(v);
   const hit = k && t.get(k);
   return hit ? hit.v : tidy(v);
 }
@@ -245,9 +261,16 @@ function partOf(r, w) {
   const split = (r.school !== undefined || r.unit !== undefined)
     ? { school: tidy(r.school), unit: tidy(r.unit) }
     : splitDepartment(r.department);
-  // the directory has no `unit`: its department sits in `department`
+  /* The directory has no `unit`: its department sits in `department` — and
+     often repeats the school there ("McDonough School of Business, Operations
+     and Information Management Area"), which would offer a department that
+     names its own school and publish the school twice on the card. */
   if (r.unit === undefined && r.department !== undefined && r.school !== undefined) {
     split.unit = tidy(r.department);
+    const lead = split.unit.split(',')[0];
+    if (split.school && nameFold(lead) === nameFold(split.school)) {
+      split.unit = tidy(split.unit.slice(lead.length + 1));
+    }
   }
   const place = canonPlace({ institution: r.institution, school: split.school, unit: split.unit });
   return { institution: place.institution, school: place.school, unit: place.unit, w };
@@ -281,9 +304,12 @@ function fromPairs(pairs) {
  * spelling, which is not always the one the whole site uses most.
  */
 export function buildVocab(rows, { generated = '', directory = [] } = {}) {
+  // a directory that is not a list of rows is no directory at all, and must
+  // not take the build down on its way to being reported
+  const dir = Array.isArray(directory) ? directory : [];
   const parts = [
     ...rows.map((r) => partOf(r, 1)),
-    ...directory.map((r) => partOf(r, 0)),
+    ...dir.map((r) => partOf(r, 0)),
   ];
 
   const universities = tally(parts.map((p) => ({ v: p.institution, w: p.w })));
@@ -303,7 +329,7 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
   const grouped = new Map();
   for (const p of parts) {
     if (!p.institution) continue;
-    const k = nameFold(p.institution);
+    const k = keyOf(p.institution);
     if (!grouped.has(k)) grouped.set(k, []);
     grouped.get(k).push(p);
   }
