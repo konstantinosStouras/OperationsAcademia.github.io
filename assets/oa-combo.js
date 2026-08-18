@@ -318,7 +318,12 @@
         input.setAttribute('aria-activedescendant', state.rows[state.active].id);
         var el = state.rows[state.active];
         var top = el.offsetTop, bottom = top + el.offsetHeight;
-        if (top < list.scrollTop) list.scrollTop = top;
+        /* A group's heading is sticky, so scrolling a row flush with the top
+           of the list parks it UNDER the heading — 28 of its 33 pixels hidden,
+           and the keyboard-highlighted option invisible. Leave room for it. */
+        var head = el.parentNode && el.parentNode.firstChild;
+        var lead = (head && head.className === 'oa-combo-group') ? head.offsetHeight : 0;
+        if (top - lead < list.scrollTop) list.scrollTop = Math.max(0, top - lead);
         else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight;
       } else {
         input.removeAttribute('aria-activedescendant');
@@ -360,8 +365,14 @@
         e.preventDefault();
         if (!state.open) { open(); return; }
         if (!state.rows.length) return;
+        /* Positions are -1 (nothing) and 0..rows-1, so the cycle is rows+1
+           long and the arithmetic runs over `active + 1`. Without that +1
+           ArrowDown moved from -1 to 0 and then stuck there for ever, and
+           ArrowUp climbed in twos — the picker could be opened from the
+           keyboard and every row but the first was unreachable. */
         var d = e.key === 'ArrowDown' ? 1 : -1;
-        state.active = (state.active + d + state.rows.length + 1) % (state.rows.length + 1) - 1;
+        var span = state.rows.length + 1;
+        state.active = (state.active + 1 + d + span) % span - 1;
         if (state.active < 0) state.active = d > 0 ? 0 : state.rows.length - 1;
         paintActive();
       } else if (e.key === 'Enter') {

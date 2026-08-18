@@ -557,16 +557,21 @@
 
     EDIT_REF = v.ref || '';
 
-    /* Keep the derived department line and its preview in step — and fire
-       `change` too, so the name fields show the spelling the SITE publishes
-       rather than the one this document happens to store (the build puts a
-       posting's school and department into the vocabulary's spelling; the
-       document it came from is never rewritten). */
+    /* Keep the derived department line and its preview in step, and let the
+       name fields settle into the spelling the SITE publishes — the same
+       canonPlace() this posting will go through when it is republished.
+
+       `change` is fired on the first two only, NEVER on the department: that
+       is what fills an EMPTY school from an unambiguous department, and doing
+       it here would put a school on a posting whose owner deliberately left
+       it off, just because they opened the edit form. */
     ['f-institution', 'f-school', 'f-unit'].forEach(function (id) {
       var el = $(id);
-      if (!el) return;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
+      if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    ['f-institution', 'f-school'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
 
@@ -915,10 +920,10 @@
           if (uni) {
             var own = uni.own.bySchool || {};
             var hit = index(own, keySchool)[keySchool(school.value)];
-            if (hit) return { name: hit, units: own[hit] || [] };
+            if (hit) return { name: hit, units: own[hit] || [], here: true };
           }
           var site = schoolIndex[keySchool(school.value)];
-          if (site) return { name: site, units: bySchool[site] || [] };
+          if (site) return { name: site, units: bySchool[site] || [], here: false };
           return null;
         }
 
@@ -936,10 +941,18 @@
             more: 'Type to search every school the site knows.',
           } : null);
 
+          /* A school the chosen university does not have — because the
+             university is new, or spelled differently — is still worth
+             offering from, but the label says so: "College of Business" is
+             thirteen universities' name for thirteen different schools, and
+             heading their departments as if they were this one's would be a
+             claim the site cannot make. */
           var mine = chosenSchool(uni);
           var units = mine ? mine.units : (uni ? (uni.own.units || []) : []);
           var label = mine
-            ? 'Departments in ' + mine.name
+            ? (mine.here
+                ? 'Departments in ' + mine.name
+                : 'Departments in ' + mine.name + ', elsewhere on the site')
             : (uni ? 'Departments at ' + uni.name : '');
 
           combos.unit.setScope(units.length ? {

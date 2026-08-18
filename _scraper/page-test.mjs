@@ -1403,7 +1403,44 @@ for (const [name, expect] of [
   await f.waitForTimeout(150);
   eq(await f.inputValue('#f-school'), 'Wibble School of Widgets', 'form: a new name is accepted');
 
-  // keyboard: Enter takes the highlighted option and must NOT submit the form
+  /* keyboard: every row is reachable — ArrowDown used to move off "nothing"
+     onto the first row and then stick there for ever, so with a scope in force
+     (one row in it, the rest under "Elsewhere on the site") no key sequence
+     reached the rest of the site at all. And the row it highlights must be
+     VISIBLE: a sticky group heading sits exactly where the list scrolls to. */
+  await f.fill('#f-school', 'school of business');
+  await f.waitForTimeout(250);
+  const rowCount = await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-opt', (n) => n.length);
+  ok(rowCount > 5, `form: a search reaches past the scope (${rowCount} rows to walk)`);
+  const walked = [];
+  for (let i = 0; i < 4; i += 1) {
+    await f.keyboard.press('ArrowDown');
+    walked.push(await f.$eval('.oa-combo-list:not([hidden])',
+      (l) => [...l.querySelectorAll('.oa-combo-opt')].indexOf(l.querySelector('.oa-combo-opt.is-active'))));
+  }
+  eq(walked, [0, 1, 2, 3], 'form: ArrowDown walks down the list rather than sticking on the first row');
+  const up = [];
+  for (let i = 0; i < 2; i += 1) {
+    await f.keyboard.press('ArrowUp');
+    up.push(await f.$eval('.oa-combo-list:not([hidden])',
+      (l) => [...l.querySelectorAll('.oa-combo-opt')].indexOf(l.querySelector('.oa-combo-opt.is-active'))));
+  }
+  eq(up, [2, 1], 'form: and ArrowUp climbs it one row at a time, not two');
+
+  for (let i = 0; i < 10; i += 1) await f.keyboard.press('ArrowDown');
+  const visible = await f.evaluate(() => {
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const el = list.querySelector('.oa-combo-opt.is-active');
+    if (!el) return 'no active row';
+    const r = el.getBoundingClientRect();
+    const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return el.contains(at) ? true : (at ? at.className : 'nothing');
+  });
+  eq(visible, true, 'form: the highlighted row is not hidden behind the sticky group heading');
+  await f.keyboard.press('Escape');
+  await f.fill('#f-school', 'Wibble School of Widgets');   // back to where the block above left it
+
+  // Enter takes the highlighted option and must NOT submit the form
   await f.fill('#f-unit', 'oper');
   await f.waitForTimeout(200);
   await f.keyboard.press('ArrowDown');
