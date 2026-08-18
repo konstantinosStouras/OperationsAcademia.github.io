@@ -40,16 +40,38 @@
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
 
 
-    <!-- theme before first paint, so neither mode ever flashes the other -->
+    <!-- theme and account chip before first paint, so neither the mode nor the
+         header ever flashes something else first -->
     <script>
     (function () {
+      var el = document.documentElement;
       try {
         var t = localStorage.getItem('oaV3Theme');
         if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
-        document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        el.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
       } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
+        el.setAttribute('data-theme', 'light');
       }
+      /* The account chip, for the same reason and in the same breath. It is
+         painted by assets/oa-accounts.js, which cannot run until the page has
+         parsed — so #oa-account is empty and 0px wide for ~130ms and the whole
+         header row jumps sideways when the chip lands (measured: the nav by
+         62px, the theme toggle by 185px). Reserve the space it will take, from
+         the same localStorage hint the chip is painted from, before the browser
+         draws anything. */
+      try {
+        var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        /* the width the chip MEASURED last visit, so the reserve is the real
+           one and not a guess at how long a name is; absent on a first visit,
+           where the stylesheet's own minimum takes over. Bounded because this
+           value is written into a style before anything else runs, and the
+           only honest thing to do with a number that is not a plausible chip
+           width is to ignore it. */
+        if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
+          el.style.setProperty('--oa-chip-w', h.w + 'px');
+        }
+      } catch (e) { /* private mode — the reserve is an optimisation */ }
     })();
     </script>
 
@@ -58,9 +80,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
+    <!-- The Firebase SDK is ~700 KB of third-party JavaScript that NOTHING on
+         screen waits for any more: the account chip is painted from the
+         localStorage hint before the SDK has even been asked for, and the
+         session it restores only confirms what the chip already shows. It was
+         being PRELOADED here, which is a high-priority fetch competing with
+         this page's own stylesheet and data at the very moment the first paint
+         is being assembled. The preconnect stays — it warms the connection, at
+         no bandwidth cost, so the SDK still arrives promptly when
+         oa-firebase.js asks for it. -->
 
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
@@ -688,16 +716,27 @@
     <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
 
     <!-- ================================================================ scripts -->
-    <script src="assets/v3.js"></script>
-    <script src="assets/oa-firebase.js"></script>
-    <script src="assets/oa-accounts.js"></script>
-    <script src="assets/oa-usage.js"></script>
-    <script src="assets/oa-list.js"></script>
-    <script src="assets/oa-jobedit.js"></script>
-    <script src="assets/oa-candidateedit.js"></script>
-    <script src="assets/oa-placementedit.js"></script>
+    <script defer src="assets/v3.js"></script>
+    <script defer src="assets/oa-firebase.js"></script>
+    <script defer src="assets/oa-accounts.js"></script>
+    <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-list.js"></script>
+    <script defer src="assets/oa-jobedit.js"></script>
+    <script defer src="assets/oa-candidateedit.js"></script>
+    <script defer src="assets/oa-placementedit.js"></script>
     <script>
-    (function () {
+    /* The external scripts above are DEFERRED, so they execute after the
+       document has been parsed — which is AFTER an inline script like this one
+       would otherwise run. This block reads what they define (OAList, V3,
+       OAAccounts), so it waits for DOMContentLoaded, the first moment they are
+       all guaranteed to have executed.
+
+       One consequence worth knowing: each of those modules dispatches on
+       document.readyState, and under `defer` that reads 'interactive', so they
+       now boot BEFORE this block instead of after it. Nothing here depends on
+       running first — but something added here that does would be a bug, not a
+       preference. */
+    document.addEventListener('DOMContentLoaded', function () {
       'use strict';
       var U = window.OAList.safeUrl;
 
@@ -767,8 +806,9 @@
          One read of the live file feeds both: the launcher's selects (which
          always SHOW a value — "All types" until a narrower one is picked),
          and the count on the explore button. */
-      fetch('/data/jobs.json', { credentials: 'same-origin', cache: 'no-cache' })
-        .then(function (r) { return r.ok ? r.json() : null; })
+      /* through OAList.load, so this and the ten-most-recent list below share
+         ONE request for the file rather than fetching 117 KB twice */
+      OAList.load('/data/jobs.json')
         .then(function (data) {
           if (!data) return;
           var rows = (Array.isArray(data) ? data : data.rows || []).filter(inCurrentMarket);
@@ -827,8 +867,9 @@
       /* The placements DATASET restarted empty at the 2026 cutover — the
          ~173 historical placements live in the /v1 archive's records — so the
          static "170+" stands until the live file grows past it. */
-      fetch('/data/placements.json', { credentials: 'same-origin', cache: 'no-cache' })
-        .then(function (r) { return r.ok ? r.json() : null; })
+      /* through OAList.load, like the postings above: this and the placements
+         list further down share ONE request for the file */
+      OAList.load('/data/placements.json')
         .then(function (data) {
           if (!data) return;
           var rows = Array.isArray(data) ? data : data.rows || [];
@@ -1179,7 +1220,7 @@
         });
         if (window.OAPlacementEdit) OAPlacementEdit.attach(placements);
       });
-    })();
+    });
     </script>
   </body>
 </html>

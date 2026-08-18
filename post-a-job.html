@@ -40,13 +40,34 @@
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <script>
     (function () {
+      var el = document.documentElement;
       try {
         var t = localStorage.getItem('oaV3Theme');
         if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
-        document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        el.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
       } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
+        el.setAttribute('data-theme', 'light');
       }
+      /* The account chip, for the same reason and in the same breath. It is
+         painted by assets/oa-accounts.js, which cannot run until the page has
+         parsed — so #oa-account is empty and 0px wide for ~130ms and the whole
+         header row jumps sideways when the chip lands (measured: the nav by
+         62px, the theme toggle by 185px). Reserve the space it will take, from
+         the same localStorage hint the chip is painted from, before the browser
+         draws anything. */
+      try {
+        var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        /* the width the chip MEASURED last visit, so the reserve is the real
+           one and not a guess at how long a name is; absent on a first visit,
+           where the stylesheet's own minimum takes over. Bounded because this
+           value is written into a style before anything else runs, and the
+           only honest thing to do with a number that is not a plausible chip
+           width is to ignore it. */
+        if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
+          el.style.setProperty('--oa-chip-w', h.w + 'px');
+        }
+      } catch (e) { /* private mode — the reserve is an optimisation */ }
     })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,9 +75,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
+    <!-- The Firebase SDK is ~700 KB of third-party JavaScript that NOTHING on
+         screen waits for any more: the account chip is painted from the
+         localStorage hint before the SDK has even been asked for, and the
+         session it restores only confirms what the chip already shows. It was
+         being PRELOADED here, which is a high-priority fetch competing with
+         this page's own stylesheet and data at the very moment the first paint
+         is being assembled. The preconnect stays — it warms the connection, at
+         no bandwidth cost, so the SDK still arrives promptly when
+         oa-firebase.js asks for it. -->
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
@@ -441,21 +468,20 @@
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
             <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a> &nbsp;&middot;&nbsp;
-            <a href="/v1/">2014-2026 archive</a>
+            <a href="privacy-policy.html">Privacy</a>
           </span>
         </div>
       </div>
     </footer>
 
 
-    <script src="assets/v3.js"></script>
-    <script src="assets/oa-firebase.js"></script>
-    <script src="assets/oa-accounts.js"></script>
-    <script src="assets/oa-usage.js"></script>
-    <script src="assets/oa-schools.js"></script>
-    <script src="assets/oa-combo.js"></script>
-    <script src="assets/oa-countries.js"></script>
-    <script src="assets/oa-jobform.js"></script>
+    <script defer src="assets/v3.js"></script>
+    <script defer src="assets/oa-firebase.js"></script>
+    <script defer src="assets/oa-accounts.js"></script>
+    <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-combo.js"></script>
+    <script defer src="assets/oa-countries.js"></script>
+    <script defer src="assets/oa-jobform.js"></script>
   </body>
 </html>

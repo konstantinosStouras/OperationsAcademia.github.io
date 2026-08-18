@@ -3160,6 +3160,203 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
   await t.close();
 }
 
+/* ------------------------------------- the header does not blink or shake
+
+   The owner's report (2026-08-18): reloading any page flashes a header with no
+   account control, which then appears and shoves the row sideways, and the
+   avatar shows a coloured initials disc for half a second before the real
+   photograph replaces it.
+
+   Both halves were measured before they were fixed: #oa-account was empty and
+   0px wide for ~130ms (the nav sat 62px to the right, the theme toggle 185px),
+   and the chip painted INITIALS at 134ms and PHOTO at 796ms.
+
+   So this drives the real thing rather than reading the source: it stubs the
+   Firebase SDK to answer SLOWLY (which is what the network does — a refused
+   request collapses the very window the bug lives in and would hide it),
+   samples the header every animation frame through a whole load, and asserts
+   that nothing moves and that the first chip ever painted is the finished one. */
+{
+  const PHOTO = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+  const SDK_DELAY = 500, PROFILE_DELAY = 400;
+  const stub = `
+    (function(){
+      var user = { uid:'u-test', email:'reader@example.com', displayName:'Kostas Stouras',
+                   photoURL:'${PHOTO}', providerData:[] };
+      var prof = { firstName:'Kostas', lastName:'Stouras', photo:'${PHOTO}' };
+      function snap(){ return { exists:true, data:function(){ return prof; } }; }
+      function doc(){ return { get:function(){ return new Promise(function(res){
+            setTimeout(function(){ res(snap()); }, ${PROFILE_DELAY}); }); },
+        set:function(){ return Promise.resolve(); },
+        onSnapshot:function(cb){ setTimeout(function(){ cb(snap()); }, ${PROFILE_DELAY}); return function(){}; } }; }
+      function coll(){ return { doc:doc, where:function(){ return this; },
+        get:function(){ return Promise.resolve({ empty:true, size:0, docs:[], forEach:function(){} }); },
+        count:function(){ return { get:function(){ return Promise.resolve({ data:function(){ return { count:0 }; } }); } }; } }; }
+      window.firebase = { apps: [], initializeApp:function(){ this.apps.push({}); return {}; },
+        auth:function(){ return { onAuthStateChanged:function(cb){ setTimeout(function(){ cb(user); }, 50); },
+          currentUser:user, signOut:function(){ return Promise.resolve(); } }; },
+        firestore:function(){ return { collection:coll, collectionGroup:coll }; } };
+      window.firebase.firestore.FieldValue = { serverTimestamp:function(){ return 0; }, delete:function(){ return 0; } };
+    })();`;
+
+  const h = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+  await h.route('**/firebasejs/**', async (route) => {
+    await new Promise((r) => setTimeout(r, SDK_DELAY));
+    await route.fulfill({ status: 200, contentType: 'application/javascript', body: stub });
+  });
+
+  // one ordinary visit, which is what teaches the browser the photo and the width
+  await h.goto(BASE, { waitUntil: 'load' });
+  await h.waitForFunction(() => {
+    try {
+      const x = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+      const p = JSON.parse(localStorage.getItem('oaAcctPhoto') || 'null');
+      return !!(x && x.w > 0 && p && p.photo);
+    } catch { return false; }
+  }, null, { timeout: 8000 }).catch(() => {});
+
+  const remembered = await h.evaluate(() => {
+    const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } };
+    return { hint: read('oaAuthHint'), photo: read('oaAcctPhoto'),
+      hintBytes: (localStorage.getItem('oaAuthHint') || '').length };
+  });
+  ok(!!(remembered.photo && remembered.photo.photo), 'the browser remembers the profile photo');
+  ok(!!(remembered.hint && remembered.hint.w > 0), 'and how wide the chip was');
+  /* THE PHOTO IS NOT IN THE HINT, and this is the check that keeps it out:
+     every page parses oaAuthHint in its <head>, before the first paint, and a
+     25 KB JPEG data URL parsed there costs exactly the milliseconds this whole
+     change is spending. (It is also the key the frozen /v2/ tree writes in its
+     own shape, so a field kept there is a field an archive visit deletes.) */
+  ok(!('photo' in (remembered.hint || {})),
+    'the head-parsed hint does not carry the picture');
+  ok(remembered.hintBytes < 400,
+    `and stays small enough to parse before the first paint (${remembered.hintBytes} bytes)`);
+
+  // now the reload the owner described, sampled frame by frame
+  await h.addInitScript(() => {
+    window.__hdr = [];
+    const snap = () => {
+      const host = document.getElementById('oa-account');
+      const nav = document.querySelector('.v3-nav a');
+      const tog = document.querySelector('.v3-theme');
+      if (host) window.__hdr.push({
+        state: host.innerHTML
+          ? (host.querySelector('.oa-avatar-img') ? 'PHOTO'
+            : host.querySelector('.oa-avatar') ? 'INITIALS'
+              : host.querySelector('#oa-signin') ? 'SIGN-IN' : 'other')
+          : 'EMPTY',
+        nav: nav ? Math.round(nav.getBoundingClientRect().left) : -1,
+        tog: tog ? Math.round(tog.getBoundingClientRect().left) : -1,
+      });
+      requestAnimationFrame(snap);
+    };
+    requestAnimationFrame(snap);
+  });
+  await h.goto(BASE, { waitUntil: 'load' });
+  await h.waitForFunction(() => !!document.querySelector('#oa-account .oa-avatar-img'), null, { timeout: 8000 })
+    .catch(() => {});
+  await h.waitForTimeout(400);
+
+  const frames = await h.evaluate(() => window.__hdr);
+  ok(frames.length > 5, `the header was sampled through the load (${frames.length} frames)`);
+  const navs = [...new Set(frames.map((f) => f.nav))];
+  const togs = [...new Set(frames.map((f) => f.tog))];
+  eq(navs.length, 1, `the nav does not move while the chip lands (saw ${navs.join(', ')})`);
+  eq(togs.length, 1, `nor does the theme toggle (saw ${togs.join(', ')})`);
+  const painted = frames.filter((f) => f.state !== 'EMPTY').map((f) => f.state);
+  ok(painted.length > 0, 'the chip was painted');
+  eq([...new Set(painted)], ['PHOTO'],
+    'and every painted state carries the photograph — the initials disc never flashes first');
+
+  // the reserve is what does it, and it is stamped before anything is drawn
+  eq(await h.evaluate(() => document.documentElement.getAttribute('data-oa-auth')), 'in',
+    'the head snippet stamps data-oa-auth before first paint');
+  ok(await h.evaluate(() => !!document.documentElement.style.getPropertyValue('--oa-chip-w')),
+    'and hands the stylesheet the width to reserve');
+
+  /* THE BAND WHERE THE NAME IS HIDDEN BUT THE WINDOW IS STILL WIDE.
+     oa-ui.css hides .oa-acct-name from 841px to 980px, while v3.css's own
+     narrow breakpoint is 900 — so a chip at 940px is an avatar and its
+     padding. Measuring THAT and remembering it as "the chip's width" would
+     under-reserve every wider window afterwards, which is the shift this whole
+     block exists to prevent. The measurement asks whether the name is
+     displayed rather than repeating a number; this pins the outcome. */
+  const band = await browser.newPage({ viewport: { width: 940, height: 900 } });
+  await band.route('**/firebasejs/**', async (route) => {
+    await new Promise((r) => setTimeout(r, SDK_DELAY));
+    await route.fulfill({ status: 200, contentType: 'application/javascript', body: stub });
+  });
+  await band.goto(BASE, { waitUntil: 'load' });
+  await band.waitForTimeout(900);
+  const narrow = await band.evaluate(() => {
+    const n = document.querySelector('.oa-acct-name');
+    let hint = null;
+    try { hint = JSON.parse(localStorage.getItem('oaAuthHint') || 'null'); } catch { /* none */ }
+    return { nameShown: !!(n && getComputedStyle(n).display !== 'none'),
+      remembered: (hint && hint.w) || 0 };
+  });
+  ok(!narrow.nameShown, 'at 940px the chip is an avatar, with no name beside it');
+  eq(narrow.remembered, 0, 'and its width is not remembered as the chip width');
+  await band.close();
+
+  await h.close();
+
+  /* …and a signed-out reader gets the signed-out reserve, not the chip's.
+     In a page of its OWN, because that is what a signed-out reader is: a
+     browser with no hint in it. Clearing the key on the page above does not
+     make one — that page still has a signed-in session running, and it writes
+     the hint straight back. */
+  const out = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+  await out.goto(BASE, { waitUntil: 'domcontentloaded' });
+  eq(await out.evaluate(() => document.documentElement.getAttribute('data-oa-auth')), 'out',
+    'a signed-out reader is stamped as such');
+  eq(await out.evaluate(() => document.documentElement.style.getPropertyValue('--oa-chip-w')), '',
+    'and no chip width is reserved for a chip they will not be shown');
+  eq(await out.evaluate(() => localStorage.getItem('oaAcctPhoto')), null,
+    'and a browser nobody has signed in on holds no picture');
+  await out.close();
+}
+
+/* --------------------------------------- the phone header carries the NAME
+
+   Owner, 2026-08-18: "for mobile devices the entire logo (picture and text)
+   should be shown on top left. Currently, I only see the image". It was a
+   deliberate rule — the wordmark at full size pushes the burger off a 390px
+   screen — so the lockup is scaled down instead of cut in half, and this is
+   what holds that: the words are there, and the row still fits, at every phone
+   width the site is likely to meet. */
+for (const w of [320, 360, 390, 430]) {
+  const m = await browser.newPage({ viewport: { width: w, height: 800 }, isMobile: true, hasTouch: true });
+  await m.goto(BASE, { waitUntil: 'domcontentloaded' });
+  const r = await m.evaluate(() => {
+    const q = (sel) => document.querySelector(sel);
+    const seen = (el) => {
+      if (!el) return false;
+      const b = el.getBoundingClientRect(), cs = getComputedStyle(el);
+      return b.width > 0 && b.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden';
+    };
+    const words = q('.v3-header .v3-words'), burger = q('.v3-burger');
+    const bb = burger ? burger.getBoundingClientRect() : null;
+    const top = bb ? document.elementFromPoint(bb.left + bb.width / 2, bb.top + bb.height / 2) : null;
+    return {
+      mark: seen(q('.v3-header .v3-mark')),
+      words: seen(words),
+      text: words ? words.innerText.replace(/\s+/g, ' ').trim() : '',
+      clash: !!(words && bb && Math.round(words.getBoundingClientRect().right) > Math.round(bb.left)),
+      burgerHit: !!(top && burger && (top === burger || burger.contains(top))),
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  ok(r.mark, `${w}px: the monogram is shown`);
+  ok(r.words, `${w}px: and so is the wordmark — the whole lockup, not the mark alone`);
+  ok(/Operations/.test(r.text) && /Academia/.test(r.text),
+    `${w}px: the wordmark reads "Operations Academia" (got ${JSON.stringify(r.text)})`);
+  ok(!r.clash, `${w}px: and does not run into the menu button`);
+  ok(r.burgerHit, `${w}px: the menu button is still the thing under its own centre`);
+  ok(!r.overflowX, `${w}px: the page does not scroll sideways`);
+  await m.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');

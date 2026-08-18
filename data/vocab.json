@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T10:06:20.048Z",
+ "generated": "2026-08-18T13:05:26.200Z",
  "universities": [
   {
    "v": "University College London",
@@ -139,6 +139,10 @@
   },
   {
    "v": "Georgia State University",
+   "n": 1
+  },
+  {
+   "v": "Harvard University",
    "n": 1
   },
   {
@@ -479,10 +483,6 @@
   },
   {
    "v": "Harvard Kennedy School",
-   "n": 0
-  },
-  {
-   "v": "Harvard University",
    "n": 0
   },
   {
@@ -1212,11 +1212,11 @@
    "n": 5
   },
   {
-   "v": "C. T. Bauer College of Business",
-   "n": 4
+   "v": "Darden School of Business",
+   "n": 5
   },
   {
-   "v": "Darden School of Business",
+   "v": "C. T. Bauer College of Business",
    "n": 4
   },
   {
@@ -1248,10 +1248,6 @@
    "n": 2
   },
   {
-   "v": "NUS Business School",
-   "n": 2
-  },
-  {
    "v": "Bayes Business School",
    "n": 1
   },
@@ -1261,10 +1257,6 @@
   },
   {
    "v": "Curtis L. Carlson School of Management",
-   "n": 1
-  },
-  {
-   "v": "Desautels Faculty of Management",
    "n": 1
   },
   {
@@ -1285,6 +1277,10 @@
   },
   {
    "v": "Gies College of Business",
+   "n": 1
+  },
+  {
+   "v": "Harvard Business School",
    "n": 1
   },
   {
@@ -1325,6 +1321,10 @@
   },
   {
    "v": "Nanyang Business School",
+   "n": 1
+  },
+  {
+   "v": "NUS Business School",
    "n": 1
   },
   {
@@ -1516,6 +1516,10 @@
    "n": 0
   },
   {
+   "v": "Desautels Faculty of Management",
+   "n": 0
+  },
+  {
    "v": "Driehaus College of Business",
    "n": 0
   },
@@ -1621,10 +1625,6 @@
   },
   {
    "v": "Harbert College of Business",
-   "n": 0
-  },
-  {
-   "v": "Harvard Business School",
    "n": 0
   },
   {
@@ -2102,23 +2102,23 @@
    "n": 6
   },
   {
-   "v": "Operations Management",
-   "n": 5
-  },
-  {
    "v": "Supply Chain Management",
    "n": 5
   },
   {
-   "v": "Department of Decision and Information Sciences",
+   "v": "Operations Management",
    "n": 4
   },
   {
-   "v": "Analytics and Operations",
+   "v": "Business Analytics",
    "n": 3
   },
   {
-   "v": "Business Analytics",
+   "v": "Data Analytics and Decision Sciences",
+   "n": 3
+  },
+  {
+   "v": "Department of Decision and Information Sciences",
    "n": 3
   },
   {
@@ -2138,11 +2138,11 @@
    "n": 3
   },
   {
-   "v": "Analytics, Information and Operations Management",
+   "v": "Analytics and Operations",
    "n": 2
   },
   {
-   "v": "Data Analytics and Decision Sciences",
+   "v": "Analytics, Information and Operations Management",
    "n": 2
   },
   {
@@ -2174,6 +2174,10 @@
    "n": 2
   },
   {
+   "v": "Technology and Operations Management",
+   "n": 2
+  },
+  {
    "v": "Business Administration",
    "n": 1
   },
@@ -2191,6 +2195,10 @@
   },
   {
    "v": "Decisions, Operations and Technology",
+   "n": 1
+  },
+  {
+   "v": "Desautels Faculty of Management, Operations Management",
    "n": 1
   },
   {
@@ -2250,6 +2258,10 @@
    "n": 1
   },
   {
+   "v": "NUS Business School, Department of Analytics and Operations",
+   "n": 1
+  },
+  {
    "v": "Operations and Analytics Department",
    "n": 1
   },
@@ -2291,10 +2303,6 @@
   },
   {
    "v": "Supply Chain and Operations",
-   "n": 1
-  },
-  {
-   "v": "Technology and Operations Management",
    "n": 1
   },
   {
@@ -4131,9 +4139,13 @@
     "Desautels Faculty of Management"
    ],
    "units": [
+    "Desautels Faculty of Management, Operations Management",
     "Operations Management"
    ],
    "bySchool": {
+    "": [
+     "Desautels Faculty of Management, Operations Management"
+    ],
     "Desautels Faculty of Management": [
      "Operations Management"
     ]
@@ -4278,11 +4290,13 @@
    ],
    "units": [
     "Analytics and Operations",
-    "Industrial Systems Engineering and Management"
+    "Industrial Systems Engineering and Management",
+    "NUS Business School, Department of Analytics and Operations"
    ],
    "bySchool": {
     "": [
-     "Industrial Systems Engineering and Management"
+     "Industrial Systems Engineering and Management",
+     "NUS Business School, Department of Analytics and Operations"
     ],
     "NUS Business School": [
      "Analytics and Operations"
@@ -6444,9 +6458,6 @@
     "Technology and Operations Management"
    ],
    "bySchool": {
-    "": [
-     "Technology and Operations Management"
-    ],
     "Darden School of Business": [
      "Data Analytics and Decision Sciences",
      "Technology and Operations Management"

@@ -377,6 +377,13 @@
     var seen = /^(\d[\d,]*)/.exec((el.textContent || '').trim());
     var now = prev ? prev.value
       : seen ? parseInt(seen[1].replace(/,/g, ''), 10) : 0;
+    /* Deliberately `<`, not `<=`: a figure the HTML seeded AT its target is
+       the ordinary case here (index.html writes "200+", "700+", "2014"), and
+       it is the one the count-up animation exists FOR — starting it at the
+       target would paint the final number and animate nothing. The reported
+       symptom, a hero holding "0+ universities", was never this line: it was
+       the observer firing behind seven synchronous scripts, which deferring
+       them and taking the counters over at parse time is what fixes. */
     var from = now > 0 && now < target ? now : 0;
     var state = { value: from, dead: false, io: null };
 
@@ -425,7 +432,6 @@
     wireSmoothScroll();
     wireSpy();
     wireFaq();
-    wireReveals();
     wireTop();
     wireCounts();
     $$('.js-current-year').forEach(function (el) {
@@ -433,9 +439,22 @@
     });
   }
 
-  // The numbers are taken over at PARSE time — this file sits at the end of
-  // the body, after the hero — so they never paint their final value and then
-  // rewind. Everything else waits for the document.
+  /* Two things are done at PARSE time — this file sits at the end of the body,
+     after all the content — and both for the same reason: what the reader sees
+     first must not depend on the seven scripts that follow this one.
+
+     The reveal-on-scroll blocks are hidden by the stylesheet until this file
+     claims them, and it used to claim them in boot(), on DOMContentLoaded —
+     which is AFTER every other script on the page has parsed and run. So the
+     whole of the home page below the hero sat blank through that window, and
+     a throw anywhere in boot()'s earlier calls left it blank for good. Doing
+     it here, first, means the content is revealed as soon as the markup it
+     acts on exists, and nothing that happens later can prevent it.
+
+     The counters are taken over here for the same kind of reason: so they
+     never paint their final value and then rewind. Everything else waits for
+     the document. */
+  wireReveals();
   wireCounts();
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

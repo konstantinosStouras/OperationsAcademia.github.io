@@ -870,18 +870,7 @@
 
     /* -------------------------------------------------------------- load */
 
-    /* `no-cache` REVALIDATES, it does not skip the cache: the browser still
-       sends the request and still gets a 304 with no body when nothing has
-       changed, so this costs a round trip and not a download. Without it the
-       reader is served whatever their browser last stored — GitHub Pages ships
-       these files with ten minutes of freshness — so a posting published a
-       minute ago was invisible to anyone who had opened the page recently, and
-       the site looked slow long after the pipeline had stopped being. */
-    fetch(cfg.data, { credentials: 'same-origin', cache: 'no-cache' })
-      .then(function (res) {
-        if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-        return res.json();
-      })
+    load(cfg.data)
       .then(function (data) {
         rows = (Array.isArray(data) ? data : data.rows || []).filter(Boolean);
         rows.forEach(function (r, i) { if (!r.id) r.id = 'r' + i; });
@@ -912,5 +901,37 @@
     };
   }
 
-  window.OAList = { mount: mount, safeUrl: safeUrl, fold: fold, derive: DERIVE };
+  /* ------------------------------------------------------- reading a file
+
+     ONE request per file per page, however many things want it. The home page
+     asked for data/jobs.json twice — 117 KB each, on every visit — because the
+     launcher card's selects and the ten-most-recent list each fetched it for
+     themselves; the second copy was pure waste on a page whose whole point is
+     to be light. Anything that wants a served dataset asks here.
+
+     `no-cache` REVALIDATES, it does not skip the cache: the browser still
+     sends the request and still gets a 304 with no body when nothing has
+     changed, so this costs a round trip and not a download. Without it the
+     reader is served whatever their browser last stored — GitHub Pages ships
+     these files with ten minutes of freshness — so a posting published a
+     minute ago was invisible to anyone who had opened the page recently, and
+     the site looked slow long after the pipeline had stopped being.
+
+     A FAILED read is not remembered: the entry is dropped so the next caller
+     tries again, rather than every list on the page inheriting one flaky
+     request. */
+  var loading = Object.create(null);
+
+  function load(url) {
+    if (loading[url]) return loading[url];
+    loading[url] = fetch(url, { credentials: 'same-origin', cache: 'no-cache' })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+        return res.json();
+      })
+      .catch(function (err) { delete loading[url]; throw err; });
+    return loading[url];
+  }
+
+  window.OAList = { mount: mount, load: load, safeUrl: safeUrl, fold: fold, derive: DERIVE };
 })();
