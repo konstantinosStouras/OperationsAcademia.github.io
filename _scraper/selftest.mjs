@@ -2162,6 +2162,17 @@ async function testRowOverrides() {
     'newsOverrides can be deleted too — hiding an update is no longer permanent');
   const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
   ok(home.includes('Restore'), 'and the home page offers the maintainer a way back');
+  /* THE HOME PAGE ALONE IS NOT A WAY BACK. It shows the newest five and cuts
+     AFTER filtering, so a hidden entry pushed out of the top five by a newer
+     one — which this repo's keep-in-sync rule makes routine — is off that page
+     for the maintainer too. Only the full list can guarantee the way back. */
+  const newsPage = await readFile(path.join(HERE, '..', 'whats-new.html'), 'utf8');
+  ok(newsPage.includes('newsAdmin || !(o && o.hidden)'),
+    'the full What\'s-new list shows the maintainer what they have hidden');
+  ok(newsPage.includes('data-restore'), 'and offers Restore there, where nothing can fall off');
+  const css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(/\.v3-news-hidden\s*\{/.test(css),
+    'and a hidden entry actually LOOKS withdrawn — the class was set with no rule behind it');
 }
 
 /* --------------------------------- what a takedown must NOT reach, and when
