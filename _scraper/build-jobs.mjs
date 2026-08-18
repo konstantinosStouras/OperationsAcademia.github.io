@@ -510,13 +510,7 @@ async function main() {
      itself wrote. Both halves matter — the ids and the references alike are
      published in data/jobs.json, so an unscoped removal is a signed-in
      stranger deleting somebody else's advertisement. */
-  const { specs: removeSpecs, ids: removeIds } = removalSpecs(pulled);
-
-  /* ONE predicate for "this run takes that row down", used by the orphan carry,
-     by the change e-mail and by the stamp alike. Keeping them apart is how the
-     report came to say something the file did not, and how a document came to
-     be marked `removed` for a posting still on the site. */
-  const isRemoved = (r) => removeSpecs.some((x) => specMatches(x, r));
+  const { specs: removeSpecs } = removalSpecs(pulled);
 
   // The maintainer's committed suppression list, honoured by every writer of
   // this file (see data/jobs-hidden.json). A posting listed here is withheld

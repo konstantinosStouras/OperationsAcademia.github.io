@@ -268,6 +268,13 @@ export function collapseSamePerson(rows) {
  * the maintainer's committed take-down list, trusted to reach a row whoever
  * reported it.
  *
+ * …and a THIRD shape, `{ id }`, which is how a row with NO reference is taken
+ * down. `ref` is issued by the form and by nothing else, so an imported row
+ * has none, and keyed on references alone this loop matched nothing at all:
+ * the row was carried on as an orphan, so the takedown reported success and
+ * changed nothing. A caller must build its specs with `removalSpecs`, which
+ * decides whose word to take for each shape.
+ *
  * Returns { rows, added, updated, removed, collapsed } in display order.
  */
 export function mergePlacementRows(existing, fresh, remove = []) {

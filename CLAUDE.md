@@ -108,9 +108,12 @@ issued by the FORM and by nothing else, so the 94 postings from the legacy
 import and the 16 from the workbook have none — today that is every row in
 `data/jobs.json`. Keyed on `ref` alone, the takedown removed nothing: the row
 was carried on as an ORPHAN, the button said "Taken down", and the posting
-stayed on the site for ever. `removeIds` in each build (and the `{ id }` spec in
-`mergeRows`/`mergeCandidateRows`/`mergePlacementRows`) is the fix, in all three
-pipelines.
+stayed on the site for ever. `removalSpecs` (jobs-model.mjs) and the `{ id }` spec in
+`mergeRows`/`mergeCandidateRows`/`mergePlacementRows` are the fix, in all three
+pipelines. It also decides WHOSE WORD to take: an id is honoured only on a
+document the build itself wrote, and a reference only for the account that
+published the row — both are printed in `data/jobs.json`, so an unscoped
+removal is a signed-in stranger taking down somebody else's posting.
 
 **When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
 never by hand-editing `data/`.** That file is rewritten from the workbook every

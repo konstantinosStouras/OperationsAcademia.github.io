@@ -188,7 +188,7 @@ async function main() {
      itself wrote, because both are published and either one unscoped is a
      signed-in stranger taking down somebody else's row. The long note is in
      jobs-model.mjs; this is the same fix in the twin pipeline. */
-  const { specs: removeSpecs, ids: removeIds } = removalSpecs(pulled);
+  const { specs: removeSpecs } = removalSpecs(pulled);
 
   /* ONE predicate for "this run takes that row down" — a reference is only a
      takedown for the account that published the row. */

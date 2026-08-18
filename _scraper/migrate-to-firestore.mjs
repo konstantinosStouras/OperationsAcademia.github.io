@@ -41,22 +41,23 @@ import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = path.join(HERE, '..', 'data', 'jobs.json');
 
-/**
- * Which published rows this migration is about.
- *
- * NOT the ones that come from the job market tracking SHEET. Those are
- * rebuilt from the workbook on every run of sync-jobmarket-sheet.mjs, which
- * is what makes an edit in the sheet — and a row DELETED from it — reach the
- * site at all. Giving one a document would break both directions: the
- * document would win over the sheet at the next build (the very trap that
- * retired the old form-sheet sync), and a posting removed from the sheet
- * could never leave the site, because its document would keep republishing
- * it.
- *
- * Exported because selftest.mjs asserts the round trip over exactly this set:
- * the guard and the migration must agree about what is being migrated, or the
- * guard fails on rows nothing would ever migrate.
- */
+/* THE TRACKING SHEET'S ROWS ARE NOT MIGRATED, and that is still true — but
+   not for the reason this comment used to give. It said a document would
+   break both directions: it would win over the sheet at the next build, and a
+   posting removed from the sheet could never leave the site because its
+   document would keep republishing it.
+
+   Both are now ANSWERED rather than avoided, in build-jobs.mjs. Every workbook
+   row gets an inert MIRROR document, whose only job is to give the maintainer
+   an Edit button; `sheetHandover` decides which side publishes, so the sheet
+   goes on maintaining a posting nobody has edited; and each mirror is pinned
+   to its row by `sheetId`, so a row deleted from the workbook takes its
+   posting off the site whether or not a document exists for it.
+
+   What this function still refuses is a MIGRATION of those rows — turning
+   them into ordinary submissions, owned here, which is exactly what would
+   break both directions. The mirrors are the sheet's own; they are created
+   and refreshed by the build, not minted here. */
 export function migratable(row) {
   return !!row && row.source !== SHEET_SOURCE;
 }

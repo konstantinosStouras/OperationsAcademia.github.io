@@ -94,9 +94,39 @@
 
   function st(dataset) {
     if (!state[dataset]) {
-      state[dataset] = { ready: false, admin: false, rows: {}, onChange: null };
+      state[dataset] = { ready: false, admin: false, rows: {}, onChange: null, own: null };
     }
     return state[dataset];
+  }
+
+  /**
+   * Which rows on the page actually BELONG to this dataset.
+   *
+   * previous-markets.html renders two populations from one list: the archive's
+   * own rows, and the postings folded in at read time from data/jobs.json.
+   * Those second ones are real submissions — the job editor owns them, and an
+   * override against one is read by NOTHING: no build applies rowOverrides to
+   * data/jobs.json. So `Take down` on one used to make the card vanish and
+   * leave the posting on the site, which is the worst shape a control can
+   * have. Standing down when another decorator has drawn is not enough on its
+   * own, because the two race: this module reads a small filtered query and
+   * the job editor reads the WHOLE jobSubmissions collection, so for the first
+   * second of every visit — and for ever if that read fails — every posting on
+   * the page carried the archive's editor.
+   *
+   * A page that renders one population need not call this; one that mixes them
+   * must, and selftest.mjs pins that previous-markets.html does.
+   */
+  function own(dataset, ids) {
+    var s = st(dataset);
+    s.own = {};
+    for (var i = 0; i < (ids || []).length; i++) s.own[ids[i]] = true;
+    return s.own;
+  }
+
+  function isOwn(dataset, row) {
+    var s = st(dataset);
+    return !s.own || !!s.own[row && row.id];
   }
 
   function isAdmin(user) {
@@ -130,15 +160,22 @@
     var out = [];
     for (var i = 0; i < (rows || []).length; i++) {
       var r = rows[i];
-      var o = s.rows[r && r.id];
+      var o = isOwn(dataset, r) ? s.rows[r && r.id] : null;
       if (!o) { out.push(r); continue; }
       if (o.hidden && !s.admin) continue;
       var copy = {};
       for (var k in r) if (Object.prototype.hasOwnProperty.call(r, k)) copy[k] = r[k];
+      /* WHAT THE FILE SAYS, kept beside what is shown. An override must record
+         only the fields the maintainer actually CHANGED — see `edit` — and
+         that cannot be decided against the displayed value, which is already
+         the override's. */
+      var base = {};
       for (var j = 0; j < spec.fields.length; j++) {
         var key = spec.fields[j].key;
+        base[key] = r[key];
         if (Object.prototype.hasOwnProperty.call(o, key)) copy[key] = o[key];
       }
+      copy._oaBase = base;
       /* Read by onCard/onPopup to draw Restore rather than Take down. A `_`
          name because it is not a field of the dataset and must never be
          mistaken for one — no card renderer reads it. */
@@ -168,7 +205,7 @@
   /** The OAList `onCard` hook for a dataset. */
   function onCard(dataset) {
     return function (li, row) {
-      if (!DATASETS[dataset]) return;
+      if (!DATASETS[dataset] || !isOwn(dataset, row)) return;
       var s = st(dataset);
       if (!s.ready || !s.admin) return;
 
@@ -219,7 +256,7 @@
   /** The map's `onPopup` hook — the twin of `onCard`, for a Leaflet popup. */
   function onPopup(dataset) {
     return function (node, row) {
-      if (!DATASETS[dataset]) return;
+      if (!DATASETS[dataset] || !isOwn(dataset, row)) return;
       var s = st(dataset);
       if (!node || !s.ready || !s.admin) return;
       if (node.querySelector('.oa-uni-admin')) return;
@@ -254,15 +291,20 @@
   function edit(dataset, row) {
     var spec = DATASETS[dataset];
     if (!spec) return;
-    var s = st(dataset);
-    var o = s.rows[row.id] || {};
+    /* `_oaBase` is stashed by apply() on a row that HAS an override. A row
+       without one is its own base — the file's value is what is on screen —
+       so falling back to `{}` here would make every field differ from '' and
+       pin the lot on the very first correction. */
+    var base = row._oaBase || row;
     var patch = {};
     var changed = false;
 
+    var asText = function (v) { return v === null || v === undefined ? '' : String(v); };
+
     for (var i = 0; i < spec.fields.length; i++) {
       var f = spec.fields[i];
-      var was = Object.prototype.hasOwnProperty.call(o, f.key) ? o[f.key] : row[f.key];
-      var got = window.prompt(f.label + ':', was === null || was === undefined ? '' : String(was));
+      var was = row[f.key];                           // what is on screen
+      var got = window.prompt(f.label + ':', asText(was));
       if (got === null) return;                       // cancelled — save nothing
       got = String(got).trim().slice(0, f.max);
 
@@ -275,18 +317,26 @@
           return;
         }
         if (n !== Number(was)) changed = true;
-        patch[f.key] = n;
+        if (n !== Number(base[f.key])) patch[f.key] = n;
         continue;
       }
-      if (got !== String(was === null || was === undefined ? '' : was)) changed = true;
-      patch[f.key] = got;
+      if (got !== asText(was)) changed = true;
+      /* ONLY WHAT DIFFERS FROM THE FILE. Writing every field would PIN every
+         field: correct a hire's name in 2026, and when the Google Sheet is
+         corrected in 2027 and the import re-run, the site would keep showing
+         the 2026 placement for ever, with nothing on the page saying why. A
+         value the maintainer left as it was is simply not in the override, so
+         the file goes on owning it. */
+      if (got !== asText(base[f.key])) patch[f.key] = got;
     }
 
     if (!changed) return;
     /* An override that has hidden the row is being edited: bringing it back is
-       what the maintainer means by correcting it. */
+       what the maintainer means by correcting it. And the write REPLACES the
+       document rather than merging into it, so a field corrected back to what
+       the file says stops being an override instead of lingering as one. */
     patch.hidden = false;
-    save(dataset, row, patch, null);
+    save(dataset, row, patch, null, null, { replace: true });
   }
 
   function note(li, message) {
@@ -318,7 +368,7 @@
     save(dataset, row, { hidden: true }, btn, 'Take down');
   }
 
-  function save(dataset, row, patch, btn, label) {
+  function save(dataset, row, patch, btn, label, opts) {
     var doc = {};
     for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) doc[k] = patch[k];
     /* The rules pin the document id to these two, so they are written on every
@@ -329,13 +379,15 @@
     doc.t = Date.now();
 
     OAFB.ready().then(function (fb) {
-      return fb.firestore().collection(COLLECTION)
-        .doc(dataset + '__' + row.id).set(doc, { merge: true });
+      var ref = fb.firestore().collection(COLLECTION).doc(dataset + '__' + row.id);
+      return (opts && opts.replace) ? ref.set(doc) : ref.set(doc, { merge: true });
     }).then(function () {
       var s = st(dataset);
-      var was = s.rows[row.id] || {};
       var now = {};
-      for (var a in was) if (Object.prototype.hasOwnProperty.call(was, a)) now[a] = was[a];
+      if (!(opts && opts.replace)) {
+        var was = s.rows[row.id] || {};
+        for (var a in was) if (Object.prototype.hasOwnProperty.call(was, a)) now[a] = was[a];
+      }
       for (var b in doc) if (Object.prototype.hasOwnProperty.call(doc, b)) now[b] = doc[b];
       s.rows[row.id] = now;
       if (s.onChange) s.onChange();
@@ -409,6 +461,7 @@
 
   window.OARowEdit = {
     apply: apply,
+    own: own,
     signature: signature,
     onCard: onCard,
     onPopup: onPopup,

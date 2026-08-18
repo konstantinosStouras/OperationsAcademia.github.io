@@ -850,7 +850,8 @@ export function collectChanges(existingRows, freshRows, removeRefs = [], removeI
      so every posting that came from the legacy import or the tracking sheet has
      none — which is every row served today — and keying the report on it alone
      reported nothing while the build removed the row. The id is what those are
-     taken down by (see build-jobs.mjs `removeIds`), so both are read here. */
+     taken down by (the callers derive them with `removalSpecs` above), so both
+     are read here. */
   const takedowns = [];
   const goneRefs = new Set(removeRefs.filter(Boolean));
   const goneIds = new Set([...(removeIds || [])].filter(Boolean));
@@ -1016,6 +1017,14 @@ export function keyOf(row) {
  * A `remove` entry is either `{ ref, owner }` — a WITHDRAWAL, which may only
  * take down a row the same account published — or a bare reference string,
  * which is the maintainer's committed take-down list (data/jobs-hidden.json)
+ *
+ * …and a THIRD shape, `{ id }`, which is how a row with NO reference is taken
+ * down. `ref` is issued by the form and by nothing else, so every posting from
+ * the legacy import and from the tracking sheet has none — today that is every
+ * row served. Keyed on references alone this loop matched nothing at all and
+ * the row was carried on as an orphan, so the takedown reported success and
+ * changed nothing. A caller must build its specs with `removalSpecs`, which
+ * decides whose word to take for each shape.
  * and is trusted to reach a row whoever posted it.
  *
  * Returns { rows, added, updated, removed } with rows in display order.

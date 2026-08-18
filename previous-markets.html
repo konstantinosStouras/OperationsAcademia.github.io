@@ -253,6 +253,7 @@
           var RowEdit = window.OARowEdit || {
             signature: function () { return ''; },
             apply: function (dataset, rows) { return rows; },
+        own: function () {},
             onCard: function () { return function () {}; },
             onPopup: function () { return function () {}; },
             attach: function () {},
@@ -295,6 +296,13 @@
               unit: 'postings'
             },
             prepare: function (rows) {
+              /* THE ARCHIVE'S OWN ROWS, named before the postings from
+                 data/jobs.json are folded in beside them. Those are real
+                 submissions and an override against one is read by nothing, so
+                 the archive editor must not offer itself on them — see `own`
+                 in assets/oa-rowedit.js. */
+              RowEdit.own('past-postings', rows.map(function (r) { return r.id; }));
+
               var have = {};
               rows.forEach(function (r) { have[r.id] = true; });
               archive.forEach(function (r) { if (!have[r.id]) rows.push(r); });

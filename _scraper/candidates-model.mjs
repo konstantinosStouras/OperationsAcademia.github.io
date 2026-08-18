@@ -314,6 +314,14 @@ export function collapseSameCandidate(rows) {
  * A `remove` entry is either `{ ref, owner }` — a candidate WITHDRAWING
  * their own profile — or a bare reference string, the maintainer's committed
  * take-down list, trusted to reach a row whoever posted it.
+ *
+ * …and a THIRD shape, `{ id }`, which is how a row with NO reference is taken
+ * down. `ref` is issued by the form and by nothing else, so every posting from
+ * the legacy import and from the tracking sheet has none — today that is every
+ * row served. Keyed on references alone this loop matched nothing at all and
+ * the row was carried on as an orphan, so the takedown reported success and
+ * changed nothing. A caller must build its specs with `removalSpecs`, which
+ * decides whose word to take for each shape.
  */
 export function mergeCandidateRows(existing, fresh, remove = []) {
   const by = new Map();

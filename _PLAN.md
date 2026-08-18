@@ -482,8 +482,8 @@ nothing away from it. The 16 documents appear on the first build that runs with
 form-issued `ref`, and no published row has one — the legacy import and the
 workbook do not issue them. The document was marked hidden, the button said
 "Taken down", the orphan carry republished the row verbatim, and the change
-e-mail reported nothing. `removeIds` (and a `{ id }` spec in `mergeRows`) fixes
-it in all three pipelines. Only the maintainer was ever affected: every
+e-mail reported nothing. `removalSpecs` (and a `{ id }` spec in `mergeRows`) fixes
+it in all three pipelines, scoping each removal to whoever may ask for it. Only the maintainer was ever affected: every
 published row's `uid` is null, so no poster has ever owned one.
 
 **(c) The three frozen archives were read-only for everybody.**

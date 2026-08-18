@@ -2067,6 +2067,51 @@ async function testRowOverrides() {
     ok(allowed.has(key), `oa-rowedit.js may write "${key}", and the rules allow it`);
   }
 
+  /* AND EVERY FIELD save() PUTS ON THE DOCUMENT ITSELF. `dataset`, `rowId`,
+     `hidden` and `t` are written there rather than declared in DATASETS, so
+     deriving the list from DATASETS alone left that half unchecked: adding one
+     bookkeeping field — `updatedBy`, say — would make the rules' hasOnly()
+     refuse EVERY Edit, Take down and Restore on all three pages, with CI green
+     and the module telling the maintainer to redeploy rules that are already
+     deployed. Derived, not restated, so it cannot drift. */
+  const saveBody = js.slice(js.indexOf('function save('), js.indexOf('/* ------', js.indexOf('function save(')));
+  const written = new Set((saveBody.match(/\bdoc\.([A-Za-z_$][\w$]*)\s*=/g) || [])
+    .map((m) => m.replace(/^doc\./, '').replace(/\s*=$/, '')));
+  ok(written.size >= 3, 'the checks below read the fields save() writes from the source');
+  for (const key of written) {
+    ok(allowed.has(key), `oa-rowedit.js's save() writes "${key}", and the rules allow it`);
+  }
+  for (const k of ['dataset', 'rowId', 't']) {
+    ok(written.has(k), `save() still writes ${k} — the rules pin the document id to it`);
+  }
+
+  /* THE EDITOR RECORDS ONLY WHAT CHANGED. Writing every field would PIN every
+     field: a correction made today would mask tomorrow's upstream fix for ever,
+     with nothing on the page saying why. */
+  ok(js.includes("if (got !== asText(base[f.key])) patch[f.key] = got;"),
+    'an override carries only the fields that differ from the file');
+  ok(js.includes('{ replace: true }') && js.includes('ref.set(doc, { merge: true })'),
+    'and a correction REPLACES the override, so a field corrected back stops being one');
+  ok(js.includes('var base = row._oaBase || row;'),
+    'a row with no override yet is its own base, so a first correction pins nothing else');
+
+  /* THE EDITOR ONLY ACTS ON ROWS THE DATASET OWNS. previous-markets.html
+     renders the archive AND the postings folded in from data/jobs.json; an
+     override against one of those is read by nothing, so Take down would empty
+     the card and leave the posting on the site. */
+  ok(js.includes('function isOwn(dataset, row)'),
+    'the editor knows which rows belong to its dataset');
+  /* AT EVERY ENTRY POINT, not just declared. Removing the CALL is a one-token
+     change that reinstates the whole failure; the declaration surviving proves
+     nothing. (page-test.mjs drives the behaviour itself.) */
+  eq((js.match(/!isOwn\(dataset, row\)/g) || []).length, 2,
+    'and asks before drawing on a card and before drawing on a map pin');
+  ok(js.includes('isOwn(dataset, r) ? s.rows[r && r.id] : null'),
+    'and before overlaying a value onto a row that is not its own');
+  const pm = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(/RowEdit\.own\('past-postings',/.test(pm),
+    'and previous-markets.html names the archive\'s own rows, because it mixes two populations');
+
   const datasets = ['past-postings', 'recent-faculty', 'universities'];
   for (const d of datasets) {
     ok(specs.includes(`'${d}'`) || specs.includes(`${d}:`),
@@ -2360,6 +2405,14 @@ async function testRefLessTakedown() {
     'so a taken-down posting is no longer carried on as an orphan');
   ok(/const builtIds = new Set\(freshVisible/.test(build),
     'a takedown never takes a row a live document just built — a renumbered same-day sibling');
+  /* AND THE MERGE IS GIVEN THE FILTERED SET. Declaring `applicable` and then
+     handing `removeSpecs` to mergeRows — the obvious-looking variable, still in
+     scope three lines either side — reinstates the silent deletion with every
+     other check in this file green. The argument is the whole guard. */
+  ok(/mergeRows\(orphans, freshVisible, applicable\)/.test(build),
+    'and the merge is handed the filtered set, which is where that guard actually bites');
+  ok(!/mergeRows\(orphans, freshVisible, removeSpecs\)/.test(build),
+    'never the unfiltered one');
   ok(/stillThere\.push/.test(build),
     'and a withdrawal that did not reach its posting is left to retry, never marked done');
 

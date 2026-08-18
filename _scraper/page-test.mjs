@@ -1610,8 +1610,11 @@ for (const [name, expect] of [
    be true for everybody, not just the maintainer — that a hidden row is gone
    from the page and an edited value is what the card actually shows.         */
 
+/* previous-markets.html is opened on a season only the ARCHIVE covers: its
+   default view is all postings folded in from data/jobs.json, which belong to
+   the job editor and which this one refuses to touch. */
 for (const [pageName, dataset, patch] of [
-  ['previous-markets.html', 'past-postings', { institution: 'Corrected Institution Name' }],
+  ['previous-markets.html?year=2015', 'past-postings', { institution: 'Corrected Institution Name' }],
   ['recent-faculty.html', 'recent-faculty', { name: 'Corrected Person Name' }],
 ]) {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
@@ -1627,7 +1630,10 @@ for (const [pageName, dataset, patch] of [
      itself — the file's first row is not the page's, which sorts. */
   const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
   const cards = await p.$$eval('.oa-card', (n) => n.length);
-  const total = (t) => Number(String(t).split('/').pop().replace(/\D/g, ''));
+  /* "1 - 10 / 93" when nothing is filtered, "1 - 10 / 93 (of 243)" when
+     something is — so read the number right after the slash, not the last one
+     on the line, which is the unfiltered corpus. */
+  const total = (t) => Number((String(t).match(/\/\s*(\d+)/) || [0, 0])[1]);
   const totalBefore = total(await p.$eval('.oa-count', (n) => n.textContent));
   ok(totalBefore > 0, `${dataset}: the results line carries a total to compare against`);
 
@@ -1811,6 +1817,64 @@ for (const [pageName, dataset, patch] of [
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
 
+/* --------- the archive editor never offers itself on a real job posting
+
+   previous-markets.html renders TWO populations from one list: the frozen
+   archive, and the postings folded in at read time from data/jobs.json. Those
+   second ones are real submissions, and an override against one is read by
+   NOTHING — no build applies rowOverrides to data/jobs.json — so Take down
+   there emptied the card and left the posting on the site. Measured: every
+   card on page one is a folded-in posting, so this was not an edge case but
+   the default view.
+
+   Standing down when the job editor has drawn is not the guard, because the
+   two race; this is. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/own: ' + e.message));
+  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(600);
+
+  const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  const past = JSON.parse(await readFile(path.join(ROOT, 'data', 'past-postings.json'), 'utf8'));
+  const archiveIds = new Set(past.map((r) => r.id));
+  const folded = new Set(jobs.map((r) => r.id).filter((id) => !archiveIds.has(id)));
+  ok(folded.size > 0, 'previous-markets: the page really does fold in live postings');
+
+  // the maintainer, with the job editor not yet resolved — the first second of
+  // every visit, and for ever if that read fails
+  await p.evaluate(() => window.OARowEdit.__setForTest('past-postings',
+    { ready: true, admin: true }));
+  await p.waitForTimeout(400);
+
+  const drawnOn = await p.$$eval('.oa-card-actions',
+    (ns) => ns.map((n) => n.closest('.oa-card').id.replace(/^job-/, '')));
+  eq(drawnOn.filter((id) => folded.has(id)), [],
+    'the archive editor draws on no posting that belongs to data/jobs.json');
+
+  /* …and it DOES draw on the archive's own rows. Filtering to a season only
+     the archive covers brings them onto the first page. */
+  const p2 = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p2.on('pageerror', (e) => jsErrors.push('overrides/own2: ' + e.message));
+  await p2.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
+  await p2.waitForSelector('.oa-card');
+  await p2.waitForTimeout(600);
+  await p2.evaluate(() => window.OARowEdit.__setForTest('past-postings',
+    { ready: true, admin: true }));
+  await p2.waitForTimeout(400);
+  const shown2 = await p2.$$eval('.oa-card', (n) => n.length);
+  ok(shown2 > 0, 'previous-markets: the archive-only season shows rows');
+  eq(await p2.$$eval('.oa-card-actions', (n) => n.length), shown2,
+    'and every one of the archive\'s own rows carries the controls');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/own')), [],
+    'no uncaught errors on either view');
+  await p.close();
+  await p2.close();
+}
+
 /* ------------- a taken-down row stays visible to the maintainer, whoever
    owns the card, and the admin-only module is never a hard dependency
 
@@ -1825,14 +1889,16 @@ for (const [pageName, dataset, patch] of [
 {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   p.on('pageerror', (e) => jsErrors.push('overrides/hidden: ' + e.message));
-  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  /* A season only the ARCHIVE covers, so every card is a row this editor owns
+     — the folded-in postings from data/jobs.json are another editor's, and it
+     refuses to touch them (the block above). */
+  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
   await p.waitForSelector('.oa-card');
   await p.waitForTimeout(600);
 
   const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
 
-  // the other decorator owns this card, exactly as it would for a posting
-  // folded in from data/jobs.json — and the row is hidden by an override
+  // the OTHER decorator owns this card, and the row is hidden by an override
   await p.evaluate((id) => {
     window.OAJobEdit.__setPermissionsForTest({
       ready: true, admin: true, byId: { [id]: id }, byRef: {},
@@ -1849,7 +1915,7 @@ for (const [pageName, dataset, patch] of [
     'and it is marked as taken down even though the other editor owns the card');
   eq(await p.$$eval(card + ' .oa-rowedit-restore', (n) => n.map((x) => x.textContent)),
     ['Restore'], 'with a way to put it back');
-  ok(await p.$eval(card + ' .oa-card-note', (n) => n.textContent).then((t) => /only you/i.test(t)),
+  ok(/only you/i.test(await p.$eval(card + ' .oa-card-note', (n) => n.textContent)),
     'and a sentence saying only they can see it');
 
   // and a visitor gets none of it: the row is simply not there
@@ -1908,7 +1974,8 @@ for (const [pageName, sel, least] of [
 {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   p.on('pageerror', (e) => jsErrors.push('overrides/xss: ' + e.message));
-  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  // an archive season, so the row is one this editor owns (see above)
+  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
   await p.waitForSelector('.oa-card');
   await p.waitForTimeout(400);
 
