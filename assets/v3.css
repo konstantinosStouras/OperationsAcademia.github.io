@@ -500,7 +500,15 @@ body.v3-sheet-open { overflow: hidden; }
 }
 [data-theme='dark'] .v3-band { background: var(--bg-3); }
 
-/* reveal-on-scroll (v3.js adds .is-in; motion-reduced visitors never move) */
+/* reveal-on-scroll (v3.js adds .is-in; motion-reduced visitors never move)
+
+   The hidden state stays the DEFAULT rather than something JavaScript opts
+   into, and that is a deliberate choice between two flashes: a class added by
+   a script at the end of the body arrives after the browser has already
+   painted, so the reader would watch the page appear and then be hidden again
+   to animate. Instead v3.js claims these blocks at PARSE time (wireReveals is
+   its first call, before anything that could throw), which is as early as the
+   markup they act on exists. */
 @media (prefers-reduced-motion: no-preference) {
   .v3-reveal { opacity: 0; transform: translateY(22px);
     transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.9, 0.3, 1); }
@@ -1290,6 +1298,36 @@ body.v3 .oa-or::before, body.v3 .oa-or::after {
    header is a flex row, so it flows in place like everything else. */
 body.v3 #oa-account { position: static; height: auto; font-family: var(--font-sans); }
 
+/* THE CHIP'S SPACE, RESERVED BEFORE THE CHIP EXISTS.
+
+   oa-accounts.js paints #oa-account, and it cannot run until the page has
+   parsed. Until then the box is empty and 0px wide, so the moment the chip
+   lands the whole header row re-flows around it — the reported "blink and
+   shake" on every reload. The inline snippet in each page's <head> stamps
+   data-oa-auth on <html> from the localStorage hint before the first paint,
+   and these two rules hold the space open so nothing has to move.
+
+   `--oa-chip-w` is what the chip MEASURED on the last visit (a long name is a
+   wider chip); the fallback is the width of a chip carrying a typical name,
+   which is right for a first visit and wrong by a few pixels at worst. It is a
+   MINIMUM, never a fixed width: over-reserving would push the burger about,
+   and a chip wider than its reserve simply grows into the row it is in.
+
+   Scoped to the header that SHOWS THE NAME, which is 981px and up — not 901,
+   the breakpoint this file uses elsewhere. oa-ui.css is loaded on these pages
+   too and hides .oa-acct-name from 841px to 980px, so a chip between 901 and
+   980 is an avatar and its padding: a fixed, name-independent size, whose
+   reserve is a constant and whose width must never be confused with the
+   measured one. oa-accounts.js measures by asking whether the name is actually
+   displayed rather than by repeating a number, so the two cannot drift. */
+@media (min-width: 981px) {
+  html[data-oa-auth='in'] body.v3 #oa-account { min-width: var(--oa-chip-w, 168px); }
+  html[data-oa-auth='out'] body.v3 #oa-account { min-width: 92px; }
+}
+@media (max-width: 980px) {
+  html[data-oa-auth='in'] body.v3 #oa-account { min-width: 40px; }
+}
+
 body.v3 #oa-account .oa-acct-off { color: var(--mut); font-size: 14.5px; white-space: nowrap; }
 
 body.v3 .oa-acct-btn {
@@ -1660,9 +1698,19 @@ body.v3 .v3-panel .oa-card:last-child { border-bottom: 0; }
 @media (max-width: 640px) {
   :root { --header-h: 58px; }
   .v3-container { padding: 0 18px; }
-  /* phone header: the mark alone — the wordmark text would push the burger
-     off the right edge of a 390px screen */
-  .v3-header .v3-logo span + span { display: none; }
+  /* PHONE HEADER: THE WHOLE LOCKUP, MARK AND WORDS (owner, 2026-08-18).
+     This used to be `.v3-header .v3-logo span + span { display: none }` — the
+     mark alone — because at full size the words really do push the burger off
+     a 390px screen. Hiding the site's name on the devices most people arrive
+     on is the wrong half of that trade, so the lockup is SCALED to fit
+     instead: a smaller mark, smaller words, tighter gaps, and `min-width: 0`
+     so the logo is the thing that gives when the row is short rather than the
+     burger being pushed out of reach. Measured at 320/360/390/430 by
+     page-test.mjs, which fails if the row overflows or the burger stops being
+     the topmost thing at its own centre. */
+  .v3-header .v3-logo { gap: 7px; min-width: 0; }
+  .v3-header .v3-w1, .v3-header .v3-w2 { font-size: 13px; letter-spacing: -0.016em; }
+  .v3-header .v3-logo .v3-mark { width: 26px; height: 36px; }
   .v3-header-inner { padding: 0 14px; gap: 10px; }
   .v3-stats { grid-template-columns: 1fr 1fr; }
   .v3-grid, .v3-grid.two, .v3-pa-grid { grid-template-columns: 1fr; }
@@ -1687,6 +1735,11 @@ body.v3 .v3-panel .oa-card:last-child { border-bottom: 0; }
 
 /* very small phones: keep the stat numbers from wrapping awkwardly */
 @media (max-width: 380px) {
+  /* one more step down for the lockup, so 320px still shows the name in full */
+  .v3-header .v3-logo { gap: 6px; }
+  .v3-header .v3-w1, .v3-header .v3-w2 { font-size: 11.5px; }
+  .v3-header .v3-logo .v3-mark { width: 22px; height: 30px; }
+  .v3-header-inner { gap: 8px; padding: 0 12px; }
   .v3-stats { grid-template-columns: 1fr; }
 }
 
