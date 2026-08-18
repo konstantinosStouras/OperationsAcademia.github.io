@@ -3673,6 +3673,16 @@ async function testNewsReview() {
     'and sends only published entries — an e-mail cannot be recalled');
   ok(/catch \(err\) \{[\s\S]{0,400}decisions = \{\}/.test(mailer),
     'a decision read that fails withholds rather than killing the job digests too');
+  /* AND THE WINDOW FLOOR IS FROZEN, in BOTH branches an alert can take. A hold
+     can outlast the 31-day cap a never-yet-sent subscriber's window starts at,
+     and a floor that slides with the clock drops the held entry on the very day
+     it is published — the run that should have delivered it. */
+  ok(/const floor = \(!a\.lastUpdateDate/.test(mailer),
+    'the update window floor is computed once per alert');
+  ok(/idle\.lastUpdateDate = floor/.test(mailer),
+    'and persisted when the run sends nothing…');
+  ok(/if \(floor\) patch\.lastUpdateDate = floor;/.test(mailer),
+    '…and when it sends, where a real send date then overrides it');
 
   /* AND THE ARCHIVE IS NOT A SIDE DOOR. /v2/ is served, and both its
      What's-new page and its alerts preview read /changelog.json straight —

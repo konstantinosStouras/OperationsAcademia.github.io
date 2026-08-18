@@ -277,6 +277,37 @@ async function selftest() {
   ok(qSent.join(',') === 'before',
     'a published entry DATED AFTER an unreviewed one waits for it; one dated before goes now');
 
+  /* AND A LONG HOLD MUST NOT QUIETLY DROP IT. A subscriber who has never had an
+     update digest has no `lastUpdateDate`, so their window floor is a 31-day
+     cap — and while it slid with the clock, an entry held longer than a month
+     fell out of it on the very day it was published: skipped on that run and on
+     every run after, with nothing in the log saying so. Freezing the floor the
+     first time it is computed is what fixes it, and this is that timeline,
+     played out day by day the way the run does it. */
+  const HELD = [{ id: 'x', date: '2026-08-26', title: 'Waited a long time', summary: 'S' }];
+  const windowFor = (day, decided, storedFloor) => {
+    const pending = News.partition(HELD, decided).pending;
+    const oldest = pending.reduce((m, e) => (!m || e.date < m ? e.date : m), '');
+    const end = updateWindowEnd(day, oldest);
+    const from = storedFloor ||
+      M.daysBefore(new Date(Date.parse(end + 'T00:00:00Z')), 31);
+    return { from, end, sent: M.newUpdatesFor(HELD, UP, from, end).map((e) => e.id) };
+  };
+  // day 1 of the hold: nothing sent, and the floor is frozen where it stood
+  const w1 = windowFor('2026-08-27', {});
+  ok(w1.sent.length === 0 && w1.end === '2026-08-25',
+    'while the entry waits, the window stops short of it and nothing goes out');
+  const frozen = w1.from;
+  // a month later it is published — WITHOUT the frozen floor it is already lost
+  const slid = windowFor('2026-09-27', { x: { status: News.APPROVED } });
+  ok(slid.sent.length === 0,
+    'a floor measured from today would have skipped it — the bug this pins');
+  const kept = windowFor('2026-09-27', { x: { status: News.APPROVED } }, frozen);
+  ok(kept.sent.join(',') === 'x',
+    'the frozen floor still covers it, so a month-long hold delays and does not lose');
+  ok(M.latestUpdateDate(HELD) === '2026-08-26',
+    'and the mark then advances to the entry itself, so it is not sent twice');
+
   // due-ness
   const now = new Date('2026-08-15T12:00:00Z');
   ok(M.isDue('daily', null, now), 'a never-sent alert is due');
@@ -482,15 +513,23 @@ async function main() {
       .sort((x, y) => String(y.addedAt).localeCompare(String(x.addedAt)));
 
     /* The change-log window is tracked by the DATE OF THE LAST ENTRY SENT, not
-       by the send timestamp — see newUpdatesFor. On a first-ever send, cap it
-       at 31 days so a new subscriber is not posted the whole back-catalogue.
-       That cap is measured back from the END of the window rather than from
-       NOW, which matters only under a hold: an entry that waits more than a
-       month for review would otherwise slide out of a never-yet-sent
-       subscriber's first window while it waited, and reach them never. With
-       nothing held `until` IS today, so this is the behaviour it always had. */
+       by the send timestamp — see newUpdatesFor. On a first-ever send it is
+       capped at 31 days so a new subscriber is not posted the whole
+       back-catalogue, and THAT FLOOR IS FROZEN THE FIRST TIME IT IS COMPUTED
+       rather than left to slide with the clock.
+
+       Sliding is what loses a held entry, and only measuring the cap from the
+       window end does not save it: while the entry waits the window is frozen
+       and nothing is sent, but the DAY IT IS PUBLISHED the hold lifts, the
+       window end jumps to today, and a floor of "today minus 31 days" has by
+       then moved past the entry's own date — so it is skipped on that run and
+       on every run after it, silently. Freezing the floor on first sight keeps
+       the entry inside the window however long it waits, and costs one extra
+       field on an alert that has never had an update digest. */
     const sinceUpdate = a.lastUpdateDate ||
       M.daysBefore(new Date(Date.parse(until + 'T00:00:00Z') || now.getTime()), 31);
+    // persisted below, in whichever branch this alert takes
+    const floor = (!a.lastUpdateDate && M.wantsUpdates(a.criteria)) ? sinceUpdate : '';
     const news = M.newUpdatesFor(updates, a.criteria, sinceUpdate, until);
 
     if (!jobs.length && !news.length) {
@@ -498,7 +537,11 @@ async function main() {
       // window starts here rather than re-scanning from the last real send.
       skipped++;
       if (SCAN) console.log(`  nothing  ${label}`);
-      else if (LIVE) await doc.ref.update({ lastCheckedAt: now.toISOString() });
+      else if (LIVE) {
+        const idle = { lastCheckedAt: now.toISOString() };
+        if (floor) idle.lastUpdateDate = floor;   // freeze the floor, see above
+        await doc.ref.update(idle);
+      }
       continue;
     }
 
@@ -536,7 +579,10 @@ async function main() {
         lastSentCount: jobs.length + news.length,
       };
       // record the newest change-log entry actually sent, so the next window
-      // starts after it rather than at a timestamp
+      // starts after it rather than at a timestamp. The frozen floor is written
+      // first and only stands when nothing was sent — a real send always knows
+      // a later date than the floor does.
+      if (floor) patch.lastUpdateDate = floor;
       const latest = M.latestUpdateDate(news);
       if (latest) patch.lastUpdateDate = latest;
       await doc.ref.update(patch);
