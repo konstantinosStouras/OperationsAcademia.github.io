@@ -3648,6 +3648,18 @@ async function testNewsReview() {
   ok(/catch \(err\) \{[\s\S]{0,400}decisions = \{\}/.test(mailer),
     'a decision read that fails withholds rather than killing the job digests too');
 
+  /* AND THE ARCHIVE IS NOT A SIDE DOOR. /v2/ is served, and both its
+     What's-new page and its alerts preview read /changelog.json straight —
+     the SHARED file, so they would have shown an entry nobody had reviewed
+     yet, in full, on a page anyone can open. An archive keeps its own frozen
+     assets by design, so rather than carry a copy of the gate there, neither
+     reads the live log any more. */
+  for (const page of ['v2/whats-new.html', 'v2/assets/oa-alerts.js']) {
+    const src = await readFile(path.join(HERE, '..', page), 'utf8');
+    ok(!/fetch\('\/changelog\.json'/.test(src),
+      `${page} does not serve the live update log — it cannot judge what is public`);
+  }
+
   /* THE STATES HAVE TO LOOK LIKE SOMETHING. Each was set with no rule behind
      it once already (.v3-news-hidden), which is invisible until someone looks. */
   const css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');

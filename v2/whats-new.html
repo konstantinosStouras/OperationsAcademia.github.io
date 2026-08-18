@@ -115,32 +115,26 @@
         return '';
       }
 
-      fetch('/changelog.json', { credentials: 'same-origin' })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (log) {
-          var host = document.getElementById('oa-whatsnew');
-          var updates = (log && log.updates) || [];
-          if (!updates.length) {
-            host.innerHTML = '<p class="oa-muted">Nothing logged yet.</p>';
-            return;
-          }
-          host.innerHTML = updates.map(function (u) {
-            var href = safeHref(u.url);
-            var title = esc(u.title || '');
-            return '<article class="oa-wn-entry">' +
-              '<p class="oa-wn-date">' + esc(fmtDate(u.date)) + '</p>' +
-              '<h3 class="oa-wn-title">' +
-                (href ? '<a href="' + esc(href) + '">' + title + '</a>' : title) +
-              '</h3>' +
-              '<p class="oa-wn-body">' + esc(u.summary || '') + '</p>' +
-            '</article>';
-          }).join('');
-        })
-        .catch(function () {
-          document.getElementById('oa-whatsnew').innerHTML =
-            '<p class="oa-muted">The update log could not be loaded. ' +
-            'Please reload the page.</p>';
-        });
+      /* THE ARCHIVE NO LONGER RENDERS THE LIVE UPDATE LOG (2026-08-18).
+
+         Entries are REVIEWED before they are published now: one that the
+         maintainer has not published yet is on nobody's screen, and one they
+         have taken down is off the list entirely. That decision lives in
+         Firestore and is read through assets/oa-news.js on the LIVE site.
+
+         This is a frozen archive with its own frozen assets — that is the whole
+         point of the three trees — so rather than carry a copy of the gate here
+         and have two answers to one question, this page stops serving a feed it
+         cannot judge and hands the reader to the live log, which is the current
+         one anyway. An archived page may point back at the live site; that is
+         how a reader who lands on one gets out. */
+      var host = document.getElementById('oa-whatsnew');
+      if (host) {
+        host.innerHTML = '<p class="oa-muted">The update log is kept on the ' +
+          'current site: <a href="/whats-new.html">what&rsquo;s new on ' +
+          'Operations Academia</a>.</p>';
+      }
+      // (esc / fmtDate / safeHref above are kept, unused, with the page.)
     })();
     </script>
 </body>
