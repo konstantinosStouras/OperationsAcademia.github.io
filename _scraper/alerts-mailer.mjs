@@ -71,6 +71,15 @@ function dayBefore(iso) {
  * anywhere to say so. Stopping short delays instead: publish or remove the one
  * that is waiting and the rest go out on the next run, in the order they were
  * written.
+ *
+ * A REMOVED entry deliberately does not hold the stream — removing one is a
+ * decision, not a pause, and it is one of the two ways to release the hold. The
+ * consequence, stated rather than hidden: an entry removed and later RESTORED
+ * goes back on the site but is not re-announced, its date being behind the
+ * windows that moved on meanwhile. That is the right way round — many
+ * subscribers will already have been e-mailed it before it came down, and
+ * nothing here can tell which, so silence beats sending some of them a
+ * duplicate.
  */
 function updateWindowEnd(today, oldestPending) {
   const before = dayBefore(oldestPending);
