@@ -28,9 +28,13 @@
 
    ACCESSIBILITY. The pattern is the ARIA 1.2 combobox: the input owns
    `role=combobox`, `aria-expanded` and `aria-activedescendant`; the list is a
-   `role=listbox` of `role=option`. Up/Down move, Enter takes, Escape closes,
-   Tab closes and keeps what is typed. It degrades to a plain text input with
-   no JavaScript, which is exactly what the field was before.
+   `role=listbox` of `role=option`, its scopes are `role=group` with the
+   heading as their label, and what it is offering is said in a live region
+   beside it. Up/Down move, Enter takes, Escape closes and keeps what is typed;
+   TAB TAKES the highlighted row, because the field has been telling the reader
+   it is selected, and closes otherwise. Enter while the list is open never
+   submits the form. It degrades to a plain text input with no JavaScript,
+   which is exactly what the field was before.
    --------------------------------------------------------------------------- */
 
 (function () {
