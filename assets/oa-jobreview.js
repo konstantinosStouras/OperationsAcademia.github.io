@@ -194,8 +194,8 @@
     var n = docs.length;
 
     if (!window.confirm('Publish all ' + n + ' postings on this page?\n\n' +
-        'They appear on the jobs page at the next build. You can still take any ' +
-        'of them down afterwards from the posting itself.')) return;
+        'They appear on the jobs page in a couple of minutes. You can still take ' +
+        'any of them down afterwards from the posting itself.')) return;
 
     btn.disabled = true;
     msg.className = 'oa-form-msg';
@@ -232,8 +232,8 @@
       msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
       msg.textContent = failed
         ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
-        : 'All ' + done + ' approved. They reach the jobs page at the next sheet read ' +
-          '— within half an hour.';
+        : 'All ' + done + ' approved. They reach the jobs page in a couple of ' +
+          'minutes — publishing starts the moment you approve.';
       btn.disabled = !!failed;
     });
   }
@@ -348,13 +348,17 @@
               });
               return;
             }
-            /* The card leaves the queue, but the POSTING does not reach the
-               site until the next build — up to 20 minutes. Saying so is the
-               difference between "it worked" and the maintainer reloading
-               jobs.html and thinking it did not. */
+            /* The card leaves the queue, but the POSTING is not on the site
+               until two workflows have run: the sheet read writes the approved
+               rows, the build merges them. A Cloud Function starts the first
+               the moment this write lands and the second follows it, so that is
+               a couple of minutes rather than the best part of an hour — but it
+               is not instant, and saying so is the difference between "it
+               worked" and the maintainer reloading jobs.html and thinking it
+               did not. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
               (act === 'approve'
-                ? 'Approved. It reaches the jobs page at the next sheet read — within half an hour.'
+                ? 'Approved. It reaches the jobs page in a couple of minutes — publishing starts now.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
           })

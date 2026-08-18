@@ -98,8 +98,8 @@
     var what = row.institution + (row.department ? ' — ' + row.department : '');
     if (!window.confirm(
       'Take this posting down?\n\n' + what + '\n\n' +
-      'It stops appearing on the site at the next update, normally within an ' +
-      'hour. Nothing is deleted — tell us and it can be put back.')) return;
+      'It stops appearing on the site within a few minutes. ' +
+      'Nothing is deleted — tell us and it can be put back.')) return;
 
     btn.disabled = true;
     btn.textContent = 'Taking down…';

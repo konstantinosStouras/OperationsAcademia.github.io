@@ -409,9 +409,9 @@
        them and no explanation, so the reader cannot express a filter and is
        not told why. Remember which happened. */
     var ready = Promise.all([
-      fetch('data/jobs.json', { credentials: 'same-origin' })
+      fetch('data/jobs.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-      fetch('changelog.json', { credentials: 'same-origin' })
+      fetch('changelog.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : { updates: [] }; })
         .catch(function () { return { updates: [] }; })
     ]).then(function (res) {

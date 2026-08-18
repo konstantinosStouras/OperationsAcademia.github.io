@@ -226,7 +226,7 @@
          data/jobs.json, so the rows that have FALLEN OUT of the jobs page's
          own window are folded in here at read time — each July the newly-past
          season appears by itself, with nothing to re-import. */
-      fetch('/data/jobs.json', { credentials: 'same-origin' })
+      fetch('/data/jobs.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (res) { return res.ok ? res.json() : []; })
         ['catch'](function () { return []; })
         .then(function (jobs) {

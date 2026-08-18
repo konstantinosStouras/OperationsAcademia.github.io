@@ -30,6 +30,15 @@ name: OA jobs — read the job market tracking sheet
 # when nothing has changed, which is the state it is in almost every time.
 
 on:
+  # The instant path: the Cloud Function (_functions/index.js) fires this the
+  # moment the maintainer approves or rejects a posting in the review queue.
+  # data/jobmarket.json holds the approved rows and nothing else writes it, so
+  # this job — not the jobs build — is what publishes an approval, and
+  # oa-jobs-build.yml follows this one's completion (see its workflow_run
+  # trigger). Approve, and the posting is on the site in about two minutes
+  # instead of the half hour the schedule below promises.
+  repository_dispatch:
+    types: [oa-jobreview-decided]
   schedule:
     # :10 and :40, off the hour so this repository does not queue behind every
     # other :00 job on the runners

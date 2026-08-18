@@ -244,7 +244,7 @@
       timer = setTimeout(function () { draw(input.value); syncUrl(); }, 140);
     });
 
-    fetch(cfg.data, { credentials: 'same-origin' })
+    fetch(cfg.data, { credentials: 'same-origin', cache: 'no-cache' })
       .then(function (res) {
         if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
         return res.json();
