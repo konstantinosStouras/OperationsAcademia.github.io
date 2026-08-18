@@ -38,7 +38,7 @@ import {
   text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta, mergeRows,
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
   marketYear, marketLabel, marketFloor, MARKET_WINDOW, collapseSameDay,
-  keyOf, isoStamp, canonCountry,
+  keyOf, isoStamp, canonCountry, canonPlace,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab, splitDepartment, joinDepartment } from './vocab.mjs';
 
@@ -274,17 +274,22 @@ export function rowsFromSheets(displayRows, rawRows) {
       year = posted ? Number(posted.slice(0, 4)) + 1 : 0;
     }
 
+    /* The sheet has one fused field; the form now has two. Splitting on the
+       way in is what puts the sheet's back-catalogue into the vocabulary the
+       form offers, so a poster picking "Fuqua School of Business" gets the
+       spelling the site already uses instead of inventing a third one — and
+       canonPlace then settles the spelling, and moves a name that landed in
+       the wrong one of the three fields into the right one. */
+    const place = canonPlace({ institution, ...splitDepartment(department) });
+
     const rec = {
       id: '',
       year,
       posted,
-      institution,
-      department,
-      /* The sheet has one fused field; the form now has two. Splitting on the
-         way in is what puts the sheet's back-catalogue into the vocabulary the
-         form offers, so a poster picking "Fuqua School of Business" gets the
-         spelling the site already uses instead of inventing a third one. */
-      ...splitDepartment(department),
+      institution: place.institution || institution,
+      department: joinDepartment(place.school, place.unit) || department,
+      school: place.school,
+      unit: place.unit,
       type,
       levels,
       applyBy,

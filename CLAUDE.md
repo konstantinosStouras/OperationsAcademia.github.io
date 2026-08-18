@@ -120,6 +120,53 @@ It is applied at every ingest (`jobs-model.rowFromSubmission`,
 that last one matters, because an alert saved under an old spelling would
 otherwise stop matching silently.
 
+## One spelling per university, school and department
+
+`assets/oa-schools.js` is the **single definition** of what each university,
+school and department is called — the same dual-mode shape as
+`assets/oa-countries.js` (browser `window.OASchools`, Node `require`), and held
+to the same rules.
+
+The three names were free text on the old form and packed into ONE column in
+the sheets the archive came from, so one department arrived under half a dozen
+names. Tulane's was posted as "Freeman School of Business", "Freeman School of
+Business, Management Science", "…, Management Sciences Area", "A.B. Freeman
+School of Business, Management Science Department" and "A. B. Freeman School of
+Business / Management Sciecne" — five entries in every filter for one place.
+
+What is canonical:
+
+* the **full official name** of the university and the school ("A. B. Freeman
+  School of Business"), as with countries;
+* the **bare field name** of the department — "Management Science", never
+  "Management Science Department", "Management Sciences Area", "Department of
+  Management Science" or "…group". The wrapper word is how one school happens
+  to organise itself and is exactly what differs between two people describing
+  the same unit; the school it sits under is the neighbouring field already.
+
+`canonPlace({institution, school, unit})` does all three at once, because WHICH
+of the three a name belongs in is part of what it decides: a department fused
+into the school field is moved across ("Kelley School of Business - Operations
+and Decision Technologies"), and a legacy archive row that packs all three into
+the university field is taken apart ("University of Pennsylvania (The Wharton
+School), Operations and Information Management (OPIM) Department"). It is pure
+and idempotent, so every writer can apply it on every rebuild.
+
+**When a new variant turns up, add it to `INSTITUTION_ALIASES` /
+`SCHOOL_ALIASES` / `UNIT_ALIASES` — never hand-edit the data**, for the reason
+the country table gives: `data/jobs.json` is rebuilt from Firestore every
+morning. `canon()` never invents — a school it has never seen is published
+under the name its poster gave it, and a comma that is part of a name is left
+alone ("University of California, Berkeley", "The Chinese University of Hong
+Kong, Shenzhen", "Bayes Business School, Faculty of Management").
+
+It is applied at every ingest — `jobs-model.rowFromSubmission`,
+`import-sheet.mjs`, `jobmarket-sheet.mjs` — and in the posting form itself
+(`assets/oa-jobform.js`), so a poster's own preview and their My postings page
+read the way the posting will publish. `data/vocab.json`, the list the form
+offers, is built from the canonical rows, so the next poster is offered the
+spelling the site already uses.
+
 ## Tests that must stay green
 
     node _scraper/selftest.mjs      # offline model/pipeline checks

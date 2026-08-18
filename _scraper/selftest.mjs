@@ -981,6 +981,152 @@ async function testCountries() {
   }
 }
 
+
+/* --------------------------------------- one spelling per school and unit
+
+   assets/oa-schools.js, on exactly the terms oa-countries.js is held to: the
+   module's own decisions, the committed data not drifting back, and every
+   ingest point still canonicalising — because data/jobs.json is rebuilt from
+   Firestore every morning, so a one-off rewrite is worth nothing on its own.
+
+   The case that started it: Tulane's one department was published as five
+   different places, so a reader filtering the archive on Tulane could not
+   tell which of the five was the department they were looking at.           */
+
+async function testSchools() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+
+  // Tulane: the five spellings the archive actually held, now one place
+  for (const [school, unit] of [
+    ['Freeman School of Business', 'Management Science'],
+    ['Freeman School of Business', 'Management Sciences Area'],
+    ['A.B. Freeman School of Business', 'Management Science Department'],
+    ['A. B. Freeman School of Business / Management Sciecne', ''],
+    ['A. B. Freeman School of Business', 'Management Science'],
+  ]) {
+    const p = S.canonPlace({ institution: 'Tulane University', school, unit });
+    eq([p.school, p.unit], ['A. B. Freeman School of Business', 'Management Science'],
+      `"${school}${unit ? ', ' + unit : ''}" is published as the one department`);
+  }
+
+  // the wrapper word is the house style, not the name
+  for (const given of ['Department of Operations Management', 'Operations Management Department',
+    'Operations Management Area', 'The Operations Management group', 'Area of Operations Management',
+    'Operations Management Division']) {
+    eq(S.canonUnit(given), 'Operations Management', `"${given}" names the same department`);
+  }
+
+  // spelling, abbreviations and the trailing short form
+  eq(S.canonUnit('Analytics & Operations Group'), 'Analytics and Operations', '"&" joins names');
+  eq(S.canonUnit('Department of Operations & Info Systems'), 'Operations and Information Systems',
+    'and abbreviations are spelt out');
+  eq(S.canonUnit('Department of Industrial Engineering and Operations Research (IEOR)'),
+    'Industrial Engineering and Operations Research', 'a trailing acronym is not part of the name');
+  eq(S.canonUnit('Department'), '', 'a wrapper word alone names nothing');
+
+  // a school field naming the department too
+  eq(S.canonPlace({ school: 'Kelley School of Business - Operations and Decision Technologies' }),
+    { institution: '', school: 'Kelley School of Business', unit: 'Operations and Decision Technologies' },
+    'a department fused into the school field is moved across');
+  eq(S.canonPlace({ institution: 'Texas A&M University',
+    school: 'Department of Information and Operations Management (INFO) at Mays Business School' }),
+    { institution: 'Texas A&M University', school: 'Mays Business School',
+      unit: 'Information and Operations Management' },
+    'and so is one written the other way round');
+
+  // the archive's one-column rows, split into the three fields the form asks for
+  eq(S.canonPlace({ institution: 'University of Pennsylvania (The Wharton School), Operations and Information Management (OPIM) Department' }),
+    { institution: 'University of Pennsylvania', school: 'Wharton School',
+      unit: 'Operations and Information Management' },
+    'a legacy row naming all three is taken apart');
+  eq(S.canonPlace({ institution: 'University of California, Los Angeles (UCLA, Anderson School of Management), Decisions, Operations and Technology Management (DOTM)' }),
+    { institution: 'University of California, Los Angeles', school: 'Anderson School of Management',
+      unit: 'Decisions, Operations and Technology Management' },
+    'including one whose campus and department both carry commas');
+
+  // …and the names a comma is simply PART of are left alone
+  for (const given of ['University of California, Berkeley', 'The Chinese University of Hong Kong, Shenzhen',
+    'Baruch College, The City University of New York (CUNY)']) {
+    eq(S.canonPlace({ institution: given }).institution, given,
+      `"${given}" is one university's name, not a university and a department`);
+  }
+  eq(S.canonPlace({ school: 'Institut Mines-Télécom Business School' }).school,
+    'Institut Mines-Télécom Business School', 'and a hyphen inside a name is not a separator');
+  eq(S.canonPlace({ school: 'Bayes Business School, Faculty of Management' }).school,
+    'Bayes Business School, Faculty of Management', 'nor is a comma between two school names');
+
+  // …and it NEVER invents one
+  eq(S.canonSchool('School of Wizardry'), 'School of Wizardry',
+    'a school it does not know is left exactly as given');
+  eq(S.canonUnit('Department of Wizardry'), 'Wizardry', 'and only its wrapper word comes off');
+  eq(S.canonSchool(''), '', 'an empty value stays empty');
+  eq(S.canonInstitution(null), '', 'as does a missing one');
+
+  // it is safe to run twice — every writer applies it on every rebuild
+  for (const row of [{ institution: 'Tulane University', school: 'Freeman School of Business', unit: 'Management Sciences Area' },
+    { institution: 'University of Pennsylvania (The Wharton School), Operations and Information Management (OPIM) Department' }]) {
+    const once = S.canonPlace(row);
+    eq(S.canonPlace(once), once, 'canonicalising an already-canonical row changes nothing');
+  }
+
+  /* THE DATA. Both served datasets carry canonical names only, and the
+     published `department` line is the two parts joined — the shape the card
+     and the filters read. */
+  for (const file of ['jobs.json', 'past-postings.json']) {
+    const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', file), 'utf8'));
+    const bad = rows.filter((r) => {
+      const p = S.canonPlace(r);
+      return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
+    }).map((r) => r.id);
+    eq(bad, [], `data/${file}: every posting names its university, school and department the one way`);
+
+    const line = rows.filter((r) => r.department !== joinDepartment(r.school, r.unit)).map((r) => r.id);
+    eq(line, [], `data/${file}: and the line the card shows is those two, joined`);
+  }
+
+  /* THE PLACE THE COMPLAINT CAME FROM. previous-markets.html?university=tulane:
+     five postings, one department. */
+  const archive = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'past-postings.json'), 'utf8'));
+  const jobs = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8'));
+  const tulane = [...jobs, ...archive].filter((r) => /tulane/i.test(r.institution));
+  ok(tulane.length >= 5, `the archive still holds every Tulane posting (${tulane.length})`);
+  eq([...new Set(tulane.map((r) => r.school))], ['A. B. Freeman School of Business'],
+    'and they all name one school');
+  eq([...new Set(tulane.map((r) => r.unit))].filter(Boolean), ['Management Science'],
+    'and one department');
+
+  /* THE INGEST POINTS, all three, or tomorrow's build brings the spellings
+     back. */
+  const row = rowFromSubmission({
+    institution: 'Tulane University', school: 'Freeman School of Business',
+    unit: 'Management Sciences Area', country: 'United States', type: 'University',
+    levels: ['Assistant Professor'], uid: 'u1', ref: 'OA-JOB-1',
+    createdAt: '2026-08-01T10:00:00Z',
+  });
+  eq([row.school, row.unit], ['A. B. Freeman School of Business', 'Management Science'],
+    'a submission is published under the canonical names');
+  for (const file of ['import-sheet.mjs', 'jobmarket-sheet.mjs']) {
+    const src = await readFile(path.join(HERE, file), 'utf8');
+    ok(/canonPlace\(\{ institution/.test(src), `${file}: and so is a row read from a spreadsheet`);
+  }
+
+  // the form applies it too, so a poster's own preview reads as it will publish
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  ok(/window\.OASchools\.canonPlace/.test(form),
+    'oa-jobform.js: the form canonicalises what the poster typed');
+  const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  ok(page.indexOf('oa-schools.js') !== -1 &&
+     page.indexOf('oa-schools.js') < page.indexOf('oa-jobform.js'),
+    'post-a-job.html: and loads the module before the form');
+
+  // the vocabulary the form offers is built from the canonical names
+  const vocab = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
+  const badSchools = vocab.schools.map((e) => e.v).filter((v) => S.canonSchool(v) !== v);
+  eq(badSchools, [], 'data/vocab.json: the form offers canonical school names');
+  const badUnits = vocab.units.map((e) => e.v).filter((v) => S.canonUnit(v) !== v);
+  eq(badUnits, [], 'and canonical department names');
+}
+
 /* ----------------------------------------- the forms fit their create rules
 
    Each create rule bounds a submission's number of keys; each form writes a
@@ -1108,8 +1254,10 @@ function testSplitFields() {
   const r = rowFromSubmission({ ...GOOD, department: undefined,
     school: 'Fuqua School of Business', unit: 'Operations Management group' });
   eq(r.school, 'Fuqua School of Business', 'school carried');
-  eq(r.unit, 'Operations Management group', 'unit carried');
-  eq(r.department, 'Fuqua School of Business, Operations Management group',
+  /* the wrapper word comes off on the way in — "group", "Area" and
+     "Department" are three houses' words for one department (oa-schools.js) */
+  eq(r.unit, 'Operations Management', 'unit carried, wrapper word off');
+  eq(r.department, 'Fuqua School of Business, Operations Management',
     'department is derived from the two');
 
   // either alone is enough
@@ -1123,9 +1271,9 @@ function testSplitFields() {
   // a legacy submission carrying only `department` is split for the vocabulary
   const legacy = rowFromSubmission({ ...GOOD, department: 'NUS Business School, Department of Analytics' });
   eq(legacy.school, 'NUS Business School', 'a legacy posting gains a school');
-  eq(legacy.unit, 'Department of Analytics', 'and a unit');
-  eq(legacy.department, 'NUS Business School, Department of Analytics',
-    'and its published line is unchanged');
+  eq(legacy.unit, 'Analytics', 'and a unit');
+  eq(legacy.department, 'NUS Business School, Analytics',
+    'and its published line reads as the canon publishes it');
 
   ok(PUBLIC_FIELDS.includes('school') && PUBLIC_FIELDS.includes('unit'),
     'both parts are published');
@@ -2042,6 +2190,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testAccountMerge();
   await testDerivedMarketYear();
   await testCountries();
+  await testSchools();
   await testSubmissionKeyCeilings();
   testJobMarketSheetParsing();
   testJobMarketSheetColumns();
