@@ -380,28 +380,44 @@ service cloud.firestore {
       allow list, delete: if false;
     }
 
-    // ------------------------------------------------ what's-new overrides
+    // ------------------------------------------------ what's-new decisions
     // The admin curates the public "What's new" list in place (owner,
-    // 2026-08-17): one doc per changelog entry id, carrying {hidden: true}
-    // and/or an edited {title, summary}. The list is public, so reads are
-    // open; only the admin writes. changelog.json stays the source of truth
-    // — an override only masks or rewords its entry on the site.
+    // 2026-08-17, extended 2026-08-18): one doc per changelog entry id,
+    // carrying the DECISION about it and, optionally, an edited
+    // {title, summary}. The list is public, so reads are open; only the admin
+    // writes. changelog.json stays the source of truth for WHAT was announced
+    // — a document here only says what has been done about it.
+    //
+    //   status: 'approved'   published — every visitor sees it
+    //   status: 'pending'    not reviewed yet — only the maintainer sees it
+    //   status: 'removed'    taken down — it leaves the list entirely
+    //
+    // NOTHING NEW PUBLISHES ITSELF (owner, 2026-08-18): an entry with NO
+    // document here is withheld unless it predates the review gate. That rule
+    // lives in assets/oa-news.js — the same file the two pages and the mailer
+    // read it through — because absence cannot be expressed in a rule at all.
+    // `hidden` is still written, in step with `status`, so a page served from
+    // an older cache reads a removal the same way; it is also how the
+    // documents written before this gate existed are still understood.
     match /newsOverrides/{id} {
       allow read: if true;
       allow write: if isAdmin()
-                   && request.resource.data.keys().hasOnly(['hidden', 'title', 'summary', 't'])
+                   && request.resource.data.keys()
+                        .hasOnly(['status', 'hidden', 'title', 'summary', 't'])
                    && str('title', 300) && str('summary', 2000)
+                   && (!('status' in request.resource.data)
+                       || request.resource.data.status in ['approved', 'pending', 'removed'])
                    && (!('hidden' in request.resource.data)
                        || request.resource.data.hidden is bool)
                    && (!('t' in request.resource.data)
                        || request.resource.data.t is number);
-      /* WITHOUT THIS, HIDING AN ENTRY IS A ONE-WAY DOOR. `allow write` cannot
-         cover a delete: `request.resource` is null on one, so
+      /* WITHOUT THIS, A DECISION IS A ONE-WAY DOOR. `allow write` cannot cover
+         a delete: `request.resource` is null on one, so
          `request.resource.data.keys()` errors and the condition is false. The
-         list then filters the hidden entry out for everybody, the maintainer
-         included, leaving nothing on the page to press to bring it back — the
-         only way out was the Firestore console. (index.html now also shows the
-         maintainer what they have hidden, so there is something to press.) */
+         way back from a removal is normally the "Removed updates" panel under
+         the list (assets/oa-news.js), which is drawn for the maintainer alone
+         — but a delete has to stay possible, or a document written wrongly
+         could only be undone from the Firestore console. */
       allow delete: if isAdmin();
     }
 

@@ -3,101 +3,108 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "whats-new-reviewed-and-tidy",
+   "date": "2026-08-18",
+   "title": "“What’s new” is reviewed before it is published, and a removed update really goes",
+   "summary": "Two changes to this update list. An update taken down now leaves the list at once, instead of staying on the page struck through — so the list only ever shows what is current. Nothing is lost: the removed ones sit in a collapsed panel under the list that only the maintainer sees, one click from being put back. And a newly logged update is no longer public the moment it is written: it waits to be reviewed, and until then it is on nobody’s screen and in nobody’s inbox. Your site-updates digest carries only updates that have actually been published, in the order they were written.",
+   "url": "https://www.operationsacademia.org/whats-new.html"
+  },
+  {
    "id": "header-paints-once",
    "date": "2026-08-18",
    "title": "The header stops blinking, and the phone header carries our name",
-   "summary": "Every reload used to flash a header with no account control, which then appeared and shoved the row sideways, and your picture showed as a coloured disc of initials for half a second before the real photograph replaced it. The header now paints its finished form on the very first frame: your picture and the space your account control takes are both remembered from your last visit, so nothing moves and nothing is drawn twice. On phones the logo is the whole lockup again \u2014 the monogram AND \"Operations Academia\" \u2014 scaled to fit rather than cut in half. The pages are quicker with it: the sign-in library is no longer fetched at high priority ahead of the page's own content, the home page downloads its postings once instead of twice, the scripts no longer queue up in front of what you are reading, and the sections below the top of the page appear as soon as the page is parsed rather than after everything has loaded.",
+   "summary": "Every reload used to flash a header with no account control, which then appeared and shoved the row sideways, and your picture showed as a coloured disc of initials for half a second before the real photograph replaced it. The header now paints its finished form on the very first frame: your picture and the space your account control takes are both remembered from your last visit, so nothing moves and nothing is drawn twice. On phones the logo is the whole lockup again — the monogram AND \"Operations Academia\" — scaled to fit rather than cut in half. The pages are quicker with it: the sign-in library is no longer fetched at high priority ahead of the page's own content, the home page downloads its postings once instead of twice, the scripts no longer queue up in front of what you are reading, and the sections below the top of the page appear as soon as the page is parsed rather than after everything has loaded.",
    "url": "https://www.operationsacademia.org/"
   },
   {
    "id": "postings-that-never-reached-the-site",
    "date": "2026-08-18",
-   "title": "Postings that said \u201cLive\u201d but were not on the site",
-   "summary": "A posting could be accepted, show as live on your own postings page, and never appear among the job postings. The nightly check that guards the data against bad names was reading two old corrections as rules about every posting from those two universities \u2014 so one new posting that named a college but no department, and one that had its school typed into the department box, made the check fail, and a failed check stops publishing altogether. Both are fixed: a school entered in the department box is now filed as a school, the two corrections pin the postings they were about, and the affected postings publish normally.",
+   "title": "Postings that said “Live” but were not on the site",
+   "summary": "A posting could be accepted, show as live on your own postings page, and never appear among the job postings. The nightly check that guards the data against bad names was reading two old corrections as rules about every posting from those two universities — so one new posting that named a college but no department, and one that had its school typed into the department box, made the check fail, and a failed check stops publishing altogether. Both are fixed: a school entered in the department box is now filed as a school, the two corrections pin the postings they were about, and the affected postings publish normally.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "postings-appear-in-minutes",
    "date": "2026-08-18",
    "title": "Postings appear in minutes, not on the hour",
-   "summary": "A posting used to wait for a scheduled update, and an approved posting waited twice \u2014 once for the sheet read that publishes it and again for the build that merges it \u2014 so the site could take the best part of an hour to show something that had already been decided. Both waits are gone: saving a posting or approving one starts publishing immediately, and the two steps now run as one chain. The pages also ask for fresh data rather than showing whatever the browser stored last, which is what made the delay look longer still.",
+   "summary": "A posting used to wait for a scheduled update, and an approved posting waited twice — once for the sheet read that publishes it and again for the build that merges it — so the site could take the best part of an hour to show something that had already been decided. Both waits are gone: saving a posting or approving one starts publishing immediately, and the two steps now run as one chain. The pages also ask for fresh data rather than showing whatever the browser stored last, which is what made the delay look longer still.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "account-menu-counts",
    "date": "2026-08-18",
    "title": "Your account menu says how many",
-   "summary": "The account menu listed \u201cMy postings\u201d and \u201cE-mail alerts\u201d without saying how much was in either, so both read the same whether you had none or a dozen. Each now carries its number. Nothing is shown until it is known \u2014 a count that could not be read shows nothing rather than a misleading zero \u2014 and the number is corrected the moment you take a posting down or delete an alert.",
+   "summary": "The account menu listed “My postings” and “E-mail alerts” without saying how much was in either, so both read the same whether you had none or a dozen. Each now carries its number. Nothing is shown until it is known — a count that could not be read shows nothing rather than a misleading zero — and the number is corrected the moment you take a posting down or delete an alert.",
    "url": "https://www.operationsacademia.org/my-postings.html"
   },
   {
    "id": "houston-and-a-recovered-posting",
    "date": "2026-08-18",
    "title": "University of Houston, and a posting that had gone missing",
-   "summary": "Houston\u2019s postings now read as one place: the C. T. Bauer College of Business, with its Department of Decision and Information Sciences and the Bauer Human-Centered Artificial Intelligence Institute both offered when you post a job. While making those names agree, a job posting disappeared \u2014 the site had been treating two advertisements from the same department on the same day as one submission repeated, and they had only been telling themselves apart because one of them had left its school blank. Two advertisements are two postings now, however alike their headings, and Bauer\u2019s September 2025 pair are both back on the site.",
+   "summary": "Houston’s postings now read as one place: the C. T. Bauer College of Business, with its Department of Decision and Information Sciences and the Bauer Human-Centered Artificial Intelligence Institute both offered when you post a job. While making those names agree, a job posting disappeared — the site had been treating two advertisements from the same department on the same day as one submission repeated, and they had only been telling themselves apart because one of them had left its school blank. Two advertisements are two postings now, however alike their headings, and Bauer’s September 2025 pair are both back on the site.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "readable-in-dark-mode",
    "date": "2026-08-18",
    "title": "Dark mode: the parts that could not be read",
-   "summary": "In dark mode several things on the site were drawing pale text on a pale panel \u2014 the university dropdown on the posting form, the \u201cChoose a file\u2026\u201d button, and the confirmation panel after saving a posting, whose message was invisible under a heading you could read. All of them are fixed, and the whole site was measured page by page in both modes rather than one report at a time: muted text (the footer, result counts, dates and hints) was very slightly too faint everywhere and is now a shade darker, and the Universities map\u2019s cluster numbers and attribution line are legible too. A check now measures every kind of page in both modes on each change, so this cannot quietly come back.",
+   "summary": "In dark mode several things on the site were drawing pale text on a pale panel — the university dropdown on the posting form, the “Choose a file…” button, and the confirmation panel after saving a posting, whose message was invisible under a heading you could read. All of them are fixed, and the whole site was measured page by page in both modes rather than one report at a time: muted text (the footer, result counts, dates and hints) was very slightly too faint everywhere and is now a shade darker, and the Universities map’s cluster numbers and attribution line are legible too. A check now measures every kind of page in both modes on each change, so this cannot quietly come back.",
    "url": "https://www.operationsacademia.org/post-a-job"
   },
   {
    "id": "one-spelling-everywhere",
    "date": "2026-08-18",
-   "title": "One spelling per university, school and department \u2014 on every page",
-   "summary": "The job postings had been tidied so that one department reads as one place; the Universities map and the recent-faculty list had not, and the map is where every posting\u2019s \u201cFurther info\u201d link lands. 213 of the map\u2019s 254 entries and 9 faculty placements now name their university, school and department exactly the way the postings do, so a school reads the same wherever you meet it and the links between the pages find each other. Nine more schools were listed twice and are now listed once, including Cornell\u2019s SC Johnson College, Stanford\u2019s Graduate School of Business and UCD\u2019s Smurfit school; and each department is named the way its own school names it \u2014 UT Dallas\u2019s Operations Management Area, Yale\u2019s Operations Department, Stanford\u2019s Operations, Information, and Technology (OIT) area.",
+   "title": "One spelling per university, school and department — on every page",
+   "summary": "The job postings had been tidied so that one department reads as one place; the Universities map and the recent-faculty list had not, and the map is where every posting’s “Further info” link lands. 213 of the map’s 254 entries and 9 faculty placements now name their university, school and department exactly the way the postings do, so a school reads the same wherever you meet it and the links between the pages find each other. Nine more schools were listed twice and are now listed once, including Cornell’s SC Johnson College, Stanford’s Graduate School of Business and UCD’s Smurfit school; and each department is named the way its own school names it — UT Dallas’s Operations Management Area, Yale’s Operations Department, Stanford’s Operations, Information, and Technology (OIT) area.",
    "url": "https://www.operationsacademia.org/universities"
   },
   {
    "id": "schools-named-as-they-name-themselves",
    "date": "2026-08-18",
-   "title": "Each school\u2019s department is listed the way that school names it",
-   "summary": "Six schools were listed with two names for one group \u2014 Yale\u2019s \u201cOperations\u201d beside \u201cOperations Management\u201d, Miami Herbert\u2019s \u201cManagement\u201d beside \u201cManagement Science\u201d \u2014 so one department read as two. Each now appears once, under the name its own school uses: Emory\u2019s Information Systems & Operations Management, Purdue\u2019s Supply Chain and Operations Management Faculty, UT Dallas\u2019s Operations Management Area, UCD Smurfit\u2019s and Miami Herbert\u2019s Management Area, and Yale\u2019s Operations Department. Two schools listed twice were merged with them \u2014 UCD Smurfit and Washington University\u2019s Olin, each of which had arrived with its words in a different order from two sources. The postings already on the site were renamed to match, so a search finds all of a department\u2019s postings together rather than half of them.",
+   "title": "Each school’s department is listed the way that school names it",
+   "summary": "Six schools were listed with two names for one group — Yale’s “Operations” beside “Operations Management”, Miami Herbert’s “Management” beside “Management Science” — so one department read as two. Each now appears once, under the name its own school uses: Emory’s Information Systems & Operations Management, Purdue’s Supply Chain and Operations Management Faculty, UT Dallas’s Operations Management Area, UCD Smurfit’s and Miami Herbert’s Management Area, and Yale’s Operations Department. Two schools listed twice were merged with them — UCD Smurfit and Washington University’s Olin, each of which had arrived with its words in a different order from two sources. The postings already on the site were renamed to match, so a search finds all of a department’s postings together rather than half of them.",
    "url": "https://www.operationsacademia.org/post-a-job"
   },
   {
    "id": "jobs-search-several-universities",
    "date": "2026-08-18",
    "title": "Search the job postings for several universities at once",
-   "summary": "The job postings search now takes more than one name. Type a university or school and press Enter and it becomes a tag under the box, so you can add another \u2014 the list then shows postings from any of them, rather than making you search one at a time. Each tag can be removed on its own, and the address bar carries them all, so a search you share or bookmark comes back exactly as you left it. The box itself now says what it searches: University/School name. The filter bar also stays in line when tags are showing, instead of nudging the control above them out of place.",
+   "summary": "The job postings search now takes more than one name. Type a university or school and press Enter and it becomes a tag under the box, so you can add another — the list then shows postings from any of them, rather than making you search one at a time. Each tag can be removed on its own, and the address bar carries them all, so a search you share or bookmark comes back exactly as you left it. The box itself now says what it searches: University/School name. The filter bar also stays in line when tags are showing, instead of nudging the control above them out of place.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "schools-of-the-world",
    "date": "2026-08-18",
    "title": "Every operations school in the world, in the posting forms",
-   "summary": "The university, school and department boxes used to offer only the places that had already advertised here \u2014 63 universities \u2014 so everybody else typed their name from scratch and the site slowly collected six spellings of one department. All three forms (a job, a candidate, a confirmed placement) now open on a directory of the world\u2019s operations and supply chain schools: 302 universities, 227 schools and 189 departments, and the list is alphabetical, narrowing as you type. A university\u2019s business school and its industrial engineering school stay separate, each with its own departments, and a school that had arrived under a long name from one source and a short one from another \u2014 \u201cSloan School of Management\u201d beside \u201cMIT Sloan School of Management\u201d \u2014 is now one entry rather than two. Two smaller things went with it: the dropdown was unreadable in the dark theme, white text on a white card, and is not any more; and adding a spelling now corrects the postings already on the site instead of leaving one school under two names.",
+   "summary": "The university, school and department boxes used to offer only the places that had already advertised here — 63 universities — so everybody else typed their name from scratch and the site slowly collected six spellings of one department. All three forms (a job, a candidate, a confirmed placement) now open on a directory of the world’s operations and supply chain schools: 302 universities, 227 schools and 189 departments, and the list is alphabetical, narrowing as you type. A university’s business school and its industrial engineering school stay separate, each with its own departments, and a school that had arrived under a long name from one source and a short one from another — “Sloan School of Management” beside “MIT Sloan School of Management” — is now one entry rather than two. Two smaller things went with it: the dropdown was unreadable in the dark theme, white text on a white card, and is not any more; and adding a spelling now corrects the postings already on the site instead of leaving one school under two names.",
    "url": "https://www.operationsacademia.org/post-a-job"
   },
   {
    "id": "postings-reviewed-before-publishing",
    "date": "2026-08-18",
    "title": "Job postings are checked by a human before they appear",
-   "summary": "Postings gathered automatically from the job market tracking sheet no longer go straight onto the site. Each one now waits for the maintainer, who checks it against the advertisement and corrects anything wrong before it is published \u2014 the closing date, the school or department name, the country, the type of position. The site derives several of those from the posting rather than being told them outright, so this is the step that makes sure what you read is what the employer actually advertised. Postings you already see are unaffected once re-approved, and nothing else about the jobs page changes.",
+   "summary": "Postings gathered automatically from the job market tracking sheet no longer go straight onto the site. Each one now waits for the maintainer, who checks it against the advertisement and corrects anything wrong before it is published — the closing date, the school or department name, the country, the type of position. The site derives several of those from the posting rather than being told them outright, so this is the step that makes sure what you read is what the employer actually advertised. Postings you already see are unaffected once re-approved, and nothing else about the jobs page changes.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
    "id": "posting-form-cascade",
    "date": "2026-08-18",
    "title": "Posting a job: the university, school and department boxes now follow each other",
-   "summary": "The three name boxes on the job form are connected. Choose your university and the school box offers that university\u2019s schools; choose one of those and the department box offers that school\u2019s departments \u2014 so a posting takes a few seconds and lands under the names everybody else uses. They reach further than the postings, too: every university, school and department in the site\u2019s own Universities directory is offered, so a university posting here for the first time gets the same help, and choosing a department the site has only ever seen in one school fills that school in above it. Nothing is closed off \u2014 typing searches every name on the site, and a school or department nobody has posted before is still accepted with one click. Searching got better in the same change: a search for \u201cIEOR\u201d or \u201cSCM\u201d now finds the department the site spells out in full, on the site and in the e-mail alerts alike, so an alert you set up under an older spelling keeps reaching you.",
+   "summary": "The three name boxes on the job form are connected. Choose your university and the school box offers that university’s schools; choose one of those and the department box offers that school’s departments — so a posting takes a few seconds and lands under the names everybody else uses. They reach further than the postings, too: every university, school and department in the site’s own Universities directory is offered, so a university posting here for the first time gets the same help, and choosing a department the site has only ever seen in one school fills that school in above it. Nothing is closed off — typing searches every name on the site, and a school or department nobody has posted before is still accepted with one click. Searching got better in the same change: a search for “IEOR” or “SCM” now finds the department the site spells out in full, on the site and in the e-mail alerts alike, so an alert you set up under an older spelling keeps reaching you.",
    "url": "https://www.operationsacademia.org/post-a-job"
   },
   {
    "id": "one-spelling-per-school",
    "date": "2026-08-18",
    "title": "One spelling per university, school and department",
-   "summary": "The same department used to appear several times over, because postings spelled it differently \u2014 Tulane's was listed as \u201cFreeman School of Business, Management Science\u201d, \u201cFreeman School of Business, Management Sciences Area\u201d and \u201cA.B. Freeman School of Business, Management Science Department\u201d, among others, so five postings of one department read as five different places. Every posting now names its university, school and department the one way \u2014 the school's full official name, and the department without the \u201cDepartment\u201d, \u201cArea\u201d or \u201cgroup\u201d each school words differently \u2014 across the current postings and the whole past-markets archive. Older archive entries that packed the university, school and department into a single line have been split into the three, so they now merge with the postings from the same place. New postings are tidied the same way as they arrive, and the posting form offers the spelling the site already uses.",
+   "summary": "The same department used to appear several times over, because postings spelled it differently — Tulane's was listed as “Freeman School of Business, Management Science”, “Freeman School of Business, Management Sciences Area” and “A.B. Freeman School of Business, Management Science Department”, among others, so five postings of one department read as five different places. Every posting now names its university, school and department the one way — the school's full official name, and the department without the “Department”, “Area” or “group” each school words differently — across the current postings and the whole past-markets archive. Older archive entries that packed the university, school and department into a single line have been split into the three, so they now merge with the postings from the same place. New postings are tidied the same way as they arrive, and the posting form offers the spelling the site already uses.",
    "url": "https://www.operationsacademia.org/previous-markets"
   },
   {
    "id": "higheredjobs-deadlines",
    "date": "2026-08-18",
    "title": "Closing dates, read from the advertisement",
-   "summary": "Postings that link to HigherEdJobs now show the closing date the advertisement itself states, instead of the catch-all \u201cUntil filled.\u201d The tracking sheet the maintainer keeps has no deadline column for most rows, so the site had nothing better to say; the advertisement does say, in a field of its own, and it is now read daily and kept up to date. Postings genuinely left open still read \u201cUntil filled.\u201d, and the Deadline filter on the jobs page \u2014 Closing soon, Expired, Until filled \u2014 sorts them accordingly.",
+   "summary": "Postings that link to HigherEdJobs now show the closing date the advertisement itself states, instead of the catch-all “Until filled.” The tracking sheet the maintainer keeps has no deadline column for most rows, so the site had nothing better to say; the advertisement does say, in a field of its own, and it is now read daily and kept up to date. Postings genuinely left open still read “Until filled.”, and the Deadline filter on the jobs page — Closing soon, Expired, Until filled — sorts them accordingly.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
@@ -111,28 +118,28 @@
    "id": "one-spelling-per-country",
    "date": "2026-08-17",
    "title": "One spelling per country, everywhere on the site",
-   "summary": "The same country used to appear several times in the Location filter, because postings and the imported archive spelled it differently \u2014 \u201cUSA\u201d, \u201cUK\u201d, \u201cHong Kong SAR\u201d, \u201cThe Netherlands\u201d, \u201cShenzhen, China\u201d. Filtering on the United Kingdom therefore showed only a quarter of the British postings. Every country is now published under one full name (\u201cUnited States\u201d, \u201cUnited Kingdom\u201d), across the current postings and the whole past-markets archive, and new postings are tidied the same way as they arrive. Links you had already saved, and e-mail alerts you set up under the old spelling, keep working unchanged.",
+   "summary": "The same country used to appear several times in the Location filter, because postings and the imported archive spelled it differently — “USA”, “UK”, “Hong Kong SAR”, “The Netherlands”, “Shenzhen, China”. Filtering on the United Kingdom therefore showed only a quarter of the British postings. Every country is now published under one full name (“United States”, “United Kingdom”), across the current postings and the whole past-markets archive, and new postings are tidied the same way as they arrive. Links you had already saved, and e-mail alerts you set up under the old spelling, keep working unchanged.",
    "url": "https://www.operationsacademia.org/jobs"
   },
   {
    "id": "posting-forms-simpler",
    "date": "2026-08-17",
-   "title": "Posting is simpler: every country listed, and no more \u201cjob market year\u201d to work out",
-   "summary": "The country box on the job form now offers every country in the world, not just the three dozen that had posted before \u2014 and you can still type one that is not listed. The \u201cJob market year\u201d question is gone from the job and candidate forms: the site works the season out from the date and simply tells you which one your posting lands in. (Reporting a placement still asks, because an offer accepted in the spring and reported in the autumn belongs to the market it was accepted in.) Correcting an older posting now also keeps it in its own season instead of quietly moving it to the current one.",
+   "title": "Posting is simpler: every country listed, and no more “job market year” to work out",
+   "summary": "The country box on the job form now offers every country in the world, not just the three dozen that had posted before — and you can still type one that is not listed. The “Job market year” question is gone from the job and candidate forms: the site works the season out from the date and simply tells you which one your posting lands in. (Reporting a placement still asks, because an offer accepted in the spring and reported in the autumn belongs to the market it was accepted in.) Correcting an older posting now also keeps it in its own season instead of quietly moving it to the current one.",
    "url": "https://www.operationsacademia.org/post-a-job"
   },
   {
    "id": "jobs-open-until-deadline",
    "date": "2026-08-17",
    "title": "A job posting now stays listed until its deadline passes",
-   "summary": "Job postings used to disappear from the list when the job market year rolled over on 1 July, even when applications were still open \u2014 an advert posted in May with a September deadline vanished in July. Now a posting stays on the job postings page for as long as its closing date has not passed, whichever season it was filed in. Postings with no fixed deadline (\u201cuntil filled\u201d) still move to the past-markets archive when the new market year begins.",
+   "summary": "Job postings used to disappear from the list when the job market year rolled over on 1 July, even when applications were still open — an advert posted in May with a September deadline vanished in July. Now a posting stays on the job postings page for as long as its closing date has not passed, whichever season it was filed in. Postings with no fixed deadline (“until filled”) still move to the past-markets archive when the new market year begins.",
    "url": "https://www.operationsacademia.org/jobs"
   },
   {
    "id": "merge-moves-every-posting",
    "date": "2026-08-17",
    "title": "Merging two accounts now moves every posting you own",
-   "summary": "If you ended up with two accounts \u2014 say Google once and ORCID another time \u2014 merging them now hands over your candidate profile and your placement reports along with your job postings, so nothing is left behind on the account that is removed. Also fixed: posting a job with the advert file attached (rather than linked) was refused by a too-tight database bound; attached files now go through.",
+   "summary": "If you ended up with two accounts — say Google once and ORCID another time — merging them now hands over your candidate profile and your placement reports along with your job postings, so nothing is left behind on the account that is removed. Also fixed: posting a job with the advert file attached (rather than linked) was refused by a too-tight database bound; attached files now go through.",
    "url": "https://www.operationsacademia.org/my-postings"
   },
   {

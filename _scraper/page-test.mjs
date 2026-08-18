@@ -2296,6 +2296,85 @@ for (const [pageName, dataset, patch] of [
   await p.close();
 }
 
+/* ------------------------------------------------ the What's-new list
+
+   assets/oa-news.js renders the update log on the front page (newest five) and
+   on whats-new.html (all of it), and decides who may see which entry. The
+   decisions come from a Firestore read CI cannot make, so they are injected —
+   what is checked is the half unit tests cannot see: that a visitor is shown
+   the published entries and NOTHING else, that a removed entry really leaves
+   the list rather than sitting in it struck through, that the maintainer can
+   still find it, and that an entry nobody has reviewed is invisible to
+   everyone but them.                                                          */
+
+for (const [pageName, listSel] of [
+  ['index.html', '#v3-news'],
+  ['whats-new.html', '#oa-whatsnew'],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1200 } });
+  p.on('pageerror', (e) => jsErrors.push('news/' + pageName + ': ' + e.message));
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector(`${listSel} li time`, { timeout: 15000 });
+
+  const LOG = [
+    { id: 'settled', date: '2026-08-01', title: 'Long since announced', summary: 's', url: '' },
+    { id: 'gone', date: '2026-08-02', title: 'Taken down', summary: 's', url: '' },
+    { id: 'live', date: '2026-09-01', title: 'Published today', summary: 's', url: '' },
+    { id: 'draft', date: '2026-09-02', title: 'Not reviewed yet', summary: 's', url: '' },
+  ];
+  const DOCS = { gone: { status: 'removed' }, live: { status: 'approved' } };
+  const titles = () => p.$$eval(`${listSel} > li strong`, (n) => n.map((x) => x.textContent));
+
+  // A VISITOR
+  await p.evaluate(([docs, log]) => window.OANews.__setForTest(docs, false, log), [DOCS, LOG]);
+  await p.waitForTimeout(200);
+  eq(await titles(), ['Published today', 'Long since announced'],
+    `${pageName}: a visitor sees the published entries, newest first`);
+  eq(await p.$$eval(`${listSel} .v3-news-admin`, (n) => n.length), 0,
+    `${pageName}: and no controls`);
+  eq(await p.$$eval('.v3-news-bin', (n) => n.length), 0,
+    `${pageName}: and no sight of what was removed`);
+
+  // THE MAINTAINER
+  await p.evaluate(([docs, log]) => window.OANews.__setForTest(docs, true, log), [DOCS, LOG]);
+  await p.waitForTimeout(200);
+  eq(await titles(), ['Not reviewed yet', 'Published today', 'Long since announced'],
+    `${pageName}: the maintainer also sees what is waiting for review`);
+  eq(await p.$$eval(`${listSel} > li.v3-news-pending strong`, (n) => n.map((x) => x.textContent)),
+    ['Not reviewed yet'], `${pageName}: flagged as unpublished, and only that one`);
+  ok((await p.$eval('.v3-news-note', (n) => n.textContent)).includes('1 new entry'),
+    `${pageName}: with a note saying how much is waiting`);
+
+  /* THE REMOVED ENTRY IS OUT OF THE LIST — that is what the owner asked for —
+     AND STILL REACHABLE, which is what stops Remove being a one-way door. */
+  ok(!(await titles()).includes('Taken down'),
+    `${pageName}: a removed entry is off the list for the maintainer too`);
+  const bin = await p.$eval('.v3-news-bin', (n) => n.textContent);
+  ok(bin.includes('Removed updates (1)') && bin.includes('Taken down'),
+    `${pageName}: and is in the collapsed panel below it`);
+  eq(await p.$eval('.v3-news-bin', (n) => n.tagName + ':' + (n.open ? 'open' : 'shut')),
+    'DETAILS:shut', `${pageName}: collapsed, so the list itself stays clean`);
+  eq(await p.$$eval('.v3-news-bin .v3-news-admin button',
+    (n) => n.map((x) => x.textContent.replace(/[^A-Za-z ]/g, '').trim())),
+    ['Restore', 'Edit'], `${pageName}: carrying the way back`);
+
+  // EDIT reaches every entry, which it did not before (whats-new.html had none)
+  eq(await p.$$eval(`${listSel} > li .v3-news-admin`, (n) =>
+    n.map((x) => Array.from(x.querySelectorAll('button'))
+      .map((b) => b.textContent.replace(/[^A-Za-z ]/g, '').trim()).join('/'))),
+    ['Publish/Edit/Remove', 'Edit/Remove', 'Edit/Remove'],
+    `${pageName}: every entry can be edited and removed; only the new one published`);
+
+  /* AN EDIT IS SHOWN, not noted beside the entry. */
+  await p.evaluate(([log]) => window.OANews.__setForTest(
+    { settled: { status: 'approved', title: 'Reworded by hand' } }, false, log), [LOG]);
+  await p.waitForTimeout(200);
+  ok((await titles()).includes('Reworded by hand'),
+    `${pageName}: a reworded entry reads as the maintainer wrote it`);
+
+  await p.close();
+}
+
 /* --------------------------------------------------- the Universities map
 
    Not an OAList page — a Leaflet map over data/universities.json, vendored

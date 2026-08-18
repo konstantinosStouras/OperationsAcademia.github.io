@@ -197,6 +197,7 @@
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-news.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
@@ -212,131 +213,24 @@
     document.addEventListener('DOMContentLoaded', function () {
       'use strict';
 
-      /* Render changelog.json, newest first. The DATES are the data's own;
-         nothing here invents or reorders them, so an entry seeded with a past
-         date reads as history and an entry dated today reads as news — the
-         same windowing rule the alerts mailer applies. */
-      function esc(s) {
-        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-      }
+      /* THE WHOLE UPDATE LOG, rendered by assets/oa-news.js — the same module
+         the front page's newest-five list and the alerts preview read through.
+         This page and the front page used to carry a renderer each, and they
+         had already drifted: the front page could edit an entry and this one
+         could not, one read the admin address from a literal and the other
+         from OAFB.adminEmail.
 
-      function fmtDate(iso) {
-        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
-        if (!m) return String(iso || '');
-        var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1];
-      }
+         What the module decides, and why, is written up in its own header. In
+         short: changelog.json says what was announced, Firestore says what the
+         maintainer has done about it — publish it, reword it, take it down —
+         and an entry nobody has reviewed yet is shown to the maintainer alone.
+         This being the FULL log, it is also where a removed entry can always
+         be found again: the front page cuts at five, so an entry pushed past
+         that is off it entirely.
 
-      // Same-origin page links only; anything else renders as plain text.
-      // changelog.json is the maintainer's file, but the rule costs nothing.
-      function safeHref(u) {
-        u = String(u || '').trim();
-        if (!u) return '';
-        if (/^https?:\/\/(www\.)?operationsacademia\.org(\/|$)/i.test(u)) return u;
-        if (u.charAt(0) === '/' && u.charAt(1) !== '/') return u;
-        return '';
-      }
-
-      /* The front page's What's-new list is CURATED: the maintainer can retitle
-         an entry or hide it outright, and that is kept in Firestore
-         (`newsOverrides`, one doc per changelog id) rather than in
-         changelog.json, which the mailer also reads. This page is the same list
-         without the five-entry cut, so it has to honour the same curation — an
-         entry the maintainer pressed "Remove" on must not simply reappear in
-         full here. Overrides are best-effort: if Firestore is unreachable or
-         its rules are not deployed, the raw log renders, which is what this
-         page did before there was any curation at all. */
-      /* AND THIS IS WHERE A HIDDEN ENTRY IS PUT BACK. The front page shows the
-         newest five, and it applies that cut AFTER filtering — so the moment a
-         hidden entry is pushed out of the top five by a newer one (which this
-         repo's own keep-in-sync rule makes routine), it is off that page for
-         the maintainer too. Only the full list can guarantee a way back, so
-         the controls live here as well: the maintainer sees what they have
-         hidden, faded, with Restore. */
-      var newsLog = null, overrides = {}, newsAdmin = false;
-
-      function render() {
-        var host = document.getElementById('oa-whatsnew');
-        if (!host || !newsLog) return;
-        var updates = (newsLog.updates || []).filter(function (u) {
-          var o = overrides[u.id];
-          return newsAdmin || !(o && o.hidden);
-        });
-        if (!updates.length) {
-          host.innerHTML = '<li><p class="v3-mut">Nothing logged yet.</p></li>';
-          return;
-        }
-        host.innerHTML = updates.map(function (u) {
-          var o = overrides[u.id] || {};
-          var href = safeHref(u.url);
-          var title = esc(o.title || u.title || '');
-          return '<li' + (o.hidden ? ' class="v3-news-hidden"' : '') + '>' +
-            '<time>' + esc(fmtDate(u.date)) + '</time>' +
-            '<strong>' +
-              (href ? '<a href="' + esc(href) + '">' + title + '</a>' : title) +
-            '</strong>' +
-            '<p>' + esc(o.summary || u.summary || '') + '</p>' +
-            (newsAdmin && o.hidden
-              ? '<p class="v3-news-admin"><button type="button" data-restore="' +
-                esc(u.id) + '">\u21a9 Restore</button>' +
-                '<span>Hidden \u2014 only you can see this.</span></p>'
-              : '') +
-          '</li>';
-        }).join('');
-
-        Array.prototype.forEach.call(host.querySelectorAll('[data-restore]'),
-          function (b) {
-            b.addEventListener('click', function () { restore(b.getAttribute('data-restore')); });
-          });
-      }
-
-      /* Restoring writes `hidden: false` rather than deleting the document,
-         so an edited title or summary on the same entry survives being put
-         back. (`newsOverrides` allows a delete too, which is what makes this
-         reversible at all — see _firestore.rules.) */
-      function restore(id) {
-        OAFB.ready().then(function (fb) {
-          return fb.firestore().collection('newsOverrides').doc(id)
-            .set({ hidden: false, t: Date.now() }, { merge: true });
-        }).then(function () {
-          overrides[id] = overrides[id] || {};
-          overrides[id].hidden = false;
-          render();
-        })['catch'](function () {
-          window.alert('Could not restore it \u2014 are the updated Firestore rules deployed?');
-        });
-      }
-
-      fetch('/changelog.json', { credentials: 'same-origin', cache: 'no-cache' })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (log) { newsLog = log; render(); })
-        ['catch'](function () {
-          document.getElementById('oa-whatsnew').innerHTML =
-            '<li><p class="v3-mut">The update log could not be loaded. ' +
-            'Please reload the page.</p></li>';
-        });
-
-      if (window.OAFB && OAFB.enabled) {
-        OAFB.ready().then(function (fb) {
-          return fb.firestore().collection('newsOverrides').get();
-        }).then(function (snap) {
-          snap.forEach(function (d) { overrides[d.id] = d.data(); });
-          render();
-        })['catch'](function () { /* rules not deployed — no curation yet */ });
-
-        OAFB.ready().then(function (fb) {
-          fb.auth().onAuthStateChanged(function (u) {
-            var was = newsAdmin;
-            newsAdmin = !!(u && u.email &&
-              u.email.toLowerCase() === String(OAFB.adminEmail || '').toLowerCase() &&
-              u.emailVerified);
-            if (newsAdmin !== was) render();
-          });
-        })['catch'](function () { /* SDK unreachable */ });
-      }
+         `link: true` because an entry here names the page it announces and
+         this list has the room to say so. */
+      OANews.mount({ list: '#oa-whatsnew', link: true });
     });
     </script>
   </body>

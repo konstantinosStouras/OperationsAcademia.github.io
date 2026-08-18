@@ -16,6 +16,7 @@
   var M = window.OAAlertMatch;
   var jobs = [];          // the current postings, for the preview and the vocab
   var jobsState = 'loading';   // 'loading' | 'ok' | 'failed' — see renderPreview
+  var rawLog = [];        // changelog.json as served, before the review decisions
   var alerts = [];        // this account's alerts
   var listFailed = false; // the last load() could not read the collection
   var editingId = null;
@@ -393,6 +394,31 @@
       .catch(function (err) { say('Could not delete that (' + (err.code || err.message) + ').', 'err'); });
   }
 
+  /* ------------------------------------------------ what's new, as published
+
+     The preview promises "this is the e-mail you will get", so it has to read
+     the update log the way the mailer does: only entries the maintainer has
+     published. Applied twice — once when the log lands (the date rule alone,
+     which withholds everything since the review gate) and again when the
+     decisions arrive, which is what lets an already-published entry through.
+     Both are re-previewed, since the composer may already be on screen. */
+  function applyNewsDecisions(docs) {
+    var News = window.OANews;
+    window.OA_CHANGELOG = News ? News.publicUpdates(rawLog, docs || {}) : [];
+    renderPreview();
+  }
+
+  function loadNewsDecisions() {
+    if (!window.OANews || !window.OAFB || !OAFB.enabled) return;
+    OAFB.ready().then(function (fb) {
+      return fb.firestore().collection(OANews.COLLECTION).get();
+    }).then(function (snap) {
+      var docs = {};
+      snap.forEach(function (d) { docs[d.id] = d.data(); });
+      applyNewsDecisions(docs);
+    })['catch'](function () { /* unreadable — the date rule stands, and withholds */ });
+  }
+
   /* -------------------------------------------------------------- wiring */
 
   function boot() {
@@ -417,7 +443,19 @@
     ]).then(function (res) {
       jobsState = res[0] ? 'ok' : 'failed';
       jobs = res[0] || [];
-      window.OA_CHANGELOG = (res[1] && res[1].updates) || [];
+      /* THE PREVIEW SHOWS REAL ENTRIES, so it must show only the ones that are
+         really public. The raw log carries entries the maintainer has not
+         published yet and entries they have taken down; putting either in
+         front of a reader composing an alert would leak the first and
+         resurrect the second, and this preview is meant to be exactly what
+         they will be e-mailed. OANews.publicUpdates is the same decision the
+         mailer makes; with no decisions read it falls back to the date rule,
+         which withholds anything since the review gate rather than guessing.
+         (Loaded from assets/oa-news.js; without it nothing is previewed, which
+         is the safe direction.) */
+      rawLog = (res[1] && res[1].updates) || [];
+      applyNewsDecisions();
+      loadNewsDecisions();
       fillChecks('a-type', vocab(function (r) { return r.type; }), 'type');
       fillChecks('a-level', vocab(function (r) { return r.levels; }), 'level');
       fillChecks('a-country', vocab(function (r) { return r.country; }), 'country');
