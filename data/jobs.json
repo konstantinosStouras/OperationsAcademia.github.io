@@ -120,8 +120,9 @@
   "year": 2027,
   "posted": "2026-08-12",
   "institution": "University of Houston",
-  "department": "Bauer Human-Centered AI Institute",
-  "school": "Bauer Human-Centered AI Institute",
+  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "school": "C. T. Bauer College of Business",
+  "unit": "Department of Decision and Information Sciences",
   "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
@@ -732,9 +733,9 @@
   "year": 2026,
   "posted": "2026-04-28",
   "institution": "University of Houston",
-  "department": "Decision and Information Sciences",
-  "school": "",
-  "unit": "Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "school": "C. T. Bauer College of Business",
+  "unit": "Department of Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -2526,9 +2527,9 @@
   "year": 2026,
   "posted": "2025-09-23",
   "institution": "University of Houston",
-  "department": "C. T. Bauer College of Business, Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
   "school": "C. T. Bauer College of Business",
-  "unit": "Decision and Information Sciences",
+  "unit": "Department of Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2561,9 +2562,9 @@
   "year": 2026,
   "posted": "2025-09-23",
   "institution": "University of Houston",
-  "department": "Decision and Information Sciences",
-  "school": "",
-  "unit": "Decision and Information Sciences",
+  "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
+  "school": "C. T. Bauer College of Business",
+  "unit": "Department of Decision and Information Sciences",
   "type": "Business School",
   "levels": [
    "Assistant Professor"

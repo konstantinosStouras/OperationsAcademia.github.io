@@ -207,7 +207,7 @@
     { u: 'University of Dayton', s: 'School of Business Administration', d: ['Management Information Systems, Operations Supply Chain and Business Analytics'] },
     { u: 'University of Florida', s: 'Warrington College of Business', d: ['Information Systems & Operations Management'] },
     { u: 'University of Hong Kong', s: 'Faculty of Business and Economics', d: ['Information and Innovation Management'] },
-    { u: 'University of Houston', s: 'C.T. Bauer College of Business', d: ['Decision & Information Sciences'] },
+    { u: 'University of Houston', s: 'C. T. Bauer College of Business', d: ['Department of Decision and Information Sciences', 'The Bauer Human-Centered Artificial Intelligence Institute'] },
     { u: 'University of Illinois Chicago', s: 'College of Business Administration', d: ['Information and Decision Sciences'] },
     { u: 'University of Illinois Urbana-Champaign', s: 'Gies College of Business', d: ['Information Systems, Operations, Supply Chain and Analytics'] },
     { u: 'University of Iowa', s: 'Tippie College of Business', d: ['Business Analytics'] },

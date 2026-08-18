@@ -1050,6 +1050,24 @@ export function sameDayKey(row) {
   return [row.year, normKey(row.institution), normKey(row.department), row.posted].join('|');
 }
 
+/** The advertisement a row points at — the one thing that can tell two
+    same-day postings from one department apart. */
+function adKey(row) {
+  const link = String(row.adUrl || '').trim() || String(row.postedAtUrl || '').trim();
+  /* our own home page is what a sheet row carries when it names no ad at all,
+     so it identifies nothing */
+  if (/^https?:\/\/(www\.)?operationsacademia\.org\/?$/i.test(link)) return '';
+  return link.toLowerCase().replace(/\/+$/, '');
+}
+
+/** Two rows may be one posting unless they name two different advertisements.
+    An absent link contradicts nothing — that is the repeat-submission case
+    this function exists for. */
+function sameAdvertisement(a, b) {
+  const x = adKey(a), y = adKey(b);
+  return !x || !y || x === y;
+}
+
 /**
  * Collapse repeat submissions of ONE posting — same market year, institution,
  * department and posting date — keeping the fullest.
@@ -1064,20 +1082,31 @@ export function sameDayKey(row) {
  * Returns { rows, collapsed } with rows in their original order.
  */
 export function collapseSameDay(rows) {
-  const best = new Map();
-  const order = [];
+  /* One SLOT per advertisement, not per (place, day). Keying on the place and
+     the date alone assumes a department advertises at most one post a day, and
+     Houston's Bauer College disproves it: two rows on 2025-09-23, one for
+     Assistant/Associate/Full "until filled" and one for Assistant only closing
+     15 October, each with its own ad link. They survived only because one of
+     them had omitted its school, so their `department` lines differed — and
+     the moment both were canonicalised to the same department, this function
+     silently dropped a real advertisement. That is the failure `normKey`'s
+     comment above already records once, from a truncated key.
 
+     So a row joins an existing slot only if it does not CONTRADICT it about
+     which advertisement it is. A missing link contradicts nothing, which
+     keeps the repeat-submission case this exists for. */
+  const slots = [];            // { key, ad, row } in the order first seen
+
+  let collapsed = 0;
   for (const row of rows) {
     const k = sameDayKey(row);
-    if (!best.has(k)) {
-      best.set(k, row);
-      order.push(k);
-    } else {
-      best.set(k, better(best.get(k), row));
-    }
+    const slot = slots.find((sl) => sl.key === k && sameAdvertisement(sl.row, row));
+    if (!slot) { slots.push({ key: k, row }); continue; }
+    slot.row = better(slot.row, row);
+    collapsed++;
   }
 
-  return { rows: order.map((k) => best.get(k)), collapsed: rows.length - order.length };
+  return { rows: slots.map((sl) => sl.row), collapsed };
 }
 
 /* -------------------------------------------------------------------- merge */

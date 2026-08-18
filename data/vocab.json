@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T09:35:49.532Z",
+ "generated": "2026-08-18T10:06:20.048Z",
  "universities": [
   {
    "v": "University College London",
@@ -1212,6 +1212,10 @@
    "n": 5
   },
   {
+   "v": "C. T. Bauer College of Business",
+   "n": 4
+  },
+  {
    "v": "Darden School of Business",
    "n": 4
   },
@@ -1248,15 +1252,7 @@
    "n": 2
   },
   {
-   "v": "Bauer Human-Centered AI Institute",
-   "n": 1
-  },
-  {
    "v": "Bayes Business School",
-   "n": 1
-  },
-  {
-   "v": "C. T. Bauer College of Business",
    "n": 1
   },
   {
@@ -2114,15 +2110,15 @@
    "n": 5
   },
   {
+   "v": "Department of Decision and Information Sciences",
+   "n": 4
+  },
+  {
    "v": "Analytics and Operations",
    "n": 3
   },
   {
    "v": "Business Analytics",
-   "n": 3
-  },
-  {
-   "v": "Decision and Information Sciences",
    "n": 3
   },
   {
@@ -2859,6 +2855,10 @@
   },
   {
    "v": "Technology, Operations and Statistics",
+   "n": 0
+  },
+  {
+   "v": "The Bauer Human-Centered Artificial Intelligence Institute",
    "n": 0
   }
  ],
@@ -5721,18 +5721,16 @@
   },
   "University of Houston": {
    "schools": [
-    "Bauer Human-Centered AI Institute",
     "C. T. Bauer College of Business"
    ],
    "units": [
-    "Decision and Information Sciences"
+    "Department of Decision and Information Sciences",
+    "The Bauer Human-Centered Artificial Intelligence Institute"
    ],
    "bySchool": {
-    "": [
-     "Decision and Information Sciences"
-    ],
     "C. T. Bauer College of Business": [
-     "Decision and Information Sciences"
+     "Department of Decision and Information Sciences",
+     "The Bauer Human-Centered Artificial Intelligence Institute"
     ]
    }
   },
@@ -6844,7 +6842,8 @@
    "Operations Management"
   ],
   "C. T. Bauer College of Business": [
-   "Decision and Information Sciences"
+   "Department of Decision and Information Sciences",
+   "The Bauer Human-Centered Artificial Intelligence Institute"
   ],
   "Cardiff Business School": [
    "Logistics and Operations Management"
