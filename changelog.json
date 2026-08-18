@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "houston-and-a-recovered-posting",
+   "date": "2026-08-18",
+   "title": "University of Houston, and a posting that had gone missing",
+   "summary": "Houston\u2019s postings now read as one place: the C. T. Bauer College of Business, with its Department of Decision and Information Sciences and the Bauer Human-Centered Artificial Intelligence Institute both offered when you post a job. While making those names agree, a job posting disappeared \u2014 the site had been treating two advertisements from the same department on the same day as one submission repeated, and they had only been telling themselves apart because one of them had left its school blank. Two advertisements are two postings now, however alike their headings, and Bauer\u2019s September 2025 pair are both back on the site.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "readable-in-dark-mode",
    "date": "2026-08-18",
    "title": "Dark mode: the parts that could not be read",

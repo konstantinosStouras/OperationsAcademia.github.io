@@ -112,7 +112,14 @@
     'Ross School of Business Technology and Operations':
       { school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
     'Faculty of Business-Operations Management':
-      { school: 'Faculty of Business', unit: 'Operations Management' }
+      { school: 'Faculty of Business', unit: 'Operations Management' },
+    /* The workbook put Houston's institute where the school goes. It is a unit
+       INSIDE the Bauer college, and the posting itself is the college's
+       Decision and Information Sciences department (owner, 2026-08-18) —
+       so the value names both, which is what this table is for. */
+    'Bauer Human-Centered AI Institute':
+      { school: 'C. T. Bauer College of Business',
+        unit: 'Department of Decision and Information Sciences' }
   };
 
   /* A value that names the UNIVERSITY AND A SCHOOL in the university's own
@@ -128,8 +135,16 @@
      is not publishable — the site would have dropped a live posting to honour
      a naming decision. The institute is what the posting is actually in. */
   var FUSED_INSTITUTIONS = {
-    'University of Houston (Bauer Human-Centered AI Institute)':
-      { institution: 'University of Houston', school: 'Bauer Human-Centered AI Institute' }
+    /* The workbook wrote the institute into the university's box and gave no
+       school and no department. The owner has since named all three (the
+       advertisement is for a Professor of Practice in Decision and Information
+       Sciences), so the split yields the college AND the department — `unit` is
+       used only where the row itself named none. */
+    'University of Houston (Bauer Human-Centered AI Institute)': {
+      institution: 'University of Houston',
+      school: 'C. T. Bauer College of Business',
+      unit: 'Department of Decision and Information Sciences',
+    }
   };
 
   /* WHERE A DEPARTMENT SITS, when the row does not say. Some postings arrive
@@ -147,7 +162,11 @@
      Keyed by the CANONICAL names, since that is what `assemble` has by the
      time it asks. */
   var UNIT_HOME = {
-    'UT San Antonio': { 'Operations and Analytics Department': 'Carlos Alvarez College of Business' }
+    'UT San Antonio': { 'Operations and Analytics Department': 'Carlos Alvarez College of Business' },
+    'University of Houston': {
+      'Department of Decision and Information Sciences': 'C. T. Bauer College of Business',
+      'The Bauer Human-Centered Artificial Intelligence Institute': 'C. T. Bauer College of Business'
+    }
   };
 
   /* Some short forms only mean one school AT ONE UNIVERSITY: "Business
@@ -326,6 +345,13 @@
     },
     'The University of Hong Kong': {   /* Faculty of Business and Economics */
       'Innovation and Information Management': 'Information and Innovation Management'
+    },
+    'University of Houston': {         /* C. T. Bauer College of Business */
+      'Decision and Information Sciences': 'Department of Decision and Information Sciences',
+      'Decision & Information Sciences': 'Department of Decision and Information Sciences',
+      'Bauer Human-Centered AI Institute': 'The Bauer Human-Centered Artificial Intelligence Institute',
+      'Bauer Human-Centered Artificial Intelligence Institute':
+        'The Bauer Human-Centered Artificial Intelligence Institute'
     },
     'University of Virginia': {        /* Darden School of Business */
       /* Darden has TWO departments today (owner, 2026-08-18) — this one and
@@ -858,7 +884,7 @@
     var institution = canonInstitution(split ? split.institution : given.institution);
     var school = canonSchool(fused.school || (split ? split.school : ''), institution);
 
-    var unit = canonUnit(given.unit, institution);
+    var unit = canonUnit(given.unit || (split && split.unit) || '', institution);
     var moved = canonUnit(fused.unit, institution);
     if (moved && !unit) unit = moved;
     else if (moved && unit && fold(moved) !== fold(unit)) {

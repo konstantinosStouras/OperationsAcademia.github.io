@@ -566,6 +566,27 @@ matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
 
+## A same-day collapse is keyed on the ADVERTISEMENT, not just the day
+
+`collapseSameDay` folds repeat submissions of one posting together — same
+market year, institution, department and date, keeping the fullest. That key
+assumes a department advertises at most one post a day, and Houston's Bauer
+College disproves it: two rows on 2025-09-23, one for Assistant/Associate/Full
+"until filled" and one for Assistant only closing 15 October, each with its own
+ad link.
+
+They had survived only BY ACCIDENT — one of them omitted its school, so the two
+`department` lines differed. The moment canonicalisation put both under the
+same department, the collapse silently dropped a real advertisement, exactly
+the failure `normKey`'s own comment records from a truncated key.
+
+So a row joins an existing slot only when it does not CONTRADICT it about which
+advertisement it is (`adKey`/`sameAdvertisement`). A missing link contradicts
+nothing, which keeps the repeat-submission case the function exists for; and a
+row pointing only at our own home page — what a sheet row carries when it names
+no ad — names nothing. **Anything that makes two postings' names agree can turn
+them into one, so a naming change is also a check on the row count.**
+
 ## Anything that paints its own ground must name its own ink
 
 Three reports in one morning (2026-08-18) were all the same fault: the

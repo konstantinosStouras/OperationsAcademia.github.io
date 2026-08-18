@@ -456,6 +456,33 @@ function testCollapseSameDay() {
   c = collapseSameDay([base, { ...base, department: 'School of Accounting and Finance' }]);
   eq(c.rows.length, 2, 'two departments on one day are two postings');
 
+  /* …AND SO ARE TWO ADVERTISEMENTS FROM ONE DEPARTMENT ON ONE DAY. Houston's
+     Bauer College really did this on 2025-09-23: Assistant/Associate/Full
+     "until filled", and Assistant only closing 15 October, each with its own
+     ad link. They survived for a year only BY ACCIDENT — one of them had
+     omitted its school, so the two `department` lines differed — and the
+     moment both were canonicalised onto the same department this function
+     dropped one of them. A key of (place, day) assumes a department
+     advertises at most one post a day, and that is not true.
+
+     A missing link still contradicts nothing: the repeat-submission case
+     above is exactly a row with no ad merging into the fuller one. */
+  const advert = { ...base, adUrl: 'https://uh.edu/assistant-associate-full', applyBy: 'Until filled' };
+  const other = { ...base, adUrl: 'https://uh.edu/assistant-only', applyByDate: '2025-10-15' };
+  c = collapseSameDay([advert, other]);
+  eq(c.rows.length, 2, 'two advertisements from one department on one day are two postings');
+  eq(c.collapsed, 0, 'and neither is reported as a repeat');
+
+  c = collapseSameDay([advert, { ...advert }]);
+  eq(c.rows.length, 1, 'while the SAME advertisement twice is still one posting');
+
+  /* our own home page is what a sheet row carries when it names no ad at all,
+     so it must not be read as an identity — two such rows are still repeats */
+  const homey = { ...base, postedAtUrl: 'http://www.operationsacademia.org/' };
+  c = collapseSameDay([homey, { ...base }]);
+  eq(c.rows.length, 1, 'a row pointing only at our own home page names no advertisement');
+
+
   // the same posting a fortnight later is a re-advertisement, not a repeat —
   // this is the "leave past duplicates alone" rule, asserted so a later
   // widening of the key cannot silently start merging them
@@ -1818,6 +1845,18 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
     }
   }
   eq(badFac, [], 'data/recent-faculty.json: and so does the recent-faculty list');
+
+  /* THE TWO POSTINGS THE COLLAPSE BUG TOOK. Houston's Bauer College advertised
+     twice on 2025-09-23, and canonicalising both onto one department made them
+     look like one submission. Pinned against the SERVED data, not just the
+     function, because that is where the loss would show. */
+  const jobs = await read('jobs.json');
+  for (const id of ['2026-university-of-houston-20250923', '2026-university-of-houston-20250923-2']) {
+    ok(jobs.some((r) => r.id === id), `data/jobs.json still carries ${id}`);
+  }
+  eq([...new Set(jobs.filter((r) => /houston/.test(r.id)).map((r) => r.department))],
+    ['C. T. Bauer College of Business, Department of Decision and Information Sciences'],
+    'and every Houston posting names its college and department the one way');
 
   /* the tracking sheet's own file, which build-jobs republishes verbatim */
   const sheet = await read('jobmarket.json');
