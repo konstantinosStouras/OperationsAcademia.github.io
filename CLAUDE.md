@@ -444,6 +444,30 @@ in `selftest.mjs` rather than silently tolerated: a new pair fails the build, a
 listed one is reported by `node _scraper/selftest.mjs --open`, and an entry is
 deleted when it is ruled on (the answer going into `SCOPED_UNIT_ALIASES`).
 
+**One spelling per place means EVERY dataset, not just the postings** (owner,
+2026-08-18: "let's use the same consistent University Name, School Name,
+Department Name, across the entire website"). `data/jobs.json` and
+`data/past-postings.json` had been canonical for a while; the two datasets
+`import-legacy-tables.mjs` writes had never been canonicalised at all — 213 of
+the map's 254 rows and 9 faculty placements named their place some other way,
+and the map is where a reader LANDS from every posting's "Further info" link.
+So `--heal-names` covers all three files it writes, and `sync-jobmarket-sheet.mjs`
+has a mode of the same name for the workbook's own postings. Each is offline and
+idempotent; the selftest asserts all four datasets together.
+
+Two rules the map heal follows: its `name` and `schoolDept` are DERIVED (the
+three names joined) and are rebuilt with them, unless the sheet said something
+of its own ("TBC"); and its **`id` never moves**, because the maintainer's
+read-time corrections are stored against it (`rowOverrides`,
+`<dataset>__<rowId>`) and a renamed id orphans every correction already made.
+
+**A duplicate key in an object literal is silent.** Adding a second
+`'Stanford University'` to `SCOPED_SCHOOL_ALIASES` did not merge or warn —
+JavaScript kept the last and dropped the earlier rule, so an alias that had
+worked for weeks stopped and the only symptom was Stanford listed twice.
+`testNoDuplicateKeys` reads the tables from the SOURCE, because by the time the
+module has evaluated the evidence is gone.
+
 ## The posting form's three name fields cascade
 
 `post-a-job.html` asks for the university, the school and the department
@@ -534,6 +558,43 @@ dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
 matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
+
+## Anything that paints its own ground must name its own ink
+
+Three reports in one morning (2026-08-18) were all the same fault: the
+vocabulary dropdown drew near-white names on a white card, the "Your changes
+have been saved" panel showed a heading and then two invisible lines, and the
+"Choose a file…" button was white on white. Each was a rule that set a
+`background` and left `color` to be inherited — fine when it was written,
+because there was only one theme, and wrong the moment `[data-theme='dark']`
+put a near-white `--ink` on the page around it.
+
+`assets/oa-ui.css` predated the palette and hardcoded ~130 light values.
+They are now theme tokens, each **keeping its old value as the `var()`
+fallback** — that is what lets `/v1/` and `/v2/`, which define none of them,
+go on rendering exactly as they did. Only the semantic panels keep fixed
+colours (success green, warning amber, the status pills), and those name a
+colour for everything inside them.
+
+Two things this turned up beyond the reports:
+
+* **`--mut` missed AA on every surface it is used on** — 4.03:1 on `--bg-3`,
+  4.29:1 on `--bg` — so the footer, the result counts and every hint on the
+  site were a hair under readable. It is `#646c78` now, the smallest change
+  that clears 4.5:1 everywhere.
+* **The map's vendored Leaflet chrome**: the attribution box kept a near-white
+  ground in dark theme under our flipped link colour (1.56:1), and the cluster
+  badge wrote white on its own pale circles (1.36–2.24:1, in BOTH themes).
+  Leaflet's stylesheets stay verbatim copies, so both corrections live in
+  `oa-ui.css`, specific enough to win despite loading first.
+
+**`page-test.mjs` measures it, and measuring is the point.** It walks one page
+per kind of chrome in BOTH themes and reads what the browser actually paints,
+compositing backgrounds rather than taking the first painted layer — a pill on
+`rgba(198, 204, 212, 0.13)` is not light, it is 13% light over near-black, and
+reading that layer alone reports a perfectly readable button at 1:1. Nothing is
+exempt. **When you add a rule that paints a background, give it a colour in the
+same change.**
 
 ## Deploying Firebase rules — ALWAYS name the project
 

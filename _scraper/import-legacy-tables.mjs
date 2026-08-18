@@ -53,7 +53,9 @@ import {
   parseCsv, redactEmails, anchor, normHeader, header, pick, arg,
 } from './import-sheet.mjs';
 import { rowsFromSheets, stampAddedAt } from './import-sheet.mjs';
-import { text, url, day, slug, buildMeta, keyOf, healPlace } from './jobs-model.mjs';
+import {
+  text, url, day, slug, buildMeta, keyOf, healPlace, canonColumns, canonInstitution,
+} from './jobs-model.mjs';
 
 /* ------------------------------------------------------------- the sheets */
 
@@ -516,32 +518,91 @@ of the DISPLAY tabs instead.`);
    importer applies it on write too, so a re-import cannot undo it — which it
    silently would have, since the importer never canonicalised at all and the
    archive's canonical spellings had been applied out of band.             */
+/** The map's rows. Its THREE name fields are canonicalised together, and the
+    two derived ones rebuilt from the result — `name` is what the marker and
+    the popup heading say, `schoolDept` the popup's "School, Department" line,
+    and both are simply their parts joined (251 of 254 rows exactly, the other
+    three with a stray space before the comma, which this also settles).
+
+    A value somebody wrote by hand is NOT rebuilt: `schoolDept` is left alone
+    where it says something the two parts do not ("TBC"). And `id` NEVER moves
+    — the maintainer's read-time corrections are stored against it
+    (`rowOverrides`, `<dataset>__<rowId>`), so a renamed id silently orphans
+    every correction already made. The map deep-links on `institution`, not on
+    the id, so nothing else wants it to follow the name. */
+function healUniversity(r) {
+  const p = canonColumns({ institution: r.institution, school: r.school, unit: r.department });
+  const institution = p.institution || r.institution || '';
+  const school = p.school || '';
+  const department = p.unit || '';
+  const join = (a, b) => [a, b].filter(Boolean).join(', ');
+  const loose = (v) => String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/\s+,/g, ',').trim();
+
+  const out = { ...r, institution, school, department };
+  /* derived, so rebuilt — unless the sheet said something of its own */
+  if (loose(r.name) === loose(join(r.institution, r.school)) || loose(r.name) === loose(r.institution)) {
+    out.name = join(institution, school) || r.name;
+  }
+  if (loose(r.schoolDept) === loose(join(r.school, r.department))) {
+    out.schoolDept = join(school, department);
+  }
+  const same = ['institution', 'school', 'department', 'name', 'schoolDept']
+    .every((k) => out[k] === r[k]);
+  return same ? r : out;
+}
+
+/** The faculty list names three institutions per row and nothing else. */
+function healFaculty(r) {
+  const out = { ...r };
+  let moved = false;
+  for (const field of ['placement', 'almaMater', 'undergrad']) {
+    if (!r[field]) continue;
+    const v = canonInstitution(r[field]);
+    if (v && v !== r[field]) { out[field] = v; moved = true; }
+  }
+  return moved ? out : r;
+}
+
 async function healNames(outDir) {
-  const file = path.join(outDir, 'past-postings.json');
-  if (!existsSync(file)) {
-    console.error(`::error::${file} is not there — nothing to heal`);
-    return false;
+  /* EVERY dataset this importer writes, not just the postings: the owner's
+     rule is one spelling per place ACROSS THE SITE, and the map and the
+     faculty list are two of the places it is read. Each has no daily build of
+     its own, which is exactly why they drifted. */
+  const JOBS = { file: 'past-postings.json', heal: healPlace, meta: true, what: 'posting' };
+  const MAP = { file: 'universities.json', heal: healUniversity, meta: false, what: 'university' };
+  const FAC = { file: 'recent-faculty.json', heal: healFaculty, meta: false, what: 'placement' };
+
+  const dry = process.argv.includes('--dry-run');
+  let ok = true;
+  for (const spec of [JOBS, MAP, FAC]) {
+    const file = path.join(outDir, spec.file);
+    if (!existsSync(file)) {
+      console.log(`::warning::${spec.file} is not there — skipped`);
+      continue;
+    }
+    const rows = JSON.parse(await readFile(file, 'utf8'));
+    const healed = rows.map(spec.heal);
+    const changed = healed.filter((r, i) => r !== rows[i]);
+    if (!changed.length) {
+      console.log(`${spec.file}: every ${spec.what} already names its place the one way`);
+      continue;
+    }
+    for (const r of changed.slice(0, 6)) {
+      console.log(`  ${r.id}: ${r.name || r.institution}${r.department ? ' — ' + r.department : ''}`);
+    }
+    if (dry) {
+      console.log(`--dry-run: ${changed.length} ${spec.what}(s) in ${spec.file} would be renamed`);
+      continue;
+    }
+    guardNoEmail(spec.file, healed);
+    await writeFile(file, serialiseRows(healed));
+    if (spec.meta) {
+      await writeFile(file.replace(/\.json$/, '-meta.json'),
+        JSON.stringify(buildMeta(healed, { generated: newestPosted(healed) }), null, 1) + '\n');
+    }
+    console.log(`${spec.file}: renamed ${changed.length} ${spec.what}(s)`);
   }
-  const rows = JSON.parse(await readFile(file, 'utf8'));
-  const healed = rows.map(healPlace);
-  const changed = healed.filter((r, i) => r !== rows[i]);
-  if (!changed.length) {
-    console.log('past-postings.json: every posting already names its place the one way');
-    return true;
-  }
-  for (const r of changed.slice(0, 10)) {
-    console.log(`  ${r.id}: ${r.institution} — ${r.department}`);
-  }
-  if (process.argv.includes('--dry-run')) {
-    console.log(`--dry-run: ${changed.length} posting(s) would be renamed`);
-    return true;
-  }
-  guardNoEmail('past-postings.json', healed);
-  await writeFile(file, serialiseRows(healed));
-  await writeFile(file.replace(/\.json$/, '-meta.json'),
-    JSON.stringify(buildMeta(healed, { generated: newestPosted(healed) }), null, 1) + '\n');
-  console.log(`past-postings.json: renamed ${changed.length} posting(s)`);
-  return true;
+  return ok;
 }
 
 /* --------------------------------------------------------------- selftest */

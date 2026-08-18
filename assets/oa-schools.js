@@ -76,7 +76,16 @@
     'City University of New York, Baruch College':
       'Baruch College, The City University of New York (CUNY)',
     'University of Illinois Urbana-Champaign': 'University of Illinois at Urbana-Champaign',
-    'University of Illinois Chicago': 'University of Illinois at Chicago'
+    'University of Illinois Chicago': 'University of Illinois at Chicago',
+
+    /* Owner, 2026-08-18. Two universities the source directory named with an
+       aside of its own, and the spellings the site had collected beside them. */
+    'Western University (Canada) / University of Western at London, Ontario': 'Western University',
+    'City St George\'s, University of London': 'University of London',
+    'City St. George\'s, University of London': 'University of London',
+    'The University of Melbourne': 'University of Melbourne',
+    'University of Texas at San Antonio': 'UT San Antonio',
+    'The University of Texas at San Antonio': 'UT San Antonio'
   };
 
   /* ---------------------------------------------------------------- schools
@@ -104,6 +113,41 @@
       { school: 'Stephen M. Ross School of Business', unit: 'Technology and Operations Management' },
     'Faculty of Business-Operations Management':
       { school: 'Faculty of Business', unit: 'Operations Management' }
+  };
+
+  /* A value that names the UNIVERSITY AND A SCHOOL in the university's own
+     box. `schoolInParens` lifts one out on its own when the bracket says
+     "School", "College", "Faculty" or "Academy" — an INSTITUTE is none of
+     those, and adding the word to that list would start lifting research
+     institutes out of names all over the site, so the one case is curated.
+
+     It matters because of what happens otherwise: this posting's ONLY
+     department was "Artificial Intelligence (AI) and healthcare", which the
+     owner has ruled is a research topic and not a department. Take it away and
+     the row has no school and no department left, and a posting with neither
+     is not publishable — the site would have dropped a live posting to honour
+     a naming decision. The institute is what the posting is actually in. */
+  var FUSED_INSTITUTIONS = {
+    'University of Houston (Bauer Human-Centered AI Institute)':
+      { institution: 'University of Houston', school: 'Bauer Human-Centered AI Institute' }
+  };
+
+  /* WHERE A DEPARTMENT SITS, when the row does not say. Some postings arrive
+     with a university and a department and no school between them — the
+     tracking workbook has no column for it — so the site showed the posting
+     with a department floating under the university, and the school the
+     department is actually in was missing from the card and from the filters.
+
+     The canon cannot infer this: a department name is not enough to name its
+     school, and guessing would file postings under schools nobody named. So
+     it is curated, one line per (university, department), and consulted ONLY
+     when the school field is empty — a row that names its own school always
+     keeps it.
+
+     Keyed by the CANONICAL names, since that is what `assemble` has by the
+     time it asks. */
+  var UNIT_HOME = {
+    'UT San Antonio': { 'Operations and Analytics Department': 'Carlos Alvarez College of Business' }
   };
 
   /* Some short forms only mean one school AT ONE UNIVERSITY: "Business
@@ -148,7 +192,6 @@
     },
     'Rice University': { 'Jones Graduate School Of Business': 'Jesse H. Jones Graduate School of Business' },
     'Southern Methodist University': { 'Cox School of Business': 'Edwin L. Cox School of Business' },
-    'Stanford University': { 'Graduate School of Business (GSB)': 'Graduate School of Business' },
     'Temple University': { 'Fox School of Business and Management': 'Fox School of Business' },
     'The Chinese University of Hong Kong': { 'CUHK Business School (Hong Kong)': 'CUHK Business School' },
     'The Ohio State University': { 'Fisher College of Business': 'Max M. Fisher College of Business' },
@@ -183,7 +226,39 @@
     'University College Dublin': {
       'UCD Michael Smurfit Graduate School of Business': 'Michael Smurfit Graduate Business School'
     },
-    'Washington University in St. Louis': { 'Olin School of Business': 'Olin Business School' }
+    'Washington University in St. Louis': { 'Olin School of Business': 'Olin Business School' },
+
+    /* Owner, 2026-08-18, naming five more places whose entry carried the source
+       directory's own editorial aside — "(formerly Cass Business)", "(Incl.
+       Dyson and Nolan)" — or a short form nobody writes out. */
+    'University of London': {
+      'Bayes Business School (formerly Cass Business)': 'Bayes Business School',
+      'Bayes Business School, Faculty of Management': 'Bayes Business School',
+      'Cass Business School': 'Bayes Business School'
+    },
+    'Cornell University': {
+      'SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)':
+        'Cornell SC Johnson College of Business',
+      /* the Johnson school is INSIDE that college, and after the owner's
+         ruling both carried the identical department — one group under two
+         school names, which is the duplication the vocabulary exists to end */
+      'Samuel Curtis Johnson Graduate School of Management': 'Cornell SC Johnson College of Business',
+      'Johnson Graduate School of Management': 'Cornell SC Johnson College of Business'
+    },
+    'University of Melbourne': {
+      'Melbourne Business School (Incl. Faculty of Business and Economics)': 'Melbourne Business School',
+      'Melbourne Business School (Incl. Faculty of Business & Economics)': 'Melbourne Business School'
+    },
+    'Stanford University': {
+      'Graduate School of Business': 'Stanford Graduate School of Business',
+      'Graduate School of Business (GSB)': 'Stanford Graduate School of Business'
+    },
+    'The University of Hong Kong': { 'School of Business': 'Faculty of Business and Economics' },
+    'The Chinese University of Hong Kong, Shenzhen': {
+      'CUHK(SZ)': 'School of Management and Economics',
+      'CUHK (SZ)': 'School of Management and Economics',
+      'The School of Management and Economics (SME)': 'School of Management and Economics'
+    }
   };
 
   var SCHOOL_ALIASES = {
@@ -235,6 +310,34 @@
       'Management': 'Management Area',
       'Management Science': 'Management Area'
     },
+    'Cornell University': {            /* Cornell SC Johnson College of Business */
+      'Operations, Technology and Information Management': 'Operations, Technology, and Information Management Area',
+      'Operations Management': 'Operations, Technology, and Information Management Area'
+    },
+    'University of Melbourne': {       /* Melbourne Business School */
+      'Business and Economics': 'Faculty of Business and Economics'
+    },
+    'Binghamton University': {         /* School of Management */
+      'Operations and Business Analytics': 'Business Analytics and Operations'
+    },
+    'Stanford University': {           /* Stanford Graduate School of Business */
+      'Operations and Information Technology': 'Operations, Information, and Technology (OIT) area',
+      'Operations, Information and Technology': 'Operations, Information, and Technology (OIT) area'
+    },
+    'The University of Hong Kong': {   /* Faculty of Business and Economics */
+      'Innovation and Information Management': 'Information and Innovation Management'
+    },
+    'University of Virginia': {        /* Darden School of Business */
+      /* Darden has TWO departments today (owner, 2026-08-18) — this one and
+         Technology and Operations Management. "Quantitative Analysis" is what
+         the group was called before, and the Universities map still carried
+         it, so the picker offered a third department that no longer exists. */
+      'Quantitative Analysis': 'Data Analytics and Decision Sciences',
+      'Quantitative Analytics': 'Data Analytics and Decision Sciences'
+    },
+    'UT San Antonio': {                /* Carlos Alvarez College of Business */
+      'Operations and Analytics': 'Operations and Analytics Department'
+    },
     'Yale University': {               /* School of Management */
       'Operations': 'Operations Department',
       'Operations Management': 'Operations Department'
@@ -277,9 +380,18 @@
   };
 
   /* A department value that says nothing — the wrapper word on its own, left
-     behind by a form that asked for "Department" and was answered literally. */
+     behind by a form that asked for "Department" and was answered literally.
+
+     The last two are NAMES, and they still say nothing about which department
+     a posting is in (owner, 2026-08-18): one is a corporate research lab the
+     source directory listed in the department column, the other a research
+     TOPIC somebody typed into it. Neither is a unit anyone can be a member of,
+     and each was its own entry in the department filter. Written out in full
+     because that is what makes them safe — nothing else can match them. */
   var EMPTY_UNITS = [
-    'department', 'dept', 'area', 'group', 'division', 'unit', 'school', 'n a', 'na', 'none', 'tbd'
+    'department', 'dept', 'area', 'group', 'division', 'unit', 'school', 'n a', 'na', 'none', 'tbd',
+    'fujitsu smu urban computing and engineering unicen corp lab',
+    'artificial intelligence ai and healthcare'
   ];
 
   /* Words that mark a name as naming a school rather than a department. Kept
@@ -386,6 +498,25 @@
     BY_SCOPED_SCHOOL[fold(uni)] = table;
     SCOPED_KEYED[institutionKey(uni)] = table;
   }
+  var BY_FUSED_INSTITUTION = Object.create(null);
+  for (var fi in FUSED_INSTITUTIONS) {
+    if (!Object.prototype.hasOwnProperty.call(FUSED_INSTITUTIONS, fi)) continue;
+    BY_FUSED_INSTITUTION[fold(fi)] = FUSED_INSTITUTIONS[fi];
+    BY_FUSED_INSTITUTION[fold(spell(fi))] = FUSED_INSTITUTIONS[fi];
+  }
+
+  var BY_UNIT_HOME = Object.create(null);
+  for (var uh in UNIT_HOME) {
+    if (!Object.prototype.hasOwnProperty.call(UNIT_HOME, uh)) continue;
+    var homes = Object.create(null);
+    for (var un in UNIT_HOME[uh]) {
+      if (!Object.prototype.hasOwnProperty.call(UNIT_HOME[uh], un)) continue;
+      homes[fold(un)] = UNIT_HOME[uh][un];
+    }
+    BY_UNIT_HOME[fold(uh)] = homes;
+    BY_UNIT_HOME[institutionKey(uh)] = homes;
+  }
+
   var BY_SCHOOL = tableOf(SCHOOL_LIST, SCHOOL_ALIASES);
   var BY_UNIT = tableOf([], UNIT_ALIASES);
 
@@ -720,8 +851,12 @@
 
   /** The three names canonicalised, with whatever the school field gave up. */
   function assemble(given, fused) {
-    var institution = canonInstitution(given.institution);
-    var school = canonSchool(fused.school, institution);
+    /* the university's box naming a school too — split before anything reads
+       either, so the school lands in the school field and the name the
+       posting publishes under is the university's own */
+    var split = BY_FUSED_INSTITUTION[fold(spell(given.institution))];
+    var institution = canonInstitution(split ? split.institution : given.institution);
+    var school = canonSchool(fused.school || (split ? split.school : ''), institution);
 
     var unit = canonUnit(given.unit, institution);
     var moved = canonUnit(fused.unit, institution);
@@ -734,6 +869,13 @@
       if (fold(unit).indexOf(fold(moved)) !== -1) { /* unit already says it */ }
       else if (fold(moved).indexOf(fold(unit)) !== -1) unit = moved;
       else unit = canonUnit(moved + ', ' + unit, institution);
+    }
+
+    /* the school the row never named — curated, never guessed, and never over
+       a school the row DID name */
+    if (!school && unit) {
+      var homes = BY_UNIT_HOME[fold(institution)] || BY_UNIT_HOME[institutionKey(institution)];
+      if (homes && homes[fold(unit)]) school = canonSchool(homes[fold(unit)], institution);
     }
 
     return { institution: institution, school: school, unit: unit };
@@ -754,6 +896,8 @@
     SCOPED_SCHOOL_ALIASES: SCOPED_SCHOOL_ALIASES,
     UNIT_ALIASES: UNIT_ALIASES,
     SCOPED_UNIT_ALIASES: SCOPED_UNIT_ALIASES,
+    FUSED_INSTITUTIONS: FUSED_INSTITUTIONS,
+    UNIT_HOME: UNIT_HOME,
     fold: fold,
     canonInstitution: canonInstitution,
     institutionKey: institutionKey,

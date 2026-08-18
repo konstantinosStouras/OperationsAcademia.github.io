@@ -36,7 +36,7 @@ export const { canon: canonCountry } = require('../assets/oa-countries.js');
    rather than two — and the archive's fused one-column rows are taken apart
    into the three fields the form now asks for. Re-exported so the importers
    use the same function. */
-export const { canonPlace, canonSchool, canonUnit, canonInstitution } =
+export const { canonPlace, canonColumns, canonSchool, canonUnit, canonInstitution } =
   require('../assets/oa-schools.js');
 
 /** The published fields, in the order they are written. Anything not listed
@@ -333,8 +333,13 @@ export function healPlace(row) {
       && department === (row.department || '')) return row;
 
   const healed = { ...row, ...place, department };
-  if (!row.school) delete healed.school;
-  if (!row.unit) delete healed.unit;
+  /* A key only where there is a value — keyed on what the canon PRODUCED, not
+     on what the row arrived with. Keyed on the row, a posting whose school the
+     canon had just lifted out of its university field ("University of Houston
+     (Bauer Human-Centered AI Institute)") lost that school again on the way
+     out, leaving a `department` line with nothing behind it. */
+  if (!place.school) delete healed.school;
+  if (!place.unit) delete healed.unit;
   if (ownUniversitiesLink(row.furtherInfoUrl)) {
     healed.furtherInfoUrl = universitiesLink(place.institution);
   }

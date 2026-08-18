@@ -1619,6 +1619,46 @@ async function testRenamedNamesStillFound() {
    refactor that quietly reverted one would otherwise show up only as a school
    listed twice again, months later.                                          */
 
+/* A DUPLICATE KEY IN AN OBJECT LITERAL IS SILENT. Adding a second
+   'Stanford University' to SCOPED_SCHOOL_ALIASES did not merge with the first
+   or raise anything — JavaScript kept the LAST and dropped the earlier rule
+   entirely, so an alias that had been working for weeks stopped, and the only
+   symptom was Stanford appearing twice in the school list. The tables are read
+   from the SOURCE, because by the time the module has evaluated the evidence
+   is gone. */
+async function testNoDuplicateKeys() {
+  const src = await readFile(path.join(HERE, '..', 'assets', 'oa-schools.js'), 'utf8');
+  for (const table of ['INSTITUTION_ALIASES', 'SCHOOL_ALIASES', 'SCOPED_SCHOOL_ALIASES',
+    'UNIT_ALIASES', 'SCOPED_UNIT_ALIASES', 'FUSED_SCHOOLS', 'FUSED_INSTITUTIONS']) {
+    const at = src.indexOf(`var ${table} = {`);
+    ok(at !== -1, `oa-schools.js declares ${table}`);
+    if (at === -1) continue;
+
+    /* the literal, brace-matched — these tables nest one level */
+    let depth = 0, end = at;
+    for (let i = src.indexOf('{', at); i < src.length; i++) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}' && --depth === 0) { end = i; break; }
+    }
+    const body = src.slice(at, end);
+
+    /* keys at the TOP level of this literal only: a nested table's keys are
+       another scope and may legitimately repeat across universities */
+    const keys = [];
+    depth = 0;
+    for (const line of body.split('\n')) {
+      const opens = (line.match(/\{/g) || []).length;
+      const closes = (line.match(/\}/g) || []).length;
+      const m = line.match(/^\s*'((?:[^'\\]|\\.)*)'\s*:/);
+      if (m && depth === 1) keys.push(m[1]);
+      depth += opens - closes;
+    }
+    const seen = new Set(), dupes = [];
+    for (const k of keys) { if (seen.has(k)) dupes.push(k); else seen.add(k); }
+    eq(dupes, [], `${table} names each of its ${keys.length} keys once`);
+  }
+}
+
 async function testScopedUnits() {
   const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
 
@@ -1643,6 +1683,21 @@ async function testScopedUnits() {
     ['Yale University', 'School of Management',
       ['Operations', 'Operations Management', 'Operations Management group'],
       'Operations Department'],
+    ['Binghamton University', 'School of Management',
+      ['Operations and Business Analytics', 'Business Analytics and Operations area'],
+      'Business Analytics and Operations'],
+    ['Stanford University', 'Stanford Graduate School of Business',
+      ['Operations and Information Technology', 'Operations, Information and Technology',
+        'Operations and Information Technology Department'],
+      'Operations, Information, and Technology (OIT) area'],
+    ['The University of Hong Kong', 'Faculty of Business and Economics',
+      ['Innovation and Information Management', 'Innovation and Information Management Area'],
+      'Information and Innovation Management'],
+    ['Cornell University', 'Cornell SC Johnson College of Business',
+      ['Operations, Technology and Information Management', 'Operations Management group'],
+      'Operations, Technology, and Information Management Area'],
+    ['UT San Antonio', 'Carlos Alvarez College of Business',
+      ['Operations and Analytics'], 'Operations and Analytics Department'],
   ];
 
   const v = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
@@ -1670,6 +1725,26 @@ async function testScopedUnits() {
     }
   }
 
+  /* THE SCHOOL A ROW NEVER NAMED. The tracking workbook has no column for it,
+     so UT San Antonio's posting arrived as a university and a department with
+     nothing between them — the card showed the department floating under the
+     university and the school was missing from the filters entirely. UNIT_HOME
+     supplies it, curated one line per (university, department) because a
+     department name cannot imply its school and guessing would file postings
+     under schools nobody named.
+
+     The load-bearing half is the second check: a row that DOES name its school
+     keeps it. A default that overrode what a poster wrote would be a rename,
+     not a fill. */
+  eq(S.canonPlace({ institution: 'University of Texas at San Antonio', school: '', unit: 'Operations and Analytics' }),
+    { institution: 'UT San Antonio', school: 'Carlos Alvarez College of Business',
+      unit: 'Operations and Analytics Department' },
+  'a posting with no school gets the one its department sits in');
+  eq(S.canonPlace({ institution: 'UT San Antonio', school: 'College of Engineering', unit: 'Operations and Analytics' }).school,
+    'College of Engineering', 'and a posting that names its own school keeps it');
+  eq(S.canonPlace({ institution: 'UT San Antonio', school: '', unit: '' }).school, '',
+    'and a row with no department is given nothing to sit in');
+
   /* ELSEWHERE THE GENERIC RULE IS UNTOUCHED. This is the whole safety
      argument for a scoped table: a poster at any other school still gets the
      bare field name, so the wrapper word cannot start splitting one unit into
@@ -1680,6 +1755,59 @@ async function testScopedUnits() {
     eq(S.canonUnit('Operations Department', uni), 'Operations',
       `as "Operations Department" is Operations at ${uni || 'no university'}`);
   }
+}
+
+/* --------------------------- the same names on the map and the faculty list
+
+   "Let's use the same consistent University Name, School Name, Department
+   Name, across the entire website" (owner, 2026-08-18). The postings had been
+   canonical for a while; the two datasets the IMPORTER writes had never been
+   canonicalised at all — 213 of the map's 254 rows and 9 faculty placements
+   named their place some other way, and the map is where a reader lands from
+   every posting's "Further info" link.
+
+   They have no daily build to heal them, which is exactly why they drifted, so
+   they get `import-legacy-tables.mjs --heal-names` and this guard.            */
+
+async function testEveryDatasetNamesPlacesTheSameWay() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  const read = async (f) => JSON.parse(await readFile(path.join(HERE, '..', 'data', f), 'utf8'));
+
+  const map = await read('universities.json');
+  const off = map.filter((r) => {
+    const p = S.canonColumns({ institution: r.institution, school: r.school, unit: r.department });
+    return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.department || '');
+  }).map((r) => r.id);
+  eq(off, [], 'data/universities.json: the map names every place the way the site does');
+
+  /* the two DERIVED fields follow the three names, or the popup heading and
+     its "School, Department" line would disagree with the row beneath them */
+  const join = (a, b) => [a, b].filter(Boolean).join(', ');
+  const loose = (v) => String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/\s+,/g, ',').trim();
+  const names = map.filter((r) => loose(r.name) !== loose(join(r.institution, r.school))
+                               && loose(r.name) !== loose(r.institution)).map((r) => r.id);
+  eq(names, [], 'and each row\'s display name is its university and school, joined');
+
+  /* ids do NOT follow a rename: the maintainer's read-time corrections are
+     stored against them (rowOverrides), so a moved id orphans every one */
+  ok(map.every((r) => typeof r.id === 'string' && r.id), 'and every row still has its id');
+
+  const faculty = await read('recent-faculty.json');
+  const badFac = [];
+  for (const r of faculty) {
+    for (const field of ['placement', 'almaMater', 'undergrad']) {
+      if (r[field] && S.canonInstitution(r[field]) !== r[field]) badFac.push(`${r.id}.${field}`);
+    }
+  }
+  eq(badFac, [], 'data/recent-faculty.json: and so does the recent-faculty list');
+
+  /* the tracking sheet's own file, which build-jobs republishes verbatim */
+  const sheet = await read('jobmarket.json');
+  const badSheet = sheet.filter((r) => {
+    const p = S.canonPlace(r);
+    return p.institution !== r.institution || p.school !== (r.school || '') || p.unit !== (r.unit || '');
+  }).map((r) => r.id);
+  eq(badSheet, [], 'data/jobmarket.json: and so do the tracking sheet\'s postings');
 }
 
 /* -------------------------------------------- the seed of the world's schools
@@ -1929,9 +2057,7 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
-    'Binghamton University|Business Analytics and Operations|Operations and Business Analytics',
-    'Stanford University|Operations and Information Technology|Operations, Information and Technology',
-    'The University of Hong Kong|Information and Innovation Management|Innovation and Information Management',
+    /* empty: every pair the sweep has found has been ruled on */
   ]);
   const dupUnits = [], openUnits = [];
   for (const [u, e] of Object.entries(v.byUniversity)) {
@@ -4020,6 +4146,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();
+  await testEveryDatasetNamesPlacesTheSameWay();
+  await testNoDuplicateKeys();
   await testScopedUnits();
   await testInstitutionSeed();
   await testFormsOfferVocab();

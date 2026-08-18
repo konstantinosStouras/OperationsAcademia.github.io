@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T08:50:39.822Z",
+ "generated": "2026-08-18T09:35:49.532Z",
  "universities": [
   {
    "v": "University College London",
@@ -14,15 +14,15 @@
    "n": 5
   },
   {
+   "v": "University of Houston",
+   "n": 4
+  },
+  {
    "v": "National University of Singapore",
    "n": 3
   },
   {
    "v": "University of California, Berkeley",
-   "n": 3
-  },
-  {
-   "v": "University of Houston",
    "n": 3
   },
   {
@@ -107,10 +107,6 @@
   },
   {
    "v": "Carnegie Mellon University",
-   "n": 1
-  },
-  {
-   "v": "City St. George's, University of London",
    "n": 1
   },
   {
@@ -250,11 +246,11 @@
    "n": 1
   },
   {
-   "v": "University of Houston (Bauer Human-Centered AI Institute)",
+   "v": "University of Illinois at Urbana-Champaign",
    "n": 1
   },
   {
-   "v": "University of Illinois at Urbana-Champaign",
+   "v": "University of London",
    "n": 1
   },
   {
@@ -274,15 +270,15 @@
    "n": 1
   },
   {
-   "v": "University of Texas at San Antonio",
-   "n": 1
-  },
-  {
    "v": "University of Wisconsin-Madison",
    "n": 1
   },
   {
    "v": "UNSW Sydney",
+   "n": 1
+  },
+  {
+   "v": "UT San Antonio",
    "n": 1
   },
   {
@@ -838,10 +834,6 @@
    "n": 0
   },
   {
-   "v": "The University of Melbourne",
-   "n": 0
-  },
-  {
    "v": "The University of Michigan-Flint",
    "n": 0
   },
@@ -974,10 +966,6 @@
    "n": 0
   },
   {
-   "v": "University of London",
-   "n": 0
-  },
-  {
    "v": "University of Louisville",
    "n": 0
   },
@@ -999,6 +987,10 @@
   },
   {
    "v": "University of Massachusetts Lowell",
+   "n": 0
+  },
+  {
+   "v": "University of Melbourne",
    "n": 0
   },
   {
@@ -1186,10 +1178,6 @@
    "n": 0
   },
   {
-   "v": "Western University (Canada) / University of Western at London, Ontario",
-   "n": 0
-  },
-  {
    "v": "WHU – Otto Beisheim School of Management",
    "n": 0
   },
@@ -1260,11 +1248,19 @@
    "n": 2
   },
   {
-   "v": "Bayes Business School, Faculty of Management",
+   "v": "Bauer Human-Centered AI Institute",
+   "n": 1
+  },
+  {
+   "v": "Bayes Business School",
    "n": 1
   },
   {
    "v": "C. T. Bauer College of Business",
+   "n": 1
+  },
+  {
+   "v": "Carlos Alvarez College of Business",
    "n": 1
   },
   {
@@ -1404,10 +1400,6 @@
    "n": 0
   },
   {
-   "v": "Bayes Business School (formerly Cass Business)",
-   "n": 0
-  },
-  {
    "v": "Beedie School of Business",
    "n": 0
   },
@@ -1425,10 +1417,6 @@
   },
   {
    "v": "Carl H. Lindner College of Business",
-   "n": 0
-  },
-  {
-   "v": "Carlos Alvarez College of Business",
    "n": 0
   },
   {
@@ -1488,6 +1476,10 @@
    "n": 0
   },
   {
+   "v": "Cornell SC Johnson College of Business",
+   "n": 0
+  },
+  {
    "v": "Cornell Tech",
    "n": 0
   },
@@ -1501,10 +1493,6 @@
   },
   {
    "v": "CUHK Business School",
-   "n": 0
-  },
-  {
-   "v": "CUHK(SZ)",
    "n": 0
   },
   {
@@ -1808,7 +1796,7 @@
    "n": 0
   },
   {
-   "v": "Melbourne Business School (Incl. Faculty of Business and Economics)",
+   "v": "Melbourne Business School",
    "n": 0
   },
   {
@@ -1924,10 +1912,6 @@
    "n": 0
   },
   {
-   "v": "SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)",
-   "n": 0
-  },
-  {
    "v": "Scheller College of Business",
    "n": 0
   },
@@ -2029,6 +2013,10 @@
   },
   {
    "v": "Solvay Brussels School of Economics and Management",
+   "n": 0
+  },
+  {
+   "v": "Stanford Graduate School of Business",
    "n": 0
   },
   {
@@ -2190,10 +2178,6 @@
    "n": 2
   },
   {
-   "v": "Artificial Intelligence (AI) and healthcare",
-   "n": 1
-  },
-  {
    "v": "Business Administration",
    "n": 1
   },
@@ -2230,15 +2214,15 @@
    "n": 1
   },
   {
+   "v": "Information and Innovation Management",
+   "n": 1
+  },
+  {
    "v": "Information Systems",
    "n": 1
   },
   {
    "v": "Information, Operations and Management Sciences",
-   "n": 1
-  },
-  {
-   "v": "Innovation and Information Management",
    "n": 1
   },
   {
@@ -2270,7 +2254,7 @@
    "n": 1
   },
   {
-   "v": "Operations and Analytics",
+   "v": "Operations and Analytics Department",
    "n": 1
   },
   {
@@ -2358,10 +2342,6 @@
    "n": 0
   },
   {
-   "v": "Business and Economics",
-   "n": 0
-  },
-  {
    "v": "Business Area, Statistics/Operations Management",
    "n": 0
   },
@@ -2446,6 +2426,10 @@
    "n": 0
   },
   {
+   "v": "Faculty of Business and Economics",
+   "n": 0
+  },
+  {
    "v": "Fashion and Textiles",
    "n": 0
   },
@@ -2455,10 +2439,6 @@
   },
   {
    "v": "Finance, Supply Chain and Transportation",
-   "n": 0
-  },
-  {
-   "v": "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab",
    "n": 0
   },
   {
@@ -2499,10 +2479,6 @@
   },
   {
    "v": "Information and Decision Sciences",
-   "n": 0
-  },
-  {
-   "v": "Information and Innovation Management",
    "n": 0
   },
   {
@@ -2710,6 +2686,10 @@
    "n": 0
   },
   {
+   "v": "Operations and Analytics",
+   "n": 0
+  },
+  {
    "v": "Operations and Data Science",
    "n": 0
   },
@@ -2723,10 +2703,6 @@
   },
   {
    "v": "Operations and Decision Technologies",
-   "n": 0
-  },
-  {
-   "v": "Operations and Information Technology",
    "n": 0
   },
   {
@@ -2810,11 +2786,11 @@
    "n": 0
   },
   {
-   "v": "Operations, SCM and ITM",
+   "v": "Operations, Information, and Technology (OIT) area",
    "n": 0
   },
   {
-   "v": "Operations, Technology and Information Management",
+   "v": "Operations, SCM and ITM",
    "n": 0
   },
   {
@@ -2822,11 +2798,11 @@
    "n": 0
   },
   {
-   "v": "Production, Technology and Operations Management",
+   "v": "Operations, Technology, and Information Management Area",
    "n": 0
   },
   {
-   "v": "Quantitative Analysis",
+   "v": "Production, Technology and Operations Management",
    "n": 0
   },
   {
@@ -2999,13 +2975,11 @@
     "School of Management"
    ],
    "units": [
-    "Business Analytics and Operations",
-    "Operations and Business Analytics"
+    "Business Analytics and Operations"
    ],
    "bySchool": {
     "School of Management": [
-     "Business Analytics and Operations",
-     "Operations and Business Analytics"
+     "Business Analytics and Operations"
     ]
    }
   },
@@ -3184,20 +3158,6 @@
     ]
    }
   },
-  "City St. George's, University of London": {
-   "schools": [
-    "Bayes Business School (formerly Cass Business)",
-    "Bayes Business School, Faculty of Management"
-   ],
-   "units": [
-    "Operations and Supply Chain Management"
-   ],
-   "bySchool": {
-    "Bayes Business School (formerly Cass Business)": [
-     "Operations and Supply Chain Management"
-    ]
-   }
-  },
   "City University of Hong Kong": {
    "schools": [
     "College of Business"
@@ -3319,25 +3279,20 @@
   },
   "Cornell University": {
    "schools": [
+    "Cornell SC Johnson College of Business",
     "Cornell Tech",
-    "Samuel Curtis Johnson Graduate School of Management",
-    "SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)",
     "School of Operations Research and Information Engineering (ORIE)"
    ],
    "units": [
-    "Operations Management",
     "Operations Research and Information Engineering",
-    "Operations, Technology and Information Management"
+    "Operations, Technology, and Information Management Area"
    ],
    "bySchool": {
+    "Cornell SC Johnson College of Business": [
+     "Operations, Technology, and Information Management Area"
+    ],
     "Cornell Tech": [
      "Operations Research and Information Engineering"
-    ],
-    "Samuel Curtis Johnson Graduate School of Management": [
-     "Operations Management"
-    ],
-    "SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)": [
-     "Operations, Technology and Information Management"
     ]
    }
   },
@@ -4824,15 +4779,11 @@
     "School of Information Systems"
    ],
    "units": [
-    "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab",
     "Operations Management"
    ],
    "bySchool": {
     "Lee Kong Chian School of Business": [
      "Operations Management"
-    ],
-    "School of Information Systems": [
-     "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab"
     ]
    }
   },
@@ -4907,16 +4858,14 @@
   "Stanford University": {
    "schools": [
     "Department of Management Science and Engineering (MS&E)",
-    "Graduate School of Business"
+    "Stanford Graduate School of Business"
    ],
    "units": [
-    "Operations and Information Technology",
-    "Operations, Information and Technology"
+    "Operations, Information, and Technology (OIT) area"
    ],
    "bySchool": {
-    "Graduate School of Business": [
-     "Operations and Information Technology",
-     "Operations, Information and Technology"
+    "Stanford Graduate School of Business": [
+     "Operations, Information, and Technology (OIT) area"
     ]
    }
   },
@@ -5120,7 +5069,6 @@
   },
   "The Chinese University of Hong Kong, Shenzhen": {
    "schools": [
-    "CUHK(SZ)",
     "School of Management and Economics"
    ],
    "units": [
@@ -5133,11 +5081,9 @@
     "": [
      "Operations Management"
     ],
-    "CUHK(SZ)": [
-     "Management and Economics"
-    ],
     "School of Management and Economics": [
      "Information Systems and Operations Management",
+     "Management and Economics",
      "The research group of Prof. Yiming Zhang"
     ]
    }
@@ -5244,37 +5190,14 @@
   },
   "The University of Hong Kong": {
    "schools": [
-    "Faculty of Business and Economics",
-    "School of Business"
+    "Faculty of Business and Economics"
    ],
    "units": [
-    "Information and Innovation Management",
-    "Innovation and Information Management"
+    "Information and Innovation Management"
    ],
    "bySchool": {
     "Faculty of Business and Economics": [
-     "Information and Innovation Management",
-     "Innovation and Information Management"
-    ],
-    "School of Business": [
-     "Innovation and Information Management"
-    ]
-   }
-  },
-  "The University of Melbourne": {
-   "schools": [
-    "Melbourne Business School (Incl. Faculty of Business and Economics)"
-   ],
-   "units": [
-    "Business and Economics",
-    "Operations"
-   ],
-   "bySchool": {
-    "": [
-     "Business and Economics"
-    ],
-    "Melbourne Business School (Incl. Faculty of Business and Economics)": [
-     "Operations"
+     "Information and Innovation Management"
     ]
    }
   },
@@ -5798,6 +5721,7 @@
   },
   "University of Houston": {
    "schools": [
+    "Bauer Human-Centered AI Institute",
     "C. T. Bauer College of Business"
    ],
    "units": [
@@ -5809,17 +5733,6 @@
     ],
     "C. T. Bauer College of Business": [
      "Decision and Information Sciences"
-    ]
-   }
-  },
-  "University of Houston (Bauer Human-Centered AI Institute)": {
-   "schools": [],
-   "units": [
-    "Artificial Intelligence (AI) and healthcare"
-   ],
-   "bySchool": {
-    "": [
-     "Artificial Intelligence (AI) and healthcare"
     ]
    }
   },
@@ -5914,12 +5827,17 @@
   },
   "University of London": {
    "schools": [
+    "Bayes Business School",
     "London Business School"
    ],
    "units": [
-    "Management Science and Operations"
+    "Management Science and Operations",
+    "Operations and Supply Chain Management"
    ],
    "bySchool": {
+    "Bayes Business School": [
+     "Operations and Supply Chain Management"
+    ],
     "London Business School": [
      "Management Science and Operations"
     ]
@@ -6020,6 +5938,24 @@
    "bySchool": {
     "Manning School of Business": [
      "Operations and Information Systems"
+    ]
+   }
+  },
+  "University of Melbourne": {
+   "schools": [
+    "Melbourne Business School"
+   ],
+   "units": [
+    "Faculty of Business and Economics",
+    "Operations"
+   ],
+   "bySchool": {
+    "": [
+     "Faculty of Business and Economics"
+    ],
+    "Melbourne Business School": [
+     "Faculty of Business and Economics",
+     "Operations"
     ]
    }
   },
@@ -6425,22 +6361,6 @@
     ]
    }
   },
-  "University of Texas at San Antonio": {
-   "schools": [
-    "Carlos Alvarez College of Business"
-   ],
-   "units": [
-    "Operations and Analytics"
-   ],
-   "bySchool": {
-    "": [
-     "Operations and Analytics"
-    ],
-    "Carlos Alvarez College of Business": [
-     "Operations and Analytics"
-    ]
-   }
-  },
   "University of Toledo": {
    "schools": [
     "College of Business and Innovation"
@@ -6523,7 +6443,6 @@
    ],
    "units": [
     "Data Analytics and Decision Sciences",
-    "Quantitative Analysis",
     "Technology and Operations Management"
    ],
    "bySchool": {
@@ -6532,7 +6451,6 @@
     ],
     "Darden School of Business": [
      "Data Analytics and Decision Sciences",
-     "Quantitative Analysis",
      "Technology and Operations Management"
     ]
    }
@@ -6625,6 +6543,19 @@
    ],
    "units": [],
    "bySchool": {}
+  },
+  "UT San Antonio": {
+   "schools": [
+    "Carlos Alvarez College of Business"
+   ],
+   "units": [
+    "Operations and Analytics Department"
+   ],
+   "bySchool": {
+    "Carlos Alvarez College of Business": [
+     "Operations and Analytics Department"
+    ]
+   }
   },
   "Utah Valley University": {
    "schools": [],
@@ -6803,13 +6734,6 @@
    "schools": [
     "Ivey Business School"
    ],
-   "units": [],
-   "bySchool": {}
-  },
-  "Western University (Canada) / University of Western at London, Ontario": {
-   "schools": [
-    "Ivey Business School"
-   ],
    "units": [
     "Operations Management"
    ],
@@ -6902,7 +6826,7 @@
   "Antai College of Economics and Management": [
    "Management Science"
   ],
-  "Bayes Business School (formerly Cass Business)": [
+  "Bayes Business School": [
    "Operations and Supply Chain Management"
   ],
   "Beedie School of Business": [
@@ -6932,7 +6856,7 @@
    "Operations, Business Analytics, and Information Systems"
   ],
   "Carlos Alvarez College of Business": [
-   "Operations and Analytics"
+   "Operations and Analytics Department"
   ],
   "Carroll School of Management": [
    "Business Analytics"
@@ -6996,6 +6920,9 @@
   "Columbia Business School": [
    "Decision, Risk, and Operations"
   ],
+  "Cornell SC Johnson College of Business": [
+   "Operations, Technology, and Information Management Area"
+  ],
   "Cornell Tech": [
    "Operations Research and Information Engineering"
   ],
@@ -7009,9 +6936,6 @@
    "Decision Sciences and Managerial Economics",
    "Operations Management"
   ],
-  "CUHK(SZ)": [
-   "Management and Economics"
-  ],
   "Culverhouse College of Commerce": [
    "Information Systems, Statistics, and Management Science"
   ],
@@ -7023,7 +6947,6 @@
   ],
   "Darden School of Business": [
    "Data Analytics and Decision Sciences",
-   "Quantitative Analysis",
    "Technology and Operations Management"
   ],
   "Darla Moore School of Business": [
@@ -7080,8 +7003,7 @@
    "Operations Management"
   ],
   "Faculty of Business and Economics": [
-   "Information and Innovation Management",
-   "Innovation and Information Management"
+   "Information and Innovation Management"
   ],
   "Faculty of Data and Decision Sciences": [
    "Operations Management"
@@ -7124,9 +7046,7 @@
    "Information Systems & Operations Management"
   ],
   "Graduate School of Business": [
-   "Operations and Information Technology",
-   "Operations Management and Information Systems",
-   "Operations, Information and Technology"
+   "Operations Management and Information Systems"
   ],
   "Graduate School of Engineering and Management": [
    "Operational Sciences"
@@ -7290,7 +7210,8 @@
    "Operations and Analytics",
    "Operations and Information Management"
   ],
-  "Melbourne Business School (Incl. Faculty of Business and Economics)": [
+  "Melbourne Business School": [
+   "Faculty of Business and Economics",
    "Operations"
   ],
   "Mendoza College of Business": [
@@ -7399,14 +7320,8 @@
   "Sam M. Walton College of Business": [
    "Supply Chain Management"
   ],
-  "Samuel Curtis Johnson Graduate School of Management": [
-   "Operations Management"
-  ],
   "Sauder School of Business": [
    "Operations and Logistics"
-  ],
-  "SC Johnson College of Business, Johnson Graduate School of Management (Incl. Dyson and Nolan)": [
-   "Operations, Technology and Information Management"
   ],
   "Scheller College of Business": [
    "Operations Management"
@@ -7422,7 +7337,6 @@
    "Finance",
    "Information and Service Economy",
    "Information Systems and Operations Management",
-   "Innovation and Information Management",
    "Operations",
    "Operations and Information Management",
    "Operations and Supply Chain Management",
@@ -7465,9 +7379,6 @@
   "School of Information Management and Engineering (SIME)": [
    "Management Science, Information Systems, Financial Information, and Computer Science"
   ],
-  "School of Information Systems": [
-   "Fujitsu-SMU Urban Computing and Engineering (UNiCEN) Corp. Lab"
-  ],
   "School of International Business Administration": [
    "Operations Management"
   ],
@@ -7476,13 +7387,13 @@
    "Information, Decisions and Operations",
    "Management and Marketing",
    "Management Science",
-   "Operations and Business Analytics",
    "Operations and Data Science",
    "Operations Department",
    "Operations Management"
   ],
   "School of Management and Economics": [
    "Information Systems and Operations Management",
+   "Management and Economics",
    "The research group of Prof. Yiming Zhang"
   ],
   "School of Science and Engineering": [
@@ -7505,6 +7416,9 @@
   ],
   "Smith School of Business": [
    "Management Science and Operations Management"
+  ],
+  "Stanford Graduate School of Business": [
+   "Operations, Information, and Technology (OIT) area"
   ],
   "Stephen M. Ross School of Business": [
    "Technology and Operations Management"
