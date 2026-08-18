@@ -125,7 +125,21 @@ jobs:
           node _scraper/build-placements.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Re-check the file we are about to commit
+        id: recheck
         run: node _scraper/selftest.mjs
+
+      # A red re-check stops the commit, which is right — a broken dataset must
+      # not ship. What it must not be is QUIET: nothing is published while it
+      # stays red, on this run or any later one, and from the outside that is
+      # indistinguishable from a site with no new postings. It cost most of a
+      # day once, with the postings sitting in Firestore marked Live.
+      - name: Say what a red re-check means
+        if: failure() && steps.recheck.outcome == 'failure'
+        run: |
+          echo "::error title=Publishing has STOPPED::The dataset was rebuilt, but the \
+          selftest failed on it, so nothing was committed — and nothing will publish \
+          until it is green. The failures above name the guard. A guard that fires on a \
+          legitimate NEW posting is the guard's bug, not the posting's."
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run
