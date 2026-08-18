@@ -3205,20 +3205,32 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
     await route.fulfill({ status: 200, contentType: 'application/javascript', body: stub });
   });
 
-  // one ordinary visit, which is what teaches the hint the photo and the width
+  // one ordinary visit, which is what teaches the browser the photo and the width
   await h.goto(BASE, { waitUntil: 'load' });
   await h.waitForFunction(() => {
     try {
       const x = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-      return !!(x && x.photo && x.w > 0);
+      const p = JSON.parse(localStorage.getItem('oaAcctPhoto') || 'null');
+      return !!(x && x.w > 0 && p && p.photo);
     } catch { return false; }
   }, null, { timeout: 8000 }).catch(() => {});
 
-  const hint = await h.evaluate(() => {
-    try { return JSON.parse(localStorage.getItem('oaAuthHint') || 'null'); } catch { return null; }
+  const remembered = await h.evaluate(() => {
+    const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } };
+    return { hint: read('oaAuthHint'), photo: read('oaAcctPhoto'),
+      hintBytes: (localStorage.getItem('oaAuthHint') || '').length };
   });
-  ok(!!(hint && hint.photo), 'the auth hint remembers the profile photo');
-  ok(!!(hint && hint.w > 0), 'and how wide the chip was');
+  ok(!!(remembered.photo && remembered.photo.photo), 'the browser remembers the profile photo');
+  ok(!!(remembered.hint && remembered.hint.w > 0), 'and how wide the chip was');
+  /* THE PHOTO IS NOT IN THE HINT, and this is the check that keeps it out:
+     every page parses oaAuthHint in its <head>, before the first paint, and a
+     25 KB JPEG data URL parsed there costs exactly the milliseconds this whole
+     change is spending. (It is also the key the frozen /v2/ tree writes in its
+     own shape, so a field kept there is a field an archive visit deletes.) */
+  ok(!('photo' in (remembered.hint || {})),
+    'the head-parsed hint does not carry the picture');
+  ok(remembered.hintBytes < 400,
+    `and stays small enough to parse before the first paint (${remembered.hintBytes} bytes)`);
 
   // now the reload the owner described, sampled frame by frame
   await h.addInitScript(() => {
@@ -3275,6 +3287,8 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
     'a signed-out reader is stamped as such');
   eq(await out.evaluate(() => document.documentElement.style.getPropertyValue('--oa-chip-w')), '',
     'and no chip width is reserved for a chip they will not be shown');
+  eq(await out.evaluate(() => localStorage.getItem('oaAcctPhoto')), null,
+    'and a browser nobody has signed in on holds no picture');
   await out.close();
 }
 
