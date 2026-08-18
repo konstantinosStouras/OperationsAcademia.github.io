@@ -637,6 +637,25 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 .v3-longform li { margin: 0 0 8px; }
 .v3-longform strong { color: var(--ink); font-weight: 600; }
 
+/* …and a longform page whose measure is set by the COLUMN rather than by
+   readability. Owner, 2026-08-18, of the two legal texts: "the text should
+   expand all the way to the right to be aligned with the top text" — the
+   body was stopping 406px short of the right edge of the hero paragraph
+   directly above it, while its LEFT edge already lined up exactly, so the
+   page read as two columns of different widths stacked on one another.
+
+   It is a variant and not a new default: 74ch stands because a text read
+   from the top down is easier to follow narrow, and these two are read the
+   other way — scanned for the one clause that matters — which is easier when
+   the column is the page's own. The consent statement and the survey page are
+   deliberately NOT given it; they are read straight through.
+
+   Nothing here sets a width. The cap is simply lifted, so the block takes
+   the width of the .v3-container it shares with the hero — which is what
+   makes the two edges line up by construction rather than by a number that
+   would have to be kept in step with --container. */
+.v3-longform.wide { max-width: none; }
+
 /* Charts published by Google Sheets. They are fixed-size and render in their
    own light styling whichever theme the reader chose, so they sit on a white
    card of their own rather than fighting the page's background — and the card

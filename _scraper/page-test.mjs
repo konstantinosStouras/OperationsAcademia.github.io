@@ -3384,6 +3384,74 @@ for (const w of [320, 360, 390, 430]) {
   await m.close();
 }
 
+/* ------------------------------ the legal texts fill their own column
+
+   Owner, 2026-08-18, of privacy-policy.html and terms-and-conditions.html:
+   "the text should expand all the way to the right to be aligned with the top
+   text". The body sat in .v3-longform, whose 74ch measure stopped it 406px
+   short of the hero paragraph's right edge while its left edge lined up
+   exactly — one page reading as two columns of different widths.
+
+   Measured rather than asserted about the stylesheet, because the alignment
+   is what was asked for and a max-width is only how it happens to be
+   achieved: the two blocks share a .v3-container, so lifting the cap makes
+   the edges agree by construction. It is checked at several widths because a
+   number kept in step with --container by hand would pass at one of them and
+   fail at the next.
+
+   And the scope is pinned in the same breath. The consent statement and the
+   survey page are longform too and were deliberately left narrow, so this
+   also fails if the cap is ever lifted on .v3-longform ITSELF — which would
+   line these two up by widening every prose page on the site. */
+{
+  const WIDE = ['privacy-policy.html', 'terms-and-conditions.html'];
+  const NARROW = ['informed_consent_statement.html', 'survey.html'];
+
+  const measure = async (page, width) => {
+    const p = await browser.newPage({ viewport: { width, height: 900 } });
+    p.on('pageerror', (e) => jsErrors.push(page + ': ' + e.message));
+    await p.goto(BASE + page, { waitUntil: 'domcontentloaded' });
+    const r = await p.evaluate(() => {
+      const edges = (el) => {
+        const b = el.getBoundingClientRect();
+        return { l: Math.round(b.left), r: Math.round(b.right), w: Math.round(b.width) };
+      };
+      const lede = document.querySelector('.v3-pa-hero .v3-lede');
+      const prose = document.querySelector('.v3-prose.v3-longform');
+      return {
+        lede: edges(lede), prose: edges(prose),
+        overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    });
+    await p.close();
+    return r;
+  };
+
+  for (const page of WIDE) {
+    for (const width of [1440, 1280, 1120, 980]) {
+      const r = await measure(page, width);
+      eq([r.prose.l, r.prose.r], [r.lede.l, r.lede.r],
+        `${page} at ${width}px: the body lines up with the text above it, left AND right`);
+      ok(!r.overflowX, `${page} at ${width}px: and the page does not scroll sideways`);
+    }
+    /* a phone is the case the cap was never reaching anyway — the container
+       is narrower than the measure — so this is here to catch a fix that
+       widened the desktop by breaking the gutter */
+    const m = await measure(page, 390);
+    eq([m.prose.l, m.prose.r], [m.lede.l, m.lede.r],
+      `${page} at 390px: still one column, gutters intact`);
+    ok(!m.overflowX, `${page} at 390px: and still no sideways scroll`);
+  }
+
+  for (const page of NARROW) {
+    const r = await measure(page, 1440);
+    ok(r.prose.w < r.lede.w,
+      `${page}: keeps the reading measure — the widening is the two legal pages only ` +
+      `(prose ${r.prose.w}px vs lede ${r.lede.w}px)`);
+    eq(r.prose.l, r.lede.l, `${page}: and still starts on the same left edge`);
+  }
+}
+
 /* ------------------------------------------------------------------ done */
 
 eq(jsErrors, [], 'no uncaught script errors');
