@@ -37,7 +37,17 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # A BACKSTOP, not a budget. Every step below that touches the network
+    # carries its own timeout, so a stall fails THAT step — conclusion
+    # "failure", naming the phase that hung — instead of being killed here,
+    # conclusion "cancelled", which reads as "a human stopped this" and says
+    # nothing about whether the code is broken. On 2026-08-18 it was the other
+    # way round: three runs of the same commit were killed at ten minutes
+    # while `playwright install --with-deps` sat in an apt-get that never
+    # returned, and each reported as a cancelled run of a step named after the
+    # test. This number is the sum of the per-step caps plus slack and must
+    # stay above them, or it fires first and we are back to "cancelled".
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
 
@@ -89,9 +99,81 @@ jobs:
           fi
           echo "no e-mail addresses and no private key material in the served files"
 
-      - name: The page renders its data
+      # Getting a browser onto the runner is THREE separate network fetches
+      # that fail in different ways — the npm package, the browser build, and
+      # the apt libraries — so they are three steps. Run as one line they were
+      # indistinguishable: a stalled mirror was reported against a step named
+      # "The page renders its data", which is the one thing it was not.
+      - name: Playwright, and the version to key its browser cache on
+        id: pw
+        timeout-minutes: 5
         run: |
           set -e
-          npm install --no-save --no-audit --no-fund playwright@1
-          npx playwright install --with-deps chromium
-          node _scraper/page-test.mjs
+          # Bounded and retried, because `timeout` is the wall clock that a
+          # socket timeout is not: a fetch that keeps trickling a byte at a
+          # time never trips npm's own limits and hangs for as long as it is
+          # allowed to. Three short attempts beat one unbounded wait.
+          for attempt in 1 2 3; do
+            if timeout 60 npm install --no-save --no-audit --no-fund playwright@1; then break; fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::the playwright package could not be installed after three attempts"
+              exit 1
+            fi
+            echo "::warning::npm install attempt $attempt stalled or failed — retrying"
+            sleep $((attempt * 10))
+          done
+          # The cache below has to name the version npm actually RESOLVED:
+          # `playwright@1` floats, and every release pins its own browser
+          # revision. Read it from what was installed rather than asking the
+          # registry a second time — a release landing between the two calls
+          # would key the cache to a version this job never ran.
+          echo "version=$(node -p "require('./node_modules/playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: The browser build that version pins
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          # Keyed on the resolved version, because that is what decides the
+          # revision on disk, and on the runner image, because `ubuntu-latest`
+          # moves under us. Deliberately NO restore-keys: a near miss would
+          # restore the PREVIOUS revision, download the right one anyway and
+          # then save both — a cache that grows without ever paying for
+          # itself. A key that never hits is not silent breakage either; it
+          # just costs the download this step already knows how to survive.
+          key: ms-playwright-${{ runner.os }}-${{ env.ImageOS }}-${{ steps.pw.outputs.version }}
+
+      - name: The browser it drives
+        timeout-minutes: 10
+        run: |
+          set -e
+          # `--with-deps` is deliberately NOT used. It runs apt-get update and
+          # apt-get install on EVERY run — before the download, cache hit or
+          # not — so it is the one phase the cache cannot help, and it is
+          # exactly what hung on 2026-08-18: the Azure Ubuntu mirror failed
+          # over and the fallback never answered, nine minutes of silence
+          # until the job cap killed the run. The GitHub runner image already
+          # ships Chrome, Chromium, Edge and Firefox, so Chromium's libraries
+          # are installed as those packages' own dependencies. The apt run is
+          # kept, bounded and best-effort, because it costs little when the
+          # mirrors are healthy; the authoritative check that the browser can
+          # RUN is the launch in the next step, which fails loudly and names
+          # any library that is genuinely missing.
+          timeout 120 npx playwright install-deps chromium ||
+            echo "::warning::playwright install-deps did not finish — continuing; the launch below is the real test"
+          for attempt in 1 2; do
+            if timeout 180 npx playwright install chromium; then break; fi
+            if [ "$attempt" = 2 ]; then
+              echo "::error::the chromium build could not be downloaded after two attempts"
+              exit 1
+            fi
+            echo "::warning::browser download attempt $attempt stalled or failed — retrying"
+            sleep 15
+          done
+
+      - name: The page renders its data
+        timeout-minutes: 8
+        # If the two steps above somehow leave no browser behind, this fails
+        # rather than skipping: page-test.mjs keeps its friendly "playwright is
+        # not installed" skip for a local run, but exits 1 on CI, where the
+        # only thing that skip could mean is that the install broke.
+        run: node _scraper/page-test.mjs
