@@ -1499,3 +1499,62 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
 /* the subscribe button rides inside the note's own paragraph */
 .oa-wn-sub { display: inline-block; margin-left: 10px; vertical-align: middle; }
+
+/* ------------------------------------------- the job posting review queue
+   The maintainer's queue on the feedback page (assets/oa-jobreview.js). It
+   reuses .oa-fb-card for the card itself; what is added here is the edit form
+   inside one. Two columns on a wide screen, one on a narrow — the fields are
+   short, so a single column would make a posting taller than the screen and
+   put Approve out of sight, which is the button the whole panel exists for. */
+.oa-rv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px 16px;
+  margin: 10px 0 4px;
+}
+
+.oa-rv-field { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.oa-rv-field.is-wide { grid-column: 1 / -1; }
+
+.oa-rv-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--oa-muted, #5a5f6b);
+}
+
+.oa-rv-field input,
+.oa-rv-field select,
+.oa-rv-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid var(--oa-line, #d7dae0);
+  border-radius: 6px;
+  background: var(--oa-bg, #fff);
+  color: inherit;
+}
+
+.oa-rv-field textarea { resize: vertical; }
+
+.oa-rv-levels { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+.oa-rv-check {
+  font-size: 13px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.oa-rv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+/* The queue's own status chip sits in the card header beside the title, so it
+   must not push the heading onto a second line on a phone. */
+.oa-rv-card header .oa-fb-status { margin-left: 8px; }

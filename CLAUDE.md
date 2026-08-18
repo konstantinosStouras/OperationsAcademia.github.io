@@ -205,6 +205,55 @@ stands down wherever `oa-jobedit.js` has drawn.
 `firebase deploy` — it needs an interactive login — so after any change to
 `_firestore.rules`, run `firebase deploy --only firestore:rules` from the
 repository root. See `_SETUP-FIREBASE.md` §4.
+## Nothing from the tracking sheet publishes itself
+
+A posting crawled from the job market workbook is **queued for the maintainer,
+not published on sight**. It appears at the top of `feedback.html` (admin-only,
+above the feedback inbox), every field editable; approving it puts it on the
+site at the next build, rejecting keeps it off for good.
+
+The reason is that the pipeline **derives** things the sheet never said — the
+market year, the type of institution, the canonical country, the entry level,
+and the closing date read off the HigherEdJobs advertisement. Those reached
+visitors before anyone had looked at them.
+
+    _scraper/jobreview.mjs         what is publishable, and what an edit is (pure)
+    assets/oa-jobreview.js         the panel on feedback.html
+    _scraper/jobreview-mailer.mjs  one e-mail per queued posting
+    oa-jobreview-mail.yml          runs it every 15 minutes
+
+**The queue is a Firestore collection (`jobReviews`), never a file under
+`data/`.** Everything in `data/` is served by Pages to anyone who asks — CI even
+checks that no e-mail address reaches it — so a posting "not yet public" cannot
+sit there in any form. `data/jobmarket.json` therefore becomes what it always
+claimed to be: the **approved** postings, and nothing else.
+
+Three rules worth keeping:
+
+- **Absence means withhold.** A row with no queue document is never published.
+  Expressed that way round — rather than "a rejection means withhold" — so a
+  queue that fails to write cannot leak a posting onto the site.
+- **An unreachable queue changes nothing.** Without it there is no way to know
+  what was approved, and both answers are wrong: publishing everything defeats
+  the gate, publishing nothing deletes every posting on the site. So
+  `data/jobmarket.json` is left exactly as it is, the same rule the sync
+  already applies to a workbook it cannot read.
+- **An edit is a correction laid on top, never a rewrite of the row.** The sheet
+  stays the source of truth; `edits` is re-applied on every build, so the
+  workbook can be re-read every morning without discarding the maintainer's
+  work. Same shape as the HigherEdJobs cache and `rowOverrides`.
+
+`EDITABLE` in `jobreview.mjs`, the `FIELDS` list in `oa-jobreview.js` and the key
+list in `_firestore.rules` must agree — **selftest.mjs pins all three together**.
+`id`, `year`, `posted` and `source` are deliberately NOT editable: they tie the
+posting to its sheet row, and changing one would make the next sync queue it
+again as new. Correct those in the workbook.
+
+**It is inert until `_firestore.rules` is redeployed** (`firebase deploy --only
+firestore:rules`) — until then the panel says permission-denied — and the
+e-mail half is inert until `SMTP_*` is set, which stamps nothing, so the
+postings are announced once it exists.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
@@ -386,6 +435,7 @@ and "what I am e-mailed" cannot mean different things.
 
     node _scraper/selftest.mjs      # offline model/pipeline checks
     node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
+    node _scraper/jobreview-mailer.mjs --selftest      # the review-queue e-mail
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

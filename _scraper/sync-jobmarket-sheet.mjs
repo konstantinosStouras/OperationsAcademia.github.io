@@ -60,7 +60,8 @@ import {
   stalenessOf, shouldWarn, emptyRegistry, adoptSheets, activeSheets, rollRegistry,
 } from './jobmarket-sheet.mjs';
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
-import { shell, esc, send, transport, toPlain, SITE, CONTACT } from './_mail.mjs';
+import { COLLECTION as REVIEW_COL, partition, needMail } from './jobreview.mjs';
+import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -138,6 +139,73 @@ async function fetchCsv(id, tab) {
       'the workbook is not readable by anyone with the link' };
   }
   return got;
+}
+
+/* ------------------------------------------------------------ review queue */
+
+/**
+ * What the maintainer has already decided about, from Firestore.
+ *
+ * `{ ok, db, docs, error }`. `ok` is false when there is no database to ask —
+ * no credentials, or a read that failed — and the caller then leaves the
+ * published file untouched rather than guessing in either direction.
+ */
+async function loadReviewQueue() {
+  let db;
+  try {
+    db = await firestore();
+  } catch (e) {
+    return { ok: false, db: null, docs: [], error: e.message };
+  }
+  if (!db) {
+    return { ok: false, db: null, docs: [],
+             error: 'no Firebase credentials in this environment' };
+  }
+  try {
+    const snap = await db.collection(REVIEW_COL).get();
+    return { ok: true, db, docs: snap.docs.map((d) => d.data()), error: '' };
+  } catch (e) {
+    return { ok: false, db: null, docs: [], error: e.message };
+  }
+}
+
+/**
+ * Put newly-found postings into the queue, and bring already-queued ones up to
+ * date with the sheet.
+ *
+ * Written one document at a time with `set(..., { merge: true })` on the
+ * refresh path, so a maintainer editing a posting in the browser while this
+ * runs cannot have their decision overwritten by a sheet re-read — `refreshQueued`
+ * only ever carries the `row`, never `status` or `edits`.
+ */
+async function writeQueue(db, split) {
+  const col = db.collection(REVIEW_COL);
+  let queued = 0, refreshed = 0;
+
+  for (const doc of split.queue) {
+    /* create(), not set(): if a document appeared since the read above — the
+       maintainer approving something mid-run — this must not overwrite their
+       decision with a fresh `pending`. */
+    try {
+      await col.doc(doc.rowId).create(doc);
+      queued++;
+    } catch (e) {
+      if (e && e.code === 6) continue;      // ALREADY_EXISTS: theirs wins
+      warn(`could not queue ${doc.rowId}: ${e.message}`);
+    }
+  }
+
+  for (const doc of split.refresh) {
+    try {
+      await col.doc(doc.rowId).set({ row: doc.row }, { merge: true });
+      refreshed++;
+    } catch (e) {
+      warn(`could not refresh ${doc.rowId}: ${e.message}`);
+    }
+  }
+
+  if (queued) log(`queued ${queued} posting(s) for review`);
+  if (refreshed) log(`${refreshed} queued posting(s) caught up with the sheet`);
 }
 
 /* -------------------------------------------------------------------- files */
@@ -375,6 +443,7 @@ async function main() {
      posting the unread workbook holds. */
   let wrote = false;
   let rows = existing;
+  let sheetRows = [];
   let fresh = 0;
 
   if (failed.length) {
@@ -422,6 +491,53 @@ async function main() {
             'so the backfill announces nothing by e-mail.');
       }
 
+      /* THE REVIEW GATE. Everything above describes what the workbook says;
+         what follows decides how much of it the public may see. A posting
+         crawled from the sheet is queued for the maintainer and published only
+         once they have approved it — see _scraper/jobreview.mjs for why the
+         queue is a Firestore collection and not a file under data/.
+
+         `sheetRows` keeps the FULL set, because the staleness check below asks
+         "is the workbook still being updated", which has nothing to do with
+         how much of it has been reviewed. Measuring that on the approved rows
+         alone would e-mail the maintainer that their sheet had gone quiet
+         while it was in fact busy and their own queue was the holdup. */
+      sheetRows = rows;
+      const queue = await loadReviewQueue();
+
+      if (!queue.ok) {
+        /* NO QUEUE IS NOT AN EMPTY QUEUE. Without it there is no way to know
+           what was approved, and both answers are wrong: publishing everything
+           defeats the gate, publishing nothing deletes every posting on the
+           site. So the file is left exactly as it is — the same rule this
+           script already applies to a workbook it cannot read. */
+        warn(`the review queue is unreachable (${queue.error}) — ` +
+             'data/jobmarket.json was left exactly as it is');
+        rows = existing;
+      } else {
+        const split = partition(rows, queue.docs, { now: isoStamp(now) });
+        rows = split.publish;
+
+        if (split.queue.length || split.refresh.length) {
+          if (DRY) {
+            log(`--dry-run: would queue ${split.queue.length} posting(s) for review` +
+                (split.refresh.length ? ` and refresh ${split.refresh.length}` : '') + '.');
+          } else {
+            await writeQueue(queue.db, split);
+          }
+        }
+        for (const d of split.queue) {
+          log(`  ~ queued for review  ${d.row.posted}  ${d.row.institution}` +
+              (d.row.department ? ' — ' + d.row.department : ''));
+        }
+        log(`review queue: ${split.publish.length} approved, ` +
+            `${split.pending.length + split.queue.length} awaiting you, ` +
+            `${split.rejected.length} turned down`);
+        if (split.pending.length + split.queue.length) {
+          log(`  review them at ${SITE}/feedback`);
+        }
+      }
+
       const before = serialiseSheetRows(existing);
       const after = serialiseSheetRows(rows);
 
@@ -463,7 +579,10 @@ async function main() {
 
   /* ------------------------------------------------------------- staleness */
 
-  const newestPosted = rows.reduce((m, r) => (r.posted > m ? r.posted : m), '');
+  /* The SHEET's newest posting, not the newest APPROVED one: the question
+     this answers is whether the workbook is still being updated. */
+  const newestPosted = (sheetRows.length ? sheetRows : rows)
+    .reduce((m, r) => (r.posted > m ? r.posted : m), '');
   const check = stalenessOf({
     ok: !failed.length,
     error: failed.map((f) => `${f.id}: ${f.error}`).join('; '),

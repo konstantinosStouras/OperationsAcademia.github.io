@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "postings-reviewed-before-publishing",
+   "date": "2026-08-18",
+   "title": "Job postings are checked by a human before they appear",
+   "summary": "Postings gathered automatically from the job market tracking sheet no longer go straight onto the site. Each one now waits for the maintainer, who checks it against the advertisement and corrects anything wrong before it is published \u2014 the closing date, the school or department name, the country, the type of position. The site derives several of those from the posting rather than being told them outright, so this is the step that makes sure what you read is what the employer actually advertised. Postings you already see are unaffected once re-approved, and nothing else about the jobs page changes.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "posting-form-cascade",
    "date": "2026-08-18",
    "title": "Posting a job: the university, school and department boxes now follow each other",

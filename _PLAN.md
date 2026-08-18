@@ -670,6 +670,56 @@ Four decisions worth recording:
    because the wrapper was only stripped while it was last. It now strips to a
    fixed point. Nothing in the postings hit it; the directory did, the first
    time anything canonicalised it.
+### 3.6c The sheet no longer publishes itself — **DONE 2026-08-18**
+
+Owner's decision: **nothing crawled from the tracking sheet goes public until
+they have approved it.** The queue is `jobReviews` in Firestore, the review
+surface is the top of `feedback.html` (admin-only, above the feedback inbox),
+and one e-mail goes out per queued posting.
+
+The motivation is §3.6b's own lesson generalised. The sheet is not the whole
+truth about a posting: the pipeline derives the market year, the institution
+type, the canonical country, the entry level and — since §3.6b — the closing
+date read off the advertisement. Every one of those reached visitors before a
+human had seen it. The HigherEdJobs pass made the derivations better; it did
+not make them reviewed.
+
+Decisions worth recording:
+
+- **The queue is a database collection, not a file.** Everything under `data/`
+  is served to anyone who asks, so "pending" and "committed to data/" are
+  contradictory. `data/jobmarket.json` is now the APPROVED set, which is what
+  its name always implied.
+- **Absence means withhold**, not "a rejection means withhold". A queue that
+  fails to write therefore publishes nothing rather than everything.
+- **An unreachable queue leaves the published file untouched.** Publishing
+  everything defeats the gate; publishing nothing deletes the site's postings.
+  The same reasoning as "a workbook that cannot be read writes nothing".
+- **Approval reaches the site from `build-jobs.mjs`, not the next sheet read.**
+  The sync runs daily and the build every 20 minutes, so reading the approved
+  documents in the build is what turns "approve" into a posting on the page
+  within one build instead of up to a day later. The sync still QUEUES.
+- **Staleness is measured on the whole sheet, not the approved subset.** The
+  question that check asks is whether the workbook is still being updated; on
+  the approved rows it would e-mail the maintainer that their sheet had gone
+  quiet while the queue was in fact the holdup.
+- **An edit is an overlay.** `edits` is re-applied on every build rather than
+  written back over the row, so the workbook can be re-read each morning
+  without discarding the maintainer's corrections — the same shape as the
+  HigherEdJobs cache and `rowOverrides`.
+- **Identity is not editable.** `id`, `year`, `posted` and `source` tie a
+  posting to its sheet row; editing one would make the next sync queue it again
+  as new. Those are corrected in the workbook.
+
+Per the owner, the sixteen postings already live go under review too, so the
+jobs page loses them at the next sync and regains each one as it is approved.
+The e-mail is one per posting rather than a digest, also per the owner.
+
+**Both halves are inert until switched on:** the panel until
+`_firestore.rules` is redeployed, and the e-mail until `SMTP_*` is set — which
+stamps nothing, so a posting queued before the mail works is announced once it
+does.
+
 ---
 
 ## 4. Things to decide

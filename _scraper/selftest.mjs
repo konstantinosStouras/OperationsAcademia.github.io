@@ -45,6 +45,11 @@ import {
   parseAd, cacheEntry, needFetch, applyVerified, deadlineOf, labelledFields,
   isHigherEdJobsUrl, jobCodeOf, detailsUrl, hejDate, DEADLINE_FIELDS,
 } from './higheredjobs.mjs';
+import {
+  COLLECTION as REVIEW_COL, EDITABLE, DOC_KEYS, PENDING, APPROVED, REJECTED,
+  queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
+  needMail, changedKeys,
+} from './jobreview.mjs';
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -3424,6 +3429,161 @@ async function testHigherEdJobsWiring() {
   }
 }
 
+
+/* ------------------------------------------------ the posting review queue */
+
+const RV_ROW = {
+  id: '2027-example-university-20260815', year: 2027, posted: '2026-08-15',
+  institution: 'Example University', department: 'Operations', school: '', unit: 'Operations',
+  type: 'University', levels: ['Assistant Professor'],
+  applyBy: 'Until filled.', applyByDate: '', comments: 'Lecturer · Orem, UT',
+  country: 'United States', adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1',
+  adLabel: 'link to Job ad', postedAtUrl: '', postedAtLabel: 'link',
+  furtherInfoUrl: '', characteristics: [], featured: false,
+  source: 'jobmarket-sheet', addedAt: '2026-08-15T00:00:00Z', owner: '',
+  _tab: '2026 Jobs', _sheet: 'abc',
+};
+
+function testReviewQueue() {
+  /* THE GATE ITSELF. A row the queue has never seen is NOT publishable — the
+     rule is "absence means withhold", never "a rejection means withhold", so a
+     queue that failed to write cannot leak a posting onto the site. */
+  const fresh = partition([RV_ROW], [], { now: '2026-08-18T00:00:00Z' });
+  eq(fresh.publish.length, 0, 'a posting the queue has not seen is not published');
+  eq(fresh.queue.length, 1, 'it is queued for the maintainer instead');
+  eq(fresh.queue[0].status, PENDING, 'as pending');
+  eq(fresh.queue[0].rowId, RV_ROW.id, 'keyed by the row it came from');
+  ok(!('_tab' in fresh.queue[0].row) && !('_sheet' in fresh.queue[0].row),
+    'the pipeline\'s own provenance keys are not carried into the queue');
+
+  // and every key it writes is one the rules allow
+  for (const k of Object.keys(fresh.queue[0])) {
+    ok(DOC_KEYS.includes(k), `queue document key "${k}" is one the rules allow`);
+  }
+
+  const approved = [{ rowId: RV_ROW.id, status: APPROVED, row: RV_ROW, edits: {} }];
+  const live = partition([RV_ROW], approved, {});
+  eq(live.publish.length, 1, 'an approved posting is published');
+  eq(live.queue.length, 0, 'and is not queued again');
+
+  /* A REJECTION IS REMEMBERED. Without this the next sync would queue it
+     again, and the maintainer would be asked every morning about a posting
+     they have already turned down. */
+  const no = partition([RV_ROW], [{ rowId: RV_ROW.id, status: REJECTED, row: RV_ROW }], {});
+  eq(no.publish.length, 0, 'a rejected posting stays off the site');
+  eq(no.queue.length, 0, 'and is never re-queued');
+
+  /* THE SHEET KEEPS MOVING UNDER THE QUEUE. A posting queued on Monday whose
+     department is corrected on Tuesday must show Tuesday's department when it
+     is finally reviewed — while staying pending, with the maintainer's own
+     edits untouched. */
+  const queued = queueDoc(RV_ROW, { now: '2026-08-18T00:00:00Z' });
+  queued.edits = { comments: 'mine' };
+  const moved = { ...RV_ROW, department: 'Operations and Analytics' };
+  const split = partition([moved], [queued], {});
+  eq(split.refresh.length, 1, 'a queued posting catches up with the sheet');
+  eq(split.refresh[0].row.department, 'Operations and Analytics', 'taking the new content');
+  eq(split.refresh[0].status, PENDING, 'while staying pending');
+  eq(split.refresh[0].edits.comments, 'mine', 'and keeping what the maintainer typed');
+  eq(refreshQueued(queued, RV_ROW), null, 'an unchanged sheet refreshes nothing');
+}
+
+function testReviewEdits() {
+  /* An edit is sanitised exactly as an ingest would sanitise it: a browser is
+     not the authority on what a posting may contain. */
+  eq(cleanEdit('country', 'USA'), 'United States',
+    'an edited country is canonicalised, so an edit cannot re-fork the Location filter');
+  eq(cleanEdit('adUrl', 'javascript:alert(1)'), '',
+    'a javascript: URL is refused');
+  eq(cleanEdit('adUrl', 'https://example.org/x'), 'https://example.org/x',
+    'a real URL is kept');
+  eq(cleanEdit('type', 'Not A Type'), undefined, 'an unknown institution type is dropped');
+  eq(cleanEdit('type', 'University'), 'University', 'a known one is kept');
+  eq(cleanEdit('levels', ['Assistant Professor', 'Nonsense']), ['Assistant Professor'],
+    'an unknown entry level is dropped from the list');
+  eq(cleanEdit('applyByDate', '20/08/2026'), undefined, 'a non-ISO closing date is refused');
+  eq(cleanEdit('applyByDate', '2026-08-20'), '2026-08-20', 'an ISO one is kept');
+  eq(cleanEdit('id', 'something-else'), undefined,
+    'the row id is not editable — it is what ties the posting to its sheet row');
+  eq(cleanEdit('year', 2030), undefined, 'nor is the market year, which the site derives');
+  eq(cleanEdits({ institution: 'X', id: 'y', bogus: 1 }), { institution: 'X' },
+    'unknown keys are dropped rather than published');
+
+  /* THE TWO DEADLINE FIELDS MOVE TOGETHER, for the same reason as in the
+     HigherEdJobs apply: the page buckets a posting as open-ended on the DATE
+     being empty, so a date on the card with "Until filled" in the filter would
+     be the worst of both. */
+  const dated = applyEdits(RV_ROW, { applyByDate: '2026-09-30' });
+  eq(dated.applyByDate, '2026-09-30', 'an edited closing date is taken');
+  eq(dated.applyBy, longDate('2026-09-30'), 'and the line shown follows it');
+
+  const opened = applyEdits({ ...RV_ROW, applyBy: 'September 30, 2026', applyByDate: '2026-09-30' },
+    { applyBy: 'Until filled.' });
+  eq(opened.applyByDate, '', 'saying "until filled" clears the date');
+
+  const both = applyEdits(RV_ROW, { applyByDate: '2026-09-30', applyBy: 'By 30 September' });
+  eq(both.applyBy, 'By 30 September', 'but an explicit line the maintainer typed wins');
+
+  eq(applyEdits(RV_ROW, {}).institution, 'Example University',
+    'an approved posting with no edits is the sheet row itself');
+  eq(changedKeys(RV_ROW, { institution: 'Example University', department: 'Other' }),
+    ['department'], 'only fields that differ count as edited');
+}
+
+async function testReviewWiring() {
+  /* The three places that must agree on what may be edited: the pure module,
+     the browser panel, and the rules. A field in one and not the others is
+     either refused by the database or silently dropped — both look to the
+     maintainer like an edit that did not save. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  const block = rules.slice(rules.indexOf('match /jobReviews/'));
+
+  for (const f of EDITABLE) {
+    ok(block.includes(`'${f.key}'`), `_firestore.rules allows editing ${f.key}`);
+    ok(panel.includes(`key: '${f.key}'`), `the review panel offers ${f.key}`);
+  }
+  for (const k of ['id', 'year', 'posted', 'source', 'addedAt']) {
+    ok(!EDITABLE.some((f) => f.key === k),
+      `${k} is NOT editable — it is the posting's identity, corrected in the sheet`);
+  }
+
+  /* A QUEUED POSTING IS NOT PUBLIC, which is the whole reason the queue is a
+     Firestore collection rather than a file under data/. Everything in data/
+     is served to anyone who asks. */
+  ok(/match \/jobReviews\/\{id\}[\s\S]*?allow read: if isAdmin\(\)/.test(rules),
+    'jobReviews is admin-read — a queued posting is not public');
+  ok(!existsSync(path.join(HERE, '..', 'data', 'jobreviews.json')),
+    'and no queue file is committed under data/, which is world-readable');
+
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(sync.includes('partition('), 'the sheet sync applies the review gate');
+  ok(sync.includes('rows = existing'),
+    'and an unreachable queue leaves the published file exactly as it is — ' +
+    'publishing everything would defeat the gate, publishing nothing would ' +
+    'delete every posting on the site');
+  ok(sync.includes('sheetRows'),
+    'staleness is measured on the WHOLE sheet, not the approved subset, so a ' +
+    'busy workbook with a full queue is not reported as gone quiet');
+
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(build.includes("where('status', '==', 'approved')"),
+    'the build publishes an approval without waiting for the next sheet read');
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-jobreview-mail.yml'), 'utf8');
+  ok(wf.includes('jobreview-mailer.mjs'), 'the workflow runs the mailer');
+  ok(wf.includes('--selftest'), 'and checks it offline first');
+
+  const html = await readFile(path.join(HERE, '..', 'feedback.html'), 'utf8');
+  ok(html.includes('id="oa-review"'), 'the feedback page carries the review panel');
+  ok(html.includes('oa-jobreview.js'), 'and loads the script that fills it');
+  ok(html.indexOf('id="oa-review"') < html.indexOf('id="oa-inbox"'),
+    'with the queue ABOVE the feedback inbox — a posting that is not on the ' +
+    'site yet is the thing most worth doing first');
+  ok(panel.includes('OAAccounts.isAdmin()'), 'the panel is drawn for the maintainer only');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -3471,5 +3631,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testHigherEdJobsParsing();
   testHigherEdJobsApply();
   await testHigherEdJobsWiring();
+  testReviewQueue();
+  testReviewEdits();
+  await testReviewWiring();
   process.exit(finish() ? 0 : 1);
 }
