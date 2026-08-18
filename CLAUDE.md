@@ -805,6 +805,57 @@ row pointing only at our own home page — what a sheet row carries when it name
 no ad — names nothing. **Anything that makes two postings' names agree can turn
 them into one, so a naming change is also a check on the row count.**
 
+## The header paints its FINAL form on the first frame
+
+Owner, 2026-08-18: reloading any page "blinks for a moment and shakes my user
+name picture to the green default and then loads my current correct picture."
+Both halves were measured in a real browser before anything was changed, with
+the Firebase SDK stubbed SLOW rather than dead (a refused request collapses the
+very window the bug lives in):
+
+* `#oa-account` was **empty and 0px wide for ~130ms** — oa-accounts.js cannot
+  run until the page has parsed — and when the chip landed the row re-flowed
+  around it: the nav moved 62px, the theme toggle 185px. That is the shake.
+* the chip then painted the **initials disc at 134ms and the photograph at
+  796ms**, because the localStorage hint (`oaAuthHint`) carried the name but not
+  the picture, so the photo could not arrive until Firestore answered.
+
+The fix is the same idea the theme flash was already solved with — decide it
+before the first paint, from what the last visit remembered:
+
+1. **the hint carries the photo** (a profile photo is a 192×192 JPEG data URL,
+   ~10–25 KB, capped at 96 KB) **and the chip's measured width**;
+2. `profilePhoto()` may fall back to it **only while the profile has not
+   loaded**, and only for the same uid — a loaded profile with no photo is an
+   account with no photo, and falling through there would resurrect a picture
+   the user had just removed, while a uid check is what stops the merge dialog
+   wearing this account's face on another account's row;
+3. **the inline snippet in every page's `<head>`** — the theme one, extended —
+   stamps `data-oa-auth` on `<html>` and hands the stylesheet `--oa-chip-w`, so
+   `v3.css` holds the chip's space open **before the browser draws anything**;
+4. the width is re-measured **after `document.fonts.ready`**, because the name
+   is set in Inter and a chip measured in the fallback face is the wrong width;
+   and only where the name is SHOWN (≥901px — the narrow header's chip is an
+   avatar and its padding, and storing that would under-reserve the wide one).
+
+`page-test.mjs` drives it: it samples the header every animation frame through
+a whole load and fails if the nav or the toggle moves, or if any painted state
+is anything but the photograph. **Anything new in the header must keep both
+properties** — a control that appears late must have its space reserved from
+the head, and anything painted from a remembered value must be painted in its
+final form or not at all.
+
+## The phone header carries the site's NAME
+
+The wordmark used to be hidden below 640px (`.v3-header .v3-logo span + span {
+display: none }`) because at full size it pushes the burger off a 390px screen.
+Hiding the site's name on the devices most people arrive on is the wrong half
+of that trade (owner, 2026-08-18), so the lockup is **scaled** instead: smaller
+mark, smaller words, tighter gaps, `min-width: 0` so the logo is what gives when
+the row is short. `page-test.mjs` measures 320/360/390/430 and fails if the
+words are missing, if they run into the menu button, if the burger stops being
+the topmost element at its own centre, or if the page scrolls sideways.
+
 ## Anything that paints its own ground must name its own ink
 
 Three reports in one morning (2026-08-18) were all the same fault: the

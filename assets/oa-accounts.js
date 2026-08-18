@@ -65,27 +65,78 @@
     try { return JSON.parse(localStorage.getItem(HINT_KEY) || 'null'); } catch (e) { return null; }
   }
 
+  /* A profile photo is a 192x192 JPEG data URL (see the canvas in openProfile),
+     which is ~10-25 KB — small enough to keep beside the name, and worth
+     keeping: it is what lets the FIRST paint of the chip be the right picture
+     instead of the initials disc that used to sit there until Firestore
+     answered. The cap is a belt: a provider URL is a few hundred bytes, and a
+     data URL that has somehow grown past this is dropped rather than risking
+     the whole hint against localStorage's quota. */
+  var HINT_PHOTO_MAX = 96 * 1024;
+
   /** `name` overrides what we store for the next page load. Firebase gives a
       password account no displayName, so the name we display comes from the
       Firestore profile — pass it in once that read has landed, or the hint
-      would only ever carry an empty string. */
+      would only ever carry an empty string.
+
+      The photo and the chip's measured width are carried for the same reason
+      as the name: everything the header needs to paint ITS FINAL FORM on the
+      first frame, before Firebase has said a word. Both are optional and both
+      are re-derived from the truth (the Firestore profile) as soon as it
+      lands, so a stale one is corrected within the same page load. */
   function writeHint(u, name) {
     try {
       if (u) {
+        var prev = readHint();
+        var mine = prev && prev.uid === u.uid ? prev : null;
         if (name === undefined) {
           // Called before the profile read has landed. Keep whatever name the
           // previous visit resolved for this same account rather than blanking
           // it — otherwise the hint can never carry a name at all.
-          var prev = readHint();
-          name = (prev && prev.uid === u.uid && prev.name) || '';
+          name = (mine && mine.name) || '';
         }
+        /* The SAME fill-from-the-previous-visit rule for the picture. Only the
+           profile read knows it, so a hint written before that read must not
+           blank what the last visit learned — that would put the initials disc
+           back for one page load, which is the whole bug. */
+        var photo = hintablePhoto(u) || (mine && mine.photo) || '';
         localStorage.setItem(HINT_KEY, JSON.stringify({
-          uid: u.uid, email: u.email || '', name: name || u.displayName || ''
+          uid: u.uid, email: u.email || '', name: name || u.displayName || '',
+          photo: photo, w: (mine && mine.w) || 0
         }));
       } else {
         localStorage.removeItem(HINT_KEY);
       }
     } catch (e) { /* private mode — the hint is an optimisation, not a requirement */ }
+  }
+
+  /** The photo to REMEMBER for the next page load, or '' — deliberately read
+      from the loaded profile (the truth) and never from the hint, so removing
+      a photo removes it here too on the very next write rather than being
+      carried for ever by the fill-empty rule above. */
+  function hintablePhoto(u) {
+    var own = u && state.user && u.uid === state.user.uid;
+    var p = own ? state.profile : null;
+    if (!p) return '';                       // profile not read yet — caller keeps the old one
+    var ph = p.photo || (u && u.photoURL) || '';
+    return ph && ph.length <= HINT_PHOTO_MAX ? ph : '';
+  }
+
+  /** What the chip measured last time, so the space it will occupy can be
+      reserved BEFORE it exists (see the inline snippet in every page's head).
+      Written only from a chip that is showing the name — the compact
+      avatar-only chip the narrow layout paints would under-reserve the wide
+      one, and an under-reserve is the shift this is here to prevent. */
+  function rememberChipWidth(px) {
+    if (!(px > 0)) return;
+    try {
+      var h = readHint();
+      if (!h || !state.user || h.uid !== state.user.uid) return;
+      var w = Math.ceil(px);
+      if (h.w === w) return;
+      h.w = w;
+      localStorage.setItem(HINT_KEY, JSON.stringify(h));
+    } catch (e) { /* private mode */ }
   }
 
   function displayName(u) {
@@ -141,7 +192,22 @@
   function profilePhoto(u) {
     var own = u && state.user && u.uid === state.user.uid;
     var p = own ? state.profile : null;
-    return (p && p.photo) || (u && u.photoURL) || '';
+    if (p && p.photo) return p.photo;
+    if (u && u.photoURL) return u.photoURL;
+    /* Nothing known yet — this is the restore window, and it is the ONLY
+       place the remembered picture is allowed to speak. The uid must match:
+       the merge dialog draws another account's row through avatarHTML() too,
+       and it must never wear this one's face (the same rule the profile read
+       above already follows).
+
+       `p` is deliberately not required to be null: a profile that HAS loaded
+       and has no photo is an account with no photo, and falling through to
+       the hint there would resurrect a picture the user had just removed. */
+    if (!p && u && u.uid) {
+      var h = readHint();
+      if (h && h.uid === u.uid && h.photo) return h.photo;
+    }
+    return '';
   }
 
   /** The avatar disc: the photo when there is one, the initials otherwise
@@ -151,8 +217,17 @@
     var cls = 'oa-avatar' + (xl ? ' oa-avatar-xl' : '');
     var ph = profilePhoto(u);
     if (ph) {
+      /* The disc's size comes from CSS (.oa-avatar is a fixed square and the
+         image fills it), so these attributes settle nothing about layout —
+         they state the 1:1 ratio and the painted size, which is what keeps a
+         slow-decoding image from being drawn at some other shape first.
+         `fetchpriority=high` because this is the header's only image and it is
+         above the fold; a profile photo is a data URL, so it costs no request
+         at all, and a provider URL is one small request worth making early. */
+      var px = xl ? 56 : 32;
       return '<span class="' + cls + '" aria-hidden="true"><img class="oa-avatar-img" ' +
-        'src="' + esc(ph) + '" alt=""></span>';
+        'src="' + esc(ph) + '" alt="" width="' + px + '" height="' + px + '" ' +
+        'decoding="async" fetchpriority="high"></span>';
     }
     return '<span class="' + cls + '" aria-hidden="true" style="--oa-hue:' + avatarHue(u) + '">' +
       esc(initials(u)) + '</span>';
@@ -337,6 +412,7 @@
       '</div>';
 
     var chip = $('#oa-chip'), menu = $('#oa-menu');
+    measureChip(chip);
     function close() { menu.hidden = true; chip.setAttribute('aria-expanded', 'false'); }
     chip.addEventListener('click', function () {
       menu.hidden = !menu.hidden;
@@ -355,6 +431,32 @@
     // screen — calling openProfile() directly showed a signed-in reader the
     // "Sign in to Operations Academia" box and threw their click away.
     if (ep) ep.addEventListener('click', function () { close(); whenSignedIn(function () { openProfile(); }); });
+  }
+
+  /** Remember how wide this chip actually is, for the reserve the next page
+      load makes before the chip exists (the inline snippet in every <head>).
+
+      TWICE, and the second time is the one that matters: the name is set in
+      Inter, which arrives from Google Fonts AFTER first paint, and a chip
+      measured in the fallback face is a chip measured at the wrong width. A
+      re-measure once document.fonts has settled is what makes the remembered
+      number the real one.
+
+      Only where the name is SHOWN — the narrow header paints an avatar and its
+      padding, a fixed size that has nothing to do with the name, and storing
+      that would under-reserve the wide header, which is the shift this is here
+      to prevent. The media query is the one v3.css reserves against; keep the
+      two in step. */
+  function measureChip(chip) {
+    if (!chip || !window.matchMedia || !matchMedia('(min-width: 901px)').matches) return;
+    var take = function () {
+      if (!document.body.contains(chip)) return;   // a later paint replaced it
+      rememberChipWidth(chip.getBoundingClientRect().width);
+    };
+    take();
+    if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
+      document.fonts.ready.then(take).catch(function () { /* no font API — the first measure stands */ });
+    }
   }
 
   /* The same control, in the off-canvas panel. main.css hides #header-wrapper

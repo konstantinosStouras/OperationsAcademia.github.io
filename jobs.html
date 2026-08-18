@@ -7,13 +7,29 @@
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <script>
     (function () {
+      var el = document.documentElement;
       try {
         var t = localStorage.getItem('oaV3Theme');
         if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
-        document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        el.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
       } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
+        el.setAttribute('data-theme', 'light');
       }
+      /* The account chip, for the same reason and in the same breath. It is
+         painted by assets/oa-accounts.js, which cannot run until the page has
+         parsed — so #oa-account is empty and 0px wide for ~130ms and the whole
+         header row jumps sideways when the chip lands (measured: the nav by
+         62px, the theme toggle by 185px). Reserve the space it will take, from
+         the same localStorage hint the chip is painted from, before the browser
+         draws anything. */
+      try {
+        var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        /* the width the chip MEASURED last visit, so the reserve is the real
+           one and not a guess at how long a name is; absent on a first visit,
+           where the stylesheet's own minimum takes over */
+        if (h && h.w > 0) el.style.setProperty('--oa-chip-w', h.w + 'px');
+      } catch (e) { /* private mode — the reserve is an optimisation */ }
     })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -173,8 +189,7 @@
             <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
           <span>
             <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
-            <a href="privacy-policy.html">Privacy</a> &nbsp;&middot;&nbsp;
-            <a href="/v1/">2014-2026 archive</a>
+            <a href="privacy-policy.html">Privacy</a>
           </span>
         </div>
       </div>
