@@ -1103,6 +1103,37 @@ async function testSchools() {
   eq(S.canonSchool(''), '', 'an empty value stays empty');
   eq(S.canonInstitution(null), '', 'as does a missing one');
 
+  /* A SCHOOL TYPED INTO THE DEPARTMENT BOX. The live failure: a Tulane
+     posting arrived with an empty School and "Freeman School of Business" in
+     the Department field, so the site would have published a place with no
+     school and a department that is one. Moved across, from the curated table
+     only. */
+  eq(S.canonPlace({ institution: 'Tulane University', school: '', unit: 'Freeman School of Business' }),
+    { institution: 'Tulane University', school: 'A. B. Freeman School of Business', unit: '' },
+    'a school left in the department box moves into the school field');
+  eq(S.canonColumns({ institution: 'Tulane University', school: '', unit: 'Freeman School of Business' }),
+    { institution: 'Tulane University', school: 'A. B. Freeman School of Business', unit: '' },
+    'and the same from a form with three boxes');
+
+  // …but a real department is never promoted, however school-ish it reads
+  eq(S.canonPlace({ institution: 'Tulane University', school: '', unit: 'Management Science' }).unit,
+    'Management Science', 'a department the school table does not know stays a department');
+  eq(S.canonPlace({ institution: 'Duke University', school: '', unit: 'School of Wizardry' }).school,
+    '', 'and neither is a school nobody has heard of — the table is the whole authority');
+
+  // a row that named BOTH keeps both — only an empty school field is filled
+  {
+    const both = S.canonPlace({ institution: 'Tulane University',
+      school: 'Freeman School of Business', unit: 'Management Science' });
+    eq(both, { institution: 'Tulane University', school: 'A. B. Freeman School of Business',
+      unit: 'Management Science' }, 'a row that names both keeps both');
+  }
+
+  {
+    const moved = S.canonPlace({ institution: 'Tulane University', school: '', unit: 'Freeman School of Business' });
+    eq(S.canonPlace(moved), moved, 'and the move is safe to run twice');
+  }
+
   // it is safe to run twice — every writer applies it on every rebuild
   for (const row of [{ institution: 'Tulane University', school: 'Freeman School of Business', unit: 'Management Sciences Area' },
     { institution: 'University of Pennsylvania (The Wharton School), Operations and Information Management (OPIM) Department' }]) {
@@ -1131,7 +1162,13 @@ async function testSchools() {
   const jobs = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8'));
   const tulane = [...jobs, ...archive].filter((r) => /tulane/i.test(r.institution));
   ok(tulane.length >= 5, `the archive still holds every Tulane posting (${tulane.length})`);
-  eq([...new Set(tulane.map((r) => r.school))], ['A. B. Freeman School of Business'],
+  /* Every Tulane posting that NAMES a school names it this way. A row that
+     names none is not a second spelling — it is a posting with a field left
+     empty, which is allowed — and failing on one would stop the publish for
+     every other posting on the site. (What used to arrive instead was the
+     school typed into the department box; assemble() now moves it across, so
+     the rows this guard was written for keep naming one school.) */
+  eq([...new Set(tulane.map((r) => r.school))].filter(Boolean), ['A. B. Freeman School of Business'],
     'and they all name one school');
   eq([...new Set(tulane.map((r) => r.unit))].filter(Boolean), ['Management Science'],
     'and one department');
@@ -1900,9 +1937,17 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
   for (const id of ['2026-university-of-houston-20250923', '2026-university-of-houston-20250923-2']) {
     ok(jobs.some((r) => r.id === id), `data/jobs.json still carries ${id}`);
   }
-  eq([...new Set(jobs.filter((r) => /houston/.test(r.id)).map((r) => r.department))],
+  /* Scoped to the two postings this is ABOUT, and deliberately not to every
+     Houston row for ever. The repair was that these two name their college and
+     department the one way; a NEW Houston posting that names its college and
+     no department is a legitimate posting, not a regression of it — and read
+     over the whole file this guard failed the build on exactly such a row,
+     which stops the commit and therefore stops publishing EVERYTHING. That the
+     names themselves are canonical is already asserted over every row in the
+     file, above; this says what this pair says. */
+  eq([...new Set(jobs.filter((r) => /houston-20250923/.test(r.id)).map((r) => r.department))],
     ['C. T. Bauer College of Business, Department of Decision and Information Sciences'],
-    'and every Houston posting names its college and department the one way');
+    'and both of that day\'s Houston postings name their college and department the one way');
 
   /* the tracking sheet's own file, which build-jobs republishes verbatim */
   const sheet = await read('jobmarket.json');

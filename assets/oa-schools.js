@@ -897,6 +897,26 @@
       else unit = canonUnit(moved + ', ' + unit, institution);
     }
 
+    /* THE SCHOOL TYPED INTO THE DEPARTMENT BOX. The mirror of the fused
+       school field above, and just as common from a three-box form: nothing
+       in the School field and "Freeman School of Business" in the Department
+       one. Left alone, the posting publishes with no school and a department
+       that is a school, which is a second spelling of a place the site
+       already lists — and the selftest's "every Tulane posting names one
+       school, and one department" guard then goes red on live data and stops
+       the whole publish, which is how one mistyped posting held up every
+       other one.
+
+       CURATED, NEVER GUESSED, exactly like the UNIT_HOME fill below: the
+       value must be a name the school table itself knows (SCHOOL_LIST or an
+       alias), so a real department is never promoted for merely carrying a
+       school-ish word. A row that named BOTH is untouched — the department
+       field is only emptied because what it held was not one. */
+    if (!school && unit && BY_SCHOOL[fold(spell(unit))]) {
+      school = canonSchool(unit, institution);
+      unit = '';
+    }
+
     /* the school the row never named — curated, never guessed, and never over
        a school the row DID name */
     if (!school && unit) {

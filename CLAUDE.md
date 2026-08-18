@@ -415,6 +415,40 @@ styled by the same rule as a real label, rather than from a pixel value that
 would silently drift when the type changes. `page-test.mjs` measures the
 baseline per row and fails if any control leaves it.
 
+## A guard that fires on a legitimate posting stops the whole site publishing
+
+`oa-jobs-build.yml` rebuilds `data/`, runs `selftest.mjs` over what it is about
+to commit, and commits nothing if that is red. That is right — a broken dataset
+must not ship — and it has one failure mode worth knowing, because it happened:
+a posting sat in Firestore marked **Live**, the maintainer's page said so, and
+it was never on the site, because every build for hours had gone red and
+therefore committed nothing. Nothing was broken in the pipeline; nothing was
+published either, and the two look identical from outside.
+
+Both red guards were pinning a PAST repair over the WHOLE of a live file:
+
+* "every Houston posting names its college and department the one way" — a new
+  Houston posting that named its college and no department failed it. Naming
+  no department is allowed;
+* "every Tulane posting names one school" — a posting arrived with an empty
+  School field and `Freeman School of Business` in the Department one.
+
+So: **a guard about specific rows names those rows** (the Houston pair is keyed
+on its own date now), and **a guard over a whole file asserts a RULE that any
+legitimate row satisfies** — that the names are canonical, which `canonPlace`
+already pins over every row. An empty field is not a second spelling.
+
+The Tulane shape was a real ingest gap and is fixed as one: `assemble()` in
+`oa-schools.js` moves a **school typed into the department box** across into
+the school field, the mirror of the fused-school-field split it already did,
+and **curated, never guessed** — the value must be a name `SCHOOL_LIST` or its
+aliases already know, so a real department is never promoted for carrying a
+school-ish word, and a row that named both is untouched.
+
+The build now also prints a `::error::` saying publishing has stopped when the
+re-check is what failed, so the log names the consequence rather than just the
+assertion.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
