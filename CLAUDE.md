@@ -392,9 +392,16 @@ Pennsylvania State University.
 
 `data/past-postings.json` has no daily build to heal it, so it gets a mode of its
 own: **`node _scraper/import-legacy-tables.mjs --heal-names`** (offline, no sheets)
-— run it after adding an alias. The importer applies `healPlace` on write too,
-which it did not before: it never canonicalised at all, so a re-import would
-silently have undone the archive's spellings.
+— run it after adding an alias; it covers all three files the importer writes.
+
+**A heal mode is not enough on its own, because `data/` is rewritten from the
+sheets.** The importer must canonicalise ON WRITE as well, and originally it
+canonicalised nothing at all. Healing only `past-postings.json` there was
+caught by CI within the hour: the import job ran `--fetch`, wrote 254 raw
+`universities.json` rows, and the selftest's "the map names every place the way
+the site does" guard went red on 213 of them. All three write paths are now
+healed and pinned by name in `selftest.mjs` — a heal that the next dispatch
+undoes is not a fix.
 
 The picker (`assets/oa-combo.js`, dual-mode so its ordering is unit-tested) opens
 **alphabetically** — accents folded onto their base letter, so École sits between

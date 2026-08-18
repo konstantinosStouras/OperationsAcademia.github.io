@@ -1792,6 +1792,24 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
      stored against them (rowOverrides), so a moved id orphans every one */
   ok(map.every((r) => typeof r.id === 'string' && r.id), 'and every row still has its id');
 
+  /* THE IMPORTER HEALS ON WRITE, not only in --heal-names. data/ is rewritten
+     from the Google Sheets whenever the legacy import is dispatched, so a mode
+     that fixes the committed file is not enough on its own: the next --fetch
+     puts the sheet's own spellings back. CI caught exactly that — the import
+     job fetched, wrote 254 raw rows, and the guard above went red on 213 of
+     them — so every write path is pinned here, by name. */
+  const importer = await readFile(path.join(HERE, 'import-legacy-tables.mjs'), 'utf8');
+  for (const [call, what] of [
+    [/await write\('universities\.json', uni,/, 'the map'],
+    [/await write\('recent-faculty\.json', placements,/, 'the faculty list'],
+    [/await write\('past-postings\.json', rows\.map\(healPlace\),/, 'the postings archive'],
+  ]) {
+    ok(call.test(importer), `import-legacy-tables.mjs canonicalises ${what} as it writes it`);
+  }
+  ok(/const uni = rows\.map\(healUniversity\)/.test(importer)
+     && /const placements = rows\.map\(healFaculty\)/.test(importer),
+  'and the healed rows are what its meta is built from, not the raw ones');
+
   const faculty = await read('recent-faculty.json');
   const badFac = [];
   for (const r of faculty) {

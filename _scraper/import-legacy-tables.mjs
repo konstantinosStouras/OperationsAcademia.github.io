@@ -476,14 +476,23 @@ of the DISPLAY tabs instead.`);
     const { rows, dropped } = mapUniversities(uniTab);
     if (!rows.length) { console.error('::error::no university row could be read'); process.exit(1); }
     for (const d of dropped) console.log(`::warning::universities: no usable coordinates — dropped "${d}"`);
-    await write('universities.json', rows, uniMeta(rows));
+    /* HEALED ON WRITE, like the postings below. Without this a real --fetch
+       re-imports the sheet's own spellings and silently undoes the naming —
+       which is exactly what CI caught: the import job fetched, wrote 254 raw
+       rows, and the selftest's "the map names every place the way the site
+       does" guard went red on 213 of them. The importer never canonicalised
+       at all, and a mode that only heals the committed file is not enough
+       when the file is rewritten from the sheet. */
+    const uni = rows.map(healUniversity);
+    await write('universities.json', uni, uniMeta(uni));
   }
 
   if (rfTab) {
     const { rows, deduped } = mapRecentFaculty(rfTab);
     if (!rows.length) { console.error('::error::no recent-faculty row could be read'); process.exit(1); }
     if (deduped) console.log(`recent faculty: collapsed ${deduped} repeat submission(s)`);
-    await write('recent-faculty.json', rows, rfMeta(rows));
+    const placements = rows.map(healFaculty);
+    await write('recent-faculty.json', placements, rfMeta(placements));
   }
 
   if (pastTabs.length || jobsPair.display) {
