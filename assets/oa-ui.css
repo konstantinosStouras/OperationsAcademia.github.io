@@ -1351,6 +1351,45 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: #77808a;
 }
 
+/* said aloud, not drawn: the count and whose list it is, for anyone who
+   cannot see the panel (assets/oa-combo.js announces into it) */
+.oa-combo-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* On a phone the panel obeys the list rules (_MOBILE-STANDARDS.md): it stays
+   on screen (rule 6: 50vh, never wider than the viewport), its rows are thumb
+   -sized (rule 3: 42px) and a long name wraps rather than widening the page
+   (rule 5). 300px of 33px rows is a mouse's list. */
+@media screen and (max-width: 640px) {
+  .oa-combo-list {
+    max-height: 50vh;
+    max-width: calc(100vw - 28px);
+  }
+
+  .oa-combo-opt {
+    min-height: 42px;
+    align-items: center;
+    padding: 9px 12px;
+    font-size: 16px;
+  }
+
+  .oa-combo-name { overflow-wrap: anywhere; }
+
+  .oa-combo-group,
+  .oa-combo-more,
+  .oa-combo-empty { font-size: 13px; }
+}
+
 /* the read-back of what the two name fields will be published as */
 .oa-derived { margin: -8px 0 18px; color: var(--mut); }
 .oa-derived:empty { display: none; }

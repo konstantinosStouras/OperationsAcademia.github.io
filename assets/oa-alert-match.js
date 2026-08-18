@@ -16,11 +16,11 @@
    --------------------------------------------------------------------------- */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./oa-countries.js'));
+    module.exports = factory(require('./oa-countries.js'), require('./oa-schools.js'));
   } else {
-    root.OAAlertMatch = factory(root.OACountries);
+    root.OAAlertMatch = factory(root.OACountries, root.OASchools);
   }
-}(typeof self !== 'undefined' ? self : this, function (OACountries) {
+}(typeof self !== 'undefined' ? self : this, function (OACountries, OASchools) {
   'use strict';
 
   var TOPICS = ['jobs', 'updates', 'candidates', 'news'];
@@ -44,6 +44,51 @@
     return (OACountries && OACountries.canon)
       ? OACountries.canon(v)
       : String(v == null ? '' : v);
+  }
+
+  /* An ALL-CAPS needle is an acronym, and the site no longer prints acronyms:
+     "Department of Industrial Engineering & Operations Research (IEOR)" is
+     published as "Industrial Engineering and Operations Research", so a reader
+     — or an alert — asking for IEOR found nothing at all. The initials of the
+     words that remain are exactly what was dropped, so they are matched too.
+     Skips the joining words an acronym skips ("and", "of", "the", "for",
+     "in"), and only ever finds MORE. */
+  var ACRONYM = /^[A-Z]{2,6}$/;
+  var JOINERS = ' and of the for in a an at on to ';
+
+  function initials(s) {
+    var words = String(s == null ? '' : s)
+      .replace(/&/g, ' and ')
+      .split(/[^A-Za-z0-9]+/);
+    var out = '', i;
+    for (i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (!w || JOINERS.indexOf(' ' + w.toLowerCase() + ' ') !== -1) continue;
+      out += w.charAt(0).toLowerCase();
+    }
+    return out;
+  }
+
+  /**
+   * What a free-text alert could reasonably mean: the words as typed, plus the
+   * university, school and department names the site publishes for them.
+   * Folded, deduplicated, empties dropped. Falls back to the words alone when
+   * oa-schools.js is not on the page, so a page that has not added the script
+   * tag behaves exactly as it did.
+   */
+  function canonNeedles(text) {
+    var out = [], i;
+    var tries = [text];
+    if (OASchools) {
+      tries.push(OASchools.canonInstitution(text));
+      tries.push(OASchools.canonSchool(text));
+      tries.push(OASchools.canonUnit(text));
+    }
+    for (i = 0; i < tries.length; i++) {
+      var f = fold(tries[i]);
+      if (f && out.indexOf(f) === -1) out.push(f);
+    }
+    return out;
   }
 
   /* Case-, diacritic- AND punctuation-insensitive, so "Munster" finds
@@ -129,9 +174,29 @@
       // matched with .some() (oa-list.js), so a needle spanning the two —
       // "virginia darden" — finds four postings here and none on the site. One
       // rule, or the e-mail promises postings the site says do not exist.
-      var needle = fold(n.text);
-      if (fold(row.institution).indexOf(needle) === -1 &&
-          fold(row.department).indexOf(needle) === -1) return false;
+      /* The alert's own words, AND the names the site publishes for them.
+
+         A subscriber asked to hear about "SCM", "IEOR" or "Penn State" — and
+         the site publishes those as "Supply Chain Management", "Industrial
+         Engineering and Operations Research" and "The Pennsylvania State
+         University" (assets/oa-schools.js). Five postings matched that first
+         alert before the names were tidied and none after: the subscriber
+         simply stops being e-mailed, with nothing to see anywhere. This is
+         what canonCountry does above, for the half of an alert that is free
+         text rather than a chosen value — and it only ever finds MORE,
+         because the words they typed are still tried first. */
+      var needles = canonNeedles(n.text);
+      var hit = false;
+      for (var t = 0; t < needles.length && !hit; t++) {
+        hit = fold(row.institution).indexOf(needles[t]) !== -1 ||
+              fold(row.department).indexOf(needles[t]) !== -1;
+      }
+      if (!hit && ACRONYM.test(String(n.text).trim())) {
+        var acr = String(n.text).trim().toLowerCase();
+        hit = initials(row.institution).indexOf(acr) !== -1 ||
+              initials(row.department).indexOf(acr) !== -1;
+      }
+      if (!hit) return false;
     }
     if (n.type.length && n.type.indexOf(row.type) === -1) return false;
     if (n.country.length && n.country.indexOf(canonCountry(row.country)) === -1) return false;

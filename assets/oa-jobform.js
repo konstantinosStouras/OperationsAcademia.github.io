@@ -868,7 +868,9 @@
        the pickers still work; a variant simply looks like a second name. */
     var S = window.OASchools;
     var val = function (el) { return String(el.value || '').trim(); };
-    var keyInst = S ? function (v) { return S.fold(S.canonInstitution(v)); } : null;
+    /* institutionKey, not the canon: one entry per university however the
+       directory spells it, which is how the vocabulary groups them too. */
+    var keyInst = S ? function (v) { return S.institutionKey(v); } : null;
     var keySchool = S ? function (v) { return S.fold(S.canonSchool(v, val(inst))); } : null;
     var keyUnit = S ? function (v) { return S.fold(S.canonUnit(v)); } : null;
 
@@ -897,7 +899,7 @@
         function index(names, key) {
           var list = Object.prototype.toString.call(names) === '[object Array]'
             ? names : Object.keys(names || {});
-          var out = {};
+          var out = Object.create(null);   // never answer for Object.prototype
           for (var i = 0; i < list.length; i++) {
             var k = key(list[i]);
             if (k && !(k in out)) out[k] = list[i];
@@ -974,8 +976,14 @@
            takes it apart — right at ingest, wrong under a poster who has
            simply not reached the next field yet. */
         function snapPlace() {
-          var name = S.canonInstitution(inst.value);
-          if (name && name !== val(inst)) inst.value = name;
+          /* The published spelling first, the canon second. canonInstitution()
+             leaves a university it has no alias for exactly as typed, so
+             "tulane university" would have been posted in lower case and
+             offered ever after as a second Tulane — the very duplication this
+             is here to end. The vocabulary knows how the site spells it. */
+          var typed = val(inst);
+          var name = uniIndex[keyInst(typed)] || S.canonInstitution(typed);
+          if (name && name !== typed) inst.value = name;
           if (!val(school) && !val(unit)) return;
 
           var place = S.canonPlace({

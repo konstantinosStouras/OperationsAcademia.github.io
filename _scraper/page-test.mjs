@@ -1433,8 +1433,13 @@ for (const [name, expect] of [
     const el = list.querySelector('.oa-combo-opt.is-active');
     if (!el) return 'no active row';
     const r = el.getBoundingClientRect();
-    const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-    return el.contains(at) ? true : (at ? at.className : 'nothing');
+    /* geometry, not hit-testing: the list can sit below the fold, where
+       elementFromPoint answers null for reasons that have nothing to do with
+       the heading. The heading is sticky, so its rect is where it is PAINTED. */
+    const head = [...list.querySelectorAll('.oa-combo-group')]
+      .map((h) => h.getBoundingClientRect())
+      .find((h) => h.bottom > r.top && h.top < r.bottom);
+    return head ? `covered by a heading (row ${r.top}-${r.bottom}, heading ${head.top}-${head.bottom})` : true;
   });
   eq(visible, true, 'form: the highlighted row is not hidden behind the sticky group heading');
   await f.keyboard.press('Escape');
@@ -1454,6 +1459,39 @@ for (const [name, expect] of [
     'form: the published line joins school and unit');
   ok((await f.textContent('#f-department-preview')).includes(unit),
     'form: the poster is shown what will appear under the institution name');
+
+  /* ---------------------------------------------- the picker on a phone
+
+     _MOBILE-STANDARDS.md rules 3, 5 and 6, over the one list on this site the
+     shared engine does not draw. It shipped as a 300px panel of 33px rows —
+     a mouse's list — because the form is not a list page and nothing measured
+     it.                                                                      */
+
+  await f.setViewportSize({ width: 390, height: 780 });
+  await f.evaluate(() => document.getElementById('f-institution').scrollIntoView({ block: 'center' }));
+  await f.click('#f-institution');
+  await f.waitForTimeout(300);
+  const phone = await f.evaluate(() => {
+    const list = document.querySelector('.oa-combo-list:not([hidden])');
+    const r = list.getBoundingClientRect();
+    const row = list.querySelector('.oa-combo-opt').getBoundingClientRect();
+    return {
+      rightEdge: Math.round(r.right),
+      width: Math.round(r.width),
+      height: Math.round(r.height),
+      row: Math.round(row.height),
+      halfViewport: Math.round(window.innerHeight / 2),
+      viewport: window.innerWidth,
+      sideways: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  });
+  ok(phone.row >= 40, `form: an option is a thumb-sized target (${phone.row}px)`);
+  ok(phone.height <= phone.halfViewport + 1,
+    `form: the panel stays within half the screen (${phone.height}px of ${phone.halfViewport}px)`);
+  ok(phone.rightEdge <= phone.viewport && phone.width <= phone.viewport - 28,
+    `form: and inside it (${phone.width}px wide, right edge ${phone.rightEdge} of ${phone.viewport})`);
+  eq(phone.sideways, 0, 'form: the open picker does not make the page scroll sideways');
+  await f.setViewportSize({ width: 1280, height: 1000 });
 
   eq(formErrors, [], 'form: no uncaught script errors');
   await f.close();

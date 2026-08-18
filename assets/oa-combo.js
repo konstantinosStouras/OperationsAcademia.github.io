@@ -93,8 +93,19 @@
     list.className = 'oa-combo-list';
     list.id = id + '-list';
     list.setAttribute('role', 'listbox');
+    /* a listbox needs a name of its own: the field's label is the only thing
+       that says WHICH list this is once focus is inside it */
+    var labelled = input.id && document.querySelector('label[for="' + input.id + '"]');
+    list.setAttribute('aria-label',
+      (labelled ? labelled.textContent.replace(/\s*\*\s*$/, '').trim() : 'Suggestions') + ' suggestions');
     list.hidden = true;
     wrap.appendChild(list);
+
+    var status = document.createElement('p');
+    status.className = 'oa-combo-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    wrap.appendChild(status);
 
     input.setAttribute('role', 'combobox');
     input.setAttribute('aria-expanded', 'false');
@@ -125,7 +136,7 @@
 
       /* how many postings are behind a name, by IDENTITY — so a scope offering
          a university's own spelling still shows the site-wide count */
-      state.counts = {};
+      state.counts = Object.create(null);
       for (var i = 0; i < state.options.length; i++) {
         var k = nameKey(state.options[i].v);
         if (k && !(k in state.counts)) state.counts[k] = state.options[i].n;
@@ -195,9 +206,17 @@
     function note(cls, text) {
       var p = document.createElement('p');
       p.className = cls;
+      p.setAttribute('role', 'presentation');   // a listbox holds options
       p.textContent = text;
       group = null;
       list.appendChild(p);
+    }
+
+    /* What the list is offering, for anyone who cannot see it. The rows
+       themselves are reached with the arrow keys; this says how many there
+       are and whose they are, which is the part a scope adds. */
+    function announce(text) {
+      if (status.textContent !== text) status.textContent = text;
     }
 
     function optionRow(o, inScope) {
@@ -212,7 +231,11 @@
       name.textContent = o.v;
       row.appendChild(name);
 
-      if (o.n > 1) {
+      /* No count on a row inside a scope: it is the count across the SITE,
+         and under "Schools at Tulane University" it reads as Tulane's.
+         "College of Business · 6 postings" where this university has one is a
+         number the site cannot stand behind. */
+      if (!inScope && o.n > 1) {
         var n = document.createElement('span');
         n.className = 'oa-combo-n';
         n.textContent = o.n + ' postings';
@@ -238,7 +261,7 @@
           }), needle)
         : [];
 
-      var seen = {};
+      var seen = Object.create(null);
       for (var i = 0; i < inScope.length; i++) seen[nameKey(inScope[i].v)] = true;
       var rest = rank(state.options, needle).filter(function (o) {
         return !seen[nameKey(o.v)];
@@ -303,6 +326,13 @@
       if (!state.rows.length) {
         note('oa-combo-empty', 'Nothing matches. Type the full name to add it.');
       }
+
+      var offered = state.rows.length - (typed && !exact ? 1 : 0);
+      announce(offered
+        ? (inScope.length && scope.label
+            ? inScope.length + ' in ' + scope.label + ', ' + offered + ' offered in all'
+            : offered + ' offered')
+        : 'Nothing matches — what you type will be added.');
 
       if (state.active >= state.rows.length) state.active = state.rows.length - 1;
       paintActive();
@@ -379,13 +409,24 @@
         if (state.open && state.active >= 0 && state.rows[state.active]) {
           e.preventDefault();                       // do not submit the form
           take(state.rows[state.active].__value);
-        } else {
+        } else if (state.open) {
+          /* An open list means Enter is about the list, not the form. The
+             poster who has typed a new name and presses Enter to confirm it
+             must not find the whole posting sent instead. */
+          e.preventDefault();
           close();
         }
       } else if (e.key === 'Escape') {
         if (state.open) { e.stopPropagation(); close(); }
       } else if (e.key === 'Tab') {
-        close();
+        /* A highlighted row is one the field SAYS is selected
+           (aria-selected), so Tab takes it rather than leaving the fragment
+           that was typed to be published — "free" is not a school. */
+        if (state.open && state.active >= 0 && state.rows[state.active]) {
+          take(state.rows[state.active].__value);
+        } else {
+          close();
+        }
       }
     });
 
@@ -400,6 +441,11 @@
     document.addEventListener('mousedown', function (e) {
       if (!wrap.contains(e.target)) close();
     });
+
+    /* Clicking a row cannot blur the input (the list's mousedown prevents the
+       default), so this only fires when focus really leaves the field — a
+       failed submit calling firstBad.focus(), say. */
+    input.addEventListener('blur', function () { close(); });
 
     input.__oaCombo = { setOptions: function (o) { setOptions(o); if (state.open) render(); },
                         setScope: setScope,

@@ -59,7 +59,11 @@
     'Penn State University': 'The Pennsylvania State University',
     'UCLA': 'University of California, Los Angeles',
     'Institut Mines-Telecom Business School': 'Institut Mines-Télécom',
-    'Institut Mines-Télécom Business School': 'Institut Mines-Télécom'
+    'Institut Mines-Télécom Business School': 'Institut Mines-Télécom',
+    /* the Universities directory's own second name for it; dropAcronym will
+       not touch a mixed-case "(CityU)", because that is the shape of the
+       "(Shenzhen)" that marks a genuinely different campus */
+    'City University of Hong Kong (CityU)': 'City University of Hong Kong'
   };
 
   /* ---------------------------------------------------------------- schools
@@ -213,7 +217,7 @@
 
   /* fold(name) -> the name we publish, for every canonical name and alias. */
   function tableOf(list, aliases) {
-    var by = {}, i;
+    var by = Object.create(null), i;
     for (i = 0; i < list.length; i++) by[fold(list[i])] = list[i];
     for (var a in aliases) {
       if (Object.prototype.hasOwnProperty.call(aliases, a)) by[fold(a)] = aliases[a];
@@ -225,7 +229,7 @@
   }
 
   var BY_INSTITUTION = tableOf([], INSTITUTION_ALIASES);
-  var BY_SCOPED_SCHOOL = {};
+  var BY_SCOPED_SCHOOL = Object.create(null);
   for (var uni in SCOPED_SCHOOL_ALIASES) {
     if (!Object.prototype.hasOwnProperty.call(SCOPED_SCHOOL_ALIASES, uni)) continue;
     BY_SCOPED_SCHOOL[fold(uni)] = tableOf([], SCOPED_SCHOOL_ALIASES[uni]);
@@ -240,6 +244,30 @@
     var s = spell(v);
     if (!s) return '';
     return BY_INSTITUTION[fold(s)] || s;
+  }
+
+  /**
+   * The same university, however it is written — an identity for GROUPING,
+   * never a name to publish.
+   *
+   * The Universities directory lists one university under several names:
+   * "City University of Hong Kong (CityU)" beside "City University of Hong
+   * Kong", "The University of Hong Kong (HKU)" beside "University of Hong Kong
+   * (HKU)". The posting form offered each as its own university, with its own
+   * schools, so half of a university's schools were invisible from the other
+   * half of it.
+   *
+   * A trailing acronym and a leading "The" are exactly what one writer adds
+   * and the next leaves out — the same two rules canonUnit and canonSchool
+   * already apply — but they must not decide what the site PUBLISHES: a
+   * posting's id and its permalink are built from its institution, and
+   * "Baruch College, The City University of New York (CUNY)" is deliberately
+   * published whole. So this is a separate function, used where names are
+   * grouped (data/vocab.json, and the posting form reading it back).
+   */
+  function institutionKey(v) {
+    var s = dropAcronym(canonInstitution(v));
+    return fold(s).replace(/^the /, '');
   }
 
   /** The one name this school is published under. The university is optional
@@ -306,7 +334,7 @@
      Faculty of Management" must both survive untouched.                      */
   var SEPARATORS = [' - ', ' – ', ' — ', ' / ', '/', ': ', ', ', '-'];
 
-  var BY_FUSED = {};
+  var BY_FUSED = Object.create(null);
   for (var fk in FUSED_SCHOOLS) {
     if (Object.prototype.hasOwnProperty.call(FUSED_SCHOOLS, fk)) BY_FUSED[fold(fk)] = FUSED_SCHOOLS[fk];
   }
@@ -488,6 +516,7 @@
     UNIT_ALIASES: UNIT_ALIASES,
     fold: fold,
     canonInstitution: canonInstitution,
+    institutionKey: institutionKey,
     canonSchool: canonSchool,
     canonUnit: canonUnit,
     canonPlace: canonPlace,

@@ -58,7 +58,8 @@ import { createRequire } from 'node:module';
    been through an ingest. */
 const require = createRequire(import.meta.url);
 export const SCHOOLS = require('../assets/oa-schools.js');
-const { canonPlace, fold: nameFold } = SCHOOLS;
+const { canonPlace, canonInstitution, canonSchool, canonUnit,
+        institutionKey, fold: nameFold } = SCHOOLS;
 
 /* --------------------------------------------------- school vs. unit
 
@@ -207,18 +208,26 @@ function keyOf(v) {
   return nameFold(s) || s.toLowerCase();
 }
 
+/** The same, for a UNIVERSITY: one entry however the name is written, so a
+    university listed twice in the directory does not offer half its schools
+    from one entry and half from the other. It groups; it never publishes. */
+function uniKeyOf(v) {
+  const s = tidy(v);
+  return institutionKey(s) || keyOf(s);
+}
+
 /**
  * Group spellings of one name, count the POSTINGS behind each (directory rows
  * carry no count) and keep one spelling per place. Returns a Map keyed by
  * keyOf so a caller can look a raw value up; `n` is a posting count, which is
  * what the form's "4 postings" note means.
  */
-function tally(items) {
+function tally(items, key = keyOf) {
   const by = new Map();
   for (const it of items) {
     const v = tidy(it.v);
     if (!v) continue;
-    const k = keyOf(v);
+    const k = key(v);
     if (!k) continue;
     const e = by.get(k) || { n: 0, forms: new Map() };
     e.n += it.w;
@@ -258,20 +267,35 @@ function formOf(t, v) {
  * doing it to a posting again costs nothing.
  */
 function partOf(r, w) {
+  /* A DIRECTORY row already has its three names in three columns (its
+     department sits in `department`, there being no `unit`), so each is
+     canonicalised ON ITS OWN.
+
+     canonPlace() must NOT be used on one: its job is to take apart a value
+     that names more than one thing, and a column that is already separate
+     only loses by it — "School of Business-Camden" is Rutgers' campus, not a
+     department, and "College of Engineering, Computing and Applied Sciences"
+     is one college's name, but read as fused values they became a department
+     called "Camden, Operations Management" and one called "Computing and
+     Applied Sciences, Industrial Engineering". Both were offered by the form
+     before this. A directory row often repeats the school in its department
+     column too ("McDonough School of Business, Operations and Information
+     Management Area"), which would publish the school twice on the card. */
+  if (r.unit === undefined && r.department !== undefined && r.school !== undefined) {
+    const institution = canonInstitution(r.institution);
+    const school = canonSchool(tidy(r.school), institution);
+    let unit = tidy(r.department);
+    const lead = unit.split(',')[0];
+    if (school && nameFold(lead) === nameFold(school)) unit = tidy(unit.slice(lead.length + 1));
+    return { institution, school, unit: canonUnit(unit), w };
+  }
+
+  /* A POSTING has been through canonPlace() at ingest already; running it
+     again is idempotent and costs nothing, and it is what puts a row from
+     anywhere else — a test fixture, an older file — on the same terms. */
   const split = (r.school !== undefined || r.unit !== undefined)
     ? { school: tidy(r.school), unit: tidy(r.unit) }
     : splitDepartment(r.department);
-  /* The directory has no `unit`: its department sits in `department` — and
-     often repeats the school there ("McDonough School of Business, Operations
-     and Information Management Area"), which would offer a department that
-     names its own school and publish the school twice on the card. */
-  if (r.unit === undefined && r.department !== undefined && r.school !== undefined) {
-    split.unit = tidy(r.department);
-    const lead = split.unit.split(',')[0];
-    if (split.school && nameFold(lead) === nameFold(split.school)) {
-      split.unit = tidy(split.unit.slice(lead.length + 1));
-    }
-  }
   const place = canonPlace({ institution: r.institution, school: split.school, unit: split.unit });
   return { institution: place.institution, school: place.school, unit: place.unit, w };
 }
@@ -312,7 +336,7 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
     ...dir.map((r) => partOf(r, 0)),
   ];
 
-  const universities = tally(parts.map((p) => ({ v: p.institution, w: p.w })));
+  const universities = tally(parts.map((p) => ({ v: p.institution, w: p.w })), uniKeyOf);
   const schools = tally(parts.map((p) => ({ v: p.school, w: p.w })));
   const units = tally(parts.map((p) => ({ v: p.unit, w: p.w })));
 
@@ -329,7 +353,7 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
   const grouped = new Map();
   for (const p of parts) {
     if (!p.institution) continue;
-    const k = keyOf(p.institution);
+    const k = uniKeyOf(p.institution);
     if (!grouped.has(k)) grouped.set(k, []);
     grouped.get(k).push(p);
   }

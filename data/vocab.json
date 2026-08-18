@@ -78,6 +78,10 @@
    "n": 2
   },
   {
+   "v": "University of Texas at Dallas",
+   "n": 2
+  },
+  {
    "v": "University of Utah",
    "n": 2
   },
@@ -218,10 +222,6 @@
    "n": 1
   },
   {
-   "v": "The University of Texas at Dallas",
-   "n": 1
-  },
-  {
    "v": "Tilburg University",
    "n": 1
   },
@@ -271,10 +271,6 @@
   },
   {
    "v": "University of Notre Dame",
-   "n": 1
-  },
-  {
-   "v": "University of Texas at Dallas",
    "n": 1
   },
   {
@@ -339,10 +335,6 @@
   },
   {
    "v": "Cass Business School",
-   "n": 0
-  },
-  {
-   "v": "City University of Hong Kong (CityU)",
    "n": 0
   },
   {
@@ -466,10 +458,6 @@
    "n": 0
   },
   {
-   "v": "Indian School of Business (ISB)",
-   "n": 0
-  },
-  {
    "v": "Indiana University",
    "n": 0
   },
@@ -495,10 +483,6 @@
   },
   {
    "v": "Lingnan University",
-   "n": 0
-  },
-  {
-   "v": "London Business School (LBS)",
    "n": 0
   },
   {
@@ -535,10 +519,6 @@
   },
   {
    "v": "National Chiao Tung University",
-   "n": 0
-  },
-  {
-   "v": "National University of Singapore (NUS)",
    "n": 0
   },
   {
@@ -634,10 +614,6 @@
    "n": 0
   },
   {
-   "v": "Shanghai University of Finance and Economics (SUFE)",
-   "n": 0
-  },
-  {
    "v": "Simon Fraser University",
    "n": 0
   },
@@ -698,10 +674,6 @@
    "n": 0
   },
   {
-   "v": "The Chinese University of Hong Kong",
-   "n": 0
-  },
-  {
    "v": "The Chinese University of Hong Kong (CUHK Business School)",
    "n": 0
   },
@@ -710,19 +682,11 @@
    "n": 0
   },
   {
-   "v": "The Hong Kong University of Science and Technology",
-   "n": 0
-  },
-  {
    "v": "The Hong Kong University of Science and Technology (HKUST)",
    "n": 0
   },
   {
    "v": "The University of Alabama",
-   "n": 0
-  },
-  {
-   "v": "The University of Hong Kong (HKU)",
    "n": 0
   },
   {
@@ -759,10 +723,6 @@
   },
   {
    "v": "University at Buffalo - The State University of New York",
-   "n": 0
-  },
-  {
-   "v": "University College Dublin (UCD)",
    "n": 0
   },
   {
@@ -827,10 +787,6 @@
   },
   {
    "v": "University of Glasgow",
-   "n": 0
-  },
-  {
-   "v": "University of Hong Kong (HKU)",
    "n": 0
   },
   {
@@ -1240,6 +1196,10 @@
    "n": 0
   },
   {
+   "v": "College of Engineering, Computing and Applied Sciences",
+   "n": 0
+  },
+  {
    "v": "College of Management",
    "n": 0
   },
@@ -1573,6 +1533,14 @@
   },
   {
    "v": "School of Business Administration, A. Gary Anderson Graduate School of Management",
+   "n": 0
+  },
+  {
+   "v": "School of Business-Camden",
+   "n": 0
+  },
+  {
+   "v": "School of Business, Analytics",
    "n": 0
   },
   {
@@ -1950,19 +1918,11 @@
    "n": 0
   },
   {
-   "v": "Camden, Operations Management",
-   "n": 0
-  },
-  {
    "v": "Center for Operations Research and Econometrics",
    "n": 0
   },
   {
    "v": "Center for Transportation and Logistics",
-   "n": 0
-  },
-  {
-   "v": "Computing and Applied Sciences, Industrial Engineering",
    "n": 0
   },
   {
@@ -2074,10 +2034,6 @@
    "n": 0
   },
   {
-   "v": "Information and Operations Management",
-   "n": 0
-  },
-  {
    "v": "Information and Service Economy",
    "n": 0
   },
@@ -2111,6 +2067,10 @@
   },
   {
    "v": "Information Technology, Analytics, and Operations",
+   "n": 0
+  },
+  {
+   "v": "Information, and Operations Management",
    "n": 0
   },
   {
@@ -2581,23 +2541,12 @@
     "College of Business"
    ],
    "units": [
-    "Decision Analytics and Operations"
-   ],
-   "bySchool": {
-    "College of Business": [
-     "Decision Analytics and Operations"
-    ]
-   }
-  },
-  "City University of Hong Kong (CityU)": {
-   "schools": [
-    "College of Business"
-   ],
-   "units": [
+    "Decision Analytics and Operations",
     "Management Science"
    ],
    "bySchool": {
     "College of Business": [
+     "Decision Analytics and Operations",
      "Management Science"
     ]
    }
@@ -2626,18 +2575,18 @@
   "Clemson University": {
    "schools": [
     "College of Business",
-    "College of Engineering"
+    "College of Engineering, Computing and Applied Sciences"
    ],
    "units": [
-    "Computing and Applied Sciences, Industrial Engineering",
+    "Industrial Engineering",
     "Management"
    ],
    "bySchool": {
     "College of Business": [
      "Management"
     ],
-    "College of Engineering": [
-     "Computing and Applied Sciences, Industrial Engineering"
+    "College of Engineering, Computing and Applied Sciences": [
+     "Industrial Engineering"
     ]
    }
   },
@@ -3129,17 +3078,6 @@
     ]
    }
   },
-  "Indian School of Business (ISB)": {
-   "schools": [],
-   "units": [
-    "Operations Management"
-   ],
-   "bySchool": {
-    "": [
-     "Operations Management"
-    ]
-   }
-  },
   "Indiana University": {
    "schools": [
     "Kelley School of Business"
@@ -3292,17 +3230,6 @@
    }
   },
   "London Business School": {
-   "schools": [],
-   "units": [
-    "Management Science and Operations"
-   ],
-   "bySchool": {
-    "": [
-     "Management Science and Operations"
-    ]
-   }
-  },
-  "London Business School (LBS)": {
    "schools": [],
    "units": [
     "Management Science and Operations"
@@ -3478,23 +3405,6 @@
    }
   },
   "National University of Singapore": {
-   "schools": [
-    "NUS Business School"
-   ],
-   "units": [
-    "Analytics and Operations",
-    "Industrial Systems Engineering and Management"
-   ],
-   "bySchool": {
-    "": [
-     "Industrial Systems Engineering and Management"
-    ],
-    "NUS Business School": [
-     "Analytics and Operations"
-    ]
-   }
-  },
-  "National University of Singapore (NUS)": {
    "schools": [
     "NUS Business School"
    ],
@@ -3778,14 +3688,14 @@
   },
   "Rutgers University": {
    "schools": [
-    "School of Business"
+    "School of Business-Camden"
    ],
    "units": [
-    "Camden, Operations Management"
+    "Operations Management"
    ],
    "bySchool": {
-    "School of Business": [
-     "Camden, Operations Management"
+    "School of Business-Camden": [
+     "Operations Management"
     ]
    }
   },
@@ -3848,13 +3758,7 @@
   },
   "Shanghai University of Finance and Economics": {
    "schools": [
-    "College of Business"
-   ],
-   "units": [],
-   "bySchool": {}
-  },
-  "Shanghai University of Finance and Economics (SUFE)": {
-   "schools": [
+    "College of Business",
     "School of Information Management and Engineering (SIME)",
     "School of International Business Administration"
    ],
@@ -3932,14 +3836,14 @@
   },
   "Southern University of Science and Technology (SUSTech)": {
    "schools": [
-    "School of Business"
+    "School of Business, Analytics"
    ],
    "units": [
-    "Analytics, Information and Operations Management"
+    "Information, and Operations Management"
    ],
    "bySchool": {
-    "School of Business": [
-     "Analytics, Information and Operations Management"
+    "School of Business, Analytics": [
+     "Information, and Operations Management"
     ]
    }
   },
@@ -4078,19 +3982,6 @@
     ]
    }
   },
-  "The Chinese University of Hong Kong": {
-   "schools": [
-    "CUHK Business School"
-   ],
-   "units": [
-    "Decision Sciences and Managerial Economics"
-   ],
-   "bySchool": {
-    "CUHK Business School": [
-     "Decision Sciences and Managerial Economics"
-    ]
-   }
-  },
   "The Chinese University of Hong Kong (CUHK Business School)": {
    "schools": [],
    "units": [
@@ -4104,12 +3995,17 @@
   },
   "The Chinese University of Hong Kong (CUHK)": {
    "schools": [
+    "CUHK Business School",
     "Faculty of Engineering"
    ],
    "units": [
+    "Decision Sciences and Managerial Economics",
     "Systems Engineering and Engineering Management"
    ],
    "bySchool": {
+    "CUHK Business School": [
+     "Decision Sciences and Managerial Economics"
+    ],
     "Faculty of Engineering": [
      "Systems Engineering and Engineering Management"
     ]
@@ -4148,27 +4044,20 @@
     ]
    }
   },
-  "The Hong Kong University of Science and Technology": {
+  "The Hong Kong University of Science and Technology (HKUST)": {
    "schools": [
     "HKUST School of Business and Management"
    ],
    "units": [
+    "Industrial Engineering and Logistics Management",
     "Information Systems, Business Statistics and Operations Management"
-   ],
-   "bySchool": {
-    "HKUST School of Business and Management": [
-     "Information Systems, Business Statistics and Operations Management"
-    ]
-   }
-  },
-  "The Hong Kong University of Science and Technology (HKUST)": {
-   "schools": [],
-   "units": [
-    "Industrial Engineering and Logistics Management"
    ],
    "bySchool": {
     "": [
      "Industrial Engineering and Logistics Management"
+    ],
+    "HKUST School of Business and Management": [
+     "Information Systems, Business Statistics and Operations Management"
     ]
    }
   },
@@ -4220,27 +4109,20 @@
   },
   "The University of Hong Kong": {
    "schools": [
-    "Faculty of Business and Economics"
+    "Faculty of Business and Economics",
+    "School of Business"
    ],
    "units": [
+    "Information and Innovation Management",
     "Innovation and Information Management"
    ],
    "bySchool": {
     "Faculty of Business and Economics": [
+     "Information and Innovation Management",
      "Innovation and Information Management"
-    ]
-   }
-  },
-  "The University of Hong Kong (HKU)": {
-   "schools": [
-    "Faculty of Business and Economics"
-   ],
-   "units": [
-    "Information and Innovation Management"
-   ],
-   "bySchool": {
-    "Faculty of Business and Economics": [
-     "Information and Innovation Management"
+    ],
+    "School of Business": [
+     "Innovation and Information Management"
     ]
    }
   },
@@ -4283,19 +4165,6 @@
     ],
     "McCombs School of Business": [
      "Information, Risk, and Operations Management"
-    ]
-   }
-  },
-  "The University of Texas at Dallas": {
-   "schools": [
-    "Naveen Jindal School of Management"
-   ],
-   "units": [
-    "Healthcare Management"
-   ],
-   "bySchool": {
-    "Naveen Jindal School of Management": [
-     "Healthcare Management"
     ]
    }
   },
@@ -4410,28 +4279,20 @@
   },
   "University College Dublin": {
    "schools": [
+    "Michael Smurfit Graduate Business School",
+    "School of Mechanical and Materials Engineering",
     "UCD Michael Smurfit Graduate School of Business"
    ],
    "units": [
-    "Management"
-   ],
-   "bySchool": {
-    "UCD Michael Smurfit Graduate School of Business": [
-     "Management"
-    ]
-   }
-  },
-  "University College Dublin (UCD)": {
-   "schools": [
-    "Michael Smurfit Graduate Business School",
-    "School of Mechanical and Materials Engineering"
-   ],
-   "units": [
+    "Management",
     "Operations Management"
    ],
    "bySchool": {
     "Michael Smurfit Graduate Business School": [
      "Operations Management"
+    ],
+    "UCD Michael Smurfit Graduate School of Business": [
+     "Management"
     ]
    }
   },
@@ -4697,19 +4558,6 @@
    ],
    "units": [],
    "bySchool": {}
-  },
-  "University of Hong Kong (HKU)": {
-   "schools": [
-    "School of Business"
-   ],
-   "units": [
-    "Innovation and Information Management"
-   ],
-   "bySchool": {
-    "School of Business": [
-     "Innovation and Information Management"
-    ]
-   }
   },
   "University of Houston": {
    "schools": [
@@ -5183,10 +5031,12 @@
     "Naveen Jindal School of Management"
    ],
    "units": [
+    "Healthcare Management",
     "Supply Chain and Operations Management"
    ],
    "bySchool": {
     "Naveen Jindal School of Management": [
+     "Healthcare Management",
      "Supply Chain and Operations Management"
     ]
    }
@@ -5597,8 +5447,10 @@
    "Information, Operations and Technology Management"
   ],
   "College of Engineering": [
-   "Computing and Applied Sciences, Industrial Engineering",
    "Mechanical and Industrial Engineering"
+  ],
+  "College of Engineering, Computing and Applied Sciences": [
+   "Industrial Engineering"
   ],
   "College of Management": [
    "Industrial Engineering and Management"
@@ -5791,7 +5643,7 @@
    "Operations and Business Analytics"
   ],
   "Mays Business School": [
-   "Information and Operations Management"
+   "Information, and Operations Management"
   ],
   "McCombs School of Business": [
    "Information, Risk, and Operations Management"
@@ -5893,7 +5745,6 @@
   ],
   "School of Business": [
    "Analytics, Information and Operations Management",
-   "Camden, Operations Management",
    "Finance",
    "Information and Service Economy",
    "Information Systems and Operations Management",
@@ -5911,6 +5762,12 @@
   ],
   "School of Business and Leadership": [
    "Business Analytics"
+  ],
+  "School of Business-Camden": [
+   "Operations Management"
+  ],
+  "School of Business, Analytics": [
+   "Information, and Operations Management"
   ],
   "School of Economics and Business Administration": [
    "Operations and Quantitative Methods"

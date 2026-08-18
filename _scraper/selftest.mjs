@@ -1303,6 +1303,25 @@ function testVocab() {
   eq(loose.byUniversity['X University'].units, ['Decision Sciences', 'Operations Management'],
     'and the university still offers both');
 
+  /* A DIRECTORY row's three names are already in three columns, so they are
+     canonicalised one by one. Running canonPlace() over them takes apart
+     values that are whole: Rutgers' campus and Clemson's college became
+     departments called "Camden, Operations Management" and "Computing and
+     Applied Sciences, Industrial Engineering", and the form offered both. */
+  const columns = buildVocab([], { directory: [
+    { institution: 'Rutgers University', school: 'School of Business-Camden',
+      department: 'Operations Management' },
+    { institution: 'Clemson University',
+      school: 'College of Engineering, Computing and Applied Sciences',
+      department: 'Industrial Engineering' },
+  ] });
+  eq(columns.byUniversity['Rutgers University'].bySchool,
+    { 'School of Business-Camden': ['Operations Management'] },
+    'a campus in a school name is not a department');
+  eq(columns.byUniversity['Clemson University'].bySchool,
+    { 'College of Engineering, Computing and Applied Sciences': ['Industrial Engineering'] },
+    'nor is half a college name');
+
   /* ------------------------------- what must never take the build down
 
      buildVocab runs inside the daily build before anything is written, so a
@@ -1341,6 +1360,60 @@ function testVocab() {
   ] });
   eq(empty.universities, [{ v: 'Aalto University', n: 0 }],
     'the directory alone can put a university on the list, with no postings behind it');
+}
+
+/* ------------------------- naming rules the cascade leans on, and only it
+
+   assets/oa-schools.js is master's, and testSchools() above covers what it
+   publishes. These are the three things the CASCADE asked of it — each one a
+   bug the Universities directory found the first time anything canonicalised
+   its rows. */
+
+function testNamesForTheCascade() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+
+  /* 1. GROUPING is not PUBLISHING. institutionKey merges the directory's
+     several names for one university; canonInstitution must go on publishing
+     each posting's own name, because its id and permalink are built from it. */
+  const same = (a, b) => S.institutionKey(a) === S.institutionKey(b);
+  ok(same('The University of Texas at Dallas', 'University of Texas at Dallas'),
+    'a leading "The" does not make two universities');
+  ok(same('The University of Hong Kong (HKU)', 'University of Hong Kong (HKU)'),
+    'nor does it beside an acronym');
+  ok(same('The Chinese University of Hong Kong (CUHK)', 'The Chinese University of Hong Kong'),
+    'and a trailing acronym does not either');
+  ok(!same('The Chinese University of Hong Kong', 'The Chinese University of Hong Kong, Shenzhen'),
+    'while a campus that really is a different place stays one');
+  ok(!same('University of Houston', 'University of Hong Kong'),
+    'and two universities are two universities');
+
+  eq(S.canonInstitution('Baruch College, The City University of New York (CUNY)'),
+    'Baruch College, The City University of New York (CUNY)',
+    'the published name keeps everything it was published with');
+  eq(S.canonInstitution('Korea Advanced Institute of Science and Technology (KAIST)'),
+    'Korea Advanced Institute of Science and Technology (KAIST)', 'acronym and all');
+
+  /* 2. canonUnit has to be idempotent, or the vocabulary offers a name the
+     ingest would not publish. A department ending in its own acronym lost the
+     acronym but kept the wrapper word, because the wrapper is only stripped
+     while it is last. */
+  const twice = (v) => S.canonUnit(S.canonUnit(v));
+  for (const v of [
+    'Engineering Management, Information, and Systems Department (EMIS)',
+    'Department of Industrial Engineering and Operations Research (IEOR)',
+    'Operations Management Area',
+  ]) {
+    eq(twice(v), S.canonUnit(v), `canonUnit is idempotent: ${v}`);
+  }
+
+  /* 3. A lookup table must not answer for Object.prototype: "constructor"
+     came back as the source of Object, and went on to become a posting's id. */
+  for (const key of ['constructor', 'Constructor', 'toString', 'valueOf']) {
+    ok(typeof S.canonUnit(key) === 'string' && !/native code/.test(S.canonUnit(key)),
+      `canonUnit("${key}") is a name, not a prototype`);
+    ok(typeof S.canonInstitution(key) === 'string',
+      `canonInstitution("${key}") is a name, not a prototype`);
+  }
 }
 
 /* ------------------------------------------ the cascade is actually wired
@@ -1387,27 +1460,56 @@ async function testCascadeWiring() {
 
 async function testRenamedNamesStillFound() {
   const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
-  const row = {
-    institution: 'Clarkson University', department: 'Operations & Information Systems',
-    country: 'United States', type: 'University',
-    levels: ['Assistant Professor'], characteristics: [],
-  };
-  const on = (text) => M.matchesJob(row, { topics: ['jobs'], text });
-  ok(on('Operations and Information Systems'),
-    'an alert saved under the spelling the site used to publish still matches');
-  ok(on('Operations & Information Systems'), 'and so does one saved under the new');
-  ok(on('operations   &   information'), 'spacing and punctuation are forgiven');
-  ok(!on('Marketing'), 'while a department the subscriber did not ask for is still excluded');
-  ok(!on('Systems Operations'), 'and it is still a substring search, not a bag of words');
 
-  /* the jobs page and the e-mails must fold text the same way, or "what I see
-     on the site" and "what I am e-mailed" mean different things — the reason
-     oa-alert-match.js carries that comment over its own fold */
-  const RULE = "replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')";
+  /* Against the REAL served postings, not an invented row: an invented one is
+     how this guard first shipped asserting on a department no posting carries
+     and that oa-schools.js would never publish. */
+  const jobs = JSON.parse(await readFile(JOBS, 'utf8'));
+  const matches = (text) => jobs.filter((r) => M.matchesJob(r, { topics: ['jobs'], text })).length;
+
+  /* Each of these is a phrase the site published BEFORE the names were
+     canonicalised, taken from the old file, and each one matched nothing
+     afterwards. An alert holds free text, so nothing can rewrite what the
+     subscriber saved — the search has to be the forgiving side. */
+  const was = [
+    ['Operations and Information Systems', 'an "and" the site now writes as "&"'],
+    ['SCM', 'an abbreviation the site now spells out'],
+    ['Penn State', 'a university under the name it was posted as'],
+    ['IEOR', 'an acronym the site no longer prints, but the initials still spell'],
+    ['DADS', 'and another'],
+    ['TOM', 'and a three-letter one'],
+    ['Management Sciences Area', 'a department with the house word it was posted with'],
+  ];
+  for (const [text, why] of was) {
+    ok(matches(text) > 0, `an alert saved as "${text}" still matches — ${why}`);
+  }
+
+  ok(matches('Marketing') > 0, 'an ordinary word still matches');
+  ok(matches('Wibble') === 0, 'a word nobody has posted still matches nothing');
+  ok(matches('Systems Operations') === 0, 'and it is a substring search, not a bag of words');
+  ok(matches('ZZQX') === 0, 'an acronym that spells no initials matches nothing');
+
+  /* The jobs page and the e-mails must read a search the same way, or "what I
+     see on the site" and "what I am e-mailed" mean different things — the
+     reason oa-alert-match.js carries that comment over its own fold. Both
+     rules, pinned in both files. */
+  const RULES = [
+    ["replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/^ | $/g, '')", 'folds a search'],
+    ['var ACRONYM = /^[A-Z]{2,6}$/;', 'takes an all-caps needle for an acronym'],
+    ['function initials(s) {', 'and matches it against the initials'],
+  ];
   for (const f of ['oa-list.js', 'oa-alert-match.js']) {
     const src = await readFile(path.join(HERE, '..', 'assets', f), 'utf8');
-    ok(src.includes(RULE), `${f}: folds a search the same way as the other side`);
+    for (const [rule, what] of RULES) {
+      ok(src.includes(rule), `${f}: ${what} the same way as the other side`);
+    }
   }
+
+  /* and the page that runs the matcher has the names module it now asks */
+  const alerts = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  const at = alerts.indexOf('oa-schools.js');
+  ok(at !== -1 && at < alerts.indexOf('oa-alert-match.js'),
+    'alerts.html: loads the names module before the matcher');
 }
 
 /* ------------------------------------------- the served vocabulary file
@@ -2404,6 +2506,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testMerge();
   testMarketYear();
   testVocab();
+  testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();
   await testVocabFile();

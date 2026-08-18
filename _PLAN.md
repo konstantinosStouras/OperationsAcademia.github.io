@@ -504,10 +504,33 @@ Four decisions worth recording:
    search and the alert matcher now fold punctuation and read "&" as "and"
    (one rule, pinned in both files), which is strictly more forgiving and
    keeps "what I see on the site" and "what I am e-mailed" the same question.
-   It rescues the "&"-versus-"and" renames; a rename that genuinely changes
-   the words ("Management Sciences Area" → "Management Science") is beyond any
-   fold, and is accepted rather than papered over.
-4. **`canonUnit()` had to become idempotent.** A department ending in its own
+   A fold alone rescued only the "&"-versus-"and" renames, and thirteen
+   free-text alerts measured silent against the canonicalised postings — "SCM",
+   "IEOR", "DADS", "Penn State", "Management Sciences Area" — so the matcher
+   also tries the needle's own canonical form ("SCM" → "Supply Chain
+   Management") and reads an ALL-CAPS needle as an acronym to be matched
+   against the initials of the words in the field ("IEOR" finds "Industrial
+   Engineering and Operations Research", whose acronym the canon dropped).
+   Twelve of the thirteen are rescued. The thirteenth is "IT Management", now
+   published as "Information Technology Management": no fold, canon or acronym
+   reaches it, and it is recorded here rather than papered over.
+4. **Grouping a university is not naming it.** The directory lists one
+   university under several names ("City University of Hong Kong (CityU)"
+   beside "City University of Hong Kong"), and the picker offered each as its
+   own university with its own schools — so half a university's schools were
+   invisible from the other half. `institutionKey()` folds a trailing acronym
+   and a leading "The" for GROUPING only, and deliberately does not touch what
+   is published: a posting's id and permalink are built from its institution,
+   and an earlier attempt to canonicalise those renamed KAIST and Baruch and
+   would have rewritten ids across the whole archive.
+5. **A directory row's three names are already in three columns**, so they are
+   canonicalised one by one and never through `canonPlace()`, whose job is
+   taking apart a value that names more than one thing. Run over columns that
+   are already separate it invents: Rutgers' campus and Clemson's college
+   became departments called "Camden, Operations Management" and "Computing
+   and Applied Sciences, Industrial Engineering", both of them offered by the
+   form.
+6. **`canonUnit()` had to become idempotent.** A department ending in its own
    acronym — "Engineering Management, Information, and Systems Department
    (EMIS)", from the directory — lost the acronym but kept the wrapper word,
    because the wrapper was only stripped while it was last. It now strips to a

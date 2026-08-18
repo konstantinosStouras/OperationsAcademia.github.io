@@ -211,12 +211,31 @@ school fills that school in above it, and `assets/oa-combo.js` takes its idea
 of "the same name" from its caller (`key`), so the picker itself needs no name
 rules of its own.
 
+**Grouping is not publishing.** `institutionKey()` in `assets/oa-schools.js`
+answers "is this the same university?" — a trailing acronym and a leading "The"
+folded away — and is used ONLY where names are grouped: `data/vocab.json` and
+the form reading it back. `canonInstitution()` goes on publishing each posting's
+own name, because its id and its permalink are built from it, and "Baruch
+College, The City University of New York (CUNY)" is deliberately published
+whole. The directory lists one university under several names; the picker must
+not offer half its schools from one entry and half from the other.
+
+**A directory row's three names are already in three columns**, so
+`buildVocab` canonicalises them one by one and never through `canonPlace()`,
+whose job is taking apart a value that names more than one thing. Run over
+columns that are already separate it invents: Rutgers' "School of
+Business-Camden" became a department called "Camden, Operations Management".
+
 **A rename can move a name a saved e-mail alert watches for.** An alert holds
 free text, not a name, so nothing can canonicalise it the way `canonCountry`
 does. Instead the site's own text search (`assets/oa-list.js`) and the alert
-matcher (`assets/oa-alert-match.js`) fold punctuation and read "&" as "and" —
-ONE rule, both files, strictly more forgiving. Keep them in step: an alert that
-matched what the site shows must go on matching it.
+matcher (`assets/oa-alert-match.js`) fold punctuation, read "&" as "and", try
+the needle's own canonical form ("SCM" → "Supply Chain Management") and match an
+ALL-CAPS needle against the initials of the words in the field ("IEOR" finds
+"Industrial Engineering and Operations Research", whose acronym the canon
+dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
+matched what the site shows must go on matching it, and "what I see on the site"
+and "what I am e-mailed" cannot mean different things.
 
 
 ## Tests that must stay green
