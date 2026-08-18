@@ -3824,6 +3824,27 @@ async function testReviewWiring() {
   ok(build.includes("where('status', '==', 'approved')"),
     'the build publishes an approval without waiting for the next sheet read');
 
+  /* THE GATE NEEDS A DATABASE, AND ITS WORKFLOW MUST GIVE IT ONE.
+     Shipped without either of these and the first run said so and did nothing:
+     `firestore()` returns null with no credentials OR no firebase-admin, the
+     sync falls back to leaving the published file exactly as it is, and the
+     result is a review queue that is never filled and postings that are never
+     withheld — a feature that looks installed and is inert. Both halves are
+     pinned because each alone is enough to cause it. */
+  const sheetWf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-jobmarket-sheet.yml'), 'utf8');
+  ok(/FIREBASE_SERVICE_ACCOUNT:\s*\$\{\{\s*secrets\.FIREBASE_SERVICE_ACCOUNT/.test(sheetWf),
+    'the sheet sync is given the credentials the review queue needs');
+  ok(/npm install[^\n]*firebase-admin/.test(sheetWf),
+    'and the client it reads the queue with — without it the gate silently no-ops');
+
+  const buildWf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-jobs-build.yml'), 'utf8');
+  ok(/FIREBASE_SERVICE_ACCOUNT:\s*\$\{\{\s*secrets\.FIREBASE_SERVICE_ACCOUNT/.test(buildWf),
+    'and so is the build, which is what publishes an approval');
+  ok(/npm install[^\n]*firebase-admin/.test(buildWf),
+    'with the same client');
+
   const wf = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-jobreview-mail.yml'), 'utf8');
   ok(wf.includes('jobreview-mailer.mjs'), 'the workflow runs the mailer');
