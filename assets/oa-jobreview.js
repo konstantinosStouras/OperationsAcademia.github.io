@@ -171,6 +171,125 @@
       '</p>';
   }
 
+  /**
+   * Approve the whole queue.
+   *
+   * WHY THIS EXISTS. The gate is right — nothing from the sheet reaches the
+   * site unseen — but the unit of work it created is a season, not a posting:
+   * the tracking sheet's "2026 Jobs" tab alone opens with 89 of them. A gate
+   * that can only be cleared 89 times is one that does not get cleared, and a
+   * queue nobody clears is the same outcome as the bug it was built to
+   * prevent: the postings are not on the site.
+   *
+   * Everything the per-card path does, it does — the maintainer's edits are
+   * read off the cards first, so anything corrected and not yet saved is
+   * carried in rather than lost — and every posting is on the screen above
+   * this button to be read before it is pressed. Writes go one at a time and
+   * the failures are counted rather than thrown, so one refused document
+   * cannot silently cost the other eighty-eight.
+   */
+  function approveAll(db, docs, cards) {
+    var msg = $('oa-review-bulk-msg');
+    var btn = $('oa-review-all');
+    var n = docs.length;
+
+    if (!window.confirm('Publish all ' + n + ' postings on this page?\n\n' +
+        'They appear on the jobs page at the next build. You can still take any ' +
+        'of them down afterwards from the posting itself.')) return;
+
+    btn.disabled = true;
+    msg.className = 'oa-form-msg';
+    msg.textContent = 'Publishing 0 of ' + n + '…';
+
+    var done = 0, failed = 0;
+    var chain = Promise.resolve();
+    docs.forEach(function (doc, i) {
+      chain = chain.then(function () {
+        var card = cards[i];
+        return db.collection(COL).doc(doc.rowId).set({
+          edits: card ? readEdits(card, doc) : (doc.edits || {}),
+          status: 'approved',
+          reviewedAt: new Date().toISOString(),
+        }, { merge: true })
+          .then(function () {
+            done++;
+            if (card) {
+              card.innerHTML = '<p class="oa-form-msg is-ok">Approved &mdash; ' +
+                esc((doc.row || {}).institution || doc.rowId) + '</p>';
+            }
+          })
+          .catch(function () {
+            failed++;
+            if (card) card.classList.add('is-err');
+          })
+          .then(function () {
+            msg.textContent = 'Publishing ' + (done + failed) + ' of ' + n + '…';
+          });
+      });
+    });
+
+    chain.then(function () {
+      msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
+      msg.textContent = failed
+        ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
+        : 'All ' + done + ' approved. They reach the jobs page at the next sheet read ' +
+          '— within half an hour.';
+      btn.disabled = !!failed;
+    });
+  }
+
+  /** The market years present in the queue, newest first. */
+  function yearsOf(docs) {
+    var seen = {};
+    docs.forEach(function (d) { seen[(d.row || {}).year || '?'] = true; });
+    return Object.keys(seen).sort().reverse();
+  }
+
+  /** 2027 -> "2026-2027", the way the site names a season everywhere else. */
+  function marketLabel(y) {
+    var n = Number(y);
+    return n ? (n - 1) + '-' + n : String(y);
+  }
+
+  /**
+   * Which market's postings are on screen.
+   *
+   * The season under way is shown FIRST and by default, because it is the one
+   * the jobs page carries: a posting approved from a closed market is correct
+   * and lands on Previous markets, which is not what someone clearing this
+   * queue in September is trying to do. It also keeps "approve everything
+   * here" honest — it approves what the tabs are showing, and never a season
+   * nobody has looked at.
+   */
+  function renderYears(db, all, active) {
+    var box = $('oa-review-years');
+    if (!box) return;
+    var years = yearsOf(all);
+    show(box, years.length > 1);
+    if (years.length < 2) return;
+
+    box.innerHTML = years.map(function (y) {
+      var n = all.filter(function (d) { return String((d.row || {}).year || '?') === y; }).length;
+      return '<button type="button" class="oa-tab' + (y === active ? ' is-on' : '') +
+        '" data-year="' + esc(y) + '">' + esc(marketLabel(y)) + ' (' + n + ')</button>';
+    }).join('') +
+      '<button type="button" class="oa-tab' + (active === '*' ? ' is-on' : '') +
+        '" data-year="*">All (' + all.length + ')</button>';
+
+    box.onclick = function (e) {
+      var b = e.target.closest('button[data-year]');
+      if (b) paint(db, all, b.dataset.year);
+    };
+  }
+
+  function paint(db, all, year) {
+    var shownDocs = year === '*' ? all : all.filter(function (d) {
+      return String((d.row || {}).year || '?') === year;
+    });
+    renderYears(db, all, year);
+    render(db, shownDocs);
+  }
+
   function render(db, docs) {
     var list = $('oa-review-list');
     var count = $('oa-review-count');
@@ -180,6 +299,13 @@
         : 'nothing';
     }
 
+    var bulk = $('oa-review-bulk');
+    show(bulk, docs.length > 1);
+    if (docs.length > 1) {
+      var label = bulk.querySelector('[data-n]');
+      if (label) label.textContent = String(docs.length);
+    }
+
     if (!docs.length) {
       list.innerHTML = '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
         'the tracking sheet appear here before they go on the site.</p>';
@@ -187,8 +313,10 @@
     }
 
     list.innerHTML = '';
+    var cards = [];
     docs.forEach(function (doc, i) {
       var card = document.createElement('article');
+      cards[i] = card;
       card.className = 'oa-fb-card oa-rv-card';
       card.innerHTML = cardHtml(doc, i);
 
@@ -226,7 +354,7 @@
                jobs.html and thinking it did not. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
               (act === 'approve'
-                ? 'Approved. It appears on the jobs page at the next build (up to 20 minutes).'
+                ? 'Approved. It reaches the jobs page at the next sheet read — within half an hour.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
           })
@@ -241,6 +369,11 @@
 
       list.appendChild(card);
     });
+
+    var all = $('oa-review-all');
+    if (all) {
+      all.onclick = function () { approveAll(db, docs, cards); };
+    }
   }
 
   function load(db) {
@@ -258,7 +391,7 @@
           return String((b.row || {}).posted || '')
             .localeCompare(String((a.row || {}).posted || ''));
         });
-        render(db, docs);
+        paint(db, docs, yearsOf(docs)[0] || '*');
       })
       .catch(function (err) {
         list.innerHTML = '<p class="oa-form-msg is-err">Could not load the queue (' +

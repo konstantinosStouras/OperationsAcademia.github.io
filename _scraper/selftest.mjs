@@ -31,7 +31,8 @@ import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-fir
 import { syncSheetMirrors } from './build-jobs.mjs';
 import {
   sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
-  inferColumns, resolveColumns, levelsFromRank, typeFromNames, rowsFromTab, collectRows,
+  inferColumns, resolveColumns, looksLikeData, repairColumns, institutionColumn,
+  levelsFromRank, typeFromNames, rowsFromTab, collectRows,
   stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
   tabsFromHtml, sheetIdsFromHtml, sheetId, sheetCsvUrl, sheetHtmlUrl,
   emptyRegistry, adoptSheets, activeSheets, rollRegistry,
@@ -2804,7 +2805,8 @@ function testJobMarketSheetRows() {
   eq(clarkson.posted, '2026-07-20', 'the posting date is the sheet\'s date');
   eq(clarkson.year, 2027,
     'and the market year is derived from it by the SITE\'s roll rule — a July 2026 ' +
-    'posting belongs to the 2026-2027 market, whatever the tab is called');
+    'posting belongs to the 2026-2027 market; the tab it sits on can only carry it ' +
+    'FORWARD into its own cycle, never back (testJobMarketSheetTabCycle)');
   eq(clarkson.country, 'United States', '"USA" is published as "United States"');
   eq(clarkson.levels, ['Visiting Faculty (various levels)'], 'the rank becomes an entry level');
   eq(clarkson.department, 'Operations and Information Systems', 'the field becomes the department');
@@ -2924,6 +2926,124 @@ function testJobMarketSheetAddedAt() {
   eq(later.fresh, 2, 'the run reports how many it had not seen before');
 }
 
+/* ------------------------------------------- a header that names one column
+                                                wrongly
+
+   THE LIVE FAILURE, kept as a fixture. The crowdsourced workbook's "2026 Jobs"
+   tab — created by its contributors when the 2026-2027 market opened — heads
+   its school column "Location", the same word it uses for the town beside it.
+   No alias of `institution` reads "location", so the header was refused; the
+   scan moved to the next row and took a POSTING as the header, because
+   "University of Hong Kong" begins with an alias of `institution` and a
+   comment reading "an expected start date of July 1, 2027" contains an alias
+   of `posted`. The date was then read from a comment column that is empty on
+   almost every row, so every row was skipped: the tab logged "0 posting(s),
+   94 row(s) skipped" every morning for four months and none of the season's
+   jobs ever reached the site.
+
+   The shape below is that tab's, cut to five rows.                            */
+
+const JMS_MISLABELLED_HEAD = [
+  '#', 'Location', 'Location', 'Country', 'Date Added', 'Job Focus Area', 'Rank',
+  'Deadline', 'Link', 'Comment  (virtual or onsite)',
+];
+
+const JMS_MISLABELLED_ROWS = [
+  ['1', 'University of Hong Kong', 'Hong Kong', 'Hong Kong', '23-Apr-26', 'BA',
+    'AP/Assoc/Full', '', 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179422894',
+    'an expected start date of July 1, 2027'],
+  ['2', 'University of Nevada Las Vegas', 'Las Vegas, NV', 'USA', '23-Apr-26', 'SCM',
+    'AP', '', 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=179416350',
+    'an expected start date of July 1, 2027'],
+  ['3', 'KU Leuven', 'Leuven', 'Belgium', '5-Jun-26', 'Information Systems Engineering',
+    'AP/Assoc/Full', '20-Aug-26', 'https://academicpositions.com/ad/ku-leuven/249301', ''],
+  ['4', 'Belmont University', 'Nashville, TN', 'USA', '5-Aug-26', 'SCM',
+    'AP/Assoc/Full', '', 'https://belmont.csod.com/ux/ats/careersite/10/home', ''],
+  ['5', 'Air Force Institute of Technology', 'Wright-Patterson AFB, Ohio', 'USA',
+    '4-Jun-26', 'Logistics and SCM', 'AP/Assoc/Full', '30-Jun-26',
+    'https://www.usajobs.gov/job/856638800', ''],
+];
+
+function testJobMarketSheetMislabelledHeader() {
+  /* 1. A row of postings is never a header, however much of its prose reads
+        like one. */
+  ok(!looksLikeData(JMS_MISLABELLED_HEAD), 'a row of column names is a header');
+  ok(looksLikeData(JMS_MISLABELLED_ROWS[0]),
+    'a row carrying a link and a date is a posting, not a header');
+  ok(looksLikeData(['Somewhere', '', '', '', '20-Jul-26']),
+    'a date alone is enough: no column is NAMED after one');
+  ok(looksLikeData(['Somewhere', 'https://example.com/ad']),
+    'and so is a link');
+  ok(!looksLikeData(['University', 'Country', 'Date Added', 'Deadline']),
+    'a plain header carries neither, and is not mistaken for data');
+
+  const map = mapColumns(JMS_MISLABELLED_HEAD);
+  eq(map.missing, ['institution'],
+    'the header itself names no institution — "Location" is the town everywhere else, ' +
+    'and reading it as the school would mis-file every other tab');
+
+  /* 2. The header is repaired rather than discarded: the one field it failed
+        to name is settled from the rows underneath it. */
+  const fixed = repairColumns(JMS_MISLABELLED_HEAD, JMS_MISLABELLED_ROWS);
+  eq(fixed.missing, [], 'and with the rows to hand it can be settled');
+  eq(fixed.index.institution, 1, 'the school column is the one holding school names');
+  eq(fixed.index.city, 2,
+    're-reading the header around it puts the town in the SECOND "Location" — ' +
+    'until then an unclaimed duplicate');
+  eq(fixed.index.deadline, 7,
+    'and everything the header did name is untouched: inferring the whole tab ' +
+    'instead would have lost the deadline, the link and the notes');
+  eq(fixed.repaired.map((r) => [r.field, r.at, r.header]), [['institution', 1, 'Location']],
+    'the repair is reported, so a run says which column it read and why');
+
+  eq(institutionColumn(JMS_MISLABELLED_ROWS.map((r) => [r[2], r[3]])), -1,
+    'a column of towns and countries never reads as the institution: the test is ' +
+    'whether the values NAME institutions, and those name none');
+
+  /* 3. End to end, which is the number that matters. */
+  const out = rowsFromTab(csvOf([[], JMS_MISLABELLED_HEAD, ...JMS_MISLABELLED_ROWS]),
+    { tab: '2026 Jobs', kind: 'jobs', minYear: 2026, cycleYear: 2027 });
+  eq(out.rows.length, 5, 'every posting on the tab is read, where none was before');
+  eq(out.skipped, 0, 'and none is skipped');
+  ok(!out.inferred, 'by repairing the header, not by giving up on it');
+
+  const hku = out.rows.find((r) => r.institution === 'University of Hong Kong');
+  ok(hku, 'the school is published under its own name');
+  eq(hku.comments, 'AP/Assoc/Full · Hong Kong · an expected start date of July 1, 2027',
+    'the town is the town and the comment is the comment');
+  eq(hku.country, 'Hong Kong', 'and the country column is still the country');
+
+  const leuven = out.rows.find((r) => r.institution === 'KU Leuven');
+  eq(leuven.applyByDate, '2026-08-20', 'a deadline the sheet states survives the repair');
+  eq(leuven.applyBy, 'August 20, 2026', 'and is shown as a date');
+}
+
+function testJobMarketSheetTabCycle() {
+  const rows = csvOf([JMS_MISLABELLED_HEAD, ...JMS_MISLABELLED_ROWS]);
+
+  /* By date alone, a posting advertised in April 2026 belongs to the market
+     that is closing — the one page it is of no use on. */
+  const byDate = rowsFromTab(rows, { tab: '2026 Jobs', kind: 'jobs', minYear: 2026 });
+  eq(byDate.rows.filter((r) => r.year === 2026).length, 4,
+    'four of these five are dated before their own cycle opened, so by date alone ' +
+    'they file under the market that has just closed');
+
+  const byTab = rowsFromTab(rows, { tab: '2026 Jobs', kind: 'jobs', minYear: 2026,
+    cycleYear: 2027 });
+  eq(byTab.rows.every((r) => r.year === 2027), true,
+    'the tab settles it: a tab created for the 2026-2027 market carries its ' +
+    'postings into that market, whenever they were advertised');
+
+  /* A FLOOR, never a ceiling — so nothing already published can move, and a
+     row added late to an old tab keeps the later year its date gives it. */
+  const late = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date'],
+    ['Clarkson University', 'USA', '20-Jul-26'],
+  ]), { tab: '2025 Jobs', kind: 'jobs', minYear: 2026, cycleYear: 2026 });
+  eq(late.rows[0].year, 2027,
+    'a July 2026 posting is a 2026-2027 posting even on the 2025 tab');
+}
+
 function testJobMarketSheetStaleness() {
   const now = new Date('2026-08-17T09:00:00Z');
 
@@ -2939,6 +3059,19 @@ function testJobMarketSheetStaleness() {
     'a sheet that reads as empty is reported rather than published');
   eq(stalenessOf({ ok: true, rows: 5, newestPosted: '', now }).reason, 'undated',
     'and so is one whose postings carry no usable date');
+
+  /* THE FAILURE THAT HID FOR FOUR MONTHS. One tab reads as empty while the
+     rest of the workbook is healthy, so every other signal here says the sheet
+     is fine: it is being read, it is being updated, its newest posting is from
+     this week — and a whole season of jobs is missing from the site. Checked
+     BEFORE the age test, because from the outside it looks exactly like a
+     quiet market and it is the one thing here a person has to go and fix. */
+  const deadTab = stalenessOf({ ok: true, rows: 40, newestPosted: '2026-08-15',
+    deadTabs: ['2026 Jobs'], now });
+  ok(deadTab.stale && deadTab.reason === 'unread-tab',
+    'a tab that was read and gave nothing is reported even when nothing else is wrong');
+  ok(/2026 Jobs/.test(deadTab.detail), 'and the message names the tab');
+  eq(deadTab.tabs, ['2026 Jobs'], 'so the e-mail can name it too');
 
   // said once, then not again for a week — but a DIFFERENT failure is news
   const check = stalenessOf({ ok: true, rows: 40, newestPosted: '2026-07-01', now });
@@ -3999,6 +4132,26 @@ function testReviewQueue() {
     ok(DOC_KEYS.includes(k), `queue document key "${k}" is one the rules allow`);
   }
 
+  /* THE GATE ARRIVING IS NOT A REASON TO RETRACT. Sixteen of the sheet's
+     postings were on the site before the queue existed, and the first morning
+     it answered they would all have had no document and therefore come down —
+     off the jobs page, after alerts about them had gone out. Already public is
+     already reviewed in the only sense that matters here, so those rows enter
+     the queue approved, with the reason written into them; rejecting one still
+     takes it down. */
+  const grand = partition([RV_ROW], [], { now: '2026-08-18T00:00:00Z',
+    published: new Set([RV_ROW.id]) });
+  eq(grand.publish.map((r) => r.id), [RV_ROW.id],
+    'a posting the site is already showing stays on it');
+  eq(grand.queue[0].status, APPROVED, 'and enters the queue approved');
+  ok(/before the review gate/i.test(grand.queue[0].note), 'saying why');
+  for (const k of Object.keys(grand.queue[0])) {
+    ok(DOC_KEYS.includes(k), `grandfathered key "${k}" is one the rules allow`);
+  }
+  eq(partition([RV_ROW], [], { published: new Set(['something-else']) }).publish.length, 0,
+    'anything the site is NOT already showing is still withheld — the gate is ' +
+    'unchanged for every posting from here on');
+
   const approved = [{ rowId: RV_ROW.id, status: APPROVED, row: RV_ROW, edits: {} }];
   const live = partition([RV_ROW], approved, {});
   eq(live.publish.length, 1, 'an approved posting is published');
@@ -4195,6 +4348,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testJobMarketSheetColumns();
   testJobMarketSheetRows();
   testJobMarketSheetAddedAt();
+  testJobMarketSheetMislabelledHeader();
+  testJobMarketSheetTabCycle();
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
   await testDeployGuard();

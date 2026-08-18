@@ -1636,3 +1636,15 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
    must not push the heading onto a second line on a phone. */
 .oa-rv-card header .oa-fb-status { margin-left: 8px; }
 
+/* Approve-the-whole-queue, above the cards rather than below them: with a
+   season's postings on the page the bottom of the list is a long way down,
+   and the button is only ever pressed after reading what is under it. It
+   paints no ground of its own, so it inherits the panel's ink. */
+.oa-rv-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
