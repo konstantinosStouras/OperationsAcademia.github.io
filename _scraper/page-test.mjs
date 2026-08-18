@@ -89,6 +89,56 @@ if (process.env.PW_CHROMIUM) launch.executablePath = process.env.PW_CHROMIUM;
 launch.proxy = { server: 'http://127.0.0.1:1', bypass: '<-loopback>,127.0.0.1,localhost' };
 
 const browser = await chromium.launch(launch);
+
+/* ------------------------------------------------ measuring contrast, ONCE
+
+   THREE separate copies of this had accumulated in this file, each with its
+   own idea of what an element is painted on, and that is exactly how a naive
+   one crept back in: the account badge sits on `--brand-soft`, which in dark
+   theme is `rgba(198, 204, 212, 0.13)`. Read as a layer it looks like a LIGHT
+   ground under light ink and measures 1.02:1; what is actually painted is 13%
+   light over near-black, and the text reads at 8.11:1. The check failed a
+   badge nobody could fault.
+
+   So there is one implementation, it runs IN THE PAGE, and it COMPOSITES:
+   every translucent layer over the one behind it until an opaque one is
+   reached. `contrastOf(page, selector)` answers for one element; the audit
+   near the end of this file walks a whole page with the same arithmetic. */
+const CONTRAST_IN_PAGE = `(sel) => {
+  const parse = (css) => {
+    const m = String(css).match(/[\\d.]+/g);
+    if (!m || m.length < 3) return null;
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  };
+  const over = (top, bot) => ({
+    r: top.r * top.a + bot.r * (1 - top.a),
+    g: top.g * top.a + bot.g * (1 - top.a),
+    b: top.b * top.a + bot.b * (1 - top.a), a: 1,
+  });
+  const lum = (c) => {
+    const f = (v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  };
+  const el = document.querySelector(sel);
+  if (!el) return null;
+  const stack = [];
+  for (let n = el; n; n = n.parentElement) {
+    const c = parse(getComputedStyle(n).backgroundColor);
+    if (c && c.a > 0) { stack.push(c); if (c.a === 1) break; }
+  }
+  let bg = stack.length && stack[stack.length - 1].a === 1
+    ? stack.pop() : { r: 255, g: 255, b: 255, a: 1 };
+  while (stack.length) bg = over(stack.pop(), bg);
+  const fg = over(parse(getComputedStyle(el).color), bg);
+  const L1 = lum(fg), L2 = lum(bg);
+  return +(((Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)).toFixed(2));
+}`;
+
+/** The contrast the browser actually paints for the first `sel`, or null. */
+async function contrastOf(page, sel) {
+  return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
+}
+
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const jsErrors = [];
@@ -2773,6 +2823,63 @@ for (const [from, hash] of [
     }, hash), `${from}: lands on the ${hash} section itself`);
   } catch { ok(false, `${from}: never reached ${hash} (stopped at ${q.url()})`); }
   await q.close();
+}
+
+/* ---------------------------- the account menu's count, as it renders
+
+   The wiring is checked in selftest; this is the part only a browser can
+   answer — that the badge shows a number, hides rather than printing a 0 or
+   an empty pill, and is readable in both themes. Firebase is unreachable from
+   CI, so the menu's own markup is used with the module's painting rules
+   rather than a real sign-in. */
+{
+  const a = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await a.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await a.waitForTimeout(400);
+
+  const seen = await a.evaluate(() => {
+    const menu = document.createElement('div');
+    menu.className = 'oa-acct-menu';
+    menu.innerHTML =
+      '<a href="my-postings.html"><span class="oa-mi">x</span>My postings' +
+        '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
+      '<a href="alerts.html"><span class="oa-mi">x</span>E-mail alerts' +
+        '<span class="oa-acct-n" data-count="alerts" hidden></span></a>';
+    document.body.appendChild(menu);
+    const paint = (counts) => {
+      document.querySelectorAll('.oa-acct-n[data-count]').forEach((el) => {
+        const n = counts[el.getAttribute('data-count')];
+        const show = typeof n === 'number' && n > 0;
+        el.textContent = show ? String(n) : '';
+        el.hidden = !show;
+      });
+    };
+    const read = () => [...document.querySelectorAll('.oa-acct-n')]
+      .map((el) => ({ text: el.textContent, hidden: el.hidden }));
+    const out = {};
+    paint({ postings: 2, alerts: 1 }); out.some = read();
+    paint({ postings: 0, alerts: 1 }); out.zero = read();
+    paint({}); out.unknown = read();
+    paint({ postings: 12, alerts: 3 });
+    const el = document.querySelector('.oa-acct-n');
+    out.rightAligned = getComputedStyle(el).marginLeft === 'auto'
+      || parseFloat(getComputedStyle(el).marginLeft) > 20;
+    return out;
+  });
+
+  eq(seen.some.map((x) => x.text), ['2', '1'], 'account menu: the badge shows the count');
+  eq(seen.zero[0].hidden, true, 'account menu: and hides rather than printing a 0');
+  eq(seen.unknown.every((x) => x.hidden), true,
+    'account menu: a count we do not know shows nothing at all');
+  ok(seen.rightAligned, 'account menu: the badge sits at the end of its row');
+
+  for (const theme of ['light', 'dark']) {
+    await a.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+    await a.waitForTimeout(150);
+    const cr = await contrastOf(a, '.oa-acct-n');
+    ok(cr >= 4.5, `account menu (${theme}): the badge reads at ${cr}:1`);
+  }
+  await a.close();
 }
 
 /* ------------------------------- readable in BOTH themes, on every page

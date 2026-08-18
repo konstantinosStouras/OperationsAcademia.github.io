@@ -1336,6 +1336,30 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 /* The season note that used to sit under the jobs heading was removed at the
    owner's request (2026-08-16), rules and element both. */
 
+/* The count beside "My postings" and "E-mail alerts". It sits at the far end
+   of its row, so the row is a flex line and the badge never pushes the label.
+   Named ink on a named ground, per the rule above: --brand-soft is a
+   translucent tint in dark theme, and a fixed colour on it would read against
+   whatever showed through.
+
+   No display rule of its own — the menu's rows are already a flex line
+   (`.oa-acct-menu a, .oa-acct-menu button` above), and restating it here only
+   risked overriding their gap with a different one. */
+.oa-acct-n {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--brand-soft, #e9ebee);
+  color: var(--ink-2, #454c56);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.oa-acct-n[hidden] { display: none; }
+
 /* ------------------------------------------------ search-as-you-type picker
    The vocabulary picker on the posting form (assets/oa-combo.js). The input
    keeps the form's own styling; everything here is the list under it. */
