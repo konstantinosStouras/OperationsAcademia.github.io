@@ -257,7 +257,6 @@
     var page = 0;
     var expanded = {};
 
-    // state: text filters hold a string, value filters hold a Set
     /* EVERY filter's selection is a Set, text ones included — a text filter now
        holds the terms that have been committed with Enter, exactly as a picker
        holds the values that have been ticked, so chips, Clear, the URL and the
@@ -392,8 +391,21 @@
             if (e.key !== 'Enter') return;
             e.preventDefault();
             var term = input.value.trim();
+            /* The pending debounce is cancelled here, so this handler now owns
+               whatever the box says — INCLUDING when it says nothing. Returning
+               early on an empty box stranded the last debounced word in
+               drafts[key]: the list stayed filtered by a term shown in no chip
+               and in no box, and syncUrl kept putting it in the address bar.
+               Erasing the box and pressing Enter now means what it looks like. */
             clearTimeout(textTimers[f.key]);
-            if (!term) return;
+            if (!term) {
+              if (drafts[f.key]) {
+                drafts[f.key] = '';
+                page = 0;
+                apply();
+              }
+              return;
+            }
             // the same term twice is one chip, not two that filter identically
             sel[f.key].add(term);
             drafts[f.key] = '';
@@ -450,9 +462,12 @@
          label of its own, so in a top-aligned bar it would sit a label's
          height above the controls it belongs with. Reserving that height with
          a hard-coded pixel value means guessing at type the stylesheet owns —
-         and getting it wrong silently, which is what a first attempt did. An
-         actual label styled by the same rule as every other one is always
-         exactly the right height, whatever the design later does to it. */
+         and getting it wrong silently, which is what a first attempt did. A
+         node styled by the same rules as a real label is always exactly the
+         right height, whatever the design later does to it. It is a <span>
+         rather than a <label> so that anything enumerating this bar's labels —
+         a screen reader, or the test that pins their names — still sees only
+         the real ones. */
       barEl.appendChild(el('div', { class: 'oa-filter oa-filter-actions' }, [
         el('span', { 'aria-hidden': 'true', class: 'oa-label-spacer', html: '&nbsp;' }),
         clear,

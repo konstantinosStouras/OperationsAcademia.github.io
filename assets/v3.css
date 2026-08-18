@@ -812,6 +812,14 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
 @media (min-width: 1000px) {
   /* the free-text searches are the primary way in — give them room */
   body.v3 .oa-filter:not(.oa-pick) { grid-column: span 2; }
+  /* ...but Clear is not one of them. It carries .oa-filter as well now (for the
+     label spacer), so it started matching the rule above — specificity (0,3,1),
+     declared later — and stopped stretching to the bar's right edge, which is
+     the one thing that rule above IT exists to guarantee. Restated here at the
+     same specificity and after it, rather than by taking .oa-filter off the
+     cell, because the spacer has to be styled as a label to be the right
+     height. */
+  body.v3 .oa-filter.oa-filter-actions { grid-column: auto / -1; }
 }
 @media (max-width: 640px) {
   /* the mobile standard, in grid form: pickers two per row, every text
@@ -1487,7 +1495,11 @@ body.v3 .oa-merge-from, body.v3 .oa-merge-into { background: var(--bg-3); border
 
 /* the engine's own filter labels, where the full bar IS shown (jobs.html,
    candidates, placements): the reference site's small-caps look */
-body.v3 .oa-filter > label {
+body.v3 .oa-filter > label,
+/* the Clear cell's height spacer, which only does its job if it is the same
+   height as a real label — this sheet shrinks labels to 11.5px, so leaving the
+   spacer on the base sheet's 13px put Clear 2.4px below the controls */
+body.v3 .oa-filter > .oa-label-spacer {
   text-transform: uppercase;
   letter-spacing: 0.09em;
   font-size: 11.5px;

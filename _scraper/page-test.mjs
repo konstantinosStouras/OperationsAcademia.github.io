@@ -1702,93 +1702,162 @@ for (const [name, expect] of [
     'jobs: a visitor who is not signed in sees no Edit or Take down');
 
   /* ------------------------------ the filter bar: several terms, one row --
-     Owner, from three screenshots: the search takes ONE institution at a
-     time, and a filter with values chosen knocked the bar out of line.
+     Owner, from three screenshots: the search took ONE institution at a time,
+     and a filter with values chosen knocked the bar out of line.
 
-     THE BAR IS SIGN-IN GATED on this page (.v3-lock puts pointer-events:none
-     over it until an account resolves), and these checks are about the bar,
-     not the gate — which has its own coverage. So the lock is lifted here,
-     and lifted again before each interaction because auth resolving late
-     re-applies it. */
-  const unlock = () => j.evaluate(() => {
-    const w = document.querySelector('.v3-lock');
-    if (w) w.classList.remove('is-locked');
-    const c = document.getElementById('v3-lock-card');
-    if (c) c.remove();
-  });
-  await unlock();
+     THE BAR IS SIGN-IN GATED on this page — .v3-lock puts pointer-events:none
+     over it until an account resolves — and these checks are about the bar,
+     not the gate, which has its own coverage. The lock is defeated by
+     OVERRIDING ITS EFFECT rather than by removing the class: jobs.html
+     re-applies the class from OAAccounts.onChange when auth finally resolves,
+     whose timing is set by a network fetch, so stripping it once (or even
+     before each step) is a race that hangs the click and takes the whole suite
+     with it. A stylesheet cannot be re-applied out from under us. */
+  await j.addStyleTag({ content:
+    '.v3-lock.is-locked .oa-filters{pointer-events:auto!important;opacity:1!important;filter:none!important}'
+    + '#v3-lock-card{display:none!important}' });
 
   eq(await j.$eval('.oa-filters label[for="oaf-institution"]', (n) => n.textContent),
     'University search', 'jobs: the search says what it searches');
   eq(await j.$eval('#oaf-institution', (n) => n.placeholder), 'University/School name',
     'jobs: and the box says what to type into it');
 
-  const bar = () => j.$eval('.oa-resultbar', (n) => n.textContent.trim());
+  const shown = () => j.$eval('.oa-resultbar', (n) => {
+    const m = n.textContent.replace(/\s+/g, ' ').match(/\/\s*(\d+)/);
+    return m ? Number(m[1]) : NaN;
+  });
 
-  // typing filters live, exactly as it always did
-  await unlock();
-  await j.fill('#oaf-institution', 'utah');
-  await j.waitForTimeout(320);
-  const oneTerm = await bar();
-  ok(/\b(\d+) \/ \1\b/.test(oneTerm.replace(/\s+/g, ' ')) || oneTerm.includes('of'),
-    'jobs: a half-typed term still narrows the list as you type');
+  /* TWO TERMS THAT MUST WIDEN, DERIVED FROM THE PAGE ITSELF. data/jobs.json is
+     rebuilt from the tracking sheet every morning, so naming institutions here
+     ("utah", "princeton") would make this check pass or fail on whatever the
+     market did overnight — a test that goes red for a reason that is not a
+     regression teaches people to ignore it. */
+  const pair = await j.evaluate(() => {
+    const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
+      .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
+    const word = (n) => (n.split(/[\s,(]+/).find((w) => w.length > 4) || '').replace(/[^a-z]/g, '');
+    const a = word(names[0] || '');
+    const b = names.map(word).find((w) => w && w !== a && !names[0].includes(w));
+    return a && b ? { a, b } : null;
+  });
+  ok(pair, 'jobs: the listing offers two different institutions to search for');
+
+  const total = await shown();
+
+  // typing filters live, exactly as it always did — and narrows, measurably
+  await j.fill('#oaf-institution', pair.a);
+  await j.waitForFunction((n) => {
+    const m = document.querySelector('.oa-resultbar').textContent.match(/\/\s*(\d+)/);
+    return m && Number(m[1]) !== n;
+  }, total, { timeout: 4000 });
+  const typed = await shown();
+  ok(typed < total,
+    `jobs: a half-typed term narrows the list as you type (${total} -> ${typed})`);
 
   // Enter banks it as a chip and empties the box for the next one
   await j.press('#oaf-institution', 'Enter');
-  await j.waitForTimeout(320);
+  await j.waitForTimeout(250);
   eq(await j.$eval('#oaf-institution', (n) => n.value), '',
     'jobs: Enter clears the box, so the next institution can be typed straight away');
   eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
-    (ns) => ns.map((n) => n.textContent)), ['utah'],
+    (ns) => ns.map((n) => n.textContent)), [pair.a],
     'jobs: and the term it banked is shown as a chip under the field');
+  eq(await shown(), typed, 'jobs: banking the term does not change what it matches');
 
-  /* SEVERAL TERMS ARE OR'd, which is the only reading that returns anything:
-     a posting has ONE institution, so "utah" AND "princeton" is empty by
-     construction. Counted rather than asserted as a number so the check does
-     not depend on which postings happen to be listed. */
-  const afterOne = Number((await bar()).match(/\/\s*(\d+)/)[1]);
-  await unlock();
-  await j.fill('#oaf-institution', 'princeton');
+  /* SEVERAL TERMS ARE OR'd, which is the only reading that returns anything: a
+     posting has ONE institution, so two names AND-ed is empty by construction. */
+  await j.fill('#oaf-institution', pair.b);
   await j.press('#oaf-institution', 'Enter');
-  await j.waitForTimeout(320);
-  const afterTwo = Number((await bar()).match(/\/\s*(\d+)/)[1]);
-  ok(afterTwo > afterOne,
-    `jobs: a second term WIDENS the search (${afterOne} -> ${afterTwo}), it does not replace it`);
+  await j.waitForTimeout(250);
+  const both = await shown();
+  ok(both > typed,
+    `jobs: a second term WIDENS the search (${typed} -> ${both}), it does not replace it`);
   eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
-    (ns) => ns.map((n) => n.textContent)), ['utah', 'princeton'],
-    'jobs: both terms are shown, each removable on its own');
+    (ns) => ns.map((n) => n.textContent)), [pair.a, pair.b],
+    'jobs: both terms are shown');
 
   // and the whole search survives being shared
-  const shared = new URL(j.url()).searchParams.getAll('institution');
-  eq(shared, ['utah', 'princeton'], 'jobs: every term is carried in the address bar');
+  eq(new URL(j.url()).searchParams.getAll('institution'), [pair.a, pair.b],
+    'jobs: every term is carried in the address bar');
 
-  /* EVERY CONTROL ON ONE BASELINE, chips or no chips. The bar is a grid whose
-     items were bottom-aligned, so a filter carrying chips — a taller cell —
-     pushed its own control UP, and "2 selected" floated above the untouched
-     boxes beside it. Measured as distinct top edges per row: with the chips
-     present there must still be exactly one baseline per row of the bar. */
-  const rows = await j.$$eval(
-    '.oa-filters input[type=search], .oa-filters .oa-pick-btn, .oa-filters .oa-clear',
-    (ns) => {
-      const tops = ns.map((n) => Math.round(n.getBoundingClientRect().top));
-      const byRow = {};
-      tops.forEach((t) => {
-        const key = Object.keys(byRow).find((k) => Math.abs(Number(k) - t) < 6);
-        byRow[key === undefined ? t : key] = true;
-      });
-      return { tops, lines: Object.keys(byRow).length };
-    });
-  const barRows = await j.$eval('.oa-filters', (n) =>
-    new Set([...n.children].map((c) => Math.round(c.getBoundingClientRect().top))).size);
-  eq(rows.lines, barRows,
-    `jobs: every control sits on its row's baseline even with chips showing ` +
-    `(${rows.tops.join(', ')})`);
+  // each chip removes its OWN term — the point of chips over one string
+  await j.click('.oa-filter:not(.oa-pick) .oa-chip');
+  await j.waitForTimeout(250);
+  eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
+    (ns) => ns.map((n) => n.textContent)), [pair.b],
+    'jobs: removing one chip leaves the other');
 
-  await unlock();
+  /* ERASING THE BOX AND PRESSING ENTER MEANS WHAT IT LOOKS LIKE. The handler
+     cancels the pending debounce, so it owns whatever the box says INCLUDING
+     nothing: an early return here stranded the last debounced word, and the
+     list stayed filtered by a term shown in no chip, in no box, and removable
+     only from the address bar. */
+  await j.fill('#oaf-institution', pair.a);
+  await j.waitForTimeout(250);
+  await j.fill('#oaf-institution', '');
+  await j.press('#oaf-institution', 'Enter');
+  await j.waitForTimeout(250);
+  const stranded = new URL(j.url()).searchParams.getAll('institution');
+  eq(stranded, [pair.b],
+    'jobs: erasing the box and pressing Enter drops the draft, it does not strand it');
+
   await j.click('.oa-clear');
-  await j.waitForTimeout(320);
+  await j.waitForTimeout(250);
   eq(await j.$$eval('.oa-chip', (ns) => ns.length), 0,
     'jobs: Clear filters drops the banked terms too');
+  eq(await shown(), total, 'jobs: and the whole listing comes back');
+
+  /* EVERY CONTROL ON ONE BASELINE, CHIPS OR NO CHIPS, and CLEAR CLOSES ITS ROW.
+     The bar is a grid whose items were bottom-aligned, so a filter carrying
+     chips — a taller cell — pushed its own control UP and "2 selected" floated
+     above the untouched boxes beside it. Measured at two widths because the
+     ≥1000px rule gives text searches a double column and Clear a rule of its
+     own: the first version of this check ran at one width and missed that
+     Clear had stopped stretching to the bar's edge.
+
+     The tolerance is 1.5px, not the 6px a first attempt used — 6px was wide
+     enough to hide a real 2.4px error, which is the whole class of defect this
+     is here to catch. */
+  /* 1000 is in the list because that is where the ≥1000px rule starts and where
+     the regression it enabled actually shows: with Clear taking `span 2` from
+     the text-search rule instead of stretching to the edge, it stops 460px
+     short THERE and nowhere else — 1280 and 1100 both look perfect. A layout
+     check is only as good as the width it runs at. */
+  for (const width of [1280, 1100, 1000]) {
+    await j.setViewportSize({ width, height: 1000 });
+    await j.fill('#oaf-institution', pair.a);
+    await j.press('#oaf-institution', 'Enter');
+    await j.waitForTimeout(250);
+
+    const geo = await j.evaluate(() => {
+      const bar = document.querySelector('.oa-filters');
+      const cs = getComputedStyle(bar);
+      const edge = bar.getBoundingClientRect().right - parseFloat(cs.paddingRight);
+      const ctrls = [...document.querySelectorAll(
+        '.oa-filters input[type=search], .oa-filters .oa-pick-btn, .oa-filters .oa-clear')];
+      const rows = [];
+      ctrls.forEach((n) => {
+        const t = n.getBoundingClientRect().top;
+        const row = rows.find((r) => Math.abs(r.top - t) < 1.5);
+        if (row) row.n++; else rows.push({ top: t, n: 1 });
+      });
+      const clear = document.querySelector('.oa-clear').getBoundingClientRect();
+      return {
+        lines: rows.length,
+        cells: new Set([...bar.children].map((c) => Math.round(c.getBoundingClientRect().top))).size,
+        clearGap: edge - clear.right,
+        chips: document.querySelectorAll('.oa-chip').length,
+      };
+    });
+    ok(geo.chips > 0, `jobs @${width}: a chip is showing, so the measurement means something`);
+    eq(geo.lines, geo.cells,
+      `jobs @${width}: every control sits on its row's baseline with chips showing`);
+    ok(Math.abs(geo.clearGap) <= 1.5,
+      `jobs @${width}: Clear still closes its row (${geo.clearGap.toFixed(1)}px short of the edge)`);
+    await j.click('.oa-clear');
+    await j.waitForTimeout(200);
+  }
+  await j.setViewportSize({ width: 1280, height: 1000 });
 
   // one posting becomes editable, as it would be for the poster who made it
   const firstId = await j.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));

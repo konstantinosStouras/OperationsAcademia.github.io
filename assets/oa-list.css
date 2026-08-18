@@ -263,9 +263,12 @@
   align-self: flex-end;
   align-items: flex-end;
   margin-left: auto;
-  /* it carries .oa-filter too, for the label spacer's sake — but not that
-     class's fixed column width */
+  /* it carries .oa-filter too, for the label spacer's sake — but neither that
+     class's fixed column width nor its column direction: this cell is a row
+     here, and .oa-filter { flex-direction: column } would otherwise flip it
+     silently in every context that loads this sheet without the v3 one. */
   width: auto;
+  flex-direction: row;
 }
 
 /* The spacer only earns its height where the bar TOP-aligns its items and
