@@ -486,8 +486,9 @@ Four decisions worth recording:
    — carries 254 curated (institution, school, department) rows, which is what
    lets the cascade work for a university that has never posted here. Directory
    rows carry NO posting count, so "4 postings" stays a count of postings, and
-   they are put through `canonPlace()` inside `buildVocab` because a directory
-   row has never been through an ingest. `data/past-postings.json` is
+   each of their three names is canonicalised inside `buildVocab` (one by one —
+   see 5) because a directory row has never been through an ingest.
+   `data/past-postings.json` is
    deliberately NOT a source: its legacy rows never separated the institution
    from the school and the department, so feeding it in would put the very mess
    this ends into the university picker.
@@ -530,7 +531,16 @@ Four decisions worth recording:
    became departments called "Camden, Operations Management" and "Computing
    and Applied Sciences, Industrial Engineering", both of them offered by the
    form.
-6. **`canonUnit()` had to become idempotent.** A department ending in its own
+6. **Two findings looked at and left alone.** `splitLegacyInstitution()` reads
+   "University of California, Los Angeles (UCLA)" as a university and a
+   department, which would merge it with Berkeley — but it cannot be reached
+   from the posting form, which refuses a posting with neither a school nor a
+   department, so it only ever sees the legacy rows it was written for. And one
+   CUHK-Shenzhen row loses its school to a UNIT_ALIASES entry ("Operations
+   Management Division, The School of Management and Economics" → "Operations
+   Management"); the school is a sibling row's, and reshaping that table is the
+   naming module's business rather than the cascade's.
+7. **`canonUnit()` had to become idempotent.** A department ending in its own
    acronym — "Engineering Management, Information, and Systems Department
    (EMIS)", from the directory — lost the acronym but kept the wrapper word,
    because the wrapper was only stripped while it was last. It now strips to a
