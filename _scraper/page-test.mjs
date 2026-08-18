@@ -3262,12 +3262,20 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
   ok(await h.evaluate(() => !!document.documentElement.style.getPropertyValue('--oa-chip-w')),
     'and hands the stylesheet the width to reserve');
 
-  // …and a signed-out reader gets the signed-out reserve, not the chip's
-  await h.evaluate(() => localStorage.removeItem('oaAuthHint'));
-  await h.goto(BASE, { waitUntil: 'domcontentloaded' });
-  eq(await h.evaluate(() => document.documentElement.getAttribute('data-oa-auth')), 'out',
-    'a signed-out reader is stamped as such');
   await h.close();
+
+  /* …and a signed-out reader gets the signed-out reserve, not the chip's.
+     In a page of its OWN, because that is what a signed-out reader is: a
+     browser with no hint in it. Clearing the key on the page above does not
+     make one — that page still has a signed-in session running, and it writes
+     the hint straight back. */
+  const out = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+  await out.goto(BASE, { waitUntil: 'domcontentloaded' });
+  eq(await out.evaluate(() => document.documentElement.getAttribute('data-oa-auth')), 'out',
+    'a signed-out reader is stamped as such');
+  eq(await out.evaluate(() => document.documentElement.style.getPropertyValue('--oa-chip-w')), '',
+    'and no chip width is reserved for a chip they will not be shown');
+  await out.close();
 }
 
 /* --------------------------------------- the phone header carries the NAME

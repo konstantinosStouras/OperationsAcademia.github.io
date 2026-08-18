@@ -845,6 +845,43 @@ properties** — a control that appears late must have its space reserved from
 the head, and anything painted from a remembered value must be painted in its
 final form or not at all.
 
+## What the page does before the reader sees anything
+
+The site is static and every page is served whole, so "fast" here is entirely
+about what the browser is made to do BEFORE it can paint, and what it is made
+to wait for afterwards. Measured on the home page in a real browser
+(`_scraper/page-test.mjs` drives the same paths), the rules that came out of it:
+
+* **Nothing on screen waits for Firebase.** The SDK is ~700 KB of third-party
+  JavaScript; it used to be `rel=preload`ed in every `<head>`, competing with
+  the page's own stylesheet at exactly the moment the first paint is assembled.
+  The account chip is painted from the hint, so nothing needs it early. The
+  `preconnect` stays — it warms the connection at no bandwidth cost.
+* **One request per file per page.** `OAList.load(url)` memoizes by URL and is
+  how anything reads a served dataset. The home page was fetching
+  `data/jobs.json` twice (117 KB each) because the launcher card's selects and
+  the ten-most-recent list each fetched it for themselves, and `placements.json`
+  the same way. A failed read is not remembered, so one flaky request is not
+  inherited by every list on the page.
+* **The scripts are `defer`red.** They were plain classic scripts, so they
+  serialised in front of DOMContentLoaded — and therefore in front of every
+  list mount, every reveal and the account paint. The trailing inline block on
+  the pages that have one is wrapped in a DOMContentLoaded handler in the same
+  breath, because a deferred external runs BEFORE an inline script that reads
+  what it defines. **Adding a script tag means adding `defer` to it**, and
+  putting anything inline that reads `OAList`/`V3`/`OAAccounts` means waiting
+  for that event.
+* **Content is not held hostage to the whole script chain.** `.v3-reveal`
+  blocks are hidden by the stylesheet until v3.js claims them, and that claim
+  (`wireReveals`) happens at PARSE time — its first call, before anything that
+  could throw — not in `boot()` on DOMContentLoaded behind seven other files.
+  The hidden-by-default state is deliberate: a class added by a script at the
+  end of the body arrives after the browser has painted, so opting IN to the
+  animation would show the page and then hide it again.
+* **A figure already at its target is not animated from zero.** The hero's
+  counters read their own text; `now === target` used to fall through to 0, so
+  the first paint said "0+ universities".
+
 ## The phone header carries the site's NAME
 
 The wordmark used to be hidden below 640px (`.v3-header .v3-logo span + span {

@@ -27,8 +27,13 @@
         el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
         /* the width the chip MEASURED last visit, so the reserve is the real
            one and not a guess at how long a name is; absent on a first visit,
-           where the stylesheet's own minimum takes over */
-        if (h && h.w > 0) el.style.setProperty('--oa-chip-w', h.w + 'px');
+           where the stylesheet's own minimum takes over. Bounded because this
+           value is written into a style before anything else runs, and the
+           only honest thing to do with a number that is not a plausible chip
+           width is to ignore it. */
+        if (typeof h.w === 'number' && h.w > 0 && h.w < 600) {
+          el.style.setProperty('--oa-chip-w', h.w + 'px');
+        }
       } catch (e) { /* private mode — the reserve is an optimisation */ }
     })();
     </script>
@@ -37,9 +42,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
-    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
+    <!-- The Firebase SDK is ~700 KB of third-party JavaScript that NOTHING on
+         screen waits for any more: the account chip is painted from the
+         localStorage hint before the SDK has even been asked for, and the
+         session it restores only confirms what the chip already shows. It was
+         being PRELOADED here, which is a high-priority fetch competing with
+         this page's own stylesheet and data at the very moment the first paint
+         is being assembled. The preconnect stays — it warms the connection, at
+         no bandwidth cost, so the SDK still arrives promptly when
+         oa-firebase.js asks for it. -->
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
@@ -199,10 +210,10 @@
     </footer>
 
 
-    <script src="assets/v3.js"></script>
-    <script src="assets/oa-firebase.js"></script>
-    <script src="assets/oa-accounts.js"></script>
-    <script src="assets/oa-usage.js"></script>
-    <script src="assets/oa-myjobs.js"></script>
+    <script defer src="assets/v3.js"></script>
+    <script defer src="assets/oa-firebase.js"></script>
+    <script defer src="assets/oa-accounts.js"></script>
+    <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-myjobs.js"></script>
   </body>
 </html>

@@ -377,7 +377,11 @@
     var seen = /^(\d[\d,]*)/.exec((el.textContent || '').trim());
     var now = prev ? prev.value
       : seen ? parseInt(seen[1].replace(/,/g, ''), 10) : 0;
-    var from = now > 0 && now < target ? now : 0;
+    /* A figure the HTML already seeded AT its target ("200+", "2014") has
+       nothing to count up to, and `now < target` made that case fall through
+       to 0 — so the hero painted "0+ universities" and held it until the
+       observer fired behind the script chain. Start from what is there. */
+    var from = now > 0 && now <= target ? now : 0;
     var state = { value: from, dead: false, io: null };
 
     function show(v) {
@@ -425,7 +429,6 @@
     wireSmoothScroll();
     wireSpy();
     wireFaq();
-    wireReveals();
     wireTop();
     wireCounts();
     $$('.js-current-year').forEach(function (el) {
@@ -433,9 +436,22 @@
     });
   }
 
-  // The numbers are taken over at PARSE time — this file sits at the end of
-  // the body, after the hero — so they never paint their final value and then
-  // rewind. Everything else waits for the document.
+  /* Two things are done at PARSE time — this file sits at the end of the body,
+     after all the content — and both for the same reason: what the reader sees
+     first must not depend on the seven scripts that follow this one.
+
+     The reveal-on-scroll blocks are hidden by the stylesheet until this file
+     claims them, and it used to claim them in boot(), on DOMContentLoaded —
+     which is AFTER every other script on the page has parsed and run. So the
+     whole of the home page below the hero sat blank through that window, and
+     a throw anywhere in boot()'s earlier calls left it blank for good. Doing
+     it here, first, means the content is revealed as soon as the markup it
+     acts on exists, and nothing that happens later can prevent it.
+
+     The counters are taken over here for the same kind of reason: so they
+     never paint their final value and then rewind. Everything else waits for
+     the document. */
+  wireReveals();
   wireCounts();
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

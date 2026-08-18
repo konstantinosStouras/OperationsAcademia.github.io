@@ -2607,18 +2607,25 @@ async function testPageSpeedWiring() {
   const html = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
   const fbjs = await readFile(path.join(HERE, '..', 'assets', 'oa-firebase.js'), 'utf8');
 
-  /* The preloads only help while they name the EXACT scripts oa-firebase.js
-     injects. A version bump there without one here would fetch dead weight on
-     every visit and silently lose the head start. */
+  /* THE SDK IS NO LONGER PRELOADED, and that is the point of this check.
+
+     It used to be, and the rule here was that the preload tags must name the
+     EXACT scripts oa-firebase.js injects — a version bump on one side without
+     the other fetches dead weight on every visit. That rule was right for what
+     the page was then. Since the account chip is painted from the localStorage
+     hint before the SDK is even asked for, NOTHING on screen waits for those
+     ~700 KB, and preloading them put a high-priority third-party fetch beside
+     the page's own stylesheet and data at exactly the moment the first paint
+     is being assembled. So the tags are gone, the preconnect stays (it warms
+     the connection at no bandwidth cost), and this asserts that state rather
+     than the old one — a reinstated preload would be a silent regression of a
+     decision, which is precisely the kind of thing a test is for. */
   const sdk = (fbjs.match(/var SDK = '([^']+)'/) || [])[1];
   ok(sdk, 'oa-firebase.js declares its SDK base URL');
-  const parts = (fbjs.match(/var PARTS = \[([^\]]+)\]/) || [])[1] || '';
-  for (const part of parts.match(/'[^']+'/g).map((x) => x.slice(1, -1))) {
-    ok(html.includes(`<link rel="preload" as="script" href="${sdk}${part}">`),
-      `post-a-job preloads ${part} at the version the code loads`);
-  }
+  ok(!/rel="preload"[^>]*gstatic\.com\/firebasejs/.test(html),
+    'post-a-job does not preload the Firebase SDK — nothing on screen waits for it');
   ok(html.includes('rel="preconnect" href="https://www.gstatic.com"'),
-    'and preconnects to the CDN');
+    'but still preconnects to the CDN, so it arrives promptly when it is asked for');
 }
 
 /* ------------------------------------- the legacy Awesome Table datasets

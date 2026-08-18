@@ -500,7 +500,15 @@ body.v3-sheet-open { overflow: hidden; }
 }
 [data-theme='dark'] .v3-band { background: var(--bg-3); }
 
-/* reveal-on-scroll (v3.js adds .is-in; motion-reduced visitors never move) */
+/* reveal-on-scroll (v3.js adds .is-in; motion-reduced visitors never move)
+
+   The hidden state stays the DEFAULT rather than something JavaScript opts
+   into, and that is a deliberate choice between two flashes: a class added by
+   a script at the end of the body arrives after the browser has already
+   painted, so the reader would watch the page appear and then be hidden again
+   to animate. Instead v3.js claims these blocks at PARSE time (wireReveals is
+   its first call, before anything that could throw), which is as early as the
+   markup they act on exists. */
 @media (prefers-reduced-motion: no-preference) {
   .v3-reveal { opacity: 0; transform: translateY(22px);
     transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.9, 0.3, 1); }

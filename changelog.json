@@ -6,7 +6,7 @@
    "id": "header-paints-once",
    "date": "2026-08-18",
    "title": "The header stops blinking, and the phone header carries our name",
-   "summary": "Every reload used to flash a header with no account control, which then appeared and shoved the row sideways, and your picture showed as a coloured disc of initials for half a second before the real photograph replaced it. The header now paints its finished form on the very first frame: your picture and the space your account control takes are both remembered from your last visit, so nothing moves and nothing is drawn twice. On phones the logo is the whole lockup again \u2014 the monogram AND \"Operations Academia\" \u2014 scaled to fit rather than cut in half.",
+   "summary": "Every reload used to flash a header with no account control, which then appeared and shoved the row sideways, and your picture showed as a coloured disc of initials for half a second before the real photograph replaced it. The header now paints its finished form on the very first frame: your picture and the space your account control takes are both remembered from your last visit, so nothing moves and nothing is drawn twice. On phones the logo is the whole lockup again \u2014 the monogram AND \"Operations Academia\" \u2014 scaled to fit rather than cut in half. The pages are quicker with it: the sign-in library is no longer fetched at high priority ahead of the page's own content, the home page downloads its postings once instead of twice, the scripts no longer queue up in front of what you are reading, and the sections below the top of the page appear as soon as the page is parsed rather than after everything has loaded.",
    "url": "https://www.operationsacademia.org/"
   },
   {

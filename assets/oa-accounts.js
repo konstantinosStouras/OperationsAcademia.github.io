@@ -47,6 +47,17 @@
   'use strict';
 
   var HINT_KEY = 'oaAuthHint';
+  /* The picture is kept in a key of its OWN, not in the hint, for two
+     reasons that both matter more than the tidiness of one object:
+
+     1. every page's <head> parses HINT_KEY before the first paint, to decide
+        whether to reserve the chip's space. A 25 KB JPEG data URL inside that
+        object would be parsed there too, on the main thread, in front of
+        everything — spending the very milliseconds this is all trying to save.
+     2. the archived /v2/ tree is the same origin and writes HINT_KEY in its
+        own (frozen) shape. A field it does not know about is a field it
+        silently deletes; a separate key is one it never touches. */
+  var PHOTO_KEY = 'oaAcctPhoto';
   var state = { user: null, resolved: false, profile: null, failed: false };
   var queue = [];
   var listeners = [];
@@ -95,31 +106,68 @@
           // it — otherwise the hint can never carry a name at all.
           name = (mine && mine.name) || '';
         }
-        /* The SAME fill-from-the-previous-visit rule for the picture. Only the
-           profile read knows it, so a hint written before that read must not
-           blank what the last visit learned — that would put the initials disc
-           back for one page load, which is the whole bug. */
-        var photo = hintablePhoto(u) || (mine && mine.photo) || '';
         localStorage.setItem(HINT_KEY, JSON.stringify({
           uid: u.uid, email: u.email || '', name: name || u.displayName || '',
-          photo: photo, w: (mine && mine.w) || 0
+          w: (mine && mine.w) || 0
         }));
+        writePhotoHint(u);
       } else {
         localStorage.removeItem(HINT_KEY);
+        localStorage.removeItem(PHOTO_KEY);
       }
     } catch (e) { /* private mode — the hint is an optimisation, not a requirement */ }
   }
 
-  /** The photo to REMEMBER for the next page load, or '' — deliberately read
-      from the loaded profile (the truth) and never from the hint, so removing
-      a photo removes it here too on the very next write rather than being
-      carried for ever by the fill-empty rule above. */
-  function hintablePhoto(u) {
+  /** Remember (or forget) this account's picture, from the loaded profile —
+      the truth — and never from what was remembered before.
+
+      THREE cases, not two, and the third is the guard: the profile has not
+      been read yet, in which case we know NOTHING and must leave whatever the
+      last visit stored exactly where it is. Writing '' there would put the
+      initials disc back for one page load, which is the whole bug; carrying
+      the old value forward when the profile HAS been read and says there is no
+      photo would resurrect a picture the user had just removed. */
+  function writePhotoHint(u) {
     var own = u && state.user && u.uid === state.user.uid;
     var p = own ? state.profile : null;
-    if (!p) return '';                       // profile not read yet — caller keeps the old one
-    var ph = p.photo || (u && u.photoURL) || '';
-    return ph && ph.length <= HINT_PHOTO_MAX ? ph : '';
+    if (!p) return;                                   // unknown — leave it alone
+    var ph = hintablePhotoSrc(p.photo || (u && u.photoURL) || '');
+    try {
+      if (!ph) { localStorage.removeItem(PHOTO_KEY); return; }
+      localStorage.setItem(PHOTO_KEY, JSON.stringify({ uid: u.uid, photo: ph }));
+    } catch (e) {
+      /* Out of quota, or private mode. The picture is the biggest thing we
+         store and the least important — dropping it costs one initials disc on
+         the next load and nothing else, so it must never take the name with
+         it (which is why it is not in the same setItem as the name). */
+      try { localStorage.removeItem(PHOTO_KEY); } catch (e2) { /* nothing to do */ }
+    }
+  }
+
+  /** The remembered picture for THIS account, or ''. Validated on the way out
+      as well as on the way in, so the two can never disagree about what is
+      allowed into an `img src`. */
+  function readPhotoHint(uid) {
+    if (!uid) return '';
+    try {
+      var rec = JSON.parse(localStorage.getItem(PHOTO_KEY) || 'null');
+      if (!rec || rec.uid !== uid) return '';
+      return hintablePhotoSrc(rec.photo);
+    } catch (e) { return ''; }
+  }
+
+  /** A picture is only remembered if it is one we would be willing to put in
+      an `img src` on the next page load, before any of this code has run.
+      localStorage is same-origin, so this is not a boundary against an
+      attacker who already has script on the page — it is a boundary against
+      ourselves: whatever ends up in that key is painted by the head snippet's
+      reserve and by avatarHTML, so it must be an image and nothing else. */
+  function hintablePhotoSrc(ph) {
+    ph = String(ph || '');
+    if (!ph || ph.length > HINT_PHOTO_MAX) return '';
+    if (ph.slice(0, 11).toLowerCase() === 'data:image/') return ph;
+    if (ph.slice(0, 8).toLowerCase() === 'https://') return ph;
+    return '';
   }
 
   /** What the chip measured last time, so the space it will occupy can be
@@ -189,33 +237,34 @@
       nothing — the caller falls back to the initials disc. Only consults the
       loaded profile for the signed-in user's own account, so a merge dialog
       can never wear this account's photo on another account's row. */
-  function profilePhoto(u) {
+  function profilePhoto(u, allowHint) {
     var own = u && state.user && u.uid === state.user.uid;
     var p = own ? state.profile : null;
     if (p && p.photo) return p.photo;
     if (u && u.photoURL) return u.photoURL;
-    /* Nothing known yet — this is the restore window, and it is the ONLY
-       place the remembered picture is allowed to speak. The uid must match:
-       the merge dialog draws another account's row through avatarHTML() too,
-       and it must never wear this one's face (the same rule the profile read
-       above already follows).
+    /* Nothing known yet — the restore window, and the ONLY place the
+       remembered picture may speak. Three conditions, each load-bearing:
 
-       `p` is deliberately not required to be null: a profile that HAS loaded
-       and has no photo is an account with no photo, and falling through to
-       the hint there would resurrect a picture the user had just removed. */
-    if (!p && u && u.uid) {
-      var h = readHint();
-      if (h && h.uid === u.uid && h.photo) return h.photo;
-    }
+       - `allowHint`, passed by the header chip and by nothing else. The
+         profile CARD draws its own avatar beside a Remove button that is
+         drawn from the real profile, so a remembered picture there would
+         offer no way to remove itself; the merge dialog draws ANOTHER
+         account's row.
+       - the uid matches, so this account's face can never appear on another
+         account's row even where the hint is allowed.
+       - `p` is null. A profile that HAS loaded and carries no photo is an
+         account with no photo, and falling through there would resurrect a
+         picture the user had just removed. */
+    if (allowHint && !p && u && u.uid) return readPhotoHint(u.uid);
     return '';
   }
 
   /** The avatar disc: the photo when there is one, the initials otherwise
       (owner, 2026-08-17 — pre-fill from the provider, let the user set their
       own, fall back to the initials disc we already draw). */
-  function avatarHTML(u, xl) {
+  function avatarHTML(u, xl, allowHint) {
     var cls = 'oa-avatar' + (xl ? ' oa-avatar-xl' : '');
-    var ph = profilePhoto(u);
+    var ph = profilePhoto(u, allowHint);
     if (ph) {
       /* The disc's size comes from CSS (.oa-avatar is a fixed square and the
          image fills it), so these attributes settle nothing about layout —
@@ -227,7 +276,7 @@
       var px = xl ? 56 : 32;
       return '<span class="' + cls + '" aria-hidden="true"><img class="oa-avatar-img" ' +
         'src="' + esc(ph) + '" alt="" width="' + px + '" height="' + px + '" ' +
-        'decoding="async" fetchpriority="high"></span>';
+        'decoding="async" fetchpriority="high" referrerpolicy="no-referrer"></span>';
     }
     return '<span class="' + cls + '" aria-hidden="true" style="--oa-hue:' + avatarHue(u) + '">' +
       esc(initials(u)) + '</span>';
@@ -375,7 +424,7 @@
         // opens keeps "Your personal area" as its first destination
         '<button type="button" class="oa-acct-chip" id="oa-chip" aria-haspopup="menu" ' +
           'aria-expanded="false" title="Your personal area">' +
-          avatarHTML(u) +
+          avatarHTML(u, false, true) +
           '<span class="oa-acct-name">' + esc(displayName(u)) + '</span>' +
           '<span class="oa-caret" aria-hidden="true"></span>' +
         '</button>' +
@@ -694,7 +743,7 @@
         // changed identity on every page load — "jane.doe", then "Jane Doe"
         // once the profile read landed. On a flat static site that is every
         // navigation.
-        writeHint(state.user, displayName(state.user));
+        writeHint(state.user, displayName(state.user));   // and the picture with it
         // A provider sign-in hands us the person's name and picture — seed
         // them into the profile FIRST (fill-empty, never overwriting typed
         // values), so a Google account arrives pre-filled and the first-run
@@ -2056,7 +2105,7 @@
   }
 
   function signOut() {
-    writeHint(null);
+    writeHint(null);          // clears the picture with it — see writeHint
     // Repaint AT ONCE, before awaiting the SDK. The chip is painted from the
     // hint and is therefore clickable long before Firebase has landed, and
     // deferring everything to ready() left the name, e-mail and avatar sitting
@@ -2109,9 +2158,16 @@
 
     OAFB.ready().then(function (fb) {
       fb.auth().onAuthStateChanged(function (u) {
+        /* The profile belongs to the account that was signed in, and NOTHING
+           was clearing it when a DIFFERENT account arrived — only when the
+           user left. So the first thing the new session did was write a hint
+           from the old session's profile: sign out of one account and into
+           another on the same machine, and the second account's chip wore the
+           first one's photograph. Clear it whenever the uid changes. */
+        var was = state.user && state.user.uid;
         state.user = u || null;
         state.resolved = true;
-        if (!u) state.profile = null;
+        if (!u || was !== u.uid) state.profile = null;
         // Whoever signs in next gets their own identity check — otherwise a
         // second account signed in on the same page would inherit the first
         // one's "already checked" latch and never be looked at.
