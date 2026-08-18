@@ -187,9 +187,14 @@
       return b;
     }
 
-    function draw(q) {
+    function draw(q, opts) {
+      var keepView = !!(opts && opts.keepView);
       var needle = fold(q);
       shown = rows.filter(function (r) { return matchesQuery(r, needle); });
+      /* Close before clearing. A popup whose marker is about to leave the
+         cluster is no longer Leaflet's to auto-close, so it lingers in the DOM
+         and the next pin opens a SECOND one beside it. */
+      map.closePopup();
       cluster.clearLayers();
       shown.forEach(function (r) {
         var m = L.marker([r.lat, r.lng], { title: r.name });
@@ -207,7 +212,10 @@
         : needle
           ? shown.length + ' of ' + rows.length + ' universities'
           : rows.length + ' universities';
-      if (shown.length) {
+      /* A SEARCH frames what it found; a REDRAW must not. Re-fitting on a
+         redraw undoes a viewport the reader chose deliberately — and every
+         correction made from a pin causes one. */
+      if (shown.length && !keepView) {
         map.fitBounds(bounds(shown).pad(0.1), { maxZoom: needle ? 8 : 17 });
       }
     }
@@ -254,11 +262,16 @@
     return {
       rows: function () { return rows.slice(); },
       shown: function () { return shown.slice(); },
-      /** Re-run cfg.prepare over the file as served, and redraw. */
+      /** Re-run cfg.prepare over the file as served, and redraw IN PLACE —
+          the reader's viewport is kept. (The popup closes: its marker is
+          destroyed by the redraw, and reopening one on a marker the cluster
+          has not finished placing leaves two popups on screen. Keeping the
+          VIEW is what makes correcting a run of schools workable; the reader
+          is still looking at the same place.) */
       refresh: function () {
         if (!base.length) return;
         rows = prepared(base);
-        draw(input.value);
+        draw(input.value, { keepView: true });
       },
       map: map,
     };

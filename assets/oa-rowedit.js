@@ -170,29 +170,48 @@
     return function (li, row) {
       if (!DATASETS[dataset]) return;
       var s = st(dataset);
+      if (!s.ready || !s.admin) return;
+
       /* Another decorator may own this row — on previous-markets.html the
          postings folded in from data/jobs.json are real submissions, and
          oa-jobedit.js gives those the FULL editor. One set of buttons per
          card, and the better one wins. */
-      if (li.querySelector('.oa-card-actions')) return;
-      if (!s.ready || !s.admin) return;
+      var owned = li.querySelector('.oa-card-actions');
+
+      /* EXCEPT WHEN THE ROW IS HIDDEN, which has to be shown whoever owns the
+         card. Standing down first left a taken-down row looking completely
+         ordinary to the maintainer while it was invisible to everybody else,
+         with no way back: the fade, the note and Restore are the only trace
+         the override leaves on the page. The two decorators race on load —
+         oa-jobedit reads the WHOLE jobSubmissions collection, this one reads a
+         small filtered query — so which of them a card ends up under is a
+         matter of timing, and the state must survive either. */
+      if (row._oaHidden) {
+        li.classList.add('oa-card-gone');
+        note(li, 'You have taken this down. Only you can see it — press Restore to ' +
+                 'put it back on the site.');
+        var into = owned || document.createElement('div');
+        if (!owned) { into.className = 'oa-card-actions'; }
+        if (!into.querySelector('.oa-rowedit-restore')) {
+          var back = button('Restore', 'oa-jobbtn-edit oa-rowedit-restore',
+            'Put this entry back on the site',
+            function (btn) { restore(dataset, row, btn); });
+          into.appendChild(back);
+        }
+        if (!owned) { li.classList.add('oa-card-owned'); li.appendChild(into); }
+        return;
+      }
+
+      if (owned) return;
 
       var bar = document.createElement('div');
       bar.className = 'oa-card-actions';
       bar.appendChild(button('Edit', 'oa-jobbtn-edit', 'Correct this entry', function () {
         edit(dataset, row);
       }));
-      bar.appendChild(row._oaHidden
-        ? button('Restore', 'oa-jobbtn-edit', 'Put this entry back on the site',
-            function (btn) { restore(dataset, row, btn); })
-        : button('Take down', 'oa-jobbtn-del',
-            'Remove this entry from the site', function (btn) { hide(dataset, row, btn); }));
+      bar.appendChild(button('Take down', 'oa-jobbtn-del',
+        'Remove this entry from the site', function (btn) { hide(dataset, row, btn); }));
       li.classList.add('oa-card-owned');
-      if (row._oaHidden) {
-        li.classList.add('oa-card-gone');
-        note(li, 'You have taken this down. Only you can see it — press Restore to ' +
-                 'put it back on the site.');
-      }
       li.appendChild(bar);
     };
   }

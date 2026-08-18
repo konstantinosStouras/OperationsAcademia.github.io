@@ -193,37 +193,51 @@
          a correction reaches every visitor, and re-running the import cannot
          undo it. Signed in as the maintainer, each card gains Edit and Take
          down. */
+      /* An ADMIN-ONLY module must never be a hard dependency of a PUBLIC page.
+         assets/oa-rowedit.js failing to load — a content blocker with a broad
+         asset filter, a transient 5xx on that one file — used to throw before
+         OAList.mount ever ran, so every reader got an empty container with no
+         message at all. The stand-in does what having no overrides does: it
+         hands the rows back untouched and draws nothing. */
+      var RowEdit = window.OARowEdit || {
+        signature: function () { return ''; },
+        apply: function (dataset, rows) { return rows; },
+        onCard: function () { return function () {}; },
+        onPopup: function () { return function () {}; },
+        attach: function () {},
+      };
+
       var base = null, live = null, list = null;
 
       /* `attach` calls back when the overrides land AND when the sign-in
          state resolves — which on the ordinary visit (no overrides, not
          the maintainer) is "nothing changed", twice. Re-rendering anyway
          costs a visible redraw a second after first paint, for nothing. */
-      var sig = OARowEdit.signature('recent-faculty');
+      var sig = RowEdit.signature('recent-faculty');
 
       function refresh() {
-        var now = OARowEdit.signature('recent-faculty');
+        var now = RowEdit.signature('recent-faculty');
         if (now === sig && list) return;
         sig = now;
         if (list && list.rerender) list.rerender();
         if (!base || !live) return;
-        var next = OARowEdit.apply('recent-faculty', base);
+        var next = RowEdit.apply('recent-faculty', base);
         live.length = 0;
         for (var i = 0; i < next.length; i++) live.push(next[i]);
         if (list && list.reload) list.reload();
       }
 
-      OARowEdit.attach('recent-faculty', { onChange: refresh });
+      RowEdit.attach('recent-faculty', { onChange: refresh });
 
       list = OAList.mount({
         mount: '#oa-recent-faculty',
         data: '/data/recent-faculty.json',
         prepare: function (rows) {
           base = rows.slice();
-          live = OARowEdit.apply('recent-faculty', rows);
+          live = RowEdit.apply('recent-faculty', rows);
           return live;
         },
-        onCard: OARowEdit.onCard('recent-faculty'),
+        onCard: RowEdit.onCard('recent-faculty'),
         /* the vendor view paged by 30, and the file is one alphabet — a bigger
            page keeps a surname's neighbours together */
         perPage: 30,

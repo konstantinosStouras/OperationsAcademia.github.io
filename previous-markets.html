@@ -244,27 +244,41 @@
              legacy import — so oa-rowedit.js corrects those at read time
              instead. oa-jobedit runs first and oa-rowedit stands down wherever
              it drew. */
+          /* An ADMIN-ONLY module must never be a hard dependency of a PUBLIC page.
+             assets/oa-rowedit.js failing to load — a content blocker with a broad
+             asset filter, a transient 5xx on that one file — used to throw before
+             OAList.mount ever ran, so every reader got an empty container with no
+             message at all. The stand-in does what having no overrides does: it
+             hands the rows back untouched and draws nothing. */
+          var RowEdit = window.OARowEdit || {
+            signature: function () { return ''; },
+            apply: function (dataset, rows) { return rows; },
+            onCard: function () { return function () {}; },
+            onPopup: function () { return function () {}; },
+            attach: function () {},
+          };
+
           var base = null, live = null, list = null;
 
           /* `attach` calls back when the overrides land AND when the sign-in
              state resolves — which on the ordinary visit (no overrides, not
              the maintainer) is "nothing changed", twice. Re-rendering anyway
              costs a visible redraw a second after first paint, for nothing. */
-          var sig = OARowEdit.signature('past-postings');
+          var sig = RowEdit.signature('past-postings');
 
           function refresh() {
-            var now = OARowEdit.signature('past-postings');
+            var now = RowEdit.signature('past-postings');
             if (now === sig && list) return;
             sig = now;
             if (list && list.rerender) list.rerender();
             if (!base || !live) return;
-            var next = OARowEdit.apply('past-postings', base);
+            var next = RowEdit.apply('past-postings', base);
             live.length = 0;
             for (var i = 0; i < next.length; i++) live.push(next[i]);
             if (list && list.reload) list.reload();
           }
 
-          OARowEdit.attach('past-postings', { onChange: refresh });
+          RowEdit.attach('past-postings', { onChange: refresh });
 
           list = OAList.mount({
             mount: '#oa-past',
@@ -288,7 +302,7 @@
                  without another fetch) and the array the engine holds (so a
                  late override can rewrite it in place). */
               base = rows.slice();
-              live = OARowEdit.apply('past-postings', rows);
+              live = RowEdit.apply('past-postings', rows);
               return live;
             },
 
@@ -338,7 +352,7 @@
 
             onCard: function (li, r) {
               if (window.OAJobEdit) OAJobEdit.onCard(li, r);
-              OARowEdit.onCard('past-postings')(li, r);
+              RowEdit.onCard('past-postings')(li, r);
             }
           });
 

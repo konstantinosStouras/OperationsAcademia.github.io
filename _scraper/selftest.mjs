@@ -2085,11 +2085,16 @@ async function testRowOverrides() {
   ]) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     ok(html.includes('assets/oa-rowedit.js'), `${page} loads the archive editor`);
-    ok(html.includes(`OARowEdit.attach('${dataset}'`), `${page} loads its overrides`);
-    ok(html.includes(`OARowEdit.apply('${dataset}'`), `${page} applies them to what it renders`);
-    ok(html.includes(`OARowEdit.onCard('${dataset}')`) ||
-       html.includes(`OARowEdit.onPopup('${dataset}')`),
+    ok(html.includes(`RowEdit.attach('${dataset}'`), `${page} loads its overrides`);
+    ok(html.includes(`RowEdit.apply('${dataset}'`), `${page} applies them to what it renders`);
+    ok(html.includes(`RowEdit.onCard('${dataset}')`) ||
+       html.includes(`RowEdit.onPopup('${dataset}')`),
       `${page} draws the maintainer's controls`);
+    /* AND IT IS A SOFT DEPENDENCY. This is a PUBLIC page and the module is
+       admin-only: if it fails to load, the page must render exactly what it
+       renders for a visitor with no overrides — not an empty container. */
+    ok(html.includes('window.OARowEdit || {'),
+      `${page} still renders its data if the admin module never loads`);
   }
 
   /* previous-markets.html carries TWO kinds of row — the archive's own, and the

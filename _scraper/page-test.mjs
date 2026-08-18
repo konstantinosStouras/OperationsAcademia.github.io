@@ -1811,6 +1811,85 @@ for (const [pageName, dataset, patch] of [
    their pipelines fill, so the card checks run only when cards exist — the
    filter-bar rules hold either way. */
 
+/* ------------- a taken-down row stays visible to the maintainer, whoever
+   owns the card, and the admin-only module is never a hard dependency
+
+   previous-markets.html carries TWO decorators, and which of them ends up
+   owning a card is a matter of timing — oa-jobedit reads the WHOLE
+   jobSubmissions collection, oa-rowedit a small filtered query. The fade, the
+   note and Restore are the ONLY trace an override leaves on the page, so if
+   they are skipped whenever the other decorator got there first, a row the
+   maintainer took down looks completely ordinary to them while being invisible
+   to everybody else — with no way back.                                     */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  p.on('pageerror', (e) => jsErrors.push('overrides/hidden: ' + e.message));
+  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('.oa-card');
+  await p.waitForTimeout(600);
+
+  const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+
+  // the other decorator owns this card, exactly as it would for a posting
+  // folded in from data/jobs.json — and the row is hidden by an override
+  await p.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({
+      ready: true, admin: true, byId: { [id]: id }, byRef: {},
+    });
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: true, rows: { [id]: { hidden: true } },
+    });
+  }, victim);
+  await p.waitForTimeout(400);
+
+  const card = `[id="job-${victim}"]`;
+  ok(await p.$(card), 'the maintainer still sees a row they took down');
+  ok(await p.$eval(card, (n) => n.classList.contains('oa-card-gone')),
+    'and it is marked as taken down even though the other editor owns the card');
+  eq(await p.$$eval(card + ' .oa-rowedit-restore', (n) => n.map((x) => x.textContent)),
+    ['Restore'], 'with a way to put it back');
+  ok(await p.$eval(card + ' .oa-card-note', (n) => n.textContent).then((t) => /only you/i.test(t)),
+    'and a sentence saying only they can see it');
+
+  // and a visitor gets none of it: the row is simply not there
+  await p.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({ ready: true, admin: false, byId: {}, byRef: {} });
+    window.OARowEdit.__setForTest('past-postings', {
+      ready: true, admin: false, rows: { [id]: { hidden: true } },
+    });
+  }, victim);
+  await p.waitForTimeout(400);
+  ok(!(await p.$(card)), 'while a visitor does not see it at all');
+
+  eq(jsErrors.filter((e) => e.startsWith('overrides/hidden')), [],
+    'no uncaught errors either way');
+  await p.close();
+}
+
+/* THE ADMIN-ONLY MODULE IS A SOFT DEPENDENCY. These are PUBLIC pages; a
+   content blocker with a broad asset filter, or a transient 5xx on one file,
+   must not cost every reader the list. The module is aborted at the network
+   and the page has to render exactly what it renders with no overrides. */
+
+for (const [pageName, sel, least] of [
+  ['previous-markets.html', '.oa-card', 1],
+  ['recent-faculty.html', '.oa-card', 1],
+  ['universities.html', 'img.leaflet-marker-icon', 1],
+]) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const errs = [];
+  p.on('pageerror', (e) => errs.push(e.message));
+  await p.route('**/oa-rowedit.js', (r) => r.abort());
+  await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector(sel, { timeout: 15000 }).catch(() => {});
+  await p.waitForTimeout(600);
+  ok(await p.$$eval(sel, (n) => n.length) >= least,
+    `${pageName} still renders its data when the admin-only module never loads`);
+  eq(errs, [], `${pageName} raises no error over the missing module`);
+  await p.close();
+}
+
 /* ----------------------- an override is DATA, never markup and never a scheme
 
    `rowOverrides` is PUBLIC-READ: whatever it holds is rendered for every
