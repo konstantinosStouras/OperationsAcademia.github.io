@@ -29,6 +29,12 @@ on:
       - 'v1/**'
       - 'v2/**'
       - 'v3/**'
+      # …and this file, which the push list has always carried and this one
+      # did not: a pull request that changes only the checks themselves got no
+      # check run, which is exactly the change most worth running before it
+      # lands. Noticed while fixing the browser step, whose own follow-up
+      # commit touched nothing else.
+      - '.github/workflows/oa-checks.yml'
   workflow_dispatch:
 
 permissions:
