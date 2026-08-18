@@ -562,7 +562,15 @@ async function main() {
   const handover = sheetHandover({
     sheetRows,
     builtSheetIds: fresh.map((f) => f.sheetId).filter(Boolean),
-    pulledSheetIds: pulled.map((d) => d.data().sheetId).filter(Boolean),
+    /* `buildOwned` HERE TOO. This was the one read of `sheetId` the provenance
+       guard had been left off, and it is enough on its own: a withdrawn
+       document naming a workbook row makes sheetHandover treat that row as
+       handed over, so the workbook's copy is dropped — while the document
+       publishes nothing, because every OTHER read of sheetId is guarded. The
+       posting simply disappears, and `stranded` cannot even report it, since
+       the row was never claimed. */
+    pulledSheetIds: pulled.map((d) => (buildOwned(d.data()) ? d.data().sheetId : ''))
+      .filter(Boolean),
     claimedSheetIds,
   });
   const { publishedFromDoc, stranded } = handover;

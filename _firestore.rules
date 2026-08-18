@@ -38,6 +38,26 @@ service cloud.firestore {
         && request.auth.token.email == 'kstouras@gmail.com';
     }
 
+    /* `mergedFrom` records the account a posting was handed over FROM, and the
+       scheduled build reads it: a poster who merged their accounts still
+       carries the OLD account's owner tag on their published row until it is
+       republished, so a withdrawal has to be matched against both
+       (`removalSpecs` in _scraper/jobs-model.mjs). That makes the field
+       load-bearing, and it is therefore pinned to the merge that writes it —
+       the ordinary correct/withdraw path may not introduce or change it.
+
+       Without this, the scoping the build does is defeated by the thing it
+       relies on: any signed-in account could look a victim's raw uid up
+       through `accountKeys` (readable one-at-a-time to anyone signed in),
+       name it as `mergedFrom` on a submission carrying the victim's published
+       `ref`, withdraw it, and have the next build take the victim's posting
+       off the site. */
+    function mergedFromUnchanged() {
+      return ('mergedFrom' in request.resource.data) == ('mergedFrom' in resource.data)
+          && (!('mergedFrom' in request.resource.data)
+              || request.resource.data.mergedFrom == resource.data.mergedFrom);
+    }
+
     function str(field, maxLen) {
       return !(field in request.resource.data)
         || (request.resource.data[field] is string
@@ -115,6 +135,8 @@ service cloud.firestore {
                     && request.resource.data.createdAt == request.time
                     && shapeOk()
                     && !('featured' in request.resource.data)
+                    // the account merge writes this; a new posting never does
+                    && !('mergedFrom' in request.resource.data)
                     && request.resource.data.keys().size() <= 34;
 
       // A poster may read, correct and withdraw their own posting.
@@ -127,6 +149,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && featuredUnchanged()
+                    && mergedFromUnchanged()
                     && shapeOk();
 
       // MERGING TWO ACCOUNTS hands a posting over to the account its owner is
@@ -193,6 +216,7 @@ service cloud.firestore {
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && candShapeOk()
+                    && !('mergedFrom' in request.resource.data)
                     && request.resource.data.keys().size() <= 30;
 
       allow read: if isOwner(resource.data.uid) || isAdmin();
@@ -201,6 +225,7 @@ service cloud.firestore {
       allow update: if isOwner(resource.data.uid)
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
+                    && mergedFromUnchanged()
                     && candShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions
@@ -242,6 +267,7 @@ service cloud.firestore {
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && plShapeOk()
+                    && !('mergedFrom' in request.resource.data)
                     && request.resource.data.keys().size() <= 25;
 
       allow read: if isOwner(resource.data.uid) || isAdmin();
@@ -249,6 +275,7 @@ service cloud.firestore {
       allow update: if isOwner(resource.data.uid)
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
+                    && mergedFromUnchanged()
                     && plShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions
@@ -417,7 +444,6 @@ service cloud.firestore {
                         'institution', 'department', 'school', 'unit', 'type',
                         'country', 'applyBy', 'comments',
                         'adUrl', 'postedAtUrl', 'furtherInfoUrl',
-                        'levels', 'characteristics',
                         // recently-hired faculty
                         'name', 'last', 'placement', 'almaMater', 'undergrad', 'webUrl',
                         // the universities map
@@ -434,7 +460,6 @@ service cloud.firestore {
                    && str('undergrad', 220)   && str('webUrl', 600)
                    && str('schoolDept', 320)  && str('address', 320)
                    && str('mapUrl', 600)      && str('facultyUrl', 600)
-                   && list('levels', 8)       && list('characteristics', 12)
                    && (!('lat' in request.resource.data)
                        || (request.resource.data.lat is number
                            && request.resource.data.lat >= -90

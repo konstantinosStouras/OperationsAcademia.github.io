@@ -686,8 +686,20 @@ export function removalSpecs(docs = []) {
        `owner` on the document is deliberately NOT trusted unless the build
        wrote it. It is a tag, the tags are published in data/jobs.json, and a
        browser can put anything in that field — trusting it would hand back the
-       very hole the scoping exists to close. A merged-away uid is safe by
-       contrast: it is a RAW uid, and those are never published. */
+       very hole the scoping exists to close.
+
+       `mergedFrom` is trusted for one reason and one only: THE RULES PIN IT.
+       `mergedFromUnchanged()` in _firestore.rules lets the account-merge
+       branch write it and refuses it everywhere else, so no ordinary correct
+       or withdraw can introduce or change it. It is NOT trusted because a raw
+       uid is hard to come by — that was the first reasoning here and it was
+       wrong: `accountKeys` is readable one document at a time by anyone
+       signed in, and it maps an e-mail to exactly that uid. Without the rule,
+       naming a victim's uid as `mergedFrom` on a submission carrying their
+       published `ref` takes their posting off the site.
+
+       So: REDEPLOY THE RULES. Until they are published this field is only as
+       good as the browser that wrote it. */
     const owners = new Set();
     if (v.uid) {
       owners.add(ownerTag(v.uid));

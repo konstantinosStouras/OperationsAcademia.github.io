@@ -2048,6 +2048,13 @@ async function testRowOverrides() {
     (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
       .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
   ok(allowed.size > 10, 'the rules enumerate the fields an override may carry');
+  /* AND NOTHING BEYOND WHAT THE EDITOR WRITES. `levels`/`characteristics` were
+     allowed and never read: dead keys, bounded only by item COUNT, so each
+     element could be an arbitrary string — a megabyte of nothing in a document
+     every visitor to the page downloads. */
+  for (const dead of ['levels', 'characteristics']) {
+    ok(!allowed.has(dead), `an override may not carry ${dead} — nothing reads it`);
+  }
   for (const k of ['dataset', 'rowId', 'hidden', 't']) {
     ok(allowed.has(k), `an override may carry ${k}`);
   }
@@ -2137,8 +2144,18 @@ async function testRemovalSafety() {
     'a poster who merged their accounts can still withdraw a posting made under the old one');
   eq(mergeRows([published], [], r.specs).removed, 1, 'and the row actually goes');
 
-  /* …without widening it: the tag is PUBLISHED, so a document may not simply
-     name one. Only a raw uid, which is not published, counts. */
+  /* …without widening it. The tag is PUBLISHED, so a document may not simply
+     name one — and `mergedFrom` is trusted ONLY because the rules pin it to
+     the account merge (`mergedFromUnchanged`). `accountKeys` maps an e-mail
+     to a raw uid for anyone signed in, so without that rule this scoping is
+     defeated by the very field it relies on. */
+  const rules0 = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(rules0.includes('function mergedFromUnchanged()'),
+    'the rules pin mergedFrom, which is the only reason the build may read it');
+  eq((rules0.match(/&& mergedFromUnchanged\(\)/g) || []).length, 3,
+    'on all three posting collections\' correct/withdraw path');
+  eq((rules0.match(/&& !\('mergedFrom' in request\.resource\.data\)/g) || []).length, 3,
+    'and a new posting may not carry it at all');
   r = removalSpecs([{ id: 'doc-2',
     data: () => ({ uid: 'a-stranger-uid-000000001', ref: 'OA-JOB-1',
                    owner: ownerTag(oldUid), status: 'withdrawn' }) }]);
@@ -2316,6 +2333,17 @@ async function testRefLessTakedown() {
   eq(ch.takedowns[0].before.id, 'a-1', 'naming the posting that went');
   eq(collectChanges(served, [], [], []).takedowns.length, 0,
     'while a run that took nothing down still reports nothing');
+
+  /* EVERY read of `sheetId` is guarded, not most of them. The one left
+     unguarded — the withdrawn documents handed to sheetHandover — was enough
+     on its own to delete a workbook posting: the row is treated as handed
+     over and dropped, while the document publishes nothing, and `stranded`
+     cannot report it because the row was never claimed. */
+  const build0 = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  eq((build0.match(/buildOwned\(d\.data\(\)\)/g) || []).length, 3,
+    'every place the build reads a document\'s sheetId asks whose word it is');
+  ok(!/pulledSheetIds: pulled\.map\(\(d\) => d\.data\(\)\.sheetId\)/.test(build0),
+    'including the withdrawn documents the hand-over reads');
 
   /* The build must collect those ids from the documents it pulled — by
      publishedId, by sheetId and by the document's own id, which for a migrated
