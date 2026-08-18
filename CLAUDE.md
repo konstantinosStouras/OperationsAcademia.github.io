@@ -117,15 +117,72 @@ removal is a signed-in stranger taking down somebody else's posting.
 
 **When the sheet changes shape, fix it in `_scraper/jobmarket-sheet.mjs` —
 never by hand-editing `data/`.** That file is rewritten from the workbook every
-morning, so a patched row comes back the next day, exactly as with the country
-spellings below. Columns are matched by header alias and a header it does not
-know is REPORTED in the run's log rather than guessed at; add the alias there.
+half hour, so a patched row comes back within the hour, exactly as with the
+country spellings below. Columns are matched by header alias and a header it
+does not know is REPORTED in the run's log rather than guessed at; add the alias
+there.
+
+**It is not the maintainer's workbook.** "OM Job Market" is owned by
+`omjobmarket2023@gmail.com` and crowdsourced — contributors add their own
+postings and, when a season opens, their own tabs. So a heading cannot be
+corrected at the source, and the pipeline has to be able to read a tab that
+names a column wrongly.
+
+### A header that names one column wrongly, and the four months it cost
+
+The "2026 Jobs" tab — created by the sheet's contributors when the 2026-2027
+market opened — heads its school column **"Location"**, the same word it uses
+for the town beside it. Every other tab heads it "School". `institution` is
+required and no alias reads "location", so that row was refused as a header;
+the scan moved to the next row and took a POSTING as one, because "University
+of Hong Kong" begins with an alias of `institution` and a comment reading "an
+expected start date of July 1, 2027" contains an alias of `posted`. Both
+required fields were satisfied by prose. The date was then read out of a
+comment column empty on almost every row, so every row was skipped. The tab
+logged `"2026 Jobs": 0 posting(s), 94 row(s) skipped` every morning and the
+site simply never showed the season — 22 postings on the jobs page where the
+sheet held 89.
+
+Three rules came out of it, and they are separate on purpose:
+
+1. **A row of postings is never a header** (`looksLikeData`), however many
+   aliases its prose contains. A link or a date is decisive — a column is not
+   NAMED after either — and two long sentences are counted rather than trusted,
+   so a wordy label survives.
+2. **A header that names most of its columns is repaired, not discarded**
+   (`repairColumns`). The one required field it failed to name is settled from
+   the DATA — the institution column is the one whose values NAME institutions,
+   read with the same `UNIVERSITY`/`BUSINESS_SCHOOL` patterns `typeFromNames`
+   uses, as a SHARE of the column (measured on the live tab: 92% of the school
+   column, 0% of the two beside it, with "KU Leuven", "ESMT Berlin" and
+   "Stanford GSB" among the 8% that name nothing). Then the header is re-read
+   AROUND that column, which is what makes the repair minimal: the tab's second
+   "Location" becomes the town, and the deadline, the link and the notes — all
+   of which whole-tab inference would have lost — are kept. It fires only for a
+   field without which nothing publishes, only when the header did not name it,
+   and never on a tab whose header is right.
+3. **A tab that is read and yields nothing is an error, not a quiet tab.** It
+   is a `::error::` annotation AND a `stalenessOf` reason of its own
+   (`unread-tab`), checked BEFORE the age test: from outside it looks exactly
+   like a quiet market, every other signal says the sheet is healthy, and it is
+   the one failure here a person has to go and fix.
+
+**Which season a posting belongs to: the tab is a FLOOR.** The site's roll rule
+reads the market year off the posting's date, which is right except for a
+school advertising early — 24 of that tab's 89 postings are dated April to June
+2026, two saying "an expected start date of July 1, 2027" in their own comment,
+and by date alone all 24 file under the season that has just closed, which is
+the one page they are of no use on. The tab settles it (`cycleYear`), because
+naming the cycle is the whole reason it exists. A floor and never a ceiling: it
+can carry a posting forward into the season its tab was made for and can never
+push one back into a closed season, so a row added late to an old tab keeps the
+later year its date gives it and nothing already published moves.
 
 A sheet that stops being updated looks exactly like a quiet job market from the
 site, so it is made visible deliberately: `stalenessOf`/`shouldWarn` e-mail the
 maintainer once (then weekly) when the sheet has gained nothing for three weeks,
-cannot be read, or reads as empty. Nothing already published is ever removed by
-one of those failures.
+cannot be read, reads as empty, or has a tab that gave nothing. Nothing already
+published is ever removed by one of those failures.
 
 ## The HigherEdJobs postings are checked against their own ads
 
@@ -253,6 +310,44 @@ again as new. Correct those in the workbook.
 firestore:rules`) — until then the panel says permission-denied — and the
 e-mail half is inert until `SMTP_*` is set, which stamps nothing, so the
 postings are announced once it exists.
+
+### The gate arriving is not a reason to retract
+
+Sixteen of the sheet's postings were on the site before the queue existed, and
+the first morning it answered they would all have had no document and therefore
+come DOWN — off the jobs page, after e-mail alerts about them had gone out.
+Already public is already reviewed in the only sense that matters here, so
+`partition(rows, docs, { published })` takes the ids the site is showing and
+enters those rows APPROVED, with the reason written into the document's `note`.
+Rejecting one still takes it down. Everything the site is not already showing is
+queued pending, which is the whole of the gate for every posting from here on.
+
+### A season is not six postings
+
+The queue's unit of work is a market, not a posting: the "2026 Jobs" tab alone
+opens with 89, and a whole workbook in scope holds several hundred across two
+seasons. Three things follow, and each of them is what keeps the gate from
+becoming the bug it was built to prevent — postings not on the site:
+
+- **The panel approves a page at once.** `approveAll` in `assets/oa-jobreview.js`
+  does exactly what the per-card path does, edits included, one write at a time
+  with the failures counted rather than thrown. A gate that can only be cleared
+  89 times does not get cleared.
+- **The queue is split by market year**, newest season first and selected by
+  default, which is what makes "approve everything here" safe to press: a
+  posting approved from a closed season is correct and lands on Previous
+  markets, and is not what someone clearing this queue in September is doing.
+- **A burst is one e-mail.** One per posting is the owner's choice and right for
+  the market ticking over; 89 of them is a mail bomb from the site's own address
+  that the provider would cut off half way. Above `BURST` (12) the mailer sends
+  a single list instead, stamping `mailedAt` per document so the two paths share
+  one high-water mark.
+
+**Approving publishes at the next SHEET READ**, because `data/jobmarket.json`
+holds the approved rows and nothing else writes it. That is why
+`oa-jobmarket-sheet.yml` runs every half hour rather than daily — see its
+header. If that cadence changes, change the panel's and the e-mail's promise
+with it.
 
 ## Mobile standards for tables and lists — MUST consult
 

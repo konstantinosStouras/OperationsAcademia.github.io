@@ -13,6 +13,16 @@
    ever announced twice and a run that dies half-way resumes rather than
    repeats.
 
+   WITH ONE EXCEPTION, ABOVE `BURST`. That choice was made about six postings,
+   and the queue does not always arrive six at a time: the morning the sheet's
+   "2026 Jobs" tab was first read properly it had eighty-nine postings on it,
+   and a whole workbook in scope holds several hundred. One e-mail each would
+   be a mail bomb from the site's own address, and the provider would rate-limit
+   it half way through — so a burst is announced ONCE, as a list, with the
+   count in the subject. Everything else is unchanged: the same high-water
+   mark, stamped per document, so a burst digest and the per-posting e-mails
+   can never announce the same posting twice.
+
    IT IS A NO-OP UNTIL IT IS CONFIGURED, exactly like alerts-mailer.mjs and
    feedback-mailer.mjs: without FIREBASE_SERVICE_ACCOUNT there is no queue to
    read, and without SMTP_* there is nowhere to send. Both states say so and
@@ -46,6 +56,11 @@ const warn = (...a) => console.log('::warning::' + a.join(' '));
 /** Where "a posting is waiting" goes. The maintainer's own address, which is
     also the one the review page is gated on. */
 const TO = process.env.JOBREVIEW_ALERT_TO || CONTACT;
+
+/** More than this many waiting at once is a batch arriving, not the market
+    ticking over, and is announced as one list. Twelve: comfortably above a
+    busy morning's trickle, far below the eighty-nine a single tab can bring. */
+export const BURST = Number(process.env.JOBREVIEW_BURST) || 12;
 
 /* ---------------------------------------------------------------- rendering */
 
@@ -88,12 +103,54 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
       'Review it on the site</a></p>' +
     '<p style="color:#5a5f6b;font-size:13px">You can correct any field before ' +
-    'approving. Approving publishes it at the next build (up to 20 minutes); ' +
+    'approving. Approving publishes it at the next sheet read, within half an hour; ' +
     'rejecting keeps it off the site for good.</p>';
 
   return {
     subject: 'Job posting to approve: ' + (title || r.id || 'untitled'),
     html: shell({ title: 'A posting is waiting for you', bodyHtml, manageUrl: reviewUrl }),
+  };
+}
+
+/**
+ * One e-mail for a batch: what arrived, in a list, with the count in the
+ * subject.
+ *
+ * Deliberately NOT the per-posting card repeated — a hundred of those is not a
+ * digest, it is the same mail bomb in one message. It is a list of what is
+ * waiting, and the decision is made on the page, where every field is editable
+ * anyway.
+ */
+export function renderDigestEmail(docs, { site = SITE } = {}) {
+  const reviewUrl = site + '/feedback';
+  const rows = docs.map((d) => {
+    const r = shown(d);
+    const title = [r.institution, r.department].filter(Boolean).join(' — ');
+    return '<tr>' +
+      '<td style="padding:3px 12px 3px 0;vertical-align:top;white-space:nowrap;' +
+        'color:#5a5f6b">' + esc(r.posted || '') + '</td>' +
+      '<td style="padding:3px 0;vertical-align:top">' + esc(title || r.id || 'untitled') +
+        (r.country ? ' <span style="color:#5a5f6b">(' + esc(r.country) + ')</span>' : '') +
+      '</td></tr>';
+  }).join('');
+
+  const bodyHtml =
+    '<p><strong>' + docs.length + ' job postings</strong> have been read from your ' +
+    'tracking sheet and are waiting for you to approve them. ' +
+    '<strong>None of them is on the site yet.</strong></p>' +
+    '<p>They came in together, so they are listed here rather than sent one by one.</p>' +
+    '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' + rows + '</table>' +
+    '<p><a href="' + esc(reviewUrl) + '" style="display:inline-block;background:#426394;' +
+      'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
+      'Review them on the site</a></p>' +
+    '<p style="color:#5a5f6b;font-size:13px">Every field is editable there before you ' +
+    'approve, one at a time or the whole page at once. Approving publishes at the next ' +
+    'sheet read, within half an hour; rejecting keeps a posting off the site for good.</p>';
+
+  return {
+    subject: docs.length + ' job postings to approve',
+    html: shell({ title: docs.length + ' postings are waiting for you',
+                  bodyHtml, manageUrl: reviewUrl }),
   };
 }
 
@@ -128,6 +185,32 @@ async function main() {
   if (!tx && !DRY) {
     warn('SMTP is not configured — the postings stay unannounced and will be ' +
          'mailed once it is. See _SETUP-EMAIL.md');
+    return 0;
+  }
+
+  /* A BATCH IS ONE E-MAIL. Stamped per document all the same, so the two
+     paths share one high-water mark and neither can re-announce the other's
+     postings. A failure to stamp is reported and the run carries on: the
+     e-mail has gone, and leaving the rest unstamped would send it again. */
+  if (due.length > BURST) {
+    const { subject, html } = renderDigestEmail(due);
+    log(`${due.length} postings arrived together — announcing them as one list.`);
+    if (DRY) {
+      log(`--- digest\nTo: ${TO}\nSubject: ${subject}\n${toPlain(html)}\n`);
+      return 0;
+    }
+    await send(tx, { from: fromAddress(), to: TO, subject, html, text: toPlain(html) });
+    const at = new Date().toISOString();
+    let stamped = 0;
+    for (const doc of due) {
+      try {
+        await db.collection(COLLECTION).doc(doc.rowId).set({ mailedAt: at }, { merge: true });
+        stamped++;
+      } catch (e) {
+        warn(`announced ${doc.rowId} but could not stamp it (${e.message})`);
+      }
+    }
+    log(`told ${TO} about ${due.length} posting(s); stamped ${stamped}.`);
     return 0;
   }
 
@@ -203,6 +286,23 @@ function selftest() {
   const due = needMail(queue).map((d) => d.rowId);
   ok(JSON.stringify(due) === JSON.stringify(['a', 'b']),
     'only unmailed pending postings are due, oldest first');
+
+  /* A BATCH IS ONE E-MAIL. One per posting is right for the market ticking
+     over and is a mail bomb for a tab arriving: eighty-nine postings, eighty-
+     nine e-mails, and a provider cutting the run off part-way through. */
+  const many = [];
+  for (let i = 0; i < BURST + 1; i++) {
+    many.push({ rowId: 'r' + i, status: 'pending', queuedAt: '2026-08-18T00:00:00Z',
+                row: { id: 'r' + i, institution: 'University ' + i, posted: '2026-08-1' + (i % 10),
+                       country: 'United States' }, edits: {} });
+  }
+  const digest = renderDigestEmail(many, { site: 'https://example.org' });
+  ok(digest.subject.includes(String(many.length)), 'the subject says how many are waiting');
+  ok(/University 0/.test(digest.html) && new RegExp('University ' + BURST).test(digest.html),
+    'and every one of them is listed, first to last');
+  ok(digest.html.includes('https://example.org/feedback'), 'with one link to review them');
+  ok(!/not on the site yet[\s\S]*not on the site yet/.test(digest.html),
+    'said once, not once per posting');
 
   console.log(fails.length
     ? `jobreview-mailer selftest: ${pass} passed, ${fails.length} FAILED\n  ` + fails.join('\n  ')

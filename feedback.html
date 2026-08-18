@@ -113,6 +113,22 @@
                       held back until you approve them &mdash; <span id="oa-review-count">nothing</span>
                       waiting. Correct anything that is wrong before approving; your
                       edits are kept and re-applied every time the sheet is re-read.</p>
+                    <!-- Approving one at a time is right for a handful and unusable for
+                         a season: the tracking sheet's own tab opened with 89 postings
+                         on it. So the whole queue can go up at once, behind a count and
+                         a confirmation, and every posting is still on screen to be read
+                         or corrected first. -->
+                    <!-- The workbook holds several market cycles at once, so the queue
+                         does too: the morning it was first read properly, 89 of its
+                         postings were the season under way and ~250 were the one that
+                         had closed. Splitting them by market is what makes approving a
+                         whole page a safe thing to press — it acts on what is shown. -->
+                    <div class="oa-tabs" id="oa-review-years" hidden></div>
+                    <p class="oa-rv-bulk" id="oa-review-bulk" hidden>
+                      <button type="button" class="button blue" id="oa-review-all">
+                        Approve all <span data-n></span> shown &amp; publish</button>
+                      <span class="oa-form-msg" id="oa-review-bulk-msg" role="status"></span>
+                    </p>
                     <div id="oa-review-list"></div>
                   </section>
 
