@@ -26,12 +26,13 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
+  specMatches,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { buildVocab, serialiseVocab } from './vocab.mjs';
@@ -476,7 +477,10 @@ async function main() {
       continue;
     }
     if (row) {
-      fresh.push({ id: d.id, key: d.id, row, sheetId: sid || '',
+      // `fixedId` is honoured by assignIds BEFORE it derives the others, so a
+      // taken-over workbook posting keeps the workbook's own id without ever
+      // colliding with a row this run derived.
+      fresh.push({ id: d.id, key: d.id, row, sheetId: sid || '', fixedId: sid || '',
                    queued: d.data().status === 'queued' });
     } else rejected.push({ id: d.id, ref: d.data().ref || d.id });
   }
@@ -489,15 +493,6 @@ async function main() {
      day derive the same id and the second overwrites the first — which is how
      Tulane's and Houston's second departments disappeared. */
   assignIds(fresh);
-
-  /* A posting the maintainer took over KEEPS THE ID THE WORKBOOK GAVE IT.
-     assignIds derives an id from year, institution and date, which is how the
-     workbook derives one too — but only the workbook knows which of two
-     postings from one school on one day is the `-2`. Re-deriving it would
-     silently renumber them, and the id is the row's identity: its `addedAt`
-     continuity, the anchor a card links to, and the cursor the e-mail alerts
-     read. */
-  for (const f of fresh) if (f.sheetId) f.row.id = f.sheetId;
 
   const existing = await readJobsStrict(JOBS);
   /* WHAT A TAKEDOWN IS KEYED ON, and why it is not only the reference.
@@ -517,13 +512,11 @@ async function main() {
      stranger deleting somebody else's advertisement. */
   const { specs: removeSpecs, ids: removeIds } = removalSpecs(pulled);
 
-  /* ONE predicate for "this run takes that row down", used by the orphan carry
-     and by the change e-mail alike. Keeping them apart is how the report came
-     to say something the file did not: a reference is only a takedown for the
-     account that published the row, so a set of bare references over-reports
-     every one it cannot match. */
-  const isRemoved = (r) => removeIds.has(r.id) ||
-    removeSpecs.some((x) => x.ref && x.ref === r.ref && (x.owner || '') === (r.owner || ''));
+  /* ONE predicate for "this run takes that row down", used by the orphan carry,
+     by the change e-mail and by the stamp alike. Keeping them apart is how the
+     report came to say something the file did not, and how a document came to
+     be marked `removed` for a posting still on the site. */
+  const isRemoved = (r) => removeSpecs.some((x) => specMatches(x, r));
 
   // The maintainer's committed suppression list, honoured by every writer of
   // this file (see data/jobs-hidden.json). A posting listed here is withheld
@@ -554,28 +547,6 @@ async function main() {
       existing.filter((r) => fromSheet(r) && sheetRows.some((s) => s.id === r.id)).length;
     log(`the tracking sheet carries ${sheetRows.length} posting(s)` +
         (goneFromSheet > 0 ? `; ${goneFromSheet} previously published are no longer in it` : ''));
-  }
-
-  /* ORPHANS — rows in the served file that no live document accounts for.
-
-     Before the migration has run, that is every posting still only in the
-     file, and rebuilding from the database alone would DELETE them. So they
-     are carried instead, and reported: the file only ever shrinks because a
-     posting was withdrawn or hidden, never because a document is missing.
-
-     The consequence, which is deliberate: taking a posting down is a STATUS
-     CHANGE (withdrawn/hidden), never deleting its document. Deleting the
-     document would leave the row orphaned and therefore preserved — the
-     opposite of what was intended. The rules reflect this: a poster may
-     withdraw their own posting, and only the maintainer may delete outright. */
-  const live_ids = new Set(fresh.map((f) => f.row.id));
-  const orphans = existing.filter((r) =>
-    !live_ids.has(r.id) &&
-    !(sheetPresent && fromSheet(r)) &&
-    !isRemoved(r));
-  if (orphans.length) {
-    warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
-         'unchanged. Run migrate-to-firestore.mjs to make them editable.');
   }
 
   /* THE HAND-OVER. A row the maintainer has taken over publishes from its
@@ -614,7 +585,48 @@ async function main() {
         'workbook — taken off the site with the rest of its removals');
   }
 
-  const merged = mergeRows(orphans, freshVisible, removeSpecs);
+  /* A REMOVAL MUST NEVER TAKE A ROW SOMETHING ELSE JUST BUILT.
+
+     Row ids are DERIVED — year, institution slug, posting date — and the `-2`
+     that separates two postings from one school on one day is assigned among
+     the rows built THAT RUN. So the moment one of a same-day pair is taken
+     down, the survivor stops being `X-2` and becomes `X` … which is exactly
+     the id the hidden document names. Reproduced end to end: taking down one
+     Tulane posting deleted the OTHER one, silently and for good.
+
+     A live document accounts for the row it built, so an id one of them now
+     occupies is not a takedown, whatever a withdrawn document says about it. */
+  const builtIds = new Set(freshVisible.map((r) => r.id));
+  const applicable = removeSpecs.filter((x) => !x.id || !builtIds.has(x.id));
+  const shadowed = removeSpecs.filter((x) => x.id && builtIds.has(x.id));
+  if (shadowed.length) {
+    log(`${shadowed.length} takedown(s) name an id a posting still being published now ` +
+        'carries — a same-day sibling was renumbered; they are left alone');
+  }
+
+  /* ORPHANS — rows in the served file that no live document accounts for.
+
+     Before the migration has run, that is every posting still only in the
+     file, and rebuilding from the database alone would DELETE them. So they
+     are carried instead, and reported: the file only ever shrinks because a
+     posting was withdrawn or hidden, never because a document is missing.
+
+     The consequence, which is deliberate: taking a posting down is a STATUS
+     CHANGE (withdrawn/hidden), never deleting its document. Deleting the
+     document would leave the row orphaned and therefore preserved — the
+     opposite of what was intended. The rules reflect this: a poster may
+     withdraw their own posting, and only the maintainer may delete outright. */
+  const live_ids = new Set(fresh.map((f) => f.row.id));
+  const orphans = existing.filter((r) =>
+    !live_ids.has(r.id) &&
+    !(sheetPresent && fromSheet(r)) &&
+    !applicable.some((x) => specMatches(x, r)));
+  if (orphans.length) {
+    warn(`${orphans.length} posting(s) in jobs.json have no document yet — carried ` +
+         'unchanged. Run migrate-to-firestore.mjs to make them editable.');
+  }
+
+  const merged = mergeRows(orphans, freshVisible, applicable);
   const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
@@ -634,7 +646,7 @@ async function main() {
      the log and the admin e-mail, so the two can never tell different
      stories. */
   const changes = collectChanges(existing, freshVisible, [],
-    existing.filter(isRemoved).map((r) => r.id));
+    existing.filter((r) => applicable.some((x) => specMatches(x, r))).map((r) => r.id));
 
   const before = serialise(existing);
   const after = serialise(rows);
@@ -721,9 +733,27 @@ async function main() {
       publishedId: f.row.id,
     }]);
   }
+
+  /* A WITHDRAWAL IS RETIRED ONLY ONCE IT HAS ACTUALLY TAKEN EFFECT. `removed`
+     takes the document out of the `withdrawn`/`hidden` query — it is the only
+     handle the build has on that removal — so stamping one whose row is still
+     published makes the failure PERMANENT, and silent: no later run can
+     retry, and nothing anywhere says why the posting is still there. It used
+     to be stamped unconditionally, which is what turned an owner-tag mismatch
+     from one bad build into a posting that could never be taken down. */
+  const stillThere = [];
   for (const d of pulled) {
     if (d.data().status !== 'withdrawn') continue;   // 'hidden' stays hidden
+    const mine = removeSpecs.filter((x) => x.docId === d.id);
+    if (mine.length && rows.some((r) => mine.some((x) => specMatches(x, r)))) {
+      stillThere.push(d.data().ref || d.id);
+      continue;
+    }
     writes.push([d.id, { status: 'removed', removedAt: new Date() }]);
+  }
+  if (stillThere.length) {
+    warn(`${stillThere.length} withdrawal(s) did not reach their posting and are left to ` +
+         `retry rather than marked done: ${stillThere.slice(0, 5).join(', ')}`);
   }
   for (let i = 0; i < writes.length; i += 400) {
     const batch = db.batch();
@@ -736,7 +766,17 @@ async function main() {
 /* Run only as the entry point, so the selftest can import syncSheetMirrors and
    drive it against a stand-in collection — the same guard migrate-to-firestore
    already uses. Importing this file used to RUN the build. */
-if (import.meta.url === `file://${process.argv[1]}`) {
+/* `pathToFileURL`, not a template string: a raw path and a file URL are not the
+   same text the moment the path holds a space or anything else a URL escapes
+   (this repository already carries a directory called `back up`). Compared as
+   strings, the two differ, main() is never called, and the process exits 0
+   having printed nothing — a scheduled publish that goes green while
+   publishing nothing, which is the worst failure available to it.
+
+   The argv[1] guard is for `node -e`, where there is no entry script at all:
+   pathToFileURL(undefined) throws, and this file is IMPORTED by the selftest
+   as well as run. */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => {
     // A build failure must not wedge the workflow into a red state forever; the
     // next scheduled run retries from the same queue.

@@ -22,7 +22,7 @@ import {
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
-  removalSpecs, buildOwned, ownerTag,
+  removalSpecs, buildOwned, ownerTag, specMatches,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, vocabKey } from './vocab.mjs';
@@ -2107,6 +2107,97 @@ async function testRowOverrides() {
   ok(home.includes('Restore'), 'and the home page offers the maintainer a way back');
 }
 
+/* --------------------------------- what a takedown must NOT reach, and when
+
+   Five ways the removal machinery went wrong, each one reproduced before it
+   was fixed. They are grouped because they share a cause: a row's id is
+   DERIVED on every build, and a document's word about which row it is was
+   taken at face value. */
+async function testRemovalSafety() {
+  const row = (id, over = {}) => ({
+    id, year: 2026, posted: '2026-04-07', institution: 'Tulane University',
+    department: 'Ops', school: '', unit: 'Ops', type: 'University',
+    levels: ['Assistant Professor'], applyBy: 'Until filled.', applyByDate: '',
+    comments: '', country: 'United States', adUrl: '', adLabel: '',
+    postedAtUrl: '', postedAtLabel: '', furtherInfoUrl: '', characteristics: [],
+    featured: false, source: 'sheet-import', addedAt: '2026-04-07T00:00:00Z',
+    owner: '', ref: '', ...over,
+  });
+
+  /* (1) A MERGED ACCOUNT'S WITHDRAWAL. Merging moves a posting to a new uid
+     WITHOUT republishing it, so the served row still carries the tag of the
+     account merged away. Scoped to the new uid alone, the poster's next
+     withdrawal matched nothing at all. */
+  const oldUid = 'uid-before-the-merge-0001';
+  const newUid = 'uid-after-the-merge-00002';
+  const published = row('p-1', { ref: 'OA-JOB-1', owner: ownerTag(oldUid) });
+  let r = removalSpecs([{ id: 'doc-1',
+    data: () => ({ uid: newUid, mergedFrom: oldUid, ref: 'OA-JOB-1', status: 'withdrawn' }) }]);
+  ok(r.specs.some((x) => specMatches(x, published)),
+    'a poster who merged their accounts can still withdraw a posting made under the old one');
+  eq(mergeRows([published], [], r.specs).removed, 1, 'and the row actually goes');
+
+  /* …without widening it: the tag is PUBLISHED, so a document may not simply
+     name one. Only a raw uid, which is not published, counts. */
+  r = removalSpecs([{ id: 'doc-2',
+    data: () => ({ uid: 'a-stranger-uid-000000001', ref: 'OA-JOB-1',
+                   owner: ownerTag(oldUid), status: 'withdrawn' }) }]);
+  eq(mergeRows([published], [], r.specs).removed, 0,
+    'while quoting somebody else’s owner tag still removes nothing');
+
+  /* (2) THE SAME-DAY SIBLING. Two Tulane postings on one day are `X` and
+     `X-2`, and which is which is decided among the rows built THAT RUN — so
+     taking one down renames the survivor onto the id the hidden document
+     names. The survivor must not be deleted by it. */
+  const hidden = { id: '2026-tulane-university-20260407',
+                   data: () => ({ uid: null, status: 'hidden',
+                                  publishedId: '2026-tulane-university-20260407' }) };
+  const survivor = row('2026-tulane-university-20260407', { department: 'Finance' });
+  const specs = removalSpecs([hidden]).specs;
+  ok(specs.some((x) => specMatches(x, survivor)),
+    'the hidden document does name the id the survivor was renumbered onto');
+  // which is exactly why the build filters those specs out before the merge
+  const builtIds = new Set([survivor.id]);
+  const applicable = specs.filter((x) => !x.id || !builtIds.has(x.id));
+  eq(applicable.length, 0, 'so a takedown naming a row still being published is set aside');
+  eq(mergeRows([survivor], [survivor], applicable).rows.length, 1,
+    'and the sibling that is still advertised stays on the site');
+
+  /* (3) A WITHDRAWAL IS RETIRED ONLY WHEN IT WORKED. `removed` takes the
+     document out of the query that finds it, so stamping one whose row is
+     still published makes the failure permanent AND silent. */
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/const mine = removeSpecs\.filter\(\(x\) => x\.docId === d\.id\)/.test(build),
+    'the stamp asks whether THIS document’s row is still published');
+  ok(/stillThere\.push/.test(build) &&
+     /did not reach their posting and are left to/.test(build.replace(/\s+/g, ' ')),
+    'and leaves it to retry, saying so, rather than marking it done');
+
+  /* (4) A PINNED ID IS CLAIMED BEFORE THE DERIVED ONES. Overwriting an id
+     AFTER assignIds could drop it onto one already handed out this run, and
+     mergeRows keys by id — the second row silently replaced the first. */
+  const a = { key: 'zzz-random-doc-id', row: row('', { institution: 'KU Leuven', posted: '2026-07-02' }) };
+  const b = { key: '2027-ku-leuven-20260702',
+              fixedId: '2027-ku-leuven-20260702',
+              row: row('', { institution: 'KU Leuven', posted: '2026-07-02', department: 'Other' }) };
+  assignIds([a, b]);
+  eq(b.row.id, '2027-ku-leuven-20260702', 'the workbook’s own id is kept');
+  ok(a.row.id !== b.row.id, 'and the derived one is made to avoid it');
+  eq(new Set([a.row.id, b.row.id]).size, 2, 'so two postings never share an id');
+
+  /* (5) THE ENTRY-POINT GUARD. A raw path and a file URL are not the same text
+     once the path holds a space, and this repository already carries a
+     directory called `back up`. Compared as strings, main() is never called
+     and the process exits 0 having published nothing. */
+  for (const f of ['build-jobs.mjs', 'migrate-to-firestore.mjs']) {
+    const src = await readFile(path.join(HERE, f), 'utf8');
+    ok(src.includes('pathToFileURL(process.argv[1]).href'),
+      `${f} compares file URLs, so a path with a space still runs the build`);
+    ok(!/`file:\/\/\$\{process\.argv\[1\]\}`/.test(src),
+      `${f} no longer builds that URL by hand`);
+  }
+}
+
 async function testMirrorLifecycle() {
   /* The sync REPORTS what it wrote, and one of its reports is a GitHub Actions
      `::warning::` annotation — which on a passing selftest would put a warning
@@ -2232,10 +2323,12 @@ async function testRefLessTakedown() {
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
   ok(/removalSpecs\(pulled\)/.test(build),
     'build-jobs.mjs keys takedowns on the id as well as the reference');
-  ok(/!isRemoved\(r\)\)/.test(build),
+  ok(/!applicable\.some\(\(x\) => specMatches\(x, r\)\)\)/.test(build),
     'so a taken-down posting is no longer carried on as an orphan');
-  ok(/existing\.filter\(isRemoved\)/.test(build),
-    'and the change e-mail reports exactly the rows the file lost, not every reference asked for');
+  ok(/const builtIds = new Set\(freshVisible/.test(build),
+    'a takedown never takes a row a live document just built — a renumbered same-day sibling');
+  ok(/stillThere\.push/.test(build),
+    'and a withdrawal that did not reach its posting is left to retry, never marked done');
 
   /* WHOSE WORD THE BUILD TAKES. Every one of these ids is published in
      data/jobs.json and data/jobmarket.json, so an unscoped removal is a
@@ -2493,6 +2586,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
   await testRowOverrides();
+  await testRemovalSafety();
   await testMirrorLifecycle();
   await testRefLessTakedown();
   await testSheetMirrors();

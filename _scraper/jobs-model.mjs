@@ -470,7 +470,26 @@ export function composeApplyBy({ untilFilled, applyByDate, applyByNote }) {
 export function assignIds(entries) {
   const ordered = entries.slice().sort((a, b) => String(a.key).localeCompare(String(b.key)));
   const seen = new Set();
+
+  /* A PINNED ID IS NOT OURS TO DERIVE, so it is claimed first and the derived
+     ones are then made to avoid it. A posting taken over from the tracking
+     sheet keeps the id the workbook gave it — only the workbook knows which of
+     two postings from one school on one day is the `-2`, and the id is the
+     row's identity: its `addedAt` continuity, the anchor a card links to, the
+     cursor the e-mail alerts read.
+
+     Claiming it AFTER the derivation, which is what this did at first, is a
+     way to lose a posting: the pinned id could land on one already handed to
+     another row this run, and mergeRows keys by id, so the second silently
+     replaced the first — the very failure this function exists to prevent. */
   for (const e of ordered) {
+    if (!e.fixedId) continue;
+    e.row.id = e.fixedId;
+    seen.add(e.fixedId);
+  }
+
+  for (const e of ordered) {
+    if (e.fixedId) continue;
     const base = jobId(e.row);
     let id = base, n = 2;
     while (seen.has(id)) id = `${base}-${n++}`;
@@ -618,6 +637,22 @@ export function buildOwned(doc) {
 }
 
 /**
+ * Does a removal spec name this row? ONE definition, because three places ask
+ * — the merge that drops the row, the orphan carry that must not re-add it,
+ * and the stamp that retires the document. They disagreed once, and the result
+ * was a document marked `removed` for a row still on the site: the withdrawal
+ * could then never be retried, because that stamp is what takes the document
+ * out of the query that finds it.
+ */
+export function specMatches(spec, row) {
+  if (!spec || !row) return false;
+  if (typeof spec === 'string') return !!row.ref && row.ref === spec;
+  if (spec.ref) return !!row.ref && row.ref === spec.ref && (spec.owner || '') === (row.owner || '');
+  if (spec.id) return row.id === spec.id;
+  return false;
+}
+
+/**
  * The removal specs a set of withdrawn/hidden documents may ask for.
  *
  * A REFERENCE is scoped to its owner — `{ ref, owner }`, which mergeRows keys
@@ -637,11 +672,38 @@ export function removalSpecs(docs = []) {
   const ids = new Set();
   for (const d of docs) {
     const v = (d && (typeof d.data === 'function' ? d.data() : d.data)) || {};
-    if (v.ref) out.push({ ref: v.ref, owner: ownerTag(v.uid) || text(v.owner, 64) });
+    const docId = (d && d.id) || '';
+
+    /* WHICH OWNER TAG THE ROW WILL BE CARRYING. Not simply this document's,
+       because MERGING TWO ACCOUNTS moves a posting to a new uid WITHOUT
+       republishing it — the rules allow exactly that (`affectedKeys` limited
+       to uid/mergedFrom/mergedAt) — so until the next build the served row
+       still carries the tag of the account the poster merged AWAY. Scoped to
+       the new uid alone, their next withdrawal matched nothing, removed
+       nothing, and was then stamped `removed`, which retires the document from
+       the query that finds it: the posting could never be taken down again.
+
+       `owner` on the document is deliberately NOT trusted unless the build
+       wrote it. It is a tag, the tags are published in data/jobs.json, and a
+       browser can put anything in that field — trusting it would hand back the
+       very hole the scoping exists to close. A merged-away uid is safe by
+       contrast: it is a RAW uid, and those are never published. */
+    const owners = new Set();
+    if (v.uid) {
+      owners.add(ownerTag(v.uid));
+      if (v.mergedFrom) owners.add(ownerTag(v.mergedFrom));
+    } else {
+      owners.add(text(v.owner, 64));       // build-written: it carries the tag itself
+    }
+    if (v.ref) for (const o of owners) out.push({ ref: v.ref, owner: o, docId });
+
     if (!buildOwned(v)) continue;
-    for (const k of [v.publishedId, v.sheetId, d && d.id]) if (k) ids.add(String(k));
+    for (const k of [v.publishedId, v.sheetId, docId]) {
+      if (!k) continue;
+      ids.add(String(k));
+      out.push({ id: String(k), docId });
+    }
   }
-  for (const id of ids) out.push({ id });
   return { specs: out, ids };
 }
 
@@ -972,7 +1034,7 @@ export function mergeRows(existing, fresh, remove = []) {
   for (const spec of remove) {
     if (!spec) continue;
     if (typeof spec === 'string') {
-      for (const [k, r] of [...by]) if (r.ref === spec) { by.delete(k); removed++; }
+      for (const [k, r] of [...by]) if (specMatches(spec, r)) { by.delete(k); removed++; }
     } else if (spec.ref) {
       if (by.delete('ref:' + (spec.owner || '') + ':' + spec.ref)) removed++;
     } else if (spec.id) {

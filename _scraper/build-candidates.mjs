@@ -39,7 +39,7 @@ import {
   CANDIDATE_PUBLIC_FIELDS, INFORMS_DAYS,
   revealGate,
 } from './candidates-model.mjs';
-import { marketYear, inCurrentMarket, ownerTag, removalSpecs } from './jobs-model.mjs';
+import { marketYear, inCurrentMarket, ownerTag, removalSpecs, specMatches } from './jobs-model.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -335,8 +335,7 @@ async function main() {
 
   /* ONE predicate for "this run takes that row down" — a reference is only a
      takedown for the account that published the row. */
-  const isRemoved = (r) => removeIds.has(r.id) ||
-    removeSpecs.some((x) => x.ref && x.ref === r.ref && (x.owner || '') === (r.owner || ''));
+  const isRemoved = (r) => removeSpecs.some((x) => specMatches(x, r));
 
 
   // The maintainer's committed suppression list, same shape as

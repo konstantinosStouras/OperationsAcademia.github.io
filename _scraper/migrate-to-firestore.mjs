@@ -33,7 +33,7 @@
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { submissionFromRow, rowFromSubmission, publicRow } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
@@ -202,7 +202,17 @@ async function main() {
   log('The Google Sheet is no longer read. Edits now happen in the database.');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/* `pathToFileURL`, not a template string: a raw path and a file URL are not the
+   same text the moment the path holds a space or anything else a URL escapes
+   (this repository already carries a directory called `back up`). Compared as
+   strings, the two differ, main() is never called, and the process exits 0
+   having printed nothing — a scheduled publish that goes green while
+   publishing nothing, which is the worst failure available to it.
+
+   The argv[1] guard is for `node -e`, where there is no entry script at all:
+   pathToFileURL(undefined) throws, and this file is IMPORTED by the selftest
+   as well as run. */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (argv.has('--selftest')) {
     const { runSelftest } = await import('./selftest.mjs');
     process.exit(runSelftest() ? 0 : 1);
