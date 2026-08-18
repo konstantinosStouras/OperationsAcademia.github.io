@@ -1869,6 +1869,26 @@ for (const [pageName, dataset, patch] of [
   eq(await p2.$$eval('.oa-card-actions', (n) => n.length), shown2,
     'and every one of the archive\'s own rows carries the controls');
 
+  /* AND AN OVERRIDE THAT ALREADY EXISTS against a folded-in posting — written
+     before this guard, or by mistake — is INERT rather than half-applied. It
+     must not hide the row, because nothing on this page could then put it
+     back: the archive editor no longer offers itself there, and the job editor
+     knows nothing about rowOverrides. */
+  /* A folded-in posting that is actually ON this page — `folded` also holds
+     the current-market rows, which previous-markets deliberately excludes, and
+     only the first ten of what is left are rendered. */
+  const stale = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
+  ok(folded.has(stale), 'the card under test really is one of the folded-in postings');
+  await p.evaluate((id) => window.OARowEdit.__setForTest('past-postings', {
+    ready: true, admin: false, rows: { [id]: { hidden: true, institution: 'Should Not Show' } },
+  }), stale);
+  await p.waitForTimeout(400);
+  ok(await p.$(`[id="job-${stale}"]`),
+    'an override against a posting the archive does not own does not hide it');
+  ok(!(await p.$$eval('.oa-card-title', (n) => n.map((x) => x.textContent)))
+      .includes('Should Not Show'),
+    'nor rewrite it — it is inert, not half-applied');
+
   eq(jsErrors.filter((e) => e.startsWith('overrides/own')), [],
     'no uncaught errors on either view');
   await p.close();
