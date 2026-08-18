@@ -67,6 +67,17 @@ let chromium;
 try {
   ({ chromium } = await import('playwright'));
 } catch {
+  /* Locally this is a convenience: the rest of the suite still runs on a
+     machine with no browser installed. In CI it never is — the workflow
+     installs Playwright two steps earlier, so a failed import means that
+     install broke, and exiting 0 here would report a green run in which none
+     of these checks ran at all. A check whose absence is invisible is not a
+     check, so in CI a missing browser is a FAILURE and says which one it is. */
+  if (process.env.CI) {
+    console.log('::error::playwright is not installed — the browser checks did not run');
+    server.close();
+    process.exit(1);
+  }
   console.log('playwright is not installed — skipping the browser checks');
   server.close();
   process.exit(0);

@@ -181,6 +181,18 @@ All four run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs
 build also runs the selftest AFTER writing `data/` and refuses to commit on
 a failure, so a red selftest silently stops publishing — fix it promptly.
 
+`page-test.mjs` skips itself with a friendly message when Playwright is not
+installed, which is right on a laptop and wrong in CI — there it exits 1
+instead (`process.env.CI`), because the workflow installs the browser two
+steps earlier and the only thing a skip could mean is that the install broke.
+A guard that reports green while running none of its checks is worse than no
+guard. For the same reason the CI step does not use `playwright install
+--with-deps`: that runs `apt-get` on every run whether or not the browser is
+cached, and on 2026-08-18 a failing-over Ubuntu mirror hung it until the job
+cap killed three runs of the same commit. The libraries ship with the runner
+image; the apt call is kept bounded and best-effort, and the browser launch is
+what proves it.
+
 `page-test.mjs` drives BOTH served designs: the checks that assert on the old
 chrome (`#nav`, `#header-wrapper`, `#titleBar`, `#navPanel`, `window.ga`,
 jQuery) run against `V2 + 'page.html'`, and the rest against the root.
