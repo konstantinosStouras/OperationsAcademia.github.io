@@ -605,8 +605,8 @@
     if (intro) {
       intro.innerHTML = '<p><strong>You are correcting a posting that is already ' +
         'on the site.</strong> Your changes appear on the ' +
-        '<a href="jobs.html">job postings page</a> at the next update, normally ' +
-        'within an hour. The posting date does not change.</p>';
+        '<a href="jobs.html">job postings page</a> within a few minutes. The ' +
+        'posting date does not change.</p>';
     }
 
     OAAccounts.whenSignedIn(function () {
@@ -796,7 +796,7 @@
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
               '<p>The posting is updated on the <a href="jobs.html">job postings page</a> ' +
-              'at the next update, normally within an hour.</p>' +
+              'within a few minutes.</p>' +
               '<p class="oa-done-actions">' +
               '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
           } else {

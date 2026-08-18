@@ -349,6 +349,46 @@ holds the approved rows and nothing else writes it. That is why
 header. If that cadence changes, change the panel's and the e-mail's promise
 with it.
 
+## What "immediate" costs, and where the waiting used to be
+
+A posting is decided in Firestore and served from `data/` by GitHub Pages, so
+publishing is always a pipeline. The rule is that **nothing waits for a
+schedule that a decision could have started**.
+
+* **A posting made or edited on the site** — `publishOnChange` in
+  `_functions/index.js` dispatches `oa-jobs-changed` and `oa-jobs-build.yml`
+  runs at once. About a minute.
+* **A posting APPROVED in the review queue** — `publishOnReview` dispatches
+  `oa-jobreview-decided` to `oa-jobmarket-sheet.yml`, because
+  `data/jobmarket.json` holds the approved rows and only that job writes it,
+  and `oa-jobs-build.yml` then runs on that workflow's `workflow_run`
+  completion to merge the file. Two workflows, one chain, about two minutes.
+  It used to be two independent schedules — up to half an hour, then up to
+  twenty minutes more — which is most of an hour after the maintainer had
+  already decided.
+
+The schedules stay as the safety net and every job is idempotent, so a missed
+doorbell costs a delay and never a posting.
+
+**The functions are deployed BY HAND** (`firebase deploy --only functions
+--project operations-academia`, from the repository root), and a doorbell that
+was never deployed looks exactly like a site that is simply slow — there is no
+error anywhere, everything still publishes, just on the schedule. That is worth
+checking first whenever "it takes ages to appear" comes up:
+`firebase functions:log` should show `build dispatched` / `sheet read
+dispatched`. The setup page's paths were stale after the promotion (it said
+`cd v2`, where there are no functions any more); they are fixed.
+
+**The last stretch of the delay is the reader's own browser.** Pages serves
+`data/*.json` with ten minutes of freshness, so a visitor who had the page open
+recently was shown what they already had, however fast the pipeline was. Every
+fetch of `data/` and `changelog.json` passes `cache: 'no-cache'`, which
+REVALIDATES rather than re-downloads — a 304 with no body when nothing changed.
+**A new fetch of a served data file must carry it.**
+
+Copy that promises a time is part of this: the forms and the review panel say
+"within a few minutes", and if the cadence ever changes, they change with it.
+
 ## A text search holds SEVERAL terms
 
 Every `type: 'text'` filter in `assets/oa-list.js` takes more than one term:

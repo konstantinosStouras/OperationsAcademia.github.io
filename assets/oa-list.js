@@ -870,7 +870,14 @@
 
     /* -------------------------------------------------------------- load */
 
-    fetch(cfg.data, { credentials: 'same-origin' })
+    /* `no-cache` REVALIDATES, it does not skip the cache: the browser still
+       sends the request and still gets a 304 with no body when nothing has
+       changed, so this costs a round trip and not a download. Without it the
+       reader is served whatever their browser last stored — GitHub Pages ships
+       these files with ten minutes of freshness — so a posting published a
+       minute ago was invisible to anyone who had opened the page recently, and
+       the site looked slow long after the pipeline had stopped being. */
+    fetch(cfg.data, { credentials: 'same-origin', cache: 'no-cache' })
       .then(function (res) {
         if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
         return res.json();

@@ -21,6 +21,18 @@ on:
   # the doorbell missed.
   repository_dispatch:
     types: [oa-jobs-changed]
+  # An approval publishes in TWO steps: the sheet read writes the approved rows
+  # into data/jobmarket.json, and this build merges that file into the served
+  # jobs.json. Chained here, so the second step does not wait for its own
+  # schedule — that wait was up to twenty minutes on top of the half hour the
+  # sheet read used to cost, and it is why an approved posting could take most
+  # of an hour to appear. It runs on `completed` whatever the conclusion: this
+  # build is idempotent and reads the file that is committed, so a sheet read
+  # that failed after committing is still published, and one that wrote nothing
+  # produces no commit here.
+  workflow_run:
+    workflows: ["OA jobs — read the job market tracking sheet"]
+    types: [completed]
   schedule:
     # every 20 minutes, off the hour so this repo does not queue behind every
     # other :00 job on the runners

@@ -1,11 +1,29 @@
 # Instant publish — setup
 
 **What it does.** A posting created, edited, withdrawn or taken down appears on
-the site in about a minute instead of at the next 20-minute build. A small
-Cloud Function (`v2/_functions/index.js`) watches `jobSubmissions` and rings
-the GitHub build's doorbell (`repository_dispatch`); the build itself is
-unchanged and the 20-minute schedule stays as the safety net, so nothing is
-lost if the function is down — changes just take up to 20 minutes again.
+the site in about a minute instead of at the next 20-minute build, and a
+posting APPROVED in the review queue appears in about two. Two small Cloud
+Functions in `_functions/index.js` ring a GitHub workflow's doorbell
+(`repository_dispatch`):
+
+| Function | Watches | Starts |
+|---|---|---|
+| `publishOnChange` | `jobSubmissions` | **OA data — publish queued postings** (`oa-jobs-changed`) |
+| `publishOnReview` | `jobReviews` | **OA jobs — read the job market tracking sheet** (`oa-jobreview-decided`), which the build then follows automatically |
+
+An approval takes two workflows because `data/jobmarket.json` holds the
+approved rows and only the sheet read writes it; `oa-jobs-build.yml` runs on
+that workflow's completion, so the two are one chain rather than two waits.
+
+The workflows themselves are unchanged and their schedules stay as the safety
+net, so nothing is lost if the functions are down — changes just take up to 20
+minutes again, and an approval up to half an hour.
+
+**PATHS MOVED WITH THE PROMOTION.** The functions used to live in `v2/`; they
+are at the repository root now, which is also where `firebase.json` is. A
+`cd v2 && firebase deploy` — what the earlier version of this page told you to
+do — deploys nothing, and the doorbell that was never deployed looks exactly
+like a site that is simply slow.
 
 The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
 build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was
@@ -31,7 +49,7 @@ more.
 
 ## 2. Give it to the function as a secret
 
-From the repo's `v2/` directory:
+From the repository root:
 
 ```
 firebase functions:secrets:set GH_DISPATCH_TOKEN --project operations-academia
@@ -43,10 +61,13 @@ any file.
 ## 3. Deploy the function
 
 ```
-cd v2
 npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
+
+This deploys BOTH functions. Always pass `--project`: the CLI remembers an
+"active project" per directory, and a deploy from this folder has already gone
+into another project's database once (see CLAUDE.md).
 
 First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
 Artifact Registry, Eventarc) — say yes. It takes a few minutes.
@@ -54,9 +75,14 @@ Artifact Registry, Eventarc) — say yes. It takes a few minutes.
 ## 4. Verify
 
 Post or edit a job on the site, then look at
-**Actions → OA jobs — publish queued postings**: a run should appear within a
+**Actions → OA data — publish queued postings**: a run should appear within a
 few seconds whose trigger reads `repository_dispatch`. The posting is live
 when that run finishes (~1 minute, plus Pages' propagation).
+
+Then approve a posting in the review queue on `feedback.html`: a run of
+**OA jobs — read the job market tracking sheet** should appear the same way,
+and a run of the publish workflow straight after it, triggered by
+`workflow_run`.
 
 Function logs, if needed:
 
@@ -64,7 +90,7 @@ Function logs, if needed:
 firebase functions:log --project operations-academia
 ```
 
-`build dispatched` = working. `dispatch refused (401)` = the PAT expired or is
+`build dispatched` / `sheet read dispatched` = working. `dispatch refused (401)` = the PAT expired or is
 wrong — mint a new one and re-run step 2, then redeploy (step 3) so the
 function picks the new secret version up.
 

@@ -755,7 +755,7 @@
          One read of the live file feeds both: the launcher's selects (which
          always SHOW a value — "All types" until a narrower one is picked),
          and the count on the explore button. */
-      fetch('/data/jobs.json', { credentials: 'same-origin' })
+      fetch('/data/jobs.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
           if (!data) return;
@@ -815,7 +815,7 @@
       /* The placements DATASET restarted empty at the 2026 cutover — the
          ~173 historical placements live in the /v1 archive's records — so the
          static "170+" stands until the live file grows past it. */
-      fetch('/data/placements.json', { credentials: 'same-origin' })
+      fetch('/data/placements.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
           if (!data) return;
@@ -836,7 +836,7 @@
          number printed in the markup — it is what stops a part-filled live
          file from REPLACING the historical total with a smaller current
          one. */
-      fetch('/data/candidates-meta.json', { credentials: 'same-origin' })
+      fetch('/data/candidates-meta.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (meta) {
           var listed = Number(meta.count) || 0;
@@ -958,7 +958,7 @@
           });
         }
 
-        fetch('/changelog.json', { credentials: 'same-origin' })
+        fetch('/changelog.json', { credentials: 'same-origin', cache: 'no-cache' })
           .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
           .then(function (log) {
             if (!(log.updates || []).length) throw new Error('empty');
