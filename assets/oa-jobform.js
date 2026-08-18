@@ -892,7 +892,11 @@
        directory spells it, which is how the vocabulary groups them too. */
     var keyInst = S ? function (v) { return S.institutionKey(v); } : null;
     var keySchool = S ? function (v) { return S.fold(S.canonSchool(v, val(inst))); } : null;
-    var keyUnit = S ? function (v) { return S.fold(S.canonUnit(v)); } : null;
+    /* the university, here too: six schools name their own unit in a way the
+       generic rule would strip ("Operations Management Area"), and without it
+       the picker would group that under the bare name and show whichever
+       spelling happened to arrive first. */
+    var keyUnit = S ? function (v) { return S.fold(S.canonUnit(v, val(inst))); } : null;
 
     /* What a name the site has never seen will be published as — so the
        "not on the list yet" row offers "Widgets" where "Widgets Group" was
@@ -903,7 +907,7 @@
       school: OACombo.attach(school, { options: [], key: keySchool,
         publishAs: S ? function (v) { return S.canonSchool(v, val(inst)); } : null }),
       unit: OACombo.attach(unit, { options: [], key: keyUnit,
-        publishAs: S ? S.canonUnit : null }),
+        publishAs: S ? function (v) { return S.canonUnit(v, val(inst)); } : null }),
     };
 
     fetch('data/vocab.json', { cache: 'no-cache' })

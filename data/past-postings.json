@@ -477,9 +477,9 @@
   "year": 2025,
   "posted": "2024-10-11",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Management Science",
+  "department": "Miami Herbert Business School, Management Area",
   "school": "Miami Herbert Business School",
-  "unit": "Management Science",
+  "unit": "Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3281,9 +3281,9 @@
   "year": 2015,
   "posted": "2014-10-08",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Management",
+  "department": "Miami Herbert Business School, Management Area",
   "school": "Miami Herbert Business School",
-  "unit": "Management",
+  "unit": "Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
@@ -3937,9 +3937,9 @@
   "year": 2015,
   "posted": "2014-09-08",
   "institution": "Emory University",
-  "department": "Goizueta Business School, Information Systems and Operations Management",
+  "department": "Goizueta Business School, Information Systems & Operations Management",
   "school": "Goizueta Business School",
-  "unit": "Information Systems and Operations Management",
+  "unit": "Information Systems & Operations Management",
   "type": "Business School",
   "levels": [
    "Other Ranks"
@@ -3952,7 +3952,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Emory%20University%20(Goizueta%20Business%20School)%2C%20Information%20Systems%20%26%20Operations%20Management",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Emory%20University",
   "characteristics": [],
   "featured": false,
   "source": "sheet-import",

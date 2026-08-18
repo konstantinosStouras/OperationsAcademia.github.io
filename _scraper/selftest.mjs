@@ -1157,7 +1157,10 @@ async function testSchools() {
   const vocab = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
   const badSchools = vocab.schools.map((e) => e.v).filter((v) => S.canonSchool(v) !== v);
   eq(badSchools, [], 'data/vocab.json: the form offers canonical school names');
-  const badUnits = vocab.units.map((e) => e.v).filter((v) => S.canonUnit(v) !== v);
+  /* isCanonicalUnit, not `canonUnit(v) === v`: six schools name their own unit
+     in a way the generic wrapper rule would strip ("Operations Management
+     Area"), and asked WITHOUT a university that rule is all canonUnit has. */
+  const badUnits = vocab.units.map((e) => e.v).filter((v) => !S.isCanonicalUnit(v));
   eq(badUnits, [], 'and canonical department names');
 }
 
@@ -1526,8 +1529,10 @@ async function testCascadeWiring() {
     'the fields are put into the published spelling by the SAME canon the submission uses');
   ok(!/'f-institution', 'f-school'\].forEach\(function \(id\) \{\n\s*var el = \$\(id\);\n\s*if \(el\) el\.dispatchEvent\(new Event\('change'/.test(form),
     'and an edit does not settle the INSTITUTION, whose spelling a permalink is built from');
-  ok(/publishAs: S \? S\.canonUnit : null/.test(form),
+  ok(/publishAs: S \? function \(v\) \{ return S\.canonUnit\(v, val\(inst\)\); \} : null/.test(form),
     'a name not on the list is offered as it will be published');
+  ok(/S\.canonUnit\(v, val\(inst\)\)/.test(form) && /var keyUnit = S \? function \(v\)/.test(form),
+    'and the department picker groups by the university too, so a scoped name is not folded away');
   ok(/canonColumns\(\{/.test(form) && !/canonPlace\(\{/.test(form),
     'but a lone institution is not read as one of the archive’s fused one-column values');
 
@@ -1600,6 +1605,81 @@ async function testRenamedNamesStillFound() {
   const at = alerts.indexOf('oa-schools.js');
   ok(at !== -1 && at < alerts.indexOf('oa-alert-match.js'),
     'alerts.html: loads the names module before the matcher');
+}
+
+/* ------------------------------ the six units their school names its own way
+
+   The owner ruled on six pairs of names the site was carrying for ONE group
+   (2026-08-18), and four of the answers keep a wrapper word the generic rule
+   strips — "Operations Management Area", "Operations Department". The rule is
+   right in general and wrong for these, so SCOPED_UNIT_ALIASES pins them by
+   university and the answer is returned TERMINALLY, never re-stripped.
+
+   Pinned name by name because these are somebody's decision, not a rule: a
+   refactor that quietly reverted one would otherwise show up only as a school
+   listed twice again, months later.                                          */
+
+async function testScopedUnits() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+
+  const RULED = [
+    ['Emory University', 'Goizueta Business School',
+      ['Operations Management', 'Information Systems and Operations Management',
+        'Information Systems & Operations Management'],
+      'Information Systems & Operations Management'],
+    ['Purdue University', 'Mitchell E. Daniels, Jr. School of Business',
+      ['Operations Management', 'Operations Management Area', 'Supply Chain and Operations Management'],
+      'Supply Chain and Operations Management Faculty'],
+    ['The University of Texas at Dallas', 'Naveen Jindal School of Management',
+      ['Operations Management', 'Supply Chain and Operations Management',
+        'Supply Chain/Operations Management Department'],
+      'Operations Management Area'],
+    ['University College Dublin', 'Michael Smurfit Graduate Business School',
+      ['Management', 'Operations Management', 'Operations Management Group'],
+      'Management Area'],
+    ['University of Miami', 'Miami Herbert Business School',
+      ['Management', 'Management Science', 'Department of Management'],
+      'Management Area'],
+    ['Yale University', 'School of Management',
+      ['Operations', 'Operations Management', 'Operations Management group'],
+      'Operations Department'],
+  ];
+
+  const v = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
+
+  for (const [uni, school, variants, name] of RULED) {
+    for (const variant of variants) {
+      eq(S.canonUnit(variant, uni), name, `${uni}: "${variant}" publishes as "${name}"`);
+    }
+    eq(S.canonUnit(name, uni), name, `and "${name}" is already itself (idempotent)`);
+    ok(S.isCanonicalUnit(name), `and canonical, though the generic rule would strip it`);
+
+    /* the school really is the one the owner named, and really is the only
+       school at that university carrying the name — which is what makes a
+       table keyed by UNIVERSITY safe here */
+    const bySchool = v.byUniversity[uni] && v.byUniversity[uni].bySchool;
+    ok(bySchool && Array.isArray(bySchool[school]),
+      `${uni} lists ${school}`);
+    if (bySchool) {
+      const elsewhere = Object.entries(bySchool)
+        .filter(([s]) => s && s !== school)
+        .filter(([, list]) => list.includes(name)).map(([s]) => s);
+      eq(elsewhere, [], `and no other school at ${uni} claims "${name}"`);
+      eq(bySchool[school].filter((u) => variants.slice(0, 2).includes(u)), [],
+        `and the names it replaced are gone from ${school}`);
+    }
+  }
+
+  /* ELSEWHERE THE GENERIC RULE IS UNTOUCHED. This is the whole safety
+     argument for a scoped table: a poster at any other school still gets the
+     bare field name, so the wrapper word cannot start splitting one unit into
+     three again. */
+  for (const uni of ['Duke University', 'Michigan State University', '']) {
+    eq(S.canonUnit('Operations Management Area', uni), 'Operations Management',
+      `"Operations Management Area" is still just Operations Management at ${uni || 'no university'}`);
+    eq(S.canonUnit('Operations Department', uni), 'Operations',
+      `as "Operations Department" is Operations at ${uni || 'no university'}`);
+  }
 }
 
 /* -------------------------------------------- the seed of the world's schools
@@ -1786,7 +1866,7 @@ async function testVocabFile() {
      under Harbert, Industrial and Systems Engineering outside it. */
   const twoSchools = Object.entries(v.byUniversity)
     .filter(([, e]) => Object.keys(e.bySchool).filter(Boolean).length > 1);
-  ok(twoSchools.length > 20,
+  ok(twoSchools.length > 15,
     `${twoSchools.length} universities keep more than one school, each with its own departments`);
   const split = twoSchools.filter(([, e]) => {
     const lists = Object.entries(e.bySchool).filter(([k]) => k).map(([, l]) => l.join('|'));
@@ -1799,17 +1879,74 @@ async function testVocabFile() {
      "Sloan School of Management" and "MIT Sloan School of Management" — and
      the picker showed both with the postings on one row and the departments
      on the other. oa-schools.js's scoped aliases are where that is settled. */
+  /* TWO COMPARISONS, BECAUSE ONE OF THEM IS BLIND. A substring check finds
+     "Haas" inside "Walter A. Haas School of Business" and misses the pairs
+     that put the SAME WORDS IN A DIFFERENT ORDER — "Michael Smurfit Graduate
+     Business School" vs "UCD Michael Smurfit Graduate School of Business",
+     "Olin Business School" vs "Olin School of Business". Both went on being
+     offered twice through a green suite that only looked one way.
+
+     So the second comparison is the DISTINCTIVE WORDS as a set, dropping the
+     generic ones ("school", "of", "business") and the university's own name
+     and initials — otherwise "UCD" or "Business" would keep two spellings of
+     one school apart for ever. */
+  const GENERIC = new Set(['the', 'school', 'college', 'faculty', 'of', 'business', 'at',
+    'and', 'graduate', 'department', 'administration', 'studies', 'institute', 'for',
+    'area', 'group']);
+  const distinctive = (name, uni) => {
+    const own = new Set(S.fold(uni).split(' ').filter(Boolean));
+    const initials = [...own].length ? S.fold(uni).split(' ').filter(Boolean).map((w) => w[0]).join('') : '';
+    return S.fold(name).split(' ')
+      .filter((w) => w && !GENERIC.has(w) && !own.has(w) && w !== initials)
+      .sort().join(' ');
+  };
+  /** Every pair of names in `list` that is probably one name written twice. */
+  const samePair = (list, uni) => {
+    const out = [];
+    for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        const a = S.fold(list[i]), b = S.fold(list[j]);
+        const da = distinctive(list[i], uni), db = distinctive(list[j], uni);
+        if (a.includes(b) || b.includes(a) || (da && da === db)) out.push([list[i], list[j]]);
+      }
+    }
+    return out;
+  };
+
   const dupSchools = [];
   for (const [u, e] of Object.entries(v.byUniversity)) {
-    const names = Object.keys(e.bySchool).filter(Boolean);
-    for (let i = 0; i < names.length; i++) {
-      for (let j = i + 1; j < names.length; j++) {
-        const a = S.fold(names[i]), b = S.fold(names[j]);
-        if (a.includes(b) || b.includes(a)) dupSchools.push(`${u}: ${names[i]} / ${names[j]}`);
-      }
+    for (const [a, b] of samePair(Object.keys(e.bySchool).filter(Boolean), u)) {
+      dupSchools.push(`${u}: ${a} / ${b}`);
     }
   }
   eq(dupSchools, [], 'and no university offers one school under two names');
+
+  /* THE SAME, ONE LEVEL DOWN: two names for one department under one school.
+     Each is a judgement only the owner can make — "Management" and
+     "Operations Management" at one school may be one group or two — so the
+     ones still awaiting an answer are NAMED here rather than silently
+     tolerated or guessed at. A pair not on this list fails the build; a pair
+     on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
+     when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
+  const AWAITING_OWNER = new Set([
+    'Binghamton University|Business Analytics and Operations|Operations and Business Analytics',
+    'Stanford University|Operations and Information Technology|Operations, Information and Technology',
+    'The University of Hong Kong|Information and Innovation Management|Innovation and Information Management',
+  ]);
+  const dupUnits = [], openUnits = [];
+  for (const [u, e] of Object.entries(v.byUniversity)) {
+    for (const list of Object.values(e.bySchool)) {
+      for (const [a, b] of samePair(list, u)) {
+        (AWAITING_OWNER.has(`${u}|${a}|${b}`) ? openUnits : dupUnits).push(`${u}: ${a} / ${b}`);
+      }
+    }
+  }
+  eq(dupUnits, [], 'and no school offers one department under two names, beyond the pairs awaiting a decision');
+  eq(openUnits.length, AWAITING_OWNER.size,
+    'and every pair on that list is still really there — a settled one is removed, not left behind');
+  if (process.argv.includes('--open')) {
+    for (const line of openUnits) console.log('  awaiting the owner: ' + line);
+  }
 
   /* the same, one level up: one place, one row in the university picker */
   const byKey = new Map();
@@ -1850,8 +1987,14 @@ async function testVocabFile() {
 }
 
 function testSplitFields() {
+  /* GOOD is a University College Dublin posting, and UCD is one of the six
+     universities whose own name for its unit overrides the wrapper rule
+     (SCOPED_UNIT_ALIASES). These cases are about the GENERIC rule, so they
+     name the university whose school they were already using. */
+  const GENERIC_UNI = { ...GOOD, institution: 'Duke University' };
+
   // the form now sends school + unit; department is derived from them
-  const r = rowFromSubmission({ ...GOOD, department: undefined,
+  const r = rowFromSubmission({ ...GENERIC_UNI, department: undefined,
     school: 'Fuqua School of Business', unit: 'Operations Management group' });
   eq(r.school, 'Fuqua School of Business', 'school carried');
   /* the wrapper word comes off on the way in — "group", "Area" and
@@ -1861,10 +2004,17 @@ function testSplitFields() {
     'department is derived from the two');
 
   // either alone is enough
-  eq(rowFromSubmission({ ...GOOD, department: undefined, school: 'Darden School of Business', unit: '' })
+  eq(rowFromSubmission({ ...GENERIC_UNI, department: undefined, school: 'Darden School of Business', unit: '' })
     .department, 'Darden School of Business', 'a school alone publishes');
-  eq(rowFromSubmission({ ...GOOD, department: undefined, school: '', unit: 'Operations Management' })
+  eq(rowFromSubmission({ ...GENERIC_UNI, department: undefined, school: '', unit: 'Operations Management' })
     .department, 'Operations Management', 'a unit alone publishes');
+
+  /* …and the scoped name wins where the owner has given one. This is GOOD's
+     own university, so it also pins that the fixtures above needed changing
+     rather than the rule. */
+  eq(rowFromSubmission({ ...GOOD, department: undefined,
+    school: 'Michael Smurfit Graduate Business School', unit: 'Operations Management group' }).unit,
+  'Management Area', 'a school that names its own unit keeps that name, wrapper and all');
   ok(rowFromSubmission({ ...GOOD, department: '', school: '', unit: '' }) === null,
     'neither is not publishable');
 
@@ -3870,6 +4020,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testNamesForTheCascade();
   await testCascadeWiring();
   await testRenamedNamesStillFound();
+  await testScopedUnits();
   await testInstitutionSeed();
   await testFormsOfferVocab();
   await testPickerTheme();

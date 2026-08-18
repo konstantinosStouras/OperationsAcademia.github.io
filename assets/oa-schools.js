@@ -172,7 +172,18 @@
     'University of Oregon': { 'Lundquist College of Business': 'Charles H. Lundquist College of Business' },
     'University of Southern California': { 'Marshall School of Business (incl. Leventhal)': 'Marshall School of Business' },
     'University of Toronto': { 'Rotman School of Management': 'Joseph L. Rotman School of Management' },
-    'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' }
+    'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' },
+
+    /* …and two the same request turned up that a SUBSTRING check cannot see,
+       because the two spellings put the same words in a different order:
+       "Michael Smurfit Graduate Business School" beside "UCD Michael Smurfit
+       Graduate School of Business", and Olin twice. Neither string contains
+       the other, so only comparing the DISTINCTIVE words — dropping the
+       generic ones and the university's own name and initials — finds them. */
+    'University College Dublin': {
+      'UCD Michael Smurfit Graduate School of Business': 'Michael Smurfit Graduate Business School'
+    },
+    'Washington University in St. Louis': { 'Olin School of Business': 'Olin Business School' }
   };
 
   var SCHOOL_ALIASES = {
@@ -183,6 +194,51 @@
     'Imperial Business School': 'Imperial College Business School',
     'Ross School of Business': 'Stephen M. Ross School of Business',
     'Booth School': 'Booth School of Business'
+  };
+
+  /* THE SCHOOL'S OWN NAME FOR ITS UNIT, where the generic rule below would
+     take it away. The bare-field-name rule is right in general — "Department",
+     "Area" and "group" are exactly what differs between two people naming one
+     unit, which is what made Tulane read as five places — and it is wrong for
+     these six, where the wrapper IS part of what the school calls the group:
+     UT Dallas has an Operations Management AREA, Purdue a Supply Chain and
+     Operations Management FACULTY, Yale an Operations DEPARTMENT.
+
+     Supplied by the owner (2026-08-18), each settling a pair of names the site
+     was carrying for ONE group. Keyed by university, like the school table
+     above and safe for the same reason: no other school at any of these six
+     carries one of these names (asserted in the selftest).
+
+     A hit is TERMINAL — returned exactly as written, never put back through
+     the wrapper rule that would undo it, and never through spell(), which
+     turns " & " into " and " and would spoil Emory's own styling. Everywhere
+     else the generic rule still applies, so a poster typing "Operations
+     Management Department" at some other school still lands on the bare name. */
+  var SCOPED_UNIT_ALIASES = {
+    'Emory University': {              /* Goizueta Business School */
+      'Information Systems and Operations Management': 'Information Systems & Operations Management',
+      'Operations Management': 'Information Systems & Operations Management'
+    },
+    'Purdue University': {             /* Mitchell E. Daniels, Jr. School of Business */
+      'Operations Management': 'Supply Chain and Operations Management Faculty',
+      'Supply Chain and Operations Management': 'Supply Chain and Operations Management Faculty'
+    },
+    'The University of Texas at Dallas': {   /* Naveen Jindal School of Management */
+      'Operations Management': 'Operations Management Area',
+      'Supply Chain and Operations Management': 'Operations Management Area'
+    },
+    'University College Dublin': {     /* Michael Smurfit Graduate Business School */
+      'Management': 'Management Area',
+      'Operations Management': 'Management Area'
+    },
+    'University of Miami': {           /* Miami Herbert Business School */
+      'Management': 'Management Area',
+      'Management Science': 'Management Area'
+    },
+    'Yale University': {               /* School of Management */
+      'Operations': 'Operations Department',
+      'Operations Management': 'Operations Department'
+    }
   };
 
   /* ------------------------------------------------------------ departments
@@ -333,6 +389,33 @@
   var BY_SCHOOL = tableOf(SCHOOL_LIST, SCHOOL_ALIASES);
   var BY_UNIT = tableOf([], UNIT_ALIASES);
 
+  /* Each variant is indexed BOTH as written and as spell() would rewrite it,
+     because " & " becomes " and " there and the two fold differently; the
+     TARGET is indexed too, so canonicalising an already-canonical name
+     returns it unchanged (idempotence, which the selftest pins).
+     SCOPED_UNIT_NAMES is the flat set of published names, for isCanonicalUnit
+     — a scoped name is canonical however the generic rule would read it. */
+  var BY_SCOPED_UNIT = Object.create(null);
+  var SCOPED_UNIT_KEYED = Object.create(null);
+  var SCOPED_UNIT_NAMES = Object.create(null);
+  for (var su in SCOPED_UNIT_ALIASES) {
+    if (!Object.prototype.hasOwnProperty.call(SCOPED_UNIT_ALIASES, su)) continue;
+    var utable = Object.create(null);
+    var given = SCOPED_UNIT_ALIASES[su];
+    for (var variant in given) {
+      if (!Object.prototype.hasOwnProperty.call(given, variant)) continue;
+      var target = given[variant];
+      utable[fold(variant)] = target;
+      utable[fold(spell(variant))] = target;
+      utable[fold(target)] = target;
+      utable[fold(spell(target))] = target;
+      SCOPED_UNIT_NAMES[fold(target)] = target;
+      SCOPED_UNIT_NAMES[fold(spell(target))] = target;
+    }
+    BY_SCOPED_UNIT[fold(su)] = utable;
+    SCOPED_UNIT_KEYED[institutionKey(su)] = utable;
+  }
+
   /* ------------------------------------------------------------- the canons */
 
   /** The one name this university is published under. */
@@ -392,10 +475,30 @@
     return bare || s;
   }
 
-  /** The one name this department is published under. */
-  function canonUnit(v) {
+  /** The one name this department is published under. The university is
+      optional and is consulted FIRST, for the six schools that name their own
+      unit in a way the generic wrapper rule would take away. */
+  function canonUnit(v, institution) {
     var s = spell(v);
     if (!s) return '';
+
+    if (institution) {
+      var scoped = BY_SCOPED_UNIT[fold(canonInstitution(institution))]
+                || SCOPED_UNIT_KEYED[institutionKey(institution)];
+      /* Asked three ways, because the same unit reaches us wearing its own
+         wrapper: as written ("Operations Management Group"), as spell()
+         rewrites it, and as the GENERIC rule would leave it ("Operations
+         Management") — which is the form the table is written in, since
+         listing every wrapper a source might use is exactly the losing game
+         the bare-name rule exists to avoid.
+
+         Terminal: the curated name is returned as written, never put back
+         through the wrapper rule that would undo it. */
+      if (scoped) {
+        var pinned = scoped[fold(v)] || scoped[fold(s)] || scoped[fold(canonUnitCore(s))];
+        if (pinned) return pinned;
+      }
+    }
 
     var hit = BY_UNIT[fold(s)];
     if (hit) return canonUnitCore(hit);
@@ -620,8 +723,8 @@
     var institution = canonInstitution(given.institution);
     var school = canonSchool(fused.school, institution);
 
-    var unit = canonUnit(given.unit);
-    var moved = canonUnit(fused.unit);
+    var unit = canonUnit(given.unit, institution);
+    var moved = canonUnit(fused.unit, institution);
     if (moved && !unit) unit = moved;
     else if (moved && unit && fold(moved) !== fold(unit)) {
       /* Both say something, and they are usually two halves of one name that
@@ -630,7 +733,7 @@
          other is a repetition — keep the fuller; otherwise rejoin them. */
       if (fold(unit).indexOf(fold(moved)) !== -1) { /* unit already says it */ }
       else if (fold(moved).indexOf(fold(unit)) !== -1) unit = moved;
-      else unit = canonUnit(moved + ', ' + unit);
+      else unit = canonUnit(moved + ', ' + unit, institution);
     }
 
     return { institution: institution, school: school, unit: unit };
@@ -638,7 +741,11 @@
 
   /** True when the value is already the name we publish. */
   function isCanonicalSchool(v) { return !!v && canonSchool(v) === v; }
-  function isCanonicalUnit(v) { return !!v && canonUnit(v) === v; }
+  function isCanonicalUnit(v) {
+    if (!v) return false;
+    if (SCOPED_UNIT_NAMES[fold(v)] === v) return true;
+    return canonUnit(v) === v;
+  }
 
   return {
     INSTITUTION_ALIASES: INSTITUTION_ALIASES,
@@ -646,6 +753,7 @@
     SCHOOL_ALIASES: SCHOOL_ALIASES,
     SCOPED_SCHOOL_ALIASES: SCOPED_SCHOOL_ALIASES,
     UNIT_ALIASES: UNIT_ALIASES,
+    SCOPED_UNIT_ALIASES: SCOPED_UNIT_ALIASES,
     fold: fold,
     canonInstitution: canonInstitution,
     institutionKey: institutionKey,

@@ -413,6 +413,37 @@ value as a fallback for the frozen archives, and `page-test.mjs` measures the
 rendered ratio in BOTH themes (a fix that only darkened the panel would trade one
 broken theme for the other).
 
+**Where a school names its own unit, that name wins.** The bare-field-name rule
+above is right in general — "Department", "Area" and "group" are exactly what
+differs between two people naming one unit — and wrong for six schools the owner
+ruled on (2026-08-18), where the wrapper IS the name: UT Dallas has an Operations
+Management **Area**, Purdue a Supply Chain and Operations Management **Faculty**,
+Yale an Operations **Department**, Emory an Information Systems **&** Operations
+Management. `SCOPED_UNIT_ALIASES` keys them by university (safe for the same
+reason the school table is: no other school at those six carries the name, which
+the selftest asserts) and the answer is **TERMINAL** — returned exactly as
+written, never put back through the rule that would undo it, and never through
+`spell()`, which turns " & " into " and ". The lookup asks three ways — as
+written, as `spell()` rewrites it, and as the generic rule would leave it —
+because listing every wrapper a source might use is the losing game the bare-name
+rule exists to avoid. Everywhere else the generic rule is untouched, which is the
+whole safety argument for scoping it. `canonUnit(v, institution)` takes the
+university, so `assemble` and the posting form's picker both pass it; a
+`canonUnit` asked without one still answers the generic way, which is why
+`isCanonicalUnit` consults the scoped names directly.
+
+**A substring check is blind to a reordering, and it cost two duplicates.**
+"Michael Smurfit Graduate Business School" and "UCD Michael Smurfit Graduate
+School of Business" contain neither one another, nor do "Olin Business School"
+and "Olin School of Business" — so both went on being offered twice through a
+green suite. The selftest now compares names TWO ways: substring, and the
+DISTINCTIVE WORDS as a set, dropping the generic ones ("school", "of",
+"business") and the university's own name and initials. Department pairs that
+are one group or two — only the owner can say — are named in `AWAITING_OWNER`
+in `selftest.mjs` rather than silently tolerated: a new pair fails the build, a
+listed one is reported by `node _scraper/selftest.mjs --open`, and an entry is
+deleted when it is ruled on (the answer going into `SCOPED_UNIT_ALIASES`).
+
 ## The posting form's three name fields cascade
 
 `post-a-job.html` asks for the university, the school and the department

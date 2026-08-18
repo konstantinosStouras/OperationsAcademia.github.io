@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T07:46:23.439Z",
+ "generated": "2026-08-18T08:50:39.822Z",
  "universities": [
   {
    "v": "University College London",
@@ -1328,6 +1328,10 @@
    "n": 1
   },
   {
+   "v": "Michael Smurfit Graduate Business School",
+   "n": 1
+  },
+  {
    "v": "Nanyang Business School",
    "n": 1
   },
@@ -1357,10 +1361,6 @@
   },
   {
    "v": "Tilburg School of Economics and Management",
-   "n": 1
-  },
-  {
-   "v": "UCD Michael Smurfit Graduate School of Business",
    "n": 1
   },
   {
@@ -1816,10 +1816,6 @@
    "n": 0
   },
   {
-   "v": "Michael Smurfit Graduate Business School",
-   "n": 0
-  },
-  {
    "v": "Mike Ilitch School of Business",
    "n": 0
   },
@@ -1845,10 +1841,6 @@
   },
   {
    "v": "Olin Business School",
-   "n": 0
-  },
-  {
-   "v": "Olin School of Business",
    "n": 0
   },
   {
@@ -2123,7 +2115,7 @@
  "units": [
   {
    "v": "Management Science",
-   "n": 7
+   "n": 6
   },
   {
    "v": "Operations Management",
@@ -2132,10 +2124,6 @@
   {
    "v": "Supply Chain Management",
    "n": 5
-  },
-  {
-   "v": "Management",
-   "n": 4
   },
   {
    "v": "Analytics and Operations",
@@ -2155,6 +2143,10 @@
   },
   {
    "v": "Information Systems and Operations Management",
+   "n": 3
+  },
+  {
+   "v": "Management",
    "n": 3
   },
   {
@@ -2179,6 +2171,10 @@
   },
   {
    "v": "Logistics and Maritime Studies",
+   "n": 2
+  },
+  {
+   "v": "Management Area",
    "n": 2
   },
   {
@@ -2290,6 +2286,10 @@
    "n": 1
   },
   {
+   "v": "Operations Management Area",
+   "n": 1
+  },
+  {
    "v": "Operations Research and Financial Engineering",
    "n": 1
   },
@@ -2311,10 +2311,6 @@
   },
   {
    "v": "Supply Chain and Operations",
-   "n": 1
-  },
-  {
-   "v": "Supply Chain and Operations Management",
    "n": 1
   },
   {
@@ -2519,6 +2515,10 @@
   },
   {
    "v": "Information Management and Business Analytics",
+   "n": 0
+  },
+  {
+   "v": "Information Systems & Operations Management",
    "n": 0
   },
   {
@@ -2750,6 +2750,10 @@
    "n": 0
   },
   {
+   "v": "Operations Department",
+   "n": 0
+  },
+  {
    "v": "Operations Group of the Division of Strategy, Entrepreneurship, and Operations",
    "n": 0
   },
@@ -2851,6 +2855,10 @@
   },
   {
    "v": "Supply Chain and Logistics Management",
+   "n": 0
+  },
+  {
+   "v": "Supply Chain and Operations Management Faculty",
    "n": 0
   },
   {
@@ -3489,13 +3497,11 @@
     "Goizueta Business School"
    ],
    "units": [
-    "Information Systems and Operations Management",
-    "Operations Management"
+    "Information Systems & Operations Management"
    ],
    "bySchool": {
     "Goizueta Business School": [
-     "Information Systems and Operations Management",
-     "Operations Management"
+     "Information Systems & Operations Management"
     ]
    }
   },
@@ -4571,15 +4577,13 @@
     "Mitchell E. Daniels, Jr. School of Business"
    ],
    "units": [
-    "Operations Management",
     "Quantitative Methods",
-    "Supply Chain and Operations Management"
+    "Supply Chain and Operations Management Faculty"
    ],
    "bySchool": {
     "Mitchell E. Daniels, Jr. School of Business": [
-     "Operations Management",
      "Quantitative Methods",
-     "Supply Chain and Operations Management"
+     "Supply Chain and Operations Management Faculty"
     ]
    }
   },
@@ -5311,14 +5315,12 @@
    ],
    "units": [
     "Healthcare Management",
-    "Operations Management",
-    "Supply Chain and Operations Management"
+    "Operations Management Area"
    ],
    "bySchool": {
     "Naveen Jindal School of Management": [
      "Healthcare Management",
-     "Operations Management",
-     "Supply Chain and Operations Management"
+     "Operations Management Area"
     ]
    }
   },
@@ -5450,20 +5452,14 @@
   "University College Dublin": {
    "schools": [
     "Michael Smurfit Graduate Business School",
-    "School of Mechanical and Materials Engineering",
-    "UCD Michael Smurfit Graduate School of Business"
+    "School of Mechanical and Materials Engineering"
    ],
    "units": [
-    "Management",
-    "Operations Management"
+    "Management Area"
    ],
    "bySchool": {
     "Michael Smurfit Graduate Business School": [
-     "Management",
-     "Operations Management"
-    ],
-    "UCD Michael Smurfit Graduate School of Business": [
-     "Management"
+     "Management Area"
     ]
    }
   },
@@ -6032,13 +6028,11 @@
     "Miami Herbert Business School"
    ],
    "units": [
-    "Management",
-    "Management Science"
+    "Management Area"
    ],
    "bySchool": {
     "Miami Herbert Business School": [
-     "Management",
-     "Management Science"
+     "Management Area"
     ]
    }
   },
@@ -6753,8 +6747,7 @@
   },
   "Washington University in St. Louis": {
    "schools": [
-    "Olin Business School",
-    "Olin School of Business"
+    "Olin Business School"
    ],
    "units": [
     "Operations and Manufacturing Management",
@@ -6762,9 +6755,7 @@
    ],
    "bySchool": {
     "Olin Business School": [
-     "Operations and Manufacturing Management"
-    ],
-    "Olin School of Business": [
+     "Operations and Manufacturing Management",
      "Supply Chain, Operations and Technology"
     ]
    }
@@ -6872,13 +6863,11 @@
     "School of Management"
    ],
    "units": [
-    "Operations",
-    "Operations Management"
+    "Operations Department"
    ],
    "bySchool": {
     "School of Management": [
-     "Operations",
-     "Operations Management"
+     "Operations Department"
     ]
    }
   },
@@ -7132,8 +7121,7 @@
    "Information Systems, Operations, Supply Chain and Analytics"
   ],
   "Goizueta Business School": [
-   "Information Systems and Operations Management",
-   "Operations Management"
+   "Information Systems & Operations Management"
   ],
   "Graduate School of Business": [
    "Operations and Information Technology",
@@ -7310,15 +7298,13 @@
    "IT, Analytics, and Operations"
   ],
   "Miami Herbert Business School": [
-   "Management",
-   "Management Science"
+   "Management Area"
   ],
   "Michael G. Foster School of Business": [
    "Information Systems and Operations Management"
   ],
   "Michael Smurfit Graduate Business School": [
-   "Management",
-   "Operations Management"
+   "Management Area"
   ],
   "Mike Ilitch School of Business": [
    "Marketing and Supply Chain Management"
@@ -7328,9 +7314,8 @@
    "Operations Research and Statistics"
   ],
   "Mitchell E. Daniels, Jr. School of Business": [
-   "Operations Management",
    "Quantitative Methods",
-   "Supply Chain and Operations Management"
+   "Supply Chain and Operations Management Faculty"
   ],
   "Monash Business School": [
    "Management"
@@ -7341,8 +7326,7 @@
   ],
   "Naveen Jindal School of Management": [
    "Healthcare Management",
-   "Operations Management",
-   "Supply Chain and Operations Management"
+   "Operations Management Area"
   ],
   "Neeley School of Business": [
    "Information Systems and Supply Chain Management"
@@ -7354,9 +7338,7 @@
    "Analytics and Operations"
   ],
   "Olin Business School": [
-   "Operations and Manufacturing Management"
-  ],
-  "Olin School of Business": [
+   "Operations and Manufacturing Management",
    "Supply Chain, Operations and Technology"
   ],
   "Otto-Beisheim School of Management": [
@@ -7494,9 +7476,9 @@
    "Information, Decisions and Operations",
    "Management and Marketing",
    "Management Science",
-   "Operations",
    "Operations and Business Analytics",
    "Operations and Data Science",
+   "Operations Department",
    "Operations Management"
   ],
   "School of Management and Economics": [
@@ -7549,9 +7531,6 @@
   "TUM School of Management": [
    "Operations and Supply Chain Management",
    "Operations and Technology"
-  ],
-  "UCD Michael Smurfit Graduate School of Business": [
-   "Management"
   ],
   "UCL School of Management": [
    "Operations and Technology"

@@ -2118,9 +2118,9 @@
   "year": 2026,
   "posted": "2025-10-03",
   "institution": "University of Texas at Dallas",
-  "department": "Naveen Jindal School of Management, Supply Chain and Operations Management",
+  "department": "Naveen Jindal School of Management, Operations Management Area",
   "school": "Naveen Jindal School of Management",
-  "unit": "Supply Chain and Operations Management",
+  "unit": "Operations Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -2188,9 +2188,9 @@
   "year": 2026,
   "posted": "2025-10-02",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Management Science",
+  "department": "Miami Herbert Business School, Management Area",
   "school": "Miami Herbert Business School",
-  "unit": "Management Science",
+  "unit": "Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -3131,9 +3131,9 @@
   "year": 2026,
   "posted": "2025-08-17",
   "institution": "University College Dublin",
-  "department": "UCD Michael Smurfit Graduate School of Business, Management",
-  "school": "UCD Michael Smurfit Graduate School of Business",
-  "unit": "Management",
+  "department": "Michael Smurfit Graduate Business School, Management Area",
+  "school": "Michael Smurfit Graduate Business School",
+  "unit": "Management Area",
   "type": "Business School",
   "levels": [
    "Assistant Professor"
