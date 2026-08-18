@@ -60,7 +60,7 @@ import {
   stalenessOf, shouldWarn, emptyRegistry, adoptSheets, activeSheets, rollRegistry,
 } from './jobmarket-sheet.mjs';
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
-import { COLLECTION as REVIEW_COL, partition, needMail } from './jobreview.mjs';
+import { COLLECTION as REVIEW_COL, partition, needMail, PENDING } from './jobreview.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -590,14 +590,22 @@ async function main() {
             await writeQueue(queue.db, split);
           }
         }
+        /* Grandfathered rows are in `queue` (they get a document) AND in
+           `publish` (the site is already showing them), so they are counted
+           out of both lines below: printed as waiting, they would tell the
+           maintainer they had sixteen more decisions to make than they do —
+           and the first real run said "545 awaiting you" when 529 were. */
+        const waiting = split.pending.length
+          + split.queue.filter((d) => d.status === PENDING).length;
+
         for (const d of split.queue) {
-          log(`  ~ queued for review  ${d.row.posted}  ${d.row.institution}` +
+          log(`  ${d.status === PENDING ? '~ queued for review' : '= kept, already public'}` +
+              `  ${d.row.posted}  ${d.row.institution}` +
               (d.row.department ? ' — ' + d.row.department : ''));
         }
         log(`review queue: ${split.publish.length} approved, ` +
-            `${split.pending.length + split.queue.length} awaiting you, ` +
-            `${split.rejected.length} turned down`);
-        if (split.pending.length + split.queue.length) {
+            `${waiting} awaiting you, ${split.rejected.length} turned down`);
+        if (waiting) {
           log(`  review them at ${SITE}/feedback`);
         }
       }
