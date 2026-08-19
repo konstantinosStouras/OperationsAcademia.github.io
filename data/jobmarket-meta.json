@@ -1,16 +1,19 @@
 {
- "generated": "2026-08-18T10:54:13.762Z",
- "count": 16,
- "newestPosted": "2026-08-15",
+ "generated": "2026-08-19T07:02:03.086Z",
+ "count": 21,
+ "newestPosted": "2026-08-18",
  "oldestPosted": "2026-07-20",
  "years": {
-  "2027": 16
+  "2027": 21
  },
  "countries": {
-  "United States": 16
+  "United States": 20,
+  "Singapore": 1
  },
  "levels": {
   "Non-tenure track (teaching) position": 13,
+  "Assistant Professor": 3,
+  "Other Ranks": 3,
   "Visiting Faculty (various levels)": 2,
   "Post-Doc": 1
  },
