@@ -301,10 +301,46 @@ Three rules worth keeping:
   work. Same shape as the HigherEdJobs cache and `rowOverrides`.
 
 `EDITABLE` in `jobreview.mjs`, the `FIELDS` list in `oa-jobreview.js` and the key
-list in `_firestore.rules` must agree — **selftest.mjs pins all three together**.
-`id`, `year`, `posted` and `source` are deliberately NOT editable: they tie the
-posting to its sheet row, and changing one would make the next sync queue it
-again as new. Correct those in the workbook.
+list in `_firestore.rules` must agree — **selftest.mjs pins all three together,
+and BOTH WAYS**: a field the panel offers that the model does not accept is a
+tick box that saves and silently does nothing, which is what "Associate
+Professor" and "Full Professor" were (the site's five `LEVELS` know only "Other
+Ranks"). `id`, `year`, `posted` and `source` are deliberately NOT editable: they
+tie the posting to its sheet row, and changing one would make the next sync
+queue it again as new. Correct those in the workbook.
+
+**The card asks the posting form's own three name questions, in its words, with
+its cascade.** It used to offer FOUR boxes for a place that has three —
+`department`, the line the card shows, beside the school and the unit it is
+joined from — and nothing kept them in step: correcting the school published a
+row whose line still said what the workbook had said, and the selftest's "the
+line equals its two parts joined" guard would then stop the whole site
+publishing. `department` is DERIVED now (`settlePlace` inside `applyEdits`,
+which also puts all three names through the same `canonColumns()` every other
+ingest uses — an alias added today reaches a posting queued last week), it
+stays in `EDITABLE` and the rules only because an old document may still carry
+one (`SHOWN` is what the panel draws), and the card previews the line under the
+two boxes exactly as the posting form does. The three boxes mount
+**`assets/oa-place-picker.js`** — see the cascade section below — so typing
+"University of Chicago" narrows School to Booth and School narrows Department,
+the same behaviour the poster gets.
+
+**A workbook posting is given the school its department sits in** —
+`fillSchoolFromDirectory` in `vocab.mjs`, applied by the sheet sync at ingest
+(and by its `--heal-names`). The workbook's one hiring-unit column holds the
+department, so fifteen of its sixteen postings arrived with a department and NO
+school — "University of California, Berkeley" + "Operations and Information
+Technology Management", with Haas missing — while `data/vocab.json` (the
+Universities directory + the `oa-institutions.js` seed) already knew the
+answer. Curated, never guessed: only where the school is EMPTY, only where
+exactly ONE school at that university carries the department, and never from a
+name the site does not already publish. It is the offline twin of the form's
+`inferSchool`. A posting it cannot settle (a programme rather than a
+department, a department named differently from the school's own, Rutgers'
+school-as-university) is the maintainer's call, made on the review card's
+cascade — never a guess. **To make a future posting resolve, add its
+(university, school, department) row to `assets/oa-institutions.js`** — the
+same rule as everywhere else: grow the database, never hand-edit `data/`.
 
 **It is inert until `_firestore.rules` is redeployed** (`firebase deploy --only
 firestore:rules`) — until then the panel says permission-denied — and the
@@ -348,6 +384,41 @@ holds the approved rows and nothing else writes it. That is why
 `oa-jobmarket-sheet.yml` runs every half hour rather than daily — see its
 header. If that cadence changes, change the panel's and the e-mail's promise
 with it.
+
+## …and what is posted through the site's own forms is ANNOUNCED
+
+Two queues reach the maintainer and only the sheet's ever said anything: a job
+posting or a candidate profile made through `post-a-job.html` /
+`post-a-candidate.html` went into Firestore, was published by the next build,
+and nobody was told. For candidates that was the worse half — profiles are held
+behind the reveal date (`data/candidates-reveal.json`), so they reach no served
+file, draw no card anywhere on the site, and there was NO screen that could
+show them at all (the only route to one was guessing its document id).
+
+    _scraper/submissions-review.mjs   which submissions are waiting (pure)
+    _scraper/submissions-mailer.mjs   one e-mail per submission
+    assets/oa-submissions.js          the panel on feedback.html
+    oa-submissions-mail.yml           runs it every 15 minutes
+
+**It is a NOTIFICATION, never a gate.** The forms promise "within a few
+minutes" and keep it; the e-mail says a posting is already live, and says a
+candidate profile is held until the reveal date — which is why the e-mail (and
+the panel it links to) is the only place the maintainer will see one. The
+bookkeeping lives ON the submission itself, not in a new collection:
+`announcedAt` is the mailer's high-water mark (stamped only after a send
+succeeds, so a run that cannot send announces the same submission next time),
+and `reviewedAt` is the panel's "I have looked at this" tick. Both collections
+were already admin-read and admin-write in `_firestore.rules`, so **no rules
+redeploy was needed** — selftest.mjs pins that, because a feature that needs
+one looks installed and is inert.
+
+**The feature arriving is not a reason to send a hundred e-mails.** Anything
+created before `SINCE` that the site is ALREADY showing is stamped without an
+e-mail — both conditions, and the date is what makes the pair safe: "already on
+the site" alone would swallow a genuinely new posting, because the build
+publishes it within a minute of its arrival. A backlog submission the site is
+NOT showing is announced — that is exactly the held-candidates case. Above
+`BURST` (12) a batch goes as one list, sharing the review mailer's reasoning.
 
 ## Nothing on "What's new" publishes itself either
 
@@ -746,6 +817,19 @@ department list to that school's departments. The lists come from
 `data/vocab.json` (`byUniversity[uni].bySchool[school]`, plus a top-level
 `bySchool`), and the picker renders a scope under its own heading —
 `setScope()` in `assets/oa-combo.js`.
+
+**The cascade is ONE file, `assets/oa-place-picker.js`, and two pages mount
+it** — the posting form and the review queue's cards on `feedback.html`, which
+ask the maintainer the same three questions about the same three names. It used
+to live inside `oa-jobform.js`, bound to three ids on one page; a copy for the
+review panel would have been the drift every other shared module here exists to
+prevent. `OAPlacePicker.wire({institution, school, unit}, {onChange})` returns
+`{destroy}`, and a caller that re-renders its markup MUST call it: every picker
+adds a `document`-level listener (the only way to see a click land outside its
+own list), so `OACombo` grew a `destroy()` for exactly this, and the review
+panel unmounts before each redraw. The module memoizes the `vocab.json` fetch
+(one request per page, however many cards mount it; a failed read is not
+remembered), and the selftest pins all of it.
 
 **The vocabulary has a second source: `data/universities.json`**, the site's
 own Universities directory. Its 254 curated (institution, school, department)

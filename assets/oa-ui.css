@@ -1617,6 +1617,40 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-rv-field { margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .oa-rv-field.is-wide { grid-column: 1 / -1; }
 
+/* What the school and the department boxes above will actually publish — the
+   card shows ONE line, and the maintainer editing two names has to be able to
+   see it. The posting form shows the poster the same thing. It carries its own
+   colour: this is a background-free rule, but it sits inside a panel that is
+   painted in both themes and inheriting would leave it at the body's ink. */
+.oa-rv-derived {
+  font-size: 12px;
+  color: var(--oa-muted, #5a5f6b);
+}
+.oa-rv-derived:empty { display: none; }
+
+/* What somebody posted, on the maintainer's "posted through the site" cards.
+   A read-only table rather than the review card's grid of inputs: these
+   postings are already live and are corrected on their own form, so there is
+   nothing here to type into. */
+.oa-sub-lines {
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 8px 0 4px;
+}
+.oa-sub-lines th {
+  text-align: left;
+  padding: 2px 12px 2px 0;
+  vertical-align: top;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--oa-muted, #5a5f6b);
+}
+.oa-sub-lines td {
+  padding: 2px 0;
+  vertical-align: top;
+  color: var(--ink, #1e2430);
+}
+
 .oa-rv-field label {
   font-size: 12px;
   font-weight: 600;

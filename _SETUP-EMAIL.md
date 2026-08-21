@@ -1,20 +1,35 @@
 # Switching on the e-mail side
 
-Two scheduled jobs send mail:
+Four scheduled jobs send mail. The first goes to subscribers; the other three
+go to **you**.
 
 | | what it sends | cadence |
 |---|---|---|
-| `v2/_scraper/alerts-mailer.mjs` | e-mail alert digests to subscribers | hourly |
-| `v2/_scraper/feedback-mailer.mjs` | new feedback to you, a receipt to the submitter, and the "your feedback is resolved" e-mail | twice an hour, and on any push adding a resolution file |
+| `_scraper/alerts-mailer.mjs` | e-mail alert digests to subscribers | hourly |
+| `_scraper/feedback-mailer.mjs` | new feedback to you, a receipt to the submitter, and the "your feedback is resolved" e-mail | twice an hour, and on any push adding a resolution file |
+| `_scraper/jobreview-mailer.mjs` | a posting read from the tracking sheet is **waiting for you to approve it** | every 15 minutes |
+| `_scraper/submissions-mailer.mjs` | somebody has **posted a job or a candidate profile** through the site's own form | every 15 minutes |
 
-Both are **no-ops without credentials**, and both print exactly what they would
-have sent instead. So you can run them today and read the output.
+The last two are different in kind, and it is worth knowing which is which. The
+review mailer is a **gate**: nothing it tells you about is on the site until you
+approve it. The submissions mailer is a **notification**: the posting is already
+live, because the form promises it will be within a few minutes — but a
+CANDIDATE profile is held behind the reveal date
+(`data/candidates-reveal.json`), so it is in no served file, draws no card
+anywhere on the site, and that e-mail (and the panel it links to on
+`/feedback`) is the only place you will see it.
+
+All four are **no-ops without credentials**, and all print exactly what they
+would have sent instead. So you can run them today and read the output.
 
 ```bash
-node v2/_scraper/alerts-mailer.mjs --selftest     # 21 offline checks
-node v2/_scraper/feedback-mailer.mjs --selftest   # 20 offline checks
-node v2/_scraper/alerts-mailer.mjs --scan         # which alerts are due
-node v2/_scraper/alerts-mailer.mjs --dry-run      # render every message, send none
+node _scraper/alerts-mailer.mjs --selftest        # offline checks
+node _scraper/feedback-mailer.mjs --selftest      #   "
+node _scraper/jobreview-mailer.mjs --selftest     #   "
+node _scraper/submissions-mailer.mjs --selftest   #   "
+node _scraper/alerts-mailer.mjs --scan            # which alerts are due
+node _scraper/submissions-mailer.mjs --scan       # what has been posted and not announced
+node _scraper/alerts-mailer.mjs --dry-run         # render every message, send none
 ```
 
 ---
@@ -59,6 +74,9 @@ Settings → Secrets and variables → Actions.
 | `FEEDBACK_TO` | where feedback lands | `kstouras@gmail.com` |
 | `CONTACT_EMAIL` | the human address in every footer | `operationsacademia@gmail.com` |
 | `SITE_URL` | absolute site root | `https://www.operationsacademia.org` |
+| `JOBREVIEW_ALERT_TO` | where "a posting is waiting for you to approve" goes | `CONTACT_EMAIL` |
+| `SUBMISSION_ALERT_TO` | where "somebody has posted something" goes | `JOBREVIEW_ALERT_TO`, then `CONTACT_EMAIL` |
+| `JOBMARKET_ALERT_TO` | where "the tracking sheet has gone quiet" goes | `CONTACT_EMAIL` |
 
 ## 3. Make the mail actually arrive
 
@@ -87,7 +105,7 @@ authorised to send is the single most common reason mail disappears.
 2. Run it again with **dry_run** ticked. It renders each message and prints it.
 3. Run it for real. Check the mailbox, and check the spam folder — if it landed
    there, go back to step 3.
-4. For feedback: submit something on `/v2/feedback.html` with your own address,
+4. For feedback: submit something on `/feedback.html` with your own address,
    then run **OA feedback — forward and resolve**. You should get two messages:
    the maintainer copy with the screenshot attached, and a receipt.
 
@@ -108,14 +126,14 @@ Each subscription carries its own **high-water mark** (`lastSentAt`), advanced
 A subscription with nothing new is **not a send**. It advances `lastCheckedAt`
 and stays quiet — nobody gets a "no new postings today" e-mail.
 
-Matching uses `v2/assets/oa-alert-match.js`, which is the *same file* the alerts
+Matching uses `assets/oa-alert-match.js`, which is the *same file* the alerts
 page loads in the browser. That is deliberate: it means the preview a subscriber
 sees while creating an alert and the e-mail they later receive cannot disagree.
 Change the matching rules in that one file and both sides move together.
 
 ## Closing a feedback ticket
 
-Add `v2/_feedback-resolutions/<TICKET>.md` and push. See the README in that
+Add `_feedback-resolutions/<TICKET>.md` and push. See the README in that
 directory. The mailer closes the ticket in Firestore **first** and then e-mails
 the submitter, so a mail failure retries only the notification and can never
 lose the record that you dealt with it.

@@ -47,10 +47,14 @@ import {
   isHigherEdJobsUrl, jobCodeOf, detailsUrl, hejDate, DEADLINE_FIELDS,
 } from './higheredjobs.mjs';
 import {
-  COLLECTION as REVIEW_COL, EDITABLE, DOC_KEYS, PENDING, APPROVED, REJECTED,
+  COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
   needMail, changedKeys,
 } from './jobreview.mjs';
+import {
+  KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
+  REVIEWED_AT as SUB_REVIEWED_AT, partitionSubmissions, isWaiting, createdDay,
+} from './submissions-review.mjs';
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -1585,28 +1589,71 @@ async function testCascadeWiring() {
   ok(/var nameKey = typeof opts\.key === 'function' \? opts\.key : fold;/.test(combo),
     'and takes its idea of "the same name" from the caller, so it needs no name rules of its own');
 
-  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
-  ok(/setScope\(/.test(form) && /bySchool/.test(form),
-    'oa-jobform.js drives the cascade from byUniversity and bySchool');
-  ok(/var S = window\.OASchools;/.test(form) && /if \(!S\) return;/.test(form),
+  /* A PICKER MOUNTED INTO MARKUP THAT IS LATER THROWN AWAY HAS TO BE GIVEN
+     BACK. Each mount adds a listener to `document` — the only way to see a
+     click land outside its own list — and the review queue redraws its whole
+     card list on a year tab. Without this the listeners accumulate, each
+     holding a detached card and the whole vocabulary. */
+  ok(/function destroy\(\)/.test(combo)
+     && /document\.removeEventListener\('mousedown', offClick\)/.test(combo),
+    'and can be taken off an input again, for a list of cards that is re-rendered');
+
+  /* THE CASCADE IS ONE FILE, AND BOTH PAGES MOUNT IT. It used to live inside
+     oa-jobform.js, bound to three ids on the posting form — and the review
+     queue asks the maintainer the same three questions about the same three
+     names. A copy is the drift every other shared module in this repository
+     exists to prevent, and no test could have told the two apart. */
+  const pick = await readFile(path.join(HERE, '..', 'assets', 'oa-place-picker.js'), 'utf8');
+  ok(/setScope\(/.test(pick) && /bySchool/.test(pick),
+    'oa-place-picker.js drives the cascade from byUniversity and bySchool');
+  ok(/var S = window\.OASchools;/.test(pick) && /if \(!S\) return;/.test(pick),
     'and the three lists still work on a page that never loaded oa-schools.js');
-  ok(/S\.canonColumns\(\{/.test(form),
+  ok(/S\.canonColumns\(\{/.test(pick),
     'the fields are put into the published spelling by the SAME canon the submission uses');
+  ok(/publishAs: S \? function \(v\) \{ return S\.canonUnit\(v, val\(inst\)\); \} : null/.test(pick),
+    'a name not on the list is offered as it will be published');
+  ok(/S\.canonUnit\(v, val\(inst\)\)/.test(pick) && /var keyUnit = S \? function \(v\)/.test(pick),
+    'and the department picker groups by the university too, so a scoped name is not folded away');
+  ok(/canonColumns\(\{/.test(pick) && !/canonPlace\(\{/.test(pick),
+    'but a lone institution is not read as one of the archive’s fused one-column values');
+  ok(/destroy: function \(\) \{/.test(pick) && /combos\[k\]\.destroy\(\)/.test(pick),
+    'and the whole cascade can be unmounted, pickers and listeners together');
+  /* One request per file per page is the site-wide rule, and a queue of forty
+     cards would otherwise ask for the vocabulary forty times. */
+  ok(/var pending = Object\.create\(null\);/.test(pick)
+     && /if \(!pending\[key\]\)/.test(pick),
+    'and the vocabulary is fetched once however many cards mount it');
+  ok(/delete pending\[key\];/.test(pick),
+    'a failed read is not remembered, so one flaky request is not inherited by every later mount');
+
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  ok(/OAPlacePicker\.wire\(/.test(form),
+    'the posting form mounts the shared cascade rather than carrying its own');
+  ok(!/byUniversity/.test(form),
+    'and no longer walks the vocabulary itself — one implementation, not two');
   ok(!/'f-institution', 'f-school'\].forEach\(function \(id\) \{\n\s*var el = \$\(id\);\n\s*if \(el\) el\.dispatchEvent\(new Event\('change'/.test(form),
     'and an edit does not settle the INSTITUTION, whose spelling a permalink is built from');
-  ok(/publishAs: S \? function \(v\) \{ return S\.canonUnit\(v, val\(inst\)\); \} : null/.test(form),
-    'a name not on the list is offered as it will be published');
-  ok(/S\.canonUnit\(v, val\(inst\)\)/.test(form) && /var keyUnit = S \? function \(v\)/.test(form),
-    'and the department picker groups by the university too, so a scoped name is not folded away');
-  ok(/canonColumns\(\{/.test(form) && !/canonPlace\(\{/.test(form),
-    'but a lone institution is not read as one of the archive’s fused one-column values');
 
-  for (const page of ['post-a-job.html']) {
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  ok(/OAPlacePicker\.wire\(/.test(panel),
+    'the review card mounts the same cascade the posting form does');
+  ok(/unmountPickers\(\)/.test(panel) && /m\.destroy\(\)/.test(panel),
+    'and gives its pickers back before it redraws the queue');
+
+  /* Deferred scripts run in document order, so the names module and the picker
+     have to be listed before whatever mounts them. */
+  for (const page of ['post-a-job.html', 'feedback.html']) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     const at = html.indexOf('oa-schools.js');
     ok(at !== -1 && at < html.indexOf('oa-combo.js'),
       `${page}: loads the names module before the picker`);
+    const cascade = html.indexOf('oa-place-picker.js');
+    ok(cascade !== -1 && cascade > html.indexOf('oa-combo.js'),
+      `${page}: loads the cascade after the picker it mounts`);
   }
+  const feedback = await readFile(path.join(HERE, '..', 'feedback.html'), 'utf8');
+  ok(feedback.indexOf('oa-place-picker.js') < feedback.indexOf('oa-jobreview.js'),
+    'feedback.html: and before the review panel that asks for it');
 }
 
 /* --------------------------------- a renamed department keeps its readers
@@ -2030,7 +2077,10 @@ async function testFormsOfferVocab() {
     ok(schools !== -1 && schools < combo,
       `${page}: loads the names module first, so two spellings group as one name`);
   }
-  for (const [file, what] of [['assets/oa-jobform.js', 'job'],
+  /* The job form's own vocabulary read moved into the shared cascade
+     (assets/oa-place-picker.js) when the review queue started mounting the same
+     three boxes — so the file that has to name vocab.json is that one. */
+  for (const [file, what] of [['assets/oa-place-picker.js', 'cascade'],
     ['assets/oa-candidateform.js', 'candidate'], ['assets/oa-placementform.js', 'placement']]) {
     const js = await read(file);
     ok(/vocab\.json/.test(js), `the ${what} form fetches data/vocab.json`);
@@ -4548,11 +4598,94 @@ async function testReviewWiring() {
 
   for (const f of EDITABLE) {
     ok(block.includes(`'${f.key}'`), `_firestore.rules allows editing ${f.key}`);
-    ok(panel.includes(`key: '${f.key}'`), `the review panel offers ${f.key}`);
   }
+  /* The PANEL is pinned against SHOWN, not EDITABLE: `department` is the line
+     the card publishes, derived from the two names beside it, and the rules
+     still have to allow it because a document written before it was derived
+     may carry one. Everything else the model accepts, the panel must ask. */
+  for (const f of SHOWN) {
+    ok(panel.includes(`key: '${f.key}'`), `the review panel offers ${f.key}`);
+    ok(panel.includes(`label: '${f.label.replace(/'/g, "\\'")}'`),
+      `and asks for ${f.key} in the same words the model names it`);
+  }
+  /* AND BOTH WAYS. A one-way pin let the panel offer a field the model does
+     not accept, which is what "Associate Professor" was: a tick box that saved
+     and then vanished, because `cleanEdit` drops anything outside LEVELS. */
+  const offered = [...panel.matchAll(/\{ key: '([a-zA-Z]+)'/g)].map((m) => m[1]);
+  for (const key of offered) {
+    ok(SHOWN.some((f) => f.key === key),
+      `the panel's ${key} box is a field the model actually accepts`);
+  }
+  ok(!offered.includes('department'),
+    'and the card does not offer the derived line beside the two names it is made of');
+
+  /* The option lists are the site's own vocabularies, not a second copy typed
+     into the browser. LEVELS is five; the panel used to offer seven, two of
+     which the model silently dropped. */
+  for (const l of LEVELS) {
+    ok(new RegExp(`v: '${l.replace(/[.*+?^$()|[\]\\]/g, '\\$&')}'`).test(panel),
+      `the review panel offers the "${l}" entry level`);
+  }
+  ok((panel.match(/\{ v: '/g) || []).length === LEVELS.length,
+    'and offers no entry level the site does not have');
+  for (const t of TYPES) {
+    ok(panel.includes(`'${t}'`), `the review panel offers the "${t}" institution type`);
+  }
+
   for (const k of ['id', 'year', 'posted', 'source', 'addedAt']) {
     ok(!EDITABLE.some((f) => f.key === k),
       `${k} is NOT editable — it is the posting's identity, corrected in the sheet`);
+  }
+
+  /* THE LINE THE CARD SHOWS IS DERIVED, and that is a publishing guard rather
+     than a tidiness one: testSchools asserts over the SERVED file that
+     `department` equals its two parts joined, and a red selftest stops
+     oa-jobs-build.yml committing anything at all. Three independent boxes and
+     no derivation meant one corrected school could stop the whole site
+     publishing. */
+  {
+    const row = {
+      id: 'r', institution: 'University of California, Berkeley', school: '',
+      unit: 'Operations and Information Technology Management',
+      department: 'Operations and Information Technology Management',
+    };
+    const fixed = applyEdits(row, { school: 'Walter A. Haas School of Business' });
+    eq(fixed.department,
+      'Walter A. Haas School of Business, Operations and Information Technology Management',
+      'correcting the school rebuilds the line the card shows');
+    eq(applyEdits(row, {}).department, row.department,
+      'and an untouched posting keeps exactly the line it arrived with');
+    eq(applyEdits(row, { school: '', unit: '' }).department, '',
+      'clearing both names clears the line, so the file stays self-consistent');
+    /* The sheet publishes `joinDepartment(...) || area`, so a row whose area
+       canonicalised away to nothing carries a line with no parts behind it.
+       Deriving would blank it, and the card, the University search and the
+       alert matcher all read it. */
+    eq(applyEdits({ institution: 'X University', school: '', unit: '', department: 'Raw area' }, {})
+      .department, 'Raw area',
+      'a row that never had two names keeps the line the sheet gave it');
+
+    /* One spelling per place, HERE TOO. cleanEdit canonicalised the country
+       and nothing else, so a school typed into this panel reached
+       data/jobs.json exactly as typed — while testSchools asserts over that
+       file that every posting names its place the way canonPlace names it, and
+       a red selftest stops the build committing. (An unknown spelling is still
+       published as typed: canon() never invents. What it fixes is a name the
+       site already knows under another form.) */
+    const spelt = applyEdits(row, {
+      institution: 'UC Berkeley',
+      school: 'Haas School of Business',
+      unit: 'Operations and Information Technology Management Department',
+    });
+    eq(spelt.institution, 'University of California, Berkeley',
+      'an edited university is put into the spelling the site publishes');
+    eq(spelt.school, 'Walter A. Haas School of Business',
+      'and so is the school');
+    eq(spelt.unit, 'Operations and Information Technology Management',
+      'and the department keeps its bare field name');
+    eq(spelt.department,
+      'Walter A. Haas School of Business, Operations and Information Technology Management',
+      'with the line rebuilt from the two of them');
   }
 
   /* A QUEUED POSTING IS NOT PUBLIC, which is the whole reason the queue is a
@@ -4622,6 +4755,88 @@ async function testReviewWiring() {
   ok(panel.includes('OAAccounts.isAdmin()'), 'the panel is drawn for the maintainer only');
 }
 
+/* ------------------------------- what was posted through the site's own forms
+
+   TWO QUEUES REACH THE MAINTAINER AND ONLY ONE OF THEM EVER SAID ANYTHING.
+   The tracking sheet's postings are held and announced; a posting or a
+   candidate profile made through the site's own forms went into Firestore, was
+   published by the next build, and nothing told anybody. For candidates that
+   was the worse half: their profiles are held behind the reveal date, so they
+   reach no served file, draw no card anywhere on the site, and there was no
+   screen that could show them at all.                                        */
+
+async function testSubmissionNotices() {
+  const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
+  const model = await read('_scraper/submissions-review.mjs');
+  const mailer = await read('_scraper/submissions-mailer.mjs');
+  const panel = await read('assets/oa-submissions.js');
+  const html = await read('feedback.html');
+
+  /* The model and the browser panel have to agree about WHAT they are looking
+     at and WHERE the bookkeeping is written, or a card ticked off in one is
+     still announced by the other. */
+  for (const kind of SUB_KINDS) {
+    ok(panel.includes(`collection: '${kind.collection}'`),
+      `the panel reads ${kind.collection}, the same collection the mailer announces`);
+    ok(panel.includes(`editPath: '${kind.editPath}'`),
+      `and opens a ${kind.one} on the same form`);
+    ok(mailer.includes('KINDS'), 'and the mailer takes its kinds from the model');
+  }
+  ok(panel.includes(`var REVIEWED_AT = '${SUB_REVIEWED_AT}';`),
+    'the panel stamps the field the model names');
+  ok(model.includes(`export const ANNOUNCED_AT = '${SUB_ANNOUNCED_AT}';`),
+    'and the mailer stamps its own, so a tick and an announcement never overwrite each other');
+  ok(!new RegExp(`['"\`]${SUB_ANNOUNCED_AT}['"\`]\\s*\\]?\\s*[:=]`).test(panel)
+     && !panel.includes(`'${SUB_ANNOUNCED_AT}'`),
+    'the panel never writes the mailer\'s high-water mark');
+
+  /* NO RULES CHANGE. Both collections are already admin-read and admin-write,
+     which is what let this ship without a manual `firebase deploy` — a feature
+     that needs one looks installed and is inert until somebody remembers. */
+  const rules = await read('_firestore.rules');
+  for (const kind of SUB_KINDS) {
+    const block = rules.slice(rules.indexOf(`match /${kind.collection}/`));
+    ok(/allow read: if isOwner\(resource\.data\.uid\) \|\| isAdmin\(\);/.test(block),
+      `${kind.collection} is readable by the maintainer`);
+    ok(/allow write: if isAdmin\(\);/.test(block),
+      `and writable by them, so "mark reviewed" needs no new rule`);
+  }
+
+  /* IT IS NOT A GATE, and the copy has to say so. A posting made through the
+     form is live within a minute because the form promises as much; telling
+     the maintainer it is waiting on them would be false. */
+  ok(/already live/.test(mailer), 'the e-mail says a posting is already live');
+  ok(/held until/i.test(mailer) && /held until/i.test(panel),
+    'and that a candidate profile is held until the reveal date, which is why it ' +
+    'is nowhere on the site');
+
+  /* A withdrawn submission is not waiting for anything, and a tracking-sheet
+     mirror has its own queue directly above this panel. */
+  ok(model.includes("const LIVE = ['queued', 'published'];"),
+    'only live submissions are listed');
+  ok(model.includes('doc.status === MIRROR_STATUS'),
+    'and a tracking-sheet mirror is never one of them — it has its own queue');
+
+  ok(html.includes('id="oa-subs"'), 'the feedback page carries the panel');
+  ok(html.includes('oa-submissions.js'), 'and loads the script that fills it');
+  ok(html.indexOf('id="oa-review"') < html.indexOf('id="oa-subs"'),
+    'below the approval queue, which is the one thing that is actually blocked on them');
+  ok(panel.includes('OAAccounts.isAdmin()'), 'and it is drawn for the maintainer only');
+
+  const wf = await read('.github/workflows/oa-submissions-mail.yml');
+  ok(wf.includes('submissions-mailer.mjs'), 'the workflow runs the mailer');
+  ok(wf.includes('--selftest'), 'and checks it offline first');
+  ok(/permissions:\s*\n\s*contents: read/.test(wf), 'a mailer commits nothing');
+  ok(/group: oa-submissions-mail-/.test(wf),
+    'and has its own concurrency group — it must never queue behind a data build');
+  /* Every quarter of an hour, and never on the review mailer's own minutes. */
+  const mine = (wf.match(/cron: '([^']+)'/) || [])[1] || '';
+  const theirs = (await read('.github/workflows/oa-jobreview-mail.yml'))
+    .match(/cron: '([^']+)'/)[1];
+  ok(mine && mine !== theirs,
+    'and does not fire on the same minutes as the review mailer');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   testSanitisers();
   testMapping();
@@ -4683,5 +4898,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testReviewQueue();
   testReviewEdits();
   await testReviewWiring();
+  await testSubmissionNotices();
   process.exit(finish() ? 0 : 1);
 }

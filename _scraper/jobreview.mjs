@@ -28,7 +28,10 @@
    selftest.mjs drive all of it offline.
    --------------------------------------------------------------------------- */
 
-import { text, url, longDate, LEVELS, TYPES, canonCountry } from './jobs-model.mjs';
+import {
+  text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
+} from './jobs-model.mjs';
+import { joinDepartment } from './vocab.mjs';
 
 /** The Firestore collection. Named here so the pipeline, the mailer and the
     page cannot drift apart on it. */
@@ -52,17 +55,35 @@ const STATUSES = [PENDING, APPROVED, REJECTED];
  * The caps mirror _firestore.rules, and selftest.mjs pins the two together —
  * a field added here without a rule would be refused by the database rather
  * than silently dropped.
+ *
+ * `department` is `derived`, which is a different thing from editable and from
+ * forbidden. It is the LINE THE CARD SHOWS — the school and the department
+ * joined (`joinDepartment`) — so offering it beside the two names it is made
+ * of gave the review card FOUR boxes for a place that has three, and let the
+ * three disagree: nothing recomputed it, so correcting the school published a
+ * row whose `department` still said what the workbook had said. That is not a
+ * cosmetic fault. `selftest.mjs` asserts over the whole served file that the
+ * line equals its two parts joined, and a red selftest by design stops
+ * `oa-jobs-build.yml` committing ANYTHING — so one corrected school would have
+ * stopped the entire site publishing. It is therefore no longer drawn (the
+ * card offers the posting form's own three boxes) and no longer read from a
+ * fresh edit; `applyEdits` derives it. It stays in this list, and in the
+ * rules, because a document written before this change may still carry one —
+ * see the fallback there.
+ *
+ * The labels are the posting form's own words (post-a-job.html), so the
+ * maintainer reads the same question the poster answered.
  */
 export const EDITABLE = [
-  { key: 'institution', label: 'Institution', max: 220 },
-  { key: 'department', label: 'School / department', max: 260 },
-  { key: 'school', label: 'School', max: 200 },
-  { key: 'unit', label: 'Department / unit', max: 200 },
-  { key: 'type', label: 'Type', max: 40, oneOf: TYPES },
+  { key: 'institution', label: 'University / Institution', max: 220 },
+  { key: 'department', label: 'School / department', max: 260, derived: true },
+  { key: 'school', label: 'School, faculty or college', max: 200 },
+  { key: 'unit', label: 'Department, area or group', max: 200 },
+  { key: 'type', label: 'Type of institution', max: 40, oneOf: TYPES },
   { key: 'levels', label: 'Entry level', list: true, oneOf: LEVELS },
   { key: 'country', label: 'Country', max: 80 },
   { key: 'applyBy', label: 'Apply by', max: 400 },
-  { key: 'applyByDate', label: 'Closing date (YYYY-MM-DD)', max: 10, date: true },
+  { key: 'applyByDate', label: 'Closing date', max: 10, date: true },
   { key: 'comments', label: 'Comments', max: 1500 },
   { key: 'adUrl', label: 'Link to the advert', max: 600, url: true },
   { key: 'postedAtUrl', label: 'Posted at', max: 600, url: true },
@@ -70,6 +91,11 @@ export const EDITABLE = [
 ];
 
 const EDITABLE_KEYS = EDITABLE.map((f) => f.key);
+
+/** What the review card actually draws — everything but the derived line.
+    Exported so selftest.mjs can pin the panel against it rather than
+    against EDITABLE, which is the wider set the RULES have to allow. */
+export const SHOWN = EDITABLE.filter((f) => !f.derived);
 
 /** Every key a `jobReviews` document may carry. */
 export const DOC_KEYS = [
@@ -183,6 +209,9 @@ export function cleanEdits(edits) {
  * on the card while the filter still called it "Until filled" would be the
  * worst of both. Editing one therefore settles the other unless the maintainer
  * set it too.
+ *
+ * THE THREE NAMES MOVE TOGETHER TOO, and that one is not a nicety. See
+ * `settlePlace` below.
  */
 export function applyEdits(row, edits) {
   const clean = cleanEdits(edits);
@@ -195,7 +224,52 @@ export function applyEdits(row, edits) {
       && /until\s*filled|open\s*until|rolling/i.test(clean.applyBy)) {
     out.applyByDate = '';
   }
-  return out;
+  return settlePlace(out, row);
+}
+
+/**
+ * The university, the school, the department and the line the card shows,
+ * settled against each other.
+ *
+ * TWO THINGS, and each of them was a way for one edit to stop the whole site
+ * publishing.
+ *
+ * ONE SPELLING PER PLACE. `cleanEdit` canonicalised the country and nothing
+ * else, so a school typed here reached `data/jobs.json` exactly as typed —
+ * while `selftest.mjs` asserts over that file that every posting names its
+ * place the way `canonPlace` names it, and a red selftest stops the build
+ * committing. So the three go through `canonColumns()`, the same function the
+ * posting form's three boxes go through (never `canonPlace`, which is for the
+ * archive's single column and would read a lone university as a university and
+ * a department). It is pure and idempotent — over the live sheet rows it
+ * changes nothing — so it also HEALS: an alias added to oa-schools.js today
+ * reaches a posting queued last week, the same reasoning as `healPlace`.
+ *
+ * THE LINE IS DERIVED, never edited. `department` is `school, unit` joined, and
+ * the selftest asserts exactly that over the served file. With three
+ * independent boxes, correcting the school left the line saying what the
+ * workbook had said, and the two disagreed in public.
+ *
+ * The one row shape that has no parts is the sheet's own fallback
+ * (`jobmarket-sheet.mjs` publishes `joinDepartment(...) || area`, so a row
+ * whose area canonicalised away to nothing keeps its raw line). Such a row is
+ * left with the line it arrived with — deriving would blank it, and the card,
+ * the University search and the alert matcher all read it. A row that HAD
+ * parts and no longer has any is a deliberate clearing and gets an empty line,
+ * which keeps the file self-consistent either way.
+ */
+export function settlePlace(out, row = {}) {
+  const place = canonColumns({
+    institution: out.institution || '',
+    school: out.school || '',
+    unit: out.unit || '',
+  });
+
+  const settled = { ...out, ...place };
+  const line = joinDepartment(place.school, place.unit);
+  settled.department = line
+    || ((row.school || row.unit) ? '' : (out.department || ''));
+  return settled;
 }
 
 /* --------------------------------------------------------------- deciding */

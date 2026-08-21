@@ -1524,6 +1524,10 @@
    "n": 0
   },
   {
+   "v": "Earl G. Graves School of Business and Management",
+   "n": 0
+  },
+  {
    "v": "EBS Business School",
    "n": 0
   },
@@ -1840,7 +1844,15 @@
    "n": 0
   },
   {
+   "v": "Parker College of Business",
+   "n": 0
+  },
+  {
    "v": "Paul Merage School of Business",
+   "n": 0
+  },
+  {
+   "v": "Peter J. Tobin College of Business",
    "n": 0
   },
   {
@@ -2094,6 +2106,10 @@
   {
    "v": "Wirtschafts- und Sozialwissenschaftliche Fakultät",
    "n": 0
+  },
+  {
+   "v": "Woodbury School of Business",
+   "n": 0
   }
  ],
  "units": [
@@ -2335,6 +2351,10 @@
   },
   {
    "v": "Business Administration/Supply Chain Management",
+   "n": 0
+  },
+  {
+   "v": "Business Analytics and Information Systems",
    "n": 0
   },
   {
@@ -3667,12 +3687,17 @@
    }
   },
   "Georgia Southern University": {
-   "schools": [],
+   "schools": [
+    "Parker College of Business"
+   ],
    "units": [
     "Logistics and Supply Chain Management"
    ],
    "bySchool": {
     "": [
+     "Logistics and Supply Chain Management"
+    ],
+    "Parker College of Business": [
      "Logistics and Supply Chain Management"
     ]
    }
@@ -4246,7 +4271,9 @@
    }
   },
   "Morgan State University": {
-   "schools": [],
+   "schools": [
+    "Earl G. Graves School of Business and Management"
+   ],
    "units": [
     "Supply Chain Management"
    ],
@@ -4854,13 +4881,19 @@
    }
   },
   "St. John's University": {
-   "schools": [],
+   "schools": [
+    "Peter J. Tobin College of Business"
+   ],
    "units": [
-    "Business Analytics"
+    "Business Analytics",
+    "Business Analytics and Information Systems"
    ],
    "bySchool": {
     "": [
      "Business Analytics"
+    ],
+    "Peter J. Tobin College of Business": [
+     "Business Analytics and Information Systems"
     ]
    }
   },
@@ -6567,7 +6600,9 @@
    }
   },
   "Utah Valley University": {
-   "schools": [],
+   "schools": [
+    "Woodbury School of Business"
+   ],
    "units": [
     "Operations and Supply Chain Management",
     "Strategic Management and Operations"
@@ -6575,6 +6610,9 @@
    "bySchool": {
     "": [
      "Operations and Supply Chain Management",
+     "Strategic Management and Operations"
+    ],
+    "Woodbury School of Business": [
      "Strategic Management and Operations"
     ]
    }
@@ -7281,8 +7319,14 @@
   "Pamplin College of Business": [
    "Business Information Technology"
   ],
+  "Parker College of Business": [
+   "Logistics and Supply Chain Management"
+  ],
   "Paul Merage School of Business": [
    "Operations and Decision Technologies"
+  ],
+  "Peter J. Tobin College of Business": [
+   "Business Analytics and Information Systems"
   ],
   "Poole College of Management": [
    "Business Management/Operations and Supply Chain",
@@ -7507,6 +7551,9 @@
   ],
   "Wisconsin School of Business": [
    "Operations and Information Management"
+  ],
+  "Woodbury School of Business": [
+   "Strategic Management and Operations"
   ],
   "Zicklin School of Business": [
    "Management"
