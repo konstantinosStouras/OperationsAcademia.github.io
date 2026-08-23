@@ -1,0 +1,146 @@
+name: OA jobs — read every crawled posting's own advertisement
+
+# The tracking sheet's postings link to ~120 different hosts, and only the
+# higheredjobs.com ones were ever checked against their own ads. This reads
+# the rest — the Interfolio / Chronicle / Inside Higher Ed / INFORMS boards
+# and the long tail of university applicant-tracking systems — with one
+# high-precision generic parser plus a Workday adapter, caches what each ad
+# says in data/adverts.json, and puts the deadlines onto the postings. It
+# ALSO reads the advertisement of every PENDING review-queue posting and
+# records what it says on the queue document (`ad`), so the review card shows
+# the position and its closing date without the maintainer opening every link
+# by hand.
+#
+# It never overwrites a deadline the maintainer typed into the sheet: a
+# disagreement is reported as a warning in this run's log so the SHEET can be
+# corrected, which fixes it at the source. On the queue it writes ONLY the
+# `ad` block — never the decision, never the edits. `validThrough` is never
+# read as a deadline. See the headers of _scraper/adverts.mjs and
+# _scraper/adverts-verify.mjs.
+#
+# The queue half needs FIREBASE_SERVICE_ACCOUNT and is a clean no-op without
+# it; the published half needs no credentials at all — the advertisements are
+# public pages.
+
+on:
+  schedule:
+    # 07:50 UTC — after oa-jobmarket-sheet.yml (06:40) has read the workbook
+    # and oa-higheredjobs-verify.yml (07:20) has taken its slice, so a posting
+    # added this morning is checked the same morning, and off the hour so this
+    # repository does not queue behind every other :00 job.
+    - cron: '50 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Fetch and report, write nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'List the ads that would be read and stop — fetches nothing'
+        type: boolean
+        default: false
+      force:
+        description: 'Re-read every ad, ignoring the freshness rule'
+        type: boolean
+        default: false
+      limit:
+        description: 'Read at most this many ads (blank = 40)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+# Shares the group with oa-jobmarket-sheet.yml, oa-higheredjobs-verify.yml and
+# oa-jobs-build.yml: all four write data/, so they must never race each
+# other's commit. Overlapping fires queue and coalesce.
+concurrency:
+  group: oa-jobs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # firebase-admin for the review-queue pass — best-effort, because the
+      # published half needs no credentials and must run without it: a failed
+      # install just means the pending cards keep what they had.
+      - name: Admin SDK (for the review-queue pass)
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12 ||
+          echo "::warning::firebase-admin could not be installed — the queue pass is skipped"
+
+      - name: Offline checks
+        run: |
+          node _scraper/selftest.mjs --publishing
+          node _scraper/adverts-verify.mjs --selftest
+
+      - name: Read the advertisements
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          node _scraper/adverts-verify.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.force && '--force' || '' }} \
+            ${{ inputs.limit && format('--limit {0}', inputs.limit) || '' }}
+
+      # The same gate every other writer of data/ runs before committing: a red
+      # selftest must stop the publish rather than ship a broken dataset.
+      - name: Re-check the files we are about to commit
+        run: node _scraper/selftest.mjs --publishing
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "no change — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "OA jobs: read the crawled postings' own advertisements"
+
+          # plain fast-forward, with rebase-and-retry — the sheet sync or the
+          # postings build may have moved the branch on while this run worked.
+          # After a rebase the dataset under us is FRESHER than the one this
+          # run read, so the cache is re-applied to it rather than the run's
+          # own copy being pushed over it.
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected — rebasing onto the new tip (attempt $i)"
+            git pull --rebase origin ${{ github.ref_name }} || exit 1
+            node _scraper/adverts-verify.mjs --apply-only
+            if [ -n "$(git status --porcelain data)" ]; then
+              git add data
+              git commit --amend --no-edit
+            fi
+            sleep $((i * 3))
+          done
+          echo "could not push after 5 attempts"
+          exit 1
+
+      # The postings only reach the site when oa-jobs-build.yml rebuilds
+      # data/jobs.json. Ringing its doorbell is what makes a filled deadline
+      # visible within minutes rather than at the next scheduled build.
+      - name: Publish what changed
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/dispatches" \
+            -d '{"event_type":"oa-jobs-changed"}' || \
+            echo "::warning::could not ring the build — the next scheduled run picks it up"

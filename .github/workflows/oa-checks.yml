@@ -82,6 +82,7 @@ jobs:
           node _scraper/import-sheet.mjs --selftest
           node _scraper/import-legacy-tables.mjs --selftest
           node _scraper/sync-jobmarket-sheet.mjs --selftest
+          node _scraper/adverts-verify.mjs --selftest
           node _scraper/jobreview-mailer.mjs --selftest
           node _scraper/submissions-mailer.mjs --selftest
 

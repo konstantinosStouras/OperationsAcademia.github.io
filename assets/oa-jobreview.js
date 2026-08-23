@@ -267,6 +267,53 @@
       '</div>';
   }
 
+  /**
+   * What the posting's own advertisement says — read off the linked page by
+   * adverts-verify.mjs (or higheredjobs-verify's parser for that host) and
+   * stored on the document as `ad`; this only draws it. RAISED, never
+   * decided, like `dup` and `biz`: the button fills the Closing-date box for
+   * the maintainer to read back, and nothing is saved until Save or Approve.
+   * `listedUntil` is shown labelled as what it is — when the LISTING comes
+   * down, which on a job board can sit eighteen months past the real
+   * deadline (the validThrough lesson) — and is deliberately given no
+   * button.
+   */
+  function advertHtml(ad, row) {
+    var gone = ad.status === 'gone';
+    var bits = [];
+
+    if (ad.title || ad.institution) {
+      bits.push('It advertises <strong>' + esc(ad.title || 'an unnamed position') +
+        '</strong>' + (ad.institution ? ' at ' + esc(ad.institution) : '') +
+        (ad.location ? ' (' + esc(ad.location) + ')' : '') + '.');
+    }
+    if (ad.applyByDate) {
+      var same = String((row && row.applyByDate) || '') === ad.applyByDate;
+      bits.push('It closes on <strong>' + esc(ad.applyByDate) + '</strong>' +
+        (same
+          ? ', which the posting already carries.'
+          : '. <button type="button" class="button" data-ad-use="' + esc(ad.applyByDate) +
+            '" style="margin-left:6px">Use this closing date</button>'));
+    } else if (ad.applyByProse) {
+      bits.push('About its deadline it says: &ldquo;' + esc(ad.applyByProse) + '&rdquo;');
+    }
+    if (ad.listedUntil) {
+      bits.push('<span class="oa-hint" style="display:inline">The board lists the ' +
+        'advertisement until ' + esc(ad.listedUntil) + ' &mdash; that is when the ' +
+        'AD comes down, not necessarily the application deadline.</span>');
+    }
+    if (!gone && !bits.length) return '';
+
+    return '<div class="oa-note' + (gone ? ' is-warn' : '') + '" data-advert>' +
+      '<strong>&#128196; What the advertisement says.</strong> ' +
+      (gone ? 'The linked advertisement is <strong>no longer up</strong>' +
+        (bits.length ? ' &mdash; what follows is what it said while it was. ' : '. ') : '') +
+      bits.join(' ') +
+      (ad.checkedAt ? ' <span class="oa-hint" style="display:inline">(read ' +
+        esc(String(ad.checkedAt).slice(0, 10)) + ')</span>' : '') +
+      '</div>';
+  }
+
   function cardHtml(doc, i) {
     var row = doc.row || {};
     var ad = safeHref(fieldValue(doc, 'adUrl'));
@@ -295,6 +342,7 @@
       '</header>' +
       (dups.length ? dupHtml(dups) : '') +
       (doc.biz ? bizHtml(doc.biz) : '') +
+      (doc.ad ? advertHtml(doc.ad, row) : '') +
       '<div class="oa-rv-grid">' +
         FIELDS.map(function (f, n) {
           var id = idp + '-' + n;
@@ -734,6 +782,22 @@
             schoolBox.value = use.getAttribute('data-biz-use') || '';
             schoolBox.dispatchEvent(new Event('input', { bubbles: true }));
             schoolBox.focus();
+          }
+          return;
+        }
+
+        /* The advertisement note's "Use this closing date": fill the
+           Closing-date box with the date the ad states, exactly as typing it
+           would — the input event makes the derived "Apply by" preview
+           follow. Nothing is written until Save or Approve, like any other
+           edit. */
+        var adUse = e.target.closest('button[data-ad-use]');
+        if (adUse) {
+          var dateBox = card.querySelector('[data-key="applyByDate"]');
+          if (dateBox) {
+            dateBox.value = adUse.getAttribute('data-ad-use') || '';
+            dateBox.dispatchEvent(new Event('input', { bubbles: true }));
+            dateBox.focus();
           }
           return;
         }
