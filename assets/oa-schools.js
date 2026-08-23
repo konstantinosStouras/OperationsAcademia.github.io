@@ -346,6 +346,11 @@
     'The University of Hong Kong': {   /* Faculty of Business and Economics */
       'Innovation and Information Management': 'Information and Innovation Management'
     },
+    'The Chinese University of Hong Kong, Shenzhen': { /* School of Management and Economics */
+      /* one unit written short (owner, 2026-08-23) — the full name is the
+         department's own */
+      'Operations Management': 'Information Systems and Operations Management'
+    },
     'University of Houston': {         /* C. T. Bauer College of Business */
       'Decision and Information Sciences': 'Department of Decision and Information Sciences',
       'Decision & Information Sciences': 'Department of Decision and Information Sciences',

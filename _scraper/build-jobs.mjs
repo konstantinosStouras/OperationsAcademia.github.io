@@ -479,27 +479,35 @@ async function main() {
     try {
       const snap = await db.collection(REVIEW_COL).where('status', '==', 'approved').get();
       const byId = new Map(sheetRows.map((r) => [r.id, r]));
-      let added = 0, edited = 0;
+      let added = 0;
       for (const d of snap.docs) {
         const v = d.data() || {};
         if (!v.row || !v.row.id) continue;
+        /* ONLY a row the sheet file does not carry yet. The document's `row`
+           is a SNAPSHOT, frozen the moment the posting was approved —
+           `refreshQueued` catches up pending documents with the sheet, never
+           decided ones — while data/jobmarket.json is rebuilt by partition()
+           from the FRESH sheet row with the same edits applied, every half
+           hour and on every decision. Replacing the file's copy with the
+           snapshot therefore republished whatever the parser got wrong WEEKS
+           ago and froze it: five postings served country "Greece" (a
+           mis-parse long since corrected in the sheet) because the stale
+           snapshot won this merge on every build. The snapshot's one job is
+           the window between an approval and the sheet read that follows it
+           — a row jobmarket.json already lists has been through that read. */
+        if (byId.has(v.row.id)) continue;
         /* approvedRow, not bare applyEdits: it also dates the posting from its
            approval (the moment it could first be read on the site), which is
            what the e-mail alerts window on — and it is the SAME function the
            sheet sync's partition publishes through, so the two writers of this
            row can never disagree about it. */
         const row = approvedRow(v.row, v);
-        if (byId.has(row.id)) {
-          if (JSON.stringify(byId.get(row.id)) !== JSON.stringify(row)) edited++;
-        } else {
-          added++;
-        }
         byId.set(row.id, row);
+        added++;
       }
-      if (added || edited) {
+      if (added) {
         sheetRows = Array.from(byId.values());
         log(`the review queue publishes ${added} newly-approved posting(s)` +
-            (edited ? ` and ${edited} edited one(s)` : '') +
             ' ahead of the next sheet read');
       }
     } catch (e) {

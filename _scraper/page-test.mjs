@@ -1873,30 +1873,51 @@ for (const [name, expect] of [
      rebuilt from the tracking sheet every morning, so naming institutions here
      ("utah", "princeton") would make this check pass or fail on whatever the
      market did overnight — a test that goes red for a reason that is not a
-     regression teaches people to ignore it. */
+     regression teaches people to ignore it.
+
+     THE WORDS HAVE TO DISCRIMINATE, or the derivation defeats its own check:
+     the morning "University of North Carolina at Chapel Hill" led the listing,
+     the first long word of the first card was "university", the second term's
+     own card contained it too — and a second term whose card the first term
+     already matches cannot widen anything, so the check went red on a listing
+     with nothing wrong in it. Generic words are skipped, the second term comes
+     from a card the first term does not appear in — and the ANCHOR card is
+     whichever card yields a usable word, not blindly the first: the very next
+     morning "City University of Hong Kong" led, whose every word is short or
+     generic, and an anchor pinned to it has no word at all. */
   const pair = await j.evaluate(() => {
     const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
       .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
-    const word = (n) => (n.split(/[\s,(]+/).find((w) => w.length > 4) || '').replace(/[^a-z]/g, '');
-    /* NEITHER title may contain the OTHER's word, or the pair cannot prove
-       anything: the day the first card was "City University of Hong Kong",
-       its word was "university" and the second term ("george", off "George
-       Mason University") matched only titles that also said "university" —
-       so the OR could not widen and the check went red on what the market
-       did overnight, which is exactly what its own comment forbids. Chosen
-       this way, each term matches a card the other does not, so the second
-       term MUST widen the search if the OR semantics hold. */
-    for (const n1 of names) {
-      const a = word(n1);
+    /* Both sides of a converging history fixed this derivation on the same
+       day, for the same reason (the first card was "City University of Hong
+       Kong", its word was "university", and no second term could widen the
+       OR); master's fix is kept — it also refuses the GENERIC words as terms,
+       which is the stronger guarantee. */
+    const GENERIC = ['university', 'school', 'college', 'institute', 'state', 'business'];
+    const word = (n) => (n.split(/[\s,(]+/)
+      .map((w) => w.replace(/[^a-z]/g, ''))
+      .find((w) => w.length > 4 && !GENERIC.includes(w)) || '');
+    for (const anchor of names) {
+      const a = word(anchor);
       if (!a) continue;
-      for (const n2 of names) {
-        const b = word(n2);
-        if (b && b !== a && !n2.includes(a) && !n1.includes(b)) return { a, b };
-      }
+      const src = names.find((n) => {
+        const w = word(n);
+        return w && w !== a && !anchor.includes(w) && !n.includes(a);
+      });
+      if (src) return { a, b: word(src) };
     }
     return null;
   });
   ok(pair, 'jobs: the listing offers two different institutions to search for');
+  /* Named, because the alternative was lived: a listing this rule could not
+     derive a pair from crashed the whole suite on `pair.a` with a bare
+     TypeError — a stack trace where a failure message should be. Every check
+     from here to the width loop types the two terms, so without them there is
+     nothing left in this block to measure. */
+  if (!pair) {
+    throw new Error('jobs: no searchable pair could be derived from the listing — '
+      + 'see the derivation above; the search checks cannot run without one');
+  }
 
   const total = await shown();
 
