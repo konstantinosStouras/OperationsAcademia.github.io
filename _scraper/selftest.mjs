@@ -838,7 +838,8 @@ async function testAccountMerge() {
   // alert looks brand new and newJobsFor() with an empty `since` matches the
   // whole catalogue — one enormous e-mail as the reward for merging.
   const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
-  for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'criteria', 'enabled']) {
+  for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'lastCandidateAt',
+    'criteria', 'enabled']) {
     ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
   }
 }
