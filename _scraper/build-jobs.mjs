@@ -37,7 +37,7 @@ import {
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
-import { buildVocab, serialiseVocab, SCHOOLS } from './vocab.mjs';
+import { buildVocab, serialiseVocab, SCHOOLS, campusCountries, healCountry } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -790,8 +790,40 @@ async function main() {
         renamed.slice(0, 5).map((r) => r.institution).join(', '));
   }
 
+  /* The site's own Universities directory. Read HERE rather than beside the
+     vocabulary below, because the country heal needs it before the rows are
+     written — see `campusCountries` in vocab.mjs. */
+  const directory = await readJson(DIRECTORY, null);
+  if (!Array.isArray(directory) || !directory.length) {
+    warn(`${path.relative(process.cwd(), DIRECTORY)} is missing or unreadable — the ` +
+         'posting form will only offer the universities that have posted here.');
+  }
+
   const merged = mergeRows(healed, freshVisible, applicable);
-  const rows = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+  const visible = merged.rows.filter((r) => !hidden.has(r.id) && !hidden.has(r.ref));
+
+  /* EVERY ROW NAMES THE COUNTRY ITS UNIVERSITY IS IN.
+
+     Applied to the merged set rather than to one source, because the fault it
+     repairs did not come from a source: the Edit form's `country` box had no
+     `autocomplete` attribute, so a browser filled the EDITOR'S own country
+     over the stored one and nine postings — American, Canadian, Singaporean —
+     published under Greece. The form no longer invites that
+     (post-a-job.html); this makes the rows already carrying it right again,
+     on every build, whichever writer produced them.
+
+     Pure and idempotent, and silent when there is nothing to say: a run in
+     which every posting already agrees with the site's own directory changes
+     nothing and prints nothing. A university the directory has no single
+     answer for — INSEAD, with a campus in France and one in Singapore — is
+     never touched. */
+  const byCountry = campusCountries(Array.isArray(directory) ? directory : []);
+  const rows = visible.map((r) => healCountry(r, byCountry));
+  const recountried = rows.filter((r, i) => r !== visible[i]);
+  if (recountried.length) {
+    log(`${recountried.length} posting(s) took the country their university is in: ` +
+        recountried.slice(0, 8).map((r) => `${r.institution} (${r.country})`).join(', '));
+  }
 
   /* ------------------------------------- the form's option lists
 
@@ -805,12 +837,6 @@ async function main() {
      oa-schools.js's canonPlace() at ingest, and buildVocab puts the directory
      rows — which have never been through an ingest — through the same
      function. */
-  const directory = await readJson(DIRECTORY, null);
-  if (!Array.isArray(directory) || !directory.length) {
-    warn(`${path.relative(process.cwd(), DIRECTORY)} is missing or unreadable — the ` +
-         'posting form will only offer the universities that have posted here.');
-  }
-
   /* A SECOND directory, beside the site's own: the operations and supply chain
      schools of the world (assets/oa-institutions.js, 178 of them). The site's
      Universities directory is a curated list of the places the maintainer has

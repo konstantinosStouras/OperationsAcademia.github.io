@@ -85,6 +85,13 @@ jobs:
           node _scraper/jobreview-mailer.mjs --selftest
           node _scraper/submissions-mailer.mjs --selftest
 
+      # The selftest asserts this over data/jobs.json, which the build heals
+      # before it writes. The ARCHIVE has no daily build to heal it, so it is
+      # swept here instead — a wrong country does not look wrong on the page,
+      # it just files a posting under a place it has nothing to do with.
+      - name: Every posting names the country its university is in
+        run: node _scraper/country-audit.mjs
+
       - name: Every link resolves, and no version reaches into another
         run: |
           set -e

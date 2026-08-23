@@ -58,6 +58,9 @@ import { createRequire } from 'node:module';
    been through an ingest. */
 const require = createRequire(import.meta.url);
 export const SCHOOLS = require('../assets/oa-schools.js');
+/* one spelling per country, and the address reader the campus-country
+   authority below is built on — see `campusCountries` */
+export const COUNTRIES = require('../assets/oa-countries.js');
 const { canonPlace, canonColumns, institutionKey, fold: nameFold } = SCHOOLS;
 
 /* --------------------------------------------------- school vs. unit
@@ -470,6 +473,100 @@ export function fillSchoolFromDirectory(row, vocab, schools = SCHOOLS) {
   const school = schoolForUnit(vocab, row.institution, row.unit, schools);
   if (!school) return row;
   return { ...row, school, department: joinDepartment(school, row.unit) };
+}
+
+/* ------------------------------------------- where a university actually IS
+
+   WHY A COUNTRY NEEDS AN AUTHORITY AT ALL. `country` is free text on the
+   posting form and it drives the jobs page's Location filter, so a wrong one
+   files a posting under a country it has nothing to do with — and nobody
+   filtering by the right country ever sees it. Nine live postings were
+   published under GREECE: American, Canadian and Singaporean universities,
+   every one of them, while the workbook those postings came from said what it
+   has always said. The cause was the Edit form's `country` box, which carried
+   no `autocomplete` attribute and is called "country" — so the browser filled
+   it from the EDITOR'S OWN address profile the moment they opened a posting to
+   correct something else, and saving published it. That box is now
+   `autocomplete="off"` (post-a-job.html), which stops it happening again; this
+   is what repairs what already happened, on every build, without anyone having
+   to remember.
+
+   THE AUTHORITY IS THE SITE'S OWN Universities directory. Every row of
+   data/universities.json carries the campus's POSTAL ADDRESS, and the last
+   administrative part of an address is a country — `countryFromAddress` in
+   assets/oa-countries.js reads it, and returns '' rather than a guess for the
+   rows whose address is a map-URL fragment or a bare postcode.
+
+   A UNIVERSITY WITH TWO COUNTRIES IS NEVER HEALED. INSEAD is in France and in
+   Singapore, and a posting at either campus is right; so a university whose
+   directory rows disagree about the country has no answer here at all, which
+   is the same discipline `schoolForUnit` applies to a department two schools
+   both claim. That guard is what makes correcting the others safe.           */
+
+/** Curated campus countries for universities the Universities directory does
+    not carry. The directory answers 197 of them; these are the ones that have
+    POSTED here without ever being mapped, so the audit would otherwise have
+    nothing to check them against.
+
+    GROW THIS LIST, exactly as oa-institutions.js is grown — one line per
+    university, and only where the campus country is not in doubt. A university
+    with campuses in two countries belongs in neither this list nor the heal:
+    leave it out and the audit stays quiet about it. */
+export const CAMPUS_COUNTRY = {
+  'Morgan State University': 'United States',        // Baltimore, Maryland
+  'Rollins College': 'United States',                // Winter Park, Florida
+  "St. John's University": 'United States',          // Queens, New York
+  'University of California, Davis': 'United States', // Davis, California
+};
+
+/**
+ * Which country each university's campus is in — the directory's addresses,
+ * plus the curated list above.
+ *
+ * Keyed by `institutionKey`, so "The University of X" and "University of X"
+ * are one university, exactly as the vocabulary groups them. A university
+ * whose rows disagree is deliberately ABSENT rather than resolved.
+ */
+export function campusCountries(directory = [], schools = SCHOOLS) {
+  const seen = new Map();
+
+  const add = (institution, country) => {
+    if (!institution || !country) return;
+    const k = schools.institutionKey(institution);
+    if (!seen.has(k)) seen.set(k, new Set());
+    seen.get(k).add(country);
+  };
+
+  for (const r of directory || []) {
+    if (!r || !r.institution) continue;
+    add(r.institution, COUNTRIES.countryFromAddress(r.address));
+  }
+  for (const [institution, country] of Object.entries(CAMPUS_COUNTRY)) {
+    add(institution, country);
+  }
+
+  const out = new Map();
+  for (const [k, set] of seen) if (set.size === 1) out.set(k, [...set][0]);
+  return out;
+}
+
+/**
+ * A row whose country contradicts where its university is, corrected.
+ *
+ * Returns the row unchanged when there is nothing to correct — pure and
+ * idempotent, like `fillSchoolFromDirectory`, so every writer applies it on
+ * every run and a run with nothing wrong writes nothing.
+ *
+ * It only ever CORRECTS a disagreement: a row whose country is already right,
+ * or whose university this map has no single answer for, is returned as it
+ * came. An EMPTY country is filled for the same reason a wrong one is
+ * replaced — the Location filter cannot show a posting that names no place.
+ */
+export function healCountry(row, byUni, schools = SCHOOLS) {
+  if (!row || !row.institution || !byUni) return row;
+  const want = byUni.get(schools.institutionKey(row.institution));
+  if (!want || want === row.country) return row;
+  return { ...row, country: want };
 }
 
 /* --------------------------------- which school is the BUSINESS school
