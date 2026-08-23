@@ -3,6 +3,12 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "job-review-source-tabs",
+   "date": "2026-08-23",
+   "title": "The job review desk splits by source, and the next market leads",
+   "summary": "The Admin area\u2019s \u201cJob postings to review\u201d panel now has two tabs: auto-crawled postings from the job market tracking sheet, still held back until the maintainer approves them, and user-added postings made through the site\u2019s own form \u2014 those stay live from the moment they are posted and are listed for a correcting look. Inside each tab the market-year filters remain, and every list now ranks the newest job market first \u2014 next season\u2019s postings before the current one\u2019s. For posters nothing changes: a posting made on the site still publishes within minutes."
+  },
+  {
    "id": "postings-publish-and-alert-in-minutes",
    "date": "2026-08-23",
    "title": "New postings publish in minutes, and alert e-mails follow them",

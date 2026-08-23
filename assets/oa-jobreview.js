@@ -8,6 +8,18 @@
    Admin area gathered every review queue, owner 2026-08-21), above the
    feedback inbox, and lets them correct any field before approving.
 
+   TWO SOURCES, ONE PANEL (owner, 2026-08-23). The crawled queue is only half
+   of what "job postings to review" means: postings are also ADDED BY PEOPLE
+   through the site's own form, and those are live within a minute because the
+   form promises as much. So the panel splits into two tabs — "Auto-crawled
+   jobs", the tracking sheet's gate, and "User-added jobs", the form's own
+   postings listed until they are marked reviewed. The user tab reads the SAME
+   documents, LIVE statuses and reviewedAt stamp as
+   _scraper/submissions-review.mjs (the model behind the mailer that announces
+   them), so this panel and the e-mails cannot disagree about what is waiting.
+   Inside each tab the market-year tabs still filter, and every list ranks the
+   NEXT market's postings first.
+
    AUTHORISATION IS THE RULES, never this file. `jobReviews` is admin-read AND
    admin-write in _firestore.rules — unlike `rowOverrides`, which is public-read,
    because a queued posting is by definition not yet public. Everything here
@@ -25,6 +37,22 @@
   'use strict';
 
   var COL = 'jobReviews';
+
+  /* The user-added half: postings made through the site's own form. Keep the
+     three names in step with _scraper/submissions-review.mjs — the model
+     behind the mailer that announces the same documents; selftest.mjs pins
+     the pairing. */
+  var SUBS_COL = 'jobSubmissions';
+  var EDIT_PATH = 'post-a-job.html?edit=';
+  /* The stamp the submissions model names (REVIEWED_AT there): ticking a card
+     off writes this one field onto the submission itself, so a posting marked
+     reviewed here is marked reviewed for the mailer too — and nothing here
+     ever writes the mailer's own high-water mark (announcedAt). */
+  var REVIEWED_AT = 'reviewedAt';
+  /* The statuses a submission is LIVE in — the pair every build reads. A
+     withdrawn, hidden or removed one is not waiting for anything, and `sheet`
+     is a tracking-sheet mirror, whose row is the crawled tab's own. */
+  var LIVE = ['queued', 'published'];
 
   /* The fields offered, in the order they are shown — THE POSTING FORM'S OWN
      QUESTIONS, in the posting form's own words, because they are the same
@@ -310,6 +338,7 @@
               card.innerHTML = '<p class="oa-form-msg is-ok">Approved &mdash; ' +
                 esc((doc.row || {}).institution || doc.rowId) + '</p>';
             }
+            retire(db, 'crawled', doc);
           })
           .catch(function () {
             failed++;
@@ -331,11 +360,47 @@
     });
   }
 
-  /** The market years present in the queue, newest first. */
-  function yearsOf(docs) {
+  /* ---------------------------------------------------- the two source tabs */
+
+  /* Which tab holds which postings, and how to read each shape: the crawled
+     tab holds `jobReviews` documents (the sheet's row under `doc.row`), the
+     user tab `{ id, data }` pairs straight from `jobSubmissions`. */
+  var SOURCES = {
+    crawled: {
+      name: 'Auto-crawled jobs',
+      yearOf: function (d) { return String((d.row || {}).year || '?'); },
+      postedOf: function (d) { return String((d.row || {}).posted || ''); }
+    },
+    user: {
+      name: 'User-added jobs',
+      yearOf: function (d) { return String((d.data || {}).year || '?'); },
+      postedOf: function (d) { return fmtDate((d.data || {}).createdAt); }
+    }
+  };
+
+  /* What load() fetched, split by source, and which tab and season are on
+     screen — kept so a decision can refresh the tab counts without re-reading
+     anything. */
+  var state = { crawled: [], user: [], userError: false, source: 'crawled', year: '*' };
+
+  /** THE NEXT MARKET LEADS (owner, 2026-08-23): 2028's postings before 2027's
+      before 2026's, and within a market the newest advertisement first — the
+      queue is read as a to-do list, and the market a posting is FOR is the one
+      its review is urgent for. An unknown year sorts last. */
+  function rankBy(s) {
+    return function (a, b) {
+      return ((Number(s.yearOf(b)) || 0) - (Number(s.yearOf(a)) || 0))
+        || s.postedOf(b).localeCompare(s.postedOf(a));
+    };
+  }
+
+  /** The market years present in a tab, the next market first ('?' last). */
+  function yearsOf(docs, s) {
     var seen = {};
-    docs.forEach(function (d) { seen[(d.row || {}).year || '?'] = true; });
-    return Object.keys(seen).sort().reverse();
+    docs.forEach(function (d) { seen[s.yearOf(d)] = true; });
+    return Object.keys(seen).sort(function (a, b) {
+      return (Number(b) || 0) - (Number(a) || 0);
+    });
   }
 
   /** 2027 -> "2026-2027", the way the site names a season everywhere else. */
@@ -345,7 +410,28 @@
   }
 
   /**
-   * Which market's postings are on screen.
+   * The two source tabs: the tracking sheet's gate and the form's own
+   * postings. Always drawn once the queue has loaded — a tab reading (0)
+   * says "nothing from this source", where a tab that vanished would leave
+   * the maintainer wondering where the user-added postings went.
+   */
+  function renderSources(db, active) {
+    var box = $('oa-review-sources');
+    if (!box) return;
+    show(box, true);
+    box.innerHTML = Object.keys(SOURCES).map(function (k) {
+      return '<button type="button" class="oa-tab' + (k === active ? ' is-on' : '') +
+        '" data-source="' + k + '">' + esc(SOURCES[k].name) +
+        ' (' + state[k].length + ')</button>';
+    }).join('');
+    box.onclick = function (e) {
+      var b = e.target.closest('button[data-source]');
+      if (b && b.dataset.source !== state.source) paint(db, b.dataset.source, null);
+    };
+  }
+
+  /**
+   * Which market's postings are on screen, within the active source tab.
    *
    * The season under way is shown FIRST and by default, because it is the one
    * the jobs page carries: a posting approved from a closed market is correct
@@ -354,15 +440,15 @@
    * here" honest — it approves what the tabs are showing, and never a season
    * nobody has looked at.
    */
-  function renderYears(db, all, active) {
+  function renderYears(db, all, active, s) {
     var box = $('oa-review-years');
     if (!box) return;
-    var years = yearsOf(all);
+    var years = yearsOf(all, s);
     show(box, years.length > 1);
     if (years.length < 2) return;
 
     box.innerHTML = years.map(function (y) {
-      var n = all.filter(function (d) { return String((d.row || {}).year || '?') === y; }).length;
+      var n = all.filter(function (d) { return s.yearOf(d) === y; }).length;
       return '<button type="button" class="oa-tab' + (y === active ? ' is-on' : '') +
         '" data-year="' + esc(y) + '">' + esc(marketLabel(y)) + ' (' + n + ')</button>';
     }).join('') +
@@ -371,16 +457,34 @@
 
     box.onclick = function (e) {
       var b = e.target.closest('button[data-year]');
-      if (b) paint(db, all, b.dataset.year);
+      if (b) paint(db, state.source, b.dataset.year);
     };
   }
 
-  function paint(db, all, year) {
+  /** One pass over what is on screen: the source tab, its seasons, the list.
+      A null year means the tab's own default — the newest market present. */
+  function paint(db, source, year) {
+    var s = SOURCES[source];
+    var all = state[source];
+    if (year == null) year = yearsOf(all, s)[0] || '*';
+    state.source = source;
+    state.year = year;
     var shownDocs = year === '*' ? all : all.filter(function (d) {
-      return String((d.row || {}).year || '?') === year;
+      return s.yearOf(d) === year;
     });
-    renderYears(db, all, year);
-    render(db, shownDocs);
+    renderSources(db, source);
+    renderYears(db, all, year, s);
+    render(db, shownDocs, source);
+  }
+
+  /** A card the maintainer has dealt with leaves its tab's counts, so the two
+      tab rows stay honest without re-reading anything; the card itself keeps
+      showing its confirmation where it stands. */
+  function retire(db, source, item) {
+    var i = state[source].indexOf(item);
+    if (i >= 0) state[source].splice(i, 1);
+    renderSources(db, state.source);
+    renderYears(db, state[state.source], state.year, SOURCES[state.source]);
   }
 
   /* The cascades mounted on the cards currently drawn.
@@ -433,7 +537,84 @@
     if (handle) mounted.push(handle);
   }
 
-  function render(db, docs) {
+  /* ------------------------------------------------- the user-added cards */
+
+  /**
+   * A posting made through the site's own form. It is ALREADY LIVE — the form
+   * promises "within a few minutes" and keeps it — so this card is a to-do
+   * item, not a gate: Open & correct opens the poster's own form (the rules
+   * let the admin save any document), and Mark reviewed writes the one stamp
+   * that takes it off the list and changes nothing else.
+   */
+  function userCardHtml(it) {
+    var d = it.data || {};
+    var line = joinDepartment(d.school, d.unit) || d.department || '';
+    var ad = safeHref(d.adUrl);
+    return '<header>' +
+        '<strong>' + esc(d.institution || 'Untitled posting') + '</strong>' +
+        (line ? ' <span class="oa-hint" style="display:inline">&mdash; ' +
+          esc(line) + '</span>' : '') +
+        '<span class="oa-fb-status is-closed">live</span>' +
+        '<p class="oa-hint">Posted ' + esc(fmtDate(d.createdAt) || '?') +
+          ' &middot; market ' + esc(marketLabel(String(d.year || '?'))) +
+          (d.ref ? ' &middot; ' + esc(d.ref) : '') +
+          (ad ? ' &middot; <a href="' + esc(ad) + '" target="_blank" rel="noopener">' +
+            'open the advert</a>' : '') +
+        '</p>' +
+      '</header>' +
+      '<table class="oa-sub-lines">' +
+        [['Entry level', (d.levels || []).join(', ')],
+         ['Country', d.country],
+         ['Apply by', d.applyByDate || d.applyByNote]]
+          .filter(function (l) { return l[1]; })
+          .map(function (l) {
+            return '<tr><th>' + esc(l[0]) + '</th><td>' + esc(l[1]) + '</td></tr>';
+          }).join('') +
+      '</table>' +
+      '<p class="oa-rv-actions">' +
+        '<a class="button blue" href="' + EDIT_PATH + encodeURIComponent(it.id) +
+          '">Open &amp; correct</a> ' +
+        '<button type="button" class="button" data-act="reviewed">Mark reviewed</button>' +
+        '<span class="oa-form-msg" data-msg role="status"></span>' +
+      '</p>';
+  }
+
+  function renderUserCards(db, items) {
+    var list = $('oa-review-list');
+    items.forEach(function (it) {
+      var card = document.createElement('article');
+      card.className = 'oa-fb-card oa-rv-card';
+      card.innerHTML = userCardHtml(it);
+
+      card.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-act="reviewed"]');
+        if (!b) return;
+        var msg = card.querySelector('[data-msg]');
+        b.disabled = true;
+        msg.className = 'oa-form-msg';
+        msg.textContent = 'Saving…';
+
+        var patch = {};
+        patch[REVIEWED_AT] = new Date().toISOString();
+        db.collection(SUBS_COL).doc(it.id).set(patch, { merge: true })
+          .then(function () {
+            card.innerHTML = '<p class="oa-form-msg is-ok">Marked reviewed &mdash; ' +
+              esc((it.data || {}).institution || it.id) + '. It stays live; this ' +
+              'only takes it off the list.</p>';
+            retire(db, 'user', it);
+          })
+          .catch(function (err) {
+            msg.className = 'oa-form-msg is-err';
+            msg.textContent = 'Could not save (' + esc(err.code || err.message) + ').';
+            b.disabled = false;
+          });
+      });
+
+      list.appendChild(card);
+    });
+  }
+
+  function render(db, docs, source) {
     var list = $('oa-review-list');
     var count = $('oa-review-count');
     if (count) {
@@ -442,9 +623,12 @@
         : 'nothing';
     }
 
+    /* Approve-the-page belongs to the GATE alone: a user-added posting is
+       already live, so there is nothing on its tab to approve. */
     var bulk = $('oa-review-bulk');
-    show(bulk, docs.length > 1);
-    if (docs.length > 1) {
+    var bulkOn = source === 'crawled' && docs.length > 1;
+    show(bulk, bulkOn);
+    if (bulkOn) {
       var label = bulk.querySelector('[data-n]');
       if (label) label.textContent = String(docs.length);
     }
@@ -452,12 +636,20 @@
     unmountPickers();
 
     if (!docs.length) {
-      list.innerHTML = '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
-        'the tracking sheet appear here before they go on the site.</p>';
+      list.innerHTML = source === 'user'
+        ? (state.userError
+          ? '<p class="oa-form-msg is-err">Could not load the postings made ' +
+            'through the site &mdash; reload to try again.</p>'
+          : '<p class="oa-hint">Nothing waiting. Job postings made through the ' +
+            'site&rsquo;s own form appear here until you mark them reviewed ' +
+            '&mdash; they are already live.</p>')
+        : '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
+          'the tracking sheet appear here before they go on the site.</p>';
       return;
     }
 
     list.innerHTML = '';
+    if (source === 'user') { renderUserCards(db, docs); return; }
     var cards = [];
     docs.forEach(function (doc, i) {
       var card = document.createElement('article');
@@ -506,6 +698,7 @@
                 ? 'Approved. It reaches the jobs page in a couple of minutes — publishing starts now.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
+            retire(db, 'crawled', doc);
           })
           .catch(function (err) {
             msg.className = 'oa-form-msg is-err';
@@ -531,19 +724,42 @@
   function load(db) {
     var list = $('oa-review-list');
     list.innerHTML = '<p class="oa-hint">Loading…</p>';
-    db.collection(COL).where('status', '==', 'pending').get()
+
+    /* The crawled queue: the pending documents, i.e. the gate. */
+    var crawled = db.collection(COL).where('status', '==', 'pending').get()
       .then(function (snap) {
-        var docs = snap.docs.map(function (d) { return d.data(); })
+        return snap.docs.map(function (d) { return d.data(); })
           .filter(function (d) { return d && d.rowId; });
-        /* Newest advertisement first — the queue is read as a to-do list, and
-           a posting advertised this morning is the one most worth publishing
-           today. Sorted here rather than in the query so no composite index is
-           needed for a collection this small. */
-        docs.sort(function (a, b) {
-          return String((b.row || {}).posted || '')
-            .localeCompare(String((a.row || {}).posted || ''));
+      });
+
+    /* The user-added postings: live and not yet ticked off — the same rule as
+       _scraper/submissions-review.mjs's isWaiting. Two equality reads rather
+       than one `in` query, one per LIVE status: the smallest query shape, and
+       nothing here needs a composite index. A refused read degrades to an
+       error state on ITS tab alone, so it can never take the gate down with
+       it. */
+    var user = Promise.all(LIVE.map(function (status) {
+      return db.collection(SUBS_COL).where('status', '==', status).get();
+    })).then(function (snaps) {
+      var items = [];
+      snaps.forEach(function (snap) {
+        snap.docs.forEach(function (d) {
+          var v = d.data() || {};
+          if (!v[REVIEWED_AT]) items.push({ id: d.id, data: v });
         });
-        paint(db, docs, yearsOf(docs)[0] || '*');
+      });
+      return items;
+    }).catch(function () { return null; });
+
+    Promise.all([crawled, user])
+      .then(function (r) {
+        /* Sorted here rather than in the query so no composite index is
+           needed for collections this small; the comparator is rankBy's
+           next-market-first, newest-advertisement-within-it. */
+        state.crawled = r[0].sort(rankBy(SOURCES.crawled));
+        state.userError = r[1] === null;
+        state.user = (r[1] || []).sort(rankBy(SOURCES.user));
+        paint(db, 'crawled', null);
       })
       .catch(function (err) {
         list.innerHTML = '<p class="oa-form-msg is-err">Could not load the queue (' +

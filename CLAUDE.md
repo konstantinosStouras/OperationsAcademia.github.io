@@ -388,6 +388,31 @@ enters those rows APPROVED, with the reason written into the document's `note`.
 Rejecting one still takes it down. Everything the site is not already showing is
 queued pending, which is the whole of the gate for every posting from here on.
 
+### Two sources, one panel
+
+The postings the maintainer reviews come from two places and their jobs
+differ (owner, 2026-08-23), so `oa-jobreview.js` draws the panel as two tabs:
+
+* **Auto-crawled jobs** — the tracking sheet's queue above: a GATE, held back
+  until approved, every field editable on the card, Approve-all included.
+* **User-added jobs** — postings made through the site's own form
+  (`jobSubmissions`). These are LIVE within a minute — the form promises as
+  much and nothing about this panel changes that — so their tab is a
+  dedicated, editable to-do list, never a gate: *Open & correct* opens the
+  poster's own form, *Mark reviewed* writes the `reviewedAt` stamp the
+  submissions model names. The job half of the "Posted through the site"
+  panel moved here (one queue, one surface — the drift rule that swept
+  feedback.html); the candidate half stays there, and the submissions MAILER
+  still announces both kinds.
+
+The market-year tabs are kept INSIDE each source tab, and every list ranks
+the NEXT market's postings first — 2028's before 2027's before 2026's, the
+newest advertisement breaking ties within a market — because the market a
+posting is FOR is the one its review is urgent for. The "Job postings to
+review" tile and the account-menu badge count both tabs (`waitingJobs` in
+`oa-adminarea.js`), so the tile and the panel beneath it cannot disagree.
+`page-test.mjs` measures all of it against the seeded queue.
+
 ### A season is not six postings
 
 The queue's unit of work is a market, not a posting: the "2026 Jobs" tab alone
@@ -429,8 +454,15 @@ show them at all (the only route to one was guessing its document id).
 
     _scraper/submissions-review.mjs   which submissions are waiting (pure)
     _scraper/submissions-mailer.mjs   one e-mail per submission
-    assets/oa-submissions.js          the panel on admin-area.html
+    assets/oa-submissions.js          the candidate half of the panel on admin-area.html
     oa-submissions-mail.yml           runs it every 15 minutes
+
+The PANEL half is split since 2026-08-23: `oa-submissions.js` draws the
+candidate profiles, while user-added JOB postings are listed by the review
+panel's own "User-added jobs" tab (`oa-jobreview.js` — see "Two sources, one
+panel" above). Both surfaces read the same LIVE statuses and tick with the
+same `reviewedAt` stamp, so a card marked reviewed on either is marked for
+the mailer too; the mailer itself still announces both kinds.
 
 **It is a NOTIFICATION, never a gate.** The forms promise "within a few
 minutes" and keep it; the e-mail says a posting is already live, and says a
@@ -522,7 +554,9 @@ is measured in `page-test.mjs`. **Inert until the rules are redeployed**:
 ## The Admin area — one page for everything waiting on the maintainer
 
 `admin-area.html` (owner, 2026-08-23) gathers every review queue in one place:
-the job postings held for approval (`jobReviews`, drawn by `oa-jobreview.js`),
+the job postings to review (drawn by `oa-jobreview.js` in two source tabs —
+the `jobReviews` queue held for approval and the user-added `jobSubmissions`,
+live but not yet marked reviewed),
 **candidate profiles including the ones held for the reveal** — the gap the
 page was made to close: the front page said "2 profiles have already been
 filed" while the maintainer had no way to SEE them, because held profiles are
