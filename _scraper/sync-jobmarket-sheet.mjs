@@ -62,7 +62,7 @@ import {
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
 import {
   COLLECTION as REVIEW_COL, partition, needMail, PENDING,
-  duplicatesOf, sameDups,
+  duplicatesOf, sameDups, businessCheck, sameBiz,
 } from './jobreview.mjs';
 import { fillSchoolFromDirectory } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
@@ -186,7 +186,7 @@ async function loadReviewQueue() {
  * runs cannot have their decision overwritten by a sheet re-read — `refreshQueued`
  * only ever carries the `row`, never `status` or `edits`.
  */
-async function writeQueue(db, split, redup = []) {
+async function writeQueue(db, split, reflag = []) {
   const col = db.collection(REVIEW_COL);
   let queued = 0, refreshed = 0, reflagged = 0;
 
@@ -212,13 +212,15 @@ async function writeQueue(db, split, redup = []) {
     }
   }
 
-  /* The duplicate flags on already-queued postings, kept true against the
-     site: a posting taken down clears the flag on the next sync, and one
-     newly made through the form raises it. Only the `dup` field is written,
-     and only where it changed — never the decision, never the edits. */
-  for (const { rowId, dup } of redup) {
+  /* The flags on already-queued postings — `dup` and `biz` — kept true
+     against the site and the sheet: a posting taken down clears its duplicate
+     flag on the next sync, one newly made through the form raises it, and a
+     row that gains or loses its business-school evidence moves its flag with
+     it. Only the flag fields are written, and only where they changed —
+     never the decision, never the edits. */
+  for (const { rowId, patch } of reflag) {
     try {
-      await col.doc(rowId).set({ dup }, { merge: true });
+      await col.doc(rowId).set(patch, { merge: true });
       reflagged++;
     } catch (e) {
       warn(`could not re-flag ${rowId}: ${e.message}`);
@@ -227,7 +229,7 @@ async function writeQueue(db, split, redup = []) {
 
   if (queued) log(`queued ${queued} posting(s) for review`);
   if (refreshed) log(`${refreshed} queued posting(s) caught up with the sheet`);
-  if (reflagged) log(`${reflagged} queued posting(s) had their duplicate flags brought up to date`);
+  if (reflagged) log(`${reflagged} queued posting(s) had their flags brought up to date`);
 }
 
 /* -------------------------------------------------------------------- files */
@@ -644,25 +646,45 @@ async function main() {
            Pending rows are re-checked every sync, so a flag appears when the
            duplicate is posted later and clears when it is taken down. */
         const site = await readJson(JOBS_FILE, []);
-        for (const doc of split.queue) doc.dup = duplicatesOf(doc.row, site);
+        for (const doc of split.queue) {
+          doc.dup = duplicatesOf(doc.row, site);
+          /* THE BUSINESS-SCHOOL FLAG (owner, 2026-08-23): a posting whose
+             text says "business" is typed Business School at ingest, and its
+             card names the business school the site's directory knows at
+             that university — computed here, drawn there, decided by the
+             maintainer. The same vocabulary fillSchoolFromDirectory read. */
+          doc.biz = businessCheck(doc.row, vocab);
+        }
         const flaggedFresh = split.queue.filter((d) => d.dup.length);
-        const redup = [];
+
+        /* Pending postings are re-checked every sync, JUDGED ON THE ROW THE
+           SHEET NOW GIVES — the refreshed copy where one is being written
+           this run, not the document's day-old snapshot, or a row that just
+           gained its business-school evidence would wait a whole sync for
+           its flag. */
+        const freshRow = new Map(split.refresh.map((d) => [d.rowId, d.row]));
+        const reflag = [];
         for (const doc of split.pending) {
-          const dup = duplicatesOf(doc.row, site);
-          if (!sameDups(dup, doc.dup)) redup.push({ rowId: doc.rowId, dup });
+          const row = freshRow.get(doc.rowId) || doc.row;
+          const patch = {};
+          const dup = duplicatesOf(row, site);
+          if (!sameDups(dup, doc.dup)) patch.dup = dup;
+          const biz = businessCheck(row, vocab);
+          if (!sameBiz(biz, doc.biz)) patch.biz = biz;
+          if (Object.keys(patch).length) reflag.push({ rowId: doc.rowId, patch });
         }
         for (const d of flaggedFresh) {
           warn(`${d.rowId} may duplicate ${d.dup.map((x) => x.ref || x.id).join(', ')} — ` +
                'flagged on its review card');
         }
 
-        if (split.queue.length || split.refresh.length || redup.length) {
+        if (split.queue.length || split.refresh.length || reflag.length) {
           if (DRY) {
             log(`--dry-run: would queue ${split.queue.length} posting(s) for review` +
                 (split.refresh.length ? ` and refresh ${split.refresh.length}` : '') +
-                (redup.length ? ` and re-flag ${redup.length}` : '') + '.');
+                (reflag.length ? ` and re-flag ${reflag.length}` : '') + '.');
           } else {
-            await writeQueue(queue.db, split, redup);
+            await writeQueue(queue.db, split, reflag);
           }
         }
         /* Grandfathered rows are in `queue` (they get a document) AND in

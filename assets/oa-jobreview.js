@@ -241,6 +241,32 @@
       '</div>';
   }
 
+  /**
+   * The business-school flag the sheet sync computed (owner, 2026-08-23):
+   * the crawled posting's text mentions "business", so it arrived typed
+   * Business School — and the site's own directory is asked which school
+   * that IS at this university. Computed offline (businessCheck in
+   * _scraper/jobreview.mjs, from the same vocab.json the cascade reads) and
+   * stored on the document as `biz`; this only draws it. A MENTION, never a
+   * decision: the "Use it" button fills the School box for the maintainer to
+   * read back, and nothing is saved until they press Save or Approve.
+   */
+  function bizHtml(biz) {
+    var school = String((biz && biz.school) || '');
+    return '<div class="oa-note" data-biz>' +
+      '<strong>&#127891; Business school posting.</strong> The posting\'s text ' +
+      'mentions the business school, so its Type arrived as ' +
+      '<strong>Business School</strong>. ' +
+      (school
+        ? 'The site\'s directory lists <strong>' + esc(school) + '</strong> as this ' +
+          'university\'s business school. ' +
+          '<button type="button" class="button" data-biz-use="' + esc(school) + '"' +
+          ' style="margin-left:6px">Use it as the School</button>'
+        : 'The site\'s directory does not list a business school for this ' +
+          'university &mdash; if you know it, type it into the School box below.') +
+      '</div>';
+  }
+
   function cardHtml(doc, i) {
     var row = doc.row || {};
     var ad = safeHref(fieldValue(doc, 'adUrl'));
@@ -268,6 +294,7 @@
         '</p>' +
       '</header>' +
       (dups.length ? dupHtml(dups) : '') +
+      (doc.biz ? bizHtml(doc.biz) : '') +
       '<div class="oa-rv-grid">' +
         FIELDS.map(function (f, n) {
           var id = idp + '-' + n;
@@ -658,6 +685,21 @@
       card.innerHTML = cardHtml(doc, i);
 
       card.addEventListener('click', function (e) {
+        /* The business-school note's "Use it": fill the School box with the
+           directory's name, exactly as typing it would — an input event so
+           the derived-line preview (and the picker, where mounted) follow.
+           Nothing is written until Save or Approve, like any other edit. */
+        var use = e.target.closest('button[data-biz-use]');
+        if (use) {
+          var schoolBox = card.querySelector('[data-key="school"]');
+          if (schoolBox) {
+            schoolBox.value = use.getAttribute('data-biz-use') || '';
+            schoolBox.dispatchEvent(new Event('input', { bubbles: true }));
+            schoolBox.focus();
+          }
+          return;
+        }
+
         var b = e.target.closest('button[data-act]');
         if (!b) return;
         var act = b.dataset.act;

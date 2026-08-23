@@ -3675,13 +3675,16 @@ for (const w of [320, 360, 390, 430]) {
   const seedDocs = [
     { path: 'jobReviews/r1', data: { rowId: 'r1', status: 'pending', queuedAt: '2026-08-20',
         row: { id: 'r1', year: 2026, posted: '2026-08-20', institution: 'Test University One', country: 'Ireland' } } },
-    /* r2 carries a duplicate flag, and a hostile one: the sync writes these
-       from postings people typed, so the banner must render them inert */
+    /* r2 carries a duplicate flag AND a business-school flag, both hostile:
+       the sync writes these from data people typed (postings, the vocabulary
+       built from them), so the banners must render them inert */
     { path: 'jobReviews/r2', data: { rowId: 'r2', status: 'pending', queuedAt: '2026-08-21',
-        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two', country: 'France' },
+        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two',
+          country: 'France', type: 'Business School' },
         dup: [{ id: 'dup-1', ref: 'OA-JOB-1', source: 'oa-form',
           institution: 'Test University <img src=x onerror=window.__xssdup=1>',
-          department: 'Operations', posted: '2026-08-10' }] } },
+          department: 'Operations', posted: '2026-08-10' }],
+        biz: { school: 'Known Business School <img src=x onerror=window.__xssbiz=1>' } } },
     // approved: must NOT be in the queue or its counts
     { path: 'jobReviews/r3', data: { rowId: 'r3', status: 'approved', queuedAt: '2026-08-19',
         row: { id: 'r3', year: 2026, posted: '2026-08-19', institution: 'Approved University', country: 'Spain' } } },
@@ -3838,6 +3841,29 @@ for (const w of [320, 360, 390, 430]) {
       'admin area: the warning says what it is');
     ok(await q.evaluate(() => !window.__xssdup),
       'admin area: a hostile duplicate entry cannot inject markup');
+
+    /* THE BUSINESS-SCHOOL FLAG IS MENTIONED THE SAME WAY (owner, 2026-08-23):
+       on the card that carries it and nowhere else, naming the school the
+       site's directory knows — a name built from data people typed, so a
+       hostile one must render inert. The Use-it button fills the School box
+       like typing would, and saves nothing. (Measured BEFORE the tab switch
+       below: the flagged card is on the crawled tab's All view, which is what
+       is on screen here.) */
+    eq(await q.locator('#oa-review-list [data-biz]').count(), 1,
+      'admin area: the business-typed posting mentions the business school, and only it');
+    ok(reviews.indexOf('Business school posting') !== -1,
+      'admin area: the mention says what it is');
+    ok(await q.evaluate(() => !window.__xssbiz),
+      'admin area: a hostile school name cannot inject markup');
+    {
+      const card = q.locator('#oa-review-list .oa-rv-card', { hasText: 'Test University Two' });
+      await card.locator('button[data-biz-use]').click();
+      eq(await card.locator('[data-key="school"]').inputValue(),
+        'Known Business School <img src=x onerror=window.__xssbiz=1>',
+        'admin area: Use-it fills the School box with the name, as typed text');
+      ok(await q.evaluate(() => !window.__xssbiz),
+        'admin area: and filling it runs nothing either');
+    }
 
     /* -- the user-added tab: a dedicated, editable list, never a gate — the
           posting is live the moment the form saved it -- */

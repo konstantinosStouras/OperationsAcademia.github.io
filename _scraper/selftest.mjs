@@ -26,11 +26,14 @@ import {
   removalSpecs, buildOwned, ownerTag, specMatches, healPlace,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
-import { splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey } from './vocab.mjs';
+import {
+  splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
+} from './vocab.mjs';
 import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
 import { syncSheetMirrors } from './build-jobs.mjs';
 import {
-  sheetDay, daysBetween, classifyTab, isIntroTab, conventionalTabs, normHeader, mapColumns,
+  sheetDay, daysBetween, deadlineDay, classifyTab, isIntroTab, conventionalTabs,
+  normHeader, mapColumns,
   inferColumns, resolveColumns, looksLikeData, repairColumns, institutionColumn,
   levelsFromRank, typeFromNames, rowsFromTab, collectRows,
   stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
@@ -49,7 +52,7 @@ import {
 import {
   COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
-  needMail, changedKeys, approvedRow, duplicatesOf, sameDups,
+  needMail, changedKeys, approvedRow, duplicatesOf, sameDups, businessCheck, sameBiz,
 } from './jobreview.mjs';
 import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
@@ -1467,6 +1470,36 @@ function testVocab() {
   ] });
   eq(empty.universities, [{ v: 'Aalto University', n: 0 }],
     'the directory alone can put a university on the list, with no postings behind it');
+
+  /* WHICH SCHOOL IS THE BUSINESS SCHOOL (owner, 2026-08-23). Answered from
+     the school's own NAME, only when the answer is unambiguous — the
+     schoolForUnit discipline: none, or two, is no answer at all. */
+  const biz = buildVocab([], { directory: [
+    { institution: 'University of California, Berkeley',
+      school: 'Walter A. Haas School of Business',
+      department: 'Operations and Information Technology Management' },
+    { institution: 'University of California, Berkeley',
+      school: 'College of Engineering',
+      department: 'Industrial Engineering and Operations Research' },
+    { institution: 'Northwestern University',
+      school: 'Kellogg School of Management', department: 'Operations' },
+    { institution: 'Two Schools University', school: 'School of Business', department: 'OM' },
+    { institution: 'Two Schools University',
+      school: 'Faculty of Business and Economics', department: 'Economics' },
+  ] });
+  eq(businessSchoolOf(biz, 'University of California, Berkeley'),
+    'Walter A. Haas School of Business',
+    'the university\'s business school is named from its own name, past its other schools');
+  eq(businessSchoolOf(biz, 'UC Berkeley'), 'Walter A. Haas School of Business',
+    'however the university is spelled — the lookup goes through institutionKey');
+  eq(businessSchoolOf(biz, 'Northwestern University'), 'Kellogg School of Management',
+    'a school of management counts as one, though it never says the word');
+  eq(businessSchoolOf(biz, 'Two Schools University'), '',
+    'two candidate schools are an ambiguity, not an answer');
+  eq(businessSchoolOf(biz, 'Nowhere University'), '',
+    'a university the vocabulary does not know names nothing');
+  eq(businessSchoolOf(null, 'University of California, Berkeley'), '',
+    'and no vocabulary at all is never fatal');
 }
 
 /* ------------------------------- the site's own link follows the name
@@ -2949,6 +2982,27 @@ function testJobMarketSheetParsing() {
   eq(sheetDay(''), '', 'nor an empty cell');
   eq(daysBetween('2026-08-01', '2026-08-15'), 14, 'whole days between two days');
 
+  /* A DEADLINE THE PIPELINE IS UNSURE OF IS NOT A DEADLINE (owner,
+     2026-08-23). A parsed date is believed only when it is plausible against
+     the day the posting went up; an ambiguous day/month whose US reading
+     fails that test is re-read the other way round — the one honest repair —
+     and a cell neither reading can save publishes NO date, which the page
+     shows as "Until filled." */
+  eq(deadlineDay('15-Nov-26', '2026-09-01'), '2026-11-15',
+    'a deadline after the posting date is believed');
+  eq(deadlineDay('15-Nov-24', '2026-09-01'), '',
+    'one that had passed before the advertisement went up is a mis-entry, not a deadline');
+  eq(deadlineDay('15-Nov-29', '2026-09-01'), '',
+    'and one years out is a mis-typed year, not a plan');
+  eq(deadlineDay('10/5/2026', '2026-09-01'), '2026-10-05',
+    'a plausible US reading is trusted, as Google itself writes dates');
+  eq(deadlineDay('5/10/2026', '2026-09-01'), '2026-10-05',
+    'while an ambiguous cell whose US reading lands before the posting is read day-first');
+  eq(deadlineDay('TBD', '2026-09-01'), '', 'prose is never a date');
+  eq(deadlineDay('', '2026-09-01'), '', 'nor is an empty cell');
+  eq(deadlineDay('15-Nov-26', ''), '2026-11-15',
+    'with no posting date there is no evidence against a parsed deadline');
+
   // which tabs are read, and which are not
   eq(classifyTab('2026 Jobs'), { year: 2026, kind: 'jobs' }, 'a jobs tab');
   eq(classifyTab('2026 NTT/PD'), { year: 2026, kind: 'ntt-pd' }, 'an NTT/PD tab');
@@ -3001,6 +3055,26 @@ function testJobMarketSheetParsing() {
     'a name that answers neither leaves the type empty rather than guessing');
   eq(typeFromNames('Some Employer', 'Department of Business Administration'), 'Business School',
     'the field column can name the school when the institution does not');
+
+  /* THE EVIDENCE IS THE WHOLE POSTING (owner, 2026-08-23): a posting that
+     says "business" ANYWHERE — the advertised title, the notes, the
+     advertisement's own address — has to do with the university's business
+     school and is flagged under Business School for the review card to
+     confirm. */
+  eq(typeFromNames('University of Utah', 'Operations',
+    'Assistant Professor of Business Analytics'), 'Business School',
+    'the bare word "business" anywhere in the posting flags it under Business School');
+  eq(typeFromNames('University of Houston', 'OM', 'Assistant Professor',
+    'the post sits in the Bauer College of Business'), 'Business School',
+    'a note naming the college counts too');
+  eq(typeFromNames('University of California Berkeley', 'Operations and IT Management',
+    'Lecturer', '', 'https://business.academickeys.com/job/z8gs65qr/Lecturer'),
+    'Business School',
+    'as does the advertisement\'s own address — a business-faculty job board says ' +
+    'what the post is');
+  eq(typeFromNames('Clarkson University', 'Operations', 'Lecturer',
+    'strong record in agribusiness studies'), 'University',
+    'while a word merely CONTAINING business is not the word — the test is bounded');
 }
 
 function testJobMarketSheetColumns() {
@@ -3092,6 +3166,9 @@ function testJobMarketSheetRows() {
     ['University', 'Country', 'Date', 'Deadline'],
     ['A School', 'USA', '1-Sep-26', '15-Nov-26'],
     ['B School', 'USA', '1-Sep-26', 'Until filled'],
+    ['C School', 'USA', '1-Sep-26', '15-Oct-24'],
+    ['D School', 'USA', '1-Sep-26', 'early December'],
+    ['E School', 'USA', '1-Sep-26', '5/10/2026'],
   ]), { minYear: 2026 });
   eq(withDeadline.rows.find((r) => r.institution === 'A School').applyByDate, '2026-11-15',
     'a deadline is read as a date');
@@ -3100,6 +3177,26 @@ function testJobMarketSheetRows() {
   eq(withDeadline.rows.find((r) => r.institution === 'B School').applyByDate, '',
     'an open-ended search carries NO date — the page buckets "until filled" on ' +
     'the date being empty, so a row with both would read as dated');
+
+  /* A DEADLINE THE PIPELINE IS UNSURE OF PUBLISHES AS "UNTIL FILLED.", with
+     the cell's own words carried onto the card (owner, 2026-08-23) — never a
+     guess presented as fact. */
+  const cRow = withDeadline.rows.find((r) => r.institution === 'C School');
+  eq(cRow.applyByDate, '',
+    'a deadline that had passed before the advertisement went up is not believed');
+  eq(cRow.applyBy, 'Until filled.', 'the posting reads "Until filled." instead');
+  ok(cRow.comments.includes('Deadline as listed: 15-Oct-24'),
+    'and the sheet\'s own words reach the card, so the maintainer can settle it');
+  const dRow = withDeadline.rows.find((r) => r.institution === 'D School');
+  eq(dRow.applyByDate, '', 'prose that is not a date sets no date');
+  eq(dRow.applyBy, 'Until filled.', 'and reads "Until filled."');
+  ok(dRow.comments.includes('Deadline as listed: early December'),
+    'with the prose kept rather than silently dropped');
+  eq(withDeadline.rows.find((r) => r.institution === 'E School').applyByDate, '2026-10-05',
+    'an ambiguous day/month whose US reading lands before the posting is read day-first');
+  ok(!withDeadline.rows.find((r) => r.institution === 'A School').comments
+      .includes('Deadline as listed'),
+    'a believed deadline leaves no note behind — the note is only for the unsure');
 
   // rows that are not postings
   const messy = rowsFromTab(csvOf([
@@ -4951,6 +5048,49 @@ function testReviewDuplicates() {
   }
 }
 
+function testReviewBusiness() {
+  /* THE BUSINESS-SCHOOL FLAG (owner, 2026-08-23). A crawled posting whose
+     text mentions "business" arrives typed Business School (typeFromNames),
+     and its review card then NAMES the business school the site's own
+     directory knows at that university — RAISED for the maintainer, never
+     decided: nothing fills the School box until they press Use it, and
+     nothing publishes until they approve. */
+  const vocab = buildVocab([], { directory: [
+    { institution: 'University of California, Berkeley',
+      school: 'Walter A. Haas School of Business',
+      department: 'Operations and Information Technology Management' },
+  ] });
+  const bizRow = { ...RV_ROW, type: 'Business School', school: '', unit: 'Operations',
+    institution: 'University of California, Berkeley' };
+
+  eq(businessCheck(bizRow, vocab), { school: 'Walter A. Haas School of Business' },
+    'a business-typed posting is given the school the directory knows');
+  eq(businessCheck(RV_ROW, vocab), null,
+    'a posting whose text never said business raises no flag');
+  eq(businessCheck({ ...bizRow, school: 'Rutgers Business School' }, vocab), null,
+    'nor does one whose School box already names a business school — the card ' +
+    'would only repeat what is in the box above it');
+  eq(businessCheck({ ...bizRow, institution: 'Nowhere University' }, vocab),
+    { school: '' },
+    'a university the directory does not know still raises the flag, with no name — ' +
+    'the card says the directory has none, and the fix is a row in oa-institutions.js');
+  eq(businessCheck(bizRow, null), { school: '' },
+    'no vocabulary at all degrades the same way, never fatally');
+
+  ok(sameBiz(null, null) && sameBiz({ school: 'X' }, { school: 'X' })
+     && !sameBiz(null, { school: 'X' }) && !sameBiz({ school: 'X' }, { school: 'Y' }),
+    'sameBiz is what keeps an unchanged sync from writing at all');
+
+  /* the sync computes it and writes it; the panel only draws it */
+  const withBiz = queueDoc(bizRow, { now: '2026-08-23T00:00:00Z',
+    biz: businessCheck(bizRow, vocab) });
+  eq(withBiz.biz, { school: 'Walter A. Haas School of Business' },
+    'a fresh queue document carries the flag');
+  for (const k of Object.keys(withBiz)) {
+    ok(DOC_KEYS.includes(k), `business-flagged queue document key "${k}" is one the rules allow`);
+  }
+}
+
 function testReviewEdits() {
   /* An edit is sanitised exactly as an ingest would sanitise it: a browser is
      not the authority on what a posting may contain. */
@@ -5205,6 +5345,21 @@ async function testReviewWiring() {
     'as a warning panel that names its own colours, per the theme rules');
   ok(mailer.includes('Possibly already on the site'),
     'and the review e-mail warns about it too');
+
+  /* THE BUSINESS-SCHOOL FLAG REACHES THE SAME PLACES, the same way (owner,
+     2026-08-23): the sync computes it against the site's own vocabulary, the
+     card mentions the school the directory knows beside a Use-it fill, and
+     the e-mail says it where the decision is asked for. */
+  ok(sync.includes('businessCheck('),
+    'the sheet sync checks every queued posting for business-school evidence');
+  ok(sync.includes('sameBiz('),
+    'and re-checks pending ones without rewriting a flag that has not moved');
+  ok(panel.includes('data-biz') && panel.includes('doc.biz'),
+    'the review card mentions the business school the site knows, where the decision is made');
+  ok(panel.includes('data-biz-use'),
+    'with a Use-it button that fills the School box — an edit the maintainer still saves');
+  ok(mailer.includes('Business school posting'),
+    'and the review e-mail mentions it too');
 
   /* TWO SOURCES, ONE PANEL (owner, 2026-08-23). The crawled queue's cards are
      the gate; a "User-added jobs" tab beside them lists the postings made
@@ -5477,6 +5632,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testHigherEdJobsWiring();
   testReviewQueue();
   testReviewDuplicates();
+  testReviewBusiness();
   testReviewEdits();
   await testReviewWiring();
   await testSubmissionNotices();

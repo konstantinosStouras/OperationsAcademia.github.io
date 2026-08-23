@@ -34,7 +34,7 @@ import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
   ownUniversitiesLink, universitiesLink,
 } from './jobs-model.mjs';
-import { joinDepartment } from './vocab.mjs';
+import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
 /* "Is this the same university?" — GROUPING, not publishing, exactly as the
    vocabulary uses it (see oa-schools.js institutionKey). The duplicate check
@@ -110,7 +110,7 @@ export const SHOWN = EDITABLE.filter((f) => !f.derived);
 /** Every key a `jobReviews` document may carry. */
 export const DOC_KEYS = [
   'rowId', 'status', 'row', 'edits',
-  'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup',
+  'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup', 'biz',
 ];
 
 /* ------------------------------------------------------------------ queue */
@@ -123,7 +123,7 @@ export const DOC_KEYS = [
  * queue is the only place a not-yet-public posting may exist (see the header).
  * It is refreshed by `refreshQueued` whenever the sheet changes underneath.
  */
-export function queueDoc(row, { now = '', dup = [] } = {}) {
+export function queueDoc(row, { now = '', dup = [], biz = null } = {}) {
   return {
     rowId: row.id,
     status: PENDING,
@@ -134,6 +134,7 @@ export function queueDoc(row, { now = '', dup = [] } = {}) {
     mailedAt: '',
     note: '',
     dup,
+    biz,
   };
 }
 
@@ -411,6 +412,43 @@ export function duplicatesOf(row, siteRows, { max = 3 } = {}) {
     to report writes nothing at all. */
 export function sameDups(a, b) {
   return JSON.stringify(a || []) === JSON.stringify(b || []);
+}
+
+/* -------------------------------------------------------- business school */
+
+/**
+ * The business-school flag on a queue document (owner, 2026-08-23): a crawled
+ * posting whose text mentions "business" is typed Business School at ingest
+ * (typeFromNames in jobmarket-sheet.mjs), and its review card should then
+ * NAME the business school the site's own directory knows at that university
+ * — so the maintainer confirms Haas is the school doing the hiring instead of
+ * looking it up.
+ *
+ * `null` when there is nothing to raise: the posting is not business-typed,
+ * or its School field already names a business school itself, in which case
+ * the card would only be repeating what is in the box above it. Otherwise
+ * `{ school }` — the directory's answer, or '' when the directory has none
+ * (the card still raises the flag, and says the directory does not know; the
+ * fix, as everywhere, is a row in assets/oa-institutions.js, never a guess).
+ *
+ * A MENTION, never a fill: `fillSchoolFromDirectory` fills a school only on
+ * the evidence of the department it houses; "the posting says business" is
+ * evidence about the POSTING, and the maintainer decides on the card.
+ */
+export function businessCheck(row, vocab, schools = null) {
+  if (!row || row.type !== 'Business School') return null;
+  if (BUSINESS_SCHOOL_NAME_RX.test(String(row.school || ''))) return null;
+  return {
+    school: schools
+      ? businessSchoolOf(vocab, row.institution, schools)
+      : businessSchoolOf(vocab, row.institution),
+  };
+}
+
+/** Two flags that say the same thing — the `sameDups` rule, for `biz`, so an
+    unchanged sync writes nothing. */
+export function sameBiz(a, b) {
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
 /* --------------------------------------------------------------- deciding */
