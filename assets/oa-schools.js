@@ -1029,7 +1029,17 @@
     var fa = fold(a), fb = fold(b);
     if (!fa || !fb) return false;
     if (fa === fb) return true;
-    if (fa.indexOf(fb) !== -1 || fb.indexOf(fa) !== -1) return true;
+    /* CONTAINED AS WHOLE WORDS, never as letters inside one. The check is here
+       to find "Haas" inside "Walter A. Haas School of Business" — a name
+       within a name. Compared as raw text it also found "IS" inside
+       "Decision", so the sweep called "IS" and "Learning, Optimization, and
+       Decision Analytics" one department written twice, the posting form
+       would have offered that as a "did you mean", and (because the sweep
+       fails a build) it stopped the site publishing. fold() leaves single
+       spaces between words, so padding both ends is the whole test — the same
+       idiom hasSchoolWord uses. */
+    if ((' ' + fa + ' ').indexOf(' ' + fb + ' ') !== -1
+      || (' ' + fb + ' ').indexOf(' ' + fa + ' ') !== -1) return true;
 
     var da = distinctiveWords(a, opts.university);
     var db = distinctiveWords(b, opts.university);

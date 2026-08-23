@@ -251,7 +251,15 @@ every build, and the committed files were healed once with the same function
 (17 postings gained their date). `extractFinalDate` reads only an explicitly
 LABELLED closing date ("Final date: Thursday, Nov 5, 2026" — UCLA's
 application-window cell); a bare "deadline" heading clauses away from a date
-is exactly the mislabelled-header mis-read and never fires. `reviewDate` is in
+is exactly the mislabelled-header mis-read and never fires. And the source's
+own labelled WINDOW can settle both fields at once: UCLA reached the site
+with its review date recorded as the closing date while its own words on the
+row said "Next review date: Oct 5 … Final date: Nov 5" — where the stored
+closing date IS the text's stated review date and the same text labels a
+final date after it, the stated final date wins and the review date takes
+its own field (`window` in healReviewDate; both labels must be explicit and
+agree with the stored date, so it can never fire on a date the maintainer
+simply typed). `reviewDate` is in
 `PUBLIC_FIELDS` (skipped when empty, like `ref`), in the jobSubmissions rules'
 `shapeOk` and the jobReviews `edits` list, and `testTwoDeadlines` /
 `testTwoDeadlinesWiring` in selftest.mjs pin the extractor, every guard and
@@ -820,6 +828,85 @@ The build now also prints a `::error::` saying publishing has stopped when the
 re-check is what failed, so the log names the consequence rather than just the
 assertion.
 
+### It happened again, at the scale the queue was built for
+
+The morning the maintainer approved a season — **449 postings in one sitting** —
+both halves of the pipeline went red and the site's data stopped moving. The
+sheet read failed on ONE row and therefore wrote none of the 449 to
+`data/jobmarket.json`; the build, reading the approved queue documents directly
+behind it, then failed on eight guards and committed nothing either. Everything
+was working. Nothing published.
+
+Five separate faults, and the shape of each is worth keeping:
+
+* **Two boxes for one fact.** The review card offered "Apply by" beside
+  "Closing date", one posting was approved with the line emptied and the date
+  left behind, and `selftest.mjs` asserts over the served file that *the date
+  shown and the date filtered on are the same date*. That is precisely the
+  `department` bug one section down, on the deadline — so the same remedy:
+  `settleDeadline` in `applyEdits` DERIVES the line (`derived: true`, out of
+  `SHOWN`), the card previews what will be published under the date box, and
+  words about a search with no closing date go in the comments.
+* **A guard about two rows, keyed on their date.** The Houston pair guard
+  matched `/houston-20250923/` and caught three new legitimate postings of the
+  same day. A guard about specific rows NAMES those rows.
+* **A guard asserting on a tie-break.** The `RULED` rulings look a university
+  up in `data/vocab.json`, which is keyed by whichever spelling has the most
+  postings — `pickForm` calls that "a tie-break, not a policy" — and one new
+  posting under "University of Texas at Dallas" moved the entry off "The
+  University of Texas at Dallas". Anything asserting about a PLACE asks
+  `institutionKey` (`uniEntry` in selftest.mjs), never the current spelling.
+  `AWAITING_OWNER` is keyed the same way.
+* **An exemption narrower than the thing it exempts.** The mirror round-trip
+  guard excused a row whose `type` the workbook left blank; the workbook may
+  leave ANY of the fields a submission needs blank, and three postings arrived
+  short of a different one each. It is keyed on `SUBMISSION_NEEDS` now, pinned
+  against `rowFromSubmission` itself so the list cannot drift.
+* **A tidiness sweep with a publishing-sized consequence.** Sixteen pairs of
+  department names — the workbook writes the FIELD where the site asks for a
+  department, so "OM" arrives beside "OM/SCM" and "SCM/OM" — stopped the whole
+  site. Two of them were not pairs at all: `similarNames` matched its substring
+  tier against raw text, so "IS" was found inside "Decision". That check is
+  word-aligned now, which also stops the posting form offering the same
+  nonsense as a "did you mean".
+
+**And the last of those changed a rule.** `selftest.mjs` has two jobs with very
+different costs: as the PR check (`oa-checks.yml`) red means somebody reads the
+failure and nothing on the live site moves; as a data writer's re-check red
+means that workflow commits NOTHING — not the offending row, everything. So the
+two duplicate-NAME sweeps, which are about tidiness rather than about the data
+being right, now report in the second role and fail in the first.
+`node _scraper/selftest.mjs --publishing` selects it, every workflow that
+writes `data/` passes it (both its precondition run and its re-check), and
+`oa-checks.yml` deliberately does not — pinned both ways, because the flag
+missing from a writer is this outage and the flag creeping into the PR check
+would leave nothing enforcing it anywhere. The pairs are named in the run log
+either way.
+
+**Two sources can mint one id, and the later writer wins.** A posting's id is
+(market year, institution, date) plus an ordinal for the same day, and ids are
+how `mergeRows` joins — so when the workbook's three Houston rows of 2025-09-23
+were approved they took `2026-university-of-houston-20250923` and `…-2` from
+the two LEGACY rows that held them, and those two went off the site with their
+advertisement links. Nothing warned; the only reason it was noticed at all is
+that a guard named those ids. Whether that matters is the maintainer's call —
+the workbook and the legacy sheet are plainly describing one Bauer hiring
+round, so this may be a merge rather than a loss — but the MECHANISM is luck,
+not design, and a fix would have to change ids, which are permalinks and the
+join key for `rowOverrides`, the review queue, the mirrors and the Edit button.
+Not attempted here.
+
+**What is still the owner's to settle.** The fourteen surviving pairs are in
+`AWAITING_OWNER`, and every one of them exists because the workbook's
+hiring-unit column holds a FIELD ("OM", "BA", "SCM/OM", "IS/OM/SCM/BA") rather
+than a department name, which the pipeline then publishes as the department.
+Ruling on them one at a time treats the symptom; the remedies are to name the
+department in the sheet, or to teach `jobmarket-sheet.mjs` that a field code is
+not a hiring unit and carry the sheet's own words onto the card the way an
+unbelievable deadline already is (`Deadline as listed: …`). Neither is done
+here: it changes what a posting PUBLISHES, and 449 of them were approved as
+they stood.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
@@ -895,7 +982,13 @@ campus's postal address, and `countryFromAddress` reads the country off it;
 `campusCountries` in `vocab.mjs` turns that into one answer per university.
 `healCountry` corrects a row that contradicts it, and `build-jobs.mjs` applies it
 to the MERGED set — the fault came from an editor, not from a source, so it must
-be repaired whichever writer produced the row.
+be repaired whichever writer produced the row. **`sync-jobmarket-sheet.mjs`
+applies it too**, on every read of the workbook and in its `--heal-names` mode:
+`data/jobmarket.json` is a served file in its own right, so a wrong country
+there files a workbook posting under a place it has nothing to do with even
+before the build merges it. The selftest asserts over both files, and reads
+both writers' source to check each really heals — a heal only one of them
+applies is undone by whichever writes next.
 
 Three properties make that safe, and all three are pinned:
 
@@ -1036,9 +1129,11 @@ The picker (`assets/oa-combo.js`, dual-mode so its ordering is unit-tested) open
 Duke and Emory — and narrows as you type. The usage count still labels a row but no
 longer orders one: count-first reads as no order at all once the list is three
 hundred names long, where the reader knows the name they want and is looking for
-it. The render cap went with it (60 → 400): an alphabetical list cut at 60 ends in
-the C's and tells the reader to keep typing without their being able to tell
-whether their university is there at all.
+it. The render cap went with it (60 → 400 → 1000, the last when the 2026-08-23
+bulk approval took the vocabulary past 400 universities and VinUniversity fell
+off the end): an alphabetical list cut short ends mid-alphabet and tells the
+reader to keep typing without their being able to tell whether their
+university is there at all.
 
 **Anything that paints its own ground must name its own ink.** The picker's panel
 set `background: #fff` and no colour, so under the dark theme it inherited `--ink`
@@ -1667,6 +1762,9 @@ change committed here is not live until someone runs that command by hand.
                                     # claiming one og:url
     node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
     node _scraper/jobreview-mailer.mjs --selftest      # the review-queue e-mail
+    node _scraper/selftest.mjs --publishing   # the same, in a data writer's
+                                    # role: a duplicate NAME is reported rather
+                                    # than stopping the site publishing
     node _scraper/country-audit.mjs # every posting names the country its
                                     # university is in, against the addresses
                                     # in the site's own Universities directory

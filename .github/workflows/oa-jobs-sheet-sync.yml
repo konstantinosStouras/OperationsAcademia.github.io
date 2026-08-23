@@ -46,7 +46,7 @@ jobs:
           node-version: '22'
 
       - name: Offline checks
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       # NO --min-year. The scope is derived by marketFloor() in jobs-model.mjs,
       # which owns the roll rule (1 July) and the MARKET_WINDOW width, and the
@@ -62,7 +62,7 @@ jobs:
                --out data/jobs.json --dry-run
 
       - name: Re-check the file we are about to commit
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run

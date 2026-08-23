@@ -728,11 +728,29 @@ export function extractFinalDate(text) {
  * changes nothing.
  */
 export function healReviewDate(row) {
-  const finalDay = String(row.applyByDate || '');
+  let finalDay = String(row.applyByDate || '');
+  let applyBy = String(row.applyBy || '');
   const believable = (d) => !!d && (!finalDay || d < finalDay);
   let review = day(row.reviewDate);
   if (review && !believable(review)) review = '';
-  let applyBy = String(row.applyBy || '');
+
+  /* THE SOURCE'S OWN LABELLED WINDOW CAN SETTLE BOTH DATES. UCLA's posting
+     reached the site with its REVIEW date recorded as the closing date —
+     "Apply by: October 5, 2026" — while its own words, carried on the same
+     row, said "Next review date: Oct 5, 2026 … Final date: Nov 5, 2026".
+     Where the stored closing date IS the text's own stated review date and
+     the SAME text labels a final date after it, the stated final date wins
+     and the review date takes its own field. Both labels must be explicit
+     and must agree with the stored date, so this can never fire on a date
+     the maintainer simply typed. */
+  const window = (text) => {
+    if (!finalDay) return null;
+    const found = extractReviewDate(text);
+    if (!found.date || found.date !== finalDay) return null;
+    const final = extractFinalDate(text);
+    return final && final > found.date ? { review: found.date, final } : null;
+  };
+
   if (!review) {
     const found = extractReviewDate(applyBy);
     if (believable(found.date)) {
@@ -741,13 +759,22 @@ export function healReviewDate(row) {
     }
   }
   if (!review) {
+    const w = window(applyBy) || window(String(row.comments || ''));
+    if (w) {
+      review = w.review;
+      finalDay = w.final;
+      applyBy = longDate(w.final);
+    }
+  }
+  if (!review) {
     const found = extractReviewDate(String(row.comments || ''));
     if (believable(found.date)) review = found.date;
   }
-  if (review === String(row.reviewDate || '') && applyBy === String(row.applyBy || '')) {
+  if (review === String(row.reviewDate || '') && applyBy === String(row.applyBy || '')
+      && finalDay === String(row.applyByDate || '')) {
     return row;
   }
-  const healed = { ...row, applyBy };
+  const healed = { ...row, applyBy, applyByDate: finalDay };
   if (review) healed.reviewDate = review;
   else delete healed.reviewDate;
   return healed;

@@ -6,7 +6,14 @@
    "id": "two-apply-by-dates",
    "date": "2026-08-23",
    "title": "Every posting now shows two deadlines: suggested and final",
-   "summary": "Many searches have no fixed closing date yet still name the day that matters most — the first-review or full-consideration date (“First review of applications will begin on September 8, 2026”). Those postings used to read a bare “Until filled.” Every posting card now carries a “Suggested apply by” line beside the “Final apply by” one, the jobs page filters on each separately (Suggested deadline · Final deadline), and the posting form asks the two dates as two questions. The suggested date is also read automatically out of the prose postings already carry — seventeen live postings, Kansas’s included, gained theirs on day one — and a date the pipeline is unsure of is never guessed: the posting keeps reading “Until filled.”",
+   "summary": "Many searches have no fixed closing date yet still name the day that matters most — the first-review or full-consideration date (“First review of applications will begin on September 8, 2026”). Those postings used to read a bare “Until filled.” Every posting card now carries a “Suggested apply by” line beside the “Final apply by” one, the jobs page filters on each separately (Suggested deadline · Final deadline), and the posting form asks the two dates as two questions. The suggested date is also read automatically out of the prose postings already carry — dozens of live postings, Kansas’s included, gained theirs on day one — and a date the pipeline is unsure of is never guessed: the posting keeps reading “Until filled.”",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
+   "id": "approved-postings-publish-in-bulk",
+   "date": "2026-08-23",
+   "title": "A season's worth of approvals publishes, and one odd posting can no longer stop the site",
+   "summary": "449 job postings were approved in one sitting and none of them reached the site. One posting whose closing date and “Apply by” line had come apart was enough to stop the job market sheet from being read at all, and the daily build stopped behind it — so nothing published, with nothing on the site to say so. The review card now asks for the closing date once and shows the line it will publish underneath, so the two can never disagree. Several internal checks that were phrased too narrowly — one about two particular Houston postings, one that looked a university up by whichever spelling was most common that day — were catching perfectly good new postings. And a check that merely notices two similar department names now reports them instead of holding the whole site's data back: it still has to be settled, but not at the price of every posting waiting.",
    "url": "https://www.operationsacademia.org/jobs.html"
   },
   {
@@ -20,7 +27,7 @@
    "id": "job-review-source-tabs",
    "date": "2026-08-23",
    "title": "The job review desk splits by source, and the next market leads",
-   "summary": "The Admin area\u2019s \u201cJob postings to review\u201d panel now has two tabs: auto-crawled postings from the job market tracking sheet, still held back until the maintainer approves them, and user-added postings made through the site\u2019s own form \u2014 those stay live from the moment they are posted and are listed for a correcting look. Inside each tab the market-year filters remain, and every list now ranks the newest job market first \u2014 next season\u2019s postings before the current one\u2019s. For posters nothing changes: a posting made on the site still publishes within minutes."
+   "summary": "The Admin area’s “Job postings to review” panel now has two tabs: auto-crawled postings from the job market tracking sheet, still held back until the maintainer approves them, and user-added postings made through the site’s own form — those stay live from the moment they are posted and are listed for a correcting look. Inside each tab the market-year filters remain, and every list now ranks the newest job market first — next season’s postings before the current one’s. For posters nothing changes: a posting made on the site still publishes within minutes."
   },
   {
    "id": "posting-form-name-guard",

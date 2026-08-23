@@ -64,7 +64,7 @@ import {
   COLLECTION as REVIEW_COL, partition, needMail, PENDING,
   duplicatesOf, sameDups, businessCheck, sameBiz,
 } from './jobreview.mjs';
-import { fillSchoolFromDirectory } from './vocab.mjs';
+import { fillSchoolFromDirectory, campusCountries, healCountry } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -574,7 +574,28 @@ async function main() {
             'from the site\'s own Universities directory');
       }
 
-      const stamped = stampAddedAt(placed, known, { now });
+      /* AND THE COUNTRY THE UNIVERSITY IS ACTUALLY IN. Same authority, same
+         discipline: every row of the Universities directory carries the
+         campus's postal address, `campusCountries` turns that into one answer
+         per university, and a row contradicting it is corrected. build-jobs
+         already heals the merged set — but `data/jobmarket.json` is a SERVED
+         file in its own right and the country drives the jobs page's Location
+         filter, so a wrong one here files a posting under a place it has
+         nothing to do with. A university whose directory rows disagree (INSEAD
+         is in France and in Singapore) has no answer and is never healed. */
+      const byCountry = campusCountries(await loadDirectory());
+      let recountried = 0;
+      const located = placed.map((r) => {
+        const out = healCountry(r, byCountry);
+        if (out !== r) recountried++;
+        return out;
+      });
+      if (recountried) {
+        log(`${recountried} posting(s) took the country their university is in, ` +
+            'from the site\'s own Universities directory');
+      }
+
+      const stamped = stampAddedAt(located, known, { now });
       rows = stamped.rows;
       fresh = stamped.fresh;
 
@@ -832,6 +853,13 @@ async function loadVocab() {
   return v && v.byUniversity ? v : null;
 }
 
+/** The Universities directory, or an empty list. The addresses `campusCountries`
+    reads to say which country a university's campus is in. */
+async function loadDirectory() {
+  const rows = await readJson(path.join(DATA, 'universities.json'), null);
+  return Array.isArray(rows) ? rows : [];
+}
+
 async function healNames() {
   const rows = await readJson(ROWS_FILE, null);
   if (!Array.isArray(rows)) {
@@ -844,8 +872,10 @@ async function healNames() {
      deadline prose. All pure and idempotent, so a run with nothing to do
      writes nothing. */
   const vocab = await loadVocab();
+  const byCountry = campusCountries(await loadDirectory());
   const healed = rows.map(healPlace)
     .map((r) => (vocab ? fillSchoolFromDirectory(r, vocab) : r))
+    .map((r) => healCountry(r, byCountry))
     .map(healReviewDate);
   const changed = healed.filter((r, i) =>
     JSON.stringify(r) !== JSON.stringify(rows[i]));

@@ -96,7 +96,7 @@ jobs:
         run: npm install --no-save --no-audit --no-fund nodemailer@6 firebase-admin@12
 
       - name: Offline checks
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       - name: Read the sheet
         env:
@@ -124,7 +124,7 @@ jobs:
       # The same gate every other writer of data/ runs before committing: a red
       # selftest must stop the publish rather than ship a broken dataset.
       - name: Re-check the files we are about to commit
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan

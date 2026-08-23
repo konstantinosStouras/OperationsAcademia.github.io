@@ -84,7 +84,7 @@ jobs:
         run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
 
       - name: Offline checks
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       - name: Publish queued postings
         if: steps.gate.outputs.ready == 'true'
@@ -126,7 +126,7 @@ jobs:
 
       - name: Re-check the file we are about to commit
         id: recheck
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       # A red re-check stops the commit, which is right — a broken dataset must
       # not ship. What it must not be is QUIET: nothing is published while it
