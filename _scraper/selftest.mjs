@@ -5461,6 +5461,25 @@ async function testReviewWiring() {
     'with a Use-it button that fills the School box — an edit the maintainer still saves');
   ok(mailer.includes('Business school posting'),
     'and the review e-mail mentions it too');
+
+  /* TWO SOURCES, ONE PANEL (owner, 2026-08-23). The crawled queue's cards are
+     the gate; a "User-added jobs" tab beside them lists the postings made
+     through the site's own form — the submissions model's documents, read
+     with its LIVE pair and ticked off with its reviewedAt stamp, which
+     testSubmissionNotices pins kind by kind. Here: the tabs exist, the page
+     mounts them beside the market-year tabs it keeps, and one comparator
+     ranks the NEXT market first in every tab. */
+  ok(panel.includes('data-source') && panel.includes('Auto-crawled jobs')
+     && panel.includes('User-added jobs'),
+    'the panel splits by source — the crawled gate and the user-added to-do list');
+  ok(html.includes('id="oa-review-sources"') && html.includes('id="oa-review-years"'),
+    'and the page mounts the source tabs beside the market-year tabs it keeps');
+  ok(panel.includes('function rankBy') && panel.includes('rankBy(SOURCES.crawled)')
+     && panel.includes('rankBy(SOURCES.user)'),
+    'one comparator ranks both tabs, the next market first');
+  ok((panel.match(/data-act="approve"|data-act="reject"/g) || []).length > 0
+     && !/userCardHtml[\s\S]*?data-act="approve"/.test(panel.slice(panel.indexOf('function userCardHtml'), panel.indexOf('function render(') )),
+    'a user-added card offers no Approve — the posting is already live, there is nothing to gate');
 }
 
 /* --------------------------------------------------------- the Admin area
@@ -5568,23 +5587,42 @@ async function testSubmissionNotices() {
      other review surface, and feedback.html is pinned CLEAN of them */
   const html = await read('admin-area.html');
 
-  /* The model and the browser panel have to agree about WHAT they are looking
-     at and WHERE the bookkeeping is written, or a card ticked off in one is
-     still announced by the other. */
+  /* The model and the browser panels have to agree about WHAT they are
+     looking at and WHERE the bookkeeping is written, or a card ticked off in
+     one is still announced by the other.
+
+     ONE SURFACE PER KIND (owner, 2026-08-23): the user-added JOB half is
+     drawn by the review panel's own "User-added jobs" tab now
+     (assets/oa-jobreview.js), beside the crawled queue it belongs with; this
+     panel keeps the candidate profiles. A second surface for one queue is
+     the drift these modules exist to prevent, so the split is pinned BOTH
+     ways — each kind has its panel, and the job kind is really gone from
+     this one. */
+  const jobPanel = await read('assets/oa-jobreview.js');
   for (const kind of SUB_KINDS) {
-    ok(panel.includes(`collection: '${kind.collection}'`),
-      `the panel reads ${kind.collection}, the same collection the mailer announces`);
-    ok(panel.includes(`editPath: '${kind.editPath}'`),
+    const host = kind.key === 'job' ? jobPanel : panel;
+    const name = kind.key === 'job' ? 'the review panel’s user-added tab'
+      : 'the submissions panel';
+    ok(host.includes(`'${kind.collection}'`),
+      `${name} reads ${kind.collection}, the same collection the mailer announces`);
+    ok(host.includes(kind.editPath),
       `and opens a ${kind.one} on the same form`);
     ok(mailer.includes('KINDS'), 'and the mailer takes its kinds from the model');
   }
-  ok(panel.includes(`var REVIEWED_AT = '${SUB_REVIEWED_AT}';`),
-    'the panel stamps the field the model names');
+  ok(!panel.includes(`'jobSubmissions'`),
+    'the submissions panel no longer draws the job half — one queue, one surface');
+  for (const [file, who] of [[panel, 'the submissions panel'],
+    [jobPanel, 'the review panel’s user-added tab']]) {
+    ok(file.includes(`var REVIEWED_AT = '${SUB_REVIEWED_AT}';`),
+      `${who} stamps the field the model names`);
+    ok(!new RegExp(`['"\`]${SUB_ANNOUNCED_AT}['"\`]\\s*\\]?\\s*[:=]`).test(file)
+       && !file.includes(`'${SUB_ANNOUNCED_AT}'`),
+      `${who} never writes the mailer's high-water mark`);
+  }
+  ok(jobPanel.includes(`var LIVE = ['queued', 'published'];`),
+    'and the user-added tab lists the same LIVE pair the model reads');
   ok(model.includes(`export const ANNOUNCED_AT = '${SUB_ANNOUNCED_AT}';`),
-    'and the mailer stamps its own, so a tick and an announcement never overwrite each other');
-  ok(!new RegExp(`['"\`]${SUB_ANNOUNCED_AT}['"\`]\\s*\\]?\\s*[:=]`).test(panel)
-     && !panel.includes(`'${SUB_ANNOUNCED_AT}'`),
-    'the panel never writes the mailer\'s high-water mark');
+    'the mailer stamps its own mark, so a tick and an announcement never overwrite each other');
 
   /* NO RULES CHANGE. Both collections are already admin-read and admin-write,
      which is what let this ship without a manual `firebase deploy` — a feature
