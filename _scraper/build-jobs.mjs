@@ -36,7 +36,7 @@ import {
   specMatches,
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
-import { COLLECTION as REVIEW_COL, applyEdits } from './jobreview.mjs';
+import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
 import { buildVocab, serialiseVocab, SCHOOLS } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -483,7 +483,12 @@ async function main() {
       for (const d of snap.docs) {
         const v = d.data() || {};
         if (!v.row || !v.row.id) continue;
-        const row = applyEdits(v.row, v.edits);
+        /* approvedRow, not bare applyEdits: it also dates the posting from its
+           approval (the moment it could first be read on the site), which is
+           what the e-mail alerts window on — and it is the SAME function the
+           sheet sync's partition publishes through, so the two writers of this
+           row can never disagree about it. */
+        const row = approvedRow(v.row, v);
         if (byId.has(row.id)) {
           if (JSON.stringify(byId.get(row.id)) !== JSON.stringify(row)) edited++;
         } else {

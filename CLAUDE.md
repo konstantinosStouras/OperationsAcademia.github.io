@@ -327,6 +327,34 @@ two boxes exactly as the posting form does. The three boxes mount
 "University of Chicago" narrows School to Booth and School narrows Department,
 the same behaviour the poster gets.
 
+**A crawled posting is checked against the site for DUPLICATES before the
+maintainer is asked about it.** A school that advertises through the site's own
+form is routinely also entered in the tracking workbook, and the crawled copy
+then arrives in the queue as a fresh posting. So the sheet sync runs every
+queued row through `duplicatesOf` (jobreview.mjs, pure) against
+`data/jobs.json` — same market year, same university (`institutionKey`, so a
+"The" cannot hide a match), and either the same advertisement link or the same
+department; two rows whose entry levels share nothing are two advertisements
+(the Houston lesson), and our own home page in a link column identifies
+nothing. The flags are stored on the queue document (`dup`, in `DOC_KEYS` and
+the rules' `hasOnly` — pinned both ways by the selftest), re-checked on every
+sync so they appear when the duplicate is posted later and clear when it is
+taken down, and RAISED, never decided: the review card draws an amber warning
+naming the postings it may repeat (measured in page-test.mjs, hostile input
+included) and the review e-mail says the same thing. Approve still publishes;
+Reject still keeps the crawled copy off.
+
+**An approval also DATES the posting from the day it was approved**
+(`approvedRow` in jobreview.mjs — applyEdits plus the re-stamp, used by
+`partition` AND by build-jobs' direct read of the queue, so the two writers
+cannot disagree). `addedAt` is what the e-mail alerts window on, and the
+queue's copy carries the day the CRAWLER first saw the row — days before
+anyone could read it on the site, so a posting approved after a subscriber's
+last digest fell outside every window and was announced to nobody.
+Grandfathered documents are exempt, and the discriminator is exact: partition
+stamps their `reviewedAt` and `queuedAt` from the same instant, while a real
+decision's `reviewedAt` is the browser's own later write.
+
 **A workbook posting is given the school its department sits in** —
 `fillSchoolFromDirectory` in `vocab.mjs`, applied by the sheet sync at ingest
 (and by its `--heal-names`). The workbook's one hiring-unit column holds the
@@ -381,11 +409,13 @@ becoming the bug it was built to prevent — postings not on the site:
   a single list instead, stamping `mailedAt` per document so the two paths share
   one high-water mark.
 
-**Approving publishes at the next SHEET READ**, because `data/jobmarket.json`
-holds the approved rows and nothing else writes it. That is why
-`oa-jobmarket-sheet.yml` runs every half hour rather than daily — see its
-header. If that cadence changes, change the panel's and the e-mail's promise
-with it.
+**Approving publishes at the next BUILD** — build-jobs.mjs reads the approved
+queue documents directly (`approvedRow`, ahead of the next sheet read), and
+`publishOnReview` in `_functions/index.js` rings the sheet read the moment a
+decision lands, with the build chained on its completion. Either way an
+approval is on the site in a couple of minutes; the half-hour sheet schedule
+is the safety net, not the promise. If any of that changes, change the panel's
+and the e-mail's promise with it.
 
 ## …and what is posted through the site's own forms is ANNOUNCED
 
@@ -559,6 +589,13 @@ schedule that a decision could have started**.
   It used to be two independent schedules — up to half an hour, then up to
   twenty minutes more — which is most of an hour after the maintainer had
   already decided.
+* **An e-mail alert whose criteria a new posting matches** —
+  `oa-alerts-mail.yml` runs on the build workflow's SUCCESSFUL completion as
+  well as hourly, so an "as soon as something appears" subscription is served
+  minutes after the posting publishes rather than by the top of the next
+  hour. Cheap by construction: each alert's high-water mark means a fire with
+  nothing new sends nothing, and a failed build (which committed nothing)
+  does not fire it at all.
 
 The schedules stay as the safety net and every job is idempotent, so a missed
 doorbell costs a delay and never a posting.
@@ -838,6 +875,12 @@ are one group or two — only the owner can say — are named in `AWAITING_OWNER
 in `selftest.mjs` rather than silently tolerated: a new pair fails the build, a
 listed one is reported by `node _scraper/selftest.mjs --open`, and an entry is
 deleted when it is ruled on (the answer going into `SCOPED_UNIT_ALIASES`).
+An entry may be listed AHEAD of its pair reaching the committed vocabulary —
+it has to be: the posting that introduces the pair sits in Firestore until the
+next green build, and demanding the entry and the pair arrive together made
+that build impossible (red before the entry, red after it). The selftest
+reports such an entry instead of failing on it; one still reported after its
+pair has shipped or been settled is stale and should be removed.
 
 **One spelling per place means EVERY dataset, not just the postings** (owner,
 2026-08-18: "let's use the same consistent University Name, School Name,

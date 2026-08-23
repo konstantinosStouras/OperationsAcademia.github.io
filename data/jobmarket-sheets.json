@@ -1,13 +1,13 @@
 {
- "generated": "2026-08-23T04:20:15Z",
+ "generated": "2026-08-23T05:40:49Z",
  "current": "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8",
  "sheets": [
   {
    "id": "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8",
    "from": "seed",
    "discoveredAt": "",
-   "lastReadAt": "2026-08-23T04:20:15Z",
-   "rows": 539,
+   "lastReadAt": "2026-08-23T05:40:49Z",
+   "rows": 570,
    "newestPosted": "2026-08-22",
    "tabs": [
     "2025 Jobs",
@@ -26,7 +26,7 @@
   }
  ],
  "staleness": {
-  "lastCheckedAt": "2026-08-23T04:20:15Z",
+  "lastCheckedAt": "2026-08-23T05:40:49Z",
   "lastWarnedAt": "",
   "lastReason": "",
   "newestPosted": "2026-08-22"

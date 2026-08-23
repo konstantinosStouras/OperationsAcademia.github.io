@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T13:05:26.200Z",
+ "generated": "2026-08-23T05:40:26.269Z",
  "universities": [
   {
    "v": "University College London",
@@ -14,11 +14,19 @@
    "n": 5
   },
   {
+   "v": "National University of Singapore",
+   "n": 4
+  },
+  {
    "v": "University of Houston",
    "n": 4
   },
   {
-   "v": "National University of Singapore",
+   "v": "City University of Hong Kong",
+   "n": 3
+  },
+  {
+   "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 3
   },
   {
@@ -34,10 +42,6 @@
    "n": 3
   },
   {
-   "v": "City University of Hong Kong",
-   "n": 2
-  },
-  {
    "v": "HEC Paris",
    "n": 2
   },
@@ -51,10 +55,6 @@
   },
   {
    "v": "Michigan State University",
-   "n": 2
-  },
-  {
-   "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 2
   },
   {
@@ -114,6 +114,10 @@
    "n": 1
   },
   {
+   "v": "Clemson University",
+   "n": 1
+  },
+  {
    "v": "Columbia University",
    "n": 1
   },
@@ -127,6 +131,10 @@
   },
   {
    "v": "Frankfurt School of Finance and Management",
+   "n": 1
+  },
+  {
+   "v": "George Mason University",
    "n": 1
   },
   {
@@ -171,6 +179,10 @@
   },
   {
    "v": "London Business School",
+   "n": 1
+  },
+  {
+   "v": "Massachusetts Institute of Technology (MIT)",
    "n": 1
   },
   {
@@ -246,11 +258,19 @@
    "n": 1
   },
   {
+   "v": "University of Chicago",
+   "n": 1
+  },
+  {
    "v": "University of Cyprus",
    "n": 1
   },
   {
    "v": "University of Illinois at Urbana-Champaign",
+   "n": 1
+  },
+  {
+   "v": "University of Iowa",
    "n": 1
   },
   {
@@ -267,6 +287,14 @@
   },
   {
    "v": "University of Minnesota",
+   "n": 1
+  },
+  {
+   "v": "University of Nevada, Las Vegas",
+   "n": 1
+  },
+  {
+   "v": "University of North Carolina at Chapel Hill",
    "n": 1
   },
   {
@@ -363,10 +391,6 @@
   },
   {
    "v": "City University of New York (CUNY)",
-   "n": 0
-  },
-  {
-   "v": "Clemson University",
    "n": 0
   },
   {
@@ -470,10 +494,6 @@
    "n": 0
   },
   {
-   "v": "George Mason University",
-   "n": 0
-  },
-  {
    "v": "George Washington University",
    "n": 0
   },
@@ -571,10 +591,6 @@
   },
   {
    "v": "Maastricht University",
-   "n": 0
-  },
-  {
-   "v": "Massachusetts Institute of Technology (MIT)",
    "n": 0
   },
   {
@@ -918,10 +934,6 @@
    "n": 0
   },
   {
-   "v": "University of Chicago",
-   "n": 0
-  },
-  {
    "v": "University of Cincinnati",
    "n": 0
   },
@@ -951,10 +963,6 @@
   },
   {
    "v": "University of Illinois at Chicago",
-   "n": 0
-  },
-  {
-   "v": "University of Iowa",
    "n": 0
   },
   {
@@ -1023,10 +1031,6 @@
   },
   {
    "v": "University of North Carolina (UNC) Chapel Hill",
-   "n": 0
-  },
-  {
-   "v": "University of North Carolina at Chapel Hill",
    "n": 0
   },
   {
@@ -1201,7 +1205,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 6
+   "n": 7
   },
   {
    "v": "UCL Global Business School for Health",
@@ -1248,11 +1252,23 @@
    "n": 2
   },
   {
+   "v": "School of Management and Economics",
+   "n": 2
+  },
+  {
    "v": "Bayes Business School",
    "n": 1
   },
   {
+   "v": "Booth School of Business",
+   "n": 1
+  },
+  {
    "v": "Carlos Alvarez College of Business",
+   "n": 1
+  },
+  {
+   "v": "Costello College of Business",
    "n": 1
   },
   {
@@ -1304,6 +1320,14 @@
    "n": 1
   },
   {
+   "v": "Kenan-Flagler Business School",
+   "n": 1
+  },
+  {
+   "v": "Lee Business School",
+   "n": 1
+  },
+  {
    "v": "McDonough School of Business",
    "n": 1
   },
@@ -1317,6 +1341,10 @@
   },
   {
    "v": "Michael Smurfit Graduate Business School",
+   "n": 1
+  },
+  {
+   "v": "MIT Sloan School of Management",
    "n": 1
   },
   {
@@ -1344,7 +1372,11 @@
    "n": 1
   },
   {
-   "v": "School of Management and Economics",
+   "v": "School of Computing",
+   "n": 1
+  },
+  {
+   "v": "School of Mathematical and Statistical Sciences",
    "n": 1
   },
   {
@@ -1353,6 +1385,10 @@
   },
   {
    "v": "Tilburg School of Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "Tippie College of Business",
    "n": 1
   },
   {
@@ -1397,10 +1433,6 @@
   },
   {
    "v": "Beedie School of Business",
-   "n": 0
-  },
-  {
-   "v": "Booth School of Business",
    "n": 0
   },
   {
@@ -1477,10 +1509,6 @@
   },
   {
    "v": "Cornell Tech",
-   "n": 0
-  },
-  {
-   "v": "Costello College of Business",
    "n": 0
   },
   {
@@ -1712,10 +1740,6 @@
    "n": 0
   },
   {
-   "v": "Kenan-Flagler Business School",
-   "n": 0
-  },
-  {
    "v": "Korea University Business School",
    "n": 0
   },
@@ -1805,10 +1829,6 @@
   },
   {
    "v": "Mike Ilitch School of Business",
-   "n": 0
-  },
-  {
-   "v": "MIT Sloan School of Management",
    "n": 0
   },
   {
@@ -2040,10 +2060,6 @@
    "n": 0
   },
   {
-   "v": "Tippie College of Business",
-   "n": 0
-  },
-  {
    "v": "Toulouse Business School",
    "n": 0
   },
@@ -2114,6 +2130,10 @@
  ],
  "units": [
   {
+   "v": "Operations Management",
+   "n": 7
+  },
+  {
    "v": "Management Science",
    "n": 6
   },
@@ -2122,15 +2142,19 @@
    "n": 5
   },
   {
-   "v": "Operations Management",
+   "v": "Business Analytics",
    "n": 4
   },
   {
-   "v": "Business Analytics",
-   "n": 3
+   "v": "Information Systems and Operations Management",
+   "n": 4
   },
   {
    "v": "Data Analytics and Decision Sciences",
+   "n": 3
+  },
+  {
+   "v": "Decision Analytics and Operations",
    "n": 3
   },
   {
@@ -2139,10 +2163,6 @@
   },
   {
    "v": "Industrial Engineering and Operations Research",
-   "n": 3
-  },
-  {
-   "v": "Information Systems and Operations Management",
    "n": 3
   },
   {
@@ -2159,10 +2179,6 @@
   },
   {
    "v": "Analytics, Information and Operations Management",
-   "n": 2
-  },
-  {
-   "v": "Decision Analytics and Operations",
    "n": 2
   },
   {
@@ -2210,6 +2226,10 @@
    "n": 1
   },
   {
+   "v": "Data Science and Decision Intelligence",
+   "n": 1
+  },
+  {
    "v": "Decisions, Operations and Technology",
    "n": 1
   },
@@ -2239,6 +2259,10 @@
   },
   {
    "v": "Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Analytics",
    "n": 1
   },
   {
@@ -2275,6 +2299,10 @@
   },
   {
    "v": "NUS Business School, Department of Analytics and Operations",
+   "n": 1
+  },
+  {
+   "v": "Operations",
    "n": 1
   },
   {
@@ -2522,10 +2550,6 @@
    "n": 0
   },
   {
-   "v": "Information Systems and Analytics",
-   "n": 0
-  },
-  {
    "v": "Information Systems and Operations",
    "n": 0
   },
@@ -2703,10 +2727,6 @@
   },
   {
    "v": "Operational Strategy",
-   "n": 0
-  },
-  {
-   "v": "Operations",
    "n": 0
   },
   {
@@ -3227,15 +3247,20 @@
   "Clemson University": {
    "schools": [
     "College of Engineering, Computing and Applied Sciences",
+    "School of Mathematical and Statistical Sciences",
     "Wilbur O. and Ann Powers College of Business"
    ],
    "units": [
+    "Data Science and Decision Intelligence",
     "Industrial Engineering",
     "Management"
    ],
    "bySchool": {
     "College of Engineering, Computing and Applied Sciences": [
      "Industrial Engineering"
+    ],
+    "School of Mathematical and Statistical Sciences": [
+     "Data Science and Decision Intelligence"
     ],
     "Wilbur O. and Ann Powers College of Business": [
      "Management"
@@ -4313,11 +4338,13 @@
   },
   "National University of Singapore": {
    "schools": [
-    "NUS Business School"
+    "NUS Business School",
+    "School of Computing"
    ],
    "units": [
     "Analytics and Operations",
     "Industrial Systems Engineering and Management",
+    "Information Systems and Analytics",
     "NUS Business School, Department of Analytics and Operations"
    ],
    "bySchool": {
@@ -4327,6 +4354,9 @@
     ],
     "NUS Business School": [
      "Analytics and Operations"
+    ],
+    "School of Computing": [
+     "Information Systems and Analytics"
     ]
    }
   },
@@ -5131,6 +5161,7 @@
     "School of Management and Economics": [
      "Information Systems and Operations Management",
      "Management and Economics",
+     "Operations Management",
      "The research group of Prof. Yiming Zhang"
     ]
    }
@@ -6130,6 +6161,13 @@
      "Managerial Sciences Department, Marketing"
     ]
    }
+  },
+  "University of Nevada, Las Vegas": {
+   "schools": [
+    "Lee Business School"
+   ],
+   "units": [],
+   "bySchool": {}
   },
   "University of New South Wales": {
    "schools": [
@@ -7415,6 +7453,9 @@
   "School of Business, Analytics": [
    "Information and Operations Management"
   ],
+  "School of Computing": [
+   "Information Systems and Analytics"
+  ],
   "School of Economics and Business Administration": [
    "Operations and Quantitative Methods"
   ],
@@ -7448,7 +7489,11 @@
   "School of Management and Economics": [
    "Information Systems and Operations Management",
    "Management and Economics",
+   "Operations Management",
    "The research group of Prof. Yiming Zhang"
+  ],
+  "School of Mathematical and Statistical Sciences": [
+   "Data Science and Decision Intelligence"
   ],
   "School of Science and Engineering": [
    "Industrial and Systems Engineering (ISyE)"

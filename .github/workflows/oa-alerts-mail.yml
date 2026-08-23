@@ -7,9 +7,19 @@ name: OA alerts — send what is due
 # A no-op until FIREBASE_SERVICE_ACCOUNT is set.
 
 on:
+  # The instant path: run right after every publish that could have added the
+  # postings a subscriber is waiting for, so an "as soon as something appears"
+  # alert really means minutes rather than "by the top of the next hour".
+  # Cheap by construction — each alert's high-water mark means a fire with
+  # nothing new sends nothing — and gated below to SUCCESSFUL builds, since a
+  # failed build committed no new postings. Daily/weekly/monthly subscriptions
+  # are simply not due on most fires.
+  workflow_run:
+    workflows: ["OA data — publish queued postings, candidates and placements"]
+    types: [completed]
   schedule:
-    # hourly, off the hour. "immediate" subscriptions are bounded by this
-    # cadence; daily/weekly/monthly ones simply are not due most of the time.
+    # hourly, off the hour — the safety net for anything the chain missed;
+    # daily/weekly/monthly subscriptions are due here and nowhere sooner.
     - cron: '23 * * * *'
   workflow_dispatch:
     inputs:
@@ -33,6 +43,10 @@ jobs:
   mail:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # A build that FAILED committed nothing, so there is nothing new to send —
+    # and its checkout here would only re-read the same file the last run saw.
+    # Scheduled and hand-dispatched fires are unaffected.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

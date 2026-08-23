@@ -77,6 +77,22 @@ function line(label, value) {
     '</th><td style="padding:3px 0;vertical-align:top">' + esc(value) + '</td></tr>';
 }
 
+/** The possible duplicates the sync found — postings ALREADY on the site this
+    crawled one may repeat. Said in the e-mail because the decision it informs
+    is exactly the one the e-mail asks for. */
+function dupHtml(doc) {
+  const dups = Array.isArray(doc.dup) ? doc.dup : [];
+  if (!dups.length) return '';
+  const items = dups.map((d) =>
+    '<li>' + esc([d.institution, d.department].filter(Boolean).join(' — ') || d.id) +
+    (d.posted ? ' <span style="color:#5a5f6b">(posted ' + esc(d.posted) + ')</span>' : '') +
+    '</li>').join('');
+  return '<p style="background:#fff8e6;border:1px solid #e6c866;border-radius:6px;' +
+    'padding:10px 14px">&#9888; <strong>Possibly already on the site</strong> — this ' +
+    'looks like it may duplicate:</p>' +
+    '<ul style="margin:6px 0 14px;padding-left:22px">' + items + '</ul>';
+}
+
 export function renderReviewEmail(doc, { site = SITE } = {}) {
   const r = shown(doc);
   const title = [r.institution, r.department].filter(Boolean).join(' — ');
@@ -87,6 +103,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
   const bodyHtml =
     '<p>A job posting has been read from your tracking sheet and is waiting for ' +
     'you to approve it. <strong>It is not on the site yet.</strong></p>' +
+    dupHtml(doc) +
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
       line('Institution', r.institution) +
       line('School / dept', r.department) +
@@ -103,7 +120,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
       'Review it on the site</a></p>' +
     '<p style="color:#5a5f6b;font-size:13px">You can correct any field before ' +
-    'approving. Approving publishes it at the next sheet read, within half an hour; ' +
+    'approving. Approving publishes it within a couple of minutes; ' +
     'rejecting keeps it off the site for good.</p>';
 
   return {
@@ -126,11 +143,13 @@ export function renderDigestEmail(docs, { site = SITE } = {}) {
   const rows = docs.map((d) => {
     const r = shown(d);
     const title = [r.institution, r.department].filter(Boolean).join(' — ');
+    const dup = Array.isArray(d.dup) && d.dup.length;
     return '<tr>' +
       '<td style="padding:3px 12px 3px 0;vertical-align:top;white-space:nowrap;' +
         'color:#5a5f6b">' + esc(r.posted || '') + '</td>' +
       '<td style="padding:3px 0;vertical-align:top">' + esc(title || r.id || 'untitled') +
         (r.country ? ' <span style="color:#5a5f6b">(' + esc(r.country) + ')</span>' : '') +
+        (dup ? ' <span style="color:#8a6d1a">&#9888; possible duplicate</span>' : '') +
       '</td></tr>';
   }).join('');
 
@@ -144,8 +163,8 @@ export function renderDigestEmail(docs, { site = SITE } = {}) {
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
       'Review them on the site</a></p>' +
     '<p style="color:#5a5f6b;font-size:13px">Every field is editable there before you ' +
-    'approve, one at a time or the whole page at once. Approving publishes at the next ' +
-    'sheet read, within half an hour; rejecting keeps a posting off the site for good.</p>';
+    'approve, one at a time or the whole page at once. Approving publishes within a ' +
+    'couple of minutes; rejecting keeps a posting off the site for good.</p>';
 
   return {
     subject: docs.length + ' job postings to approve',
@@ -276,6 +295,20 @@ function selftest() {
   ok(renderReviewEmail(edited).subject.includes('Corrected University'),
     'an edit already made is what the e-mail shows');
 
+  /* A POSSIBLE DUPLICATE IS SAID WHERE THE DECISION IS ASKED FOR. The sync
+     writes `dup` onto the document when a crawled posting looks like a job
+     already on the site; the e-mail has to carry it, or the maintainer
+     approves a repeat from their inbox that the review card would have warned
+     them about. Escaped like everything else — a duplicate entry is built
+     from a posting somebody typed. */
+  const dupped = { ...doc, dup: [{ id: 'y', ref: 'OA-JOB-1', source: 'oa-form',
+    institution: 'Example <b>University</b>', department: 'Operations', posted: '2026-08-10' }] };
+  const dmail = renderReviewEmail(dupped);
+  ok(/Possibly already on the site/.test(dmail.html), 'a flagged duplicate is warned about');
+  ok(!dmail.html.includes('<b>University</b>'), 'and its fields cannot inject markup');
+  ok(!/Possibly already on the site/.test(mail.html),
+    'a posting with no flag carries no warning');
+
   // only pending-and-unmailed, oldest first
   const queue = [
     { rowId: 'b', status: 'pending', queuedAt: '2026-08-17T00:00:00Z', mailedAt: '' },
@@ -296,6 +329,7 @@ function selftest() {
                 row: { id: 'r' + i, institution: 'University ' + i, posted: '2026-08-1' + (i % 10),
                        country: 'United States' }, edits: {} });
   }
+  many[1].dup = [{ id: 'z', institution: 'University 1', department: '', posted: '2026-08-01' }];
   const digest = renderDigestEmail(many, { site: 'https://example.org' });
   ok(digest.subject.includes(String(many.length)), 'the subject says how many are waiting');
   ok(/University 0/.test(digest.html) && new RegExp('University ' + BURST).test(digest.html),
@@ -303,6 +337,10 @@ function selftest() {
   ok(digest.html.includes('https://example.org/admin-area'), 'with one link to review them');
   ok(!/not on the site yet[\s\S]*not on the site yet/.test(digest.html),
     'said once, not once per posting');
+  ok((digest.html.match(/possible duplicate/g) || []).length === 1,
+    'the one flagged posting is marked as a possible duplicate, and only it');
+  ok(!/half an hour/.test(digest.html) && !/half an hour/.test(mail.html),
+    'no e-mail still promises the retired half-hour cadence — approving publishes in minutes');
 
   console.log(fails.length
     ? `jobreview-mailer selftest: ${pass} passed, ${fails.length} FAILED\n  ` + fails.join('\n  ')

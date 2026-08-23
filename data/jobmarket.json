@@ -1,5 +1,33 @@
 [
  {
+  "id": "2027-city-university-of-hong-kong-20260822",
+  "year": 2027,
+  "posted": "2026-08-22",
+  "institution": "City University of Hong Kong",
+  "department": "College of Business, Decision Analytics and Operations",
+  "school": "College of Business",
+  "unit": "Decision Analytics and Operations",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-b560",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=City%20University%20of%20Hong%20Kong",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-23T05:25:23Z",
+  "owner": ""
+ },
+ {
   "id": "2027-clemson-university-20260818",
   "year": 2027,
   "posted": "2026-08-18",
@@ -11,8 +39,8 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
+  "applyBy": "October 15, 2026",
+  "applyByDate": "2026-10-15",
   "comments": "AP · Clemson, SC",
   "country": "United States",
   "adUrl": "https://apply.interfolio.com/185276",
@@ -23,7 +51,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-18T19:36:26Z",
+  "addedAt": "2026-08-19T05:54:27Z",
   "owner": ""
  },
  {
@@ -46,11 +74,11 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore%20(IS)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=National%20University%20of%20Singapore",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-18T21:34:57Z",
+  "addedAt": "2026-08-19T05:55:39Z",
   "owner": ""
  },
  {
@@ -65,19 +93,19 @@
   "levels": [
    "Other Ranks"
   ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
+  "applyBy": "November 13, 2026",
+  "applyByDate": "2026-11-13",
   "comments": "Assistant/Associate · Chicago, IL",
   "country": "United States",
   "adUrl": "https://apply.interfolio.com/191650",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Chicago%20(Booth)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Chicago",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-18T15:43:18Z",
+  "addedAt": "2026-08-19T06:01:59Z",
   "owner": ""
  },
  {
@@ -127,11 +155,11 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=MIT%20Sloan",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Massachusetts%20Institute%20of%20Technology%20(MIT)",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-18T10:54:13Z",
+  "addedAt": "2026-08-19T06:04:41Z",
   "owner": ""
  },
  {
@@ -159,7 +187,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-18T10:54:13Z",
+  "addedAt": "2026-08-19T06:06:10Z",
   "owner": ""
  },
  {

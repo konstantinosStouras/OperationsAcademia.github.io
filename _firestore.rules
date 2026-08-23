@@ -508,12 +508,16 @@ service cloud.firestore {
                         ['pending', 'approved', 'rejected']
                    && request.resource.data.keys().hasOnly([
                         'rowId', 'status', 'row', 'edits',
-                        'queuedAt', 'reviewedAt', 'mailedAt', 'note',
+                        'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup',
                       ])
                    && str('queuedAt', 40) && str('reviewedAt', 40)
                    && str('mailedAt', 40) && str('note', 1000)
                    && (!('row' in request.resource.data)
                        || request.resource.data.row is map)
+                   // the possible-duplicate flags the sheet sync computes;
+                   // the panel only reads them
+                   && (!('dup' in request.resource.data)
+                       || request.resource.data.dup is list)
                    && (!('edits' in request.resource.data)
                        || (request.resource.data.edits is map
                            && request.resource.data.edits.keys().hasOnly([
