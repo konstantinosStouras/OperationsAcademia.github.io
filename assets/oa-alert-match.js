@@ -149,6 +149,11 @@
     return normalise(c).topics.indexOf('updates') !== -1;
   }
 
+  /** True when the alert asks for new candidate profiles. */
+  function wantsCandidates(c) {
+    return normalise(c).topics.indexOf('candidates') !== -1;
+  }
+
   /** True when the alert has no job filters, i.e. "tell me about everything". */
   function isBroad(c) {
     var n = normalise(c);
@@ -249,6 +254,89 @@
     });
   }
 
+  /* ------------------------------------------------------------- candidates
+
+     Candidate profiles are PEOPLE, and they are public only once the admin's
+     reveal date has passed: until then _scraper/build-candidates.mjs writes
+     ZERO rows into data/candidates.json (held back means not written, never
+     written-and-hidden). Everything here reads THAT file and nothing else, so
+     a profile the site is not showing cannot reach an e-mail by construction
+     — there is no row to mention.
+
+     The topic carries no filters, deliberately. The filter fieldset asks
+     job-shaped questions (type, entry level, country) that a person does not
+     have, and silently applying them would filter every profile out;
+     subscribing to candidates means hearing about each new public profile. */
+
+  /** Every profile added strictly after `since` — data/candidates.json rows,
+      which by construction exist only once the reveal has happened. */
+  function newCandidatesFor(rows, c, since) {
+    if (!wantsCandidates(c)) return [];
+    var cut = since ? String(since) : '';
+    return arr(rows).filter(function (r) {
+      return !cut || String(r.addedAt || '') > cut;
+    });
+  }
+
+  /** The newest `addedAt` in a set of profiles — what to store as the next
+      candidate high-water mark. */
+  function latestAddedAt(rows) {
+    return arr(rows).reduce(function (m, r) {
+      var d = String(r.addedAt || '');
+      return d > m ? d : m;
+    }, '');
+  }
+
+  /**
+   * What the candidates topic sends this alert, if anything:
+   *
+   *   { kind: 'reveal', count, mark }    one short, friendly "the profiles
+   *                                      are now live" note — NEVER a listing
+   *   { kind: 'profiles', rows, mark }   the profiles added since last time
+   *   null                               nothing to say
+   *
+   * `since` is the alert's own candidate high-water mark (`lastCandidateAt`),
+   * empty for an alert that has never been sent a candidate e-mail; `revealAt`
+   * is the announced reveal day (yyyy-mm-dd, from data/candidates-meta.json).
+   * The announcement goes to any alert whose mark PRECEDES the reveal day, and
+   * that rule is what makes the reveal day ONE e-mail instead of eighty:
+   * profiles are collected for weeks and appear all at once, each stamped
+   * `addedAt` when it was POSTED, so on the day the catalogue goes live a
+   * per-profile window would either replay the whole back-catalogue or —
+   * worse — miss it entirely (every stamp already behind the subscriber's
+   * window). It is a rule about the reveal rather than about first contact
+   * because seasons REPEAT: when the admin sets the next cycle's reveal date
+   * the served file is held back to empty, and on the new reveal day an alert
+   * whose mark survives from last season must again be met with the short
+   * note, never a sixty-row listing. (With no revealAt readable, an empty
+   * mark still announces — the safe direction — and a set one lists.)
+   *
+   * `mark` is the newest addedAt this send covers — advance the stored mark
+   * to it ONLY when the send succeeds, exactly like every other high-water
+   * mark in the mailer.
+   *
+   * While the profiles are held the rows are [] and this returns null: no
+   * announcement, no listing, no mention. That is the reveal gate holding in
+   * the mailer, and it holds because the served file is the only source.
+   */
+  function candidateNews(rows, c, since, revealAt) {
+    if (!wantsCandidates(c)) return null;
+    rows = arr(rows);
+    if (!rows.length) return null;
+    var mark = since ? String(since) : '';
+    // an ISO stamp compares against a bare day lexicographically: a mark
+    // stamped ON the reveal day ('2026-10-11T…') already sorts after it
+    var day = String(revealAt || '').slice(0, 10);
+    if (!mark || (day && mark < day)) {
+      return { kind: 'reveal', count: rows.length, mark: latestAddedAt(rows) };
+    }
+    var fresh = newCandidatesFor(rows, c, mark).sort(function (x, y) {
+      return String(y.addedAt || '').localeCompare(String(x.addedAt || ''));
+    });
+    if (!fresh.length) return null;
+    return { kind: 'profiles', rows: fresh, mark: latestAddedAt(fresh) };
+  }
+
   /** The newest entry date in a set — what to store as the next `sinceDate`. */
   function latestUpdateDate(entries) {
     return arr(entries).reduce(function (m, e) {
@@ -295,9 +383,13 @@
     normalise: normalise,
     wantsJobs: wantsJobs,
     wantsUpdates: wantsUpdates,
+    wantsCandidates: wantsCandidates,
     isBroad: isBroad,
     matchesJob: matchesJob,
     newJobsFor: newJobsFor,
+    newCandidatesFor: newCandidatesFor,
+    latestAddedAt: latestAddedAt,
+    candidateNews: candidateNews,
     newUpdatesFor: newUpdatesFor,
     latestUpdateDate: latestUpdateDate,
     daysBefore: daysBefore,

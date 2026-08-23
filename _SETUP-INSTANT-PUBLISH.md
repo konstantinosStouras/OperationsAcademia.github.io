@@ -2,13 +2,17 @@
 
 **What it does.** A posting created, edited, withdrawn or taken down appears on
 the site in about a minute instead of at the next 20-minute build, and a
-posting APPROVED in the review queue appears in about two. Two small Cloud
+posting APPROVED in the review queue appears in about two. Candidate profiles
+ring the same bell: once the reveal date has passed, a new profile is on the
+site in about a minute too (before it, the build's reveal gate still writes
+nothing, so the early ring costs nothing and leaks nothing). Three small Cloud
 Functions in `_functions/index.js` ring a GitHub workflow's doorbell
 (`repository_dispatch`):
 
 | Function | Watches | Starts |
 |---|---|---|
 | `publishOnChange` | `jobSubmissions` | **OA data — publish queued postings** (`oa-jobs-changed`) |
+| `publishOnCandidateChange` | `candidateSubmissions` | the same build (`oa-jobs-changed`) — it runs `build-candidates.mjs` too |
 | `publishOnReview` | `jobReviews` | **OA jobs — read the job market tracking sheet** (`oa-jobreview-decided`), which the build then follows automatically |
 
 An approval takes two workflows because `data/jobmarket.json` holds the
