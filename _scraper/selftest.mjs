@@ -28,6 +28,7 @@ import {
 } from './jobs-model.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
+  campusCountries, healCountry, SCHOOLS,
 } from './vocab.mjs';
 import { docIdFor, migrationDoc, lostFields, migratable } from './migrate-to-firestore.mjs';
 import { syncSheetMirrors } from './build-jobs.mjs';
@@ -1028,6 +1029,106 @@ async function testCountries() {
     ok(/legacyValues: \(window\.OACountries \|\| \{\}\)\.ALIASES/.test(html),
       `${page}: an old ?country=USA link still selects the United States`);
   }
+
+  /* ------------------------------- A US CITY IS NOT THE COUNTRY IT IS NAMED AFTER
+
+     canon() reads a comma-separated value from the RIGHT, because the last part
+     of an address is its most administrative one — and it used to walk past the
+     state to match a town. St. John's University is in Jamaica, New York, and
+     the site published it under the country JAMAICA. A US state settles it. */
+  for (const [given, want] of [
+    ['Jamaica, NY', 'United States'],
+    ['Jamaica, New York', 'United States'],
+    ['Davis, CA', 'United States'],
+    ['Winter Park, Florida', 'United States'],
+    ['Baltimore, Maryland, United States', 'United States'],
+    ['Atlanta, GA', 'United States'],
+  ]) {
+    eq(C.canon(given), want, `"${given}" is published as "${want}"`);
+  }
+  /* ...and the one state canon() must NOT settle by name, because guessing is
+     worse than leaving it: Georgia is a country too. */
+  eq(C.canon('Athens, Georgia'), 'Georgia',
+    'a name that is both a state and a country is never guessed at');
+  eq(C.canon('Georgia'), 'Georgia', 'and the country keeps its own name');
+  ok(C.US_STATES.some((r) => r[1] === 'GA'),
+    'while its ABBREVIATION still settles an address — dropping GA with the '
+    + 'name left Emory unreadable');
+  eq(C.canon('Victoria, Australia'), 'Australia', 'a country still wins where it is one');
+
+  /* ------------------------------- the address is the site's answer to "where"
+
+     data/universities.json carries a postal address per campus, and that is
+     what a posting's country is audited against (_scraper/country-audit.mjs).
+     It NEVER INVENTS: an address the parser cannot read has no answer, and the
+     audit then says nothing about that university rather than guessing one. */
+  for (const [address, want] of [
+    ['Runeberginkatu 14-16, 00100 Helsinki, Finland', 'Finland'],
+    ['100 Main St, Cambridge, MA 02142', 'United States'],
+    ['1300 Clifton Rd, Atlanta, GA 30322', 'United States'],
+    ['21 Lower Kent Ridge Rd, Singapore 119077', 'Singapore'],
+    ['Lidasan Building WuJiaoChang, Yangpu Qu, Shanghai Shi China', 'China'],
+    ['15z/data=!4m2!3m1!1s0x0:0x30816f9ab195bb29?sa=X&ved=0ahUK', ''],
+    ['', ''],
+  ]) {
+    eq(C.countryFromAddress(address), want,
+      `the address ending "${address.slice(-28) || '(empty)'}" reads as "${want}"`);
+  }
+
+  /* --------------------------------- and every posting names the country it is in
+
+     THE FAULT THIS CATCHES. `country` drives the Location filter, so a wrong
+     one does not look wrong — the posting just files itself somewhere it has
+     nothing to do with and stops being findable. Nine live postings were
+     published under Greece because the Edit form's country box had no
+     `autocomplete` attribute and a browser filled it from the editor's own
+     address profile.
+
+     Asserted over data/jobs.json ALONE, deliberately: that is the file
+     build-jobs.mjs heals before it writes (healCountry), so this guard asserts
+     a rule the publisher itself guarantees and cannot fire on a legitimate new
+     posting — the failure mode CLAUDE.md records twice. The archive, which has
+     no daily build, is swept by country-audit.mjs in the checks workflow. */
+  const byUni = campusCountries(JSON.parse(
+    await readFile(path.join(HERE, '..', 'data', 'universities.json'), 'utf8')));
+  ok(byUni.size > 150, `the site can place ${byUni.size} universities from their own addresses`);
+  ok(!byUni.has(SCHOOLS.institutionKey('INSEAD')),
+    'a university with campuses in two countries has NO single answer, which is '
+    + 'what makes correcting the others safe');
+
+  const jobRows = JSON.parse(await readFile(JOBS, 'utf8'));
+  const wrongCountry = jobRows
+    .filter((r) => byUni.has(SCHOOLS.institutionKey(r.institution || '')))
+    .filter((r) => r.country !== byUni.get(SCHOOLS.institutionKey(r.institution)))
+    .map((r) => `${r.id}: ${r.institution} says ${r.country || '(none)'}`);
+  eq(wrongCountry, [], 'data/jobs.json: every posting names the country its university is in');
+
+  // the heal itself: corrects a disagreement, and is otherwise untouched
+  const wrongRow = { institution: 'McGill University', country: 'Greece' };
+  eq(healCountry(wrongRow, byUni).country, 'Canada', 'a contradicted country is corrected');
+  const rightRow = { institution: 'McGill University', country: 'Canada' };
+  ok(healCountry(rightRow, byUni) === rightRow,
+    'and a row that already agrees is returned untouched');
+  const unplaceable = { institution: 'INSEAD', country: 'Singapore' };
+  ok(healCountry(unplaceable, byUni) === unplaceable,
+    'a university the site cannot place is never rewritten');
+
+  /* THE ROOT CAUSE, PINNED. A field called "country" on a form about somebody
+     ELSE'S campus is exactly what a browser fills from the reader's own
+     address profile, and the institution box had `autocomplete="organization"`
+     — the poster's own employer, over the university they are advertising.
+     Both are off. The poster's OWN name and e-mail keep their autofill, which
+     is what those tokens are for. */
+  const jobForm = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  for (const id of ['f-country', 'f-institution']) {
+    const at = jobForm.indexOf(`id="${id}"`);
+    ok(at !== -1, `post-a-job.html offers ${id}`);
+    const tag = jobForm.slice(at, jobForm.indexOf('>', at));
+    ok(/autocomplete="off"/.test(tag),
+      `post-a-job.html: ${id} is not filled from the reader's own address profile`);
+  }
+  ok(/autocomplete="email"/.test(jobForm),
+    'while the poster’s own e-mail still autofills, which is what it is for');
 }
 
 

@@ -169,6 +169,114 @@
    * Anything still unrecognised is returned CLEANED BUT UNCHANGED. This
    * function must never guess a country it was not given.
    */
+
+  /* ------------------------------------------------- the United States, by state
+
+     WHY A STATE TABLE LIVES IN A COUNTRY FILE. canon() reads a comma-separated
+     value from the outside — a sheet cell, a posting form, a postal address —
+     and scans its parts from the RIGHT, because the last part of an address is
+     the most administrative one. That is right, and it had one hole: a part
+     that is a US CITY sharing a country's name won before the state beside it
+     was ever considered. St. John's University is in Jamaica, New York, and
+     the site published it under the country JAMAICA.
+
+     So a US state settles the country, which is the same "most administrative
+     part wins" rule the reverse scan already expresses — a state is simply the
+     administrative part below a country and above a town.
+
+     GEORGIA IS THE ONE THAT NEEDS CARE. It is the only US state that is also a
+     country, so its NAME cannot settle anything — "Athens, Georgia" falls
+     through to the country, exactly as it did before, because guessing is
+     worse than leaving it. Its ABBREVIATION is not ambiguous at all, and
+     dropping "GA" with the name is a bug in its own right: it left Emory's
+     "1300 Clifton Rd, Atlanta, GA 30322" unreadable. So the name is listed in
+     AMBIGUOUS_STATE_NAMES and skipped; the abbreviation is registered like
+     every other. */
+  var US_STATES = [
+    ['Alabama', 'AL'], ['Alaska', 'AK'], ['Arizona', 'AZ'], ['Arkansas', 'AR'],
+    ['California', 'CA'], ['Colorado', 'CO'], ['Connecticut', 'CT'], ['Delaware', 'DE'],
+    ['District of Columbia', 'DC'], ['Florida', 'FL'], ['Georgia', 'GA'],
+    ['Hawaii', 'HI'], ['Idaho', 'ID'],
+    ['Illinois', 'IL'], ['Indiana', 'IN'], ['Iowa', 'IA'], ['Kansas', 'KS'],
+    ['Kentucky', 'KY'], ['Louisiana', 'LA'], ['Maine', 'ME'], ['Maryland', 'MD'],
+    ['Massachusetts', 'MA'], ['Michigan', 'MI'], ['Minnesota', 'MN'], ['Mississippi', 'MS'],
+    ['Missouri', 'MO'], ['Montana', 'MT'], ['Nebraska', 'NE'], ['Nevada', 'NV'],
+    ['New Hampshire', 'NH'], ['New Jersey', 'NJ'], ['New Mexico', 'NM'], ['New York', 'NY'],
+    ['North Carolina', 'NC'], ['North Dakota', 'ND'], ['Ohio', 'OH'], ['Oklahoma', 'OK'],
+    ['Oregon', 'OR'], ['Pennsylvania', 'PA'], ['Rhode Island', 'RI'], ['South Carolina', 'SC'],
+    ['South Dakota', 'SD'], ['Tennessee', 'TN'], ['Texas', 'TX'], ['Utah', 'UT'],
+    ['Vermont', 'VT'], ['Virginia', 'VA'], ['Washington', 'WA'], ['West Virginia', 'WV'],
+    ['Wisconsin', 'WI'], ['Wyoming', 'WY']
+  ];
+
+  /** A state whose NAME is also a country's, so the name alone settles
+      nothing. The abbreviation still does. */
+  var AMBIGUOUS_STATE_NAMES = ['Georgia'];
+
+  var US_BY_FOLD = {};
+  (function () {
+    var skip = {};
+    for (var a = 0; a < AMBIGUOUS_STATE_NAMES.length; a++) {
+      skip[fold(AMBIGUOUS_STATE_NAMES[a])] = true;
+    }
+    for (var i = 0; i < US_STATES.length; i++) {
+      if (!skip[fold(US_STATES[i][0])]) US_BY_FOLD[fold(US_STATES[i][0])] = true;
+      US_BY_FOLD[fold(US_STATES[i][1])] = true;
+    }
+  }());
+
+  /** Is this address part a US state, written either way? "MA 02142" counts:
+      a five-digit ZIP after a state is the most decisive form there is. */
+  function usStatePart(part) {
+    var s = clean(part);
+    if (!s) return false;
+    if (US_BY_FOLD[fold(s)]) return true;
+    var m = s.match(/^(.+?)\s+\d{5}(?:-\d{4})?$/);       // "<state> <ZIP>"
+    return !!(m && US_BY_FOLD[fold(m[1])]);
+  }
+
+  /**
+   * The country a POSTAL ADDRESS is in, or '' when it cannot be read.
+   *
+   * The Universities directory (data/universities.json) carries one address
+   * per school, and that address is the site's own answer to "where is this
+   * university" — which is what makes it the authority a posting's country can
+   * be audited against (see _scraper/country-audit.mjs).
+   *
+   * It reads from the RIGHT for the same reason canon() does, and it NEVER
+   * INVENTS: an address whose tail is a map-URL fragment, a bare postcode or a
+   * campus building returns '' rather than a guess, and the audit then has
+   * nothing to say about that university.
+   */
+  function countryFromAddress(address) {
+    var s = clean(address);
+    if (!s) return '';
+    var parts = s.split(',').map(clean).filter(Boolean).reverse();
+    for (var i = 0; i < parts.length; i++) {
+      var hit = BY_FOLD[fold(parts[i])];
+      if (hit) return hit;
+      if (usStatePart(parts[i])) return 'United States';
+      /* the city-states write their postcode where a country would go */
+      var m = parts[i].match(/^(.+?)\s+\d{4,6}$/);
+      if (m) {
+        hit = BY_FOLD[fold(m[1])];
+        if (hit) return hit;
+      }
+      /* ...and an address can END in its country with no comma before it —
+         "Yangpu Qu, Shanghai Shi China". Only the LAST part is read this way,
+         and only as a whole trailing word-run, so a street called after a
+         country cannot be mistaken for one. */
+      if (i === 0) {
+        var words = parts[i].split(/\s+/);
+        for (var w = Math.max(0, words.length - 4); w < words.length; w++) {
+          hit = BY_FOLD[fold(words.slice(w).join(' '))];
+          if (hit) return hit;
+        }
+      }
+    }
+    return '';
+  }
+
   function canon(v) {
     var s = clean(v);
     if (!s) return '';
@@ -187,6 +295,10 @@
       for (var j = 0; j < parts.length; j++) {
         hit = BY_FOLD[fold(parts[j])];
         if (hit) return hit;
+        /* ...and a US STATE settles it, before any part further left can win.
+           Without this the reverse scan walked past "NY" and matched the town
+           "Jamaica" as a country — see US_STATES above. */
+        if (usStatePart(parts[j])) return 'United States';
       }
     }
 
@@ -201,8 +313,10 @@
   return {
     LIST: LIST,
     ALIASES: ALIASES,
+    US_STATES: US_STATES,
     fold: fold,
     canon: canon,
-    isCanonical: isCanonical
+    isCanonical: isCanonical,
+    countryFromAddress: countryFromAddress
   };
 }));

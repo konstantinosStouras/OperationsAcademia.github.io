@@ -790,6 +790,68 @@ It is applied at every ingest (`jobs-model.rowFromSubmission`,
 that last one matters, because an alert saved under an old spelling would
 otherwise stop matching silently.
 
+### A US city is not the country it is named after
+
+`canon()` reads a comma-separated value from the RIGHT, because the last part of
+an address is its most administrative one. That is right, and it had one hole:
+a part that is a US CITY sharing a country's name won before the state beside it
+was ever considered. St. John's University is in **Jamaica, New York**, and the
+site published it under the country **Jamaica**.
+
+So `US_STATES` settles the country — the same "most administrative part wins"
+rule the reverse scan already expressed, since a state sits below a country and
+above a town. **Georgia is the one that needs care**: it is the only US state
+that is also a country, so its NAME settles nothing ("Athens, Georgia" still
+reads as the country, because guessing is worse than leaving it) while its
+ABBREVIATION settles everything — dropping "GA" with the name left Emory's
+`Atlanta, GA 30322` unreadable, which is a bug of its own.
+
+### Where a university actually IS, and the nine postings filed under Greece
+
+`country` drives the jobs page's Location filter, so a wrong one **does not look
+wrong**: the posting quietly files itself under a country it has nothing to do
+with, and nobody filtering by the right one ever sees it. Nine live postings —
+American, Canadian and Singaporean universities — were published under Greece.
+
+**The cause was a form field, not a pipeline.** `post-a-job.html`'s country box
+carried no `autocomplete` attribute and is called `country`, so a browser filled
+it from the EDITOR'S OWN address profile the moment they opened a posting to
+correct something else, and saving published it. The institution box had
+`autocomplete="organization"` — the poster's own employer, over the university
+they are advertising. Both are `autocomplete="off"` now, and the selftest pins
+them; the poster's own name and e-mail keep their autofill, which is what those
+tokens are for. On the **candidate** form the affiliation genuinely IS the
+person's own, so it keeps `organization` — the rule is whether the field
+describes the person filling it in or somebody else.
+
+**The authority for repairing what already happened is the site's own
+Universities directory.** Every row of `data/universities.json` carries the
+campus's postal address, and `countryFromAddress` reads the country off it;
+`campusCountries` in `vocab.mjs` turns that into one answer per university.
+`healCountry` corrects a row that contradicts it, and `build-jobs.mjs` applies it
+to the MERGED set — the fault came from an editor, not from a source, so it must
+be repaired whichever writer produced the row.
+
+Three properties make that safe, and all three are pinned:
+
+* **A university with two countries is never healed.** INSEAD is in France and
+  in Singapore, so its rows disagree and it has no answer here at all — the same
+  discipline `schoolForUnit` applies to a department two schools both claim.
+* **The parser never invents.** An address that is a map-URL fragment or a bare
+  postcode returns `''`, and the audit then says nothing about that university
+  rather than guessing.
+* **The guard asserts only what the publisher guarantees.** The selftest checks
+  `data/jobs.json`, which the build heals before writing, so it cannot fire on a
+  legitimate new posting — the failure mode this file records twice. The
+  ARCHIVE, which has no daily build, is swept by `country-audit.mjs` as its own
+  CI step instead.
+
+**A university the directory does not carry** has no address to read, so its
+postings cannot be checked — `node _scraper/country-audit.mjs --all` lists them.
+Map it in the Universities sheet, or add the campus country to `CAMPUS_COUNTRY`
+in `_scraper/vocab.mjs`, which is grown one curated line at a time exactly like
+`oa-institutions.js` and only where the country is not in doubt.
+
 ## One spelling per university, school and department
 
 `assets/oa-schools.js` is the **single definition** of what each university,
@@ -1540,6 +1602,10 @@ change committed here is not live until someone runs that command by hand.
                                     # claiming one og:url
     node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
     node _scraper/jobreview-mailer.mjs --selftest      # the review-queue e-mail
+    node _scraper/country-audit.mjs # every posting names the country its
+                                    # university is in, against the addresses
+                                    # in the site's own Universities directory
+                                    # (--all lists the ones it cannot place)
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules
