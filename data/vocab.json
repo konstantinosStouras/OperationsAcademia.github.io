@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-23T05:26:06.504Z",
+ "generated": "2026-08-23T05:42:25.488Z",
  "universities": [
   {
    "v": "University College London",
@@ -22,6 +22,10 @@
    "n": 4
   },
   {
+   "v": "City University of Hong Kong",
+   "n": 3
+  },
+  {
    "v": "The Chinese University of Hong Kong, Shenzhen",
    "n": 3
   },
@@ -36,10 +40,6 @@
   {
    "v": "University of San Diego",
    "n": 3
-  },
-  {
-   "v": "City University of Hong Kong",
-   "n": 2
   },
   {
    "v": "HEC Paris",
@@ -1205,7 +1205,7 @@
  "schools": [
   {
    "v": "College of Business",
-   "n": 6
+   "n": 7
   },
   {
    "v": "UCL Global Business School for Health",
@@ -2154,6 +2154,10 @@
    "n": 3
   },
   {
+   "v": "Decision Analytics and Operations",
+   "n": 3
+  },
+  {
    "v": "Department of Decision and Information Sciences",
    "n": 3
   },
@@ -2175,10 +2179,6 @@
   },
   {
    "v": "Analytics, Information and Operations Management",
-   "n": 2
-  },
-  {
-   "v": "Decision Analytics and Operations",
    "n": 2
   },
   {
