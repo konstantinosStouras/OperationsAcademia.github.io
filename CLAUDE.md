@@ -430,6 +430,31 @@ enters those rows APPROVED, with the reason written into the document's `note`.
 Rejecting one still takes it down. Everything the site is not already showing is
 queued pending, which is the whole of the gate for every posting from here on.
 
+### Two sources, one panel
+
+The postings the maintainer reviews come from two places and their jobs
+differ (owner, 2026-08-23), so `oa-jobreview.js` draws the panel as two tabs:
+
+* **Auto-crawled jobs** — the tracking sheet's queue above: a GATE, held back
+  until approved, every field editable on the card, Approve-all included.
+* **User-added jobs** — postings made through the site's own form
+  (`jobSubmissions`). These are LIVE within a minute — the form promises as
+  much and nothing about this panel changes that — so their tab is a
+  dedicated, editable to-do list, never a gate: *Open & correct* opens the
+  poster's own form, *Mark reviewed* writes the `reviewedAt` stamp the
+  submissions model names. The job half of the "Posted through the site"
+  panel moved here (one queue, one surface — the drift rule that swept
+  feedback.html); the candidate half stays there, and the submissions MAILER
+  still announces both kinds.
+
+The market-year tabs are kept INSIDE each source tab, and every list ranks
+the NEXT market's postings first — 2028's before 2027's before 2026's, the
+newest advertisement breaking ties within a market — because the market a
+posting is FOR is the one its review is urgent for. The "Job postings to
+review" tile and the account-menu badge count both tabs (`waitingJobs` in
+`oa-adminarea.js`), so the tile and the panel beneath it cannot disagree.
+`page-test.mjs` measures all of it against the seeded queue.
+
 ### A season is not six postings
 
 The queue's unit of work is a market, not a posting: the "2026 Jobs" tab alone
@@ -471,8 +496,15 @@ show them at all (the only route to one was guessing its document id).
 
     _scraper/submissions-review.mjs   which submissions are waiting (pure)
     _scraper/submissions-mailer.mjs   one e-mail per submission
-    assets/oa-submissions.js          the panel on admin-area.html
+    assets/oa-submissions.js          the candidate half of the panel on admin-area.html
     oa-submissions-mail.yml           runs it every 15 minutes
+
+The PANEL half is split since 2026-08-23: `oa-submissions.js` draws the
+candidate profiles, while user-added JOB postings are listed by the review
+panel's own "User-added jobs" tab (`oa-jobreview.js` — see "Two sources, one
+panel" above). Both surfaces read the same LIVE statuses and tick with the
+same `reviewedAt` stamp, so a card marked reviewed on either is marked for
+the mailer too; the mailer itself still announces both kinds.
 
 **It is a NOTIFICATION, never a gate.** The forms promise "within a few
 minutes" and keep it; the e-mail says a posting is already live, and says a
@@ -564,7 +596,9 @@ is measured in `page-test.mjs`. **Inert until the rules are redeployed**:
 ## The Admin area — one page for everything waiting on the maintainer
 
 `admin-area.html` (owner, 2026-08-23) gathers every review queue in one place:
-the job postings held for approval (`jobReviews`, drawn by `oa-jobreview.js`),
+the job postings to review (drawn by `oa-jobreview.js` in two source tabs —
+the `jobReviews` queue held for approval and the user-added `jobSubmissions`,
+live but not yet marked reviewed),
 **candidate profiles including the ones held for the reveal** — the gap the
 page was made to close: the front page said "2 profiles have already been
 filed" while the maintainer had no way to SEE them, because held profiles are
@@ -775,6 +809,68 @@ It is applied at every ingest (`jobs-model.rowFromSubmission`,
 `import-sheet.mjs`) and on both sides of every comparison in the alert matcher —
 that last one matters, because an alert saved under an old spelling would
 otherwise stop matching silently.
+
+### A US city is not the country it is named after
+
+`canon()` reads a comma-separated value from the RIGHT, because the last part of
+an address is its most administrative one. That is right, and it had one hole:
+a part that is a US CITY sharing a country's name won before the state beside it
+was ever considered. St. John's University is in **Jamaica, New York**, and the
+site published it under the country **Jamaica**.
+
+So `US_STATES` settles the country — the same "most administrative part wins"
+rule the reverse scan already expressed, since a state sits below a country and
+above a town. **Georgia is the one that needs care**: it is the only US state
+that is also a country, so its NAME settles nothing ("Athens, Georgia" still
+reads as the country, because guessing is worse than leaving it) while its
+ABBREVIATION settles everything — dropping "GA" with the name left Emory's
+`Atlanta, GA 30322` unreadable, which is a bug of its own.
+
+### Where a university actually IS, and the nine postings filed under Greece
+
+`country` drives the jobs page's Location filter, so a wrong one **does not look
+wrong**: the posting quietly files itself under a country it has nothing to do
+with, and nobody filtering by the right one ever sees it. Nine live postings —
+American, Canadian and Singaporean universities — were published under Greece.
+
+**The cause was a form field, not a pipeline.** `post-a-job.html`'s country box
+carried no `autocomplete` attribute and is called `country`, so a browser filled
+it from the EDITOR'S OWN address profile the moment they opened a posting to
+correct something else, and saving published it. The institution box had
+`autocomplete="organization"` — the poster's own employer, over the university
+they are advertising. Both are `autocomplete="off"` now, and the selftest pins
+them; the poster's own name and e-mail keep their autofill, which is what those
+tokens are for. On the **candidate** form the affiliation genuinely IS the
+person's own, so it keeps `organization` — the rule is whether the field
+describes the person filling it in or somebody else.
+
+**The authority for repairing what already happened is the site's own
+Universities directory.** Every row of `data/universities.json` carries the
+campus's postal address, and `countryFromAddress` reads the country off it;
+`campusCountries` in `vocab.mjs` turns that into one answer per university.
+`healCountry` corrects a row that contradicts it, and `build-jobs.mjs` applies it
+to the MERGED set — the fault came from an editor, not from a source, so it must
+be repaired whichever writer produced the row.
+
+Three properties make that safe, and all three are pinned:
+
+* **A university with two countries is never healed.** INSEAD is in France and
+  in Singapore, so its rows disagree and it has no answer here at all — the same
+  discipline `schoolForUnit` applies to a department two schools both claim.
+* **The parser never invents.** An address that is a map-URL fragment or a bare
+  postcode returns `''`, and the audit then says nothing about that university
+  rather than guessing.
+* **The guard asserts only what the publisher guarantees.** The selftest checks
+  `data/jobs.json`, which the build heals before writing, so it cannot fire on a
+  legitimate new posting — the failure mode this file records twice. The
+  ARCHIVE, which has no daily build, is swept by `country-audit.mjs` as its own
+  CI step instead.
+
+**A university the directory does not carry** has no address to read, so its
+postings cannot be checked — `node _scraper/country-audit.mjs --all` lists them.
+Map it in the Universities sheet, or add the campus country to `CAMPUS_COUNTRY`
+in `_scraper/vocab.mjs`, which is grown one curated line at a time exactly like
+`oa-institutions.js` and only where the country is not in doubt.
 
 ## One spelling per university, school and department
 
@@ -1526,6 +1622,10 @@ change committed here is not live until someone runs that command by hand.
                                     # claiming one og:url
     node _scraper/higheredjobs-verify.mjs --selftest   # its own round trip
     node _scraper/jobreview-mailer.mjs --selftest      # the review-queue e-mail
+    node _scraper/country-audit.mjs # every posting names the country its
+                                    # university is in, against the addresses
+                                    # in the site's own Universities directory
+                                    # (--all lists the ones it cannot place)
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

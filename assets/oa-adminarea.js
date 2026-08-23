@@ -6,8 +6,10 @@
    FOUR QUEUES, one page (owner, 2026-08-21: "include there any items to be
    reviewed: job postings, candidate profiles, feedback received"):
 
-     1. job postings crawled from the tracking sheet, held for approval
-        (Firestore `jobReviews`, drawn by assets/oa-jobreview.js);
+     1. job postings to review (Firestore, drawn by assets/oa-jobreview.js in
+        two tabs): the ones crawled from the tracking sheet and held for
+        approval (`jobReviews`), and the user-added ones made through the
+        site's own form (`jobSubmissions`), live but not yet marked reviewed;
      2. CANDIDATE PROFILES — the gap this page was made to close: the front
         page said "2 profiles have already been filed" while the maintainer
         had no way to SEE them, because profiles are held out of
@@ -135,6 +137,35 @@
     return newsMemo;
   }
 
+  /** Job postings waiting in the review panel: the crawled queue's pending
+      documents PLUS the user-added postings not yet marked reviewed — the
+      panel's own two tabs, so the tile and the badge count what it shows. An
+      aggregate cannot ask "reviewedAt absent", so the submissions are read
+      and filtered, exactly as the panel reads them (two equality queries, one
+      per live status): the collection is small and this runs once per
+      session. Each half that cannot be read is unknown; the leg is null only
+      when NEITHER half answered, the same partial-answer rule as below. */
+  function waitingJobs(db) {
+    var nul = function () { return null; };
+    return Promise.all([
+      countOf(db.collection('jobReviews').where('status', '==', 'pending'))['catch'](nul),
+      Promise.all(['queued', 'published'].map(function (s) {
+        return db.collection(OAFB.col.jobSubmissions).where('status', '==', s).get();
+      })).then(function (snaps) {
+        var n = 0;
+        snaps.forEach(function (snap) {
+          snap.forEach(function (d) {
+            if (!(d.data() || {}).reviewedAt) n++;
+          });
+        });
+        return n;
+      })['catch'](nul)
+    ]).then(function (r) {
+      if (typeof r[0] !== 'number' && typeof r[1] !== 'number') return null;
+      return (r[0] || 0) + (r[1] || 0);
+    });
+  }
+
   /**
    * Everything waiting for the maintainer, counted once for every consumer:
    * {jobs, candidates, feedback, news, total}. A leg that cannot be read
@@ -146,7 +177,7 @@
       var db = fb.firestore();
       var nul = function () { return null; };
       return Promise.all([
-        countOf(db.collection('jobReviews').where('status', '==', 'pending'))['catch'](nul),
+        waitingJobs(db)['catch'](nul),
         heldCandidates()['catch'](nul),
         countOf(db.collection(OAFB.col.feedback).where('status', '==', 'open'))['catch'](nul),
         pendingNews(db).then(function (p) {

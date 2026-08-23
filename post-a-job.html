@@ -207,7 +207,7 @@
                           <label for="f-institution">University / Institution <span class="oa-req" aria-hidden="true">*</span></label>
                           <p class="oa-hint">Shown publicly, as the heading of your posting.</p>
                           <input type="text" id="f-institution" name="institution" maxlength="160"
-                                 autocomplete="organization" required>
+                                 autocomplete="off" required>
                         </div>
                         <div class="oa-field">
                           <label for="f-type">Type of institution <span class="oa-req" aria-hidden="true">*</span></label>
@@ -258,7 +258,8 @@
                         <div class="oa-field">
                           <label for="f-country">Country of the campus <span class="oa-req" aria-hidden="true">*</span></label>
                           <p class="oa-hint">Shown publicly. Used by the <em>Location</em> filter.</p>
-                          <input type="text" id="f-country" name="country" list="oa-countries" maxlength="60" required>
+                          <input type="text" id="f-country" name="country" list="oa-countries" maxlength="60"
+                                 autocomplete="off" required>
                           <datalist id="oa-countries"></datalist>
                         </div>
                         <div class="oa-field">

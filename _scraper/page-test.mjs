@@ -3688,6 +3688,27 @@ for (const w of [320, 360, 390, 430]) {
     // approved: must NOT be in the queue or its counts
     { path: 'jobReviews/r3', data: { rowId: 'r3', status: 'approved', queuedAt: '2026-08-19',
         row: { id: 'r3', year: 2026, posted: '2026-08-19', institution: 'Approved University', country: 'Spain' } } },
+    /* r4 is the NEXT market's posting, advertised BEFORE the others — the
+       list must rank it first anyway: the market year outranks the posted
+       date, and the newest advertisement only breaks ties within a market */
+    { path: 'jobReviews/r4', data: { rowId: 'r4', status: 'pending', queuedAt: '2026-08-18',
+        row: { id: 'r4', year: 2027, posted: '2026-05-02', institution: 'Early University', country: 'Denmark' } } },
+    /* the user-added postings the review panel's second tab lists: two
+       waiting (one per market, so the ranking is measurable), one already
+       ticked off, one withdrawn, one tracking-sheet mirror — the last three
+       must all stay off the to-do list */
+    { path: 'jobSubmissions/u1', data: { status: 'queued', year: 2026, institution: 'Poster University One',
+        school: 'A School of Business', unit: 'Operations', levels: ['Assistant Professor'],
+        country: 'Ireland', applyByDate: '2026-10-01', adUrl: 'https://example.edu/ad-1',
+        ref: 'OA-JOB-11', createdAt: '2026-08-19T09:00:00.000Z' } },
+    { path: 'jobSubmissions/u2', data: { status: 'queued', year: 2027, institution: 'Poster University Two',
+        createdAt: '2026-08-21T09:00:00.000Z' } },
+    { path: 'jobSubmissions/u3', data: { status: 'published', year: 2026, institution: 'Reviewed University',
+        reviewedAt: '2026-08-22T10:00:00.000Z', createdAt: '2026-08-18T09:00:00.000Z' } },
+    { path: 'jobSubmissions/u4', data: { status: 'withdrawn', year: 2026, institution: 'Withdrawn University',
+        createdAt: '2026-08-17T09:00:00.000Z' } },
+    { path: 'jobSubmissions/u5', data: { status: 'sheet', year: 2026, institution: 'Mirror University',
+        createdAt: '2026-08-16T09:00:00.000Z' } },
     { path: 'feedback/f1', data: { ticket: 'OA-260820-AAAA', status: 'open', forwarded: false,
         message: 'First open ticket', createdAt: '2026-08-20T10:00:00.000Z' } },
     { path: 'feedback/f2', data: { ticket: 'OA-260821-BBBB', status: 'open', forwarded: false,
@@ -3749,7 +3770,10 @@ for (const w of [320, 360, 390, 430]) {
 
   /* -- the badge, on a page that is NOT the admin area ---------------------- */
   {
-    const expected = 2 + metaHeld + 2 + newsPending + 1;   // + the pending name fix
+    /* the jobs leg counts BOTH of the review panel's tabs (3 crawled pending
+       + 2 user-added postings not yet marked reviewed), and the fifth queue
+       adds its pending name fix */
+    const expected = 3 + 2 + metaHeld + 2 + newsPending + 1;
     const { ctx, q, errors } = await adminAreaPage(ADMIN, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
     eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 1,
@@ -3760,9 +3784,9 @@ for (const w of [320, 360, 390, 430]) {
       const el = document.querySelector('#oa-menu .oa-acct-n[data-count="admin"]');
       return el && el.textContent === String(want);
     }, expected, { timeout: 15000 });
-    ok(true, `admin area: the badge lands on ${expected} — 2 pending reviews + ` +
-      `${metaHeld} held profiles + 2 open tickets + ${newsPending} unpublished updates ` +
-      '+ 1 name correction');
+    ok(true, `admin area: the badge lands on ${expected} — 3 pending reviews + ` +
+      `2 user-added postings + ${metaHeld} held profiles + 2 open tickets + ` +
+      `${newsPending} unpublished updates + 1 name correction`);
     ok(await q.evaluate(() =>
       document.querySelectorAll('script[src="assets/oa-news.js"]').length <= 1 &&
       document.querySelectorAll('script[src="assets/oa-adminarea.js"]').length <= 1),
@@ -3781,14 +3805,39 @@ for (const w of [320, 360, 390, 430]) {
     }, null, { timeout: 10000 });
     ok(true, 'admin area: the admin session unhides the desk and hides the guest note');
 
-    // the review queue: pending only, newest advertisement first
+    /* -- the review queue: two source tabs, the gate first, the next market
+          leading every list (owner, 2026-08-23) -- */
+    await q.waitForFunction(() => {
+      const els = document.querySelectorAll('#oa-review-sources button[data-source]');
+      return els.length === 2 &&
+        els[0].textContent === 'Auto-crawled jobs (3)' &&
+        els[1].textContent === 'User-added jobs (2)';
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: the two source tabs land counted — 3 crawled pending, 2 user-added waiting');
+    ok(await q.$eval('#oa-review-sources button[data-source="crawled"]',
+      (el) => el.classList.contains('is-on')),
+      'admin area: and the gate — the auto-crawled tab — is the default');
+
+    // the default season is the NEXT market, so its one crawled posting shows
     await q.waitForFunction(() =>
-      (document.getElementById('oa-review-count') || {}).textContent === '2 postings',
+      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      null, { timeout: 10000 });
+    eq(await q.$$eval('#oa-review-years button[data-year]',
+      (els) => els.map((e) => e.textContent)),
+      ['2026-2027 (1)', '2025-2026 (2)', 'All (3)'],
+      'admin area: the market-year tabs are kept, the next market first and selected');
+
+    // the whole queue, ranked: market year first, newest advertisement within it
+    await q.click('#oa-review-years button[data-year="*"]');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '3 postings',
       null, { timeout: 10000 });
     const reviews = await q.textContent('#oa-review-list');
-    ok(reviews.indexOf('Test University Two') !== -1 &&
+    ok(reviews.indexOf('Early University') !== -1 &&
+       reviews.indexOf('Early University') < reviews.indexOf('Test University Two') &&
        reviews.indexOf('Test University Two') < reviews.indexOf('Test University One'),
-      'admin area: both pending postings are drawn, newest first');
+      'admin area: the 2027-market posting leads although it was advertised first — ' +
+      'the year outranks the posted date, which only breaks ties within a market');
     ok(reviews.indexOf('Approved University') === -1,
       'admin area: an approved posting is not in the queue');
 
@@ -3806,7 +3855,9 @@ for (const w of [320, 360, 390, 430]) {
        on the card that carries it and nowhere else, naming the school the
        site's directory knows — a name built from data people typed, so a
        hostile one must render inert. The Use-it button fills the School box
-       like typing would, and saves nothing. */
+       like typing would, and saves nothing. (Measured BEFORE the tab switch
+       below: the flagged card is on the crawled tab's All view, which is what
+       is on screen here.) */
     eq(await q.locator('#oa-review-list [data-biz]').count(), 1,
       'admin area: the business-typed posting mentions the business school, and only it');
     ok(reviews.indexOf('Business school posting') !== -1,
@@ -3822,6 +3873,51 @@ for (const w of [320, 360, 390, 430]) {
       ok(await q.evaluate(() => !window.__xssbiz),
         'admin area: and filling it runs nothing either');
     }
+
+    /* -- the user-added tab: a dedicated, editable list, never a gate — the
+          posting is live the moment the form saved it -- */
+    await q.click('#oa-review-sources button[data-source="user"]');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      null, { timeout: 10000 });
+    ok((await q.textContent('#oa-review-list')).indexOf('Poster University Two') !== -1,
+      'admin area: the user tab opens on ITS newest market, like the gate does');
+    await q.click('#oa-review-years button[data-year="*"]');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '2 postings',
+      null, { timeout: 10000 });
+    const userList = await q.textContent('#oa-review-list');
+    ok(userList.indexOf('Poster University Two') < userList.indexOf('Poster University One'),
+      'admin area: user-added postings rank by market year too — 2027 before 2026');
+    ok(userList.indexOf('Reviewed University') === -1,
+      'admin area: a submission already marked reviewed is off the list');
+    ok(userList.indexOf('Withdrawn University') === -1,
+      'admin area: a withdrawn one is not waiting for anything');
+    ok(userList.indexOf('Mirror University') === -1,
+      'admin area: and a tracking-sheet mirror stays with its own queue');
+    ok(await q.locator('#oa-review-bulk').isHidden(),
+      'admin area: approve-the-page is the gate’s alone — nothing here needs approving');
+    eq(await q.locator('#oa-review-list a[href="post-a-job.html?edit=u1"]').count(), 1,
+      'admin area: a user-added card opens the poster’s own form to correct it');
+
+    // ticking one off writes the one stamp, and the tab count follows live
+    await q.click('article:has(a[href="post-a-job.html?edit=u1"]) button[data-act="reviewed"]');
+    await q.waitForFunction(() => {
+      const d = window.__fb.docs['jobSubmissions/u1'];
+      return d && typeof d.reviewedAt === 'string' && d.reviewedAt.length > 0;
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: Mark reviewed writes reviewedAt onto the submission itself — nothing else');
+    await q.waitForFunction(() =>
+      (document.querySelector('#oa-review-sources button[data-source="user"]') || {})
+        .textContent === 'User-added jobs (1)', null, { timeout: 10000 });
+    ok(true, 'admin area: and the tab count follows without a reload');
+
+    // the gate is untouched by any of that
+    await q.click('#oa-review-sources button[data-source="crawled"]');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '1 posting',
+      null, { timeout: 10000 });
+    ok(true, 'admin area: switching back lands on the gate’s newest market again');
 
     // the inbox: open tab, newest first, through the moved-but-unchanged panel
     await q.waitForFunction(() =>
@@ -3885,12 +3981,16 @@ for (const w of [320, 360, 390, 430]) {
     }, null, { timeout: 10000 });
     ok(true, 'admin area: and the decided card re-renders one click from re-opening');
 
-    // the tiles and the badge, corrected from the documents on screen — the
-    // strip ends on the Registered-users statistic (owner, 2026-08-23)
+    /* the tiles and the badge, corrected from the documents on screen — the
+       jobs tile counts BOTH of the review panel's tabs (3 crawled + 2
+       user-added as seeded; those counts were read at load, before one was
+       ticked off above, and nothing recounts them mid-session), the approved
+       name fix no longer counts as waiting, and the strip ends on the
+       Registered-users statistic (owner, 2026-08-23) */
     await q.waitForFunction((want) => {
       const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
       return els.length === 6 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
-    }, ['2', seededHeld, '2', newsPending, 0, seededUsers].join(','), { timeout: 10000 });
+    }, ['5', seededHeld, '2', newsPending, 0, seededUsers].join(','), { timeout: 10000 });
     ok(true, 'admin area: the six tiles agree with the data beneath them — the ' +
       'approved fix no longer counts as waiting, and the registered-user tally is on screen');
     ok(await q.locator('#oa-aa-tiles span.oa-aa-tile-stat').count() === 1 &&
@@ -3900,7 +4000,7 @@ for (const w of [320, 360, 390, 430]) {
       'links, never marked due, nothing to press');
     eq(await q.evaluate(() =>
       (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
-      2 + seededHeld + 2 + newsPending,
+      5 + seededHeld + 2 + newsPending,
       'admin area: and the cached menu badge is corrected from the same numbers — ' +
       'the registered-user count is in none of them');
 
