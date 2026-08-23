@@ -467,6 +467,56 @@ export function fillSchoolFromDirectory(row, vocab, schools = SCHOOLS) {
   return { ...row, school, department: joinDepartment(school, row.unit) };
 }
 
+/* --------------------------------- which school is the BUSINESS school
+
+   THE QUESTION THE REVIEW CARD ASKS (owner, 2026-08-23): a crawled posting
+   that mentions "business" is flagged under Type: Business School, and the
+   card should then NAME the business school the site already knows at that
+   university — "University of California, Berkeley" advertising a
+   business-flavoured post is Haas's posting, and the site's own directory
+   (data/vocab.json, fed by oa-institutions.js and universities.json) says so.
+
+   ANSWERED FROM THE NAMES, never from a guess: a school IS the business
+   school when its own name says business — "Walter A. Haas School of
+   Business", "C. T. Bauer College of Business", "Kellogg School of
+   Management" — and a university offering two such names is an ambiguity the
+   maintainer settles, exactly as schoolForUnit treats two schools carrying
+   one department. A school the pattern cannot read ("The Wharton School")
+   simply is not named, which costs a mention and never a wrong one.        */
+
+/** A school NAME that declares itself the business school. Deliberately wider
+    than the posting-text patterns in jobmarket-sheet.mjs — a school with
+    "business" anywhere in its NAME is business-related ("Bayes Business
+    School", "Faculty of Business and Economics"), and the management/commerce
+    forms cover the ones that never say the word. */
+export const BUSINESS_SCHOOL_NAME_RX =
+  /\bbusiness\b|school of management|management school|faculty of management|school of commerce/i;
+
+/**
+ * The one school at `institution` whose name says it is the business school,
+ * or ''.
+ *
+ * The same lookup discipline as `schoolForUnit`: the university is found
+ * through `institutionKey`, so any spelling the site canonicalises reaches
+ * the entry, and only an UNAMBIGUOUS answer is given — none, or two, is ''.
+ */
+export function businessSchoolOf(vocab, institution, schools = SCHOOLS) {
+  if (!institution) return '';
+  const byUniversity = (vocab && vocab.byUniversity) || {};
+
+  const want = schools.institutionKey(institution);
+  let own = null;
+  for (const name of Object.keys(byUniversity)) {
+    if (schools.institutionKey(name) !== want) continue;
+    own = byUniversity[name];
+    break;
+  }
+  if (!own || !Array.isArray(own.schools)) return '';
+
+  const hits = own.schools.filter((s) => s && BUSINESS_SCHOOL_NAME_RX.test(s));
+  return hits.length === 1 ? hits[0] : '';
+}
+
 /** Stable JSON with a trailing newline, so a diff shows the names that changed. */
 export function serialiseVocab(vocab) {
   return JSON.stringify(vocab, null, 1) + '\n';

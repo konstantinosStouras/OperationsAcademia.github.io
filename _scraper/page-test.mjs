@@ -1825,13 +1825,26 @@ for (const [name, expect] of [
      rebuilt from the tracking sheet every morning, so naming institutions here
      ("utah", "princeton") would make this check pass or fail on whatever the
      market did overnight — a test that goes red for a reason that is not a
-     regression teaches people to ignore it. */
+     regression teaches people to ignore it.
+
+     DISTINCTIVE words only, and the b term comes from a card the a term does
+     not match — which is what widening MEANS. Taking the first long word did
+     exactly what this comment forswears: the morning the first card read
+     "University of North Carolina…", a was "university" (30 of the 35 cards)
+     and b was "george", from "George Mason UNIVERSITY" — a card a already
+     matched — so the widen check failed 30 -> 30 on data that was perfectly
+     healthy. */
   const pair = await j.evaluate(() => {
     const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
       .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
-    const word = (n) => (n.split(/[\s,(]+/).find((w) => w.length > 4) || '').replace(/[^a-z]/g, '');
+    const generic = ['university', 'college', 'school', 'institute', 'institution',
+      'business', 'management', 'technology', 'national', 'state', 'academy'];
+    const word = (n) => (n.split(/[\s,(]+/)
+      .map((w) => w.replace(/[^a-z]/g, ''))
+      .find((w) => w.length > 4 && generic.indexOf(w) < 0) || '');
     const a = word(names[0] || '');
-    const b = names.map(word).find((w) => w && w !== a && !names[0].includes(w));
+    const b = a && names.filter((n) => !n.includes(a)).map(word)
+      .find((w) => w && w !== a);
     return a && b ? { a, b } : null;
   });
   ok(pair, 'jobs: the listing offers two different institutions to search for');
@@ -3592,13 +3605,16 @@ for (const w of [320, 360, 390, 430]) {
   const seedDocs = [
     { path: 'jobReviews/r1', data: { rowId: 'r1', status: 'pending', queuedAt: '2026-08-20',
         row: { id: 'r1', year: 2026, posted: '2026-08-20', institution: 'Test University One', country: 'Ireland' } } },
-    /* r2 carries a duplicate flag, and a hostile one: the sync writes these
-       from postings people typed, so the banner must render them inert */
+    /* r2 carries a duplicate flag AND a business-school flag, both hostile:
+       the sync writes these from data people typed (postings, the vocabulary
+       built from them), so the banners must render them inert */
     { path: 'jobReviews/r2', data: { rowId: 'r2', status: 'pending', queuedAt: '2026-08-21',
-        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two', country: 'France' },
+        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two',
+          country: 'France', type: 'Business School' },
         dup: [{ id: 'dup-1', ref: 'OA-JOB-1', source: 'oa-form',
           institution: 'Test University <img src=x onerror=window.__xssdup=1>',
-          department: 'Operations', posted: '2026-08-10' }] } },
+          department: 'Operations', posted: '2026-08-10' }],
+        biz: { school: 'Known Business School <img src=x onerror=window.__xssbiz=1>' } } },
     // approved: must NOT be in the queue or its counts
     { path: 'jobReviews/r3', data: { rowId: 'r3', status: 'approved', queuedAt: '2026-08-19',
         row: { id: 'r3', year: 2026, posted: '2026-08-19', institution: 'Approved University', country: 'Spain' } } },
@@ -3695,6 +3711,27 @@ for (const w of [320, 360, 390, 430]) {
       'admin area: the warning says what it is');
     ok(await q.evaluate(() => !window.__xssdup),
       'admin area: a hostile duplicate entry cannot inject markup');
+
+    /* THE BUSINESS-SCHOOL FLAG IS MENTIONED THE SAME WAY (owner, 2026-08-23):
+       on the card that carries it and nowhere else, naming the school the
+       site's directory knows — a name built from data people typed, so a
+       hostile one must render inert. The Use-it button fills the School box
+       like typing would, and saves nothing. */
+    eq(await q.locator('#oa-review-list [data-biz]').count(), 1,
+      'admin area: the business-typed posting mentions the business school, and only it');
+    ok(reviews.indexOf('Business school posting') !== -1,
+      'admin area: the mention says what it is');
+    ok(await q.evaluate(() => !window.__xssbiz),
+      'admin area: a hostile school name cannot inject markup');
+    {
+      const card = q.locator('#oa-review-list .oa-rv-card', { hasText: 'Test University Two' });
+      await card.locator('button[data-biz-use]').click();
+      eq(await card.locator('[data-key="school"]').inputValue(),
+        'Known Business School <img src=x onerror=window.__xssbiz=1>',
+        'admin area: Use-it fills the School box with the name, as typed text');
+      ok(await q.evaluate(() => !window.__xssbiz),
+        'admin area: and filling it runs nothing either');
+    }
 
     // the inbox: open tab, newest first, through the moved-but-unchanged panel
     await q.waitForFunction(() =>

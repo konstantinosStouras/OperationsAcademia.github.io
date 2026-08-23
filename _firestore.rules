@@ -508,7 +508,7 @@ service cloud.firestore {
                         ['pending', 'approved', 'rejected']
                    && request.resource.data.keys().hasOnly([
                         'rowId', 'status', 'row', 'edits',
-                        'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup',
+                        'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup', 'biz',
                       ])
                    && str('queuedAt', 40) && str('reviewedAt', 40)
                    && str('mailedAt', 40) && str('note', 1000)
@@ -518,6 +518,11 @@ service cloud.firestore {
                    // the panel only reads them
                    && (!('dup' in request.resource.data)
                        || request.resource.data.dup is list)
+                   // the business-school flag the sync computes — a map, or
+                   // null when the sync has cleared it; the panel only reads it
+                   && (!('biz' in request.resource.data)
+                       || request.resource.data.biz == null
+                       || request.resource.data.biz is map)
                    && (!('edits' in request.resource.data)
                        || (request.resource.data.edits is map
                            && request.resource.data.edits.keys().hasOnly([

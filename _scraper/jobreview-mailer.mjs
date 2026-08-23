@@ -93,6 +93,25 @@ function dupHtml(doc) {
     '<ul style="margin:6px 0 14px;padding-left:22px">' + items + '</ul>';
 }
 
+/** The business-school flag the sync computed — the posting's text says
+    "business", so it arrived typed Business School, and the site's own
+    directory is asked which school that IS at this university. Said in the
+    e-mail for the dupHtml reason: it informs exactly the decision the e-mail
+    asks for. */
+function bizHtml(doc) {
+  const biz = doc && doc.biz;
+  if (!biz) return '';
+  const school = String(biz.school || '');
+  return '<p style="background:#eef4fb;border:1px solid #b8cbe4;border-radius:6px;' +
+    'padding:10px 14px">&#127891; <strong>Business school posting</strong> — its text ' +
+    'mentions the business school, so it is flagged under Type: Business School. ' +
+    (school
+      ? 'The site lists <strong>' + esc(school) + '</strong> as this university’s ' +
+        'business school.'
+      : 'The site’s directory does not list a business school for this university.') +
+    '</p>';
+}
+
 export function renderReviewEmail(doc, { site = SITE } = {}) {
   const r = shown(doc);
   const title = [r.institution, r.department].filter(Boolean).join(' — ');
@@ -104,6 +123,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
     '<p>A job posting has been read from your tracking sheet and is waiting for ' +
     'you to approve it. <strong>It is not on the site yet.</strong></p>' +
     dupHtml(doc) +
+    bizHtml(doc) +
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
       line('Institution', r.institution) +
       line('School / dept', r.department) +
@@ -308,6 +328,21 @@ function selftest() {
   ok(!dmail.html.includes('<b>University</b>'), 'and its fields cannot inject markup');
   ok(!/Possibly already on the site/.test(mail.html),
     'a posting with no flag carries no warning');
+
+  /* THE BUSINESS-SCHOOL FLAG IS SAID WHERE THE DECISION IS ASKED FOR, like
+     the duplicate one: the sync stamps `biz` on a posting whose text says
+     "business", naming the school the site's directory knows — and the school
+     name comes from data people typed, so it must render inert. */
+  const bizzed = { ...doc, biz: { school: 'Haas School of <b>Business</b>' } };
+  const bmail = renderReviewEmail(bizzed);
+  ok(/Business school posting/.test(bmail.html), 'a business-school flag is mentioned');
+  ok(/Haas School of/.test(bmail.html), 'naming the school the directory knows');
+  ok(!bmail.html.includes('<b>Business</b>'), 'with its name escaped, never injected');
+  const bizNone = renderReviewEmail({ ...doc, biz: { school: '' } });
+  ok(/does not list a business school/.test(bizNone.html),
+    'and a directory with no answer says so rather than staying silent');
+  ok(!/Business school posting/.test(mail.html),
+    'while a posting with no flag carries no mention');
 
   // only pending-and-unmailed, oldest first
   const queue = [
