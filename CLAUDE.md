@@ -593,6 +593,26 @@ pending `jobReviews` + `heldCount` from `data/candidates-meta.json` (the same
 file the front page announces from) + open `feedback` + pending changelog
 entries.
 
+**The summary strip ends on one STATISTIC — the Registered-users card**
+(owner, 2026-08-23): a `count()` aggregate over `registeredUsers`, the
+contentless per-account tally every sign-in already writes (oa-accounts.js).
+It is /lit/'s registered-users tile with the visibility inverted — there the
+figure is public, here it is **the maintainer's alone**: the collection is
+admin-read in `_firestore.rules` (it was public-read, which nothing public
+ever consumed) and the Admin area is the one place it is shown. The card is
+deliberately NOT a queue: `registeredCount()` in `oa-adminarea.js` is separate
+from `pendingCounts()`, so the "Admin area N" badge never counts it (a figure
+nobody can clear would inflate it for ever) and no other page's badge refresh
+pays a read for it. **The count is of PEOPLE, not sign-ins**: merging two
+accounts deletes the duplicate's mark (`runMerge` step 5, while the merge can
+still write as that user — the owner-delete the rules allow), so the figure
+comes down on its own; a mark orphaned any OTHER way (an account deleted in
+the Firebase console) stays until something like /lit/'s registered-users
+audit exists here. The tightened read rule is **inert until redeployed**
+(`firebase deploy --only firestore:rules --project operations-academia`) —
+the card works either way, since the admin passes both rules; only the
+public's API access waits on the deploy.
+
 Candidate cards offer **Edit**, which opens the SAME form the candidate used
 (`post-a-candidate.html?edit=<docId>` — the rules already let the admin read
 and write any profile; no rules change shipped with this page, which

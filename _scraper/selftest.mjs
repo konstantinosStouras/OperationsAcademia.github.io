@@ -5412,6 +5412,26 @@ async function testAdminArea() {
     'the held-profiles number is read from the SAME file the front page ' +
     'announces "N profiles have already been filed" from, so the two agree');
 
+  /* the Registered-users card (owner, 2026-08-23): a statistic beside the
+     queues, and NEVER in the badge — the badge counts what is waiting, and a
+     figure nobody can clear would inflate it for ever */
+  ok(/collection\(OAFB\.col\.registered\)/.test(js),
+    'the Registered-users card counts the registeredUsers tally — the marks ' +
+    'every sign-in writes and the account merge retires');
+  ok(js.includes("['jobs', 'candidates', 'feedback', 'news', 'names']"),
+    'the badge sums exactly the five queues — the registered-user statistic ' +
+    'is beside them, never among them');
+  ok(!/r\[5\]|users:\s*r\[/.test(js.slice(js.indexOf('function pendingCounts'),
+      js.indexOf('the summary strip'))),
+    'pendingCounts stays the five queues — every page’s badge refresh must ' +
+    'not pay a read for a number only the admin page shows');
+  ok(/match \/registeredUsers\/\{uid\}[\s\S]*?allow read: if isAdmin\(\);/.test(rules),
+    'registeredUsers is admin-read — the figure is the maintainer’s, not the ' +
+    'public’s (owner, 2026-08-23), and nothing public ever consumed it');
+  ok(/match \/registeredUsers\/\{uid\}[\s\S]*?allow delete: if isOwner\(uid\);/.test(rules),
+    'and an account can still withdraw its OWN mark — the delete the merge ' +
+    'depends on, so two merged profiles count as one person');
+
   /* the menu row goes where the page is */
   ok(/href="admin-area\.html"/.test(acct),
     'the account menu links the Admin area');

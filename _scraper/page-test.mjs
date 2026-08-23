@@ -3720,8 +3720,17 @@ for (const w of [320, 360, 390, 430]) {
     { path: 'nameFixes/n2', data: { kind: 'school', from: 'Olde School of Business',
         to: 'New School of Business', institution: '', note: '', uid: 'u-fix-2',
         authEmail: '', status: 'approved', createdAt: '2026-08-19T10:00:00.000Z' } },
+    /* the statistic beside the queues: three registered accounts' contentless
+       marks — the tally every sign-in writes and the account merge retires */
+    { path: 'registeredUsers/u-reg-1', data: { t: 1 } },
+    { path: 'registeredUsers/u-reg-2', data: { t: 2 } },
+    { path: 'registeredUsers/u-reg-3', data: { t: 3 } },
   ];
   const seededHeld = preReveal ? 2 : 0;   // c1 + c2 are queued
+  /* the three seeded marks PLUS the admin's own: signing in writes your own
+     registeredUsers mark (oa-accounts.js, once per session), and the desk
+     scenario's session is itself a registered account */
+  const seededUsers = 3 + 1;
 
   /** A fresh CONTEXT per scenario: the badge cache and the auth hint live in
       localStorage, and a shared context would hand one scenario the last
@@ -3876,17 +3885,24 @@ for (const w of [320, 360, 390, 430]) {
     }, null, { timeout: 10000 });
     ok(true, 'admin area: and the decided card re-renders one click from re-opening');
 
-    // the tiles and the badge, corrected from the documents on screen
+    // the tiles and the badge, corrected from the documents on screen — the
+    // strip ends on the Registered-users statistic (owner, 2026-08-23)
     await q.waitForFunction((want) => {
       const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
-      return els.length === 5 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
-    }, ['2', seededHeld, '2', newsPending, 0].join(','), { timeout: 10000 });
-    ok(true, 'admin area: the five tiles agree with the panels beneath them — the ' +
-      'approved fix no longer counts as waiting');
+      return els.length === 6 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
+    }, ['2', seededHeld, '2', newsPending, 0, seededUsers].join(','), { timeout: 10000 });
+    ok(true, 'admin area: the six tiles agree with the data beneath them — the ' +
+      'approved fix no longer counts as waiting, and the registered-user tally is on screen');
+    ok(await q.locator('#oa-aa-tiles span.oa-aa-tile-stat').count() === 1 &&
+       await q.locator('#oa-aa-tiles a.oa-aa-tile').count() === 5 &&
+       await q.locator('#oa-aa-tiles .oa-aa-tile-stat.is-due').count() === 0,
+      'admin area: the Registered-users card is a statistic — a span among five ' +
+      'links, never marked due, nothing to press');
     eq(await q.evaluate(() =>
       (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
       2 + seededHeld + 2 + newsPending,
-      'admin area: and the cached menu badge is corrected from the same numbers');
+      'admin area: and the cached menu badge is corrected from the same numbers — ' +
+      'the registered-user count is in none of them');
 
     // taking a profile down really writes, and the desk follows
     q.once('dialog', (d) => d.accept());

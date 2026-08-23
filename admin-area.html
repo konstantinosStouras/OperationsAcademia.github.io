@@ -137,8 +137,12 @@
             <!-- One tile per queue, each linking to its panel below. The numbers
                  are computed by assets/oa-adminarea.js — the SAME function the
                  account menu's "Admin area" badge is refreshed from, so the two
-                 can never disagree about what is waiting. -->
-            <nav class="oa-aa-tiles" id="oa-aa-tiles" aria-label="What is waiting for review"></nav>
+                 can never disagree about what is waiting. The strip ends on one
+                 STATISTIC (owner, 2026-08-23): the Registered-users card — the
+                 count() over the registeredUsers tally, admin-read in the rules
+                 and shown nowhere public — which links to nothing and joins no
+                 total, so the badge still counts only what is waiting. -->
+            <nav class="oa-aa-tiles" id="oa-aa-tiles" aria-label="What is waiting for review, and how many users are registered"></nav>
 
             <!-- ============================ postings awaiting review -->
             <!-- First deliberately: a queued posting is not on the site until it
