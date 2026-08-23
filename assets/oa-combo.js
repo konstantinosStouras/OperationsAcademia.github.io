@@ -496,18 +496,45 @@
       take(row.__value);
     });
 
-    document.addEventListener('mousedown', function (e) {
+    function offClick(e) {
       if (!wrap.contains(e.target)) close();
-    });
+    }
+    document.addEventListener('mousedown', offClick);
 
     /* Clicking a row cannot blur the input (the list's mousedown prevents the
        default), so this only fires when focus really leaves the field — a
        failed submit calling firstBad.focus(), say. */
     input.addEventListener('blur', function () { close(); });
 
+    /**
+     * Take the picker off an input again, leaving a plain text field.
+     *
+     * WHY A PICKER NEEDS A WAY OUT. Every mount adds a listener to `document`
+     * that closes the list when a click lands outside it — the only way to
+     * catch a click on something the wrapper does not contain. On a page whose
+     * fields are drawn once that costs nothing; in a LIST OF CARDS that is
+     * re-rendered (the review queue's year tabs redraw the whole list) every
+     * pass would leave a listener behind, holding the detached card, its
+     * options and the whole vocabulary alive. So the caller can give it back.
+     *
+     * The wrapper is left in place: a re-render throws the subtree away, and a
+     * caller that keeps the field gets a plain input inside a spare div, which
+     * is inert. What matters is that nothing survives that this element does.
+     */
+    function destroy() {
+      close();
+      document.removeEventListener('mousedown', offClick);
+      if (list.parentNode) list.parentNode.removeChild(list);
+      if (status.parentNode) status.parentNode.removeChild(status);
+      ['role', 'aria-expanded', 'aria-controls', 'aria-autocomplete']
+        .forEach(function (a) { input.removeAttribute(a); });
+      try { delete input.__oaCombo; } catch (e) { input.__oaCombo = null; }
+    }
+
     input.__oaCombo = { setOptions: function (o) { setOptions(o); if (state.open) render(); },
                         setScope: setScope,
-                        close: close };
+                        close: close,
+                        destroy: destroy };
     return input.__oaCombo;
   }
 

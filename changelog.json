@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "postings-name-their-school",
+   "date": "2026-08-21",
+   "title": "Job postings now name the school as well as the department",
+   "summary": "Postings crawled from the job market tracking sheet used to arrive with a department and no school \u2014 \u201cUniversity of California, Berkeley \u00b7 Operations and Information Technology Management\u201d, with the Haas School missing \u2014 because the sheet has one column for the hiring unit. The site\u2019s own directory of operations and supply chain schools already knows which department sits in which school, so that answer is filled in automatically wherever it is unambiguous, and the directory itself gained several schools. Searching by school name in the University filter now finds these postings too.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "whats-new-reviewed-and-tidy",
    "date": "2026-08-18",
    "title": "\u201cWhat\u2019s new\u201d is reviewed before it is published, and a removed update really goes",
