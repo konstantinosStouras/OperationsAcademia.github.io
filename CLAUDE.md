@@ -213,6 +213,70 @@ Local runs: `node _scraper/higheredjobs-verify.mjs --apply-only` (re-apply the
 committed cache) or `--scan`. A real read needs egress to higheredjobs.com,
 which this build environment denies (403), so it happens on the runners.
 
+## …and every OTHER advertisement is read too
+
+HigherEdJobs is 156 of the sheet's 449 postings; the rest link to ~120 other
+hosts — Interfolio (36), Chronicle (27), the INFORMS career center (18),
+Inside Higher Ed (15), and a long tail of one-per-university applicant
+tracking systems (Workday, PeopleAdmin, Cornerstone, Taleo, Oracle…). Those
+were never checked at all, so their postings published "Until filled." and
+their review cards asked the maintainer to open every advertisement by hand.
+
+    _scraper/adverts.mjs           parse any ad, decide what it changes (pure)
+    _scraper/adverts-verify.mjs    fetch, cache, apply — and the queue pass
+    .github/workflows/oa-adverts-verify.yml   daily, after the two above
+
+One generic HIGH-PRECISION parser — schema.org JobPosting JSON-LD plus a
+labelled-field scan over the three shapes these systems write facts in
+(`<strong>Label:</strong>`, `<th>/<td>`, `<dt>/<dd>`) — plus the one adapter a
+host actually needs: Workday pages are a JavaScript shell, so they are read
+from the tenant's public CXS JSON endpoint (`workdayApiUrl`). A page in a
+shape it cannot read parses to `unreadable` and CHANGES NOTHING — that is
+what makes a generic parser safe across a hundred hosts (the PDFs some rows
+link to, and any bot-walled board, land there too). Google Docs, LinkedIn and
+higheredjobs.com are never fetched — the last because that host has its OWN
+pipeline, and two caches for one advertisement would disagree silently
+(`isAdvertUrl`; one URL, one owner, pinned in the selftest).
+
+**Two lessons from elsewhere in this repo are LOAD-BEARING here.**
+`validThrough` — and every label naming the LISTING's end ("End date",
+"Expires") — is NEVER read as a deadline anywhere in the module: on a board
+it is when the AD comes down, ~18 months out on HigherEdJobs and the paid
+listing's end on the Madgex boards. It is recorded separately as
+`listedUntil` and shown labelled as what it is. And an ambiguous all-numeric
+date ("05/10/2026" — Coventry writes day-first, Salt Lake City month-first)
+is REFUSED rather than guessed: unlike the sheet ingest's `deadlineDay`,
+which has a cell that must mean something and a posting date to test a repair
+against, a scraped page can afford "no date, prose kept".
+
+**What it writes, and where.** For the PUBLISHED postings it is exactly the
+HigherEdJobs pass again: what each ad said is cached in `data/adverts.json`,
+deadlines fill ONLY rows the sheet left open-ended (both fields move
+together), a deadline the maintainer typed is never overwritten — the
+disagreement is a warning naming both dates — and `sync-jobmarket-sheet.mjs`
+re-applies the cache on every workbook read, or the morning rebuild would
+revert every filled deadline. For the PENDING queue it records what the ad
+says ON the review document as `ad` (title, institution, closing date,
+`listedUntil`, whether the listing is even still up) — never in `data/`,
+because a pending posting is not public and everything under `data/` is
+served to anyone who asks. The review card and the review e-mail then draw it
+beside `dup` and `biz`, and like them it is RAISED, NEVER DECIDED: the
+card's "Use this closing date" button only fills the box, and nothing
+publishes until the maintainer approves. The queue pass writes the `ad`
+block and nothing else — never the decision, never the edits (the selftest
+pins the merge as the file's only document write). A pending HigherEdJobs ad
+IS read here (via that host's own parser), because the published HigherEdJobs
+pass only ever sees approved rows.
+
+**When an employer labels the closing date some new way, add it to
+`DEADLINE_LABELS` in `adverts.mjs` — never hand-edit `data/`** (the
+HigherEdJobs rule, same reason: the data is rebuilt every morning). Local
+runs: `--apply-only`, `--scan`, `--selftest`; a real read happens on the
+runners (this environment's egress denies every one of these hosts), and the
+workflow's `dry_run`/`scan` dispatch inputs are how a new host's readability
+is measured before anything is written. The queue pass needs
+`FIREBASE_SERVICE_ACCOUNT` and is a clean no-op without it.
+
 ## The frozen archives, and how the maintainer edits them
 
 `data/past-postings.json`, `data/recent-faculty.json` and

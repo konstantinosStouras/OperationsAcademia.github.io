@@ -120,10 +120,15 @@ const EDITABLE_KEYS = EDITABLE.map((f) => f.key);
     against EDITABLE, which is the wider set the RULES have to allow. */
 export const SHOWN = EDITABLE.filter((f) => !f.derived);
 
-/** Every key a `jobReviews` document may carry. */
+/** Every key a `jobReviews` document may carry. `ad` is what the posting's
+    own advertisement says — title, closing date, whether the listing is
+    still up — written by adverts-verify.mjs's queue pass and drawn on the
+    review card. Like `dup` and `biz` it is RAISED, never decided: the card's
+    button only fills the closing-date box, and nothing publishes until the
+    maintainer approves. */
 export const DOC_KEYS = [
   'rowId', 'status', 'row', 'edits',
-  'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup', 'biz',
+  'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup', 'biz', 'ad',
 ];
 
 /* ------------------------------------------------------------------ queue */

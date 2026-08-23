@@ -112,6 +112,32 @@ function bizHtml(doc) {
     '</p>';
 }
 
+/** What the posting's OWN advertisement says — read off the linked page by
+    adverts-verify.mjs and stored on the document as `ad`. Said in the e-mail
+    for the dupHtml reason: the closing date, and whether the listing is even
+    still up, inform exactly the decision the e-mail asks for. `listedUntil`
+    is deliberately not repeated here — on a board it is when the AD comes
+    down, not the deadline, and the card labels it properly. */
+function advertHtml(doc) {
+  const ad = doc && doc.ad;
+  if (!ad) return '';
+  const gone = ad.status === 'gone';
+  const bits = [];
+  if (ad.title) {
+    bits.push('it advertises <strong>' + esc(ad.title) + '</strong>' +
+      (ad.institution ? ' at ' + esc(ad.institution) : ''));
+  }
+  if (ad.applyByDate) bits.push('it closes on <strong>' + esc(ad.applyByDate) + '</strong>');
+  else if (ad.applyByProse) bits.push('about its deadline it says “' + esc(ad.applyByProse) + '”');
+  if (!gone && !bits.length) return '';
+  return '<p style="background:#eef7ee;border:1px solid #a8cba8;border-radius:6px;' +
+    'padding:10px 14px">&#128196; <strong>What the advertisement says</strong> — ' +
+    (gone ? 'the linked advertisement is <strong>no longer up</strong>' +
+      (bits.length ? '; while it was up, ' : '.') : '') +
+    bits.join('; ') + (bits.length ? '.' : '') +
+    '</p>';
+}
+
 export function renderReviewEmail(doc, { site = SITE } = {}) {
   const r = shown(doc);
   const title = [r.institution, r.department].filter(Boolean).join(' — ');
@@ -124,6 +150,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
     'you to approve it. <strong>It is not on the site yet.</strong></p>' +
     dupHtml(doc) +
     bizHtml(doc) +
+    advertHtml(doc) +
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
       line('Institution', r.institution) +
       line('School / dept', r.department) +
@@ -343,6 +370,28 @@ function selftest() {
     'and a directory with no answer says so rather than staying silent');
   ok(!/Business school posting/.test(mail.html),
     'while a posting with no flag carries no mention');
+
+  /* WHAT THE ADVERTISEMENT SAYS IS SAID WHERE THE DECISION IS ASKED FOR,
+     like the two flags above: adverts-verify.mjs stamps `ad` with what the
+     linked page states, and the closing date — or the listing being down —
+     informs exactly the decision the e-mail asks for. The fields come from a
+     scraped page, so they must render inert. */
+  const advertised = { ...doc, ad: { status: 'ok', url: 'https://x.example/1',
+    title: 'Assistant <b>Professor</b>', institution: 'Example University',
+    applyByDate: '2026-10-15', applyByProse: '', listedUntil: '2028-02-06',
+    checkedAt: '2026-08-23T00:00:00Z' } };
+  const amail = renderReviewEmail(advertised);
+  ok(/What the advertisement says/.test(amail.html), 'the advertisement\'s reading is mentioned');
+  ok(/2026-10-15/.test(amail.html), 'with the closing date it states');
+  ok(!amail.html.includes('<b>Professor</b>'), 'its title escaped, never injected');
+  ok(!/2028-02-06/.test(amail.html),
+    'and the listing\'s own end date is NOT repeated as if it were a deadline');
+  const adGone = renderReviewEmail({ ...doc, ad: { status: 'gone', url: 'https://x.example/1',
+    title: '', institution: '', applyByDate: '2026-08-01', applyByProse: '',
+    listedUntil: '', checkedAt: '2026-08-23T00:00:00Z' } });
+  ok(/no longer up/.test(adGone.html), 'a listing that has come down is said to be down');
+  ok(!/What the advertisement says/.test(mail.html),
+    'while a posting with no ad block carries no mention');
 
   // only pending-and-unmailed, oldest first
   const queue = [

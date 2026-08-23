@@ -51,6 +51,12 @@ import {
   isHigherEdJobsUrl, jobCodeOf, detailsUrl, hejDate, DEADLINE_FIELDS,
 } from './higheredjobs.mjs';
 import {
+  parseAdvert, advertDate, advertKeyOf, isAdvertUrl, workdayApiUrl,
+  applyAdverts, cacheEntry as advertCacheEntry, needFetch as advertNeedFetch,
+  adBlock, sameAdInfo, queueNeedsFetch,
+  DEADLINE_LABELS as ADVERT_DEADLINE_LABELS, LISTING_END_LABELS,
+} from './adverts.mjs';
+import {
   COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
   needMail, changedKeys, approvedRow, duplicatesOf, sameDups, businessCheck, sameBiz,
@@ -5144,6 +5150,247 @@ async function testHigherEdJobsWiring() {
 }
 
 
+/* ------------------------------------------ every OTHER advertisement host */
+
+/** A page in the shape the generic applicant-tracking systems serve: a
+    JobPosting JSON-LD block wrapped in @graph — with the validThrough trap —
+    and a PeopleAdmin-style details table naming the real closing date. */
+const GENERIC_AD = `<!doctype html><html><head>
+<title>Faculty openings</title>
+<script type="application/ld+json">
+{ "@context":"http://schema.org/", "@graph":[ {"@type":"WebSite","name":"x"},
+  { "@type":"JobPosting",
+    "title":"Assistant Professor of Operations Management",
+    "datePosted":"2026-08-10",
+    "validThrough":"2028-01-31",
+    "hiringOrganization":{"@type":"Organization","name":"Example University"},
+    "jobLocation":{"@type":"Place","address":{"@type":"PostalAddress",
+      "addressLocality":"Springfield","addressRegion":"IL","addressCountry":"US"}},
+    "employmentType":"FULL_TIME" } ] }
+</script></head><body>
+<h1>Assistant Professor of Operations Management</h1>
+<table>
+  <tr><th>Open Date</th><td>08/10/2026</td></tr>
+  <tr><th>Close Date</th><td>10/15/2026</td></tr>
+</table>
+</body></html>`;
+
+function testAdvertsParsing() {
+  const ad = parseAdvert(GENERIC_AD);
+
+  ok(ad.ok, 'a generic applicant-tracking page parses');
+  eq(ad.applyByDate, '2026-10-15', 'the deadline is the page\'s own labelled Close Date');
+  eq(ad.title, 'Assistant Professor of Operations Management', 'the position is read');
+  eq(ad.institution, 'Example University', 'and the employer');
+  eq(ad.location, 'Springfield, IL, US', 'and where the post is');
+  eq(ad.posted, '2026-08-10', 'and when it was advertised');
+
+  /* THE HIGHEREDJOBS LESSON, GENERALISED — the reason this module is not a
+     three-line JSON-LD reader. `validThrough` is when the LISTING comes
+     down, ~18 months out on the boards, and it may never become a deadline
+     anywhere. It is recorded separately, labelled as what it is. */
+  eq(ad.listedUntil, '2028-01-31', 'validThrough is recorded as the listing\'s end');
+  const ldOnly = parseAdvert(GENERIC_AD.replace(/<table>[\s\S]*?<\/table>/, ''));
+  eq(ldOnly.applyByDate, '', 'and with no labelled deadline the posting gets NO date — ' +
+    'validThrough is never one');
+  eq(ldOnly.listedUntil, '2028-01-31', 'while the listing\'s end is still shown for what it is');
+  ok(!ADVERT_DEADLINE_LABELS.some((l) => /valid\s*through|end date|expir/i.test(l)),
+    'no listing-end label is in the list a deadline may come from');
+  ok(LISTING_END_LABELS.every((l) => !ADVERT_DEADLINE_LABELS.includes(l)),
+    'and the two label lists are disjoint');
+
+  // the other two labelled shapes
+  eq(parseAdvert('<h1>Post</h1><dl><dt>Closing date</dt><dd>15 October 2026</dd></dl>')
+    .applyByDate, '2026-10-15', 'a dt/dd closing date is read');
+  eq(parseAdvert('<h1>Post</h1><p><strong>Application deadline:</strong> October 15, 2026</p>')
+    .applyByDate, '2026-10-15', 'and a bold-label one');
+
+  // the employer's own sentence, believed only when it parses to a date
+  const prose = parseAdvert('<h1>Post</h1><p>The application deadline is 15 October 2026.</p>');
+  eq(prose.applyByDate, '2026-10-15', 'a deadline stated in prose is read');
+  const openEnded = parseAdvert(
+    '<h1>Post</h1><table><tr><th>Close Date</th><td>Open until filled</td></tr></table>');
+  eq(openEnded.applyByDate, '', 'an open-ended search carries no date');
+  ok(/until filled/i.test(openEnded.applyByProse), 'though what it said is kept');
+
+  /* AN AMBIGUOUS ALL-NUMERIC DATE IS REFUSED, NOT GUESSED. These pages are
+     written on both sides of the Atlantic; "05/10/2026" is the fifth of
+     October in Coventry and the tenth of May in Salt Lake City, and unlike
+     the sheet ingest this parser has no cell that has to mean something. */
+  eq(advertDate('05/10/2026'), '', 'a date that could be either order is refused');
+  eq(advertDate('25/10/2026'), '2026-10-25', 'one whose day settles the order is read');
+  eq(advertDate('10/25/2026'), '2026-10-25', 'in either direction');
+  eq(advertDate('2026-10-15 23:59'), '2026-10-15', 'ISO is read, with or without a time');
+  eq(advertDate('15th October 2026'), '2026-10-15', 'and both wordy orders');
+  eq(advertDate('October 15th, 2026'), '2026-10-15', 'with or without their ordinals');
+  eq(advertDate('rolling'), '', 'and prose is not forced into a date');
+
+  // a page in a shape this does not know changes nothing rather than half-read
+  eq(parseAdvert('<html><body><p>Something else entirely</p></body></html>').ok, false,
+    'an unrecognised page does not parse');
+  ok(parseAdvert('<html><body>This position has been filled.</body></html>').gone,
+    'and a listing that has come down is recognised as gone');
+
+  /* ONE URL, ONE OWNER. higheredjobs.com has its own pipeline and cache; two
+     caches for one advertisement would disagree silently. The other skips
+     each have their reason in adverts.mjs. */
+  ok(!isAdvertUrl('https://www.higheredjobs.com/faculty/details.cfm?JobCode=1'),
+    'a HigherEdJobs link belongs to the HigherEdJobs pass, not this one');
+  ok(!isAdvertUrl('https://docs.google.com/document/d/x.y'), 'a Google Doc is never fetched');
+  ok(!isAdvertUrl('https://www.linkedin.com/jobs/view/123'), 'nor LinkedIn\'s login wall');
+  ok(!isAdvertUrl('https://www.operationsacademia.org/'), 'nor our own home page');
+  ok(!isAdvertUrl('javascript:alert(1)//x.y'), 'nor anything that is not an http(s) URL');
+  ok(isAdvertUrl('https://jobs.chronicle.com/job/38018595/x/'), 'while a board link is');
+
+  // the advertisement's identity: the URL, minus its tracking decoration
+  eq(advertKeyOf('https://jobs.chronicle.com/job/1/x/?LinkSource=PremiumListing&utm_source=a#top'),
+    advertKeyOf('https://www.jobs.chronicle.com/job/1/x'),
+    'two links to one advertisement share one cache key');
+  ok(advertKeyOf('https://www.higheredjobs.com/faculty/details.cfm?JobCode=1') === '',
+    'and a URL this pass does not own gets no key at all');
+
+  // Workday's pages are a JS shell over a public JSON endpoint
+  eq(workdayApiUrl('https://psu.wd1.myworkdayjobs.com/en-US/PSU_Academic/job/Penn-State/Slug-1'),
+    'https://psu.wd1.myworkdayjobs.com/wday/cxs/psu/PSU_Academic/job/Slug-1',
+    'a Workday job URL maps to its tenant\'s CXS endpoint');
+  eq(workdayApiUrl('https://umd.wd1.myworkdayjobs.com/exstaff/job/Campus/Title_JR100'),
+    'https://umd.wd1.myworkdayjobs.com/wday/cxs/umd/exstaff/job/Title_JR100',
+    'with or without the locale segment');
+  eq(workdayApiUrl('https://utah.peopleadmin.com/postings/195629'), '',
+    'and anything else is read as the ordinary page it is');
+}
+
+function testAdvertsApply() {
+  const link = 'https://apply.example.com/12345?utm_source=x';
+  const key = advertKeyOf(link);
+  const cache = {
+    generated: '', ads: {
+      [key]: advertCacheEntry(parseAdvert(GENERIC_AD),
+        { adUrl: link, checkedAt: '2026-08-18T00:00:00Z', via: 'page' }),
+    },
+  };
+
+  /* The same three rules as the HigherEdJobs apply, pinned again here
+     because this is a second implementation of them. */
+  const openEnded = [{ id: 'a', adUrl: link, applyBy: 'Until filled.', applyByDate: '' }];
+  const got = applyAdverts(openEnded, cache, { today: '2026-08-18' });
+  eq(got.rows[0].applyByDate, '2026-10-15', 'an open-ended posting takes the ad\'s deadline');
+  eq(got.rows[0].applyBy, longDate('2026-10-15'), 'shown the way the site writes a date');
+  eq(got.changed.length, 1, 'and the correction is reported');
+  const again = applyAdverts(got.rows, cache, { today: '2026-08-18' });
+  eq(serialise(again.rows), serialise(got.rows), 're-applying is a no-op');
+
+  const typed = [{ id: 'b', adUrl: link, applyBy: 'September 1, 2026', applyByDate: '2026-09-01' }];
+  const kept = applyAdverts(typed, cache, { today: '2026-08-18' });
+  eq(kept.rows[0].applyByDate, '2026-09-01', 'a deadline from the sheet wins over the ad');
+  eq(kept.conflicts.length, 1, 'but the disagreement is reported');
+
+  const unread = { ads: { [key]: { status: 'unreadable', applyByDate: '' } } };
+  eq(serialise(applyAdverts(openEnded, unread, {}).rows), serialise(openEnded),
+    'an unreadable advertisement leaves the posting exactly as it was');
+
+  /* THE TWO PASSES SELECT DISJOINT ROWS — a HigherEdJobs posting is never
+     touched by this one, so the order the sheet sync re-applies the two
+     caches in cannot matter. */
+  const hej = [{ id: 'c', adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1',
+    applyBy: 'Until filled.', applyByDate: '' }];
+  eq(serialise(applyAdverts(hej, cache, {}).rows), serialise(hej),
+    'a HigherEdJobs posting is left to the HigherEdJobs pass');
+
+  // what is fetched, and what is left alone — the same four rules
+  const row = { id: 'a', adUrl: link, posted: '2026-08-15' };
+  eq(advertNeedFetch([row], { ads: {} }, { today: '2026-08-18' }).length, 1,
+    'an advertisement never read is read');
+  eq(advertNeedFetch([row], cache, { today: '2026-08-18', ttlDays: 7 }).length, 0,
+    'one read a moment ago is left alone');
+  eq(advertNeedFetch([row], cache, { today: '2026-11-30', ttlDays: 7 }).length, 0,
+    'one whose deadline has passed is frozen — the search is over');
+  eq(advertNeedFetch([row], cache, { today: '2026-08-18', force: true }).length, 1,
+    '--force reads it anyway');
+
+  /* The `ad` block a pending review document carries — RAISED, never
+     decided, like dup and biz beside it. */
+  const block = adBlock(cache.ads[key], { adUrl: link });
+  eq(block.applyByDate, '2026-10-15', 'the queue block carries the deadline the ad states');
+  eq(block.listedUntil, '2028-01-31', 'and the listing\'s end, labelled separately');
+  ok(sameAdInfo(block, adBlock(cache.ads[key], { adUrl: link })),
+    'two blocks that say the same thing compare equal — an unchanged run writes nothing');
+  const doc = { rowId: 'x', status: 'pending', row: { adUrl: link }, ad: null };
+  ok(queueNeedsFetch(doc, { today: '2026-08-18' }).fetch,
+    'a pending posting with no block is read');
+  ok(!queueNeedsFetch({ ...doc, ad: block, edits: {} }, { today: '2026-08-19', ttlDays: 7 }).fetch,
+    'a fresh block is left alone');
+  ok(queueNeedsFetch({ ...doc, ad: block, edits: { adUrl: 'https://other.example.com/2' } },
+    { today: '2026-08-19' }).fetch, 'a re-linked advertisement is read again');
+  ok(queueNeedsFetch({ rowId: 'y', status: 'pending',
+    row: { adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=9' } },
+    { today: '2026-08-19' }).fetch,
+    'and on the QUEUE a HigherEdJobs advertisement is read too — the published ' +
+    'HigherEdJobs pass only ever sees approved rows, so a pending card would ' +
+    'otherwise show nothing');
+}
+
+async function testAdvertsWiring() {
+  /* The same three-file agreement as the HigherEdJobs wiring, because a
+     broken link between them fails the same silent way. */
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(sync.includes('applyAdverts'),
+    'the sheet sync re-applies what the advertisements said');
+  ok(sync.includes('adverts.json'), 'reading it from the committed cache');
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-adverts-verify.yml'), 'utf8');
+  ok(wf.includes('adverts-verify.mjs'), 'the workflow runs the check');
+  ok(wf.includes('node _scraper/selftest.mjs'),
+    'and re-checks the files it is about to commit, like every other writer of data/');
+  ok(/group: oa-jobs-data-/.test(wf),
+    'it shares the data/ concurrency group, so it never races the sheet read or the build');
+  ok(wf.includes('--apply-only'),
+    'and a rejected push re-applies onto the new tip rather than pushing over it');
+  ok(wf.includes('FIREBASE_SERVICE_ACCOUNT'),
+    'and it carries the credentials the review-queue pass needs');
+
+  /* The queue pass writes the `ad` block and NOTHING else — never the
+     decision, never the edits. Read from the source, like the panel pins. */
+  const verify = await readFile(path.join(HERE, 'adverts-verify.mjs'), 'utf8');
+  ok(verify.includes('.set({ ad: block }, { merge: true })'),
+    'the queue pass writes only the ad block, by merge');
+  eq((verify.match(/\.set\(/g) || []).length, 1,
+    'and that merge is the ONLY document write in the file — never the ' +
+    'decision, never the edits');
+  ok(!verify.includes('.update(') && !verify.includes('.delete('),
+    'no other write path exists');
+
+  /* The block reaches both places the decision is made — the card and the
+     e-mail — with the button that fills the box rather than deciding. */
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  ok(panel.includes('data-advert'), 'the review card draws what the advertisement says');
+  ok(panel.includes('data-ad-use'), 'with a button that fills the Closing-date box');
+  ok(panel.includes("querySelector('[data-key=\"applyByDate\"]')"),
+    'and the button fills exactly the box the card publishes from');
+  const mailer = await readFile(path.join(HERE, 'jobreview-mailer.mjs'), 'utf8');
+  ok(mailer.includes('advertHtml(doc)'), 'and the review e-mail says the same thing');
+
+  /* The cache is data/, so it must survive a round trip like every other
+     file there — and the served postings must still satisfy the served-file
+     rules after the pass has touched them. */
+  if (existsSync(path.join(HERE, '..', 'data', 'adverts.json'))) {
+    const cache = JSON.parse(
+      await readFile(path.join(HERE, '..', 'data', 'adverts.json'), 'utf8'));
+    ok(cache && typeof cache.ads === 'object', 'the committed cache has the shape it should');
+    for (const [k, ad] of Object.entries(cache.ads)) {
+      ok(['ok', 'gone', 'unreadable'].includes(ad.status), `cache ${k}: a known status`);
+      ok(!ad.applyByDate || /^\d{4}-\d{2}-\d{2}$/.test(ad.applyByDate),
+        `cache ${k}: the deadline is ISO`);
+      ok(advertKeyOf(ad.url) === k, `cache ${k}: its url names the same advertisement`);
+    }
+    const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'jobmarket.json'), 'utf8'));
+    const applied = applyAdverts(rows, cache, {});
+    eq(serialise(applied.rows), serialise(rows),
+      'the committed postings already carry what the advertisements said');
+  }
+}
+
 /* ------------------------------------------------ the posting review queue */
 
 const RV_ROW = {
@@ -5582,7 +5829,7 @@ async function testReviewWiring() {
      writer is the outage this file records, and the flag CREEPING INTO the PR
      check would leave nothing enforcing it anywhere. */
   const WRITERS = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
-    'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml'];
+    'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml'];
   for (const name of WRITERS) {
     const src = await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8');
     const runs = [...src.matchAll(/node _scraper\/selftest\.mjs([^\n]*)/g)].map((m) => m[1]);
@@ -5954,6 +6201,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testHigherEdJobsParsing();
   testHigherEdJobsApply();
   await testHigherEdJobsWiring();
+  testAdvertsParsing();
+  testAdvertsApply();
+  await testAdvertsWiring();
   testReviewQueue();
   testReviewDuplicates();
   testReviewBusiness();

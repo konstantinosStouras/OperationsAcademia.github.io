@@ -60,6 +60,7 @@ import {
   stalenessOf, shouldWarn, emptyRegistry, adoptSheets, activeSheets, rollRegistry,
 } from './jobmarket-sheet.mjs';
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
+import { applyAdverts, emptyCache as emptyAdvertsCache } from './adverts.mjs';
 import {
   COLLECTION as REVIEW_COL, partition, needMail, PENDING,
   duplicatesOf, sameDups, businessCheck, sameBiz,
@@ -73,6 +74,7 @@ const ROWS_FILE = path.join(DATA, 'jobmarket.json');
 const META_FILE = path.join(DATA, 'jobmarket-meta.json');
 const REG_FILE = path.join(DATA, 'jobmarket-sheets.json');
 const VERIFIED_FILE = path.join(DATA, 'higheredjobs.json');
+const ADVERTS_FILE = path.join(DATA, 'adverts.json');
 /* The postings the site is showing, whatever their source — what a crawled
    row is checked against for DUPLICATES before the maintainer is asked about
    it. Read leniently: no file just means no flags, never a failed run. */
@@ -264,6 +266,18 @@ async function readVerifiedCache() {
     return (cache && cache.ads) ? cache : emptyCache();
   } catch {
     return emptyCache();
+  }
+}
+
+/** Its sibling for every OTHER advertisement host — data/adverts.json,
+    written by adverts-verify.mjs. Read just as leniently, for the same
+    reason. */
+async function readAdvertsCache() {
+  try {
+    const cache = JSON.parse(await readFile(ADVERTS_FILE, 'utf8'));
+    return (cache && cache.ads) ? cache : emptyAdvertsCache();
+  } catch {
+    return emptyAdvertsCache();
   }
 }
 
@@ -616,6 +630,22 @@ async function main() {
             'HigherEdJobs advertisement states');
       }
       for (const c of verified.conflicts) {
+        warn(`${c.id}: the sheet says ${c.sheet}, the advertisement says ${c.ad} — ` +
+             'the sheet wins; correct it there if the advertisement is right');
+      }
+
+      /* …and the same re-apply for every OTHER advertisement host, from
+         data/adverts.json (adverts-verify.mjs). One cache per pipeline, one
+         URL per owner — the two select disjoint rows, so the order of the
+         two applies cannot matter. */
+      const adverts = applyAdverts(rows, await readAdvertsCache(),
+        { today: isoStamp(now).slice(0, 10) });
+      rows = adverts.rows;
+      if (adverts.changed.length) {
+        log(`${adverts.changed.length} posting(s) took the deadline their ` +
+            'own advertisement states');
+      }
+      for (const c of adverts.conflicts) {
         warn(`${c.id}: the sheet says ${c.sheet}, the advertisement says ${c.ad} — ` +
              'the sheet wins; correct it there if the advertisement is right');
       }

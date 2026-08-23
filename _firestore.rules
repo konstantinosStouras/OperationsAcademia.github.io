@@ -512,7 +512,7 @@ service cloud.firestore {
                         ['pending', 'approved', 'rejected']
                    && request.resource.data.keys().hasOnly([
                         'rowId', 'status', 'row', 'edits',
-                        'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup', 'biz',
+                        'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup', 'biz', 'ad',
                       ])
                    && str('queuedAt', 40) && str('reviewedAt', 40)
                    && str('mailedAt', 40) && str('note', 1000)
@@ -527,6 +527,11 @@ service cloud.firestore {
                    && (!('biz' in request.resource.data)
                        || request.resource.data.biz == null
                        || request.resource.data.biz is map)
+                   // what the posting's own advertisement says, written by
+                   // adverts-verify.mjs; the panel only reads it
+                   && (!('ad' in request.resource.data)
+                       || request.resource.data.ad == null
+                       || request.resource.data.ad is map)
                    && (!('edits' in request.resource.data)
                        || (request.resource.data.edits is map
                            && request.resource.data.edits.keys().hasOnly([
