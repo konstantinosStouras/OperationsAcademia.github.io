@@ -37,13 +37,18 @@ import {
 } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { COLLECTION as REVIEW_COL, approvedRow } from './jobreview.mjs';
-import { buildVocab, serialiseVocab } from './vocab.mjs';
+import { buildVocab, serialiseVocab, SCHOOLS } from './vocab.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
 const JOBS = path.join(DATA, 'jobs.json');
 const META = path.join(DATA, 'jobs-meta.json');
 const VOCAB = path.join(DATA, 'vocab.json');
+/* The name corrections the maintainer has APPROVED from posters' suggestions
+   (Firestore `nameFixes`, reviewed on admin-area.html). Served, because the
+   posting form applies the same overlay to its own preview; holds names only,
+   never who suggested them — nothing under data/ may carry an e-mail. */
+const FIXES = path.join(DATA, 'name-fixes.json');
 /* The maintainer's job market tracking sheet, read by sync-jobmarket-sheet.mjs
    into rows of exactly this file's shape. It is a SECOND source of postings,
    beside the database — see the block in main() that merges it. */
@@ -401,6 +406,47 @@ async function main() {
 
   const now = new Date();
 
+  /* ------------------------------------------- approved name corrections
+
+     Posters suggest them (assets/oa-namefix.js), the maintainer approves them
+     on admin-area.html, and THIS is where an approval takes effect: the
+     approved set is read from Firestore, written into the served
+     data/name-fixes.json (which the posting form overlays on its own
+     preview), and applied — through oa-schools.js's fixPlace, AFTER canon —
+     to every row this run publishes and to the vocabulary. One approval
+     renames the old spelling across the whole live dataset.
+
+     normalizeFixes() makes every target canonical under the BUILT-IN rules,
+     which is what keeps the selftest's "every posting names its place the one
+     way" guard green without it having to know a fix exists; the frozen
+     archives are deliberately NOT touched (rowOverrides and --heal-names are
+     their repair paths), and a fix that keeps earning its keep is promoted
+     into oa-schools.js's alias tables, which reach everything.
+
+     AN UNREACHABLE QUEUE CHANGES NOTHING — the committed file stands, so a
+     run without credentials can never let a fixed sheet row regress to the
+     workbook's old spelling, and never applies a fix nobody approved. */
+  const committedFixes = await readJson(FIXES, null);
+  let fixes = SCHOOLS.normalizeFixes((committedFixes && committedFixes.fixes) || []);
+  let fixesFresh = false;   // only a successful Firestore read rewrites the file
+  if (db) {
+    try {
+      const snap = await db.collection('nameFixes').where('status', '==', 'approved').get();
+      const raw = snap.docs
+        .map((d) => d.data() || {})
+        .sort((a, b) => (a.kind + '|' + (a.institution || '') + '|' + (a.from || ''))
+          .localeCompare(b.kind + '|' + (b.institution || '') + '|' + (b.from || '')));
+      fixes = SCHOOLS.normalizeFixes(raw);
+      fixesFresh = true;
+    } catch (e) {
+      warn(`could not read the approved name corrections (${e.message}) — ` +
+           'applying the committed ones');
+    }
+  }
+  if (fixes.length) {
+    log(`${fixes.length} approved name correction(s) in force`);
+  }
+
   /* ------------------------------------------ the job market tracking sheet
 
      Read BEFORE the submissions are turned into rows, because two decisions
@@ -541,7 +587,7 @@ async function main() {
   for (const d of live) {
     let row = null;
     try {
-      row = rowFromSubmission(d.data(), { now });
+      row = rowFromSubmission(d.data(), { now, fixes });
     } catch (e) {
       // One unreadable document must not kill the run: it stays as it is, so
       // without this the next scheduled run dies on it too and no posting is
@@ -653,8 +699,26 @@ async function main() {
   });
   const { publishedFromDoc, stranded } = handover;
 
+  /* THE SHEET'S ROWS HEAR ABOUT A CORRECTION HERE. data/jobmarket.json is
+     rewritten from the workbook (which keeps its own spellings) and the sheet
+     sync deliberately does NOT apply fixes — so the overlay is laid on at
+     publish time, every run, exactly like the HigherEdJobs cache.
+
+     THE ID NEVER MOVES, the same rule the map heal follows. A sheet row's id
+     is its join key everywhere — the workbook-existence check, the review
+     queue's documents, the mirror's sheetId, and oa-jobedit's Edit button all
+     name it — and healPlace would re-derive it (a sheet id IS jobId-shaped),
+     which would orphan every one of those. So it is put back. Skipped
+     entirely when no fix is in force, so a fix-free run is byte-identical. */
+  const sheetPublished = fixes.length
+    ? handover.rows.map((r) => {
+        const h = healPlace(r, fixes);
+        return h === r ? r : { ...h, id: r.id };
+      })
+    : handover.rows;
+
   const freshVisible = fresh.map((f) => f.row)
-    .concat(handover.rows)
+    .concat(sheetPublished)
     .filter((r) => !hidden.has(r.ref) && !hidden.has(r.id));
 
   if (stranded.length) {
@@ -719,7 +783,7 @@ async function main() {
      "every posting names its place the one way" guard would go red, which by
      design stops the build committing anything. healPlace is pure and
      idempotent, so a run with no new alias changes nothing. */
-  const healed = orphans.map(healPlace);
+  const healed = orphans.map((r) => healPlace(r, fixes));
   const renamed = healed.filter((r, i) => r !== orphans[i]);
   if (renamed.length) {
     log(`${renamed.length} carried posting(s) renamed to the site's current spelling: ` +
@@ -760,7 +824,7 @@ async function main() {
      Nothing else in the pipeline needs to know it exists. */
   const seeded = [...(Array.isArray(directory) ? directory : []), ...institutionSeed()];
 
-  const vocab = buildVocab(rows, { generated: now.toISOString(), directory: seeded });
+  const vocab = buildVocab(rows, { generated: now.toISOString(), directory: seeded, fixes });
 
   /* THE PAGE shows only the market year under way (owner, 2026-08-16), but
      the FILE stays complete: it is the projection of every live document, the
@@ -821,6 +885,22 @@ async function main() {
     log(`wrote ${path.relative(process.cwd(), VOCAB)} ` +
         `(${vocab.universities.length} universities, ${vocab.schools.length} schools, ` +
         `${vocab.units.length} departments)`);
+  }
+
+  /* data/name-fixes.json follows the same discipline as vocab.json: rewritten
+     only from a SUCCESSFUL queue read (an unreachable queue changes nothing),
+     and only when the fixes themselves changed — `generated` alone must not
+     commit an identical file every run. It holds names only, never who
+     suggested them: data/ is served to anyone who asks. */
+  const fixesBare = (v) => JSON.stringify((v && v.fixes) || []);
+  if (fixesFresh && fixesBare(committedFixes) !== fixesBare({ fixes })) {
+    if (DRY) {
+      log('--dry-run: not writing name-fixes.json.');
+    } else {
+      await writeFile(FIXES,
+        JSON.stringify({ generated: now.toISOString(), fixes }, null, 1) + '\n');
+      log(`wrote ${path.relative(process.cwd(), FIXES)} (${fixes.length} correction(s))`);
+    }
   }
 
   /* ------------------------------------------ tell the admin what changed

@@ -1594,6 +1594,54 @@ for (const [name, expect] of [
   ok((await f.textContent('#f-department-preview')).includes(unit),
     'form: the poster is shown what will appear under the institution name');
 
+  /* ------------------------------------------------ DID YOU MEAN, on screen
+
+     The merge guard the unit tests cannot see: a typed near-miss of a name
+     the site already lists (here a typo of Tulane's own "Management Science")
+     is pointed at the existing entry ABOVE the "new name" row — with both on
+     offer, because only the poster knows whether their department genuinely
+     is new. A second spelling splits a place's postings across two entries in
+     every filter, which is the mess the vocabulary exists to end. */
+  await f.fill('#f-unit', '');
+  await f.fill('#f-unit', 'Managment Science');
+  await f.waitForTimeout(250);
+  const nearRows = await f.$$eval('.oa-combo-near-opt .oa-combo-name',
+    (n) => n.map((x) => x.textContent));
+  ok(nearRows[0] === 'Management Science',
+    `form: a typo of an existing department draws its did-you-mean row (${JSON.stringify(nearRows)})`);
+  ok((await f.$$eval('.oa-combo-list:not([hidden]) .oa-combo-add', (n) => n.length)) === 1,
+    'form: while the new-name row stays on offer — a suggestion, never a restriction');
+  await f.click('.oa-combo-near-opt');
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-unit'), 'Management Science',
+    'form: taking the did-you-mean row merges the posting into the existing entry');
+
+  /* --------------------------------- the Type follows the chosen names
+
+     Choosing "A. B. Freeman School of Business" states the answer to "Type of
+     institution", so an EMPTY select is filled ("Business School") — and a
+     value the poster picked themselves is never overruled, exactly like the
+     three names. */
+  await f.evaluate(() => { document.getElementById('f-type').value = ''; });
+  await f.fill('#f-school', 'A. B. Freeman School of Business');
+  await f.evaluate(() => document.getElementById('f-school')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-type'), 'Business School',
+    'form: the empty Type select follows the chosen school');
+  await f.evaluate(() => {
+    const t = document.getElementById('f-type');
+    t.value = 'University';                       // the poster's own choice…
+    t.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await f.evaluate(() => document.getElementById('f-school')
+    .dispatchEvent(new Event('change', { bubbles: true })));
+  await f.waitForTimeout(150);
+  eq(await f.inputValue('#f-type'), 'University',
+    'form: …and a Type the poster picked is never overruled by the guess');
+  await f.fill('#f-school', 'Wibble School of Widgets');   // back where the blocks above left it
+  await f.fill('#f-unit', unit);
+
   /* ---------------------------------------------- the picker on a phone
 
      _MOBILE-STANDARDS.md rules 3, 5 and 6, over the one list on this site the
@@ -1840,6 +1888,11 @@ for (const [name, expect] of [
   const pair = await j.evaluate(() => {
     const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
       .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
+    /* Both sides of a converging history fixed this derivation on the same
+       day, for the same reason (the first card was "City University of Hong
+       Kong", its word was "university", and no second term could widen the
+       OR); master's fix is kept — it also refuses the GENERIC words as terms,
+       which is the stronger guarantee. */
     const GENERIC = ['university', 'school', 'college', 'institute', 'state', 'business'];
     const word = (n) => (n.split(/[\s,(]+/)
       .map((w) => w.replace(/[^a-z]/g, ''))
@@ -3654,6 +3707,16 @@ for (const w of [320, 360, 390, 430]) {
         first: 'Wendy', last: 'Withdrew', createdAt: '2026-08-19T09:00:00.000Z' } },
     { path: 'candidateSubmissions/c4', data: { uid: 'u-cand-4', status: 'hidden', year: 2027,
         first: 'Harry', last: 'Hidden', createdAt: '2026-08-18T09:00:00.000Z' } },
+    /* the fifth queue: a poster's name correction waiting for a decision, and
+       one already approved — which must NOT count, only wait for the build */
+    { path: 'nameFixes/n1', data: { kind: 'unit', from: 'Operations Managment',
+        to: 'Operations Management', institution: 'Test University One',
+        note: 'the department’s own page spells it so', uid: 'u-fix-1',
+        authEmail: 'fixer@example.edu', status: 'pending',
+        createdAt: '2026-08-21T10:00:00.000Z' } },
+    { path: 'nameFixes/n2', data: { kind: 'school', from: 'Olde School of Business',
+        to: 'New School of Business', institution: '', note: '', uid: 'u-fix-2',
+        authEmail: '', status: 'approved', createdAt: '2026-08-19T10:00:00.000Z' } },
   ];
   const seededHeld = preReveal ? 2 : 0;   // c1 + c2 are queued
 
@@ -3674,7 +3737,7 @@ for (const w of [320, 360, 390, 430]) {
 
   /* -- the badge, on a page that is NOT the admin area ---------------------- */
   {
-    const expected = 2 + metaHeld + 2 + newsPending;
+    const expected = 2 + metaHeld + 2 + newsPending + 1;   // + the pending name fix
     const { ctx, q, errors } = await adminAreaPage(ADMIN, 'index.html');
     await q.waitForSelector('#oa-chip', { timeout: 10000 });
     eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 1,
@@ -3686,7 +3749,8 @@ for (const w of [320, 360, 390, 430]) {
       return el && el.textContent === String(want);
     }, expected, { timeout: 15000 });
     ok(true, `admin area: the badge lands on ${expected} — 2 pending reviews + ` +
-      `${metaHeld} held profiles + 2 open tickets + ${newsPending} unpublished updates`);
+      `${metaHeld} held profiles + 2 open tickets + ${newsPending} unpublished updates ` +
+      '+ 1 name correction');
     ok(await q.evaluate(() =>
       document.querySelectorAll('script[src="assets/oa-news.js"]').length <= 1 &&
       document.querySelectorAll('script[src="assets/oa-adminarea.js"]').length <= 1),
@@ -3763,12 +3827,38 @@ for (const w of [320, 360, 390, 430]) {
     ok(await q.locator('article[data-id="c1"] a[href="https://example.edu/jane"]').count() === 1,
       'admin area: while a real https link is still a link');
 
+    /* THE FIFTH QUEUE: the pending name correction is on screen with the
+       decision buttons, the approved one waits under its own heading (for
+       the build, not for a click), and approving really writes — status,
+       the timestamp, and the maintainer's own correction to the correction. */
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-names-list .oa-aa-fix').length === 2,
+      null, { timeout: 10000 });
+    const fixesText = await q.textContent('#oa-aa-names-list');
+    ok(fixesText.includes('Operations Managment') && fixesText.includes('Operations Management'),
+      'admin area: the suggested correction shows both spellings, old and new');
+    ok(fixesText.includes('Olde School of Business'),
+      'admin area: and an already-approved one is still on screen, never vanished');
+    await q.fill('article[data-id="n1"] input[data-role="to"]', 'Operations Management Group');
+    await q.click('article[data-id="n1"] button[data-act="approve"]');
+    await q.waitForFunction(() => {
+      const d = window.__fb.docs['nameFixes/n1'];
+      return d && d.status === 'approved' && d.to === 'Operations Management Group' && d.reviewedAt;
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: Approve writes the decision, the reworded target and the timestamp');
+    await q.waitForFunction(() => {
+      const card = document.querySelector('article[data-id="n1"]');
+      return card && card.querySelector('button[data-act="reopen"]');
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: and the decided card re-renders one click from re-opening');
+
     // the tiles and the badge, corrected from the documents on screen
     await q.waitForFunction((want) => {
       const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
-      return els.length === 4 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
-    }, ['2', seededHeld, '2', newsPending].join(','), { timeout: 10000 });
-    ok(true, 'admin area: the four tiles agree with the panels beneath them');
+      return els.length === 5 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
+    }, ['2', seededHeld, '2', newsPending, 0].join(','), { timeout: 10000 });
+    ok(true, 'admin area: the five tiles agree with the panels beneath them — the ' +
+      'approved fix no longer counts as waiting');
     eq(await q.evaluate(() =>
       (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
       2 + seededHeld + 2 + newsPending,

@@ -406,6 +406,73 @@
                     </div>
                   </form>
 
+                  <!-- ------------------------- suggest a name correction
+
+                       A poster who knows a university, school or department
+                       name is published WRONGLY on the site can say so here
+                       (assets/oa-namefix.js). Nothing renames itself: the
+                       suggestion is queued for the maintainer on
+                       admin-area.html, and once approved the data build
+                       renames every posting and vocabulary entry carrying the
+                       old spelling. Drawn for signed-in visitors only — the
+                       same bar as posting — and OUTSIDE the job form, so its
+                       fields never travel with a posting and Enter in one of
+                       them cannot submit somebody's half-written job. -->
+                  <section class="oa-namefix" id="oa-namefix" hidden>
+                    <p class="oa-hint" id="oa-namefix-lede">Is a university, school or
+                      department name published wrongly on this site? &nbsp;
+                      <button type="button" class="button oa-btn-ghost oa-btn-sm"
+                        id="oa-namefix-open">Suggest a correction</button></p>
+
+                    <div class="oa-namefix-form" id="oa-namefix-form" hidden>
+                      <h3>Suggest a name correction</h3>
+                      <p class="oa-hint">Once the maintainer approves it, every posting
+                        that carries the old spelling is renamed and the pickers above
+                        stop offering it &mdash; usually within the hour.</p>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="nf-kind">Which name is wrong?</label>
+                          <select id="nf-kind">
+                            <option value="institution">A university / institution</option>
+                            <option value="school">A school, faculty or college</option>
+                            <option value="unit" selected>A department, area or group</option>
+                          </select>
+                        </div>
+                        <div class="oa-field" id="nf-inst-field">
+                          <label for="nf-inst">At which university?</label>
+                          <p class="oa-hint">Scopes the fix to that university. Leave empty
+                            only if the name is wrong everywhere it appears.</p>
+                          <input type="text" id="nf-inst" maxlength="200">
+                        </div>
+                      </div>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="nf-from">The name as the site publishes it now</label>
+                          <input type="text" id="nf-from" maxlength="200">
+                        </div>
+                        <div class="oa-field">
+                          <label for="nf-to">What it should be</label>
+                          <input type="text" id="nf-to" maxlength="200">
+                        </div>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="nf-note">How do you know? (optional)</label>
+                        <p class="oa-hint">A link to the school&rsquo;s own page settles it fastest.
+                          Not published.</p>
+                        <input type="text" id="nf-note" maxlength="1000">
+                      </div>
+
+                      <div class="oa-actions">
+                        <button type="button" class="button blue" id="nf-send">Suggest this correction</button>
+                        <button type="button" class="button oa-btn-ghost" id="nf-cancel">Cancel</button>
+                        <p class="oa-form-msg" id="nf-msg" role="alert"></p>
+                      </div>
+                    </div>
+                  </section>
+
                   <div class="oa-done" id="oa-done" hidden>
                     <h3>Thank you &mdash; your posting has been received.</h3>
                     <p>Reference <span class="oa-ticket" id="oa-ref"></span> &mdash; keep this if you
@@ -484,5 +551,6 @@
     <script defer src="assets/oa-place-picker.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-jobform.js"></script>
+    <script defer src="assets/oa-namefix.js"></script>
   </body>
 </html>
