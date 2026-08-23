@@ -1878,9 +1878,23 @@ for (const [name, expect] of [
     const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
       .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
     const word = (n) => (n.split(/[\s,(]+/).find((w) => w.length > 4) || '').replace(/[^a-z]/g, '');
-    const a = word(names[0] || '');
-    const b = names.map(word).find((w) => w && w !== a && !names[0].includes(w));
-    return a && b ? { a, b } : null;
+    /* NEITHER title may contain the OTHER's word, or the pair cannot prove
+       anything: the day the first card was "City University of Hong Kong",
+       its word was "university" and the second term ("george", off "George
+       Mason University") matched only titles that also said "university" —
+       so the OR could not widen and the check went red on what the market
+       did overnight, which is exactly what its own comment forbids. Chosen
+       this way, each term matches a card the other does not, so the second
+       term MUST widen the search if the OR semantics hold. */
+    for (const n1 of names) {
+      const a = word(n1);
+      if (!a) continue;
+      for (const n2 of names) {
+        const b = word(n2);
+        if (b && b !== a && !n2.includes(a) && !n1.includes(b)) return { a, b };
+      }
+    }
+    return null;
   });
   ok(pair, 'jobs: the listing offers two different institutions to search for');
 
