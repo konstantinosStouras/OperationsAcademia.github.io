@@ -6,7 +6,7 @@
                               ->  THIS  ->  one e-mail per submission
        candidateSubmissions /                        |
                                           the maintainer looks at it on
-                                          operationsacademia.org/feedback
+                                          operationsacademia.org/admin-area
 
    WHAT WAS MISSING. The tracking sheet's postings are announced
    (jobreview-mailer.mjs) and everything posted through the site's own forms
@@ -65,7 +65,7 @@ const log = (...a) => console.log(...a);
 const warn = (...a) => console.log('::warning::' + a.join(' '));
 
 /** Where "somebody has posted something" goes. The maintainer's own address,
-    which is also the one the feedback page's panel is gated on. */
+    which is also the one the Admin area's panel is gated on. */
 const TO = process.env.SUBMISSION_ALERT_TO || process.env.JOBREVIEW_ALERT_TO || CONTACT;
 
 /** More than this many at once is a batch arriving, not the market ticking
@@ -95,7 +95,7 @@ export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' 
   const doc = entry.data || {};
   const row = entry.row || null;
   const title = kind.headline(doc, row);
-  const reviewUrl = site + '/feedback';
+  const reviewUrl = site + '/admin-area';
   const editUrl = site + '/' + kind.editPath + encodeURIComponent(entry.id);
 
   const held = kind.key === 'candidate' && revealAt;
@@ -131,7 +131,7 @@ export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' 
  * those is not a digest, it is the same mail bomb in one message.
  */
 export function renderSubmissionDigest(items, { site = SITE } = {}) {
-  const reviewUrl = site + '/feedback';
+  const reviewUrl = site + '/admin-area';
   const rows = items.map(({ kind, entry }) => {
     const title = kind.headline(entry.data || {}, entry.row || null);
     return '<tr>' +
@@ -336,7 +336,7 @@ function selftest() {
   ok(/Management Science/.test(one.html), 'the body carries the posting itself');
   ok(/post-a-job\.html\?edit=j1/.test(one.html),
     'and links straight to the form that corrects it');
-  ok(/https:\/\/x\.test\/feedback/.test(one.html), 'and to the page listing everything waiting');
+  ok(/https:\/\/x\.test\/admin-area/.test(one.html), 'and to the page listing everything waiting');
   ok(/already live/.test(one.html),
     'it says the posting is live — this is a notification, never a gate');
 

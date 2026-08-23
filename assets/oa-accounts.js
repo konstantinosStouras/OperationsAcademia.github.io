@@ -395,11 +395,27 @@
 
   var ICON = {
     post: '&#128221;',
+    admin: '&#128736;',
     mine: '&#128203;',
     alerts: '&#9993;',
     profile: '&#128100;',
     feedback: '&#128172;'
   };
+
+  /* Whether to DRAW the maintainer's menu entry. From the resolved session
+     it is OAAccounts.isAdmin()'s exact test, verified address included; while
+     the header still paints from the localStorage hint the address alone
+     decides, because the hint does not carry verification. That is safe for
+     the same reason every other admin gate here is: drawing a link grants
+     nothing — the rules are the authorisation — and the hint only ever
+     exists for a session that HAS resolved on this browser before. It also
+     keeps the menu's FIRST paint its final form: the row does not pop in a
+     second later when Firebase confirms what the hint already said. */
+  function adminish(u) {
+    if (!u || !window.OAFB || !OAFB.adminEmail) return false;
+    if (String(u.email || '').toLowerCase() !== String(OAFB.adminEmail).toLowerCase()) return false;
+    return u === state.user ? !!u.emailVerified : true;
+  }
 
   function paint() {
     // The off-canvas copy first: it must follow every state change even on a
@@ -476,6 +492,15 @@
             '<a role="menuitem" href="feedback.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.feedback + '</span>Send feedback</a>' +
           '</div>' +
+          /* the maintainer's own row (owner, 2026-08-21): the review desk,
+             with how many items are waiting on it — pending job postings,
+             held candidate profiles, open feedback, unpublished updates */
+          (adminish(u) ?
+            '<div class="oa-acct-group">' +
+              '<a role="menuitem" href="admin-area.html">' +
+                '<span class="oa-mi" aria-hidden="true">' + ICON.admin + '</span>Admin area' +
+                '<span class="oa-acct-n" data-count="admin" hidden></span></a>' +
+            '</div>' : '') +
           '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">' +
             '<span class="oa-mi" aria-hidden="true">&#8618;</span>Sign out</button>' +
         '</div>' +
@@ -573,6 +598,7 @@
         esc(u.email || '') + '</span>' +
       '<a class="link depth-0" href="account.html">Your personal area</a>' +
       '<a class="link depth-0" href="my-postings.html">My postings</a>' +
+      (adminish(u) ? '<a class="link depth-0" href="admin-area.html">Admin area</a>' : '') +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {
@@ -733,16 +759,65 @@
           .catch(function () { return null; }),
         countOf(db.collection(OAFB.col.users).doc(uid).collection(OAFB.col.alerts))
           .catch(function () { return null; }),
+        adminish(state.user) ? adminPending() : Promise.resolve(null),
       ]);
     }).then(function (r) {
       if (!state.user || state.user.uid !== uid) return;   // signed out mid-flight
       var counts = readCounts(uid);
       if (typeof r[0] === 'number') counts.postings = r[0];
       if (typeof r[1] === 'number') counts.alerts = r[1];
+      if (typeof r[2] === 'number') counts.admin = r[2];
       writeCounts(uid, counts);
       paintCounts(counts);
       try { sessionStorage.setItem(COUNT_SESSION, uid); } catch (e) { /* ignore */ }
     }).catch(function () { /* no badge is the honest answer; never show a 0 */ });
+  }
+
+  /* ------------------------------------------- what is waiting for the admin
+
+     The number beside "Admin area": pending job postings + candidate profiles
+     held for the reveal + open feedback tickets + updates awaiting
+     publication. Counted by assets/oa-adminarea.js
+     (OAAdminArea.pendingCounts) — THE SAME function the Admin area page draws
+     its summary tiles from, so the menu can never promise a different number
+     than the page shows — and oa-news.js rides along because the news share
+     must be decided through the one module every consumer of those decisions
+     reads. Both scripts are fetched on demand, in the maintainer's own
+     browser only: every other visitor pays nothing for this. */
+  function adminPending() {
+    return Promise.all([
+      loadScript('assets/oa-news.js', 'OANews'),
+      loadScript('assets/oa-adminarea.js', 'OAAdminArea')
+    ]).then(function () {
+      return window.OAAdminArea.pendingCounts();
+    }).then(function (c) {
+      return c && typeof c.total === 'number' ? c.total : null;
+    }).catch(function () { return null; });
+  }
+
+  /** Load one of our own scripts once. A page that already carries the tag
+      (admin-area.html, whats-new.html) may not have EXECUTED it yet — the
+      tags are deferred — so an existing tag is waited on, by watching for the
+      global it defines, rather than duplicated or trusted; a second oa-news
+      execution would replace window.OANews and orphan its mounted lists.
+      Relative like every asset URL here: all live pages sit at the root. */
+  function loadScript(src, globalName) {
+    if (window[globalName]) return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      if (!document.querySelector('script[src="' + src + '"]')) {
+        var el = document.createElement('script');
+        el.src = src;
+        el.onerror = function () { reject(new Error('could not load ' + src)); };
+        document.head.appendChild(el);
+      }
+      var waited = 0;
+      (function poll() {
+        if (window[globalName]) return resolve();
+        waited += 50;
+        if (waited > 10000) return reject(new Error(src + ' never defined ' + globalName));
+        setTimeout(poll, 50);
+      })();
+    });
   }
 
   var PROFILE_FIELDS = ['firstName', 'lastName', 'affiliation', 'website'];

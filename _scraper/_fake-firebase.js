@@ -119,16 +119,53 @@
     record('list', this.path);
     return Promise.resolve(querySnap(childrenOf(this.path).map(snapOf)));
   };
+  /* The queries the pages actually issue — where(==), orderBy, limit, get —
+     chainable the way the compat SDK chains them. Grown for the Admin area
+     checks (2026-08-23): the feedback inbox reads
+     where('status').orderBy('createdAt').limit(n), which the old where-only
+     stub answered with a TypeError. Still not an emulator: equality filters
+     and one order key, which is every query in this repository's assets. */
+  function Query(path, filters, sort, max) {
+    this.path = path;
+    this.__f = filters || [];
+    this.__s = sort || null;
+    this.__n = max || 0;
+  }
+  Query.prototype.where = function (field, op, value) {
+    return new Query(this.path, this.__f.concat([[field, value]]), this.__s, this.__n);
+  };
+  Query.prototype.orderBy = function (field, dir) {
+    return new Query(this.path, this.__f, [field, dir === 'desc' ? -1 : 1], this.__n);
+  };
+  Query.prototype.limit = function (n) {
+    return new Query(this.path, this.__f, this.__s, n);
+  };
+  Query.prototype.get = function () {
+    record('query', this.path + this.__f.map(function (f) {
+      return '?' + f[0] + '==' + f[1];
+    }).join(''));
+    var snaps = childrenOf(this.path).map(snapOf);
+    this.__f.forEach(function (f) {
+      snaps = snaps.filter(function (s) { return s.data()[f[0]] === f[1]; });
+    });
+    if (this.__s) {
+      var k = this.__s[0], dir = this.__s[1];
+      snaps.sort(function (a, b) {
+        var x = a.data()[k], y = b.data()[k];
+        return (x < y ? -1 : x > y ? 1 : 0) * dir;
+      });
+    }
+    if (this.__n) snaps = snaps.slice(0, this.__n);
+    return Promise.resolve(querySnap(snaps));
+  };
   Col.prototype.where = function (field, op, value) {
-    var self = this;
-    return {
-      get: function () {
-        record('query', self.path + '?' + field + op + value);
-        return Promise.resolve(querySnap(
-          childrenOf(self.path).map(snapOf)
-            .filter(function (s) { return s.data()[field] === value; })));
-      }
-    };
+    return new Query(this.path, [[field, value]]);
+  };
+  Col.prototype.orderBy = function (field, dir) {
+    return new Query(this.path).orderBy(field, dir);
+  };
+  Col.prototype.limit = function (n) {
+    return new Query(this.path, [], null, n);
   };
 
   function firestoreFor() {

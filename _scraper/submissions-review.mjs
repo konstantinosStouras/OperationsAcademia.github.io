@@ -23,7 +23,7 @@
                    actually been handed to a transport, so a run that cannot
                    send announces the same submission next time rather than
                    losing it.
-     reviewedAt    the maintainer pressed "Reviewed" on the feedback page. It
+     reviewedAt    the maintainer pressed "Reviewed" on the Admin area. It
                    takes the card off the list and nothing else — the posting
                    was already live, this is a to-do list, not a gate.
 

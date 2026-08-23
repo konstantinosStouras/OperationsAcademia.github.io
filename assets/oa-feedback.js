@@ -296,6 +296,9 @@
   }
 
   function wireInbox() {
+    // Only where the inbox markup exists — the Admin area since the move
+    // (owner, 2026-08-21); feedback.html keeps the form and no inbox.
+    if (!$('oa-inbox')) return;
     var wired = false;
     OAAccounts.onChange(function () {
       if (!OAAccounts.isAdmin()) { show($('oa-inbox'), false); return; }
@@ -326,7 +329,14 @@
   /* -------------------------------------------------------------- wiring */
 
   function boot() {
+    /* The inbox and the form are SEPARATE mounts since the Admin area took
+       the inbox (owner, 2026-08-21): feedback.html carries the public form
+       and no inbox, admin-area.html the inbox and no form. Each wires itself
+       only where its markup exists, so this one file serves both pages. */
+    wireInbox();
+
     var form = $('oa-fb-form');
+    if (!form) return;
     var msg = $('fb-message');
 
     msg.addEventListener('input', function () {
@@ -394,8 +404,6 @@
           '<a href="mailto:operationsacademia@gmail.com">operationsacademia@gmail.com</a>.');
       }
     });
-
-    wireInbox();
 
     // convenience: prefill from the signed-in account
     OAAccounts.onChange(function (u) {

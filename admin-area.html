@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin area — Operations Academia</title>
+    <meta name="description" content="The maintainer's review desk — job postings, candidate profiles, feedback and site updates waiting to be looked at.">
+    <!-- The maintainer's own desk: noindex, and DELIBERATELY no og:* block.
+         Nobody shares this page, and an og:url here would claim an Open Graph
+         identity for a page that gates everything behind the admin account —
+         card: false in _scraper/share-check.mjs, with the six section stubs. -->
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="canonical" href="https://www.operationsacademia.org/admin-area.html">
+    <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
+    <script>
+    (function () {
+      var el = document.documentElement;
+      try {
+        var t = localStorage.getItem('oaV3Theme');
+        if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+        el.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      } catch (e) {
+        el.setAttribute('data-theme', 'light');
+      }
+      /* Reserve the account chip's space before first paint — the same
+         snippet as every other page; see feedback.html for the reasoning. */
+      try {
+        var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
+        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
+          el.style.setProperty('--oa-chip-w', h.w + 'px');
+        }
+      } catch (e) { /* private mode — the reserve is an optimisation */ }
+    })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+    <link href="assets/oa-list.css" rel="stylesheet">
+    <link href="assets/oa-ui.css" rel="stylesheet">
+    <link href="assets/v3.css" rel="stylesheet">
+  </head>
+
+  <body class="v3">
+
+    <header class="v3-header">
+      <div class="v3-header-inner">
+        <a class="v3-logo" href="./" aria-label="Operations Academia — home">
+          <span class="v3-mark" aria-hidden="true">OA</span>
+          <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
+        </a>
+        <nav class="v3-nav" aria-label="Site sections">
+          <a href="./#jobs">Jobs</a>
+        <a href="./#candidates">Candidates</a>
+        <a href="./#placements">Placements</a>
+        <a href="./#survey">Survey</a>
+        <a href="./#resources">Resources</a>
+        <a href="./#faq">FAQ</a>
+        <a href="./#about">About</a>
+        <a href="./#contact">Contact</a>
+        </nav>
+        <div class="v3-header-actions">
+          <button type="button" class="v3-theme" aria-label="Switch theme">
+            <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+            <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+          </button>
+          <div id="oa-account"></div>
+          <button type="button" class="v3-burger" aria-label="Open the menu" aria-expanded="false" aria-controls="v3-sheet">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="v3-sheet-backdrop" aria-hidden="true"></div>
+    <aside class="v3-sheet" id="v3-sheet" aria-label="Menu">
+      <div class="v3-sheet-head">
+        <a class="v3-logo" href="./">
+          <span class="v3-mark" aria-hidden="true">OA</span>
+        </a>
+        <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
+      </div>
+      <nav aria-label="Site sections">
+        <a href="./#jobs">Jobs</a>
+        <a href="./#candidates">Candidates</a>
+        <a href="./#placements">Placements</a>
+        <a href="./#survey">Survey</a>
+        <a href="./#resources">Resources</a>
+        <a href="./#faq">FAQ</a>
+        <a href="./#about">About</a>
+        <a href="./#contact">Contact</a>
+      </nav>
+      <div class="v3-sheet-foot">
+        <div id="oa-np"></div>
+        <button type="button" class="v3-theme" aria-label="Switch theme">
+            <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+            <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+          </button>
+      </div>
+    </aside>
+
+    <main>
+      <section class="v3-pa-hero">
+        <div class="v3-container">
+          <span class="v3-kicker">Maintainer</span>
+          <h1 class="v3-h1">Admin area</h1>
+          <p class="v3-lede" style="margin-top:14px">Everything waiting for your review, in one place</p>
+        </div>
+      </section>
+
+      <div class="v3-container v3-page">
+        <div class="oa-form" id="oa-aa">
+
+          <!-- ============================================== not-the-admin -->
+          <!-- Shown to everyone until the session resolves as the maintainer.
+               DRAWING (or hiding) any of this grants nothing: jobReviews,
+               feedback and candidateSubmissions are admin-read in
+               _firestore.rules, so a browser that unhides the panels for the
+               wrong visitor still cannot load a single document. -->
+          <section class="oa-panel" id="oa-aa-guest">
+            <h3 class="oa-panel-h">This page is the maintainer&rsquo;s review desk</h3>
+            <p>It gathers everything on Operations Academia that is waiting to be
+            looked at &mdash; job postings crawled from the tracking sheet, candidate
+            profiles filed before the reveal, feedback tickets and site updates
+            awaiting publication. Only the maintainer&rsquo;s account can read any of
+            it.</p>
+            <p id="oa-aa-signin-p" hidden><button type="button" class="button blue"
+              id="oa-aa-signin">Sign in</button></p>
+            <p><a href="./">&larr; Back to Operations Academia</a></p>
+          </section>
+
+          <div id="oa-aa-admin" hidden>
+
+            <!-- ------------------------------------------- the summary strip -->
+            <!-- One tile per queue, each linking to its panel below. The numbers
+                 are computed by assets/oa-adminarea.js — the SAME function the
+                 account menu's "Admin area" badge is refreshed from, so the two
+                 can never disagree about what is waiting. -->
+            <nav class="oa-aa-tiles" id="oa-aa-tiles" aria-label="What is waiting for review"></nav>
+
+            <!-- ============================ postings awaiting review -->
+            <!-- First deliberately: a queued posting is not on the site until it
+                 is approved, so it is the thing most worth doing first. Filled by
+                 assets/oa-jobreview.js, exactly as it was when this panel lived
+                 on the feedback page. -->
+            <section class="oa-panel" id="oa-review" hidden>
+              <h3 class="oa-panel-h">&#128203; Job postings to review</h3>
+              <p class="oa-hint">Crawled from the job market tracking sheet and
+                held back until you approve them &mdash; <span id="oa-review-count">nothing</span>
+                waiting. Correct anything that is wrong before approving; your
+                edits are kept and re-applied every time the sheet is re-read.</p>
+              <!-- Approving one at a time is right for a handful and unusable for
+                   a season: the tracking sheet's own tab opened with 89 postings
+                   on it. So the whole queue can go up at once, behind a count and
+                   a confirmation, and every posting is still on screen to be read
+                   or corrected first. -->
+              <!-- The workbook holds several market cycles at once, so the queue
+                   does too: the morning it was first read properly, 89 of its
+                   postings were the season under way and ~250 were the one that
+                   had closed. Splitting them by market is what makes approving a
+                   whole page a safe thing to press — it acts on what is shown. -->
+              <div class="oa-tabs" id="oa-review-years" hidden></div>
+              <p class="oa-rv-bulk" id="oa-review-bulk" hidden>
+                <button type="button" class="button blue" id="oa-review-all">
+                  Approve all <span data-n></span> shown &amp; publish</button>
+                <span class="oa-form-msg" id="oa-review-bulk-msg" role="status"></span>
+              </p>
+              <div id="oa-review-list"></div>
+            </section>
+
+            <!-- ============================ what has been posted here
+
+                 The queue above is a GATE — nothing on it is on the site
+                 until it is approved. This is a TO-DO LIST: a posting or
+                 a profile made through the site's own forms is live
+                 within a minute, because the form promises as much, and
+                 this only says it arrived.
+
+                 It exists because there was nowhere to look. A job
+                 posting draws a card on the jobs page; a CANDIDATE
+                 PROFILE does not — profiles are held behind the reveal
+                 date, so they reach no served file at all and the only
+                 way to open one was to guess its document id.
+
+                 Beside it, the Candidate profiles panel below is the full
+                 ROSTER — withdrawn and hidden included, with Take down and
+                 Put it back — where this is the unread-arrivals list across
+                 both kinds. Ticking a card here changes nothing but the
+                 tick. -->
+            <section class="oa-panel" id="oa-subs" hidden>
+              <h3 class="oa-panel-h">&#128228; Posted through the site</h3>
+              <p class="oa-hint">Job postings and candidate profiles people have
+                submitted, newest first &mdash; <span id="oa-subs-count">nothing</span>
+                to look at. They are already live (candidate profiles are held until
+                the reveal date), so this is a list to read, not a gate: open one to
+                correct it, or mark it reviewed to take it off the list.</p>
+              <div id="oa-subs-list"></div>
+            </section>
+
+            <!-- ================================= candidate profiles -->
+            <!-- The gap this page was made to close (owner, 2026-08-21): the
+                 candidates section said "2 profiles have already been filed"
+                 while the maintainer had no way to SEE them — profiles are held
+                 out of data/candidates.json until the reveal date, and the
+                 candidates page therefore had nothing to draw Edit buttons on.
+                 This panel lists them straight from Firestore, which the rules
+                 already let the admin read, held and published alike. -->
+            <section class="oa-panel" id="oa-aa-cands" hidden>
+              <h3 class="oa-panel-h">&#127891; Candidate profiles</h3>
+              <p class="oa-hint" id="oa-aa-cands-hint">Every profile filed through the site,
+                including the ones held back until the reveal. Edit opens the same
+                form the candidate used; nothing here is visible to anyone but you
+                until the reveal date publishes it.</p>
+              <div id="oa-aa-cands-list"><p class="oa-hint">Loading&hellip;</p></div>
+            </section>
+
+            <!-- ===================================== maintainer inbox -->
+            <!-- Filled by assets/oa-feedback.js, exactly as it was when this
+                 panel lived on the feedback page; the public form stays there. -->
+            <section class="oa-panel" id="oa-inbox" hidden>
+              <h3 class="oa-panel-h">&#128229; Feedback inbox</h3>
+              <div class="oa-tabs" id="oa-inbox-tabs">
+                <button type="button" class="oa-tab is-on" data-tab="open">Open</button>
+                <button type="button" class="oa-tab" data-tab="closed">Closed</button>
+                <button type="button" class="oa-tab" data-tab="all">All</button>
+              </div>
+              <div id="oa-inbox-list"></div>
+            </section>
+
+            <!-- ============================ updates awaiting publication -->
+            <!-- Counted and listed THROUGH assets/oa-news.js — the one module
+                 every consumer of the what's-new decisions reads, so this list
+                 cannot disagree with the page or the mailer. The publish and
+                 remove controls live on whats-new.html; this panel only says
+                 what is waiting and points there. -->
+            <section class="oa-panel" id="oa-aa-news" hidden>
+              <h3 class="oa-panel-h">&#128240; Updates awaiting publication</h3>
+              <p class="oa-hint">Logged in <code>changelog.json</code> but not yet
+                published &mdash; nobody sees them and no digest carries them until
+                you publish each one.</p>
+              <div id="oa-aa-news-list"></div>
+              <p><a href="whats-new.html">Review and publish them on the What&rsquo;s
+                new page &rarr;</a></p>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="v3-footer">
+      <div class="v3-container">
+        <div class="v3-footer-grid">
+          <div class="v3-footer-brand">
+            <!-- the SAME footer as the front page (owner, 2026-08-17): every
+                 page and sub-page ends the same way -->
+            <a class="v3-logo v3-logo-foot" href="./" aria-label="Operations Academia — home">
+              <span class="v3-mark" aria-hidden="true">OA</span>
+              <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
+            </a>
+            <p>Trusted by <a href="previous-markets.html">over 200 universities around the
+            world</a>.<br>
+            Made with &#9749; in Athens, Charlottesville, Dublin, Fontainebleau and Singapore.<br>
+            Sponsored by the
+            <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/" target="_blank" rel="noopener">CUHK DOT Department</a>
+            and the <a href="https://connect.informs.org/msom/home" target="_blank" rel="noopener">INFORMS MSOM Society</a>.</p>
+          </div>
+          <div>
+            <h4>Discover</h4>
+            <ul>
+              <li><a href="./#jobs">Job postings</a></li>
+              <li><a href="./#candidates">Candidates</a></li>
+              <li><a href="./#placements">Placements</a></li>
+              <li><a href="./#survey">Survey</a></li>
+              <li><a href="./#resources">Resources</a></li>
+              <li><a href="analytics.html">Analytics</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Participate</h4>
+            <ul>
+              <li><a href="post-a-job.html">Post a job</a></li>
+              <li><a href="post-a-candidate.html">Post your candidacy</a></li>
+              <li><a href="post-a-placement.html">Report a placement</a></li>
+              <li><a href="alerts.html">E-mail alerts</a></li>
+              <li><a href="feedback.html">Feedback</a></li>
+              <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="v3-footer-legal">
+          <span>&copy; 2014-<span class="js-current-year"></span>
+            <a href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a></span>
+          <span>
+            <a href="terms-and-conditions.html">Terms</a> &nbsp;&middot;&nbsp;
+            <a href="privacy-policy.html">Privacy</a>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+
+    <script defer src="assets/v3.js"></script>
+    <script defer src="assets/oa-firebase.js"></script>
+    <script defer src="assets/oa-accounts.js"></script>
+    <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-news.js"></script>
+    <!-- The review card asks the maintainer the posting form's own three name
+         questions, so it mounts the posting form's own cascade: choosing a
+         university narrows the school list, choosing a school narrows the
+         department list. All three are optional — without them the card's
+         boxes are plain text inputs and everything else still works. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-combo.js"></script>
+    <script defer src="assets/oa-place-picker.js"></script>
+    <script defer src="assets/oa-jobreview.js"></script>
+    <script defer src="assets/oa-submissions.js"></script>
+    <script defer src="assets/oa-feedback.js"></script>
+    <script defer src="assets/oa-adminarea.js"></script>
+  </body>
+</html>

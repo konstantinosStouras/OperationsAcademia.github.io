@@ -1642,7 +1642,9 @@ async function testCascadeWiring() {
 
   /* Deferred scripts run in document order, so the names module and the picker
      have to be listed before whatever mounts them. */
-  for (const page of ['post-a-job.html', 'feedback.html']) {
+  /* admin-area.html, not feedback.html: the review panel — and with it the
+     cascade — moved to the Admin area when it gathered every review queue. */
+  for (const page of ['post-a-job.html', 'admin-area.html']) {
     const html = await readFile(path.join(HERE, '..', page), 'utf8');
     const at = html.indexOf('oa-schools.js');
     ok(at !== -1 && at < html.indexOf('oa-combo.js'),
@@ -1651,9 +1653,12 @@ async function testCascadeWiring() {
     ok(cascade !== -1 && cascade > html.indexOf('oa-combo.js'),
       `${page}: loads the cascade after the picker it mounts`);
   }
-  const feedback = await readFile(path.join(HERE, '..', 'feedback.html'), 'utf8');
-  ok(feedback.indexOf('oa-place-picker.js') < feedback.indexOf('oa-jobreview.js'),
-    'feedback.html: and before the review panel that asks for it');
+  const adminArea = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  // the SCRIPT TAGS, not the first mention — the page's own comments name the
+  // modules long before the tags do
+  ok(adminArea.indexOf('src="assets/oa-place-picker.js"') <
+     adminArea.indexOf('src="assets/oa-jobreview.js"'),
+    'admin-area.html: and before the review panel that asks for it');
 }
 
 /* --------------------------------- a renamed department keeps its readers
@@ -1906,8 +1911,19 @@ async function testAccountCounts() {
   ok(/state\.user\.uid !== uid/.test(acct),
     'and a read that lands after a sign-out is dropped');
 
+  /* the maintainer's own badge, same rules */
+  ok(/data-count="admin"/.test(acct),
+    'the menu carries a count beside Admin area');
+  ok(/adminish\(u\)/.test(acct) && /adminish\(state\.user\)/.test(acct),
+    'drawn and refreshed only for the maintainer — every other visitor pays ' +
+    'nothing for it');
+  ok(/OAAdminArea\.pendingCounts\(\)/.test(acct),
+    'and the number comes from OAAdminArea.pendingCounts — THE function the ' +
+    'Admin area page draws its tiles from, so menu and page cannot disagree');
+
   for (const [file, what, n] of [['assets/oa-myjobs.js', 'postings', 'docs.length'],
-    ['assets/oa-alerts.js', 'alerts', 'alerts.length']]) {
+    ['assets/oa-alerts.js', 'alerts', 'alerts.length'],
+    ['assets/oa-adminarea.js', 'admin', 'total']]) {
     const js = await readFile(path.join(HERE, '..', file), 'utf8');
     ok(new RegExp(`setCount\\('${what}', ${n.replace('.', '\\.')}\\)`).test(js),
       `${file} corrects the ${what} count from the list it already loaded`);
@@ -4746,13 +4762,114 @@ async function testReviewWiring() {
   ok(wf.includes('jobreview-mailer.mjs'), 'the workflow runs the mailer');
   ok(wf.includes('--selftest'), 'and checks it offline first');
 
-  const html = await readFile(path.join(HERE, '..', 'feedback.html'), 'utf8');
-  ok(html.includes('id="oa-review"'), 'the feedback page carries the review panel');
+  /* The review queue lives on the ADMIN AREA now (owner, 2026-08-21): a
+     dedicated page for everything waiting on the maintainer, instead of admin
+     panels stacked on top of the public feedback form. The promotion rule
+     applies — the work is the move AND the sweep, so the old host is pinned
+     to be clean of it. */
+  const html = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(html.includes('id="oa-review"'), 'the Admin area carries the review panel');
   ok(html.includes('oa-jobreview.js'), 'and loads the script that fills it');
   ok(html.indexOf('id="oa-review"') < html.indexOf('id="oa-inbox"'),
     'with the queue ABOVE the feedback inbox — a posting that is not on the ' +
     'site yet is the thing most worth doing first');
   ok(panel.includes('OAAccounts.isAdmin()'), 'the panel is drawn for the maintainer only');
+
+  const fb = await readFile(path.join(HERE, '..', 'feedback.html'), 'utf8');
+  ok(!fb.includes('id="oa-review"') && !fb.includes('id="oa-inbox"')
+     && !fb.includes('oa-jobreview.js'),
+    'and feedback.html is SWEPT of the admin panels — left in place, the same ' +
+    'queue would be served from two pages and drift');
+
+  const mailer = await readFile(path.join(HERE, 'jobreview-mailer.mjs'), 'utf8');
+  ok(mailer.includes("site + '/admin-area'") && !mailer.includes("site + '/feedback'"),
+    'the review e-mail points at the Admin area, not at the page the queue left');
+}
+
+/* --------------------------------------------------------- the Admin area
+
+   One page for everything waiting on the maintainer (owner, 2026-08-21):
+   job postings held for approval, candidate profiles — including the ones
+   held back until the reveal, which the front page counted ("2 profiles have
+   already been filed") while the maintainer had no way to SEE them — the
+   feedback inbox, and updates awaiting publication. These pins hold the page
+   to the properties that make it safe and honest, not to its wording. */
+
+async function testAdminArea() {
+  const page = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+
+  /* the page: maintainer-only, never indexed, never shared */
+  ok(/name="robots" content="noindex,nofollow"/.test(page),
+    'admin-area.html is noindex — the review desk is not a page to find');
+  ok(page.includes('id="oa-aa-guest"') && !page.includes('property="og:'),
+    'it explains itself to a stranger and carries no og:* identity to steal');
+
+  /* all four queues, in to-do order: what is not on the site yet first */
+  for (const id of ['oa-review', 'oa-aa-cands', 'oa-inbox', 'oa-aa-news']) {
+    ok(page.includes(`id="${id}"`), `admin-area.html carries #${id}`);
+  }
+  ok(page.indexOf('id="oa-review"') < page.indexOf('id="oa-aa-cands"')
+     && page.indexOf('id="oa-aa-cands"') < page.indexOf('id="oa-inbox"'),
+    'postings to review, then held profiles, then feedback — the two queues ' +
+    'that gate publication come before the one that does not');
+  for (const src of ['oa-news.js', 'oa-jobreview.js', 'oa-feedback.js', 'oa-adminarea.js']) {
+    ok(page.includes(`assets/${src}`), `and loads ${src}`);
+  }
+
+  /* the module: drawn for the admin alone, counting news THROUGH the module */
+  ok(js.includes('OAAccounts.isAdmin()'),
+    'oa-adminarea.js shows the desk to the maintainer only — the rules stay ' +
+    'the authorisation');
+  ok(/OANews\.partition\(/.test(js) && !/REVIEW_FROM\s*=/.test(js),
+    'the pending-updates share is decided through OANews.partition, never a ' +
+    'second reading of the review gate');
+  ok(/\/\^https\?:\\\/\\\//.test(js) || js.includes('^https?:'),
+    'a submitted link is host-checked before it becomes an href — this panel ' +
+    'renders documents nobody has vetted');
+  ok(js.includes('known ? total : null'),
+    'a count where NOTHING answered is unknown, never a 0 \u2014 a fabricated zero ' +
+    'would overwrite a cached badge that was honest (the menu-count rule)');
+  ok(js.includes("'/data/candidates-meta.json'"),
+    'the held-profiles number is read from the SAME file the front page ' +
+    'announces "N profiles have already been filed" from, so the two agree');
+
+  /* the menu row goes where the page is */
+  ok(/href="admin-area\.html"/.test(acct),
+    'the account menu links the Admin area');
+
+  /* the reads this page depends on are already allowed — no rules change
+     rode along, which is worth pinning because an edit here that needed one
+     would ship a panel that says permission-denied */
+  ok(/match \/candidateSubmissions\/\{id\}[\s\S]*?allow read: if isOwner\(resource\.data\.uid\) \|\| isAdmin\(\);/.test(rules),
+    'candidateSubmissions is admin-read — held profiles are the admin\u2019s to see');
+  ok(/match \/feedback\/\{id\}[\s\S]*?allow read, update, delete: if isAdmin\(\);/.test(rules),
+    'and the feedback inbox stays admin-read');
+
+  /* the reveal grouping is the build's own semantics: before the date every
+     queued profile is held, from the day itself queued means published */
+  const fn = /function candGroupOf[\s\S]*?\n  }/.exec(js);
+  ok(fn, 'candGroupOf is present');
+  if (fn) {
+    /* eslint-disable-next-line no-new-func */
+    const candGroupOf = new Function('return (' + fn[0] + ')')();
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', '2026-08-23'), 'held',
+      'a queued profile before the reveal is HELD');
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', '2026-10-11'), 'live',
+      'and on the reveal day itself it is live — the same >= the page uses');
+    eq(candGroupOf({ status: 'withdrawn' }, '2026-10-11', '2026-08-23'), 'withdrawn',
+      'a withdrawal stays the candidate\u2019s own whatever the date');
+    eq(candGroupOf({ status: 'hidden' }, '', '2026-08-23'), 'hidden',
+      'and a takedown stays the maintainer\u2019s');
+    eq(candGroupOf({}, '', '2026-08-23'), 'held',
+      'no reveal date announced means EVERYTHING is held \u2014 the build\u2019s own ' +
+      'revealGate (candidates-model.mjs) publishes nothing until a date is set');
+    eq(candGroupOf({}, 'soon', '2026-08-23'), 'held',
+      'and a malformed date holds too \u2014 the typo revealGate exists to survive ' +
+      'must not read as \u201ceverything is public\u201d here');
+  }
 }
 
 /* ------------------------------- what was posted through the site's own forms
@@ -4770,7 +4887,9 @@ async function testSubmissionNotices() {
   const model = await read('_scraper/submissions-review.mjs');
   const mailer = await read('_scraper/submissions-mailer.mjs');
   const panel = await read('assets/oa-submissions.js');
-  const html = await read('feedback.html');
+  /* the Admin area, not feedback.html: the panel moved there with every
+     other review surface, and feedback.html is pinned CLEAN of them */
+  const html = await read('admin-area.html');
 
   /* The model and the browser panel have to agree about WHAT they are looking
      at and WHERE the bookkeeping is written, or a card ticked off in one is
@@ -4817,7 +4936,7 @@ async function testSubmissionNotices() {
   ok(model.includes('doc.status === MIRROR_STATUS'),
     'and a tracking-sheet mirror is never one of them — it has its own queue');
 
-  ok(html.includes('id="oa-subs"'), 'the feedback page carries the panel');
+  ok(html.includes('id="oa-subs"'), 'the Admin area carries the panel');
   ok(html.includes('oa-submissions.js'), 'and loads the script that fills it');
   ok(html.indexOf('id="oa-review"') < html.indexOf('id="oa-subs"'),
     'below the approval queue, which is the one thing that is actually blocked on them');
@@ -4887,6 +5006,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testDeployGuard();
   await testRowOverrides();
   await testNewsReview();
+  await testAdminArea();
   await testRemovalSafety();
   await testMirrorLifecycle();
   await testRefLessTakedown();

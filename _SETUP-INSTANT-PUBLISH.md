@@ -79,7 +79,7 @@ Post or edit a job on the site, then look at
 few seconds whose trigger reads `repository_dispatch`. The posting is live
 when that run finishes (~1 minute, plus Pages' propagation).
 
-Then approve a posting in the review queue on `feedback.html`: a run of
+Then approve a posting in the review queue on `admin-area.html`: a run of
 **OA jobs — read the job market tracking sheet** should appear the same way,
 and a run of the publish workflow straight after it, triggered by
 `workflow_run`.

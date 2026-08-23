@@ -12,7 +12,7 @@
 
    WHY IT IS ITS OWN FILE. All of this used to live inside oa-jobform.js's
    wireVocab(), bound to three ids on one page — and the review queue on
-   feedback.html asks the maintainer exactly the same three questions about
+   admin-area.html asks the maintainer exactly the same three questions about
    exactly the same three names. Copying it would have been the drift this
    repository keeps warning about in every other shared module (oa-countries.js,
    oa-schools.js, oa-news.js): two cascades, one of them quietly a version

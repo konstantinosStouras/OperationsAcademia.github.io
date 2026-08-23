@@ -2,7 +2,7 @@
    Operations Academia — what has been posted through the site and not yet
    looked at.
 
-   THE PANEL THIS DRAWS sits on the feedback page beside the tracking sheet's
+   THE PANEL THIS DRAWS sits on the Admin area (admin-area.html) beside the tracking sheet's
    review queue, and it is deliberately NOT the same thing. That queue is a
    GATE: nothing on it is on the site until the maintainer approves it. This is
    a TO-DO LIST: a posting made through the site's own form is live within a

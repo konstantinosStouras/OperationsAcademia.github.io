@@ -139,6 +139,17 @@ function idsOf(rel) {
 
 const ATTR = /\s(?:href|src|data-include)="([^"]*)"/g;
 
+
+/* Live pages that CHOOSE not to be indexed, each with its reason. The rule
+   this excepts exists so a live page cannot deindex itself by accident — a
+   noindex here is no accident: */
+const NOINDEX_OK = new Set([
+  // the maintainer's review desk — admin-gated, shared with nobody, and a
+  // page whose whole audience is one signed-in account has no business in a
+  // search index (share-check lists it card: false for the same reason)
+  'admin-area.html',
+]);
+
 for (const file of walk(ROOT)) {
   const rel = path.relative(ROOT, file).split(path.sep).join('/');
   const tree = treeOf(rel);
@@ -209,7 +220,7 @@ for (const file of walk(ROOT)) {
   if (treeOf(rel) && !noindex && !/partials\//.test(rel)) {
     problems.push(`${rel}: an archived page must carry noindex or it competes with the live one`);
   }
-  if (!treeOf(rel) && noindex && !stub) {
+  if (!treeOf(rel) && noindex && !stub && !NOINDEX_OK.has(rel)) {
     problems.push(`${rel}: a live page must NOT carry noindex`);
   }
 }

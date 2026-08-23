@@ -17,7 +17,7 @@ live, because the form promises it will be within a few minutes — but a
 CANDIDATE profile is held behind the reveal date
 (`data/candidates-reveal.json`), so it is in no served file, draws no card
 anywhere on the site, and that e-mail (and the panel it links to on
-`/feedback`) is the only place you will see it.
+`/admin-area`) is the only place you will see it.
 
 All four are **no-ops without credentials**, and all print exactly what they
 would have sent instead. So you can run them today and read the output.
