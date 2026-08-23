@@ -803,6 +803,57 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
 .oa-tab.is-on { border-color: var(--brand); background: var(--brand); color: var(--on-brand, #fff); }
 
+/* ------------------------------------------------ the Admin area's chrome
+   The summary strip on admin-area.html: one tile per review queue, each a
+   link to its panel. Every colour is a theme token WITH its light value as
+   the fallback (the rule the whole file follows — anything that paints its
+   own ground names its own ink), so both themes read. */
+.oa-aa-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0 0 22px;
+}
+.oa-aa-tile {
+  display: block;
+  padding: 16px 18px;
+  border: 1px solid var(--line-soft, #ececec);
+  border-radius: 6px;
+  background: var(--bg-2, #fff);
+  color: var(--ink, #313a45);
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.oa-aa-tile:hover { border-color: var(--brand, #3a424d); }
+.oa-aa-tile.is-due { border-color: var(--brand, #3a424d); }
+.oa-aa-tile-n {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--brand, #3a424d);
+}
+.oa-aa-tile-l {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--mut, #646c78);
+}
+
+/* candidate cards reuse .oa-fb-card; these are only the additions */
+.oa-aa-group-h {
+  margin: 20px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink, #313a45);
+}
+.oa-aa-cand header strong { margin-right: 8px; font-size: 15px; }
+.oa-aa-cand-meta { margin: 0 0 6px; color: var(--ink-2, #454c56); }
+.oa-aa-cand-actions { margin: 10px 0 0; }
+.oa-aa-cand-actions .button { margin-right: 8px; }
+.oa-aa-news-ul { margin: 0 0 10px; padding-left: 20px; }
+.oa-aa-news-ul li { margin: 0 0 6px; }
+
 .oa-fb-card {
   margin: 0 0 14px;
   padding: 14px 16px;

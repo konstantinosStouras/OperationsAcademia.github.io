@@ -238,6 +238,8 @@ export const PAGES = [
      home page. Giving one an og:url would put a noindexed page back on the
      home page's Open Graph identity, which is the whole defect this file
      exists to prevent. They stay bare, deliberately. */
+  { file: 'admin-area.html', card: false,
+    why: "maintainer-only review desk (noindex) — a page nobody shares, and an og:url on it would claim an Open Graph identity for a page that answers only the admin" },
   { file: 'candidates.html', card: false, why: 'redirect stub → /#candidates' },
   { file: 'placements.html', card: false, why: 'redirect stub → /#placements' },
   { file: 'faqs.html', card: false, why: 'redirect stub → /#faq' },

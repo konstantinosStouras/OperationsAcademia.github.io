@@ -5,7 +5,7 @@
        jobReviews (Firestore)  ->  THIS  ->  one e-mail per queued posting
                                                        |
                                           the maintainer approves it at
-                                          operationsacademia.org/feedback
+                                          operationsacademia.org/admin-area
 
    ONE E-MAIL PER POSTING, by the owner's choice: a queued posting is a single
    decision to make, and a digest of six turns six decisions into one thing to
@@ -80,7 +80,7 @@ function line(label, value) {
 export function renderReviewEmail(doc, { site = SITE } = {}) {
   const r = shown(doc);
   const title = [r.institution, r.department].filter(Boolean).join(' — ');
-  const reviewUrl = site + '/feedback';
+  const reviewUrl = site + '/admin-area';
 
   const ad = /^https?:\/\//i.test(String(r.adUrl || '')) ? r.adUrl : '';
 
@@ -122,7 +122,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
  * anyway.
  */
 export function renderDigestEmail(docs, { site = SITE } = {}) {
-  const reviewUrl = site + '/feedback';
+  const reviewUrl = site + '/admin-area';
   const rows = docs.map((d) => {
     const r = shown(d);
     const title = [r.institution, r.department].filter(Boolean).join(' — ');
@@ -267,7 +267,7 @@ function selftest() {
   const mail = renderReviewEmail(doc, { site: 'https://example.org' });
   ok(/Example University/.test(mail.subject), 'the subject names the posting');
   ok(/not on the site yet/i.test(mail.html), 'the body says it is not published');
-  ok(mail.html.includes('https://example.org/feedback'), 'and links to the review page');
+  ok(mail.html.includes('https://example.org/admin-area'), 'and links to the review page');
 
   /* The e-mail must show what APPROVING would publish, not the raw sheet row —
      otherwise a correction already typed in the browser is invisible in the
@@ -300,7 +300,7 @@ function selftest() {
   ok(digest.subject.includes(String(many.length)), 'the subject says how many are waiting');
   ok(/University 0/.test(digest.html) && new RegExp('University ' + BURST).test(digest.html),
     'and every one of them is listed, first to last');
-  ok(digest.html.includes('https://example.org/feedback'), 'with one link to review them');
+  ok(digest.html.includes('https://example.org/admin-area'), 'with one link to review them');
   ok(!/not on the site yet[\s\S]*not on the site yet/.test(digest.html),
     'said once, not once per posting');
 

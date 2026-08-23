@@ -265,9 +265,11 @@ repository root. See `_SETUP-FIREBASE.md` §4.
 ## Nothing from the tracking sheet publishes itself
 
 A posting crawled from the job market workbook is **queued for the maintainer,
-not published on sight**. It appears at the top of `feedback.html` (admin-only,
-above the feedback inbox), every field editable; approving it puts it on the
-site at the next build, rejecting keeps it off for good.
+not published on sight**. It appears at the top of `admin-area.html` — the
+maintainer's Admin area, above the feedback inbox (it lived on feedback.html
+until the Admin area gathered every review queue) — every field editable;
+approving it puts it on the site at the next build, rejecting keeps it off
+for good.
 
 The reason is that the pipeline **derives** things the sheet never said — the
 market year, the type of institution, the canonical country, the entry level,
@@ -275,7 +277,7 @@ and the closing date read off the HigherEdJobs advertisement. Those reached
 visitors before anyone had looked at them.
 
     _scraper/jobreview.mjs         what is publishable, and what an edit is (pure)
-    assets/oa-jobreview.js         the panel on feedback.html
+    assets/oa-jobreview.js         the panel on admin-area.html
     _scraper/jobreview-mailer.mjs  one e-mail per queued posting
     oa-jobreview-mail.yml          runs it every 15 minutes
 
@@ -415,6 +417,59 @@ redeploy rules that are already deployed. The browser half (what a visitor sees,
 what the maintainer sees, that a removed entry is off the list AND in the panel)
 is measured in `page-test.mjs`. **Inert until the rules are redeployed**:
 `firebase deploy --only firestore:rules --project operations-academia`.
+
+## The Admin area — one page for everything waiting on the maintainer
+
+`admin-area.html` (owner, 2026-08-23) gathers every review queue in one place:
+the job postings held for approval (`jobReviews`, drawn by `oa-jobreview.js`),
+**candidate profiles including the ones held for the reveal** — the gap the
+page was made to close: the front page said "2 profiles have already been
+filed" while the maintainer had no way to SEE them, because held profiles are
+kept out of `data/candidates.json` until the reveal date and the candidates
+page therefore had nothing to draw its Edit buttons on — the feedback inbox
+(`oa-feedback.js`), and "What's new" entries awaiting publication (listed
+THROUGH `OANews.partition`, never a second reading of the gate; the publish
+controls stay on `whats-new.html`).
+
+The review queue and the inbox MOVED here from `feedback.html`, which is now
+purely the public form — the move came with the sweep: `jobreview-mailer.mjs`
+points its e-mails at `/admin-area`, and the selftest pins feedback.html clean
+of the panels. `oa-feedback.js` serves both pages by mounting the form and the
+inbox independently, each only where its markup exists.
+
+**The account menu carries "Admin area N"** — the number of items waiting —
+drawn for the maintainer alone (`adminish()` in `oa-accounts.js`: the resolved
+session must match `OAFB.adminEmail` verified; the pre-resolve hint's address
+alone decides so the menu's first paint is its final form). The count follows
+the menu-badge rules above (cache first, refresh once per session, exact where
+the data is loaded) and is computed by ONE function for both consumers —
+`OAAdminArea.pendingCounts()` in `assets/oa-adminarea.js`, which
+`oa-accounts.js` loads on demand (with `oa-news.js`) in the maintainer's
+browser only, so the badge and the page's summary tiles can never disagree:
+pending `jobReviews` + `heldCount` from `data/candidates-meta.json` (the same
+file the front page announces from) + open `feedback` + pending changelog
+entries.
+
+Candidate cards offer **Edit**, which opens the SAME form the candidate used
+(`post-a-candidate.html?edit=<docId>` — the rules already let the admin read
+and write any profile; no rules change shipped with this page, which
+`testAdminArea` in `selftest.mjs` pins), and Take down / Put it back as status
+changes (`hidden`/`queued`), never deletes. A withdrawn profile gets no
+restore button — the candidate withdrew it themselves.
+
+**The whole path is measured, not trusted**: a block in `page-test.mjs`
+drives the badge, the tiles, the panels and the takedown against
+`_fake-firebase.js` with a seeded queue — the expected numbers computed from
+the same served files the code reads, a held profile asserted onto the
+admin's screen with its Edit control, and a hostile submission (markup in a
+name, a `javascript:` link) asserted inert. The shim grew chainable
+`where().orderBy().limit()` queries for it.
+
+The page is `noindex` (a named exception in `link-check.mjs`) and carries **no
+`og:*` block** (`card: false` in share-check's PAGES): nobody shares the
+maintainer's desk, and an `og:url` on it would claim an identity for a page
+that answers only the admin. Drawing or hiding any of it grants nothing — the
+collections are admin-read in `_firestore.rules`, which is the authorisation.
 
 ## What "immediate" costs, and where the waiting used to be
 

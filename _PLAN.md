@@ -675,7 +675,9 @@ Four decisions worth recording:
 Owner's decision: **nothing crawled from the tracking sheet goes public until
 they have approved it.** The queue is `jobReviews` in Firestore, the review
 surface is the top of `feedback.html` (admin-only, above the feedback inbox),
-and one e-mail goes out per queued posting.
+and one e-mail goes out per queued posting. *(Since 2026-08-23 the review
+surface is `admin-area.html` — the Admin area gathered every review queue;
+the queue and the mechanics are unchanged.)*
 
 The motivation is §3.6b's own lesson generalised. The sheet is not the whole
 truth about a posting: the pipeline derives the market year, the institution

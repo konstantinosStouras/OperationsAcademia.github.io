@@ -606,7 +606,7 @@ async function main() {
         log(`review queue: ${split.publish.length} approved, ` +
             `${waiting} awaiting you, ${split.rejected.length} turned down`);
         if (waiting) {
-          log(`  review them at ${SITE}/feedback`);
+          log(`  review them at ${SITE}/admin-area`);
         }
       }
 

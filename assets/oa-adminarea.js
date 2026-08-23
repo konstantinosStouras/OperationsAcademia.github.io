@@ -1,0 +1,477 @@
+/* ---------------------------------------------------------------------------
+   Operations Academia — the Admin area (admin-area.html): everything waiting
+   for the maintainer's review, in one place, and the ONE place the number
+   beside "Admin area" in the account menu is computed.
+
+   FOUR QUEUES, one page (owner, 2026-08-21: "include there any items to be
+   reviewed: job postings, candidate profiles, feedback received"):
+
+     1. job postings crawled from the tracking sheet, held for approval
+        (Firestore `jobReviews`, drawn by assets/oa-jobreview.js);
+     2. CANDIDATE PROFILES — the gap this page was made to close: the front
+        page said "2 profiles have already been filed" while the maintainer
+        had no way to SEE them, because profiles are held out of
+        data/candidates.json until the reveal date and the candidates page
+        therefore had nothing to draw its Edit buttons on. This module lists
+        them straight from `candidateSubmissions`, which _firestore.rules
+        already lets the admin read, held and published alike;
+     3. the feedback inbox (Firestore `feedback`, drawn by assets/oa-feedback.js);
+     4. "What's new" entries awaiting publication — counted and listed THROUGH
+        window.OANews (partition), the one module every consumer of the
+        newsOverrides decisions reads, so this page cannot disagree with the
+        what's-new page or the mailer about what is pending.
+
+   THE BADGE AND THE PAGE COUNT WITH THE SAME FUNCTION. pendingCounts() below
+   is called by this page for its summary tiles AND by oa-accounts.js for the
+   "Admin area N" badge (which loads this file on demand, in the maintainer's
+   browser only), so the menu can never promise a different number than the
+   page shows. The page then corrects the cached badge from the real candidate
+   documents via OAAccounts.setCount('admin', …), the same
+   exact-where-the-data-is-already-loaded rule my-postings and alerts follow.
+
+   AUTHORISATION IS THE RULES, never this file. Everything here only decides
+   what is DRAWN: jobReviews, feedback and candidateSubmissions are admin-read
+   in _firestore.rules, so a browser that unhides the panels for the wrong
+   visitor still cannot load a single document.
+   --------------------------------------------------------------------------- */
+(function () {
+  'use strict';
+
+  /* oa-accounts.js loads this file on demand for the badge; a page that also
+     carries it in a <script> tag would otherwise run the IIFE twice and wire
+     every listener twice. Whichever copy runs first wins; the other returns. */
+  if (window.OAAdminArea) return;
+
+  function $(id) { return document.getElementById(id); }
+  function show(el, on) { if (el) el.hidden = !on; }
+
+  function esc(s) {
+    return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* http(s) only, exactly as oa-jobreview.js renders a queued row's links: a
+     submission is typed by a stranger and this panel is the one place it is
+     rendered before anyone has vetted it. */
+  function safeHref(u) {
+    var s = String(u || '').trim();
+    return /^https?:\/\//i.test(s) ? s : '';
+  }
+
+  function todayIso() { return new Date().toISOString().slice(0, 10); }
+
+  /* One request per file per page — the site's own rule (OAList.load does the
+     same): the counts AND the panels read candidates-meta.json and
+     changelog.json, and without this each was fetched twice per open. A
+     failed read is NOT remembered, so one flaky request is not inherited.
+     cache: 'no-cache' REVALIDATES rather than re-downloads — Pages serves
+     data/ with ten minutes of freshness, and a review count read from a stale
+     cache says the queue is a size it no longer is. */
+  var jsonMemo = {};
+  function fetchJson(url) {
+    if (jsonMemo[url]) return jsonMemo[url];
+    jsonMemo[url] = fetch(url, { credentials: 'same-origin', cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      ['catch'](function (err) { delete jsonMemo[url]; throw err; });
+    return jsonMemo[url];
+  }
+
+  /** count() aggregate with a fetch fallback — the same shape oa-accounts.js
+      uses for the postings and alerts badges: one read whatever the
+      collection holds. */
+  function countOf(ref) {
+    if (typeof ref.count === 'function') {
+      return ref.count().get().then(function (snap) {
+        var d = snap && typeof snap.data === 'function' ? snap.data() : null;
+        return d && typeof d.count === 'number' ? d.count : null;
+      });
+    }
+    return ref.get().then(function (snap) { return snap ? snap.size : null; });
+  }
+
+  /* --------------------------------------------------- the four queue sizes */
+
+  /** Profiles filed and still waiting for the reveal. Read from the SAME file
+      the front page announces "N profiles have already been filed" from
+      (data/candidates-meta.json), so the badge and that banner agree; the
+      build writes heldCount 0 once revealed, and the date guard covers the
+      window between the reveal day and the next build. */
+  function heldCandidates() {
+    return fetchJson('/data/candidates-meta.json').then(function (meta) {
+      var at = String(meta.revealAt || '');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(at) && todayIso() >= at) return 0;
+      return Number(meta.heldCount) || 0;
+    });
+  }
+
+  /** Changelog entries still pending, decided THROUGH OANews — never a second
+      reading of the review gate. Null when the module is not on the page,
+      which the callers treat as "unknown", never as zero. */
+  var newsMemo = null;
+  function pendingNews(db) {
+    if (!window.OANews) return Promise.resolve(null);
+    if (newsMemo) return newsMemo;   // the tiles and the panel share one read
+    newsMemo = Promise.all([
+      fetchJson('/changelog.json'),
+      db.collection(OANews.COLLECTION).get()
+    ]).then(function (r) {
+      var docs = {};
+      r[1].forEach(function (d) { docs[d.id] = d.data(); });
+      return OANews.partition((r[0] && r[0].updates) || [], docs).pending;
+    })['catch'](function (err) { newsMemo = null; throw err; });
+    return newsMemo;
+  }
+
+  /**
+   * Everything waiting for the maintainer, counted once for every consumer:
+   * {jobs, candidates, feedback, news, total}. A leg that cannot be read
+   * resolves null — unknown, not zero — and the total sums what IS known, so
+   * one refused read never hides the rest of the queue.
+   */
+  function pendingCounts() {
+    return OAFB.ready().then(function (fb) {
+      var db = fb.firestore();
+      var nul = function () { return null; };
+      return Promise.all([
+        countOf(db.collection('jobReviews').where('status', '==', 'pending'))['catch'](nul),
+        heldCandidates()['catch'](nul),
+        countOf(db.collection(OAFB.col.feedback).where('status', '==', 'open'))['catch'](nul),
+        pendingNews(db).then(function (p) {
+          return p === null ? null : p.length;
+        })['catch'](nul)
+      ]);
+    }).then(function (r) {
+      var total = 0, known = 0;
+      for (var i = 0; i < r.length; i++) {
+        if (typeof r[i] === 'number') { total += r[i]; known++; }
+      }
+      /* NOTHING answered — rules not deployed, offline — is UNKNOWN, never a
+         zero: a 0 here would overwrite a cached badge that was honest with
+         one that is not (the same rule the menu counts follow). A PARTIAL
+         answer still sums what is known — each queue is independent, and
+         withholding three known numbers over one refused read helps nobody. */
+      return { jobs: r[0], candidates: r[1], feedback: r[2], news: r[3],
+               total: known ? total : null };
+    });
+  }
+
+  /* ------------------------------------------------------- the summary strip */
+
+  var TILES = [
+    { key: 'jobs', label: 'Job postings to review', to: '#oa-review' },
+    { key: 'candidates', label: 'Candidate profiles held', to: '#oa-aa-cands' },
+    { key: 'feedback', label: 'Open feedback tickets', to: '#oa-inbox' },
+    { key: 'news', label: 'Updates awaiting publication', to: '#oa-aa-news' }
+  ];
+
+  function paintTiles(c) {
+    var host = $('oa-aa-tiles');
+    if (!host) return;
+    host.innerHTML = TILES.map(function (t) {
+      var n = c[t.key];
+      var known = typeof n === 'number';
+      return '<a class="oa-aa-tile' + (known && n > 0 ? ' is-due' : '') + '" href="' + t.to + '">' +
+        '<span class="oa-aa-tile-n">' + (known ? n : '?') + '</span>' +
+        '<span class="oa-aa-tile-l">' + esc(t.label) + '</span></a>';
+    }).join('');
+  }
+
+  /* -------------------------------------------------------- candidate cards */
+
+  var CAND_STATUS = {
+    held: 'Held until the reveal — visible to nobody but you and the candidate',
+    live: 'Published on the candidates page',
+    withdrawn: 'Withdrawn by the candidate',
+    hidden: 'Taken down by you'
+  };
+
+  /** Which pile a stored profile belongs to. Pure, so the selftest can hold
+      it to the build's own reveal semantics: until the reveal date EVERY
+      queued profile is held (build-candidates.mjs publishes a constant []),
+      and from the day itself queued means live. */
+  function candGroupOf(doc, revealAt, today) {
+    var s = String((doc && doc.status) || 'queued');
+    if (s === 'withdrawn') return 'withdrawn';
+    if (s === 'hidden') return 'hidden';
+    /* the build's own gate (revealGate in candidates-model.mjs): NO announced
+       date means everything is HELD — the build publishes nothing until the
+       admin sets one — and from the day itself queued means live */
+    var at = /^\d{4}-\d{2}-\d{2}$/.test(String(revealAt || '')) ? revealAt : '';
+    var held = !at || today < at;
+    return held ? 'held' : 'live';
+  }
+
+  function fmtDate(ts) {
+    try {
+      var d = ts && typeof ts.toDate === 'function' ? ts.toDate() : (ts ? new Date(ts) : null);
+      return d && !isNaN(d) ? d.toISOString().slice(0, 10) : '';
+    } catch (e) { return ''; }
+  }
+
+  function candLink(url, label) {
+    var u = safeHref(url);
+    return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + label + '</a>' : '';
+  }
+
+  function candCard(id, v, group) {
+    var name = ((v.first || '') + ' ' + (v.last || '')).replace(/\s+/g, ' ').trim() || '(no name)';
+    var links = [
+      candLink(v.cvUrl, 'CV'),
+      candLink(v.rsUrl, 'Research summary'),
+      candLink(v.webUrl, 'Website')
+    ].filter(Boolean).join(' &middot; ');
+    var uploads = [
+      v.cvUploadName ? 'CV upload: ' + esc(v.cvUploadName) : '',
+      v.rsUploadName ? 'Research summary upload: ' + esc(v.rsUploadName) : ''
+    ].filter(Boolean).join(' &middot; ');
+    var meta = [
+      v.affiliation ? esc(v.affiliation) : '',
+      v.position ? esc(v.position) : '',
+      v.year ? esc(v.year) + ' market' : ''
+    ].filter(Boolean).join(' &middot; ');
+    var areas = []
+      .concat(Array.isArray(v.researchAreas) ? v.researchAreas : [])
+      .map(function (a) { return esc(a); }).join(', ');
+    var days = []
+      .concat(Array.isArray(v.informsDays) ? v.informsDays : [])
+      .map(function (a) { return esc(a); }).join(', ');
+
+    return '<article class="oa-fb-card oa-aa-cand" data-id="' + esc(id) + '">' +
+      '<header><strong>' + esc(name) + '</strong>' +
+        '<span class="oa-fb-status is-' + (group === 'held' ? 'open' : 'closed') + '">' +
+          esc(group) + '</span> ' +
+        '<span class="oa-hint" style="display:inline">' +
+          (fmtDate(v.createdAt) ? 'filed ' + esc(fmtDate(v.createdAt)) : '') + '</span>' +
+      '</header>' +
+      (meta ? '<p class="oa-aa-cand-meta">' + meta + '</p>' : '') +
+      (areas ? '<p class="oa-hint">Research: ' + areas + '</p>' : '') +
+      (days ? '<p class="oa-hint">INFORMS day(s): ' + days + '</p>' : '') +
+      (links ? '<p>' + links + '</p>' : '') +
+      (uploads ? '<p class="oa-hint">' + uploads + ' &mdash; filed into Drive by the next build</p>' : '') +
+      /* the address is admin-only reading; the flag says whether the BUILD
+         may publish it (emailPublic, the disclosure the rebuild retired) */
+      (v.email ? '<p class="oa-hint">' + esc(v.email) +
+        (v.emailPublic ? ' (published on the profile)' : ' (kept private)') + '</p>' : '') +
+      (v.note ? '<p class="oa-fb-body">' + esc(v.note) + '</p>' : '') +
+      '<p class="oa-hint">' + esc(CAND_STATUS[group] || '') + '</p>' +
+      '<p class="oa-aa-cand-actions">' +
+        '<button type="button" class="button blue" data-act="edit">Edit</button> ' +
+        (group === 'withdrawn'
+          /* the candidate withdrew it themselves; putting it back is theirs
+             to do, so the only offer is to read it */
+          ? ''
+          : (group === 'hidden'
+            ? '<button type="button" class="button oa-btn-ghost" data-act="restore">Put it back</button>'
+            : '<button type="button" class="button oa-btn-ghost" data-act="takedown">Take down</button>')) +
+        '<span class="oa-form-msg" role="status"></span>' +
+      '</p>' +
+    '</article>';
+  }
+
+  var CAND_GROUPS = [
+    ['held', 'Held for the reveal'],
+    ['live', 'Published'],
+    ['withdrawn', 'Withdrawn by their candidate'],
+    ['hidden', 'Taken down by you']
+  ];
+
+  function renderCandidates(db, revealAt) {
+    var list = $('oa-aa-cands-list');
+    if (!list) return Promise.resolve(null);
+    list.innerHTML = '<p class="oa-hint">Loading&hellip;</p>';
+
+    return db.collection(OAFB.col.candidateSubmissions).get().then(function (snap) {
+      var groups = { held: [], live: [], withdrawn: [], hidden: [] };
+      var today = todayIso();
+      snap.forEach(function (d) {
+        var v = d.data() || {};
+        groups[candGroupOf(v, revealAt, today)].push({ id: d.id, v: v });
+      });
+      /* newest filed first within each pile — the queue is read as a to-do
+         list, like the job review queue's newest-advertisement-first */
+      var byNewest = function (a, b) {
+        return String(fmtDate(b.v.createdAt)).localeCompare(String(fmtDate(a.v.createdAt)));
+      };
+
+      var out = '';
+      CAND_GROUPS.forEach(function (g) {
+        var rows = groups[g[0]];
+        if (!rows.length) return;
+        rows.sort(byNewest);
+        out += '<h4 class="oa-aa-group-h">' + g[1] + ' (' + rows.length + ')</h4>' +
+          rows.map(function (r) { return candCard(r.id, r.v, g[0]); }).join('');
+      });
+      list.innerHTML = out ||
+        '<p class="oa-hint">No candidate profiles have been filed yet.</p>';
+      return groups;
+    })['catch'](function (err) {
+      list.innerHTML = '<p class="oa-form-msg is-err">Could not load the profiles (' +
+        esc((err && (err.code || err.message)) || 'error') + '). If this says ' +
+        'permission-denied, the rules have not been deployed yet &mdash; see ' +
+        '_SETUP-FIREBASE.md &sect;4.</p>';
+      return null;
+    });
+  }
+
+  function wireCandidateActions(db, revealAt) {
+    var list = $('oa-aa-cands-list');
+    if (!list || list.dataset.oaWired) return;
+    list.dataset.oaWired = '1';
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
+      if (!btn) return;
+      var card = btn.closest('.oa-aa-cand');
+      var id = card && card.getAttribute('data-id');
+      if (!id) return;
+
+      if (btn.getAttribute('data-act') === 'edit') {
+        /* the SAME form the candidate used — oa-candidateform.js's ?edit=
+           mode loads the document and saves it back, and the rules let the
+           admin do both on any profile */
+        location.href = 'post-a-candidate.html?edit=' + encodeURIComponent(id);
+        return;
+      }
+
+      var down = btn.getAttribute('data-act') === 'takedown';
+      var msg = card.querySelector('.oa-form-msg');
+      if (down && !window.confirm('Take this profile down?\n\nIt stops being ' +
+        'published (or eligible for the reveal) until it is put back. Nothing ' +
+        'is deleted.')) return;
+
+      btn.disabled = true;
+      /* 'hidden' is the maintainer's takedown, 'queued' the publishable state
+         — the same two words oa-candidateedit.js and the build read */
+      db.collection(OAFB.col.candidateSubmissions).doc(id).update({
+        status: down ? 'hidden' : 'queued',
+        updatedAt: new Date().toISOString()
+      }).then(function () {
+        renderCandidates(db, revealAt).then(correctBadge);
+      })['catch'](function (err) {
+        btn.disabled = false;
+        if (msg) {
+          msg.className = 'oa-form-msg is-err';
+          msg.textContent = 'Could not save that (' +
+            ((err && err.code) || 'error') + ').';
+        }
+      });
+    });
+  }
+
+  /* ----------------------------------------------------------- news pending */
+
+  function renderNews(db) {
+    var list = $('oa-aa-news-list');
+    if (!list) return;
+    pendingNews(db).then(function (p) {
+      if (p === null) { show($('oa-aa-news'), false); return; }
+      if (!p.length) {
+        list.innerHTML = '<p class="oa-hint">Nothing waiting &mdash; every logged ' +
+          'update has been reviewed.</p>';
+        return;
+      }
+      list.innerHTML = '<ul class="oa-aa-news-ul">' + p.map(function (e) {
+        return '<li><strong>' + esc(e.title || e.id) + '</strong>' +
+          (e.date ? ' <span class="oa-hint" style="display:inline">' + esc(e.date) + '</span>' : '') +
+          '</li>';
+      }).join('') + '</ul>';
+    })['catch'](function () {
+      list.innerHTML = '<p class="oa-hint">Could not read the update log.</p>';
+    });
+  }
+
+  /* ------------------------------------------------------------- the badge */
+
+  var lastCounts = null;
+
+  /** The exact-where-loaded correction: once the page has real numbers, the
+      cached menu badge is set from them, the same rule my-postings applies. */
+  function correctBadge(groups) {
+    if (!lastCounts) return;
+    if (groups) lastCounts.candidates = groups.held.length;
+    var total = 0, known = 0;
+    ['jobs', 'candidates', 'feedback', 'news'].forEach(function (k) {
+      if (typeof lastCounts[k] === 'number') { total += lastCounts[k]; known++; }
+    });
+    // all four unknown is UNKNOWN — never write a 0 over an honest cache
+    lastCounts.total = known ? total : null;
+    paintTiles(lastCounts);
+    if (known && window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('admin', total);
+  }
+
+  /* ----------------------------------------------------------------- wiring */
+
+  var startedFor = null;
+
+  function start() {
+    OAFB.ready().then(function (fb) {
+      var db = fb.firestore();
+
+      fetchJson('/data/candidates-meta.json')['catch'](function () { return {}; })
+        .then(function (meta) {
+          var revealAt = String((meta && meta.revealAt) || '');
+          var hint = $('oa-aa-cands-hint');
+          if (hint && /^\d{4}-\d{2}-\d{2}$/.test(revealAt) && todayIso() < revealAt) {
+            hint.innerHTML = 'Every profile filed through the site, including the ' +
+              'ones held back until the reveal on <strong>' + esc(revealAt) +
+              '</strong>. Edit opens the same form the candidate used; a held ' +
+              'profile is visible to nobody but you and its candidate until the ' +
+              'reveal publishes it.';
+          }
+          show($('oa-aa-cands'), true);
+          wireCandidateActions(db, revealAt);
+          return renderCandidates(db, revealAt);
+        })
+        .then(function (groups) {
+          /* tiles first from the shared counter, then corrected from the real
+             documents the moment they are on screen */
+          return pendingCounts().then(function (c) {
+            lastCounts = c;
+            paintTiles(c);
+            correctBadge(groups);
+          });
+        })['catch'](function () { /* each panel reports its own failure */ });
+
+      show($('oa-aa-news'), true);
+      renderNews(db);
+    })['catch'](function () {
+      var g = $('oa-aa-guest');
+      show(g, true);
+      show($('oa-aa-admin'), false);
+      if (g) g.insertAdjacentHTML('beforeend',
+        '<p class="oa-form-msg is-err">The review desk is not connected to its ' +
+        'database from here.</p>');
+    });
+  }
+
+  function boot() {
+    if (!$('oa-aa') || !window.OAAccounts || !window.OAFB) return;
+
+    var signin = $('oa-aa-signin');
+    if (signin) signin.addEventListener('click', function () { OAAccounts.openAuth(); });
+
+    OAAccounts.onChange(function (u) {
+      var is = OAAccounts.isAdmin();
+      show($('oa-aa-guest'), !is);
+      show($('oa-aa-admin'), is);
+      show($('oa-aa-signin-p'), !is && !u && OAFB.enabled);
+      if (!is) { startedFor = null; return; }
+      if (startedFor === u.uid) return;   // onChange fires on every auth event
+      startedFor = u.uid;
+      start();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+
+  window.OAAdminArea = {
+    /** The one number beside "Admin area" — shared with oa-accounts.js. */
+    pendingCounts: pendingCounts,
+    /* the pure pieces, for the selftest */
+    pure: {
+      candGroupOf: candGroupOf,
+      safeHref: safeHref
+    }
+  };
+})();

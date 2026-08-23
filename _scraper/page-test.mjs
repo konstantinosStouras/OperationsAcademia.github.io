@@ -3559,7 +3559,208 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ------------------------------------------------- the Admin area, end to end
+
+   admin-area.html gathers every review queue (owner, 2026-08-23), and the
+   account menu carries "Admin area N". What no static pin can prove is the
+   money path: that the badge, the summary tiles and the panels all land on
+   the SAME numbers from the same data, that the gap the page was built for is
+   really closed (a candidate profile HELD for the reveal is on the admin's
+   screen with an Edit control), and that a submission typed by a stranger is
+   rendered inert. Driven against _fake-firebase.js with a seeded queue; the
+   EXPECTED numbers are computed here from the same served files the code
+   reads (changelog.json through assets/oa-news.js, candidates-meta.json), so
+   this stays green as the site's own data moves. */
+{
+  const SHIM = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+  const { createRequire } = await import('node:module');
+  const OANewsNode = createRequire(import.meta.url)(path.join(ROOT, 'assets', 'oa-news.js'));
+  const changelog = JSON.parse(await readFile(path.join(ROOT, 'changelog.json'), 'utf8'));
+  const newsPending = OANewsNode.partition(changelog.updates, {}).pending.length;
+  const cmeta = JSON.parse(await readFile(path.join(ROOT, 'data', 'candidates-meta.json'), 'utf8'));
+  const today = new Date().toISOString().slice(0, 10);
+  const validReveal = /^\d{4}-\d{2}-\d{2}$/.test(String(cmeta.revealAt || ''));
+  // the build's gate: no announced date holds everything
+  const preReveal = !validReveal || today < cmeta.revealAt;
+  const metaHeld = preReveal ? (Number(cmeta.heldCount) || 0) : 0;
+
+  const ADMIN = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+    emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+  const NOBODY = { uid: 'visitor-uid-00000000', email: 'someone@example.edu',
+    emailVerified: true, displayName: 'Someone Else', providerData: [] };
+
+  const seedDocs = [
+    { path: 'jobReviews/r1', data: { rowId: 'r1', status: 'pending', queuedAt: '2026-08-20',
+        row: { id: 'r1', year: 2026, posted: '2026-08-20', institution: 'Test University One', country: 'Ireland' } } },
+    { path: 'jobReviews/r2', data: { rowId: 'r2', status: 'pending', queuedAt: '2026-08-21',
+        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two', country: 'France' } } },
+    // approved: must NOT be in the queue or its counts
+    { path: 'jobReviews/r3', data: { rowId: 'r3', status: 'approved', queuedAt: '2026-08-19',
+        row: { id: 'r3', year: 2026, posted: '2026-08-19', institution: 'Approved University', country: 'Spain' } } },
+    { path: 'feedback/f1', data: { ticket: 'OA-260820-AAAA', status: 'open', forwarded: false,
+        message: 'First open ticket', createdAt: '2026-08-20T10:00:00.000Z' } },
+    { path: 'feedback/f2', data: { ticket: 'OA-260821-BBBB', status: 'open', forwarded: false,
+        message: 'Second open ticket', createdAt: '2026-08-21T10:00:00.000Z' } },
+    { path: 'feedback/f3', data: { ticket: 'OA-260818-CCCC', status: 'closed', forwarded: true,
+        message: 'A closed ticket', createdAt: '2026-08-18T10:00:00.000Z' } },
+    /* c1 is the hostile one: markup in a name, javascript: in a link — the
+       panel renders documents nobody has vetted, so it must render them inert */
+    { path: 'candidateSubmissions/c1', data: { uid: 'u-cand-1', status: 'queued', year: 2027,
+        first: '<img src=x onerror=window.__xss1=1>', last: 'Doe',
+        affiliation: 'Somewhere <b>Bold</b>', position: 'PhD candidate',
+        cvUrl: 'javascript:window.__xss2=1', webUrl: 'https://example.edu/jane',
+        email: 'jane@example.edu', emailPublic: false,
+        researchAreas: ['Supply Chain'], informsDays: ['Sunday'],
+        createdAt: '2026-08-20T09:00:00.000Z' } },
+    { path: 'candidateSubmissions/c2', data: { uid: 'u-cand-2', status: 'queued', year: 2027,
+        first: 'John', last: 'Smith', affiliation: 'Elsewhere', position: 'Post-doc',
+        createdAt: '2026-08-21T09:00:00.000Z' } },
+    { path: 'candidateSubmissions/c3', data: { uid: 'u-cand-3', status: 'withdrawn', year: 2027,
+        first: 'Wendy', last: 'Withdrew', createdAt: '2026-08-19T09:00:00.000Z' } },
+    { path: 'candidateSubmissions/c4', data: { uid: 'u-cand-4', status: 'hidden', year: 2027,
+        first: 'Harry', last: 'Hidden', createdAt: '2026-08-18T09:00:00.000Z' } },
+  ];
+  const seededHeld = preReveal ? 2 : 0;   // c1 + c2 are queued
+
+  /** A fresh CONTEXT per scenario: the badge cache and the auth hint live in
+      localStorage, and a shared context would hand one scenario the last
+      one's numbers — the very confusion the uid-keyed cache exists to stop. */
+  async function adminAreaPage(user, url) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs: seedDocs })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + url, { waitUntil: 'load' });
+    return { ctx, q, errors };
+  }
+
+  /* -- the badge, on a page that is NOT the admin area ---------------------- */
+  {
+    const expected = 2 + metaHeld + 2 + newsPending;
+    const { ctx, q, errors } = await adminAreaPage(ADMIN, 'index.html');
+    await q.waitForSelector('#oa-chip', { timeout: 10000 });
+    eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 1,
+      'admin area: the resolved admin session draws the menu row');
+    eq(await q.locator('#oa-np a[href="admin-area.html"]').count(), 1,
+      'admin area: and the mobile sheet panel carries it too');
+    await q.waitForFunction((want) => {
+      const el = document.querySelector('#oa-menu .oa-acct-n[data-count="admin"]');
+      return el && el.textContent === String(want);
+    }, expected, { timeout: 15000 });
+    ok(true, `admin area: the badge lands on ${expected} — 2 pending reviews + ` +
+      `${metaHeld} held profiles + 2 open tickets + ${newsPending} unpublished updates`);
+    ok(await q.evaluate(() =>
+      document.querySelectorAll('script[src="assets/oa-news.js"]').length <= 1 &&
+      document.querySelectorAll('script[src="assets/oa-adminarea.js"]').length <= 1),
+      'admin area: the two counting scripts were loaded once, on demand');
+    eq(errors, [], 'admin area: badge run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- the desk itself ------------------------------------------------------ */
+  {
+    const { ctx, q, errors } = await adminAreaPage(ADMIN, 'admin-area.html');
+    await q.waitForFunction(() => {
+      const g = document.getElementById('oa-aa-guest');
+      const a = document.getElementById('oa-aa-admin');
+      return g && g.hidden && a && !a.hidden;
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: the admin session unhides the desk and hides the guest note');
+
+    // the review queue: pending only, newest advertisement first
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-review-count') || {}).textContent === '2 postings',
+      null, { timeout: 10000 });
+    const reviews = await q.textContent('#oa-review-list');
+    ok(reviews.indexOf('Test University Two') !== -1 &&
+       reviews.indexOf('Test University Two') < reviews.indexOf('Test University One'),
+      'admin area: both pending postings are drawn, newest first');
+    ok(reviews.indexOf('Approved University') === -1,
+      'admin area: an approved posting is not in the queue');
+
+    // the inbox: open tab, newest first, through the moved-but-unchanged panel
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-inbox-list .oa-fb-card').length === 2,
+      null, { timeout: 10000 });
+    const inbox = await q.textContent('#oa-inbox-list');
+    ok(inbox.indexOf('Second open ticket') < inbox.indexOf('First open ticket'),
+      'admin area: the two open tickets are listed, newest first');
+    ok(inbox.indexOf('A closed ticket') === -1, 'admin area: the closed one is not');
+
+    // THE GAP THIS PAGE CLOSES: all four profiles on screen, held ones included
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-cands-list .oa-aa-cand').length === 4,
+      null, { timeout: 10000 });
+    ok(true, 'admin area: all four candidate profiles are on the admin\u2019s screen');
+    if (preReveal) {
+      const heads = await q.$$eval('#oa-aa-cands-list .oa-aa-group-h',
+        (els) => els.map((e) => e.textContent));
+      ok(/^Held for the reveal \(2\)/.test(heads[0] || ''),
+        'admin area: the two filed-for-the-reveal profiles lead, counted');
+    }
+    ok(await q.locator('article[data-id="c1"] button[data-act="edit"]').count() === 1,
+      'admin area: a held profile carries Edit — the control the candidates page could not draw');
+    ok(await q.locator('article[data-id="c3"] button[data-act="takedown"], ' +
+                       'article[data-id="c3"] button[data-act="restore"]').count() === 0,
+      'admin area: a profile its candidate withdrew offers no restore — that is theirs to undo');
+    ok(await q.locator('article[data-id="c4"] button[data-act="restore"]').count() === 1,
+      'admin area: one the maintainer hid can be put back');
+
+    // hostile input is rendered inert
+    ok(await q.evaluate(() => !document.querySelector('#oa-aa-cands-list img') &&
+        !document.querySelector('#oa-aa-cands-list b') &&
+        !document.querySelector('#oa-aa-cands-list a[href^="javascript:"]') &&
+        !window.__xss1 && !window.__xss2),
+      'admin area: markup in a name and a javascript: link render as text, never as DOM');
+    ok(await q.locator('article[data-id="c1"] a[href="https://example.edu/jane"]').count() === 1,
+      'admin area: while a real https link is still a link');
+
+    // the tiles and the badge, corrected from the documents on screen
+    await q.waitForFunction((want) => {
+      const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
+      return els.length === 4 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
+    }, ['2', seededHeld, '2', newsPending].join(','), { timeout: 10000 });
+    ok(true, 'admin area: the four tiles agree with the panels beneath them');
+    eq(await q.evaluate(() =>
+      (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
+      2 + seededHeld + 2 + newsPending,
+      'admin area: and the cached menu badge is corrected from the same numbers');
+
+    // taking a profile down really writes, and the desk follows
+    q.once('dialog', (d) => d.accept());
+    await q.click('article[data-id="c2"] button[data-act="takedown"]');
+    await q.waitForFunction(() => window.__fb.docs['candidateSubmissions/c2'].status === 'hidden',
+      null, { timeout: 10000 });
+    ok(true, 'admin area: Take down writes status hidden — a status change, never a delete');
+    await q.waitForFunction(() => {
+      const card = document.querySelector('article[data-id="c2"]');
+      return card && card.querySelector('button[data-act="restore"]');
+    }, null, { timeout: 10000 });
+    ok(true, 'admin area: and the card re-renders under the taken-down pile, one click from back');
+
+    eq(errors, [], 'admin area: desk run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- everyone else -------------------------------------------------------- */
+  {
+    const { ctx, q } = await adminAreaPage(NOBODY, 'index.html');
+    await q.waitForSelector('#oa-chip', { timeout: 10000 });
+    eq(await q.locator('#oa-menu a[href="admin-area.html"]').count(), 0,
+      'admin area: a resolved non-admin session gets no menu row');
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await q.waitForTimeout(600);
+    ok(await q.locator('#oa-aa-guest').isVisible() && await q.locator('#oa-aa-admin').isHidden(),
+      'admin area: and the desk stays the guest note for them');
+    await ctx.close();
+  }
+}
+
 /* ------------------------------------------------------------------ done */
+
 
 eq(jsErrors, [], 'no uncaught script errors');
 

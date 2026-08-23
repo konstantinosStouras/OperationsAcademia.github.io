@@ -160,48 +160,12 @@
 
                 <div class="oa-form">
 
-                  <!-- ============================ postings awaiting review -->
-                  <!-- Above the feedback inbox deliberately: a queued posting is
-                       not on the site until it is approved, so it is the thing
-                       most worth doing first. Admin-only, and the panel being
-                       drawn grants nothing — jobReviews is admin-read in the
-                       rules, so a non-admin browser that reached this markup
-                       still cannot load a single document. -->
-                  <section class="oa-panel" id="oa-review" hidden>
-                    <h3 class="oa-panel-h">&#128203; Job postings to review</h3>
-                    <p class="oa-hint">Crawled from the job market tracking sheet and
-                      held back until you approve them &mdash; <span id="oa-review-count">nothing</span>
-                      waiting. Correct anything that is wrong before approving; your
-                      edits are kept and re-applied every time the sheet is re-read.</p>
-                    <!-- Approving one at a time is right for a handful and unusable for
-                         a season: the tracking sheet's own tab opened with 89 postings
-                         on it. So the whole queue can go up at once, behind a count and
-                         a confirmation, and every posting is still on screen to be read
-                         or corrected first. -->
-                    <!-- The workbook holds several market cycles at once, so the queue
-                         does too: the morning it was first read properly, 89 of its
-                         postings were the season under way and ~250 were the one that
-                         had closed. Splitting them by market is what makes approving a
-                         whole page a safe thing to press — it acts on what is shown. -->
-                    <div class="oa-tabs" id="oa-review-years" hidden></div>
-                    <p class="oa-rv-bulk" id="oa-review-bulk" hidden>
-                      <button type="button" class="button blue" id="oa-review-all">
-                        Approve all <span data-n></span> shown &amp; publish</button>
-                      <span class="oa-form-msg" id="oa-review-bulk-msg" role="status"></span>
-                    </p>
-                    <div id="oa-review-list"></div>
-                  </section>
-
-                  <!-- ===================================== maintainer inbox -->
-                  <section class="oa-panel" id="oa-inbox" hidden>
-                    <h3 class="oa-panel-h">&#128229; Feedback inbox</h3>
-                    <div class="oa-tabs" id="oa-inbox-tabs">
-                      <button type="button" class="oa-tab is-on" data-tab="open">Open</button>
-                      <button type="button" class="oa-tab" data-tab="closed">Closed</button>
-                      <button type="button" class="oa-tab" data-tab="all">All</button>
-                    </div>
-                    <div id="oa-inbox-list"></div>
-                  </section>
+                  <!-- The maintainer's review queue and feedback inbox used to sit
+                       here; they moved to admin-area.html (owner, 2026-08-21),
+                       the dedicated Admin area that gathers EVERYTHING waiting
+                       for review — job postings, candidate profiles, feedback
+                       and unpublished updates. This page is the public form
+                       and nothing else. -->
 
                   <section class="oa-panel">
 
@@ -374,7 +338,6 @@
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
-    <script defer src="assets/oa-jobreview.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
   </body>
 </html>

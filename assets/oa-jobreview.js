@@ -4,8 +4,9 @@
    Postings crawled from the job market workbook are no longer published on
    sight: they are held in the Firestore `jobReviews` collection until the
    maintainer has looked at them. This draws that queue at the top of the
-   feedback page, above the feedback inbox, and lets them correct any field
-   before approving.
+   Admin area (admin-area.html — it lived on the feedback page until the
+   Admin area gathered every review queue, owner 2026-08-21), above the
+   feedback inbox, and lets them correct any field before approving.
 
    AUTHORISATION IS THE RULES, never this file. `jobReviews` is admin-read AND
    admin-write in _firestore.rules — unlike `rowOverrides`, which is public-read,
