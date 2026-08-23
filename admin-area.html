@@ -260,6 +260,25 @@
                 new page &rarr;</a></p>
             </section>
 
+            <!-- ============================ name-correction suggestions -->
+            <!-- Posters' corrections to published university / school /
+                 department names (assets/oa-namefix.js). NOTHING RENAMES
+                 ITSELF: a suggestion waits here, and approving it has the data
+                 build write it into data/name-fixes.json and rename every
+                 posting and vocabulary entry that carries the old spelling —
+                 within about an hour. A fix that keeps recurring belongs in
+                 assets/oa-schools.js's alias tables, which also reach the
+                 frozen archives through --heal-names. -->
+            <section class="oa-panel" id="oa-aa-names" hidden>
+              <h3 class="oa-panel-h">&#9999;&#65039; Name corrections suggested</h3>
+              <p class="oa-hint">A poster says a university, school or department
+                name is published wrongly. Approving renames it across every
+                posting and the form&rsquo;s pickers at the next data build; the
+                Universities map and the frozen archives keep their own
+                read-time overrides.</p>
+              <div id="oa-aa-names-list"><p class="oa-hint">Loading&hellip;</p></div>
+            </section>
+
           </div>
         </div>
       </div>

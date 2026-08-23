@@ -1644,8 +1644,10 @@ async function testCascadeWiring() {
     'and the three lists still work on a page that never loaded oa-schools.js');
   ok(/S\.canonColumns\(\{/.test(pick),
     'the fields are put into the published spelling by the SAME canon the submission uses');
-  ok(/publishAs: S \? function \(v\) \{ return S\.canonUnit\(v, val\(inst\)\); \} : null/.test(pick),
-    'a name not on the list is offered as it will be published');
+  ok(/unit: S\.canonUnit\(v, val\(inst\)\) \}\)\.unit;/.test(pick)
+     && /publishAs: S \? function \(v\) \{/.test(pick),
+    'a name not on the list is offered as it will be published — canon, then the ' +
+    'approved corrections overlay (fixedPlace), the same order every ingest applies');
   ok(/S\.canonUnit\(v, val\(inst\)\)/.test(pick) && /var keyUnit = S \? function \(v\)/.test(pick),
     'and the department picker groups by the university too, so a scoped name is not folded away');
   ok(/canonColumns\(\{/.test(pick) && !/canonPlace\(\{/.test(pick),
@@ -2272,24 +2274,21 @@ async function testVocabFile() {
      generic ones ("school", "of", "business") and the university's own name
      and initials — otherwise "UCD" or "Business" would keep two spellings of
      one school apart for ever. */
-  const GENERIC = new Set(['the', 'school', 'college', 'faculty', 'of', 'business', 'at',
-    'and', 'graduate', 'department', 'administration', 'studies', 'institute', 'for',
-    'area', 'group']);
-  const distinctive = (name, uni) => {
-    const own = new Set(S.fold(uni).split(' ').filter(Boolean));
-    const initials = [...own].length ? S.fold(uni).split(' ').filter(Boolean).map((w) => w[0]).join('') : '';
-    return S.fold(name).split(' ')
-      .filter((w) => w && !GENERIC.has(w) && !own.has(w) && w !== initials)
-      .sort().join(' ');
-  };
-  /** Every pair of names in `list` that is probably one name written twice. */
+  /** Every pair of names in `list` that is probably one name written twice —
+      asked THROUGH the module (oa-schools.js similarNames), the same
+      judgement the posting form's "did you mean" rows point a typed
+      near-miss at, so the sweep and the form cannot disagree about what a
+      duplicate is. STRICT tier deliberately: a pair this sweep flags fails
+      the build, and the fuzzy suggestion tier ("Management" is CONTAINED in
+      "Operations Management") is exactly what a build-failing assertion must
+      not use — only the owner can say whether those are one group or two. */
   const samePair = (list, uni) => {
     const out = [];
     for (let i = 0; i < list.length; i++) {
       for (let j = i + 1; j < list.length; j++) {
-        const a = S.fold(list[i]), b = S.fold(list[j]);
-        const da = distinctive(list[i], uni), db = distinctive(list[j], uni);
-        if (a.includes(b) || b.includes(a) || (da && da === db)) out.push([list[i], list[j]]);
+        if (S.similarNames(list[i], list[j], { university: uni })) {
+          out.push([list[i], list[j]]);
+        }
       }
     }
     return out;
@@ -3836,6 +3835,255 @@ async function testNewsReview() {
     'and the old hidden-in-place styling is gone with the behaviour it drew');
 }
 
+/* ----------------------------------- posters keep the name database clean
+
+   Two halves, one discipline. The picker's "did you mean" rows stop a slight
+   respelling of an existing place from being added as a second entry — the
+   judgement is oa-schools.js's similarNames, the SAME function the duplicate
+   sweep above holds the built vocabulary with, so the guard at the door and
+   the audit behind it cannot disagree. And a name the site already publishes
+   WRONGLY can be corrected by a signed-in poster: a `nameFixes` suggestion,
+   pinned pending by the rules, approved on admin-area.html, written by the
+   build into data/name-fixes.json and applied — after canon, never instead of
+   it — to every posting and to the vocabulary. */
+async function testNameFixes() {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  const NF = require(path.join(HERE, '..', 'assets', 'oa-namefix.js'));
+
+  /* ------------------------------------------------- the same-name judgement */
+
+  ok(S.similarNames('Olin Business School', 'Olin School of Business'),
+    'similarNames: the same distinctive words in another order are one school');
+  ok(S.similarNames('Michael Smurfit Graduate Business School',
+    'UCD Michael Smurfit Graduate School of Business',
+    { university: 'University College Dublin' }),
+    'and the university\'s own name and initials are not distinctive within its lists');
+  ok(!S.similarNames('Marketing', 'Operations Management'),
+    'two genuinely different departments are not one');
+  ok(!S.similarNames('Managment Science', 'Management Science'),
+    'STRICT (the build-failing tier) does not chase typos');
+  ok(S.similarNames('Managment Science', 'Management Science', { fuzzy: true }),
+    'the FUZZY tier (a suggestion the poster can wave away) does');
+  ok(S.similarNames('Operation Management', 'Operations Management', { fuzzy: true }),
+    'and singular/plural');
+  ok(S.similarNames('Booth School of Business',
+    'The University of Chicago Booth School of Business', { fuzzy: true }),
+    'and one name contained in the other');
+  ok(!S.similarNames('Information Systems', 'Information Management', { fuzzy: true }),
+    'but a different long word is a different department, even fuzzily');
+  eq(S.findSimilar('Managment Science',
+    ['Marketing', 'Management Science', 'Management Sciences Dept', 'Operations']),
+    ['Management Science', 'Management Sciences Dept'],
+    'findSimilar returns the near-misses, in list order');
+  eq(S.findSimilar('Management Science', ['Management Science']), [],
+    'and never the name itself — identical is not a suggestion');
+  eq(S.findSimilar('x', ['xa', 'xb', 'xc', 'xd']).length <= 3, true,
+    'capped, so a short needle cannot flood the picker');
+
+  /* the picker wires the judgement in: the did-you-mean rows above the
+     "new name" row, fed by the place picker from the same vocabulary */
+  const combo = await readFile(path.join(HERE, '..', 'assets', 'oa-combo.js'), 'utf8');
+  ok(/opts\.similar\(typed\)/.test(combo) && combo.includes('oa-combo-near'),
+    'oa-combo.js draws the did-you-mean rows when the caller finds a near-miss');
+  const pick = await readFile(path.join(HERE, '..', 'assets', 'oa-place-picker.js'), 'utf8');
+  ok(/S\.findSimilar\(typed/.test(pick),
+    'oa-place-picker.js answers it through oa-schools.js — one judgement, both halves');
+
+  /* ------------------------------------ the type follows the chosen names */
+
+  for (const [inst, more] of [
+    ['Rutgers Business School–Newark', 'MS and IS'],
+    ['Clarkson University', 'Operations'],
+    ['Rollins College', 'SCM'],
+    ['INSEAD', 'Technology and Operations Management'],
+    ['Some Employer', 'Department of Business Administration'],
+    ['University of Nevada, Las Vegas', 'Lee Business School'],
+    ['KU Leuven', ''],
+    ['ESMT Berlin', ''],
+  ]) {
+    eq(S.typeGuess(inst, more, ''), typeFromNames(inst, more),
+      `typeGuess("${inst}") answers exactly as the pipeline's typeFromNames does`);
+  }
+  ok(/type: \$\('f-type'\)/.test(await readFile(
+    path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8')),
+    'the posting form hands the Type select to the cascade');
+  ok(/data-oa-auto-type/.test(pick) && /if \(typeEl\.value && typeEl\.value !== auto\) return;/.test(pick),
+    'which only ever fills an empty field or corrects its own earlier guess — ' +
+    'a value the poster picked is never overruled');
+
+  /* --------------------------------------------- the corrections themselves */
+
+  const fixes = S.normalizeFixes([
+    { kind: 'institution', from: 'Wibble Institute of Technology',
+      to: 'Wobble Institute of Technology' },
+    { kind: 'unit', from: 'Operations Managment', to: 'Operations Management Department',
+      institution: 'Wobble Institute of Technology' },
+    { kind: 'school', from: 'Nowhere School', to: 'Nowhere School' },   // renames nothing
+    { kind: 'bogus', from: 'a', to: 'b' },                              // no such kind
+    { kind: 'unit', from: '', to: 'Something' },                        // nothing to rename
+  ]);
+  eq(fixes.length, 2, 'normalizeFixes drops junk: unknown kinds, empty names, self-renames');
+  eq(fixes.find((f) => f.kind === 'unit').to, 'Operations Management',
+    'and canonicalises every TARGET — a fixed row stays canonical under the built-in ' +
+    'rules, which is what keeps the "one way" guard green without it knowing the fix');
+
+  eq(S.normalizeFixes([
+    { kind: 'school', from: 'Old School', to: 'Mid School Name' },
+    { kind: 'school', from: 'Mid School Name', to: 'Final School Name' },
+  ]).map((f) => f.to), ['Final School Name', 'Final School Name'],
+    'a chain resolves (A->B, B->C is A->C)');
+  eq(S.normalizeFixes([
+    { kind: 'school', from: 'Aaa School', to: 'Bbb School' },
+    { kind: 'school', from: 'Bbb School', to: 'Aaa School' },
+  ]), [], 'and a cycle cannot be honoured, so it is dropped whole');
+
+  const fixed = S.fixPlace(
+    { institution: 'Wibble Institute of Technology', school: '', unit: 'Operations Managment' },
+    fixes);
+  eq(fixed, { institution: 'Wobble Institute of Technology', school: '',
+    unit: 'Operations Management' },
+    'fixPlace renames the institution FIRST, so a fix scoped to the corrected ' +
+    'university still reaches a row that carried the old spelling');
+  eq(S.fixPlace(fixed, fixes), fixed, 'and is idempotent');
+  eq(S.fixPlace(
+    { institution: 'Elsewhere University', school: '', unit: 'Operations Managment' }, fixes),
+    { institution: 'Elsewhere University', school: '', unit: 'Operations Managment' },
+    'a SCOPED fix never fires at another university');
+  const restated = S.canonColumns(fixed);
+  eq({ institution: restated.institution, school: restated.school, unit: restated.unit },
+    fixed, 'and a fixed place is a fixed point of canon — the overlay extends the ' +
+    'spelling authority, it never argues with it');
+
+  /* every ingest applies the overlay: a carried row, a fresh submission, the
+     vocabulary — same fixes, same function, same order (canon first) */
+  const stale = {
+    id: '', year: 2026, posted: '2026-04-07',
+    institution: 'Wibble Institute of Technology',
+    unit: 'Operations Managment', department: 'Operations Managment',
+    country: 'Ireland', furtherInfoUrl: universitiesLink('Wibble Institute of Technology'),
+  };
+  stale.id = jobId(stale);
+  const healed = healPlace(stale, fixes);
+  eq(healed.institution, 'Wobble Institute of Technology', 'healPlace renames a carried row');
+  eq(healed.department, 'Operations Management', 'and rebuilds the line the card shows');
+  eq(healed.id, jobId(healed), 'its derived id follows the name, as it did for Penn State');
+  eq(healed.furtherInfoUrl, universitiesLink('Wobble Institute of Technology'),
+    'and the site\'s own "Further info" link follows too');
+  eq(healPlace(stale), stale,
+    'with no fixes in force the row comes back UNTOUCHED — by identity, so a ' +
+    'fix-free run is byte-identical');
+
+  const sub = rowFromSubmission({ ...GOOD, department: undefined,
+    institution: 'Wibble Institute of Technology', school: '',
+    unit: 'Operations Managment' }, { now: new Date('2026-08-20'), fixes });
+  eq(sub.institution, 'Wobble Institute of Technology',
+    'a fresh submission typed under the old spelling publishes under the corrected one');
+  eq(sub.department, 'Operations Management', 'department line included');
+
+  const v = buildVocab([
+    { institution: 'Wibble Institute of Technology', school: '', unit: 'Operations Managment' },
+  ], {
+    directory: [{ institution: 'Wibble Institute of Technology',
+      school: 'Wibble School of Business', department: 'Operations Managment' }],
+    fixes,
+  });
+  ok(v.universities.some((o) => o.v === 'Wobble Institute of Technology')
+     && !v.universities.some((o) => o.v === 'Wibble Institute of Technology'),
+    'the vocabulary offers the corrected spelling and stops offering the old one');
+  ok(v.units.some((o) => o.v === 'Operations Management')
+     && !v.units.some((o) => /Managment/.test(o.v)),
+    'for directory rows too — the pickers cannot re-teach the mistake');
+
+  /* ---------------------------------------- the queue, pinned to the rules */
+
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const block = rules.slice(rules.indexOf('match /nameFixes/'));
+  ok(block.length > 100, 'the rules know the nameFixes collection');
+  ok(/request\.resource\.data\.status == 'pending'/.test(block),
+    'NOTHING RENAMES ITSELF: a suggestion is created pending, and only that');
+  ok(/request\.resource\.data\.uid == request\.auth\.uid/.test(block),
+    'and is pinned to the account that made it');
+
+  /* every key the form writes has a rule, and the rules allow nothing more —
+     both ways, the oa-news.js discipline */
+  const createList = block.slice(block.indexOf('hasOnly('),
+    block.indexOf('])', block.indexOf('hasOnly(')));
+  const allowedCreate = [...new Set((createList.match(/'[^']+'/g) || [])
+    .map((q) => q.slice(1, -1)))].sort();
+  eq(allowedCreate, [...NF.DOC_KEYS].sort(),
+    'the create rule and oa-namefix.js DOC_KEYS agree, both ways');
+
+  const nf = await readFile(path.join(HERE, '..', 'assets', 'oa-namefix.js'), 'utf8');
+  const addBlock = nf.slice(nf.indexOf('.add({'), nf.indexOf('})', nf.indexOf('.add({')));
+  const written = [...new Set((addBlock.match(/^\s*(\w+):/gm) || [])
+    .map((m) => m.trim().replace(':', '')))].sort();
+  eq(written, [...NF.DOC_KEYS].sort(),
+    'and DOC_KEYS is what the form actually writes, read from the source');
+
+  /* the admin's update is tighter than isAdmin(): the decision, a reworded
+     target, a note and the timestamp — never the suggester's identity or what
+     they said was wrong */
+  const at2 = block.indexOf('.affectedKeys().hasOnly(');
+  const updList = block.slice(at2, block.indexOf('])', at2));
+  const allowedUpdate = [...new Set((updList.match(/'[^']+'/g) || [])
+    .map((q) => q.slice(1, -1)))].sort();
+  eq(allowedUpdate, [...NF.ADMIN_EDIT_KEYS].sort(),
+    'the update rule and ADMIN_EDIT_KEYS agree, both ways');
+
+  const adminSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  const patchBlock = adminSrc.slice(adminSrc.indexOf('var patch = {'),
+    adminSrc.indexOf('};', adminSrc.indexOf('var patch = {')));
+  const patched = [...new Set([
+    ...(patchBlock.match(/^\s*(\w+):/gm) || []).map((m) => m.trim().replace(':', '')),
+    ...(adminSrc.match(/patch\.(\w+) =/g) || []).map((m) => m.replace(/patch\.| =/g, '')),
+  ])];
+  for (const k of patched) {
+    ok(NF.ADMIN_EDIT_KEYS.includes(k),
+      `the panel writes "${k}", which the update rule allows`);
+  }
+  for (const s of [NF.PENDING, NF.APPROVED, NF.REJECTED]) {
+    ok(block.slice(0, block.indexOf('allow delete')).includes(`'${s}'`),
+      `the rules name the "${s}" status`);
+  }
+
+  /* the queue is drawn, counted, and applied */
+  ok(/collection\('nameFixes'\)\.where\('status', '==', 'pending'\)/.test(adminSrc),
+    'the Admin area badge counts the pending suggestions');
+  ok(adminSrc.includes("key: 'names'"), 'and the summary strip has their tile');
+  const adminHtml = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(adminHtml.includes('id="oa-aa-names-list"'), 'admin-area.html carries the panel');
+
+  const jobHtml = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  ok(jobHtml.includes('id="oa-namefix"') && jobHtml.includes('id="nf-send"')
+     && jobHtml.includes('assets/oa-namefix.js'),
+    'and the posting form carries the suggestion card and its module');
+
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/collection\('nameFixes'\)\.where\('status', '==', 'approved'\)/.test(build),
+    'the build reads what was APPROVED — a pending suggestion changes nothing');
+  ok(/normalizeFixes/.test(build) && /buildVocab\(rows, \{ generated: now\.toISOString\(\), directory: seeded, fixes \}\)/.test(build),
+    'normalises them once and hands them to the vocabulary build');
+  ok(/if \(fixesFresh && fixesBare\(committedFixes\) !== fixesBare\(\{ fixes \}\)\)/.test(build),
+    'and rewrites data/name-fixes.json only from a successful queue read that changed it — ' +
+    'an unreachable queue changes nothing, in either direction');
+
+  /* the served overlay file: names only, never who suggested them */
+  const seedRaw = await readFile(path.join(HERE, '..', 'data', 'name-fixes.json'), 'utf8');
+  const seed = JSON.parse(seedRaw);
+  ok(Array.isArray(seed.fixes), 'data/name-fixes.json is committed (the form fetches it)');
+  eq(S.normalizeFixes(seed.fixes), seed.fixes.map((f) => f),
+    'and every committed fix survives normalisation unchanged — the build wrote ' +
+    'what it will apply');
+  ok(!/@/.test(seedRaw), 'and carries no e-mail address — data/ is served to anyone');
+
+  ok(/FIXES_URL/.test(pick) && /S\.normalizeFixes/.test(pick) && /S\.fixPlace/.test(pick),
+    'the browser overlays the same file through the same two functions, so the ' +
+    'poster\'s preview and the build cannot disagree about what a fix does');
+  ok(/OAPlacePicker\.fixedPlace\(place\)/.test(await readFile(
+    path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8')),
+    'the submission itself included');
+}
+
 /* --------------------------------- what a takedown must NOT reach, and when
 
    Five ways the removal machinery went wrong, each one reproduced before it
@@ -4088,8 +4336,9 @@ async function testRefLessTakedown() {
      oa-schools.js renames them instead of turning the "one way" guard below
      red — which, since the build runs this file before committing, would stop
      the site publishing anything at all. */
-  ok(/orphans\.map\(healPlace\)/.test(build) && /mergeRows\(healed,/.test(build),
-    'and the postings it carries are re-canonicalised on the way through');
+  ok(/orphans\.map\(\(r\) => healPlace\(r, fixes\)\)/.test(build) && /mergeRows\(healed,/.test(build),
+    'and the postings it carries are re-canonicalised on the way through, approved ' +
+    'name corrections included');
   ok(!/mergeRows\(orphans, freshVisible, removeSpecs\)/.test(build),
     'never the unfiltered one');
   ok(/stillThere\.push/.test(build),
@@ -4260,8 +4509,13 @@ async function testJobMarketSheetWiring() {
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
   ok(/data', 'jobmarket\.json'\)/.test(build) || build.includes("'jobmarket.json'"),
     'build-jobs.mjs reads the sheet dataset');
-  ok(build.includes('.concat(handover.rows)'),
-    'and merges its rows beside the postings from the database');
+  ok(build.includes('.concat(sheetPublished)')
+     && /handover\.rows\.map\(\(r\) => \{/.test(build)
+     && /return h === r \? r : \{ \.\.\.h, id: r\.id \};/.test(build),
+    'and merges its rows beside the postings from the database — through healPlace, ' +
+    'so an approved name correction reaches the workbook\'s rows too, with the id PUT ' +
+    'BACK: a sheet id is jobId-shaped and every join key (the workbook-existence ' +
+    'check, the review queue, the mirror, the Edit button) names it');
   ok(build.includes('sheetHandover({'),
     'the hand-over decision is one function, exercised directly by the checks above');
   /* THE HAND-OVER. A workbook row the maintainer has edited or taken down
@@ -5211,6 +5465,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await testDeployGuard();
   await testRowOverrides();
   await testNewsReview();
+  await testNameFixes();
   await testAdminArea();
   await testRemovalSafety();
   await testMirrorLifecycle();

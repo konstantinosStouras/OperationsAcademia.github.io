@@ -9,6 +9,20 @@
    "summary": "The Admin area\u2019s \u201cJob postings to review\u201d panel now has two tabs: auto-crawled postings from the job market tracking sheet, still held back until the maintainer approves them, and user-added postings made through the site\u2019s own form \u2014 those stay live from the moment they are posted and are listed for a correcting look. Inside each tab the market-year filters remain, and every list now ranks the newest job market first \u2014 next season\u2019s postings before the current one\u2019s. For posters nothing changes: a posting made on the site still publishes within minutes."
   },
   {
+   "id": "posting-form-name-guard",
+   "date": "2026-08-23",
+   "title": "The posting form keeps one name per place — and knows what kind of place it is",
+   "summary": "Three improvements to the university → school → department pickers on the posting form. Typing a name that is really a slight respelling of one the site already lists — a typo, a plural, the same words in another order — now draws a “Did you mean” row pointing at the existing entry, right above the option to add yours as genuinely new: a second spelling would split a place’s postings across two entries in every filter. The “Type of institution” box now follows the names you choose — pick “Lee Business School” and it fills in Business School by itself, though a value you set yourself is never overruled. And a brand-new university, school or department still lands on the site’s lists within minutes of posting, offered to the next poster with its schools and departments cascading correctly.",
+   "url": "https://www.operationsacademia.org/post-a-job.html"
+  },
+  {
+   "id": "name-corrections",
+   "date": "2026-08-23",
+   "title": "Spotted a wrongly published school name? You can now fix it",
+   "summary": "The site publishes every university, school and department under one spelling — but the spelling it settled on can simply be wrong, and until now only the maintainer could repair it. A signed-in poster can now press “Suggest a correction” on the posting form, say what the name should be, and once the maintainer approves it the whole site follows: every posting that carried the old spelling is renamed, the form’s pickers stop offering it, and future postings typed under the old name publish under the corrected one — usually within the hour. Nothing renames itself: every suggestion waits for review first.",
+   "url": "https://www.operationsacademia.org/post-a-job.html"
+  },
+  {
    "id": "postings-publish-and-alert-in-minutes",
    "date": "2026-08-23",
    "title": "New postings publish in minutes, and alert e-mails follow them",
