@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T07:57:23Z",
+ "generated": "2026-08-23T07:50:55Z",
  "ads": {
   "179504973": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179504973",
@@ -112,6 +112,22 @@
    "salary": "Depends on Qualifications",
    "jobNumber": "FY2706370",
    "checkedAt": "2026-08-18T00:00:00Z"
+  },
+  "179529094": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529094",
+   "status": "ok",
+   "via": "page",
+   "title": "TENURED/TENURE TRACK FACULTY IN BUSINESS ANALYTICS",
+   "institution": "The University of Iowa",
+   "location": "Iowa City, IA",
+   "type": "Full-Time",
+   "posted": "2026-08-14",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Business Analytics",
+   "salary": "Commensurate",
+   "jobNumber": "",
+   "checkedAt": "2026-08-23T07:50:55Z"
   },
   "179529368": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179529368",
