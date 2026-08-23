@@ -1,0 +1,94 @@
+name: OA — tell the maintainer somebody has posted something
+
+# A job posting or a candidate profile made through the site's OWN forms went
+# into Firestore, was published by the next build, and nothing said so. The
+# tracking sheet's postings had a mailer; these did not. For candidates it was
+# worse: their profiles are held behind the reveal date, so they reach no
+# served file and draw no card anywhere on the site — there was no screen that
+# could show them at all.
+#
+# This mails the maintainer about each one and stamps `announcedAt` on the
+# document, so nothing is announced twice. It is NOT a gate: the posting is
+# already live, or about to be, exactly as the form promises.
+#
+# Every 15 minutes, off the boundary and off the review mailer's minutes so the
+# two never argue over the same SMTP connection. A run with nothing new costs
+# two Firestore queries and sends nothing.
+#
+# A no-op until FIREBASE_SERVICE_ACCOUNT is set, and a no-op that SAYS SO until
+# SMTP_* is set — the submissions simply stay unannounced and are mailed once
+# it exists, because `announcedAt` is only stamped after a send succeeds.
+
+on:
+  schedule:
+    - cron: '3,18,33,48 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Render the e-mails and print them, send nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'List what would be mailed and stop'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-submissions-mail-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Is Firebase configured?
+        id: gate
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          # Until the project exists this job has nothing to do. Checking first
+          # saves an npm install on every scheduled fire.
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Firebase is not configured yet — nothing to do. See _SETUP-FIREBASE.md"
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+        if: steps.gate.outputs.ready == 'true'
+
+      # Runs even when the gate is closed: it needs neither credentials nor the
+      # network, and it is the check that would catch a broken renderer before
+      # the first real submission is ever made.
+      - name: Offline checks
+        run: node _scraper/submissions-mailer.mjs --selftest
+
+      - name: Announce what has been posted
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # Where "somebody has posted something" goes. Defaults to
+          # JOBREVIEW_ALERT_TO, then to CONTACT in _mail.mjs.
+          SUBMISSION_ALERT_TO: ${{ vars.SUBMISSION_ALERT_TO }}
+          JOBREVIEW_ALERT_TO: ${{ vars.JOBREVIEW_ALERT_TO }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          node _scraper/submissions-mailer.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}

@@ -61,6 +61,7 @@ import {
 } from './jobmarket-sheet.mjs';
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
 import { COLLECTION as REVIEW_COL, partition, needMail, PENDING } from './jobreview.mjs';
+import { fillSchoolFromDirectory } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -521,7 +522,36 @@ async function main() {
       const known = existing.concat(
         (queue.docs || []).map((d) => d.row).filter((r) => r && r.id));
 
-      const stamped = stampAddedAt(collected.rows, known, { now });
+      /* THE SCHOOL THE WORKBOOK NEVER NAMED. Its hiring-unit column holds the
+         department — the more specific of the two, and the one the advert
+         names — so fifteen of its sixteen postings arrived with a department
+         and no school: "University of California, Berkeley" and "Operations
+         and Information Technology Management", with Haas missing. The site's
+         own Universities directory already says which department sits in which
+         school, and `fillSchoolFromDirectory` asks it. Only where the school is
+         empty, only where the answer is unambiguous, and only from a name the
+         site already publishes — see vocab.mjs.
+
+         AFTER the same-day collapse, deliberately: making two postings' names
+         agree can turn them into one, and this is a naming change. Applied
+         before it, a row that gained a school could fold onto a sibling that
+         had one all along, which is a row count moving for a reason nobody
+         asked for. */
+      const vocab = await loadVocab();
+      let filled = 0;
+      const placed = vocab
+        ? collected.rows.map((r) => {
+          const out = fillSchoolFromDirectory(r, vocab);
+          if (out !== r) filled++;
+          return out;
+        })
+        : collected.rows;
+      if (filled) {
+        log(`${filled} posting(s) gained the school their department sits in, ` +
+            'from the site\'s own Universities directory');
+      }
+
+      const stamped = stampAddedAt(placed, known, { now });
       rows = stamped.rows;
       fresh = stamped.fresh;
 
@@ -721,14 +751,35 @@ async function main() {
    no workbook and no credentials: the same answer the next sync will produce,
    just sooner. Run it after adding an alias, exactly like the legacy
    importer's mode of the same name.                                         */
+/**
+ * The site's own vocabulary, or null.
+ *
+ * `data/vocab.json` is written by build-jobs.mjs from the postings AND from
+ * the Universities directory, and is the same file the posting form's cascade
+ * reads — so the school this pipeline fills in and the school the maintainer
+ * would be offered on the review card are the same answer, from the same
+ * place. Absent or unreadable means no fill, never a failed run.
+ */
+async function loadVocab() {
+  const v = await readJson(path.join(DATA, 'vocab.json'), null);
+  return v && v.byUniversity ? v : null;
+}
+
 async function healNames() {
   const rows = await readJson(ROWS_FILE, null);
   if (!Array.isArray(rows)) {
     console.error(`::error::${ROWS_FILE} is missing or unreadable — nothing to heal`);
     return false;
   }
-  const healed = rows.map(healPlace);
-  const changed = healed.filter((r, i) => r !== rows[i]);
+  /* The same two passes the sync itself makes, in the same order: put every
+     name into the spelling the site publishes, then give a posting the school
+     its department sits in. Both are pure and idempotent, so a run with
+     nothing to do writes nothing. */
+  const vocab = await loadVocab();
+  const healed = rows.map(healPlace)
+    .map((r) => (vocab ? fillSchoolFromDirectory(r, vocab) : r));
+  const changed = healed.filter((r, i) =>
+    JSON.stringify(r) !== JSON.stringify(rows[i]));
   if (!changed.length) {
     log('data/jobmarket.json: every posting already names its place the one way');
     return true;

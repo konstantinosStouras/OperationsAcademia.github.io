@@ -170,6 +170,35 @@
               <div id="oa-review-list"></div>
             </section>
 
+            <!-- ============================ what has been posted here
+
+                 The queue above is a GATE — nothing on it is on the site
+                 until it is approved. This is a TO-DO LIST: a posting or
+                 a profile made through the site's own forms is live
+                 within a minute, because the form promises as much, and
+                 this only says it arrived.
+
+                 It exists because there was nowhere to look. A job
+                 posting draws a card on the jobs page; a CANDIDATE
+                 PROFILE does not — profiles are held behind the reveal
+                 date, so they reach no served file at all and the only
+                 way to open one was to guess its document id.
+
+                 Beside it, the Candidate profiles panel below is the full
+                 ROSTER — withdrawn and hidden included, with Take down and
+                 Put it back — where this is the unread-arrivals list across
+                 both kinds. Ticking a card here changes nothing but the
+                 tick. -->
+            <section class="oa-panel" id="oa-subs" hidden>
+              <h3 class="oa-panel-h">&#128228; Posted through the site</h3>
+              <p class="oa-hint">Job postings and candidate profiles people have
+                submitted, newest first &mdash; <span id="oa-subs-count">nothing</span>
+                to look at. They are already live (candidate profiles are held until
+                the reveal date), so this is a list to read, not a gate: open one to
+                correct it, or mark it reviewed to take it off the list.</p>
+              <div id="oa-subs-list"></div>
+            </section>
+
             <!-- ================================= candidate profiles -->
             <!-- The gap this page was made to close (owner, 2026-08-21): the
                  candidates section said "2 profiles have already been filed"
@@ -278,7 +307,16 @@
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-news.js"></script>
+    <!-- The review card asks the maintainer the posting form's own three name
+         questions, so it mounts the posting form's own cascade: choosing a
+         university narrows the school list, choosing a school narrows the
+         department list. All three are optional — without them the card's
+         boxes are plain text inputs and everything else still works. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-combo.js"></script>
+    <script defer src="assets/oa-place-picker.js"></script>
     <script defer src="assets/oa-jobreview.js"></script>
+    <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
     <script defer src="assets/oa-adminarea.js"></script>
   </body>

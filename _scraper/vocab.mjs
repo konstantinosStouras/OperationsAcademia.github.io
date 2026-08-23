@@ -389,6 +389,84 @@ export function buildVocab(rows, { generated = '', directory = [] } = {}) {
   };
 }
 
+/* --------------------------------- the school a posting never named
+
+   THE PROBLEM, measured on the live workbook: fifteen of its sixteen postings
+   reached the site with a department and NO SCHOOL — "University of California,
+   Berkeley" and "Operations and Information Technology Management", with Haas
+   missing; "University of Virginia" and "Technology and Operations Management",
+   with Darden missing. The tracking sheet has one column for the hiring unit
+   and contributors fill it with the department, which is the more specific of
+   the two and the one the advert names.
+
+   AND THE SITE ALREADY KNEW. `data/universities.json` is 254 curated
+   (university, school, department) rows and its whole reason for existing is to
+   say WHICH DEPARTMENT SITS IN WHICH SCHOOL — the third level of the posting
+   form's cascade. It answers for five of those sixteen straight away, and for
+   every future posting whose department the site has already seen.
+
+   CURATED, NEVER GUESSED, and the same three guards `assemble()` in
+   oa-schools.js applies to the fills it makes:
+
+     - only when the school field is EMPTY. A row that named its school is
+       never overruled, whatever the directory thinks;
+     - only when EXACTLY ONE school at that university carries the department.
+       Two is an ambiguity, not a fact, and the maintainer settles it on the
+       review card;
+     - the '' key is skipped. It means "departments at this university with no
+       school on record", which is the absence being filled, not a school.
+
+   It is the offline twin of `inferSchool` in assets/oa-place-picker.js — the
+   same question, asked of the same file — so a posting the maintainer would
+   have been offered the school for gets it without being asked.               */
+
+/**
+ * The one school at `institution` whose departments include `unit`, or ''.
+ *
+ * `vocab` is a built vocabulary (or the served data/vocab.json). `schools` is
+ * assets/oa-schools.js, passed in rather than imported so this stays usable
+ * from a shard that vendors its own copy.
+ */
+export function schoolForUnit(vocab, institution, unit, schools = SCHOOLS) {
+  if (!institution || !unit) return '';
+  const byUniversity = (vocab && vocab.byUniversity) || {};
+
+  /* However the university is spelled: institutionKey is what the vocabulary
+     itself groups by, so a posting saying "UC Berkeley" finds the entry filed
+     under "University of California, Berkeley". */
+  const want = schools.institutionKey(institution);
+  let own = null;
+  for (const name of Object.keys(byUniversity)) {
+    if (schools.institutionKey(name) !== want) continue;
+    own = byUniversity[name];
+    break;
+  }
+  if (!own || !own.bySchool) return '';
+
+  const key = (v) => schools.fold(schools.canonUnit(v, institution));
+  const k = key(unit);
+  if (!k) return '';
+
+  const hits = Object.keys(own.bySchool).filter((s) =>
+    s && own.bySchool[s].some((u) => key(u) === k));
+  return hits.length === 1 ? hits[0] : '';
+}
+
+/**
+ * A row with the school the directory says its department sits in.
+ *
+ * Returns the row unchanged when there is nothing to add — pure and
+ * idempotent, so every writer can apply it on every run. The `department`
+ * line is rebuilt with it, because that is what the card shows and what the
+ * selftest asserts equals its two parts joined.
+ */
+export function fillSchoolFromDirectory(row, vocab, schools = SCHOOLS) {
+  if (!row || row.school || !row.unit) return row;
+  const school = schoolForUnit(vocab, row.institution, row.unit, schools);
+  if (!school) return row;
+  return { ...row, school, department: joinDepartment(school, row.unit) };
+}
+
 /** Stable JSON with a trailing newline, so a diff shows the names that changed. */
 export function serialiseVocab(vocab) {
   return JSON.stringify(vocab, null, 1) + '\n';

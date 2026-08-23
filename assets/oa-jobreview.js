@@ -26,24 +26,49 @@
 
   var COL = 'jobReviews';
 
-  /* The fields offered, in the order they are shown. A SUBSET of what a
-     posting holds: id, market year, posted date and source are its identity
-     and its bookkeeping — editing them would detach the posting from the sheet
-     row it came from, so the next sync would queue it again as new. Those are
-     corrected in the workbook. Keep in step with EDITABLE in
-     _scraper/jobreview.mjs and with the key list in _firestore.rules;
-     selftest.mjs pins all three together. */
+  /* The fields offered, in the order they are shown — THE POSTING FORM'S OWN
+     QUESTIONS, in the posting form's own words, because they are the same
+     questions about the same posting and a maintainer reading a card should
+     recognise what the poster answered.
+
+     A SUBSET of what a posting holds: id, market year, posted date and source
+     are its identity and its bookkeeping — editing them would detach the
+     posting from the sheet row it came from, so the next sync would queue it
+     again as new. Those are corrected in the workbook.
+
+     TWO THINGS THIS LIST USED TO GET WRONG, and both of them were invisible:
+
+     * it offered `department` — the LINE the card shows, which is the school
+       and the department joined — beside the two names it is made of. Four
+       boxes for a place that has three, and nothing kept them in step: a
+       corrected school published a row whose line still said what the workbook
+       had said, and `selftest.mjs` asserts over the served file that the line
+       equals its two parts joined. A red selftest stops the build committing
+       anything at all, so one corrected school would have stopped the whole
+       site publishing. It is DERIVED now (`applyEdits` in
+       _scraper/jobreview.mjs), shown under the two boxes as a preview, and no
+       longer offered;
+     * it offered "Associate Professor" and "Full Professor", which are not
+       entry levels the site HAS. `LEVELS` in _scraper/jobs-model.mjs is the
+       five below, and `cleanEdit` drops anything else — so ticking either of
+       those saved a box that then silently did nothing. The site's own name
+       for that rank is "Other Ranks", and the label is the posting form's.
+
+     Keep in step with EDITABLE in _scraper/jobreview.mjs and with the key list
+     in _firestore.rules; selftest.mjs pins the three together, and pins these
+     option lists against LEVELS and TYPES. */
   var FIELDS = [
-    { key: 'institution', label: 'Institution', max: 220 },
-    { key: 'department', label: 'School / department', max: 260 },
-    { key: 'school', label: 'School', max: 200 },
-    { key: 'unit', label: 'Department / unit', max: 200 },
-    { key: 'type', label: 'Type', max: 40,
+    { key: 'institution', label: 'University / Institution', max: 220, place: 'institution' },
+    { key: 'type', label: 'Type of institution', max: 40,
       options: ['', 'Business School', 'University'] },
+    { key: 'school', label: 'School, faculty or college', max: 200, place: 'school' },
+    { key: 'unit', label: 'Department, area or group', max: 200, place: 'unit' },
     { key: 'levels', label: 'Entry level', list: true, options: [
-      'Assistant Professor', 'Associate Professor', 'Full Professor',
-      'Non-tenure track (teaching) position', 'Post-Doc',
-      'Visiting Faculty (various levels)', 'Other Ranks'] },
+      { v: 'Assistant Professor' },
+      { v: 'Other Ranks', label: 'Other Ranks (Associate, Full, Chaired)' },
+      { v: 'Post-Doc' },
+      { v: 'Non-tenure track (teaching) position' },
+      { v: 'Visiting Faculty (various levels)' }] },
     { key: 'country', label: 'Country', max: 80 },
     { key: 'applyBy', label: 'Apply by', max: 400 },
     { key: 'applyByDate', label: 'Closing date', max: 10, type: 'date' },
@@ -52,6 +77,14 @@
     { key: 'postedAtUrl', label: 'Posted at', max: 600 },
     { key: 'furtherInfoUrl', label: 'Further info', max: 600 }
   ];
+
+  /** The line the card publishes: the school and the department joined. ONE
+      definition of that join lives in _scraper/vocab.mjs and this is its
+      browser twin — it only ever previews what applyEdits will derive. */
+  function joinDepartment(school, unit) {
+    return [String(school || '').trim(), String(unit || '').trim()]
+      .filter(Boolean).join(', ');
+  }
 
   function $(id) { return document.getElementById(id); }
   function show(el, on) { if (el) el.hidden = !on; }
@@ -82,10 +115,17 @@
     var v = value == null ? '' : value;
     if (f.list) {
       var chosen = Array.isArray(v) ? v : (v ? [v] : []);
+      /* The VALUE is what the site stores and the LABEL is what a reader is
+         asked — they differ for one rank, exactly as on the posting form:
+         "Other Ranks" covers Associate, Full and Chaired, and a tick box that
+         said only "Other Ranks" would leave the maintainer guessing which of
+         the three it meant. */
       return '<div class="oa-rv-levels">' + f.options.map(function (o, i) {
+        var val = typeof o === 'string' ? o : o.v;
+        var text = (typeof o === 'string' ? '' : o.label) || val;
         return '<label class="oa-rv-check"><input type="checkbox" data-key="' + f.key +
-          '" id="' + id + '-' + i + '" value="' + esc(o) + '"' +
-          (chosen.indexOf(o) >= 0 ? ' checked' : '') + '> ' + esc(o) + '</label>';
+          '" id="' + id + '-' + i + '" value="' + esc(val) + '"' +
+          (chosen.indexOf(val) >= 0 ? ' checked' : '') + '> ' + esc(text) + '</label>';
       }).join('') + '</div>';
     }
     if (f.options) {
@@ -143,10 +183,18 @@
     var ad = safeHref(fieldValue(doc, 'adUrl'));
     var idp = 'rv' + i;
 
+    /* The heading reads the posting as it WOULD BE PUBLISHED — the row with
+       any edit already made on top — not the raw workbook row. It used to read
+       `row.department` directly, so a card whose school had just been
+       corrected still carried the old line above the boxes that had corrected
+       it. */
+    var line = joinDepartment(fieldValue(doc, 'school'), fieldValue(doc, 'unit'))
+      || fieldValue(doc, 'department') || '';
+
     return '<header>' +
-        '<strong>' + esc(row.institution || row.id || 'Untitled posting') + '</strong>' +
-        (row.department ? ' <span class="oa-hint" style="display:inline">— ' +
-          esc(row.department) + '</span>' : '') +
+        '<strong>' + esc(fieldValue(doc, 'institution') || row.id || 'Untitled posting') + '</strong>' +
+        (line ? ' <span class="oa-hint" style="display:inline">— ' +
+          esc(line) + '</span>' : '') +
         '<span class="oa-fb-status is-open">under review</span>' +
         '<p class="oa-hint">Advertised ' + esc(row.posted || '?') +
           ' &middot; market ' + esc(String(row.year || '?')) +
@@ -161,6 +209,13 @@
           return '<p class="oa-rv-field' + (f.area || f.list ? ' is-wide' : '') + '">' +
             '<label for="' + id + '">' + esc(f.label) + '</label>' +
             inputFor(f, fieldValue(doc, f.key), id) +
+            (f.place === 'unit'
+              /* What the two name boxes above will actually publish. The card
+                 shows one line, not two names, so the maintainer has to be able
+                 to see it — the posting form shows the poster the same thing
+                 (`#f-department-preview`). */
+              ? '<span class="oa-hint oa-rv-derived" data-derived aria-live="polite"></span>'
+              : '') +
             '</p>';
         }).join('') +
       '</div>' +
@@ -291,6 +346,56 @@
     render(db, shownDocs);
   }
 
+  /* The cascades mounted on the cards currently drawn.
+
+     THEY HAVE TO BE GIVEN BACK. Every picker adds a listener to `document` —
+     the only way to notice a click landing outside its own list — and the year
+     tabs redraw the whole queue, up to three per card. Left alone, each pass
+     would leave a card's worth of listeners behind holding a detached card and
+     the whole vocabulary. Nothing else on this site mounts a picker into
+     markup it later throws away, which is why OACombo grew a destroy() for
+     this. */
+  var mounted = [];
+
+  function unmountPickers() {
+    mounted.forEach(function (m) { if (m && m.destroy) m.destroy(); });
+    mounted = [];
+  }
+
+  /**
+   * Give one card's three name boxes the site's own cascade: choosing the
+   * university narrows the school list to that university's schools, choosing
+   * a school narrows the department list to its departments, a department the
+   * site has only ever seen in one school fills that school in, and each name
+   * is put into the spelling the site publishes as the field is left.
+   *
+   * The SAME module the posting form mounts (assets/oa-place-picker.js), which
+   * is the point: the maintainer correcting a posting and the poster making
+   * one are answering the same three questions, and two implementations would
+   * have drifted. It is entirely optional — without the picker scripts the
+   * boxes stay ordinary text inputs and everything else on the card works.
+   */
+  function wirePlace(card) {
+    var box = function (key) { return card.querySelector('[data-key="' + key + '"]'); };
+    var inst = box('institution'), school = box('school'), unit = box('unit');
+    var derived = card.querySelector('[data-derived]');
+    if (!inst || !school || !unit) return;
+
+    function preview() {
+      if (!derived) return;
+      var line = joinDepartment(school.value, unit.value);
+      derived.textContent = line ? 'Published as: ' + line : '';
+    }
+    school.addEventListener('input', preview);
+    unit.addEventListener('input', preview);
+    preview();
+
+    if (!window.OAPlacePicker) return;
+    var handle = OAPlacePicker.wire(
+      { institution: inst, school: school, unit: unit }, { onChange: preview });
+    if (handle) mounted.push(handle);
+  }
+
   function render(db, docs) {
     var list = $('oa-review-list');
     var count = $('oa-review-count');
@@ -306,6 +411,8 @@
       var label = bulk.querySelector('[data-n]');
       if (label) label.textContent = String(docs.length);
     }
+
+    unmountPickers();
 
     if (!docs.length) {
       list.innerHTML = '<p class="oa-hint">Nothing waiting. Postings crawled from ' +
@@ -373,6 +480,9 @@
       });
 
       list.appendChild(card);
+      /* After the card is IN the document: the picker wraps the input in place
+         and measures where its list will fit. */
+      wirePlace(card);
     });
 
     var all = $('oa-review-all');
