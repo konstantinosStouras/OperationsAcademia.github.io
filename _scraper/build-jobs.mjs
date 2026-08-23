@@ -31,6 +31,7 @@ import { createRequire } from 'node:module';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
+  healReviewDate,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
@@ -818,10 +819,17 @@ async function main() {
      answer for — INSEAD, with a campus in France and one in Singapore — is
      never touched. */
   const byCountry = campusCountries(Array.isArray(directory) ? directory : []);
-  const rows = visible.map((r) => healCountry(r, byCountry));
+  /* …AND ITS SUGGESTED APPLY-BY, where its own prose states one. Applied to
+     the merged set for the same reason as the country heal: the sentence
+     lives in rows from every writer — the sheet, the form, the legacy import,
+     a carried orphan — and healReviewDate is pure, idempotent and fill-empty,
+     so a run in which every posting already says what it knows changes
+     nothing. */
+  const rows = visible.map((r) => healReviewDate(healCountry(r, byCountry)));
   const recountried = rows.filter((r, i) => r !== visible[i]);
   if (recountried.length) {
-    log(`${recountried.length} posting(s) took the country their university is in: ` +
+    log(`${recountried.length} posting(s) healed against the directory or their own ` +
+        'deadline prose: ' +
         recountried.slice(0, 8).map((r) => `${r.institution} (${r.country})`).join(', '));
   }
 

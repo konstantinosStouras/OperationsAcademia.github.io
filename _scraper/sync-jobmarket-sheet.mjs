@@ -51,7 +51,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { marketFloor, isoStamp, healPlace } from './jobs-model.mjs';
+import { marketFloor, isoStamp, healPlace, healReviewDate } from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
   sheetCsvUrl, sheetHtmlUrl, sheetEditUrl, sheetId,
@@ -838,13 +838,15 @@ async function healNames() {
     console.error(`::error::${ROWS_FILE} is missing or unreadable — nothing to heal`);
     return false;
   }
-  /* The same two passes the sync itself makes, in the same order: put every
-     name into the spelling the site publishes, then give a posting the school
-     its department sits in. Both are pure and idempotent, so a run with
-     nothing to do writes nothing. */
+  /* The same passes the sync itself makes, in the same order: put every
+     name into the spelling the site publishes, give a posting the school
+     its department sits in, and read the suggested apply-by out of its own
+     deadline prose. All pure and idempotent, so a run with nothing to do
+     writes nothing. */
   const vocab = await loadVocab();
   const healed = rows.map(healPlace)
-    .map((r) => (vocab ? fillSchoolFromDirectory(r, vocab) : r));
+    .map((r) => (vocab ? fillSchoolFromDirectory(r, vocab) : r))
+    .map(healReviewDate);
   const changed = healed.filter((r, i) =>
     JSON.stringify(r) !== JSON.stringify(rows[i]));
   if (!changed.length) {

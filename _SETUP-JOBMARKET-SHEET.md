@@ -102,6 +102,15 @@ derived, and it is worth knowing how:
 typed it, and the town, both shown on the card's comments line — so nothing you
 record is lost even though the site's own posting form never asked for it.
 
+**A first-review date in the deadline cell becomes the posting's "Suggested
+apply by".** Contributors often paste the search's own words ("First review of
+applications will begin on September 8, 2026…"); `extractReviewDate`
+(jobs-model.mjs) reads the date out of that prose, the captured sentence
+leaves the card's deadline line, and the rest is judged as before. A cell it
+is unsure of keeps every word it had. A closing date stated as labelled prose
+("Final date: Thursday, Nov 5, 2026") is read too, under the same
+plausibility test as any other deadline.
+
 **A deadline is not invented.** With no deadline column the posting reads
 "Until filled.", which is what the site's Deadline filter already calls a
 posting with no closing date. Put a date in a `Deadline` column and it is used.

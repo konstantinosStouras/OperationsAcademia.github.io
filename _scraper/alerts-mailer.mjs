@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import {
   shell, esc, safeUrl, headerSafe, send, transport, firestore, unsubHeaders, SITE, toPlain,
 } from './_mail.mjs';
+import { longDate } from './jobs-model.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -114,7 +115,10 @@ function jobHtml(r) {
   const meta = [
     (r.levels || []).join(', '),
     r.country,
-    r.applyBy ? `apply by ${r.applyBy}` : '',
+    // the suggested (first-review) date, where the posting names one — keep
+    // the wording in step with the alerts page's preview (oa-alerts.js)
+    r.reviewDate ? `suggested apply by ${longDate(r.reviewDate)}` : '',
+    r.applyBy ? `final apply by ${r.applyBy}` : '',
   ].filter(Boolean).map(esc).join(' &middot; ');
 
   const posted = safeUrl(r.postedAtUrl), ad = safeUrl(r.adUrl);

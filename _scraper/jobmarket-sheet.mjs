@@ -49,6 +49,7 @@ import { createRequire } from 'node:module';
 import {
   text, url, jobId, canonCountry, canonPlace, longDate, marketYear, universitiesLink,
   displayOrder, collapseSameDay, isoStamp, publicRow, LEVELS, OPEN_ENDED_RX,
+  extractReviewDate, extractFinalDate, healReviewDate,
 } from './jobs-model.mjs';
 import { parseCsv, redactEmails } from './import-sheet.mjs';
 import { splitDepartment, joinDepartment } from './vocab.mjs';
@@ -924,14 +925,29 @@ export function rowsFromTab(csv, {
     if (!link && linkCell) unlinked++;
 
     const deadlineProse = text(redactEmails(cell(raw, index, 'deadline')), 200);
+    /* THE SUGGESTED APPLY-BY lives in this same cell as prose ("First review
+       of applications will begin on September 8, 2026…"), so it is read out
+       FIRST — the captured sentence leaves the prose, and what remains is
+       judged exactly as the whole cell used to be. extractReviewDate is the
+       shared high-precision extractor (jobs-model.mjs); a cell it is unsure
+       of keeps every word it had. */
+    const review = extractReviewDate(deadlineProse);
+    const remainder = review.date ? review.rest : deadlineProse;
     /* Prose that says the search stays open beats a parsed date, exactly as at
        every other ingest — the page buckets "Until filled" on the date being
        EMPTY, so a row carrying both would read as dated. */
-    const openEnded = OPEN_ENDED_RX.test(deadlineProse);
+    const openEnded = OPEN_ENDED_RX.test(remainder);
     /* …and a parsed date is only BELIEVED when it is plausible against the
        posting date (see deadlineDay): a deadline the pipeline is unsure of
-       publishes as "Until filled.", never as a guess. */
-    const deadline = openEnded ? '' : deadlineDay(deadlineProse, posted);
+       publishes as "Until filled.", never as a guess. A cell that states its
+       closing date as LABELLED prose rather than a bare date — UCLA's
+       "Final date: Thursday, Nov 5, 2026" — is read by extractFinalDate,
+       under the same plausibility test. */
+    const deadline = openEnded ? ''
+      : (deadlineDay(remainder, posted) || deadlineDay(extractFinalDate(remainder), posted));
+    /* the suggested date must fall BEFORE the final one — equal is the
+       closing date said twice, later contradicts it (healReviewDate's rule) */
+    const reviewDate = review.date && (!deadline || review.date < deadline) ? review.date : '';
 
     /* One spelling per university, school and department — the same canon the
        form and the other importer apply, so a row this workbook contributes
@@ -949,7 +965,9 @@ export function rowsFromTab(csv, {
       rank && !LEVELS.includes(rank) ? rank : '',
       city,
       notes,
-      deadlineProse && !openEnded && !deadline ? `Deadline as listed: ${deadlineProse}` : '',
+      // the remainder, not the whole cell: what extractReviewDate captured is
+      // already on the card as the suggested apply-by
+      remainder && !openEnded && !deadline ? `Deadline as listed: ${remainder}` : '',
     ].filter(Boolean).join(' · ').slice(0, 1200);
 
     const row = {
@@ -974,8 +992,9 @@ export function rowsFromTab(csv, {
          filter is already saying, and drop a row the card is expected to have.
          A date in the sheet is shown as a date; prose that says the search
          stays open is shown as the sheet wrote it. */
-      applyBy: openEnded ? deadlineProse : (deadline ? longDate(deadline) : 'Until filled.'),
+      applyBy: openEnded ? remainder : (deadline ? longDate(deadline) : 'Until filled.'),
       applyByDate: openEnded ? '' : deadline,
+      reviewDate,
       comments,
       country: canonCountry(text(cell(raw, index, 'country'), 60)),
       adUrl: link,
@@ -999,7 +1018,10 @@ export function rowsFromTab(csv, {
       _sheet: id,
     };
     row.id = jobId(row);
-    rows.push(row);
+    /* the fill-empty pass over the whole row — it also reads the comments
+       (the notes column travels there), where a contributor sometimes puts
+       the review sentence instead of the deadline cell */
+    rows.push(healReviewDate(row));
   }
 
   return { rows, skipped, unmapped: head.unmapped || [], missing: [], unlinked,

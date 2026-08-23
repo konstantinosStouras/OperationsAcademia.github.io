@@ -213,6 +213,51 @@ Local runs: `node _scraper/higheredjobs-verify.mjs --apply-only` (re-apply the
 committed cache) or `--scan`. A real read needs egress to higheredjobs.com,
 which this build environment denies (403), so it happens on the runners.
 
+## Two deadlines per posting: suggested and final
+
+Many searches have no fixed closing date yet name the day that matters most —
+the first-review / full-consideration date ("First review of applications will
+begin on September 8, 2026, and will continue until the position has been
+filled"). Those postings read a bare "Until filled." So a posting carries TWO
+dates (owner, 2026-08-23): **`reviewDate`**, the SUGGESTED apply-by, and
+**`applyByDate`**, the FINAL one — which alone still drives the market roll
+(`deadlineOpen`): a review date passing does not close a search. The card shows
+"Suggested apply by" (only where known) above "Final apply by"; the jobs page
+filters on each (**Suggested deadline**: Review ahead / Review passed / No
+review date — its own vocabulary, because "Expired" is the wrong word for a
+date that closes nothing; **Final deadline** keeps the vendor page's three
+words AND its `deadline` URL key, so every saved link works); the posting form
+asks the two dates as two questions, the review card offers the box, and the
+alert e-mails + the alerts page's preview name both ("suggested apply by … ·
+final apply by …").
+
+**The suggested date is read out of the prose the sources already carry** —
+`extractReviewDate` / `extractFinalDate` / `healReviewDate` in
+`jobs-model.mjs`, the deadlineDay discipline throughout: every pattern demands
+the reviewing/consideration context in the same sentence as a date WITH a
+four-digit year, an ambiguous `10/12/2025` is refused rather than guessed, and
+a posting the extractor is unsure of keeps reading "Until filled." exactly as
+the owner asked. A suggested date ON OR AFTER the final one is dropped
+wherever it is set (equal is the deadline said twice — half the corpus; later
+contradicts it): in `healReviewDate`, in `applyEdits`, in the form's own
+validation, and when the HigherEdJobs verify fills a closing date onto an
+open-ended row. `healReviewDate` is pure, idempotent and fill-empty — the
+`healPlace` pattern — applied at `rowFromSubmission`, the sheet ingest
+(`rowsFromTab`, which also trims the captured sentence so the Kansas card
+reads "Suggested apply by: September 8, 2026 · Final apply by: Until
+filled."), the sync's `--heal-names`, and the whole merged set in
+`build-jobs.mjs` beside `healCountry` — so rows from every writer heal on
+every build, and the committed files were healed once with the same function
+(17 postings gained their date). `extractFinalDate` reads only an explicitly
+LABELLED closing date ("Final date: Thursday, Nov 5, 2026" — UCLA's
+application-window cell); a bare "deadline" heading clauses away from a date
+is exactly the mislabelled-header mis-read and never fires. `reviewDate` is in
+`PUBLIC_FIELDS` (skipped when empty, like `ref`), in the jobSubmissions rules'
+`shapeOk` and the jobReviews `edits` list, and `testTwoDeadlines` /
+`testTwoDeadlinesWiring` in selftest.mjs pin the extractor, every guard and
+every surface. The `/v2/` archive deliberately ignores the new key — its
+frozen assets read `applyBy`/`applyByDate` exactly as before.
+
 ## The frozen archives, and how the maintainer edits them
 
 `data/past-postings.json`, `data/recent-faculty.json` and

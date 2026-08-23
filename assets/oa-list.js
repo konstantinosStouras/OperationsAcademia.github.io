@@ -166,6 +166,16 @@
       // a deadline that falls TODAY is still open, hence < 0 rather than <= 0
       return daysBetween(todayISO(), row.applyByDate) < 0 ? 'Expired' : 'Closing soon';
     },
+    /* The SUGGESTED apply-by — the first-review / full-consideration date a
+       posting names beside (or instead of) its hard deadline (`reviewDate`,
+       see jobs-model.mjs healReviewDate). Its own vocabulary, because the
+       deadline one above is the vendor page's and means something else:
+       a review date passing does not close a search, so "Expired" would be
+       the wrong word for it. */
+    review: function (row) {
+      if (!row.reviewDate) return 'No review date';
+      return daysBetween(todayISO(), row.reviewDate) < 0 ? 'Review passed' : 'Review ahead';
+    },
     datePosted: function (row) {
       if (!row.posted) return 'Older posts';
       var age = daysBetween(row.posted, todayISO());
@@ -181,6 +191,7 @@
      list exactly, down to the order the three sit in. */
   var BUCKET_ORDER = {
     deadline: ['Closing soon', 'Expired', 'Until filled'],
+    review: ['Review ahead', 'Review passed', 'No review date'],
     datePosted: ['Last 7 days', 'Last 30 days', 'Last 3 months', 'Older posts'],
   };
 
@@ -933,5 +944,17 @@
     return loading[url];
   }
 
-  window.OAList = { mount: mount, load: load, safeUrl: safeUrl, fold: fold, derive: DERIVE };
+  /* An ISO day the way the site writes dates — "September 8, 2026". The
+     browser twin of jobs-model.mjs longDate(), for the card rows that render
+     a stored date (the suggested apply-by) rather than stored prose. */
+  function longDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!m) return '';
+    var names = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December'];
+    return names[+m[2] - 1] + ' ' + (+m[3]) + ', ' + (+m[1]);
+  }
+
+  window.OAList = { mount: mount, load: load, safeUrl: safeUrl, fold: fold,
+    derive: DERIVE, longDate: longDate };
 })();
