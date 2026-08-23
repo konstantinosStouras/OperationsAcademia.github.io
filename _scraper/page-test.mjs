@@ -1825,16 +1825,46 @@ for (const [name, expect] of [
      rebuilt from the tracking sheet every morning, so naming institutions here
      ("utah", "princeton") would make this check pass or fail on whatever the
      market did overnight — a test that goes red for a reason that is not a
-     regression teaches people to ignore it. */
+     regression teaches people to ignore it.
+
+     THE WORDS HAVE TO DISCRIMINATE, or the derivation defeats its own check:
+     the morning "University of North Carolina at Chapel Hill" led the listing,
+     the first long word of the first card was "university", the second term's
+     own card contained it too — and a second term whose card the first term
+     already matches cannot widen anything, so the check went red on a listing
+     with nothing wrong in it. Generic words are skipped, the second term comes
+     from a card the first term does not appear in — and the ANCHOR card is
+     whichever card yields a usable word, not blindly the first: the very next
+     morning "City University of Hong Kong" led, whose every word is short or
+     generic, and an anchor pinned to it has no word at all. */
   const pair = await j.evaluate(() => {
     const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
       .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
-    const word = (n) => (n.split(/[\s,(]+/).find((w) => w.length > 4) || '').replace(/[^a-z]/g, '');
-    const a = word(names[0] || '');
-    const b = names.map(word).find((w) => w && w !== a && !names[0].includes(w));
-    return a && b ? { a, b } : null;
+    const GENERIC = ['university', 'school', 'college', 'institute', 'state', 'business'];
+    const word = (n) => (n.split(/[\s,(]+/)
+      .map((w) => w.replace(/[^a-z]/g, ''))
+      .find((w) => w.length > 4 && !GENERIC.includes(w)) || '');
+    for (const anchor of names) {
+      const a = word(anchor);
+      if (!a) continue;
+      const src = names.find((n) => {
+        const w = word(n);
+        return w && w !== a && !anchor.includes(w) && !n.includes(a);
+      });
+      if (src) return { a, b: word(src) };
+    }
+    return null;
   });
   ok(pair, 'jobs: the listing offers two different institutions to search for');
+  /* Named, because the alternative was lived: a listing this rule could not
+     derive a pair from crashed the whole suite on `pair.a` with a bare
+     TypeError — a stack trace where a failure message should be. Every check
+     from here to the width loop types the two terms, so without them there is
+     nothing left in this block to measure. */
+  if (!pair) {
+    throw new Error('jobs: no searchable pair could be derived from the listing — '
+      + 'see the derivation above; the search checks cannot run without one');
+  }
 
   const total = await shown();
 
