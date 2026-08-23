@@ -36,8 +36,8 @@ export const { canon: canonCountry } = require('../assets/oa-countries.js');
    rather than two — and the archive's fused one-column rows are taken apart
    into the three fields the form now asks for. Re-exported so the importers
    use the same function. */
-export const { canonPlace, canonColumns, canonSchool, canonUnit, canonInstitution } =
-  require('../assets/oa-schools.js');
+export const { canonPlace, canonColumns, canonSchool, canonUnit, canonInstitution,
+  normalizeFixes, fixPlace } = require('../assets/oa-schools.js');
 
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/jobs.json — which is how submitter and chair
@@ -320,12 +320,17 @@ export function inCurrentMarket(row, now = new Date()) {
    name: it is derived from the institution slug, so leaving it would strand
    the row under a name no longer on the site — the same call the canon made
    when Penn State became The Pennsylvania State University.                 */
-export function healPlace(row) {
-  const place = canonPlace({
+export function healPlace(row, fixes = []) {
+  /* the approved name corrections (data/name-fixes.json) ride the same heal:
+     an OVERLAY after canon, never a second canon — normalizeFixes made every
+     target canonical, so a fixed row still satisfies the "every posting names
+     its place the one way" guard whether or not it has heard of the fix */
+  const canoned = canonPlace({
     institution: row.institution,
     school: row.school || '',
     unit: row.unit || '',
   });
+  const place = fixes.length ? fixPlace(canoned, fixes) : canoned;
   const department = joinDepartment(place.school, place.unit);
   /* A STALE LINK IS A REASON TO HEAL ON ITS OWN. The early return used to
      test the three names alone, so a row whose names were already canonical
@@ -361,7 +366,7 @@ export function healPlace(row) {
  * submission is not publishable. The client already validated; this validates
  * AGAIN because the client is not trusted with what reaches a served file.
  */
-export function rowFromSubmission(doc, { now = new Date() } = {}) {
+export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
   const country = canonCountry(text(doc.country, MAXLEN.country));
   const levels = pickList(doc.levels, LEVELS);
   const type = TYPES.includes(text(doc.type, 40)) ? text(doc.type, 40) : '';
@@ -378,12 +383,16 @@ export function rowFromSubmission(doc, { now = new Date() } = {}) {
     : splitDepartment(text(doc.department, MAXLEN.department));
 
   /* …and then all three names are canonicalised together, because which of
-     the three a name belongs in is part of what canon() decides. */
-  const place = canonPlace({
+     the three a name belongs in is part of what canon() decides — and the
+     approved name corrections are laid on top, the same overlay healPlace
+     applies to a carried row, so a fresh submission typed under a corrected
+     spelling publishes under the corrected one. */
+  const canoned = canonPlace({
     institution: text(doc.institution, MAXLEN.institution),
     school: parts.school,
     unit: parts.unit,
   });
+  const place = fixes.length ? fixPlace(canoned, fixes) : canoned;
   const institution = text(place.institution, MAXLEN.institution);
   const school = text(place.school, MAXLEN.school);
   const unit = text(place.unit, MAXLEN.unit);

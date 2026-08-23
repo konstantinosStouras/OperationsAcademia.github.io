@@ -327,6 +327,44 @@
 
       if (over > 0) note('oa-combo-more', 'Keep typing to narrow ' + over + ' more.');
 
+      /* DID YOU MEAN — the merge guard on the "new name" row below. A typed
+         name that is probably a slight respelling of one already on the list
+         (a typo, a plural, the same words reordered — the caller judges,
+         through oa-schools.js's similarNames) is pointed at the existing
+         entry FIRST, right above the row that would add it as a second one:
+         a second spelling splits a place's postings across two entries in
+         every filter, which is the exact mess the vocabulary exists to end.
+         A suggestion, never a restriction — the add row stays, because only
+         the poster knows whether their department genuinely is new. */
+      var near = [];
+      if (typed && !exact && typeof opts.similar === 'function') {
+        try { near = opts.similar(typed) || []; } catch (err) { near = []; }
+      }
+      if (near.length) {
+        note('oa-combo-near',
+          'Already on the list — is one of these the place you mean? ' +
+          'Adding a second spelling would split its postings.');
+        for (i = 0; i < near.length; i++) {
+          var nr = document.createElement('div');
+          nr.className = 'oa-combo-opt oa-combo-near-opt';
+          nr.id = id + '-opt-' + state.rows.length;
+          nr.setAttribute('role', 'option');
+          nr.setAttribute('aria-selected', 'false');
+          var nn = document.createElement('span');
+          nn.className = 'oa-combo-name';
+          nn.textContent = near[i];
+          nr.appendChild(nn);
+          var tag = document.createElement('span');
+          tag.className = 'oa-combo-n';
+          tag.textContent = 'already on the list';
+          nr.appendChild(tag);
+          nr.__value = near[i];
+          group = null;
+          list.appendChild(nr);
+          state.rows.push(nr);
+        }
+      }
+
       /* The "Other" case, offered rather than hidden behind a mode switch: if
          what is typed is not already a known name, taking this row is what
          adds it to the list everyone else sees from the next build on. A

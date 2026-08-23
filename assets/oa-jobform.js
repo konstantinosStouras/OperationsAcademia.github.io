@@ -196,6 +196,12 @@
       school: String($('f-school').value || '').trim(),
       unit: String($('f-unit').value || '').trim()
     });
+    /* …then the approved name corrections (data/name-fixes.json), AFTER canon
+       — the same overlay the build applies at ingest, so the submission and
+       the poster's preview carry the spelling that will be published. */
+    if (window.OAPlacePicker && OAPlacePicker.fixedPlace) {
+      place = OAPlacePicker.fixedPlace(place);
+    }
     if (place.institution) out.institution = place.institution.slice(0, MAX.institution);
     out.school = String(place.school || '').slice(0, MAX.school);
     out.unit = String(place.unit || '').slice(0, MAX.unit);
@@ -886,7 +892,11 @@
        so the joined line follows a value the cascade fills in or re-spells,
        which a keystroke listener alone would never see. */
     if (window.OAPlacePicker) {
-      OAPlacePicker.wire({ institution: inst, school: school, unit: unit },
+      /* f-type rides along as the OPTIONAL fourth field: the cascade fills it
+         from what the chosen names state ("Lee Business School" is a Business
+         School) and never overrules a value the poster picked themselves. */
+      OAPlacePicker.wire(
+        { institution: inst, school: school, unit: unit, type: $('f-type') },
         { onChange: sync });
     }
   }

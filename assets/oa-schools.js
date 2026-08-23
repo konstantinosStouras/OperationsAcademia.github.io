@@ -346,6 +346,11 @@
     'The University of Hong Kong': {   /* Faculty of Business and Economics */
       'Innovation and Information Management': 'Information and Innovation Management'
     },
+    'The Chinese University of Hong Kong, Shenzhen': { /* School of Management and Economics */
+      /* one unit written short (owner, 2026-08-23) — the full name is the
+         department's own */
+      'Operations Management': 'Information Systems and Operations Management'
+    },
     'University of Houston': {         /* C. T. Bauer College of Business */
       'Decision and Information Sciences': 'Department of Decision and Information Sciences',
       'Decision & Information Sciences': 'Department of Decision and Information Sciences',
@@ -935,6 +940,276 @@
     return canonUnit(v) === v;
   }
 
+  /* ------------------------------------ is this the SAME name, probably?
+
+     ONE definition of "these two names are probably one place", because it
+     already existed twice in spirit: the selftest's duplicate sweep compared
+     the DISTINCTIVE words of two names as a set (that is what caught "Olin
+     Business School" beside "Olin School of Business", which contain neither
+     one another), and the posting form needed exactly the same judgement to
+     warn a poster that the "new" department they are about to add is a slight
+     respelling of one the site already lists. Two copies of that rule would
+     drift, so both read this one.
+
+     TWO STRICTNESSES, deliberately. The STRICT comparison — substring either
+     way, or identical distinctive-word sets — is what the selftest holds the
+     built vocabulary to: a pair it flags fails the build, so it must never
+     fire on two names that are genuinely different places. The FUZZY tier
+     adds singular/plural, a one-letter slip in a long word, and one name's
+     distinctive words being contained in the other's — right for a
+     "did you mean" SUGGESTION the poster is free to wave away, and far too
+     eager for a build-failing assertion ("Management" is contained in
+     "Operations Management", and only the owner can say whether those are one
+     group or two). */
+
+  var GENERIC_NAME_WORDS = ['the', 'school', 'college', 'faculty', 'of', 'business', 'at',
+    'and', 'graduate', 'department', 'administration', 'studies', 'institute', 'for',
+    'area', 'group'];
+
+  /** The words that make a name ITSELF — generic ones dropped, and, when the
+      university is known, its own words and initials too ("UCD" and
+      "Business" must not keep two spellings of one Smurfit apart). Sorted, so
+      two orderings of one name compare equal. */
+  function distinctiveWords(name, university) {
+    var own = Object.create(null);
+    var initials = '';
+    if (university) {
+      var uw = fold(university).split(' ');
+      for (var i = 0; i < uw.length; i++) {
+        if (!uw[i]) continue;
+        own[uw[i]] = true;
+        initials += uw[i].charAt(0);
+      }
+    }
+    var out = [];
+    var words = fold(name).split(' ');
+    for (var j = 0; j < words.length; j++) {
+      var w = words[j];
+      if (!w || own[w] || w === initials) continue;
+      if (GENERIC_NAME_WORDS.indexOf(w) !== -1) continue;
+      out.push(w);
+    }
+    return out.sort();
+  }
+
+  /** One edit apart — a substitution, or one letter inserted/dropped. */
+  function oneSlipApart(a, b) {
+    if (Math.abs(a.length - b.length) > 1) return false;
+    var i = 0, j = 0, slips = 0;
+    while (i < a.length && j < b.length) {
+      if (a.charAt(i) === b.charAt(j)) { i++; j++; continue; }
+      if (++slips > 1) return false;
+      if (a.length === b.length) { i++; j++; }
+      else if (a.length > b.length) i++;
+      else j++;
+    }
+    return slips + (a.length - i) + (b.length - j) <= 1;
+  }
+
+  /** The same word, near enough for a suggestion: equal, a plural of the
+      other, or — long words only, so "arts"/"acts" never match — one slip
+      apart ("managment" is "management"). */
+  function sameWord(a, b) {
+    if (a === b) return true;
+    if (a.length > 3 && a === b + 's') return true;
+    if (b.length > 3 && b === a + 's') return true;
+    if (a.length < 5 || b.length < 5) return false;
+    return oneSlipApart(a, b);
+  }
+
+  /**
+   * Are these two names probably ONE name written twice?
+   *
+   *   opts.university   context: that university's own words are not
+   *                     distinctive within its own lists
+   *   opts.fuzzy        add the suggestion-grade tolerances (see above)
+   */
+  function similarNames(a, b, opts) {
+    opts = opts || {};
+    var fa = fold(a), fb = fold(b);
+    if (!fa || !fb) return false;
+    if (fa === fb) return true;
+    if (fa.indexOf(fb) !== -1 || fb.indexOf(fa) !== -1) return true;
+
+    var da = distinctiveWords(a, opts.university);
+    var db = distinctiveWords(b, opts.university);
+    if (da.length && da.join(' ') === db.join(' ')) return true;
+    if (!opts.fuzzy || !da.length || !db.length) return false;
+
+    /* every word of the SMALLER name has a near-enough partner in the larger
+       one, each partner spent once — which covers a typo, a plural, and a
+       name that is the other plus a few extra words */
+    var small = da.length <= db.length ? da : db;
+    var large = (da.length <= db.length ? db : da).slice();
+    for (var i = 0; i < small.length; i++) {
+      var hit = -1;
+      for (var j = 0; j < large.length; j++) {
+        if (large[j] !== null && sameWord(small[i], large[j])) { hit = j; break; }
+      }
+      if (hit === -1) return false;
+      large[hit] = null;
+    }
+    return true;
+  }
+
+  /** The names in `list` a poster typing `name` probably means — the picker's
+      "did you mean" row. Fuzzy by construction (it is a suggestion), capped,
+      and never the name itself. */
+  function findSimilar(name, list, opts) {
+    opts = opts || {};
+    var max = opts.max || 3;
+    var out = [];
+    var fn = fold(name);
+    if (!fn) return out;
+    for (var i = 0; i < (list || []).length && out.length < max; i++) {
+      var v = list[i];
+      if (!v || fold(v) === fn) continue;
+      if (similarNames(name, v, { university: opts.university, fuzzy: true })) out.push(v);
+    }
+    return out;
+  }
+
+  /* ----------------------------------------- what KIND of institution it is
+
+     The browser twin of `typeFromNames` in _scraper/jobmarket-sheet.mjs — the
+     selftest pins the two against each other over one fixture list, so the
+     form's suggestion and the pipeline's derivation cannot drift. The names
+     STATE the answer ("Rutgers Business School", "Clarkson University");
+     where they state neither ("INSEAD"), the answer is empty and the field is
+     left for the poster — evidence, never a guess. */
+
+  var TYPE_BUSINESS_SCHOOL =
+    /business school|school of business|college of business|business college|school of management|management school|graduate school of business|school of commerce|business administration/;
+  var TYPE_UNIVERSITY = /universit|college|institute|polytechnic|\bacademy\b|\bschool\b/;
+
+  function typeGuess(institution, school, unit) {
+    var inst = clean(institution).slice(0, 300);
+    var all = [inst, clean(school).slice(0, 300), clean(unit).slice(0, 300)]
+      .join(' · ').toLowerCase();
+    if (TYPE_BUSINESS_SCHOOL.test(all)) return 'Business School';
+    // only the EMPLOYER's own name answers "what kind of institution is this?"
+    return TYPE_UNIVERSITY.test(inst.toLowerCase()) ? 'University' : '';
+  }
+
+  /* --------------------------- corrections approved from the review queue
+
+     A signed-in poster can suggest that a name the site publishes is wrong
+     ("Suggest a correction" on post-a-job.html -> Firestore `nameFixes`); the
+     maintainer approves or rejects it on admin-area.html; the data build
+     writes the approved ones into data/name-fixes.json and applies them —
+     through THESE two functions — to every posting and to the form's own
+     vocabulary. The browser applies the same file to the picker's preview, so
+     what a poster reads back is what the build will publish.
+
+     AN OVERLAY, NEVER A SECOND CANON. canon() stays the single spelling
+     authority; a fix is applied AFTER it, and normalizeFixes() puts every
+     TARGET through canon() first — so a fixed row is still canonical under
+     the built-in rules and the selftest's "every posting names its place the
+     one way" guard stays green whether or not it has heard of the fix. A fix
+     that has earned its keep is promoted into the alias tables above (which
+     also reach the frozen archives via --heal-names); until then the overlay
+     keeps the live data right without a deploy. */
+
+  /** The identity a fix matches a stored value on. */
+  function fixKey(v) { return fold(spell(v)); }
+
+  /**
+   * Validate and canonicalise raw fix documents into the entries fixPlace()
+   * applies: `{ kind, from, to, institution? }`. Drops junk (unknown kind,
+   * empty names, a fix that renames a name to itself), canonicalises every
+   * TARGET so a fixed row stays canonical, resolves chains (A->B, B->C
+   * becomes A->C) and drops cycles, and deduplicates on (kind, scope, from) —
+   * first entry wins, so the build's read order decides a genuine conflict
+   * deterministically.
+   */
+  function normalizeFixes(list) {
+    var out = [];
+    var seen = Object.create(null);
+    var i, f;
+    for (i = 0; i < (list || []).length && out.length < 500; i++) {
+      f = list[i] || {};
+      var kind = f.kind === 'institution' || f.kind === 'school' || f.kind === 'unit'
+        ? f.kind : '';
+      var from = clean(f.from).slice(0, 200);
+      var inst = kind === 'institution' ? '' : canonInstitution(clean(f.institution).slice(0, 200));
+      if (!kind || !from) continue;
+
+      var to = '';
+      if (kind === 'institution') to = canonInstitution(clean(f.to).slice(0, 200));
+      else if (kind === 'school') to = canonSchool(clean(f.to).slice(0, 200), inst);
+      else to = canonUnit(clean(f.to).slice(0, 200), inst);
+      if (!to || fixKey(from) === fixKey(to)) continue;
+
+      var key = kind + '|' + (inst ? institutionKey(inst) : '') + '|' + fixKey(from);
+      if (seen[key]) continue;
+      seen[key] = true;
+
+      var entry = { kind: kind, from: from, to: to };
+      if (inst) entry.institution = inst;
+      out.push(entry);
+    }
+
+    /* chains resolve, cycles drop: a target that is itself another fix's
+       `from` (same kind, compatible scope) follows through, and an entry
+       still moving after five hops is circular and cannot be honoured */
+    var kept = [];
+    for (i = 0; i < out.length; i++) {
+      f = out[i];
+      var to2 = f.to, hops = 0, moved = true;
+      while (moved && hops < 5) {
+        moved = false;
+        for (var j = 0; j < out.length; j++) {
+          var o = out[j];
+          if (o === f || o.kind !== f.kind) continue;
+          if ((o.institution || '') && (f.institution || '')
+              && institutionKey(o.institution) !== institutionKey(f.institution)) continue;
+          if (fixKey(to2) === fixKey(o.from)) { to2 = o.to; moved = true; hops++; break; }
+        }
+      }
+      if (moved || fixKey(f.from) === fixKey(to2)) continue;
+      kept.push(f.to === to2 ? f : (f.institution
+        ? { kind: f.kind, from: f.from, to: to2, institution: f.institution }
+        : { kind: f.kind, from: f.from, to: to2 }));
+    }
+    return kept;
+  }
+
+  /** One field of a place, taken to its fixed point under the fixes that
+      apply to it. Bounded, so a cycle that survived normalizeFixes (two
+      half-overlapping scopes, say) can never hang a build. */
+  function applyFixes(value, kind, instKey, fixes) {
+    var v = value, prev = null, n = 0;
+    while (v && v !== prev && n++ < 6) {
+      prev = v;
+      for (var i = 0; i < fixes.length; i++) {
+        var f = fixes[i];
+        if (f.kind !== kind) continue;
+        if (f.institution && institutionKey(f.institution) !== instKey) continue;
+        if (fixKey(v) === fixKey(f.from)) { v = f.to; break; }
+      }
+    }
+    return v;
+  }
+
+  /**
+   * A place with the approved corrections applied — AFTER canon(), which is
+   * where every caller runs it. Pure and idempotent (normalizeFixes made the
+   * targets canonical and un-chained). The institution is fixed FIRST, so a
+   * school or department fix scoped to the corrected university still reaches
+   * a row that carried the old spelling.
+   */
+  function fixPlace(place, fixes) {
+    var p = place || {};
+    if (!fixes || !fixes.length) return p;
+    var institution = applyFixes(clean(p.institution), 'institution', '', fixes);
+    var key = institutionKey(institution);
+    return {
+      institution: institution,
+      school: applyFixes(clean(p.school), 'school', key, fixes),
+      unit: applyFixes(clean(p.unit), 'unit', key, fixes),
+    };
+  }
+
   return {
     INSTITUTION_ALIASES: INSTITUTION_ALIASES,
     SCHOOL_LIST: SCHOOL_LIST,
@@ -954,6 +1229,12 @@
     splitFused: splitFused,
     splitLegacyInstitution: splitLegacyInstitution,
     isCanonicalSchool: isCanonicalSchool,
-    isCanonicalUnit: isCanonicalUnit
+    isCanonicalUnit: isCanonicalUnit,
+    distinctiveWords: distinctiveWords,
+    similarNames: similarNames,
+    findSimilar: findSimilar,
+    typeGuess: typeGuess,
+    normalizeFixes: normalizeFixes,
+    fixPlace: fixPlace
   };
 }));

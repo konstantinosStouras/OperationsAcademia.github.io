@@ -35,6 +35,7 @@
   'use strict';
 
   var DEFAULT_URL = 'data/vocab.json';
+  var FIXES_URL = 'data/name-fixes.json';
 
   /* One request per file per page, the site-wide rule — a card list mounting a
      cascade per card must not fetch the vocabulary once per card. Memoized by
@@ -52,6 +53,47 @@
         .catch(function () { delete pending[key]; return null; });
     }
     return pending[key];
+  }
+
+  /* ------------------------------------ approved name corrections (overlay)
+
+     data/name-fixes.json holds the corrections the maintainer has APPROVED
+     from posters' suggestions (see assets/oa-namefix.js and the build). The
+     build applies them to every published row and to the vocabulary; loading
+     the same file here keeps the form's own preview in step — a poster who
+     types the old spelling reads back the one the build will publish. An
+     overlay AFTER canon, never a second canon: the pure half (normalizeFixes,
+     fixPlace) lives in assets/oa-schools.js, so the browser and the build
+     cannot disagree about what a fix does.
+
+     Entirely optional, like everything else here: no file, no module, or a
+     failed fetch just means no overlay, and the build still applies the
+     fixes at ingest. */
+  var loadedFixes = [];
+  var fixesPending = null;
+
+  function nameFixes(url) {
+    if (!fixesPending) {
+      fixesPending = fetch(url || FIXES_URL, { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          var S = window.OASchools;
+          loadedFixes = (S && S.normalizeFixes)
+            ? S.normalizeFixes((j && j.fixes) || []) : [];
+          return loadedFixes;
+        })
+        .catch(function () { fixesPending = null; return []; });
+    }
+    return fixesPending;
+  }
+
+  /** The place with whatever corrections have loaded applied — synchronous,
+      so a submit that races the fetch simply goes without (the build applies
+      the same fixes again at ingest). */
+  function fixedPlace(place) {
+    var S = window.OASchools;
+    if (!loadedFixes.length || !S || !S.fixPlace) return place;
+    return S.fixPlace(place, loadedFixes);
   }
 
   /** A key -> name index over an array of names or an object's keys. */
@@ -83,11 +125,20 @@
     els = els || {};
     opts = opts || {};
     var inst = els.institution, school = els.school, unit = els.unit;
+    /* The OPTIONAL fourth field: the "Type of institution" <select>. When it
+       is handed over, the cascade fills it from what the names themselves
+       state (typeGuess in oa-schools.js — "Lee Business School" is a business
+       school) the moment the poster's choice makes the answer evident. Only
+       ever an EMPTY field, or one this cascade filled itself: a value the
+       poster picked is theirs, exactly like the three names. */
+    var typeEl = els.type || null;
     if (!inst || !school || !unit || !window.OACombo) return null;
 
     var changed = typeof opts.onChange === 'function' ? opts.onChange : function () {};
     var listeners = [];
     var dead = false;
+
+    nameFixes(opts.fixesUrl);   // start the overlay loading beside the vocabulary
 
     function on(el, type, fn) {
       el.addEventListener(type, fn);
@@ -125,12 +176,32 @@
       return window.OACombo.attach(el, more);
     }
 
+    /* The "did you mean" judgement each picker asks before offering to add a
+       NEW name (oa-combo.js draws the rows). Filled in once the vocabulary
+       has arrived — until then there is nothing to compare against, and an
+       empty answer draws nothing. */
+    var similarFns = { inst: null, school: null, unit: null };
+    var similarFor = function (which) {
+      return function (typed) {
+        return similarFns[which] ? similarFns[which](typed) : [];
+      };
+    };
+
     var combos = {
-      inst: attach(inst, { key: keyInst, publishAs: S ? S.canonInstitution : null }),
-      school: attach(school, { key: keySchool,
-        publishAs: S ? function (v) { return S.canonSchool(v, val(inst)); } : null }),
-      unit: attach(unit, { key: keyUnit,
-        publishAs: S ? function (v) { return S.canonUnit(v, val(inst)); } : null }),
+      inst: attach(inst, { key: keyInst, similar: similarFor('inst'),
+        publishAs: S ? function (v) {
+          return fixedPlace({ institution: S.canonInstitution(v), school: '', unit: '' }).institution;
+        } : null }),
+      school: attach(school, { key: keySchool, similar: similarFor('school'),
+        publishAs: S ? function (v) {
+          return fixedPlace({ institution: val(inst),
+            school: S.canonSchool(v, val(inst)), unit: '' }).school;
+        } : null }),
+      unit: attach(unit, { key: keyUnit, similar: similarFor('unit'),
+        publishAs: S ? function (v) {
+          return fixedPlace({ institution: val(inst), school: '',
+            unit: S.canonUnit(v, val(inst)) }).unit;
+        } : null }),
     };
 
     vocabulary(opts.vocabUrl).then(function (v) {
@@ -148,6 +219,63 @@
       var uniIndex = index(byUniversity, keyInst);
       var schoolIndex = index(bySchool, keySchool);
       var uniNames = Object.keys(byUniversity);
+      var allSchools = (v.schools || []).map(function (o) { return o && o.v ? o.v : o; });
+      var allUnits = (v.units || []).map(function (o) { return o && o.v ? o.v : o; });
+
+      /** Several lists as one, each name once — the chosen university's own
+          names first, so a suggestion prefers the spelling used HERE. */
+      function uniqNames(lists) {
+        var out = [], seen = Object.create(null);
+        for (var i = 0; i < lists.length; i++) {
+          var l = lists[i] || [];
+          for (var j = 0; j < l.length; j++) {
+            var k = S.fold(l[j]);
+            if (!k || seen[k]) continue;
+            seen[k] = true;
+            out.push(l[j]);
+          }
+        }
+        return out;
+      }
+
+      /* The pickers' "did you mean" (oa-combo.js draws it): a typed name that
+         is probably a slight respelling of one the site already lists — a
+         typo, a plural, the same words in another order — is pointed at the
+         existing entry before the row that would add it as a new one. The
+         judgement itself is oa-schools.js's similarNames, the same one the
+         selftest sweeps the built vocabulary with. */
+      similarFns.inst = function (typed) {
+        return S.findSimilar(typed, uniNames, {});
+      };
+      similarFns.school = function (typed) {
+        var uni = chosenUniversity();
+        return S.findSimilar(typed,
+          uniqNames([uni ? (uni.own.schools || []) : [], allSchools]),
+          { university: uni ? uni.name : val(inst) });
+      };
+      similarFns.unit = function (typed) {
+        var uni = chosenUniversity();
+        var mine = chosenSchool(uni);
+        var scoped = mine ? mine.units : (uni ? (uni.own.units || []) : []);
+        return S.findSimilar(typed, uniqNames([scoped, allUnits]),
+          { university: uni ? uni.name : val(inst) });
+      };
+
+      /* The Type select follows what the chosen names STATE — "Lee Business
+         School" is a business school, "Clarkson University" a university —
+         and only ever fills an EMPTY field or corrects its own earlier guess.
+         A value the poster picked is never overruled, and a name that states
+         neither (INSEAD) fills nothing. */
+      function maybeFillType() {
+        if (!typeEl || !S.typeGuess) return;
+        var guess = S.typeGuess(val(inst), val(school), val(unit));
+        if (!guess || typeEl.value === guess) return;
+        var auto = typeEl.getAttribute('data-oa-auto-type') || '';
+        if (typeEl.value && typeEl.value !== auto) return;
+        typeEl.value = guess;
+        typeEl.setAttribute('data-oa-auto-type', guess);
+        typeEl.dispatchEvent(new Event('change', { bubbles: true }));
+      }
 
       /** The university the institution field names, however it is spelled. */
       function chosenUniversity() {
@@ -244,13 +372,23 @@
                    S.canonInstitution(typed);
         if (name && name !== typed) inst.value = name;
 
-        var place = S.canonColumns({
+        var canoned = S.canonColumns({
           institution: inst.value, school: school.value, unit: unit.value,
         });
+        /* …then the approved corrections, AFTER canon — the same overlay the
+           build applies at ingest, so what the poster reads back is what will
+           be published. The institution is only rewritten where the OVERLAY
+           moved it: the canon's own answer already went through `name`. */
+        var place = fixedPlace(canoned);
+        if (place.institution && place.institution !== canoned.institution
+            && place.institution !== val(inst)) {
+          inst.value = place.institution;
+        }
         if (place.school !== val(school) || place.unit !== val(unit)) {
           school.value = place.school;
           unit.value = place.unit;
         }
+        maybeFillType();
         changed();
       }
 
@@ -269,6 +407,7 @@
         });
         if (hits.length !== 1) return;
         school.value = hits[0];
+        maybeFillType();
         changed();
       }
 
@@ -278,6 +417,7 @@
       on(school, 'change', function () { snapPlace(); rescope(); });
       on(unit, 'change', function () { snapPlace(); inferSchool(); rescope(); });
       rescope();
+      maybeFillType();   // a form opened on an edit may already name a school
     });
 
     return {
@@ -292,5 +432,12 @@
     };
   }
 
-  window.OAPlacePicker = { wire: wire, vocabulary: vocabulary, DEFAULT_URL: DEFAULT_URL };
+  window.OAPlacePicker = {
+    wire: wire,
+    vocabulary: vocabulary,
+    nameFixes: nameFixes,
+    fixedPlace: fixedPlace,
+    DEFAULT_URL: DEFAULT_URL,
+    FIXES_URL: FIXES_URL,
+  };
 })();

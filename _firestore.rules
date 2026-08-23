@@ -534,6 +534,52 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ------------------------------------------- name-correction suggestions
+    // A signed-in poster who spots a university, school or department name the
+    // site publishes WRONGLY can suggest the correction from the posting form
+    // (assets/oa-namefix.js). NOTHING RENAMES ITSELF: status is pinned to
+    // 'pending' on create, only the maintainer decides (admin-area.html), and
+    // the data build applies the APPROVED ones — writing them into the served
+    // data/name-fixes.json and renaming every posting and vocabulary entry
+    // that carries the old spelling. The same "the browser is never trusted
+    // with what gets published" rule as jobSubmissions.
+    //
+    // The maintainer's update may also reword `to` (correcting the correction
+    // before approving it); `kind`, `from` and the suggester's identity are
+    // part of what was suggested and stay as filed — hence the tighter
+    // affectedKeys() on update rather than a plain isAdmin() write.
+    match /nameFixes/{id} {
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.kind in ['institution', 'school', 'unit']
+                    && request.resource.data.from is string
+                    && request.resource.data.from.size() >= 2
+                    && request.resource.data.to is string
+                    && request.resource.data.to.size() >= 2
+                    && str('from', 200)        && str('to', 200)
+                    && str('institution', 200) && str('note', 1000)
+                    && str('authEmail', 200)
+                    && request.resource.data.keys().hasOnly(
+                         ['kind', 'from', 'to', 'institution', 'note',
+                          'uid', 'authEmail', 'status', 'createdAt']);
+
+      // the suggester may read their own suggestion back; the maintainer all
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+
+      allow update: if isAdmin()
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['status', 'to', 'institution',
+                                                  'note', 'reviewedAt'])
+                    && request.resource.data.status in
+                         ['pending', 'approved', 'rejected']
+                    && str('to', 200) && str('institution', 200)
+                    && str('note', 1000) && str('reviewedAt', 40);
+
+      allow delete: if isAdmin();
+    }
+
     // --------------------------------------------------- usage (admin-only)
     // Usage telemetry (owner, 2026-08-17): one doc per browsing session —
     // time on site, the links/buttons clicked, and which form FIELDS were

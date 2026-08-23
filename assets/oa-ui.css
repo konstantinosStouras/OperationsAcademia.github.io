@@ -1493,11 +1493,42 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 
 /* the "type something new" row */
 .oa-combo-add { border-top: 1px solid var(--line-soft, #eef1f4); color: var(--brand-2); }
+
+/* THE MERGE GUARD above it: "did you mean" rows pointing a typed near-miss
+   at the entry the site already lists, so a typo or a plural does not become
+   a second spelling of one place. The note paints no ground of its own (it
+   sits on the panel's), so it only needs its ink named; the rows are ordinary
+   .oa-combo-opt rows and inherit the panel's colours. */
+.oa-combo-near {
+  margin: 0;
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--line-soft, #eef1f4);
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--ink-2, #454c56);
+}
+.oa-combo-near-opt .oa-combo-name { font-weight: 600; }
 .oa-combo-plus {
   flex: 0 0 auto;
   font-weight: 700;
   line-height: 1;
 }
+
+/* -------------------------------- suggest a name correction (oa-namefix.js)
+
+   A bordered card, deliberately with NO background of its own — it sits on
+   the page's ground and inherits the page's ink, so there is no pairing to
+   get wrong in either theme. */
+.oa-namefix { margin: 20px 0 0; }
+.oa-namefix .button.oa-btn-sm { padding: 6px 12px; font-size: 13.5px; }
+.oa-namefix-form {
+  margin-top: 12px;
+  padding: 16px 18px 6px;
+  border: 1px solid var(--line-soft, #eef1f4);
+  border-radius: 10px;
+}
+.oa-namefix-form h3 { margin: 0 0 6px; font-size: 17px; }
 
 .oa-combo-more,
 .oa-combo-empty {
