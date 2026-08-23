@@ -5,8 +5,17 @@
    THE PANEL THIS DRAWS sits on the Admin area (admin-area.html) beside the tracking sheet's
    review queue, and it is deliberately NOT the same thing. That queue is a
    GATE: nothing on it is on the site until the maintainer approves it. This is
-   a TO-DO LIST: a posting made through the site's own form is live within a
+   a TO-DO LIST: a profile made through the site's own form is filed within a
    minute, because the form promises as much, and this only says it arrived.
+
+   CANDIDATE PROFILES ONLY, since 2026-08-23. Job postings made through the
+   form used to be listed here too; they are drawn by the review panel's own
+   "User-added jobs" tab now (assets/oa-jobreview.js — one queue, one surface,
+   the same reasoning that pinned feedback.html clean when the queues moved).
+   The submissions MODEL keeps both kinds — the mailer still announces a job
+   posting the moment it arrives — and the two panels share the LIVE statuses
+   and the reviewedAt stamp, so a card ticked on either surface is ticked for
+   the mailer too.
 
    IT EXISTS BECAUSE THERE WAS NOWHERE TO LOOK. A job posting turns up on the
    jobs page and can be corrected from its own card. A CANDIDATE PROFILE
@@ -30,29 +39,11 @@
   'use strict';
 
   /* Keep in step with KINDS in _scraper/submissions-review.mjs; selftest.mjs
-     pins the collection names, the stamps and the edit paths across the two. */
+     pins the collection names, the stamps and the edit paths across the two.
+     The `job` kind is deliberately NOT here — the review panel's User-added
+     tab (assets/oa-jobreview.js) draws those, and a second surface for the
+     same queue is the drift this repository's modules exist to prevent. */
   var KINDS = [
-    {
-      key: 'job',
-      collection: 'jobSubmissions',
-      one: 'job posting',
-      many: 'job postings',
-      editPath: 'post-a-job.html?edit=',
-      title: function (d) {
-        return [d.institution, d.department ||
-          [d.school, d.unit].filter(Boolean).join(', ')].filter(Boolean).join(' — ') ||
-          'a posting';
-      },
-      lines: function (d) {
-        return [
-          ['Entry level', (d.levels || []).join(', ')],
-          ['Country', d.country],
-          ['Apply by', d.applyBy],
-        ];
-      },
-      link: function (d) { return d.adUrl || ''; },
-      linkLabel: 'the advertisement',
-    },
     {
       key: 'candidate',
       collection: 'candidateSubmissions',
@@ -143,14 +134,14 @@
     var count = $('oa-subs-count');
     if (count) {
       count.textContent = items.length
-        ? String(items.length) + (items.length === 1 ? ' submission' : ' submissions')
+        ? String(items.length) + (items.length === 1 ? ' profile' : ' profiles')
         : 'nothing';
     }
 
     if (!items.length) {
-      list.innerHTML = '<p class="oa-hint">Nothing waiting. Postings and profiles made ' +
-        'through the site appear here when they arrive, so you can see them even while ' +
-        'candidate profiles are held back.</p>';
+      list.innerHTML = '<p class="oa-hint">Nothing waiting. Candidate profiles filed ' +
+        'through the site appear here when they arrive, so you can read one even ' +
+        'while it is held until the reveal date.</p>';
       return;
     }
 

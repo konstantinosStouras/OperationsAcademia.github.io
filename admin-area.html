@@ -147,10 +147,21 @@
                  on the feedback page. -->
             <section class="oa-panel" id="oa-review" hidden>
               <h3 class="oa-panel-h">&#128203; Job postings to review</h3>
-              <p class="oa-hint">Crawled from the job market tracking sheet and
-                held back until you approve them &mdash; <span id="oa-review-count">nothing</span>
-                waiting. Correct anything that is wrong before approving; your
-                edits are kept and re-applied every time the sheet is re-read.</p>
+              <p class="oa-hint">Every job posting waiting for your look &mdash;
+                <span id="oa-review-count">nothing</span> shown.
+                <strong>Auto-crawled</strong> postings come from the job market
+                tracking sheet and are held back until you approve them; correct
+                anything that is wrong first &mdash; your edits are kept and
+                re-applied every time the sheet is re-read.
+                <strong>User-added</strong> postings were made through the
+                site&rsquo;s own form and are already live; open one to correct
+                it, or mark it reviewed to take it off the list.</p>
+              <!-- Two sources, one panel (owner, 2026-08-23): the postings
+                   crawled from the tracking sheet (a GATE — nothing publishes
+                   until approved) and the ones people posted through the site's
+                   own form (already live — a to-do list). The tabs split them
+                   by source; filled by assets/oa-jobreview.js. -->
+              <div class="oa-tabs" id="oa-review-sources" hidden></div>
               <!-- Approving one at a time is right for a handful and unusable for
                    a season: the tracking sheet's own tab opened with 89 postings
                    on it. So the whole queue can go up at once, behind a count and
@@ -160,7 +171,8 @@
                    does too: the morning it was first read properly, 89 of its
                    postings were the season under way and ~250 were the one that
                    had closed. Splitting them by market is what makes approving a
-                   whole page a safe thing to press — it acts on what is shown. -->
+                   whole page a safe thing to press — it acts on what is shown;
+                   within each tab the NEXT market's postings lead the list. -->
               <div class="oa-tabs" id="oa-review-years" hidden></div>
               <p class="oa-rv-bulk" id="oa-review-bulk" hidden>
                 <button type="button" class="button blue" id="oa-review-all">
@@ -173,29 +185,32 @@
             <!-- ============================ what has been posted here
 
                  The queue above is a GATE — nothing on it is on the site
-                 until it is approved. This is a TO-DO LIST: a posting or
-                 a profile made through the site's own forms is live
-                 within a minute, because the form promises as much, and
-                 this only says it arrived.
+                 until it is approved. This is a TO-DO LIST: a profile made
+                 through the site's own form is filed within a minute,
+                 because the form promises as much, and this only says it
+                 arrived. (Job postings made through the form used to be
+                 listed here too; they are the review panel's own
+                 "User-added jobs" tab now — one queue, one surface, owner
+                 2026-08-23.)
 
-                 It exists because there was nowhere to look. A job
-                 posting draws a card on the jobs page; a CANDIDATE
-                 PROFILE does not — profiles are held behind the reveal
-                 date, so they reach no served file at all and the only
-                 way to open one was to guess its document id.
+                 It exists because there was nowhere to look: a CANDIDATE
+                 PROFILE draws no card anywhere — profiles are held behind
+                 the reveal date, so they reach no served file at all and
+                 the only way to open one was to guess its document id.
 
                  Beside it, the Candidate profiles panel below is the full
                  ROSTER — withdrawn and hidden included, with Take down and
-                 Put it back — where this is the unread-arrivals list across
-                 both kinds. Ticking a card here changes nothing but the
-                 tick. -->
+                 Put it back — where this is the unread-arrivals list.
+                 Ticking a card here changes nothing but the tick. -->
             <section class="oa-panel" id="oa-subs" hidden>
               <h3 class="oa-panel-h">&#128228; Posted through the site</h3>
-              <p class="oa-hint">Job postings and candidate profiles people have
-                submitted, newest first &mdash; <span id="oa-subs-count">nothing</span>
-                to look at. They are already live (candidate profiles are held until
-                the reveal date), so this is a list to read, not a gate: open one to
-                correct it, or mark it reviewed to take it off the list.</p>
+              <p class="oa-hint">Candidate profiles people have filed through the
+                site, newest first &mdash; <span id="oa-subs-count">nothing</span>
+                to look at. A profile is held until the reveal date, so this is
+                the one place to read a new one; job postings made through the
+                site are reviewed under &ldquo;Job postings to review&rdquo;
+                above. Open one to correct it, or mark it reviewed to take it
+                off the list.</p>
               <div id="oa-subs-list"></div>
             </section>
 
