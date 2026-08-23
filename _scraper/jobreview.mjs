@@ -28,10 +28,20 @@
    selftest.mjs drive all of it offline.
    --------------------------------------------------------------------------- */
 
+import { createRequire } from 'node:module';
+
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
+  ownUniversitiesLink, universitiesLink,
 } from './jobs-model.mjs';
 import { joinDepartment } from './vocab.mjs';
+
+/* "Is this the same university?" — GROUPING, not publishing, exactly as the
+   vocabulary uses it (see oa-schools.js institutionKey). The duplicate check
+   below has to fold "The University of X" onto "University of X" or a posting
+   made under one and crawled under the other would never be flagged. */
+const require = createRequire(import.meta.url);
+const { institutionKey, fold: foldName } = require('../assets/oa-schools.js');
 
 /** The Firestore collection. Named here so the pipeline, the mailer and the
     page cannot drift apart on it. */
@@ -100,7 +110,7 @@ export const SHOWN = EDITABLE.filter((f) => !f.derived);
 /** Every key a `jobReviews` document may carry. */
 export const DOC_KEYS = [
   'rowId', 'status', 'row', 'edits',
-  'queuedAt', 'reviewedAt', 'mailedAt', 'note',
+  'queuedAt', 'reviewedAt', 'mailedAt', 'note', 'dup',
 ];
 
 /* ------------------------------------------------------------------ queue */
@@ -113,7 +123,7 @@ export const DOC_KEYS = [
  * queue is the only place a not-yet-public posting may exist (see the header).
  * It is refreshed by `refreshQueued` whenever the sheet changes underneath.
  */
-export function queueDoc(row, { now = '' } = {}) {
+export function queueDoc(row, { now = '', dup = [] } = {}) {
   return {
     rowId: row.id,
     status: PENDING,
@@ -123,6 +133,7 @@ export function queueDoc(row, { now = '' } = {}) {
     reviewedAt: '',
     mailedAt: '',
     note: '',
+    dup,
   };
 }
 
@@ -269,7 +280,137 @@ export function settlePlace(out, row = {}) {
   const line = joinDepartment(place.school, place.unit);
   settled.department = line
     || ((row.school || row.unit) ? '' : (out.department || ''));
+
+  /* THE SITE'S OWN LINK FOLLOWS THE NAME, here as everywhere. The workbook's
+     ingest builds the "Further info" link from the institution AS THE SHEET
+     WROTE IT, so a review edit that corrects the name ("MIT Sloan" ->
+     "Massachusetts Institute of Technology (MIT)") left the stored link asking
+     the Universities page for a spelling no posting uses any more — and the
+     selftest's "no posting links to a university under a name it does not use"
+     guard went red on the freshly-built jobs.json, which by design stops the
+     build committing ANYTHING. Three approved postings held the whole site's
+     publishing for a day exactly this way (NUS, Chicago Booth, MIT Sloan,
+     2026-08-23). Ours is ours to regenerate; a link the sheet's contributor
+     actually gave is left alone — the same rule as healPlace. */
+  if (place.institution && ownUniversitiesLink(settled.furtherInfoUrl)) {
+    settled.furtherInfoUrl = universitiesLink(place.institution);
+  }
   return settled;
+}
+
+/**
+ * The row an APPROVED document publishes — the maintainer's edits applied,
+ * and the posting DATED FROM ITS APPROVAL.
+ *
+ * `addedAt` is what the e-mail alerts window on ("new postings since the last
+ * digest"), and for a gate-held posting the queue's copy carries the day the
+ * CRAWLER first saw it — which can be days before anybody could read it on
+ * the site. Dated that way, a posting approved after a subscriber's last
+ * digest but crawled before it fell OUTSIDE every window and was announced to
+ * nobody. The day it reached the site is the day it was approved, so that is
+ * the day it is dated from.
+ *
+ * Grandfathered documents are exempt, and the discriminator is exact:
+ * `partition` stamps their `reviewedAt` and `queuedAt` from the same instant,
+ * while a real decision's `reviewedAt` is the browser's own later write. The
+ * sixteen postings that were public before the gate existed were already
+ * announced, and re-dating them would blast every subscriber about postings
+ * they were told about weeks ago.
+ *
+ * Deterministic from the document alone, so the two writers that publish an
+ * approval — the sheet sync's `partition` and build-jobs' direct read of the
+ * queue — cannot disagree and the served file cannot flap between them.
+ */
+export function approvedRow(row, doc) {
+  const out = applyEdits(row, doc && doc.edits);
+  const reviewed = String((doc && doc.reviewedAt) || '');
+  const queued = String((doc && doc.queuedAt) || '');
+  if (reviewed && reviewed !== queued) {
+    const t = Date.parse(reviewed);
+    if (!Number.isNaN(t)) {
+      const stamp = new Date(t).toISOString().replace(/\.\d{3}Z$/, 'Z');
+      if (!out.addedAt || out.addedAt < stamp) out.addedAt = stamp;
+    }
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------- duplicates */
+
+/** The advertisement a row points at, normalised for comparison. Our own home
+    page is what a sheet row carries when it names no ad at all, so it
+    identifies nothing — the same reading as `adKey` in jobs-model.mjs. */
+function dupLinks(row) {
+  return [row.adUrl, row.postedAtUrl]
+    .map((v) => String(v || '').trim().toLowerCase()
+      .replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, ''))
+    .filter((v) => v && !/^operationsacademia\.org$/.test(v));
+}
+
+/** A name folded for "is this the same department?" — diacritics and
+    punctuation dropped, "&" read as "and", via oa-schools' own fold(). */
+function foldedName(v) {
+  return foldName(String(v || ''));
+}
+
+/** What a duplicate entry carries onto the queue document: enough for the
+    review card to say which posting it might repeat, and nothing else — a
+    document is not a place to copy whole rows into. */
+function dupEntry(r) {
+  return {
+    id: String(r.id || ''),
+    ref: String(r.ref || ''),
+    source: String(r.source || ''),
+    institution: String(r.institution || ''),
+    department: String(r.department || ''),
+    posted: String(r.posted || ''),
+  };
+}
+
+/**
+ * The postings already on the site that a crawled row may DUPLICATE — the
+ * same job, posted through the site's own form (or an earlier import) before
+ * the crawler found it.
+ *
+ * A FLAG, never a collapse: the maintainer decides on the review card, which
+ * is why the rules here are looser than `collapseSameDay`'s (that one silently
+ * drops a row, so it demands the same DAY; a person reading a warning does
+ * not). Two rows are flagged when they share the market year and the
+ * university AND either point at the same advertisement or name the same
+ * department. The one contradiction honoured is the Houston lesson: both rows
+ * carrying entry levels with none in common are two different advertisements
+ * from one department, not one posting twice.
+ */
+export function duplicatesOf(row, siteRows, { max = 3 } = {}) {
+  if (!row || !row.institution) return [];
+  const key = institutionKey(row.institution);
+  const links = dupLinks(row);
+  const unit = foldedName(row.unit);
+  const line = foldedName(row.department);
+  const levels = Array.isArray(row.levels) ? row.levels : [];
+
+  const out = [];
+  for (const s of siteRows || []) {
+    if (!s || !s.institution || String(s.id || '') === String(row.id || '')) continue;
+    if (Number(s.year) !== Number(row.year)) continue;
+    if (institutionKey(s.institution) !== key) continue;
+
+    const sLevels = Array.isArray(s.levels) ? s.levels : [];
+    if (levels.length && sLevels.length && !levels.some((l) => sLevels.includes(l))) continue;
+
+    const sameAd = dupLinks(s).some((l) => links.includes(l));
+    const sameUnit = !!unit && foldedName(s.unit) === unit;
+    const sameLine = !!line && foldedName(s.department) === line;
+    if (sameAd || sameUnit || sameLine) out.push(dupEntry(s));
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+/** Two duplicate lists that say the same thing — so a sync with nothing new
+    to report writes nothing at all. */
+export function sameDups(a, b) {
+  return JSON.stringify(a || []) === JSON.stringify(b || []);
 }
 
 /* --------------------------------------------------------------- deciding */
@@ -334,7 +475,7 @@ export function partition(rows, docs, { now = '', published = null } = {}) {
     }
 
     if (doc.status === APPROVED) {
-      publish.push(applyEdits(row, doc.edits));
+      publish.push(approvedRow(row, doc));
       continue;
     }
 

@@ -3592,8 +3592,13 @@ for (const w of [320, 360, 390, 430]) {
   const seedDocs = [
     { path: 'jobReviews/r1', data: { rowId: 'r1', status: 'pending', queuedAt: '2026-08-20',
         row: { id: 'r1', year: 2026, posted: '2026-08-20', institution: 'Test University One', country: 'Ireland' } } },
+    /* r2 carries a duplicate flag, and a hostile one: the sync writes these
+       from postings people typed, so the banner must render them inert */
     { path: 'jobReviews/r2', data: { rowId: 'r2', status: 'pending', queuedAt: '2026-08-21',
-        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two', country: 'France' } } },
+        row: { id: 'r2', year: 2026, posted: '2026-08-21', institution: 'Test University Two', country: 'France' },
+        dup: [{ id: 'dup-1', ref: 'OA-JOB-1', source: 'oa-form',
+          institution: 'Test University <img src=x onerror=window.__xssdup=1>',
+          department: 'Operations', posted: '2026-08-10' }] } },
     // approved: must NOT be in the queue or its counts
     { path: 'jobReviews/r3', data: { rowId: 'r3', status: 'approved', queuedAt: '2026-08-19',
         row: { id: 'r3', year: 2026, posted: '2026-08-19', institution: 'Approved University', country: 'Spain' } } },
@@ -3680,6 +3685,16 @@ for (const w of [320, 360, 390, 430]) {
       'admin area: both pending postings are drawn, newest first');
     ok(reviews.indexOf('Approved University') === -1,
       'admin area: an approved posting is not in the queue');
+
+    /* THE DUPLICATE FLAG IS RAISED WHERE THE DECISION IS MADE — on the card
+       of the one posting that carries it, and nowhere else. The flag's fields
+       come from postings people typed, so a hostile one must render inert. */
+    eq(await q.locator('#oa-review-list [data-dup]').count(), 1,
+      'admin area: the flagged posting raises its possible-duplicate warning, and only it');
+    ok(reviews.indexOf('Possibly already on the site') !== -1,
+      'admin area: the warning says what it is');
+    ok(await q.evaluate(() => !window.__xssdup),
+      'admin area: a hostile duplicate entry cannot inject markup');
 
     // the inbox: open tab, newest first, through the moved-but-unchanged panel
     await q.waitForFunction(() =>

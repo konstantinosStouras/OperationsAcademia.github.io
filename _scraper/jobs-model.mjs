@@ -327,10 +327,19 @@ export function healPlace(row) {
     unit: row.unit || '',
   });
   const department = joinDepartment(place.school, place.unit);
+  /* A STALE LINK IS A REASON TO HEAL ON ITS OWN. The early return used to
+     test the three names alone, so a row whose names were already canonical
+     but whose own Universities link still asked for an earlier spelling —
+     written before the name was corrected — was returned untouched, and the
+     "no posting links to a university under a name it does not use" guard
+     stayed red with nothing left to heal it. */
+  const ownLink = ownUniversitiesLink(row.furtherInfoUrl);
+  const freshLink = (ownLink && place.institution) ? universitiesLink(place.institution) : '';
   if (place.institution === row.institution
       && place.school === (row.school || '')
       && place.unit === (row.unit || '')
-      && department === (row.department || '')) return row;
+      && department === (row.department || '')
+      && (!freshLink || row.furtherInfoUrl === freshLink)) return row;
 
   const healed = { ...row, ...place, department };
   /* A key only where there is a value — keyed on what the canon PRODUCED, not
@@ -340,9 +349,7 @@ export function healPlace(row) {
      out, leaving a `department` line with nothing behind it. */
   if (!place.school) delete healed.school;
   if (!place.unit) delete healed.unit;
-  if (ownUniversitiesLink(row.furtherInfoUrl)) {
-    healed.furtherInfoUrl = universitiesLink(place.institution);
-  }
+  if (freshLink) healed.furtherInfoUrl = freshLink;
   if (row.id && row.id === jobId(row)) healed.id = jobId(healed);
   return healed;
 }

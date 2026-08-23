@@ -5,7 +5,7 @@ go to **you**.
 
 | | what it sends | cadence |
 |---|---|---|
-| `_scraper/alerts-mailer.mjs` | e-mail alert digests to subscribers | hourly |
+| `_scraper/alerts-mailer.mjs` | e-mail alert digests to subscribers | right after every publish, and hourly as the safety net |
 | `_scraper/feedback-mailer.mjs` | new feedback to you, a receipt to the submitter, and the "your feedback is resolved" e-mail | twice an hour, and on any push adding a resolution file |
 | `_scraper/jobreview-mailer.mjs` | a posting read from the tracking sheet is **waiting for you to approve it** | every 15 minutes |
 | `_scraper/submissions-mailer.mjs` | somebody has **posted a job or a candidate profile** through the site's own form | every 15 minutes |

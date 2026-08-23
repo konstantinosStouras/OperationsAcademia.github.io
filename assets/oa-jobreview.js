@@ -178,10 +178,46 @@
     return d.toISOString().slice(0, 10);
   }
 
+  /* Where a flagged duplicate came from, in the maintainer's own words. */
+  var DUP_SOURCE = {
+    'oa-form': 'posted through the site',
+    'sheet-import': 'from the legacy import',
+    'jobmarket-sheet': 'from the tracking sheet'
+  };
+
+  /**
+   * The possible duplicates the sheet sync found for this row — postings
+   * ALREADY ON THE SITE that look like the same job. Computed offline
+   * (duplicatesOf in _scraper/jobreview.mjs) and stored on the document as
+   * `dup`; this only draws it. A warning, never a decision: Approve still
+   * publishes beside the existing posting, Reject keeps the crawled copy off.
+   */
+  function dupHtml(dups) {
+    var items = dups.map(function (d) {
+      var name = [d.institution, d.department].filter(Boolean).join(' — ');
+      var jobsUrl = '/jobs?institution=' + encodeURIComponent(d.institution || '');
+      return '<li>' + esc(name || d.id) +
+        (d.posted ? ' <span class="oa-hint" style="display:inline">(posted ' +
+          esc(d.posted) + (DUP_SOURCE[d.source] ? ', ' + esc(DUP_SOURCE[d.source]) : '') +
+          ')</span>' : '') +
+        ' &middot; <a href="' + esc(jobsUrl) + '" target="_blank" rel="noopener">see it live</a>' +
+        '</li>';
+    }).join('');
+    return '<div class="oa-note is-warn" data-dup>' +
+      '<strong>&#9888; Possibly already on the site.</strong> This crawled posting ' +
+      'looks like ' + (dups.length === 1 ? 'a job that is' : dups.length + ' jobs that are') +
+      ' already published:' +
+      '<ul style="margin:6px 0 4px;padding-left:20px">' + items + '</ul>' +
+      'If it is the same job, <strong>Reject</strong> keeps this copy off the site; ' +
+      'if it is a different one, <strong>Approve</strong> publishes it as usual.' +
+      '</div>';
+  }
+
   function cardHtml(doc, i) {
     var row = doc.row || {};
     var ad = safeHref(fieldValue(doc, 'adUrl'));
     var idp = 'rv' + i;
+    var dups = Array.isArray(doc.dup) ? doc.dup : [];
 
     /* The heading reads the posting as it WOULD BE PUBLISHED — the row with
        any edit already made on top — not the raw workbook row. It used to read
@@ -203,6 +239,7 @@
             'open the advert</a>' : '') +
         '</p>' +
       '</header>' +
+      (dups.length ? dupHtml(dups) : '') +
       '<div class="oa-rv-grid">' +
         FIELDS.map(function (f, n) {
           var id = idp + '-' + n;

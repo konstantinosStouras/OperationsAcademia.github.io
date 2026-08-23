@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "postings-publish-and-alert-in-minutes",
+   "date": "2026-08-23",
+   "title": "New postings publish in minutes, and alert e-mails follow them",
+   "summary": "A job posting made through the site — or approved from the maintainer's review queue — now reaches the job postings page within a couple of minutes, and an e-mail alert set to “as soon as something appears” is sent minutes after that instead of by the top of the next hour. Postings crawled from the job market tracking sheet are also checked against the jobs already listed before the maintainer reviews them, so a job posted here and later picked up by the crawl is flagged as a possible duplicate rather than slipping onto the page twice.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "candidate-alerts",
    "date": "2026-08-23",
    "title": "E-mail alerts now cover the job market candidates",
