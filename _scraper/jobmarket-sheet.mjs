@@ -325,6 +325,62 @@ export function daysBetween(a, b) {
   return Math.round((bt - at) / 86400e3);
 }
 
+/* -------------------------------------------------------------- deadlines
+
+   A DEADLINE THE PIPELINE IS UNSURE OF IS NOT A DEADLINE (owner, 2026-08-23:
+   "if no submit by information or deadline is included in the posting, or if
+   you are completely unsure of the deadline, say until filled"). `sheetDay`
+   has to survive a hand-kept spreadsheet, so on an ambiguous all-numeric cell
+   it guesses at US order — right for a date Google itself wrote, and wrong for
+   a contributor typing day-first: "5/10/2026" meaning the fifth of October was
+   published as the tenth of May, a deadline BEFORE the advertisement went up.
+   Nothing checked the answer against the one fact every row carries — the day
+   it was posted.
+
+   So a deadline is only believed when it is PLAUSIBLE against the posting
+   date: on or after it, and within DEADLINE_WINDOW_DAYS of it (no search on
+   this market advertises a closing date two years out — a date past that is a
+   mis-typed year, not a plan). An ambiguous day/month whose US reading fails
+   that test is re-read the other way round FIRST — the one honest repair,
+   because only one of the two readings can be a date the advertisement could
+   have meant — and a cell neither reading can save publishes NO date, which
+   the page already shows as "Until filled." The cell's own words are then
+   carried into the comments (see rowsFromTab), so what the sheet said is on
+   the card for the maintainer to settle rather than silently lost.           */
+
+/** How far past the posting date a claimed deadline is still believable. */
+export const DEADLINE_WINDOW_DAYS = 730;
+
+/**
+ * The deadline a sheet cell states, believed only when it is plausible
+ * against the day the posting went up — or ''.
+ */
+export function deadlineDay(v, posted = '') {
+  const s = text(v, 40);
+  if (!s) return '';
+
+  const plausible = (d) => {
+    if (!d) return false;
+    if (!posted) return true;             // nothing to test against
+    const gap = daysBetween(posted, d);
+    return gap != null && gap >= 0 && gap <= DEADLINE_WINDOW_DAYS;
+  };
+
+  const first = sheetDay(s);
+  if (plausible(first)) return first;
+
+  // an all-numeric day/month that could be read either way: try the other
+  const m = s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})\b/);
+  if (m) {
+    const a = +m[1], b = +m[2], y = fullYear(+m[3]);
+    if (a <= 12 && b <= 12 && a !== b) {
+      const swapped = iso(y, b, a);
+      if (plausible(swapped)) return swapped;
+    }
+  }
+  return '';
+}
+
 /* ----------------------------------------------------------------- columns
 
    The sheet's header wording is the maintainer's, not a contract, so columns
@@ -747,23 +803,36 @@ export function levelsFromRank(rank, kind = '') {
 
    The site's Type filter answers "what kind of institution is this?" — the old
    sheet's column was headed "Type of Institution" — and the tracking sheet has
-   no such column. So it is read off the NAMES, which state it: "Rutgers
-   Business School" is a business school and "Clarkson University" is a
-   university. That is evidence, not a guess.
+   no such column. So it is read off the posting's own TEXT, which states it:
+   "Rutgers Business School" is a business school and "Clarkson University" is
+   a university. That is evidence, not a guess.
 
-   Where the names say neither ("INSEAD", "CEIBS"), the type is left EMPTY
+   THE EVIDENCE IS THE WHOLE POSTING, not the employer's name alone (owner,
+   2026-08-23): a posting that says "business" ANYWHERE — the field column, the
+   advertised title, the notes, the advertisement's own address — has to do
+   with the university's business school and is flagged under Business School,
+   so Berkeley advertising a business-flavoured post files under the school
+   doing the hiring rather than under "University". Every crawled posting is
+   held in the review queue before it publishes, and its card names the
+   business school the site's directory knows (see businessCheck in
+   jobreview.mjs), so the maintainer confirms the flag rather than discovering
+   it. The residual imprecision runs the other way now: a business-school
+   posting whose row never says so stays a University, and the maintainer's
+   card is where that is corrected.
+
+   Where the text says neither ("INSEAD", "CEIBS"), the type is left EMPTY
    rather than defaulted. An empty type is what the served-file check already
    allows (`!r.type || TYPES.includes(...)`); a made-up one would sit behind a
-   filter a visitor trusts.
-
-   The known imprecision, stated rather than hidden: a business school inside a
-   university is filed under the university unless one of the two columns names
-   the school (Berkeley advertising for Haas reads "University of California
-   Berkeley", so it is a University here). The maintainer can name the school
-   in the sheet's field column to correct it.                                  */
+   filter a visitor trusts.                                                    */
 
 const BUSINESS_SCHOOL =
   /business school|school of business|college of business|business college|school of management|management school|graduate school of business|school of commerce|business administration/;
+
+/* The owner's own rule: the bare WORD is evidence enough. Word-bounded, so
+   "agribusiness" is not read as it, and kept OUT of institutionColumn's
+   patterns above — a column of departments saying "Business Analytics" names
+   no institution. */
+const BUSINESS_WORD = /\bbusiness\b/;
 
 const UNIVERSITY = /universit|college|institute|polytechnic|\bacademy\b|\bschool\b/;
 
@@ -771,7 +840,7 @@ export function typeFromNames(institution, ...rest) {
   const inst = text(institution, 300);
   const all = [inst, ...rest.map((p) => text(p, 300))].join(' · ').toLowerCase();
 
-  if (BUSINESS_SCHOOL.test(all)) return 'Business School';
+  if (BUSINESS_SCHOOL.test(all) || BUSINESS_WORD.test(all)) return 'Business School';
   // only the EMPLOYER's own name answers "what kind of institution is this?" —
   // "Department of Industrial Engineering" says nothing about the employer
   return UNIVERSITY.test(inst.toLowerCase()) ? 'University' : '';
@@ -855,11 +924,14 @@ export function rowsFromTab(csv, {
     if (!link && linkCell) unlinked++;
 
     const deadlineProse = text(redactEmails(cell(raw, index, 'deadline')), 200);
-    const deadline = sheetDay(deadlineProse);
     /* Prose that says the search stays open beats a parsed date, exactly as at
        every other ingest — the page buckets "Until filled" on the date being
        EMPTY, so a row carrying both would read as dated. */
     const openEnded = OPEN_ENDED_RX.test(deadlineProse);
+    /* …and a parsed date is only BELIEVED when it is plausible against the
+       posting date (see deadlineDay): a deadline the pipeline is unsure of
+       publishes as "Until filled.", never as a guess. */
+    const deadline = openEnded ? '' : deadlineDay(deadlineProse, posted);
 
     /* One spelling per university, school and department — the same canon the
        form and the other importer apply, so a row this workbook contributes
@@ -870,11 +942,14 @@ export function rowsFromTab(csv, {
        title as advertised (five entry levels cannot carry "Professor of
        Practice — Decision & Information Sciences") and the town. Dropping
        either would lose the most useful thing on the row, so both are carried
-       in the line the card already shows for prose. */
+       in the line the card already shows for prose — as is a deadline cell
+       that could not be believed as a date, so the sheet's own words reach
+       the review card instead of vanishing behind "Until filled." */
     const comments = [
       rank && !LEVELS.includes(rank) ? rank : '',
       city,
       notes,
+      deadlineProse && !openEnded && !deadline ? `Deadline as listed: ${deadlineProse}` : '',
     ].filter(Boolean).join(' · ').slice(0, 1200);
 
     const row = {
@@ -885,7 +960,11 @@ export function rowsFromTab(csv, {
       department: joinDepartment(place.school, place.unit) || area,
       school: place.school,
       unit: place.unit,
-      type: typeFromNames(place.institution || institution, area),
+      /* judged over the WHOLE posting's text — the field column, the
+         advertised title, the notes and the advertisement's own address, any
+         of which saying "business" flags it under Business School (owner,
+         2026-08-23; the review card then names the school the site knows) */
+      type: typeFromNames(place.institution || institution, area, rank, notes, linkCell),
       levels: levelsFromRank(rank, kind),
       /* No deadline column, or an empty cell, reads as "Until filled." — the
          same rule import-sheet.mjs applies to the other spreadsheet, and not a

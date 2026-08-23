@@ -344,6 +344,48 @@ naming the postings it may repeat (measured in page-test.mjs, hostile input
 included) and the review e-mail says the same thing. Approve still publishes;
 Reject still keeps the crawled copy off.
 
+**A crawled posting that mentions "business" is flagged under Business School,
+and its card NAMES the school** (owner, 2026-08-23). `typeFromNames` used to
+read only the employer's name and the field column, so Berkeley advertising a
+business-flavoured post filed under "University". It now judges the WHOLE
+posting's text — the field column, the advertised title, the notes and the
+advertisement's own address — and the bare word "business" (word-bounded, so
+"agribusiness" is not it) is evidence enough: the row arrives typed
+`Business School`. The sync then asks the site's own vocabulary which school
+that IS at that university — `businessSchoolOf` in `vocab.mjs`, the
+`schoolForUnit` discipline: answered from the school's own name
+(`BUSINESS_SCHOOL_NAME_RX`), through `institutionKey` so any spelling reaches
+the entry, and only when UNAMBIGUOUS — and `businessCheck` in `jobreview.mjs`
+stores the answer on the queue document as **`biz`** (`{ school }`; `null`
+when the posting is not business-typed or its School box already names a
+business school). Like `dup` it is in `DOC_KEYS` and the rules' `hasOnly`
+(pinned both ways), computed for fresh queue documents AND re-checked on every
+sync for pending ones — judged on the row the sheet NOW gives, the refreshed
+copy when one is being written that run — and RAISED, never decided: the
+review card mentions the school ("The site's directory lists **Haas** …") with
+a **Use it as the School** button that only fills the box, the review e-mail
+says the same thing, and nothing publishes until the maintainer approves. A
+university the directory cannot answer for still gets the flag, saying the
+directory has none — the fix is a row in `assets/oa-institutions.js`, the same
+rule as everywhere: grow the database, never guess.
+
+**A deadline the pipeline is unsure of publishes as "Until filled."** (owner,
+2026-08-23). `sheetDay` guesses US order on an ambiguous all-numeric cell —
+right for a date Google itself wrote, wrong for a contributor typing
+day-first: "5/10/2026" meaning the fifth of October published as the tenth of
+May, a deadline BEFORE the advertisement went up. `deadlineDay` in
+`jobmarket-sheet.mjs` now believes a parsed deadline only when it is PLAUSIBLE
+against the posting date — on or after it, within `DEADLINE_WINDOW_DAYS`
+(730) of it. An ambiguous day/month whose US reading fails that test is
+re-read the other way round first (the one honest repair — only one of the
+two readings can be a date the advertisement could have meant); a cell
+neither reading can save, or that never parsed at all, publishes NO date —
+which the page already shows and buckets as "Until filled." — and its own
+words are carried onto the card as `Deadline as listed: …` in the comments,
+so the maintainer can settle it on review instead of the claim being silently
+lost. The HigherEdJobs verify still fills genuinely-known deadlines from the
+advertisements themselves, unchanged.
+
 **An approval also DATES the posting from the day it was approved**
 (`approvedRow` in jobreview.mjs — applyEdits plus the re-stamp, used by
 `partition` AND by build-jobs' direct read of the queue, so the two writers
