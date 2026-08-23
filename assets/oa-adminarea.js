@@ -23,6 +23,18 @@
         newsOverrides decisions reads, so this page cannot disagree with the
         what's-new page or the mailer about what is pending.
 
+   AND ONE STATISTIC (owner, 2026-08-23): a Registered-users card — how many
+   accounts hold a `registeredUsers/{uid}` mark, the contentless tally every
+   sign-in writes (oa-accounts.js). It is /lit/'s registered-users tile with
+   the visibility inverted: there the figure is public, here it is the
+   maintainer's alone — the collection is admin-read in _firestore.rules, and
+   this page is the one place it is shown. The count is of PEOPLE, not
+   sign-ins: merging two accounts deletes the duplicate's mark (runMerge in
+   oa-accounts.js, while the merge can still write as that user), so the
+   figure comes down on its own the next time this page reads it. A mark
+   orphaned some OTHER way (an account deleted in the Firebase console) stays
+   until something like /lit/'s registered-users audit exists here.
+
    THE BADGE AND THE PAGE COUNT WITH THE SAME FUNCTION. pendingCounts() below
    is called by this page for its summary tiles AND by oa-accounts.js for the
    "Admin area N" badge (which loads this file on demand, in the maintainer's
@@ -188,6 +200,22 @@
     });
   }
 
+  /**
+   * How many accounts are registered — the `registeredUsers` tally every
+   * sign-in writes, counted with one aggregate read. DELIBERATELY NOT part of
+   * pendingCounts(): that function is "everything WAITING for the maintainer"
+   * and feeds the "Admin area N" badge on every page — a statistic in its sum
+   * would inflate the badge with items nobody can clear, and a statistic in
+   * its Promise.all would make every page's badge refresh pay a read for a
+   * number only this page shows. Merge-aware for free: the count is of marks,
+   * and a merge deletes the duplicate account's mark.
+   */
+  function registeredCount() {
+    return OAFB.ready().then(function (fb) {
+      return countOf(fb.firestore().collection(OAFB.col.registered));
+    });
+  }
+
   /* ------------------------------------------------------- the summary strip */
 
   var TILES = [
@@ -198,6 +226,11 @@
     { key: 'names', label: 'Name corrections suggested', to: '#oa-aa-names' }
   ];
 
+  /* The registered-user count, kept beside lastCounts rather than in it so no
+     badge arithmetic can ever sum it. null = not answered (a refused read
+     draws the same '?' the queue tiles draw), a number is the count. */
+  var lastUsers = null;
+
   function paintTiles(c) {
     var host = $('oa-aa-tiles');
     if (!host) return;
@@ -207,7 +240,13 @@
       return '<a class="oa-aa-tile' + (known && n > 0 ? ' is-due' : '') + '" href="' + t.to + '">' +
         '<span class="oa-aa-tile-n">' + (known ? n : '?') + '</span>' +
         '<span class="oa-aa-tile-l">' + esc(t.label) + '</span></a>';
-    }).join('');
+    }).join('') +
+      /* The sixth card is a STATISTIC, not a queue: it links to no panel, is
+         never "due", and stays out of every total — a span, so it cannot even
+         read as something to press. */
+      '<span class="oa-aa-tile oa-aa-tile-stat">' +
+        '<span class="oa-aa-tile-n">' + (typeof lastUsers === 'number' ? lastUsers : '?') + '</span>' +
+        '<span class="oa-aa-tile-l">Registered users</span></span>';
   }
 
   /* -------------------------------------------------------- candidate cards */
@@ -605,6 +644,16 @@
             correctBadge(groups);
           });
         })['catch'](function () { /* each panel reports its own failure */ });
+
+      /* the statistic beside the queues. Whichever read answers last paints
+         last: landing before pendingCounts, it rides that paint (paintTiles
+         always draws the card from lastUsers); landing after, it repaints the
+         strip that is already on screen. A refused read keeps the '?'. */
+      registeredCount().then(function (n) {
+        if (typeof n !== 'number') return;
+        lastUsers = n;
+        if (lastCounts) paintTiles(lastCounts);
+      })['catch'](function () { /* rules not deployed / offline — unknown, never 0 */ });
 
       show($('oa-aa-news'), true);
       renderNews(db);

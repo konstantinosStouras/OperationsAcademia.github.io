@@ -335,11 +335,15 @@ service cloud.firestore {
       allow read, write: if isOwner(uid);
     }
 
-    // A contentless public tally so the site can show "N registered users"
-    // without exposing the user list. One document per account holding a
-    // coarse timestamp and nothing else — no e-mail, no name.
+    // A contentless tally of registered accounts: one document per account
+    // holding a coarse timestamp and nothing else — no e-mail, no name. It
+    // exists for ONE reader, the Registered-users card on the maintainer's
+    // Admin area (a count() aggregate, which needs read permission like any
+    // other read). The figure is the maintainer's, not the public's (owner,
+    // 2026-08-23) — /lit/ shows its equivalent to everyone, this site does
+    // not — so the read is admin-only, and nothing public ever consumed it.
     match /registeredUsers/{uid} {
-      allow read: if true;
+      allow read: if isAdmin();
       allow create, update: if isOwner(uid)
                             && request.resource.data.keys().hasOnly(['t'])
                             && request.resource.data.t is number;

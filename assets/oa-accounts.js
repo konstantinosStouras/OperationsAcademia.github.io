@@ -2308,9 +2308,12 @@
         if (u) {
           loadProfile(u);
           loadCounts(u);
-          // Public, contentless tally so the site can show a registered-user
-          // count without anyone being able to read the user list. Same shape
-          // as /lit/'s registeredUsers/{uid}: a coarse timestamp, nothing else.
+          // Contentless tally so the Admin area can count registered users
+          // without anyone being able to read the user list. Same shape as
+          // /lit/'s registeredUsers/{uid} — a coarse timestamp, nothing else —
+          // but admin-read, not public: the figure is the maintainer's alone
+          // (owner, 2026-08-23). The write stays the owner's own, and the
+          // merge deletes the duplicate's mark so the count is of people.
           //
           // ONCE PER SESSION, as /lit/ does it — not once per page view. This
           // is a flat multi-page site: a signed-in reader opening ten pages

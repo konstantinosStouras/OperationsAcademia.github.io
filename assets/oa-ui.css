@@ -826,6 +826,11 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 .oa-aa-tile:hover { border-color: var(--brand, #3a424d); }
 .oa-aa-tile.is-due { border-color: var(--brand, #3a424d); }
+/* The Registered-users card is a statistic, not a queue: nothing opens from
+   it, so it keeps the resting border on hover and the default cursor — a tile
+   that highlights like its neighbours promises a panel it does not have. */
+.oa-aa-tile-stat { cursor: default; }
+.oa-aa-tile-stat:hover { border-color: var(--line-soft, #ececec); }
 .oa-aa-tile-n {
   display: block;
   font-size: 30px;
