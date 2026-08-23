@@ -40,6 +40,7 @@
    --------------------------------------------------------------------------- */
 
 import { COLLECTION, needMail, applyEdits } from './jobreview.mjs';
+import { longDate } from './jobs-model.mjs';
 import {
   shell, esc, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
 } from './_mail.mjs';
@@ -132,7 +133,8 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
       line('Country', r.country) +
       line('Advertised', r.posted) +
       line('Market year', r.year ? String(r.year) : '') +
-      line('Apply by', r.applyBy) +
+      line('Suggested apply by', r.reviewDate ? longDate(r.reviewDate) : '') +
+      line('Final apply by', r.applyBy) +
       line('Comments', r.comments) +
     '</table>' +
     (ad ? '<p><a href="' + esc(ad) + '">Open the advertisement</a></p>' : '') +

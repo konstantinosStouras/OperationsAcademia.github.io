@@ -151,7 +151,14 @@
       options: [],
       counts: {},
       scope: { label: '', values: [], other: '', more: '' },
-      max: opts.max || 400,
+      /* The render cap exists so a pathological list cannot lock the page —
+         it must sit ABOVE the real vocabulary, or the alphabetical list ends
+         mid-alphabet and reads as complete. It was 60 (ended in the C's),
+         then 400 — which the 2026-08-23 bulk approval outgrew: 518
+         universities, and VinUniversity fell off the end of the picker.
+         page-test.mjs asserts the seed's own names render, so the cap
+         cannot silently fall behind the list again. */
+      max: opts.max || 1000,
       open: false,
       active: -1,
       rows: [],

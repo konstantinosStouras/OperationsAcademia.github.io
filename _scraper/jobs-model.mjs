@@ -51,7 +51,7 @@ export const { canonPlace, canonColumns, canonSchool, canonUnit, canonInstitutio
     digest went out later that day, permanently. */
 export const PUBLIC_FIELDS = [
   'id', 'year', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
-  'applyBy', 'applyByDate', 'comments', 'country',
+  'applyBy', 'applyByDate', 'reviewDate', 'comments', 'country',
   'adUrl', 'adPending', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
 ];
@@ -454,6 +454,12 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     levels,
     applyBy: text(applyBy, MAXLEN.applyBy),
     applyByDate,
+    /* The SUGGESTED apply-by — the first-review / full-consideration date.
+       The form's own field first; healReviewDate below then validates it
+       against the final date and, for a document made before the field
+       existed (every mirror and migrated posting), reads it out of the
+       apply-by prose itself. */
+    reviewDate: day(doc.reviewDate),
     comments: text(doc.comments, MAXLEN.comments),
     country,
     adUrl: url(doc.adUrl),
@@ -495,7 +501,7 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     owner: ownerTag(doc.uid) || text(doc.owner, 64),
   };
   row.id = jobId(row);
-  return row;
+  return healReviewDate(row);
 }
 
 /** Any of the three shapes a stored timestamp arrives in, or null.
@@ -533,8 +539,8 @@ export function publicRow(row) {
     // the sheet has none, and writing `"ref": ""` onto every one of those rows
     // is 90-odd lines of noise in a file whose diff is meant to be readable.
     // `adPending` is the same: meaningful only while true, noise on every
-    // other row.
-    if ((k === 'ref' || k === 'adPending') && !row[k]) continue;
+    // other row — and so is `reviewDate`, which most postings never state.
+    if ((k === 'ref' || k === 'adPending' || k === 'reviewDate') && !row[k]) continue;
     out[k] = row[k];
   }
   return out;
@@ -548,6 +554,230 @@ export function composeApplyBy({ untilFilled, applyByDate, applyByNote }) {
   const note = text(applyByNote, MAXLEN.applyBy);
   if (untilFilled) return note ? `Until filled. ${note}` : 'Until filled.';
   return [applyByDate ? longDate(applyByDate) : '', note].filter(Boolean).join('. ');
+}
+
+/* -------------------------------------------- the two deadlines a search has
+
+   MANY SEARCHES HAVE NO CLOSING DATE AND STILL NAME A DATE THAT MATTERS
+   (owner, 2026-08-23): the day the committee starts reading. Kansas writes
+   "First review of applications will begin on September 8, 2026, and will
+   continue until the position has been filled"; UCLA gives a whole window
+   ("Next review date: Oct 5, 2026 … Final date: Nov 5, 2026"). Both published
+   as a bare "Until filled." — true, and the least informative true thing the
+   card could say.
+
+   So a posting carries TWO dates now:
+
+     reviewDate    the SUGGESTED apply-by — the first-review / full-
+                   consideration date. Apply by this day to be in the pile the
+                   committee reads first. Empty when the posting names none.
+     applyByDate   the FINAL apply-by — the hard closing date, exactly as
+                   before. Empty means "Until filled.", and it alone drives
+                   the market roll (deadlineOpen): a review date passing does
+                   not close a search.
+
+   `extractReviewDate` reads the suggested date out of the PROSE the sources
+   already carry, because that is where it lives — the sheet's deadline cell,
+   a poster's own note. Deliberately HIGH-PRECISION, the deadlineDay
+   discipline: every pattern demands the reviewing/consideration context AND a
+   date with a four-digit year, an ambiguous 10/12/2026 is refused rather than
+   guessed, and a posting the extractor is unsure of keeps reading exactly as
+   it did ("Until filled."). `healReviewDate` applies it to a whole row —
+   fill-empty, idempotent, applied at every ingest and on every build like
+   healPlace — and cuts the captured sentence out of the `applyBy` line, so
+   the Kansas card reads "Suggested apply by: September 8, 2026 · Final apply
+   by: Until filled." instead of carrying the sentence twice.               */
+
+/** The written-out dates the sources use: "September 8, 2026",
+    "Monday, Oct 5, 2026", "Oct 12th 2025", "20 February 2026", ISO, and the
+    slash form. `\b` after the year keeps a typo'd "12014" from half-matching. */
+const PROSE_DATE =
+  '(?:(?:mon|tues?|wednes|thurs?|fri|satur|sun)day,?\\s+)?' +
+  '(?:[a-z]{3,9}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}' +
+  '|\\d{1,2}(?:st|nd|rd|th)?\\s+[a-z]{3,9}\\.?,?\\s+\\d{4}' +
+  '|\\d{4}-\\d{2}-\\d{2}' +
+  '|\\d{1,2}/\\d{1,2}/\\d{4})\\b';
+
+/** A prose date -> ISO day, or ''. Stricter than day() about ambiguity: an
+    all-numeric cell both of whose parts could be the month ("10/12/2026") is
+    refused — a suggested deadline the pipeline is unsure of is not published,
+    the same rule deadlineDay applies to the final one. */
+export function parseProseDay(v) {
+  const s = String(v ?? '').trim().toLowerCase()
+    .replace(/^(?:mon|tues?|wednes|thurs?|fri|satur|sun)day,?\s+/, '')
+    .replace(/(\d{1,2})(?:st|nd|rd|th)\b/, '$1')
+    .replace(/[.,]/g, '');
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return valid(m[1], m[2], m[3]);
+  m = s.match(/^([a-z]{3,9})\s+(\d{1,2})\s+(\d{4})$/);
+  if (m) {
+    const mo = MONTHS.indexOf(m[1].slice(0, 3)) + 1;
+    return mo ? valid(m[3], String(mo), m[2]) : '';
+  }
+  m = s.match(/^(\d{1,2})\s+([a-z]{3,9})\s+(\d{4})$/);
+  if (m) {
+    const mo = MONTHS.indexOf(m[2].slice(0, 3)) + 1;
+    return mo ? valid(m[3], String(mo), m[1]) : '';
+  }
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const a = +m[1], b = +m[2];
+    if (a <= 12 && b <= 12 && a !== b) return '';   // could be read either way
+    if (a > 12) return valid(m[3], m[2], m[1]);     // day-first, forced
+    return valid(m[3], m[1], m[2]);                 // US, forced (or a == b)
+  }
+  return '';
+}
+
+/* The shapes the committed postings actually use, most specific first. Every
+   one demands its context IN THE SAME SENTENCE as the date ([^.;] gaps), so a
+   date mentioned near the word "review" is never enough on its own. */
+const REVIEW_PATTERNS = [
+  // "First review/consideration/screening of applications will begin on <date>"
+  '(?:first\\s+|initial\\s+|formal\\s+)?(?:review|consideration|screening)s?\\s+of\\s+' +
+    '(?:the\\s+)?applica[a-z]*[^.;:]{0,60}?\\b(?:begin|commence|start)(?:s|ning)?\\s+' +
+    '(?:formally\\s+)?(?:on\\s+|approximately\\s+|around\\s+|about\\s+)?%D%',
+  // "the committee will begin (formally) reviewing applications on <date>"
+  '(?:begin|commence|start)s?\\s+(?:formally\\s+)?(?:review|screen|consider)ing\\s+' +
+    '(?:of\\s+)?applications?\\s+(?:on\\s+|approximately\\s+)?%D%',
+  // "(application) review will begin on <date>"
+  '(?:application\\s+)?review\\s+(?:will\\s+|shall\\s+)?begins?\\s+' +
+    '(?:on\\s+|approximately\\s+)?%D%',
+  // "Next review date: <date>" — the UCLA application-window shape
+  '(?:next\\s+|first\\s+)?review\\s+date:?\\s+%D%',
+  // "for/to ensure full consideration … (apply) by <date>"
+  '(?:for|to\\s+(?:ensure|receive|guarantee))\\s+(?:full(?:\\s+and\\s+timely)?\\s+)?' +
+    'consideration[^.;]{0,120}?\\bby:?\\s+%D%',
+  // "…received/submitted by <date> … full consideration / given priority"
+  '(?:received|submitted|submit|completed|apply|applications?)[^.;]{0,60}?' +
+    '\\b(?:by|on\\s+or\\s+before)\\s+%D%[^.;]{0,80}?' +
+    '\\b(?:full(?:\\s+and\\s+timely)?\\s+consideration|given\\s+priority|priority\\s+(?:review|consideration))',
+  // "priority will be given to … received by <date>"
+  'priority\\s+(?:will\\s+be\\s+)?given\\s+to[^.;]{0,80}?\\breceived\\s+by\\s+%D%',
+  // "apply before <date> for first-round interviews"
+  'apply\\s+(?:before|by)\\s+%D%[^.;]{0,60}?\\bfirst[-\\s]round',
+];
+
+/* A hard closing date stated as prose rather than as a bare cell — the other
+   half of UCLA's window ("Final date: Thursday, Nov 5, 2026"). ONLY an
+   explicit label counts: a bare "deadline" heading three clauses away from a
+   date is exactly the mis-read the sheet ingest's header lesson records. */
+const FINAL_PATTERNS = [
+  '(?:final|closing)\\s+(?:date|deadline)\\s*(?:is\\s+|:\\s*|[-–—]\\s*)%D%',
+  'applications?\\s+(?:will\\s+be\\s+)?accepted\\s+(?:until|through)\\s+%D%',
+];
+
+function firstDateMatch(text, patterns) {
+  const s = String(text ?? '');
+  if (!s) return null;
+  for (const p of patterns) {
+    const m = new RegExp(p.replace('%D%', '(' + PROSE_DATE + ')'), 'i').exec(s);
+    if (!m) continue;
+    const date = parseProseDay(m[1]);
+    if (date) return { date, from: m.index, to: m.index + m[0].length };
+  }
+  return null;
+}
+
+/** The text with the sentence holding [from, to) removed — how the captured
+    review sentence leaves the `applyBy` line without touching its neighbours. */
+function withoutSentence(text, from, to) {
+  let a = 0;
+  for (let i = from - 1; i > 0; i--) {
+    const c = text[i];
+    if ((c === '.' || c === ';') && /\s/.test(text[i + 1] || '')) { a = i + 1; break; }
+  }
+  let b = text.length;
+  for (let i = to; i < text.length; i++) {
+    const c = text[i];
+    if (c === '.' || c === ';') { b = i + 1; break; }
+  }
+  return (text.slice(0, a) + ' ' + text.slice(b)).replace(/\s+/g, ' ').trim();
+}
+
+/** `{ date, rest }`: the suggested apply-by a text states, and the text with
+    that sentence removed — `rest` is the text unchanged when nothing fired. */
+export function extractReviewDate(text) {
+  const s = String(text ?? '');
+  const m = firstDateMatch(s, REVIEW_PATTERNS);
+  if (!m) return { date: '', rest: s };
+  return { date: m.date, rest: withoutSentence(s, m.from, m.to) };
+}
+
+/** The labelled FINAL closing date a text states, or ''. The caller applies
+    its own plausibility test, exactly as deadlineDay's callers do. */
+export function extractFinalDate(text) {
+  const m = firstDateMatch(text, FINAL_PATTERNS);
+  return m ? m.date : '';
+}
+
+/**
+ * A row's suggested apply-by, settled: an explicit `reviewDate` validated,
+ * else extracted from the row's own `applyBy` prose (which then loses the
+ * captured sentence), else from its comments (never trimmed — they are the
+ * card's own record of what the source said).
+ *
+ * A suggested date ON OR AFTER the final one is dropped, in either source:
+ * later contradicts the closing date, and equal is the deadline itself said
+ * twice ("for full consideration apply by <the closing date>" — half the
+ * corpus), which would put the same date on the card in two rows.
+ *
+ * Pure, idempotent and fill-empty, so every writer applies it on every pass —
+ * the healPlace pattern: fresh submissions, the sheet ingest, carried orphans
+ * and the committed files all heal the same way, and a run with nothing new
+ * changes nothing.
+ */
+export function healReviewDate(row) {
+  let finalDay = String(row.applyByDate || '');
+  let applyBy = String(row.applyBy || '');
+  const believable = (d) => !!d && (!finalDay || d < finalDay);
+  let review = day(row.reviewDate);
+  if (review && !believable(review)) review = '';
+
+  /* THE SOURCE'S OWN LABELLED WINDOW CAN SETTLE BOTH DATES. UCLA's posting
+     reached the site with its REVIEW date recorded as the closing date —
+     "Apply by: October 5, 2026" — while its own words, carried on the same
+     row, said "Next review date: Oct 5, 2026 … Final date: Nov 5, 2026".
+     Where the stored closing date IS the text's own stated review date and
+     the SAME text labels a final date after it, the stated final date wins
+     and the review date takes its own field. Both labels must be explicit
+     and must agree with the stored date, so this can never fire on a date
+     the maintainer simply typed. */
+  const window = (text) => {
+    if (!finalDay) return null;
+    const found = extractReviewDate(text);
+    if (!found.date || found.date !== finalDay) return null;
+    const final = extractFinalDate(text);
+    return final && final > found.date ? { review: found.date, final } : null;
+  };
+
+  if (!review) {
+    const found = extractReviewDate(applyBy);
+    if (believable(found.date)) {
+      review = found.date;
+      applyBy = found.rest || (finalDay ? longDate(finalDay) : 'Until filled.');
+    }
+  }
+  if (!review) {
+    const w = window(applyBy) || window(String(row.comments || ''));
+    if (w) {
+      review = w.review;
+      finalDay = w.final;
+      applyBy = longDate(w.final);
+    }
+  }
+  if (!review) {
+    const found = extractReviewDate(String(row.comments || ''));
+    if (believable(found.date)) review = found.date;
+  }
+  if (review === String(row.reviewDate || '') && applyBy === String(row.applyBy || '')
+      && finalDay === String(row.applyByDate || '')) {
+    return row;
+  }
+  const healed = { ...row, applyBy, applyByDate: finalDay };
+  if (review) healed.reviewDate = review;
+  else delete healed.reviewDate;
+  return healed;
 }
 
 /**
@@ -661,6 +891,7 @@ export function submissionFromRow(row, { uid = null, status = 'published' } = {}
     country: row.country || '',
     untilFilled,
     applyByDate: row.applyByDate || '',
+    reviewDate: row.reviewDate || '',
     applyByNote,
     comments: row.comments || '',
     adUrl: row.adUrl || '',

@@ -40,6 +40,17 @@
     });
   }
 
+  /* An ISO day the way the site writes dates — the mailer's longDate(). This
+     page does not load oa-list.js, so the preview carries its own copy; keep
+     the three in step. */
+  function longDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!m) return String(iso || '');
+    var names = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December'];
+    return names[+m[2] - 1] + ' ' + (+m[3]) + ', ' + (+m[1]);
+  }
+
   function say(msg, kind) {
     var m = $('a-msg');
     m.textContent = msg || '';
@@ -212,7 +223,9 @@
           parts.push('<li><strong>' + esc(r.institution) + '</strong> &mdash; ' +
             esc(r.department) + '<br><span class="oa-hint" style="display:inline">' +
             esc((r.levels || []).join(', ')) + ' &middot; ' + esc(r.country) +
-            ' &middot; apply by ' + esc(r.applyBy || 'until filled') + '</span></li>');
+            (r.reviewDate ? ' &middot; suggested apply by ' +
+              esc(longDate(r.reviewDate)) : '') +
+            ' &middot; final apply by ' + esc(r.applyBy || 'until filled') + '</span></li>');
         });
         parts.push('</ul>');
         parts.push('<p class="oa-hint">' + matching + ' of the ' + jobs.length +

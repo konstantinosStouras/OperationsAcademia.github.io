@@ -368,7 +368,14 @@
             fields: ['institution', 'department'],
             placeholder: 'University/School name',
             legacyParam: 'filterA' },
-          { key: 'deadline',    label: 'Deadline',        derive: 'deadline',
+          /* TWO deadline filters since 2026-08 (owner): the SUGGESTED
+             apply-by (the first-review / full-consideration date many
+             "until filled" searches name) and the FINAL apply-by (the hard
+             closing date, the filter this page always had — its key stays
+             `deadline` so every saved link keeps working). */
+          { key: 'review',      label: 'Suggested deadline', derive: 'review',
+            placeholder: 'Any review date' },
+          { key: 'deadline',    label: 'Final deadline',  derive: 'deadline',
             placeholder: 'Any deadline',
             legacyValues: { Open: 'Closing soon' } },
           { key: 'type',        label: 'Type',            field: 'type',
@@ -399,7 +406,10 @@
           rows: function (r) {
             return [
               { label: 'Entry level', value: (r.levels || []).join(', ') },
-              { label: 'Apply by',    value: r.applyBy },
+              /* the suggested (first-review) date, only where the posting
+                 names one — an empty row is skipped by the engine */
+              { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
+              { label: 'Final apply by',     value: r.applyBy },
               { label: 'Comments on Job Posting', value: r.comments },
               { label: 'File link',
                 html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad')

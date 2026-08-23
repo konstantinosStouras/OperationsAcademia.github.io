@@ -414,7 +414,10 @@
                 return [
                   { label: 'Job market year', value: r.year ? String(r.year) : '' },
                   { label: 'Entry level',     value: (r.levels || []).join(', ') },
-                  { label: 'Apply by',        value: r.applyBy },
+                  /* the suggested (first-review) date — the archive's legacy
+                     rows carry none, and an empty row is skipped */
+                  { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
+                  { label: 'Final apply by',     value: r.applyBy },
                   { label: 'Comments on Job Posting', value: r.comments },
                   { label: 'File link',
                     html: link(r.adUrl, r.adLabel || 'link to Job ad') },

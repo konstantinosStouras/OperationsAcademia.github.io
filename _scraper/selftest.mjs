@@ -24,6 +24,7 @@ import {
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
   removalSpecs, buildOwned, ownerTag, specMatches, healPlace,
+  parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import {
@@ -365,6 +366,13 @@ async function testServedFile() {
     }
     ok(!r.applyByDate || /^\d{4}-\d{2}-\d{2}$/.test(r.applyByDate),
       `row ${r.id}: applyByDate is ISO or empty`);
+    /* the SUGGESTED apply-by: ISO where present, and always BEFORE the final
+       date — equal is the deadline said twice, later contradicts it
+       (healReviewDate, which the build applies to every row) */
+    ok(!r.reviewDate || /^\d{4}-\d{2}-\d{2}$/.test(r.reviewDate),
+      `row ${r.id}: reviewDate is ISO or absent`);
+    ok(!r.reviewDate || !r.applyByDate || r.reviewDate < r.applyByDate,
+      `row ${r.id}: the suggested apply-by falls before the final one`);
     ok(!r.posted || /^\d{4}-\d{2}-\d{2}$/.test(r.posted), `row ${r.id}: posted is ISO`);
     ok(!r.adUrl || url(r.adUrl) === r.adUrl, `row ${r.id}: adUrl is a safe URL`);
     ok(!r.postedAtUrl || url(r.postedAtUrl) === r.postedAtUrl,
@@ -2555,6 +2563,15 @@ async function testVocabFile() {
     'University of Houston|OM|SCM/OM',
     'University of Houston|OM/SCM|SCM/OM',
     'University of Texas at Dallas|OM|OM/IS (Healthcare Management)',
+    /* Two more pairs from the same batch of sheet approvals (2026-08-23,
+       arrived on master with the 449-posting publish and left its own
+       selftest red — which stops every build committing). Each is a
+       judgement only the owner can make: St. John's may house Business
+       Analytics inside a wider Business Analytics and Information Systems
+       department or beside it, and Kansas's "Operations research" reads
+       like the field tacked onto the department's own name. */
+    "St. John's University|Business Analytics|Business Analytics and Information Systems",
+    'University of Kansas|Analytics, Information, Operations|Analytics, Information, Operations research',
   ]);
   /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
      files it under today — that is `pickForm`'s tie-break and it moves with
@@ -5413,6 +5430,253 @@ function testReviewEdits() {
     ['department'], 'only fields that differ count as edited');
 }
 
+/* ------------------------------------------- the two deadlines a search has
+
+   Owner, 2026-08-23: many searches have no fixed closing date yet name the
+   day the committee starts reading ("First review of applications will begin
+   on September 8, 2026…"), and both were published as a bare "Until filled."
+   A posting now carries reviewDate (the SUGGESTED apply-by) beside
+   applyByDate (the FINAL apply-by); the extractor that reads it out of the
+   sources' own prose is deliberately high-precision, and everything here
+   holds it to that. */
+
+function testTwoDeadlines() {
+  // ---- the date forms the sources actually write
+  eq(parseProseDay('September 8, 2026'), '2026-09-08', 'a written-out date parses');
+  eq(parseProseDay('Monday, Oct 5, 2026'), '2026-10-05', 'a weekday prefix is stepped over');
+  eq(parseProseDay('Oct 12th 2025'), '2025-10-12', 'an ordinal, comma-less date parses');
+  eq(parseProseDay('20 February 2026'), '2026-02-20', 'and the day-first written form');
+  eq(parseProseDay('2026-09-08'), '2026-09-08', 'ISO passes through');
+  eq(parseProseDay('10/31/2025'), '2025-10-31', 'an all-numeric date with a day over 12 is forced');
+  eq(parseProseDay('10/12/2025'), '',
+    'an all-numeric date that could be read either way is REFUSED — a suggested ' +
+    'deadline the pipeline is unsure of is not published, the deadlineDay rule');
+  eq(parseProseDay('December 1, 12014'), '', 'a typo\'d year is not a date');
+  eq(parseProseDay('October 10th'), '', 'and no year is no date at all');
+
+  // ---- the extractor fires on the shapes the committed corpus holds…
+  const kansas = 'Until filled. First review of applications will begin on ' +
+    'September 8, 2026, and will continue until the position has been filled.';
+  eq(extractReviewDate(kansas), { date: '2026-09-08', rest: 'Until filled.' },
+    'the Kansas shape: the first-review date is read and its sentence leaves the line');
+  eq(extractReviewDate('Until filled. For Full Consideration, apply by: August 27, 2026'),
+    { date: '2026-08-27', rest: 'Until filled.' }, 'the full-consideration shape');
+  eq(extractReviewDate('Next review date: Monday, Oct 5, 2026. Apply by this date.').date,
+    '2026-10-05', 'the UCLA application-window shape');
+  eq(extractReviewDate('review will begin on September 1, 2026.').date, '2026-09-01',
+    'the bare "review will begin" shape the comments carry');
+  eq(extractReviewDate('The search committee will begin reviewing applications on ' +
+    'October 6, 2025.').date, '2025-10-06', 'the begin-reviewing shape');
+  eq(extractReviewDate('Consideration of applications and nominations will commence ' +
+    'on 20 February 2026 until the position is filled.').date, '2026-02-20',
+    'the commence shape, day-first date included');
+  eq(extractReviewDate('candidates who submit their application package by ' +
+    'September 28, 2025, will be given priority.').date, '2025-09-28',
+    'the given-priority shape');
+  eq(extractReviewDate('Until filled. Apply before Oct 12th 2025 for first round ' +
+    'Zoom interview (Oct 15 - Oct 20)'),
+    { date: '2025-10-12', rest: 'Until filled.' }, 'the first-round-interview shape');
+
+  // …and ONLY on those: a date near the word "review" is never enough
+  eq(extractReviewDate('We advise candidates who are attending INFORMS to submit by ' +
+    '30th September').date, '', 'no year, no fire');
+  eq(extractReviewDate('Review of applications will begin on October 10th and will ' +
+    'continue until the positions are filled.').date, '', 'even mid-pattern');
+  eq(extractReviewDate('Priority will be given to completed applications received by ' +
+    '10/12/2025.').date, '', 'an ambiguous all-numeric date does not fire either');
+  eq(extractReviewDate('Applications will be reviewed on a rolling basis.').date, '',
+    'rolling review names no date');
+  eq(extractReviewDate('We strongly encourage candidates attending INFORMS to apply by ' +
+    'October 9, 2026, and to include their presentation information.').date, '',
+    'encouragement without a consideration clause is not a review date');
+  const untouched = 'Until filled. Early submissions are encouraged.';
+  eq(extractReviewDate(untouched).rest, untouched, 'a line nothing fired on keeps every word');
+
+  // ---- the labelled FINAL date (the other half of UCLA's window)
+  eq(extractFinalDate('Final date: Thursday, Nov 5, 2026'), '2026-11-05',
+    'an explicitly labelled closing date is read');
+  eq(extractFinalDate('Applications will be accepted until November 5, 2026.'),
+    '2026-11-05', 'and the accepted-until form');
+  eq(extractFinalDate('Application Deadline The search committee will begin reviewing ' +
+    'applications on October 6, 2025.'), '',
+    'a bare "deadline" heading clauses away from a date is NOT a closing date — ' +
+    'the mislabelled-header lesson');
+  eq(extractFinalDate('The deadline for applications is strict.'), '', 'nor is no date');
+
+  // ---- healReviewDate: fill-empty, guarded, idempotent
+  const base = {
+    id: 'x', applyBy: kansas, applyByDate: '', reviewDate: '', comments: '',
+  };
+  const healed = healReviewDate(base);
+  eq(healed.reviewDate, '2026-09-08', 'a row heals from its own apply-by prose');
+  eq(healed.applyBy, 'Until filled.', 'and the captured sentence leaves the line');
+  eq(healReviewDate(healed), healed, 'healing is idempotent — a second pass changes nothing');
+
+  const fromComments = healReviewDate({
+    id: 'x', applyBy: 'Until filled.', applyByDate: '',
+    comments: 'Although this position will remain open until filled, review will ' +
+      'begin on September 1, 2026.',
+  });
+  eq(fromComments.reviewDate, '2026-09-01', 'the comments are read too');
+  ok(fromComments.comments.includes('review will begin'),
+    'but never trimmed — they are the card\'s record of what the source said');
+
+  eq(healReviewDate({ id: 'x', applyBy: 'November 1, 2025. For full consideration, ' +
+    'applications should be received by November 1, 2025.', applyByDate: '2025-11-01' })
+    .reviewDate, undefined,
+    'a suggested date EQUAL to the final one is the deadline said twice, not news');
+
+  /* THE UCLA WINDOW: the posting reached the site with its REVIEW date
+     recorded as the closing date, while its own words on the same row named
+     both. Both labels explicit AND agreeing with the stored date, so this can
+     never fire on a date the maintainer simply typed. */
+  const ucla = healReviewDate({
+    id: 'x', applyBy: 'October 5, 2026', applyByDate: '2026-10-05',
+    comments: 'Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at ' +
+      '11:59pm (Pacific Time) Apply by this date to ensure full consideration by the ' +
+      'committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time)',
+  });
+  eq(ucla.reviewDate, '2026-10-05',
+    'a stored closing date that IS the text\'s own review date takes the suggested field');
+  eq(ucla.applyByDate, '2026-11-05', 'and the text\'s labelled Final date becomes the closing one');
+  eq(ucla.applyBy, 'November 5, 2026', 'shown as the line the filter agrees with');
+  eq(healReviewDate(ucla), ucla, 'settling the window is idempotent too');
+  eq(healReviewDate({ id: 'x', applyBy: 'October 5, 2026', applyByDate: '2026-10-05',
+    comments: 'Review of applications will begin on October 5, 2026.' }).applyByDate,
+    '2026-10-05',
+    'with no labelled final date the stored closing date is never touched');
+  eq(healReviewDate({ id: 'x', applyBy: 'Until filled.', applyByDate: '2026-09-01',
+    reviewDate: '2026-10-01' }).reviewDate, undefined,
+    'and one AFTER the final date contradicts it, wherever it was typed');
+  eq(healReviewDate({ id: 'x', applyBy: 'Until filled.', applyByDate: '2026-12-01',
+    reviewDate: '2026-10-01' }).reviewDate, '2026-10-01',
+    'an explicit suggested date before the final one is kept as given');
+
+  // ---- the mapping: the form's field, the legacy documents' prose
+  const dated = rowFromSubmission({ ...GOOD, reviewDate: '2025-10-15' });
+  eq(dated.reviewDate, '2025-10-15', 'a submission carries the form\'s suggested date');
+  eq(rowFromSubmission({ ...GOOD, reviewDate: '2025-11-30' }).reviewDate, undefined,
+    'unless it does not fall before the final date');
+  const legacy = rowFromSubmission({ ...GOOD, untilFilled: true, applyByDate: '',
+    applyByNote: 'First review of applications will begin on September 8, 2026.' });
+  eq(legacy.reviewDate, '2026-09-08',
+    'a document from before the field existed heals from its own prose');
+  eq(legacy.applyBy, 'Until filled.', 'and its apply-by line reads clean');
+
+  // the round trip — a healed row survives becoming a document and coming back
+  const back = rowFromSubmission(submissionFromRow(dated), {});
+  eq(back.reviewDate, dated.reviewDate, 'reviewDate survives the migration round trip');
+  eq(back.applyBy, dated.applyBy, 'with the apply-by line intact');
+
+  // ---- the sheet ingest: the same extraction at the same cell
+  const sheet = rowsFromTab(csvOf([
+    ['University', 'Country', 'Date', 'Deadline'],
+    ['Kansas School', 'USA', '6-Aug-26', 'Until filled. First review of applications ' +
+      'will begin on September 8, 2026, and will continue until the position has been filled.'],
+    ['Window School', 'USA', '21-Aug-26', 'Next review date: Monday, Oct 5, 2026. Apply by ' +
+      'this date to ensure full consideration. Final date: Thursday, Nov 5, 2026'],
+    ['Plain School', 'USA', '1-Sep-26', '15-Nov-26'],
+  ]), { minYear: 2026 });
+  const ks = sheet.rows.find((r) => r.institution === 'Kansas School');
+  eq(ks.reviewDate, '2026-09-08', 'a workbook cell yields the suggested apply-by');
+  eq(ks.applyBy, 'Until filled.', 'the line keeps only what the extraction did not capture');
+  eq(ks.applyByDate, '', 'and an open-ended search still carries no closing date');
+  const win = sheet.rows.find((r) => r.institution === 'Window School');
+  eq(win.reviewDate, '2026-10-05', 'an application-window cell yields the review date');
+  eq(win.applyByDate, '2026-11-05', 'AND its labelled final date');
+  eq(win.applyBy, 'November 5, 2026', 'shown the way the site writes dates');
+  const plain = sheet.rows.find((r) => r.institution === 'Plain School');
+  ok(!plain.reviewDate, 'a bare-date cell still reads exactly as it always did');
+  ok(!('reviewDate' in publicRow(plain)),
+    'and publishes no empty reviewDate key');
+  eq(plain.applyByDate, '2026-11-15', 'with its deadline untouched');
+
+  // ---- the review queue: the maintainer's box obeys the same rule
+  const rvRow = { id: 'r', institution: 'X University', school: '', unit: 'Ops',
+    department: 'Ops', applyBy: 'Until filled.', applyByDate: '' };
+  eq(applyEdits(rvRow, { reviewDate: '2026-10-01' }).reviewDate, '2026-10-01',
+    'the review card can set the suggested date');
+  eq(applyEdits({ ...rvRow, reviewDate: '2026-10-01' }, { reviewDate: '' }).reviewDate, '',
+    'and clear it');
+  eq(applyEdits({ ...rvRow, reviewDate: '2026-10-01' },
+    { applyByDate: '2026-09-15' }).reviewDate, '',
+    'a closing date moved before the suggested one drops the suggestion — ' +
+    'whichever box the maintainer touched');
+  eq(cleanEdit('reviewDate', '20/08/2026'), undefined, 'a non-ISO suggested date is refused');
+
+  // ---- the HigherEdJobs verify: a closing date arriving re-settles the pair
+  const link = detailsUrl('1234567');
+  const ad = { status: 'ok', applyByDate: '2026-08-20' };
+  const kept = applyVerified(
+    [{ id: 'a', adUrl: link, applyBy: 'Until filled.', applyByDate: '', reviewDate: '2026-08-01' }],
+    { ads: { 1234567: ad } }, {});
+  eq(kept.rows[0].reviewDate, '2026-08-01',
+    'a review date before the advertisement\'s deadline survives it arriving');
+  const dropped = applyVerified(
+    [{ id: 'b', adUrl: link, applyBy: 'Until filled.', applyByDate: '', reviewDate: '2026-09-01' }],
+    { ads: { 1234567: ad } }, {});
+  eq(dropped.rows[0].reviewDate, undefined,
+    'one on or after it is the contradiction healReviewDate always drops');
+}
+
+/* The pages, the form, the panel and the mailers all say the two dates the
+   same way — read from the sources, the discipline every other wiring test
+   here follows. */
+async function testTwoDeadlinesWiring() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+
+  const jobs = await read('jobs.html');
+  ok(jobs.includes("key: 'review'") && jobs.includes("label: 'Suggested deadline'"),
+    'jobs.html offers the Suggested deadline filter');
+  ok(jobs.includes("label: 'Final deadline'") && jobs.includes("derive: 'deadline'"),
+    'beside the Final deadline one');
+  ok(jobs.includes("key: 'deadline'"),
+    'whose URL key stays `deadline`, so every saved link keeps working');
+
+  for (const page of ['jobs.html', 'index.html', 'previous-markets.html']) {
+    const html = await read(page);
+    ok(html.includes("label: 'Suggested apply by'") && html.includes('OAList.longDate'),
+      `${page}: the card shows the suggested apply-by as a written-out date`);
+    ok(html.includes("label: 'Final apply by'") && !/label: 'Apply by'/.test(html),
+      `${page}: and the old single Apply-by row is gone`);
+  }
+
+  const list = await read('assets', 'oa-list.js');
+  ok(/review:\s*function\s*\(row\)/.test(list) && list.includes("'No review date'"),
+    'the engine derives the review buckets');
+  ok(list.includes('longDate: longDate'), 'and exports the date formatter the cards use');
+
+  const form = await read('post-a-job.html');
+  ok(form.includes('id="f-reviewDate"'), 'the posting form asks for the suggested date');
+  ok(form.includes('Suggested apply by') && form.includes('Final apply by'),
+    'in the words the cards use');
+  ok(!/<input type="date" id="f-reviewDate"[^>]*required/.test(form),
+    'and the suggested date is OPTIONAL — most postings name none');
+
+  const formJs = await read('assets', 'oa-jobform.js');
+  ok(formJs.includes('out.reviewDate'), 'the form submits it');
+  ok(formJs.includes("set('f-reviewDate', v.reviewDate)"),
+    'and an edit opens with it filled in');
+
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(/str\('reviewDate', 20\)/.test(rules),
+    'jobSubmissions accepts the field — a form key with no rule is a ' +
+    'permission-denied at save time');
+
+  // the alerts say both dates, in the same words, in the inbox and the preview
+  const mailer = await readFile(path.join(HERE, 'alerts-mailer.mjs'), 'utf8');
+  const preview = await read('assets', 'oa-alerts.js');
+  for (const [name, src] of [['alerts-mailer.mjs', mailer], ['oa-alerts.js', preview]]) {
+    ok(src.includes('suggested apply by') && src.includes('final apply by'),
+      `${name}: names the suggested and the final apply-by alike`);
+  }
+
+  // the model's own list carries the field where the served file writes it
+  ok(PUBLIC_FIELDS.includes('reviewDate'), 'reviewDate is a published field');
+  ok(!('reviewDate' in publicRow({ id: 'x', reviewDate: '' })),
+    'and an empty one is not written onto every row of the served file');
+}
+
 async function testReviewWiring() {
   /* The three places that must agree on what may be edited: the pure module,
      the browser panel, and the rules. A field in one and not the others is
@@ -5959,6 +6223,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testReviewBusiness();
   testReviewEdits();
   await testReviewWiring();
+  testTwoDeadlines();
+  await testTwoDeadlinesWiring();
   await testSubmissionNotices();
   process.exit(finish() ? 0 : 1);
 }
