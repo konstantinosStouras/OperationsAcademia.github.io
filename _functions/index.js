@@ -1,9 +1,14 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — instant publish.
 
-   TWO doorbells, one job each. When a job posting changes in Firestore, start
-   the GitHub build that publishes it, so a new posting or an edit reaches the
-   site in about a minute instead of waiting for the 20-minute schedule; and
+   THREE doorbells, one job each. When a job posting changes in Firestore,
+   start the GitHub build that publishes it, so a new posting or an edit
+   reaches the site in about a minute instead of waiting for the 20-minute
+   schedule; when a CANDIDATE PROFILE changes, start the same build — it runs
+   build-candidates.mjs too, and once the reveal date has passed a new profile
+   is public information the moment it is posted (before the date, the
+   build's own reveal gate still writes nothing, so ringing early costs
+   nothing and leaks nothing); and
    when the maintainer APPROVES a posting from the review queue, start the
    sheet read that publishes it, which is a different workflow because
    data/jobmarket.json holds the approved rows and only that job writes it.
@@ -51,6 +56,30 @@ const REVIEW_EVENT_TYPE = 'oa-jobreview-decided';
     itself for ever. */
 const CLIENT_STATES = ['queued', 'withdrawn', 'hidden'];
 
+/** One repository_dispatch POST — the whole of what every doorbell does once
+    it has decided to ring. Shared so the three cannot drift. */
+async function ring(eventType, payload, okLine) {
+  const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${GH_DISPATCH_TOKEN.value().trim()}`,
+      accept: 'application/vnd.github+json',
+      'content-type': 'application/json',
+      'user-agent': 'operations-academia-functions',
+    },
+    body: JSON.stringify({ event_type: eventType, client_payload: payload }),
+  });
+
+  if (res.status === 204) {
+    logger.info(okLine, payload);
+  } else {
+    // 401: the PAT is wrong or expired (fine-grained PATs default to 30-day
+    // expiry — set a long one deliberately). 404: the PAT cannot see the
+    // repo. Either way the scheduled build still publishes within 20 min.
+    logger.error('dispatch refused', { http: res.status, body: await res.text() });
+  }
+}
+
 exports.publishOnChange = onDocumentWritten(
   {
     document: 'jobSubmissions/{id}',
@@ -73,28 +102,37 @@ exports.publishOnChange = onDocumentWritten(
       return;
     }
 
-    const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${GH_DISPATCH_TOKEN.value().trim()}`,
-        accept: 'application/vnd.github+json',
-        'content-type': 'application/json',
-        'user-agent': 'operations-academia-functions',
-      },
-      body: JSON.stringify({
-        event_type: EVENT_TYPE,
-        client_payload: { id: event.params.id, status: after.status },
-      }),
-    });
+    await ring(EVENT_TYPE, { id: event.params.id, status: after.status },
+      'build dispatched');
+  });
 
-    if (res.status === 204) {
-      logger.info('build dispatched', { id: event.params.id, status: after.status });
-    } else {
-      // 401: the PAT is wrong or expired (fine-grained PATs default to 30-day
-      // expiry — set a long one deliberately). 404: the PAT cannot see the
-      // repo. Either way the scheduled build still publishes within 20 min.
-      logger.error('dispatch refused', { http: res.status, body: await res.text() });
+/* ------------------------------------------------------------- candidates */
+
+exports.publishOnCandidateChange = onDocumentWritten(
+  {
+    document: 'candidateSubmissions/{id}',
+    secrets: [GH_DISPATCH_TOKEN],
+    region: 'us-central1',
+    retry: false,
+  },
+  async (event) => {
+    const after = event.data && event.data.after && event.data.after.exists
+      ? event.data.after.data() : null;
+    if (!after) return;
+
+    /* Same guard, same loop it must not create: build-candidates stamps
+       'published' (and 'removed'), so only the states a client leaves ring
+       the bell. Before the reveal date this dispatch is a no-op by
+       construction — the build's revealGate writes no row — and after it, a
+       new profile (or an edit, or a withdrawal) is on the site in about a
+       minute, which is what makes "posted immediately once public" true. */
+    if (!CLIENT_STATES.includes(after.status)) {
+      logger.debug('skip: build bookkeeping', { status: after.status });
+      return;
     }
+
+    await ring(EVENT_TYPE, { id: event.params.id, status: after.status },
+      'candidate build dispatched');
   });
 
 /* --------------------------------------------------------------- approvals */
@@ -124,23 +162,6 @@ exports.publishOnReview = onDocumentWritten(
       return;
     }
 
-    const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${GH_DISPATCH_TOKEN.value().trim()}`,
-        accept: 'application/vnd.github+json',
-        'content-type': 'application/json',
-        'user-agent': 'operations-academia-functions',
-      },
-      body: JSON.stringify({
-        event_type: REVIEW_EVENT_TYPE,
-        client_payload: { id: event.params.id, status: after.status },
-      }),
-    });
-
-    if (res.status === 204) {
-      logger.info('sheet read dispatched', { id: event.params.id, status: after.status });
-    } else {
-      logger.error('dispatch refused', { http: res.status, body: await res.text() });
-    }
+    await ring(REVIEW_EVENT_TYPE, { id: event.params.id, status: after.status },
+      'sheet read dispatched');
   });

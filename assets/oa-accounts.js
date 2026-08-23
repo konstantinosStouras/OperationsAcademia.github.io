@@ -1631,7 +1631,7 @@
      dropping them would answer a merge with one enormous e-mail. */
   var ALERT_FIELDS = ['name', 'email', 'frequency', 'enabled', 'criteria',
                       'createdAt', 'lastSentAt', 'lastCheckedAt', 'lastUpdateDate',
-                      'lastSentCount'];
+                      'lastCandidateAt', 'lastSentCount'];
 
   /** "1 job posting" / "3 job postings". Written out rather than "(s)": these
       lines are the only account of what a merge did, and they should read as
