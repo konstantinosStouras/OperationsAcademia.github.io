@@ -98,7 +98,6 @@
       { v: 'Non-tenure track (teaching) position' },
       { v: 'Visiting Faculty (various levels)' }] },
     { key: 'country', label: 'Country', max: 80 },
-    { key: 'applyBy', label: 'Apply by', max: 400 },
     { key: 'applyByDate', label: 'Closing date', max: 10, type: 'date' },
     { key: 'comments', label: 'Comments', max: 1500, area: true },
     { key: 'adUrl', label: 'Link to the advert', max: 600 },
@@ -301,12 +300,15 @@
           return '<p class="oa-rv-field' + (f.area || f.list ? ' is-wide' : '') + '">' +
             '<label for="' + id + '">' + esc(f.label) + '</label>' +
             inputFor(f, fieldValue(doc, f.key), id) +
-            (f.place === 'unit'
-              /* What the two name boxes above will actually publish. The card
-                 shows one line, not two names, so the maintainer has to be able
-                 to see it — the posting form shows the poster the same thing
-                 (`#f-department-preview`). */
-              ? '<span class="oa-hint oa-rv-derived" data-derived aria-live="polite"></span>'
+            /* What the boxes above will actually PUBLISH. Two lines on a
+               posting are derived rather than typed — the school and the
+               department joined, and the closing date written out — and the
+               card shows the line, not its parts, so the maintainer has to be
+               able to read back what they are approving. The posting form
+               shows the poster the same thing (`#f-department-preview`). */
+            (f.place === 'unit' || f.key === 'applyByDate'
+              ? '<span class="oa-hint oa-rv-derived" aria-live="polite" data-derived="'
+                + (f.key === 'applyByDate' ? 'deadline' : 'place') + '"></span>'
               : '') +
             '</p>';
         }).join('') +
@@ -546,7 +548,7 @@
   function wirePlace(card) {
     var box = function (key) { return card.querySelector('[data-key="' + key + '"]'); };
     var inst = box('institution'), school = box('school'), unit = box('unit');
-    var derived = card.querySelector('[data-derived]');
+    var derived = card.querySelector('[data-derived="place"]');
     if (!inst || !school || !unit) return;
 
     function preview() {
@@ -562,6 +564,40 @@
     var handle = OAPlacePicker.wire(
       { institution: inst, school: school, unit: unit }, { onChange: preview });
     if (handle) mounted.push(handle);
+  }
+
+  /**
+   * The closing date, and the line the card will show for it.
+   *
+   * The browser twin of `settleDeadline` in _scraper/jobreview.mjs, and it only
+   * ever PREVIEWS what that function will derive — the card used to offer a box
+   * for the line as well, which let one posting reach the site with a closing
+   * date and no line at all and stopped the whole site publishing.
+   */
+  function wireDeadline(card) {
+    var date = card.querySelector('[data-key="applyByDate"]');
+    var derived = card.querySelector('[data-derived="deadline"]');
+    if (!date || !derived) return;
+
+    function preview() {
+      var v = String(date.value || '').trim();
+      derived.textContent = 'Published as: ' + (v ? longDate(v) : 'Until filled.');
+    }
+    date.addEventListener('input', preview);
+    date.addEventListener('change', preview);
+    preview();
+  }
+
+  /** "2026-10-05" as the card writes it. The browser twin of `longDate` in
+      _scraper/jobs-model.mjs — same month names, same shape, and built from
+      the date's own parts so a timezone can never move it a day. */
+  function longDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '').trim());
+    if (!m) return '';
+    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    var name = MONTHS[+m[2] - 1];
+    return name ? name + ' ' + (+m[3]) + ', ' + m[1] : '';
   }
 
   /* ------------------------------------------------- the user-added cards */
@@ -755,6 +791,7 @@
       /* After the card is IN the document: the picker wraps the input in place
          and measures where its list will fit. */
       wirePlace(card);
+      wireDeadline(card);
     });
 
     var all = $('oa-review-all');

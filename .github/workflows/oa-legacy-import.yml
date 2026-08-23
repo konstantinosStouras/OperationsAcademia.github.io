@@ -46,13 +46,13 @@ jobs:
       - name: Offline checks
         run: |
           node _scraper/import-legacy-tables.mjs --selftest
-          node _scraper/selftest.mjs
+          node _scraper/selftest.mjs --publishing
 
       - name: Read the sheets and rebuild the archives
         run: node _scraper/import-legacy-tables.mjs --fetch --out-dir data ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Re-check the files we are about to commit
-        run: node _scraper/selftest.mjs
+        run: node _scraper/selftest.mjs --publishing
 
       - name: Commit
         if: ${{ !inputs.dry_run }}
