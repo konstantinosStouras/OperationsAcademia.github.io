@@ -81,6 +81,19 @@ const STATUSES = [PENDING, APPROVED, REJECTED];
  * rules, because a document written before this change may still carry one —
  * see the fallback there.
  *
+ * `applyBy` is `derived` for exactly the same reason, and it took exactly the
+ * same course before anyone noticed. It is the LINE THE CARD SHOWS for the
+ * closing date, and the card offered it beside the date it is made of — two
+ * boxes for one fact, with nothing keeping them in step. One posting was
+ * approved with that box emptied and its closing date left behind, and
+ * `selftest.mjs` asserts over the served file that the date shown and the date
+ * filtered on are the same date: the sheet read went red, so the approved
+ * postings were never written to `data/jobmarket.json`, and the build went red
+ * behind it, so NOTHING published at all. `applyEdits` derives the line now
+ * (`settleDeadline`); the maintainer sets the closing date and reads the line
+ * back under it, and words that belong to a search with no closing date go in
+ * the comments, which are editable.
+ *
  * The labels are the posting form's own words (post-a-job.html), so the
  * maintainer reads the same question the poster answered.
  */
@@ -92,7 +105,7 @@ export const EDITABLE = [
   { key: 'type', label: 'Type of institution', max: 40, oneOf: TYPES },
   { key: 'levels', label: 'Entry level', list: true, oneOf: LEVELS },
   { key: 'country', label: 'Country', max: 80 },
-  { key: 'applyBy', label: 'Apply by', max: 400 },
+  { key: 'applyBy', label: 'Apply by', max: 400, derived: true },
   { key: 'applyByDate', label: 'Closing date', max: 10, date: true },
   { key: 'comments', label: 'Comments', max: 1500 },
   { key: 'adUrl', label: 'Link to the advert', max: 600, url: true },
@@ -229,14 +242,45 @@ export function applyEdits(row, edits) {
   const clean = cleanEdits(edits);
   const out = { ...row, ...clean };
 
-  if ('applyByDate' in clean && !('applyBy' in clean)) {
-    out.applyBy = clean.applyByDate ? longDate(clean.applyByDate) : 'Until filled.';
-  }
-  if ('applyBy' in clean && !('applyByDate' in clean)
-      && /until\s*filled|open\s*until|rolling/i.test(clean.applyBy)) {
+  /* A line the maintainer wrote that says the search stays open takes the date
+     with it — the one direction where their words, not the date, are the fact
+     being stated. Everything else is settled by `settleDeadline`. */
+  if ('applyBy' in clean && !('applyByDate' in clean) && OPEN_ENDED.test(clean.applyBy)) {
     out.applyByDate = '';
   }
-  return settlePlace(out, row);
+  return settlePlace(settleDeadline(out), row);
+}
+
+/** A line that says the search has no closing date rather than naming one. */
+const OPEN_ENDED = /until\s*filled|open\s*until|rolling/i;
+
+/**
+ * The closing date and the line the card shows for it, settled against each
+ * other — the deadline's `settlePlace`.
+ *
+ * THE LINE IS DERIVED, never edited. The jobs page buckets a posting as
+ * open-ended on the DATE being empty (assets/oa-list.js) while the card prints
+ * the LINE, so the two disagreeing is the worst of both: a date on the card
+ * that the Deadline filter does not know about, or the reverse. `selftest.mjs`
+ * says so over the whole served file — "the date shown and the date filtered
+ * on are the same date" — and a red selftest by design stops the sheet read
+ * and the build from committing ANYTHING.
+ *
+ * That is not hypothetical. One approved posting carried a closing date of
+ * 2026-10-05 and an EMPTY line, because the review card offered a box for each
+ * and emptying one left the other behind. Both workflows went red on it and
+ * 449 approved postings never reached the site.
+ *
+ * So: a date is shown as its own long form, and a row with no date says what
+ * it said about staying open, or "Until filled." — the ingest's own default
+ * for an empty deadline cell, and what the page's filter already calls it.
+ * Pure and idempotent, so every build may re-apply it.
+ */
+export function settleDeadline(row) {
+  const date = text(row.applyByDate, 10);
+  const line = text(row.applyBy, 400);
+  if (date) return { ...row, applyByDate: date, applyBy: longDate(date) };
+  return { ...row, applyByDate: '', applyBy: OPEN_ENDED.test(line) ? line : 'Until filled.' };
 }
 
 /**

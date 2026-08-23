@@ -3673,8 +3673,13 @@ for (const w of [320, 360, 390, 430]) {
     emailVerified: true, displayName: 'Someone Else', providerData: [] };
 
   const seedDocs = [
+    /* r1 carries THE SHAPE THAT STOPPED THE SITE: a closing date with an empty
+       line beside it, which is what the card produced when it offered a box
+       for each. The line is derived now, so the card must show what will be
+       published and must not offer a box to disagree with it. */
     { path: 'jobReviews/r1', data: { rowId: 'r1', status: 'pending', queuedAt: '2026-08-20',
-        row: { id: 'r1', year: 2026, posted: '2026-08-20', institution: 'Test University One', country: 'Ireland' } } },
+        row: { id: 'r1', year: 2026, posted: '2026-08-20', institution: 'Test University One',
+          country: 'Ireland', applyBy: '', applyByDate: '2026-10-05' } } },
     /* r2 carries a duplicate flag AND a business-school flag, both hostile:
        the sync writes these from data people typed (postings, the vocabulary
        built from them), so the banners must render them inert */
@@ -3863,6 +3868,26 @@ for (const w of [320, 360, 390, 430]) {
         'admin area: Use-it fills the School box with the name, as typed text');
       ok(await q.evaluate(() => !window.__xssbiz),
         'admin area: and filling it runs nothing either');
+    }
+
+    /* -- the deadline is ONE fact with one box, and the card says what it will
+          publish. Two boxes for it let a posting reach the site with a closing
+          date and no line, which failed the served-file guard and stopped both
+          the sheet read and the build from committing anything at all. -- */
+    {
+      const card = q.locator('#oa-review-list .oa-rv-card', { hasText: 'Test University One' });
+      eq(await card.locator('[data-key="applyBy"]').count(), 0,
+        'admin area: the card offers no box for the line the date is written into');
+      eq(await card.locator('[data-derived="deadline"]').textContent(),
+        'Published as: October 5, 2026',
+        'admin area: it shows the line that WILL be published, from the date beside it');
+      await card.locator('[data-key="applyByDate"]').fill('');
+      await q.waitForFunction(() => {
+        const el = document.querySelector('[data-derived="deadline"]');
+        return el && el.textContent === 'Published as: Until filled.';
+      }, null, { timeout: 10000 });
+      ok(true, 'admin area: and clearing the date says what the page already calls a posting without one');
+      await card.locator('[data-key="applyByDate"]').fill('2026-10-05');
     }
 
     /* -- the user-added tab: a dedicated, editable list, never a gate — the

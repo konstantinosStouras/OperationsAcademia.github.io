@@ -80,6 +80,37 @@ function eq(actual, expected, what) {
   ok(a === b, `${what}\n      expected ${b}\n      got      ${a}`);
 }
 
+/* --------------------------------------------- what a red selftest COSTS
+
+   This file has two jobs and they carry very different consequences.
+
+   As a PR CHECK (oa-checks.yml) it guards the repository: red means somebody
+   reads the failure and fixes it before merging, and nothing on the live site
+   moves either way.
+
+   As the BUILD'S RE-CHECK (oa-jobs-build.yml, oa-jobmarket-sheet.yml) it
+   guards what is about to be committed — and red there means the build
+   commits NOTHING. Not the offending row: nothing. Every posting the site
+   would have gained, every correction, every approval, held back until
+   somebody notices, with no error anywhere that a reader could see. CLAUDE.md
+   records that outcome twice, and it happened again the morning 449 approved
+   postings arrived: sixteen pairs of department names the workbook writes
+   short ("OM" beside "OM/SCM") took the whole site's data offline-stale.
+
+   So a guard that is about TIDINESS rather than about the data being right is
+   reported in that role instead of failing it. `--publishing` says which role
+   this run is in; the pairs are named in the log either way, and the PR check
+   still fails on them, which is where a naming duplicate is actually fixed. */
+const PUBLISHING = process.argv.includes('--publishing');
+
+/** A finding that must not stop the site publishing: fatal in the PR check,
+    a named warning in the build's re-check. */
+function tidy(list, what) {
+  if (!list.length || !PUBLISHING) { eq(list, [], what); return; }
+  pass++;
+  console.log(`::warning::${what} — ${list.length} to settle: ${list.join('; ')}`);
+}
+
 /* ------------------------------------------------------------- sanitisers */
 
 function testSanitisers() {
@@ -1096,12 +1127,27 @@ async function testCountries() {
     'a university with campuses in two countries has NO single answer, which is '
     + 'what makes correcting the others safe');
 
-  const jobRows = JSON.parse(await readFile(JOBS, 'utf8'));
-  const wrongCountry = jobRows
-    .filter((r) => byUni.has(SCHOOLS.institutionKey(r.institution || '')))
-    .filter((r) => r.country !== byUni.get(SCHOOLS.institutionKey(r.institution)))
-    .map((r) => `${r.id}: ${r.institution} says ${r.country || '(none)'}`);
-  eq(wrongCountry, [], 'data/jobs.json: every posting names the country its university is in');
+  /* BOTH FILES THE PIPELINE HEALS. data/jobmarket.json is served in its own
+     right — the workbook's postings, which the jobs page filters by country
+     like any other — and the sheet sync heals it on every read for the same
+     reason build-jobs heals the merged set. Asserted only over the files a
+     writer guarantees; the archive is country-audit.mjs's job. */
+  for (const file of ['jobs.json', 'jobmarket.json']) {
+    const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', file), 'utf8'));
+    const wrongCountry = rows
+      .filter((r) => byUni.has(SCHOOLS.institutionKey(r.institution || '')))
+      .filter((r) => r.country !== byUni.get(SCHOOLS.institutionKey(r.institution)))
+      .map((r) => `${r.id}: ${r.institution} says ${r.country || '(none)'}`);
+    eq(wrongCountry, [], `data/${file}: every posting names the country its university is in`);
+  }
+
+  /* and BOTH writers really do heal it — read from the source, because a heal
+     that only one of them applies is undone by whichever writes next */
+  for (const writer of ['build-jobs.mjs', 'sync-jobmarket-sheet.mjs']) {
+    const src = await readFile(path.join(HERE, writer), 'utf8');
+    ok(/healCountry\(/.test(src) && /campusCountries\(/.test(src),
+      `${writer} heals the country against the Universities directory`);
+  }
 
   // the heal itself: corrects a disagreement, and is otherwise untouched
   const wrongRow = { institution: 'McGill University', country: 'Greece' };
@@ -1946,6 +1992,19 @@ async function testNoDuplicateKeys() {
   }
 }
 
+/** A university's entry in the built vocabulary, found by its own IDENTITY.
+    `byUniversity` is keyed by the spelling the site publishes most, and that
+    moves with the postings — so anything asserting about a PLACE has to ask
+    `institutionKey`, the same fold the vocabulary groups by. */
+function uniEntry(vocab, name) {
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  const want = S.institutionKey(name);
+  const by = (vocab && vocab.byUniversity) || {};
+  if (by[name]) return by[name];
+  for (const [k, e] of Object.entries(by)) if (S.institutionKey(k) === want) return e;
+  return null;
+}
+
 async function testScopedUnits() {
   const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
 
@@ -1995,6 +2054,14 @@ async function testScopedUnits() {
 
   const v = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
 
+  /* The lookup itself, pinned: a ruling names a university one way and the
+     vocabulary files it under whichever spelling has the most postings. */
+  eq(uniEntry({ byUniversity: { 'University of Texas at Dallas': { bySchool: { A: [] } } } },
+    'The University of Texas at Dallas').bySchool.A, [],
+  'a university is found however the vocabulary happens to spell it today');
+  eq(uniEntry({ byUniversity: {} }, 'Nowhere University'), null,
+    'and a university the vocabulary does not carry is simply absent');
+
   for (const [uni, school, variants, name] of RULED) {
     for (const variant of variants) {
       eq(S.canonUnit(variant, uni), name, `${uni}: "${variant}" publishes as "${name}"`);
@@ -2004,8 +2071,17 @@ async function testScopedUnits() {
 
     /* the school really is the one the owner named, and really is the only
        school at that university carrying the name — which is what makes a
-       table keyed by UNIVERSITY safe here */
-    const bySchool = v.byUniversity[uni] && v.byUniversity[uni].bySchool;
+       table keyed by UNIVERSITY safe here.
+
+       LOOKED UP BY THE UNIVERSITY'S KEY, not by the name this table writes.
+       `byUniversity` is keyed by whichever SPELLING the site publishes most,
+       which `pickForm` calls "a tie-break, not a policy" — so one new posting
+       under "University of Texas at Dallas" moved the entry off "The
+       University of Texas at Dallas" and this guard failed on a vocabulary
+       with nothing wrong in it, while the build it was re-checking committed
+       nothing. The ruling is about a PLACE; the spelling it is filed under is
+       not part of it. */
+    const bySchool = uniEntry(v, uni) && uniEntry(v, uni).bySchool;
     ok(bySchool && Array.isArray(bySchool[school]),
       `${uni} lists ${school}`);
     if (bySchool) {
@@ -2173,7 +2249,8 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
      look like one submission. Pinned against the SERVED data, not just the
      function, because that is where the loss would show. */
   const jobs = await read('jobs.json');
-  for (const id of ['2026-university-of-houston-20250923', '2026-university-of-houston-20250923-2']) {
+  const HOUSTON_PAIR = ['2026-university-of-houston-20250923', '2026-university-of-houston-20250923-2'];
+  for (const id of HOUSTON_PAIR) {
     ok(jobs.some((r) => r.id === id), `data/jobs.json still carries ${id}`);
   }
   /* Scoped to the two postings this is ABOUT, and deliberately not to every
@@ -2184,8 +2261,14 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
      which stops the commit and therefore stops publishing EVERYTHING. That the
      names themselves are canonical is already asserted over every row in the
      file, above; this says what this pair says. */
-  eq([...new Set(jobs.filter((r) => /houston-20250923/.test(r.id)).map((r) => r.department))],
-    ['C. T. Bauer College of Business, Department of Decision and Information Sciences'],
+  /* NAMED, not matched. Keyed on the date it caught every Houston row of that
+     day, and the workbook later contributed three more — legitimate postings
+     whose department the sheet writes as "SCM/OM" — so a guard about TWO rows
+     failed on rows it was never about, and stopped the site publishing. The
+     two ids are the two postings; nothing else is this guard's business. */
+  eq(HOUSTON_PAIR.map((id) => (jobs.find((r) => r.id === id) || {}).department),
+    HOUSTON_PAIR.map(() =>
+      'C. T. Bauer College of Business, Department of Decision and Information Sciences'),
     'and both of that day\'s Houston postings name their college and department the one way');
 
   /* the tracking sheet's own file, which build-jobs republishes verbatim */
@@ -2434,7 +2517,7 @@ async function testVocabFile() {
       dupSchools.push(`${u}: ${a} / ${b}`);
     }
   }
-  eq(dupSchools, [], 'and no university offers one school under two names');
+  tidy(dupSchools, 'and no university offers one school under two names');
 
   /* THE SAME, ONE LEVEL DOWN: two names for one department under one school.
      Each is a judgement only the owner can make — "Management" and
@@ -2444,8 +2527,40 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
-    /* empty: every pair the sweep has found has been ruled on */
+    /* THE WORKBOOK WRITES A FIELD WHERE THE SITE ASKS FOR A DEPARTMENT. Its
+       hiring-unit column holds what the post is IN — "OM", "BA", "SCM/OM",
+       "IS/BA" — and the pipeline publishes that as the department name, so one
+       department arrives under an acronym, its expansion and every ordering of
+       a slash pair. Fourteen such pairs came in with one batch of approvals.
+       They are the owner's to rule on (the answer to each goes in
+       SCOPED_UNIT_ALIASES), and the real remedy is upstream: name the
+       department in the sheet, or teach the ingest that a field code is not a
+       department. Listed here so they are not silently tolerated. */
+    'Auburn University|BA|BA/IS',
+    'Auburn University|BA|IS/BA',
+    'Auburn University|BA/IS|IS/BA',
+    'Chicago Booth|OM|OM/SCM',
+    'Eastern New Mexico University|OM|Production and OM',
+    'Middle Georgia State University|Management|Supply Chain Management',
+    'Texas State University|Analytics|IS and Analytics',
+    'Texas State University|IS|IS and Analytics',
+    'University of California, Berkeley|IEOR|IEOR, decision analytics',
+    'University of Houston|OM|OM/IS',
+    'University of Houston|OM|OM/SCM',
+    'University of Houston|OM|SCM/OM',
+    'University of Houston|OM/SCM|SCM/OM',
+    'University of Texas at Dallas|OM|OM/IS (Healthcare Management)',
   ]);
+  /* KEYED BY THE UNIVERSITY'S IDENTITY, not by the spelling the vocabulary
+     files it under today — that is `pickForm`'s tie-break and it moves with
+     the postings, which is exactly how the UTD ruling above stopped matching
+     the morning one new posting dropped a "The". */
+  const awaitingKey = (u, a, b) => `${S.institutionKey(u)}|${a}|${b}`;
+  const awaiting = new Map();
+  for (const entry of AWAITING_OWNER) {
+    const [u, a, b] = entry.split('|');
+    awaiting.set(awaitingKey(u, a, b), entry);
+  }
   const dupUnits = [], openUnits = [], seenAwaiting = new Set();
   for (const [u, e] of Object.entries(v.byUniversity)) {
     for (const list of Object.values(e.bySchool)) {
@@ -2454,14 +2569,14 @@ async function testVocabFile() {
            depends on the order the vocabulary lists them, which moves as
            postings arrive, and an entry must not stop matching because two
            names swapped places */
-        const key = AWAITING_OWNER.has(`${u}|${a}|${b}`) ? `${u}|${a}|${b}`
-          : (AWAITING_OWNER.has(`${u}|${b}|${a}`) ? `${u}|${b}|${a}` : '');
+        const key = awaiting.has(awaitingKey(u, a, b)) ? awaitingKey(u, a, b)
+          : (awaiting.has(awaitingKey(u, b, a)) ? awaitingKey(u, b, a) : '');
         if (key) { openUnits.push(`${u}: ${a} / ${b}`); seenAwaiting.add(key); }
         else dupUnits.push(`${u}: ${a} / ${b}`);
       }
     }
   }
-  eq(dupUnits, [], 'and no school offers one department under two names, beyond the pairs awaiting a decision');
+  tidy(dupUnits, 'and no school offers one department under two names, beyond the pairs awaiting a decision');
   /* An entry whose pair is NOT in the committed vocabulary is reported, never
      failed. It has to be listable AHEAD of the pair's arrival: the posting
      that introduces the pair sits in Firestore until the next GREEN build,
@@ -2471,9 +2586,9 @@ async function testVocabFile() {
      the only order that works, so the window is allowed and NAMED; an entry
      still on this report after its pair has shipped (or been settled) is
      stale and should be removed. */
-  for (const k of AWAITING_OWNER) {
+  for (const [k, entry] of awaiting) {
     if (!seenAwaiting.has(k)) {
-      console.log('  (awaiting-owner entry not (yet) in the committed vocabulary: ' + k + ')');
+      console.log('  (awaiting-owner entry not (yet) in the committed vocabulary: ' + entry + ')');
     }
   }
   if (process.argv.includes('--open')) {
@@ -4398,6 +4513,11 @@ async function testMirrorLifecycle() {
   }
 }
 
+/** What `rowFromSubmission` will not publish a posting without — the same
+    minimum a card needs to be worth rendering (jobs-model.mjs). `department`
+    is the school and the unit joined, so a row that names neither has none. */
+const SUBMISSION_NEEDS = ['institution', 'department', 'country', 'type', 'levels'];
+
 async function runMirrorLifecycle() {
   const now = new Date('2026-08-18T00:00:00Z');
   const mk = (id, over = {}) => ({
@@ -4620,16 +4740,41 @@ async function testSheetMirrors() {
   eq(back.applyBy, row.applyBy, 'including the deadline line, rebuilt from its parts');
 
   /* Every committed workbook posting must round-trip, or taking one over would
-     quietly rewrite it. The ONE that does not is the honest case: a row whose
-     `type` the workbook left blank cannot become a submission at all, so it
-     stays the workbook's until the maintainer fills that in — which the form
-     requires them to do. */
+     quietly rewrite it. The ones that do not are the honest case, and it is
+     wider than the `type` it was first written for: the workbook may leave ANY
+     of the fields a submission needs blank — a row with no entry level, no
+     country, no hiring unit at all — and the site publishes those, because the
+     sheet's own row is what it publishes. A DOCUMENT cannot carry them, so
+     such a posting stays the workbook's until the maintainer fills the gap in,
+     which the posting form requires of them before it will save. Keyed on what
+     is actually missing rather than on `type` alone: three legitimate postings
+     (Leeds, McMaster, Caldwell) arrived short of a different field each and
+     failed a guard that only knew about one, which stopped the build
+     committing and took the whole site's data with it. */
+  /* …and the list is pinned against the function rather than kept in step by
+     hand: drop any one of these from a row that otherwise publishes and it
+     must stop publishing, or the exemption above would quietly excuse a row
+     the mirror really does break. */
+  const whole = {
+    ...sheetMirrorDoc(row, { now }), status: 'queued',
+    school: 'Woodbury School of Business', unit: 'Operations & SCM', department: '',
+  };
+  ok(rowFromSubmission(whole, { now }), 'a row with everything a submission needs publishes');
+  for (const f of SUBMISSION_NEEDS) {
+    const less = { ...whole };
+    if (f === 'department') { less.school = ''; less.unit = ''; less.department = ''; }
+    else less[f] = Array.isArray(whole[f]) ? [] : '';
+    ok(!rowFromSubmission(less, { now }),
+      `and without a ${f} it does not — which is what the exemption is keyed on`);
+  }
+
   const committed = JSON.parse(await readFile(JOBS, 'utf8')).filter((r) => r.source === SHEET_SOURCE);
   for (const r of committed) {
     const m = sheetMirrorDoc(r, { now });
     const out = rowFromSubmission({ ...m, status: 'queued' }, { now });
-    if (!r.type) {
-      ok(!out, `sheet row ${r.id}: a posting the workbook left untyped cannot publish from a document`);
+    const short = SUBMISSION_NEEDS.find((f) => !(Array.isArray(r[f]) ? r[f].length : r[f]));
+    if (short) {
+      ok(!out, `sheet row ${r.id}: a posting the workbook left without a ${short} cannot publish from a document`);
       continue;
     }
     ok(out, `sheet row ${r.id}: its mirror publishes`);
@@ -5225,8 +5370,37 @@ function testReviewEdits() {
     { applyBy: 'Until filled.' });
   eq(opened.applyByDate, '', 'saying "until filled" clears the date');
 
+  /* AND THE LINE IS DERIVED, never typed. A line the maintainer wrote used to
+     win over the date beside it, which is a trap rather than a courtesy: the
+     served file must satisfy "the date shown and the date filtered on are the
+     same date", so "By 30 September" against a closing date of 2026-09-30
+     would fail the sheet read AND the build, and neither commits on a failure.
+     One posting proved it — approved with the line emptied and the date left
+     behind, taking 449 approved postings off the site with it. */
   const both = applyEdits(RV_ROW, { applyByDate: '2026-09-30', applyBy: 'By 30 September' });
-  eq(both.applyBy, 'By 30 September', 'but an explicit line the maintainer typed wins');
+  eq(both.applyBy, longDate('2026-09-30'), 'a line typed beside a date is derived from the date');
+
+  const cleared = applyEdits({ ...RV_ROW, applyBy: 'September 30, 2026', applyByDate: '2026-09-30' },
+    { applyBy: '' });
+  eq(cleared.applyBy, longDate('2026-09-30'),
+    'and emptying the line rebuilds it rather than leaving the date unshown');
+  eq(cleared.applyByDate, '2026-09-30', 'the date it is filtered on is untouched');
+
+  const undated = applyEdits({ ...RV_ROW, applyBy: 'September 30, 2026', applyByDate: '2026-09-30' },
+    { applyByDate: '' });
+  eq(undated.applyBy, 'Until filled.',
+    'clearing the date says what the page already calls a posting without one');
+
+  /* Every combination leaves the pair coherent, which is the property the
+     served-file guard actually asserts — pinned here over the model itself so
+     a future edit path cannot reintroduce the shape. */
+  for (const edit of [{}, { applyBy: '' }, { applyByDate: '' }, { applyBy: 'nonsense' },
+    { applyByDate: '2027-01-09' }, { applyBy: 'Open until filled' },
+    { applyBy: 'x', applyByDate: '2027-01-09' }]) {
+    const out = applyEdits({ ...RV_ROW, applyBy: 'September 30, 2026', applyByDate: '2026-09-30' }, edit);
+    ok(out.applyByDate ? out.applyBy === longDate(out.applyByDate) : !!out.applyBy,
+      `edit ${JSON.stringify(edit)}: the date shown and the date filtered on stay one date`);
+  }
 
   eq(applyEdits(RV_ROW, {}).institution, 'Example University',
     'an approved posting with no edits is the sheet row itself');
@@ -5265,6 +5439,8 @@ async function testReviewWiring() {
   }
   ok(!offered.includes('department'),
     'and the card does not offer the derived line beside the two names it is made of');
+  ok(!offered.includes('applyBy'),
+    'nor the deadline line beside the date it is written from');
 
   /* The option lists are the site's own vocabularies, not a second copy typed
      into the browser. LEVELS is five; the panel used to offer seven, two of
@@ -5391,6 +5567,28 @@ async function testReviewWiring() {
     'and so is the build, which is what publishes an approval');
   ok(/npm install[^\n]*firebase-admin/.test(buildWf),
     'with the same client');
+
+  /* WHICH ROLE EACH RUN IS IN. A workflow that writes data/ commits nothing on
+     a red selftest, so every selftest it runs — the precondition as well as
+     the re-check — must be in the publishing role, where a tidiness finding is
+     reported instead of stopping the site's data. The PR check is the one that
+     must NOT be, because that is where a naming duplicate is meant to be
+     caught and fixed. Pinned in both directions: the flag missing from a
+     writer is the outage this file records, and the flag CREEPING INTO the PR
+     check would leave nothing enforcing it anywhere. */
+  const WRITERS = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
+    'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml'];
+  for (const name of WRITERS) {
+    const src = await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8');
+    const runs = [...src.matchAll(/node _scraper\/selftest\.mjs([^\n]*)/g)].map((m) => m[1]);
+    ok(runs.length > 0, `${name} re-checks what it is about to commit`);
+    ok(runs.every((rest) => rest.includes('--publishing')),
+      `and does it in the publishing role, where a naming duplicate cannot stop the site`);
+  }
+  const prCheck = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-checks.yml'), 'utf8');
+  ok(/node _scraper\/selftest\.mjs\s*$/m.test(prCheck),
+    'while the PR check runs it strict — the one place a naming duplicate is meant to fail');
 
   const wf = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-jobreview-mail.yml'), 'utf8');
