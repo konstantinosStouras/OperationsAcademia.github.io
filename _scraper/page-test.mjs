@@ -3879,6 +3879,44 @@ for (const w of [320, 360, 390, 430]) {
         'admin area: and filling it runs nothing either');
     }
 
+    /* -- ONE SIZE FOR THE CARD'S CONTROLS. `.oa-rv-field` named input, select
+          and textarea together and set 13px on all three, but
+          `.oa-form input[type='text']` outranks a plain `.oa-rv-field input`,
+          so the typed boxes rendered at the site's 15px while the select and
+          the textarea sat at 13px beside them — which is what the maintainer
+          saw. Measured from what the browser paints, because that is the only
+          place the cascade's answer is visible. -- */
+    {
+      const sizes = await q.evaluate(() => {
+        const card = document.querySelector('#oa-review-list .oa-rv-card');
+        const out = {};
+        for (const el of card.querySelectorAll('.oa-rv-field input:not([type="checkbox"]), .oa-rv-field select, .oa-rv-field textarea')) {
+          const key = el.getAttribute('data-key') || el.tagName.toLowerCase();
+          out[key] = getComputedStyle(el).fontSize;
+        }
+        return out;
+      });
+      const seen = [...new Set(Object.values(sizes))];
+      eq(seen.length, 1,
+        'admin area: every control on the review card is one font size — ' + JSON.stringify(sizes));
+
+      /* and the same height, so the two columns read as one grid rather than
+         as boxes of two builds. The date box carries a browser-drawn picker,
+         so it is allowed its own pixel or two. */
+      const heights = await q.evaluate(() => {
+        const card = document.querySelector('#oa-review-list .oa-rv-card');
+        const out = {};
+        for (const el of card.querySelectorAll('.oa-rv-field input:not([type="checkbox"]), .oa-rv-field select')) {
+          out[el.getAttribute('data-key') || el.tagName.toLowerCase()] =
+            Math.round(el.getBoundingClientRect().height);
+        }
+        return out;
+      });
+      const hs = Object.values(heights);
+      ok(Math.max(...hs) - Math.min(...hs) <= 2,
+        'admin area: and one height — ' + JSON.stringify(heights));
+    }
+
     /* -- the deadline is ONE fact with one box, and the card says what it will
           publish. Two boxes for it let a posting reach the site with a closing
           date and no line, which failed the served-file guard and stopped both

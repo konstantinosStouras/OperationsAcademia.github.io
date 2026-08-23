@@ -1744,16 +1744,31 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: var(--oa-muted, #5a5f6b);
 }
 
+/* ONE SIZE FOR THE THREE CONTROLS, which this block used to promise and only
+   ever half kept. It named input, select and textarea together and set 13px on
+   all three — but `.oa-form input[type='text']` (a class, an ATTRIBUTE and a
+   type) outranks `.oa-rv-field input` (a class and a type), so every typed box
+   on the card took the site's own form styling at 15px while the select and
+   the textarea sat at 13px beside them. Measured: 15px/40px tall against
+   13px/34px, which is what the maintainer saw and asked about.
+
+   So the card no longer sets a size or a padding at all: `.oa-form` styles all
+   three, exactly as it styles the posting form the maintainer is correcting a
+   posting to match. Nothing is added to outrank anything — the override that
+   could only ever reach two of the three controls is simply gone. */
 .oa-rv-field input,
 .oa-rv-field select,
 .oa-rv-field textarea {
   width: 100%;
   font: inherit;
-  font-size: 13px;
-  padding: 6px 8px;
   border: 1px solid var(--oa-line, #d7dae0);
   border-radius: 6px;
-  background: var(--oa-bg, var(--bg-2, #fff));
+  /* background-COLOR, never the shorthand: `.oa-form select` draws the
+     dropdown chevron as a background-image (the browser's own is turned off
+     with appearance:none), and a shorthand here blanks it — which is the very
+     trap the note on that rule records about main.css. The card was doing it,
+     so its one select had no arrow and did not read as a dropdown at all. */
+  background-color: var(--oa-bg, var(--bg-2, #fff));
   color: inherit;
 }
 

@@ -1613,6 +1613,26 @@ Two traps this hit, both worth knowing before adding a rule:
 * **`--on-brand`, not `#fff`, on anything filled with `var(--brand)`.** The
   checkbox tick and radio dot were fixed white on a brand-filled box, and
   `--brand` is LIGHT in dark theme — a white tick on a near-white box.
+* **One rule naming input, select and textarea can still reach only two of
+  them.** `.oa-rv-field` (the review card) set 13px on all three, but
+  `.oa-form input[type='text']` — a class, an ATTRIBUTE and a type — outranks
+  `.oa-rv-field input`, which has a class and a type. So every typed box on the
+  card took the site's form styling at 15px while the select and the textarea
+  sat at 13px beside them, measured at 40px against 34px tall; the owner saw it
+  and asked why the fonts were smaller. The card sets no size or padding at all
+  now — `.oa-form` styles all three, exactly as it styles the posting form the
+  maintainer is correcting a posting to match — because the fix for an override
+  that can only reach part of what it names is usually to DELETE it, not to
+  out-specify it. **Writing a font-size or a padding for a form control means
+  measuring all three kinds**, which `page-test.mjs` now does on that card.
+* **`background` is a shorthand and blanks a background-IMAGE.** The same rule
+  painted the card's controls with `background:`, which wipes the chevron
+  `.oa-form select` draws (the browser's own is off under `appearance: none`).
+  It is `background-color` there now. Worth knowing: `body.v3 .oa-form select`
+  in v3.css does the same thing at a higher specificity, so **no select on the
+  v3 site draws that chevron** — a pre-existing, site-wide condition, and
+  restoring it needs a theme-aware arrow (the vendored SVG is a fixed `#555`,
+  which would be near-invisible on dark).
 
 **`page-test.mjs` measures it, and measuring is the point.** It walks one page
 per kind of chrome in BOTH themes and reads what the browser actually paints,
