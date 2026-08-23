@@ -932,6 +932,76 @@ College, The City University of New York (CUNY)" is deliberately published
 whole. The directory lists one university under several names; the picker must
 not offer half its schools from one entry and half from the other.
 
+**A slight respelling is offered a MERGE before it can become a second
+entry.** The picker's "new name" row is what lets a school that opens a
+department tomorrow stay postable — and it is also how one place quietly
+becomes two ("Operation Managment" beside "Operations Management", each with
+half the postings). So when the typed name is probably a respelling of one the
+site already lists, the picker draws **"did you mean" rows pointing at the
+existing entry directly above the add-new row** (`oa-combo.js`, fed by
+`similar()` closures in `oa-place-picker.js`). A suggestion, never a
+restriction: the add row stays, because only the poster knows whether their
+department genuinely is new. The judgement is ONE function —
+`similarNames(a, b, {university, fuzzy})` in `assets/oa-schools.js` — with two
+strictnesses that must not be swapped: the STRICT tier (substring either way,
+or identical distinctive-word sets) is what the selftest's duplicate sweep
+holds the built vocabulary to, so it must never fire on two genuinely
+different places; the FUZZY tier adds singular/plural, a one-letter slip in a
+long word, and containment ("Management" inside "Operations Management") —
+right for a waveable suggestion, and exactly what a build-failing assertion
+must not use. The selftest's `samePair` reads the module, so the guard at the
+door and the audit behind it cannot disagree.
+
+**The Type of institution follows the chosen names.** `typeGuess()` in
+`oa-schools.js` is the browser twin of the pipeline's `typeFromNames`
+(`jobmarket-sheet.mjs`) — the selftest pins the two against each other over
+one fixture list — and the cascade (which now takes the `f-type` select as an
+optional fourth field) fills it the moment the names state the answer: "Lee
+Business School" is a Business School, "Clarkson University" a University,
+INSEAD states neither and fills nothing. Only ever an EMPTY select or its own
+earlier guess (`data-oa-auto-type`); a value the poster picked is never
+overruled, exactly like the three names.
+
+**A name the site publishes WRONGLY can be corrected by the people who know
+— and nothing renames itself.** `oa-schools.js`'s alias tables fix a wrong
+spelling permanently, but only the maintainer can edit code. A signed-in
+poster can now press **"Suggest a correction"** on `post-a-job.html`
+(`assets/oa-namefix.js` → Firestore `nameFixes`, `status` pinned to
+`'pending'` by the rules; `from` must be a name the vocabulary actually
+offers, because a correction renames something that exists — a NEW place is
+simply typed into the posting). The maintainer decides on `admin-area.html`
+(a fifth queue, counted in the "Admin area N" badge; the card shows what the
+target will PUBLISH as, and the correction itself can be corrected before
+approving). The jobs build then reads the APPROVED ones, writes them into the
+served **`data/name-fixes.json`** (names only — nothing under `data/` may
+carry an e-mail) and applies them through `fixPlace()`:
+
+* **an overlay AFTER canon, never a second canon.** `normalizeFixes()` puts
+  every TARGET through `canon*()` first, so a fixed row is still canonical
+  under the built-in rules and the "every posting names its place the one
+  way" guard stays green without the selftest knowing a fix exists;
+* applied at every point the build touches a row: fresh submissions
+  (`rowFromSubmission`), carried orphans (`healPlace`), the tracking sheet's
+  rows at publish time (their **ids are put back** — a sheet id is
+  jobId-shaped and it is the join key to the workbook, the review queue, the
+  mirror and the Edit button), and the vocabulary (`buildVocab`), so the
+  pickers stop offering the old spelling on the next build;
+* the browser loads the same file and applies the same two functions
+  (`oa-place-picker.js`, and `collect()` in `oa-jobform.js`), so the poster's
+  preview and the published posting cannot disagree;
+* **an unreachable queue changes nothing**: the committed file stands, in
+  both directions — no fix nobody approved, and no regression of a fix
+  already in force;
+* the FROZEN ARCHIVES are deliberately not touched — `rowOverrides` and
+  `--heal-names` remain their repair paths — and a fix that keeps earning its
+  keep is **promoted into the alias tables**, which reach everything.
+
+`DOC_KEYS`/`ADMIN_EDIT_KEYS` in `oa-namefix.js` are pinned against the rules'
+`hasOnly()` lists both ways, and against what the form and the panel actually
+write, read from the source (`testNameFixes` in `selftest.mjs`). **Inert until
+the rules are redeployed**: `firebase deploy --only firestore:rules --project
+operations-academia`.
+
 **Three names already in three columns go through `canonColumns()`, never
 `canonPlace()`.** `canonPlace` takes apart a value that names more than one
 thing — right for the archive's single column, and a guess anywhere else. Over

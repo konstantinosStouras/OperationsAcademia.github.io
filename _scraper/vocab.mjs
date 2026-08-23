@@ -265,7 +265,11 @@ function formOf(t, v) {
  * "Management Science" instead of a second one — and it is idempotent, so
  * doing it to a posting again costs nothing.
  */
-function partOf(r, w) {
+function partOf(r, w, fixes = []) {
+  /* the approved name corrections (data/name-fixes.json), applied AFTER canon
+     exactly as every row ingest applies them — so the option lists offer the
+     corrected spelling and the old one stops being offered at all */
+  const overlay = (place) => (fixes.length ? SCHOOLS.fixPlace(place, fixes) : place);
   /* A DIRECTORY row already has its three names in three columns (its
      department sits in `department`, there being no `unit`), so each is
      canonicalised ON ITS OWN.
@@ -284,7 +288,7 @@ function partOf(r, w) {
     let unit = tidy(r.department);
     const lead = unit.split(',')[0];
     if (r.school && nameFold(lead) === nameFold(r.school)) unit = tidy(unit.slice(lead.length + 1));
-    const place = canonColumns({ institution: r.institution, school: r.school, unit });
+    const place = overlay(canonColumns({ institution: r.institution, school: r.school, unit }));
     return { institution: place.institution, school: place.school, unit: place.unit, w };
   }
 
@@ -294,7 +298,8 @@ function partOf(r, w) {
   const split = (r.school !== undefined || r.unit !== undefined)
     ? { school: tidy(r.school), unit: tidy(r.unit) }
     : splitDepartment(r.department);
-  const place = canonPlace({ institution: r.institution, school: split.school, unit: split.unit });
+  const place = overlay(
+    canonPlace({ institution: r.institution, school: split.school, unit: split.unit }));
   return { institution: place.institution, school: place.school, unit: place.unit, w };
 }
 
@@ -325,13 +330,13 @@ function fromPairs(pairs) {
  * scope it is offered in: a university's own list keeps that university's
  * spelling, which is not always the one the whole site uses most.
  */
-export function buildVocab(rows, { generated = '', directory = [] } = {}) {
+export function buildVocab(rows, { generated = '', directory = [], fixes = [] } = {}) {
   // a directory that is not a list of rows is no directory at all, and must
   // not take the build down on its way to being reported
   const dir = Array.isArray(directory) ? directory : [];
   const parts = [
-    ...rows.map((r) => partOf(r, 1)),
-    ...dir.map((r) => partOf(r, 0)),
+    ...rows.map((r) => partOf(r, 1, fixes)),
+    ...dir.map((r) => partOf(r, 0, fixes)),
   ];
 
   const universities = tally(parts.map((p) => ({ v: p.institution, w: p.w })), uniKeyOf);

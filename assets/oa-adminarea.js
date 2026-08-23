@@ -139,7 +139,8 @@
         countOf(db.collection(OAFB.col.feedback).where('status', '==', 'open'))['catch'](nul),
         pendingNews(db).then(function (p) {
           return p === null ? null : p.length;
-        })['catch'](nul)
+        })['catch'](nul),
+        countOf(db.collection('nameFixes').where('status', '==', 'pending'))['catch'](nul)
       ]);
     }).then(function (r) {
       var total = 0, known = 0;
@@ -151,7 +152,7 @@
          one that is not (the same rule the menu counts follow). A PARTIAL
          answer still sums what is known — each queue is independent, and
          withholding three known numbers over one refused read helps nobody. */
-      return { jobs: r[0], candidates: r[1], feedback: r[2], news: r[3],
+      return { jobs: r[0], candidates: r[1], feedback: r[2], news: r[3], names: r[4],
                total: known ? total : null };
     });
   }
@@ -162,7 +163,8 @@
     { key: 'jobs', label: 'Job postings to review', to: '#oa-review' },
     { key: 'candidates', label: 'Candidate profiles held', to: '#oa-aa-cands' },
     { key: 'feedback', label: 'Open feedback tickets', to: '#oa-inbox' },
-    { key: 'news', label: 'Updates awaiting publication', to: '#oa-aa-news' }
+    { key: 'news', label: 'Updates awaiting publication', to: '#oa-aa-news' },
+    { key: 'names', label: 'Name corrections suggested', to: '#oa-aa-names' }
   ];
 
   function paintTiles(c) {
@@ -380,6 +382,147 @@
     });
   }
 
+  /* ------------------------------------------------- name-fix suggestions
+
+     Posters' corrections to published university / school / department names
+     (assets/oa-namefix.js -> Firestore `nameFixes`). NOTHING RENAMES ITSELF:
+     a suggestion waits here until it is approved, and the data build then
+     writes the approved set into data/name-fixes.json and renames every
+     posting and vocabulary entry carrying the old spelling — so Approve is a
+     rename across the whole live dataset, within about an hour.
+
+     Deciding is never a one-way door (the newsOverrides rule): a decided
+     suggestion stays on the list under its own heading with the way back —
+     re-open, or flip the decision — because a queue whose entries vanish can
+     only be repaired from the Firestore console. */
+
+  var FIX_KIND = { institution: 'University', school: 'School', unit: 'Department' };
+
+  /** What a suggestion will actually publish as — the same canon + overlay
+      discipline the build applies, so the card promises what will happen,
+      not what was typed. */
+  function fixPublishesAs(v) {
+    var S = window.OASchools;
+    if (!S || !S.normalizeFixes) return String(v.to || '');
+    var n = S.normalizeFixes([v]);
+    return n.length ? n[0].to : '';
+  }
+
+  function fixCard(id, v) {
+    var status = String(v.status || 'pending');
+    var as = fixPublishesAs(v);
+    var acts = status === 'pending'
+      ? '<button type="button" class="button blue" data-act="approve">Approve &amp; rename</button> ' +
+        '<button type="button" class="button oa-btn-ghost" data-act="reject">Reject</button>'
+      : '<button type="button" class="button oa-btn-ghost" data-act="reopen">Re-open</button>';
+    return '<article class="oa-fb-card oa-aa-fix" data-id="' + esc(id) + '">' +
+      '<header><strong>' + esc(FIX_KIND[v.kind] || v.kind || '?') + ' name</strong> ' +
+        '<span class="oa-fb-status is-' + (status === 'pending' ? 'open' : 'closed') + '">' +
+          esc(status) + '</span> ' +
+        (v.institution && v.kind !== 'institution'
+          ? '<span class="oa-hint" style="display:inline">at ' + esc(v.institution) + '</span>'
+          : '') +
+      '</header>' +
+      '<p class="oa-aa-fix-names">&ldquo;' + esc(v.from || '') + '&rdquo; &rarr; ' +
+        '&ldquo;' + esc(v.to || '') + '&rdquo;' +
+        (as && as !== String(v.to || '')
+          ? ' <span class="oa-hint" style="display:inline">(publishes as &ldquo;' +
+            esc(as) + '&rdquo; &mdash; the site&rsquo;s house style)</span>'
+          : '') +
+        (as ? '' : ' <span class="oa-hint" style="display:inline">(as it stands this ' +
+          'cannot be applied &mdash; correct it below before approving)</span>') +
+      '</p>' +
+      (v.note ? '<p class="oa-fb-body">' + esc(v.note) + '</p>' : '') +
+      (v.authEmail ? '<p class="oa-hint">suggested by ' + esc(v.authEmail) + '</p>' : '') +
+      (status === 'pending'
+        ? '<p class="oa-field" style="margin:8px 0"><label>Correct it first, if the ' +
+          'suggestion itself needs correcting</label>' +
+          '<input type="text" data-role="to" maxlength="200" value="' + esc(v.to || '') + '"></p>'
+        : '') +
+      '<p class="oa-aa-cand-actions">' + acts +
+        '<span class="oa-form-msg" role="status"></span></p>' +
+    '</article>';
+  }
+
+  /** Draws the queue; resolves the number still pending, for the badge. */
+  function renderNameFixes(db) {
+    var list = $('oa-aa-names-list');
+    if (!list) return Promise.resolve(null);
+    list.innerHTML = '<p class="oa-hint">Loading&hellip;</p>';
+
+    return db.collection('nameFixes').get().then(function (snap) {
+      var groups = { pending: [], approved: [], rejected: [] };
+      snap.forEach(function (d) {
+        var v = d.data() || {};
+        var g = groups[String(v.status || 'pending')] || groups.pending;
+        g.push({ id: d.id, v: v });
+      });
+      var byNewest = function (a, b) {
+        return String(fmtDate(b.v.createdAt)).localeCompare(String(fmtDate(a.v.createdAt)));
+      };
+      var out = '';
+      [['pending', 'Waiting for your decision'],
+       ['approved', 'Approved — applied by the data build'],
+       ['rejected', 'Rejected']].forEach(function (g) {
+        var rows = groups[g[0]];
+        if (!rows.length) return;
+        rows.sort(byNewest);
+        out += '<h4 class="oa-aa-group-h">' + g[1] + ' (' + rows.length + ')</h4>' +
+          rows.map(function (r) { return fixCard(r.id, r.v); }).join('');
+      });
+      list.innerHTML = out ||
+        '<p class="oa-hint">Nobody has suggested a name correction yet.</p>';
+      return groups.pending.length;
+    })['catch'](function (err) {
+      list.innerHTML = '<p class="oa-form-msg is-err">Could not load the suggestions (' +
+        esc((err && (err.code || err.message)) || 'error') + '). If this says ' +
+        'permission-denied, the rules have not been deployed yet &mdash; see ' +
+        '_SETUP-FIREBASE.md &sect;4.</p>';
+      return null;
+    });
+  }
+
+  function wireNameFixActions(db) {
+    var list = $('oa-aa-names-list');
+    if (!list || list.dataset.oaWired) return;
+    list.dataset.oaWired = '1';
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
+      if (!btn) return;
+      var card = btn.closest('.oa-aa-fix');
+      var id = card && card.getAttribute('data-id');
+      if (!id) return;
+
+      var act = btn.getAttribute('data-act');
+      var msg = card.querySelector('.oa-form-msg');
+      var edited = card.querySelector('input[data-role="to"]');
+      var patch = {
+        status: act === 'approve' ? 'approved' : (act === 'reject' ? 'rejected' : 'pending'),
+        reviewedAt: new Date().toISOString()
+      };
+      // the maintainer's own correction to the correction rides the decision
+      if (edited && String(edited.value || '').trim()) {
+        patch.to = String(edited.value).trim().slice(0, 200);
+      }
+
+      btn.disabled = true;
+      db.collection('nameFixes').doc(id).update(patch).then(function () {
+        return renderNameFixes(db);
+      }).then(function (pending) {
+        if (typeof pending === 'number' && lastCounts) {
+          lastCounts.names = pending;
+          correctBadge(null);
+        }
+      })['catch'](function (err) {
+        btn.disabled = false;
+        if (msg) {
+          msg.className = 'oa-form-msg is-err';
+          msg.textContent = 'Could not save that (' + ((err && err.code) || 'error') + ').';
+        }
+      });
+    });
+  }
+
   /* ------------------------------------------------------------- the badge */
 
   var lastCounts = null;
@@ -390,7 +533,7 @@
     if (!lastCounts) return;
     if (groups) lastCounts.candidates = groups.held.length;
     var total = 0, known = 0;
-    ['jobs', 'candidates', 'feedback', 'news'].forEach(function (k) {
+    ['jobs', 'candidates', 'feedback', 'news', 'names'].forEach(function (k) {
       if (typeof lastCounts[k] === 'number') { total += lastCounts[k]; known++; }
     });
     // all four unknown is UNKNOWN — never write a 0 over an honest cache
@@ -434,6 +577,15 @@
 
       show($('oa-aa-news'), true);
       renderNews(db);
+
+      show($('oa-aa-names'), true);
+      wireNameFixActions(db);
+      renderNameFixes(db).then(function (pending) {
+        if (typeof pending === 'number' && lastCounts) {
+          lastCounts.names = pending;
+          correctBadge(null);
+        }
+      });
     })['catch'](function () {
       var g = $('oa-aa-guest');
       show(g, true);

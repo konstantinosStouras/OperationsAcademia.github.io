@@ -3,6 +3,20 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "posting-form-name-guard",
+   "date": "2026-08-23",
+   "title": "The posting form keeps one name per place — and knows what kind of place it is",
+   "summary": "Three improvements to the university → school → department pickers on the posting form. Typing a name that is really a slight respelling of one the site already lists — a typo, a plural, the same words in another order — now draws a “Did you mean” row pointing at the existing entry, right above the option to add yours as genuinely new: a second spelling would split a place’s postings across two entries in every filter. The “Type of institution” box now follows the names you choose — pick “Lee Business School” and it fills in Business School by itself, though a value you set yourself is never overruled. And a brand-new university, school or department still lands on the site’s lists within minutes of posting, offered to the next poster with its schools and departments cascading correctly.",
+   "url": "https://www.operationsacademia.org/post-a-job.html"
+  },
+  {
+   "id": "name-corrections",
+   "date": "2026-08-23",
+   "title": "Spotted a wrongly published school name? You can now fix it",
+   "summary": "The site publishes every university, school and department under one spelling — but the spelling it settled on can simply be wrong, and until now only the maintainer could repair it. A signed-in poster can now press “Suggest a correction” on the posting form, say what the name should be, and once the maintainer approves it the whole site follows: every posting that carried the old spelling is renamed, the form’s pickers stop offering it, and future postings typed under the old name publish under the corrected one — usually within the hour. Nothing renames itself: every suggestion waits for review first.",
+   "url": "https://www.operationsacademia.org/post-a-job.html"
+  },
+  {
    "id": "admin-area",
    "date": "2026-08-23",
    "title": "An Admin area gathers everything waiting for review",
