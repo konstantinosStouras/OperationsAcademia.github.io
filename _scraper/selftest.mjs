@@ -1849,6 +1849,12 @@ async function testScopedUnits() {
       'Operations, Technology, and Information Management Area'],
     ['UT San Antonio', 'Carlos Alvarez College of Business',
       ['Operations and Analytics'], 'Operations and Analytics Department'],
+    /* one unit written short (owner, 2026-08-23) — the pair the review sweep
+       raised when a form posting filed "Operations Management" beside the
+       directory's full name */
+    ['The Chinese University of Hong Kong, Shenzhen', 'School of Management and Economics',
+      ['Operations Management'],
+      'Information Systems and Operations Management'],
   ];
 
   const v = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'vocab.json'), 'utf8'));
@@ -2305,12 +2311,7 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
-    /* CUHK-Shenzhen, School of Management and Economics (2026-08-23): the
-       directory seed's "Information Systems and Operations Management" beside
-       a new form posting's "Operations Management" — one unit written short,
-       or two units? Only the owner can say; the answer goes in
-       SCOPED_UNIT_ALIASES and this entry is then deleted. */
-    'The Chinese University of Hong Kong, Shenzhen|Information Systems and Operations Management|Operations Management',
+    /* empty: every pair the sweep has found has been ruled on */
   ]);
   const dupUnits = [], openUnits = [], seenAwaiting = new Set();
   for (const [u, e] of Object.entries(v.byUniversity)) {
@@ -4870,6 +4871,10 @@ async function testReviewWiring() {
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
   ok(build.includes("where('status', '==', 'approved')"),
     'the build publishes an approval without waiting for the next sheet read');
+  ok(/if \(byId\.has\(v\.row\.id\)\) continue;/.test(build),
+    'and only ADDS a row the sheet file does not carry yet — the document\'s row is ' +
+    'a snapshot frozen at approval, and replacing the file\'s fresher copy with it ' +
+    'is what served five postings a mis-parsed country for weeks');
 
   /* THE GATE NEEDS A DATABASE, AND ITS WORKFLOW MUST GIVE IT ONE.
      Shipped without either of these and the first run said so and did nothing:

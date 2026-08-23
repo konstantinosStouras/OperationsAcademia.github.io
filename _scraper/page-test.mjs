@@ -1825,13 +1825,28 @@ for (const [name, expect] of [
      rebuilt from the tracking sheet every morning, so naming institutions here
      ("utah", "princeton") would make this check pass or fail on whatever the
      market did overnight — a test that goes red for a reason that is not a
-     regression teaches people to ignore it. */
+     regression teaches people to ignore it.
+
+     THE WORDS HAVE TO DISCRIMINATE, or the derivation defeats its own check:
+     the morning "University of North Carolina at Chapel Hill" led the listing,
+     the first long word of the first card was "university", the second term's
+     own card contained it too — and a second term whose card the first term
+     already matches cannot widen anything, so the check went red on a listing
+     with nothing wrong in it. Generic words are skipped, and the second term
+     comes from a card the first term does not appear in. */
   const pair = await j.evaluate(() => {
     const names = [...document.querySelectorAll('.oa-card .oa-card-title')]
       .map((t) => t.textContent.trim().toLowerCase()).filter(Boolean);
-    const word = (n) => (n.split(/[\s,(]+/).find((w) => w.length > 4) || '').replace(/[^a-z]/g, '');
+    const GENERIC = ['university', 'school', 'college', 'institute', 'state', 'business'];
+    const word = (n) => (n.split(/[\s,(]+/)
+      .map((w) => w.replace(/[^a-z]/g, ''))
+      .find((w) => w.length > 4 && !GENERIC.includes(w)) || '');
     const a = word(names[0] || '');
-    const b = names.map(word).find((w) => w && w !== a && !names[0].includes(w));
+    const src = a && names.find((n) => {
+      const w = word(n);
+      return w && w !== a && !names[0].includes(w) && !n.includes(a);
+    });
+    const b = src ? word(src) : '';
     return a && b ? { a, b } : null;
   });
   ok(pair, 'jobs: the listing offers two different institutions to search for');

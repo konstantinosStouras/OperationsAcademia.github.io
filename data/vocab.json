@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-23T05:00:41.554Z",
+ "generated": "2026-08-23T05:26:06.504Z",
  "universities": [
   {
    "v": "University College London",
@@ -1252,6 +1252,10 @@
    "n": 2
   },
   {
+   "v": "School of Business",
+   "n": 2
+  },
+  {
    "v": "School of Management and Economics",
    "n": 2
   },
@@ -1273,6 +1277,10 @@
   },
   {
    "v": "Curtis L. Carlson School of Management",
+   "n": 1
+  },
+  {
+   "v": "David D. Reh School of Business",
    "n": 1
   },
   {
@@ -1356,11 +1364,11 @@
    "n": 1
   },
   {
-   "v": "School Economics and Management",
+   "v": "Parker College of Business",
    "n": 1
   },
   {
-   "v": "School of Business",
+   "v": "School Economics and Management",
    "n": 1
   },
   {
@@ -1373,6 +1381,10 @@
   },
   {
    "v": "School of Computing",
+   "n": 1
+  },
+  {
+   "v": "School of Engineering and Applied Science",
    "n": 1
   },
   {
@@ -1408,7 +1420,15 @@
    "n": 1
   },
   {
+   "v": "Walter A. Haas School of Business",
+   "n": 1
+  },
+  {
    "v": "Wisconsin School of Business",
+   "n": 1
+  },
+  {
+   "v": "Woodbury School of Business",
    "n": 1
   },
   {
@@ -1525,10 +1545,6 @@
   },
   {
    "v": "D'Amore-McKim School of Business",
-   "n": 0
-  },
-  {
-   "v": "David D. Reh School of Business",
    "n": 0
   },
   {
@@ -1864,10 +1880,6 @@
    "n": 0
   },
   {
-   "v": "Parker College of Business",
-   "n": 0
-  },
-  {
    "v": "Paul Merage School of Business",
    "n": 0
   },
@@ -1969,10 +1981,6 @@
   },
   {
    "v": "School of Engineering",
-   "n": 0
-  },
-  {
-   "v": "School of Engineering and Applied Science",
    "n": 0
   },
   {
@@ -2088,10 +2096,6 @@
    "n": 0
   },
   {
-   "v": "Walter A. Haas School of Business",
-   "n": 0
-  },
-  {
    "v": "Warrington College of Business",
    "n": 0
   },
@@ -2122,20 +2126,20 @@
   {
    "v": "Wirtschafts- und Sozialwissenschaftliche Fakultät",
    "n": 0
-  },
-  {
-   "v": "Woodbury School of Business",
-   "n": 0
   }
  ],
  "units": [
   {
-   "v": "Operations Management",
-   "n": 7
+   "v": "Information Systems and Operations Management",
+   "n": 6
   },
   {
    "v": "Management Science",
    "n": 6
+  },
+  {
+   "v": "Operations Management",
+   "n": 5
   },
   {
    "v": "Supply Chain Management",
@@ -2143,10 +2147,6 @@
   },
   {
    "v": "Business Analytics",
-   "n": 4
-  },
-  {
-   "v": "Information Systems and Operations Management",
    "n": 4
   },
   {
@@ -3236,9 +3236,6 @@
     "Operations and Information Systems"
    ],
    "bySchool": {
-    "": [
-     "Operations and Information Systems"
-    ],
     "David D. Reh School of Business": [
      "Operations and Information Systems"
     ]
@@ -3719,9 +3716,6 @@
     "Logistics and Supply Chain Management"
    ],
    "bySchool": {
-    "": [
-     "Logistics and Supply Chain Management"
-    ],
     "Parker College of Business": [
      "Logistics and Supply Chain Management"
     ]
@@ -4577,9 +4571,6 @@
     "Operations Research and Financial Engineering"
    ],
    "bySchool": {
-    "": [
-     "Operations Research and Financial Engineering"
-    ],
     "School of Engineering and Applied Science": [
      "Operations Research and Financial Engineering"
     ]
@@ -5151,17 +5142,15 @@
    "units": [
     "Information Systems and Operations Management",
     "Management and Economics",
-    "Operations Management",
     "The research group of Prof. Yiming Zhang"
    ],
    "bySchool": {
     "": [
-     "Operations Management"
+     "Information Systems and Operations Management"
     ],
     "School of Management and Economics": [
      "Information Systems and Operations Management",
      "Management and Economics",
-     "Operations Management",
      "The research group of Prof. Yiming Zhang"
     ]
    }
@@ -5581,8 +5570,7 @@
    ],
    "bySchool": {
     "": [
-     "Industrial Engineering and Operations Research",
-     "Operations and Information Technology Management"
+     "Industrial Engineering and Operations Research"
     ],
     "Walter A. Haas School of Business": [
      "Operations and Information Technology Management"
@@ -5866,9 +5854,6 @@
     "Analytics, Information, Operations"
    ],
    "bySchool": {
-    "": [
-     "Analytics, Information and Operations Management"
-    ],
     "School of Business": [
      "Analytics, Information and Operations Management",
      "Analytics, Information, Operations"
@@ -6647,8 +6632,7 @@
    ],
    "bySchool": {
     "": [
-     "Operations and Supply Chain Management",
-     "Strategic Management and Operations"
+     "Operations and Supply Chain Management"
     ],
     "Woodbury School of Business": [
      "Strategic Management and Operations"
@@ -7489,7 +7473,6 @@
   "School of Management and Economics": [
    "Information Systems and Operations Management",
    "Management and Economics",
-   "Operations Management",
    "The research group of Prof. Yiming Zhang"
   ],
   "School of Mathematical and Statistical Sciences": [
