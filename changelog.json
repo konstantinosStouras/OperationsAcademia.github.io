@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "candidate-alerts",
+   "date": "2026-08-23",
+   "title": "E-mail alerts now cover the job market candidates",
+   "summary": "The alerts page gained a third thing to be told about: new job market candidates. Profiles are collected now and shown all at once on the reveal date, and nothing is e-mailed about any profile before the site itself shows it. On the day the profiles go live, subscribers get one short, friendly note saying the candidates are up — never a listing of the whole catalogue — and from then on a note whenever a new candidate posts a public profile, which now also reaches the site within about a minute of being posted.",
+   "url": "https://www.operationsacademia.org/alerts.html"
+  },
+  {
    "id": "admin-area",
    "date": "2026-08-23",
    "title": "An Admin area gathers everything waiting for review",

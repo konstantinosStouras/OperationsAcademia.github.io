@@ -14,6 +14,17 @@
    alert next run rather than skipping the window, and a run that dies halfway
    does not silently swallow a day of postings for everybody after it.
 
+   CANDIDATES (owner, 2026-08-23). The candidates topic reads ONE source:
+   data/candidates.json — the file build-candidates.mjs leaves EMPTY until the
+   admin's reveal date, so a profile the site is not showing cannot reach an
+   inbox by construction; this mailer never looks at candidateSubmissions.
+   The first candidate e-mail any alert receives is a single short "the
+   profiles are now live" note (never a listing — on the reveal day weeks of
+   profiles appear at once, and eighty separate mentions is the bombardment
+   the owner asked to avoid); after it, each new public profile is listed in
+   the alert's normal digest. The per-alert mark is `lastCandidateAt`, and
+   candidateNews() in assets/oa-alert-match.js is the whole decision.
+
    Modes:
      --dry-run    match and render, send nothing, print each message
      --scan       report the subscriptions and what each would send
@@ -120,7 +131,65 @@ function jobHtml(r) {
   </li>`;
 }
 
-export function renderAlertEmail({ alert, jobs, updates }) {
+/** One candidate profile, as a list item. Every field is submitted through
+    the profile form, so each part is escaped before the separators join it,
+    and every link goes through safeUrl — a profile reaches an inbox
+    unreviewed, exactly like a posting. */
+function candidateHtml(r) {
+  const meta = [r.position, r.affiliation].filter(Boolean).map(esc).join(' &middot; ');
+  const areas = (r.researchAreas || []).map(esc).join(', ');
+
+  const cv = safeUrl(r.cvUrl), rs = safeUrl(r.rsUrl), web = safeUrl(r.webUrl);
+  const links = [
+    cv ? `<a href="${esc(cv)}">CV</a>` : '',
+    rs ? `<a href="${esc(rs)}">research summary</a>` : '',
+    web ? `<a href="${esc(web)}">website</a>` : '',
+  ].filter(Boolean).join(' &middot; ');
+
+  return `<li style="margin-bottom:14px;">
+    <strong style="font-size:16px;">${esc(r.name)}</strong><br>
+    <span style="color:rgba(0,0,0,.6);">${meta}</span>
+    ${areas ? `<br><span style="color:#666;font-size:13px;">${areas}</span>` : ''}
+    ${links ? `<br><span style="font-size:13px;">${links}</span>` : ''}
+  </li>`;
+}
+
+/**
+ * The one-off "the candidate profiles are now live" note — the FIRST candidate
+ * e-mail every subscriber gets, sent instead of a listing (see the header).
+ * Written to read like a person wrote it, short and friendly, and with no
+ * em-dashes anywhere (both by the owner's instruction); the selftest pins the
+ * last one, because an em-dash is exactly what a later edit would add without
+ * thinking.
+ */
+export function renderCandidatesLiveEmail({ alert, count }) {
+  const who = count === 1
+    ? 'The first candidate has already shared their profile'
+    : `${count} candidates have already shared their profiles`;
+
+  const body = `
+    <p style="margin:0 0 14px;">Hello,</p>
+    <p style="margin:0 0 14px;">Good news: the candidate profiles for this year's
+      Operations job market are now live on Operations Academia. ${esc(who)}, with
+      their research areas, their CVs and the INFORMS days they will be around.</p>
+    <p style="margin:24px 0;">
+      <a href="${esc(SITE)}/#candidates" style="display:inline-block;background:#3B7DBC;color:#fff;
+         padding:9px 18px;border-radius:3px;text-decoration:none;font-weight:600;">
+         Meet the candidates</a></p>
+    <p style="margin:0 0 14px;">More profiles will keep arriving as the season goes on.
+      You asked us to tell you about candidates, so whenever someone new posts a
+      profile we will send you a short note about them.</p>
+    <p style="margin:0;">Happy reading,<br>The Operations Academia team</p>`;
+
+  return shell({
+    title: alert.name || 'Operations Academia',
+    bodyHtml: body,
+    manageUrl: MANAGE_URL,
+    unsubUrl: unsubscribeUrl(alert),
+  });
+}
+
+export function renderAlertEmail({ alert, jobs, updates, candidates = [] }) {
   const parts = [];
   const n = jobs.length;
 
@@ -137,8 +206,22 @@ export function renderAlertEmail({ alert, jobs, updates }) {
     }
   }
 
+  const nc = candidates.length;
+  if (nc) {
+    parts.push(`<p style="margin:${n ? '22px' : '0'} 0 14px;">${nc === 1
+      ? 'A new candidate joined the job market page:'
+      : `${nc} new candidates joined the job market page:`}</p>`);
+    parts.push('<ul style="padding-left:20px;margin:0 0 18px;">');
+    parts.push(candidates.slice(0, MAX_ROWS).map(candidateHtml).join(''));
+    parts.push('</ul>');
+    if (nc > MAX_ROWS) {
+      parts.push(`<p style="color:#666;font-size:13px;">…and ${nc - MAX_ROWS} more.
+        <a href="${esc(SITE)}/#candidates">See them all on the site</a>.</p>`);
+    }
+  }
+
   if (updates.length) {
-    parts.push(`<p style="margin:${n ? '22px' : '0'} 0 10px;"><strong>What is new on the
+    parts.push(`<p style="margin:${(n || nc) ? '22px' : '0'} 0 10px;"><strong>What is new on the
       site</strong></p><ul style="padding-left:20px;margin:0 0 18px;">`);
     for (const u of updates) {
       const uUrl = safeUrl(u.url);
@@ -151,10 +234,15 @@ export function renderAlertEmail({ alert, jobs, updates }) {
     parts.push('</ul>');
   }
 
+  // The button aims where the e-mail's news is: a candidates-only message
+  // must not end on "Browse all job postings" about postings it never named.
+  const cta = (nc && !n)
+    ? { href: `${SITE}/#candidates`, label: 'Meet the candidates' }
+    : { href: `${SITE}/jobs`, label: 'Browse all job postings' };
   parts.push(`<p style="margin-top:20px;">
-    <a href="${esc(SITE)}/jobs" style="display:inline-block;background:#3B7DBC;color:#fff;
+    <a href="${esc(cta.href)}" style="display:inline-block;background:#3B7DBC;color:#fff;
        padding:9px 18px;border-radius:3px;text-decoration:none;font-weight:600;">
-       Browse all job postings</a></p>`);
+       ${esc(cta.label)}</a></p>`);
 
   return shell({
     title: alert.name || 'Operations Academia',
@@ -233,6 +321,83 @@ async function selftest() {
     'latestUpdateDate of nothing is empty, so the mark is left alone');
   ok(M.daysBefore(new Date('2026-08-15T00:00:00Z'), 31) === '2026-07-15',
     'a first-ever send is capped rather than posting the back-catalogue');
+
+  /* ------------------------------------------------------------- candidates
+
+     The rules the owner set (2026-08-23), each pinned: nothing about a profile
+     the site is not showing; ONE friendly note when the year's profiles go
+     live, never a listing of the lot; then a note about each new profile,
+     since by then it is public information. */
+  const CAND = [
+    { id: '2027-doe-jane', name: 'Jane Doe', position: 'PhD Candidate',
+      affiliation: 'Wharton, University of Pennsylvania',
+      researchAreas: ['Supply Chain Management', 'Behavioral Operations'],
+      informsDays: ['Sunday'], cvUrl: 'https://example.org/cv.pdf',
+      addedAt: '2026-08-20T09:00:00Z' },
+    { id: '2027-lee-ann', name: 'Ann Lee', position: 'Post-Doctoral Researcher',
+      affiliation: 'MIT Sloan', researchAreas: [],
+      addedAt: '2026-10-12T08:00:00Z' },
+  ];
+  const CT = { topics: ['candidates'] };
+
+  ok(M.candidateNews([], CT, '') === null,
+    'held profiles are not in the served file, so nothing about them can be sent');
+  ok(M.candidateNews(CAND, { topics: ['jobs'] }, '') === null,
+    'a jobs-only alert is sent no candidate e-mail');
+  const rev = M.candidateNews(CAND, CT, '');
+  ok(rev && rev.kind === 'reveal' && rev.count === 2,
+    'the first candidate e-mail is the one friendly note, never a listing');
+  ok(rev.mark === '2026-10-12T08:00:00Z',
+    'the note covers everything on the page — its mark is the newest profile');
+  const lst = M.candidateNews(CAND, CT, '2026-08-20T09:00:00Z');
+  ok(lst && lst.kind === 'profiles' && lst.rows.length === 1 &&
+    lst.rows[0].id === '2027-lee-ann',
+    'after the note, only profiles added since the mark are listed');
+  ok(M.candidateNews(CAND, CT, '2026-10-12T08:00:00Z') === null,
+    'nothing new means no candidate e-mail, and the mark stands');
+
+  /* Seasons repeat: next cycle the admin sets a new reveal date, the served
+     file is held back to empty, and on the new reveal day it fills at once.
+     The announcement is keyed on the REVEAL DAY, so a subscriber whose mark
+     survives from last season is met with the note again, not a listing. */
+  const REV = '2026-10-11';
+  ok(M.candidateNews(CAND, CT, '2025-11-05T00:00:00Z', REV).kind === 'reveal',
+    'a mark left from last season meets the new reveal with the note, never a listing');
+  const after = M.candidateNews(CAND, CT, '2026-10-11T09:00:00Z', REV);
+  ok(after && after.kind === 'profiles' && after.rows.length === 1,
+    'a mark stamped on or after the reveal day lists only the genuinely new profiles');
+  const filtered = M.candidateNews(CAND,
+    { topics: ['candidates'], country: ['USA'], level: ['Post-Doc'] },
+    '2026-08-20T09:00:00Z');
+  ok(filtered && filtered.rows.length === 1,
+    'the job filters never narrow people — the candidates topic has no filters');
+
+  const live = renderCandidatesLiveEmail({ alert: { id: 'x', name: 'My alert' }, count: 2 });
+  ok(live.includes('2 candidates'), 'the live note says how many profiles are up');
+  ok(live.includes('#candidates'), 'the live note links to the candidates section');
+  ok(live.includes('Unsubscribe'), 'the live note offers an unsubscribe');
+  ok(!live.includes('—') && !live.includes('&mdash;'),
+    'and carries no em-dash, per the owner’s instruction on its wording');
+  ok(renderCandidatesLiveEmail({ alert: { id: 'x' }, count: 1 })
+    .includes('The first candidate'),
+    'a single profile reads as a sentence, not as "1 candidates"');
+
+  const candDigest = renderAlertEmail({
+    alert: { id: 'x', name: 'n' }, jobs: [], updates: [], candidates: CAND,
+  });
+  ok(candDigest.includes('Jane Doe') && candDigest.includes('Ann Lee'),
+    'the digest lists the new profiles');
+  ok(candDigest.includes('Meet the candidates'),
+    'a candidates-only e-mail ends on the candidates, not on the job board');
+  const evilCand = renderAlertEmail({
+    alert: { id: 'x', name: 'n' }, jobs: [], updates: [],
+    candidates: [{ ...CAND[0], name: '<img src=x onerror=alert(1)>',
+      affiliation: '<b>aff</b>', cvUrl: 'javascript:alert(1)', webUrl: 'data:text/html,x' }],
+  });
+  ok(!evilCand.includes('<img src=x'), 'a profile name cannot inject markup');
+  ok(!evilCand.includes('<b>aff</b>'), 'a profile affiliation cannot inject markup');
+  ok(!/href="javascript:/i.test(evilCand), 'a javascript: CV link is not linked');
+  ok(!/href="data:/i.test(evilCand), 'a data: website link is not linked');
 
   /* ------------------------------- what may be announced at all (oa-news.js)
 
@@ -421,11 +586,24 @@ async function main() {
     return;
   }
 
-  const [rows, changelog] = await Promise.all([
+  const [rows, changelog, candRowsAll, candMeta] = await Promise.all([
     readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8').then(JSON.parse).catch(() => []),
     readFile(path.join(HERE, '..', 'changelog.json'), 'utf8').then(JSON.parse)
       .catch(() => ({ updates: [] })),
+    /* THE ONLY SOURCE OF CANDIDATES IS THE SERVED FILE. build-candidates.mjs
+       writes no row into it until the admin's reveal date, so while profiles
+       are held this reads [] and nothing about them can be mentioned — the
+       reveal gate holds here because there is nothing to leak, not because
+       this file remembers to check a date. A read failure is [] too: the safe
+       direction (nothing sent, no mark advanced, retried next run). */
+    readFile(path.join(HERE, '..', 'data', 'candidates.json'), 'utf8')
+      .then(JSON.parse).catch(() => []),
+    // the meta names the reveal day — what decides announcement vs listing
+    readFile(path.join(HERE, '..', 'data', 'candidates-meta.json'), 'utf8')
+      .then(JSON.parse).catch(() => null),
   ]);
+  const cands = Array.isArray(candRowsAll) ? candRowsAll : [];
+  const candRevealAt = (candMeta && candMeta.revealAt) || '';
   /* WHAT MAY BE SENT is not the whole change log. An entry the maintainer has
      not published yet must not be announced — an e-mail is the one thing that
      cannot be recalled, so a digest would defeat the review gate outright —
@@ -532,7 +710,15 @@ async function main() {
     const floor = (!a.lastUpdateDate && M.wantsUpdates(a.criteria)) ? sinceUpdate : '';
     const news = M.newUpdatesFor(updates, a.criteria, sinceUpdate, until);
 
-    if (!jobs.length && !news.length) {
+    /* CANDIDATES. `lastCandidateAt` is this alert's own candidate mark; empty
+       means it has never had a candidate e-mail, and candidateNews then
+       answers with the one-off "the profiles are now live" note instead of a
+       listing — see the header, and the long note on candidateNews itself.
+       While the reveal holds, `cands` is [] and this is null: silence. */
+    const cand = M.candidateNews(cands, a.criteria, a.lastCandidateAt || '', candRevealAt);
+    const candRows = cand && cand.kind === 'profiles' ? cand.rows : [];
+
+    if (!jobs.length && !news.length && !cand) {
       // NOTHING NEW IS NOT A SEND. Advance the mark anyway, so tomorrow's
       // window starts here rather than re-scanning from the last real send.
       skipped++;
@@ -546,14 +732,60 @@ async function main() {
     }
 
     if (SCAN) {
-      console.log(`  DUE      ${label}  ${jobs.length} posting(s), ${news.length} update(s)`);
+      const candNote = !cand ? ''
+        : cand.kind === 'reveal'
+          ? `, the candidates-are-live note (${cand.count} profile(s))`
+          : `, ${candRows.length} candidate profile(s)`;
+      console.log(`  DUE      ${label}  ${jobs.length} posting(s), ${news.length} update(s)${candNote}`);
       continue;
     }
 
-    const html = renderAlertEmail({ alert: a, jobs, updates: news });
+    /* THE REVEAL NOTE IS ITS OWN E-MAIL — one short, friendly message saying
+       the year's profiles are live, never folded into a digest as a section
+       (the owner's wording is the point of it). Its mark advances only behind
+       a real delivery, like every other; a failure here does not block the
+       job/update digest below, which carries no candidate rows in this state
+       (candRows is [] while the announcement is pending). */
+    if (cand && cand.kind === 'reveal') {
+      try {
+        const delivered = await send(tx, {
+          to: a.email,
+          subject: "This year's job market candidates are now live",
+          html: renderCandidatesLiveEmail({ alert: a, count: cand.count }),
+          headers: unsubHeaders(unsubscribeUrl(a)),
+        }, { dryRun: DRY });
+
+        if (delivered) {
+          const notePatch = {
+            lastCandidateAt: cand.mark || now.toISOString(),
+            lastCheckedAt: now.toISOString(),
+          };
+          // freeze the update-window floor here too — a run whose whole
+          // output is this note must not leave it sliding (see the idle
+          // branch); the digest below rewrites it when it also sends
+          if (floor) notePatch.lastUpdateDate = floor;
+          await doc.ref.update(notePatch);
+          sent++;
+          console.log(`sent ${label}: the candidates-are-live note (${cand.count} profile(s))`);
+        } else {
+          console.log(`would send ${label}: the candidates-are-live note (${cand.count} profile(s))`);
+        }
+      } catch (err) {
+        failed++;
+        console.log(`::warning::could not send to ${redact(a.email)}: ${err.message}`);
+      }
+    }
+
+    // the announcement may have been the whole of this run for this alert
+    if (!jobs.length && !news.length && !candRows.length) continue;
+
+    const html = renderAlertEmail({ alert: a, jobs, updates: news, candidates: candRows });
     const subject = a.name ||
       (jobs.length ? `${jobs.length} new job posting${jobs.length > 1 ? 's' : ''}`
-        : 'What is new on Operations Academia');
+        : candRows.length
+          ? (candRows.length === 1 ? 'A new job market candidate'
+            : `${candRows.length} new job market candidates`)
+          : 'What is new on Operations Academia');
 
     try {
       const delivered = await send(tx, {
@@ -568,7 +800,8 @@ async function main() {
       // treating that as a send would drop this window on the floor for good.
       if (!delivered) {
         skipped++;
-        console.log(`would send ${label}: ${jobs.length} posting(s), ${news.length} update(s)`);
+        console.log(`would send ${label}: ${jobs.length} posting(s), ` +
+          `${candRows.length} candidate(s), ${news.length} update(s)`);
         continue;
       }
 
@@ -576,7 +809,7 @@ async function main() {
       const patch = {
         lastSentAt: now.toISOString(),
         lastCheckedAt: now.toISOString(),
-        lastSentCount: jobs.length + news.length,
+        lastSentCount: jobs.length + news.length + candRows.length,
       };
       // record the newest change-log entry actually sent, so the next window
       // starts after it rather than at a timestamp. The frozen floor is written
@@ -585,10 +818,15 @@ async function main() {
       if (floor) patch.lastUpdateDate = floor;
       const latest = M.latestUpdateDate(news);
       if (latest) patch.lastUpdateDate = latest;
+      // and the newest profile actually sent, for the same reason: the next
+      // candidate window starts after it, never at a wall clock a profile
+      // published mid-run could slip behind
+      if (candRows.length && cand.mark) patch.lastCandidateAt = cand.mark;
       await doc.ref.update(patch);
 
       sent++;
-      console.log(`sent ${label}: ${jobs.length} posting(s), ${news.length} update(s)`);
+      console.log(`sent ${label}: ${jobs.length} posting(s), ` +
+        `${candRows.length} candidate(s), ${news.length} update(s)`);
     } catch (err) {
       failed++;
       console.log(`::warning::could not send to ${redact(a.email)}: ${err.message}`);

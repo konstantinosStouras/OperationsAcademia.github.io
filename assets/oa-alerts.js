@@ -16,6 +16,11 @@
   var M = window.OAAlertMatch;
   var jobs = [];          // the current postings, for the preview and the vocab
   var jobsState = 'loading';   // 'loading' | 'ok' | 'failed' — see renderPreview
+  var cands = [];         // data/candidates.json — EMPTY until the reveal date,
+                          // which is exactly what the mailer reads, so the
+                          // preview cannot show a profile an e-mail could not
+  var candMeta = null;    // data/candidates-meta.json — the reveal date and the
+                          // waiting COUNT, the two things the site announces
   var rawLog = [];        // changelog.json as served, before the review decisions
   var alerts = [];        // this account's alerts
   var listFailed = false; // the last load() could not read the collection
@@ -120,6 +125,7 @@
     var topics = [];
     if ($('t-jobs').checked) topics.push('jobs');
     if ($('t-updates').checked) topics.push('updates');
+    if ($('t-candidates').checked) topics.push('candidates');
     return {
       name: $('a-name').value.trim().slice(0, 120),
       email: $('a-email').value.trim().slice(0, 200),
@@ -144,7 +150,8 @@
     // asked for the OTHER stream, so the new form starts there instead.
     if (!a) {
       var wanted = new URLSearchParams(location.search).get('topic');
-      a = { criteria: { topics: wanted === 'updates' ? ['updates'] : ['jobs'] } };
+      a = { criteria: { topics: wanted === 'updates' || wanted === 'candidates'
+        ? [wanted] : ['jobs'] } };
     }
     var c = M.normalise(a.criteria);
     $('a-name').value = a.name || '';
@@ -152,6 +159,7 @@
     $('a-freq').value = a.frequency || 'daily';
     $('t-jobs').checked = c.topics.indexOf('jobs') !== -1;
     $('t-updates').checked = c.topics.indexOf('updates') !== -1;
+    $('t-candidates').checked = c.topics.indexOf('candidates') !== -1;
     $('a-text').value = c.text || '';
     writeGroup('type', c.type);
     writeGroup('level', c.level);
@@ -230,6 +238,38 @@
       }
     }
 
+    if (M.wantsCandidates(c)) {
+      parts.push('<p><strong>Job market candidates</strong></p>');
+      if (cands.length) {
+        /* The profiles are public: the first e-mail is the short "they are
+           live" note, then a note per new profile — sample the newest. The
+           rows come from data/candidates.json, the same file the mailer
+           reads, so the preview cannot show a profile an e-mail could not. */
+        parts.push('<p>First one short note that this year’s profiles are live (' +
+          cands.length + ' so far), then a note whenever a new candidate posts, like:</p><ul>');
+        cands.slice(0, 2).forEach(function (r) {
+          parts.push('<li><strong>' + esc(r.name) + '</strong><br>' +
+            '<span class="oa-hint" style="display:inline">' +
+            esc([r.position, r.affiliation].filter(Boolean).join(' · ')) +
+            '</span></li>');
+        });
+        parts.push('</ul>');
+      } else {
+        /* Held: the served file is empty until the admin's reveal date, and
+           the meta carries only the date and a COUNT — which is all the site
+           itself announces, so it is all the preview may say either. */
+        var revealAt = (candMeta || {}).revealAt || '';
+        var held = (candMeta || {}).heldCount || 0;
+        parts.push('<p class="oa-hint">Profiles are being collected now and go up all at ' +
+          'once' + (revealAt ? ' on <strong>' + esc(revealAt) + '</strong>'
+            : ', on a date the site will announce') +
+          (held ? ' (' + held + ' already waiting)' : '') +
+          '. Nothing is e-mailed about any profile before then. On the day you will get ' +
+          'one short, friendly note that the candidates are live, and from then on a note ' +
+          'for each new profile.</p>');
+      }
+    }
+
     if (M.wantsUpdates(c)) {
       parts.push('<p><strong>What is new on the site</strong></p><ul>');
       (window.OA_CHANGELOG || []).slice(0, 2).forEach(function (e) {
@@ -259,6 +299,7 @@
         c.country.length ? c.country.join(' or ') : ''
       ].filter(Boolean).join(', '));
     }
+    if (c.topics.indexOf('candidates') !== -1) bits.push('new job market candidates');
     if (c.topics.indexOf('updates') !== -1) bits.push('changes to the website');
     // only reachable for an alert saved before the no-topic guard worked; say
     // what it does rather than describing it as a subscription to everything
@@ -439,10 +480,19 @@
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
       fetch('changelog.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : { updates: [] }; })
-        .catch(function () { return { updates: [] }; })
+        .catch(function () { return { updates: [] }; }),
+      /* the candidates preview: the SERVED rows (empty until the reveal) and
+         the meta's reveal date + waiting count. A failed read of either is
+         simply the held state's wording without a date — never an error. */
+      fetch('data/candidates.json', { credentials: 'same-origin', cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
+      fetch('data/candidates-meta.json', { credentials: 'same-origin', cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
     ]).then(function (res) {
       jobsState = res[0] ? 'ok' : 'failed';
       jobs = res[0] || [];
+      cands = Array.isArray(res[2]) ? res[2] : [];
+      candMeta = res[3];
       /* THE PREVIEW SHOWS REAL ENTRIES, so it must show only the ones that are
          really public. The raw log carries entries the maintainer has not
          published yet and entries they have taken down; putting either in
