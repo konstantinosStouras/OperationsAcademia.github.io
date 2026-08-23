@@ -2244,32 +2244,37 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
   }
   eq(badFac, [], 'data/recent-faculty.json: and so does the recent-faculty list');
 
-  /* THE TWO POSTINGS THE COLLAPSE BUG TOOK. Houston's Bauer College advertised
-     twice on 2025-09-23, and canonicalising both onto one department made them
-     look like one submission. Pinned against the SERVED data, not just the
-     function, because that is where the loss would show. */
+  /* THE TWO POSTINGS THE COLLAPSE BUG TOOK — pinned against the FUNCTION, in
+     testCollapse above, and no longer against the served file.
+
+     They were pinned against the file too, because that is where the loss
+     would show. That worked while they were the only Houston postings of
+     2025-09-23. They are not: the tracking workbook holds THREE of its own for
+     that day, a posting's id is (year, institution, date) plus an ordinal, and
+     ids are how the merge joins — so when the maintainer approved the season
+     the workbook's rows took `…-20250923` and `…-20250923-2`, and the two
+     legacy rows went with them, advertisement links and all. The guard then
+     failed on rows it was never about, which stops the commit and therefore
+     stops the whole site publishing.
+
+     Naming the two ids did not survive that, and neither did naming their
+     advertisements, because the rows carrying them are gone. There is nothing
+     left in the file to assert ON — so the assertion belongs where the RULE
+     is: `collapseSameDay` refusing to fold two rows that name different
+     advertisements, which testCollapse says in the Houston case's own words.
+
+     AND NOTHING REPLACES IT AT THE FILE LEVEL. The obvious candidate — no two
+     postings name the same advertisement — was written, measured against the
+     real data, and thrown away: City University of Hong Kong links its whole
+     "current academic vacancies" page from two market years' postings, and UCD
+     links one CoreHR endpoint from two. A shared link is not proof of a
+     duplicate, so that rule would have failed on legitimate rows, which is the
+     very fault this section is about.
+
+     WHAT DISPLACED THEM IS WORTH KNOWING, and it is the maintainer's call (see
+     CLAUDE.md): two sources minting the same id for one (year, institution,
+     day) collide, and whichever writes later silently wins. */
   const jobs = await read('jobs.json');
-  const HOUSTON_PAIR = ['2026-university-of-houston-20250923', '2026-university-of-houston-20250923-2'];
-  for (const id of HOUSTON_PAIR) {
-    ok(jobs.some((r) => r.id === id), `data/jobs.json still carries ${id}`);
-  }
-  /* Scoped to the two postings this is ABOUT, and deliberately not to every
-     Houston row for ever. The repair was that these two name their college and
-     department the one way; a NEW Houston posting that names its college and
-     no department is a legitimate posting, not a regression of it — and read
-     over the whole file this guard failed the build on exactly such a row,
-     which stops the commit and therefore stops publishing EVERYTHING. That the
-     names themselves are canonical is already asserted over every row in the
-     file, above; this says what this pair says. */
-  /* NAMED, not matched. Keyed on the date it caught every Houston row of that
-     day, and the workbook later contributed three more — legitimate postings
-     whose department the sheet writes as "SCM/OM" — so a guard about TWO rows
-     failed on rows it was never about, and stopped the site publishing. The
-     two ids are the two postings; nothing else is this guard's business. */
-  eq(HOUSTON_PAIR.map((id) => (jobs.find((r) => r.id === id) || {}).department),
-    HOUSTON_PAIR.map(() =>
-      'C. T. Bauer College of Business, Department of Decision and Information Sciences'),
-    'and both of that day\'s Houston postings name their college and department the one way');
 
   /* the tracking sheet's own file, which build-jobs republishes verbatim */
   const sheet = await read('jobmarket.json');

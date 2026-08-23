@@ -830,6 +830,19 @@ missing from a writer is this outage and the flag creeping into the PR check
 would leave nothing enforcing it anywhere. The pairs are named in the run log
 either way.
 
+**Two sources can mint one id, and the later writer wins.** A posting's id is
+(market year, institution, date) plus an ordinal for the same day, and ids are
+how `mergeRows` joins — so when the workbook's three Houston rows of 2025-09-23
+were approved they took `2026-university-of-houston-20250923` and `…-2` from
+the two LEGACY rows that held them, and those two went off the site with their
+advertisement links. Nothing warned; the only reason it was noticed at all is
+that a guard named those ids. Whether that matters is the maintainer's call —
+the workbook and the legacy sheet are plainly describing one Bauer hiring
+round, so this may be a merge rather than a loss — but the MECHANISM is luck,
+not design, and a fix would have to change ids, which are permalinks and the
+join key for `rowOverrides`, the review queue, the mirrors and the Edit button.
+Not attempted here.
+
 **What is still the owner's to settle.** The fourteen surviving pairs are in
 `AWAITING_OWNER`, and every one of them exists because the workbook's
 hiring-unit column holds a FIELD ("OM", "BA", "SCM/OM", "IS/OM/SCM/BA") rather
