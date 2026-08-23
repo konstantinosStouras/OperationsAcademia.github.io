@@ -99,6 +99,7 @@
       { v: 'Visiting Faculty (various levels)' }] },
     { key: 'country', label: 'Country', max: 80 },
     { key: 'applyByDate', label: 'Closing date', max: 10, type: 'date' },
+    { key: 'reviewDate', label: 'Suggested apply by', max: 10, type: 'date' },
     { key: 'comments', label: 'Comments', max: 1500, area: true },
     { key: 'adUrl', label: 'Link to the advert', max: 600 },
     { key: 'postedAtUrl', label: 'Posted at', max: 600 },
@@ -676,7 +677,8 @@
       '<table class="oa-sub-lines">' +
         [['Entry level', (d.levels || []).join(', ')],
          ['Country', d.country],
-         ['Apply by', d.applyByDate || d.applyByNote]]
+         ['Suggested apply by', d.reviewDate],
+         ['Final apply by', d.applyByDate || d.applyByNote]]
           .filter(function (l) { return l[1]; })
           .map(function (l) {
             return '<tr><th>' + esc(l[0]) + '</th><td>' + esc(l[1]) + '</td></tr>';

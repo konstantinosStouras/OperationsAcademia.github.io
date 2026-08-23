@@ -234,7 +234,7 @@
     if (untilFilled) {
       out.applyByDate = '';
     } else if (!day) {
-      setError($('f-applyByDate'), 'Please give a deadline, or tick that there is no fixed one.');
+      setError($('f-applyByDate'), 'Please give a final deadline, or tick that there is no fixed one.');
       if (!firstBad) firstBad = $('f-applyByDate');
       out.applyByDate = '';
     } else if (!isoDay(day)) {
@@ -247,6 +247,30 @@
       out.applyByDate = day;
     }
     out.untilFilled = !!untilFilled;
+
+    /* The SUGGESTED apply-by — the first-review / full-consideration date.
+       Optional: most postings name none. The build validates again
+       (jobs-model healReviewDate) and drops a suggested date that does not
+       fall before the final one, so the same rule is said here, where the
+       poster can still fix it. */
+    var review = String($('f-reviewDate').value || '').trim();
+    if (!review) {
+      setError($('f-reviewDate'), '');
+      out.reviewDate = '';
+    } else if (!isoDay(review)) {
+      setError($('f-reviewDate'),
+        'Please check that date — the year should be a four-digit one, like 2026.');
+      if (!firstBad) firstBad = $('f-reviewDate');
+      out.reviewDate = '';
+    } else if (out.applyByDate && review >= out.applyByDate) {
+      setError($('f-reviewDate'),
+        'The suggested date should fall before the final closing date — leave it empty if they are the same.');
+      if (!firstBad) firstBad = $('f-reviewDate');
+      out.reviewDate = '';
+    } else {
+      setError($('f-reviewDate'), '');
+      out.reviewDate = review;
+    }
 
     var urlFields = [['f-postedAtUrl', 'postedAtUrl'], ['f-adUrl', 'adUrl']];
     for (var i = 0; i < urlFields.length; i++) {
@@ -545,6 +569,7 @@
 
     set('f-country', v.country);
     set('f-applyByDate', v.applyByDate);
+    set('f-reviewDate', v.reviewDate);
     set('f-applyByNote', v.applyByNote);
     set('f-comments', v.comments);
     set('f-adUrl', v.adUrl);

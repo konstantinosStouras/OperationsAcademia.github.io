@@ -29,7 +29,7 @@
    never read; DEADLINE_FIELDS below is the whole list of what is.
    --------------------------------------------------------------------------- */
 
-import { text, url, longDate, OPEN_ENDED_RX } from './jobs-model.mjs';
+import { text, url, longDate, OPEN_ENDED_RX, healReviewDate } from './jobs-model.mjs';
 
 /** Hosts whose /faculty/details.cfm pages this module knows how to read. */
 const HOSTS = new Set(['higheredjobs.com', 'www.higheredjobs.com']);
@@ -516,7 +516,11 @@ export function applyVerified(rows, cache, { today = '' } = {}) {
        fields move together: the page buckets a posting as open-ended on the
        DATE being empty, so setting one without the other would show a date on
        the card and file it under "Until filled" in the filter. */
-    const next = { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate };
+    /* …and the SUGGESTED date is re-settled against the date that just
+       arrived (healReviewDate): a first-review date on or after the ad's
+       closing date is the closing date said twice, or a contradiction. */
+    const next = healReviewDate(
+      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate });
     changed.push({
       id: row.id, jobCode: code, from: row.applyBy, to: next.applyBy,
       past: !!(today && ad.applyByDate < today),

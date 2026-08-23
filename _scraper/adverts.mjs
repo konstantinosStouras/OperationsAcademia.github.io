@@ -43,7 +43,7 @@
    that is wrong half the time.
    --------------------------------------------------------------------------- */
 
-import { text, url, longDate, OPEN_ENDED_RX } from './jobs-model.mjs';
+import { text, url, longDate, OPEN_ENDED_RX, healReviewDate } from './jobs-model.mjs';
 import { isHigherEdJobsUrl } from './higheredjobs.mjs';
 
 /** How an advertisement's own deadline is labelled, in order of authority.
@@ -631,7 +631,12 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
       return row;
     }
 
-    const next = { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate };
+    /* …and the SUGGESTED date is re-settled against the date that just
+       arrived (healReviewDate, exactly as the HigherEdJobs apply does): a
+       first-review date on or after the ad's closing date is the closing
+       date said twice, or a contradiction. */
+    const next = healReviewDate(
+      { ...row, applyBy: longDate(ad.applyByDate), applyByDate: ad.applyByDate });
     changed.push({
       id: row.id, key, from: row.applyBy, to: next.applyBy,
       past: !!(today && ad.applyByDate < today),

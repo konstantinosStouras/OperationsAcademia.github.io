@@ -276,6 +276,58 @@ runners (this environment's egress denies every one of these hosts), and the
 workflow's `dry_run`/`scan` dispatch inputs are how a new host's readability
 is measured before anything is written. The queue pass needs
 `FIREBASE_SERVICE_ACCOUNT` and is a clean no-op without it.
+## Two deadlines per posting: suggested and final
+
+Many searches have no fixed closing date yet name the day that matters most —
+the first-review / full-consideration date ("First review of applications will
+begin on September 8, 2026, and will continue until the position has been
+filled"). Those postings read a bare "Until filled." So a posting carries TWO
+dates (owner, 2026-08-23): **`reviewDate`**, the SUGGESTED apply-by, and
+**`applyByDate`**, the FINAL one — which alone still drives the market roll
+(`deadlineOpen`): a review date passing does not close a search. The card shows
+"Suggested apply by" (only where known) above "Final apply by"; the jobs page
+filters on each (**Suggested deadline**: Review ahead / Review passed / No
+review date — its own vocabulary, because "Expired" is the wrong word for a
+date that closes nothing; **Final deadline** keeps the vendor page's three
+words AND its `deadline` URL key, so every saved link works); the posting form
+asks the two dates as two questions, the review card offers the box, and the
+alert e-mails + the alerts page's preview name both ("suggested apply by … ·
+final apply by …").
+
+**The suggested date is read out of the prose the sources already carry** —
+`extractReviewDate` / `extractFinalDate` / `healReviewDate` in
+`jobs-model.mjs`, the deadlineDay discipline throughout: every pattern demands
+the reviewing/consideration context in the same sentence as a date WITH a
+four-digit year, an ambiguous `10/12/2025` is refused rather than guessed, and
+a posting the extractor is unsure of keeps reading "Until filled." exactly as
+the owner asked. A suggested date ON OR AFTER the final one is dropped
+wherever it is set (equal is the deadline said twice — half the corpus; later
+contradicts it): in `healReviewDate`, in `applyEdits`, in the form's own
+validation, and when the HigherEdJobs verify fills a closing date onto an
+open-ended row. `healReviewDate` is pure, idempotent and fill-empty — the
+`healPlace` pattern — applied at `rowFromSubmission`, the sheet ingest
+(`rowsFromTab`, which also trims the captured sentence so the Kansas card
+reads "Suggested apply by: September 8, 2026 · Final apply by: Until
+filled."), the sync's `--heal-names`, and the whole merged set in
+`build-jobs.mjs` beside `healCountry` — so rows from every writer heal on
+every build, and the committed files were healed once with the same function
+(17 postings gained their date). `extractFinalDate` reads only an explicitly
+LABELLED closing date ("Final date: Thursday, Nov 5, 2026" — UCLA's
+application-window cell); a bare "deadline" heading clauses away from a date
+is exactly the mislabelled-header mis-read and never fires. And the source's
+own labelled WINDOW can settle both fields at once: UCLA reached the site
+with its review date recorded as the closing date while its own words on the
+row said "Next review date: Oct 5 … Final date: Nov 5" — where the stored
+closing date IS the text's stated review date and the same text labels a
+final date after it, the stated final date wins and the review date takes
+its own field (`window` in healReviewDate; both labels must be explicit and
+agree with the stored date, so it can never fire on a date the maintainer
+simply typed). `reviewDate` is in
+`PUBLIC_FIELDS` (skipped when empty, like `ref`), in the jobSubmissions rules'
+`shapeOk` and the jobReviews `edits` list, and `testTwoDeadlines` /
+`testTwoDeadlinesWiring` in selftest.mjs pin the extractor, every guard and
+every surface. The `/v2/` archive deliberately ignores the new key — its
+frozen assets read `applyBy`/`applyByDate` exactly as before.
 
 ## The frozen archives, and how the maintainer edits them
 
@@ -1140,9 +1192,11 @@ The picker (`assets/oa-combo.js`, dual-mode so its ordering is unit-tested) open
 Duke and Emory — and narrows as you type. The usage count still labels a row but no
 longer orders one: count-first reads as no order at all once the list is three
 hundred names long, where the reader knows the name they want and is looking for
-it. The render cap went with it (60 → 400): an alphabetical list cut at 60 ends in
-the C's and tells the reader to keep typing without their being able to tell
-whether their university is there at all.
+it. The render cap went with it (60 → 400 → 1000, the last when the 2026-08-23
+bulk approval took the vocabulary past 400 universities and VinUniversity fell
+off the end): an alphabetical list cut short ends mid-alphabet and tells the
+reader to keep typing without their being able to tell whether their
+university is there at all.
 
 **Anything that paints its own ground must name its own ink.** The picker's panel
 set `background: #fff` and no colour, so under the dark theme it inherited `--ink`

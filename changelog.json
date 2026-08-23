@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "two-apply-by-dates",
+   "date": "2026-08-23",
+   "title": "Every posting now shows two deadlines: suggested and final",
+   "summary": "Many searches have no fixed closing date yet still name the day that matters most — the first-review or full-consideration date (“First review of applications will begin on September 8, 2026”). Those postings used to read a bare “Until filled.” Every posting card now carries a “Suggested apply by” line beside the “Final apply by” one, the jobs page filters on each separately (Suggested deadline · Final deadline), and the posting form asks the two dates as two questions. The suggested date is also read automatically out of the prose postings already carry — dozens of live postings, Kansas’s included, gained theirs on day one — and a date the pipeline is unsure of is never guessed: the posting keeps reading “Until filled.”",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "approved-postings-publish-in-bulk",
    "date": "2026-08-23",
    "title": "A season's worth of approvals publishes, and one odd posting can no longer stop the site",

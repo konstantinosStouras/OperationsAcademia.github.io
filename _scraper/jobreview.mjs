@@ -107,6 +107,7 @@ export const EDITABLE = [
   { key: 'country', label: 'Country', max: 80 },
   { key: 'applyBy', label: 'Apply by', max: 400, derived: true },
   { key: 'applyByDate', label: 'Closing date', max: 10, date: true },
+  { key: 'reviewDate', label: 'Suggested apply by', max: 10, date: true },
   { key: 'comments', label: 'Comments', max: 1500 },
   { key: 'adUrl', label: 'Link to the advert', max: 600, url: true },
   { key: 'postedAtUrl', label: 'Posted at', max: 600, url: true },
@@ -252,6 +253,13 @@ export function applyEdits(row, edits) {
      being stated. Everything else is settled by `settleDeadline`. */
   if ('applyBy' in clean && !('applyByDate' in clean) && OPEN_ENDED.test(clean.applyBy)) {
     out.applyByDate = '';
+  }
+  /* The SUGGESTED apply-by keeps healReviewDate's rule wherever it is set:
+     a first-review date on or after the closing date is the closing date said
+     twice, or a contradiction, and is not published — whichever of the two
+     boxes the maintainer moved. */
+  if (out.reviewDate && out.applyByDate && out.reviewDate >= out.applyByDate) {
+    out.reviewDate = '';
   }
   return settlePlace(settleDeadline(out), row);
 }

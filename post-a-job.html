@@ -274,20 +274,30 @@
 
                       <div class="oa-row">
                         <div class="oa-field">
-                          <label for="f-applyByDate">Apply by <span class="oa-req" aria-hidden="true">*</span></label>
-                          <p class="oa-hint">Shown publicly. Drives the <em>Deadline</em> filter, so
-                          the posting stops showing as open once the date passes.</p>
+                          <label for="f-reviewDate">Suggested apply by</label>
+                          <p class="oa-hint">Shown publicly. The first-review or
+                          full-consideration date &mdash; &ldquo;apply by this date to ensure
+                          full consideration&rdquo;. Leave it empty if the posting names none.</p>
                           <!-- bounded so the picker cannot offer a year the build
                                would drop (jobs-model day(): 1990-2100) -->
+                          <input type="date" id="f-reviewDate" name="reviewDate"
+                                 min="1990-01-01" max="2100-12-31">
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-applyByDate">Final apply by <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly. The hard closing date &mdash; drives
+                          the <em>Final deadline</em> filter, so the posting stops showing as open
+                          once the date passes.</p>
                           <input type="date" id="f-applyByDate" name="applyByDate"
                                  min="1990-01-01" max="2100-12-31" required>
                         </div>
-                        <div class="oa-field">
-                          <label class="oa-check" style="margin-top:32px;font-weight:400">
-                            <input type="checkbox" id="f-untilFilled" name="untilFilled">
-                            There is no fixed deadline &mdash; applications are considered until the post is filled
-                          </label>
-                        </div>
+                      </div>
+
+                      <div class="oa-field">
+                        <label class="oa-check" style="font-weight:400">
+                          <input type="checkbox" id="f-untilFilled" name="untilFilled">
+                          There is no fixed final deadline &mdash; applications are considered until the post is filled
+                        </label>
                       </div>
 
                       <div class="oa-field">

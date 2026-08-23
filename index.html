@@ -969,7 +969,10 @@
             rows: function (r) {
               return [
                 { label: 'Entry level', value: (r.levels || []).join(', ') },
-                { label: 'Apply by',    value: r.applyBy },
+                /* the suggested (first-review) date, only where the posting
+                   names one — an empty row is skipped by the engine */
+                { label: 'Suggested apply by', value: OAList.longDate(r.reviewDate) },
+                { label: 'Final apply by',     value: r.applyBy },
                 { label: 'Comments on Job Posting', value: r.comments },
                 { label: 'File link',
                   html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad', true)

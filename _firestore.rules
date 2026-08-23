@@ -81,7 +81,10 @@ service cloud.firestore {
             // every posting made before the split carries.
             && str('school', 200)      && str('unit', 200)
             && str('country', 80)      && str('type', 40)
-            && str('applyByDate', 20)  && str('applyByNote', 400)
+            // the FINAL apply-by and the SUGGESTED (first-review) apply-by —
+            // the form's two date questions since 2026-08
+            && str('applyByDate', 20)  && str('reviewDate', 20)
+            && str('applyByNote', 400)
             && str('comments', 1500)   && str('postedAtUrl', 600)
             && str('adUrl', 600)       && str('ref', 60)
             && str('firstName', 100)   && str('lastName', 100)
@@ -122,10 +125,10 @@ service cloud.firestore {
       // which rightly stays put): the build treats it as trustworthy (it
       // becomes addedAt, the e-mail alerts' cursor), so a bogus 1e16 or a
       // back-dated value must not exist at all.
-      // The key ceiling must clear what the form actually writes: 27 keys
+      // The key ceiling must clear what the form actually writes: 28 keys
       // always (collect() + ref/uid/authEmail/status/source/createdAt) and 4
       // more when the advert is UPLOADED rather than linked (adUploadPath/
-      // Name/Type/Size) — 31 in all. At the old ceiling of 30 exactly the
+      // Name/Type/Size) — 32 in all. At the old ceiling of 30 exactly the
       // upload case was refused as permission-denied while a link-only
       // posting sailed through. selftest.mjs pins this arithmetic against
       // the form source, so a new field fails the build, not the poster.
@@ -537,7 +540,7 @@ service cloud.firestore {
                            && request.resource.data.edits.keys().hasOnly([
                                 'institution', 'department', 'school', 'unit',
                                 'type', 'levels', 'country',
-                                'applyBy', 'applyByDate', 'comments',
+                                'applyBy', 'applyByDate', 'reviewDate', 'comments',
                                 'adUrl', 'postedAtUrl', 'furtherInfoUrl',
                               ])));
       allow delete: if isAdmin();
