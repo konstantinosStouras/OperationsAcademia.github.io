@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 import {
-  text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows, healPlace,
+  text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
   universitiesLink, ownUniversitiesLink,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
