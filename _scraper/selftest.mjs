@@ -23,7 +23,7 @@ import {
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
-  removalSpecs, buildOwned, ownerTag, specMatches,
+  removalSpecs, buildOwned, ownerTag, specMatches, healPlace,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
 } from './jobs-model.mjs';
 import { splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey } from './vocab.mjs';
@@ -49,7 +49,7 @@ import {
 import {
   COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
-  needMail, changedKeys,
+  needMail, changedKeys, approvedRow, duplicatesOf, sameDups,
 } from './jobreview.mjs';
 import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
@@ -1492,6 +1492,39 @@ async function testFurtherInfoLink() {
     furtherInfoUrl: 'https://www.psu.edu/careers' });
   eq(theirs.furtherInfoUrl, 'https://www.psu.edu/careers', 'and theirs is left alone');
 
+  /* A REVIEW EDIT FOLLOWS THE SAME RULE. The workbook ingest builds the link
+     from the institution as the sheet wrote it, so an approval whose edit
+     corrects the name published a link asking for the old spelling — three of
+     them ("MIT Sloan", "University of Chicago (Booth)", "NUS (IS)") turned
+     this very guard red on 2026-08-23 and stopped every posting on the site
+     from publishing for a day. */
+  const sheetRow = { id: 'r', institution: 'MIT Sloan', school: '', unit: 'Operations Management',
+    department: 'Operations Management', furtherInfoUrl: universitiesLink('MIT Sloan') };
+  const approvedEdit = applyEdits(sheetRow,
+    { institution: 'Massachusetts Institute of Technology (MIT)' });
+  eq(approvedEdit.furtherInfoUrl,
+    universitiesLink('Massachusetts Institute of Technology (MIT)'),
+    'a review edit that corrects the name regenerates the site\'s own link with it');
+  const sheetTheirs = applyEdits({ ...sheetRow, furtherInfoUrl: 'https://mitsloan.mit.edu/faculty' },
+    { institution: 'Massachusetts Institute of Technology (MIT)' });
+  eq(sheetTheirs.furtherInfoUrl, 'https://mitsloan.mit.edu/faculty',
+    'while a link the sheet\'s contributor gave is never touched');
+
+  /* AND A CARRIED ROW HEALS A STALE LINK ON ITS OWN. healPlace used to test
+     the three names alone, so a row already canonical whose own link still
+     asked for an earlier spelling came back untouched — red for ever, with
+     nothing left to heal it. */
+  const staleCarried = {
+    id: 'c', institution: 'University of Chicago', school: 'Booth School of Business',
+    unit: 'Operations Management', department: 'Booth School of Business, Operations Management',
+    furtherInfoUrl: universitiesLink('University of Chicago (Booth)'),
+  };
+  eq(healPlace(staleCarried).furtherInfoUrl, universitiesLink('University of Chicago'),
+    'a carried row with canonical names still heals a stale link of ours');
+  const freshCarried = { ...staleCarried, furtherInfoUrl: universitiesLink('University of Chicago') };
+  ok(healPlace(freshCarried) === freshCarried,
+    'and a row whose names and link are both right is returned untouched');
+
   /* the served file, row by row: every one of our links names its own row */
   const rows = JSON.parse(await readFile(JOBS, 'utf8'));
   const wrong = rows.filter((r) => ownUniversitiesLink(r.furtherInfoUrl) &&
@@ -2271,19 +2304,43 @@ async function testVocabFile() {
      on it is reported by `node _scraper/selftest.mjs --open`. Delete the entry
      when the owner rules on it (the answer goes in SCOPED_UNIT_ALIASES). */
   const AWAITING_OWNER = new Set([
-    /* empty: every pair the sweep has found has been ruled on */
+    /* CUHK-Shenzhen, School of Management and Economics (2026-08-23): the
+       directory seed's "Information Systems and Operations Management" beside
+       a new form posting's "Operations Management" — one unit written short,
+       or two units? Only the owner can say; the answer goes in
+       SCOPED_UNIT_ALIASES and this entry is then deleted. */
+    'The Chinese University of Hong Kong, Shenzhen|Information Systems and Operations Management|Operations Management',
   ]);
-  const dupUnits = [], openUnits = [];
+  const dupUnits = [], openUnits = [], seenAwaiting = new Set();
   for (const [u, e] of Object.entries(v.byUniversity)) {
     for (const list of Object.values(e.bySchool)) {
       for (const [a, b] of samePair(list, u)) {
-        (AWAITING_OWNER.has(`${u}|${a}|${b}`) ? openUnits : dupUnits).push(`${u}: ${a} / ${b}`);
+        /* looked up both ways round: which of the pair the sweep meets first
+           depends on the order the vocabulary lists them, which moves as
+           postings arrive, and an entry must not stop matching because two
+           names swapped places */
+        const key = AWAITING_OWNER.has(`${u}|${a}|${b}`) ? `${u}|${a}|${b}`
+          : (AWAITING_OWNER.has(`${u}|${b}|${a}`) ? `${u}|${b}|${a}` : '');
+        if (key) { openUnits.push(`${u}: ${a} / ${b}`); seenAwaiting.add(key); }
+        else dupUnits.push(`${u}: ${a} / ${b}`);
       }
     }
   }
   eq(dupUnits, [], 'and no school offers one department under two names, beyond the pairs awaiting a decision');
-  eq(openUnits.length, AWAITING_OWNER.size,
-    'and every pair on that list is still really there — a settled one is removed, not left behind');
+  /* An entry whose pair is NOT in the committed vocabulary is reported, never
+     failed. It has to be listable AHEAD of the pair's arrival: the posting
+     that introduces the pair sits in Firestore until the next GREEN build,
+     and the old "still really there" equality made that build impossible —
+     red before the entry was added (an unlisted pair) and red after it (an
+     entry with no pair in yesterday's committed data). Listing it first is
+     the only order that works, so the window is allowed and NAMED; an entry
+     still on this report after its pair has shipped (or been settled) is
+     stale and should be removed. */
+  for (const k of AWAITING_OWNER) {
+    if (!seenAwaiting.has(k)) {
+      console.log('  (awaiting-owner entry not (yet) in the committed vocabulary: ' + k + ')');
+    }
+  }
   if (process.argv.includes('--open')) {
     for (const line of openUnits) console.log('  awaiting the owner: ' + line);
   }
@@ -4559,6 +4616,83 @@ function testReviewQueue() {
   eq(split.refresh[0].status, PENDING, 'while staying pending');
   eq(split.refresh[0].edits.comments, 'mine', 'and keeping what the maintainer typed');
   eq(refreshQueued(queued, RV_ROW), null, 'an unchanged sheet refreshes nothing');
+
+  /* AN APPROVAL DATES THE POSTING FROM THE DAY IT COULD FIRST BE READ. The
+     queue's copy carries the day the crawler first saw the row, which can be
+     days before the maintainer approved it — and `addedAt` is what the e-mail
+     alerts window on, so dated from the crawl a posting approved after a
+     subscriber's last digest fell outside every window and was announced to
+     nobody. Grandfathered documents are exempt (their reviewedAt and queuedAt
+     are the same instant, stamped by partition itself): those postings were
+     public and announced long before the gate existed, and re-dating them
+     would blast every subscriber about postings they already know. */
+  const decided = { rowId: RV_ROW.id, status: APPROVED, row: RV_ROW, edits: {},
+    queuedAt: '2026-08-18T00:00:00Z', reviewedAt: '2026-08-22T09:30:00.123Z' };
+  const published = partition([RV_ROW], [decided], {}).publish[0];
+  eq(published.addedAt, '2026-08-22T09:30:00Z',
+    'an approved posting is dated from its approval, not from the crawl');
+  eq(approvedRow(RV_ROW, { ...decided, reviewedAt: '2026-08-18T00:00:00Z' }).addedAt,
+    RV_ROW.addedAt,
+    'a grandfathered document (reviewedAt == queuedAt) keeps the date it had');
+  eq(approvedRow({ ...RV_ROW, addedAt: '2026-08-25T00:00:00Z' }, decided).addedAt,
+    '2026-08-25T00:00:00Z',
+    'and a date already later than the approval is never wound back');
+  ok(approvedRow(RV_ROW, decided).addedAt ===
+     approvedRow(RV_ROW, decided).addedAt &&
+     JSON.stringify(approvedRow(RV_ROW, decided)) ===
+     JSON.stringify(partition([RV_ROW], [decided], {}).publish[0]),
+    'the sheet sync and the build publish an approval identically, so the file cannot flap');
+}
+
+function testReviewDuplicates() {
+  /* THE SAME JOB, ALREADY POSTED. A school that advertises through the site's
+     own form is routinely also entered in the tracking workbook, and the
+     crawled copy then arrives in the queue as a fresh posting. It is FLAGGED
+     against the site, never collapsed: the maintainer decides on the card. */
+  const site = [
+    { id: 'OA-1', ref: 'OA-JOB-260820-HLA8', source: 'oa-form', year: 2027,
+      institution: 'University of Nevada, Las Vegas', school: 'Lee Business School',
+      unit: 'Marketing', department: 'Lee Business School, Marketing',
+      levels: ['Assistant Professor'], posted: '2026-08-20',
+      adUrl: 'https://apply.interfolio.com/12345' },
+  ];
+  const crawled = { id: '2027-unlv-20260822', year: 2027,
+    institution: 'The University of Nevada, Las Vegas', school: '',
+    unit: 'Marketing', department: 'Marketing',
+    levels: ['Assistant Professor'], posted: '2026-08-22', adUrl: '' };
+
+  eq(duplicatesOf(crawled, site).map((d) => d.id), ['OA-1'],
+    'a crawled posting naming the same department at the same university in the ' +
+    'same market is flagged, across a "The" the two spellings do not share');
+
+  eq(duplicatesOf({ ...crawled, unit: 'Finance', department: 'Finance' }, site), [],
+    'a different department at the same school is not');
+  eq(duplicatesOf({ ...crawled, year: 2026 }, site), [],
+    'nor is the same department in a different market year');
+  eq(duplicatesOf({ ...crawled, unit: '', department: '',
+    adUrl: 'https://apply.interfolio.com/12345/' }, site).map((d) => d.id), ['OA-1'],
+    'while the same advertisement link flags it whatever the names say');
+  eq(duplicatesOf({ ...crawled, levels: ['Post-Doc'] }, site), [],
+    'and two rows whose entry levels share nothing are two advertisements — ' +
+    'the Houston lesson, honoured here too');
+  eq(duplicatesOf({ ...crawled, adUrl: 'https://www.operationsacademia.org/',
+    unit: '', department: '' }, site), [],
+    'our own home page in the link column identifies nothing');
+
+  const entry = duplicatesOf(crawled, site)[0];
+  eq(Object.keys(entry).sort(),
+    ['department', 'id', 'institution', 'posted', 'ref', 'source'],
+    'a flag carries what the card needs to say and nothing else — never a whole row');
+
+  ok(sameDups([entry], [entry]) && !sameDups([entry], []),
+    'sameDups is what keeps an unchanged sync from writing at all');
+
+  /* the sync computes the flags and writes them; the panel only draws them */
+  const withDup = queueDoc(crawled, { now: '2026-08-22T00:00:00Z', dup: [entry] });
+  eq(withDup.dup.length, 1, 'a fresh queue document carries its flags');
+  for (const k of Object.keys(withDup)) {
+    ok(DOC_KEYS.includes(k), `flagged queue document key "${k}" is one the rules allow`);
+  }
 }
 
 function testReviewEdits() {
@@ -4784,6 +4918,33 @@ async function testReviewWiring() {
   const mailer = await readFile(path.join(HERE, 'jobreview-mailer.mjs'), 'utf8');
   ok(mailer.includes("site + '/admin-area'") && !mailer.includes("site + '/feedback'"),
     'the review e-mail points at the Admin area, not at the page the queue left');
+
+  /* THE DOCUMENT AND THE RULES, PINNED BOTH WAYS — the news gate's own
+     discipline, applied here: a key the module writes with no rule is a
+     permission-denied at save time, and a rule with no key is a door nobody
+     documented. The FIRST hasOnly list in the block is the document's; the
+     second is the edits map's, pinned against EDITABLE above. */
+  const docList = new Set(
+    (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
+      .match(/'[a-zA-Z]+'/g) || []).map((s) => s.slice(1, -1)));
+  eq([...docList].sort(), [...DOC_KEYS].sort(),
+    'every key a jobReviews document may carry has a rule, and no rule allows a key ' +
+    'the module does not know');
+
+  /* THE DUPLICATE FLAGS REACH EVERY PLACE THE DECISION IS MADE. The sync
+     computes them (the only writer), the card raises them where Approve and
+     Reject are pressed, and the e-mail — the other place an approval is
+     decided from — says the same thing. */
+  ok(sync.includes('duplicatesOf('),
+    'the sheet sync checks every queued posting against the site for duplicates');
+  ok(sync.includes('sameDups('),
+    'and re-checks pending ones without rewriting a flag that has not moved');
+  ok(panel.includes('data-dup') && panel.includes('doc.dup'),
+    'the review card raises a stored duplicate flag where the decision is made');
+  ok(panel.includes('oa-note is-warn'),
+    'as a warning panel that names its own colours, per the theme rules');
+  ok(mailer.includes('Possibly already on the site'),
+    'and the review e-mail warns about it too');
 }
 
 /* --------------------------------------------------------- the Admin area
@@ -5016,6 +5177,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testHigherEdJobsApply();
   await testHigherEdJobsWiring();
   testReviewQueue();
+  testReviewDuplicates();
   testReviewEdits();
   await testReviewWiring();
   await testSubmissionNotices();
