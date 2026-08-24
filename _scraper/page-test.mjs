@@ -1279,6 +1279,46 @@ for (const [name, expect] of [
   eq(prefilled.editDoc.rowId, DS_ROW,
     'v3 post-a-job: \u2026as a MERGE onto the row\u2019s own document, where the page reads it');
 
+  /* -- a pre-fill mark never outlives its value (the CI race) --------------
+
+     The failure the first CI run caught, made deterministic: the records
+     fill Tulane's one department and MARK it; the poster then overtypes it,
+     re-scopes the school, and picks the very string the stale mark still
+     holds \u2014 all inside ONE task, so no resolve timer can run in between,
+     which is exactly the interleaving CI produced under load. The mark must
+     be retired ON THE EVENT (reconcile in oa-uniinfo.js), or the pending
+     resolve reads the pick as its own stale fill and clears a department
+     the poster just chose. */
+  const race = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'Tulane University');
+    await q.waitForFunction(() =>
+      document.getElementById('f-unit').value === 'Management Science' &&
+      document.getElementById('f-unit').getAttribute('data-oa-auto-unit') === 'Management Science',
+    null, { timeout: 8000 });
+    await q.evaluate(() => {
+      const put = (id, v) => {
+        const el = document.getElementById(id);
+        el.value = v;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+      put('f-unit', 'Wibble Widgets Group');        // taken over by the poster
+      put('f-school', 'Wibble School of Widgets');  // \u2026who re-scopes the school
+      put('f-unit', 'Management Science');          // \u2026and picks the marked string
+    });
+    await q.waitForTimeout(400);                    // let every scheduled resolve run
+    return q.evaluate(() => ({
+      unit: document.getElementById('f-unit').value,
+      school: document.getElementById('f-school').value,
+    }));
+  });
+  eq(race.unit, 'Management Science',
+    'v3 post-a-job: a department the poster picked survives every late resolve \u2014 ' +
+    'a stale pre-fill mark is retired on the event, not on the next timer');
+  eq(race.school, 'Wibble School of Widgets',
+    'v3 post-a-job: \u2026and the re-scoped school stays the poster\u2019s too');
+
   /* -- correct it (the edit path), on /v3/ --------------------------------- */
 
   const editSeed = {

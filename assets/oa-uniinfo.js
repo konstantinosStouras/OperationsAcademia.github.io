@@ -297,6 +297,9 @@
     var dead = false;
     var timer = null;
     var lastAutoChars = '';
+    /* fields whose fill the poster CLEARED — a decision, held for the page's
+       life, so no later resolve can refill what they emptied */
+    var declined = {};
 
     function on(el, type, fn) {
       if (!el) return;
@@ -309,24 +312,62 @@
     /** Fill an EMPTY field, or correct/retire this module's own earlier
         fill — never a value the poster typed. `value` may be '', which
         clears a stale auto-fill after the university changed. Returns
-        whether anything was written. */
+        whether anything was written.
+
+        OWNERSHIP IS THE VALUE STILL BEING EXACTLY WHAT WAS WRITTEN. The
+        mark (`data-oa-auto-*`) says what this module last put in the box,
+        and two things end its claim: the poster CLEARING the fill — "the
+        department sits directly under the university" is said by emptying
+        the school field, so that empty box is a decision, remembered for
+        the page's life and never refilled — and the field being TAKEN OVER
+        by any other writer (typing, a combo row, a restored draft). The
+        takeover check is what makes this order-independent: without it, a
+        stale mark could string-equal a value a combo pick later sets, and
+        a late resolve would clear a department the poster had just chosen
+        (the Tulane did-you-mean race, caught by page-test under CI load). */
     function autoFill(el, attr, value, events) {
-      if (!el) return false;
+      if (!el || declined[attr]) return false;
       var own = el.getAttribute(attr) || '';
       var current = trim(el.value);
+      if (own && !current) {                           // our fill, cleared — a decision
+        el.removeAttribute(attr);
+        declined[attr] = true;
+        return false;
+      }
+      if (own && current !== own) {                    // taken over — the mark is stale
+        el.removeAttribute(attr);
+        own = '';
+      }
       if (current && current !== own) return false;    // the poster's — theirs
-      /* a fill the poster then CLEARED is a decision, not an empty box —
-         "the department sits directly under the university" is said by
-         emptying the school field, and refilling it would fight them */
-      if (own && !current && value === own) { el.removeAttribute(attr); return false; }
       if (current === value) return false;             // nothing to do
       el.value = value;
       if (value) el.setAttribute(attr, value);
       else el.removeAttribute(attr);
-      (events || ['input']).forEach(function (t) {
+      /* 'change', never 'input': the name pickers OPEN THEIR DROPDOWN on any
+         input event (oa-combo.js reads one as typing), and a dropdown popping
+         open under a box the poster never touched is not a fill, it is a
+         startle. 'change' reaches everything that matters — the cascade's
+         snapPlace (which relays to the form's sync), the draft, the error
+         clearing — without impersonating a keystroke. */
+      (events || ['change']).forEach(function (t) {
         el.dispatchEvent(new Event(t, { bubbles: true }));
       });
       return true;
+    }
+
+    /** The synchronous half of the ownership rule, run on the very event a
+        field changes: a mark whose field no longer holds exactly what was
+        written is retired NOW — cleared meaning declined, overtyped meaning
+        taken over — so no later resolve can act on a stale claim, whatever
+        order the timers fire in. */
+    function reconcile(el, attr) {
+      if (!el) return;
+      var own = el.getAttribute(attr) || '';
+      if (!own) return;
+      var current = trim(el.value);
+      if (current === own) return;
+      el.removeAttribute(attr);
+      if (!current) declined[attr] = true;
     }
 
     function charBoxes() {
@@ -393,8 +434,8 @@
            — the same reasoning fill() in oa-jobform.js records for the
            events it does not fire. */
         if (opts.fillNames !== false) {
-          var named = autoFill(school, 'data-oa-auto-school', f.school, ['input', 'change']);
-          named = autoFill(unit, 'data-oa-auto-unit', f.unit, ['input', 'change']) || named;
+          var named = autoFill(school, 'data-oa-auto-school', f.school);
+          named = autoFill(unit, 'data-oa-auto-unit', f.unit) || named;
           if (named) {
             f = facts(rows, {
               institution: val(inst), school: val(school), unit: val(unit),
@@ -424,9 +465,12 @@
     }
 
     function schedule() {
-      /* after the picker's own change handlers have settled the values —
-         snapPlace rewrites a field into its published spelling on the same
-         event this listens for */
+      /* the marks first, synchronously, on the event itself — see reconcile */
+      reconcile(school, 'data-oa-auto-school');
+      reconcile(unit, 'data-oa-auto-unit');
+      /* then the fills, after the picker's own change handlers have settled
+         the values — snapPlace rewrites a field into its published spelling
+         on the same event this listens for */
       clearTimeout(timer);
       timer = setTimeout(resolve, 0);
     }

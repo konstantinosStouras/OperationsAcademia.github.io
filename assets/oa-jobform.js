@@ -951,6 +951,12 @@
     }
     school.addEventListener('input', sync);
     unit.addEventListener('input', sync);
+    /* 'change' as well: the records pre-fill (oa-uniinfo.js) deliberately
+       dispatches only 'change' — an 'input' would pop the pickers' dropdowns
+       open — and the joined line must follow a filled-in school even when
+       the cascade (whose own onChange relays to sync) failed to mount. */
+    school.addEventListener('change', sync);
+    unit.addEventListener('change', sync);
     sync();
 
     /* The cascade itself is assets/oa-place-picker.js — the same one the
