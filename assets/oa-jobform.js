@@ -823,11 +823,20 @@
              a copy e-mailed, "post another". None of that is true of a
              correction, so say what actually happened instead. */
           if (EDIT_ID) {
+            /* The echo (assets/oa-fresh.js): the jobs page this browser opens
+               NEXT shows the corrected posting immediately, while the build
+               publishes it for everyone else. `doc` is what was actually
+               written — canonicalised, name-fixed — so the echo reads the way
+               the posting will publish. */
+            if (window.OAFresh) {
+              OAFresh.stash({ docId: EDIT_ID, ref: EDIT_REF,
+                              fields: OAFresh.echoFields(doc) });
+            }
             var done = $('oa-done');
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
-              '<p>The posting is updated on the <a href="jobs.html">job postings page</a> ' +
-              'within a few minutes.</p>' +
+              '<p>The <a href="jobs.html">job postings page</a> already shows your ' +
+              'edit on this device. Everyone else sees it within a few minutes.</p>' +
               '<p class="oa-done-actions">' +
               '<a class="button blue" href="jobs.html">Back to the job postings</a></p>';
           } else {

@@ -862,6 +862,30 @@ REVALIDATES rather than re-downloads — a 304 with no body when nothing changed
 Copy that promises a time is part of this: the forms and the review panel say
 "within a few minutes", and if the cadence ever changes, they change with it.
 
+**And the EDITOR does not wait even that long** (owner, 2026-08-24: "when the
+admin edits a posted job, the edits should be shown immediately"). Saving an
+edit — or taking a posting down — leaves an ECHO in that browser's
+localStorage (`assets/oa-fresh.js`), and every page that renders
+`data/jobs.json` overlays it at read time: the jobs page the editor opens
+next already shows the correction, while the pipeline publishes it for
+everyone else exactly as before. It is the header-hint idea applied to a
+posting, and it is honest by construction: PER BROWSER (nothing leaves the
+machine, so no visitor can see an unpublished value); echoing ONLY what the
+build would publish (a pinned subset of `PUBLIC_FIELDS`, the Apply-by line
+composed by a parity-pinned browser twin of `composeApplyBy`, values taken
+from the form AFTER `canonColumns()` and the name fixes); and STANDING DOWN
+against the build, not against hope — the echo is dropped when the served
+row carries every echoed value, when `data/jobs-meta.json`'s `generated`
+stamp shows a build begun after the save has published (its sanitisers have
+the last word, even where they disagree), or after an hour. The overlay is
+hooked into `OAList.load` (one place, every consumer) plus
+previous-markets.html's own fetch; the stash is written by the edit form and
+by oa-jobedit's takedown. `testFreshEcho` in selftest.mjs pins the parity
+twins, the field whitelist and all the wiring; page-test.mjs measures the
+echoed card on the rendered jobs page. A posting's identity (`id`, `year`,
+`posted`) is deliberately not echoable — an edit does not move a posting,
+and the echo must not either.
+
 ## A text search holds SEVERAL terms
 
 Every `type: 'text'` filter in `assets/oa-list.js` takes more than one term:
