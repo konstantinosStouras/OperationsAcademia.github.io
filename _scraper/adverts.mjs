@@ -43,8 +43,15 @@
    that is wrong half the time.
    --------------------------------------------------------------------------- */
 
-import { text, url, longDate, OPEN_ENDED_RX, healReviewDate } from './jobs-model.mjs';
+import {
+  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns,
+} from './jobs-model.mjs';
 import { isHigherEdJobsUrl } from './higheredjobs.mjs';
+import { universityForSchool, schoolForUnit, SCHOOLS } from './vocab.mjs';
+
+/* fold(), for "is this stated name the organisation repeated?" — the same
+   grouping-not-publishing use jobreview.mjs makes of it. */
+const foldName = (v) => SCHOOLS.fold(String(v || ''));
 
 /** How an advertisement's own deadline is labelled, in order of authority.
     Every one of these names the APPLICATION's end, never the listing's —
@@ -387,9 +394,14 @@ export function parseWorkdayJson(json) {
   out.employmentType = text(info.timeType || '', 60);
 
   const desc = String(info.jobDescription || '');
-  const { date, prose } = deadlineFrom(labelledPairs(desc), plain(desc));
+  const fields = labelledPairs(desc);
+  const { date, prose } = deadlineFrom(fields, plain(desc));
   out.applyByDate = date;
   out.applyByProse = prose;
+
+  const stated = placeFieldsFrom(fields, out.institution);
+  out.school = stated.school;
+  out.department = stated.department;
 
   out.ok = !!(out.title || out.institution);
   return out;
@@ -400,9 +412,36 @@ export function parseWorkdayJson(json) {
 function emptyParse() {
   return {
     ok: false, gone: false,
-    title: '', institution: '', location: '', posted: '',
+    title: '', institution: '', school: '', department: '',
+    location: '', posted: '',
     applyByDate: '', applyByProse: '', listedUntil: '', employmentType: '',
   };
+}
+
+/** Labels under which these systems name the SCHOOL and the DEPARTMENT —
+    PeopleAdmin's details table ("College", "Department"), the boards'
+    dt/dd blocks. Read exact-key like the deadline labels, and kept apart
+    from them: which of the three name questions a value answers is decided
+    later, by `advertPlace`, against the site's own vocabulary. */
+export const SCHOOL_LABELS = ['school', 'college', 'school/college', 'school or college', 'faculty'];
+export const DEPARTMENT_LABELS = [
+  'department', 'hiring department', 'department/organization',
+  'academic unit', 'organizational unit', 'unit',
+];
+
+/** The school and department a page states, dropped when a value merely
+    repeats the organisation's own name (Workday writes the university into
+    half its fields). */
+function placeFieldsFrom(fields, institution) {
+  const own = foldName(String(institution || ''));
+  const pick = (labels) => {
+    for (const l of labels) {
+      const v = text(pairValue(fields, l), 200);
+      if (v && (!own || foldName(v) !== own)) return v;
+    }
+    return '';
+  };
+  return { school: pick(SCHOOL_LABELS), department: pick(DEPARTMENT_LABELS) };
 }
 
 /**
@@ -514,6 +553,10 @@ export function parseAdvert(html) {
     || advertDate(pairValue(fields, 'posted'));
   out.employmentType = text((ld && ld.employmentType) || pairValue(fields, 'type'), 60);
 
+  const stated = placeFieldsFrom(fields, out.institution);
+  out.school = stated.school;
+  out.department = stated.department;
+
   const { date, prose } = deadlineFrom(fields, body);
   out.applyByDate = date;
   out.applyByProse = prose;
@@ -550,6 +593,8 @@ export function cacheEntry(parsed, { adUrl = '', checkedAt = '', previous = null
     via,
     title: keep(parsed.title, prev.title),
     institution: keep(parsed.institution, prev.institution),
+    school: keep(parsed.school, prev.school),
+    department: keep(parsed.department, prev.department),
     location: keep(parsed.location, prev.location),
     posted: keep(parsed.posted, prev.posted),
     applyByDate: keep(parsed.applyByDate, prev.applyByDate),
@@ -650,19 +695,80 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
 /* -------------------------------------------------------------- queue block */
 
 /**
+ * WHERE a posting sits, classified from what the advertisement stated —
+ * `{ institution, school, unit }` in the site's own three-name shape, or
+ * null when the page stated nothing usable.
+ *
+ * CURATED, NEVER GUESSED, at every step, because these three names are the
+ * site's most-fought-over vocabulary (see "One spelling per university,
+ * school and department" in CLAUDE.md):
+ *
+ *   - a hiring organisation that is really a SCHOOL — "Harvard Business
+ *     School", the Interfolio shape — is filed under its university ONLY
+ *     when the site's own directory names exactly one home for it
+ *     (`universityForSchool`);
+ *   - the three names then go through `canonColumns()`, the same function
+ *     the posting form's three boxes go through, so what the card offers is
+ *     the spelling the site already publishes;
+ *   - an EMPTY school whose department the directory can place at that
+ *     university is filled from the directory (`schoolForUnit`, the
+ *     `fillSchoolFromDirectory` discipline — one school, or nothing).
+ *
+ * A name the vocabulary has never seen is still RETURNED, exactly as stated
+ * — the maintainer decides on the card, and `settlePlace` canonicalises
+ * whatever they adopt — but nothing here ever invents a pairing the
+ * directory does not know.
+ */
+export function advertPlace(ad, vocab, schools = SCHOOLS) {
+  const inst = text(ad && ad.institution, 200);
+  const sch = text(ad && ad.school, 200);
+  const unit = text(ad && ad.department, 200);
+  if (!inst && !sch && !unit) return null;
+
+  let institution = inst;
+  let school = sch;
+
+  if (inst && !sch) {
+    const home = universityForSchool(vocab, inst, schools);
+    if (home) { institution = home.institution; school = home.school; }
+  }
+  if (!institution && school) {
+    const home = universityForSchool(vocab, school, schools);
+    if (home) { institution = home.institution; school = home.school; }
+  }
+
+  const place = canonColumns({ institution, school, unit });
+  if (place.institution && !place.school && place.unit) {
+    const housed = schoolForUnit(vocab, place.institution, place.unit, schools);
+    if (housed) place.school = housed;
+  }
+
+  const out = {
+    institution: place.institution || '',
+    school: place.school || '',
+    unit: place.unit || '',
+  };
+  return (out.institution || out.school || out.unit) ? out : null;
+}
+
+/**
  * The `ad` block a pending review document carries — what the advertisement
  * itself says, put where the maintainer decides. RAISED, NEVER DECIDED, like
- * `dup` and `biz` beside it: the review card draws it with a button that
- * only fills the closing-date box, and nothing publishes until Approve.
- * `listedUntil` rides along labelled as what it is.
+ * `dup` and `biz` beside it: the review card draws it with buttons that only
+ * fill the boxes, and nothing publishes until Approve. `listedUntil` rides
+ * along labelled as what it is; `place` is `advertPlace`'s classification of
+ * the stated names against the site's own vocabulary.
  */
-export function adBlock(entry, { adUrl = '' } = {}) {
+export function adBlock(entry, { adUrl = '', place = null } = {}) {
   if (!entry) return null;
   return {
     url: adUrl || entry.url || '',
     status: entry.status || 'unreadable',
     title: entry.title || '',
     institution: entry.institution || '',
+    school: entry.school || '',
+    department: entry.department || '',
+    place: place || null,
     location: entry.location || '',
     posted: entry.posted || '',
     applyByDate: entry.applyByDate || '',
@@ -676,6 +782,54 @@ export function adBlock(entry, { adUrl = '' } = {}) {
     with nothing new writes nothing to the document. */
 export function sameAdInfo(a, b) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
+/* ------------------------------------------------------------ host report */
+
+/**
+ * The distinct websites the postings' advertisements live on, for the given
+ * market years (default: the two newest in the rows): one entry per host,
+ * `{ host, postings, years, read }` — `read` naming which pipeline covers it.
+ * Drive/Docs links are EXCLUDED BY THE OWNER'S OWN RULE (2026-08-24): they
+ * are user-uploaded copies whose address changes every time, so a host list
+ * carrying them would name storage, not a job board. Our own home page — a
+ * sheet row that names no ad — is likewise nothing.
+ */
+export function advertHostsReport(rows, { years = null } = {}) {
+  const all = (rows || []).filter((r) => r && r.adUrl);
+  const wanted = years && years.length ? years.map(Number)
+    : [...new Set(all.map((r) => Number(r.year)).filter(Boolean))]
+      .sort((a, b) => b - a).slice(0, 2);
+
+  const byHost = new Map();
+  for (const r of all) {
+    if (!wanted.includes(Number(r.year))) continue;
+    let host;
+    try {
+      host = new URL(url(r.adUrl)).hostname.toLowerCase().replace(/^www\./, '');
+    } catch { continue; }
+    if (!host) continue;
+    if (/(^|\.)(drive|docs)\.google\.com$/.test(host)) continue;
+    if (/(^|\.)operationsacademia\.org$/.test(host)) continue;
+
+    const read = isHigherEdJobsUrl(r.adUrl) ? 'higheredjobs pipeline'
+      : workdayApiUrl(r.adUrl) ? 'adverts pipeline (Workday JSON)'
+      : !isAdvertUrl(r.adUrl) ? 'never fetched (login wall)'
+      : /\.pdf(\?|$)/i.test(r.adUrl) ? 'adverts pipeline (PDF — unreadable)'
+      : 'adverts pipeline (generic)';
+
+    const e = byHost.get(host) || { host, postings: 0, years: new Set(), read };
+    e.postings++;
+    e.years.add(Number(r.year));
+    byHost.set(host, e);
+  }
+
+  return {
+    years: wanted,
+    hosts: [...byHost.values()]
+      .map((e) => ({ ...e, years: [...e.years].sort() }))
+      .sort((a, b) => b.postings - a.postings || a.host.localeCompare(b.host)),
+  };
 }
 
 /**

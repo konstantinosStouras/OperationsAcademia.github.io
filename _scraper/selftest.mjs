@@ -54,7 +54,7 @@ import {
 import {
   parseAdvert, advertDate, advertKeyOf, isAdvertUrl, workdayApiUrl,
   applyAdverts, cacheEntry as advertCacheEntry, needFetch as advertNeedFetch,
-  adBlock, sameAdInfo, queueNeedsFetch,
+  adBlock, sameAdInfo, queueNeedsFetch, advertPlace, advertHostsReport,
   DEADLINE_LABELS as ADVERT_DEADLINE_LABELS, LISTING_END_LABELS,
 } from './adverts.mjs';
 import {
@@ -5189,6 +5189,8 @@ const GENERIC_AD = `<!doctype html><html><head>
 <table>
   <tr><th>Open Date</th><td>08/10/2026</td></tr>
   <tr><th>Close Date</th><td>10/15/2026</td></tr>
+  <tr><th>College</th><td>College of Business</td></tr>
+  <tr><th>Department</th><td>Management Sciences</td></tr>
 </table>
 </body></html>`;
 
@@ -5275,6 +5277,99 @@ function testAdvertsParsing() {
     'with or without the locale segment');
   eq(workdayApiUrl('https://utah.peopleadmin.com/postings/195629'), '',
     'and anything else is read as the ordinary page it is');
+
+  // where the page files the post — the school and department it states
+  eq(ad.school, 'College of Business', 'the labelled College is read as the school');
+  eq(ad.department, 'Management Sciences', 'and the labelled Department as the department');
+  const orgEcho = parseAdvert('<h1>Post</h1>' +
+    '<script type="application/ld+json">{"@type":"JobPosting","title":"Post",' +
+    '"hiringOrganization":{"@type":"Organization","name":"Example University"}}</script>' +
+    '<table><tr><th>Department</th><td>Example University</td></tr></table>');
+  eq(orgEcho.department, '',
+    'a "department" that merely repeats the organisation\'s own name is nothing');
+}
+
+function testAdvertsPlace() {
+  /* Classifying the ad's stated names into the site's three — university,
+     school, department — against the site's own vocabulary. CURATED, NEVER
+     GUESSED: every resolution below either comes from the directory
+     unambiguously or leaves the name exactly as stated. */
+  const VOCAB = { byUniversity: {
+    'University of California, Berkeley': {
+      schools: ['Haas School of Business'],
+      bySchool: { 'Haas School of Business': ['Operations and Information Technology Management'] },
+    },
+    'Example University': {
+      schools: ['College of Business'],
+      bySchool: { 'College of Business': ['Management Sciences'] },
+    },
+    'Other University': {
+      schools: ['College of Business'],
+      bySchool: { 'College of Business': [] },
+    },
+  } };
+
+  /* THE INTERFOLIO SHAPE: the hiring organisation IS the school. The
+     directory names exactly one home for Haas, so the classification says
+     which university the posting belongs to — the owner's "categorize the
+     University correctly" case. */
+  const haas = advertPlace({ institution: 'Haas School of Business' }, VOCAB);
+  eq(haas.institution, 'University of California, Berkeley',
+    'a hiring organisation that is a school is filed under its university');
+  eq(haas.school, 'Walter A. Haas School of Business',
+    'with itself as the school, in the site\'s own canonical spelling');
+
+  /* A school name TWO universities use identifies neither. */
+  const shared = advertPlace({ institution: 'College of Business' }, VOCAB);
+  eq(shared.school, '', 'a school name two universities share resolves no pairing');
+
+  /* An empty school settled from the directory by the department it houses —
+     the fillSchoolFromDirectory discipline. */
+  const housed = advertPlace({
+    institution: 'University of California, Berkeley',
+    department: 'Operations and Information Technology Management',
+  }, VOCAB);
+  eq(housed.school, 'Haas School of Business',
+    'an empty school is settled from the directory by its department');
+  eq(housed.unit, 'Operations and Information Technology Management',
+    'and the department keeps its own field');
+
+  /* The stated three pass through canonColumns — the posting form's own
+     canon — so the card offers the spelling the site publishes. */
+  const stated = advertPlace({
+    institution: 'Example University', school: 'College of Business',
+    department: 'Management Sciences',
+  }, VOCAB);
+  eq(stated.institution, 'Example University', 'the university is kept');
+  eq(stated.school, 'College of Business', 'the school is kept');
+  ok(advertPlace({}, VOCAB) === null, 'a page that stated nothing classifies to nothing');
+
+  /* The host inventory — the owner's first question (2026-08-24): the
+     distinct websites this and last market year's postings are advertised
+     on, drive/docs links EXCLUDED (user-uploaded copies whose address
+     changes every time, not job boards). */
+  const rows = [
+    { id: 'a', year: 2027, adUrl: 'https://www.jobs.chronicle.com/job/1/' },
+    { id: 'b', year: 2026, adUrl: 'https://jobs.chronicle.com/job/2/' },
+    { id: 'c', year: 2026, adUrl: 'https://drive.google.com/file/d/x/view' },
+    { id: 'd', year: 2026, adUrl: 'https://docs.google.com/document/d/y' },
+    { id: 'e', year: 2026, adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1' },
+    { id: 'f', year: 2025, adUrl: 'https://old.example.edu/ad' },
+    { id: 'g', year: 2026, adUrl: 'https://psu.wd1.myworkdayjobs.com/en-US/S/job/P/Slug-1' },
+    { id: 'h', year: 2026, adUrl: '' },
+  ];
+  const report = advertHostsReport(rows, { years: [2027, 2026] });
+  const hosts = report.hosts.map((h) => h.host);
+  ok(hosts.includes('jobs.chronicle.com'), 'a board the postings link is listed');
+  eq(report.hosts.find((h) => h.host === 'jobs.chronicle.com').postings, 2,
+    'counted once per posting, www folded onto the bare host');
+  ok(!hosts.some((h) => /google\.com$/.test(h)),
+    'drive and docs links are excluded — user-uploaded copies, not job boards');
+  ok(!hosts.includes('old.example.edu'), 'a year outside the window is not counted');
+  eq(report.hosts.find((h) => h.host === 'higheredjobs.com').read, 'higheredjobs pipeline',
+    'each host names the pipeline that reads it');
+  ok(/Workday/.test(report.hosts.find((h) => h.host === 'psu.wd1.myworkdayjobs.com').read),
+    'a Workday tenant is marked as read from its JSON endpoint');
 }
 
 function testAdvertsApply() {
@@ -5330,6 +5425,12 @@ function testAdvertsApply() {
   const block = adBlock(cache.ads[key], { adUrl: link });
   eq(block.applyByDate, '2026-10-15', 'the queue block carries the deadline the ad states');
   eq(block.listedUntil, '2028-01-31', 'and the listing\'s end, labelled separately');
+  eq(block.school, 'College of Business', 'and the school the page states');
+  eq(block.department, 'Management Sciences', 'and its department');
+  const classified = adBlock(cache.ads[key], { adUrl: link,
+    place: { institution: 'Example University', school: 'College of Business', unit: 'Management Sciences' } });
+  eq(classified.place.institution, 'Example University',
+    'and the vocabulary\'s classification rides on the block for the card to offer');
   ok(sameAdInfo(block, adBlock(cache.ads[key], { adUrl: link })),
     'two blocks that say the same thing compare equal — an unchanged run writes nothing');
   const doc = { rowId: 'x', status: 'pending', row: { adUrl: link }, ad: null };
@@ -5372,7 +5473,7 @@ async function testAdvertsWiring() {
   const verify = await readFile(path.join(HERE, 'adverts-verify.mjs'), 'utf8');
   ok(verify.includes('.set({ ad: block }, { merge: true })'),
     'the queue pass writes only the ad block, by merge');
-  eq((verify.match(/\.set\(/g) || []).length, 1,
+  eq((verify.match(/\.doc\([^)]*\)\.set\(/g) || []).length, 1,
     'and that merge is the ONLY document write in the file — never the ' +
     'decision, never the edits');
   ok(!verify.includes('.update(') && !verify.includes('.delete('),
@@ -5385,8 +5486,18 @@ async function testAdvertsWiring() {
   ok(panel.includes('data-ad-use'), 'with a button that fills the Closing-date box');
   ok(panel.includes("querySelector('[data-key=\"applyByDate\"]')"),
     'and the button fills exactly the box the card publishes from');
+  ok(panel.includes('data-ad-place'),
+    'the vocabulary\'s classification gets its adopt-the-names button');
+  ok(panel.includes('data-ad-use-school') && panel.includes('data-ad-use-unit'),
+    'and the stated school and department get a button each');
   const mailer = await readFile(path.join(HERE, 'jobreview-mailer.mjs'), 'utf8');
   ok(mailer.includes('advertHtml(doc)'), 'and the review e-mail says the same thing');
+  ok(mailer.includes('vocabulary files it as'),
+    'the classification included — the e-mail informs the same decision');
+  /* The pending queue is what the maintainer is actively deciding, so the
+     queue pass spends the run's budget FIRST (owner, 2026-08-24). */
+  ok(verify.indexOf('await queuePass') < verify.indexOf('await publishedPass'),
+    'the queue pass runs before the published one — pending cards first');
 
   /* The cache is data/, so it must survive a round trip like every other
      file there — and the served postings must still satisfy the served-file
@@ -6466,6 +6577,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testHigherEdJobsApply();
   await testHigherEdJobsWiring();
   testAdvertsParsing();
+  testAdvertsPlace();
   testAdvertsApply();
   await testAdvertsWiring();
   testReviewQueue();
