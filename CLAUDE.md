@@ -409,6 +409,53 @@ stands down wherever `oa-jobedit.js` has drawn.
 `firebase deploy` — it needs an interactive login — so after any change to
 `_firestore.rules`, run `firebase deploy --only firestore:rules` from the
 repository root. See `_SETUP-FIREBASE.md` §4.
+
+## The Universities directory — one card per university, editable by anyone signed in
+
+`universities.html` is a CARD DIRECTORY since 2026-08-24 (owner: one card per
+university — its business school, its engineering/non-business school, each
+school's departments inside it), with the Leaflet map kept as the second view
+behind a Cards ⇄ Map switch (mounted lazily; the map half is unchanged —
+`data/universities.json` + `rowOverrides`).
+
+    _scraper/directory-model.mjs   what merges with what, and why (pure)
+    _scraper/build-directory.mjs   writes data/directory.json + directory-meta.json
+    assets/oa-directory.js         grouping, the OAList mount, the edit layer
+    assets/oa-directory.css        the page's own chrome, theme tokens throughout
+
+**`data/directory.json` is a BUILT file** — offline and deterministic, merged
+from the curated archive (`data/universities.json`), the `oa-institutions.js`
+seed and BOTH postings files, every name through `canonColumns()`. It is
+rebuilt as the last step of `oa-jobs-build.yml`, so **a posting always fits
+under a card, and a posting from a place no source lists CREATES its card in
+the run that published it** (the owner's rule). Two bounded folds keep the
+table clean without guessing: a school-less posting joins the ONE schooled row
+carrying its department (the `fillSchoolFromDirectory` discipline), and a bare
+acronym department folds into the ONE row whose initials spell it (the
+search's own acronym rule). A row's `id` is derived from the folded names
+(`rowKey` — `institutionKey` for the university part) and is what an edit is
+keyed on, so it never depends on array position.
+
+**`directoryEdits` is the read-time overlay, and ANY REGISTERED USER writes
+it** (owner, 2026-08-24) — the `rowOverrides` pattern with the write opened
+from the maintainer to every signed-in account. An edit stores only what
+differs from the committed file; `add: true` marks a row contributed whole;
+every document carries `by` (pinned to the writing uid by the rules, so
+attribution cannot be forged), `name` and `t`, and **every card shows "Last
+edited by <name> on <date>"**. Renaming a row so its names match another
+row's MERGES the two on screen — that plus the maintainer-only `hidden` flag
+(the duplicate's takedown, faded-with-Restore for them, never a one-way door)
+is the merge tool. The maintainer alone also deletes a document ("Reset to
+file") and alone sees the **"Last edited" filter** (an `order`ed, `className`-
+hidden OAList filter — two small generic options added to the engine for it),
+which exists to drive a review sweep. `testDirectoryModel`/
+`testDirectoryWiring` in selftest.mjs pin the merge rules and the
+module↔rules field lists BOTH WAYS; page-test.mjs measures who is offered
+which control, the attribution line, and the page's mobile gate (it is in
+`MOBILE_PAGES` now — the cards are an OAList mount; the map view keeps its own
+phone block, which switches views first). **Inert until the rules are
+redeployed**: `firebase deploy --only firestore:rules --project
+operations-academia`.
 ## Nothing from the tracking sheet publishes itself
 
 A posting crawled from the job market workbook is **queued for the maintainer,

@@ -3851,6 +3851,131 @@ async function testDeployGuard() {
     'and all three of this repository\'s deployable sections are still configured');
 }
 
+/* ------------------------------ the Universities directory (owner, 2026-08-24)
+
+   data/directory.json is the flat table universities.html groups into one
+   card per university — merged by _scraper/build-directory.mjs from the
+   curated archive, the oa-institutions.js seed and every posting, so a
+   posting always fits under a card and a posting from a place no source
+   lists creates one. `directoryEdits` is its read-time overlay, the
+   rowOverrides pattern with the write opened to every registered user;
+   the model tests pin the merge rules, the wiring test pins the module,
+   the rules, the served file and every page that has to agree. */
+async function testDirectoryModel() {
+  const { buildDirectory, rowKey, directoryStats } = await import('./directory-model.mjs');
+
+  eq(rowKey('The University of Texas at Dallas (UTD)', 'Naveen Jindal School of Management', 'Operations Management Area'),
+    rowKey('University of Texas at Dallas', 'Naveen Jindal School of Management', 'Operations Management Area'),
+    'directory: two spellings of one university key one row — the institutionKey join');
+
+  const archive = [{
+    institution: 'Testland University', school: 'Testland School of Business',
+    department: 'Operations Management', address: '1 Test St, Testville, France',
+    lat: 1, lng: 2, mapUrl: 'https://maps.example/x',
+    facultyUrl: 'https://test.example/faculty',
+  }];
+  const seed = [{ institution: 'Testland University', school: 'Testland School of Business', department: 'Operations Management' }];
+  const jobs = [
+    { institution: 'Testland University', school: 'Testland School of Business', unit: 'Operations Management', posted: '2026-08-01', country: 'France', type: 'University' },
+    // the form's school box left empty — the offline twin of
+    // fillSchoolFromDirectory settles it onto the ONE schooled row
+    { institution: 'Testland University', school: '', unit: 'Operations Management', posted: '2026-08-10', country: 'France' },
+    // …and an acronym department folds into its expansion, the same
+    // initials rule the site's search and the alert matcher apply
+    { institution: 'Testland University', school: '', unit: 'OM', posted: '2026-08-14', country: 'France' },
+    { institution: 'Brand New University', school: '', unit: 'Supply Chain Management', posted: '2026-08-12', country: 'Ireland', type: 'University' },
+  ];
+  const { rows } = buildDirectory({ archive, seed, jobs, past: [] });
+
+  const tl = rows.filter((r) => r.institution === 'Testland University');
+  eq(tl.length, 1, 'directory: the archive, the seed and three postings merge into ONE row');
+  eq(tl[0].n, 3, 'directory: the school-less and the acronym posting both fold into the schooled row');
+  eq(tl[0].lastPosted, '2026-08-14', 'directory: lastPosted is the newest across everything folded');
+  eq(tl[0].sources, ['directory', 'postings', 'seed'], 'directory: provenance is the union');
+  eq(tl[0].type, 'Business School',
+    'directory: a school NAMED "…School of Business" is a business school, whatever type the posting was filed under');
+  eq(tl[0].country, 'France', 'directory: the row\'s own evidence names its country');
+  eq(tl[0].facultyUrl, 'https://test.example/faculty', 'directory: the archive keeps the links');
+
+  const fresh = rows.find((r) => r.institution === 'Brand New University');
+  ok(fresh && fresh.n === 1 && fresh.sources.join() === 'postings',
+    'directory: a posting from a place NO source lists creates its row — and with it a new card');
+  eq(directoryStats(rows).universities, 2, 'directory: the meta counts universities the way the page groups them');
+}
+
+async function testDirectoryWiring() {
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8');
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+
+  const block = rules.slice(rules.indexOf('match /directoryEdits/'));
+  ok(block.length > 100, 'the rules carry a directoryEdits block');
+  ok(/allow read: if true;/.test(block.slice(0, 400)),
+    'an edit reaches EVERY visitor — a correction is not an editor-only view');
+  ok(/allow create, update: if signedIn\(\)/.test(block.slice(0, 900)),
+    'and ANY registered user may write one (owner, 2026-08-24)');
+  ok(/request\.resource\.data\.by == request\.auth\.uid/.test(block.slice(0, 1200)),
+    'attribution cannot be forged: `by` is pinned to the writing account');
+  ok(/'hidden' in request\.resource\.data[\s\S]{0,220}isAdmin\(\)/.test(block),
+    'hiding a row — the merge\'s takedown half — stays the maintainer\'s alone');
+  ok(/allow delete: if isAdmin\(\);/.test(block.slice(0, 3200)),
+    'and only the maintainer resets an edit back to the committed file');
+
+  /* the module and the rules agree BOTH WAYS, the testRowOverrides shape:
+     a field the editor writes with no rule is a permission-denied nobody can
+     debug; a rule with no writer is a dead key bounded only by its cap */
+  const allowed = new Set(
+    (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
+      .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
+  const fieldSpec = js.slice(js.indexOf('var FIELDS'), js.indexOf('var TYPE_LABEL'));
+  const fieldKeys = (fieldSpec.match(/key: '([^']+)'/g) || []).map((m) => m.slice(6, -1));
+  ok(fieldKeys.length >= 7, 'the editor offers the seven directory fields');
+  for (const key of fieldKeys) {
+    ok(allowed.has(key), `oa-directory.js may write "${key}", and the rules allow it`);
+  }
+  const saveBody = js.slice(js.indexOf('function save('), js.indexOf('function saveFailed('));
+  const written = new Set((saveBody.match(/\bdoc\.([A-Za-z_$][\w$]*)\s*=/g) || [])
+    .map((m) => m.replace(/^doc\./, '').replace(/\s*=$/, '')));
+  ok(written.size >= 4, 'the bookkeeping fields save() writes are read from the source');
+  for (const key of written) {
+    ok(allowed.has(key), `oa-directory.js's save() writes "${key}", and the rules allow it`);
+  }
+  eq([...allowed].sort(),
+    [...new Set([...fieldKeys, ...written, 'rowId', 'add', 'hidden', 'by', 'name', 't'])].sort(),
+    'the rules allow exactly what the editor writes — nothing dead, nothing refused');
+
+  /* the served file: unique ids (they are what an edit is keyed on) and the
+     one-spelling-per-place rule every dataset holds */
+  const dir = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'directory.json'), 'utf8'));
+  ok(dir.length > 500, `data/directory.json holds the merged table (${dir.length} rows)`);
+  eq(new Set(dir.map((r) => r.id)).size, dir.length,
+    'directory row ids are unique — an edit document names exactly one row');
+  const off = dir.filter((r) => {
+    const c = SCHOOLS.canonColumns({
+      institution: r.institution, school: r.school || '', unit: r.department || '',
+    });
+    return c.institution !== r.institution || c.school !== (r.school || '')
+      || c.unit !== (r.department || '');
+  }).map((r) => r.id);
+  eq(off, [], 'data/directory.json: every row names its place the way the site does');
+  const meta = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'directory-meta.json'), 'utf8'));
+  const { directoryStats } = await import('./directory-model.mjs');
+  eq(meta, directoryStats(dir), 'directory-meta.json agrees with the table it describes');
+
+  /* the page mounts the whole of it, and the gates cover the page */
+  const page = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
+  for (const need of ['assets/oa-list.js', 'assets/oa-list.css', 'assets/oa-directory.js',
+    'assets/oa-directory.css', 'OADirectory.mount', 'oa-dir-viewmap',
+    'assets/oa-uni-map.js', 'assets/oa-rowedit.js']) {
+    ok(page.includes(need), `universities.html carries ${need}`);
+  }
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  ok(/MOBILE_PAGES = \[[^\]]*'universities\.html'/.test(pt),
+    'universities.html mounts OAList now, so it is in MOBILE_PAGES — the standards\' own gate');
+  const wf = await readFile(path.join(HERE, '..', '.github', 'workflows', 'oa-jobs-build.yml'), 'utf8');
+  ok(wf.includes('build-directory.mjs'),
+    'oa-jobs-build.yml rebuilds the directory in the run that publishes the postings');
+}
+
 async function testRowOverrides() {
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-rowedit.js'), 'utf8');
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
@@ -6650,6 +6775,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
   await testDeployGuard();
+  await testDirectoryModel();
+  await testDirectoryWiring();
   await testRowOverrides();
   await testNewsReview();
   await testNameFixes();

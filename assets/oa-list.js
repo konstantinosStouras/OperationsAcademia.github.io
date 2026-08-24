@@ -327,7 +327,11 @@
       sel[f.key].forEach(function (v) { if (!(v in counts)) counts[v] = 0; });
 
       var names = Object.keys(counts);
-      var order = f.derive && BUCKET_ORDER[f.derive];
+      /* A filter may declare its own value order (`order: [...]`) — the
+         universities directory's "Last edited" buckets read newest-first,
+         which alphabetical sorting would shuffle. Derived buckets keep their
+         built-in order exactly as before. */
+      var order = (f.derive && BUCKET_ORDER[f.derive]) || f.order;
       names.sort(function (a, b) {
         if (order) {
           var ia = order.indexOf(a), ib = order.indexOf(b);
@@ -364,7 +368,14 @@
       filters.forEach(function (f) { clearTimeout(textTimers[f.key]); });
       barEl.innerHTML = '';
       filters.forEach(function (f) {
-        var wrap = el('div', { class: 'oa-filter' + (f.type === 'text' ? '' : ' oa-pick') });
+        /* `className` lets a page address ONE filter's wrapper — the
+           universities directory hides its "Last edited" filter from
+           everybody but the maintainer that way. Visibility only: hiding a
+           control grants nothing, exactly like every admin panel here. */
+        var wrap = el('div', {
+          class: 'oa-filter' + (f.type === 'text' ? '' : ' oa-pick') +
+                 (f.className ? ' ' + f.className : ''),
+        });
         var id = 'oaf-' + f.key;
         wrap.appendChild(el('label', { for: id, text: f.label }));
 

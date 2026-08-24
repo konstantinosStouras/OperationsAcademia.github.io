@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Universities — Operations Academia</title>
-    <meta name="description" content="An interactive map of the 200+ universities and schools with Operations departments that have posted here. Search by name, or click a pin to see what a school has advertised.">
+    <meta name="description" content="The searchable directory of 500+ universities and schools with Operations departments — grouped by university, with each school, department and link. Search it, or explore the map.">
     <link rel="canonical" href="https://www.operationsacademia.org/universities.html">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
@@ -20,7 +20,7 @@
     <meta property="og:site_name" content="Operations Academia">
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="Universities &amp; schools with Operations departments">
-    <meta property="og:description" content="An interactive map of the 200+ universities and schools with Operations departments that have posted here. Search by name, or click a pin to see what a school has advertised.">
+    <meta property="og:description" content="The searchable directory of 500+ universities and schools with Operations departments — grouped by university, with each school, department and link. Search it, or explore the map.">
     <meta property="og:url" content="https://www.operationsacademia.org/universities.html">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
@@ -30,12 +30,12 @@
     <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Universities &amp; schools with Operations departments">
-    <meta name="twitter:description" content="An interactive map of the 200+ universities and schools with Operations departments that have posted here. Search by name, or click a pin to see what a school has advertised.">
+    <meta name="twitter:description" content="The searchable directory of 500+ universities and schools with Operations departments — grouped by university, with each school, department and link. Search it, or explore the map.">
     <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta name="twitter:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
     <link rel="image_src" href="https://www.operationsacademia.org/images/share-square.jpg">
     <meta itemprop="name" content="Universities &amp; schools with Operations departments">
-    <meta itemprop="description" content="An interactive map of the 200+ universities and schools with Operations departments that have posted here. Search by name, or click a pin to see what a school has advertised.">
+    <meta itemprop="description" content="The searchable directory of 500+ universities and schools with Operations departments — grouped by university, with each school, department and link. Search it, or explore the map.">
     <meta itemprop="image" content="https://www.operationsacademia.org/images/share-square.jpg">
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <script>
@@ -78,17 +78,16 @@
     <!-- The Firebase SDK is ~700 KB of third-party JavaScript that NOTHING on
          screen waits for any more: the account chip is painted from the
          localStorage hint before the SDK has even been asked for, and the
-         session it restores only confirms what the chip already shows. It was
-         being PRELOADED here, which is a high-priority fetch competing with
-         this page's own stylesheet and data at the very moment the first paint
-         is being assembled. The preconnect stays — it warms the connection, at
-         no bandwidth cost, so the SDK still arrives promptly when
-         oa-firebase.js asks for it. -->
+         session it restores only confirms what the chip already shows. The
+         preconnect warms the connection, at no bandwidth cost, so the SDK
+         still arrives promptly when oa-firebase.js asks for it. -->
     <link href="assets/oa-ui.css" rel="stylesheet">
+    <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/leaflet/leaflet.css" rel="stylesheet">
     <link href="assets/leaflet/MarkerCluster.css" rel="stylesheet">
     <link href="assets/leaflet/MarkerCluster.Default.css" rel="stylesheet">
     <link href="assets/oa-uni-map.css" rel="stylesheet">
+    <link href="assets/oa-directory.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
   </head>
 
@@ -154,7 +153,8 @@
         <div class="v3-container">
           <span class="v3-kicker">Universities</span>
           <h1 class="v3-h1">Universities &amp; schools with Operations departments</h1>
-          <p class="v3-lede" style="margin-top:14px">The universities and business schools with Operations departments or faculty that have used the platform. Search by name above the map, or click a pin to see what a school has posted.</p>
+          <p class="v3-lede" style="margin-top:14px">One card per university: its business school, its engineering or other non-business school, and every department doing Operations in them — <span id="oa-dir-count">built from every posting made here and the site&rsquo;s curated records</span>. Search below, or switch to the map.</p>
+          <p class="v3-mut oa-dir-note" style="margin-top:12px">Signed in? Every card is yours to correct — open it and press <strong>Edit</strong> on a department, or <strong>+ Add a department</strong>. Each card shows who last edited it and when.</p>
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn primary" href="post-a-job.html">Post a job &mdash; it&rsquo;s free</a>
             <a class="v3-btn ghost" href="./#resources">&larr; Back to the overview</a>
@@ -164,10 +164,22 @@
       </section>
 
       <div class="v3-container" style="padding-bottom:90px">
-        <!-- The map itself. Leaflet + OpenStreetMap, vendored under
-             assets/leaflet/ — the same engine the previous design used, so the
-             pins, the clustering and the per-school popups are unchanged. -->
-        <div id="oa-uni"></div>
+        <div class="oa-dir-views" role="tablist" aria-label="View">
+          <button type="button" id="oa-dir-viewcards" class="is-on" aria-pressed="true">Cards</button>
+          <button type="button" id="oa-dir-viewmap" aria-pressed="false">Map</button>
+        </div>
+
+        <!-- The directory: OAList over data/directory.json, grouped one card
+             per university by assets/oa-directory.js, with the community's
+             directoryEdits overlaid at read time. -->
+        <div id="oa-dir"></div>
+
+        <!-- The map view. The SAME Leaflet map the page has carried since the
+             vendor rebuild — pins, clustering and per-school popups unchanged
+             (assets/oa-uni-map.js over data/universities.json, with the
+             maintainer's rowOverrides) — mounted lazily on the first switch,
+             so the cards view costs no tile traffic. -->
+        <div id="oa-uni" hidden></div>
       </div>
     </main>
     <footer class="v3-footer">
@@ -229,41 +241,50 @@
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-countries.js"></script>
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/leaflet/leaflet.js"></script>
     <script defer src="assets/leaflet/leaflet.markercluster.js"></script>
     <script defer src="assets/oa-uni-map.js"></script>
     <script defer src="assets/oa-rowedit.js"></script>
+    <script defer src="assets/oa-directory.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
        would otherwise run. This block reads what they define (OAList, V3,
-       OAAccounts), so it waits for DOMContentLoaded, the first moment they are
-       all guaranteed to have executed.
-
-       One consequence worth knowing: each of those modules dispatches on
-       document.readyState, and under `defer` that reads 'interactive', so they
-       now boot BEFORE this block instead of after it. Nothing here depends on
-       running first — but something added here that does would be a bug, not a
-       preference. */
+       OADirectory, OAUniMap), so it waits for DOMContentLoaded, the first
+       moment they are all guaranteed to have executed. */
     document.addEventListener('DOMContentLoaded', function () {
-      /* data/universities.json is a FROZEN ARCHIVE — written once from the
-         maintainer's Google Sheet by _scraper/import-legacy-tables.mjs, and
-         its workflow has no schedule. So this map was read-only for everybody,
-         the maintainer included. `rowOverrides` corrects a school AT READ TIME
-         (assets/oa-rowedit.js): the committed file stays the source of truth,
-         an override reaches every visitor, and re-running the import cannot
-         undo a correction. Signed in as the maintainer, every pin's popup
-         gains Edit and Take down.
+      'use strict';
 
-         ADDING a school is still done upstream, in the sheet: two places that
-         can both create the same row would list it twice as soon as the import
-         next ran. */
-      /* An ADMIN-ONLY module must never be a hard dependency of a PUBLIC page.
-         assets/oa-rowedit.js failing to load — a content blocker with a broad
-         asset filter, a transient 5xx on that one file — used to throw before
-         OAList.mount ever ran, so every reader got an empty container with no
-         message at all. The stand-in does what having no overrides does: it
-         hands the rows back untouched and draws nothing. */
+      /* ------------------------------------------------- the card directory
+
+         data/directory.json (built by _scraper/build-directory.mjs from the
+         curated archive + the oa-institutions seed + every posting) grouped
+         one card per university, with the community's `directoryEdits`
+         overlaid at read time — assets/oa-directory.js owns all of it. */
+      OADirectory.mount({ mount: '#oa-dir' });
+
+      /* the hero's own count, from the meta file the build writes beside the
+         table — the fallback words in the markup stand until it arrives */
+      OAList.load('/data/directory-meta.json').then(function (m) {
+        if (!m || !m.universities) return;
+        document.getElementById('oa-dir-count').textContent =
+          m.universities + ' universities and ' + m.departments +
+          ' departments so far, built from every posting made here and the ' +
+          'site’s curated records';
+      })['catch'](function () { /* the fallback words are already right */ });
+
+      /* ------------------------------------------------------- the map view
+
+         Mounted LAZILY on the first switch — the cards are the landing view,
+         and mounting Leaflet up front would fetch tiles nobody asked for.
+         Everything about the map itself is unchanged from the page's previous
+         design: data/universities.json, the maintainer's rowOverrides
+         corrections (assets/oa-rowedit.js), Edit/Take down on the popups. */
+      var uniMap = null;
+
       var RowEdit = window.OARowEdit || {
         signature: function () { return ''; },
         apply: function (dataset, rows) { return rows; },
@@ -273,34 +294,59 @@
         attach: function () {},
       };
 
-      var uniMap = OAUniMap.mount({
-        mount: '#oa-uni',
-        data: '/data/universities.json',
-        prepare: function (rows) { return RowEdit.apply('universities', rows); },
-        onPopup: function (node, row) { RowEdit.onPopup('universities')(node, row); },
-        /* The candidates list is a SECTION of the one-page site, and three
-           list engines share that page's query string, so its filter keys are
-           namespaced. Left to the engine's default this would open
-           candidates.html?affiliation=… — which still resolves, but as a
-           redirect that DROPS the query, landing the reader on every
-           candidate instead of the school's. */
-        candidatesHref: function (q) { return './?c_affiliation=' + q + '#candidates'; },
-      });
+      function mountMap() {
+        if (uniMap) return;
+        uniMap = OAUniMap.mount({
+          mount: '#oa-uni',
+          data: '/data/universities.json',
+          prepare: function (rows) { return RowEdit.apply('universities', rows); },
+          onPopup: function (node, row) { RowEdit.onPopup('universities')(node, row); },
+          /* The candidates list is a SECTION of the one-page site, and three
+             list engines share that page's query string, so its filter keys
+             are namespaced — see the root jobs page for the same note. */
+          candidatesHref: function (q) { return './?c_affiliation=' + q + '#candidates'; },
+        });
 
-      /* Redraw only when something a visitor would see has actually changed.
-         `attach` calls back when the overrides land and again when the sign-in
-         state resolves, and on the ordinary visit both say "nothing" — but a
-         redraw re-fits the map's bounds, which visibly jumps the view of
-         somebody already reading it. */
-      var uniSig = RowEdit.signature('universities');
-      RowEdit.attach('universities', {
-        onChange: function () {
-          var now = RowEdit.signature('universities');
-          if (now === uniSig) return;
-          uniSig = now;
-          if (uniMap && uniMap.refresh) uniMap.refresh();
-        },
-      });
+        var uniSig = RowEdit.signature('universities');
+        RowEdit.attach('universities', {
+          onChange: function () {
+            var now = RowEdit.signature('universities');
+            if (now === uniSig) return;
+            uniSig = now;
+            if (uniMap && uniMap.refresh) uniMap.refresh();
+          },
+        });
+      }
+
+      var dirEl = document.getElementById('oa-dir');
+      var mapEl = document.getElementById('oa-uni');
+      var btnCards = document.getElementById('oa-dir-viewcards');
+      var btnMap = document.getElementById('oa-dir-viewmap');
+
+      function setView(map) {
+        dirEl.hidden = map;
+        mapEl.hidden = !map;
+        btnCards.classList.toggle('is-on', !map);
+        btnMap.classList.toggle('is-on', map);
+        btnCards.setAttribute('aria-pressed', map ? 'false' : 'true');
+        btnMap.setAttribute('aria-pressed', map ? 'true' : 'false');
+        if (map) {
+          mountMap();
+          /* a map mounted while its container had another size needs telling
+             the container is on screen again, or the tiles sit misaligned */
+          if (uniMap && uniMap.map) {
+            setTimeout(function () { uniMap.map.invalidateSize(); }, 0);
+          }
+        }
+      }
+      btnCards.addEventListener('click', function () { setView(false); });
+      btnMap.addEventListener('click', function () { setView(true); });
+
+      /* ?view=map deep-links straight to the pins — and the map's own legacy
+         search keys (?q=, the vendor's ?filterA=/?filterB=) are claimed by
+         the CARD search now, which is where those links' readers land. */
+      var params = new URLSearchParams(location.search);
+      if (params.get('view') === 'map') setView(true);
     });
     </script>
   </body>

@@ -498,6 +498,47 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ------------------------------------- the Universities directory's edits
+    // universities.html's card directory (data/directory.json) is a BUILT
+    // file, and this collection is its read-time overlay — the rowOverrides
+    // pattern above with the write opened from the maintainer to EVERY
+    // REGISTERED USER (owner, 2026-08-24: "allow admin or any registered user
+    // to edit it"). A document is keyed on the row it corrects; `add: true`
+    // marks a row a user contributed whole (a department no source carries
+    // yet). Every write must carry its author (`by` — pinned to the writing
+    // account, so attribution cannot be forged onto someone else's uid) and
+    // is shown on the card as "Last edited by <name> on <date>".
+    //
+    // What stays THE MAINTAINER'S ALONE: `hidden` (taking a row off the page
+    // — the duplicate half of a merge) and delete (resetting an edit back to
+    // the committed file). Both one-way doors otherwise; and without the
+    // separate `allow delete`, reset would be impossible at all —
+    // request.resource is null on a delete, so an `allow write` condition
+    // errors and evaluates false (the newsOverrides lesson).
+    match /directoryEdits/{id} {
+      allow read: if true;
+      allow create, update: if signedIn()
+                   && id == request.resource.data.rowId
+                   && request.resource.data.by == request.auth.uid
+                   && request.resource.data.keys().hasOnly([
+                        'rowId', 'add', 'hidden', 'by', 'name', 't',
+                        'institution', 'school', 'department', 'type',
+                        'country', 'deptUrl', 'facultyUrl',
+                      ])
+                   && str('rowId', 200)
+                   && str('institution', 220) && str('school', 200)
+                   && str('department', 260)  && str('type', 40)
+                   && str('country', 80)      && str('name', 120)
+                   && str('deptUrl', 600)     && str('facultyUrl', 600)
+                   && (!('add' in request.resource.data)
+                       || request.resource.data.add is bool)
+                   && (!('t' in request.resource.data)
+                       || request.resource.data.t is number)
+                   && (!('hidden' in request.resource.data)
+                       || (request.resource.data.hidden is bool && isAdmin()));
+      allow delete: if isAdmin();
+    }
+
     // -------------------------------------------- the job review queue
     // Postings crawled from the maintainer's tracking sheet, held back until
     // they are approved. UNLIKE rowOverrides above, this is NOT public-read:

@@ -124,6 +124,16 @@ jobs:
         run: |
           node _scraper/build-placements.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
+      # The Universities directory follows the postings: OFFLINE (it reads
+      # only the files the steps above just rewrote, plus the committed
+      # archive and seed), deterministic, and NOT gated on Firebase — so a
+      # posting from a university the directory does not carry creates its
+      # card in the same run that published the posting, which is the rule
+      # the page states. An unchanged input set writes byte-identical files
+      # and the commit below simply has nothing to say about them.
+      - name: Rebuild the Universities directory
+        run: node _scraper/build-directory.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
       - name: Re-check the file we are about to commit
         id: recheck
         run: node _scraper/selftest.mjs --publishing
