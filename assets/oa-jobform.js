@@ -286,6 +286,23 @@
       }
     }
 
+    /* The department-page link is NOT part of the posting — it verifies, and
+       when corrected UPDATES, the Universities directory's record for this
+       department (assets/oa-uniinfo.js; the write happens after the posting
+       is accepted). It is validated HERE, where the poster can still fix it,
+       rather than silently dropped after they pressed Post — but it is never
+       read into the submission document, whose rules pin its field set. */
+    var deptUrlEl = $('f-deptUrl');
+    if (deptUrlEl) {
+      var du = httpUrl(deptUrlEl.value);
+      if (du === null) {
+        setError(deptUrlEl, 'That does not look like a web address. It should start with https://');
+        if (!firstBad) firstBad = deptUrlEl;
+      } else {
+        setError(deptUrlEl, '');
+      }
+    }
+
     var chairEmail = String($('f-chairEmail').value || '').trim();
     if (chairEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(chairEmail)) {
       setError($('f-chairEmail'), 'That does not look like an e-mail address.');
@@ -817,6 +834,22 @@
           doc.createdAt = fb.firestore.FieldValue.serverTimestamp();
           return col.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
+          /* The poster has just VERIFIED the department's page link against
+             the site's records: a changed value is filed into the
+             Universities directory's own overlay (directoryEdits — the same
+             correction any signed-in user makes on universities.html).
+             Fire-and-forget by contract: the posting is already sent, and
+             nothing here may un-confirm it. */
+          if (window.OAUniInfo) {
+            OAUniInfo.commit({
+              uid: user.uid,
+              name: (window.OAAccounts && OAAccounts.displayName()) || '',
+              place: { institution: doc.institution, school: doc.school, unit: doc.unit },
+              deptUrl: ($('f-deptUrl') || {}).value || '',
+            })['catch'](function (err) {
+              if (window.console) console.error('uniinfo:', err);
+            });
+          }
           draftClear();
           sent = true;
           /* The confirmation is written for a NEW posting — a reference to keep,
@@ -932,6 +965,24 @@
       OAPlacePicker.wire(
         { institution: inst, school: school, unit: unit, type: $('f-type') },
         { onChange: sync });
+    }
+
+    /* …and beside the cascade, what the site's RECORDS answer for the typed
+       names (assets/oa-uniinfo.js over data/directory.json): a unique school
+       or department, a unanimous type, a single-campus country, and — once
+       the three names identify one directory row — its department-page link
+       and its checklist. Only ever a definite answer, only ever into an
+       empty field or over its own earlier fill; INSEAD's two departments and
+       three campus countries stay the poster's to settle. In EDIT mode the
+       name fields are left alone entirely — a posting whose owner left the
+       school off must not gain one because the form was opened. */
+    if (window.OAUniInfo) {
+      OAUniInfo.wire({
+        institution: inst, school: school, unit: unit,
+        type: $('f-type'), country: $('f-country'),
+        deptUrl: $('f-deptUrl'), deptUrlNote: $('f-deptUrl-note'),
+        chars: $('f-chars'), charsNote: $('f-chars-note'),
+      }, { fillNames: !EDIT_ID });
     }
   }
 
