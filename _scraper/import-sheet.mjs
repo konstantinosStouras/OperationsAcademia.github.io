@@ -31,6 +31,7 @@
    one-off; making it depend on a live API would be a standing liability.
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
@@ -596,6 +597,6 @@ function selftest() {
   return true;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   main().catch((err) => { console.error(err); process.exit(1); });
 }

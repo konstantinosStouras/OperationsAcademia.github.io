@@ -44,6 +44,7 @@
    GitHub Actions runners.
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { createRequire } from 'node:module';
 
 import {
@@ -1276,7 +1277,7 @@ export function rollRegistry(registry, { now = new Date() } = {}) {
 
 /* --------------------------------------------------------------- selftest */
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   // the whole suite — runSelftest()'s subset covers none of this file
   const { spawnSync } = await import('node:child_process');
   const { fileURLToPath: toPath } = await import('node:url');

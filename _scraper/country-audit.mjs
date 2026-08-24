@@ -29,6 +29,7 @@
      --json      machine-readable, for a workflow step
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -119,6 +120,6 @@ async function main() {
   return wrong.length ? 1 : 0;
 }
 
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   process.exit(await main());
 }

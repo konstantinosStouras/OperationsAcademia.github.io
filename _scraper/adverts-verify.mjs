@@ -60,6 +60,7 @@
    mailers.
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -604,7 +605,7 @@ function selftest() {
   return fails.length === 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   if (has('--selftest')) {
     process.exit(selftest() ? 0 : 1);
   } else {
