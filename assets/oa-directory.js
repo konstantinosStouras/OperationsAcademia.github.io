@@ -50,9 +50,11 @@
 
   /* What the two stored type values are CALLED on this page. The stored
      vocabulary is the posting form's ("Business School" / "University"); the
-     card chips and the School-type filter speak the owner's wording for the
-     second one, which is the whole point of it — an IEOR department is not a
-     business school. */
+     in-card school chips and the School-type filter speak the owner's wording
+     for the second one, which is the whole point of it — an IEOR department is
+     not a business school. The card TOP deliberately carries no type badge
+     (owner, 2026-08-24: not needed above the university's name) — the chips
+     live on each school section inside the opened card. */
   var TYPE_LABEL = { 'Business School': 'Business school', University: 'Non-business school' };
 
   var EDIT_BUCKETS = ['Edited today', 'Last 7 days', 'Last 30 days', 'Older edits', 'Never edited'];
@@ -413,12 +415,6 @@
     return bits.join(' — ');
   }
 
-  function cardBadges(card) {
-    return card.types.map(function (t) {
-      return { text: t, cls: t === 'Business school' ? 'oa-label-primary' : 'oa-label-nonbiz' };
-    });
-  }
-
   /* ----------------------------------------------------------- editing */
 
   function baseOf(rowId) {
@@ -699,7 +695,6 @@
       card: {
         title: function (c) { return c.institution; },
         subtitle: cardSubtitle,
-        badges: cardBadges,
         rows: cardRows,
       },
       onCard: onCard,
