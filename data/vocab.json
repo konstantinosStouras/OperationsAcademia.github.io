@@ -1586,10 +1586,6 @@
    "n": 0
   },
   {
-   "v": "ESSEC Business School",
-   "n": 0
-  },
-  {
    "v": "European School of Management and Technology",
    "n": 0
   },
@@ -1819,10 +1815,6 @@
   },
   {
    "v": "Tel Aviv University",
-   "n": 0
-  },
-  {
-   "v": "The Chinese University of Hong Kong (CUHK Business School)",
    "n": 0
   },
   {
@@ -2504,10 +2496,6 @@
    "n": 0
   },
   {
-   "v": "Foster School of Business",
-   "n": 0
-  },
-  {
    "v": "Freeman College of Management",
    "n": 0
   },
@@ -2581,6 +2569,10 @@
   },
   {
    "v": "IESE Business School",
+   "n": 0
+  },
+  {
+   "v": "Indian School of Business",
    "n": 0
   },
   {
@@ -2716,6 +2708,10 @@
    "n": 0
   },
   {
+   "v": "Michael F. Price College of Business",
+   "n": 0
+  },
+  {
    "v": "Michael G. Foster School of Business",
    "n": 0
   },
@@ -2761,10 +2757,6 @@
   },
   {
    "v": "Poole College of Management",
-   "n": 0
-  },
-  {
-   "v": "Price College of Business",
    "n": 0
   },
   {
@@ -5884,22 +5876,15 @@
     "ESSEC Business School"
    ],
    "units": [
-    "Information Systems, Data Analytics and Operations"
-   ],
-   "bySchool": {
-    "ESSEC Business School": [
-     "Information Systems, Data Analytics and Operations"
-    ]
-   }
-  },
-  "ESSEC Business School": {
-   "schools": [],
-   "units": [
+    "Information Systems, Data Analytics and Operations",
     "Operations Management"
    ],
    "bySchool": {
     "": [
      "Operations Management"
+    ],
+    "ESSEC Business School": [
+     "Information Systems, Data Analytics and Operations"
     ]
    }
   },
@@ -6465,7 +6450,7 @@
   },
   "Indian School of Business (ISB)": {
    "schools": [
-    "School of Business"
+    "Indian School of Business"
    ],
    "units": [
     "OM",
@@ -6476,7 +6461,7 @@
      "OM",
      "Operations Management"
     ],
-    "School of Business": [
+    "Indian School of Business": [
      "Operations Management"
     ]
    }
@@ -8765,17 +8750,6 @@
     ]
    }
   },
-  "The Chinese University of Hong Kong (CUHK Business School)": {
-   "schools": [],
-   "units": [
-    "Decision Sciences and Managerial Economics"
-   ],
-   "bySchool": {
-    "": [
-     "Decision Sciences and Managerial Economics"
-    ]
-   }
-  },
   "The Chinese University of Hong Kong, Shenzhen": {
    "schools": [
     "School of Management and Economics"
@@ -10288,7 +10262,7 @@
   },
   "University of Oklahoma": {
    "schools": [
-    "Price College of Business"
+    "Michael F. Price College of Business"
    ],
    "units": [
     "Marketing and Supply Chain Management",
@@ -10298,7 +10272,7 @@
     "": [
      "Supply Chain Management"
     ],
-    "Price College of Business": [
+    "Michael F. Price College of Business": [
      "Marketing and Supply Chain Management"
     ]
    }
@@ -10788,7 +10762,6 @@
   },
   "University of Washington": {
    "schools": [
-    "Foster School of Business",
     "Michael G. Foster School of Business"
    ],
    "units": [
@@ -11678,6 +11651,9 @@
   "Imperial College Business School": [
    "Analytics and Operations"
   ],
+  "Indian School of Business": [
+   "Operations Management"
+  ],
   "Institut Mines-Télécom Business School": [
    "Management, Marketing and Strategy"
   ],
@@ -11814,6 +11790,9 @@
   "Miami Herbert Business School": [
    "Management Area"
   ],
+  "Michael F. Price College of Business": [
+   "Marketing and Supply Chain Management"
+  ],
   "Michael G. Foster School of Business": [
    "Information Systems and Operations Management"
   ],
@@ -11877,9 +11856,6 @@
   "Poole College of Management": [
    "Business Management/Operations and Supply Chain",
    "Information Technology, Analytics and Operations"
-  ],
-  "Price College of Business": [
-   "Marketing and Supply Chain Management"
   ],
   "Questrom School of Business": [
    "Information Systems",

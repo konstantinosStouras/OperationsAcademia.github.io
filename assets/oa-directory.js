@@ -249,7 +249,7 @@
         if ((r.lastPosted || '') > lastPosted) lastPosted = r.lastPosted || '';
         if (r._edit && (!edited || r._edit.t > edited.t)) edited = r._edit;
         (r.sources || []).forEach(function (s) {
-          if (s === 'directory' || s === 'seed') hasCurated = true;
+          if (s === 'directory' || s === 'seed' || s === 'omlist') hasCurated = true;
         });
       }
 

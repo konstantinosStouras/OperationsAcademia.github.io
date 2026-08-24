@@ -54,8 +54,9 @@ async function main() {
   const jobs = await readJson('data/jobs.json', []);
   const past = await readJson('data/past-postings.json', []);
   const seed = require('../assets/oa-institutions.js').directoryRows();
+  const omlist = require('../assets/oa-omlist.js').directoryRows();
 
-  const { rows } = buildDirectory({ archive, seed, jobs, past });
+  const { rows } = buildDirectory({ archive, seed, jobs, past, omlist });
   const stats = directoryStats(rows);
 
   const body = JSON.stringify(rows, null, 1) + '\n';

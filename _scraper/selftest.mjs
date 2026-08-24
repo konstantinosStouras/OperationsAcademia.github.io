@@ -3902,6 +3902,32 @@ async function testDirectoryModel() {
   ok(fresh && fresh.n === 1 && fresh.sources.join() === 'postings',
     'directory: a posting from a place NO source lists creates its row — and with it a new card');
   eq(directoryStats(rows).universities, 2, 'directory: the meta counts universities the way the page groups them');
+
+  /* THE OM LIST ENRICHES, NEVER LISTS (owner, 2026-08-24). Its records fill
+     `deptUrl` on the row they join and add the departments the other sources
+     missed, under the same card — and a university only the OM list knows
+     adds NO card, so growing the site's list stays the seed's job. */
+  const om = buildDirectory({
+    archive, seed, jobs: [], past: [],
+    omlist: [
+      { institution: 'Testland University', school: 'Testland School of Business',
+        department: 'Operations Management', deptUrl: 'https://test.example/om#faculty' },
+      { institution: 'Testland University', school: 'Testland School of Business',
+        department: 'Decision Sciences', deptUrl: 'https://test.example/ds#faculty' },
+      { institution: 'Omlist Only University', school: 'School of Business',
+        department: 'Operations', deptUrl: 'https://only.example/om' },
+    ],
+  });
+  const omTl = om.rows.filter((r) => r.institution === 'Testland University');
+  eq(omTl.length, 2,
+    'directory: the OM list adds the department the sources missed, under the same card');
+  eq(omTl.find((r) => r.department === 'Operations Management').deptUrl,
+    'https://test.example/om#faculty',
+    'directory: the OM list fills deptUrl on the row it joins — the link the cards draw');
+  ok(omTl.every((r) => r.sources.indexOf('omlist') !== -1),
+    'directory: an OM-list row carries its provenance');
+  eq(om.rows.filter((r) => r.institution === 'Omlist Only University').length, 0,
+    'directory: a university only the OM list knows adds NO card — enrich, never list');
 }
 
 async function testDirectoryWiring() {
@@ -3975,6 +4001,55 @@ async function testDirectoryWiring() {
   const wf = await readFile(path.join(HERE, '..', '.github', 'workflows', 'oa-jobs-build.yml'), 'utf8');
   ok(wf.includes('build-directory.mjs'),
     'oa-jobs-build.yml rebuilds the directory in the run that publishes the postings');
+
+  /* THE OM-LIST ENRICHMENT IS WIRED END TO END (owner, 2026-08-24): the
+     curated module is name-clean under the site's own canon, the build feeds
+     it, the served file carries the links it exists to supply, and the map's
+     popups draw the SAME records the cards were built from. */
+  const OM = require('../assets/oa-omlist.js');
+  ok(OM.LIST.length >= 180, `oa-omlist.js carries the OM list (${OM.LIST.length} universities)`);
+  /* Like the seed, the module stores the OM list's OWN spellings and the
+     canon maps them — so the claim is about the OUTCOME: each record's school
+     lands as ONE school group on its university's card, and never puts a
+     near-duplicate group beside one the site already carries (the failure the
+     module header's seven curated normalisations exist to prevent — remove
+     one on a regeneration and this is the test that goes red). */
+  const dirSchools = new Map();
+  for (const r of dir) {
+    const k = SCHOOLS.institutionKey(r.institution);
+    if (!dirSchools.has(k)) dirSchools.set(k, new Set());
+    if (r.school) dirSchools.get(k).add(r.school);
+  }
+  const omMisses = [];
+  for (const r of OM.directoryRows()) {
+    const c = SCHOOLS.canonColumns({
+      institution: r.institution, school: r.school, unit: r.department,
+    });
+    const held = dirSchools.get(SCHOOLS.institutionKey(c.institution));
+    if (!held || !c.school) continue;   // not listed on the site (skipped by design), or a standalone school
+    if (!held.has(c.school)) {
+      omMisses.push(c.institution + ': "' + c.school + '" reached no school group');
+      continue;
+    }
+    for (const s of held) {
+      if (s !== c.school && SCHOOLS.similarNames(c.school, s, { university: c.institution })) {
+        omMisses.push(c.institution + ': "' + c.school + '" beside "' + s + '"');
+      }
+    }
+  }
+  eq(omMisses, [],
+    'every OM-list school lands on ONE school group — never a near-duplicate beside an existing one');
+  for (const r of OM.directoryRows()) {
+    ok(!r.deptUrl || /^https?:\/\//.test(r.deptUrl),
+      `an OM-list department link is absolute http(s) or absent (${r.institution})`);
+  }
+  const build = await readFile(path.join(HERE, 'build-directory.mjs'), 'utf8');
+  ok(build.includes("require('../assets/oa-omlist.js')") && build.includes('omlist'),
+    'build-directory.mjs feeds the OM list into the merge');
+  ok(dir.filter((r) => r.deptUrl).length >= 150,
+    'data/directory.json carries the department links the OM list supplies');
+  ok(page.includes('assets/oa-omlist.js') && page.includes('addOmDepartments'),
+    'universities.html loads the module and appends its departments to the map\'s popups');
 }
 
 async function testRowOverrides() {

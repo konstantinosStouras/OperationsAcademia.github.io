@@ -85,7 +85,19 @@
     'City St. George\'s, University of London': 'University of London',
     'The University of Melbourne': 'University of Melbourne',
     'University of Texas at San Antonio': 'UT San Antonio',
-    'The University of Texas at San Antonio': 'UT San Antonio'
+    'The University of Texas at San Antonio': 'UT San Antonio',
+
+    /* The OM-list merge (2026-08-24) turned up archived postings holding a
+       university under its LONG-FORM or fused name while the site's own card
+       carries the name everyone uses — two cards for one place. The name
+       kept is the site's card's own; a long form nobody says ("Institut
+       Européen d'Administration des Affaires") is the alias, not the name.
+       ESSEC goes the same way as ISB: the university is "ESSEC", and "ESSEC
+       Business School" is the school group on its card. */
+    'Institut Européen d\'Administration des Affaires (INSEAD)': 'INSEAD',
+    'École des Hautes Études commerciales (HEC) Paris': 'HEC Paris',
+    'École des Hautes Études commerciales (HEC) de Montréal': 'HEC Montréal',
+    'ESSEC Business School': 'ESSEC'
   };
 
   /* ---------------------------------------------------------------- schools
@@ -144,6 +156,21 @@
       institution: 'University of Houston',
       school: 'C. T. Bauer College of Business',
       unit: 'Department of Decision and Information Sciences',
+    },
+
+    /* Two archive rows the OM-list merge turned up (2026-08-24) whose
+       university box names the school too — each was standing as a second
+       card beside the university's own. The bracket form is not lifted
+       automatically because "(CUHK Business School)" has the same shape as
+       the "(Shenzhen)" that marks a genuinely different campus — curated,
+       like everything in this table. */
+    'The Chinese University of Hong Kong (CUHK Business School)': {
+      institution: 'The Chinese University of Hong Kong',
+      school: 'CUHK Business School',
+    },
+    'University of Utah, David Eccles School of Business': {
+      institution: 'University of Utah',
+      school: 'David Eccles School of Business',
     }
   };
 
@@ -176,6 +203,10 @@
   var SCOPED_SCHOOL_ALIASES = {
     'National University of Singapore': { 'Business School': 'NUS Business School' },
     'Özyeğin University': { 'School of Business': 'Faculty of Business' },
+    /* A standalone school's card is labelled generically "School of Business"
+       by the OM-list-descended sources; at ISB the site's postings name the
+       school after itself, and that fuller name wins (2026-08-24). */
+    'Indian School of Business': { 'School of Business': 'Indian School of Business' },
 
     /* ONE SCHOOL, WRITTEN TWO WAYS. The site's own Universities directory and
        the seed of the world's operations schools (assets/oa-institutions.js)
@@ -235,6 +266,13 @@
     'University of Southern California': { 'Marshall School of Business (incl. Leventhal)': 'Marshall School of Business' },
     'University of Toronto': { 'Rotman School of Management': 'Joseph L. Rotman School of Management' },
     'University of Illinois at Chicago': { 'College of Business Administration': 'College of Business' },
+
+    /* …and three more the OM-list merge turned up (2026-08-24): the archive
+       and the postings had been carrying these schools short and full as two
+       groups on one card. The FULL OFFICIAL name wins, as throughout. */
+    'University of Cincinnati': { 'Lindner College of Business': 'Carl H. Lindner College of Business' },
+    'University of Oklahoma': { 'Price College of Business': 'Michael F. Price College of Business' },
+    'University of Washington': { 'Foster School of Business': 'Michael G. Foster School of Business' },
 
     /* …and two the same request turned up that a SUBSTRING check cannot see,
        because the two spellings put the same words in a different order:

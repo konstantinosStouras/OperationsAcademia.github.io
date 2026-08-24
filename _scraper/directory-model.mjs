@@ -122,18 +122,20 @@ function voteCountry(row, country) {
 /**
  * Merge the sources into the flat directory table.
  *
- *   buildDirectory({ archive, seed, jobs, past })
+ *   buildDirectory({ archive, seed, jobs, past, omlist })
  *     → { rows, names: Map(instKey → display name) }
  *
  * `archive` rows are data/universities.json's shape (institution / school /
  * department / address / lat / lng / mapUrl / facultyUrl); `seed` rows are
  * oa-institutions.directoryRows(); `jobs` and `past` are the two postings
- * files. PURE — reads its arguments, touches nothing on disk.
+ * files; `omlist` rows are oa-omlist.directoryRows() — the OM list's
+ * departments with their `deptUrl` links. PURE — reads its arguments,
+ * touches nothing on disk.
  */
-export function buildDirectory({ archive = [], seed = [], jobs = [], past = [] } = {}) {
+export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], omlist = [] } = {}) {
   const rows = new Map();          // id → row
   const display = new Map();       // instKey → { name, rank } — the card title
-  const RANK = { directory: 3, seed: 2, postings: 1 };
+  const RANK = { directory: 3, seed: 2, postings: 1, omlist: 2 };
 
   function claimName(institution, source) {
     const key = SCHOOLS.institutionKey(institution);
@@ -189,6 +191,24 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [] }
     if (!row.storedType && (t === 'Business School' || t === 'University')) row.storedType = t;
   }
 
+  /* THE OM LIST ENRICHES THE UNIVERSITIES THE SITE ALREADY LISTS — and only
+     those (owner, 2026-08-24: "OA lists many more schools, but those that are
+     listed should be updated"). Each record adds/joins its (school, dept)
+     rows through the same canon as every other source and fills the row's
+     `deptUrl` — the link the cards have always been ready to draw. Fill-empty
+     on an existing row, so a link a signed-in user corrected upstream of the
+     build is never clobbered; and NEVER a new card — a university only the OM
+     list knows is skipped, so growing the site's list stays the seed's job. */
+  const listed = new Set();
+  for (const row of rows.values()) listed.add(SCHOOLS.institutionKey(row.institution));
+  for (const r of omlist) {
+    const key = SCHOOLS.institutionKey(names(r.institution, '', '').institution);
+    if (!listed.has(key)) continue;
+    const row = rowFor(r.institution, r.school, r.department, 'omlist');
+    if (!row) continue;
+    if (!row.deptUrl && r.deptUrl) row.deptUrl = String(r.deptUrl);
+  }
+
   /* A POSTING WITH NO SCHOOL JOINS THE ROW THAT NAMES ONE — the offline twin
      of fillSchoolFromDirectory, under the same discipline: only where the
      school is empty, only where exactly ONE schooled row at that university
@@ -215,6 +235,7 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [] }
       home.countryVotes[c] = (home.countryVotes[c] || 0) + row.countryVotes[c];
     }
     if (!home.facultyUrl && row.facultyUrl) home.facultyUrl = row.facultyUrl;
+    if (!home.deptUrl && row.deptUrl) home.deptUrl = row.deptUrl;
     rows.delete(id);
   }
 

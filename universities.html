@@ -248,6 +248,7 @@
     <script defer src="assets/leaflet/leaflet.markercluster.js"></script>
     <script defer src="assets/oa-uni-map.js"></script>
     <script defer src="assets/oa-rowedit.js"></script>
+    <script defer src="assets/oa-omlist.js"></script>
     <script defer src="assets/oa-directory.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
@@ -294,13 +295,60 @@
         attach: function () {},
       };
 
+      /* The OM list's departments on the pin's popup — the same records
+         assets/oa-omlist.js feeds the card directory through the build, so a
+         pin and its card cannot disagree. Joined by institutionKey, the join
+         the cards use; each department links to its page on the university's
+         own website where the OM list carries one. */
+      var omByUni = null;
+      function omRecordFor(inst) {
+        if (!window.OAOMList || !window.OASchools) return null;
+        if (!omByUni) {
+          omByUni = {};
+          OAOMList.LIST.forEach(function (r) {
+            omByUni[OASchools.institutionKey(r.u)] = r;
+          });
+        }
+        return omByUni[OASchools.institutionKey(String(inst || ''))] || null;
+      }
+      function addOmDepartments(node, row) {
+        var rec = omRecordFor(row.institution || row.name);
+        if (!rec || !rec.d.length) return;
+        var tbody = node.querySelector('tbody');
+        if (!tbody) return;
+        var tr = document.createElement('tr');
+        var label = document.createElement('td');
+        label.className = 'oa-uni-poplabel';
+        label.textContent = 'Operations departments';
+        var val = document.createElement('td');
+        rec.d.forEach(function (dep, i) {
+          if (i) val.appendChild(document.createTextNode(' · '));
+          if (dep.url && /^https?:\/\//i.test(dep.url)) {
+            var a = document.createElement('a');
+            a.href = dep.url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = dep.n;
+            val.appendChild(a);
+          } else {
+            val.appendChild(document.createTextNode(dep.n));
+          }
+        });
+        tr.appendChild(label);
+        tr.appendChild(val);
+        tbody.appendChild(tr);
+      }
+
       function mountMap() {
         if (uniMap) return;
         uniMap = OAUniMap.mount({
           mount: '#oa-uni',
           data: '/data/universities.json',
           prepare: function (rows) { return RowEdit.apply('universities', rows); },
-          onPopup: function (node, row) { RowEdit.onPopup('universities')(node, row); },
+          onPopup: function (node, row) {
+            RowEdit.onPopup('universities')(node, row);
+            addOmDepartments(node, row);
+          },
           /* The candidates list is a SECTION of the one-page site, and three
              list engines share that page's query string, so its filter keys
              are namespaced — see the root jobs page for the same note. */
