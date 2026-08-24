@@ -815,8 +815,8 @@
   "levels": [
    "Visiting Faculty (various levels)"
   ],
-  "applyBy": "July 27, 2026. Review of applications will begin July 27, 2026 and continue until the position is filled. The appointment is expected to begin in August 2026",
-  "applyByDate": "2026-07-27",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
   "comments": "Visiting Assistant Professor · Winter Park, Florida",
   "country": "United States",
   "adUrl": "https://jobs.chronicle.com/job/38021352/visiting-assistant-professor-supply-chain-management/",
@@ -844,7 +844,7 @@
   ],
   "applyBy": "April 30, 2027",
   "applyByDate": "2027-04-30",
-  "comments": "Jamaica, NY",
+  "comments": "non TTAP · Jamaica, NY",
   "country": "United States",
   "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179519224&Title=Assistant%20Professor",
   "adLabel": "link to Job ad",
@@ -862,15 +862,15 @@
   "year": 2027,
   "posted": "2026-08-05",
   "institution": "University of California, Davis",
-  "department": "Business Analytics",
-  "school": "",
+  "department": "Graduate School of Management, Business Analytics",
+  "school": "Graduate School of Management",
   "unit": "Business Analytics",
-  "type": "University",
+  "type": "Business School",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
-  "applyBy": "September 4, 2026",
-  "applyByDate": "2026-09-04",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
   "comments": "Lecturer · Davis, CA",
   "country": "United States",
   "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179518447&Title=Lecturer%2C%20Master%20Of%20Science%20In%20Business%20Analytics%20Program%202026-2027",
@@ -892,17 +892,17 @@
   "department": "Darden School of Business, Technology and Operations Management",
   "school": "Darden School of Business",
   "unit": "Technology and Operations Management",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "Academic General Faculty (AGF, non-tenure track) in TOM, beginning in the fall of 2026. Most commonly, AGFs will be on either a Teaching Track or a Practice Track. For the Teaching Track, primary responsibilities would be teaching and developing curricular materials. For the Practice Track, primary responsibilities would be teaching in both MBA and Executive Education programs and writing with a view to influencing practice. AGF applicants typically bring a distinctive competency to the School without necessarily being expected to engage in the breadth of contribution of a tenured or tenure-track faculty.",
+  "comments": "Academic General Faculty · Charlottesville, VA",
   "country": "United States",
   "adUrl": "https://careers.insidehighered.com/job/3405514/academic-general-faculty-technology-and-operations-management-tom-/",
   "adLabel": "link to Job ad",
-  "postedAtUrl": "https://dossier.interfolio.com/apply/173755",
+  "postedAtUrl": "",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Virginia",
   "characteristics": [],
@@ -950,9 +950,9 @@
   "levels": [
    "Non-tenure track (teaching) position"
   ],
-  "applyBy": "August 12, 2026",
-  "applyByDate": "2026-08-12",
-  "comments": "Lecturer in Baltimore, Maryland, United States",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Lecturer · Baltimore, Maryland",
   "country": "United States",
   "adUrl": "https://jobs.chronicle.com/job/38019542/full-time-lecturer-supply-chain-management/",
   "adLabel": "link to Job ad",
@@ -5053,12 +5053,12 @@
   "owner": ""
  },
  {
-  "id": "2026-new-york-university-stern-20260120",
+  "id": "2026-new-york-university-20260120",
   "year": 2026,
   "posted": "2026-01-20",
-  "institution": "New York University (Stern)",
-  "department": "OM and AI",
-  "school": "",
+  "institution": "New York University",
+  "department": "Leonard N. Stern School of Business, OM and AI",
+  "school": "Leonard N. Stern School of Business",
   "unit": "OM and AI",
   "type": "University",
   "levels": [
@@ -5072,7 +5072,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20York%20University%20(Stern)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=New%20York%20University",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -7250,12 +7250,12 @@
   "owner": ""
  },
  {
-  "id": "2026-university-of-south-carolina-darla-moore-20251027",
+  "id": "2026-university-of-south-carolina-20251027",
   "year": 2026,
   "posted": "2025-10-27",
-  "institution": "University of South Carolina (Darla Moore)",
-  "department": "OM&SCM",
-  "school": "",
+  "institution": "University of South Carolina",
+  "department": "Darla Moore School of Business, OM&SCM",
+  "school": "Darla Moore School of Business",
   "unit": "OM&SCM",
   "type": "University",
   "levels": [
@@ -7269,7 +7269,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina%20(Darla%20Moore)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -7421,10 +7421,10 @@
   "owner": ""
  },
  {
-  "id": "2026-korea-advanced-institute-of-science-and-technolo-20251022",
+  "id": "2026-kaist-20251022",
   "year": 2026,
   "posted": "2025-10-22",
-  "institution": "Korea Advanced Institute of Science and Technology (KAIST)",
+  "institution": "KAIST",
   "department": "College of Business, Operations Strategy and Management Science",
   "school": "College of Business",
   "unit": "Operations Strategy and Management Science",
@@ -7441,7 +7441,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Korea%20Advanced%20Institute%20of%20Science%20and%20Technology%20(KAIST)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=KAIST",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -7510,7 +7510,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-21T00:00:00Z",
+  "addedAt": "2026-08-23T10:27:52Z",
   "owner": ""
  },
  {
@@ -7854,12 +7854,12 @@
   "owner": ""
  },
  {
-  "id": "2026-university-of-pennsylvania-wharton-20251014",
+  "id": "2026-university-of-pennsylvania-20251014",
   "year": 2026,
   "posted": "2025-10-14",
-  "institution": "University of Pennsylvania (Wharton)",
-  "department": "OM/IS (rookie)",
-  "school": "",
+  "institution": "University of Pennsylvania",
+  "department": "Wharton School, OM/IS (rookie)",
+  "school": "Wharton School",
   "unit": "OM/IS (rookie)",
   "type": "University",
   "levels": [
@@ -7873,7 +7873,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Pennsylvania%20(Wharton)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Pennsylvania",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -7931,7 +7931,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-13T00:00:00Z",
+  "addedAt": "2026-08-23T10:27:55Z",
   "owner": ""
  },
  {
@@ -8498,7 +8498,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-06T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:00Z",
   "owner": ""
  },
  {
@@ -8529,12 +8529,12 @@
   "owner": ""
  },
  {
-  "id": "2026-iowa-state-university-ivy-20251006",
+  "id": "2026-iowa-state-university-20251006",
   "year": 2026,
   "posted": "2025-10-06",
-  "institution": "Iowa State University (Ivy)",
-  "department": "IS/BA",
-  "school": "",
+  "institution": "Iowa State University",
+  "department": "Ivy College of Business, IS/BA",
+  "school": "Ivy College of Business",
   "unit": "IS/BA",
   "type": "Business School",
   "levels": [
@@ -8548,7 +8548,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Iowa%20State%20University%20(Ivy)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Iowa%20State%20University",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -8809,7 +8809,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-03T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:02Z",
   "owner": ""
  },
  {
@@ -8890,7 +8890,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-03T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:03Z",
   "owner": ""
  },
  {
@@ -8944,7 +8944,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-02T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:04Z",
   "owner": ""
  },
  {
@@ -9006,43 +9006,8 @@
   "year": 2026,
   "posted": "2025-10-02",
   "institution": "University of Miami",
-  "department": "Miami Herbert Business School, Management Area",
+  "department": "Miami Herbert Business School, BA: FinTech, AI, Healthcare",
   "school": "Miami Herbert Business School",
-  "unit": "Management Area",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor",
-   "Other Ranks"
-  ],
-  "applyBy": "Until filled. Review of applications will begin immediately and continue until the positions are filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "United States",
-  "adUrl": "https://drive.google.com/open?id=1wruOSaPVGrJdKQ4CPbU-KAIFLhfcmc_I",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://careers.miami.edu/us/en/job/R100081474/MHBS-Assistant-Associate-Full-Professor",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Miami",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-10-02T00:00:00Z",
-  "owner": ""
- },
- {
-  "id": "2026-university-of-miami-herbert-20251002",
-  "year": 2026,
-  "posted": "2025-10-02",
-  "institution": "University of Miami (Herbert)",
-  "department": "BA: FinTech, AI, Healthcare",
-  "school": "",
   "unit": "BA: FinTech, AI, Healthcare",
   "type": "University",
   "levels": [
@@ -9056,7 +9021,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Miami%20(Herbert)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Miami",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -9114,7 +9079,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-10-02T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:05Z",
   "owner": ""
  },
  {
@@ -9475,7 +9440,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-09-26T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:09Z",
   "owner": ""
  },
  {
@@ -9809,7 +9774,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-09-23T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:10Z",
   "owner": ""
  },
  {
@@ -9836,7 +9801,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-09-23T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:11Z",
   "owner": ""
  },
  {
@@ -10176,7 +10141,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-09-16T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:14Z",
   "owner": ""
  },
  {
@@ -11144,12 +11109,12 @@
   "owner": ""
  },
  {
-  "id": "2026-southern-methodist-university-cox-school-of-busi-20250829",
+  "id": "2026-southern-methodist-university-20250829",
   "year": 2026,
   "posted": "2025-08-29",
-  "institution": "Southern Methodist University: Cox School of Business",
-  "department": "ITOM",
-  "school": "",
+  "institution": "Southern Methodist University",
+  "department": "Edwin L. Cox School of Business, ITOM",
+  "school": "Edwin L. Cox School of Business",
   "unit": "ITOM",
   "type": "Business School",
   "levels": [
@@ -11163,7 +11128,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Southern%20Methodist%20University%3A%20Cox%20School%20of%20Business",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Southern%20Methodist%20University",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -11287,12 +11252,12 @@
   "owner": ""
  },
  {
-  "id": "2026-darla-moore-school-of-business-20250822",
+  "id": "2026-university-of-south-carolina-20250822",
   "year": 2026,
   "posted": "2025-08-22",
-  "institution": "Darla Moore School of Business",
-  "department": "OSC(Empirical Healthcare Focus)",
-  "school": "",
+  "institution": "University of South Carolina",
+  "department": "Darla Moore School of Business, OSC(Empirical Healthcare Focus)",
+  "school": "Darla Moore School of Business",
   "unit": "OSC(Empirical Healthcare Focus)",
   "type": "Business School",
   "levels": [
@@ -11306,45 +11271,11 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Darla%20Moore%20School%20of%20Business",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-23T10:28:23Z",
-  "owner": ""
- },
- {
-  "id": "2026-university-of-south-carolina-20250822",
-  "year": 2026,
-  "posted": "2025-08-22",
-  "institution": "University of South Carolina",
-  "department": "Darla Moore School of Business, Management Science",
-  "school": "Darla Moore School of Business",
-  "unit": "Management Science",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "comments": "Department representatives will be conducting prescreening interviews at upcoming conferences in Fall 2025, prior to on-campus interviews for finalist candidates.",
-  "country": "United States",
-  "adUrl": "https://drive.google.com/open?id=1m93aodt9UuqAWbmyBBEtyAE0fAvL7CMf",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://uscjobs.sc.edu/postings/193782",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20South%20Carolina",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2025-08-22T00:00:00Z",
   "owner": ""
  },
  {
@@ -11371,7 +11302,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-08-21T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:24Z",
   "owner": ""
  },
  {
@@ -11398,7 +11329,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-08-21T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:24Z",
   "owner": ""
  },
  {
@@ -11701,7 +11632,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-08-13T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:25Z",
   "owner": ""
  },
  {
@@ -11952,8 +11883,8 @@
   "year": 2026,
   "posted": "2025-08-08",
   "institution": "Colorado State University",
-  "department": "Supply Chain Management",
-  "school": "",
+  "department": "College of Business, Supply Chain Management",
+  "school": "College of Business",
   "unit": "Supply Chain Management",
   "type": "University",
   "levels": [
@@ -12254,12 +12185,11 @@
   "owner": ""
  },
  {
-  "id": "2026-the-hong-kong-polytechnic-university-polyu-20250802",
+  "id": "2026-the-hong-kong-polytechnic-university-20250802",
   "year": 2026,
   "posted": "2025-08-02",
-  "institution": "The Hong Kong Polytechnic University (PolyU)",
+  "institution": "The Hong Kong Polytechnic University",
   "department": "SCM/OM",
-  "school": "",
   "unit": "SCM/OM",
   "type": "University",
   "levels": [
@@ -12268,12 +12198,12 @@
   "applyBy": "Until filled.",
   "applyByDate": "",
   "comments": "Open Rank · Hong Kong",
-  "country": "China",
+  "country": "Hong Kong",
   "adUrl": "https://careercenter.informs.org/c-academic-jobs.html?locale=en&page=1&sort=date&country=&state=&city=&zip=&latitude=&longitude=&job_type_filter=Academic&keywords=&city_state_zip=&job_id=4880",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University%20(PolyU)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
@@ -13979,7 +13909,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2025-06-05T00:00:00Z",
+  "addedAt": "2026-08-23T10:28:48Z",
   "owner": ""
  },
  {
@@ -14172,12 +14102,12 @@
   "owner": ""
  },
  {
-  "id": "2026-ivey-business-school-western-university-20250526",
+  "id": "2026-western-university-20250526",
   "year": 2026,
   "posted": "2025-05-26",
-  "institution": "Ivey Business School, Western University",
-  "department": "Management Science",
-  "school": "",
+  "institution": "Western University",
+  "department": "Ivey Business School, Management Science",
+  "school": "Ivey Business School",
   "unit": "Management Science",
   "type": "Business School",
   "levels": [
@@ -14191,7 +14121,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://grad.uwo.ca/doc/postdoc/opportunities/Postdoctoral%20Associate%20Position%20in%20MS%20Ivey%20Western.pdf",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ivey%20Business%20School%2C%20Western%20University",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Western%20University",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -14611,12 +14541,12 @@
   "owner": ""
  },
  {
-  "id": "2026-ivey-business-school-20250523",
+  "id": "2026-western-university-20250523",
   "year": 2026,
   "posted": "2025-05-23",
-  "institution": "Ivey Business School",
-  "department": "Management Science",
-  "school": "",
+  "institution": "Western University",
+  "department": "Ivey Business School, Management Science",
+  "school": "Ivey Business School",
   "unit": "Management Science",
   "type": "Business School",
   "levels": [
@@ -14630,7 +14560,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ivey%20Business%20School",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Western%20University",
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",

@@ -794,6 +794,22 @@
         return a.outerHTML;
       }
 
+      /* An internal link into the site's own lists — relative, same tab, the
+         label escaped by the DOM (the tree-links-relatively rule; `link()`
+         above is for the profile's own EXTERNAL urls and demands https). The
+         universities page claims ?filterA= as its search — the same key every
+         posting's "Further info" link uses — so a card's university lands as
+         a removable chip there (owner, 2026-08-24: "lists should be
+         inter-linked"). */
+      function uniLink(name) {
+        name = String(name || '').replace(/^\s+|\s+$/g, '');
+        if (!name) return null;
+        var a = document.createElement('a');
+        a.href = 'universities.html?filterA=' + encodeURIComponent(name);
+        a.textContent = name;
+        return a.outerHTML;
+      }
+
       function mailto(email) {
         email = String(email || '').trim();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return null;
@@ -1040,6 +1056,7 @@
               return [
                 { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') },
                 { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
+                { label: 'University page',       html: uniLink(r.affiliation) },
                 { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
                 { label: 'Research summary',      html: link(r.rsUrl, 'link') },
                 { label: 'Web page',              html: link(r.webUrl, 'link') },
@@ -1100,7 +1117,8 @@
             badges:   function (r) { return []; },
             rows: function (r) {
               return [
-                { label: 'PhD institution', value: r.phdInstitution },
+                { label: 'Joining', html: uniLink(r.joiningInstitution) },
+                { label: 'PhD institution', html: uniLink(r.phdInstitution) },
                 { label: 'Undergraduate institution', value: r.undergradInstitution },
                 { label: 'Website', html: link(r.webUrl, 'link') },
                 { label: 'Job market year', value: r.year ? String(r.year) : '' }

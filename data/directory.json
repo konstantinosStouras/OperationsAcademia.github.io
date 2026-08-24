@@ -1088,16 +1088,6 @@
   "lastPosted": "2025-09-05"
  },
  {
-  "id": "catolica-lisbon-school-of-business-and-economics__school-of-management__operations-and-data-science",
-  "institution": "Católica Lisbon School of Business and Economics",
-  "school": "School of Management",
-  "department": "Operations and Data Science",
-  "type": "Business School",
-  "sources": [
-   "seed"
-  ]
- },
- {
   "id": "catolica-lisbon-school-of-business-and-economics__school-of-management__operations-and-data-science-lisbon",
   "institution": "Católica Lisbon School of Business and Economics",
   "school": "School of Management",
@@ -1105,7 +1095,8 @@
   "type": "Business School",
   "deptUrl": "https://clsbe.lisboa.ucp.pt/faculty-directory?f[]=field_areas_of_research:1579",
   "sources": [
-   "omlist"
+   "omlist",
+   "seed"
   ]
  },
  {
@@ -1811,18 +1802,6 @@
   ],
   "n": 1,
   "lastPosted": "2026-01-23"
- },
- {
-  "id": "darla-moore-school-of-business____osc-empirical-healthcare-focus",
-  "institution": "Darla Moore School of Business",
-  "department": "OSC(Empirical Healthcare Focus)",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-08-22"
  },
  {
   "id": "dartmouth-college__thayer-school-of-engineering",
@@ -3461,20 +3440,22 @@
   "lastPosted": "2026-03-19"
  },
  {
-  "id": "iowa-state-university__ivy-college-of-business__supply-chain-management",
+  "id": "iowa-state-university__ivy-college-of-business__is-ba",
   "institution": "Iowa State University",
   "school": "Ivy College of Business",
-  "department": "Supply Chain Management",
+  "department": "IS/BA",
   "type": "Business School",
-  "deptUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
+  "country": "United States",
   "sources": [
-   "omlist",
-   "seed"
-  ]
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2025-10-06"
  },
  {
-  "id": "iowa-state-university-college-of-business____supply-chain-and-information-systems",
-  "institution": "Iowa State University (College of Business)",
+  "id": "iowa-state-university__ivy-college-of-business__supply-chain-and-information-systems",
+  "institution": "Iowa State University",
+  "school": "Ivy College of Business",
   "department": "Supply Chain and Information Systems",
   "type": "Business School",
   "country": "United States",
@@ -3488,16 +3469,16 @@
   "lng": -93.6444688
  },
  {
-  "id": "iowa-state-university-ivy____is-ba",
-  "institution": "Iowa State University (Ivy)",
-  "department": "IS/BA",
-  "type": "University",
-  "country": "United States",
+  "id": "iowa-state-university__ivy-college-of-business__supply-chain-management",
+  "institution": "Iowa State University",
+  "school": "Ivy College of Business",
+  "department": "Supply Chain Management",
+  "type": "Business School",
+  "deptUrl": "https://www.ivybusiness.iastate.edu/directory/?LName=&Department=SCM",
   "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-10-06"
+   "omlist",
+   "seed"
+  ]
  },
  {
   "id": "ipade-business-school____om-and-is",
@@ -3522,30 +3503,6 @@
   ],
   "n": 1,
   "lastPosted": "2026-03-10"
- },
- {
-  "id": "ivey-business-school____management-science",
-  "institution": "Ivey Business School",
-  "department": "Management Science",
-  "type": "Business School",
-  "country": "Canada",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-05-23"
- },
- {
-  "id": "ivey-business-school-western-university____management-science",
-  "institution": "Ivey Business School, Western University",
-  "department": "Management Science",
-  "type": "Business School",
-  "country": "Canada",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-05-26"
  },
  {
   "id": "james-madison-university____ba",
@@ -3618,11 +3575,20 @@
   "school": "College of Business",
   "department": "Operations Strategy and Management Science",
   "type": "Business School",
+  "country": "South Korea",
+  "address": "South Korea, Seoul, Dongdaemun-gu, Cheongnyangri-dong, Hoegi-ro, 85",
+  "facultyUrl": "http://www.business.kaist.edu/_prog/prof/index.php?site_dvs_cd=en&menu_dvs_cd=0501&div_cd=C02009",
   "deptUrl": "https://www.business.kaist.edu/_prog/prof/?site_dvs_cd=en&menu_dvs_cd=050106&div_cd=C02009",
   "sources": [
+   "directory",
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2025-10-22",
+  "lat": 37.5933445,
+  "lng": 127.0477953
  },
  {
   "id": "katholieke-universiteit-ku-leuven____research-center-for-operations-management",
@@ -3775,24 +3741,6 @@
   "lastPosted": "2014-04-08",
   "lat": 38.9379737,
   "lng": -77.0890599
- },
- {
-  "id": "korea-advanced-institute-of-science-and-technology__college-of-business__operations-strategy-and-management-science",
-  "institution": "Korea Advanced Institute of Science and Technology (KAIST)",
-  "school": "College of Business",
-  "department": "Operations Strategy and Management Science",
-  "type": "Business School",
-  "country": "South Korea",
-  "address": "South Korea, Seoul, Dongdaemun-gu, Cheongnyangri-dong, Hoegi-ro, 85",
-  "facultyUrl": "http://www.business.kaist.edu/_prog/prof/index.php?site_dvs_cd=en&menu_dvs_cd=0501&div_cd=C02009",
-  "sources": [
-   "directory",
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-10-22",
-  "lat": 37.5933445,
-  "lng": 127.0477953
  },
  {
   "id": "korea-university__korea-university-business-school__logistics-service-and-operations-management",
@@ -4772,6 +4720,19 @@
   "lastPosted": "2014-09-05"
  },
  {
+  "id": "new-york-university__leonard-n-stern-school-of-business__om-and-ai",
+  "institution": "New York University",
+  "school": "Leonard N. Stern School of Business",
+  "department": "OM and AI",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-01-20"
+ },
+ {
   "id": "new-york-university__leonard-n-stern-school-of-business__technology-operations-and-statistics",
   "institution": "New York University",
   "school": "Leonard N. Stern School of Business",
@@ -4836,18 +4797,6 @@
   ],
   "n": 1,
   "lastPosted": "2026-01-23"
- },
- {
-  "id": "new-york-university-stern____om-and-ai",
-  "institution": "New York University (Stern)",
-  "department": "OM and AI",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-01-20"
  },
  {
   "id": "norfolk-state-university____ba",
@@ -6293,8 +6242,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2025-08-29",
   "lat": 32.8425575,
   "lng": -96.7841136
  },
@@ -6313,18 +6265,6 @@
   ],
   "lat": 32.8427376,
   "lng": -96.7829672
- },
- {
-  "id": "southern-methodist-university-cox-school-of-business____itom",
-  "institution": "Southern Methodist University: Cox School of Business",
-  "department": "ITOM",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-08-29"
  },
  {
   "id": "southern-university-of-science-and-technology-sustech__school-of-business-analytics__information-and-operations-management",
@@ -7149,11 +7089,11 @@
   ]
  },
  {
-  "id": "hong-kong-polytechnic-university-polyu____scm-om",
-  "institution": "The Hong Kong Polytechnic University (PolyU)",
+  "id": "hong-kong-polytechnic-university____scm-om",
+  "institution": "The Hong Kong Polytechnic University",
   "department": "SCM/OM",
   "type": "University",
-  "country": "China",
+  "country": "Hong Kong",
   "sources": [
    "postings"
   ],
@@ -9306,6 +9246,19 @@
   ]
  },
  {
+  "id": "university-of-miami__miami-herbert-business-school__ba-fintech-ai-healthcare",
+  "institution": "University of Miami",
+  "school": "Miami Herbert Business School",
+  "department": "BA: FinTech, AI, Healthcare",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2025-10-02"
+ },
+ {
   "id": "university-of-miami__miami-herbert-business-school__management-area",
   "institution": "University of Miami",
   "school": "Miami Herbert Business School",
@@ -9322,22 +9275,10 @@
    "postings",
    "seed"
   ],
-  "n": 3,
-  "lastPosted": "2025-10-02",
+  "n": 2,
+  "lastPosted": "2024-10-11",
   "lat": 25.7201133,
   "lng": -80.2763875
- },
- {
-  "id": "university-of-miami-herbert____ba-fintech-ai-healthcare",
-  "institution": "University of Miami (Herbert)",
-  "department": "BA: FinTech, AI, Healthcare",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-10-02"
  },
  {
   "id": "university-of-michigan____industrial-and-operations-engineering",
@@ -9906,6 +9847,19 @@
   ]
  },
  {
+  "id": "university-of-pennsylvania__wharton-school__om-is-rookie",
+  "institution": "University of Pennsylvania",
+  "school": "Wharton School",
+  "department": "OM/IS (rookie)",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2025-10-14"
+ },
+ {
   "id": "university-of-pennsylvania__wharton-school__operations-and-information-management",
   "institution": "University of Pennsylvania",
   "school": "Wharton School",
@@ -9939,18 +9893,6 @@
   "lastPosted": "2026-02-27",
   "lat": 39.9529106,
   "lng": -75.1982674
- },
- {
-  "id": "university-of-pennsylvania-wharton____om-is-rookie",
-  "institution": "University of Pennsylvania (Wharton)",
-  "department": "OM/IS (rookie)",
-  "type": "University",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2025-10-14"
  },
  {
   "id": "university-of-pittsburgh____industrial-engineering",
@@ -10141,22 +10083,36 @@
    "postings",
    "seed"
   ],
-  "n": 3,
+  "n": 2,
   "lastPosted": "2025-10-24",
   "lat": 33.9945213,
   "lng": -81.0334363
  },
  {
-  "id": "university-of-south-carolina-darla-moore____om-scm",
-  "institution": "University of South Carolina (Darla Moore)",
+  "id": "university-of-south-carolina__darla-moore-school-of-business__om-scm",
+  "institution": "University of South Carolina",
+  "school": "Darla Moore School of Business",
   "department": "OM&SCM",
-  "type": "University",
+  "type": "Business School",
   "country": "United States",
   "sources": [
    "postings"
   ],
   "n": 1,
   "lastPosted": "2025-10-27"
+ },
+ {
+  "id": "university-of-south-carolina__darla-moore-school-of-business__osc-empirical-healthcare-focus",
+  "institution": "University of South Carolina",
+  "school": "Darla Moore School of Business",
+  "department": "OSC(Empirical Healthcare Focus)",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2025-08-22"
  },
  {
   "id": "university-of-south-florida____is",
@@ -11390,6 +11346,19 @@
   "lastPosted": "2015-02-05",
   "lat": 43.0044427,
   "lng": -81.2773205
+ },
+ {
+  "id": "western-university__ivey-business-school__management-science",
+  "institution": "Western University",
+  "school": "Ivey Business School",
+  "department": "Management Science",
+  "type": "Business School",
+  "country": "Canada",
+  "sources": [
+   "postings"
+  ],
+  "n": 2,
+  "lastPosted": "2025-05-26"
  },
  {
   "id": "western-university__ivey-business-school__operations-management",

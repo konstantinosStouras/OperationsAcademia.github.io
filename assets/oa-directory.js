@@ -384,15 +384,21 @@
         html: schoolHTML(card, sc),
       });
     }
+    /* THE SAME LINK SET THE MAP'S POPUP OFFERS (owner, 2026-08-24: "lists
+       should be inter-linked") — one university, every list about it, each
+       pre-filtered by the card's institution name exactly as every posting's
+       "Further info" link filters this page. The candidates list is a SECTION
+       of the one-page site whose filter keys are namespaced (c_), the same
+       note universities.html carries for the map. */
+    var q = encodeURIComponent(card.institution);
     var foot = [];
     if (card.n) {
-      foot.push('<a href="jobs.html?institution=' + encodeURIComponent(card.institution) +
-        '">Current postings</a>');
-      foot.push('<a href="previous-markets.html?university=' +
-        encodeURIComponent(card.institution) + '">Past postings</a>');
+      foot.push('<a href="jobs.html?institution=' + q + '">Current postings</a>');
+      foot.push('<a href="previous-markets.html?university=' + q + '">Past postings</a>');
     }
-    foot.push('<a href="recent-faculty.html?placement=' +
-      encodeURIComponent(card.institution) + '">Recent hires</a>');
+    foot.push('<a href="recent-faculty.html?placement=' + q + '">Recent hires</a>');
+    foot.push('<a href="recent-faculty.html?alma=' + q + '">PhD alumni</a>');
+    foot.push('<a href="./?c_affiliation=' + q + '#candidates">Candidates on the market</a>');
     if (state.user) {
       foot.push('<button type="button" class="oa-jobbtn oa-jobbtn-edit" data-dir-add="' +
         esc(card.institution) + '">+ Add a department</button>');

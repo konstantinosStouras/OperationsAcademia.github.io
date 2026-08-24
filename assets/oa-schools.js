@@ -97,7 +97,12 @@
     'Institut Européen d\'Administration des Affaires (INSEAD)': 'INSEAD',
     'École des Hautes Études commerciales (HEC) Paris': 'HEC Paris',
     'École des Hautes Études commerciales (HEC) de Montréal': 'HEC Montréal',
-    'ESSEC Business School': 'ESSEC'
+    'ESSEC Business School': 'ESSEC',
+    /* KAIST is its own official name (since 2008), and the site's card and
+       the OM list both use it; "(PolyU)" is the mixed-case-bracket shape
+       dropAcronym deliberately leaves alone (the CityU precedent above). */
+    'Korea Advanced Institute of Science and Technology (KAIST)': 'KAIST',
+    'The Hong Kong Polytechnic University (PolyU)': 'The Hong Kong Polytechnic University'
   };
 
   /* ---------------------------------------------------------------- schools
@@ -171,6 +176,52 @@
     'University of Utah, David Eccles School of Business': {
       institution: 'University of Utah',
       school: 'David Eccles School of Business',
+    },
+
+    /* The 2026 workbook writes several universities with their school in the
+       same box — "(Stern)", "(Wharton)", a colon, or the school standing
+       alone as if it were the university. Each splits to the site's card and
+       the school's canonical name; the row's own School box, where it says
+       anything, still wins (`assemble` reads the split fill-empty). */
+    'New York University (Stern)': {
+      institution: 'New York University',
+      school: 'Leonard N. Stern School of Business',
+    },
+    'University of Pennsylvania (Wharton)': {
+      institution: 'University of Pennsylvania',
+      school: 'The Wharton School',
+    },
+    'University of Miami (Herbert)': {
+      institution: 'University of Miami',
+      school: 'Miami Herbert Business School',
+    },
+    'University of South Carolina (Darla Moore)': {
+      institution: 'University of South Carolina',
+      school: 'Darla Moore School of Business',
+    },
+    'Darla Moore School of Business': {
+      institution: 'University of South Carolina',
+      school: 'Darla Moore School of Business',
+    },
+    'Southern Methodist University: Cox School of Business': {
+      institution: 'Southern Methodist University',
+      school: 'Edwin L. Cox School of Business',
+    },
+    'Iowa State University (Ivy)': {
+      institution: 'Iowa State University',
+      school: 'Ivy College of Business',
+    },
+    'Iowa State University (College of Business)': {
+      institution: 'Iowa State University',
+      school: 'Ivy College of Business',
+    },
+    'Ivey Business School': {
+      institution: 'Western University',
+      school: 'Ivey Business School',
+    },
+    'Ivey Business School, Western University': {
+      institution: 'Western University',
+      school: 'Ivey Business School',
     }
   };
 
@@ -347,6 +398,12 @@
      else the generic rule still applies, so a poster typing "Operations
      Management Department" at some other school still lands on the bare name. */
   var SCOPED_UNIT_ALIASES = {
+    'Católica Lisbon School of Business and Economics': {
+      /* the OM list names the school's two operations groups BY CAMPUS —
+         "(Lisbon)" and "(Porto)" — and the site's own unsuffixed entry is the
+         Lisbon group, so the fuller campus-named form wins (2026-08-24) */
+      'Operations and Data Science': 'Operations and Data Science (Lisbon)'
+    },
     'Emory University': {              /* Goizueta Business School */
       'Information Systems and Operations Management': 'Information Systems & Operations Management',
       'Operations Management': 'Information Systems & Operations Management'

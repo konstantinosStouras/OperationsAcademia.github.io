@@ -1765,8 +1765,12 @@ function testNamesForTheCascade() {
   eq(S.canonInstitution('Baruch College, The City University of New York (CUNY)'),
     'Baruch College, The City University of New York (CUNY)',
     'the published name keeps everything it was published with');
+  /* …unless the alias tables say the acronym IS the name: KAIST has been the
+     university's official name since 2008, the site's own card and the OM
+     list both use it, and the long form was standing as a second card
+     (aliased 2026-08-24, with the OM-list merge). */
   eq(S.canonInstitution('Korea Advanced Institute of Science and Technology (KAIST)'),
-    'Korea Advanced Institute of Science and Technology (KAIST)', 'acronym and all');
+    'KAIST', 'and the long form of a university whose acronym IS its name folds onto it');
 
   /* 2. canonUnit has to be idempotent, or the vocabulary offers a name the
      ingest would not publish. A department ending in its own acronym lost the
@@ -2436,14 +2440,17 @@ async function testVocabFile() {
     ok(v[key] !== undefined, `vocab.json carries ${key}`);
   }
 
-  /* TWO directories, exactly as build-jobs.mjs feeds them: the site's own
-     Universities page, and the seed of the world's operations and supply chain
+  /* THREE directories, exactly as build-jobs.mjs feeds them: the site's own
+     Universities page, the seed of the world's operations and supply chain
      schools (assets/oa-institutions.js) that lets a first-time poster from a
-     university nobody has posted from find their school already listed. */
+     university nobody has posted from find their school already listed, and
+     the OM list's departments (assets/oa-omlist.js) — so the posting form's
+     cascade offers the full database (owner, 2026-08-24). */
   const seed = require(path.join(HERE, '..', 'assets', 'oa-institutions.js'));
+  const om = require(path.join(HERE, '..', 'assets', 'oa-omlist.js'));
   const rebuilt = buildVocab(jobs, {
     generated: v.generated,
-    directory: [...directory, ...seed.directoryRows()],
+    directory: [...directory, ...seed.directoryRows(), ...om.directoryRows()],
   });
   eq(serialiseVocab(rebuilt), serialiseVocab(v),
     'vocab.json is exactly what the postings and the two directories rebuild');
