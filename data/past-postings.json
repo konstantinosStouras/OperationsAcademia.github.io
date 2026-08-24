@@ -151,12 +151,12 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2025-university-of-utah-david-eccles-school-of-busine-20250108",
+  "id": "2025-university-of-utah-20250108",
   "year": 2025,
   "posted": "2025-01-08",
-  "institution": "University of Utah, David Eccles School of Business",
-  "department": "Operations and Information Systems",
-  "school": "",
+  "institution": "University of Utah",
+  "department": "David Eccles School of Business, Operations and Information Systems",
+  "school": "David Eccles School of Business",
   "unit": "Operations and Information Systems",
   "type": "Business School",
   "levels": [
@@ -170,7 +170,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://utah.peopleadmin.com/postings/174564",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Utah%2C%20David%20Eccles%20School%20of%20Business",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Utah",
   "characteristics": [
    "Research seminars",
    "Masters",
@@ -671,12 +671,11 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2025-essec-business-school-20240926",
+  "id": "2025-essec-20240926",
   "year": 2025,
   "posted": "2024-09-26",
-  "institution": "ESSEC Business School",
+  "institution": "ESSEC",
   "department": "Operations Management",
-  "school": "",
   "unit": "Operations Management",
   "type": "Business School",
   "levels": [
@@ -691,7 +690,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "https://essec.edu/en/pages/become-professor-at-essec/",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=ESSEC%20Business%20School",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=ESSEC",
   "characteristics": [
    "Research seminars",
    "PhD",
@@ -935,8 +934,8 @@
   "year": 2025,
   "posted": "2024-09-20",
   "institution": "University of Cincinnati",
-  "department": "Lindner College of Business, Operations, Business Analytics and Information Systems",
-  "school": "Lindner College of Business",
+  "department": "Carl H. Lindner College of Business, Operations, Business Analytics and Information Systems",
+  "school": "Carl H. Lindner College of Business",
   "unit": "Operations, Business Analytics and Information Systems",
   "type": "Business School",
   "levels": [
@@ -2219,10 +2218,10 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-ecole-des-hautes-etudes-commerciales-hec-paris-20141215",
+  "id": "2015-hec-paris-20141215",
   "year": 2015,
   "posted": "2014-12-15",
-  "institution": "École des Hautes Études commerciales (HEC) Paris",
+  "institution": "HEC Paris",
   "department": "Operations Management and Information Technology",
   "unit": "Operations Management and Information Technology",
   "type": "Business School",
@@ -2237,7 +2236,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.hec.edu/Faculty-Research/Operations-Management-Information-Technology/Job-openings",
   "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=%C3%89cole%20des%20Hautes%20%C3%89tudes%20commerciales%20(HEC)%20Paris",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Paris",
   "characteristics": [],
   "featured": false,
   "source": "sheet-import",
@@ -3499,31 +3498,6 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-ecole-des-hautes-etudes-commerciales-hec-de-mont-20140923",
-  "year": 2015,
-  "posted": "2014-09-23",
-  "institution": "École des Hautes Études commerciales (HEC) de Montréal",
-  "department": "Logistics and Operations Management",
-  "unit": "Logistics and Operations Management",
-  "type": "Business School",
-  "levels": [
-   "Assistant Professor"
-  ],
-  "applyBy": "October 15, 2014",
-  "applyByDate": "2014-10-15",
-  "comments": "",
-  "country": "Canada",
-  "adUrl": "https://drive.google.com/file/d/0B_Uo0W8T0JrVQTE5UmkxTGZISHc/edit?usp=sharing",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "http://www.operationsacademia.org/",
-  "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=%C3%89cole%20des%20Hautes%20%C3%89tudes%20commerciales%20(HEC)%20de%20Montr%C3%A9al",
-  "characteristics": [],
-  "featured": false,
-  "source": "sheet-import",
-  "addedAt": "2026-08-16T13:09:54Z"
- },
- {
   "id": "2015-harvard-kennedy-school-20140923",
   "year": 2015,
   "posted": "2014-09-23",
@@ -3544,6 +3518,31 @@
   "postedAtUrl": "http://academicpositions.harvard.edu/postings/5711",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Harvard%20Kennedy%20School",
+  "characteristics": [],
+  "featured": false,
+  "source": "sheet-import",
+  "addedAt": "2026-08-16T13:09:54Z"
+ },
+ {
+  "id": "2015-hec-montreal-20140923",
+  "year": 2015,
+  "posted": "2014-09-23",
+  "institution": "HEC Montréal",
+  "department": "Logistics and Operations Management",
+  "unit": "Logistics and Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "October 15, 2014",
+  "applyByDate": "2014-10-15",
+  "comments": "",
+  "country": "Canada",
+  "adUrl": "https://drive.google.com/file/d/0B_Uo0W8T0JrVQTE5UmkxTGZISHc/edit?usp=sharing",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "http://www.operationsacademia.org/",
+  "postedAtLabel": "Operations Academia",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=HEC%20Montr%C3%A9al",
   "characteristics": [],
   "featured": false,
   "source": "sheet-import",
@@ -3682,10 +3681,10 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-institut-europeen-d-administration-des-affaires-20140915",
+  "id": "2015-insead-20140915",
   "year": 2015,
   "posted": "2014-09-15",
-  "institution": "Institut Européen d'Administration des Affaires (INSEAD)",
+  "institution": "INSEAD",
   "department": "Technology and Operations Management",
   "unit": "Technology and Operations Management",
   "type": "Business School",
@@ -3701,7 +3700,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Institut%20Europ%C3%A9en%20d'Administration%20des%20Affaires%20(INSEAD)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=INSEAD",
   "characteristics": [],
   "featured": false,
   "source": "sheet-import",
@@ -4257,8 +4256,8 @@
   "year": 2015,
   "posted": "2014-08-10",
   "institution": "University of Washington",
-  "department": "Foster School of Business",
-  "school": "Foster School of Business",
+  "department": "Michael G. Foster School of Business",
+  "school": "Michael G. Foster School of Business",
   "type": "Business School",
   "levels": [
    "Assistant Professor",
@@ -4358,10 +4357,10 @@
   "addedAt": "2026-08-16T13:09:54Z"
  },
  {
-  "id": "2015-institut-europeen-d-administration-des-affaires-20140711",
+  "id": "2015-insead-20140711",
   "year": 2015,
   "posted": "2014-07-11",
-  "institution": "Institut Européen d'Administration des Affaires (INSEAD)",
+  "institution": "INSEAD",
   "department": "Humanitarian Research Group (HRG), Social Innovation Center",
   "unit": "Humanitarian Research Group (HRG), Social Innovation Center",
   "type": "Business School",
@@ -4374,7 +4373,7 @@
   "adLabel": "link to Job ad",
   "postedAtUrl": "http://www.operationsacademia.org/",
   "postedAtLabel": "Operations Academia",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Institut%20Europ%C3%A9en%20d'Administration%20des%20Affaires%20(INSEAD)",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=INSEAD",
   "characteristics": [],
   "featured": false,
   "source": "sheet-import",

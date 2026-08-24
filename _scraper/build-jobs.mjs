@@ -68,14 +68,22 @@ const DIRECTORY = path.join(DATA, 'universities.json');
 const require = createRequire(import.meta.url);
 
 function institutionSeed() {
-  try {
-    return require('../assets/oa-institutions.js').directoryRows();
-  } catch (e) {
-    // never a reason to fail a publish: without it the form simply offers less
-    warn('assets/oa-institutions.js could not be read (' + e.message + ') — the '
-       + 'posting form will offer only the site\'s own Universities directory.');
-    return [];
+  /* BOTH curated modules: the seed of the world's operations schools AND the
+     OM list's departments (owner, 2026-08-24 — "the form during job posting
+     is populated from the universities we list in our full database"). The
+     OM rows carry the departments the seed missed, so the cascade offers
+     them; buildVocab reads only the three names, so deptUrl is inert here. */
+  const out = [];
+  for (const mod of ['../assets/oa-institutions.js', '../assets/oa-omlist.js']) {
+    try {
+      out.push(...require(mod).directoryRows());
+    } catch (e) {
+      // never a reason to fail a publish: without it the form simply offers less
+      warn(mod.replace('../', '') + ' could not be read (' + e.message + ') — the '
+         + 'posting form will offer that much less.');
+    }
   }
+  return out;
 }
 
 const argv = new Set(process.argv.slice(2));

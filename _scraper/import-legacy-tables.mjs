@@ -578,9 +578,24 @@ async function healNames(outDir) {
      rule is one spelling per place ACROSS THE SITE, and the map and the
      faculty list are two of the places it is read. Each has no daily build of
      its own, which is exactly why they drifted. */
-  const JOBS = { file: 'past-postings.json', heal: healPlace, meta: true, what: 'posting' };
-  const MAP = { file: 'universities.json', heal: healUniversity, meta: false, what: 'university' };
-  const FAC = { file: 'recent-faculty.json', heal: healFaculty, meta: false, what: 'placement' };
+  /* Each file is re-sorted under ITS OWN build's comparator after the heal —
+     a rename can move a row's place in an order keyed on the name (HEC
+     Montréal's long form healed to its short one and sat where the É had),
+     and a healed file must be byte-what-the-build-would-write. */
+  const JOBS = {
+    file: 'past-postings.json', heal: healPlace, meta: true, what: 'posting',
+    sort: (a, b) => (b.year - a.year) || String(b.posted).localeCompare(String(a.posted)) ||
+      a.institution.localeCompare(b.institution),
+  };
+  const MAP = {
+    file: 'universities.json', heal: healUniversity, meta: false, what: 'university',
+    sort: (a, b) => a.name.localeCompare(b.name),
+  };
+  const FAC = {
+    file: 'recent-faculty.json', heal: healFaculty, meta: false, what: 'placement',
+    sort: (a, b) => a.last.localeCompare(b.last, 'en', { sensitivity: 'base' }) ||
+      a.name.localeCompare(b.name),
+  };
 
   const dry = process.argv.includes('--dry-run');
   let ok = true;
@@ -605,6 +620,7 @@ async function healNames(outDir) {
       continue;
     }
     guardNoEmail(spec.file, healed);
+    if (spec.sort) healed.sort(spec.sort);
     await writeFile(file, serialiseRows(healed));
     if (spec.meta) {
       await writeFile(file.replace(/\.json$/, '-meta.json'),
