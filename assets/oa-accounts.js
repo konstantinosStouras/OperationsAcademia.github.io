@@ -7,7 +7,10 @@
      - the signed-out control is a proper "Sign in" pill;
      - the signed-in chip greets the person by NAME (owner, 2026-08-17); its
        menu opens with a "SIGNED IN AS <e-mail>" block and a link to
-       account.html labelled "Your personal area", then the section links;
+       account.html labelled "My personal area", then the section links —
+       except for the maintainer, whose "Admin area" row sits ABOVE the
+       personal area (owner, 2026-08-24: the review desk is what they open
+       the menu for);
      - the sign-in / registration modal is redesigned: brand header, one mode
        at a time (sign in ⇄ create account), and registration collects the
        whole profile up front (first/last name, optional affiliation, website
@@ -458,9 +461,10 @@
     host.innerHTML =
       '<div class="oa-acct-wrap">' +
         // the chip greets the person by NAME (owner, 2026-08-17); the menu it
-        // opens keeps "Your personal area" as its first destination
+        // opens keeps "My personal area" as its first destination — except
+        // for the maintainer, whose Admin area row leads (owner, 2026-08-24)
         '<button type="button" class="oa-acct-chip" id="oa-chip" aria-haspopup="menu" ' +
-          'aria-expanded="false" title="Your personal area">' +
+          'aria-expanded="false" title="My personal area">' +
           avatarHTML(u, false, true) +
           '<span class="oa-acct-name">' + esc(displayName(u)) + '</span>' +
           '<span class="oa-caret" aria-hidden="true"></span>' +
@@ -474,9 +478,19 @@
           /* Relative, like every link this design writes: that is what let
              the whole tree be previewed under a directory before it was
              promoted to the root, and what will let the next one do the same. */
+          /* the maintainer's own row LEADS the menu (owner, 2026-08-24: the
+             review desk, with how many items are waiting on it, sits above
+             the personal area — it is what the maintainer opens the menu
+             for). Every other visitor's menu is unchanged. */
+          (adminish(u) ?
+            '<div class="oa-acct-group">' +
+              '<a role="menuitem" href="admin-area.html">' +
+                '<span class="oa-mi" aria-hidden="true">' + ICON.admin + '</span>Admin area' +
+                '<span class="oa-acct-n" data-count="admin" hidden></span></a>' +
+            '</div>' : '') +
           '<div class="oa-acct-group">' +
             '<a role="menuitem" class="oa-acct-primary" href="account.html">' +
-              '<span class="oa-mi" aria-hidden="true">&#128100;</span>Your personal area</a>' +
+              '<span class="oa-mi" aria-hidden="true">&#128100;</span>My personal area</a>' +
           '</div>' +
           '<div class="oa-acct-group">' +
             '<a role="menuitem" href="post-a-job.html">' +
@@ -492,15 +506,6 @@
             '<a role="menuitem" href="feedback.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.feedback + '</span>Send feedback</a>' +
           '</div>' +
-          /* the maintainer's own row (owner, 2026-08-21): the review desk,
-             with how many items are waiting on it — pending job postings,
-             held candidate profiles, open feedback, unpublished updates */
-          (adminish(u) ?
-            '<div class="oa-acct-group">' +
-              '<a role="menuitem" href="admin-area.html">' +
-                '<span class="oa-mi" aria-hidden="true">' + ICON.admin + '</span>Admin area' +
-                '<span class="oa-acct-n" data-count="admin" hidden></span></a>' +
-            '</div>' : '') +
           '<button class="oa-acct-out" role="menuitem" type="button" id="oa-signout">' +
             '<span class="oa-mi" aria-hidden="true">&#8618;</span>Sign out</button>' +
         '</div>' +
@@ -596,9 +601,11 @@
     box.innerHTML =
       '<span class="oa-np-as"><strong>' + esc(displayName(u)) + '</strong>' +
         esc(u.email || '') + '</span>' +
-      '<a class="link depth-0" href="account.html">Your personal area</a>' +
-      '<a class="link depth-0" href="my-postings.html">My postings</a>' +
+      // the maintainer's Admin area leads here too, above the personal area
+      // (owner, 2026-08-24) — the same order the header menu draws
       (adminish(u) ? '<a class="link depth-0" href="admin-area.html">Admin area</a>' : '') +
+      '<a class="link depth-0" href="account.html">My personal area</a>' +
+      '<a class="link depth-0" href="my-postings.html">My postings</a>' +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {
