@@ -128,6 +128,15 @@ function advertHtml(doc) {
     bits.push('it advertises <strong>' + esc(ad.title) + '</strong>' +
       (ad.institution ? ' at ' + esc(ad.institution) : ''));
   }
+  const place = ad.place || null;
+  if (place && (place.institution || place.school || place.unit)) {
+    bits.push('the site’s vocabulary files it as <strong>' +
+      esc([place.institution, place.school, place.unit].filter(Boolean).join(' — ')) +
+      '</strong>');
+  } else if (ad.school || ad.department) {
+    bits.push('the page files it under <strong>' +
+      esc([ad.school, ad.department].filter(Boolean).join(', ')) + '</strong>');
+  }
   if (ad.applyByDate) bits.push('it closes on <strong>' + esc(ad.applyByDate) + '</strong>');
   else if (ad.applyByProse) bits.push('about its deadline it says “' + esc(ad.applyByProse) + '”');
   if (!gone && !bits.length) return '';
@@ -392,6 +401,12 @@ function selftest() {
     title: '', institution: '', applyByDate: '2026-08-01', applyByProse: '',
     listedUntil: '', checkedAt: '2026-08-23T00:00:00Z' } });
   ok(/no longer up/.test(adGone.html), 'a listing that has come down is said to be down');
+  const placed = renderReviewEmail({ ...doc, ad: { ...advertised.ad,
+    place: { institution: 'Example <b>University</b>',
+      school: 'Haas School of Business', unit: 'Operations' } } });
+  ok(/vocabulary files it as/.test(placed.html),
+    'the vocabulary\'s classification of the advertiser is mentioned');
+  ok(!placed.html.includes('<b>University</b>'), 'with its names escaped, never injected');
   ok(!/What the advertisement says/.test(mail.html),
     'while a posting with no ad block carries no mention');
 

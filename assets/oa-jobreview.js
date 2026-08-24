@@ -287,6 +287,31 @@
         '</strong>' + (ad.institution ? ' at ' + esc(ad.institution) : '') +
         (ad.location ? ' (' + esc(ad.location) + ')' : '') + '.');
     }
+
+    /* WHERE the page files the post — classified against the site's own
+       vocabulary where that answered (`advertPlace` in _scraper/adverts.mjs:
+       a hiring organisation that is really a school is filed under its
+       university, the names canonicalised, an empty school settled from the
+       directory by its department), otherwise the page's own words. One
+       button adopts the classified names into the three boxes; the stated
+       names get a button each. Nothing is saved until Save or Approve. */
+    var place = ad.place || null;
+    if (place && (place.institution || place.school || place.unit)) {
+      var named = [place.institution, place.school, place.unit].filter(Boolean);
+      bits.push('The site\'s vocabulary files it as <strong>' + esc(named.join(' — ')) +
+        '</strong>. <button type="button" class="button" data-ad-place' +
+        (place.institution ? ' data-ad-inst="' + esc(place.institution) + '"' : '') +
+        (place.school ? ' data-ad-school="' + esc(place.school) + '"' : '') +
+        (place.unit ? ' data-ad-unit="' + esc(place.unit) + '"' : '') +
+        ' style="margin-left:6px">Use these names</button>');
+    } else if (ad.school || ad.department) {
+      bits.push('The page files it under <strong>' +
+        esc([ad.school, ad.department].filter(Boolean).join(', ')) + '</strong>.' +
+        (ad.school ? ' <button type="button" class="button" data-ad-use-school="' +
+          esc(ad.school) + '" style="margin-left:6px">Use as the School</button>' : '') +
+        (ad.department ? ' <button type="button" class="button" data-ad-use-unit="' +
+          esc(ad.department) + '" style="margin-left:6px">Use as the Department</button>' : ''));
+    }
     if (ad.applyByDate) {
       var same = String((row && row.applyByDate) || '') === ad.applyByDate;
       bits.push('It closes on <strong>' + esc(ad.applyByDate) + '</strong>' +
@@ -798,6 +823,47 @@
             dateBox.value = adUse.getAttribute('data-ad-use') || '';
             dateBox.dispatchEvent(new Event('input', { bubbles: true }));
             dateBox.focus();
+          }
+          return;
+        }
+
+        /* "Use these names": adopt the vocabulary's classification of the
+           advertiser into the three name boxes — only the names it actually
+           settled, exactly as typing them would (input events, so the
+           cascade and the derived-line preview follow). */
+        var adPlace = e.target.closest('button[data-ad-place]');
+        if (adPlace) {
+          [['institution', 'data-ad-inst'], ['school', 'data-ad-school'],
+           ['unit', 'data-ad-unit']].forEach(function (pair) {
+            var v = adPlace.getAttribute(pair[1]);
+            if (!v) return;
+            var box = card.querySelector('[data-key="' + pair[0] + '"]');
+            if (box) {
+              box.value = v;
+              box.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          });
+          return;
+        }
+
+        /* …and the page's own stated school / department, one box each. */
+        var adSchool = e.target.closest('button[data-ad-use-school]');
+        if (adSchool) {
+          var sBox = card.querySelector('[data-key="school"]');
+          if (sBox) {
+            sBox.value = adSchool.getAttribute('data-ad-use-school') || '';
+            sBox.dispatchEvent(new Event('input', { bubbles: true }));
+            sBox.focus();
+          }
+          return;
+        }
+        var adUnit = e.target.closest('button[data-ad-use-unit]');
+        if (adUnit) {
+          var uBox = card.querySelector('[data-key="unit"]');
+          if (uBox) {
+            uBox.value = adUnit.getAttribute('data-ad-use-unit') || '';
+            uBox.dispatchEvent(new Event('input', { bubbles: true }));
+            uBox.focus();
           }
           return;
         }

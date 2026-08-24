@@ -619,6 +619,39 @@ export function businessSchoolOf(vocab, institution, schools = SCHOOLS) {
   return hits.length === 1 ? hits[0] : '';
 }
 
+/**
+ * The one university whose school list carries `name`, as
+ * `{ institution, school }` — or null.
+ *
+ * The inverse of `businessSchoolOf`, with the same lookup discipline: the
+ * name is canonicalised first (so "Sloan School of Management" reaches the
+ * entry filed under the full official name), compared FOLDED, and only an
+ * UNAMBIGUOUS answer is given — a school name two universities both use
+ * ("College of Business") identifies neither. This is what lets an
+ * advertisement whose hiring organisation is a SCHOOL ("Harvard Business
+ * School", the Interfolio shape) be filed under its university.
+ */
+export function universityForSchool(vocab, name, schools = SCHOOLS) {
+  const want = schools.fold(schools.canonSchool(String(name || '')));
+  if (!want) return null;
+  const byUniversity = (vocab && vocab.byUniversity) || {};
+
+  const hits = [];
+  for (const uni of Object.keys(byUniversity)) {
+    const own = byUniversity[uni];
+    const names = Array.isArray(own && own.schools) ? own.schools
+      : Object.keys((own && own.bySchool) || {});
+    for (const s of names) {
+      if (s && schools.fold(schools.canonSchool(s)) === want) {
+        hits.push({ institution: uni, school: s });
+        break;
+      }
+    }
+    if (hits.length > 1) return null;
+  }
+  return hits.length === 1 ? hits[0] : null;
+}
+
 /** Stable JSON with a trailing newline, so a diff shows the names that changed. */
 export function serialiseVocab(vocab) {
   return JSON.stringify(vocab, null, 1) + '\n';
