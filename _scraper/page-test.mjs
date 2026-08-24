@@ -2087,6 +2087,61 @@ for (const [name, expect] of [
   await j.close();
 }
 
+/* --------------------------- the edit you just saved, shown before the build
+
+   Owner, 2026-08-24: "when the admin edits a posted job, the edits should be
+   shown immediately after in the updated job posting." The pipeline stays the
+   pipeline (about a minute); what this measures is the ECHO — oa-fresh.js
+   overlaying, at read time, what THIS browser just saved. The expectations
+   come from the same served file the page reads: a real posting is picked
+   from data/jobs.json, an echo for it is seeded exactly as the form would
+   stash it, and the rendered page must show the echoed institution at once —
+   while a second, taken-down posting must not render at all.                */
+
+{
+  const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  const current = jobs.filter((r) => r && r.institution && r.id
+    && Number(r.year) === marketYear());
+  const target = current[0];
+  const victim = current.find((r) => r !== target);
+
+  const seed = {};
+  // the form stashes under the DOCUMENT id and joins on ref where the posting
+  // has one; a migrated posting's row id IS its document id, so either works
+  seed[target.ref ? 'doc-echo-test' : target.id] = {
+    t: Date.now(), ref: target.ref || '', removed: false,
+    f: { institution: 'Echoed University (Test)' },
+  };
+  seed[victim.id] = { t: Date.now(), ref: victim.ref || '', removed: true, f: {} };
+
+  const e = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const eErrors = [];
+  e.on('pageerror', (err) => eErrors.push(err.message));
+  await e.addInitScript(([key, val]) => {
+    try { localStorage.setItem(key, val); } catch (err) { /* storage off: the echo simply stands down */ }
+  }, ['oaFreshJobs', JSON.stringify(seed)]);
+
+  await e.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await e.waitForSelector('.oa-card');
+  await e.waitForTimeout(600);
+
+  /* The page's ONE reading path first — what every card renders from — then
+     the pixels: the echoed name must actually be on a card. */
+  const loaded = await e.evaluate(([victimId]) =>
+    window.OAList.load('/data/jobs.json').then((rows) => ({
+      echoed: rows.some((r) => r.institution === 'Echoed University (Test)'),
+      victimGone: !rows.some((r) => r.id === victimId),
+    })), [victim.id]);
+  ok(loaded.echoed, 'jobs: the edit this browser just saved is in the loaded rows');
+  ok(loaded.victimGone, 'jobs: and the posting this browser just took down is not');
+
+  const texts = await e.$$eval('.oa-card', (ns) => ns.map((n) => n.textContent));
+  ok(texts.some((t) => t.includes('Echoed University (Test)')),
+    'jobs: the edit is on a rendered card immediately — no build in between');
+  eq(eErrors, [], 'jobs: the echo raises no script errors');
+  await e.close();
+}
+
 /* ------------------------------------------------- the advert file picker
 
    The form offers "upload the advert itself" beside "paste a link". What is

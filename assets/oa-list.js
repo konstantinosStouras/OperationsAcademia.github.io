@@ -951,6 +951,15 @@
         if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
         return res.json();
       })
+      /* The edit the person using THIS browser just saved, overlaid before
+         anything renders (assets/oa-fresh.js) — so a correction shows here
+         immediately while the build publishes it for everyone else. A page
+         without the module, any other URL, and the common empty-stash case
+         all pass straight through. */
+      .then(function (data) {
+        return (typeof window !== 'undefined' && window.OAFresh)
+          ? window.OAFresh.apply(url, data) : data;
+      })
       .catch(function (err) { delete loading[url]; throw err; });
     return loading[url];
   }

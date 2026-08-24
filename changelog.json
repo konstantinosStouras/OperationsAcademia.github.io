@@ -10,6 +10,13 @@
    "url": "https://www.operationsacademia.org/universities.html"
   },
   {
+   "id": "edits-show-immediately",
+   "date": "2026-08-24",
+   "title": "An edit you save is on your screen immediately",
+   "summary": "Correcting a posting used to look like nothing had happened: the change was saved and publishing, but for the next minutes the jobs page went on showing the very text you had just fixed. Now the page you open after saving already shows your correction — and a posting you take down is already gone from the list — on the device you saved it from, while the site publishes it for everyone else within a few minutes exactly as before. What you see is what will publish: the same name-spelling and deadline rules the site applies are applied to the preview, and the published version takes over the moment it lands.",
+   "url": "https://www.operationsacademia.org/jobs.html"
+  },
+  {
    "id": "two-apply-by-dates",
    "date": "2026-08-23",
    "title": "Every posting now shows two deadlines: suggested and final",
