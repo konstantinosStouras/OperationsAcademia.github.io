@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-23T11:23:49.572Z",
+ "generated": "2026-08-24T05:22:19.023Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -170,6 +170,10 @@
    "n": 2
   },
   {
+   "v": "Ball State University",
+   "n": 2
+  },
+  {
    "v": "Carnegie Mellon University",
    "n": 2
   },
@@ -326,6 +330,10 @@
    "n": 2
   },
   {
+   "v": "The Chinese University of Hong Kong",
+   "n": 2
+  },
+  {
    "v": "The Hong Kong Polytechnic University",
    "n": 2
   },
@@ -450,10 +458,6 @@
    "n": 1
   },
   {
-   "v": "Ball State University",
-   "n": 1
-  },
-  {
    "v": "Baruch College - CUNY",
    "n": 1
   },
@@ -558,10 +562,6 @@
    "n": 1
   },
   {
-   "v": "Chinese University of Hong Kong",
-   "n": 1
-  },
-  {
    "v": "College of Charleston",
    "n": 1
   },
@@ -595,6 +595,10 @@
   },
   {
    "v": "Coppin State University",
+   "n": 1
+  },
+  {
+   "v": "Cottey College",
    "n": 1
   },
   {
@@ -1027,6 +1031,10 @@
   },
   {
    "v": "Singapore Management University",
+   "n": 1
+  },
+  {
+   "v": "Singapore University of Technology and Design",
    "n": 1
   },
   {
@@ -1774,10 +1782,6 @@
    "n": 0
   },
   {
-   "v": "Singapore University of Technology and Design (SUTD)",
-   "n": 0
-  },
-  {
    "v": "Skolkovo Institute of Science and Technology (Skoltech)",
    "n": 0
   },
@@ -2160,6 +2164,10 @@
    "n": 1
   },
   {
+   "v": "CUHK Business School",
+   "n": 1
+  },
+  {
    "v": "Curtis L. Carlson School of Management",
    "n": 1
   },
@@ -2405,10 +2413,6 @@
   },
   {
    "v": "Cranfield School of Management",
-   "n": 0
-  },
-  {
-   "v": "CUHK Business School",
    "n": 0
   },
   {
@@ -3090,6 +3094,10 @@
    "n": 3
   },
   {
+   "v": "ISOM",
+   "n": 3
+  },
+  {
    "v": "SCM and Logistics",
    "n": 3
   },
@@ -3122,6 +3130,10 @@
    "n": 2
   },
   {
+   "v": "Decisions, Operations and Technology",
+   "n": 2
+  },
+  {
    "v": "DS and Analytics",
    "n": 2
   },
@@ -3143,10 +3155,6 @@
   },
   {
    "v": "ISBA",
-   "n": 2
-  },
-  {
-   "v": "ISOM",
    "n": 2
   },
   {
@@ -3402,10 +3410,6 @@
    "n": 1
   },
   {
-   "v": "Decisions, Operations and Technology",
-   "n": 1
-  },
-  {
    "v": "Department of Decision and Information Sciences",
    "n": 1
   },
@@ -3431,6 +3435,10 @@
   },
   {
    "v": "Empirical business problems",
+   "n": 1
+  },
+  {
+   "v": "Engineering Systems and Design",
    "n": 1
   },
   {
@@ -3711,6 +3719,10 @@
   },
   {
    "v": "open disciplinary focus",
+   "n": 1
+  },
+  {
+   "v": "Operation Management",
    "n": 1
   },
   {
@@ -5265,30 +5277,6 @@
     ]
    }
   },
-  "Chinese University of Hong Kong": {
-   "schools": [
-    "CUHK Business School",
-    "Faculty of Engineering"
-   ],
-   "units": [
-    "Decision Sciences and Managerial Economics",
-    "OM/IS",
-    "Operations Management",
-    "Systems Engineering and Engineering Management"
-   ],
-   "bySchool": {
-    "": [
-     "OM/IS"
-    ],
-    "CUHK Business School": [
-     "Decision Sciences and Managerial Economics",
-     "Operations Management"
-    ],
-    "Faculty of Engineering": [
-     "Systems Engineering and Engineering Management"
-    ]
-   }
-  },
   "City University of Hong Kong": {
    "schools": [
     "College of Business"
@@ -5553,6 +5541,17 @@
    ],
    "units": [],
    "bySchool": {}
+  },
+  "Cottey College": {
+   "schools": [],
+   "units": [
+    "Operation Management"
+   ],
+   "bySchool": {
+    "": [
+     "Operation Management"
+    ]
+   }
   },
   "County College of Morris": {
    "schools": [],
@@ -8232,10 +8231,16 @@
     ]
    }
   },
-  "Singapore University of Technology and Design (SUTD)": {
+  "Singapore University of Technology and Design": {
    "schools": [],
-   "units": [],
-   "bySchool": {}
+   "units": [
+    "Engineering Systems and Design"
+   ],
+   "bySchool": {
+    "": [
+     "Engineering Systems and Design"
+    ]
+   }
   },
   "SKEMA Business School": {
    "schools": [],
@@ -8731,6 +8736,32 @@
    "bySchool": {
     "": [
      "Business"
+    ]
+   }
+  },
+  "The Chinese University of Hong Kong": {
+   "schools": [
+    "CUHK Business School",
+    "Faculty of Engineering"
+   ],
+   "units": [
+    "Decision Sciences and Managerial Economics",
+    "Decisions, Operations and Technology",
+    "OM/IS",
+    "Operations Management",
+    "Systems Engineering and Engineering Management"
+   ],
+   "bySchool": {
+    "": [
+     "OM/IS"
+    ],
+    "CUHK Business School": [
+     "Decision Sciences and Managerial Economics",
+     "Decisions, Operations and Technology",
+     "Operations Management"
+    ],
+    "Faculty of Engineering": [
+     "Systems Engineering and Engineering Management"
     ]
    }
   },
@@ -11496,6 +11527,7 @@
   ],
   "CUHK Business School": [
    "Decision Sciences and Managerial Economics",
+   "Decisions, Operations and Technology",
    "Operations Management"
   ],
   "Culverhouse College of Commerce": [

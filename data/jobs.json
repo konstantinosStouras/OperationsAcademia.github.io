@@ -35,6 +35,41 @@
   "owner": ""
  },
  {
+  "id": "2027-the-chinese-university-of-hong-kong-20260824",
+  "year": 2027,
+  "posted": "2026-08-24",
+  "institution": "The Chinese University of Hong Kong",
+  "department": "CUHK Business School, Decisions, Operations and Technology",
+  "school": "CUHK Business School",
+  "unit": "Decisions, Operations and Technology",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 31, 2026",
+  "applyByDate": "2026-12-31",
+  "comments": "Please submit your application package (including a letter of interest, a full resume and recent teaching-related information such as teaching evaluations) via the CUHK career site and at least three reference letters should be sent directly to the Chairperson, Department of Decisions, Operations and Technology by the referees via e-mail ([e-mail removed]). We will invite shortlisted candidates for in-person interviews at the INFORMS Annual Meeting (2026). Interested candidates are advised to submit the application by October 9, 2026 with information of their presentations at INFORMS, if any.",
+  "country": "Hong Kong",
+  "adUrl": "https://drive.google.com/file/d/1-LxBKUy1ucCkJuXsAKtln9U6ASKo1-NE/view?usp=drivesdk",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://cuhk.taleo.net/careersection/cu_career_teach/jobdetail.ftl?job=2600015Q&tz=GMT%2B08%3A00&tzname=Asia%2FHong_Kong",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Chinese%20University%20of%20Hong%20Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-24T02:53:49Z",
+  "ref": "OA-JOB-260824-Q4P4",
+  "owner": "6eebe23816fe369a"
+ },
+ {
   "id": "2027-city-university-of-hong-kong-20260822",
   "year": 2027,
   "posted": "2026-08-22",
@@ -63,6 +98,34 @@
   "owner": ""
  },
  {
+  "id": "2027-singapore-university-of-technology-and-design-20260822",
+  "year": 2027,
+  "posted": "2026-08-22",
+  "institution": "Singapore University of Technology and Design",
+  "department": "Engineering Systems and Design",
+  "school": "",
+  "unit": "Engineering Systems and Design",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Open Rank · Singapore",
+  "country": "Singapore",
+  "adUrl": "https://careercenter.informs.org/job/tenured-tenure-track-faculty-members-for-engineering-systems-and-design-esd-pillar-singapore-5469",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Singapore%20University%20of%20Technology%20and%20Design",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-24T04:23:40Z",
+  "owner": ""
+ },
+ {
   "id": "2027-university-of-california-los-angeles-20260822",
   "year": 2027,
   "posted": "2026-08-22",
@@ -88,6 +151,60 @@
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-23T10:21:39Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-ball-state-university-20260821",
+  "year": 2027,
+  "posted": "2026-08-21",
+  "institution": "Ball State University",
+  "department": "ISOM",
+  "school": "",
+  "unit": "ISOM",
+  "type": "University",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Instructor · Muncie, IN",
+  "country": "United States",
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179530780&Title=Instructor%20of%20ISOM",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Ball%20State%20University",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-24T04:24:18Z",
+  "owner": ""
+ },
+ {
+  "id": "2027-cottey-college-20260821",
+  "year": 2027,
+  "posted": "2026-08-21",
+  "institution": "Cottey College",
+  "department": "Operation Management",
+  "school": "",
+  "unit": "Operation Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "AP · Nevada, MO",
+  "country": "United States",
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179535448&Title=Assistant%20Professor%20in%20Business%20Administration",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Cottey%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-24T04:24:28Z",
   "owner": ""
  },
  {
