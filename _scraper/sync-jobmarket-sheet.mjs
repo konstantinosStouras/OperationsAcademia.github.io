@@ -46,6 +46,7 @@
    as the scholarly APIs in the sibling repositories.
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -936,7 +937,7 @@ async function healNames() {
   return true;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   if (has('--heal-names')) process.exit(await healNames() ? 0 : 1);
   if (has('--selftest')) {
     /* The WHOLE suite, not runSelftest()'s three-suite subset — which does not

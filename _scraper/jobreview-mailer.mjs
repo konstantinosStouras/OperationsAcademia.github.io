@@ -39,6 +39,7 @@
      --selftest   offline checks, no network, no credentials
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { COLLECTION, needMail, applyEdits } from './jobreview.mjs';
 import { longDate } from './jobs-model.mjs';
 import {
@@ -449,7 +450,7 @@ function selftest() {
   return fails.length === 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   if (has('--selftest')) {
     process.exit(selftest() ? 0 : 1);
   } else {

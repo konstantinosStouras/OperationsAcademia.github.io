@@ -45,6 +45,7 @@
    address reaches an output anyway.
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -749,6 +750,6 @@ function selftest() {
   return true;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   main().catch((err) => { console.error(err); process.exit(1); });
 }

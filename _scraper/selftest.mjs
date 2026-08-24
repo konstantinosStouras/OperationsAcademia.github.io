@@ -9,6 +9,7 @@
        node v2/_scraper/selftest.mjs
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -5520,6 +5521,45 @@ async function testAdvertsWiring() {
   }
 }
 
+/* ------------------------------- "am I the script being run?", on Windows too */
+
+async function testCliMainGuards() {
+  /* Every CLI here used to gate its main block by gluing "file://" onto
+     process.argv[1] and comparing that to import.meta.url — true on the
+     Linux runners, NEVER true on Windows (a URL glued from a backslashed
+     path is not the module's URL), so on the maintainer's own machine every
+     local mode — the selftest included — loaded, matched nothing, and
+     exited 0 in silence. A no-op with a green exit code. The comparison
+     lives in ONE place now (_main.mjs, both sides converted to paths, win32
+     case-folded), and the glued pattern is pinned out of the whole
+     directory. The needle is assembled, not written, so this check cannot
+     catch its own description — the lesson the private-key guard's comment
+     records. */
+  const NEEDLE = 'file://' + '${process.' + 'argv[1]}';
+  const dir = (await import('node:fs/promises')).readdir;
+  for (const name of (await dir(HERE)).filter((n) => n.endsWith('.mjs'))) {
+    const src = await readFile(path.join(HERE, name), 'utf8');
+    ok(!src.includes(NEEDLE),
+      `${name}: no hand-glued file:// comparison — it is never true on Windows`);
+    if (name !== '_main.mjs' && src.includes('isMain(import.meta.url)')) {
+      ok(src.includes("from './_main.mjs'"),
+        `${name}: the guard is the shared one, not a copy`);
+    }
+  }
+
+  /* The helper itself, driven in-process: the script node was asked to run
+     answers true — through the same conversion on every platform — an
+     imported module answers false, and garbage answers false rather than
+     throwing inside its host. */
+  const { pathToFileURL } = await import('node:url');
+  ok(isMain(pathToFileURL(path.resolve(process.argv[1])).href),
+    'the running script knows it is the running script');
+  ok(!isMain(pathToFileURL(path.join(HERE, 'jobs-model.mjs')).href),
+    'an imported module knows it is not');
+  ok(!isMain('not a url') && !isMain('https://example.org/x.mjs'),
+    'and nothing here can throw inside a module that imports it');
+}
+
 /* -------------------------- the edit you just saved, shown before the build */
 
 async function testFreshEcho() {
@@ -6742,7 +6782,7 @@ async function testSubmissionNotices() {
     'and does not fire on the same minutes as the review mailer');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
   testOwnershipAndPending();
@@ -6806,6 +6846,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testAdvertsPlace();
   testAdvertsApply();
   await testAdvertsWiring();
+  await testCliMainGuards();
   await testFreshEcho();
   await testGuardRepairs();
   testReviewQueue();

@@ -25,6 +25,7 @@
    by the check workflow.
    --------------------------------------------------------------------------- */
 
+import { isMain } from './_main.mjs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -314,7 +315,7 @@ async function check({ keep = false } = {}) {
   console.log('Drive uploads are working for both folders.');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const argv = new Set(process.argv.slice(2));
   if (argv.has('--check')) {
     await check({ keep: argv.has('--keep') });
