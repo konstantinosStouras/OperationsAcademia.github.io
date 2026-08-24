@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-24T10:42:03.546Z",
+ "generated": "2026-08-24T11:01:41.830Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -2152,10 +2152,6 @@
    "n": 1
   },
   {
-   "v": "Graduate School of Management",
-   "n": 1
-  },
-  {
    "v": "Harvard Business School",
    "n": 1
   },
@@ -2501,6 +2497,10 @@
   },
   {
    "v": "Graduate School of Engineering and Management",
+   "n": 0
+  },
+  {
+   "v": "Graduate School of Management",
    "n": 0
   },
   {
@@ -9270,6 +9270,9 @@
     "Operations Management"
    ],
    "bySchool": {
+    "": [
+     "Business Analytics"
+    ],
     "Graduate School of Management": [
      "Business Analytics",
      "Operations Management"
