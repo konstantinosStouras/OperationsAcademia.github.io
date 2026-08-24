@@ -826,9 +826,6 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 .oa-aa-tile:hover { border-color: var(--brand, #3a424d); }
 .oa-aa-tile.is-due { border-color: var(--brand, #3a424d); }
-/* The Registered-users card is a statistic, not a queue: nothing opens from
-   it, so it keeps the resting border on hover and the default cursor — a tile
-   that highlights like its neighbours promises a panel it does not have. */
 /* The statistic card. It used to open nothing, so its hover was deliberately
    killed and its cursor left as an arrow; since 2026-08-24 it opens the
    Registered-users roster, so it behaves like the queue tiles beside it. The
@@ -1859,8 +1856,14 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   border-bottom: 2px solid var(--line, #dcdfe4);
   white-space: nowrap;
 }
-.oa-u-table tbody tr:hover { background: var(--bg-2, #f7f8fa); }
-.oa-u-table a { color: var(--link, #1a5fb4); }
+/* --bg-3, not --bg-2: the panel this table sits in IS --bg-2
+   (body.v3 .oa-panel), so hovering a row painted it its own colour and nothing
+   moved — measured identical in both themes before this. */
+.oa-u-table tbody tr:hover { background: var(--bg-3, #f7f8fa); }
+/* --brand, the token every other link on this site uses. `--link` does not
+   exist here: it fell back to a hardcoded blue, theme-blind, which is exactly
+   what this block's header says not to do. */
+.oa-u-table a { color: var(--brand, #3a424d); }
 .oa-u-tick { width: 34px; }
 /* A tick box is a touch target before it is a control. */
 .oa-u-tick input { width: 18px; height: 18px; }
@@ -1883,7 +1886,7 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   border: 0;
   padding: 0;
   font: inherit;
-  color: var(--link, #1a5fb4);
+  color: var(--brand, #3a424d);
   text-decoration: underline;
   cursor: pointer;
 }

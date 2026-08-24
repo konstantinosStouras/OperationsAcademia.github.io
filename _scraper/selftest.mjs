@@ -4004,6 +4004,18 @@ async function testUsersAndMessages() {
     'the userDirectory rule allows exactly the roster’s four fields — a key with ' +
     'no rule is a permission-denied nobody can debug, a rule with no writer is dead');
 
+  /* …and what the WRITER actually writes, read out of its own source. Pinning
+     the rules against a declared list leaves that half unchecked: the list
+     could agree with the rules perfectly while syncDirectoryRow had stopped
+     sending one of them (testRowOverrides records the same lesson). */
+  const syncSrc = accts.slice(accts.indexOf('function syncDirectoryRow'),
+    accts.indexOf('function loadProfile'));
+  ok(syncSrc.length > 200, 'the roster writer is where this thinks it is');
+  for (const k of U.ROW_KEYS) {
+    ok(new RegExp('(^|[{;\\s])' + k + ':|row\\.' + k + '\\s*=').test(syncSrc),
+      `syncDirectoryRow really writes "${k}" — not merely declares it`);
+  }
+
   /* ---------------------------------------------------------- the threads */
 
   const thr = rules.slice(rules.indexOf('match /messages/{uid}'),
