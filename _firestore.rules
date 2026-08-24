@@ -402,6 +402,23 @@ service cloud.firestore {
     //
     // Disclosed in the Privacy Policy.
     match /userDirectory/{uid} {
+      // Declared BEFORE the allow statements that call it, for the reason the
+      // sibling /lit/ rules hoist isFeedbackAdmin(): a rule calling a function
+      // declared after it is not something to leave to chance.
+      function rowOk() {
+        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen'])
+          && str('name', 200) && str('email', 200)
+          // THE ADDRESS CANNOT BE FORGED — but it may be ABSENT. A provider
+          // sign-in need not carry an e-mail claim at all (ORCID's does not),
+          // and demanding one would silently leave exactly those accounts off
+          // the roster. So: no address, or the caller's own. Never anyone
+          // else's.
+          && (!('email' in request.resource.data)
+              || request.resource.data.email == request.auth.token.email)
+          && request.resource.data.first is number
+          && request.resource.data.seen is number;
+      }
+
       // The maintainer reads the whole roster; a person may read the ONE row
       // the site keeps about them, which is also what lets the browser
       // preserve `first` below without the maintainer's permission. A
@@ -414,17 +431,11 @@ service cloud.firestore {
       // `first` is WRITE-ONCE: on any later write it must be exactly what is
       // already stored. The browser reads its own row once per session and
       // sends `first` back unchanged; a client that tried to reset it — or to
-      // back-date itself in the roster — is refused.
+      // back-date itself in the roster — is refused. (An account can still
+      // delete its own row and open a new one, which is inherent in owning it
+      // and only ever moves its OWN first-seen date.)
       allow update: if isOwner(uid) && rowOk()
                     && request.resource.data.first == resource.data.first;
-
-      function rowOk() {
-        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen'])
-          && str('name', 200) && str('email', 200)
-          && request.resource.data.email == request.auth.token.email
-          && request.resource.data.first is number
-          && request.resource.data.seen is number;
-      }
       // An account may withdraw its OWN row, and only its own — which is what
       // the merge does with the duplicate it removes, so the roster lists
       // people rather than sign-ins. It mirrors registeredUsers exactly.
@@ -501,7 +512,16 @@ service cloud.firestore {
                       && request.resource.data.t is number
                       && (
                         (isAdmin() && request.resource.data.from == 'admin')
-                        || (isOwner(uid) && request.resource.data.from == 'user')
+                        // A REPLY NEEDS A THREAD TO REPLY TO. Without this an
+                        // owner could write unbounded documents under their own
+                        // uid that no thread head points at — invisible on the
+                        // Admin area, which lists threads, and so an unbounded
+                        // write channel nobody would ever see. It also states
+                        // in the rules what the panels already promise: only
+                        // the maintainer opens a conversation. One billed read
+                        // per reply, and a reply is a rare thing.
+                        || (isOwner(uid) && request.resource.data.from == 'user'
+                            && exists(/databases/$(database)/documents/messages/$(uid)))
                       );
         allow update, delete: if isAdmin();
       }

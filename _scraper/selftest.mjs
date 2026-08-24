@@ -4030,6 +4030,29 @@ async function testUsersAndMessages() {
   ok(/allow update, delete: if isAdmin\(\);/.test(items),
     'only the maintainer may retract a message: a thread whose history either ' +
     'party can rewrite is not a record of anything');
+  ok(/exists\(\/databases\/\$\(database\)\/documents\/messages\/\$\(uid\)\)/.test(items),
+    'A REPLY NEEDS A THREAD TO REPLY TO — without it an owner could write ' +
+    'unbounded documents under their own uid that no thread head points at, ' +
+    'invisible on a page that lists threads');
+  ok(/allow delete: if isAdmin\(\);/.test(thr.slice(0, itemsAt)),
+    'and the maintainer can remove an orphaned conversation, which the ghost ' +
+    'panel offers a button for');
+  ok(/oa-u-del/.test(users) && /function deleteThread/.test(users),
+    '…a button that exists: the panel used to say "open one to read or delete ' +
+    'it" with no delete control anywhere');
+  ok(/\(!\('email' in request\.resource\.data\)/.test(dir),
+    'a sign-in with no e-mail claim still gets a roster row — demanding one ' +
+    'would silently omit exactly those accounts');
+  ok(dir.indexOf('function rowOk()') < dir.indexOf('allow create'),
+    'rowOk() is declared before the allow statements that call it');
+  ok(/needsAdmin: !!\(prev && prev\.needsAdmin\)/.test(users),
+    'A BROADCAST IS NOT AN ANSWER: sending to somebody who has replied leaves ' +
+    'them in the queue — only reading the thread clears it');
+  ok(/d\.batch\(\)/.test(users),
+    'the message and its bookkeeping are ONE write — half of them landing ' +
+    'would leave a message the roster does not know about');
+  ok(/var draft = \(\$\('oa-u-body'\) \|\| \{\}\)\.value/.test(users),
+    'and ticking a recipient does not throw away the message already typed');
   ok(/request\.resource\.data\.body\.size\(\) <= 5000/.test(items)
     && U.MAXLEN.body === 5000,
     'the body cap in the rules and the one both compose boxes enforce are the same number');

@@ -96,6 +96,7 @@
     if (unread > 0) {
       db.collection(THREADS).doc(uid).set({ userUnread: 0 }, { merge: true })
         .then(function () {
+          if (!stillOurs(uid)) return;      // signed out mid-flight
           if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('messages', 0);
         })['catch'](function () { /* rules not deployed — the badge stays honest */ });
     }
@@ -127,10 +128,16 @@
       })
       .then(function () {
         if (ta) ta.value = '';
-        if (out) { out.className = 'oa-form-msg is-ok'; out.textContent = 'Sent.'; }
-        loadedFor = null;                      // re-read so the reply appears
-        return load(db, uid);
+        /* Re-read so the reply appears. The uid latch must NOT be cleared to
+           do it — clearing it is what would let a second click, or an auth
+           echo, post the same reply again. */
+        return load(db, uid).then(function () {
+          var after = $('oa-msg-out');
+          if (after) { after.className = 'oa-form-msg is-ok'; after.textContent = 'Sent.'; }
+        });
       })['catch'](function (err) {
+        var live = $('oa-msg-send');
+        if (live) live.disabled = false;
         if (btn) btn.disabled = false;
         if (out) {
           out.className = 'oa-form-msg is-err';
@@ -141,18 +148,26 @@
       });
   }
 
+  /* The account can change while a read is in flight — sign out, then sign in
+     as someone else. Without this the older read wins: the previous person's
+     thread is painted, and their unread count is written into the new
+     account's menu badge. The same `stillOurs` guard loadProfile applies. */
+  function stillOurs(uid) { return loadedFor === uid; }
+
   function load(db, uid) {
     var thread = db.collection(THREADS).doc(uid);
     return Promise.all([
       thread.get(),
       thread.collection(ITEMS).orderBy('t').get()
     ]).then(function (both) {
+      if (!stillOurs(uid)) return;
       var head = both[0] && both[0].exists ? (both[0].data() || {}) : null;
       var items = [];
       both[1].forEach(function (d) { items.push(d.data() || {}); });
       show($('oa-msg-loading'), false);
       render(db, uid, head, items);
     })['catch'](function (err) {
+      if (!stillOurs(uid)) return;
       loadedFor = null;                        // a retry must be possible
       show($('oa-msg-loading'), false);
       var list = $('oa-msg-list');

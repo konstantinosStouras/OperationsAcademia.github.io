@@ -256,8 +256,12 @@
       return;
     }
 
-    var head = '<tr><th class="oa-u-tick"><input type="checkbox" id="oa-u-all" ' +
-      'aria-label="Select every account shown"></th>';
+    /* The select-all box must SHOW its own state, or it can be ticked and never
+       un-ticked: the strip re-renders on every pick and would paint it empty
+       again. It is checked when every row on screen is picked. */
+    var allOn = rows.length > 0 && rows.every(function (r) { return !!state.picked[r.uid]; });
+    var head = '<tr><th class="oa-u-tick"><input type="checkbox" id="oa-u-all"' +
+      (allOn ? ' checked' : '') + ' aria-label="Select every account shown"></th>';
     COLS.forEach(function (c) {
       var on = state.sortKey === c.key;
       var arrow = on ? (state.sortDir === 'asc' ? ' ▲' : ' ▼') : '';
@@ -265,7 +269,7 @@
         '" data-sort="' + esc(c.key) + '" aria-label="Sort by ' + esc(c.label) + '">' +
         esc(c.label) + arrow + '</button></th>';
     });
-    head += '</tr>';
+    head += '<th></th></tr>';
 
     var body = rows.map(function (r) {
       var tds = COLS.map(function (c) { return '<td>' + c.cell(r) + '</td>'; }).join('');
@@ -273,7 +277,13 @@
         '<td class="oa-u-tick"><input type="checkbox" class="oa-u-pick" ' +
           'data-uid="' + esc(r.uid) + '"' + (state.picked[r.uid] ? ' checked' : '') +
           ' aria-label="Select ' + esc(r.name || r.email || r.uid) + '"></td>' +
-        tds + '</tr>';
+        tds +
+        /* …and every row opens its conversation. Without this the "Message
+           replies waiting" tile counts something the maintainer cannot reach:
+           the only Open control was on the orphaned threads below. */
+        '<td><button type="button" class="button oa-btn-ghost oa-u-open" data-uid="' +
+          esc(r.uid) + '">' + (r.thread ? 'Open' : 'Message') + '</button></td>' +
+        '</tr>';
     }).join('');
 
     var ghosts = '';
@@ -290,7 +300,8 @@
           return '<li><button type="button" class="oa-u-open" data-uid="' + esc(t.uid) +
             '">' + esc(t.uid) + '</button> <span class="oa-hint">' +
             esc(threadLabel(t)) + (t.lastAt ? ' · ' + esc(day(t.lastAt)) : '') +
-            '</span></li>';
+            '</span> <button type="button" class="button oa-btn-ghost oa-u-del" ' +
+            'data-uid="' + esc(t.uid) + '">Delete</button></li>';
         }).join('') + '</ul>';
     }
 
@@ -317,8 +328,11 @@
       f.addEventListener('input', function () {
         state.filter = f.value || '';
         renderTable();
+        /* Restore focus AND the caret where it actually was — forcing it to the
+           end makes editing a term mid-string impossible. */
+        var at = f.selectionStart;
         var again = $('oa-u-filter');
-        if (again) { again.focus(); try { again.setSelectionRange(again.value.length, again.value.length); } catch (e) {} }
+        if (again) { again.focus(); try { again.setSelectionRange(at, at); } catch (e) {} }
       });
     }
     Array.prototype.forEach.call(document.querySelectorAll('.oa-u-sort'), function (b) {
@@ -354,6 +368,33 @@
     Array.prototype.forEach.call(document.querySelectorAll('.oa-u-open'), function (b) {
       b.addEventListener('click', function () { openThread(b.getAttribute('data-uid')); });
     });
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-u-del'), function (b) {
+      b.addEventListener('click', function () { deleteThread(b.getAttribute('data-uid')); });
+    });
+  }
+
+  /* Remove an orphaned conversation for good. Offered only on a thread whose
+     roster row has gone — a live account's thread is a record of something and
+     stays. The rules allow the maintainer alone to delete, and the items go
+     first: deleting only the head would leave the messages unreachable rather
+     than gone. */
+  function deleteThread(uid) {
+    if (!root.confirm('Delete this conversation for good? This cannot be undone.')) return;
+    db().then(function (d) {
+      var head = d.collection(THREADS).doc(uid);
+      return head.collection(ITEMS).get().then(function (snap) {
+        var kill = [];
+        snap.forEach(function (doc) { kill.push(doc.ref.delete()); });
+        return Promise.all(kill);
+      }).then(function () { return head.delete(); });
+    }).then(load)['catch'](function (err) {
+      var host = $('oa-aa-users-list');
+      if (host) {
+        host.insertAdjacentHTML('beforeend',
+          '<p class="oa-form-msg is-err">Could not delete (' +
+          esc(err && (err.code || err.message)) + ').</p>');
+      }
+    });
   }
 
   function downloadCsv() {
@@ -378,6 +419,10 @@
     var host = $('oa-aa-users-compose');
     if (!host) return;
     var n = pickedUids().length;
+    /* Ticking a recipient re-renders this block, and rebuilding the textarea
+       would throw away a message already written — which is exactly the order
+       people work in: write, then choose who. Carry the draft across. */
+    var draft = ($('oa-u-body') || {}).value || '';
     host.innerHTML =
       '<h4 class="oa-aa-group-h">Send a message</h4>' +
       '<p class="oa-hint">It appears in the person’s own area on this site under ' +
@@ -389,6 +434,8 @@
         (n ? '' : ' disabled') + '>' +
         (n ? 'Send to ' + n + (n === 1 ? ' person' : ' people') : 'Select who to message') +
         '</button> <span class="oa-form-msg" id="oa-u-msg" role="status"></span></p>';
+    var ta = $('oa-u-body');
+    if (ta && draft) ta.value = draft;
     var b = $('oa-u-send');
     if (b) b.addEventListener('click', send);
   }
@@ -422,35 +469,54 @@
           var head = d.collection(THREADS).doc(uid);
           var row = state.rows.filter(function (r) { return r.uid === uid; })[0];
           var prev = (row && row.thread) || null;
-          return head.collection(ITEMS).add({ from: 'admin', body: body, t: now })
-            .then(function () {
-              return head.set({
-                uid: uid,
-                lastAt: now,
-                lastFrom: 'admin',
-                needsAdmin: false,          // we have just acted
-                userUnread: (prev && typeof prev.userUnread === 'number' ? prev.userUnread : 0) + 1
-              }, { merge: true });
-            })
+          /* ONE atomic write for the message and its bookkeeping. Two
+             sequential writes can half-fail: the recipient would hold a
+             message the roster does not know about, and this would report it
+             as undelivered when it had in fact arrived. */
+          var batch = d.batch();
+          batch.set(head.collection(ITEMS).doc(), { from: 'admin', body: body, t: now });
+          batch.set(head, {
+            uid: uid,
+            lastAt: now,
+            lastFrom: 'admin',
+            /* NOT `false`. Clearing it here would drop somebody who has
+               replied out of the "awaiting you" queue without their reply
+               having been read — and a broadcast is not an answer. Only
+               opening the thread and pressing "Mark answered", or replying to
+               it, clears the flag. */
+            needsAdmin: !!(prev && prev.needsAdmin),
+            userUnread: (prev && typeof prev.userUnread === 'number' ? prev.userUnread : 0) + 1
+          }, { merge: true });
+          return batch.commit()
             .then(function () { sent++; })
             ['catch'](function () { failed++; });
         });
       }, Promise.resolve()).then(function () {
         if (ta) ta.value = '';
         state.picked = {};
-        if (msg) {
-          msg.className = failed ? 'oa-form-msg is-err' : 'oa-form-msg is-ok';
-          msg.textContent = failed
-            ? 'Sent to ' + sent + '; ' + failed + ' could not be delivered.'
-            : 'Sent to ' + sent + (sent === 1 ? ' person.' : ' people.');
-        }
-        return load();
+        /* Reload FIRST — it repaints the compose block, which would otherwise
+           wipe the line below — then say what happened. */
+        return load().then(function () {
+          var after = $('oa-u-msg');
+          if (after) {
+            after.className = failed ? 'oa-form-msg is-err' : 'oa-form-msg is-ok';
+            after.textContent = failed
+              ? 'Sent to ' + sent + '; ' + failed + ' could not be delivered.'
+              : 'Sent to ' + sent + (sent === 1 ? ' person.' : ' people.');
+          }
+        });
       });
     })['catch'](function (err) {
+      /* Re-enable whichever button is on screen: the reload above may already
+         have replaced the one we disabled, and a Send stuck disabled is a
+         panel the maintainer has to reload to use again. */
+      var live = $('oa-u-send');
+      if (live) live.disabled = false;
       if (btn) btn.disabled = false;
-      if (msg) {
-        msg.className = 'oa-form-msg is-err';
-        msg.textContent = err && err.code === 'permission-denied'
+      var out = $('oa-u-msg') || msg;
+      if (out) {
+        out.className = 'oa-form-msg is-err';
+        out.textContent = err && err.code === 'permission-denied'
           ? 'The messaging rules have not been deployed yet (see _SETUP-FIREBASE.md §4).'
           : 'Could not send (' + (err && (err.code || err.message)) + ').';
       }

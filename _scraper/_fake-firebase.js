@@ -108,7 +108,13 @@
   }
 
   function Col(path) { this.path = path; }
-  Col.prototype.doc = function (id) { return new DocRef(this.path + '/' + id); };
+  Col.prototype.doc = function (id) {
+    // no id = mint one, as the real SDK does for `collection(x).doc()`
+    if (id === undefined || id === null || id === '') {
+      id = 'auto' + (Object.keys(docs).length + 1) + '_' + this.path.replace(/\//g, '_');
+    }
+    return new DocRef(this.path + '/' + id);
+  };
   Col.prototype.add = function (data) {
     var id = 'auto' + (Object.keys(docs).length + 1);
     return new DocRef(this.path + '/' + id).set(data).then(function () {
@@ -168,8 +174,36 @@
     return new Query(this.path, [], null, n);
   };
 
+  /* A write batch. Grown for the roster's broadcast (2026-08-24), which sends
+     a message and its thread bookkeeping as ONE write: two sequential writes
+     can half-fail, leaving the recipient holding a message the roster does not
+     know about. Not a transaction — the real thing is atomic and this simply
+     replays the calls in order on commit, which is all a test needs to observe
+     that both documents land. `doc()` with no id mints one, as the SDK does. */
+  function Batch() { this.__ops = []; }
+  Batch.prototype.set = function (ref, data, opts) {
+    this.__ops.push(function () { return ref.set(data, opts); });
+    return this;
+  };
+  Batch.prototype.update = function (ref, patch) {
+    this.__ops.push(function () { return ref.update(patch); });
+    return this;
+  };
+  Batch.prototype['delete'] = function (ref) {
+    this.__ops.push(function () { return ref['delete'](); });
+    return this;
+  };
+  Batch.prototype.commit = function () {
+    return this.__ops.reduce(function (chain, op) {
+      return chain.then(op);
+    }, Promise.resolve());
+  };
+
   function firestoreFor() {
-    return { collection: function (name) { return new Col(name); } };
+    return {
+      collection: function (name) { return new Col(name); },
+      batch: function () { return new Batch(); }
+    };
   }
   firestoreFor.FieldValue = { serverTimestamp: function () { return '<serverTimestamp>'; } };
 

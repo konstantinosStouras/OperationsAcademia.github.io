@@ -878,10 +878,6 @@
     var latch = 'oaDir:' + u.uid;
     try { if (sessionStorage.getItem(latch)) return; } catch (e) { /* private mode */ }
     var email = String(u.email || '');
-    // The rules require email === the auth token's address. An account with no
-    // address on its token (it should not happen, but a custom provider could)
-    // would be refused, so do not spend the write.
-    if (!email) return;
     try { sessionStorage.setItem(latch, '1'); } catch (e) { /* private mode */ }
 
     OAFB.ready().then(function (fb) {
@@ -891,11 +887,16 @@
         var had = snap && snap.exists ? (snap.data() || {}) : null;
         var row = {
           name: String(displayName(u) || '').slice(0, 200),
-          email: email.slice(0, 200),
           seen: now,
           // write-once: send back what is stored, or open the row at now
           first: had && typeof had.first === 'number' ? had.first : now
         };
+        /* Only when there IS one. A provider sign-in need not carry an e-mail
+           claim (ORCID's does not), and the rules refuse an address that is
+           not the caller's own — so sending an empty string would leave
+           exactly those accounts off the roster entirely. They get a row with
+           a name and their dates, and the roster shows "—". */
+        if (email) row.email = email.slice(0, 200);
         return ref.set(row, { merge: true });
       });
     }).catch(function () {

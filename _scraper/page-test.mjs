@@ -4419,6 +4419,42 @@ for (const w of [320, 360, 390, 430]) {
     ok((await q.textContent('#oa-u-send')).indexOf('1 person') !== -1,
       'roster: select-all takes only the rows on screen, so the filter IS the picker');
 
+    /* EVERY row opens its conversation. The "Message replies waiting" tile
+       counts threads owing an answer, and for a while the only Open control
+       was on the ORPHANED threads below — so the queue could be counted and
+       not read. */
+    eq(await q.locator('#oa-aa-users tbody tr .oa-u-open').count(),
+      await q.locator('#oa-aa-users tbody tr').count(),
+      'roster: every row opens its conversation — a queue you cannot read is not a queue');
+    await q.fill('#oa-u-filter', 'bea@');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+    await q.click('#oa-aa-users tbody tr .oa-u-open');
+    await q.waitForSelector('#oa-aa-users-thread .oa-u-msg', { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users-thread')).indexOf('Hello back.') !== -1,
+      'roster: …and the maintainer can read the reply that is waiting for them');
+    await q.click('#oa-u-close');
+    await q.fill('#oa-u-filter', '');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length > 1, null, { timeout: 10000 });
+
+    /* A message already typed must survive choosing who to send it to — which
+       is the order people actually work in. Bea is NOT picked at this point
+       (select-all above ran with the list filtered to Cy), so this ticks her
+       and then unticks her, leaving the selection exactly as it was. */
+    await q.fill('#oa-u-body', 'Draft that must survive.');
+    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-pick');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-u-send') || {}).textContent.indexOf('2 people') !== -1,
+      null, { timeout: 10000 });
+    eq(await q.inputValue('#oa-u-body'), 'Draft that must survive.',
+      'roster: ticking a recipient does not throw away the message already written');
+    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-pick');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-u-send') || {}).textContent.indexOf('1 person') !== -1,
+      null, { timeout: 10000 });
+    ok(true, 'roster: …and a tick can be undone — the box shows the state it is in');
+
     /* …and sending really writes, with `from` the rules pin */
     await q.fill('#oa-u-body', 'A message to Cy.');
     q.once('dialog', (d) => d.accept());
@@ -4438,6 +4474,26 @@ for (const w of [320, 360, 390, 430]) {
     eq(wrote.head.userUnread, 1, '…carrying one unread for them');
     eq(wrote.head.needsAdmin, false,
       '…and NOT flagged as waiting on the maintainer, who has just acted');
+
+    /* A BROADCAST IS NOT AN ANSWER. Bea has replied and is waiting; sending
+       her a message must not quietly drop her out of the "awaiting you" queue
+       — only reading the thread and marking it answered does that. */
+    await q.click('#oa-aa-users tr:has-text("bea@example.edu") .oa-u-pick');
+    await q.fill('#oa-u-body', 'A broadcast.');
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-u-send');
+    await q.waitForFunction(() =>
+      (window.__fb.dump()['messages/u-msg-2'] || {}).lastFrom === 'admin',
+      null, { timeout: 10000 });
+    eq(await q.evaluate(() => window.__fb.dump()['messages/u-msg-2'].needsAdmin), true,
+      'roster: a broadcast leaves somebody who is still owed an answer IN the queue');
+
+    /* An orphaned thread can really be removed — the panel says so. */
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-aa-users .oa-u-del[data-uid="u-gone-9"]');
+    await q.waitForFunction(() => !window.__fb.dump()['messages/u-gone-9'],
+      null, { timeout: 10000 });
+    ok(true, 'roster: and the delete the ghost panel offers actually deletes it');
 
     eq(errors, [], 'roster: maintainer run — no uncaught script error');
     await ctx.close();

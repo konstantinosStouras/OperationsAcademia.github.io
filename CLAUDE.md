@@ -943,6 +943,25 @@ account". The merge hunk is byte-identical in `/v2/assets/oa-accounts.js`, which
 (`(OAFB.col && OAFB.col.userDirectory) || 'userDirectory'`) — the archive's
 frozen `col` map does not carry it.
 
+**A reply needs a thread to reply to.** The items rule requires the parent
+thread to `exists()` before an owner may write into it. Without that, an owner
+could write unbounded documents under their own uid that no thread head points
+at — invisible on a page that LISTS threads, and so an unbounded write channel
+nobody would ever see. It also makes "only the maintainer opens a conversation"
+true in the rules rather than only in the copy, at one billed read per reply.
+
+**A broadcast is not an answer.** Sending to somebody who has replied leaves
+`needsAdmin` as it was; only opening the thread and pressing "Mark answered"
+clears it. Clearing it on send would drop an unanswered reply out of the queue
+silently. The message and its bookkeeping go as ONE batched write, because half
+of them landing would leave the recipient holding a message the roster does not
+know about and the panel calling it undelivered.
+
+**An account with no e-mail claim still gets a row.** The address is pinned to
+`request.auth.token.email` but may be ABSENT — a provider sign-in need not carry
+one, and demanding it would silently leave exactly those accounts off the
+roster.
+
 **Inert until the rules are redeployed** (nothing in CI does it):
 `firebase deploy --only firestore:rules --project operations-academia`. Both
 panels say so rather than showing a bare permission-denied.
