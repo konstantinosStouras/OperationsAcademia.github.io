@@ -1,6 +1,38 @@
 {
- "generated": "2026-08-23T07:50:55Z",
+ "generated": "2026-08-24T08:07:52Z",
  "ads": {
+  "179445424": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179445424",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor of Computer Science & Information Technology",
+   "institution": "Hood College",
+   "location": "Frederick, MD",
+   "type": "Full-Time",
+   "posted": "2026-05-15",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Information Systems and Technology ; +1 Computer Science",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-08-24T08:07:52Z"
+  },
+  "179447138": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179447138",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant/Associate Professor of Data Analytics",
+   "institution": "Palm Beach Atlantic University",
+   "location": "West Palm Beach, FL",
+   "type": "Full-Time",
+   "posted": "2026-05-18",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Business Analytics",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-08-24T08:07:52Z"
+  },
   "179504973": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179504973",
    "status": "ok",
@@ -144,6 +176,38 @@
    "salary": "Depends on Qualifications",
    "jobNumber": "FY2706368",
    "checkedAt": "2026-08-18T00:00:00Z"
+  },
+  "179530780": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179530780",
+   "status": "ok",
+   "via": "page",
+   "title": "Instructor of ISOM",
+   "institution": "Ball State University",
+   "location": "Muncie, IN",
+   "type": "Adjunct/Part-Time",
+   "posted": "2026-08-18",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Information Systems and Technology",
+   "salary": "$4,000 per class",
+   "jobNumber": "",
+   "checkedAt": "2026-08-24T08:07:52Z"
+  },
+  "179535448": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179535448",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant Professor in Business Administration",
+   "institution": "Cottey College",
+   "location": "Nevada, MO",
+   "type": "Full-Time",
+   "posted": "2026-08-21",
+   "applyByDate": "",
+   "applyByProse": "Open Until Filled",
+   "category": "Business Administration",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-08-24T08:07:52Z"
   }
  }
 }
