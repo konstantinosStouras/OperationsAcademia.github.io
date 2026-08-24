@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-24T11:01:41.830Z",
+ "generated": "2026-08-24T18:16:14.371Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -14,15 +14,15 @@
    "n": 7
   },
   {
+   "v": "Tulane University",
+   "n": 6
+  },
+  {
    "v": "University of Virginia",
    "n": 6
   },
   {
    "v": "Arizona State University",
-   "n": 5
-  },
-  {
-   "v": "Tulane University",
    "n": 5
   },
   {
@@ -2032,12 +2032,12 @@
    "n": 8
   },
   {
-   "v": "UCL Global Business School for Health",
+   "v": "A. B. Freeman School of Business",
    "n": 6
   },
   {
-   "v": "A. B. Freeman School of Business",
-   "n": 5
+   "v": "UCL Global Business School for Health",
+   "n": 6
   },
   {
    "v": "Darden School of Business",
@@ -2983,7 +2983,7 @@
   },
   {
    "v": "Management Science",
-   "n": 7
+   "n": 8
   },
   {
    "v": "Business Analytics",
