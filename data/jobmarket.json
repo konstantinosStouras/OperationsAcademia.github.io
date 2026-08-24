@@ -67,9 +67,8 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 5, 2026",
-  "applyByDate": "2026-11-05",
-  "reviewDate": "2026-10-05",
+  "applyBy": "October 5, 2026",
+  "applyByDate": "2026-10-05",
   "comments": "Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at 11:59pm (Pacific Time) Apply by this date to ensure full consideration by the committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time) Applications will continue to be accepted until this date, but those received after the review date will only be considered if the position has not yet been filled.",
   "country": "United States",
   "adUrl": "https://recruit.apo.ucla.edu/JPF11233",
@@ -8786,7 +8785,7 @@
   "department": "Edwin L. Cox School of Business, ITOM",
   "school": "Edwin L. Cox School of Business",
   "unit": "ITOM",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Other Ranks"
   ],
@@ -8894,7 +8893,7 @@
   "department": "Darla Moore School of Business, OSC(Empirical Healthcare Focus)",
   "school": "Darla Moore School of Business",
   "unit": "OSC(Empirical Healthcare Focus)",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Assistant Professor"
   ],
@@ -9594,6 +9593,7 @@
   "posted": "2025-08-02",
   "institution": "The Hong Kong Polytechnic University",
   "department": "SCM/OM",
+  "school": "",
   "unit": "SCM/OM",
   "type": "University",
   "levels": [
@@ -11782,7 +11782,7 @@
   "department": "Ivey Business School, Management Science",
   "school": "Ivey Business School",
   "unit": "Management Science",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
