@@ -2361,11 +2361,14 @@ async function testInstitutionSeed() {
 
    The owner's request was for the university, school and department lists in
    the JOB form, the CANDIDATE form and the PLACEMENT form. The job form has
-   three cascading boxes; the placement form has three institution boxes; the
-   candidate form has ONE free-text "Current affiliation" — deliberately, since
-   a candidate writes "Wharton, University of Pennsylvania" and the published
-   field, the card and the alert matcher have always carried that as one
-   string. So it gets the picker WITHOUT being split.                        */
+   three cascading boxes; the placement form has three institution boxes; and
+   since 2026-08-24 the candidate form asks the SAME three name questions the
+   job form does (owner: university / school / department, with an example
+   each — Northwestern University, Kellogg School of Management, Operations),
+   replacing its old single free-text "Current affiliation". What PUBLISHES is
+   still one `affiliation` line, derived by joining the three smallest-first,
+   so the card, the alert matcher and the universities page's affiliation
+   deep links read exactly what they always did.                            */
 
 async function testFormsOfferVocab() {
   const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
@@ -2377,11 +2380,33 @@ async function testFormsOfferVocab() {
     ok(schools !== -1 && schools < combo,
       `${page}: loads the names module first, so two spellings group as one name`);
   }
+
+  /* The candidate form mounts the SHARED cascade over its three name fields —
+     never a combo of its own, which would be the second-cascade drift
+     oa-place-picker.js exists to prevent. The page must load the module, the
+     form must wire it, and the three fields must be the job form's own ids so
+     the cascade asks its questions the one way. */
+  const candHtml = await read('post-a-candidate.html');
+  ok(/oa-place-picker\.js/.test(candHtml),
+    'post-a-candidate.html loads the shared cascade');
+  for (const id of ['f-institution', 'f-school', 'f-unit']) {
+    ok(candHtml.includes(`id="${id}"`),
+      `post-a-candidate.html asks for ${id} — the three names, separately`);
+  }
+  ok(!/id="f-affiliation"/.test(candHtml),
+    'and the old single affiliation box is gone');
+  const candJs = await read('assets/oa-candidateform.js');
+  ok(/OAPlacePicker\.wire/.test(candJs),
+    'oa-candidateform.js mounts the shared cascade over the three fields');
+  ok(/canonColumns/.test(candJs) && /joinAffiliation/.test(candJs),
+    'and derives the ONE published affiliation line from them, canonicalised');
+
   /* The job form's own vocabulary read moved into the shared cascade
      (assets/oa-place-picker.js) when the review queue started mounting the same
-     three boxes — so the file that has to name vocab.json is that one. */
+     three boxes — so the file that has to name vocab.json is that one. The
+     candidate form joined the cascade on 2026-08-24, so it left this list. */
   for (const [file, what] of [['assets/oa-place-picker.js', 'cascade'],
-    ['assets/oa-candidateform.js', 'candidate'], ['assets/oa-placementform.js', 'placement']]) {
+    ['assets/oa-placementform.js', 'placement']]) {
     const js = await read(file);
     ok(/vocab\.json/.test(js), `the ${what} form fetches data/vocab.json`);
     ok(/institutionKey/.test(js), `and groups its universities the site's way`);

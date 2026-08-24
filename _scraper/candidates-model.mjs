@@ -25,7 +25,7 @@
 
 import {
   text, url, day, slug, pickList, ownerTag, keyOf, uniqueIds,
-  marketYear, isoDay, isoStamp,
+  marketYear, isoDay, isoStamp, canonColumns,
 } from './jobs-model.mjs';
 
 /** The published fields, in the order they are written. Anything not listed
@@ -61,8 +61,31 @@ export const INFORMS_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday'];
 
 const MAXLEN = {
   first: 100, last: 100, affiliation: 220, position: 160,
+  institution: 160, school: 160, unit: 160,
   cvUrl: 500, rsUrl: 500, webUrl: 500, email: 160,
 };
+
+/**
+ * The affiliation's three parts -> the ONE published line (owner, 2026-08-24:
+ * the form asks university / school / department separately, the way the job
+ * form does). Joined smallest-first — "Operations, Kellogg School of
+ * Management, Northwestern University" — the shape the site's candidate data
+ * has always used ("Wharton, University of Pennsylvania"), so the cards, the
+ * alert matcher and the universities page's affiliation deep links read it
+ * unchanged. Through the SAME canonColumns() every other ingest uses, so a
+ * candidate's spelling and the postings' spelling cannot part company; empty
+ * when no part is given, so the caller can fall back to a legacy free-text
+ * `affiliation`.
+ */
+export function joinCandidateAffiliation(doc) {
+  const place = canonColumns({
+    institution: text(doc.institution, MAXLEN.institution),
+    school: text(doc.school, MAXLEN.school),
+    unit: text(doc.unit, MAXLEN.unit),
+  });
+  return [place.unit, place.school, place.institution]
+    .filter(Boolean).join(', ').slice(0, MAXLEN.affiliation);
+}
 
 /* How many research areas one profile may carry, and how long each may be.
    The Firestore rule (`list('researchAreas', 10)`) bounds the LENGTH of the
@@ -126,7 +149,12 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 export function rowFromCandidateSubmission(doc, { now = new Date() } = {}) {
   const first = text(doc.first, MAXLEN.first);
   const last = text(doc.last, MAXLEN.last);
-  const affiliation = text(doc.affiliation, MAXLEN.affiliation);
+  /* the three parts win over the stored one-line `affiliation` where any is
+     given — the client derives the line from them too, but the client is not
+     trusted with what reaches a served file; a pre-split document carries
+     only the free-text line, which is honoured as before */
+  const affiliation = joinCandidateAffiliation(doc)
+    || text(doc.affiliation, MAXLEN.affiliation);
   const position = text(doc.position, MAXLEN.position);
 
   // the minimum a card needs to be worth rendering: who, and where they are

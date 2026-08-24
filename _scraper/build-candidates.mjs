@@ -544,6 +544,24 @@ function selftest() {
   eq(messy.researchAreas[0], 'Queueing Theory',
     'areas are text()-scrubbed and deduplicated');
 
+  /* the affiliation's three parts (owner, 2026-08-24) — the form asks
+     university / school / department; the model joins them smallest-first
+     into the ONE published line, and the parts win over a stale legacy
+     free-text affiliation */
+  eq(rowFromCandidateSubmission({
+    ...base, affiliation: '', institution: 'Northwestern University',
+    school: 'Kellogg School of Management', unit: 'Operations',
+  }, { now }).affiliation,
+  'Operations, Kellogg School of Management, Northwestern University',
+  'the three name fields publish as one joined affiliation, smallest first');
+  eq(rowFromCandidateSubmission({ ...base, institution: 'Northwestern University' }, { now })
+    .affiliation, 'Northwestern University',
+  'the parts win over a stale legacy affiliation');
+  eq(rowFromCandidateSubmission({ ...base, unit: 'Operations' }, { now }).affiliation,
+    'Operations', 'a lone part still derives the line');
+  eq(row.affiliation, 'Wharton, University of Pennsylvania',
+    'a pre-split profile keeps its free-text affiliation exactly as filed');
+
   // junk year falls back to the market year of the run
   eq(rowFromCandidateSubmission({ ...base, year: 200 }, { now }).year, marketYear(now),
     'a junk year falls back to the current market year');
