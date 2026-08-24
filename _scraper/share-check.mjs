@@ -198,8 +198,8 @@ export const PAGES = [
   },
   {
     file: 'account.html', url: '/account.html',
-    title: 'Your personal area — Operations Academia',
-    ogTitle: 'Your personal area',
+    title: 'My personal area — Operations Academia',
+    ogTitle: 'My personal area',
     description: 'Your Operations Academia account — the postings you have made, the alerts you subscribe to, and the details kept against your name.',
   },
   {

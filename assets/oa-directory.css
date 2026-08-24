@@ -33,15 +33,8 @@
   color: var(--on-brand, #ffffff);
 }
 
-/* the "Non-business school" card badge — the business one reuses the
-   engine's brand-filled .oa-label-primary */
-.oa-label-nonbiz {
-  background-color: var(--bg-3, #eff0f2);
-  color: var(--ink-2, #454c56) !important;
-  border: 1px solid var(--line, #ccd1d7);
-}
-
-/* a school section's type chip, inside the card body */
+/* a school section's type chip, inside the card body — the card TOP carries
+   no type badge (owner, 2026-08-24: not needed above the university's name) */
 .oa-dir-chip {
   display: inline-block;
   font-size: 11px;
