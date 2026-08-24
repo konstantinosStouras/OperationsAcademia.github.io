@@ -102,15 +102,17 @@ Run locally:
     node _scraper/selftest.mjs
     node _scraper/page-test.mjs        (needs Playwright; PW_CHROMIUM=<path> to pin the browser)
 
-## Non-list pages: the Universities map
+## Non-list pages: the Universities map view
 
 There are no Awesome Table embeds left (2026-08-16: `previous-markets.html`
-and `recent-faculty.html` were rebuilt on OAList and joined `MOBILE_PAGES`;
-`universities.html` became a Leaflet map over `data/universities.json`).
+and `recent-faculty.html` were rebuilt on OAList and joined `MOBILE_PAGES`).
 **Do not add a new Awesome Table embed for any reason.**
 
-The map page cannot mount OAList, so it follows these rules through its own
-stylesheet (`assets/oa-uni-map.css`: the 14px phone gutter, the 16px/42px
-search input) and has its own phone block in `page-test.mjs` instead of a
-`MOBILE_PAGES` entry — a future non-list page should do the same, and the
-selftest pins that the block exists.
+`universities.html` serves TWO views since 2026-08-24: the card directory —
+an OAList mount, so it is in `MOBILE_PAGES` like any list page — and the
+Leaflet map it has carried since the vendor rebuild, behind the Cards ⇄ Map
+switch. The map cannot mount OAList, so it follows these rules through its
+own stylesheet (`assets/oa-uni-map.css`: the 14px phone gutter, the 16px/42px
+search input) and keeps its own phone block in `page-test.mjs`, which now
+switches to the map view first — a future non-list page (or view) should do
+the same, and the selftest pins that the block exists.

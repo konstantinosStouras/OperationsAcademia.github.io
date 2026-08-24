@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "universities-directory",
+   "date": "2026-08-24",
+   "title": "The Universities page is now a searchable, community-editable directory",
+   "summary": "One card per university — its business school, its engineering or other non-business school, and every department doing Operations in them — built from every posting ever made here plus the site’s curated records, with the interactive map kept as a second view. Any posting from a place the directory does not yet list creates its card automatically. Signed-in users can correct any card or add a department, and each card shows who last edited it and when.",
+   "url": "https://www.operationsacademia.org/universities.html"
+  },
+  {
    "id": "edits-show-immediately",
    "date": "2026-08-24",
    "title": "An edit you save is on your screen immediately",

@@ -134,7 +134,7 @@ export const PAGES = [
     file: 'universities.html', url: '/universities.html',
     title: 'Universities — Operations Academia',
     ogTitle: 'Universities & schools with Operations departments',
-    description: 'An interactive map of the 200+ universities and schools with Operations departments that have posted here. Search by name, or click a pin to see what a school has advertised.',
+    description: 'The searchable directory of 500+ universities and schools with Operations departments — grouped by university, with each school, department and link. Search it, or explore the map.',
   },
   {
     file: 'recent-faculty.html', url: '/recent-faculty.html',

@@ -1,0 +1,127 @@
+/* ---------------------------------------------------------------------------
+   Operations Academia — the Universities directory's own chrome, on top of
+   the shared list engine (oa-list.css, which owns the filters, chips, cards
+   and the whole mobile treatment — _MOBILE-STANDARDS.md rule 0).
+
+   EVERY GROUND NAMES ITS OWN INK (the site rule): every rule here that paints
+   a background also sets its colour, through the theme tokens with their
+   light values as fallbacks, so both themes hold without a second stylesheet.
+   --------------------------------------------------------------------------- */
+
+/* the Cards ⇄ Map switch above the list */
+.oa-dir-views {
+  display: flex;
+  gap: 0;
+  margin: 0 0 14px;
+  border: 1px solid var(--line, #ccd1d7);
+  border-radius: 10px;
+  overflow: hidden;
+  width: max-content;
+}
+.oa-dir-views button {
+  font: 600 14px/1.4 inherit;
+  font-family: inherit;
+  padding: 9px 18px;
+  min-height: 42px;
+  border: 0;
+  background: var(--bg-2, #ffffff);
+  color: var(--ink-2, #454c56);
+  cursor: pointer;
+}
+.oa-dir-views button.is-on {
+  background: var(--brand, #3a424d);
+  color: var(--on-brand, #ffffff);
+}
+
+/* the "Non-business school" card badge — the business one reuses the
+   engine's brand-filled .oa-label-primary */
+.oa-label-nonbiz {
+  background-color: var(--bg-3, #eff0f2);
+  color: var(--ink-2, #454c56) !important;
+  border: 1px solid var(--line, #ccd1d7);
+}
+
+/* a school section's type chip, inside the card body */
+.oa-dir-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin: 0 0 6px;
+}
+.oa-dir-chip.is-biz {
+  background: var(--warn-bg, #fdf6e8);
+  color: var(--gold, #b98a3e);
+  border: 1px solid var(--warn-line, #e5cf9c);
+}
+.oa-dir-chip.is-nonbiz {
+  background: var(--brand-soft, #e9ebee);
+  color: var(--brand, #3a424d);
+  border: 1px solid var(--line-soft, #dee1e5);
+}
+
+/* one department row */
+.oa-dir-dept {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 6px 0;
+}
+.oa-dir-dept + .oa-dir-dept { border-top: 1px solid var(--line-soft, #dee1e5); }
+.oa-dir-dname { font-weight: 500; color: var(--ink, #22272e); }
+.oa-dir-dname em { color: var(--mut, #646c78); font-weight: 400; }
+.oa-dir-links { font-size: 13px; }
+.oa-dir-links a { color: var(--ink-2, #454c56); }
+.oa-dir-n {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ok, #2e7d4f);
+  white-space: nowrap;
+}
+.oa-dir-new {
+  font-size: 12px;
+  color: var(--gold, #b98a3e);
+  font-weight: 600;
+}
+.oa-dir-acts { display: inline-flex; gap: 6px; margin-left: auto; }
+
+/* a row the maintainer has hidden — shown to them alone, faded, with the
+   note saying so (the "hiding is never a one-way door" rule) */
+.oa-dir-hidden { opacity: 0.55; }
+.oa-dir-gone {
+  flex-basis: 100%;
+  font-size: 12.5px;
+  color: var(--err, #b3413d);
+}
+
+/* the card's attribution line — "Last edited by … on …" */
+.oa-dir-edited {
+  margin: 0;
+  padding: 8px 18px 12px;
+  font-size: 12.5px;
+  color: var(--mut, #646c78);
+}
+.oa-dir-edited.is-never { font-style: italic; }
+
+/* the card footer's link row */
+.oa-dir-foot { font-size: 13.5px; color: var(--mut, #646c78); }
+.oa-dir-foot a { color: var(--ink-2, #454c56); }
+.oa-dir-foot .oa-jobbtn { margin-left: 4px; }
+
+/* THE MAINTAINER'S FILTER. Hidden for everybody else — visibility only, the
+   buckets are computed from edit documents every visitor already downloads;
+   the rules are the authorisation for everything that writes. */
+.oa-list:not(.is-dir-admin) .oa-f-lastedited { display: none; }
+
+/* the note under the hero while the community-edit rules are not yet live */
+.oa-dir-note { font-size: 13.5px; color: var(--mut, #646c78); }
+
+@media (max-width: 640px) {
+  .oa-dir-acts { margin-left: 0; flex-basis: 100%; }
+  .oa-dir-views { width: 100%; }
+  .oa-dir-views button { flex: 1 1 50%; }
+}

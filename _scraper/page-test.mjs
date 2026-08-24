@@ -2541,22 +2541,117 @@ for (const [pageName, listSel] of [
   await p.close();
 }
 
+/* ------------------------- the Universities directory: cards and the edits
+
+   universities.html's landing view since 2026-08-24: OAList over
+   data/directory.json, grouped one card per university, with the community's
+   `directoryEdits` overlaid at read time (assets/oa-directory.js). The
+   Firestore read is one this sandbox cannot make, so the signed-in and
+   maintainer shapes are driven through OADirectory.__setForTest — which
+   changes only what is DRAWN; the rules stay the authorisation. What a
+   browser CAN prove: the cards render, a signed-out visitor is offered no
+   edit control and no Last-edited filter, a registered user gets Edit and
+   Add (and never Hide/Reset), the card says who last edited it and when,
+   and a hidden row stays visible to the maintainer with Restore. */
+
+{
+  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+  p.on('pageerror', (e) => jsErrors.push('directory: ' + e.message));
+  await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('#oa-dir .oa-card', { timeout: 15000 });
+
+  const anon = await p.evaluate(() => {
+    const host = document.getElementById('oa-dir');
+    const f = host.querySelector('.oa-f-lastedited');
+    return {
+      cards: host.querySelectorAll('.oa-card').length,
+      lastEditedShown: f ? getComputedStyle(f).display !== 'none' : null,
+      controls: host.querySelectorAll('[data-dir-edit], [data-dir-add], [data-dir-hide]').length,
+      firstRow: (host.querySelector('[data-dir-row]') || { getAttribute: () => '' })
+        .getAttribute('data-dir-row'),
+    };
+  });
+  ok(anon.cards > 0, `directory: the cards render (${anon.cards} on page one)`);
+  eq(anon.lastEditedShown, false,
+    'directory: the Last-edited filter is drawn for the maintainer alone');
+  eq(anon.controls, 0, 'directory: a signed-out visitor is offered no edit control');
+  ok(anon.firstRow, 'directory: every department row carries the id an edit is keyed on');
+
+  // a REGISTERED USER: Edit on every row, Add on every card, the attribution
+  // line — and none of the maintainer's controls
+  /* the fixture name must be one canonUnit() leaves alone — a "…Department"
+     suffix is a wrapper word the canon strips, which is correct on the page
+     and baffling in a test fixture */
+  await p.evaluate((rowId) => {
+    const edits = {};
+    edits[rowId] = { rowId, department: 'Quantitative Corrections',
+      name: 'Test Editor', t: Date.now(), by: 'u-test' };
+    OADirectory.__setForTest({ user: { uid: 'u-test' }, admin: false, edits });
+  }, anon.firstRow);
+  await p.waitForTimeout(300);
+  const asUser = await p.evaluate(() => {
+    const host = document.getElementById('oa-dir');
+    const f = host.querySelector('.oa-f-lastedited');
+    return {
+      edits: host.querySelectorAll('[data-dir-edit]').length,
+      adds: host.querySelectorAll('[data-dir-add]').length,
+      adminOnly: host.querySelectorAll('[data-dir-hide], [data-dir-reset]').length,
+      lastEditedShown: f ? getComputedStyle(f).display !== 'none' : null,
+      note: [...host.querySelectorAll('.oa-dir-edited')].map((n) => n.textContent)
+        .find((t) => t.includes('Test Editor')) || '',
+      corrected: [...host.querySelectorAll('.oa-dir-dname')].some((n) =>
+        n.textContent === 'Quantitative Corrections'),
+    };
+  });
+  ok(asUser.edits > 0 && asUser.adds > 0,
+    'directory: a registered user may edit any row and add a department');
+  eq(asUser.adminOnly, 0, 'directory: Hide and Reset stay the maintainer\'s alone');
+  eq(asUser.lastEditedShown, false, 'directory: …and so does the Last-edited filter');
+  ok(/Last edited by Test Editor on /.test(asUser.note),
+    `directory: the card says who last edited it and when ("${asUser.note.trim()}")`);
+  ok(asUser.corrected,
+    'directory: the correction is what every visitor reads — overlaid at read time');
+
+  // the MAINTAINER: the Last-edited filter, and hiding is never a one-way door
+  await p.evaluate((rowId) => {
+    const edits = {};
+    edits[rowId] = { rowId, hidden: true, name: 'Test Editor', t: Date.now(), by: 'u-admin' };
+    OADirectory.__setForTest({ user: { uid: 'u-admin' }, admin: true, edits });
+  }, anon.firstRow);
+  await p.waitForTimeout(300);
+  const asAdmin = await p.evaluate(() => {
+    const host = document.getElementById('oa-dir');
+    const f = host.querySelector('.oa-f-lastedited');
+    return {
+      lastEditedShown: f ? getComputedStyle(f).display !== 'none' : null,
+      restores: host.querySelectorAll('[data-dir-restore]').length,
+      hiddenRows: host.querySelectorAll('.oa-dir-hidden').length,
+    };
+  });
+  eq(asAdmin.lastEditedShown, true, 'directory: the maintainer gets the Last-edited filter');
+  ok(asAdmin.restores > 0 && asAdmin.hiddenRows > 0,
+    'directory: a hidden row stays visible TO THE MAINTAINER, faded, with Restore');
+  await p.close();
+}
+
 /* --------------------------------------------------- the Universities map
 
-   Not an OAList page — a Leaflet map over data/universities.json, vendored
-   under assets/leaflet/. What the vendor view did is what is pinned: every
-   school with coordinates is a pin, the search filters the pins as you type,
-   a pin's popup carries the links into the site's own pages, and the legacy
-   ?filterA= deep link (every posting's "Further info" column) lands in the
-   search. Tiles come from openstreetmap.org at runtime and are deliberately
-   NOT asserted — this sandbox has no network, and the map's own DOM is the
-   part that is ours. */
+   The page's SECOND view since 2026-08-24 (the cards above are the landing
+   one): the same Leaflet map over data/universities.json, vendored under
+   assets/leaflet/, mounted lazily on the first switch. What the vendor view
+   did is what is pinned: every school with coordinates is a pin, the search
+   filters the pins as you type, a pin's popup carries the links into the
+   site's own pages. Tiles come from openstreetmap.org at runtime and are
+   deliberately NOT asserted — this sandbox has no network, and the map's own
+   DOM is the part that is ours. */
 
 {
   const unis = JSON.parse(await readFile(path.join(ROOT, 'data', 'universities.json'), 'utf8'));
   const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   p.on('pageerror', (e) => jsErrors.push('universities: ' + e.message));
   await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await p.waitForSelector('#oa-dir-viewmap', { timeout: 15000 });
+  await p.click('#oa-dir-viewmap');
   await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
 
   eq(await p.$eval('.oa-uni-count', (n) => n.textContent), `${unis.length} universities`,
@@ -2663,28 +2758,34 @@ for (const [pageName, listSel] of [
     await d.close();
   }
 
-  // the deep link every posting's Further-info column emits
+  /* The deep link every posting's Further-info column emits. It lands on the
+     CARDS now — the page's landing view — as a chip the reader can see and
+     remove, which is where a reader following "Further info" is best served:
+     the university's whole card, not a pin to hunt for. */
   const viaA = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   viaA.on('pageerror', (e) => jsErrors.push('universities filterA: ' + e.message));
   await viaA.goto(BASE + 'universities.html?filterA=INSEAD', { waitUntil: 'domcontentloaded' });
-  await viaA.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
-  eq(await viaA.inputValue('#oa-uni-search'), 'INSEAD',
-    'universities: ?filterA lands in the search, as it landed in the vendor filter');
-  eq(await viaA.$eval('.oa-uni-count', (n) => n.textContent),
-    `${expect} of ${unis.length} universities`,
-    'universities: and it narrows the map the same way');
+  await viaA.waitForSelector('#oa-dir .oa-card, #oa-dir .oa-empty', { timeout: 15000 });
+  eq(await viaA.$eval('#oa-dir .oa-chip .oa-chip-label', (n) => n.textContent), 'INSEAD',
+    'universities: ?filterA lands on the cards as a chip, as it landed in the vendor filter');
+  const viaCount = await viaA.$eval('#oa-dir .oa-count', (n) => n.textContent);
+  ok(/\(of \d+\)/.test(viaCount),
+    `universities: and it narrows the directory (count reads "${viaCount}")`);
   await viaA.close();
   await p.close();
 }
 
-/* the map page on a phone — it cannot mount OAList, so it is not in
-   MOBILE_PAGES; the same rules are asserted against its own controls */
+/* the MAP VIEW on a phone — the cards view is an OAList page and holds the
+   standard through MOBILE_PAGES below; the map cannot mount OAList, so the
+   same rules are asserted against its own controls once it is switched to */
 {
   const m = await browser.newPage({
     viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
   m.on('pageerror', (e) => jsErrors.push('universities mobile: ' + e.message));
   await m.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  await m.waitForSelector('#oa-dir-viewmap', { timeout: 15000 });
+  await m.click('#oa-dir-viewmap');
   await m.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
 
   const mob = await m.evaluate(() => {
@@ -2864,16 +2965,25 @@ for (const [pageName, listSel] of [
    must not cost every reader the list. The module is aborted at the network
    and the page has to render exactly what it renders with no overrides. */
 
-for (const [pageName, sel, least] of [
-  ['previous-markets.html', '.oa-card', 1],
-  ['recent-faculty.html', '.oa-card', 1],
-  ['universities.html', 'img.leaflet-marker-icon', 1],
+for (const [pageName, sel, least, mapBtn] of [
+  ['previous-markets.html', '.oa-card', 1, null],
+  ['recent-faculty.html', '.oa-card', 1, null],
+  // the directory lands on its cards, which never touch the module; the MAP
+  // view is where oa-rowedit hooks in, so it is switched to and held to the
+  // same rule — the stand-in draws nothing and the pins still render
+  ['universities.html', 'img.leaflet-marker-icon', 1, '#oa-dir-viewmap'],
 ]) {
   const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   const errs = [];
   p.on('pageerror', (e) => errs.push(e.message));
   await p.route('**/oa-rowedit.js', (r) => r.abort());
   await p.goto(BASE + pageName, { waitUntil: 'domcontentloaded' });
+  if (mapBtn) {
+    await p.waitForSelector('#oa-dir .oa-card', { timeout: 15000 }).catch(() => {});
+    ok(await p.$$eval('#oa-dir .oa-card', (n) => n.length) >= 1,
+      `${pageName} still renders its cards when the admin-only module never loads`);
+    await p.click(mapBtn);
+  }
   await p.waitForSelector(sel, { timeout: 15000 }).catch(() => {});
   await p.waitForTimeout(600);
   ok(await p.$$eval(sel, (n) => n.length) >= least,
@@ -2955,6 +3065,9 @@ for (const [pageName, sel, least] of [
   const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
   p.on('pageerror', (e) => jsErrors.push('universities/edit: ' + e.message));
   await p.goto(BASE + 'universities.html', { waitUntil: 'domcontentloaded' });
+  // the cards are the landing view — the map mounts on the switch
+  await p.waitForSelector('#oa-dir-viewmap', { timeout: 15000 });
+  await p.click('#oa-dir-viewmap');
   await p.waitForSelector('.oa-uni-map .leaflet-marker-icon', { timeout: 15000 });
 
   const openPopup = async () => {
@@ -3018,6 +3131,9 @@ const MOBILE_PAGES = [
   // work through pointer-events:none, which is the point of measuring rather
   // than tapping here), and the two archive lists rebuilt in this design
   'index.html', 'jobs.html', 'previous-markets.html', 'recent-faculty.html',
+  // the Universities directory — an OAList page since 2026-08-24 (its map
+  // view keeps its own phone block above, as _MOBILE-STANDARDS.md describes)
+  'universities.html',
   // and the archived design, which is still served and still has to hold the
   // standard on a phone. Its candidates and placements are pages of their own
   // there; on the live site they are sections of index.html, above.
