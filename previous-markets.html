@@ -224,6 +224,7 @@
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
+    <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
     <script defer src="assets/oa-rowedit.js"></script>
@@ -297,6 +298,13 @@
       fetch('/data/jobs.json', { credentials: 'same-origin', cache: 'no-cache' })
         .then(function (res) { return res.ok ? res.json() : []; })
         ['catch'](function () { return []; })
+        /* This page reads jobs.json with its own fetch rather than through
+           OAList.load, so it applies the just-saved-edit echo itself
+           (assets/oa-fresh.js) — the maintainer who corrects a past posting
+           must see the correction here too. */
+        .then(function (jobs) {
+          return window.OAFresh ? OAFresh.apply('/data/jobs.json', jobs) : jobs;
+        })
         .then(function (jobs) {
           var archive = (Array.isArray(jobs) ? jobs : [])
             .filter(function (r) { return !inCurrentMarket(r); });

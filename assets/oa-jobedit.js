@@ -113,11 +113,16 @@
         updatedAt: new Date().toISOString(),
       });
     }).then(function () {
+      /* The echo (assets/oa-fresh.js): the next time THIS browser loads the
+         list, the row is already gone, while the build takes it down for
+         everyone else. */
+      if (window.OAFresh) OAFresh.stash({ docId: id, ref: row.ref || '', removed: true });
       btn.textContent = 'Taken down';
       var li = btn.closest('.oa-card');
       if (li) li.classList.add('oa-card-gone');
-      note(li, 'This posting has been taken down. It will disappear from the ' +
-               'list at the next update.');
+      note(li, 'This posting has been taken down. It is already gone from the ' +
+               'list on this device; for everyone else it disappears within a ' +
+               'few minutes.');
     }).catch(function (err) {
       fail(btn, err && err.code === 'permission-denied'
         ? 'You are not allowed to change this posting.'

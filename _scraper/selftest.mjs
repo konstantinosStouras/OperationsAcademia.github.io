@@ -5520,6 +5520,146 @@ async function testAdvertsWiring() {
   }
 }
 
+/* -------------------------- the edit you just saved, shown before the build */
+
+async function testFreshEcho() {
+  const F = require(path.join(HERE, '..', 'assets', 'oa-fresh.js'));
+
+  /* THE ECHO MAY ONLY SAY WHAT THE BUILD WOULD PUBLISH. Its field list is a
+     subset of the served row's, its Apply-by line is composed by a browser
+     twin of composeApplyBy, and its link rules are browser twins of
+     jobs-model's — parity-pinned here, like every vendored copy. */
+  eq(F.FIELDS.filter((k) => !PUBLIC_FIELDS.includes(k)), [],
+    'every field the echo may set is one the served row carries');
+  for (const k of ['id', 'year', 'posted', 'addedAt', 'source', 'ref', 'owner', 'featured']) {
+    ok(!F.FIELDS.includes(k), `and the posting's identity/bookkeeping (${k}) is not echoable`);
+  }
+  for (const c of [
+    { untilFilled: true, applyByNote: '' },
+    { untilFilled: true, applyByNote: 'Early applications welcome.' },
+    { untilFilled: false, applyByDate: '2026-10-15', applyByNote: '' },
+    { untilFilled: false, applyByDate: '2026-10-15', applyByNote: 'CV and two letters.' },
+    { untilFilled: false, applyByDate: '', applyByNote: 'Rolling review.' },
+  ]) {
+    eq(F.composeApplyBy(c), composeApplyBy(c),
+      'the echoed Apply-by line is the line the build will publish');
+  }
+  eq(F.universitiesLink('Penn State'), universitiesLink('Penn State'),
+    'the regenerated Further-info link is the build\'s own');
+  for (const u of [universitiesLink('X'), 'https://example.edu/jobs/1', '']) {
+    eq(F.ownUniversitiesLink(u), ownUniversitiesLink(u),
+      'and "is this link ours to regenerate" answers the same both sides');
+  }
+
+  /* echoFields: the published shape of what the form wrote — and a document
+     carrying a fresh FILE upload echoes no advert link, because the build
+     replaces it with the Drive link. */
+  const doc = {
+    institution: 'Example University', school: 'School of Business',
+    unit: 'Operations', department: 'School of Business, Operations',
+    type: 'University', levels: ['Assistant Professor'], country: 'United States',
+    untilFilled: false, applyByDate: '2026-10-15', applyByNote: '',
+    reviewDate: '2026-09-01', comments: 'Two positions.', characteristics: ['PhD'],
+    adUrl: 'https://example.edu/ad', postedAtUrl: '',
+  };
+  const echoed = F.echoFields(doc);
+  eq(echoed.applyBy, composeApplyBy(doc), 'the line rides with its date');
+  eq(echoed.adUrl, 'https://example.edu/ad', 'a linked advert is echoed');
+  ok(!('adUrl' in F.echoFields({ ...doc, adUploadPath: 'up/x.pdf' })),
+    'while a fresh file upload echoes no link at all');
+  eq(Object.keys(echoed).filter((k) => !F.FIELDS.includes(k)), [],
+    'and echoFields emits nothing outside the pinned list');
+
+  /* THE OVERLAY, driven pure. A saved edit shows at once; a takedown removes
+     the row; and the echo STANDS DOWN the moment its job is done — the served
+     row already agrees, a build begun after the save has published (its word
+     wins even where it disagrees), or an hour has passed. */
+  const store = (() => {
+    let bag = {};
+    return { getItem: (k) => bag[k] || null, setItem: (k, v) => { bag[k] = v; } };
+  })();
+  const T0 = 1_000_000_000_000;
+  F.stash({ docId: 'doc-1', ref: 'OA-JOB-260101-XXXX', fields: echoed },
+    { store, now: T0 });
+  F.stash({ docId: '2026-old-university-20250901', removed: true }, { store, now: T0 });
+
+  const served = [
+    { id: '2026-example-university-20250901', ref: 'OA-JOB-260101-XXXX',
+      institution: 'Exmaple Univresity', applyBy: 'Until filled.', applyByDate: '',
+      furtherInfoUrl: universitiesLink('Exmaple Univresity') },
+    { id: '2026-old-university-20250901', institution: 'Old University' },
+    { id: '2026-other-university-20250901', institution: 'Other University',
+      furtherInfoUrl: 'https://example.edu/about' },
+  ];
+  const map = JSON.parse(store.getItem(F.KEY));
+  const got = F.overlay(served.map((r) => ({ ...r })), map, { now: T0 + 5000, builtAt: '' });
+  const hit = got.rows.find((r) => r.ref === 'OA-JOB-260101-XXXX');
+  eq(hit.institution, 'Example University', 'the saved edit shows immediately');
+  eq(hit.applyByDate, '2026-10-15', 'its deadline with it');
+  eq(hit.applyBy, composeApplyBy(doc), 'and the line the page prints');
+  eq(hit.furtherInfoUrl, universitiesLink('Example University'),
+    'our own Further-info link follows the corrected name');
+  ok(!got.rows.some((r) => r.id === '2026-old-university-20250901'),
+    'a taken-down posting is off the list at once');
+  eq(got.rows.find((r) => r.id === '2026-other-university-20250901').furtherInfoUrl,
+    'https://example.edu/about', 'a link the poster gave is never touched');
+  eq(got.spent, [], 'and nothing stands down while the build has not landed');
+
+  // the row the poster gave a link: institution echo must not regenerate it
+  const posterLink = F.overlay(
+    [{ id: 'x', ref: 'OA-JOB-260101-XXXX', furtherInfoUrl: 'https://example.edu/about' }],
+    map, { now: T0 + 5000, builtAt: '' });
+  eq(posterLink.rows[0].furtherInfoUrl, 'https://example.edu/about',
+    'even when the echo renames the institution');
+
+  // published: the served row now carries every echoed value
+  const landedRow = { id: 'y', ref: 'OA-JOB-260101-XXXX', ...echoed,
+    furtherInfoUrl: universitiesLink('Example University') };
+  const landed = F.overlay([{ ...landedRow }], map, { now: T0 + 5000, builtAt: '' });
+  ok(landed.spent.includes('doc-1'), 'an echo the build has published stands down');
+
+  // superseded: a build GENERATED comfortably after the save wins outright
+  const later = F.overlay(served.map((r) => ({ ...r })), map,
+    { now: T0 + 300000, builtAt: new Date(T0 + F.BUILD_GRACE_MS + 1000).toISOString() });
+  ok(later.spent.includes('doc-1'),
+    'a build begun after the save has the last word, even where it disagrees');
+  eq(later.rows.find((r) => r.ref === 'OA-JOB-260101-XXXX').institution,
+    'Exmaple Univresity', 'and the served value stands');
+
+  // aged out: an hour on, the echo stands down whatever happened
+  const aged = F.overlay(served.map((r) => ({ ...r })), map,
+    { now: T0 + F.TTL_MS + 1, builtAt: '' });
+  ok(aged.spent.includes('doc-1'), 'an echo an hour old stands down');
+
+  // a takedown whose row the build already removed is spent, not kept for ever
+  const removedGone = F.overlay([{ id: 'z' }], map, { now: T0 + 5000, builtAt: '' });
+  ok(removedGone.spent.includes('2026-old-university-20250901'),
+    'a removal the build has published stands down');
+
+  ok(!F.isJobsUrl('/data/placements.json') && F.isJobsUrl('/data/jobs.json'),
+    'the echo overlays the jobs dataset and nothing else');
+
+  /* THE WIRING, read from the source — a stash nobody applies, or an apply
+     nobody feeds, is the silent failure this feature exists to end. */
+  const list = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
+  ok(list.includes('OAFresh.apply(url, data)'),
+    'every dataset read through OAList.load passes through the echo');
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  ok(form.includes('OAFresh.stash(') && form.includes('OAFresh.echoFields(doc)'),
+    'the edit form stashes what it just saved');
+  ok(/already shows your\s+.?edit on this device/.test(form.replace(/['+]/g, '')),
+    'and its confirmation claims exactly what the echo delivers — this device, now');
+  const editBtns = await readFile(path.join(HERE, '..', 'assets', 'oa-jobedit.js'), 'utf8');
+  ok(editBtns.includes('removed: true'), 'a takedown echoes as a removal');
+  for (const page of ['jobs.html', 'index.html', 'previous-markets.html', 'post-a-job.html']) {
+    const html = await readFile(path.join(HERE, '..', page), 'utf8');
+    ok(html.includes('assets/oa-fresh.js'), `${page} loads the echo module`);
+  }
+  const pm = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(pm.includes("OAFresh.apply('/data/jobs.json', jobs)"),
+    'previous-markets, which fetches jobs.json itself, applies the echo itself');
+}
+
 /* ------------------ the two guards that stopped publishing on 2026-08-24 */
 
 async function testGuardRepairs() {
@@ -6666,6 +6806,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testAdvertsPlace();
   testAdvertsApply();
   await testAdvertsWiring();
+  await testFreshEcho();
   await testGuardRepairs();
   testReviewQueue();
   testReviewDuplicates();
