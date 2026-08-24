@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "candidate-affiliation-in-three",
+   "date": "2026-08-24",
+   "title": "The candidate form asks your affiliation the way the job form does",
+   "summary": "Creating your job-market profile now asks your affiliation as three questions instead of one box: your university (for example “Northwestern University”), your school, faculty or college (“Kellogg School of Management”), and your department, area or group (“Operations”). The same smart lists the job posting form uses narrow each answer as you type — choosing your university offers its schools, choosing a school offers its departments — and every name lands in the spelling the site already publishes. Your profile still shows one affiliation line, built from your answers, so nothing about the candidates page changes.",
+   "url": "https://www.operationsacademia.org/post-a-candidate.html"
+  },
+  {
    "id": "one-candidate-profile-per-year",
    "date": "2026-08-24",
    "title": "One candidate profile per market year, files that stay current, and a shortcut to report your placement",

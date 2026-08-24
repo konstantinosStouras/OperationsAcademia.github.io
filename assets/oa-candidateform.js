@@ -43,6 +43,7 @@
 
   var MAX = {
     first: 100, last: 100, affiliation: 220, position: 160,
+    institution: 160, school: 160, unit: 160,
     cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200
   };
 
@@ -135,6 +136,44 @@
 
   var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+  /* ---------------------------------------------- the affiliation, in three
+
+     The one free-text "Current affiliation" box became the SAME three name
+     questions the job form asks (owner, 2026-08-24) — university, school,
+     department — put through the same canonColumns() so a candidate at
+     "Kellogg School of Management" and one at "Kellogg" land on one spelling.
+     What PUBLISHES is still one `affiliation` line, joined smallest-first
+     ("Operations, Kellogg School of Management, Northwestern University" —
+     the shape the site's own data has always used, "Wharton, University of
+     Pennsylvania"), so the cards, the alert matcher, the admin panel and the
+     universities page's deep links all read exactly as before. */
+
+  function placeParts() {
+    var raw = {
+      institution: String(($('f-institution') || {}).value || '').trim().slice(0, MAX.institution),
+      school: String(($('f-school') || {}).value || '').trim().slice(0, MAX.school),
+      unit: String(($('f-unit') || {}).value || '').trim().slice(0, MAX.unit),
+    };
+    var S = window.OASchools;
+    var place = (S && S.canonColumns ? S.canonColumns : function (v) { return v; })(raw);
+    if (window.OAPlacePicker && OAPlacePicker.fixedPlace) {
+      place = OAPlacePicker.fixedPlace(place);
+    }
+    return place;
+  }
+
+  function joinAffiliation(place) {
+    return [place.unit, place.school, place.institution]
+      .filter(Boolean).join(', ').slice(0, MAX.affiliation);
+  }
+
+  function paintAffiliationPreview() {
+    var el = $('f-affiliation-preview');
+    if (!el) return;
+    var line = joinAffiliation(placeParts());
+    el.textContent = line ? 'Your affiliation will read: ' + line : '';
+  }
+
   /** Read + validate the form. Returns the submission document, or null. */
   function collect() {
     var out = {}, firstBad = null;
@@ -149,7 +188,14 @@
 
     need('f-first', 'first', 'your first name');
     need('f-last', 'last', 'your last name');
-    need('f-affiliation', 'affiliation', 'your current affiliation');
+    need('f-institution', 'institution', 'the university you are at');
+
+    var place = placeParts();
+    out.institution = place.institution;
+    out.school = place.school;
+    out.unit = place.unit;
+    // derived, never typed: the one line every consumer of the profile reads
+    out.affiliation = joinAffiliation(place);
 
     var position = $('f-position');
     setError(position, position.value ? '' : 'Please choose your current position.');
@@ -442,7 +488,24 @@
 
     set('f-first', v.first);
     set('f-last', v.last);
-    set('f-affiliation', v.affiliation);
+    /* the three name fields; a profile from before the split carries only the
+       joined `affiliation`, which canonPlace() takes apart where it can (the
+       fused legacy shape it exists for) and otherwise leaves whole in the
+       university box for the candidate to redistribute */
+    if (v.institution || v.school || v.unit) {
+      set('f-institution', v.institution);
+      set('f-school', v.school);
+      set('f-unit', v.unit);
+    } else if (v.affiliation) {
+      var S = window.OASchools;
+      var p = S && S.canonPlace
+        ? S.canonPlace({ institution: v.affiliation, school: '', unit: '' })
+        : { institution: v.affiliation, school: '', unit: '' };
+      set('f-institution', p.institution);
+      set('f-school', p.school);
+      set('f-unit', p.unit);
+    }
+    paintAffiliationPreview();
     set('f-position', v.position);
     EDIT_YEAR = Number(v.year) || 0;
     paintYearNote();                 // the profile's own season, never today's
@@ -592,39 +655,34 @@
   /* ------------------------------------------------------------------- boot */
 
 
-  /* ------------------------------------------------------ the shared vocabulary
+  /* ------------------------------------------------------ the shared cascade
 
-     "Current affiliation" is ONE free-text box, deliberately: a candidate
-     writes "Wharton, University of Pennsylvania" — a school and a university
-     together — and the candidates page, the alert matcher and the published
-     `affiliation` field have always carried it as one string. So this offers
-     the university names the site already publishes (data/vocab.json, which
-     the posting form reads too) WITHOUT splitting the field: pick one and it
-     is spelled the way every other page spells it; keep typing and whatever
-     you write is what publishes.
-
-     A HINT, never a restriction, and entirely optional — without oa-combo.js
-     on the page, or if the fetch fails, the field is an ordinary text input
-     and the form works exactly as it did. */
+     The candidate's affiliation is the SAME three name questions the job form
+     asks (owner, 2026-08-24 — it used to be one free-text box), so it mounts
+     the SAME shared cascade, assets/oa-place-picker.js: choosing the
+     university narrows the school list, choosing the school narrows the
+     department list, and each name is put into the spelling the site
+     publishes as the field is left. A hint, never a restriction, and entirely
+     optional — without the module the three fields are plain text inputs and
+     the form works exactly as before. */
 
   function wireVocab() {
-    if (!window.OACombo) return;
-    var el = $('f-affiliation');
-    if (!el) return;
+    var inst = $('f-institution'), school = $('f-school'), unit = $('f-unit');
+    if (!inst || !school || !unit) return;
 
-    /* one entry per university however the vocabulary spells it, the job
-       form's rule — institutionKey groups, canonInstitution publishes */
-    var S = window.OASchools;
-    var combo = OACombo.attach(el, {
-      options: [],
-      key: S ? function (v) { return S.institutionKey(v); } : null,
-      publishAs: S ? S.canonInstitution : null,
+    [inst, school, unit].forEach(function (el) {
+      el.addEventListener('input', paintAffiliationPreview);
+      el.addEventListener('change', paintAffiliationPreview);
     });
+    paintAffiliationPreview();
 
-    fetch('data/vocab.json', { cache: 'no-cache' })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (v) { if (v) combo.setOptions(v.universities || []); })
-      .catch(function () { /* an ordinary text input; that is fine */ });
+    if (window.OAPlacePicker) {
+      /* onChange so the preview follows a value the cascade fills in or
+         re-spells, which a keystroke listener alone would never see */
+      OAPlacePicker.wire(
+        { institution: inst, school: school, unit: unit },
+        { onChange: paintAffiliationPreview });
+    }
   }
 
   function boot() {

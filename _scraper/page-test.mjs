@@ -1255,7 +1255,10 @@ for (const [name, expect] of [
     await q.waitForSelector('#oa-cand-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-first', 'Grace');
     await q.fill('#f-last', 'Hopper');
-    await q.fill('#f-affiliation', 'Test University');
+    // the owner's own example (2026-08-24): university / school / department
+    await q.fill('#f-institution', 'Northwestern University');
+    await q.fill('#f-school', 'Kellogg School of Management');
+    await q.fill('#f-unit', 'Operations');
     await q.selectOption('#f-position', 'PhD Candidate');
     await q.fill('#f-email', 'grace@example.edu');
     await q.fill('#f-personalEmail', 'grace.hopper@gmail.example');
@@ -1282,6 +1285,11 @@ for (const [name, expect] of [
     'the e-mail address stays private unless the candidate opted in');
   eq(cand.doc.personalEmail, 'grace.hopper@gmail.example',
     'the personal e-mail \u2014 the address that outlives the affiliation \u2014 is stored on the profile');
+  eq([cand.doc.institution, cand.doc.school, cand.doc.unit],
+    ['Northwestern University', 'Kellogg School of Management', 'Operations'],
+    'the affiliation is asked as three fields \u2014 university, school, department');
+  eq(cand.doc.affiliation, 'Operations, Kellogg School of Management, Northwestern University',
+    'and publishes as the ONE joined line every consumer already reads');
   eq(cand.doc.rsUrl, undefined,
     'and the retired research-summary field is never written');
   eq(cand.noRs, true,
@@ -1305,11 +1313,14 @@ for (const [name, expect] of [
       heading: (document.querySelector('.v3-pa-hero .v3-h1') ||
         document.querySelector('.title-heading h2') || {}).textContent || '',
       first: document.getElementById('f-first').value,
+      inst: document.getElementById('f-institution').value,
     }));
   });
   eq(one.heading.trim(), 'Edit your profile',
     'a candidate who already has a profile this season is sent to EDIT it \u2014 one profile per market year');
   eq(one.first, 'Grace', 'and the form holds their own profile, not a blank one');
+  eq(one.inst, 'Test University',
+    'a pre-split profile\u2019s free-text affiliation lands in the university box to redistribute');
 
   /* -- report a placement on /v3/ ------------------------------------------ */
 

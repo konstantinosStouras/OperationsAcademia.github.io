@@ -201,6 +201,10 @@ service cloud.firestore {
       function candShapeOk() {
         return str('first', 100)      && str('last', 100)
             && str('affiliation', 220) && str('position', 160)
+            // the affiliation's three parts (owner, 2026-08-24): university,
+            // school, department — the form derives `affiliation` from them
+            && str('institution', 220) && str('school', 220)
+            && str('unit', 220)
             && str('cvUrl', 600)       && str('rsUrl', 600)
             && str('webUrl', 600)      && str('email', 200)
             && str('personalEmail', 200)
@@ -228,7 +232,10 @@ service cloud.firestore {
                     && request.resource.data.createdAt == request.time
                     && candShapeOk()
                     && !('mergedFrom' in request.resource.data)
-                    && request.resource.data.keys().size() <= 30;
+                    // 34 like jobSubmissions: the three affiliation parts
+                    // (2026-08-24) took the form's worst-case key inventory
+                    // past the old 30 — the selftest counts it against this
+                    && request.resource.data.keys().size() <= 34;
 
       allow read: if isOwner(resource.data.uid) || isAdmin();
 

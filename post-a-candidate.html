@@ -223,12 +223,21 @@
                         </div>
                       </div>
 
+                      <!-- The one free-text "Current affiliation" box became the
+                           SAME three name questions the job form asks (owner,
+                           2026-08-24): university, school, department — with the
+                           shared cascade (oa-place-picker.js) narrowing each
+                           list. What publishes is still ONE affiliation line,
+                           joined smallest-first ("Operations, Kellogg School of
+                           Management, Northwestern University"), so the cards,
+                           filters, alerts and deep links read exactly as
+                           before. -->
                       <div class="oa-row">
                         <div class="oa-field">
-                          <label for="f-affiliation">Current affiliation <span class="oa-req" aria-hidden="true">*</span></label>
-                          <p class="oa-hint">Shown publicly. The institution you are at now, for
-                          example &ldquo;Wharton, University of Pennsylvania&rdquo;.</p>
-                          <input type="text" id="f-affiliation" name="affiliation" maxlength="220"
+                          <label for="f-institution">University <span class="oa-req" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">Shown publicly. The university you are at now &mdash;
+                          for example &ldquo;Northwestern University&rdquo;.</p>
+                          <input type="text" id="f-institution" name="institution" maxlength="160"
                                  autocomplete="organization" required>
                         </div>
                         <div class="oa-field">
@@ -247,6 +256,23 @@
                           </select>
                         </div>
                       </div>
+
+                      <div class="oa-row">
+                        <div class="oa-field">
+                          <label for="f-school">School, faculty or college</label>
+                          <p class="oa-hint">Shown publicly. For example &ldquo;Kellogg School of
+                          Management&rdquo;. Leave empty if you sit directly under the
+                          university.</p>
+                          <input type="text" id="f-school" name="school" maxlength="160">
+                        </div>
+                        <div class="oa-field">
+                          <label for="f-unit">Department, area or group</label>
+                          <p class="oa-hint">Shown publicly. For example &ldquo;Operations&rdquo;.</p>
+                          <input type="text" id="f-unit" name="unit" maxlength="160">
+                        </div>
+                      </div>
+
+                      <p class="oa-hint oa-derived" id="f-affiliation-preview" aria-live="polite"></p>
 
                       <div class="oa-field">
                         <span class="oa-label-text">Job market</span>
@@ -455,6 +481,7 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-schools.js"></script>
     <script defer src="assets/oa-combo.js"></script>
+    <script defer src="assets/oa-place-picker.js"></script>
     <script defer src="assets/oa-candidateform.js"></script>
   </body>
 </html>
