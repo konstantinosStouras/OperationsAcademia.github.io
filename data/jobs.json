@@ -11116,7 +11116,7 @@
   "department": "Edwin L. Cox School of Business, ITOM",
   "school": "Edwin L. Cox School of Business",
   "unit": "ITOM",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Other Ranks"
   ],
@@ -11259,7 +11259,7 @@
   "department": "Darla Moore School of Business, OSC(Empirical Healthcare Focus)",
   "school": "Darla Moore School of Business",
   "unit": "OSC(Empirical Healthcare Focus)",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Assistant Professor"
   ],
@@ -12190,6 +12190,7 @@
   "posted": "2025-08-02",
   "institution": "The Hong Kong Polytechnic University",
   "department": "SCM/OM",
+  "school": "",
   "unit": "SCM/OM",
   "type": "University",
   "levels": [
@@ -14548,7 +14549,7 @@
   "department": "Ivey Business School, Management Science",
   "school": "Ivey Business School",
   "unit": "Management Science",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
