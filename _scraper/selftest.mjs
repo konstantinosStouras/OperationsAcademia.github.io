@@ -6989,6 +6989,60 @@ async function testSubmissionNotices() {
     'and does not fire on the same minutes as the review mailer');
 }
 
+/* --------------------------------------- the candidate profile policy
+
+   Owner, 2026-08-24: a registered candidate has ONE profile per market year,
+   and the "Post confirmed placement" invite on a candidates card is the
+   CANDIDATE's own control — drawn only on their own card, for them alone.
+   The browser halves are measured in page-test.mjs where they can be; these
+   pin the wiring that a browser run cannot cheaply reach (the card control
+   is on a list the committed dataset ships empty, so page-test has no card
+   to click until the first reveal). */
+
+async function testCandidateProfilePolicy() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+
+  /* the form sends an account that already has a profile this season to EDIT
+     it — the create path is never offered twice */
+  const form = await read('assets', 'oa-candidateform.js');
+  ok(/redirectToOwnProfile/.test(form) &&
+     /where\('uid', '==', user\.uid\)/.test(form),
+    'oa-candidateform: an existing profile is looked up by the OWNER, not by name');
+  ok(/location\.replace\('post-a-candidate\.html\?edit='/.test(form),
+    'and found, the form reopens it for editing instead of creating a second');
+
+  /* the model backstop: one account, one market year, one row — whatever the
+     names say (the detail the name key cannot see) */
+  const model = await read('_scraper', 'candidates-model.mjs');
+  ok(/\|acct:/.test(model),
+    'candidates-model: the collapse has an ACCOUNT pass keyed (year, owner)');
+  ok(/r\.owner \? /.test(model),
+    'which never touches an imported row that has no owner');
+
+  /* the card invite is the candidate's own: keyed on the uid itself, so the
+     admin's broad read cannot draw it on everyone else's card */
+  const cards = await read('assets', 'oa-candidateedit.js');
+  ok(/Post confirmed placement/.test(cards),
+    'oa-candidateedit: the candidate card offers "Post confirmed placement"');
+  const gate = cards.indexOf('perm.own[id]');
+  const invite = cards.indexOf("button('Post confirmed placement'");
+  ok(gate !== -1 && invite !== -1 && gate < invite,
+    'and it is gated on perm.own — the signed-in candidate’s OWN profile');
+  ok(/v\.uid && v\.uid === perm\.uid/.test(cards),
+    'own is keyed on the uid itself, never on admin privilege');
+
+  /* the replacement rule: filing a new upload retires the Drive file it
+     supersedes, best-effort, AFTER the document points at the new one */
+  const build = await read('_scraper', 'build-candidates.mjs');
+  const point = build.indexOf('[slot.driveId]: uploaded.id');
+  const retire = build.indexOf('drive.deleteFile({ token, id: supersededId })');
+  ok(point !== -1 && retire !== -1 && point < retire,
+    'build-candidates: a superseded upload is removed from Drive only after ' +
+    'the profile points at its replacement');
+  ok(/supersededId !== uploaded\.id/.test(build),
+    'and never the file just filed');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -7066,5 +7120,6 @@ if (isMain(import.meta.url)) {
   testTwoDeadlines();
   await testTwoDeadlinesWiring();
   await testSubmissionNotices();
+  await testCandidateProfilePolicy();
   process.exit(finish() ? 0 : 1);
 }

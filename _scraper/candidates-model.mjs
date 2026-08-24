@@ -285,25 +285,55 @@ function better(a, b) {
   return fullness(a) >= fullness(b) ? a : b;
 }
 
-/** Collapse repeat profiles of ONE person in ONE market year, keeping the
-    better row. The same person re-appearing in the NEXT market year is a
-    genuinely new profile and is left alone. Returns { rows, collapsed } in
-    the original order. */
-export function collapseSameCandidate(rows) {
+/** One collapse pass: rows sharing a key are folded onto the better one, in
+    the original order; a row whose keyFn answers null is never folded. */
+function collapseBy(rows, keyFn) {
   const best = new Map();
-  const order = [];
+  const order = [];   // { k } for keyed slots, { row } for keyless rows
 
   for (const row of rows) {
-    const k = sameCandidateKey(row);
+    const k = keyFn(row);
+    if (k == null) { order.push({ row }); continue; }
     if (!best.has(k)) {
       best.set(k, row);
-      order.push(k);
+      order.push({ k });
     } else {
       best.set(k, better(best.get(k), row));
     }
   }
 
-  return { rows: order.map((k) => best.get(k)), collapsed: rows.length - order.length };
+  return {
+    rows: order.map((e) => (e.k != null ? best.get(e.k) : e.row)),
+    collapsed: rows.length - order.length,
+  };
+}
+
+/** Collapse repeat profiles — TWO passes, because two rows can be repeats in
+    two different ways:
+
+    (1) ONE PERSON in one market year, keyed (year, name) — the original
+        collapse: a candidate who posted twice instead of editing.
+    (2) ONE ACCOUNT in one market year, keyed (year, owner) — the owner's rule
+        (2026-08-24): a registered candidate has ONE profile per market year,
+        full stop. The name key alone cannot enforce it — the same account
+        posting under a corrected spelling ("Jane Doe" then "Jane A. Doe") is
+        two names and was two cards. The form now redirects a signed-in
+        candidate who already has a profile this season into EDITING it, and
+        this pass is the backstop that heals whatever slipped past (a race,
+        an offline import, a pre-rule duplicate). Keyed on `owner` (the uid
+        digest), so an imported row with no owner is never touched.
+
+    The same person re-appearing in the NEXT market year is a genuinely new
+    profile and is left alone by both. Returns { rows, collapsed } in the
+    original order. */
+export function collapseSameCandidate(rows) {
+  const byName = collapseBy(rows, sameCandidateKey);
+  const byAccount = collapseBy(byName.rows,
+    (r) => (r.owner ? `${r.year}|acct:${r.owner}` : null));
+  return {
+    rows: byAccount.rows,
+    collapsed: byName.collapsed + byAccount.collapsed,
+  };
 }
 
 /* -------------------------------------------------------------------- merge */

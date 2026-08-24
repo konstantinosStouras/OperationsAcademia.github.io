@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "one-candidate-profile-per-year",
+   "date": "2026-08-24",
+   "title": "One candidate profile per market year, files that stay current, and a shortcut to report your placement",
+   "summary": "Each registered candidate now has exactly one profile per job market year: if you have already filed one this season, the profile form simply reopens it for editing instead of creating a second. Replacing your CV with a newer upload keeps only the newest version — the superseded file is removed from our archive, so an old CV can never linger behind your profile. And once your position is confirmed, your own card on the candidates page offers a “Post confirmed placement” button — visible only to you, on your own profile — that takes you straight to the placements form. As before, only you (and the maintainer) can edit your profile.",
+   "url": "https://www.operationsacademia.org/post-a-candidate.html"
+  },
+  {
    "id": "candidate-form-no-research-summary",
    "date": "2026-08-24",
    "title": "The candidate profile form is shorter, and asks for a lasting address",
