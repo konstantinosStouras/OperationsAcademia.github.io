@@ -316,27 +316,12 @@
                         <p class="oa-error" id="f-cvFile-error" hidden></p>
                       </div>
 
-                      <div class="oa-field">
-                        <span class="oa-label-text" id="lbl-rs">Your research summary</span>
-                        <p class="oa-hint" id="f-rsFile-hint">Shown publicly as the <em>Research
-                        summary</em> link. A one- or two-page research statement — upload it
-                        (PDF or Word, up to 15&nbsp;MB) or paste a link.</p>
-
-                        <div class="oa-advert" role="group" aria-labelledby="lbl-rs">
-                          <label class="oa-file" id="f-rsFile-label">
-                            <input type="file" id="f-rsFile"
-                                   accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-                            <span class="oa-file-btn" aria-hidden="true">Choose a file&hellip;</span>
-                            <span class="oa-file-name" id="f-rsFile-name">No file chosen</span>
-                          </label>
-                          <button type="button" class="oa-file-clear" id="f-rsFile-clear" hidden>
-                            Remove</button>
-                          <p class="oa-hint oa-advert-or">&mdash; or paste a link &mdash;</p>
-                          <label class="oa-visually-hidden" for="f-rsUrl">Link to your research summary</label>
-                          <input type="url" id="f-rsUrl" name="rsUrl" maxlength="500" placeholder="https://">
-                        </div>
-                        <p class="oa-error" id="f-rsFile-error" hidden></p>
-                      </div>
+                      <!-- The research summary slot was RETIRED here (owner,
+                           2026-08-24): candidates are no longer asked for one.
+                           A profile filed while the form still offered it keeps
+                           its rsUrl / rsUpload* fields — the build, the rules
+                           and the admin card still carry them — but nothing on
+                           this page asks for or writes them any more. -->
 
                       <div class="oa-field">
                         <label for="f-webUrl">Your web page</label>
@@ -356,6 +341,17 @@
                         <strong>Not published</strong> &mdash; unless you tick the box below.</p>
                         <input type="email" id="f-email" name="email" maxlength="160"
                                autocomplete="email" required>
+                      </div>
+
+                      <div class="oa-field">
+                        <label for="f-personalEmail">Your personal e-mail <span class="oa-req" aria-hidden="true">*</span></label>
+                        <p class="oa-hint"><strong>Not published.</strong> A personal address
+                        (Gmail or similar) that stays with you after you graduate &mdash; so we
+                        can still reach you about your profile once your current school address
+                        stops working. If the address above is already a personal one, give the
+                        same address here.</p>
+                        <input type="email" id="f-personalEmail" name="personalEmail" maxlength="160"
+                               autocomplete="home email" required>
                       </div>
 
                       <div class="oa-field">

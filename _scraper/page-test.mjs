@@ -1258,6 +1258,7 @@ for (const [name, expect] of [
     await q.fill('#f-affiliation', 'Test University');
     await q.selectOption('#f-position', 'PhD Candidate');
     await q.fill('#f-email', 'grace@example.edu');
+    await q.fill('#f-personalEmail', 'grace.hopper@gmail.example');
     await q.check('input[name="researchAreas"][value="Supply Chain Management"]');
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
@@ -1267,7 +1268,11 @@ for (const [name, expect] of [
       const k = Object.keys(d).find((p) => p.startsWith('candidateSubmissions/'));
       return d[k];
     });
-    return { ref, doc };
+    // the research-summary slot was retired (owner, 2026-08-24) — the form
+    // must neither offer it nor write its fields
+    const noRs = await q.evaluate(() =>
+      !document.getElementById('f-rsUrl') && !document.getElementById('f-rsFile'));
+    return { ref, doc, noRs };
   });
   ok(/^OA-CAND-\d{6}-[A-Z2-9]{4}$/.test(cand.ref.trim()),
     'v3 post-a-candidate: the candidate is given a quotable reference');
@@ -1275,6 +1280,12 @@ for (const [name, expect] of [
   eq(cand.doc.uid, KEPT, 'and owned by the signed-in candidate');
   eq(cand.doc.emailPublic, false,
     'the e-mail address stays private unless the candidate opted in');
+  eq(cand.doc.personalEmail, 'grace.hopper@gmail.example',
+    'the personal e-mail \u2014 the address that outlives the affiliation \u2014 is stored on the profile');
+  eq(cand.doc.rsUrl, undefined,
+    'and the retired research-summary field is never written');
+  eq(cand.noRs, true,
+    'the form no longer offers the research-summary slot (retired 2026-08-24)');
   eq(cand.doc.year, marketYear(),
     'and its market year is derived from the date, like the job form\u2019s');
 

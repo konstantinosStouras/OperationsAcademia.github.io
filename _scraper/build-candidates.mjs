@@ -469,6 +469,7 @@ function selftest() {
     cvUrl: 'https://example.org/jane-doe-cv.pdf',
     rsUrl: '', webUrl: 'https://janedoe.example.org',
     email: 'jane@example.org', emailPublic: false,
+    personalEmail: 'jane.personal@example.org',
     note: 'private note for the maintainer', authEmail: 'jane@example.org',
   };
 
@@ -537,8 +538,11 @@ function selftest() {
   /* ------------------------------------------------------------- privacy */
 
   const pub = publicCandidateRow(row);
-  for (const k of ['uid', 'authEmail', 'note', 'emailPublic', 'cvUploadPath',
-    'rsUploadPath', 'status', 'createdAt']) {
+  /* personalEmail (owner, 2026-08-24) is in this list BY DESIGN: it exists so
+     the maintainer can reach a candidate after their school address dies with
+     the affiliation, and it must never reach a world-readable file. */
+  for (const k of ['uid', 'authEmail', 'note', 'emailPublic', 'personalEmail',
+    'cvUploadPath', 'rsUploadPath', 'status', 'createdAt']) {
     ok(!(k in pub), `publicCandidateRow never carries ${k}`);
   }
   ok(Object.keys(pub).every((k) => CANDIDATE_PUBLIC_FIELDS.includes(k)),

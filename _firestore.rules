@@ -184,11 +184,18 @@ service cloud.firestore {
 
     /* A job-market candidate's own profile: the same lifecycle as a job
        posting (create queued -> the build publishes -> correct or withdraw),
-       plus two optional uploads (CV, research summary) that land in Storage
-       (see _storage.rules, kind 'candidates') and are filed into Drive by the
-       build, exactly like a job advert. `email` is published ONLY when
-       `emailPublic` is true — the old sheet published every address, which is
-       the disclosure the rebuild retires. */
+       plus an optional CV upload that lands in Storage (see _storage.rules,
+       kind 'candidates') and is filed into Drive by the build, exactly like a
+       job advert. `email` is published ONLY when `emailPublic` is true — the
+       old sheet published every address, which is the disclosure the rebuild
+       retires. `personalEmail` (owner, 2026-08-24) is asked of everyone and
+       NEVER published — it is how the maintainer reaches a candidate after
+       their school address dies with the affiliation; it is not in
+       CANDIDATE_PUBLIC_FIELDS, so it can never reach data/candidates.json.
+       The rsUrl / rsUpload* fields are the RETIRED research-summary slot
+       (form stopped asking 2026-08-24): kept bounded here because profiles
+       filed before that still carry them, and an unbounded legacy key would
+       be worse than a bounded one. */
     match /candidateSubmissions/{id} {
 
       function candShapeOk() {
@@ -196,6 +203,7 @@ service cloud.firestore {
             && str('affiliation', 220) && str('position', 160)
             && str('cvUrl', 600)       && str('rsUrl', 600)
             && str('webUrl', 600)      && str('email', 200)
+            && str('personalEmail', 200)
             && str('note', 1500)       && str('source', 40)
             && str('authEmail', 200)   && str('ref', 60)
             && str('cvUploadPath', 400) && str('cvUploadName', 200)

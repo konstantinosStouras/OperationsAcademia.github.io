@@ -30,7 +30,12 @@ import {
 
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/candidates.json — which is how `uid`, `authEmail`,
-    `emailPublic` and the private note stay out of a public repository.
+    `emailPublic`, `personalEmail` (the durable address the form asks for so
+    the maintainer can reach a candidate after their school address dies with
+    the affiliation — NEVER published, owner 2026-08-24) and the private note
+    stay out of a public repository. `rsUrl` stays listed although the form
+    stopped asking for a research summary (2026-08-24): profiles filed while
+    it still did keep their link.
 
     `email` IS listed, and that is not a leak: publicCandidateRow() only ever
     carries a value into it when the candidate opted in (rowFromCandidate-
