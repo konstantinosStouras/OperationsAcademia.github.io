@@ -371,6 +371,142 @@ service cloud.firestore {
       allow delete: if isOwner(uid);
     }
 
+    // -------------------------------------------------- the account roster
+    //
+    // What the maintainer may know about a registered account: a name, an
+    // address, and when it was first and last seen. It exists because
+    // `registeredUsers` deliberately does NOT carry any of that — it is a
+    // contentless tally, and on the sibling /lit/ the same collection is
+    // PUBLIC-read, so identity could never be added to it there and the two
+    // sites are kept in the same shape. `profiles/{uid}` is owner-only and
+    // holds no address at all (the address lives in the Firebase Auth record,
+    // which no browser client can read for anyone but itself).
+    //
+    // It exists for TWO readers, both the maintainer's: the Registered-users
+    // roster on the Admin area, and the recipient picker that addresses a
+    // message. Nobody else can read it — not other signed-in users, not the
+    // public.
+    //
+    // THE ADDRESS CANNOT BE FORGED. `email` must equal the caller's own
+    // verified-or-not auth address (`request.auth.token.email`), the same
+    // pin-it-to-the-writer trick `directoryEdits.by` uses, so a roster row
+    // says what the account really signs in as rather than whatever its owner
+    // typed. `name` is self-reported, exactly as it is everywhere else on the
+    // site, and is rendered as text and never as markup.
+    //
+    // `first` is write-once in practice: the client sends it only on create.
+    // A rule cannot express "never raised" without reading the old document,
+    // so the roster treats it as the earliest thing it has seen and says
+    // "first seen", never "joined" — the true joined date is Firebase Auth's
+    // own creationTime, which only the Admin SDK can read.
+    //
+    // Disclosed in the Privacy Policy.
+    match /userDirectory/{uid} {
+      // The maintainer reads the whole roster; a person may read the ONE row
+      // the site keeps about them, which is also what lets the browser
+      // preserve `first` below without the maintainer's permission. A
+      // collection-wide query cannot resolve {uid} and so is refused for
+      // everyone but the admin.
+      allow read: if isAdmin() || isOwner(uid);
+
+      allow create: if isOwner(uid) && rowOk();
+
+      // `first` is WRITE-ONCE: on any later write it must be exactly what is
+      // already stored. The browser reads its own row once per session and
+      // sends `first` back unchanged; a client that tried to reset it — or to
+      // back-date itself in the roster — is refused.
+      allow update: if isOwner(uid) && rowOk()
+                    && request.resource.data.first == resource.data.first;
+
+      function rowOk() {
+        return request.resource.data.keys().hasOnly(['name', 'email', 'first', 'seen'])
+          && str('name', 200) && str('email', 200)
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.first is number
+          && request.resource.data.seen is number;
+      }
+      // An account may withdraw its OWN row, and only its own — which is what
+      // the merge does with the duplicate it removes, so the roster lists
+      // people rather than sign-ins. It mirrors registeredUsers exactly.
+      allow delete: if isOwner(uid);
+    }
+
+    // ------------------------------------------------------------ messages
+    //
+    // Two-party threads between the maintainer and one account (owner,
+    // 2026-08-24). ONE thread per account, keyed on the uid itself, which is
+    // what lets a user read their own unread count with a single get() —
+    // no query, no composite index — and lets the maintainer list the threads
+    // needing an answer with one equality filter.
+    //
+    // IT IS DELIBERATELY TOP-LEVEL, NOT users/{uid}/messages. Firestore ORs
+    // every matching rule, so under the blanket
+    // `match /users/{uid}/{document=**} { allow read, write: if isOwner(uid); }`
+    // a narrower rule can only ever GRANT more: the owner's blanket write
+    // could not be taken away, and a user could forge a message from the
+    // maintainer in their own inbox or clear the flag that says they owe a
+    // reply. A top-level collection carrying a `uid` field is the shape
+    // jobSubmissions already uses, and it is the only one the maintainer can
+    // LIST at all.
+    //
+    // Nothing here is ever published: message bodies stay in Firestore and
+    // never reach a file under data/, like feedback and the candidate
+    // submissions. Disclosed in the Privacy Policy.
+    match /messages/{uid} {
+      allow read: if isAdmin() || isOwner(uid);
+
+      // The maintainer owns the thread: opening one, and clearing the flag
+      // once the reply has been read.
+      allow create, update: if isAdmin()
+                            && request.resource.data.keys().hasOnly(['uid', 'lastAt', 'lastFrom', 'needsAdmin', 'userUnread'])
+                            && request.resource.data.uid == uid
+                            && request.resource.data.lastAt is number
+                            && request.resource.data.lastFrom in ['admin', 'user']
+                            && request.resource.data.needsAdmin is bool
+                            && request.resource.data.userUnread is int
+                            && request.resource.data.userUnread >= 0;
+
+      // The owner may do exactly two things, and neither can rewrite history:
+      //   1. mark the thread read — `userUnread` to zero and nothing else;
+      //   2. record that they have replied — which must say the reply came
+      //      FROM them and must raise the maintainer's flag, never lower it.
+      // Anything else (a first thread, another field, clearing needsAdmin)
+      // is refused, so the queue on the Admin area cannot be emptied by the
+      // person who is waiting in it.
+      allow update: if isOwner(uid)
+                    && (
+                      (request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['userUnread'])
+                       && request.resource.data.userUnread == 0)
+                      ||
+                      (request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['lastAt', 'lastFrom', 'needsAdmin'])
+                       && request.resource.data.lastFrom == 'user'
+                       && request.resource.data.needsAdmin == true
+                       && request.resource.data.lastAt is number)
+                    );
+
+      allow delete: if isAdmin();
+
+      // One message. `from` is pinned to who is actually writing, so neither
+      // side can put words in the other's mouth; the body is bounded; and
+      // only the maintainer may edit or retract one, because a thread whose
+      // history either party can rewrite is not a record of anything.
+      match /items/{itemId} {
+        allow read: if isAdmin() || isOwner(uid);
+        allow create: if request.resource.data.keys().hasOnly(['from', 'body', 't'])
+                      && request.resource.data.body is string
+                      && request.resource.data.body.size() > 0
+                      && request.resource.data.body.size() <= 5000
+                      && request.resource.data.t is number
+                      && (
+                        (isAdmin() && request.resource.data.from == 'admin')
+                        || (isOwner(uid) && request.resource.data.from == 'user')
+                      );
+        allow update, delete: if isAdmin();
+      }
+    }
+
     // ------------------------------------------------------ identity keys
     //
     // How the site notices that one person has two accounts. Each session

@@ -4267,15 +4267,20 @@ for (const w of [320, 360, 390, 430]) {
        Registered-users statistic (owner, 2026-08-23) */
     await q.waitForFunction((want) => {
       const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
-      return els.length === 6 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
-    }, ['5', seededHeld, '2', newsPending, 0, seededUsers].join(','), { timeout: 10000 });
-    ok(true, 'admin area: the six tiles agree with the data beneath them — the ' +
-      'approved fix no longer counts as waiting, and the registered-user tally is on screen');
-    ok(await q.locator('#oa-aa-tiles span.oa-aa-tile-stat').count() === 1 &&
-       await q.locator('#oa-aa-tiles a.oa-aa-tile').count() === 5 &&
+      return els.length === 7 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
+    }, ['5', seededHeld, '2', newsPending, 0, 0, seededUsers].join(','), { timeout: 10000 });
+    ok(true, 'admin area: the seven tiles agree with the data beneath them — the ' +
+      'approved fix no longer counts as waiting, nobody is waiting on a message ' +
+      'reply, and the registered-user tally is on screen');
+    /* The Registered-users card became a LINK on 2026-08-24, when the roster
+       panel gave it somewhere to go — it was a span precisely because it
+       opened nothing. What still makes it a statistic is the class, which
+       keeps it out of every badge sum, and that it is never marked due. */
+    ok(await q.locator('#oa-aa-tiles a.oa-aa-tile-stat[href="#oa-aa-users"]').count() === 1 &&
+       await q.locator('#oa-aa-tiles a.oa-aa-tile').count() === 7 &&
        await q.locator('#oa-aa-tiles .oa-aa-tile-stat.is-due').count() === 0,
-      'admin area: the Registered-users card is a statistic — a span among five ' +
-      'links, never marked due, nothing to press');
+      'admin area: the Registered-users card opens the roster and is still a ' +
+      'statistic — never marked due, and out of every total');
     eq(await q.evaluate(() =>
       (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
       5 + seededHeld + 2 + newsPending,
@@ -4308,6 +4313,193 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForTimeout(600);
     ok(await q.locator('#oa-aa-guest').isVisible() && await q.locator('#oa-aa-admin').isHidden(),
       'admin area: and the desk stays the guest note for them');
+    await ctx.close();
+  }
+}
+
+/* ------------------------------------- the roster and the message threads
+
+   The Admin area could COUNT registered accounts and learn nothing else about
+   them, so the maintainer had no way to see who they were or reach any of
+   them (owner, 2026-08-24). What no static pin can prove is the money path:
+   that the roster renders the identity the accounts wrote about themselves,
+   that a name typed by a stranger is inert, that ticking people and writing
+   once really opens a thread on each of them with `from` set to the person
+   who wrote it — and that the recipient, on their own page, sees it and can
+   answer. Driven against _fake-firebase.js with a seeded roster. */
+{
+  const SHIM = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+
+  const ADMIN = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+    emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+  const READER = { uid: 'u-msg-2', email: 'bea@example.edu',
+    emailVerified: true, displayName: 'Bea Baker', providerData: [] };
+
+  const seed = [
+    /* three accounts, and the FIRST carries the two hostile shapes at once:
+       markup in a name (it is rendered on the maintainer's screen) and a
+       leading '=' (it reaches a spreadsheet through Download CSV) */
+    { path: 'userDirectory/u-msg-1', data: { name: '=cmd|calc<img src=x onerror=window.__xssU=1>',
+        email: 'avery@example.edu', first: 1000, seen: 3000 } },
+    { path: 'userDirectory/u-msg-2', data: { name: 'Bea Baker',
+        email: 'bea@example.edu', first: 2000, seen: 2000 } },
+    { path: 'userDirectory/u-msg-3', data: { name: 'Cy Carter',
+        email: 'cy@example.edu', first: 3000, seen: 1000 } },
+
+    /* Bea has replied and is waiting — the one thing here that is a QUEUE */
+    { path: 'messages/u-msg-2', data: { uid: 'u-msg-2', lastAt: 5000, lastFrom: 'user',
+        needsAdmin: true, userUnread: 1 } },
+    { path: 'messages/u-msg-2/items/m1', data: { from: 'admin', body: 'Hello Bea.', t: 4000 } },
+    { path: 'messages/u-msg-2/items/m2', data: { from: 'user', body: 'Hello back.', t: 5000 } },
+
+    /* a thread whose roster row has GONE — the account was merged away, which
+       deletes its row while it can still write as that user. The record is
+       kept rather than silently dropped. */
+    { path: 'messages/u-gone-9', data: { uid: 'u-gone-9', lastAt: 900, lastFrom: 'admin',
+        needsAdmin: false, userUnread: 0 } },
+  ];
+
+  async function open(user, url) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs: seed })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + url, { waitUntil: 'load' });
+    return { ctx, q, errors };
+  }
+
+  /* -- the maintainer's roster --------------------------------------------- */
+  {
+    const { ctx, q, errors } = await open(ADMIN, 'admin-area.html');
+    await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
+
+    const text = await q.textContent('#oa-aa-users');
+    ok(text.indexOf('bea@example.edu') !== -1 && text.indexOf('cy@example.edu') !== -1,
+      'roster: the maintainer can finally see WHO has registered, by the address ' +
+      'they sign in with — the whole gap this closed');
+    eq(await q.evaluate(() => window.__xssU), undefined,
+      'roster: markup in a name is rendered as text, never executed');
+    ok((await q.textContent('#oa-aa-users')).indexOf('<img src=x') !== -1,
+      '…and is shown as the characters the account really typed');
+
+    /* the thread column is the queue: Bea is waiting, the others are not */
+    const bea = q.locator('#oa-aa-users tr', { hasText: 'bea@example.edu' });
+    ok((await bea.textContent()).indexOf('Replied — awaiting you') !== -1,
+      'roster: a person who has replied is shown as waiting for the maintainer');
+
+    /* the ghost: a thread with no roster row behind it */
+    ok((await q.textContent('#oa-aa-users')).indexOf('Threads with no account') !== -1,
+      'roster: a thread whose account was merged away is kept and shown as ' +
+      'exactly that, rather than vanishing with the row');
+
+    /* sorting is by what is DISPLAYED — one spec owns heading, cell and key */
+    const namesNow = () => q.$$eval('#oa-aa-users tbody tr td:nth-child(2)',
+      (tds) => tds.map((t) => t.textContent.trim()));
+    await q.click('#oa-aa-users .oa-u-sort[data-sort="email"]');
+    const byEmail = await namesNow();
+    ok(byEmail.length >= 3 && byEmail.join('|').indexOf('Bea Baker') < byEmail.join('|').indexOf('Cy Carter'),
+      'roster: clicking a heading sorts by that column, ascending first');
+    await q.click('#oa-aa-users .oa-u-sort[data-sort="email"]');
+    const rev = await namesNow();
+    eq(rev.slice().reverse().join(','), byEmail.join(','),
+      'roster: and a second click is a clean reversal, not a reshuffle');
+
+    /* the Find box doubles as the recipient picker: select-all takes what is
+       SHOWN, so a filtered roster is how a subset is addressed */
+    await q.fill('#oa-u-filter', 'cy@');
+    await q.waitForFunction(() =>
+      document.querySelectorAll('#oa-aa-users tbody tr').length === 1, null, { timeout: 10000 });
+    ok(true, 'roster: Find narrows the list');
+    await q.click('#oa-u-all');
+    await q.waitForFunction(() =>
+      (document.getElementById('oa-u-send') || {}).disabled === false, null, { timeout: 10000 });
+    ok((await q.textContent('#oa-u-send')).indexOf('1 person') !== -1,
+      'roster: select-all takes only the rows on screen, so the filter IS the picker');
+
+    /* …and sending really writes, with `from` the rules pin */
+    await q.fill('#oa-u-body', 'A message to Cy.');
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-u-send');
+    await q.waitForFunction(() => {
+      const d = window.__fb.dump();
+      return Object.keys(d).some((k) => k.indexOf('messages/u-msg-3/items/') === 0);
+    }, null, { timeout: 10000 });
+    const wrote = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const key = Object.keys(d).filter((k) => k.indexOf('messages/u-msg-3/items/') === 0)[0];
+      return { item: d[key], head: d['messages/u-msg-3'] };
+    });
+    eq(wrote.item.from, 'admin', 'messaging: the maintainer’s message is stamped from: admin');
+    eq(wrote.item.body, 'A message to Cy.', '…with the body as written');
+    eq(wrote.head.uid, 'u-msg-3', 'messaging: and a thread head keyed on the person’s own uid');
+    eq(wrote.head.userUnread, 1, '…carrying one unread for them');
+    eq(wrote.head.needsAdmin, false,
+      '…and NOT flagged as waiting on the maintainer, who has just acted');
+
+    eq(errors, [], 'roster: maintainer run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- the reader's own page ------------------------------------------------ */
+  {
+    const { ctx, q, errors } = await open(READER, 'messages.html');
+    await q.waitForSelector('#oa-msg-list .oa-u-msg', { timeout: 10000 });
+    const body = await q.textContent('#oa-msg-list');
+    ok(body.indexOf('Hello Bea.') !== -1 && body.indexOf('Hello back.') !== -1,
+      'messages: the recipient sees the whole conversation, oldest first');
+
+    /* reading them IS reading them */
+    await q.waitForFunction(() =>
+      (window.__fb.dump()['messages/u-msg-2'] || {}).userUnread === 0,
+      null, { timeout: 10000 });
+    ok(true, 'messages: opening the page marks the thread read — the badge follows');
+
+    /* a reply is stamped from the person writing it, and RAISES the flag it
+       may never lower */
+    await q.fill('#oa-msg-body', 'Thanks!');
+    await q.click('#oa-msg-send');
+    await q.waitForFunction(() => {
+      const d = window.__fb.dump();
+      return Object.keys(d).some((k) =>
+        k.indexOf('messages/u-msg-2/items/') === 0 && d[k].body === 'Thanks!');
+    }, null, { timeout: 10000 });
+    const reply = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).filter((x) =>
+        x.indexOf('messages/u-msg-2/items/') === 0 && d[x].body === 'Thanks!')[0];
+      return { item: d[k], head: d['messages/u-msg-2'] };
+    });
+    eq(reply.item.from, 'user', 'messages: a reply is stamped from: user — the rules pin it, ' +
+      'so neither side can put words in the other’s mouth');
+    eq(reply.head.needsAdmin, true,
+      'messages: and it RAISES the maintainer’s flag — the queue on the Admin ' +
+      'area cannot be emptied by the person waiting in it');
+    eq(reply.head.lastFrom, 'user', '…recording who spoke last');
+
+    eq(errors, [], 'messages: reader run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a phone, because an e-mail address has no spaces --------------------- */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 850 } });
+    const q = await ctx.newPage();
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user: ADMIN, docs: seed })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+    await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
+    const over = await q.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    ok(over <= 1, `roster at 390px: the PAGE does not scroll sideways (${over}px) — ` +
+      'the table scrolls inside its own container instead');
+    ok(await q.evaluate(() => {
+      const w = document.querySelector('.oa-u-wrap');
+      return !!w && getComputedStyle(w).overflowX === 'auto';
+    }), 'roster at 390px: …which is what that container is for');
     await ctx.close();
   }
 }

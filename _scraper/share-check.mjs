@@ -209,6 +209,12 @@ export const PAGES = [
     description: 'The job postings, candidate profiles and placements you have submitted to Operations Academia — edit any of them, or take one down.',
   },
   {
+    file: 'messages.html', url: '/messages.html',
+    title: 'Messages — Operations Academia',
+    ogTitle: 'Messages',
+    description: 'Messages between you and the maintainer of Operations Academia — read what has been sent to you and reply.',
+  },
+  {
     file: 'feedback.html', url: '/feedback.html',
     title: 'Feedback — Operations Academia',
     ogTitle: 'Feedback',

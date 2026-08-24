@@ -283,6 +283,29 @@
               <div id="oa-aa-names-list"><p class="oa-hint">Loading&hellip;</p></div>
             </section>
 
+            <!-- The roster, and the maintainer's side of the message threads.
+                 LAST, because it is the one panel that is not a queue: the
+                 people who have replied and are waiting DO have a tile above,
+                 but the list itself is a statistic — everyone who has ever
+                 signed in — and the page reads queues first, statistics last.
+                 assets/oa-users.js draws it; both collections are admin-read
+                 in _firestore.rules, so an unhidden panel still loads nothing
+                 for the wrong visitor. -->
+            <section class="oa-panel" id="oa-aa-users" hidden>
+              <h3 class="oa-panel-h">&#128101; Registered users</h3>
+              <p class="oa-hint">Everyone who has signed in since the roster
+                shipped &mdash; the name they show themselves under, the address
+                they sign in with, and where their conversation with you stands.
+                Tick the people you want to reach and write once: the message
+                appears in their own area on this site under &ldquo;Messages&rdquo;,
+                where they can reply to you. <strong>No e-mail is sent</strong>
+                &mdash; the address links open your own mail client when e-mail
+                is what you want.</p>
+              <div id="oa-aa-users-list"><p class="oa-hint">Loading&hellip;</p></div>
+              <div id="oa-aa-users-thread" hidden></div>
+              <div id="oa-aa-users-compose"></div>
+            </section>
+
           </div>
         </div>
       </div>
@@ -356,6 +379,7 @@
     <script defer src="assets/oa-jobreview.js"></script>
     <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
+    <script defer src="assets/oa-users.js"></script>
     <script defer src="assets/oa-adminarea.js"></script>
   </body>
 </html>
