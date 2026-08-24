@@ -231,6 +231,18 @@ async function transferUploads(db, live, { now }) {
           contentType: v[slot.type] || 'application/pdf',
         });
 
+        /* A REPLACEMENT retires the file it replaces (owner, 2026-08-24:
+           "show only the newest version … and remove the former PDF version
+           from my files"). The document still carries the PREVIOUS filing's
+           Drive id at this point — the form blanks the link when a new file
+           is chosen but never touches the id — so that is the file the new
+           upload supersedes. Deleted AFTER the document points at the new
+           one: a crash in between leaves an orphaned OLD file in Drive
+           (harmless, and said so below) rather than a profile whose CV link
+           is dead. Best-effort, like the Storage delete — a leftover file is
+           a tidiness problem, never a reason to fail the filing. */
+        const supersededId = String(v[slot.driveId] || '');
+
         /* Write the link BEFORE deleting the landing-strip object: a crash in
            between leaves a stray object in Storage (harmless, cleaned by
            hand) rather than a filed-and-forgotten upload with no link. */
@@ -240,6 +252,17 @@ async function transferUploads(db, live, { now }) {
           ...clearedSlot(slot),
         });
         await file.delete().catch(() => {});
+
+        if (supersededId && supersededId !== uploaded.id) {
+          try {
+            await drive.deleteFile({ token, id: supersededId });
+            log(`  removed the superseded ${slot.label} for ${v.ref || d.id} from Drive`);
+          } catch (e) {
+            warn(`candidate uploads: the superseded ${slot.label} for ` +
+              `${v.ref || d.id} could not be removed from Drive (${e.message}) — ` +
+              'the profile already points at the new file; delete the old one by hand');
+          }
+        }
 
         log(`  filed ${slot.label} for ${v.ref || d.id}: ${uploaded.name}`);
       } catch (e) {
@@ -611,6 +634,21 @@ function selftest() {
   // the same person NEXT year is a new profile, left alone
   c = collapseSameCandidate([row, { ...row, year: 2028, id: '2028-doe-jane' }]);
   eq(c.collapsed, 0, 'a profile in the next market year does not collapse');
+
+  /* ONE ACCOUNT, one market year, two NAMES (owner, 2026-08-24: a registered
+     candidate has one profile per market year). The name key alone cannot see
+     this — "Jane Doe" then "Jane A. Doe" is two names and was two cards — so
+     the account pass folds them onto the newest. */
+  const respelled = rowFromCandidateSubmission({
+    ...base, ref: 'OA-CAND-261004-EEEE', first: 'Jane A.',
+    createdAt: new Date('2026-10-04T09:00:00Z'),
+  }, { now });
+  c = collapseSameCandidate([row, respelled]);
+  eq(c.collapsed, 1, 'one ACCOUNT twice in one year collapses, whatever the names say');
+  eq(c.rows[0].ref, 'OA-CAND-261004-EEEE', 'and the newest profile is the one kept');
+
+  c = collapseSameCandidate([row, { ...respelled, year: 2028, id: '2028-doe-jane-a' }]);
+  eq(c.collapsed, 0, 'the same account in the NEXT market year is a genuinely new profile');
 
   /* -------------------------------------------------- ids + serialisation */
 

@@ -1289,6 +1289,28 @@ for (const [name, expect] of [
   eq(cand.doc.year, marketYear(),
     'and its market year is derived from the date, like the job form\u2019s');
 
+  /* -- one profile per account per market year (owner, 2026-08-24) --------- */
+
+  const oneSeed = { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: {
+    uid: KEPT, status: 'queued', ref: 'OA-CAND-260820-ZZZZ',
+    first: 'Grace', last: 'Hopper', affiliation: 'Test University',
+    position: 'PhD Candidate', year: marketYear(),
+    createdAt: '2026-08-20T00:00:00.000Z',
+  } }] };
+  const one = await onSite('post-a-candidate.html', oneSeed, async (q) => {
+    await q.waitForURL(/post-a-candidate\.html\?edit=c9/, { timeout: 10000 });
+    await q.waitForFunction(() => document.getElementById('f-first').value !== '',
+      null, { timeout: 8000 });
+    return q.evaluate(() => ({
+      heading: (document.querySelector('.v3-pa-hero .v3-h1') ||
+        document.querySelector('.title-heading h2') || {}).textContent || '',
+      first: document.getElementById('f-first').value,
+    }));
+  });
+  eq(one.heading.trim(), 'Edit your profile',
+    'a candidate who already has a profile this season is sent to EDIT it \u2014 one profile per market year');
+  eq(one.first, 'Grace', 'and the form holds their own profile, not a blank one');
+
   /* -- report a placement on /v3/ ------------------------------------------ */
 
   const plac = await onSite('post-a-placement.html', { user: keptUser, docs: [] }, async (q) => {

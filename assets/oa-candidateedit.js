@@ -33,8 +33,14 @@
 
   /* What a signed-in user may touch, keyed both ways: an imported profile
      would have the row's own id as its document id, while one made through
-     the form has a random document id and carries a `ref`. */
-  var perm = { ready: false, admin: false, byId: {}, byRef: {}, uid: null };
+     the form has a random document id and carries a `ref`. `own` narrows
+     further — the documents that are the signed-in user's OWN profile, not
+     merely ones the admin may touch: the "Post confirmed placement" invite
+     (owner, 2026-08-24) is the CANDIDATE's control, drawn only on their own
+     card, so the admin browsing the list is not offered it on everyone
+     else's. For a non-admin the two sets are identical by construction (the
+     query is where uid == me). */
+  var perm = { ready: false, admin: false, byId: {}, byRef: {}, own: {}, uid: null };
   var list = null;   // the OAList instance, so cards can be redrawn late
 
   function isAdmin(user) {
@@ -87,6 +93,19 @@
       'Remove this profile from the site', function (btn) {
         takeDown(id, row, btn);
       }));
+
+    /* The candidate's own invite to close the loop (owner, 2026-08-24): once
+       a position is confirmed, report it on the Placements page. Drawn ONLY
+       on the signed-in candidate's OWN card — nobody else, the admin
+       included, sees it on this profile — and it grants nothing: it is a
+       link to the placement form everyone can already reach. */
+    if (perm.own[id]) {
+      bar.appendChild(button('Post confirmed placement', 'oa-jobbtn-edit',
+        'Confirmed a position? Report your placement — only you see this ' +
+        'button, on your own profile', function () {
+          location.href = 'post-a-placement.html';
+        }));
+    }
 
     li.classList.add('oa-card-owned');
     li.appendChild(bar);
@@ -145,7 +164,7 @@
   /* ------------------------------------------------------------ permissions */
 
   function load(user) {
-    perm = { ready: false, admin: false, byId: {}, byRef: {}, uid: user && user.uid };
+    perm = { ready: false, admin: false, byId: {}, byRef: {}, own: {}, uid: user && user.uid };
 
     if (!user || !window.OAFB || !OAFB.enabled) { perm.ready = true; redraw(); return; }
 
@@ -162,6 +181,9 @@
         var v = d.data() || {};
         perm.byId[d.id] = d.id;
         if (v.ref) perm.byRef[v.ref] = d.id;
+        // OWN is by uid, never by privilege: the admin's broad read covers
+        // everyone, but only their own profile is theirs
+        if (v.uid && v.uid === perm.uid) perm.own[d.id] = true;
       });
       perm.ready = true;
       redraw();
@@ -188,7 +210,7 @@
        rules remain the authorisation. */
     __setPermissionsForTest: function (p) {
       perm = { ready: !!p.ready, admin: !!p.admin, byId: p.byId || {},
-               byRef: p.byRef || {}, uid: p.uid || null };
+               byRef: p.byRef || {}, own: p.own || {}, uid: p.uid || null };
       redraw();
     },
 

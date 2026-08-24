@@ -675,10 +675,49 @@
       });
     }
 
+    /* ONE PROFILE PER CANDIDATE PER MARKET YEAR (owner, 2026-08-24). An
+       account that already filed a profile for the season under way is sent
+       to EDIT that profile, never offered a blank form that would create a
+       second one. Enforced here by redirect, and healed at build time by
+       collapseSameCandidate's account pass (candidates-model.mjs), so a race
+       or an offline import cannot put two cards up for one account either.
+       Checked once per page load; a failure to check is not fatal — the
+       build's collapse is the backstop. */
+    var oneProfileChecked = false;
+    function redirectToOwnProfile(user) {
+      if (EDIT_ID || sent || oneProfileChecked || !user) return;
+      oneProfileChecked = true;
+
+      OAFB.ready().then(function (fb) {
+        return fb.firestore().collection(col()).where('uid', '==', user.uid).get();
+      }).then(function (snap) {
+        if (sent) return;
+        var season = jobMarketYears().current;
+        var found = '', foundAt = '';
+        snap.forEach(function (d) {
+          var v = d.data() || {};
+          if (Number(v.year) !== season) return;
+          // several (a pre-rule duplicate): open the newest, the one the
+          // build's collapse keeps
+          var at = v.createdAt && v.createdAt.toDate
+            ? v.createdAt.toDate().toISOString() : String(v.createdAt || '');
+          if (!found || at >= foundAt) { found = d.id; foundAt = at; }
+        });
+        if (!found) return;
+        say('You already have a profile for the ' + (season - 1) + '–' + season +
+            ' job market — opening it for editing. One profile per market year.');
+        location.replace('post-a-candidate.html?edit=' + encodeURIComponent(found));
+      }).catch(function (err) {
+        if (window.console) console.warn('one-profile check:', err);
+      });
+    }
+
     OAAccounts.onChange(function (user) {
       // The profile has already been sent — a later auth event must not put
       // the form back over the confirmation. See oa-jobform.js.
       if (sent) return;
+
+      redirectToOwnProfile(user);
 
       if (OAAccounts.failed && OAAccounts.failed()) {
         standDown('<strong>We cannot reach the posting service right now.</strong> ' +
