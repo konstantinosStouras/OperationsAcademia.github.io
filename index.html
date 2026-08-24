@@ -276,7 +276,7 @@
             <span class="v3-kicker">Candidates</span>
             <h2 class="v3-h2" id="oa-cands-heading">Job market candidates (2026-2027)</h2>
             <p class="v3-lede">The candidates applying for faculty positions in Operations this
-            season, with their CV, research summary and INFORMS presentation day(s) &mdash; so
+            season, with their CV and INFORMS presentation day(s) &mdash; so
             hiring committees can find their talks and attend them. Contact a candidate directly
             to arrange an interview.</p>
             <div class="v3-section-cta">
@@ -441,7 +441,7 @@
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>If you are applying to academic jobs in Operations this season, sign in and
                 <a href="post-a-candidate.html">create your job-market profile</a> &mdash; with
-                your CV and research summary attached, your research areas, and the day(s) you
+                your CV attached, your research areas, and the day(s) you
                 present at INFORMS, so hiring committees can find your talk and attend it.</p>
                 <p>Profiles are collected continuously but revealed <strong>all at once</strong>
                 on a set date each season, so no one gains from posting earlier or later. You
@@ -1041,6 +1041,9 @@
                 { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') },
                 { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
                 { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
+                // the form stopped asking for a research summary (2026-08-24);
+                // the row stays for profiles filed while it still did, and an
+                // empty rsUrl draws nothing
                 { label: 'Research summary',      html: link(r.rsUrl, 'link') },
                 { label: 'Web page',              html: link(r.webUrl, 'link') },
                 { label: 'Contact',               html: mailto(r.email) }

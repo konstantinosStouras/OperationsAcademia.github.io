@@ -3,6 +3,13 @@
  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
  "updates": [
   {
+   "id": "candidate-form-no-research-summary",
+   "date": "2026-08-24",
+   "title": "The candidate profile form is shorter, and asks for a lasting address",
+   "summary": "Creating your job-market profile no longer asks for a research summary — your CV, research areas and INFORMS day(s) are what hiring committees actually use, and profiles filed with a summary keep theirs. The form now asks for a personal e-mail address instead: a school address dies with the affiliation, and this is how we can still reach you about your profile in later years. It is never published — like the private note, it goes to the maintainer and nowhere else.",
+   "url": "https://www.operationsacademia.org/post-a-candidate.html"
+  },
+  {
    "id": "universities-directory",
    "date": "2026-08-24",
    "title": "The Universities page is now a searchable, community-editable directory",

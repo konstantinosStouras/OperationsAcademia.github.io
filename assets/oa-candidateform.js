@@ -10,21 +10,28 @@
 
    WHAT IS DIFFERENT FROM JOBS, and why:
 
-     - TWO uploads instead of one: the CV and the research summary each have
-       their own landing-strip slot (uploads/{uid}/candidates/…, see
-       _storage.rules) and their own field family on the document
-       (cvUploadPath… and rsUploadPath…). The build files each into the
-       season's "Candidates Files" Drive folder independently.
+     - ONE upload: the CV has its own landing-strip slot
+       (uploads/{uid}/candidates/…, see _storage.rules) and its own field
+       family on the document (cvUploadPath…). The build files it into the
+       season's "Candidates Files" Drive folder. (A research-summary slot
+       used to sit beside it — RETIRED 2026-08-24, per the owner: candidates
+       are no longer asked for one. A profile filed while the form still
+       offered it keeps its rsUrl / rsUpload* fields — edits here update()
+       and never mention them, so they survive — and the build still files a
+       legacy rs upload; this form just never asks again.)
 
-     - The candidate OWNS the files as well as the text. Editing offers all
-       three verbs on each document: UPLOAD one (a new file replaces whatever
+     - The candidate OWNS the file as well as the text. Editing offers all
+       three verbs on the document: UPLOAD one (a new file replaces whatever
        the profile linked to), REPLACE it (the same control — the newest
        upload is what the build files), and REMOVE it (clear the link box, or
        the Remove button on an upload still waiting to be filed).
 
      - The e-mail address is private BY DEFAULT and published only on the
        candidate's own opt-in (`emailPublic`) — the disclosure the old stack
-       made unconditionally is now a choice.
+       made unconditionally is now a choice. A second, PERSONAL address
+       (`personalEmail`, owner 2026-08-24) is asked of everyone and NEVER
+       published: a school address dies with the affiliation, and this is how
+       the maintainer can still reach a candidate years later.
 
    The client is never trusted with what gets published — v2/_firestore.rules
    pins `status` to 'queued' and `uid` to the caller, and the build
@@ -36,7 +43,7 @@
 
   var MAX = {
     first: 100, last: 100, affiliation: 220, position: 160,
-    cvUrl: 500, rsUrl: 500, webUrl: 500, email: 160, note: 1200
+    cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200
   };
 
   // list('researchAreas', 10) in the rules: an eleventh tick would be refused
@@ -157,6 +164,18 @@
     out.email = ev.slice(0, MAX.email);
     out.emailPublic = !!$('f-emailPublic').checked;
 
+    /* The PERSONAL address (owner, 2026-08-24): asked of everyone, so the
+       maintainer can still reach a candidate after their school address dies
+       with the affiliation. NEVER published — it is not in candidates-model's
+       CANDIDATE_PUBLIC_FIELDS, so it can never reach data/candidates.json. */
+    var pemail = $('f-personalEmail');
+    var pev = String(pemail.value || '').trim();
+    var pemailOk = EMAIL_RE.test(pev);
+    setError(pemail, pemailOk ? ''
+      : 'Please give a personal e-mail address — one that stays with you after you graduate.');
+    if (!pemailOk && !firstBad) firstBad = pemail;
+    out.personalEmail = pev.slice(0, MAX.personalEmail);
+
     out.researchAreas = checked('researchAreas');
     if (out.researchAreas.length > AREAS_MAX) {
       setError($('f-areas'), 'Please tick at most ' + AREAS_MAX + ' research areas.');
@@ -167,7 +186,7 @@
 
     out.informsDays = checked('informsDays');
 
-    var urlFields = [['f-cvUrl', 'cvUrl'], ['f-rsUrl', 'rsUrl'], ['f-webUrl', 'webUrl']];
+    var urlFields = [['f-cvUrl', 'cvUrl'], ['f-webUrl', 'webUrl']];
     for (var i = 0; i < urlFields.length; i++) {
       var el = $(urlFields[i][0]);
       var u = httpUrl(el.value);
@@ -243,7 +262,8 @@
   }
 
   /**
-   * One upload slot: the CV or the research summary.
+   * One upload slot — the CV, today; the machinery stays generic because it
+   * once served two (the retired research summary) and may again.
    * `prefix` names the element family (f-<prefix>File…, f-<prefix>Url) and
    * the document field family (<prefix>UploadPath…, <prefix>Url).
    */
@@ -393,7 +413,7 @@
     return slot;
   }
 
-  var cvSlot, rsSlot;
+  var cvSlot;
 
   /* ------------------------------------------------------------ edit mode
 
@@ -427,9 +447,9 @@
     EDIT_YEAR = Number(v.year) || 0;
     paintYearNote();                 // the profile's own season, never today's
     set('f-cvUrl', v.cvUrl);
-    set('f-rsUrl', v.rsUrl);
     set('f-webUrl', v.webUrl);
     set('f-email', v.email || v.authEmail);
+    set('f-personalEmail', v.personalEmail);
     set('f-note', v.note);
 
     ticks('researchAreas', v.researchAreas);
@@ -438,9 +458,10 @@
     var ep = $('f-emailPublic');
     if (ep) ep.checked = v.emailPublic === true;
 
-    // an upload from a previous visit the build has not filed yet
+    // an upload from a previous visit the build has not filed yet. (A legacy
+    // rsUploadPath has no slot to show in any more — the build still files
+    // it, and update() never touches fields this form does not write.)
     if (v.cvUploadPath) cvSlot.showPending(v.cvUploadName);
-    if (v.rsUploadPath) rsSlot.showPending(v.rsUploadName);
 
     EDIT_REF = v.ref || '';
   }
@@ -472,18 +493,12 @@
        uploads, replaces and removes, and in edit mode the hint has to say so
        — a returning candidate's question is "how do I change my CV", not
        "how do I attach one". */
-    var cvHint = $('f-cvFile-hint'), rsHint = $('f-rsFile-hint');
+    var cvHint = $('f-cvFile-hint');
     if (cvHint) {
       cvHint.innerHTML = 'Your current <em>CV</em> link is in the box below. Upload a ' +
         'new file or paste a different link to <strong>replace</strong> it — or ' +
         'clear the box (and press Remove on any file waiting to be filed) to ' +
         '<strong>remove</strong> the CV from your profile.';
-    }
-    if (rsHint) {
-      rsHint.innerHTML = 'Your current <em>Research summary</em> link is in the box ' +
-        'below. Upload a new file or paste a different link to ' +
-        '<strong>replace</strong> it — or clear the box to ' +
-        '<strong>remove</strong> it from your profile.';
     }
 
     show($('oa-takedown'), true);
@@ -614,7 +629,6 @@
 
   function boot() {
     cvSlot = makeSlot('cv', 'CV');
-    rsSlot = makeSlot('rs', 'research summary');
     enterEditMode();
     wireTakeDown();
     paintYearNote();
@@ -693,18 +707,12 @@
       say(EDIT_ID ? 'Saving…' : 'Sending…');
 
       OAAccounts.whenSignedIn(function (user) {
-        /* The files first, one after the other, then the document that
-           references them — the reverse order could publish a profile
-           pointing at an upload that failed. */
+        /* The file first, then the document that references it — the reverse
+           order could publish a profile pointing at an upload that failed. */
         cvSlot.upload(user, function (pct) {
           say(verb + 'uploading your CV (' + pct + '%)');
         }).then(function (cvUp) {
           cvSlot.applyTo(doc, cvUp);
-          return rsSlot.upload(user, function (pct) {
-            say(verb + 'uploading your research summary (' + pct + '%)');
-          });
-        }).then(function (rsUp) {
-          rsSlot.applyTo(doc, rsUp);
           return OAFB.ready();
         }).then(function (fb) {
           var c = fb.firestore().collection(col());

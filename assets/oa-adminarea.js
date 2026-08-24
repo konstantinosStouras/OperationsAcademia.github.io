@@ -321,10 +321,15 @@
       (days ? '<p class="oa-hint">INFORMS day(s): ' + days + '</p>' : '') +
       (links ? '<p>' + links + '</p>' : '') +
       (uploads ? '<p class="oa-hint">' + uploads + ' &mdash; filed into Drive by the next build</p>' : '') +
-      /* the address is admin-only reading; the flag says whether the BUILD
-         may publish it (emailPublic, the disclosure the rebuild retired) */
+      /* the addresses are admin-only reading; the flag says whether the BUILD
+         may publish the first (emailPublic, the disclosure the rebuild
+         retired), and the personal one is NEVER published — it exists so the
+         candidate is still reachable once their school address dies with the
+         affiliation (owner, 2026-08-24) */
       (v.email ? '<p class="oa-hint">' + esc(v.email) +
         (v.emailPublic ? ' (published on the profile)' : ' (kept private)') + '</p>' : '') +
+      (v.personalEmail ? '<p class="oa-hint">' + esc(v.personalEmail) +
+        ' (personal — never published)</p>' : '') +
       (v.note ? '<p class="oa-fb-body">' + esc(v.note) + '</p>' : '') +
       '<p class="oa-hint">' + esc(CAND_STATUS[group] || '') + '</p>' +
       '<p class="oa-aa-cand-actions">' +
