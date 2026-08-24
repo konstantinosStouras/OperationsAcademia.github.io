@@ -51,7 +51,9 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { marketFloor, isoStamp, healPlace, healReviewDate } from './jobs-model.mjs';
+import {
+  marketFloor, isoStamp, healPlace, healReviewDate, stripRowEmails,
+} from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
   sheetCsvUrl, sheetHtmlUrl, sheetEditUrl, sheetId,
@@ -610,7 +612,11 @@ async function main() {
       }
 
       const stamped = stampAddedAt(located, known, { now });
-      rows = stamped.rows;
+      /* No e-mail address may reach a served file, and the workbook's notes
+         column can carry a contact one — stripped here like every other
+         ingest (see stripRowEmails in jobs-model.mjs), or the build's
+         served-file guard stops the whole publish over it. */
+      rows = stamped.rows.map(stripRowEmails);
       fresh = stamped.fresh;
 
       /* What the advertisements themselves say about their deadlines, read by
@@ -906,7 +912,8 @@ async function healNames() {
   const healed = rows.map(healPlace)
     .map((r) => (vocab ? fillSchoolFromDirectory(r, vocab) : r))
     .map((r) => healCountry(r, byCountry))
-    .map(healReviewDate);
+    .map(healReviewDate)
+    .map(stripRowEmails);
   const changed = healed.filter((r, i) =>
     JSON.stringify(r) !== JSON.stringify(rows[i]));
   if (!changed.length) {

@@ -101,6 +101,85 @@ export function url(v) {
   return s.slice(0, 500);
 }
 
+/* An e-mail address, with or without its local part — the guard in
+   selftest.mjs matches the bare `@domain.tld` tail, so the strip has to
+   catch at least everything the guard does or a stripped row could still
+   stop the publish. */
+const EMAIL_RX = /[A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g;
+
+/**
+ * Free text with any e-mail address removed.
+ *
+ * NOTHING UNDER data/ MAY CARRY AN E-MAIL — CI greps for it, and the
+ * selftest's own copy of that guard refuses to let the build commit a
+ * dataset holding one. That is right (a served file is a disclosure and a
+ * harvest target), and it had a failure mode this repository documents
+ * twice over: a guard firing on a LEGITIMATE row stops the whole site
+ * publishing. On 2026-08-24 one posting arrived from Firestore with a
+ * contact address in its text and every build from 03:14 committed
+ * nothing. The address is the one thing the site will not serve, so it is
+ * removed AT INGEST — the advertisement link carries the contact anyway —
+ * and the marker says something was there rather than silently shortening
+ * the sentence. Pure and idempotent, so every build re-applies it.
+ */
+export function stripEmails(v) {
+  return String(v ?? '').replace(EMAIL_RX, '[e-mail removed]');
+}
+
+/**
+ * A whole row, its free text stripped of e-mail addresses.
+ *
+ * Every own string field except the URLs: an address EMBEDDED in a stored
+ * https link is vanishingly rare and rewriting one would break the link —
+ * if it ever happens the guard still fires and a person decides, which is
+ * the right order for a one-off. Applied at every ingest (rowFromSubmission,
+ * the review queue's applyEdits) and to the whole merged set in build-jobs
+ * and the sheet sync, the healCountry pattern, so a row from ANY writer is
+ * clean on every rebuild.
+ */
+export function stripRowEmails(row) {
+  if (!row || typeof row !== 'object') return row;
+  const out = { ...row };
+  for (const [k, v] of Object.entries(out)) {
+    if (typeof v !== 'string' || /Url$/.test(k)) continue;
+    if (v.includes('@')) out[k] = stripEmails(v);
+  }
+  return out;
+}
+
+/**
+ * Put a verify pass's freshly-filled deadlines onto data/jobs.json's copies
+ * of the sheet's rows — ONLY the rows the pass changed, and ONLY the three
+ * deadline fields.
+ *
+ * The verify passes (higheredjobs-verify.mjs, adverts-verify.mjs) used to put
+ * the whole jobmarket.json row back over every sheet-sourced jobs.json row,
+ * and that clobbered what it did not know how to redo: jobs.json is
+ * build-jobs' output, healed over the MERGED set (healPlace, fixPlace,
+ * healReviewDate's suggested/final split), while jobmarket.json can lawfully
+ * disagree — UCLA's row carries the maintainer's typed October 5 there while
+ * the built row carries the text's own stated final date, November 5, with
+ * October 5 as the suggested one. The wholesale copy reverted that split and
+ * the mirror guard stopped the whole commit. A changed row's deadline fields
+ * are the pass's own fact; everything else on the row stays the build's, and
+ * an unchanged row is not touched at all.
+ */
+export function patchDeadlines(jobsRows, applied, source) {
+  if (!Array.isArray(jobsRows)) return jobsRows;
+  const changed = new Set((applied.changed || []).map((c) => c.id));
+  const byId = new Map((applied.rows || []).map((r) => [r.id, r]));
+  return jobsRows.map((r) => {
+    if (!r || r.source !== source || !changed.has(r.id) || !byId.has(r.id)) return r;
+    const fresh = byId.get(r.id);
+    const next = { ...r, applyBy: fresh.applyBy, applyByDate: fresh.applyByDate };
+    /* healReviewDate ran over the filled row, so its verdict on the suggested
+       date is authoritative for it — including "there is none". */
+    if (fresh.reviewDate) next.reviewDate = fresh.reviewDate;
+    else delete next.reviewDate;
+    return next;
+  });
+}
+
 /** An ISO yyyy-mm-dd day, or ''. Accepts the forms the old sheet used. */
 export function day(v) {
   const s = String(v ?? '').trim();
@@ -501,7 +580,7 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     owner: ownerTag(doc.uid) || text(doc.owner, 64),
   };
   row.id = jobId(row);
-  return healReviewDate(row);
+  return stripRowEmails(healReviewDate(row));
 }
 
 /** Any of the three shapes a stored timestamp arrives in, or null.

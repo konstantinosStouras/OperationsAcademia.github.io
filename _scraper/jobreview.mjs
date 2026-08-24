@@ -32,7 +32,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
-  ownUniversitiesLink, universitiesLink,
+  ownUniversitiesLink, universitiesLink, stripRowEmails,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -261,7 +261,12 @@ export function applyEdits(row, edits) {
   if (out.reviewDate && out.applyByDate && out.reviewDate >= out.applyByDate) {
     out.reviewDate = '';
   }
-  return settlePlace(settleDeadline(out), row);
+  /* NOTHING UNDER data/ MAY CARRY AN E-MAIL, and an approved queue document
+     is a writer of data/: an address typed into the comments while reviewing
+     — or carried in from the workbook's notes — stopped every build from
+     committing on 2026-08-24 (the served-file guard, doing its job on the
+     wrong target). Stripped here, at the ingest, like rowFromSubmission. */
+  return stripRowEmails(settlePlace(settleDeadline(out), row));
 }
 
 /** A line that says the search has no closing date rather than naming one. */

@@ -31,6 +31,7 @@ import { createRequire } from 'node:module';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
+  stripRowEmails,
   healReviewDate,
   marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
@@ -825,7 +826,12 @@ async function main() {
      a carried orphan — and healReviewDate is pure, idempotent and fill-empty,
      so a run in which every posting already says what it knows changes
      nothing. */
-  const rows = visible.map((r) => healReviewDate(healCountry(r, byCountry)));
+  /* …and stripped of e-mail addresses, whichever writer produced the row —
+     the served-file guard refuses to commit one, so a single address in a
+     fresh submission's comments used to stop the WHOLE site publishing
+     (2026-08-24, from 03:14). The ingests strip too; this is the merged-set
+     backstop, the healCountry pattern. */
+  const rows = visible.map((r) => stripRowEmails(healReviewDate(healCountry(r, byCountry))));
   const recountried = rows.filter((r, i) => r !== visible[i]);
   if (recountried.length) {
     log(`${recountried.length} posting(s) healed against the directory or their own ` +
