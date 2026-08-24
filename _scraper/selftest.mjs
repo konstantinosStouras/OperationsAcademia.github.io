@@ -26,6 +26,7 @@ import {
   removalSpecs, buildOwned, ownerTag, specMatches, healPlace,
   parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
+  stripEmails, stripRowEmails, patchDeadlines,
 } from './jobs-model.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
@@ -5519,6 +5520,91 @@ async function testAdvertsWiring() {
   }
 }
 
+/* ------------------ the two guards that stopped publishing on 2026-08-24 */
+
+async function testGuardRepairs() {
+  /* A: NO E-MAIL REACHES A SERVED FILE — settled at INGEST, not by outage.
+     The served-file guard is right to refuse a dataset holding one, and one
+     contact address in a fresh submission's text stopped every build from
+     03:14 that morning. The address is removed where the row is made, so a
+     legitimate posting can never stop the site again. */
+  eq(stripEmails('write to jane.doe@uni.edu today'), 'write to [e-mail removed] today',
+    'an e-mail address in free text is removed, with a marker in its place');
+  eq(stripEmails('reach me @gmail.com'), 'reach me [e-mail removed]',
+    'including the bare @domain tail, which is all the guard needs to fire');
+  eq(stripEmails(stripEmails('a@b.co and c@d.org')), stripEmails('a@b.co and c@d.org'),
+    'stripping is idempotent, so every build may re-apply it');
+  ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(stripEmails('x a@b.co y, then @d.org too')),
+    'nothing the served-file guard matches survives the strip');
+
+  const struck = stripRowEmails({
+    comments: 'Contact: chair@uni.edu with questions.',
+    adUrl: 'https://x.edu/path?owner=a@b.co',
+    levels: ['Assistant Professor'],
+  });
+  ok(!struck.comments.includes('@'), 'a row\'s free text is stripped');
+  eq(struck.adUrl, 'https://x.edu/path?owner=a@b.co',
+    'while a stored URL is never rewritten — breaking a link is worse, and ' +
+    'the guard still stands over that one-off');
+  eq(struck.levels, ['Assistant Professor'], 'and nothing else about the row moves');
+
+  const sub = rowFromSubmission({
+    ...GOOD, comments: 'We interview at INFORMS — write to chair@example.edu.',
+  });
+  ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(JSON.stringify(publicRow(sub))),
+    'a submission whose comments carry an address publishes without it');
+  const edited = applyEdits(RV_ROW, { comments: 'ask soandso@uni.edu first' });
+  ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(String(edited.comments)),
+    'and so does a queue posting whose review edit typed one in');
+
+  /* B: A VERIFY PASS PATCHES DEADLINES, IT NEVER CLOBBERS THE BUILT ROW.
+     data/jobs.json is build-jobs' output, healed over the merged set;
+     data/jobmarket.json can lawfully disagree (UCLA: the maintainer's typed
+     October 5 there, the text's own November 5 final + October 5 suggested
+     in the built row). The verify passes used to copy every sheet row
+     wholesale and reverted that split; the mirror guard then stopped the
+     commit. Only changed rows, only the deadline fields. */
+  const jobsRows = [
+    { id: 'u1', source: SHEET_SOURCE, applyBy: 'November 5, 2026',
+      applyByDate: '2026-11-05', reviewDate: '2026-10-05', school: 'Healed School' },
+    { id: 'u2', source: SHEET_SOURCE, applyBy: 'Until filled.', applyByDate: '',
+      reviewDate: '2026-09-01', school: 'Kept School' },
+    { id: 'u3', source: 'oa-form', applyBy: 'Until filled.', applyByDate: '' },
+  ];
+  const applied = {
+    rows: [
+      { id: 'u1', applyBy: 'October 5, 2026', applyByDate: '2026-10-05' },
+      { id: 'u2', applyBy: longDate('2026-12-01'), applyByDate: '2026-12-01' },
+      { id: 'u3', applyBy: longDate('2026-12-01'), applyByDate: '2026-12-01' },
+    ],
+    changed: [{ id: 'u2' }, { id: 'u3' }],
+  };
+  const next = patchDeadlines(jobsRows, applied, SHEET_SOURCE);
+  eq(next[0], jobsRows[0],
+    'a row the pass did not change keeps the built suggested/final split, ' +
+    'even where the sheet file disagrees — the UCLA case');
+  eq(next[1].applyByDate, '2026-12-01', 'a filled row takes its new closing date');
+  eq(next[1].applyBy, longDate('2026-12-01'), 'both fields moving together');
+  eq(next[1].school, 'Kept School', 'and keeps everything else the build gave it');
+  ok(!('reviewDate' in next[1]),
+    'its suggested date follows healReviewDate\'s verdict on the filled row — ' +
+    'including "there is none"');
+  eq(next[2], jobsRows[2], 'a posting the sheet does not own is never touched');
+
+  /* The wiring, read from the source — a strip only one writer applies is
+     undone by whichever writes next, the healCountry lesson. */
+  const bj = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(bj.includes('stripRowEmails('), 'build-jobs strips the merged set');
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(sync.includes('stripRowEmails'), 'the sheet sync strips what it writes');
+  for (const f of ['higheredjobs-verify.mjs', 'adverts-verify.mjs']) {
+    const src = await readFile(path.join(HERE, f), 'utf8');
+    ok(src.includes('patchDeadlines('), `${f} patches deadlines onto jobs.json`);
+    ok(!src.includes('byId.get(r.id) : r'),
+      `and the wholesale row copy is gone from ${f}`);
+  }
+}
+
 /* ------------------------------------------------ the posting review queue */
 
 const RV_ROW = {
@@ -6580,6 +6666,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   testAdvertsPlace();
   testAdvertsApply();
   await testAdvertsWiring();
+  await testGuardRepairs();
   testReviewQueue();
   testReviewDuplicates();
   testReviewBusiness();

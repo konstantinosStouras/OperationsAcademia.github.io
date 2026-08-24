@@ -922,6 +922,21 @@ The build now also prints a `::error::` saying publishing has stopped when the
 re-check is what failed, so the log names the consequence rather than just the
 assertion.
 
+It happened a third time on 2026-08-24, twice in one morning, and both were
+the same shape again. (1) One posting arrived from Firestore with a contact
+e-mail address in its text, and the served-file guard — right that nothing
+under `data/` may carry one — stopped every build from 03:14. The address is
+now removed AT INGEST (`stripEmails`/`stripRowEmails` in jobs-model.mjs,
+applied in `rowFromSubmission`, the review queue's `applyEdits`, the sheet
+sync, and over build-jobs' whole merged set — the healCountry pattern; a
+marker says something was removed, and stored URLs are never rewritten).
+(2) The two advert-verify passes wrote jobmarket.json's copy of EVERY sheet
+row back into jobs.json, reverting heals only the build applies — UCLA's
+suggested/final deadline split — and the mirror guard stopped their commits.
+They now patch ONLY the deadline fields of ONLY the rows they filled
+(`patchDeadlines` in jobs-model.mjs). `testGuardRepairs` pins both, wiring
+included.
+
 ### It happened again, at the scale the queue was built for
 
 The morning the maintainer approved a season — **449 postings in one sitting** —

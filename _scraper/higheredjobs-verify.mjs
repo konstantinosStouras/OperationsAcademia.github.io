@@ -43,7 +43,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { isoStamp, longDate } from './jobs-model.mjs';
+import { isoStamp, longDate, patchDeadlines } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import {
   parseAd, cacheEntry, emptyCache, needFetch, applyVerified,
@@ -246,15 +246,14 @@ async function main() {
   const sheetBefore = JSON.stringify(sheetRows, null, 1) + '\n';
   const sheetAfter = JSON.stringify(applied.rows, null, 1) + '\n';
 
-  /* data/jobs.json carries the sheet's postings verbatim (build-jobs.mjs
-     concatenates them), so the corrected rows are put back by id. Only rows
-     the sheet owns are touched: a posting from the database belongs to whoever
-     submitted it, and the next build would overwrite an edit here anyway. */
+  /* data/jobs.json takes ONLY the deadlines this run filled, onto ONLY the
+     rows it filled them for (patchDeadlines in jobs-model.mjs). It used to
+     take the whole jobmarket.json copy of every sheet row, which clobbered
+     what build-jobs had healed on rows this pass never touched — UCLA's
+     suggested/final deadline split was reverted exactly that way and the
+     mirror guard stopped the whole commit (2026-08-24). */
   const jobs = await readJson(JOBS_FILE, []);
-  const byId = new Map(applied.rows.map((r) => [r.id, r]));
-  const jobsNext = Array.isArray(jobs)
-    ? jobs.map((r) => (r && r.source === SHEET_SOURCE && byId.has(r.id)) ? byId.get(r.id) : r)
-    : jobs;
+  const jobsNext = patchDeadlines(jobs, applied, SHEET_SOURCE);
   const jobsBefore = JSON.stringify(jobs, null, 1) + '\n';
   const jobsAfter = JSON.stringify(jobsNext, null, 1) + '\n';
 

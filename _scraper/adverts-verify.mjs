@@ -65,7 +65,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { isoStamp, longDate, marketYear } from './jobs-model.mjs';
+import { isoStamp, longDate, marketYear, patchDeadlines } from './jobs-model.mjs';
 import { SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import { firestore } from './_mail.mjs';
 import { COLLECTION as REVIEW_COL, PENDING } from './jobreview.mjs';
@@ -480,14 +480,13 @@ async function main() {
   const sheetBefore = JSON.stringify(sheetRows, null, 1) + '\n';
   const sheetAfter = JSON.stringify(applied.rows, null, 1) + '\n';
 
-  /* data/jobs.json carries the sheet's postings verbatim (build-jobs.mjs
-     concatenates them), so the corrected rows are put back by id — only rows
-     the sheet owns, exactly as higheredjobs-verify.mjs does. */
+  /* data/jobs.json takes ONLY the deadlines this run filled, onto ONLY the
+     rows it filled them for (patchDeadlines in jobs-model.mjs) — exactly as
+     higheredjobs-verify.mjs does, and for the reason recorded there: the
+     wholesale row copy reverted build-jobs' own heals on rows this pass
+     never touched, and the mirror guard stopped the whole commit. */
   const jobs = await readJson(JOBS_FILE, []);
-  const byId = new Map(applied.rows.map((r) => [r.id, r]));
-  const jobsNext = Array.isArray(jobs)
-    ? jobs.map((r) => (r && r.source === SHEET_SOURCE && byId.has(r.id)) ? byId.get(r.id) : r)
-    : jobs;
+  const jobsNext = patchDeadlines(jobs, applied, SHEET_SOURCE);
   const jobsBefore = JSON.stringify(jobs, null, 1) + '\n';
   const jobsAfter = JSON.stringify(jobsNext, null, 1) + '\n';
 
