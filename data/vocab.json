@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-25T03:10:34.347Z",
+ "generated": "2026-08-25T05:44:37.550Z",
  "universities": [
   {
    "v": "Tulane University",
@@ -2144,11 +2144,11 @@
    "n": 1
   },
   {
-   "v": "Faculty of Economics and Business",
+   "v": "Gies College of Business",
    "n": 1
   },
   {
-   "v": "Gies College of Business",
+   "v": "Graduate School of Management",
    "n": 1
   },
   {
@@ -2497,10 +2497,6 @@
   },
   {
    "v": "Graduate School of Engineering and Management",
-   "n": 0
-  },
-  {
-   "v": "Graduate School of Management",
    "n": 0
   },
   {
@@ -2959,7 +2955,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 45
+   "n": 44
   },
   {
    "v": "BA",
@@ -2979,15 +2975,11 @@
   },
   {
    "v": "Management Science",
-   "n": 10
+   "n": 9
   },
   {
    "v": "Data Analytics",
    "n": 8
-  },
-  {
-   "v": "Business Analytics",
-   "n": 6
   },
   {
    "v": "Information Systems and Operations Management",
@@ -3007,6 +2999,10 @@
   },
   {
    "v": "Business",
+   "n": 5
+  },
+  {
+   "v": "Business Analytics",
    "n": 5
   },
   {
@@ -3051,6 +3047,10 @@
   },
   {
    "v": "SCM/OM",
+   "n": 3
+  },
+  {
+   "v": "Technology and Operations Management",
    "n": 3
   },
   {
@@ -3174,10 +3174,6 @@
    "n": 2
   },
   {
-   "v": "Technology and Operations Management",
-   "n": 2
-  },
-  {
    "v": "AI and Analytics",
    "n": 1
   },
@@ -3251,6 +3247,10 @@
   },
   {
    "v": "BA/OR",
+   "n": 1
+  },
+  {
+   "v": "Business Analytics and Information Systems",
    "n": 1
   },
   {
@@ -3378,6 +3378,10 @@
    "n": 1
   },
   {
+   "v": "Economics and Business",
+   "n": 1
+  },
+  {
    "v": "Empirical business problems",
    "n": 1
   },
@@ -3439,6 +3443,14 @@
   },
   {
    "v": "Information and Operations Management",
+   "n": 1
+  },
+  {
+   "v": "Information Science and Systems",
+   "n": 1
+  },
+  {
+   "v": "Information Systems",
    "n": 1
   },
   {
@@ -3938,10 +3950,6 @@
    "n": 0
   },
   {
-   "v": "Business Analytics and Information Systems",
-   "n": 0
-  },
-  {
    "v": "Business Analytics and Operations",
    "n": 0
   },
@@ -4011,10 +4019,6 @@
   },
   {
    "v": "Decisions, Operations and Technology Management",
-   "n": 0
-  },
-  {
-   "v": "Economics and Business",
    "n": 0
   },
   {
@@ -4095,10 +4099,6 @@
   },
   {
    "v": "Information Management and Business Analytics",
-   "n": 0
-  },
-  {
-   "v": "Information Systems",
    "n": 0
   },
   {
@@ -6702,13 +6702,16 @@
   },
   "KU Leuven": {
    "schools": [
-    "Faculty of Economics and Business",
     "Faculty of Economics and Business (FEB)"
    ],
    "units": [
+    "Economics and Business",
     "Research Center for Operations Management"
    ],
    "bySchool": {
+    "": [
+     "Economics and Business"
+    ],
     "Faculty of Economics and Business (FEB)": [
      "Research Center for Operations Management"
     ]
@@ -7138,11 +7141,11 @@
     "Earl G. Graves School of Business and Management"
    ],
    "units": [
-    "Supply Chain Management"
+    "Information Science and Systems"
    ],
    "bySchool": {
     "": [
-     "Supply Chain Management"
+     "Information Science and Systems"
     ]
    }
   },
@@ -8294,12 +8297,10 @@
     "Peter J. Tobin College of Business"
    ],
    "units": [
-    "Business Analytics",
     "Business Analytics and Information Systems"
    ],
    "bySchool": {
     "Peter J. Tobin College of Business": [
-     "Business Analytics",
      "Business Analytics and Information Systems"
     ]
    }
@@ -8820,10 +8821,12 @@
     "A. B. Freeman School of Business"
    ],
    "units": [
+    "Information Systems",
     "Management Science"
    ],
    "bySchool": {
     "A. B. Freeman School of Business": [
+     "Information Systems",
      "Management Science"
     ]
    }
@@ -9270,9 +9273,6 @@
     "Operations Management"
    ],
    "bySchool": {
-    "": [
-     "Business Analytics"
-    ],
     "Graduate School of Management": [
      "Business Analytics",
      "Operations Management"
@@ -11246,6 +11246,7 @@
  },
  "bySchool": {
   "A. B. Freeman School of Business": [
+   "Information Systems",
    "Management Science"
   ],
   "Alberta School of Business": [
@@ -11730,7 +11731,6 @@
    "Operations and Decision Technologies"
   ],
   "Peter J. Tobin College of Business": [
-   "Business Analytics",
    "Business Analytics and Information Systems"
   ],
   "Poole College of Management": [

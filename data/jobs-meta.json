@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-25T03:10:34.347Z",
+ "generated": "2026-08-25T05:44:37.550Z",
  "count": 538,
  "years": {
   "2026": 496,
@@ -7,8 +7,8 @@
   "2028": 1
  },
  "types": {
-  "University": 348,
-  "Business School": 155
+  "University": 345,
+  "Business School": 158
  },
  "levels": {
   "Assistant Professor": 324,
@@ -55,12 +55,12 @@
   "Switzerland": 1
  },
  "characteristics": {
-  "Undergrad": 70,
-  "MBA": 69,
-  "Research seminars": 69,
-  "Masters": 68,
-  "Exec Ed": 58,
-  "PhD": 56
+  "Undergrad": 74,
+  "MBA": 73,
+  "Research seminars": 72,
+  "Masters": 71,
+  "Exec Ed": 61,
+  "PhD": 57
  },
  "featured": 1,
  "newestPosted": "2026-08-24"

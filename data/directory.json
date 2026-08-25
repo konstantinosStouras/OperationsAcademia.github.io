@@ -3979,6 +3979,24 @@
   ]
  },
  {
+  "id": "ku-leuven____economics-and-business",
+  "institution": "KU Leuven",
+  "department": "Economics and Business",
+  "type": "University",
+  "country": "Belgium",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-07-02"
+ },
+ {
   "id": "ku-leuven__faculty-of-economics-and-business",
   "institution": "KU Leuven",
   "school": "Faculty of Economics and Business",
@@ -3993,8 +4011,8 @@
   "sources": [
    "postings"
   ],
-  "n": 2,
-  "lastPosted": "2026-07-02"
+  "n": 1,
+  "lastPosted": "2024-08-13"
  },
  {
   "id": "ku-leuven__faculty-of-economics-and-business-feb__research-center-for-operations-management",
@@ -4707,11 +4725,14 @@
   "lng": -74.2003358
  },
  {
-  "id": "morgan-state-university____supply-chain-management",
+  "id": "morgan-state-university____information-science-and-systems",
   "institution": "Morgan State University",
-  "department": "Supply Chain Management",
+  "department": "Information Science and Systems",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -6716,27 +6737,23 @@
   "lng": 103.8476699
  },
  {
-  "id": "st-john-s-university__peter-j-tobin-college-of-business__business-analytics",
-  "institution": "St. John's University",
-  "school": "Peter J. Tobin College of Business",
-  "department": "Business Analytics",
-  "type": "Business School",
-  "country": "United States",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-08-05"
- },
- {
   "id": "st-john-s-university__peter-j-tobin-college-of-business__business-analytics-and-information-systems",
   "institution": "St. John's University",
   "school": "Peter J. Tobin College of Business",
   "department": "Business Analytics and Information Systems",
   "type": "Business School",
+  "country": "United States",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-05"
  },
  {
   "id": "stanford-gsb____om",
@@ -7913,6 +7930,26 @@
   "lastPosted": "2026-04-07"
  },
  {
+  "id": "tulane-university__a-b-freeman-school-of-business__information-systems",
+  "institution": "Tulane University",
+  "school": "A. B. Freeman School of Business",
+  "department": "Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-24"
+ },
+ {
   "id": "tulane-university__a-b-freeman-school-of-business__management-science",
   "institution": "Tulane University",
   "school": "A. B. Freeman School of Business",
@@ -7936,7 +7973,7 @@
    "postings",
    "seed"
   ],
-  "n": 7,
+  "n": 6,
   "lastPosted": "2026-08-24",
   "lat": 29.9390304,
   "lng": -90.1195362
@@ -9944,26 +9981,6 @@
   "lng": -83.7402262
  },
  {
-  "id": "university-of-michigan__stephen-m-ross-school-of-business",
-  "institution": "University of Michigan",
-  "school": "Stephen M. Ross School of Business",
-  "type": "Business School",
-  "country": "United States",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-07-08"
- },
- {
   "id": "university-of-michigan__stephen-m-ross-school-of-business__interdisciplinary-position-management-and-organizations-stra",
   "institution": "University of Michigan",
   "school": "Stephen M. Ross School of Business",
@@ -9998,8 +10015,8 @@
    "directory",
    "postings"
   ],
-  "n": 2,
-  "lastPosted": "2024-08-12",
+  "n": 3,
+  "lastPosted": "2026-07-08",
   "lat": 42.2727776,
   "lng": -83.737529
  },
@@ -11313,6 +11330,12 @@
   "mapUrl": "https://goo.gl/maps/MH4DnQV9u3D2",
   "facultyUrl": "http://www.darden.virginia.edu/faculty-research/academic-areas/technology-operations/",
   "deptUrl": "https://www.darden.virginia.edu/faculty-research/academic-areas/technology-operations-management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
