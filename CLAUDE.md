@@ -2104,8 +2104,54 @@ one place for that truth. `selftest.mjs` fails if a deployable section is left
 un-hooked or if the guard starts hardcoding an id — and the guard is the net,
 not the practice: **pass `--project` yourself.**
 
-**Nothing in CI deploys rules.** It needs an interactive login, so a rules
-change committed here is not live until someone runs that command by hand.
+### …and the FIRESTORE rules publish themselves
+
+"Nothing in CI deploys rules — it needs an interactive login" is what this file
+said for months, and it was **half true and expensive**. `firebase deploy` does
+need a login. Releasing a ruleset does not: the Admin SDK's Security Rules API
+(`securityRules().releaseFirestoreRulesetFromSource`) publishes with a SERVICE
+ACCOUNT, and `FIREBASE_SERVICE_ACCOUNT` has been a secret here all along —
+eight workflows use it.
+
+The cost of the belief was six features shipped INERT behind rules that were
+committed and never published: the review queue, the news gate, the name fixes,
+the directory edits, and the roster and messaging threads. That last one is how
+it surfaced (owner, 2026-08-24) — an Admin-area panel whose code, page and rules
+were all in the repository, listing nobody, under a red line telling the
+maintainer to go and run a command. **A feature that needs a manual step to
+become real looks installed and is not**, which is the failure shape this
+repository names everywhere else.
+
+    _scraper/deploy-rules.mjs                 publish _firestore.rules (pure guards + the release)
+    .github/workflows/oa-deploy-rules.yml     after every green check on master, or one button
+
+Four properties, and each is load-bearing:
+
+* **It cannot reach another project.** The credential names its own project and
+  the script refuses unless that equals `.firebaserc`'s default — this folder's
+  rules have twice been published into `stouras-answerarena`, so the CLI guard's
+  rule is applied to this road too, by `projectMismatch`.
+* **It cannot publish the wrong FILE.** `sourceProblem` refuses an empty or
+  truncated read, anything without `rules_version`, and — by name —
+  `_storage.rules`, which declares a different service and sits one argument
+  away.
+* **It runs behind the checks, never on a raw push.** `workflow_run` on
+  "OA — checks" succeeding on master: the offline guards are what pin the rules
+  against the modules that write those collections, and publishing is the one
+  action here the next run cannot undo. Same discipline as "a red selftest stops
+  publishing", applied to the rules.
+* **It is cheap to fire.** The live ruleset is read first and an identical one is
+  a no-op, so a push that touched no rules mints nothing.
+
+**Storage rules and the Functions still go through the CLI**, deliberately —
+doubling what a bad run can reach, for a file that changes once a year, is not a
+trade worth making. The one thing that can still stop a run is IAM: if the key
+cannot release rulesets the script says so and names the role
+(`roles/firebaserules.admin`) rather than failing obscurely.
+
+So the rule for this repository is now: **change `_firestore.rules`, let the
+checks pass, and it is live.** Both panels that report a permission-denied name
+the workflow rather than a terminal.
 
 ## Tests that must stay green
 

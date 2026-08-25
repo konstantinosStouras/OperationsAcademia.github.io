@@ -517,7 +517,8 @@
       if (out) {
         out.className = 'oa-form-msg is-err';
         out.textContent = err && err.code === 'permission-denied'
-          ? 'The messaging rules have not been deployed yet (see _SETUP-FIREBASE.md §4).'
+          ? 'The messaging rules have not been published yet — run the ' +
+            '“OA — publish the Firestore rules” workflow (see _SETUP-FIREBASE.md §4).'
           : 'Could not send (' + (err && (err.code || err.message)) + ').';
       }
     });
@@ -610,9 +611,17 @@
     })['catch'](function (err) {
       if (host) {
         host.innerHTML = '<p class="oa-form-msg is-err">' + (err && err.code === 'permission-denied'
-          ? 'The roster rules have not been deployed yet, so this list is empty ' +
-            'rather than broken — run <code>firebase deploy --only firestore:rules ' +
-            '--project operations-academia</code> (see _SETUP-FIREBASE.md §4).'
+          /* The remedy is a BUTTON now, not a terminal: the rules publish from
+             GitHub Actions with the service account this site already holds
+             (oa-deploy-rules.yml). Naming the run first is the point — the old
+             wording sent the maintainer to install a CLI and log in, which is
+             exactly why six rule-gated features sat inert. */
+          ? 'The roster rules have not been published yet, so this list is empty ' +
+            'rather than broken — run the <strong>“OA — publish the Firestore ' +
+            'rules”</strong> workflow from the repository’s Actions tab (it also ' +
+            'runs itself after every green check on master), or ' +
+            '<code>firebase deploy --only firestore:rules --project ' +
+            'operations-academia</code> locally. See _SETUP-FIREBASE.md §4.'
           : 'Could not load the roster (' + esc(err && (err.code || err.message)) + ').') +
           '</p>';
       }

@@ -3884,6 +3884,101 @@ async function testDeployGuard() {
     'and all three of this repository\'s deployable sections are still configured');
 }
 
+/* ------------------------------------- the rules publish themselves now
+
+   "Nothing in CI deploys rules — it needs an interactive login" was half true
+   and cost six features: they shipped inert behind rules that were committed
+   and never published, and the Admin area's roster is what finally showed it
+   (owner, 2026-08-24 — a panel listing nobody under a red line telling the
+   maintainer to go and run a command). `firebase deploy` needs a login;
+   RELEASING A RULESET does not, and the service account eight workflows here
+   already use can do it.
+
+   What is pinned is what makes that safe to automate: the same wrong-project
+   guard the CLI road carries, a refusal to publish the neighbouring file, and
+   the run sitting BEHIND the offline checks rather than on a raw push.       */
+
+async function testRulesDeploy() {
+  const root = path.join(HERE, '..');
+  const src = await readFile(path.join(root, '_scraper', 'deploy-rules.mjs'), 'utf8');
+  const wf = await readFile(
+    path.join(root, '.github', 'workflows', 'oa-deploy-rules.yml'), 'utf8');
+
+  /* Importing a deploy script must not deploy. Every CLI here is guarded, and
+     on this one the guard is the difference between a module the checks can
+     read and one that publishes the moment anything touches it. */
+  ok(/isMain\(import\.meta\.url\)/.test(src),
+    'deploy-rules is guarded by isMain — importing it publishes nothing');
+  ok(!/\bfileURLToPath\(import\.meta\.url\)\s*===/.test(src),
+    'and through _main.mjs, never the Windows-broken comparison');
+
+  /* The pure guards, against the module itself rather than a copy of its
+     rules — the same both-ways discipline every other pairing here follows. */
+  const mod = await import('./deploy-rules.mjs');
+  eq(mod.projectMismatch('operations-academia', 'operations-academia'), '',
+    'a credential for this project publishes');
+  ok(mod.projectMismatch('stouras-answerarena', 'operations-academia') !== '',
+    'a credential for the project this folder has twice mis-deployed into is REFUSED');
+  ok(mod.projectMismatch('operations-academia', '') !== '',
+    'and an unreadable .firebaserc never falls back to a default');
+
+  /* The expected project comes from .firebaserc, never a literal — the rule
+     testDeployGuard holds check-project.mjs to, applied to this road. */
+  const rc = JSON.parse(await readFile(path.join(root, '.firebaserc'), 'utf8'));
+  ok(src.includes('.firebaserc'), 'the deploy reads its target from .firebaserc');
+  /* Measured over the code that RESOLVES the target, not over the fixtures
+     below it: the selftest's wrong-project case names the real sibling project
+     this folder was twice mis-deployed into, which is worth keeping. */
+  const logic = src.slice(0, src.indexOf('function selftest('));
+  ok(logic.length > 1000 && !logic.includes(`'${rc.projects.default}'`),
+    'and does not hardcode the project id');
+
+  /* The two files sit side by side and differ by one word in an argument. */
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  const storage = await readFile(path.join(root, '_storage.rules'), 'utf8');
+  eq(mod.sourceProblem(rules), '',
+    'the committed Firestore rules are publishable as they stand');
+  ok(mod.sourceProblem(storage) !== '',
+    'and the STORAGE rules are refused — a different service, one argument away');
+  ok(mod.sourceProblem('') !== '', 'an empty read never publishes');
+
+  /* Identical rules are a no-op, which is what makes a run per check cheap. */
+  eq(mod.sameSource([{ name: 'firestore.rules', content: rules }], rules), true,
+    'live rules identical to the repository publish nothing, whatever the file is named');
+  eq(mod.sameSource([], rules), false,
+    'and no live ruleset at all is never read as "already published"');
+
+  /* BEHIND the checks, never on a raw push: publishing is the one action here
+     the next run cannot undo, and the offline guards are what prove the rules
+     agree with the modules that write those collections. */
+  ok(/workflow_run:/.test(wf) && /workflows: \["OA — checks"\]/.test(wf),
+    'the workflow runs after the offline checks, not on the push itself');
+  ok(/conclusion == 'success'/.test(wf) && /head_branch == 'master'/.test(wf),
+    'and only when they PASSED, on master');
+  ok(!/^\s*push:/m.test(wf), 'there is no raw push trigger');
+  ok(/workflow_dispatch:/.test(wf) && /dry_run/.test(wf),
+    'and the maintainer can fire it by hand, dry-run included');
+  ok(/deploy-rules\.mjs --selftest/.test(wf),
+    'the run proves its own guards before it publishes anything');
+  ok(/FIREBASE_SERVICE_ACCOUNT/.test(wf),
+    'it publishes with the service account this repository already holds');
+
+  /* The panels tell the maintainer what to press. The old wording sent them to
+     install a CLI and log in, which is the reason this was never done. */
+  const users = await readFile(path.join(root, 'assets', 'oa-users.js'), 'utf8');
+  ok(/publish the Firestore rules/.test(users),
+    'the roster panel names the workflow that fixes it');
+
+  /* And the two documents that told everybody the opposite. */
+  for (const [file, what] of [['CLAUDE.md', 'the repository conventions'],
+    ['_SETUP-FIREBASE.md', 'the setup page']]) {
+    const doc = await readFile(path.join(root, file), 'utf8');
+    ok(!/Nothing in CI deploys rules\./.test(doc),
+      `${what} no longer claims nothing in CI can deploy rules`);
+    ok(/oa-deploy-rules/.test(doc), `${what} names the workflow instead`);
+  }
+}
+
 /* ------------------------------ the Universities directory (owner, 2026-08-24)
 
    data/directory.json is the flat table universities.html groups into one
@@ -7526,6 +7621,7 @@ if (isMain(import.meta.url)) {
   testJobMarketSheetStaleness();
   await testJobMarketSheetChain();
   await testDeployGuard();
+  await testRulesDeploy();
   await testDirectoryModel();
   await testDirectoryWiring();
   await testUniInfo();
