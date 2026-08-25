@@ -1333,16 +1333,42 @@ async function testSchools() {
   const jobs = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8'));
   const tulane = [...jobs, ...archive].filter((r) => /tulane/i.test(r.institution));
   ok(tulane.length >= 5, `the archive still holds every Tulane posting (${tulane.length})`);
-  /* Every Tulane posting that NAMES a school names it this way. A row that
-     names none is not a second spelling — it is a posting with a field left
-     empty, which is allowed — and failing on one would stop the publish for
-     every other posting on the site. (What used to arrive instead was the
-     school typed into the department box; assemble() now moves it across, so
-     the rows this guard was written for keep naming one school.) */
-  eq([...new Set(tulane.map((r) => r.school))].filter(Boolean), ['A. B. Freeman School of Business'],
-    'and they all name one school');
-  eq([...new Set(tulane.map((r) => r.unit))].filter(Boolean), ['Management Science'],
-    'and one department');
+  /* WHAT THE REPAIR PROMISED, AND WHAT IT DID NOT. The complaint was one
+     place reading as five, so the promise is that the five REPORTED SPELLINGS
+     never come back — not that Tulane may only ever have the one school and
+     the one department it had that day.
+
+     Pinned the second way this fired on 2026-08-25: a Tulane posting arrived
+     naming Information Systems, which is a second DEPARTMENT and not a second
+     spelling of Management Science, and the whole site stopped publishing —
+     the fourth outage of this exact shape CLAUDE.md records. An empty field
+     was already excused here for the same reason; a genuinely new name needed
+     excusing too, and the rule is the one this file states for every guard
+     over a live file: assert something any legitimate row satisfies.
+
+     So: the canonical names are still THERE (the repair reached the data),
+     the retired spellings are still GONE (it has not come undone), and a
+     school or department nobody had heard of that morning is free to arrive.
+     That the five collapse onto the canonical pair at all is the alias
+     table's own job and is tested on fixtures above, where new data cannot
+     reach it. */
+  const tulaneSchools = [...new Set(tulane.map((r) => r.school))].filter(Boolean);
+  const tulaneUnits = [...new Set(tulane.map((r) => r.unit))].filter(Boolean);
+  ok(tulaneSchools.includes('A. B. Freeman School of Business'),
+    'and they name the school the one way the site publishes it');
+  ok(tulaneUnits.includes('Management Science'),
+    'and the department the five spellings collapsed into is still on the site');
+  /* The spellings the complaint named, each of which used to be its own entry
+     in every filter. `school` and `unit` are checked against BOTH fields
+     because what used to arrive was the school typed into the department box. */
+  const RETIRED_TULANE = [
+    'Freeman School of Business', 'AB Freeman School of Business',
+    'A.B. Freeman School of Business', 'Management Sciences Area',
+    'Management Science Department', 'Management Sciecne',
+  ];
+  eq(tulane.filter((r) => RETIRED_TULANE.some((n) => n === r.school || n === r.unit))
+    .map((r) => r.id), [],
+  'and no Tulane posting names one of the retired spellings');
 
   /* THE INGEST POINTS, all three, or tomorrow's build brings the spellings
      back. */
