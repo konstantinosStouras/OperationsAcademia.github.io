@@ -1,0 +1,68 @@
+name: OA — sync the registered-users roster
+
+# The Admin area showed "31 Registered users" over a roster listing ONE person
+# (owner, 2026-08-25). Both were right: the tally is a mark every sign-in
+# writes, while a roster ROW is written by the browser once per session — and
+# the rules permitting that write had only just been published, so the roster
+# held exactly the people who had signed in since.
+#
+# Firebase Auth knows all of them, and only the Admin SDK can ask. This job
+# reads every account and writes the roster row the browser would have written,
+# with the one field a browser can never know: the true joined date.
+#
+# It is CHEAP and IDEMPOTENT — an account whose row is already current costs no
+# write, so a fire with nothing new commits nothing. Daily is plenty (the
+# browser keeps rows fresh as people visit); the dispatch is for right after a
+# rules deploy, which is exactly the case that created the gap.
+#
+# A no-op, saying so, until FIREBASE_SERVICE_ACCOUNT is set.
+
+on:
+  schedule:
+    # once a day, off the hour so it does not queue behind every other :00 job
+    - cron: '41 4 * * *'
+  workflow_dispatch:
+    inputs:
+      scan:
+        description: 'Report what Auth holds and what would change, write nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-user-directory
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set — nothing will be synced."
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      # The offline checks over the mapping before anything is written.
+      - run: node _scraper/sync-user-directory.mjs --selftest
+
+      - name: Sync the roster
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ "${{ inputs.scan }}" = "true" ]; then
+            node _scraper/sync-user-directory.mjs --scan
+          else
+            node _scraper/sync-user-directory.mjs
+          fi

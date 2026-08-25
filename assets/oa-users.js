@@ -611,17 +611,28 @@
     })['catch'](function (err) {
       if (host) {
         host.innerHTML = '<p class="oa-form-msg is-err">' + (err && err.code === 'permission-denied'
-          /* The remedy is a BUTTON now, not a terminal: the rules publish from
-             GitHub Actions with the service account this site already holds
-             (oa-deploy-rules.yml). Naming the run first is the point — the old
-             wording sent the maintainer to install a CLI and log in, which is
-             exactly why six rule-gated features sat inert. */
-          ? 'The roster rules have not been published yet, so this list is empty ' +
-            'rather than broken — run the <strong>“OA — publish the Firestore ' +
-            'rules”</strong> workflow from the repository’s Actions tab (it also ' +
-            'runs itself after every green check on master), or ' +
-            '<code>firebase deploy --only firestore:rules --project ' +
-            'operations-academia</code> locally. See _SETUP-FIREBASE.md §4.'
+          /* TWO CAUSES, and telling them apart is the whole point of this
+             message. The remedy is a BUTTON now, not a terminal (the rules
+             publish from GitHub Actions with the service account this site
+             already holds — oa-deploy-rules.yml); the old wording sent the
+             maintainer to install a CLI and log in, which is exactly why six
+             rule-gated features sat inert.
+
+             And the SECOND cause is the one that cost an afternoon on
+             2026-08-25: the rules had just been published and this page was
+             still the copy the browser had cached from before, so it went on
+             reporting a deploy that had already happened. A message cannot
+             fix a stale copy of itself — but once loaded it can say to
+             reload, which is why that comes FIRST. */
+          ? 'This list is empty rather than broken. <strong>If the rules were ' +
+            'published in the last few minutes, reload the page</strong> ' +
+            '(Ctrl+F5 / ⌘⇧R) — this panel may be a copy your browser cached ' +
+            'before they went live. Otherwise they have not been published ' +
+            'yet: run the <strong>“OA — publish the Firestore rules”</strong> ' +
+            'workflow from the repository’s Actions tab (it also runs itself ' +
+            'after every green check on master), or <code>firebase deploy ' +
+            '--only firestore:rules --project operations-academia</code> ' +
+            'locally. See _SETUP-FIREBASE.md §4.'
           : 'Could not load the roster (' + esc(err && (err.code || err.message)) + ').') +
           '</p>';
       }
