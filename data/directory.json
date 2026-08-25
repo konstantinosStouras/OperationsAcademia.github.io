@@ -3090,9 +3090,9 @@
   "lastPosted": "2026-03-01"
  },
  {
-  "id": "hong-kong-polytechnic-university__faculty-of-business-incl-logistics-and-maritime-studies__fashion-and-textiles",
+  "id": "hong-kong-polytechnic-university__faculty-of-business__fashion-and-textiles",
   "institution": "Hong Kong Polytechnic University",
-  "school": "Faculty of Business (incl. Logistics and Maritime Studies)",
+  "school": "Faculty of Business",
   "department": "Fashion and Textiles",
   "type": "University",
   "sources": [
@@ -3101,9 +3101,9 @@
   ]
  },
  {
-  "id": "hong-kong-polytechnic-university__faculty-of-business-incl-logistics-and-maritime-studies__logistics-and-maritime-studies",
+  "id": "hong-kong-polytechnic-university__faculty-of-business__logistics-and-maritime-studies",
   "institution": "Hong Kong Polytechnic University",
-  "school": "Faculty of Business (incl. Logistics and Maritime Studies)",
+  "school": "Faculty of Business",
   "department": "Logistics and Maritime Studies",
   "type": "University",
   "country": "Hong Kong",

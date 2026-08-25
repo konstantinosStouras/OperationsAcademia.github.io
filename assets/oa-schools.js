@@ -283,6 +283,22 @@
     'Erasmus University Rotterdam': { 'Rotterdam School of Management (RSM)': 'Rotterdam School of Management' },
     'Georgia State University': { 'Robinson College of Business': 'J. Mack Robinson College of Business' },
     'Harvard University': { 'Harvard Business School (HBS)': 'Harvard Business School' },
+    /* A PARENTHETICAL NOTE, and the rule above says the short name wins: the
+       faculty is called the Faculty of Business, and "(incl. Logistics and
+       Maritime Studies)" annotates a department the SAME record already
+       carries as its own — it is a note about the faculty, not its name. Both
+       hand-compiled sources spell it the long way (oa-institutions.js and
+       oa-omlist.js), so settling it here rather than in either module reaches
+       both at once, survives a regeneration of either, and canonicalises a
+       posting typed with the annotation too.
+
+       Found the hard way on 2026-08-25: somebody posted a job there and named
+       the faculty correctly, the two spellings met in data/directory.json, and
+       a near-duplicate sweep that was still fatal in the publishing role took
+       the whole site's data offline-stale for five consecutive builds. The
+       sweep is a warning there now; this is the half that settles the pair. */
+    'Hong Kong Polytechnic University': {
+      'Faculty of Business (incl. Logistics and Maritime Studies)': 'Faculty of Business' },
     'Lehigh University': { 'College of Business and Economics': 'College of Business' },
     'Massachusetts Institute of Technology': { 'Sloan School of Management': 'MIT Sloan School of Management' },
     'Nanyang Technological University': { 'Nanyang Business School (NBS)': 'Nanyang Business School' },

@@ -1252,6 +1252,45 @@ unbelievable deadline already is (`Deadline as listed: …`). Neither is done
 here: it changes what a posting PUBLISHES, and 449 of them were approved as
 they stood.
 
+### …and a fourth time, because the flag was only half the fix
+
+The demotion above moved TWO of the three near-duplicate sweeps to `tidy`. The
+third — "every OM-list school lands on ONE school group" in
+`testDirectoryWiring` — was left on `eq`, and `--publishing` cannot help a
+sweep that fails in both roles. On 2026-08-25 somebody posted a job at The
+Hong Kong Polytechnic University and named its school **"Faculty of
+Business"**, which is what the faculty is called; `oa-omlist.js` and
+`oa-institutions.js` both carry it as "Faculty of Business (incl. Logistics
+and Maritime Studies)"; the two spellings met in `data/directory.json` — which
+`build-directory.mjs` merges FROM THE POSTINGS, so any poster can grow that
+list — and the sweep went red. Five consecutive builds committed nothing. The
+sibling sweep two thousand lines above reported the SAME pair as a warning and
+passed, which is how thoroughly this was a decision about the guard rather
+than about the data.
+
+What it cost is the exact thing the owner reported: three user-added postings
+and nine the maintainer had just approved sat unpublished, `data/jobs.json`
+frozen at 07:24, with the site showing none of them and nothing anywhere a
+reader — or the maintainer — could see. Every build's log said
+`+12 new … wrote data/jobs.json`, because the build DID all of it; only the
+commit was withheld.
+
+Both halves are fixed. The sweep is `tidy` like its siblings. And the rule is
+now pinned where it is actually decided rather than in the workflow files: an
+assertion whose message says two names are one place must be a `tidy` call,
+read out of `selftest.mjs`'s OWN source by `testReviewWiring` (the count is
+pinned too, so deleting a sweep cannot be a way to make it quiet). **A new
+near-duplicate sweep goes through `tidy`, always** — the PR check is where a
+naming duplicate fails, and it is fixed by an alias, never by holding real
+postings back.
+
+The pair itself was settled in `SCOPED_SCHOOL_ALIASES`, not in either curated
+module: the rule there already covers it ("the longer string is not a fuller
+name but a parenthetical acronym, a campus note…"), the parenthetical
+annotates a department the same record already carries as its own, and one
+alias reaches both hand-compiled sources, survives a regeneration of either,
+and canonicalises a posting typed with the annotation too.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
