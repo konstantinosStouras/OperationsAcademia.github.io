@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-24T18:56:55.188Z",
+ "generated": "2026-08-25T03:10:34.347Z",
  "universities": [
   {
    "v": "Tulane University",
@@ -3014,10 +3014,6 @@
    "n": 5
   },
   {
-   "v": "Operations Management",
-   "n": 4
-  },
-  {
    "v": "SCM/Logistics",
    "n": 4
   },
@@ -3043,6 +3039,10 @@
   },
   {
    "v": "ISOM",
+   "n": 3
+  },
+  {
+   "v": "Operations Management",
    "n": 3
   },
   {
