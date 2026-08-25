@@ -4515,7 +4515,31 @@ async function testDirectoryWiring() {
       }
     }
   }
-  eq(omMisses, [],
+  /* THE THIRD NAMING SWEEP, and it was the one left able to stop the site.
+
+     `dirSchools` is built from data/directory.json, which build-directory.mjs
+     merges from the POSTINGS — so a person posting a job names a school and
+     this list grows. On 2026-08-25 somebody posted at The Hong Kong
+     Polytechnic University and named its school "Faculty of Business", which
+     is what the faculty is actually called; the OM list carries the same
+     faculty under its own annotated spelling, "Faculty of Business (incl.
+     Logistics and Maritime Studies)"; `similarNames` correctly reported the
+     pair — and because this sweep alone was still on `eq`, the build's
+     re-check went red and COMMITTED NOTHING. Three user-added postings and
+     nine postings the maintainer had just approved sat unpublished through
+     five consecutive builds, with the site showing neither and no reader able
+     to tell why.
+
+     It is the same finding as its two siblings above (`dupSchools`,
+     `dupUnits`) — one place spelled two ways, judged by the same
+     `similarNames` — and it is about TIDINESS, not about a posting being
+     wrong: neither spelling makes the advertisement any less true, and the
+     card renders identically either way. So it reports in the publishing
+     role and fails in the PR check, exactly as they do. That is where a
+     naming duplicate is meant to be settled — by an alias in oa-schools.js
+     or a normalisation in oa-omlist.js — and it is settled without a queue of
+     real postings being held hostage to it in the meantime. */
+  tidy(omMisses,
     'every OM-list school lands on ONE school group — never a near-duplicate beside an existing one');
   for (const r of OM.directoryRows()) {
     ok(!r.deptUrl || /^https?:\/\//.test(r.deptUrl),
@@ -7308,6 +7332,36 @@ async function testReviewWiring() {
     path.join(HERE, '..', '.github', 'workflows', 'oa-checks.yml'), 'utf8');
   ok(/node _scraper\/selftest\.mjs\s*$/m.test(prCheck),
     'while the PR check runs it strict — the one place a naming duplicate is meant to fail');
+
+  /* AND EVERY NAMING SWEEP IS IN THAT ROLE — the half the flag cannot deliver
+     on its own.
+
+     `--publishing` only decides what `tidy` DOES; a sweep left on `eq` fails
+     in both roles and stops the site's data whatever the flag says. That is
+     not hypothetical: two of the three near-duplicate sweeps were moved to
+     `tidy` when the 449-posting approval went red, the OM-list one was not,
+     and on 2026-08-25 it took five consecutive builds down over one school
+     spelled two ways — while the sibling sweep beside it reported the SAME
+     pair as a warning and passed.
+
+     So the rule is pinned where it is actually decided: an assertion that
+     says two names are one place is a `tidy` call. Read from this file's own
+     source, because by the time it has run the distinction has evaporated.
+     The count is pinned too — deleting a sweep must be a deliberate act, not
+     a way to make this quiet. */
+  const selfSrc = await readFile(path.join(HERE, 'selftest.mjs'), 'utf8');
+  const NAMING_FINDING = /two names|near-duplicate/;
+  const ASSERTION =
+    /\b(tidy|eq|ok)\(\s*([A-Za-z_$][\w$]*)\s*,\s*(?:\[\s*\]\s*,\s*)?\n?\s*'((?:[^'\\]|\\.)*)'/g;
+  const namingSweeps = [];
+  for (let m = ASSERTION.exec(selfSrc); m; m = ASSERTION.exec(selfSrc)) {
+    if (NAMING_FINDING.test(m[3])) namingSweeps.push({ fn: m[1], list: m[2], what: m[3] });
+  }
+  ok(namingSweeps.length >= 3,
+    `every near-duplicate NAME sweep is accounted for (${namingSweeps.length} found)`);
+  eq(namingSweeps.filter((s) => s.fn !== 'tidy').map((s) => s.list + ': ' + s.what), [],
+    'and each reports in the publishing role rather than stopping the site — a naming ' +
+    'duplicate is settled by an alias, never by holding real postings back');
 
   const wf = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-jobreview-mail.yml'), 'utf8');

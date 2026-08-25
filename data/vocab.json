@@ -2440,10 +2440,6 @@
    "n": 0
   },
   {
-   "v": "Faculty of Business (incl. Logistics and Maritime Studies)",
-   "n": 0
-  },
-  {
    "v": "Faculty of Business Administration",
    "n": 0
   },
@@ -8699,7 +8695,7 @@
   },
   "The Hong Kong Polytechnic University": {
    "schools": [
-    "Faculty of Business (incl. Logistics and Maritime Studies)"
+    "Faculty of Business"
    ],
    "units": [
     "Fashion and Textiles",
@@ -8711,7 +8707,7 @@
      "Logistics and Maritime Studies",
      "SCM/OM"
     ],
-    "Faculty of Business (incl. Logistics and Maritime Studies)": [
+    "Faculty of Business": [
      "Fashion and Textiles",
      "Logistics and Maritime Studies"
     ]
@@ -11426,9 +11422,7 @@
    "Management, Technology and Economics"
   ],
   "Faculty of Business": [
-   "Computing and Decision Sciences"
-  ],
-  "Faculty of Business (incl. Logistics and Maritime Studies)": [
+   "Computing and Decision Sciences",
    "Fashion and Textiles",
    "Logistics and Maritime Studies"
   ],
