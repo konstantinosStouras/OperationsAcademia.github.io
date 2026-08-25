@@ -826,11 +826,11 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 .oa-aa-tile:hover { border-color: var(--brand, #3a424d); }
 .oa-aa-tile.is-due { border-color: var(--brand, #3a424d); }
-/* The Registered-users card is a statistic, not a queue: nothing opens from
-   it, so it keeps the resting border on hover and the default cursor — a tile
-   that highlights like its neighbours promises a panel it does not have. */
-.oa-aa-tile-stat { cursor: default; }
-.oa-aa-tile-stat:hover { border-color: var(--line-soft, #ececec); }
+/* The statistic card. It used to open nothing, so its hover was deliberately
+   killed and its cursor left as an arrow; since 2026-08-24 it opens the
+   Registered-users roster, so it behaves like the queue tiles beside it. The
+   class remains because it is what keeps the figure OUT of every badge sum. */
+.oa-aa-tile-stat { cursor: pointer; }
 .oa-aa-tile-n {
   display: block;
   font-size: 30px;
@@ -1808,3 +1808,112 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   margin: 0 0 14px;
 }
 
+
+
+/* ---------------------------------------------------------------------------
+   The registered-users roster and the message threads (assets/oa-users.js on
+   admin-area.html, assets/oa-messages.js on messages.html).
+
+   Every colour here is a theme token WITH its light value as the var()
+   fallback, so the frozen /v1/ and /v2/ trees — which define no tokens —
+   keep rendering exactly as they did. Anything that paints its own ground
+   names its own ink: this block was written after three reports in one
+   morning that were all the same missing `color`.
+   --------------------------------------------------------------------------- */
+
+.oa-u-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  margin: 0 0 12px;
+}
+.oa-u-find { display: flex; align-items: center; gap: 8px; }
+.oa-u-find > span { font-size: 13px; font-weight: 600; color: var(--mut, #646c78); }
+/* 16px or iOS zooms the whole page when the field takes focus. */
+.oa-u-find input { font-size: 16px; }
+.oa-u-count { font-size: 13px; color: var(--mut, #646c78); margin-right: auto; }
+
+/* An e-mail address has no spaces, so it sets a table's minimum width: the
+   table scrolls inside its OWN container rather than making the page scroll
+   sideways at 390px. */
+.oa-u-wrap { overflow-x: auto; }
+
+.oa-u-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: var(--ink, #23272e);
+}
+.oa-u-table th,
+.oa-u-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line-soft, #ececec);
+  overflow-wrap: anywhere;
+}
+.oa-u-table thead th {
+  border-bottom: 2px solid var(--line, #dcdfe4);
+  white-space: nowrap;
+}
+/* --bg-3, not --bg-2: the panel this table sits in IS --bg-2
+   (body.v3 .oa-panel), so hovering a row painted it its own colour and nothing
+   moved — measured identical in both themes before this. */
+.oa-u-table tbody tr:hover { background: var(--bg-3, #f7f8fa); }
+/* --brand, the token every other link on this site uses. `--link` does not
+   exist here: it fell back to a hardcoded blue, theme-blind, which is exactly
+   what this block's header says not to do. */
+.oa-u-table a { color: var(--brand, #3a424d); }
+.oa-u-tick { width: 34px; }
+/* A tick box is a touch target before it is a control. */
+.oa-u-tick input { width: 18px; height: 18px; }
+
+.oa-u-sort {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink, #23272e);
+  cursor: pointer;
+}
+.oa-u-sort.is-on { color: var(--brand, #3a424d); }
+
+.oa-u-ghosts { list-style: none; margin: 8px 0 0; padding: 0; }
+.oa-u-ghosts li { padding: 4px 0; font-size: 14px; color: var(--ink, #23272e); }
+.oa-u-open {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--brand, #3a424d);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* One conversation, drawn the same way on both sides of it. */
+.oa-u-thread { list-style: none; margin: 0 0 14px; padding: 0; }
+.oa-u-msg {
+  padding: 10px 12px;
+  margin: 0 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line-soft, #ececec);
+  background: var(--bg-2, #f7f8fa);
+  color: var(--ink, #23272e);
+}
+.oa-u-msg.is-me { border-left: 3px solid var(--brand, #3a424d); }
+.oa-u-msg.is-them { border-left: 3px solid var(--done-strong, #2e7d5b); }
+.oa-u-who { font-weight: 700; font-size: 13px; }
+.oa-u-when { float: right; font-size: 12px; color: var(--mut, #646c78); }
+.oa-u-msg p { margin: 6px 0 0; font-size: 15px; line-height: 1.55; }
+
+.oa-msg-reply textarea,
+#oa-aa-users-compose textarea { width: 100%; font-size: 16px; }
+
+@media (max-width: 480px) {
+  /* The action column never wraps its button; everything else may. */
+  .oa-u-bar { gap: 8px; }
+  .oa-u-count { margin-right: 0; width: 100%; }
+  .oa-u-table { font-size: 13px; }
+  .oa-u-table th, .oa-u-table td { padding: 7px 8px; }
+}

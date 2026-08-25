@@ -401,6 +401,7 @@
     admin: '&#128736;',
     mine: '&#128203;',
     alerts: '&#9993;',
+    messages: '&#128172;',
     profile: '&#128100;',
     feedback: '&#128172;'
   };
@@ -501,6 +502,12 @@
             '<a role="menuitem" href="alerts.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts' +
               '<span class="oa-acct-n" data-count="alerts" hidden></span></a>' +
+            /* The one badge here that does NOT count the cards its page
+               lists: it counts what is UNREAD, because a conversation you
+               have read is not an empty one. messages.html says so. */
+            '<a role="menuitem" href="messages.html">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.messages + '</span>Messages' +
+              '<span class="oa-acct-n" data-count="messages" hidden></span></a>' +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
               '<span class="oa-mi" aria-hidden="true">&#9998;</span>Edit profile</button>' +
             '<a role="menuitem" href="feedback.html">' +
@@ -606,6 +613,7 @@
       (adminish(u) ? '<a class="link depth-0" href="admin-area.html">Admin area</a>' : '') +
       '<a class="link depth-0" href="account.html">My personal area</a>' +
       '<a class="link depth-0" href="my-postings.html">My postings</a>' +
+      '<a class="link depth-0" href="messages.html">Messages</a>' +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {
@@ -767,6 +775,18 @@
         countOf(db.collection(OAFB.col.users).doc(uid).collection(OAFB.col.alerts))
           .catch(function () { return null; }),
         adminish(state.user) ? adminPending() : Promise.resolve(null),
+        /* Unread messages. ONE get() of the person's own thread head — not a
+           count() over a query — because the thread is keyed on the uid, so
+           there is exactly one document to look at and no composite index to
+           deploy. A thread that does not exist is not an error: it is nobody
+           having written to them, which is zero. */
+        db.collection(OAFB.col.messages).doc(uid).get()
+          .then(function (snap) {
+            if (!snap || !snap.exists) return 0;
+            var n = (snap.data() || {}).userUnread;
+            return typeof n === 'number' ? n : 0;
+          })
+          .catch(function () { return null; }),
       ]);
     }).then(function (r) {
       if (!state.user || state.user.uid !== uid) return;   // signed out mid-flight
@@ -774,6 +794,7 @@
       if (typeof r[0] === 'number') counts.postings = r[0];
       if (typeof r[1] === 'number') counts.alerts = r[1];
       if (typeof r[2] === 'number') counts.admin = r[2];
+      if (typeof r[3] === 'number') counts.messages = r[3];
       writeCounts(uid, counts);
       paintCounts(counts);
       try { sessionStorage.setItem(COUNT_SESSION, uid); } catch (e) { /* ignore */ }
@@ -833,6 +854,58 @@
     return fb.firestore().collection(OAFB.col.profiles).doc(uid);
   }
 
+  /* THE ROSTER ROW. `registeredUsers` is a contentless tally by contract —
+     and on the sibling /lit/ the same collection is PUBLIC-read — so the
+     maintainer could count accounts and learn nothing else about them: the
+     address is in the Firebase Auth record, which no browser can read for
+     anyone but itself, and profiles/{uid} is owner-only. This writes the one
+     row the Admin area's roster lists, and the rules pin `email` to
+     request.auth.token.email so a row says what the account really signs in
+     as rather than whatever its owner typed.
+
+     ONCE PER SESSION, like the tally beside it and for the same reason — this
+     is a flat multi-page site and a per-page write would cost a signed-in
+     reader ten writes an visit. It costs one extra READ, which the tally does
+     not, because `first` is write-once in the rules and the browser has to
+     send back the value already stored; that read is the account's own row,
+     which is why the rule lets a person read the row the site keeps on them.
+
+     Best-effort throughout: an undeployed rule, a private-mode storage
+     exception or an offline moment must never block a sign-in, so every leg
+     swallows its error exactly as the tally does. */
+  function syncDirectoryRow(u) {
+    if (!u || !window.OAFB) return;
+    var latch = 'oaDir:' + u.uid;
+    try { if (sessionStorage.getItem(latch)) return; } catch (e) { /* private mode */ }
+    var email = String(u.email || '');
+    try { sessionStorage.setItem(latch, '1'); } catch (e) { /* private mode */ }
+
+    OAFB.ready().then(function (fb) {
+      var ref = fb.firestore().collection(OAFB.col.userDirectory).doc(u.uid);
+      var now = Date.now();
+      return ref.get().then(function (snap) {
+        var had = snap && snap.exists ? (snap.data() || {}) : null;
+        var row = {
+          name: String(displayName(u) || '').slice(0, 200),
+          seen: now,
+          // write-once: send back what is stored, or open the row at now
+          first: had && typeof had.first === 'number' ? had.first : now
+        };
+        /* Only when there IS one. A provider sign-in need not carry an e-mail
+           claim (ORCID's does not), and the rules refuse an address that is
+           not the caller's own — so sending an empty string would leave
+           exactly those accounts off the roster entirely. They get a row with
+           a name and their dates, and the roster shows "—". */
+        if (email) row.email = email.slice(0, 200);
+        return ref.set(row, { merge: true });
+      });
+    }).catch(function () {
+      /* rule not deployed yet, or offline — never block sign-in. Drop the
+         latch so the next page load in this session tries again. */
+      try { sessionStorage.removeItem(latch); } catch (e) { /* private mode */ }
+    });
+  }
+
   function loadProfile(u) {
     state.profile = null;                // never carry the previous account's
     if (!u) return;
@@ -856,6 +929,10 @@
         // once the profile read landed. On a flat static site that is every
         // navigation.
         writeHint(state.user, displayName(state.user));   // and the picture with it
+        /* …and the roster row, from HERE rather than beside the tally, so it
+           carries the name the site actually shows. Written before the seed
+           below, which only ever fills a profile that was empty. */
+        syncDirectoryRow(state.user);
         // A provider sign-in hands us the person's name and picture — seed
         // them into the profile FIRST (fill-empty, never overwriting typed
         // values), so a Google account arrives pre-filled and the first-run
@@ -2086,7 +2163,22 @@
       .then(function () {
         return Promise.all([
           db.collection(OAFB.col.profiles).doc(dupUid).delete().catch(function () {}),
-          db.collection(OAFB.col.registered).doc(dupUid).delete().catch(function () {})
+          db.collection(OAFB.col.registered).doc(dupUid).delete().catch(function () {}),
+          /* …and the roster row, for the same reason as the tally beside it:
+             deleting a sign-in does not delete its Firestore data, so a row
+             left behind would list one person twice on the Admin area for
+             ever. Both are owner-deletes, done here while we can still write
+             as the duplicate.
+
+             The duplicate's message THREAD is deliberately NOT deleted. Only
+             the maintainer may delete one (a thread whose history either
+             party can erase is not a record of anything), and nothing here
+             sends anything, so an orphan costs no e-mail — unlike the alert
+             subscriptions above, which is why those must go. The Admin area
+             renders a thread whose roster row has gone as exactly that, and
+             the maintainer can remove it there. */
+          db.collection((OAFB.col && OAFB.col.userDirectory) || 'userDirectory')
+            .doc(dupUid).delete().catch(function () {})
         ]);
       })
       .then(function () {

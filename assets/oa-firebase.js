@@ -149,6 +149,14 @@
          profiles/{uid}               the account's own profile document
          registeredUsers/{uid}        contentless tally — admin-read; the Admin
                                       area's Registered-users count() reads it
+         userDirectory/{uid}          the roster row — name, auth address, first
+                                      and last seen; owner-written, admin-read.
+                                      Separate from registeredUsers because that
+                                      one is contentless by contract (and PUBLIC
+                                      on /lit/), so identity can never join it
+         messages/{uid}               one maintainer<->account thread, keyed on
+                                      the uid; messages/{uid}/items/{id} are the
+                                      messages themselves
          accountKeys/{key}            "one person, two accounts" hints (orcid:… / email:…)
          jobSubmissions/{id}          a posted job, before the build commits it to JSON
          feedback/{id}                feedback + screenshots                          */
@@ -158,6 +166,9 @@
       testEmails: 'testEmails',
       profiles: 'profiles',
       registered: 'registeredUsers',
+      userDirectory: 'userDirectory',
+      messages: 'messages',
+      messageItems: 'items',
       accountKeys: 'accountKeys',
       jobSubmissions: 'jobSubmissions',
       candidateSubmissions: 'candidateSubmissions',

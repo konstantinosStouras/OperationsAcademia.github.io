@@ -1,374 +1,381 @@
 {
- "version": 1,
- "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
- "updates": [
-  {
-   "id": "job-form-prefills-from-records",
-   "date": "2026-08-24",
-   "title": "The job form fills itself in from the site’s own records — and keeps them honest",
-   "summary": "Type your university into the posting form and everything the site’s records answer definitely is filled in for you: its one school, its type, the country of a single-campus university, and — once the department is named — the department’s own page link and the checklist of what your school offers (research seminars, a PhD programme, and so on). Only definite answers are filled: INSEAD lists two departments and campuses in three countries, so those stay yours to choose. The pre-filled department link asks you to verify it, and a correction updates the Universities directory for everyone the moment your posting is sent — the same record every future poster is then offered.",
-   "url": "https://www.operationsacademia.org/post-a-job.html"
-  },
-  {
-   "id": "candidate-affiliation-in-three",
-   "date": "2026-08-24",
-   "title": "The candidate form asks your affiliation the way the job form does",
-   "summary": "Creating your job-market profile now asks your affiliation as three questions instead of one box: your university (for example “Northwestern University”), your school, faculty or college (“Kellogg School of Management”), and your department, area or group (“Operations”). The same smart lists the job posting form uses narrow each answer as you type — choosing your university offers its schools, choosing a school offers its departments — and every name lands in the spelling the site already publishes. Your profile still shows one affiliation line, built from your answers, so nothing about the candidates page changes.",
-   "url": "https://www.operationsacademia.org/post-a-candidate.html"
-  },
-  {
-   "id": "one-candidate-profile-per-year",
-   "date": "2026-08-24",
-   "title": "One candidate profile per market year, files that stay current, and a shortcut to report your placement",
-   "summary": "Each registered candidate now has exactly one profile per job market year: if you have already filed one this season, the profile form simply reopens it for editing instead of creating a second. Replacing your CV with a newer upload keeps only the newest version — the superseded file is removed from our archive, so an old CV can never linger behind your profile. And once your position is confirmed, your own card on the candidates page offers a “Post confirmed placement” button — visible only to you, on your own profile — that takes you straight to the placements form. As before, only you (and the maintainer) can edit your profile.",
-   "url": "https://www.operationsacademia.org/post-a-candidate.html"
-  },
-  {
-   "id": "candidate-form-no-research-summary",
-   "date": "2026-08-24",
-   "title": "The candidate profile form is shorter, and asks for a lasting address",
-   "summary": "Creating your job-market profile no longer asks for a research summary — your CV, research areas and INFORMS day(s) are what hiring committees actually use, and profiles filed with a summary keep theirs. The form now asks for a personal e-mail address instead: a school address dies with the affiliation, and this is how we can still reach you about your profile in later years. It is never published — like the private note, it goes to the maintainer and nowhere else.",
-   "url": "https://www.operationsacademia.org/post-a-candidate.html"
-  },
-  {
-   "id": "universities-directory",
-   "date": "2026-08-24",
-   "title": "The Universities page is now a searchable, community-editable directory",
-   "summary": "One card per university — its business school, its engineering or other non-business school, and every department doing Operations in them — built from every posting ever made here plus the site’s curated records, with the interactive map kept as a second view. Any posting from a place the directory does not yet list creates its card automatically. Signed-in users can correct any card or add a department, and each card shows who last edited it and when.",
-   "url": "https://www.operationsacademia.org/universities.html"
-  },
-  {
-   "id": "edits-show-immediately",
-   "date": "2026-08-24",
-   "title": "An edit you save is on your screen immediately",
-   "summary": "Correcting a posting used to look like nothing had happened: the change was saved and publishing, but for the next minutes the jobs page went on showing the very text you had just fixed. Now the page you open after saving already shows your correction — and a posting you take down is already gone from the list — on the device you saved it from, while the site publishes it for everyone else within a few minutes exactly as before. What you see is what will publish: the same name-spelling and deadline rules the site applies are applied to the preview, and the published version takes over the moment it lands.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "two-apply-by-dates",
-   "date": "2026-08-23",
-   "title": "Every posting now shows two deadlines: suggested and final",
-   "summary": "Many searches have no fixed closing date yet still name the day that matters most — the first-review or full-consideration date (“First review of applications will begin on September 8, 2026”). Those postings used to read a bare “Until filled.” Every posting card now carries a “Suggested apply by” line beside the “Final apply by” one, the jobs page filters on each separately (Suggested deadline · Final deadline), and the posting form asks the two dates as two questions. The suggested date is also read automatically out of the prose postings already carry — dozens of live postings, Kansas’s included, gained theirs on day one — and a date the pipeline is unsure of is never guessed: the posting keeps reading “Until filled.”",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "approved-postings-publish-in-bulk",
-   "date": "2026-08-23",
-   "title": "A season's worth of approvals publishes, and one odd posting can no longer stop the site",
-   "summary": "449 job postings were approved in one sitting and none of them reached the site. One posting whose closing date and “Apply by” line had come apart was enough to stop the job market sheet from being read at all, and the daily build stopped behind it — so nothing published, with nothing on the site to say so. The review card now asks for the closing date once and shows the line it will publish underneath, so the two can never disagree. Several internal checks that were phrased too narrowly — one about two particular Houston postings, one that looked a university up by whichever spelling was most common that day — were catching perfectly good new postings. And a check that merely notices two similar department names now reports them instead of holding the whole site's data back: it still has to be settled, but not at the price of every posting waiting.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "postings-name-the-right-country",
-   "date": "2026-08-23",
-   "title": "Job postings are filed under the country they are actually in",
-   "summary": "Nine postings — at American, Canadian and Singaporean universities — were listed under Greece, so anyone filtering the job postings by the right country simply never saw them. The cause was the posting form itself: the “country” box invited the browser to fill in whoever was editing the posting’s own home country, quietly replacing what was there. The box no longer does that, the affected postings now name the right country, and every posting is checked against the campus address the site already holds for that university — so a posting that contradicts where its university is gets put right automatically. A university with campuses in two countries, like INSEAD, is deliberately left alone.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "job-review-source-tabs",
-   "date": "2026-08-23",
-   "title": "The job review desk splits by source, and the next market leads",
-   "summary": "The Admin area’s “Job postings to review” panel now has two tabs: auto-crawled postings from the job market tracking sheet, still held back until the maintainer approves them, and user-added postings made through the site’s own form — those stay live from the moment they are posted and are listed for a correcting look. Inside each tab the market-year filters remain, and every list now ranks the newest job market first — next season’s postings before the current one’s. For posters nothing changes: a posting made on the site still publishes within minutes."
-  },
-  {
-   "id": "posting-form-name-guard",
-   "date": "2026-08-23",
-   "title": "The posting form keeps one name per place — and knows what kind of place it is",
-   "summary": "Three improvements to the university → school → department pickers on the posting form. Typing a name that is really a slight respelling of one the site already lists — a typo, a plural, the same words in another order — now draws a “Did you mean” row pointing at the existing entry, right above the option to add yours as genuinely new: a second spelling would split a place’s postings across two entries in every filter. The “Type of institution” box now follows the names you choose — pick “Lee Business School” and it fills in Business School by itself, though a value you set yourself is never overruled. And a brand-new university, school or department still lands on the site’s lists within minutes of posting, offered to the next poster with its schools and departments cascading correctly.",
-   "url": "https://www.operationsacademia.org/post-a-job.html"
-  },
-  {
-   "id": "name-corrections",
-   "date": "2026-08-23",
-   "title": "Spotted a wrongly published school name? You can now fix it",
-   "summary": "The site publishes every university, school and department under one spelling — but the spelling it settled on can simply be wrong, and until now only the maintainer could repair it. A signed-in poster can now press “Suggest a correction” on the posting form, say what the name should be, and once the maintainer approves it the whole site follows: every posting that carried the old spelling is renamed, the form’s pickers stop offering it, and future postings typed under the old name publish under the corrected one — usually within the hour. Nothing renames itself: every suggestion waits for review first.",
-   "url": "https://www.operationsacademia.org/post-a-job.html"
-  },
-  {
-   "id": "postings-publish-and-alert-in-minutes",
-   "date": "2026-08-23",
-   "title": "New postings publish in minutes, and alert e-mails follow them",
-   "summary": "A job posting made through the site — or approved from the maintainer's review queue — now reaches the job postings page within a couple of minutes, and an e-mail alert set to “as soon as something appears” is sent minutes after that instead of by the top of the next hour. Postings crawled from the job market tracking sheet are also checked against the jobs already listed before the maintainer reviews them, so a job posted here and later picked up by the crawl is flagged as a possible duplicate rather than slipping onto the page twice.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "candidate-alerts",
-   "date": "2026-08-23",
-   "title": "E-mail alerts now cover the job market candidates",
-   "summary": "The alerts page gained a third thing to be told about: new job market candidates. Profiles are collected now and shown all at once on the reveal date, and nothing is e-mailed about any profile before the site itself shows it. On the day the profiles go live, subscribers get one short, friendly note saying the candidates are up — never a listing of the whole catalogue — and from then on a note whenever a new candidate posts a public profile, which now also reaches the site within about a minute of being posted.",
-   "url": "https://www.operationsacademia.org/alerts.html"
-  },
-  {
-   "id": "admin-area",
-   "date": "2026-08-23",
-   "title": "An Admin area gathers everything waiting for review",
-   "summary": "The maintainer now has one page — the Admin area, linked from the account menu with a count of how many items are waiting — that gathers everything on the site needing a decision: job postings crawled from the tracking sheet and held for approval, candidate profiles filed for the coming reveal (which could be counted but not seen before this), open feedback tickets, and site updates awaiting publication. For everyone else nothing changes: the feedback page is now purely the form, and every queue stays readable by the maintainer’s account alone."
-  },
-  {
-   "id": "postings-name-their-school",
-   "date": "2026-08-21",
-   "title": "Job postings now name the school as well as the department",
-   "summary": "Postings crawled from the job market tracking sheet used to arrive with a department and no school — “University of California, Berkeley · Operations and Information Technology Management”, with the Haas School missing — because the sheet has one column for the hiring unit. The site’s own directory of operations and supply chain schools already knows which department sits in which school, so that answer is filled in automatically wherever it is unambiguous, and the directory itself gained several schools. Searching by school name in the University filter now finds these postings too.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "whats-new-reviewed-and-tidy",
-   "date": "2026-08-18",
-   "title": "“What’s new” is reviewed before it is published, and a removed update really goes",
-   "summary": "Two changes to this update list. An update taken down now leaves the list at once, instead of staying on the page struck through — so the list only ever shows what is current. Nothing is lost: the removed ones sit in a collapsed panel under the list that only the maintainer sees, one click from being put back. And a newly logged update is no longer public the moment it is written: it waits to be reviewed, and until then it is on nobody’s screen and in nobody’s inbox. Your site-updates digest carries only updates that have actually been published, in the order they were written.",
-   "url": "https://www.operationsacademia.org/whats-new.html"
-  },
-  {
-   "id": "link-previews-that-work",
-   "date": "2026-08-18",
-   "title": "Sharing a link to the site now shows a proper card",
-   "summary": "Paste a page of Operations Academia into WhatsApp, Messenger, LinkedIn, Slack, Telegram or Signal and you now get a picture, a title and a sentence describing that page — the job postings, the universities map, a form, whichever one you sent. Only the front page carried any of that before; the other twenty-three produced a bare link. Two things that can spoil a preview were also put right: sixty-eight old copies of the site, including the 2014-2026 archive, were declaring the front page’s address as their own, and a folder of backups turned out to be public. Whether that is what had been spoiling the front page’s own preview we cannot prove from here — that answer lives inside Facebook — but it was wrong either way."
-  },
-  {
-   "id": "header-paints-once",
-   "date": "2026-08-18",
-   "title": "The header stops blinking, and the phone header carries our name",
-   "summary": "Every reload used to flash a header with no account control, which then appeared and shoved the row sideways, and your picture showed as a coloured disc of initials for half a second before the real photograph replaced it. The header now paints its finished form on the very first frame: your picture and the space your account control takes are both remembered from your last visit, so nothing moves and nothing is drawn twice. On phones the logo is the whole lockup again — the monogram AND \"Operations Academia\" — scaled to fit rather than cut in half. The pages are quicker with it: the sign-in library is no longer fetched at high priority ahead of the page's own content, the home page downloads its postings once instead of twice, the scripts no longer queue up in front of what you are reading, and the sections below the top of the page appear as soon as the page is parsed rather than after everything has loaded. The footer no longer carries the link to the 2014-2026 archive; the archive itself is untouched and still there.",
-   "url": "https://www.operationsacademia.org/"
-  },
-  {
-   "id": "postings-that-never-reached-the-site",
-   "date": "2026-08-18",
-   "title": "Postings that said “Live” but were not on the site",
-   "summary": "A posting could be accepted, show as live on your own postings page, and never appear among the job postings. The nightly check that guards the data against bad names was reading two old corrections as rules about every posting from those two universities — so one new posting that named a college but no department, and one that had its school typed into the department box, made the check fail, and a failed check stops publishing altogether. Both are fixed: a school entered in the department box is now filed as a school, the two corrections pin the postings they were about, and the affected postings publish normally.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "postings-appear-in-minutes",
-   "date": "2026-08-18",
-   "title": "Postings appear in minutes, not on the hour",
-   "summary": "A posting used to wait for a scheduled update, and an approved posting waited twice — once for the sheet read that publishes it and again for the build that merges it — so the site could take the best part of an hour to show something that had already been decided. Both waits are gone: saving a posting or approving one starts publishing immediately, and the two steps now run as one chain. The pages also ask for fresh data rather than showing whatever the browser stored last, which is what made the delay look longer still.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "account-menu-counts",
-   "date": "2026-08-18",
-   "title": "Your account menu says how many",
-   "summary": "The account menu listed “My postings” and “E-mail alerts” without saying how much was in either, so both read the same whether you had none or a dozen. Each now carries its number. Nothing is shown until it is known — a count that could not be read shows nothing rather than a misleading zero — and the number is corrected the moment you take a posting down or delete an alert.",
-   "url": "https://www.operationsacademia.org/my-postings.html"
-  },
-  {
-   "id": "houston-and-a-recovered-posting",
-   "date": "2026-08-18",
-   "title": "University of Houston, and a posting that had gone missing",
-   "summary": "Houston’s postings now read as one place: the C. T. Bauer College of Business, with its Department of Decision and Information Sciences and the Bauer Human-Centered Artificial Intelligence Institute both offered when you post a job. While making those names agree, a job posting disappeared — the site had been treating two advertisements from the same department on the same day as one submission repeated, and they had only been telling themselves apart because one of them had left its school blank. Two advertisements are two postings now, however alike their headings, and Bauer’s September 2025 pair are both back on the site.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "readable-in-dark-mode",
-   "date": "2026-08-18",
-   "title": "Dark mode: the parts that could not be read",
-   "summary": "In dark mode several things on the site were drawing pale text on a pale panel — the university dropdown on the posting form, the “Choose a file…” button, and the confirmation panel after saving a posting, whose message was invisible under a heading you could read. All of them are fixed, and the whole site was measured page by page in both modes rather than one report at a time: muted text (the footer, result counts, dates and hints) was very slightly too faint everywhere and is now a shade darker, and the Universities map’s cluster numbers and attribution line are legible too. A check now measures every kind of page in both modes on each change, so this cannot quietly come back.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "one-spelling-everywhere",
-   "date": "2026-08-18",
-   "title": "One spelling per university, school and department — on every page",
-   "summary": "The job postings had been tidied so that one department reads as one place; the Universities map and the recent-faculty list had not, and the map is where every posting’s “Further info” link lands. 213 of the map’s 254 entries and 9 faculty placements now name their university, school and department exactly the way the postings do, so a school reads the same wherever you meet it and the links between the pages find each other. Nine more schools were listed twice and are now listed once, including Cornell’s SC Johnson College, Stanford’s Graduate School of Business and UCD’s Smurfit school; and each department is named the way its own school names it — UT Dallas’s Operations Management Area, Yale’s Operations Department, Stanford’s Operations, Information, and Technology (OIT) area.",
-   "url": "https://www.operationsacademia.org/universities"
-  },
-  {
-   "id": "schools-named-as-they-name-themselves",
-   "date": "2026-08-18",
-   "title": "Each school’s department is listed the way that school names it",
-   "summary": "Six schools were listed with two names for one group — Yale’s “Operations” beside “Operations Management”, Miami Herbert’s “Management” beside “Management Science” — so one department read as two. Each now appears once, under the name its own school uses: Emory’s Information Systems & Operations Management, Purdue’s Supply Chain and Operations Management Faculty, UT Dallas’s Operations Management Area, UCD Smurfit’s and Miami Herbert’s Management Area, and Yale’s Operations Department. Two schools listed twice were merged with them — UCD Smurfit and Washington University’s Olin, each of which had arrived with its words in a different order from two sources. The postings already on the site were renamed to match, so a search finds all of a department’s postings together rather than half of them.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "jobs-search-several-universities",
-   "date": "2026-08-18",
-   "title": "Search the job postings for several universities at once",
-   "summary": "The job postings search now takes more than one name. Type a university or school and press Enter and it becomes a tag under the box, so you can add another — the list then shows postings from any of them, rather than making you search one at a time. Each tag can be removed on its own, and the address bar carries them all, so a search you share or bookmark comes back exactly as you left it. The box itself now says what it searches: University/School name. The filter bar also stays in line when tags are showing, instead of nudging the control above them out of place.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "schools-of-the-world",
-   "date": "2026-08-18",
-   "title": "Every operations school in the world, in the posting forms",
-   "summary": "The university, school and department boxes used to offer only the places that had already advertised here — 63 universities — so everybody else typed their name from scratch and the site slowly collected six spellings of one department. All three forms (a job, a candidate, a confirmed placement) now open on a directory of the world’s operations and supply chain schools: 302 universities, 227 schools and 189 departments, and the list is alphabetical, narrowing as you type. A university’s business school and its industrial engineering school stay separate, each with its own departments, and a school that had arrived under a long name from one source and a short one from another — “Sloan School of Management” beside “MIT Sloan School of Management” — is now one entry rather than two. Two smaller things went with it: the dropdown was unreadable in the dark theme, white text on a white card, and is not any more; and adding a spelling now corrects the postings already on the site instead of leaving one school under two names.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "postings-reviewed-before-publishing",
-   "date": "2026-08-18",
-   "title": "Job postings are checked by a human before they appear",
-   "summary": "Postings gathered automatically from the job market tracking sheet no longer go straight onto the site. Each one now waits for the maintainer, who checks it against the advertisement and corrects anything wrong before it is published — the closing date, the school or department name, the country, the type of position. The site derives several of those from the posting rather than being told them outright, so this is the step that makes sure what you read is what the employer actually advertised. Postings you already see are unaffected once re-approved, and nothing else about the jobs page changes.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "posting-form-cascade",
-   "date": "2026-08-18",
-   "title": "Posting a job: the university, school and department boxes now follow each other",
-   "summary": "The three name boxes on the job form are connected. Choose your university and the school box offers that university’s schools; choose one of those and the department box offers that school’s departments — so a posting takes a few seconds and lands under the names everybody else uses. They reach further than the postings, too: every university, school and department in the site’s own Universities directory is offered, so a university posting here for the first time gets the same help, and choosing a department the site has only ever seen in one school fills that school in above it. Nothing is closed off — typing searches every name on the site, and a school or department nobody has posted before is still accepted with one click. Searching got better in the same change: a search for “IEOR” or “SCM” now finds the department the site spells out in full, on the site and in the e-mail alerts alike, so an alert you set up under an older spelling keeps reaching you.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "one-spelling-per-school",
-   "date": "2026-08-18",
-   "title": "One spelling per university, school and department",
-   "summary": "The same department used to appear several times over, because postings spelled it differently — Tulane's was listed as “Freeman School of Business, Management Science”, “Freeman School of Business, Management Sciences Area” and “A.B. Freeman School of Business, Management Science Department”, among others, so five postings of one department read as five different places. Every posting now names its university, school and department the one way — the school's full official name, and the department without the “Department”, “Area” or “group” each school words differently — across the current postings and the whole past-markets archive. Older archive entries that packed the university, school and department into a single line have been split into the three, so they now merge with the postings from the same place. New postings are tidied the same way as they arrive, and the posting form offers the spelling the site already uses.",
-   "url": "https://www.operationsacademia.org/previous-markets"
-  },
-  {
-   "id": "higheredjobs-deadlines",
-   "date": "2026-08-18",
-   "title": "Closing dates, read from the advertisement",
-   "summary": "Postings that link to HigherEdJobs now show the closing date the advertisement itself states, instead of the catch-all “Until filled.” The tracking sheet the maintainer keeps has no deadline column for most rows, so the site had nothing better to say; the advertisement does say, in a field of its own, and it is now read daily and kept up to date. Postings genuinely left open still read “Until filled.”, and the Deadline filter on the jobs page — Closing soon, Expired, Until filled — sorts them accordingly.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "single-page-redesign-live",
-   "date": "2026-08-17",
-   "title": "A new Operations Academia — one page, light or dark",
-   "summary": "The site has been redesigned. Everything for the market under way now reads as one scrolling page — job postings, candidates, placements, the survey, resources, the FAQ — with a flat keyword bar at the top instead of menus, and a light or dark mode you choose and the site remembers. The full filterable job list has its own page, as does the Universities map, the recent-faculty list and the past-markets archive, all rebuilt in the new look. Nothing moved address: every link you have saved still works, and the 2014–2026 site is still at /v1/.",
-   "url": "https://www.operationsacademia.org/"
-  },
-  {
-   "id": "one-spelling-per-country",
-   "date": "2026-08-17",
-   "title": "One spelling per country, everywhere on the site",
-   "summary": "The same country used to appear several times in the Location filter, because postings and the imported archive spelled it differently — “USA”, “UK”, “Hong Kong SAR”, “The Netherlands”, “Shenzhen, China”. Filtering on the United Kingdom therefore showed only a quarter of the British postings. Every country is now published under one full name (“United States”, “United Kingdom”), across the current postings and the whole past-markets archive, and new postings are tidied the same way as they arrive. Links you had already saved, and e-mail alerts you set up under the old spelling, keep working unchanged.",
-   "url": "https://www.operationsacademia.org/jobs"
-  },
-  {
-   "id": "posting-forms-simpler",
-   "date": "2026-08-17",
-   "title": "Posting is simpler: every country listed, and no more “job market year” to work out",
-   "summary": "The country box on the job form now offers every country in the world, not just the three dozen that had posted before — and you can still type one that is not listed. The “Job market year” question is gone from the job and candidate forms: the site works the season out from the date and simply tells you which one your posting lands in. (Reporting a placement still asks, because an offer accepted in the spring and reported in the autumn belongs to the market it was accepted in.) Correcting an older posting now also keeps it in its own season instead of quietly moving it to the current one.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "jobs-open-until-deadline",
-   "date": "2026-08-17",
-   "title": "A job posting now stays listed until its deadline passes",
-   "summary": "Job postings used to disappear from the list when the job market year rolled over on 1 July, even when applications were still open — an advert posted in May with a September deadline vanished in July. Now a posting stays on the job postings page for as long as its closing date has not passed, whichever season it was filed in. Postings with no fixed deadline (“until filled”) still move to the past-markets archive when the new market year begins.",
-   "url": "https://www.operationsacademia.org/jobs"
-  },
-  {
-   "id": "merge-moves-every-posting",
-   "date": "2026-08-17",
-   "title": "Merging two accounts now moves every posting you own",
-   "summary": "If you ended up with two accounts — say Google once and ORCID another time — merging them now hands over your candidate profile and your placement reports along with your job postings, so nothing is left behind on the account that is removed. Also fixed: posting a job with the advert file attached (rather than linked) was refused by a too-tight database bound; attached files now go through.",
-   "url": "https://www.operationsacademia.org/my-postings"
-  },
-  {
-   "id": "legacy-tables-own-stack",
-   "date": "2026-08-16",
-   "title": "The Universities map, Past job postings and Recent faculty now run on the site itself",
-   "summary": "The last three vendor tables are gone: the Universities page is now the site's own interactive map (search, clustered pins, and per-school links into candidates, jobs and placements), Past job postings is a filterable archive of every recorded market — including seasons that were previously nowhere on the site — and Recent faculty keeps its familiar list with shareable filtered links. Every deep link that worked before still works.",
-   "url": "https://www.operationsacademia.org/universities"
-  },
-  {
-   "id": "cutover-new-site-live",
-   "date": "2026-08-16",
-   "title": "The new site is live — and the old one is archived at /v1",
-   "summary": "The rebuilt site now IS operationsacademia.org: every page, the job postings list, posting a job, e-mail alerts and feedback all run on the site's own machinery, with no third-party table service in the reading path. The previous version is preserved exactly as it was at operationsacademia.org/v1, for reference.",
-   "url": "https://www.operationsacademia.org/"
-  },
-  {
-   "id": "jobs-current-market-only",
-   "date": "2026-08-16",
-   "title": "The job postings page shows the market year under way",
-   "summary": "The list now carries exactly the season its title names: postings filed since 1 July, plus anything a school has already advertised for this market or the next. Previous seasons remain in the archive at /v1 and in the site's records.",
-   "url": "https://www.operationsacademia.org/jobs"
-  },
-  {
-   "id": "candidates-own-form",
-   "date": "2026-08-16",
-   "title": "Candidate profiles are posted on the site itself",
-   "summary": "Job-market candidates now create their profile directly on the site: sign in once, fill in the form, upload a CV and a research summary, and the profile appears on the Candidates page at the next update. Because the profile is tied to your account, you can come back to correct it, replace or remove your files, or take the profile down — none of which was possible before.",
-   "url": "https://www.operationsacademia.org/candidates"
-  },
-  {
-   "id": "placements-own-form",
-   "date": "2026-08-16",
-   "title": "Confirmed placements are reported on the site itself",
-   "summary": "Reporting a confirmed placement is now a form on the site: who, from which PhD program, joining which institution as what. The placement appears on the Placements page at the next update, and the person who reported it can correct or withdraw it.",
-   "url": "https://www.operationsacademia.org/placements"
-  },
-  {
-   "id": "whats-new-page",
-   "date": "2026-08-16",
-   "title": "A What's-new page, with e-mail updates you can subscribe to",
-   "summary": "About → What's new lists every change to the site, newest first — this page you are reading. It is generated from the same record the e-mail digests are sent from, so signing in and subscribing to site updates delivers exactly these entries to your inbox as they ship.",
-   "url": "https://www.operationsacademia.org/whats-new"
-  },
-  {
-   "id": "whole-site-in-v2",
-   "date": "2026-08-16",
-   "title": "Every page of the site is now in the new version",
-   "summary": "The new site used to hold only the rebuilt pages — job postings, posting a job, e-mail alerts and feedback — while everything else still pointed at the old one. Every remaining page has now been carried across, identical in content and look, so the whole site can be browsed in the new version from home page to footer without ever leaving it.",
-   "url": "https://www.operationsacademia.org/"
-  },
-  {
-   "id": "site-wide-review-fixes",
-   "date": "2026-08-16",
-   "title": "A site-wide review, and dozens of fixes",
-   "summary": "The whole of the new site was reviewed page by page and script by script. Among the fixes: the header's Feedback button no longer covers the navigation menu on smaller laptops; on a phone, signing in and out now works from the menu panel; searching inside a filter box types correctly; printed pages include each posting's details; filters can be combined without the menu closing after every tick; and e-mail alerts are delivered exactly once per posting.",
-   "url": "https://www.operationsacademia.org/jobs.html"
-  },
-  {
-   "id": "merge-duplicate-accounts",
-   "date": "2026-08-16",
-   "title": "Signed up twice? Merge the two accounts into one",
-   "summary": "You can sign in with Google, with ORCID, or with an e-mail address and a password — and until now each of those started a separate account, because ORCID shares no e-mail address for us to recognise you by. So did a second Gmail address. Two accounts meant your alerts on one and your job postings on the other. Edit profile now offers 'Merge this account into another of mine': you sign in to the one you want to keep, and everything moves across — your alerts with their history intact, your job postings still yours to correct or withdraw, and any details the account you keep was missing. Nothing is deleted until the move has succeeded. The same card also lets you attach a second sign-in to the account you already have, so it never happens again — and if we spot that an ORCID registration duplicates an account you already had, we say so and offer the merge instead of leaving you to find it.",
-   "url": "https://www.operationsacademia.org/"
-  },
-  {
-   "id": "jobs-filters-and-cards",
-   "date": "2026-08-16",
-   "title": "The job filters read as they always did, and the list feels it",
-   "summary": "The Deadline filter offers exactly the three choices the old table did — Closing soon, Expired and Until filled — so a posting whose closing date is still ahead is described the way it has always been described. A value you have chosen can now be removed by clicking anywhere on its blue tag, rather than having to hit the small × on it. And the posting under your pointer now lifts gently off the page, so it is obvious which one you are about to open.",
-   "url": "https://www.operationsacademia.org/jobs"
-  },
-  {
-   "id": "account-menu-and-profile",
-   "date": "2026-08-15",
-   "title": "A proper account menu, and a profile with your name on it",
-   "summary": "Signed-in visitors now get an account button in the header carrying their initials and their name, opening a menu with everything their account can do: post a job, e-mail alerts, edit profile, send feedback, sign out. A new profile card lets you set the name you are known by — until now the site could only greet you by half of your e-mail address. Posting a job also asks you to sign in or register up front, rather than after the form has been filled in.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "jobs-sheet-sync",
-   "date": "2026-08-15",
-   "title": "Every job posting is listed again",
-   "summary": "Postings submitted through the old form kept arriving after the new list was built from a one-off copy of the spreadsheet, so the new page had fallen behind the old one. The spreadsheet is now read automatically twice an hour and anything missing is added, so both lists show the same postings until the old form is retired.",
-   "url": "https://www.operationsacademia.org/jobs"
-  },
-  {
-   "id": "own-job-postings-table",
-   "date": "2026-08-15",
-   "title": "The job postings list is now our own",
-   "summary": "The job postings page no longer depends on a third-party table service. It is built from data held in the site's own repository, so it loads faster, keeps working if any vendor goes away, and can be improved whenever we like. Filtering behaves as before, with one addition: a filtered view now has its own web address, so you can bookmark or share exactly what you are looking at.",
-   "url": "https://www.operationsacademia.org/jobs"
-  },
-  {
-   "id": "post-a-job-form",
-   "date": "2026-08-15",
-   "title": "Posting a job no longer goes through a third-party form",
-   "summary": "Job postings are submitted on the site itself. You sign in once, and your posting appears on the list automatically, normally within the hour. Because it is tied to your account, you can come back to correct a deadline or a broken link, or withdraw the posting once the search closes — none of which was possible before.",
-   "url": "https://www.operationsacademia.org/post-a-job"
-  },
-  {
-   "id": "accounts-and-alerts",
-   "date": "2026-08-15",
-   "title": "Accounts, and e-mail alerts you control",
-   "summary": "You can now create a free account and subscribe to e-mail alerts: every new job posting, or only the ones matching filters you choose — a country, a rank, a type of school. You pick how often to hear from us, and every message carries a one-click unsubscribe.",
-   "url": "https://www.operationsacademia.org/alerts"
-  },
-  {
-   "id": "feedback-page",
-   "date": "2026-08-15",
-   "title": "A feedback page that actually closes the loop",
-   "summary": "Report a problem, attach a screenshot, and get a ticket number — no account needed. When the thing you reported is fixed, you get an e-mail telling you what was done and linking to it.",
-   "url": "https://www.operationsacademia.org/feedback"
-  }
- ]
+  "version": 1,
+  "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
+  "updates": [
+    {
+      "id": "messages-from-the-maintainer",
+      "date": "2026-08-24",
+      "title": "Messages between you and the site’s maintainer",
+      "summary": "Your personal area has a new “Messages” section. If the maintainer needs to reach you — about a posting, your candidate profile, or the site itself — the message appears there and you can reply to it in place, and the number beside “Messages” in your account menu says how many you have not read. It is entirely on the site: nothing is e-mailed to you, nothing you write is published, and nobody but the two of you can read it. To raise something yourself, Send feedback is still the way.",
+      "url": "https://www.operationsacademia.org/messages.html"
+    },
+    {
+      "id": "job-form-prefills-from-records",
+      "date": "2026-08-24",
+      "title": "The job form fills itself in from the site’s own records — and keeps them honest",
+      "summary": "Type your university into the posting form and everything the site’s records answer definitely is filled in for you: its one school, its type, the country of a single-campus university, and — once the department is named — the department’s own page link and the checklist of what your school offers (research seminars, a PhD programme, and so on). Only definite answers are filled: INSEAD lists two departments and campuses in three countries, so those stay yours to choose. The pre-filled department link asks you to verify it, and a correction updates the Universities directory for everyone the moment your posting is sent — the same record every future poster is then offered.",
+      "url": "https://www.operationsacademia.org/post-a-job.html"
+    },
+    {
+      "id": "candidate-affiliation-in-three",
+      "date": "2026-08-24",
+      "title": "The candidate form asks your affiliation the way the job form does",
+      "summary": "Creating your job-market profile now asks your affiliation as three questions instead of one box: your university (for example “Northwestern University”), your school, faculty or college (“Kellogg School of Management”), and your department, area or group (“Operations”). The same smart lists the job posting form uses narrow each answer as you type — choosing your university offers its schools, choosing a school offers its departments — and every name lands in the spelling the site already publishes. Your profile still shows one affiliation line, built from your answers, so nothing about the candidates page changes.",
+      "url": "https://www.operationsacademia.org/post-a-candidate.html"
+    },
+    {
+      "id": "one-candidate-profile-per-year",
+      "date": "2026-08-24",
+      "title": "One candidate profile per market year, files that stay current, and a shortcut to report your placement",
+      "summary": "Each registered candidate now has exactly one profile per job market year: if you have already filed one this season, the profile form simply reopens it for editing instead of creating a second. Replacing your CV with a newer upload keeps only the newest version — the superseded file is removed from our archive, so an old CV can never linger behind your profile. And once your position is confirmed, your own card on the candidates page offers a “Post confirmed placement” button — visible only to you, on your own profile — that takes you straight to the placements form. As before, only you (and the maintainer) can edit your profile.",
+      "url": "https://www.operationsacademia.org/post-a-candidate.html"
+    },
+    {
+      "id": "candidate-form-no-research-summary",
+      "date": "2026-08-24",
+      "title": "The candidate profile form is shorter, and asks for a lasting address",
+      "summary": "Creating your job-market profile no longer asks for a research summary — your CV, research areas and INFORMS day(s) are what hiring committees actually use, and profiles filed with a summary keep theirs. The form now asks for a personal e-mail address instead: a school address dies with the affiliation, and this is how we can still reach you about your profile in later years. It is never published — like the private note, it goes to the maintainer and nowhere else.",
+      "url": "https://www.operationsacademia.org/post-a-candidate.html"
+    },
+    {
+      "id": "universities-directory",
+      "date": "2026-08-24",
+      "title": "The Universities page is now a searchable, community-editable directory",
+      "summary": "One card per university — its business school, its engineering or other non-business school, and every department doing Operations in them — built from every posting ever made here plus the site’s curated records, with the interactive map kept as a second view. Any posting from a place the directory does not yet list creates its card automatically. Signed-in users can correct any card or add a department, and each card shows who last edited it and when.",
+      "url": "https://www.operationsacademia.org/universities.html"
+    },
+    {
+      "id": "edits-show-immediately",
+      "date": "2026-08-24",
+      "title": "An edit you save is on your screen immediately",
+      "summary": "Correcting a posting used to look like nothing had happened: the change was saved and publishing, but for the next minutes the jobs page went on showing the very text you had just fixed. Now the page you open after saving already shows your correction — and a posting you take down is already gone from the list — on the device you saved it from, while the site publishes it for everyone else within a few minutes exactly as before. What you see is what will publish: the same name-spelling and deadline rules the site applies are applied to the preview, and the published version takes over the moment it lands.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "two-apply-by-dates",
+      "date": "2026-08-23",
+      "title": "Every posting now shows two deadlines: suggested and final",
+      "summary": "Many searches have no fixed closing date yet still name the day that matters most — the first-review or full-consideration date (“First review of applications will begin on September 8, 2026”). Those postings used to read a bare “Until filled.” Every posting card now carries a “Suggested apply by” line beside the “Final apply by” one, the jobs page filters on each separately (Suggested deadline · Final deadline), and the posting form asks the two dates as two questions. The suggested date is also read automatically out of the prose postings already carry — dozens of live postings, Kansas’s included, gained theirs on day one — and a date the pipeline is unsure of is never guessed: the posting keeps reading “Until filled.”",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "approved-postings-publish-in-bulk",
+      "date": "2026-08-23",
+      "title": "A season's worth of approvals publishes, and one odd posting can no longer stop the site",
+      "summary": "449 job postings were approved in one sitting and none of them reached the site. One posting whose closing date and “Apply by” line had come apart was enough to stop the job market sheet from being read at all, and the daily build stopped behind it — so nothing published, with nothing on the site to say so. The review card now asks for the closing date once and shows the line it will publish underneath, so the two can never disagree. Several internal checks that were phrased too narrowly — one about two particular Houston postings, one that looked a university up by whichever spelling was most common that day — were catching perfectly good new postings. And a check that merely notices two similar department names now reports them instead of holding the whole site's data back: it still has to be settled, but not at the price of every posting waiting.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "postings-name-the-right-country",
+      "date": "2026-08-23",
+      "title": "Job postings are filed under the country they are actually in",
+      "summary": "Nine postings — at American, Canadian and Singaporean universities — were listed under Greece, so anyone filtering the job postings by the right country simply never saw them. The cause was the posting form itself: the “country” box invited the browser to fill in whoever was editing the posting’s own home country, quietly replacing what was there. The box no longer does that, the affected postings now name the right country, and every posting is checked against the campus address the site already holds for that university — so a posting that contradicts where its university is gets put right automatically. A university with campuses in two countries, like INSEAD, is deliberately left alone.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "job-review-source-tabs",
+      "date": "2026-08-23",
+      "title": "The job review desk splits by source, and the next market leads",
+      "summary": "The Admin area’s “Job postings to review” panel now has two tabs: auto-crawled postings from the job market tracking sheet, still held back until the maintainer approves them, and user-added postings made through the site’s own form — those stay live from the moment they are posted and are listed for a correcting look. Inside each tab the market-year filters remain, and every list now ranks the newest job market first — next season’s postings before the current one’s. For posters nothing changes: a posting made on the site still publishes within minutes."
+    },
+    {
+      "id": "posting-form-name-guard",
+      "date": "2026-08-23",
+      "title": "The posting form keeps one name per place — and knows what kind of place it is",
+      "summary": "Three improvements to the university → school → department pickers on the posting form. Typing a name that is really a slight respelling of one the site already lists — a typo, a plural, the same words in another order — now draws a “Did you mean” row pointing at the existing entry, right above the option to add yours as genuinely new: a second spelling would split a place’s postings across two entries in every filter. The “Type of institution” box now follows the names you choose — pick “Lee Business School” and it fills in Business School by itself, though a value you set yourself is never overruled. And a brand-new university, school or department still lands on the site’s lists within minutes of posting, offered to the next poster with its schools and departments cascading correctly.",
+      "url": "https://www.operationsacademia.org/post-a-job.html"
+    },
+    {
+      "id": "name-corrections",
+      "date": "2026-08-23",
+      "title": "Spotted a wrongly published school name? You can now fix it",
+      "summary": "The site publishes every university, school and department under one spelling — but the spelling it settled on can simply be wrong, and until now only the maintainer could repair it. A signed-in poster can now press “Suggest a correction” on the posting form, say what the name should be, and once the maintainer approves it the whole site follows: every posting that carried the old spelling is renamed, the form’s pickers stop offering it, and future postings typed under the old name publish under the corrected one — usually within the hour. Nothing renames itself: every suggestion waits for review first.",
+      "url": "https://www.operationsacademia.org/post-a-job.html"
+    },
+    {
+      "id": "postings-publish-and-alert-in-minutes",
+      "date": "2026-08-23",
+      "title": "New postings publish in minutes, and alert e-mails follow them",
+      "summary": "A job posting made through the site — or approved from the maintainer's review queue — now reaches the job postings page within a couple of minutes, and an e-mail alert set to “as soon as something appears” is sent minutes after that instead of by the top of the next hour. Postings crawled from the job market tracking sheet are also checked against the jobs already listed before the maintainer reviews them, so a job posted here and later picked up by the crawl is flagged as a possible duplicate rather than slipping onto the page twice.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "candidate-alerts",
+      "date": "2026-08-23",
+      "title": "E-mail alerts now cover the job market candidates",
+      "summary": "The alerts page gained a third thing to be told about: new job market candidates. Profiles are collected now and shown all at once on the reveal date, and nothing is e-mailed about any profile before the site itself shows it. On the day the profiles go live, subscribers get one short, friendly note saying the candidates are up — never a listing of the whole catalogue — and from then on a note whenever a new candidate posts a public profile, which now also reaches the site within about a minute of being posted.",
+      "url": "https://www.operationsacademia.org/alerts.html"
+    },
+    {
+      "id": "admin-area",
+      "date": "2026-08-23",
+      "title": "An Admin area gathers everything waiting for review",
+      "summary": "The maintainer now has one page — the Admin area, linked from the account menu with a count of how many items are waiting — that gathers everything on the site needing a decision: job postings crawled from the tracking sheet and held for approval, candidate profiles filed for the coming reveal (which could be counted but not seen before this), open feedback tickets, and site updates awaiting publication. For everyone else nothing changes: the feedback page is now purely the form, and every queue stays readable by the maintainer’s account alone."
+    },
+    {
+      "id": "postings-name-their-school",
+      "date": "2026-08-21",
+      "title": "Job postings now name the school as well as the department",
+      "summary": "Postings crawled from the job market tracking sheet used to arrive with a department and no school — “University of California, Berkeley · Operations and Information Technology Management”, with the Haas School missing — because the sheet has one column for the hiring unit. The site’s own directory of operations and supply chain schools already knows which department sits in which school, so that answer is filled in automatically wherever it is unambiguous, and the directory itself gained several schools. Searching by school name in the University filter now finds these postings too.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "whats-new-reviewed-and-tidy",
+      "date": "2026-08-18",
+      "title": "“What’s new” is reviewed before it is published, and a removed update really goes",
+      "summary": "Two changes to this update list. An update taken down now leaves the list at once, instead of staying on the page struck through — so the list only ever shows what is current. Nothing is lost: the removed ones sit in a collapsed panel under the list that only the maintainer sees, one click from being put back. And a newly logged update is no longer public the moment it is written: it waits to be reviewed, and until then it is on nobody’s screen and in nobody’s inbox. Your site-updates digest carries only updates that have actually been published, in the order they were written.",
+      "url": "https://www.operationsacademia.org/whats-new.html"
+    },
+    {
+      "id": "link-previews-that-work",
+      "date": "2026-08-18",
+      "title": "Sharing a link to the site now shows a proper card",
+      "summary": "Paste a page of Operations Academia into WhatsApp, Messenger, LinkedIn, Slack, Telegram or Signal and you now get a picture, a title and a sentence describing that page — the job postings, the universities map, a form, whichever one you sent. Only the front page carried any of that before; the other twenty-three produced a bare link. Two things that can spoil a preview were also put right: sixty-eight old copies of the site, including the 2014-2026 archive, were declaring the front page’s address as their own, and a folder of backups turned out to be public. Whether that is what had been spoiling the front page’s own preview we cannot prove from here — that answer lives inside Facebook — but it was wrong either way."
+    },
+    {
+      "id": "header-paints-once",
+      "date": "2026-08-18",
+      "title": "The header stops blinking, and the phone header carries our name",
+      "summary": "Every reload used to flash a header with no account control, which then appeared and shoved the row sideways, and your picture showed as a coloured disc of initials for half a second before the real photograph replaced it. The header now paints its finished form on the very first frame: your picture and the space your account control takes are both remembered from your last visit, so nothing moves and nothing is drawn twice. On phones the logo is the whole lockup again — the monogram AND \"Operations Academia\" — scaled to fit rather than cut in half. The pages are quicker with it: the sign-in library is no longer fetched at high priority ahead of the page's own content, the home page downloads its postings once instead of twice, the scripts no longer queue up in front of what you are reading, and the sections below the top of the page appear as soon as the page is parsed rather than after everything has loaded. The footer no longer carries the link to the 2014-2026 archive; the archive itself is untouched and still there.",
+      "url": "https://www.operationsacademia.org/"
+    },
+    {
+      "id": "postings-that-never-reached-the-site",
+      "date": "2026-08-18",
+      "title": "Postings that said “Live” but were not on the site",
+      "summary": "A posting could be accepted, show as live on your own postings page, and never appear among the job postings. The nightly check that guards the data against bad names was reading two old corrections as rules about every posting from those two universities — so one new posting that named a college but no department, and one that had its school typed into the department box, made the check fail, and a failed check stops publishing altogether. Both are fixed: a school entered in the department box is now filed as a school, the two corrections pin the postings they were about, and the affected postings publish normally.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "postings-appear-in-minutes",
+      "date": "2026-08-18",
+      "title": "Postings appear in minutes, not on the hour",
+      "summary": "A posting used to wait for a scheduled update, and an approved posting waited twice — once for the sheet read that publishes it and again for the build that merges it — so the site could take the best part of an hour to show something that had already been decided. Both waits are gone: saving a posting or approving one starts publishing immediately, and the two steps now run as one chain. The pages also ask for fresh data rather than showing whatever the browser stored last, which is what made the delay look longer still.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "account-menu-counts",
+      "date": "2026-08-18",
+      "title": "Your account menu says how many",
+      "summary": "The account menu listed “My postings” and “E-mail alerts” without saying how much was in either, so both read the same whether you had none or a dozen. Each now carries its number. Nothing is shown until it is known — a count that could not be read shows nothing rather than a misleading zero — and the number is corrected the moment you take a posting down or delete an alert.",
+      "url": "https://www.operationsacademia.org/my-postings.html"
+    },
+    {
+      "id": "houston-and-a-recovered-posting",
+      "date": "2026-08-18",
+      "title": "University of Houston, and a posting that had gone missing",
+      "summary": "Houston’s postings now read as one place: the C. T. Bauer College of Business, with its Department of Decision and Information Sciences and the Bauer Human-Centered Artificial Intelligence Institute both offered when you post a job. While making those names agree, a job posting disappeared — the site had been treating two advertisements from the same department on the same day as one submission repeated, and they had only been telling themselves apart because one of them had left its school blank. Two advertisements are two postings now, however alike their headings, and Bauer’s September 2025 pair are both back on the site.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "readable-in-dark-mode",
+      "date": "2026-08-18",
+      "title": "Dark mode: the parts that could not be read",
+      "summary": "In dark mode several things on the site were drawing pale text on a pale panel — the university dropdown on the posting form, the “Choose a file…” button, and the confirmation panel after saving a posting, whose message was invisible under a heading you could read. All of them are fixed, and the whole site was measured page by page in both modes rather than one report at a time: muted text (the footer, result counts, dates and hints) was very slightly too faint everywhere and is now a shade darker, and the Universities map’s cluster numbers and attribution line are legible too. A check now measures every kind of page in both modes on each change, so this cannot quietly come back.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "one-spelling-everywhere",
+      "date": "2026-08-18",
+      "title": "One spelling per university, school and department — on every page",
+      "summary": "The job postings had been tidied so that one department reads as one place; the Universities map and the recent-faculty list had not, and the map is where every posting’s “Further info” link lands. 213 of the map’s 254 entries and 9 faculty placements now name their university, school and department exactly the way the postings do, so a school reads the same wherever you meet it and the links between the pages find each other. Nine more schools were listed twice and are now listed once, including Cornell’s SC Johnson College, Stanford’s Graduate School of Business and UCD’s Smurfit school; and each department is named the way its own school names it — UT Dallas’s Operations Management Area, Yale’s Operations Department, Stanford’s Operations, Information, and Technology (OIT) area.",
+      "url": "https://www.operationsacademia.org/universities"
+    },
+    {
+      "id": "schools-named-as-they-name-themselves",
+      "date": "2026-08-18",
+      "title": "Each school’s department is listed the way that school names it",
+      "summary": "Six schools were listed with two names for one group — Yale’s “Operations” beside “Operations Management”, Miami Herbert’s “Management” beside “Management Science” — so one department read as two. Each now appears once, under the name its own school uses: Emory’s Information Systems & Operations Management, Purdue’s Supply Chain and Operations Management Faculty, UT Dallas’s Operations Management Area, UCD Smurfit’s and Miami Herbert’s Management Area, and Yale’s Operations Department. Two schools listed twice were merged with them — UCD Smurfit and Washington University’s Olin, each of which had arrived with its words in a different order from two sources. The postings already on the site were renamed to match, so a search finds all of a department’s postings together rather than half of them.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "jobs-search-several-universities",
+      "date": "2026-08-18",
+      "title": "Search the job postings for several universities at once",
+      "summary": "The job postings search now takes more than one name. Type a university or school and press Enter and it becomes a tag under the box, so you can add another — the list then shows postings from any of them, rather than making you search one at a time. Each tag can be removed on its own, and the address bar carries them all, so a search you share or bookmark comes back exactly as you left it. The box itself now says what it searches: University/School name. The filter bar also stays in line when tags are showing, instead of nudging the control above them out of place.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "schools-of-the-world",
+      "date": "2026-08-18",
+      "title": "Every operations school in the world, in the posting forms",
+      "summary": "The university, school and department boxes used to offer only the places that had already advertised here — 63 universities — so everybody else typed their name from scratch and the site slowly collected six spellings of one department. All three forms (a job, a candidate, a confirmed placement) now open on a directory of the world’s operations and supply chain schools: 302 universities, 227 schools and 189 departments, and the list is alphabetical, narrowing as you type. A university’s business school and its industrial engineering school stay separate, each with its own departments, and a school that had arrived under a long name from one source and a short one from another — “Sloan School of Management” beside “MIT Sloan School of Management” — is now one entry rather than two. Two smaller things went with it: the dropdown was unreadable in the dark theme, white text on a white card, and is not any more; and adding a spelling now corrects the postings already on the site instead of leaving one school under two names.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "postings-reviewed-before-publishing",
+      "date": "2026-08-18",
+      "title": "Job postings are checked by a human before they appear",
+      "summary": "Postings gathered automatically from the job market tracking sheet no longer go straight onto the site. Each one now waits for the maintainer, who checks it against the advertisement and corrects anything wrong before it is published — the closing date, the school or department name, the country, the type of position. The site derives several of those from the posting rather than being told them outright, so this is the step that makes sure what you read is what the employer actually advertised. Postings you already see are unaffected once re-approved, and nothing else about the jobs page changes.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "posting-form-cascade",
+      "date": "2026-08-18",
+      "title": "Posting a job: the university, school and department boxes now follow each other",
+      "summary": "The three name boxes on the job form are connected. Choose your university and the school box offers that university’s schools; choose one of those and the department box offers that school’s departments — so a posting takes a few seconds and lands under the names everybody else uses. They reach further than the postings, too: every university, school and department in the site’s own Universities directory is offered, so a university posting here for the first time gets the same help, and choosing a department the site has only ever seen in one school fills that school in above it. Nothing is closed off — typing searches every name on the site, and a school or department nobody has posted before is still accepted with one click. Searching got better in the same change: a search for “IEOR” or “SCM” now finds the department the site spells out in full, on the site and in the e-mail alerts alike, so an alert you set up under an older spelling keeps reaching you.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "one-spelling-per-school",
+      "date": "2026-08-18",
+      "title": "One spelling per university, school and department",
+      "summary": "The same department used to appear several times over, because postings spelled it differently — Tulane's was listed as “Freeman School of Business, Management Science”, “Freeman School of Business, Management Sciences Area” and “A.B. Freeman School of Business, Management Science Department”, among others, so five postings of one department read as five different places. Every posting now names its university, school and department the one way — the school's full official name, and the department without the “Department”, “Area” or “group” each school words differently — across the current postings and the whole past-markets archive. Older archive entries that packed the university, school and department into a single line have been split into the three, so they now merge with the postings from the same place. New postings are tidied the same way as they arrive, and the posting form offers the spelling the site already uses.",
+      "url": "https://www.operationsacademia.org/previous-markets"
+    },
+    {
+      "id": "higheredjobs-deadlines",
+      "date": "2026-08-18",
+      "title": "Closing dates, read from the advertisement",
+      "summary": "Postings that link to HigherEdJobs now show the closing date the advertisement itself states, instead of the catch-all “Until filled.” The tracking sheet the maintainer keeps has no deadline column for most rows, so the site had nothing better to say; the advertisement does say, in a field of its own, and it is now read daily and kept up to date. Postings genuinely left open still read “Until filled.”, and the Deadline filter on the jobs page — Closing soon, Expired, Until filled — sorts them accordingly.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "single-page-redesign-live",
+      "date": "2026-08-17",
+      "title": "A new Operations Academia — one page, light or dark",
+      "summary": "The site has been redesigned. Everything for the market under way now reads as one scrolling page — job postings, candidates, placements, the survey, resources, the FAQ — with a flat keyword bar at the top instead of menus, and a light or dark mode you choose and the site remembers. The full filterable job list has its own page, as does the Universities map, the recent-faculty list and the past-markets archive, all rebuilt in the new look. Nothing moved address: every link you have saved still works, and the 2014–2026 site is still at /v1/.",
+      "url": "https://www.operationsacademia.org/"
+    },
+    {
+      "id": "one-spelling-per-country",
+      "date": "2026-08-17",
+      "title": "One spelling per country, everywhere on the site",
+      "summary": "The same country used to appear several times in the Location filter, because postings and the imported archive spelled it differently — “USA”, “UK”, “Hong Kong SAR”, “The Netherlands”, “Shenzhen, China”. Filtering on the United Kingdom therefore showed only a quarter of the British postings. Every country is now published under one full name (“United States”, “United Kingdom”), across the current postings and the whole past-markets archive, and new postings are tidied the same way as they arrive. Links you had already saved, and e-mail alerts you set up under the old spelling, keep working unchanged.",
+      "url": "https://www.operationsacademia.org/jobs"
+    },
+    {
+      "id": "posting-forms-simpler",
+      "date": "2026-08-17",
+      "title": "Posting is simpler: every country listed, and no more “job market year” to work out",
+      "summary": "The country box on the job form now offers every country in the world, not just the three dozen that had posted before — and you can still type one that is not listed. The “Job market year” question is gone from the job and candidate forms: the site works the season out from the date and simply tells you which one your posting lands in. (Reporting a placement still asks, because an offer accepted in the spring and reported in the autumn belongs to the market it was accepted in.) Correcting an older posting now also keeps it in its own season instead of quietly moving it to the current one.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "jobs-open-until-deadline",
+      "date": "2026-08-17",
+      "title": "A job posting now stays listed until its deadline passes",
+      "summary": "Job postings used to disappear from the list when the job market year rolled over on 1 July, even when applications were still open — an advert posted in May with a September deadline vanished in July. Now a posting stays on the job postings page for as long as its closing date has not passed, whichever season it was filed in. Postings with no fixed deadline (“until filled”) still move to the past-markets archive when the new market year begins.",
+      "url": "https://www.operationsacademia.org/jobs"
+    },
+    {
+      "id": "merge-moves-every-posting",
+      "date": "2026-08-17",
+      "title": "Merging two accounts now moves every posting you own",
+      "summary": "If you ended up with two accounts — say Google once and ORCID another time — merging them now hands over your candidate profile and your placement reports along with your job postings, so nothing is left behind on the account that is removed. Also fixed: posting a job with the advert file attached (rather than linked) was refused by a too-tight database bound; attached files now go through.",
+      "url": "https://www.operationsacademia.org/my-postings"
+    },
+    {
+      "id": "legacy-tables-own-stack",
+      "date": "2026-08-16",
+      "title": "The Universities map, Past job postings and Recent faculty now run on the site itself",
+      "summary": "The last three vendor tables are gone: the Universities page is now the site's own interactive map (search, clustered pins, and per-school links into candidates, jobs and placements), Past job postings is a filterable archive of every recorded market — including seasons that were previously nowhere on the site — and Recent faculty keeps its familiar list with shareable filtered links. Every deep link that worked before still works.",
+      "url": "https://www.operationsacademia.org/universities"
+    },
+    {
+      "id": "cutover-new-site-live",
+      "date": "2026-08-16",
+      "title": "The new site is live — and the old one is archived at /v1",
+      "summary": "The rebuilt site now IS operationsacademia.org: every page, the job postings list, posting a job, e-mail alerts and feedback all run on the site's own machinery, with no third-party table service in the reading path. The previous version is preserved exactly as it was at operationsacademia.org/v1, for reference.",
+      "url": "https://www.operationsacademia.org/"
+    },
+    {
+      "id": "jobs-current-market-only",
+      "date": "2026-08-16",
+      "title": "The job postings page shows the market year under way",
+      "summary": "The list now carries exactly the season its title names: postings filed since 1 July, plus anything a school has already advertised for this market or the next. Previous seasons remain in the archive at /v1 and in the site's records.",
+      "url": "https://www.operationsacademia.org/jobs"
+    },
+    {
+      "id": "candidates-own-form",
+      "date": "2026-08-16",
+      "title": "Candidate profiles are posted on the site itself",
+      "summary": "Job-market candidates now create their profile directly on the site: sign in once, fill in the form, upload a CV and a research summary, and the profile appears on the Candidates page at the next update. Because the profile is tied to your account, you can come back to correct it, replace or remove your files, or take the profile down — none of which was possible before.",
+      "url": "https://www.operationsacademia.org/candidates"
+    },
+    {
+      "id": "placements-own-form",
+      "date": "2026-08-16",
+      "title": "Confirmed placements are reported on the site itself",
+      "summary": "Reporting a confirmed placement is now a form on the site: who, from which PhD program, joining which institution as what. The placement appears on the Placements page at the next update, and the person who reported it can correct or withdraw it.",
+      "url": "https://www.operationsacademia.org/placements"
+    },
+    {
+      "id": "whats-new-page",
+      "date": "2026-08-16",
+      "title": "A What's-new page, with e-mail updates you can subscribe to",
+      "summary": "About → What's new lists every change to the site, newest first — this page you are reading. It is generated from the same record the e-mail digests are sent from, so signing in and subscribing to site updates delivers exactly these entries to your inbox as they ship.",
+      "url": "https://www.operationsacademia.org/whats-new"
+    },
+    {
+      "id": "whole-site-in-v2",
+      "date": "2026-08-16",
+      "title": "Every page of the site is now in the new version",
+      "summary": "The new site used to hold only the rebuilt pages — job postings, posting a job, e-mail alerts and feedback — while everything else still pointed at the old one. Every remaining page has now been carried across, identical in content and look, so the whole site can be browsed in the new version from home page to footer without ever leaving it.",
+      "url": "https://www.operationsacademia.org/"
+    },
+    {
+      "id": "site-wide-review-fixes",
+      "date": "2026-08-16",
+      "title": "A site-wide review, and dozens of fixes",
+      "summary": "The whole of the new site was reviewed page by page and script by script. Among the fixes: the header's Feedback button no longer covers the navigation menu on smaller laptops; on a phone, signing in and out now works from the menu panel; searching inside a filter box types correctly; printed pages include each posting's details; filters can be combined without the menu closing after every tick; and e-mail alerts are delivered exactly once per posting.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
+      "id": "merge-duplicate-accounts",
+      "date": "2026-08-16",
+      "title": "Signed up twice? Merge the two accounts into one",
+      "summary": "You can sign in with Google, with ORCID, or with an e-mail address and a password — and until now each of those started a separate account, because ORCID shares no e-mail address for us to recognise you by. So did a second Gmail address. Two accounts meant your alerts on one and your job postings on the other. Edit profile now offers 'Merge this account into another of mine': you sign in to the one you want to keep, and everything moves across — your alerts with their history intact, your job postings still yours to correct or withdraw, and any details the account you keep was missing. Nothing is deleted until the move has succeeded. The same card also lets you attach a second sign-in to the account you already have, so it never happens again — and if we spot that an ORCID registration duplicates an account you already had, we say so and offer the merge instead of leaving you to find it.",
+      "url": "https://www.operationsacademia.org/"
+    },
+    {
+      "id": "jobs-filters-and-cards",
+      "date": "2026-08-16",
+      "title": "The job filters read as they always did, and the list feels it",
+      "summary": "The Deadline filter offers exactly the three choices the old table did — Closing soon, Expired and Until filled — so a posting whose closing date is still ahead is described the way it has always been described. A value you have chosen can now be removed by clicking anywhere on its blue tag, rather than having to hit the small × on it. And the posting under your pointer now lifts gently off the page, so it is obvious which one you are about to open.",
+      "url": "https://www.operationsacademia.org/jobs"
+    },
+    {
+      "id": "account-menu-and-profile",
+      "date": "2026-08-15",
+      "title": "A proper account menu, and a profile with your name on it",
+      "summary": "Signed-in visitors now get an account button in the header carrying their initials and their name, opening a menu with everything their account can do: post a job, e-mail alerts, edit profile, send feedback, sign out. A new profile card lets you set the name you are known by — until now the site could only greet you by half of your e-mail address. Posting a job also asks you to sign in or register up front, rather than after the form has been filled in.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "jobs-sheet-sync",
+      "date": "2026-08-15",
+      "title": "Every job posting is listed again",
+      "summary": "Postings submitted through the old form kept arriving after the new list was built from a one-off copy of the spreadsheet, so the new page had fallen behind the old one. The spreadsheet is now read automatically twice an hour and anything missing is added, so both lists show the same postings until the old form is retired.",
+      "url": "https://www.operationsacademia.org/jobs"
+    },
+    {
+      "id": "own-job-postings-table",
+      "date": "2026-08-15",
+      "title": "The job postings list is now our own",
+      "summary": "The job postings page no longer depends on a third-party table service. It is built from data held in the site's own repository, so it loads faster, keeps working if any vendor goes away, and can be improved whenever we like. Filtering behaves as before, with one addition: a filtered view now has its own web address, so you can bookmark or share exactly what you are looking at.",
+      "url": "https://www.operationsacademia.org/jobs"
+    },
+    {
+      "id": "post-a-job-form",
+      "date": "2026-08-15",
+      "title": "Posting a job no longer goes through a third-party form",
+      "summary": "Job postings are submitted on the site itself. You sign in once, and your posting appears on the list automatically, normally within the hour. Because it is tied to your account, you can come back to correct a deadline or a broken link, or withdraw the posting once the search closes — none of which was possible before.",
+      "url": "https://www.operationsacademia.org/post-a-job"
+    },
+    {
+      "id": "accounts-and-alerts",
+      "date": "2026-08-15",
+      "title": "Accounts, and e-mail alerts you control",
+      "summary": "You can now create a free account and subscribe to e-mail alerts: every new job posting, or only the ones matching filters you choose — a country, a rank, a type of school. You pick how often to hear from us, and every message carries a one-click unsubscribe.",
+      "url": "https://www.operationsacademia.org/alerts"
+    },
+    {
+      "id": "feedback-page",
+      "date": "2026-08-15",
+      "title": "A feedback page that actually closes the loop",
+      "summary": "Report a problem, attach a screenshot, and get a ticket number — no account needed. When the thing you reported is fixed, you get an e-mail telling you what was done and linking to it.",
+      "url": "https://www.operationsacademia.org/feedback"
+    }
+  ]
 }

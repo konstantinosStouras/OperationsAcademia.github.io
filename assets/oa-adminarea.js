@@ -183,7 +183,12 @@
         pendingNews(db).then(function (p) {
           return p === null ? null : p.length;
         })['catch'](nul),
-        countOf(db.collection('nameFixes').where('status', '==', 'pending'))['catch'](nul)
+        countOf(db.collection('nameFixes').where('status', '==', 'pending'))['catch'](nul),
+        /* People who have replied and are waiting for an answer. This IS a
+           queue — something the maintainer can clear — unlike the roster
+           beside it, which is a statistic. One equality filter on a top-level
+           collection, so it needs no composite index. */
+        countOf(db.collection(OAFB.col.messages).where('needsAdmin', '==', true))['catch'](nul)
       ]);
     }).then(function (r) {
       var total = 0, known = 0;
@@ -196,7 +201,7 @@
          answer still sums what is known — each queue is independent, and
          withholding three known numbers over one refused read helps nobody. */
       return { jobs: r[0], candidates: r[1], feedback: r[2], news: r[3], names: r[4],
-               total: known ? total : null };
+               messages: r[5], total: known ? total : null };
     });
   }
 
@@ -223,7 +228,8 @@
     { key: 'candidates', label: 'Candidate profiles held', to: '#oa-aa-cands' },
     { key: 'feedback', label: 'Open feedback tickets', to: '#oa-inbox' },
     { key: 'news', label: 'Updates awaiting publication', to: '#oa-aa-news' },
-    { key: 'names', label: 'Name corrections suggested', to: '#oa-aa-names' }
+    { key: 'names', label: 'Name corrections suggested', to: '#oa-aa-names' },
+    { key: 'messages', label: 'Message replies waiting', to: '#oa-aa-users' }
   ];
 
   /* The registered-user count, kept beside lastCounts rather than in it so no
@@ -241,12 +247,14 @@
         '<span class="oa-aa-tile-n">' + (known ? n : '?') + '</span>' +
         '<span class="oa-aa-tile-l">' + esc(t.label) + '</span></a>';
     }).join('') +
-      /* The sixth card is a STATISTIC, not a queue: it links to no panel, is
-         never "due", and stays out of every total — a span, so it cannot even
-         read as something to press. */
-      '<span class="oa-aa-tile oa-aa-tile-stat">' +
+      /* The last card is a STATISTIC, not a queue: never "due", and out of
+         every total, so no badge arithmetic can sum a figure nobody can
+         clear. It WAS a span, deliberately, because it opened nothing — since
+         2026-08-24 it opens the roster, so it is a link like the others and
+         keeps only the class that holds it out of the sums. */
+      '<a class="oa-aa-tile oa-aa-tile-stat" href="#oa-aa-users">' +
         '<span class="oa-aa-tile-n">' + (typeof lastUsers === 'number' ? lastUsers : '?') + '</span>' +
-        '<span class="oa-aa-tile-l">Registered users</span></span>';
+        '<span class="oa-aa-tile-l">Registered users</span></a>';
   }
 
   /* -------------------------------------------------------- candidate cards */
@@ -608,10 +616,10 @@
     if (!lastCounts) return;
     if (groups) lastCounts.candidates = groups.held.length;
     var total = 0, known = 0;
-    ['jobs', 'candidates', 'feedback', 'news', 'names'].forEach(function (k) {
+    ['jobs', 'candidates', 'feedback', 'news', 'names', 'messages'].forEach(function (k) {
       if (typeof lastCounts[k] === 'number') { total += lastCounts[k]; known++; }
     });
-    // all four unknown is UNKNOWN — never write a 0 over an honest cache
+    // all of them unknown is UNKNOWN — never write a 0 over an honest cache
     lastCounts.total = known ? total : null;
     paintTiles(lastCounts);
     if (known && window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('admin', total);
@@ -705,6 +713,16 @@
   window.OAAdminArea = {
     /** The one number beside "Admin area" — shared with oa-accounts.js. */
     pendingCounts: pendingCounts,
+    /** Repaint the summary strip. oa-users.js calls it after sending or
+        answering, so the "Message replies waiting" tile follows what the
+        panel below it now shows. Best-effort: a refused read keeps the
+        previous honest figure rather than replacing it with a zero. */
+    refresh: function () {
+      return pendingCounts().then(function (c) {
+        lastCounts = c;
+        paintTiles(c);
+      })['catch'](function () { /* keep what is on screen */ });
+    },
     /* the pure pieces, for the selftest */
     pure: {
       candGroupOf: candGroupOf,

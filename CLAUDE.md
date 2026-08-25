@@ -862,6 +862,117 @@ maintainer's desk, and an `og:url` on it would claim an identity for a page
 that answers only the admin. Drawing or hiding any of it grants nothing — the
 collections are admin-read in `_firestore.rules`, which is the authorisation.
 
+## Who has registered, and messaging them
+
+The Admin area could **count** registered accounts and learn nothing else about
+them. That was not an oversight — it was three separate deliberate decisions
+meeting: `registeredUsers/{uid}` is contentless by contract (`hasOnly(['t'])`),
+`profiles/{uid}` is owner-only with no admin clause, and **the e-mail address is
+not in Firestore at all**; it lives in the Firebase Auth record, which no browser
+can read for anyone but itself. So the maintainer saw "42" and had no way to know
+who they were or to reach any of them.
+
+    userDirectory/{uid}        the roster row — owner-written, maintainer-read
+    messages/{uid}             one thread per account, keyed on the uid
+    messages/{uid}/items/{id}  the messages themselves
+
+**The address cannot be forged.** `email` must equal `request.auth.token.email`
+— the pin-it-to-the-writer trick `directoryEdits.by` already uses — so a roster
+row says what the account really signs in as rather than whatever its owner
+typed. `first` is **write-once** (`request.resource.data.first == resource.data.first`
+on update), which is why the owner may read their own row: the browser has to
+send the stored value back, and it costs one read per session to do it.
+
+**Identity could not go into `registeredUsers`, and the reason is the sibling
+site.** On `/lit/` the same collection is PUBLIC-read, so a name and an address
+there would be world-readable. The two sites are kept in the same SHAPE, so
+neither puts identity in the tally.
+
+**`registeredUsers.t` is not a joined date.** It is `set()` once per session, so
+it is *last seen*; the roster says "First seen" and "Last seen" and never
+"Joined". The true joined date is Auth's own `creationTime`, which only the Admin
+SDK can read.
+
+**The threads are TOP-LEVEL, and that is load-bearing.** Firestore ORs every
+matching rule, so under the blanket `match /users/{uid}/{document=**} { allow
+read, write: if isOwner(uid); }` a narrower rule can only ever GRANT more: the
+owner's blanket write could not be taken away, and a user could forge a message
+from the maintainer in their own inbox or clear the flag saying they owe a reply.
+A top-level collection carrying a `uid` field is the shape `jobSubmissions` uses,
+and the only one the maintainer can LIST at all. Keying the thread on the uid
+also means the doc id IS its owner's uid, so `isOwner(uid)` on the items
+subcollection is the id-composition guard in its strongest form — a stranger
+cannot post into someone else's thread.
+
+**It is IN-APP, not e-mail** (owner, 2026-08-24). Nothing here sends mail: there
+is no SMTP path, no `List-Unsubscribe`, no delivery to stamp. That is also what
+makes "no opt-out" defensible — a message lands in the person's own area on the
+site, not in their inbox. The addresses carry `mailto:` links so the maintainer
+can write from their own client when e-mail is what they want, and **the Feedback
+page remains how a VISITOR starts a conversation**; this direction is the
+maintainer's, so a person with no thread sees "no messages" and a pointer to
+Feedback rather than a compose box the rules would refuse.
+
+**A reply is a queue; the roster is a statistic.** "Message replies waiting"
+joined `pendingCounts()` and the badge's key list (now six), because it is
+something the maintainer can clear. The roster did not — the Registered-users
+card stays out of every total for the reason its comment gives, that a figure
+nobody can clear would inflate the badge for ever. It DID become a link, since
+it now has somewhere to go; it was a `<span>` precisely because it opened
+nothing.
+
+**The user's badge counts what is UNREAD**, not how many messages the page
+lists — the one badge on this site whose number is deliberately not the number
+of cards below it, because a read conversation is not an empty one. It is one
+`get()` of the person's own thread, so no query and no composite index.
+
+`assets/oa-users.js` is its own file on purpose: `oa-accounts.js` fetches
+`oa-adminarea.js` in the maintainer's browser on **every** page to compute the
+badge, and roster rendering, sorting and CSV do not belong in that download.
+**There was no CSV precedent in this repo**; `csvCell` quotes every field,
+doubles internal quotes and defuses a leading `=`, `+`, `-` or `@`, because these
+are names people typed and a spreadsheet would otherwise execute one.
+
+The merge deletes the duplicate's roster row (or one person is listed twice for
+ever, the bug the `registeredUsers` delete exists to prevent) but deliberately
+NOT its thread: only the maintainer may delete one, and nothing here sends
+anything, so an orphan costs no e-mail — unlike the alert subscriptions, which is
+why those must go. The Admin area lists such a thread under "Threads with no
+account". The merge hunk is byte-identical in `/v2/assets/oa-accounts.js`, which
+`selftest.mjs` pins, so the collection name is read defensively there
+(`(OAFB.col && OAFB.col.userDirectory) || 'userDirectory'`) — the archive's
+frozen `col` map does not carry it.
+
+**A reply needs a thread to reply to.** The items rule requires the parent
+thread to `exists()` before an owner may write into it. Without that, an owner
+could write unbounded documents under their own uid that no thread head points
+at — invisible on a page that LISTS threads, and so an unbounded write channel
+nobody would ever see. It also makes "only the maintainer opens a conversation"
+true in the rules rather than only in the copy, at one billed read per reply.
+
+**A broadcast is not an answer.** Sending to somebody who has replied leaves
+`needsAdmin` as it was; only opening the thread and pressing "Mark answered"
+clears it. Clearing it on send would drop an unanswered reply out of the queue
+silently. The message and its bookkeeping go as ONE batched write, because half
+of them landing would leave the recipient holding a message the roster does not
+know about and the panel calling it undelivered.
+
+**An account with no e-mail claim still gets a row.** The address is pinned to
+`request.auth.token.email` but may be ABSENT — a provider sign-in need not carry
+one, and demanding it would silently leave exactly those accounts off the
+roster.
+
+**Inert until the rules are redeployed** (nothing in CI does it):
+`firebase deploy --only firestore:rules --project operations-academia`. Both
+panels say so rather than showing a bare permission-denied.
+
+Tests: `testUsersAndMessages` in `_scraper/selftest.mjs` (the rules against the
+module BOTH WAYS for all three key sets, the pinned address, the write-once
+`first`, the owner's two narrowed updates, CSV injection, nulls-last sorting,
+and the wiring on all four pages) and the roster/messaging block in
+`_scraper/page-test.mjs` (the money path in a real browser, hostile input
+included, plus the 390px gate).
+
 ## What "immediate" costs, and where the waiting used to be
 
 A posting is decided in Firestore and served from `data/` by GitHub Pages, so

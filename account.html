@@ -204,6 +204,12 @@
             <p>What we e-mail you about, and how often. Every message has a one-click
             unsubscribe.</p>
           </a>
+          <a class="v3-pa-card" href="messages.html">
+            <h3><span class="v3-ico" aria-hidden="true">&#128172;</span> Messages</h3>
+            <span class="v3-pa-n" id="pa-n-messages">&mdash;</span>
+            <p>Messages between you and the site&rsquo;s maintainer. The number is how
+            many you have not read yet.</p>
+          </a>
           <a class="v3-pa-card" href="post-a-job.html">
             <h3><span class="v3-ico" aria-hidden="true">&#128221;</span> Post a job</h3>
             <p>Advertise an academic opening. It publishes automatically, normally within an
@@ -371,11 +377,21 @@
           var alertsQ = db.collection(OAFB.col.users).doc(user.uid)
             .collection(OAFB.col.alerts).get()
             .then(function (s) { return s.size; }).catch(function () { return null; });
-          return Promise.all([jobsQ, alertsQ]);
+          /* Unread messages: ONE get() of the person's own thread, which is
+             keyed on their uid — no query, no index. A thread nobody has
+             opened is zero, not an error. */
+          var msgQ = db.collection(OAFB.col.messages).doc(user.uid).get()
+            .then(function (d) {
+              if (!d || !d.exists) return 0;
+              var n = (d.data() || {}).userUnread;
+              return typeof n === 'number' ? n : 0;
+            }).catch(function () { return null; });
+          return Promise.all([jobsQ, alertsQ, msgQ]);
         }).then(function (r) {
-          var jobs = r[0], alerts = r[1];
+          var jobs = r[0], alerts = r[1], msgs = r[2];
           if (jobs !== null) document.getElementById('pa-n-jobs').textContent = String(jobs);
           if (alerts !== null) document.getElementById('pa-n-alerts').textContent = String(alerts);
+          if (msgs !== null) document.getElementById('pa-n-messages').textContent = String(msgs);
           // holding nothing at all → the friendly nudge card above the grid
           if (jobs === 0 && alerts === 0) empty.hidden = false;
         }).catch(function () { /* counts are decoration — the links still work */ });

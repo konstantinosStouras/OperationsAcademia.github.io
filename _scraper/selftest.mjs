@@ -4025,6 +4025,205 @@ async function testDirectoryModel() {
     'directory: the checklist is the NEWEST posting\'s, whole — carried through the school-less fold');
 }
 
+/* The registered-users roster and the maintainer<->account message threads
+   (owner, 2026-08-24). Two collections, two surfaces and one badge, so this
+   pins: the rules against what the modules write BOTH WAYS, the address that
+   cannot be forged, the queue/statistic split the badge depends on, and the
+   wiring on all four pages. */
+async function testUsersAndMessages() {
+  const U = require(path.join(HERE, '..', 'assets', 'oa-users.js'));
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const users = await readFile(path.join(HERE, '..', 'assets', 'oa-users.js'), 'utf8');
+  const msgs = await readFile(path.join(HERE, '..', 'assets', 'oa-messages.js'), 'utf8');
+  const accts = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+  const area = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+
+  const keysOf = (block, from) => new Set(
+    (block.slice(block.indexOf('hasOnly([', from), block.indexOf('])', block.indexOf('hasOnly([', from)))
+      .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
+
+  /* ------------------------------------------------------ the roster row */
+
+  const dir = rules.slice(rules.indexOf('match /userDirectory/'),
+    rules.indexOf('// ------------------------------------------------------------ messages'));
+  ok(dir.length > 200, 'the rules carry a userDirectory block');
+  ok(/allow read: if isAdmin\(\) \|\| isOwner\(uid\);/.test(dir),
+    'the maintainer reads the roster; a person reads the one row about themselves ' +
+    '— which is also what lets the browser send `first` back unchanged');
+  ok(/request\.resource\.data\.email == request\.auth\.token\.email/.test(dir),
+    'THE ADDRESS CANNOT BE FORGED: `email` is pinned to the caller’s own auth ' +
+    'token, so a roster row says what the account really signs in as');
+  ok(/request\.resource\.data\.first == resource\.data\.first/.test(dir),
+    '`first` is write-once — a client cannot back-date itself in the roster');
+  ok(/allow delete: if isOwner\(uid\);/.test(dir),
+    'an account withdraws its OWN row and only its own, exactly as it does its ' +
+    'registeredUsers mark, so the roster lists people rather than sign-ins');
+
+  const dirKeys = keysOf(dir, 0);
+  for (const k of U.ROW_KEYS) {
+    ok(dirKeys.has(k), `oa-users.js reads userDirectory."${k}", and the rules allow writing it`);
+  }
+  eq([...dirKeys].sort(), [...U.ROW_KEYS].sort(),
+    'the userDirectory rule allows exactly the roster’s four fields — a key with ' +
+    'no rule is a permission-denied nobody can debug, a rule with no writer is dead');
+
+  /* …and what the WRITER actually writes, read out of its own source. Pinning
+     the rules against a declared list leaves that half unchecked: the list
+     could agree with the rules perfectly while syncDirectoryRow had stopped
+     sending one of them (testRowOverrides records the same lesson). */
+  const syncSrc = accts.slice(accts.indexOf('function syncDirectoryRow'),
+    accts.indexOf('function loadProfile'));
+  ok(syncSrc.length > 200, 'the roster writer is where this thinks it is');
+  for (const k of U.ROW_KEYS) {
+    ok(new RegExp('(^|[{;\\s])' + k + ':|row\\.' + k + '\\s*=').test(syncSrc),
+      `syncDirectoryRow really writes "${k}" — not merely declares it`);
+  }
+
+  /* ---------------------------------------------------------- the threads */
+
+  const thr = rules.slice(rules.indexOf('match /messages/{uid}'),
+    rules.indexOf('// ------------------------------------------------------ identity keys'));
+  ok(thr.length > 400, 'the rules carry a messages block');
+  ok(/allow read: if isAdmin\(\) \|\| isOwner\(uid\);/.test(thr),
+    'a thread is readable by its two parties and nobody else');
+
+  const threadKeys = keysOf(thr, 0);
+  eq([...threadKeys].sort(), [...U.THREAD_KEYS].sort(),
+    'the thread head allows exactly what oa-users.js writes on it');
+
+  const itemsAt = thr.indexOf('match /items/');
+  ok(itemsAt > 0, 'the messages themselves are a subcollection of their thread');
+  const itemKeys = keysOf(thr, itemsAt);
+  eq([...itemKeys].sort(), [...U.ITEM_KEYS].sort(),
+    'a message allows exactly {from, body, t}');
+
+  const items = thr.slice(itemsAt);
+  ok(/isAdmin\(\) && request\.resource\.data\.from == 'admin'/.test(items)
+    && /isOwner\(uid\) && request\.resource\.data\.from == 'user'/.test(items),
+    '`from` is pinned to whoever is actually writing — neither side can put ' +
+    'words in the other’s mouth');
+  ok(/allow update, delete: if isAdmin\(\);/.test(items),
+    'only the maintainer may retract a message: a thread whose history either ' +
+    'party can rewrite is not a record of anything');
+  ok(/exists\(\/databases\/\$\(database\)\/documents\/messages\/\$\(uid\)\)/.test(items),
+    'A REPLY NEEDS A THREAD TO REPLY TO — without it an owner could write ' +
+    'unbounded documents under their own uid that no thread head points at, ' +
+    'invisible on a page that lists threads');
+  ok(/allow delete: if isAdmin\(\);/.test(thr.slice(0, itemsAt)),
+    'and the maintainer can remove an orphaned conversation, which the ghost ' +
+    'panel offers a button for');
+  ok(/oa-u-del/.test(users) && /function deleteThread/.test(users),
+    '…a button that exists: the panel used to say "open one to read or delete ' +
+    'it" with no delete control anywhere');
+  ok(/\(!\('email' in request\.resource\.data\)/.test(dir),
+    'a sign-in with no e-mail claim still gets a roster row — demanding one ' +
+    'would silently omit exactly those accounts');
+  ok(dir.indexOf('function rowOk()') < dir.indexOf('allow create'),
+    'rowOk() is declared before the allow statements that call it');
+  ok(/needsAdmin: !!\(prev && prev\.needsAdmin\)/.test(users),
+    'A BROADCAST IS NOT AN ANSWER: sending to somebody who has replied leaves ' +
+    'them in the queue — only reading the thread clears it');
+  ok(/d\.batch\(\)/.test(users),
+    'the message and its bookkeeping are ONE write — half of them landing ' +
+    'would leave a message the roster does not know about');
+  ok(/var draft = \(\$\('oa-u-body'\) \|\| \{\}\)\.value/.test(users),
+    'and ticking a recipient does not throw away the message already typed');
+  ok(/request\.resource\.data\.body\.size\(\) <= 5000/.test(items)
+    && U.MAXLEN.body === 5000,
+    'the body cap in the rules and the one both compose boxes enforce are the same number');
+
+  /* The owner's two narrowed updates. THE QUEUE CANNOT BE EMPTIED BY THE
+     PERSON WAITING IN IT: a reply may only RAISE needsAdmin, and marking a
+     thread read may touch nothing but userUnread. */
+  ok(/affectedKeys\(\)\s*\n?\s*\.hasOnly\(\['userUnread'\]\)/.test(thr)
+    && /request\.resource\.data\.userUnread == 0/.test(thr),
+    'the owner may mark their thread read — userUnread to zero, and nothing else');
+  ok(/hasOnly\(\['lastAt', 'lastFrom', 'needsAdmin'\]\)/.test(thr)
+    && /request\.resource\.data\.lastFrom == 'user'/.test(thr)
+    && /request\.resource\.data\.needsAdmin == true/.test(thr),
+    'and may record a reply, which must say it came from them and must RAISE ' +
+    'the maintainer’s flag — never lower it');
+
+  /* NOT under users/{uid}: Firestore ORs matching rules, so the blanket
+     owner-write there could only ever be widened, and a user could forge a
+     maintainer message in their own inbox. */
+  ok(!/match \/users\/\{uid\}\/messages/.test(rules),
+    'the threads are TOP-LEVEL — under users/{uid} the blanket owner-write ' +
+    'could not be narrowed and a reply-only constraint would be unenforceable');
+
+  /* ------------------------------------------ a statistic is not a queue */
+
+  ok(/collection\(OAFB\.col\.messages\)\.where\('needsAdmin', '==', true\)/.test(area),
+    'the badge counts the people WAITING for a reply — one equality filter, so ' +
+    'no composite index');
+  ok(!/collection\(OAFB\.col\.userDirectory\)/.test(area),
+    'and never the roster itself: a figure nobody can clear must not inflate the badge');
+
+  /* ---------------------------------------------------- what a CSV cannot do */
+
+  eq(U.csvCell('=cmd|calc'), '"\'=cmd|calc"',
+    'a CSV cell defuses a leading = — these are names people typed, and a ' +
+    'spreadsheet would otherwise EXECUTE one');
+  for (const c of ['+', '-', '@']) {
+    ok(U.csvCell(c + 'x').indexOf('"\'' + c) === 0, `…and a leading ${c}`);
+  }
+  eq(U.csvCell('a"b'), '"a""b"', 'and doubles an internal quote');
+
+  /* ------------------------------------------------- what a sort cannot do */
+
+  const rows = [{ n: 'b', v: 2 }, { n: 'a', v: null }, { n: 'c', v: 1 }];
+  eq(U.sortRows(rows, (r) => r.v, 'asc').map((r) => r.n).join(''), 'cba',
+    'sortRows: ascending, and the unknown value LAST');
+  eq(U.sortRows(rows, (r) => r.v, 'desc').map((r) => r.n).join(''), 'bca',
+    'sortRows: descending, and the unknown value last in THAT direction too — ' +
+    'an account with no name has nothing to compare, which is not "sorts first"');
+  eq(U.fold('École'), 'ecole', 'names fold for sorting, accents and all');
+
+  /* ------------------------------------------------------------- the wiring */
+
+  const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(admin.includes('id="oa-aa-users"') && admin.includes('assets/oa-users.js'),
+    'the Admin area carries the roster panel and loads the module that draws it');
+  ok(/<script defer src="assets\/oa-users\.js">/.test(admin),
+    '…deferred, like every other script on the page');
+  ok(!/loadScript\('assets\/oa-users\.js'/.test(accts)
+    && !/renderTable|csvOf|oa-u-table/.test(area),
+    'the roster lives in its OWN file and the badge path never fetches it: ' +
+    'oa-accounts.js pulls oa-adminarea.js into EVERY page in the maintainer’s ' +
+    'browser, and roster rendering, sorting and CSV do not belong in that download');
+
+  const page = await readFile(path.join(HERE, '..', 'messages.html'), 'utf8');
+  ok(page.includes('assets/oa-messages.js') && page.includes('id="oa-msg-list"'),
+    'messages.html mounts the reader’s side');
+  ok(page.includes('My personal area'),
+    'and is a personal-area page, with that area’s own kicker');
+  ok(/OAAccounts\.setCount\('messages'/.test(msgs),
+    'the page corrects the badge from the thread it has already loaded — the ' +
+    'exact-where-the-data-is-loaded rule my-postings and alerts follow');
+  ok(/data-count="messages"/.test(accts),
+    'the account menu carries the Messages badge');
+  ok(/href="messages\.html">Messages<\/a>/.test(accts),
+    'and the mobile sheet does too — a menu change missed there hides the ' +
+    'feature entirely on a phone');
+  ok(/col\.userDirectory\)[\s\S]{0,80}\.doc\(dupUid\)\.delete\(\)/.test(accts)
+    || /userDirectory'\)\s*\n?\s*\.doc\(dupUid\)\.delete\(\)/.test(accts),
+    'the account merge retires the duplicate’s roster row, or one person is ' +
+    'listed twice for ever — the reason its registeredUsers mark goes too');
+
+  ok(/userDirectory: 'userDirectory'/.test(
+    await readFile(path.join(HERE, '..', 'assets', 'oa-firebase.js'), 'utf8')),
+    'both collection names live in OAFB.col, so a rename is one line there and ' +
+    'one in the rules');
+
+  /* Disclosed, like usageSessions before it: this is identity the maintainer
+     can read, and a privacy policy that does not say so is wrong. */
+  const priv = await readFile(path.join(HERE, '..', 'privacy-policy.html'), 'utf8');
+  ok(/sign\s+in\s+with,\s+and\s+when\s+your\s+account\s+was\s+first\s+and\s+last\s+seen/
+    .test(priv),
+    'the Privacy Policy discloses the roster');
+  ok(/Messages/.test(priv), '…and the messages');
+}
+
 async function testDirectoryWiring() {
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8');
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
@@ -7072,12 +7271,12 @@ async function testAdminArea() {
   ok(/collection\(OAFB\.col\.registered\)/.test(js),
     'the Registered-users card counts the registeredUsers tally — the marks ' +
     'every sign-in writes and the account merge retires');
-  ok(js.includes("['jobs', 'candidates', 'feedback', 'news', 'names']"),
-    'the badge sums exactly the five queues — the registered-user statistic ' +
+  ok(js.includes("['jobs', 'candidates', 'feedback', 'news', 'names', 'messages']"),
+    'the badge sums exactly the six queues — the registered-user statistic ' +
     'is beside them, never among them');
-  ok(!/r\[5\]|users:\s*r\[/.test(js.slice(js.indexOf('function pendingCounts'),
+  ok(!/users:\s*r\[/.test(js.slice(js.indexOf('function pendingCounts'),
       js.indexOf('the summary strip'))),
-    'pendingCounts stays the five queues — every page’s badge refresh must ' +
+    'pendingCounts stays QUEUES only — every page’s badge refresh must ' +
     'not pay a read for a number only the admin page shows');
   ok(/match \/registeredUsers\/\{uid\}[\s\S]*?allow read: if isAdmin\(\);/.test(rules),
     'registeredUsers is admin-read — the figure is the maintainer’s, not the ' +
@@ -7334,6 +7533,7 @@ if (isMain(import.meta.url)) {
   await testNewsReview();
   await testNameFixes();
   await testAdminArea();
+  await testUsersAndMessages();
   await testRemovalSafety();
   await testMirrorLifecycle();
   await testRefLessTakedown();

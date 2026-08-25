@@ -1408,7 +1408,22 @@
       .then(function () {
         return Promise.all([
           db.collection(OAFB.col.profiles).doc(dupUid).delete().catch(function () {}),
-          db.collection(OAFB.col.registered).doc(dupUid).delete().catch(function () {})
+          db.collection(OAFB.col.registered).doc(dupUid).delete().catch(function () {}),
+          /* …and the roster row, for the same reason as the tally beside it:
+             deleting a sign-in does not delete its Firestore data, so a row
+             left behind would list one person twice on the Admin area for
+             ever. Both are owner-deletes, done here while we can still write
+             as the duplicate.
+
+             The duplicate's message THREAD is deliberately NOT deleted. Only
+             the maintainer may delete one (a thread whose history either
+             party can erase is not a record of anything), and nothing here
+             sends anything, so an orphan costs no e-mail — unlike the alert
+             subscriptions above, which is why those must go. The Admin area
+             renders a thread whose roster row has gone as exactly that, and
+             the maintainer can remove it there. */
+          db.collection((OAFB.col && OAFB.col.userDirectory) || 'userDirectory')
+            .doc(dupUid).delete().catch(function () {})
         ]);
       })
       .then(function () {
