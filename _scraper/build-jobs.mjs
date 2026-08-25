@@ -840,7 +840,13 @@ async function main() {
      (2026-08-24, from 03:14). The ingests strip too; this is the merged-set
      backstop, the healCountry pattern. */
   const rows = visible.map((r) => stripRowEmails(healReviewDate(healCountry(r, byCountry))));
-  const recountried = rows.filter((r, i) => r !== visible[i]);
+  /* BY VALUE, not by identity. `healCountry` returns the row itself when it
+     changes nothing, but `stripRowEmails` spreads unconditionally — so every
+     row was a new object and this counted ALL of them, every run, then named
+     the first eight as though they were the healed ones. It read
+     "541 posting(s) healed … CUHK, PolyU, Tulane" on a run that healed none of
+     them, which is worse than saying nothing. */
+  const recountried = rows.filter((r, i) => serialise([r]) !== serialise([visible[i]]));
   if (recountried.length) {
     log(`${recountried.length} posting(s) healed against the directory or their own ` +
         'deadline prose: ' +
@@ -889,8 +895,33 @@ async function main() {
      so on a normal run ("every posting has a document") they read "+95 new"
      when one posting is new and six were edited. Computed once, used for both
      the log and the admin e-mail, so the two can never tell different
-     stories. */
-  const changes = collectChanges(existing, freshVisible, [],
+     stories.
+
+     IT IS `rows`, NOT `freshVisible` — the rows about to be WRITTEN, not the
+     raw ones read from the sources (owner, 2026-08-25: "too many emails daily
+     with the title [OA] Job postings changed: 22 edited … you are not editing
+     these jobs all the time, right?").
+
+     `freshVisible` is what the documents and the workbook SAY; `rows` is what
+     this file will CONTAIN — the same rows after the merge, the collapse and
+     every heal the build applies on the way out (healCountry, healReviewDate,
+     stripRowEmails, healPlace, and mergeRows' own preservation of `addedAt`).
+     Those heals are the whole point: the source keeps saying what it always
+     said, and the build keeps correcting it. So diffing the served file
+     against the RAW rows reported every correction as a fresh edit, on every
+     write, for ever — 23 of them at the time of writing, of which 17 were the
+     `addedAt` bookkeeping stamp that mergeRows deliberately carries over, and
+     the rest UCLA's two-deadline split, a canonicalised department, a
+     regenerated "Further info" link. Nobody had touched any of them.
+
+     The same slip made the log lie in the other direction: `+12 new` on a run
+     that added 3, because nine of the twelve were duplicates the collapse
+     folded away after the count was taken. Counting what is written says 3.
+
+     A genuine edit still reports: if a poster changes a posting, `rows`
+     differs from `existing` and the e-mail goes out — which is what it is
+     for. */
+  const changes = collectChanges(existing, rows, [],
     existing.filter((r) => applicable.some((x) => specMatches(x, r))).map((r) => r.id));
 
   const before = serialise(existing);
@@ -902,7 +933,9 @@ async function main() {
     log(`jobs.json: +${changes.added} new, ${changes.edits.length} edited, ` +
         `${changes.takedowns.length} taken down  (${rows.length} total)`);
     const known = new Set(existing.map((r) => (r.ref ? 'ref:' + r.ref : 'id:' + r.id)));
-    for (const r of freshVisible) {
+    // `rows` again, for the reason above: a duplicate the collapse folded away
+    // was never added, and listing it here named a posting nobody could find.
+    for (const r of rows) {
       if (!known.has(r.ref ? 'ref:' + r.ref : 'id:' + r.id)) {
         log(`  + ${r.ref || r.id}  ${r.institution}`);
       }

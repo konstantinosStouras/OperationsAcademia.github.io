@@ -1098,6 +1098,59 @@ echoed card on the rendered jobs page. A posting's identity (`id`, `year`,
 `posted`) is deliberately not echoable — an edit does not move a posting,
 and the echo must not either.
 
+## The admin change e-mail reports what CHANGED, not what was healed
+
+"[OA] Job postings changed: 22 edited", daily, for postings nobody had touched
+(owner, 2026-08-25: *"you are not editing these jobs all the time, right? then
+why the emails?"*). Two independent causes, and together they accounted for all
+23 of the phantom edits measured against the live data.
+
+**One: the diff was taken against the WRONG SIDE of the pipeline.**
+`build-jobs.mjs` computed `collectChanges(existing, freshVisible, …)` —
+`freshVisible` being the rows as the DOCUMENTS and the WORKBOOK state them,
+while the file it then writes is `rows`: the same postings after the merge, the
+collapse, and every heal the build applies on the way out (`healCountry`,
+`healReviewDate`, `stripRowEmails`, `healPlace`, and mergeRows' preservation of
+`addedAt`). Those heals are the whole point — the source keeps saying what it
+always said and the build keeps correcting it — so diffing the served file
+against the RAW rows reported every correction as a fresh edit on every write,
+for ever. UCLA's suggested/final deadline split, a canonicalised department, a
+regenerated "Further info" link: all permanent, none of them an edit.
+
+It is `collectChanges(existing, rows, …)` now, which is the honest comparison —
+the previous served file against the one about to replace it — and it fixes a
+second symptom of the same slip: the log **overcounted new postings in the
+other direction**, announcing `+12 new` on the run that added 3, because nine
+of the twelve were duplicates `collapseSameDay` folded away after the count was
+taken. The `+ ref` listing under it iterates `rows` for the same reason; it had
+been naming postings nobody could then find on the site.
+
+**Two: `addedAt` was diffed at all.** It records when the dataset first saw a
+posting, it is the only cursor the e-mail alerts have, and `mergeRows` carries
+it over from the previous row precisely so a re-read never re-stamps it. Nobody
+edits it. It is skipped in `diffRows` beside `id` and `adPending` now — 17 of
+the 23 were this one field, and the block that sends the e-mail already claimed
+"bookkeeping writes never produce an e-mail", which is only true with both
+halves in place.
+
+**A genuine edit still mails**, which is the point of the feature: if a poster
+or the maintainer changes a posting, `rows` differs from `existing` and the
+before/after goes out. Measured after the fix: an unchanged rebuild reports 0.
+
+While proving it, a third defect in the same block: the run log's
+`N posting(s) healed against the directory or their own deadline prose` counted
+by OBJECT IDENTITY (`r !== visible[i]`). `healCountry` returns the row itself
+when it changes nothing, but `stripRowEmails` spreads unconditionally — so every
+row was a new object, the line reported ALL 541 every run, and then named the
+first eight as though they were the healed ones. It compares by value now. A log
+line that names innocent rows is worse than no log line: it is what made those
+eight postings look like the ones being edited.
+
+Pinned by `testChanges` in `selftest.mjs` — the `addedAt` skip, an unchanged
+rebuild reporting nothing, a collapsed row never counted as new, and the
+build's own source read back to check it diffs `rows` and never `freshVisible`
+again (reproducing it for real needs Firestore and the workbook).
+
 ## A text search holds SEVERAL terms
 
 Every `type: 'text'` filter in `assets/oa-list.js` takes more than one term:
