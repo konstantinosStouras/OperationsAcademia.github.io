@@ -1200,6 +1200,125 @@ for (const [name, expect] of [
   ok(posted.yearNote.includes(`${marketYear() - 1}\u2013${marketYear()}`),
     `the form SAYS which season the posting lands in (${marketYear() - 1}-${marketYear()}), so nothing is hidden`);
 
+  /* -- the site's records pre-fill the form (owner, 2026-08-24) ------------
+
+     Typing INSEAD must fill what the records answer definitely \u2014 its one
+     school, its unanimous type \u2014 and leave the department (two on record)
+     and the country (three campuses) to the poster. Choosing a department
+     must surface its page link FROM THE OVERLAY (a signed-in correction
+     reaches the next poster), and correcting that link must file a
+     directoryEdits document when the posting is sent. Driven against the
+     live data/directory.json, so this breaks if INSEAD's rows ever stop
+     saying what this scenario needs them to say \u2014 which is the point. */
+
+  const DS_ROW = 'insead__school-of-business__decision-sciences';
+  const prefilled = await onSite('post-a-job.html', {
+    user: keptUser,
+    docs: [{ path: 'directoryEdits/' + DS_ROW, data: {
+      rowId: DS_ROW, by: 'someone-else', name: 'A. User', t: 5,
+      deptUrl: 'https://edited.example/ds',
+    } }],
+  }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'INSEAD');
+    await q.waitForFunction(() => document.getElementById('f-school').value !== '',
+      null, { timeout: 8000 });
+    const afterUni = await q.evaluate(() => ({
+      school: document.getElementById('f-school').value,
+      unit: document.getElementById('f-unit').value,
+      type: document.getElementById('f-type').value,
+      country: document.getElementById('f-country').value,
+    }));
+
+    await q.fill('#f-unit', 'Decision Sciences');
+    await q.waitForFunction(() => document.getElementById('f-deptUrl').value !== '',
+      null, { timeout: 8000 });
+    const link = await q.evaluate(() => ({
+      deptUrl: document.getElementById('f-deptUrl').value,
+      note: document.getElementById('f-deptUrl-note').textContent,
+    }));
+
+    // the poster corrects the link, finishes the posting, and sends it
+    await q.fill('#f-deptUrl', 'https://corrected.example/ds');
+    await q.fill('#f-country', 'France');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    await q.check('input[name="levels"][value="Assistant Professor"]');
+    await q.check('#f-untilFilled');
+    await q.fill('#f-firstName', 'Kon');
+    await q.fill('#f-lastName', 'Stouras');
+    await q.fill('#f-email', 'kon@example.edu');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    await q.waitForFunction((row) => {
+      const d = window.__fb.dump()['directoryEdits/' + row];
+      return !!d && d.deptUrl === 'https://corrected.example/ds';
+    }, DS_ROW, { timeout: 8000 });
+    return {
+      afterUni, link,
+      editDoc: await q.evaluate((row) =>
+        window.__fb.dump()['directoryEdits/' + row], DS_ROW),
+    };
+  });
+  eq(prefilled.afterUni.school, 'School of Business',
+    'v3 post-a-job: INSEAD\u2019s ONE school is pre-filled from the site\u2019s records');
+  eq(prefilled.afterUni.type, 'Business School',
+    'v3 post-a-job: \u2026and so is its unanimous type');
+  eq(prefilled.afterUni.unit, '',
+    'v3 post-a-job: two departments on record \u2014 the department stays the poster\u2019s');
+  eq(prefilled.afterUni.country, '',
+    'v3 post-a-job: three campus countries \u2014 the country stays the poster\u2019s');
+  eq(prefilled.link.deptUrl, 'https://edited.example/ds',
+    'v3 post-a-job: the department\u2019s link is pre-filled from the OVERLAID record ' +
+    '\u2014 a signed-in correction reaches the next poster');
+  ok(/records/.test(prefilled.link.note),
+    'v3 post-a-job: \u2026with a note asking the poster to verify it');
+  eq(prefilled.editDoc.deptUrl, 'https://corrected.example/ds',
+    'v3 post-a-job: the corrected link is filed into directoryEdits when the posting is sent');
+  eq(prefilled.editDoc.by, KEPT,
+    'v3 post-a-job: \u2026attributed to the poster, never to whoever edited before');
+  eq(prefilled.editDoc.rowId, DS_ROW,
+    'v3 post-a-job: \u2026as a MERGE onto the row\u2019s own document, where the page reads it');
+
+  /* -- a pre-fill mark never outlives its value (the CI race) --------------
+
+     The failure the first CI run caught, made deterministic: the records
+     fill Tulane's one department and MARK it; the poster then overtypes it,
+     re-scopes the school, and picks the very string the stale mark still
+     holds \u2014 all inside ONE task, so no resolve timer can run in between,
+     which is exactly the interleaving CI produced under load. The mark must
+     be retired ON THE EVENT (reconcile in oa-uniinfo.js), or the pending
+     resolve reads the pick as its own stale fill and clears a department
+     the poster just chose. */
+  const race = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'Tulane University');
+    await q.waitForFunction(() =>
+      document.getElementById('f-unit').value === 'Management Science' &&
+      document.getElementById('f-unit').getAttribute('data-oa-auto-unit') === 'Management Science',
+    null, { timeout: 8000 });
+    await q.evaluate(() => {
+      const put = (id, v) => {
+        const el = document.getElementById(id);
+        el.value = v;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+      put('f-unit', 'Wibble Widgets Group');        // taken over by the poster
+      put('f-school', 'Wibble School of Widgets');  // \u2026who re-scopes the school
+      put('f-unit', 'Management Science');          // \u2026and picks the marked string
+    });
+    await q.waitForTimeout(400);                    // let every scheduled resolve run
+    return q.evaluate(() => ({
+      unit: document.getElementById('f-unit').value,
+      school: document.getElementById('f-school').value,
+    }));
+  });
+  eq(race.unit, 'Management Science',
+    'v3 post-a-job: a department the poster picked survives every late resolve \u2014 ' +
+    'a stale pre-fill mark is retired on the event, not on the next timer');
+  eq(race.school, 'Wibble School of Widgets',
+    'v3 post-a-job: \u2026and the re-scoped school stays the poster\u2019s too');
+
   /* -- correct it (the edit path), on /v3/ --------------------------------- */
 
   const editSeed = {

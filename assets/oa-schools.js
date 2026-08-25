@@ -706,6 +706,39 @@
     return fold(s).replace(/^the /, '');
   }
 
+  /* ------------------------------------------- the directory row's id
+
+     The stable id a Universities-directory row is keyed on — and therefore
+     the id a `directoryEdits/{rowId}` correction is filed under. It lives
+     HERE, in the one dual-mode module both sides already load, because TWO
+     writers must agree on it to the byte: the build
+     (_scraper/directory-model.mjs, which stamps it onto every row of
+     data/directory.json) and the posting form (assets/oa-uniinfo.js, which
+     writes a poster's department-link correction against it). A browser copy
+     that drifted by one character would file corrections against rows that
+     do not exist, silently, for ever. */
+
+  /** One address-part slug, matching the shape of the archive's own row ids
+      ('aalto-university-school-of-business'): folded, hyphenated, bounded. */
+  function slugPart(s) {
+    return fold(String(s || '')).replace(/\s+/g, '-').slice(0, 60);
+  }
+
+  /** The directory row id for a (university, school, department). The
+      UNIVERSITY part folds through institutionKey, so two spellings of one
+      university key one row — exactly the join the vocabulary uses — while
+      the school and department parts fold spelling only. Never empty: a
+      university row with no school and no department is the university part
+      alone. */
+  function directoryRowKey(institution, school, unit) {
+    var parts = [
+      slugPart(institutionKey(institution || '')),
+      slugPart(school),
+      slugPart(unit),
+    ];
+    return parts.join('__').replace(/__+$/, '') || 'row';
+  }
+
   /** The one name this school is published under. The university is optional
       and is consulted first, for the short forms that mean different schools
       at different universities. */
@@ -1327,6 +1360,8 @@
     fold: fold,
     canonInstitution: canonInstitution,
     institutionKey: institutionKey,
+    slugPart: slugPart,
+    directoryRowKey: directoryRowKey,
     canonSchool: canonSchool,
     canonUnit: canonUnit,
     canonPlace: canonPlace,

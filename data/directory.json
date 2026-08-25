@@ -314,6 +314,14 @@
   "department": "Information Systems",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -382,6 +390,12 @@
   "department": "Industrial and Systems Engineering",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -495,6 +509,14 @@
   "mapUrl": "https://goo.gl/maps/ZpF78",
   "facultyUrl": "https://zicklin.baruch.cuny.edu/faculty-research/academic-departments/management/",
   "deptUrl": "https://zicklin.baruch.cuny.edu/faculty-research/academic-departments/management/faculty-management/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -659,6 +681,13 @@
   "mapUrl": "https://goo.gl/maps/c8Yqa",
   "facultyUrl": "https://www.bc.edu/bc-web/schools/carroll-school/academic-departments/operations-management.html",
   "deptUrl": "https://www.bc.edu/content/bc-web/schools/carroll-school/faculty-research/faculty-expertise.html",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -791,6 +820,9 @@
   "school": "Freeman College of Management",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -819,6 +851,10 @@
   "department": "Analytics and Operations Management",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -994,6 +1030,14 @@
   "school": "Heinz College of Information Systems and Public Policy",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -1242,6 +1286,14 @@
   "department": "Decision Analytics and Operations",
   "type": "Business School",
   "country": "Hong Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -1257,6 +1309,14 @@
   "country": "Hong Kong",
   "address": "12/F Lau Ming Wai Academic Building, 83 Tat Chee Avenue, Kowloon Tong, Hong Kong",
   "facultyUrl": "http://www.cb.cityu.edu.hk/ms/people/academic/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -1538,6 +1598,12 @@
   "address": "500 W 120th St #510, New York, NY 10027",
   "mapUrl": "https://goo.gl/maps/Ngj0F",
   "facultyUrl": "http://ieor.columbia.edu/people/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -1751,6 +1817,14 @@
   "department": "Decisions, Operations and Technology",
   "type": "Business School",
   "country": "Hong Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -1855,6 +1929,9 @@
   "department": "Business Analytics",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -1932,6 +2009,14 @@
   "mapUrl": "https://goo.gl/maps/QANvr",
   "facultyUrl": "http://www.fuqua.duke.edu/faculty_research/faculty_directory/?area=Operations%20Management",
   "deptUrl": "https://areas.fuqua.duke.edu/operations-management/?_gl=1*egnn90*_gcl_au*MjEzNDIwMzQ0MC4xNzc1NDA0MTA0*_ga*MTg0NTA2MzgwMS4xNzc1NDA0MTA0*_ga_1QY6PJLGK7*czE3NzU0MDQxMDQkbzEkZzAkdDE3NzU0MDQxMDQkajYwJGwwJGgw*_ga_PB0LYZLB4K*czE3NzU0MDQxMDQkbzEkZzAkdDE3NzU0MDQxMDQkajYwJGwwJGgw*_ga_FRQ1WCSNLF*czE3NzU0MDQxMDQkbzEkZzAkdDE3NzU0MDQxMDQkajYwJGwwJGgw",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -2169,6 +2254,14 @@
   "country": "France",
   "address": "3 Avenue Bernard Hirsch, 95021 Cergy-Pontoise, France",
   "facultyUrl": "http://www.essec.edu/en/pages/faculty-and-research/departments/operations-management/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -2445,6 +2538,11 @@
   "mapUrl": "https://goo.gl/maps/VvhsI",
   "facultyUrl": "https://www.frankfurt-school.de/home/research/departments/management.html",
   "deptUrl": "https://www.frankfurt-school.de/en/research-and-faculty/faculty/faculty-directory?sort=employeeLastName%7Casc",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -2462,6 +2560,13 @@
   "department": "Technology and Operations Management",
   "type": "University",
   "country": "Germany",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -2498,6 +2603,12 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://business.gmu.edu/faculty-and-research/academic-areas/information-systems-and-operations-management-area?size=n_20_n&filters%5B0%5D%5Bfield%5D=domains&filters%5B0%5D%5Bvalues%5D%5B0%5D=https%3A%2F%2Fbusiness.gmu.edu&filters%5B0%5D%5Btype%5D=all",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -2585,6 +2696,13 @@
   "department": "NRF Business of Retail Initiative",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -2599,6 +2717,13 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://msb.georgetown.edu/faculty-research/operations-analytics/",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -2697,6 +2822,14 @@
   "department": "Management",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -2786,6 +2919,12 @@
   "department": "Climate and Sustainability Impact Lab, Digital Data Design Institute",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -2802,6 +2941,14 @@
   "address": "Boston, MA 02163",
   "facultyUrl": "http://www.hbs.edu/faculty/units/tom/Pages/faculty.aspx",
   "deptUrl": "https://www.hbs.edu/faculty/units/tom/Pages/faculty.aspx",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -2890,6 +3037,14 @@
   "country": "France",
   "facultyUrl": "http://www.hec.edu/Faculty-Research/Operations-Management-Information-Technology/Department-directory",
   "deptUrl": "https://www.hec.edu/en/faculty-research/faculty-directory/faculty-member/all/all/information-systems-and-operations-management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -2954,6 +3109,12 @@
   "country": "Hong Kong",
   "facultyUrl": "http://www.lms.polyu.edu.hk/en/staff/academic-staff/",
   "deptUrl": "https://www.polyu.edu.hk/lms/people/academic-staff/",
+  "characteristics": [
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -3098,6 +3259,14 @@
   "department": "Operations and Business Analytics",
   "type": "Business School",
   "country": "Spain",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -3162,6 +3331,14 @@
   "department": "Operations, Information and Technology",
   "type": "Business School",
   "country": "Spain",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -3186,6 +3363,13 @@
   "department": "Operations, Information and Technology",
   "type": "Business School",
   "country": "Spain",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -3251,6 +3435,14 @@
   "mapUrl": "https://goo.gl/maps/HeHDKJ3Xrcv",
   "facultyUrl": "http://wwwf.imperial.ac.uk/business-school/people/faculty-by-department/",
   "deptUrl": "https://www.imperial.ac.uk/business-school/faculty-research/academic-areas/analytics-operations/people/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -3285,6 +3477,12 @@
   "country": "India",
   "facultyUrl": "http://www.isb.edu/faculty-research/faculty/directory",
   "deptUrl": "https://www.isb.edu/faculty-and-research/faculty-directory?area=operations-management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -3328,6 +3526,14 @@
   "address": "N Fee Ln, Bloomington, IN 47405",
   "mapUrl": "https://goo.gl/maps/cFfRa",
   "facultyUrl": "http://www.kelley.iu.edu/ODT/Faculty/page11166.cfm",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -3403,7 +3609,11 @@
   "school": "School of Business",
   "department": "Technology and Operations Management",
   "type": "Business School",
-  "country": "France",
+  "countries": [
+   "France",
+   "Singapore",
+   "United Arab Emirates"
+  ],
   "facultyUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management",
   "deptUrl": "https://www.insead.edu/faculty-research/academic-areas/technology-operations-management#group-faculty",
   "sources": [
@@ -3433,6 +3643,13 @@
   "department": "Management, Marketing and Strategy",
   "type": "Business School",
   "country": "France",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -3579,6 +3796,13 @@
   "address": "South Korea, Seoul, Dongdaemun-gu, Cheongnyangri-dong, Hoegi-ro, 85",
   "facultyUrl": "http://www.business.kaist.edu/_prog/prof/index.php?site_dvs_cd=en&menu_dvs_cd=0501&div_cd=C02009",
   "deptUrl": "https://www.business.kaist.edu/_prog/prof/?site_dvs_cd=en&menu_dvs_cd=050106&div_cd=C02009",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -3760,6 +3984,12 @@
   "school": "Faculty of Economics and Business",
   "type": "University",
   "country": "Belgium",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -3868,6 +4098,13 @@
   "department": "Decision and Technology Analytics",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -3953,6 +4190,12 @@
   "address": "26 Sussex Pl, Marylebone, London, UK",
   "mapUrl": "https://goo.gl/maps/sGKcnNCiQnN2",
   "facultyUrl": "https://www.london.edu/faculty-and-research/subject-areas/management-science-and-operations#.Vf8no9KUfg0",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -3991,6 +4234,13 @@
   "school": "Quinlan School of Business",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -4134,6 +4384,14 @@
   "department": "Desautels Faculty of Management, Operations Management",
   "type": "University",
   "country": "Canada",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -4266,6 +4524,14 @@
   "address": "632 Bogue St n520, East Lansing, MI 48824, United States",
   "facultyUrl": "https://broad.msu.edu/supply-chain-management/",
   "deptUrl": "https://broad.msu.edu/directory/?q=&expertise=0&program=0&department=26&employment%5B0%5D=1",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -4467,6 +4733,9 @@
   "school": "College of Computing and Data Science",
   "type": "University",
   "country": "Singapore",
+  "characteristics": [
+   "Research seminars"
+  ],
   "sources": [
    "postings"
   ],
@@ -4479,6 +4748,14 @@
   "school": "Nanyang Business School",
   "type": "Business School",
   "country": "Singapore",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -4545,6 +4822,14 @@
   "department": "NUS Business School, Department of Analytics and Operations",
   "type": "Business School",
   "country": "Singapore",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -4596,6 +4881,13 @@
   "country": "Singapore",
   "address": "1 Engineering Drive 2, #06-25 Blk E1A, Singapore 117576",
   "facultyUrl": "https://www.eng.nus.edu.sg/isem/about-us/faculty-members/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -4616,6 +4908,14 @@
   "mapUrl": "https://goo.gl/maps/n0rjW",
   "facultyUrl": "http://bschool.nus.edu/DecisionSciences/FacultyStaff/FacultyMembers.aspx",
   "deptUrl": "https://bschool.nus.edu.sg/analytics-operations/faculty/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -4635,6 +4935,12 @@
   "country": "United States",
   "address": "1411 Cunningham Rd, Monterey, CA 93943",
   "facultyUrl": "https://my.nps.edu/web/or/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -5038,6 +5344,14 @@
   "department": "Operations Management",
   "type": "Business School",
   "country": "Portugal",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -5073,6 +5387,11 @@
   "department": "Business, Information Systems/Technology",
   "type": "University",
   "country": "China",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -5085,6 +5404,11 @@
   "department": "Business, Operations and Business Analytics",
   "type": "University",
   "country": "China",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -5201,6 +5525,14 @@
   "department": "Operations Management",
   "type": "University",
   "country": "Turkey",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -6003,6 +6335,12 @@
   "school": "College of Business",
   "type": "Business School",
   "country": "China",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -6016,6 +6354,13 @@
   "department": "Operations Management",
   "type": "Business School",
   "country": "China",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -6426,6 +6771,14 @@
   "department": "Management Science and Engineering",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -6529,6 +6882,12 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://www.stonybrook.edu/commcms/business/faculty-research/research.php#view-operations",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -6581,6 +6940,13 @@
   "department": "Information, Operations and Management Sciences",
   "type": "Business School",
   "country": "France",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -6604,6 +6970,11 @@
   "department": "Computer Science",
   "type": "University",
   "country": "Germany",
+  "characteristics": [
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -6694,6 +7065,14 @@
   "department": "Operations and Supply Chain Management",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -6799,6 +7178,14 @@
   "mapUrl": "https://goo.gl/maps/HJ82y",
   "facultyUrl": "http://mays.tamu.edu/directory/?type=faculty&department=527",
   "deptUrl": "https://mays.tamu.edu/directory/?department=2&office=0&center=0&type=&fullname=",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -6999,6 +7386,13 @@
   "department": "Decisions, Operations and Technology",
   "type": "Business School",
   "country": "Hong Kong",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -7028,6 +7422,14 @@
   "type": "Business School",
   "country": "China",
   "deptUrl": "https://sme.cuhk.edu.cn/en/teacher-search?academic%5B216%5D=216",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -7058,6 +7460,14 @@
   "department": "The research group of Prof. Yiming Zhang",
   "type": "Business School",
   "country": "China",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -7134,6 +7544,9 @@
   "department": "Smart Manufacturing Thrust, Systems hub",
   "type": "University",
   "country": "China",
+  "characteristics": [
+   "PhD"
+  ],
   "sources": [
    "postings"
   ],
@@ -7191,6 +7604,14 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://fisher.osu.edu/directory?department=224",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -7222,6 +7643,14 @@
   "mapUrl": "https://goo.gl/maps/crCKa",
   "facultyUrl": "http://www.smeal.psu.edu/scis/people/faculty",
   "deptUrl": "https://www.smeal.psu.edu/scis/people/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -7263,6 +7692,14 @@
   "mapUrl": "https://goo.gl/maps/2rRYo",
   "facultyUrl": "https://www.fbe.hku.hk/academic-areas/innovation-and-information-management",
   "deptUrl": "https://www.hkubs.hku.hk/people/faculty?pg=1&staff_type=faculty&subject_area=innovation-and-information-management&track=professoriate&region=hku",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -7295,6 +7732,12 @@
   "department": "Business Analytics",
   "type": "University",
   "country": "Australia",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -7328,6 +7771,9 @@
   "mapUrl": "https://goo.gl/maps/QyHGs",
   "facultyUrl": "http://www.mccombs.utexas.edu/Departments/IROM/Faculty/Directory#tab-pane2",
   "deptUrl": "https://www.mccombs.utexas.edu/faculty-and-research/faculty-directory/?filter=true&department_taxonomy=irom",
+  "characteristics": [
+   "Research seminars"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -7346,6 +7792,14 @@
   "department": "Healthcare Management",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -7372,6 +7826,12 @@
   "type": "University",
   "country": "Netherlands",
   "deptUrl": "https://www.tilburguniversity.edu/about/schools/economics-and-management/organization/departments/information-systems-and-operations-management/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -7439,6 +7899,13 @@
   "school": "A. B. Freeman School of Business",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -7456,6 +7923,13 @@
   "mapUrl": "https://goo.gl/maps/8kcVA",
   "facultyUrl": "https://business.tulane.edu/faculty-research/faculty-listings.php?area=info",
   "deptUrl": "https://freeman.tulane.edu/faculty-research/management-science",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -7580,6 +8054,10 @@
   "department": "Systems Engineering",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -7592,6 +8070,10 @@
   "department": "Mathematics",
   "type": "University",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -7771,6 +8253,14 @@
   "mapUrl": "https://goo.gl/maps/va8Gf",
   "facultyUrl": "https://rms.ucd.ie/ufrs/!w_valocal_ucd_search.show_results?t=319053195",
   "deptUrl": "https://www.smurfitschool.ie/facultyresearch/subjectareas/management/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -7803,6 +8293,12 @@
   "school": "UCL Global Business School for Health",
   "type": "Business School",
   "country": "United Kingdom",
+  "characteristics": [
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -7815,6 +8311,13 @@
   "school": "UCL School of Management",
   "type": "Business School",
   "country": "United Kingdom",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -7832,6 +8335,14 @@
   "mapUrl": "https://goo.gl/maps/uHi7Z",
   "facultyUrl": "https://www.mgmt.ucl.ac.uk/people#operations-technology",
   "deptUrl": "https://www.mgmt.ucl.ac.uk/people#operations-technology",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -7911,6 +8422,14 @@
   "type": "Business School",
   "country": "Canada",
   "deptUrl": "https://www.ualberta.ca/en/accounting-business-analytics/people.html?discipline=OperationsManagement",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -8114,6 +8633,9 @@
   "address": "4141 Etcheverry Hall, Berkeley, CA 94720",
   "mapUrl": "https://goo.gl/maps/DllUI",
   "facultyUrl": "http://ieor.berkeley.edu/People/Faculty/index.htm",
+  "characteristics": [
+   "MBA"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -8214,6 +8736,13 @@
   "mapUrl": "https://goo.gl/maps/9YUDB",
   "facultyUrl": "https://www.anderson.ucla.edu/faculty-and-research/decisions-operations-and-technology-management/faculty",
   "deptUrl": "https://www.anderson.ucla.edu/faculty-and-research/decisions-operations-and-technology-management/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -8298,6 +8827,13 @@
   "school": "Judge Business School",
   "type": "Business School",
   "country": "United Kingdom",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -8345,6 +8881,14 @@
   "mapUrl": "https://goo.gl/maps/dV8jZ",
   "facultyUrl": "http://www.chicagobooth.edu/faculty/directory",
   "deptUrl": "https://www.chicagobooth.edu/faculty/academic-areas/operations-management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -8379,6 +8923,12 @@
   "mapUrl": "https://goo.gl/maps/SqXuLrjo3RM2",
   "facultyUrl": "https://business.uc.edu/academics/departments/obais/faculty.html",
   "deptUrl": "https://www.business.uc.edu/faculty-research/obais/faculty.html",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -8462,6 +9012,13 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://www.colorado.edu/business/faculty-research/directory/strategy-entrepreneurship-and-operations-faculty/operations-management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -8508,6 +9065,14 @@
   "country": "Cyprus",
   "address": "University of Cyprus University House \"Anastasios G. Leventis\" 1 Panepistimiou Avenue 2109 Aglantzia, Nicosia P.O. Box 20537, 1678 Nicosia, Cyprus",
   "facultyUrl": "https://www.ucy.ac.cy/bpa/people/academic-staff/?lang=en",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -8737,6 +9302,14 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://www.bauer.uh.edu/search/directory/index2.asp?dept=DISC",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -8846,6 +9419,12 @@
   "address": "Wohlers Hall, 1206 S 6th St #330, Champaign, IL 61820",
   "mapUrl": "https://goo.gl/maps/mraAYvPcD2S2",
   "facultyUrl": "https://business.illinois.edu/ba/directories/operations-management/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -8921,6 +9500,12 @@
   "department": "Analytics, Information, Operations research",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -8983,6 +9568,14 @@
   "school": "Bayes Business School",
   "type": "Business School",
   "country": "United Kingdom",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -9075,6 +9668,9 @@
   "address": "68131 Mannheim, Germany",
   "mapUrl": "https://goo.gl/maps/TAFmt",
   "facultyUrl": "http://stolletz.bwl.uni-mannheim.de/en/team/",
+  "characteristics": [
+   "PhD"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -9092,6 +9688,9 @@
   "type": "Business School",
   "country": "Germany",
   "deptUrl": "https://www.mannheim-business-school.com/en/the-mannheim-experience/faculty-research/faculty/",
+  "characteristics": [
+   "PhD"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -9269,6 +9868,14 @@
   "mapUrl": "https://goo.gl/maps/xSQox",
   "facultyUrl": "http://bus.miami.edu/faculty-and-research/faculty-directory/management/index.html",
   "deptUrl": "https://www.herbert.miami.edu/faculty-research/directory/index.html",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -9342,6 +9949,14 @@
   "school": "Stephen M. Ross School of Business",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -9371,6 +9986,14 @@
   "address": "701 Tappan Ave, Ann Arbor, MI 48109",
   "mapUrl": "https://goo.gl/maps/hi4wO",
   "facultyUrl": "http://michiganross.umich.edu/faculty-research/directory?status=All&department=39&name=&last=&sort_by=field_sort_name_value",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "postings"
@@ -9446,6 +10069,11 @@
   "mapUrl": "https://goo.gl/maps/KowG7tPsB5u",
   "facultyUrl": "http://carlsonschool.umn.edu/departments/supply-chain-operations-department/faculty",
   "deptUrl": "https://carlsonschool.umn.edu/departments/supply-chain-operations/faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -9543,6 +10171,13 @@
   "address": "https://www.google.com/maps/place/College+of+Business+Admininstration/@40.816943,-96.705613,17z/data=!4m13!1m7!3m6!1s0x8796bee306248e9f:0x59f44629f9cab0a4!2s1240+R+St,+Lincoln,+NE+68508!3b1!8m2!3d40.816943!4d-96.7034243!3m4!1s0x8796bee3ac239f5b:0x7d468ef97abb900b!8m2!3d40.8178448!4d-96.7034169",
   "facultyUrl": "https://cba.unl.edu/about-us/faculty-and-staff-directory/",
   "deptUrl": "https://business.unl.edu/supply-chain-management-analytics/supply-chain-management-and-analytics-faculty-and-staff/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -9629,6 +10264,14 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://www.kenan-flagler.unc.edu/faculty/?academic-areas=operations",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -9779,6 +10422,14 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://www.ou.edu/price/directory/areas#mscm",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -9794,6 +10445,14 @@
   "department": "Marketing, Supply Chain Management, and Healthcare",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -10022,6 +10681,9 @@
   "school": "Knauss School of Business",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "MBA"
+  ],
   "sources": [
    "postings"
   ],
@@ -10077,6 +10739,14 @@
   "address": "https://www.google.com/maps/place/Darla+Moore+School+of+Business/@33.9945213,-81.0334363,15z/data=!4m2!3m1!1s0x0:0x30816f9ab195bb29?sa=X&ved=0ahUKEwjQivrmu9TTAhWMNiYKHdfcCRYQ_BIIhQUwbA",
   "facultyUrl": "http://moore.sc.edu/facultyresearch/facultystaff.aspx",
   "deptUrl": "https://sc.edu/study/colleges_schools/moore/study/management_science/our_people/index.php",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -10414,6 +11084,14 @@
   "department": "Management",
   "type": "Business School",
   "country": "Canada",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -10523,6 +11201,14 @@
   "address": "1655 Campus Center Dr, Salt Lake City, UT 84112, USA",
   "facultyUrl": "https://eccles.utah.edu/search/?_sft_departments=department-of-operations-and-is&_sft_ecclesRoles=faculty",
   "deptUrl": "https://eccles.utah.edu/search/?_sft_departments=department-of-operations-and-is&amp;_sft_ecclesRoles=faculty",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -10576,6 +11262,13 @@
   "school": "Darden School of Business",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -10593,6 +11286,11 @@
   "mapUrl": "https://goo.gl/maps/MH4DnQV9u3D2",
   "facultyUrl": "http://www.darden.virginia.edu/faculty-research/academic-areas/quantitative-analysis/",
   "deptUrl": "https://www.darden.virginia.edu/faculty-research/academic-areas/data-analytics-decision-sciences",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "MBA"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -10771,6 +11469,14 @@
   "mapUrl": "https://goo.gl/maps/t58U0",
   "facultyUrl": "http://bus.wisc.edu/knowledge-expertise/academic-departments/operations-information-management/faculty-staff",
   "deptUrl": "https://business.wisc.edu/directory/?_profile_type=faculty&_profile_department=operations-and-information-management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
@@ -10831,6 +11537,13 @@
   "school": "UNSW Business School - School of Information Systems and Technology Management",
   "type": "Business School",
   "country": "Australia",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "postings"
   ],
@@ -10975,6 +11688,13 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://www.villanova.edu/university/business/faculty-and-research/faculty-by-department.html#4",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -11153,6 +11873,13 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://business.wfu.edu/expert-faculty-research/faculty-and-academic-centers/",
+  "characteristics": [
+   "Research seminars",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
@@ -11203,6 +11930,14 @@
   "school": "Olin Business School",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -11216,6 +11951,14 @@
   "department": "Boeing Center for Supply Chain Innovation",
   "type": "Business School",
   "country": "United States",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -11354,6 +12097,14 @@
   "department": "Management Science",
   "type": "Business School",
   "country": "Canada",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "postings"
   ],
@@ -11546,6 +12297,14 @@
   "type": "Business School",
   "country": "Canada",
   "deptUrl": "https://schulich.yorku.ca/faculty/",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "omlist",
    "postings",
