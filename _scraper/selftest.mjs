@@ -4005,6 +4005,69 @@ async function testRulesDeploy() {
   }
 }
 
+/* ------------------------------- the roster is seeded from Auth
+
+   "31 Registered users" over a roster listing ONE person (owner, 2026-08-25).
+   Both numbers were right: the tally is a mark every sign-in writes, while a
+   roster ROW is written by the BROWSER once per session — so the roster held
+   only the people who had signed in since its rules were published, minutes
+   earlier. Firebase Auth knows all of them and only the Admin SDK can ask.
+
+   What is pinned is the constraint that makes the backfill safe to run: the
+   Admin SDK bypasses the rules, so a row it writes with a FIFTH key would be
+   accepted — and would then freeze that row against its own owner for ever,
+   because the browser's merge produces a document `hasOnly` refuses.         */
+
+async function testUserDirectorySync() {
+  const root = path.join(HERE, '..');
+  const mod = await import('./sync-user-directory.mjs');
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+
+  /* The rules' own list for a roster row, read out of the file rather than
+     copied — the both-ways discipline every other pairing here follows. */
+  const block = rules.slice(rules.indexOf('match /userDirectory/{uid}'));
+  const hasOnly = /hasOnly\(\[([^\]]*)\]\)/.exec(block);
+  ok(hasOnly, '_firestore.rules bounds a roster row with hasOnly');
+  const allowed = (hasOnly ? hasOnly[1] : '')
+    .split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  eq(mod.ROW_KEYS.slice().sort(), allowed.slice().sort(),
+    'the sync writes EXACTLY the keys the rules allow — a fifth would freeze the ' +
+    'row against its own owner');
+
+  /* And what it actually writes obeys that, not just what it declares. */
+  const row = mod.rowFromAuthUser({
+    uid: 'u', email: 'a@b.edu', displayName: 'A B',
+    metadata: { creationTime: 'Mon, 01 Jan 2026 00:00:00 GMT',
+      lastSignInTime: 'Mon, 01 Jun 2026 00:00:00 GMT' },
+  }, null);
+  eq(Object.keys(row).sort(), allowed.slice().sort(),
+    'and a row it builds carries those keys and no others');
+  ok(typeof row.first === 'number' && typeof row.seen === 'number',
+    'with the two dates as NUMBERS, which is what the rules demand');
+
+  /* Dates only ever correct backwards / forwards in the safe direction. */
+  eq(mod.rowFromAuthUser({ uid: 'u', email: 'a@b.edu', metadata: {} },
+    { name: '', email: 'a@b.edu', first: 5, seen: 9 }), null,
+  'an account already current costs no write, so a daily fire commits nothing');
+
+  /* The collection name is the one the panel reads. */
+  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
+  ok(fbjs.includes(`userDirectory: '${mod.DIRECTORY}'`),
+    'the sync writes the collection the Admin area actually reads');
+
+  const wf = await readFile(
+    path.join(root, '.github', 'workflows', 'oa-user-directory.yml'), 'utf8');
+  ok(/FIREBASE_SERVICE_ACCOUNT/.test(wf), 'the workflow passes the service account');
+  ok(/sync-user-directory\.mjs --selftest/.test(wf),
+    'and proves the mapping before it writes anything');
+  ok(/workflow_dispatch:/.test(wf) && /schedule:/.test(wf),
+    'it runs daily and on demand — the dispatch is for right after a rules deploy');
+
+  const src = await readFile(path.join(root, '_scraper', 'sync-user-directory.mjs'), 'utf8');
+  ok(/isMain\(import\.meta\.url\)/.test(src),
+    'and importing it syncs nothing');
+}
+
 /* ------------------------------ the Universities directory (owner, 2026-08-24)
 
    data/directory.json is the flat table universities.html groups into one
@@ -7648,6 +7711,7 @@ if (isMain(import.meta.url)) {
   await testJobMarketSheetChain();
   await testDeployGuard();
   await testRulesDeploy();
+  await testUserDirectorySync();
   await testDirectoryModel();
   await testDirectoryWiring();
   await testUniInfo();

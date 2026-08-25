@@ -547,8 +547,14 @@
     var box = $('oa-review-years');
     if (!box) return;
     var years = yearsOf(all, s);
-    show(box, years.length > 1);
-    if (years.length < 2) return;
+    /* DRAWN WHENEVER THERE IS A SEASON TO NAME, not only when there are two.
+       Hiding a filter with one value reads as the filter being MISSING — which
+       is what it was reported as (owner, 2026-08-25: "I don't see an option to
+       filter the results by job market year"), on a tab whose 86 postings all
+       happened to belong to one market. A row saying "2025-2026 (86) · All"
+       answers the question the empty space could not. */
+    show(box, years.length > 0);
+    if (!years.length) return;
 
     box.innerHTML = years.map(function (y) {
       var n = all.filter(function (d) { return s.yearOf(d) === y; }).length;
@@ -717,8 +723,66 @@
       '</p>';
   }
 
+  /**
+   * The user tab's bulk verb: tick every posting on the page off the list.
+   *
+   * approveAll's reasoning, with the one difference that matters — NOTHING IS
+   * PUBLISHED HERE. These postings are already live; the stamp only takes them
+   * off this list, which is why the confirmation says so and why a failure is
+   * harmless (the posting is unaffected either way). One write at a time with
+   * the failures COUNTED rather than thrown, so 86 rows do not become 86
+   * rejected promises and one useless message.
+   */
+  function markAllReviewed(db, items) {
+    var msg = $('oa-review-bulk-msg');
+    var btn = $('oa-review-all');
+    var n = items.length;
+
+    if (!window.confirm('Mark all ' + n + ' postings on this page reviewed?\n\n' +
+        'They stay live — this only takes them off your list. Nothing is ' +
+        'published, changed or taken down.')) return;
+
+    btn.disabled = true;
+    msg.className = 'oa-form-msg';
+    msg.textContent = 'Saving 0 of ' + n + '…';
+
+    var done = 0, failed = 0;
+    var chain = Promise.resolve();
+    items.forEach(function (it) {
+      chain = chain.then(function () {
+        var patch = {};
+        patch[REVIEWED_AT] = new Date().toISOString();
+        return db.collection(SUBS_COL).doc(it.id).set(patch, { merge: true })
+          .then(function () { done++; retire(db, 'user', it); })
+          .catch(function () { failed++; })
+          .then(function () {
+            msg.textContent = 'Saving ' + (done + failed) + ' of ' + n + '…';
+          });
+      });
+    });
+
+    chain.then(function () {
+      msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
+      msg.textContent = failed
+        ? done + ' marked reviewed, ' + failed + ' could not be saved — reload and try those again.'
+        : 'All ' + done + ' marked reviewed. They are still live; they have just ' +
+          'left this list.';
+      /* The rows are gone from the tab's own state, so redraw what is left
+         rather than leaving the page showing what was just cleared. */
+      if (!failed) paint(db, 'user', state.year);
+    });
+  }
+
   function renderUserCards(db, items) {
     var list = $('oa-review-list');
+
+    /* The bulk button is shared with the crawled tab, which wires it at the
+       end of its own render — so this path has to claim it, or the user tab
+       would carry the LAST crawled page's handler and approve postings the
+       maintainer is not looking at. */
+    var all = $('oa-review-all');
+    if (all) all.onclick = function () { markAllReviewed(db, items); };
+
     items.forEach(function (it) {
       var card = document.createElement('article');
       card.className = 'oa-fb-card oa-rv-card';
@@ -761,14 +825,27 @@
         : 'nothing';
     }
 
-    /* Approve-the-page belongs to the GATE alone: a user-added posting is
-       already live, so there is nothing on its tab to approve. */
+    /* BOTH TABS GET A BULK ACTION, because both have the same arithmetic
+       problem: "a gate that can only be cleared 89 times does not get
+       cleared", and the user tab opened with 86 (owner, 2026-08-25 — the
+       control was simply not there).
+
+       The VERB differs, and that difference is the whole reason this was
+       gated to one tab in the first place. Approving publishes; a user-added
+       posting is already live, so its bulk action is the tick that takes a
+       row off the list and nothing else. Same button, two promises, and each
+       says which it is. */
     var bulk = $('oa-review-bulk');
-    var bulkOn = source === 'crawled' && docs.length > 1;
+    var btn = $('oa-review-all');
+    var bulkOn = docs.length > 1;
     show(bulk, bulkOn);
-    if (bulkOn) {
-      var label = bulk.querySelector('[data-n]');
-      if (label) label.textContent = String(docs.length);
+    if (bulkOn && btn) {
+      btn.textContent = source === 'crawled'
+        ? 'Approve all ' + docs.length + ' shown & publish'
+        : 'Mark all ' + docs.length + ' shown reviewed';
+      btn.disabled = false;
+      var bm = $('oa-review-bulk-msg');
+      if (bm) { bm.className = 'oa-form-msg'; bm.textContent = ''; }
     }
 
     unmountPickers();

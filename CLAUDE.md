@@ -962,9 +962,63 @@ know about and the panel calling it undelivered.
 one, and demanding it would silently leave exactly those accounts off the
 roster.
 
-**Inert until the rules are redeployed** (nothing in CI does it):
-`firebase deploy --only firestore:rules --project operations-academia`. Both
-panels say so rather than showing a bare permission-denied.
+The rules publish themselves now (see "…and the FIRESTORE rules publish
+themselves" above); both panels say what to press rather than showing a bare
+permission-denied, and they say **reload first**, because the copy of the panel
+reporting a missing deploy may itself predate it — which is exactly what
+happened the morning it went live.
+
+### The roster is seeded from Auth, or it lists whoever happened to come back
+
+"31 Registered users" over a roster listing **one person** (owner, 2026-08-25).
+Both numbers were right, which is what made it unreadable: `registeredUsers` is
+the contentless mark every sign-in writes, while a `userDirectory` ROW is
+written by the BROWSER, once per session — and the rules permitting that write
+had been published minutes earlier. So the roster held precisely the people who
+had signed in since. A panel whose own copy says "everyone who has signed in
+since the roster shipped" is honest and no help to a maintainer who wants to
+reach their users today.
+
+**Firebase Auth knows all of them and only the Admin SDK can ask.**
+`_scraper/sync-user-directory.mjs` (`.github/workflows/oa-user-directory.yml`,
+daily + on demand) reads every account and writes the row the browser would
+have — plus the one field CLAUDE.md recorded as unobtainable: the TRUE joined
+date, Auth's `creationTime`, in place of "first seen by this site".
+
+Three properties, and the first is the one that could have gone badly wrong:
+
+* **Four keys and no more.** `rowOk()` pins a row to
+  `hasOnly(['name','email','first','seen'])`. The Admin SDK bypasses the rules,
+  so a fifth key would be written happily — and would then freeze that row
+  against **its own owner** for ever, because the browser's merge produces a
+  document `hasOnly` refuses. The selftest reads the allowed list out of the
+  rules and pins it against `ROW_KEYS` both ways.
+* **Dates only move in the safe direction.** `first` takes the earliest known
+  (Auth's real joined date corrects a later "first seen"), `seen` the latest, so
+  a sync can never contradict what the site itself watched happen.
+* **A name the site holds is never overwritten** by Auth's `displayName`: the
+  browser writes the name the account shows itself under, which is derived from
+  the profile and is the better one where they differ.
+
+An account already current costs no write, so a daily fire commits nothing. The
+dispatch exists for the case that created the gap: right after a rules deploy.
+
+### Both review tabs can be cleared a page at a time
+
+`approveAll` was gated to the crawled tab on the reasoning that "approve-the-page
+belongs to the GATE alone" — right about approving, wrong about the arithmetic:
+the user-added tab opened with **86** postings and no way to clear them (owner,
+2026-08-25), which is the same "a gate that can only be cleared 89 times does not
+get cleared" that motivated the bulk action in the first place. Both tabs carry
+one now; what must never cross over is the VERB. Approving publishes; a
+user-added posting is already live, so its button ticks rows off the list and
+says exactly that, and `page-test.mjs` pins that the word "approve" never appears
+on it. The shared button is re-claimed by whichever tab drew last — wired only on
+the crawled path, the user tab would have carried the previous page's handler.
+
+**A filter with one value is still drawn.** The market-year row hid itself unless
+a tab held two seasons, and an empty space where a control belongs reads as the
+control being MISSING — which is how it was reported.
 
 Tests: `testUsersAndMessages` in `_scraper/selftest.mjs` (the rules against the
 module BOTH WAYS for all three key sets, the pinned address, the write-once

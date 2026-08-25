@@ -4292,8 +4292,24 @@ for (const w of [320, 360, 390, 430]) {
       'admin area: a withdrawn one is not waiting for anything');
     ok(userList.indexOf('Mirror University') === -1,
       'admin area: and a tracking-sheet mirror stays with its own queue');
-    ok(await q.locator('#oa-review-bulk').isHidden(),
-      'admin area: approve-the-page is the gate’s alone — nothing here needs approving');
+    /* BOTH TABS CARRY A BULK ACTION (owner, 2026-08-25: the user tab opened
+       with 86 postings and no way to clear them). What must NEVER cross over
+       is the VERB: approving publishes, and nothing on this tab is waiting to
+       be published — its postings are already live, so the button ticks them
+       off the list and says exactly that. */
+    ok(await q.locator('#oa-review-bulk').isVisible(),
+      'admin area: the user tab has a bulk action too — 86 rows do not get cleared one at a time');
+    const userBulk = (await q.textContent('#oa-review-all') || '').toLowerCase();
+    ok(/mark all/.test(userBulk) && /reviewed/.test(userBulk),
+      `admin area: and its verb is Mark all reviewed, not Approve (read: "${userBulk}")`);
+    ok(!/approve/.test(userBulk) && !/publish/.test(userBulk),
+      'admin area: nothing on the user tab offers to approve or publish — it is already live');
+
+    /* The season filter is DRAWN even when a tab holds one market: an empty
+       space where a control belongs reads as the control being missing, which
+       is how this was reported. */
+    ok(await q.locator('#oa-review-years').isVisible(),
+      'admin area: the market-year filter is on screen for the user tab');
     eq(await q.locator('#oa-review-list a[href="post-a-job.html?edit=u1"]').count(), 1,
       'admin area: a user-added card opens the poster’s own form to correct it');
 
