@@ -1282,21 +1282,52 @@ for (const [name, expect] of [
   /* -- a pre-fill mark never outlives its value (the CI race) --------------
 
      The failure the first CI run caught, made deterministic: the records
-     fill Tulane's one department and MARK it; the poster then overtypes it,
-     re-scopes the school, and picks the very string the stale mark still
+     fill a university's ONE department and MARK it; the poster then overtypes
+     it, re-scopes the school, and picks the very string the stale mark still
      holds \u2014 all inside ONE task, so no resolve timer can run in between,
      which is exactly the interleaving CI produced under load. The mark must
      be retired ON THE EVENT (reconcile in oa-uniinfo.js), or the pending
      resolve reads the pick as its own stale fill and clears a department
-     the poster just chose. */
+     the poster just chose.
+
+     THE FIXTURE IS READ FROM THE VOCABULARY, NOT NAMED. It used to be
+     "Tulane University" + "Management Science", and on 2026-08-25 a
+     perfectly legitimate posting gave Freeman a SECOND department
+     ("Information Systems") \u2014 so the records could no longer answer
+     definitely, the pre-fill correctly declined to guess, this assertion
+     timed out, and master went red with nothing wrong on the site. That is
+     the third time a guard in this repository has pinned a fact about
+     specific rows that the data is free to change; the rule it broke is the
+     one CLAUDE.md already states \u2014 a guard over a whole file asserts a RULE
+     any legitimate row satisfies. So the test asks the vocabulary for a
+     university that HAS exactly one school with exactly one department, and
+     drives that one; when the catalogue holds none it says so and skips,
+     because a race in the browser is not evidence about anybody's
+     departments. */
+  const vocab = JSON.parse(await readFile(path.join(ROOT, 'data', 'vocab.json'), 'utf8'));
+  const soloUni = (() => {
+    for (const [uni, entry] of Object.entries(vocab.byUniversity || {})) {
+      const schools = Object.entries(entry.bySchool || {});
+      if (schools.length !== 1) continue;
+      const [school, units] = schools[0];
+      const list = Array.isArray(units) ? units : Object.keys(units || {});
+      if (list.length === 1 && school && list[0]) return { uni, school, unit: list[0] };
+    }
+    return null;
+  })();
+
+  if (!soloUni) {
+    ok(true, 'v3 post-a-job: no single-department university in the vocabulary \u2014 ' +
+      'the pre-fill race check has nothing definite to drive, and is skipped');
+  } else {
   const race = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
-    await q.fill('#f-institution', 'Tulane University');
-    await q.waitForFunction(() =>
-      document.getElementById('f-unit').value === 'Management Science' &&
-      document.getElementById('f-unit').getAttribute('data-oa-auto-unit') === 'Management Science',
-    null, { timeout: 8000 });
-    await q.evaluate(() => {
+    await q.fill('#f-institution', soloUni.uni);
+    await q.waitForFunction((want) =>
+      document.getElementById('f-unit').value === want &&
+      document.getElementById('f-unit').getAttribute('data-oa-auto-unit') === want,
+    soloUni.unit, { timeout: 8000 });
+    await q.evaluate((want) => {
       const put = (id, v) => {
         const el = document.getElementById(id);
         el.value = v;
@@ -1305,19 +1336,20 @@ for (const [name, expect] of [
       };
       put('f-unit', 'Wibble Widgets Group');        // taken over by the poster
       put('f-school', 'Wibble School of Widgets');  // \u2026who re-scopes the school
-      put('f-unit', 'Management Science');          // \u2026and picks the marked string
-    });
+      put('f-unit', want);                          // \u2026and picks the marked string
+    }, soloUni.unit);
     await q.waitForTimeout(400);                    // let every scheduled resolve run
     return q.evaluate(() => ({
       unit: document.getElementById('f-unit').value,
       school: document.getElementById('f-school').value,
     }));
   });
-  eq(race.unit, 'Management Science',
+  eq(race.unit, soloUni.unit,
     'v3 post-a-job: a department the poster picked survives every late resolve \u2014 ' +
     'a stale pre-fill mark is retired on the event, not on the next timer');
   eq(race.school, 'Wibble School of Widgets',
     'v3 post-a-job: \u2026and the re-scoped school stays the poster\u2019s too');
+  }
 
   /* -- correct it (the edit path), on /v3/ --------------------------------- */
 
@@ -1619,8 +1651,22 @@ for (const [name, expect] of [
   });
   eq(dept.heading, 'Departments in A. B. Freeman School of Business',
     'form: the department list narrows to the school that was chosen');
-  eq(dept.inScope, ['Management Science'],
-    'form: to ITS departments — one, not the three spellings it was posted under');
+  /* THE CLAIM IS ABOUT SPELLINGS, NOT ABOUT HOW MANY DEPARTMENTS FREEMAN HAS.
+     It asserted the list was exactly ['Management Science'], which was true
+     when written and stopped being true on 2026-08-25, when a legitimate
+     posting gave Freeman a second department ("Information Systems") and took
+     master red. What this test exists to prove is that the three spellings the
+     school was posted under — "Management Science", "…Sciences Area",
+     "…Science Department" — collapse to ONE entry, so that is what it says
+     now: the canonical name is offered exactly once and no variant of it
+     appears beside it. A new department is somebody advertising a job, not a
+     regression. */
+  const ms = dept.inScope.filter((n) => /management\s+science/i.test(n));
+  eq(ms, ['Management Science'],
+    'form: to ITS departments — Management Science ONCE, not the three spellings ' +
+    'it was posted under');
+  ok(dept.inScope.length >= 1,
+    `form: and the school's departments are listed (${dept.inScope.length})`);
 
   // typing still reaches the whole site: a scope narrows, it never hides
   await f.fill('#f-unit', 'supply chain');
