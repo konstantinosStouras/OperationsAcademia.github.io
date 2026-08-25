@@ -4397,26 +4397,6 @@
   "lng": -71.0827329
  },
  {
-  "id": "mcgill-university____desautels-faculty-of-management-operations-management",
-  "institution": "McGill University",
-  "department": "Desautels Faculty of Management, Operations Management",
-  "type": "University",
-  "country": "Canada",
-  "characteristics": [
-   "Research seminars",
-   "PhD",
-   "Masters",
-   "MBA",
-   "Undergrad",
-   "Exec Ed"
-  ],
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-07-28"
- },
- {
   "id": "mcgill-university__desautels-faculty-of-management",
   "institution": "McGill University",
   "school": "Desautels Faculty of Management",
@@ -4439,11 +4419,22 @@
   "mapUrl": "https://goo.gl/maps/6ux1t",
   "facultyUrl": "https://www.mcgill.ca/desautels/people/field_mprofile_areas/Operations%20Management/field_mprofile_group/Faculty",
   "deptUrl": "https://www.mcgill.ca/desautels/people/field_mprofile_areas/Operations%2520Management",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-07-28",
   "lat": 45.5026099,
   "lng": -73.5764347
  },

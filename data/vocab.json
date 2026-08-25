@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-25T05:44:37.550Z",
+ "generated": "2026-08-25T07:24:51.259Z",
  "universities": [
   {
    "v": "Tulane University",
@@ -2132,6 +2132,10 @@
    "n": 1
   },
   {
+   "v": "Desautels Faculty of Management",
+   "n": 1
+  },
+  {
    "v": "Edwin L. Cox School of Business",
    "n": 1
   },
@@ -2401,10 +2405,6 @@
   },
   {
    "v": "Department of Management Science and Engineering (MS&E)",
-   "n": 0
-  },
-  {
-   "v": "Desautels Faculty of Management",
    "n": 0
   },
   {
@@ -3010,6 +3010,10 @@
    "n": 5
   },
   {
+   "v": "Operations Management",
+   "n": 4
+  },
+  {
    "v": "SCM/Logistics",
    "n": 4
   },
@@ -3035,10 +3039,6 @@
   },
   {
    "v": "ISOM",
-   "n": 3
-  },
-  {
-   "v": "Operations Management",
    "n": 3
   },
   {
@@ -3355,10 +3355,6 @@
   },
   {
    "v": "Department of Decision and Information Sciences",
-   "n": 1
-  },
-  {
-   "v": "Desautels Faculty of Management, Operations Management",
    "n": 1
   },
   {
@@ -6948,13 +6944,9 @@
     "Desautels Faculty of Management"
    ],
    "units": [
-    "Desautels Faculty of Management, Operations Management",
     "Operations Management"
    ],
    "bySchool": {
-    "": [
-     "Desautels Faculty of Management, Operations Management"
-    ],
     "Desautels Faculty of Management": [
      "Operations Management"
     ]
