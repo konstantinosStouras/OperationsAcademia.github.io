@@ -1,0 +1,92 @@
+name: OA — publish the Firestore rules
+
+# THE STEP NOBODY COULD RUN FROM HERE, until 2026-08-24.
+#
+# Six features shipped "inert until the rules are redeployed" because
+# publishing was believed to need an interactive `firebase login` and therefore
+# a person at a laptop. It does not: the Admin SDK's Security Rules API
+# releases a ruleset from source with a SERVICE ACCOUNT, and this repository
+# has held one as FIREBASE_SERVICE_ACCOUNT all along (eight other workflows use
+# it). So _scraper/deploy-rules.mjs publishes _firestore.rules the same way
+# every other job here talks to Firebase.
+#
+# WHEN IT RUNS. After "OA — checks" has passed on master — never on a push
+# directly, because the offline guards are what prove the rules file agrees
+# with the modules that write those collections, and this is the one action in
+# the repository the next run cannot undo. Publishing behind a green check is
+# the discipline the data builds already follow ("a red selftest stops
+# publishing"), applied to the rules.
+#
+# It is CHEAP TO FIRE. The script reads the live ruleset first and exits
+# without publishing when it is byte-for-byte what the repository holds, so the
+# common case — a push that touched no rules — costs one API read and mints
+# nothing.
+#
+# It CANNOT REACH ANOTHER PROJECT. The service account names its own project
+# and the script refuses to publish unless that equals the default in
+# .firebaserc. This repository's rules have twice been published into another
+# app's database by a CLI that remembered a different target; that cannot
+# happen down this road.
+#
+# The CLI path is unchanged and still correct for Storage and the Functions:
+#   firebase deploy --only storage,functions --project operations-academia
+
+on:
+  workflow_run:
+    workflows: ["OA — checks"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Compare with the live rules and report, publish nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-deploy-rules
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # A dispatch runs on whatever ref it was asked for; an automatic run
+    # publishes ONLY behind a green master check.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'master')
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # Say what is missing rather than failing obscurely: without the secret
+      # the script is a clean no-op, and this makes the reason readable in the
+      # run's log instead of only in its output.
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set — nothing will be published."
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      # The offline guards over the pure halves (the project check, the
+      # content check, the no-op comparison) before anything is published.
+      - run: node _scraper/deploy-rules.mjs --selftest
+
+      - name: Publish _firestore.rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node _scraper/deploy-rules.mjs --dry-run
+          else
+            node _scraper/deploy-rules.mjs
+          fi

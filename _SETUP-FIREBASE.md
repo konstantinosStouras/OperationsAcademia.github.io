@@ -179,12 +179,39 @@ depends on ORCID: it merges any two accounts, whatever they sign in with.
 
 ## 4. Deploy the security rules — **before announcing anything**
 
+**The Firestore rules publish themselves now.** `.github/workflows/oa-deploy-rules.yml`
+runs `_scraper/deploy-rules.mjs` after every green **OA — checks** run on
+`master`, and you can fire it by hand from the repository's **Actions** tab
+(→ *OA — publish the Firestore rules* → *Run workflow*; tick **dry_run** to see
+what it would change and publish nothing).
+
+It uses the `FIREBASE_SERVICE_ACCOUNT` secret from §5 — the same key eight other
+workflows already hold — through the Admin SDK's Security Rules API, which is
+why no interactive login is involved. It reads the live ruleset first and does
+nothing when it already matches the repository, so a push that touched no rules
+costs one API call.
+
+**One permission it may need.** The key must be allowed to release rulesets.
+The Firebase Admin SDK service account usually can; if the run reports
+`PERMISSION_DENIED`, grant it **Firebase Rules Admin**
+(`roles/firebaserules.admin`) in Google Cloud console → IAM and run it again —
+the script says exactly this when it happens.
+
+**Storage rules and the Functions still go through the CLI**, deliberately:
+
 ```bash
 npm install -g firebase-tools
 firebase login
 
 cd <this repository>       # the ROOT: the config lives here, beside the rules
-firebase deploy --only firestore:rules
+firebase deploy --only storage --project operations-academia
+```
+
+The Firestore rules can still be deployed this way too, and the command is
+unchanged:
+
+```bash
+firebase deploy --only firestore:rules --project operations-academia
 ```
 
 `firebase.json` at the repository ROOT already points the CLI at
@@ -197,16 +224,21 @@ old command deploys nothing (or the wrong thing). The CLI refuses any path
 outside its own config's directory, which is why the config sits at the root
 beside the rules rather than next to the pages that read them.
 
-**DEPLOYING IS A STEP SOMEBODY HAS TO REMEMBER.** No workflow runs
-`firebase deploy` — nothing in CI can, since it needs an interactive login —
-so a rules change committed here is NOT live until this command is run by
-hand. Every feature the rules gate stays inert in the meantime, which is the
-designed failure (a refused write says so) but is indistinguishable from a bug
-if you have forgotten the step. **Run it after every change to
-`_firestore.rules`.** The rules currently in the repository and not yet
-deployed at the time of writing include the 34-key posting ceiling, the
-`newsOverrides` and `usageSessions` blocks, and the `rowOverrides` block that
-makes the frozen archives editable at all.
+**IT USED TO BE A STEP SOMEBODY HAD TO REMEMBER, and that cost real
+features.** This page said for months that nothing in CI could deploy because
+it needed an interactive login. `firebase deploy` does; **publishing a ruleset
+does not** — the Admin SDK releases one from source with a service account. In
+the meantime six features shipped inert behind rules that were committed and
+never published: the review queue, the news gate, the name fixes, the directory
+edits, and the roster and messaging threads the Admin area draws. The last of
+those is how it was noticed (2026-08-24): a Registered-users panel with the
+code, the page and the rules all in the repository, showing nobody, under a red
+line telling the maintainer to go and run a command.
+
+So the automatic run above is the fix, and the rule now is simply: **change
+`_firestore.rules`, let the checks pass, and it is live.** A refused write still
+says so if something goes wrong, which is the designed failure — but it should
+no longer be the resting state.
 
 Firestore must exist first: Firestore
 Database → **Create database** → production mode → a region near your readers
