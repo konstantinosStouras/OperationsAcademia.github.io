@@ -35,6 +35,105 @@
   "owner": ""
  },
  {
+  "id": "2027-the-hong-kong-polytechnic-university-20260825",
+  "year": 2027,
+  "posted": "2026-08-25",
+  "institution": "The Hong Kong Polytechnic University",
+  "department": "Faculty of Business, Logistics and Maritime Studies",
+  "school": "Faculty of Business",
+  "unit": "Logistics and Maritime Studies",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-01",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=260825004",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
+  "characteristics": [
+   "PhD",
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-25T07:40:10Z",
+  "ref": "OA-JOB-260825-UGHD",
+  "owner": "cab1275d573362e3"
+ },
+ {
+  "id": "2027-the-hong-kong-polytechnic-university-20260825-2",
+  "year": 2027,
+  "posted": "2026-08-25",
+  "institution": "The Hong Kong Polytechnic University",
+  "department": "Faculty of Business, Logistics and Maritime Studies",
+  "school": "Faculty of Business",
+  "unit": "Logistics and Maritime Studies",
+  "type": "University",
+  "levels": [
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-01",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=260825005",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
+  "characteristics": [
+   "PhD",
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-25T07:43:28Z",
+  "ref": "OA-JOB-260825-GP39",
+  "owner": "cab1275d573362e3"
+ },
+ {
+  "id": "2027-the-hong-kong-polytechnic-university-20260825-3",
+  "year": 2027,
+  "posted": "2026-08-25",
+  "institution": "The Hong Kong Polytechnic University",
+  "department": "Faculty of Business, Logistics and Maritime Studies",
+  "school": "Faculty of Business",
+  "unit": "Logistics and Maritime Studies",
+  "type": "University",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-09-01",
+  "comments": "",
+  "country": "Hong Kong",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.polyu.edu.hk/job_detail.php?job=260825003",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=The%20Hong%20Kong%20Polytechnic%20University",
+  "characteristics": [
+   "PhD",
+   "Masters",
+   "MBA"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-25T07:32:36Z",
+  "ref": "OA-JOB-260825-3XYV",
+  "owner": "cab1275d573362e3"
+ },
+ {
   "id": "2027-the-chinese-university-of-hong-kong-20260824",
   "year": 2027,
   "posted": "2026-08-24",
