@@ -1668,6 +1668,51 @@ dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
 matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
+## The posting form pre-fills from the site's records — and keeps them honest
+
+Beside the cascade, `post-a-job.html` mounts **`assets/oa-uniinfo.js`** (owner,
+2026-08-24: "when a user enters e.g. INSEAD, the rest fields should be
+immediately filled matching what we have in the database"): a dual-mode module
+that reads `data/directory.json` — the SAME table universities.html displays,
+WITH the community's `directoryEdits` overlaid at read time, so a correction
+made there (or through this very form) is the record the next poster is
+offered — and fills, per typed name, everything the records answer
+DEFINITELY: the university's one school, the one department in scope, a
+unanimous type, a single-campus country, and — once the three names identify a
+directory row — its `deptUrl` and its `characteristics` checklist (research
+seminars, PhD programme, …), which the directory rows now carry from each
+place's NEWEST posting (latest wins whole, so unticking a box is how a school
+that stopped a programme says so). **Only a definite answer is ever filled**:
+INSEAD lists two departments so the department stays empty, and its campuses
+sit in three countries so the country does too — the directory model publishes
+a multi-campus row's campus countries as a `countries` LIST with NO single
+`country` (the `campusCountries` discipline; a posting-vote majority must
+never dress that ambiguity up as an answer), and the cards list every one, so
+a reader filtering the directory by Singapore finds INSEAD. Every fill lands
+in an EMPTY field or over this module's own earlier fill (`data-oa-auto-*`,
+the maybeFillType discipline), a fill the poster then CLEARS is a decision and
+never refilled, and in EDIT mode the name fields are left entirely alone — a
+posting whose owner left the school off must not gain one because the form was
+opened.
+
+**The write-back is one bounded thing.** The form's "The department's own
+page" field (`f-deptUrl`) pre-fills from the record with a note asking the
+poster to VERIFY it; it is never part of the submission document (the
+jobSubmissions rules pin that field set — the selftest checks no `out.deptUrl`
+ever appears), and after the posting is accepted a CHANGED link is filed as a
+`directoryEdits/{rowId}` MERGE (deptUrl + attribution only, so a document
+holding somebody's other corrections keeps them; an empty field never erases;
+a hidden row is never written). Every OTHER pre-filled field travels with the
+posting itself and reaches the directory through the ordinary pipeline — the
+build re-reads the published rows. The row id is
+**`OASchools.directoryRowKey`, the ONE definition** — directory-model.mjs
+re-exports it — so the browser and the build cannot disagree about where a
+correction files, including for a place posting here for the first time,
+whose row the very build that publishes the posting creates. Pure halves
+(`facts`, `overlay`, `deptUrlPatch`) and the rules/field parities are pinned
+by `testUniInfo` in selftest.mjs; who actually SEES the fills — INSEAD's
+school and type in, its department and country left, the overlaid link, the
+filed correction — is measured in page-test.mjs.
 
 ## The account menu counts what it links to
 

@@ -131,6 +131,11 @@
           var key = FIELDS[j].key;
           if (Object.prototype.hasOwnProperty.call(e, key)) copy[key] = e[key];
         }
+        /* A multi-campus row abstains from naming ONE country and carries
+           `countries` instead (directory-model.mjs). An editor who then
+           NAMES one has answered the question the build could not, so their
+           answer stands alone rather than beside the abstention's list. */
+        if (Object.prototype.hasOwnProperty.call(e, 'country')) delete copy.countries;
         copy._edit = { name: e.name || '', t: e.t || 0 };
         if (e.hidden) copy._hidden = true;
       }
@@ -209,6 +214,9 @@
       ['type', 'country', 'deptUrl', 'facultyUrl', 'address', 'mapUrl'].forEach(function (f) {
         if (!held[f] && r[f]) held[f] = r[f];
       });
+      if ((!held.countries || !held.countries.length) && r.countries && r.countries.length) {
+        held.countries = r.countries;
+      }
       if (r._edit && (!held._edit || r._edit.t > held._edit.t)) held._edit = r._edit;
       if (r._hidden && held._hidden) held._hidden = true; else held._hidden = false;
     }
@@ -243,7 +251,13 @@
         if (!schools[sk].name && r.school) schools[sk].name = r.school;
         if (!schools[sk].type && r.type) schools[sk].type = r.type;
         schools[sk].rows.push(r);
-        if (r.country && countries.indexOf(r.country) === -1) countries.push(r.country);
+        /* a multi-campus row lists EVERY campus country (INSEAD is found by
+           a reader filtering for France, Singapore or the UAE alike) */
+        var rc = (r.countries && r.countries.length) ? r.countries
+          : (r.country ? [r.country] : []);
+        for (var ci = 0; ci < rc.length; ci++) {
+          if (countries.indexOf(rc[ci]) === -1) countries.push(rc[ci]);
+        }
         var tl = TYPE_LABEL[r.type];
         if (tl && types.indexOf(tl) === -1) types.push(tl);
         if (aka.indexOf(r.institution) === -1) aka.push(r.institution);

@@ -1,6 +1,10 @@
 {
- "generated": "2026-08-24T11:01:41.830Z",
+ "generated": "2026-08-25T03:10:34.347Z",
  "universities": [
+  {
+   "v": "Tulane University",
+   "n": 8
+  },
   {
    "v": "University of Houston",
    "n": 8
@@ -19,10 +23,6 @@
   },
   {
    "v": "Arizona State University",
-   "n": 5
-  },
-  {
-   "v": "Tulane University",
    "n": 5
   },
   {
@@ -2028,16 +2028,16 @@
  ],
  "schools": [
   {
+   "v": "A. B. Freeman School of Business",
+   "n": 8
+  },
+  {
    "v": "College of Business",
    "n": 8
   },
   {
    "v": "UCL Global Business School for Health",
    "n": 6
-  },
-  {
-   "v": "A. B. Freeman School of Business",
-   "n": 5
   },
   {
    "v": "Darden School of Business",
@@ -2978,12 +2978,12 @@
    "n": 13
   },
   {
-   "v": "Data Analytics",
-   "n": 8
+   "v": "Management Science",
+   "n": 10
   },
   {
-   "v": "Management Science",
-   "n": 7
+   "v": "Data Analytics",
+   "n": 8
   },
   {
    "v": "Business Analytics",
@@ -3014,10 +3014,6 @@
    "n": 5
   },
   {
-   "v": "Operations Management",
-   "n": 4
-  },
-  {
    "v": "SCM/Logistics",
    "n": 4
   },
@@ -3043,6 +3039,10 @@
   },
   {
    "v": "ISOM",
+   "n": 3
+  },
+  {
+   "v": "Operations Management",
    "n": 3
   },
   {

@@ -3960,6 +3960,69 @@ async function testDirectoryModel() {
     'directory: an OM-list row carries its provenance');
   eq(om.rows.filter((r) => r.institution === 'Omlist Only University').length, 0,
     'directory: a university only the OM list knows adds NO card — enrich, never list');
+
+  /* THE ROW ID IS THE ONE DEFINITION IN oa-schools.js. The posting form
+     files a poster's department-link correction against the same id
+     (assets/oa-uniinfo.js), so the build's copy is a re-export, never a
+     twin — a browser copy that drifted by one character would file
+     corrections against rows that do not exist, silently, for ever. */
+  eq(rowKey, SCHOOLS.directoryRowKey,
+    'directory: rowKey IS OASchools.directoryRowKey — one definition, both writers');
+
+  /* A UNIVERSITY WITH CAMPUSES IN TWO COUNTRIES NAMES NO SINGLE COUNTRY
+     (owner, 2026-08-24: INSEAD's country must stay the poster's to settle).
+     Campus evidence — the archive's addresses — outranks the posting votes
+     and follows the campusCountries discipline: one campus country settles
+     the row, several are published as `countries` with NO `country`, so a
+     posting-vote majority can never dress an ambiguity up as an answer. */
+  const multi = buildDirectory({
+    archive: [
+      { institution: 'Spanning University', school: '', department: 'Operations',
+        address: '1 Rue de Test, 77300 Fontainebleau, France' },
+      { institution: 'Spanning University', school: '', department: 'Operations',
+        address: '1 Test Ave, Singapore 138676' },
+    ],
+    seed: [{ institution: 'Spanning University', school: 'School of Business', department: 'Operations' }],
+    jobs: [
+      // two French postings OUTVOTE the Singapore campus — and must not win
+      { institution: 'Spanning University', school: '', unit: 'Operations', posted: '2026-08-01', country: 'France' },
+      { institution: 'Spanning University', school: '', unit: 'Operations', posted: '2026-08-02', country: 'France' },
+    ],
+    past: [],
+  });
+  const span = multi.rows.filter((r) => r.institution === 'Spanning University');
+  eq(span.length, 1, 'directory: the two campuses and the seed merge into ONE row');
+  ok(!span[0].country,
+    'directory: a multi-campus university has NO single country, whatever the postings vote');
+  eq(span[0].countries, ['France', 'Singapore'],
+    'directory: …and lists EVERY campus country instead, so each finds it in the filter');
+  const one = buildDirectory({
+    archive: [{ institution: 'Single Campus University', school: '', department: 'Operations',
+      address: '2 Test St, Dublin, Ireland' }],
+    seed: [], jobs: [], past: [],
+  }).rows[0];
+  eq(one.country, 'Ireland', 'directory: one campus country settles the row');
+  ok(!one.countries, 'directory: …and a settled row carries no countries list');
+
+  /* THE NEWEST POSTING'S WORD ON WHAT THE SCHOOL OFFERS — the form's
+     checklist reaches the directory row, latest wins WHOLE (a school that
+     stopped its PhD programme says so by unticking the box), and the
+     school-less fold carries it to the schooled home. */
+  const chars = buildDirectory({
+    archive, seed,
+    jobs: [
+      { institution: 'Testland University', school: 'Testland School of Business',
+        unit: 'Operations Management', posted: '2026-08-01', country: 'France',
+        characteristics: ['Research seminars', 'PhD'] },
+      { institution: 'Testland University', school: '',
+        unit: 'Operations Management', posted: '2026-08-10', country: 'France',
+        characteristics: ['Research seminars', 'MBA'] },
+    ],
+    past: [],
+  });
+  eq(chars.rows.find((r) => r.institution === 'Testland University').characteristics,
+    ['Research seminars', 'MBA'],
+    'directory: the checklist is the NEWEST posting\'s, whole — carried through the school-less fold');
 }
 
 /* The registered-users roster and the maintainer<->account message threads
@@ -4281,6 +4344,154 @@ async function testDirectoryWiring() {
     'data/directory.json carries the department links the OM list supplies');
   ok(page.includes('assets/oa-omlist.js') && page.includes('addOmDepartments'),
     'universities.html loads the module and appends its departments to the map\'s popups');
+}
+
+/* ------------------------------------------------------------------------
+   The posting form's pre-fill from the site's own records, and the link
+   write-back into the Universities directory (assets/oa-uniinfo.js;
+   owner, 2026-08-24: "when a user enters e.g. INSEAD … fields without a
+   definite answer should be left empty; other fields with unique answers
+   should be pre-filled"). The pure half is pinned here; who actually SEES
+   the fills is measured in page-test.mjs.                                */
+async function testUniInfo() {
+  const U = require('../assets/oa-uniinfo.js');
+
+  /* fixtures shaped like INSEAD's own directory rows: one school, TWO
+     departments, campuses in three countries */
+  const rows = [
+    { id: 'insead__school-of-business__technology-and-operations-management',
+      institution: 'INSEAD', school: 'School of Business',
+      department: 'Technology and Operations Management', type: 'Business School',
+      countries: ['France', 'Singapore', 'United Arab Emirates'],
+      deptUrl: 'https://www.insead.edu/tom',
+      characteristics: ['Research seminars', 'PhD'] },
+    { id: 'insead__school-of-business__decision-sciences',
+      institution: 'INSEAD', school: 'School of Business',
+      department: 'Decision Sciences', type: 'Business School' },
+    { id: 'one-dept-college____operations',
+      institution: 'One Dept College', school: '', department: 'Operations',
+      type: 'University', country: 'Ireland',
+      deptUrl: 'https://odc.example/ops', characteristics: ['MBA'] },
+  ];
+
+  const insead = U.facts(rows, { institution: 'INSEAD' }, SCHOOLS);
+  eq(insead.school, 'School of Business',
+    'uniinfo: the ONE school at the university is a definite answer — filled');
+  eq(insead.unit, '', 'uniinfo: two departments on record — the poster settles it');
+  eq(insead.type, 'Business School', 'uniinfo: a unanimous type is filled');
+  eq(insead.country, '',
+    'uniinfo: campuses in three countries — no single country, whatever any row says');
+  ok(!insead.row, 'uniinfo: no row is matched while the department is unsettled');
+
+  const tom = U.facts(rows,
+    { institution: 'INSEAD', unit: 'Technology and Operations Management' }, SCHOOLS);
+  ok(!!tom.row, 'uniinfo: naming the department identifies its row');
+  eq(tom.rowId, 'insead__school-of-business__technology-and-operations-management',
+    'uniinfo: a school-less ask finds its schooled home — the build\'s own fold');
+  eq(tom.deptUrl, 'https://www.insead.edu/tom', 'uniinfo: …and serves its recorded link');
+  eq(tom.characteristics, ['Research seminars', 'PhD'],
+    'uniinfo: …and its recorded checklist');
+
+  const odc = U.facts(rows, { institution: 'One Dept College' }, SCHOOLS);
+  eq(odc.unit, 'Operations',
+    'uniinfo: a single-department university fills the department too');
+  eq(odc.country, 'Ireland', 'uniinfo: a single-country record fills the country');
+  ok(!!odc.row, 'uniinfo: …and the unique fills identify the row on their own');
+
+  const hidden = U.facts(rows.map((r) =>
+    r.id === 'one-dept-college____operations' ? { ...r, _hidden: true } : r),
+  { institution: 'One Dept College' }, SCHOOLS);
+  ok(!hidden.row && !hidden.unit,
+    'uniinfo: a row the maintainer took down answers nothing');
+
+  const fresh = U.facts(rows,
+    { institution: 'INSEAD', school: 'School of Business', unit: 'Marketing' }, SCHOOLS);
+  ok(!fresh.row, 'uniinfo: a department no source lists matches no row');
+  eq(fresh.rowId, SCHOOLS.directoryRowKey('INSEAD', 'School of Business', 'Marketing'),
+    'uniinfo: …but a correction still knows where to file — the id the build WILL mint');
+
+  /* the write decision: an empty field never erases, the record's own value
+     needs no write, a difference is the correction */
+  eq(U.deptUrlPatch('https://a.example', ''), '',
+    'uniinfo: an empty link field never erases a recorded link');
+  eq(U.deptUrlPatch('https://a.example', 'https://a.example'), '',
+    'uniinfo: confirming the record writes nothing');
+  eq(U.deptUrlPatch('https://a.example', 'https://b.example'), 'https://b.example',
+    'uniinfo: a changed link is the correction');
+  eq(U.deptUrlPatch('', 'https://b.example'), 'https://b.example',
+    'uniinfo: a link where none was recorded is one too');
+
+  /* the overlay: the SAME read-time correction layer universities.html
+     applies, so the record offered to the next poster is the record the
+     site actually shows */
+  const over = U.overlay(rows, {
+    'insead__school-of-business__technology-and-operations-management': {
+      rowId: 'insead__school-of-business__technology-and-operations-management',
+      by: 'u1', name: 'A User', t: 5,
+      deptUrl: 'https://corrected.example/tom', country: 'France',
+    },
+  });
+  const oTom = over.find((r) =>
+    r.id === 'insead__school-of-business__technology-and-operations-management');
+  eq(oTom.deptUrl, 'https://corrected.example/tom',
+    'uniinfo: an edit overrides the committed link');
+  ok(!oTom.countries,
+    'uniinfo: an editor who NAMED a country retires the multi-campus abstention');
+  eq(U.facts(over,
+    { institution: 'INSEAD', unit: 'Technology and Operations Management' },
+    SCHOOLS).deptUrl,
+  'https://corrected.example/tom',
+  'uniinfo: the facts read the OVERLAID record — a correction reaches the next poster');
+
+  /* the module and the directory page cannot disagree about what an edit
+     may change — pinned against oa-directory.js's own FIELDS list */
+  const dirJs = await readFile(path.join(HERE, '..', 'assets', 'oa-directory.js'), 'utf8');
+  const fieldSpec = dirJs.slice(dirJs.indexOf('var FIELDS'), dirJs.indexOf('var TYPE_LABEL'));
+  const fieldKeys = (fieldSpec.match(/key: '([^']+)'/g) || []).map((m) => m.slice(6, -1));
+  eq(U.EDIT_FIELDS.slice().sort(), fieldKeys.slice().sort(),
+    'uniinfo: the form-side overlay reads exactly the fields the directory page edits');
+
+  /* the write stays inside the rules: every key commit() puts on the
+     document has a directoryEdits rule, and the write is a MERGE so a
+     document holding somebody's other corrections keeps them */
+  const src = await readFile(path.join(HERE, '..', 'assets', 'oa-uniinfo.js'), 'utf8');
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const block = rules.slice(rules.indexOf('match /directoryEdits/'));
+  const allowed = new Set(
+    (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
+      .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
+  const commitBody = src.slice(src.indexOf('function commit('),
+    src.indexOf('return {', src.indexOf('function commit(')));
+  const docLit = /var doc = \{([\s\S]*?)\};/.exec(commitBody);
+  ok(!!docLit, 'uniinfo: commit() builds one document literal the test can read');
+  const written = (docLit[1].match(/(\w+):/g) || []).map((m) => m.slice(0, -1));
+  ok(written.length >= 5, 'uniinfo: the document carries the link and its bookkeeping');
+  for (const key of written) {
+    ok(allowed.has(key), `uniinfo: commit() writes "${key}", and the rules allow it`);
+  }
+  ok(/\{ merge: true \}/.test(commitBody),
+    'uniinfo: the write is a MERGE — other corrections on the document survive');
+  eq(U.COLLECTION, 'directoryEdits',
+    'uniinfo: the write lands in the collection the directory page reads');
+
+  /* the wiring: the page carries the field and the module, the form mounts
+     the pre-fill, files the correction, and never lets the link into the
+     submission document (whose rules pin its field set) */
+  const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  for (const need of ['assets/oa-uniinfo.js', 'id="f-deptUrl"',
+    'id="f-deptUrl-note"', 'id="f-chars-note"']) {
+    ok(page.includes(need), `post-a-job.html carries ${need}`);
+  }
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  ok(form.includes('OAUniInfo.wire'),
+    'oa-jobform.js mounts the records pre-fill beside the cascade');
+  ok(form.includes('OAUniInfo.commit'),
+    'oa-jobform.js files the link correction after a posting is accepted');
+  ok(!/\bout\.deptUrl\b/.test(form),
+    'the link never joins the submission document — jobSubmissions\' rules pin its field set');
+  ok(/fillNames: !EDIT_ID/.test(form),
+    'edit mode never fills a name field — a posting whose owner left the school ' +
+    'off must not gain one because the form was opened');
 }
 
 async function testRowOverrides() {
@@ -7317,6 +7528,7 @@ if (isMain(import.meta.url)) {
   await testDeployGuard();
   await testDirectoryModel();
   await testDirectoryWiring();
+  await testUniInfo();
   await testRowOverrides();
   await testNewsReview();
   await testNameFixes();

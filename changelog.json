@@ -10,6 +10,13 @@
       "url": "https://www.operationsacademia.org/messages.html"
     },
     {
+      "id": "job-form-prefills-from-records",
+      "date": "2026-08-24",
+      "title": "The job form fills itself in from the site’s own records — and keeps them honest",
+      "summary": "Type your university into the posting form and everything the site’s records answer definitely is filled in for you: its one school, its type, the country of a single-campus university, and — once the department is named — the department’s own page link and the checklist of what your school offers (research seminars, a PhD programme, and so on). Only definite answers are filled: INSEAD lists two departments and campuses in three countries, so those stay yours to choose. The pre-filled department link asks you to verify it, and a correction updates the Universities directory for everyone the moment your posting is sent — the same record every future poster is then offered.",
+      "url": "https://www.operationsacademia.org/post-a-job.html"
+    },
+    {
       "id": "candidate-affiliation-in-three",
       "date": "2026-08-24",
       "title": "The candidate form asks your affiliation the way the job form does",

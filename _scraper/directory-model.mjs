@@ -45,10 +45,14 @@ const SCHOOLS = require('../assets/oa-schools.js');
 const COUNTRIES = require('../assets/oa-countries.js');
 
 /* One address-part slug, matching the shape of the archive's own row ids
-   ('aalto-university-school-of-business'): folded, hyphenated, bounded. */
-export function slugPart(s) {
-  return SCHOOLS.fold(String(s || '')).replace(/\s+/g, '-').slice(0, 60);
-}
+   ('aalto-university-school-of-business'): folded, hyphenated, bounded.
+
+   BOTH live in assets/oa-schools.js now, and this file only re-exports them:
+   the posting form writes a poster's department-link correction against the
+   SAME id (assets/oa-uniinfo.js), and two copies of the key function is how
+   a correction gets filed against a row that does not exist — silently, for
+   ever. One definition, loaded by both sides, the oa-countries.js shape. */
+export const slugPart = SCHOOLS.slugPart;
 
 /** The stable id an edit document is keyed on. The UNIVERSITY part folds
     through institutionKey, so "The University of Texas at Dallas (UTD)" and
@@ -56,14 +60,7 @@ export function slugPart(s) {
     vocabulary uses — while the school and department parts fold spelling
     only. Never empty: a university row with no school and no department is
     the university part alone. */
-export function rowKey(institution, school, unit) {
-  const parts = [
-    slugPart(SCHOOLS.institutionKey(institution || '')),
-    slugPart(school),
-    slugPart(unit),
-  ];
-  return parts.join('__').replace(/__+$/, '') || 'row';
-}
+export const rowKey = SCHOOLS.directoryRowKey;
 
 /* The three names of one source row, canonicalised the one way. Three
    separate columns, so canonColumns and never canonPlace — see CLAUDE.md. */
@@ -106,6 +103,9 @@ function newRow(id, n) {
     n: 0,
     lastPosted: '',
     countryVotes: Object.create(null),
+    campusVotes: Object.create(null),
+    characteristics: [],
+    charsDay: '',
   };
 }
 
@@ -117,6 +117,34 @@ function voteCountry(row, country) {
   const c = COUNTRIES.canon(String(country || '').trim());
   if (!c) return;
   row.countryVotes[c] = (row.countryVotes[c] || 0) + 1;
+}
+
+/* A CAMPUS country — read off an archive row's postal address — is a fact
+   about where the university IS, so it is kept apart from the posting votes:
+   one campus country settles the row, and two or more mean the row spans
+   countries (INSEAD is in France AND Singapore AND Abu Dhabi) and no single
+   country may be published for it — the campusCountries discipline in
+   vocab.mjs, which is what keeps healCountry honest about the same rows. */
+function voteCampus(row, country) {
+  const c = COUNTRIES.canon(String(country || '').trim());
+  if (!c) return;
+  row.campusVotes[c] = (row.campusVotes[c] || 0) + 1;
+}
+
+/* The newest posting's word on what the school offers — research seminars, a
+   PhD programme, and the rest of the form's checklist. LATEST WINS whole,
+   never a union: a school that stopped its PhD programme says so by unticking
+   the box on its next posting, and a union could never forget anything. */
+function noteCharacteristics(row, chars, day) {
+  const list = (Array.isArray(chars) ? chars : [])
+    .filter((c) => typeof c === 'string' && c.trim())
+    .map((c) => c.trim().slice(0, 60))
+    .slice(0, 12);
+  if (!list.length) return;
+  const d = String(day || '');
+  if (row.charsDay && d < row.charsDay) return;
+  row.characteristics = list;
+  row.charsDay = d;
 }
 
 /**
@@ -173,7 +201,7 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     if (!isFinite(row.lat) && isFinite(r.lat)) { row.lat = r.lat; row.lng = r.lng; }
     if (!row.mapUrl && r.mapUrl) row.mapUrl = String(r.mapUrl);
     if (!row.facultyUrl && r.facultyUrl) row.facultyUrl = String(r.facultyUrl);
-    voteCountry(row, COUNTRIES.countryFromAddress(String(r.address || '')));
+    voteCampus(row, COUNTRIES.countryFromAddress(String(r.address || '')));
   }
 
   for (const r of seed) {
@@ -187,6 +215,7 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     const day = String(r.posted || '');
     if (day > row.lastPosted) row.lastPosted = day;
     voteCountry(row, r.country);
+    noteCharacteristics(row, r.characteristics, day);
     const t = String(r.type || '').trim();
     if (!row.storedType && (t === 'Business School' || t === 'University')) row.storedType = t;
   }
@@ -234,6 +263,10 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     for (const c in row.countryVotes) {
       home.countryVotes[c] = (home.countryVotes[c] || 0) + row.countryVotes[c];
     }
+    for (const c in row.campusVotes) {
+      home.campusVotes[c] = (home.campusVotes[c] || 0) + row.campusVotes[c];
+    }
+    noteCharacteristics(home, row.characteristics, row.charsDay);
     if (!home.facultyUrl && row.facultyUrl) home.facultyUrl = row.facultyUrl;
     if (!home.deptUrl && row.deptUrl) home.deptUrl = row.deptUrl;
     rows.delete(id);
@@ -269,15 +302,29 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
     for (const c in row.countryVotes) {
       home.countryVotes[c] = (home.countryVotes[c] || 0) + row.countryVotes[c];
     }
+    for (const c in row.campusVotes) {
+      home.campusVotes[c] = (home.campusVotes[c] || 0) + row.campusVotes[c];
+    }
+    noteCharacteristics(home, row.characteristics, row.charsDay);
     rows.delete(id);
   }
 
   const out = [...rows.values()].map((row) => {
-    // the country the row's own evidence names — most votes wins, a tie is
-    // no answer at all (the healCountry discipline: never invent)
+    /* The country the row's own evidence names. CAMPUS evidence (the
+       archive's addresses) outranks posting votes and is held to the
+       campusCountries discipline: one campus country settles it, two or more
+       mean the row genuinely spans countries — published as `countries`, with
+       NO single `country`, so nothing downstream can mistake a majority for
+       an answer (INSEAD's most-posted-from campus is not "the" country).
+       Only a row with no campus evidence falls back to the posting votes —
+       most votes wins, a tie is no answer at all (the healCountry
+       discipline: never invent). */
+    const campuses = Object.keys(row.campusVotes).sort();
     const votes = Object.entries(row.countryVotes).sort((a, b) => b[1] - a[1]);
-    const country = votes.length && (votes.length === 1 || votes[0][1] > votes[1][1])
-      ? votes[0][0] : '';
+    const country = campuses.length === 1 ? campuses[0]
+      : campuses.length ? ''
+        : votes.length && (votes.length === 1 || votes[0][1] > votes[1][1])
+          ? votes[0][0] : '';
     row.type = typeOf(row.storedType, row.institution, row.school, row.department);
     const rec = {
       id: row.id,
@@ -286,10 +333,12 @@ export function buildDirectory({ archive = [], seed = [], jobs = [], past = [], 
       department: row.department,
       type: row.type,
       country,
+      countries: campuses.length > 1 ? campuses : [],
       address: row.address,
       mapUrl: row.mapUrl,
       facultyUrl: row.facultyUrl,
       deptUrl: row.deptUrl,
+      characteristics: row.characteristics,
       sources: row.sources.slice().sort(),
       n: row.n,
       lastPosted: row.lastPosted,

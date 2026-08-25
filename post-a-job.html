@@ -350,6 +350,27 @@
                     <fieldset>
                       <legend>Your department</legend>
 
+                      <!-- NOT part of the posting: this field verifies — and,
+                           when the poster corrects it, UPDATES — the link the
+                           Universities directory shows for this department
+                           (assets/oa-uniinfo.js pre-fills it from
+                           data/directory.json and files a changed value as a
+                           directoryEdits correction after the posting is
+                           sent). It is inside the form only so the poster
+                           meets it in one flow; collect() never reads it into
+                           the submission document. -->
+                      <div class="oa-field">
+                        <label for="f-deptUrl">The department&rsquo;s own page</label>
+                        <p class="oa-hint">Not published with the posting &mdash; this is the
+                        link the <a href="universities.html">Universities directory</a> shows
+                        for your department. Where the site already has one it appears here:
+                        please verify it, and correct it if it has moved. A correction updates
+                        the directory for everyone.</p>
+                        <input type="url" id="f-deptUrl" name="deptUrl" maxlength="600"
+                               placeholder="https://">
+                        <p class="oa-hint oa-derived" id="f-deptUrl-note" aria-live="polite"></p>
+                      </div>
+
                       <div class="oa-field">
                         <span class="oa-label-text" id="lbl-chars">Does your school or department have any of the following?</span>
                         <p class="oa-hint">Shown publicly as small tags, and used by the
@@ -362,6 +383,7 @@
                           <label class="oa-check"><input type="checkbox" name="characteristics" value="Undergrad"> An undergraduate programme with Operations courses</label>
                           <label class="oa-check"><input type="checkbox" name="characteristics" value="Exec Ed"> Executive education in Operations</label>
                         </div>
+                        <p class="oa-hint oa-derived" id="f-chars-note" aria-live="polite"></p>
                       </div>
                     </fieldset>
 
@@ -560,6 +582,7 @@
     <script defer src="assets/oa-schools.js"></script>
     <script defer src="assets/oa-combo.js"></script>
     <script defer src="assets/oa-place-picker.js"></script>
+    <script defer src="assets/oa-uniinfo.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-jobform.js"></script>
