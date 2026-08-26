@@ -584,6 +584,61 @@ afford the wider net because a person reads its answer; this one cannot.
 Pinned both ways in `selftest.mjs`, including the UCD and CityU cases and the
 sync's own source (rejects, never deletes).
 
+### Every posting under review, and a button to ask again
+
+Dropping a row as it is CRAWLED leaves the queue as it was: every posting
+already under review the day that shipped was crawled before the rule existed,
+and nothing was ever going to sweep them (owner, 2026-08-26: *"Check ALL jobs
+currently under review … apply for all jobs under review"*). So the queue is
+swept too — the pending documents FIRST, then the fresh rows measured against
+what survived.
+
+**A per-row check cannot sweep a set**, and that is the whole reason
+`findAdvertRepeats` exists: two queued rows naming one advertisement are each a
+repeat of the OTHER, so checking them independently against the same list drops
+BOTH and loses the posting altogether. It keeps what it has already kept, so
+exactly one survives — and the rows go in **oldest first** (`queuedAt`), so the
+survivor is the one that has been waiting longest.
+
+Three consequences the sweep must carry with it, each pinned: a posting on its
+way out is not also **re-flagged** (`dup`/`biz` on a document being rejected),
+is not **refreshed** from the sheet, and is not counted among the decisions
+still **waiting** on the maintainer. And the write is a TRANSACTION that only
+ever moves a document out of `pending` — every other write in that file is
+careful never to overwrite a decision made in the browser mid-run, and this one
+writes a decision, so it has to look first. A posting approved a second ago is
+theirs.
+
+**And the maintainer can ask on demand**: *Check for duplicate adverts*, beside
+Approve-all on the crawled tab of `/admin-area`. It is the SAME RULE — the
+button and the pipeline read one dual-mode file, `assets/oa-advert-dup.js`,
+which `_scraper/jobreview.mjs` re-exports rather than carrying its own copy (the
+drift every shared module here exists to prevent; `oa-schools.js`,
+`oa-countries.js`, `oa-news.js` are the same shape). Four things it does
+deliberately:
+
+* it sweeps the **whole crawled queue**, not the page on screen — a repeat is
+  always in the same market year as what it repeats, so no page could show a
+  pair the sweep should have left alone;
+* it re-reads `data/jobs.json` with **`cache: 'no-cache'`**, because Pages
+  serves `data/` with ten minutes of freshness and a stale copy would keep a
+  repeat of something published nine minutes ago;
+* it **reports before it writes** — every drop is named in the confirmation with
+  the posting it repeats, and dismissing it writes nothing;
+* it judges the row **as it will publish**, the maintainer's unsaved edits
+  included: a link just corrected on the card is the link the check reads.
+
+It is drawn for ONE posting too, unlike Approve-all's `> 1`: a single queued
+posting can perfectly well repeat one that is already live, which is the case
+that was reported. It is on the crawled tab alone — a user-added posting is
+already on the site, and taking it off is its poster's decision or the Take-down
+control, never a sweep.
+
+`page-test.mjs` measures the money path in a real browser against its own seeded
+pair and its own routed `jobs.json`: dismissing writes nothing, accepting
+rejects the two repeats (never deletes them), the OLDER of the pair survives, the
+document says why it went, and a second press reports that it found nothing.
+
 **A crawled posting that mentions "business" is flagged under Business School,
 and its card NAMES the school** (owner, 2026-08-23). `typeFromNames` used to
 read only the employer's name and the field column, so Berkeley advertising a

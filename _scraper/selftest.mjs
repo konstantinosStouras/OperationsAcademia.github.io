@@ -63,7 +63,7 @@ import {
   COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
   needMail, changedKeys, approvedRow, duplicatesOf, sameDups, businessCheck, sameBiz,
-  advertRepeat, repeatNote,
+  advertRepeat, findAdvertRepeats, repeatNote,
 } from './jobreview.mjs';
 import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
@@ -6901,6 +6901,34 @@ function testReviewDuplicates() {
   ok(repeatNote(null).length > 0 && repeatNote(null).length < 1000,
     'and stays inside the note field the rules already allow, even with nothing to name');
 
+  /* ---- SWEEPING A WHOLE SET, not one row at a time ---------------------
+
+     Owner, 2026-08-26: "Apply for ALL jobs under review". A per-row check
+     cannot do that on its own — two queued rows naming one advertisement are
+     each a repeat of the OTHER, so checking them independently against the
+     same list drops both and loses the posting altogether. `findAdvertRepeats`
+     keeps what it has already kept, so exactly one survives; and the caller
+     hands the rows over oldest-first, so the survivor is the one that has been
+     waiting longest. */
+  const q1 = { ...sameAd, id: 'Q-A' };
+  const q2 = { ...sameAd, id: 'Q-B' };
+  const both = findAdvertRepeats([q1, q2], []);
+  eq(both.keep.map((r) => r.id), ['Q-A'],
+    'two queued rows naming one advertisement leave exactly one — never zero');
+  eq(both.drop.map((d) => d.row.id), ['Q-B'],
+    'and the one dropped is the later of the two, because the caller passes them oldest first');
+  eq(both.drop[0].of.id, 'Q-A', 'the drop names the row that survived it');
+
+  eq(findAdvertRepeats([q1], site).drop.map((d) => d.of.id), ['OA-1'],
+    'a queued row repeating something LIVE is dropped against the site, as before');
+  eq(findAdvertRepeats([q1], site).keep, [],
+    'and does not then join the list the rest are measured against');
+  eq(findAdvertRepeats([{ ...crawled, adUrl: '' },
+    { ...crawled, id: 'X-2', adUrl: '' }], []).drop, [],
+    'rows naming no advertisement are never swept together');
+  eq(findAdvertRepeats([], site).drop, [],
+    'and an empty queue sweeps to nothing');
+
   /* AND THE DROP SURVIVES THE ENTRY LEVELS MOVING UNDER IT. Two of its four
      contradictions are read off the row (the department and the levels), and
      `levelsFromRank` now ticks BOTH boxes for every open-rank search (owner,
@@ -6918,6 +6946,9 @@ function testReviewDuplicates() {
     'no served posting is judged a repeat of another even with the entry-level ' +
     'contradiction taken away — so a search now ticking two boxes cannot start ' +
     'dropping real postings');
+  eq(findAdvertRepeats(levelBlind, []).drop.map((d) => d.row.id), [],
+    'and the whole-queue sweep, which is what actually drops one, sweeps the ' +
+    'same corpus to nothing');
 
   /* THE WIRING: the sync drops rather than queues, and REJECTS rather than
      deletes — `partition` re-queues a row whose document is gone, so a delete
@@ -6928,13 +6959,98 @@ function testReviewDuplicates() {
     'the sheet sync checks every fresh queue document for a repeated advertisement');
   ok(/doc\.status = REJECTED/.test(syncSrc),
     'and drops it by REJECTING it, which keeps it out of the pending list for good');
-  ok(/\[\.\.\.site, \.\.\.split\.pending\.map/.test(syncSrc),
-    'comparing against what is live AND what is already queued');
+  ok(/findAdvertRepeats\(pendingPairs\.map/.test(syncSrc),
+    'the postings ALREADY under review are swept too, not only the fresh ones');
+  ok(/\.sort\(\(a, b\) => String\(a\.queuedAt \|\| ''\)/.test(syncSrc),
+    'oldest first, so the one that has been waiting longest is the one that stays');
+  ok(/\[\.\.\.site, \.\.\.swept\.keep\]/.test(syncSrc),
+    'comparing against what is live AND what survived in the queue');
   ok(/listed\.push\(doc\.row\)/.test(syncSrc),
     'and against the fresh rows it has just accepted, so one advertisement ' +
     'listed twice in the workbook is queued once');
+  ok(/status: REJECTED[\s\S]{0,200}?note: repeatNote\(d\.of\)/.test(syncSrc),
+    'a swept queue document is rejected with the reason in its note');
+  ok(/runTransaction[\s\S]{0,400}?!== PENDING\) return false/.test(syncSrc),
+    'and only from PENDING, in a transaction — a decision made in the browser ' +
+    'mid-run is the maintainer\'s and is never overwritten');
+  ok(/if \(droppedIds\.has\(doc\.rowId\)\) continue/.test(syncSrc),
+    'a posting on its way out of the queue is not also re-flagged');
+  ok(/split\.pending\.filter\(\(d\) => !droppedIds\.has\(d\.rowId\)\)\.length/.test(syncSrc),
+    'and is not counted among the decisions still waiting on the maintainer');
   ok(!/doc\.status = REJECTED[\s\S]{0,400}?\bdelete\b/.test(syncSrc),
     'nothing deletes the document');
+
+  /* ---- AND THE BUTTON, which must read the SAME FILE -------------------
+
+     Owner, 2026-08-26: "Create a button to check for such duplicates in the
+     future." The rule therefore has two callers, and a browser COPY of it
+     would drift from the pipeline's the first time either was corrected — the
+     drift every shared module in this repository exists to prevent. So it is
+     ONE dual-mode file (assets/oa-advert-dup.js) that jobreview.mjs
+     re-exports, pinned here from both ends. */
+  const dupSrc = readFileSync(path.join(HERE, '..', 'assets', 'oa-advert-dup.js'), 'utf8');
+  ok(/module\.exports = factory\(require\('\.\/oa-schools\.js'\)\)/.test(dupSrc)
+     && /root\.OAAdvertDup = factory\(root\.OASchools\)/.test(dupSrc),
+    'the advert-repeat rule is one dual-mode file, Node and browser');
+  const jrSrc = readFileSync(path.join(HERE, 'jobreview.mjs'), 'utf8');
+  ok(/require\(['"]\.\.\/assets\/oa-advert-dup\.js['"]\)/.test(jrSrc),
+    'and the pipeline RE-EXPORTS it rather than carrying its own copy');
+  for (const name of ['advertLink', 'advertRepeat', 'findAdvertRepeats', 'repeatNote']) {
+    ok(new RegExp('\\b' + name + '\\b').test(jrSrc.slice(0, jrSrc.indexOf('oa-advert-dup'))
+      + jrSrc.slice(jrSrc.indexOf('oa-advert-dup'))),
+      `${name} reaches the pipeline through that one re-export`);
+  }
+
+  const rvSrc = readFileSync(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  ok(/OAAdvertDup\.findAdvertRepeats\(/.test(rvSrc),
+    'the Admin-area button decides with the shared rule, never a copy of it');
+  ok(!/function advertRepeat\b/.test(rvSrc),
+    'and the panel defines no rule of its own');
+  ok(/fetch\('data\/jobs\.json', \{ cache: 'no-cache' \}\)/.test(rvSrc),
+    'it re-reads what is LIVE, revalidated — Pages serves data/ with ten ' +
+    'minutes of freshness and a stale copy would keep a repeat');
+  ok(/window\.confirm\([\s\S]{0,600}?lines/.test(rvSrc),
+    'it names every posting it would remove before it removes any');
+  ok(/status: 'rejected'[\s\S]{0,200}?note: OAAdvertDup\.repeatNote\(d\.of\)/.test(rvSrc),
+    'and rejects with the same fields the sync writes — never a delete');
+  ok(/state\.crawled\.slice\(\)\.sort\(/.test(rvSrc),
+    'over the WHOLE crawled queue, oldest first, not just the page on screen');
+  ok(/var dupOn = source === 'crawled' && state\.crawled\.length > 0/.test(rvSrc),
+    'drawn on the crawled tab alone — a user-added posting is already live — ' +
+    'and for ONE posting too, which can repeat something already published');
+
+  const adminPage = readFileSync(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/id="oa-review-dupes"/.test(adminPage), 'the Admin area carries the button');
+  /* SCRIPT TAGS, not the first mention: the panel is named in a comment two
+     hundred lines above its own tag, so a bare indexOf compares a sentence
+     with a script. */
+  const tagAt = (f) => adminPage.indexOf('<script defer src="assets/' + f + '">');
+  ok(tagAt('oa-advert-dup.js') > tagAt('oa-schools.js'),
+    'and loads the rule after oa-schools.js, whose institutionKey it folds names with');
+  ok(tagAt('oa-advert-dup.js') < tagAt('oa-jobreview.js'),
+    'and before the panel that calls it');
+  ok(/<script defer src="assets\/oa-advert-dup\.js">/.test(adminPage),
+    'deferred, like every other script on the page');
+
+  /* AND IT NEEDS NO RULES REDEPLOY. The sync writes with the Admin SDK, which
+     bypasses the rules; the BUTTON writes from a browser, so every key it
+     sends has to be one `jobReviews` already allows — `note` and `dup` were
+     chosen for exactly that. A feature that needs a manual step to become real
+     looks installed and is not, which is the failure shape this repository
+     names everywhere else. */
+  const rulesSrc = readFileSync(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const jrRule = rulesSrc.slice(rulesSrc.indexOf('match /jobReviews/{id}'));
+  const jrAllowed = (jrRule.slice(jrRule.indexOf('hasOnly(['),
+    jrRule.indexOf('])', jrRule.indexOf('hasOnly(['))).match(/'([^']+)'/g) || [])
+    .map((x) => x.replace(/'/g, ''));
+  for (const k of ['status', 'reviewedAt', 'note', 'dup']) {
+    ok(jrAllowed.indexOf(k) >= 0,
+      `the button's "${k}" is already allowed on a jobReviews document — no redeploy`);
+  }
+  ok(/'rejected'/.test(jrRule.slice(0, jrRule.indexOf('hasOnly('))),
+    'and "rejected" is a status the rules accept from the browser');
+  ok(repeatNote(site[0]).length < 1000,
+    'and the reason fits the note field the rules cap at 1000 characters');
 
   const entry = duplicatesOf(crawled, site)[0];
   eq(Object.keys(entry).sort(),

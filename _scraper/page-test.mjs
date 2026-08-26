@@ -4141,12 +4141,13 @@ for (const w of [320, 360, 390, 430]) {
   /** A fresh CONTEXT per scenario: the badge cache and the auth hint live in
       localStorage, and a shared context would hand one scenario the last
       one's numbers — the very confusion the uid-keyed cache exists to stop. */
-  async function adminAreaPage(user, url) {
+  async function adminAreaPage(user, url, extra = []) {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
     const q = await ctx.newPage();
     const errors = [];
     q.on('pageerror', (e) => errors.push(e.message));
-    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs: seedDocs })};`);
+    const docs = extra.length ? seedDocs.concat(extra) : seedDocs;
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs })};`);
     await q.route('**/firebasejs/**', (r) =>
       r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
     await q.goto(BASE + url, { waitUntil: 'load' });
@@ -4481,6 +4482,151 @@ for (const w of [320, 360, 390, 430]) {
     ok(true, 'admin area: and the card re-renders under the taken-down pile, one click from back');
 
     eq(errors, [], 'admin area: desk run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- "Check for duplicate adverts" ---------------------------------------
+
+     Owner, 2026-08-26: "Check all jobs currently under review for duplicates
+     in the sense that their Link to the advert coincides with the Link to the
+     advert of another job already publicly posted or in the queue … Also,
+     create a button to check for such duplicates in the future."
+
+     Its own scenario, with its own three seeded postings and its own routed
+     data/jobs.json, so the queue the rest of this block counts is untouched
+     and the live side is a FIXTURE rather than whatever is committed today.
+
+       rp1  the oldest of two rows naming one advertisement — must SURVIVE
+       rp2  the younger of that pair                        — must GO
+       rp3  a row repeating something already LIVE          — must GO
+
+     rp3's university carries a "The" the live posting does not, so the fold
+     that makes them one university is measured rather than assumed. */
+  {
+    const AD = 'https://example.edu/one-advert';
+    const LIVE_AD = 'https://example.edu/live-advert';
+    const pair = (id, queuedAt, over) => ({
+      path: 'jobReviews/' + id,
+      data: {
+        rowId: id, status: 'pending', queuedAt,
+        row: Object.assign({
+          id, year: 2026, posted: '2026-08-10', country: 'Ireland',
+          institution: 'Repeat University', school: '', unit: 'Operations',
+          department: 'Operations', levels: ['Assistant Professor'], adUrl: AD,
+        }, over || {}),
+      },
+    });
+    const extra = [
+      pair('rp1', '2026-08-10'),
+      pair('rp2', '2026-08-12'),
+      pair('rp3', '2026-08-11', {
+        institution: 'The Live Repeat University', unit: 'Marketing',
+        department: 'Marketing', adUrl: LIVE_AD,
+      }),
+    ];
+    const LIVE = [{
+      id: 'LIVE-1', ref: 'OA-JOB-LIVE-1', source: 'oa-form', year: 2026,
+      institution: 'Live Repeat University', school: '', unit: 'Marketing',
+      department: 'Marketing', levels: ['Assistant Professor'],
+      posted: '2026-08-01', adUrl: LIVE_AD,
+    }];
+
+    const { ctx, q, errors } = await adminAreaPage(ADMIN, 'about:blank', extra);
+    await q.route('**/data/jobs.json', (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify(LIVE) }));
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+
+    await q.waitForFunction(() => {
+      const b = document.querySelector('#oa-review-sources button[data-source="crawled"]');
+      return b && b.textContent === 'Auto-crawled jobs (6)';
+    }, null, { timeout: 10000 });
+    ok(true, 'duplicate adverts: the queue opens with all six crawled postings');
+
+    /* The button is on the crawled tab and not on the user one: a user-added
+       posting is already on the site, and taking it off is its poster's
+       decision or the Take-down control, never a sweep. */
+    ok(await q.locator('#oa-review-dupes').isVisible(),
+      'duplicate adverts: the button is on the crawled tab');
+    await q.click('#oa-review-sources button[data-source="user"]');
+    await q.waitForFunction(() => {
+      const b = document.getElementById('oa-review-dupes');
+      return b && b.hidden;
+    }, null, { timeout: 10000 });
+    ok(true, 'duplicate adverts: and not on the user-added one');
+    await q.click('#oa-review-sources button[data-source="crawled"]');
+    await q.waitForFunction(() => {
+      const b = document.getElementById('oa-review-dupes');
+      return b && !b.hidden;
+    }, null, { timeout: 10000 });
+
+    /* IT REPORTS BEFORE IT WRITES. Dismissing the confirmation must leave the
+       queue exactly as it was — a sweep that had already written by the time
+       it asked would be a button nobody could safely press. */
+    let asked = '';
+    q.once('dialog', (d) => { asked = d.message(); d.dismiss(); });
+    await q.click('#oa-review-dupes');
+    await q.waitForFunction(() =>
+      /nothing removed/.test((document.getElementById('oa-review-bulk-msg') || {}).textContent || ''),
+      null, { timeout: 15000 });
+    ok(/Take these 2 postings out of the queue/.test(asked),
+      'duplicate adverts: it names how many it would remove — ' + JSON.stringify(asked.slice(0, 60)));
+    ok(/OA-JOB-LIVE-1/.test(asked),
+      'duplicate adverts: and names the LIVE posting one of them repeats, across a "The"');
+    ok(/rp1/.test(asked) || /Repeat University/.test(asked),
+      'duplicate adverts: and the queued one the other repeats');
+    eq(await q.evaluate(() => [
+      window.__fb.docs['jobReviews/rp1'].status,
+      window.__fb.docs['jobReviews/rp2'].status,
+      window.__fb.docs['jobReviews/rp3'].status,
+    ]), ['pending', 'pending', 'pending'],
+      'duplicate adverts: dismissing the confirmation writes nothing at all');
+
+    /* And now for real: the two repeats are REJECTED — never deleted, because
+       `partition` re-queues a row whose document is gone — with the reason in
+       `note` and the posting they repeat in `dup`, the two fields the rules
+       already allow. The OLDEST of the pair is the one that stays. */
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-review-dupes');
+    await q.waitForFunction(() => {
+      const d = window.__fb.docs;
+      return d['jobReviews/rp2'].status === 'rejected' &&
+             d['jobReviews/rp3'].status === 'rejected';
+    }, null, { timeout: 15000 });
+    eq(await q.evaluate(() => window.__fb.docs['jobReviews/rp1'].status), 'pending',
+      'duplicate adverts: the oldest of two rows naming one advertisement survives');
+    eq(await q.evaluate(() => {
+      const d = window.__fb.docs['jobReviews/rp3'];
+      return [typeof d.note, (d.dup || [])[0] && d.dup[0].ref, typeof d.reviewedAt];
+    }), ['string', 'OA-JOB-LIVE-1', 'string'],
+      'duplicate adverts: a dropped document says why it went and names what it repeats');
+    ok(await q.evaluate(() =>
+      /already live or already in the queue/.test(window.__fb.docs['jobReviews/rp3'].note)),
+      'duplicate adverts: in the words the pipeline writes, from the one shared module');
+    ok(await q.evaluate(() => !!window.__fb.docs['jobReviews/rp2']),
+      'duplicate adverts: and the document is still there — rejected, never deleted');
+
+    await q.waitForFunction(() => {
+      const b = document.querySelector('#oa-review-sources button[data-source="crawled"]');
+      return b && b.textContent === 'Auto-crawled jobs (4)';
+    }, null, { timeout: 10000 });
+    ok(true, 'duplicate adverts: the tab count follows without a reload');
+
+    /* AND THE OUTCOME SURVIVES THE REDRAW. render() clears this line, so an
+       outcome written before the repaint is wiped by it and the queue shrinks
+       under a blank strip — the message has to come after. */
+    ok(/2 repeated postings taken out of the queue/.test(
+      await q.textContent('#oa-review-bulk-msg') || ''),
+      'duplicate adverts: and it still says what it did once the queue has redrawn');
+
+    /* Pressed again with nothing left to find, it says so rather than going
+       quiet — the answer a maintainer actually wants most of the time. */
+    await q.click('#oa-review-dupes');
+    await q.waitForFunction(() =>
+      /none of them/.test((document.getElementById('oa-review-bulk-msg') || {}).textContent || ''),
+      null, { timeout: 15000 });
+    ok(true, 'duplicate adverts: a clean sweep reports that it found nothing');
+
+    eq(errors, [], 'duplicate adverts: no uncaught script error');
     await ctx.close();
   }
 

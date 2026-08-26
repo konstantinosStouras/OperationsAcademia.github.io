@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-25T23:35:09.927Z",
+ "generated": "2026-08-26T10:33:14.327Z",
  "universities": [
   {
    "v": "Tulane University",
@@ -135,6 +135,10 @@
   },
   {
    "v": "University of Mannheim",
+   "n": 3
+  },
+  {
+   "v": "University of Pennsylvania",
    "n": 3
   },
   {
@@ -387,10 +391,6 @@
   },
   {
    "v": "University of Oklahoma",
-   "n": 2
-  },
-  {
-   "v": "University of Pennsylvania",
    "n": 2
   },
   {
@@ -2092,6 +2092,10 @@
    "n": 2
   },
   {
+   "v": "Wharton School",
+   "n": 2
+  },
+  {
    "v": "Wisconsin School of Business",
    "n": 2
   },
@@ -2289,10 +2293,6 @@
   },
   {
    "v": "Walter A. Haas School of Business",
-   "n": 1
-  },
-  {
-   "v": "Wharton School",
    "n": 1
   },
   {
@@ -3726,6 +3726,10 @@
    "n": 1
   },
   {
+   "v": "Operations, Information and Decisions",
+   "n": 1
+  },
+  {
    "v": "Operations, Information and Technology",
    "n": 1
   },
@@ -4387,10 +4391,6 @@
   },
   {
    "v": "Operations, Business Analytics, and Information Systems",
-   "n": 0
-  },
-  {
-   "v": "Operations, Information and Decisions",
    "n": 0
   },
   {
