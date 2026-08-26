@@ -636,8 +636,84 @@ control, never a sweep.
 
 `page-test.mjs` measures the money path in a real browser against its own seeded
 pair and its own routed `jobs.json`: dismissing writes nothing, accepting
-rejects the two repeats (never deletes them), the OLDER of the pair survives, the
+rejects the repeats (never deletes them), the OLDER of a pair survives, the
 document says why it went, and a second press reports that it found nothing.
+
+### "Already listed" is a DECISION, not a deployment
+
+The button missed the case it was built for (owner, 2026-08-26): one of two
+identical Stanford MS&E postings was approved, and pressing *Check for
+duplicate adverts* then failed to catch the other.
+
+Both halves of the comparison had lost it at once. An approved posting is **out
+of the queue** — the panel lists `status == 'pending'` only, and `retire()`
+drops it the moment the decision lands — and it is **not in `data/jobs.json`**
+either, because that is a built file and the build had not run. For that window
+its twin was measured against a set holding NEITHER copy, so nothing could
+match.
+
+That is not a race to paper over. `data/jobs.json` lags **every** approval by up
+to a build, so "already posted" has to mean what the maintainer has DECIDED, not
+what has been deployed. The comparison set is therefore the served file **plus
+every approved queue document** — one equality query in the panel (no composite
+index), `split.publish` in the sheet sync (already through `approvedRow`). A
+posting that has published is in both and matches the same either way; a refused
+approved-queue read degrades to the served file alone, which is the old
+behaviour, never to a lost sweep.
+
+Pinned both ways, and the browser test seeds the exact shape: `rp4` pending and
+`rp5` approved, one advertisement between them, with the served file EMPTY of
+both. Reverting the fix makes that test time out rather than fail quietly — the
+twin is never caught.
+
+## An approved posting is on the maintainer's jobs page at once
+
+Owner, 2026-08-26: *"when I press a job under review to become public, it should
+immediately show up in the list of job postings available to the public."*
+
+Approving writes Firestore; the BUILD turns that into a row in
+`data/jobs.json`. Until it runs the posting is in neither place — out of the
+queue and not on the site — which reads exactly like an approval that did not
+save.
+
+**The doorbell that was supposed to close that gap has never rung.**
+`publishOnReview` and `publishOnChange` are in `_functions/index.js` and neither
+is deployed: the `oa-jobreview-decided` dispatch has **zero runs, ever**, and
+all 251 `oa-jobs-changed` dispatches were sent by `github-actions[bot]` — the
+sheet workflow's own final curl — never by the function. So an approval waits
+for the build's 20-minute schedule while the card said "publishing starts now".
+That is this file's own recorded trap: *a doorbell that was never deployed looks
+exactly like a site that is simply slow*. One `firebase deploy --only functions
+--project operations-academia` fixes it for everybody; nothing in CI performs
+it.
+
+So the approval is **echoed**, the way a saved EDIT already is
+(`assets/oa-fresh.js`): the published row is left in that browser's
+localStorage and every page rendering `jobs.json` overlays it at read time. Two
+things had to grow for it:
+
+* **the echo can now ADD a row**, not only change or remove one. An edit
+  overlays a row that exists; an approval creates one, so `overlay` inserts it
+  and marks the echo spent the moment the served file carries that id.
+* **`OAFresh.approvedRow`** — a browser twin of `jobreview.mjs`'s own, with
+  `canonColumns` INJECTED so the file keeps no dependency and the parity test
+  can drive it in Node. It is pinned against the real one over a case table
+  covering every branch: the derived department line, the derived Apply-by
+  line, a suggested date on or after the closing one, an edited line that says
+  the search stays open, our own Further-info link following a renamed
+  university, e-mails stripped, and dated-from-approval versus grandfathered.
+  **A mismatch there would be a private fiction shown to the maintainer for a
+  build**, which is exactly what this module's third promise forbids.
+
+The three honesty properties are unchanged and all three are measured in a real
+browser: PER BROWSER (a second context with the same served file shows nothing),
+it stands down against the build (a build that STARTED after the approval has
+the last word), and it echoes only what the build would publish.
+
+**And the copy now says what is true of this installation** — "Approved — and on
+your own jobs page straight away. Everyone else sees it at the next build." —
+with `selftest.mjs` pinning that nothing the maintainer READS claims a doorbell
+nobody has deployed.
 
 **A crawled posting that mentions "business" is flagged under Business School,
 and its card NAMES the school** (owner, 2026-08-23). `typeFromNames` used to
