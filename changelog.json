@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "market-year-from-the-deadline",
+      "date": "2026-08-26",
+      "title": "A posting is filed under the season its apply-by date falls in",
+      "summary": "Which job market a posting belongs to used to be read off the day it went up. That is wrong for the postings that matter most in the spring: a school advertising in May for a search that closes in September is recruiting for the season opening in July, and by its posting date it was filed under the season that had just closed \u2014 the one page it is of no use on. The deadline decides now: the final apply-by date, or the suggested apply-by date where the search runs until filled, and only then the date it was posted. The posting form works it out from the dates you type and says which market you will be listed under before you send it.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
       "id": "messages-from-the-maintainer",
       "date": "2026-08-24",
       "title": "Messages between you and the site’s maintainer",

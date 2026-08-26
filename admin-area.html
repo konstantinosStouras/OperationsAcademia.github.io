@@ -263,6 +263,29 @@
                  cannot disagree with the page or the mailer. The publish and
                  remove controls live on whats-new.html; this panel only says
                  what is waiting and points there. -->
+            <!-- Postings whose stored season disagrees with their own
+                 apply-by dates. A REPORT, not a queue: the list is derived by
+                 the jobs build into data/jobs-yearcheck.json, so there is no
+                 document to decide and nothing to deploy — settle a posting
+                 and it leaves the list at the next build. It is deliberately
+                 not re-filed automatically: a posting's year is half its id,
+                 and an id that moves is published twice. -->
+            <section class="oa-panel" id="oa-aa-yc" hidden>
+              <h3 class="oa-panel-h">&#128197; Market year to check</h3>
+              <p class="oa-hint">A posting belongs to the season its
+                <strong>apply-by date</strong> falls in &mdash; the final one,
+                or the suggested one where the search is open-ended, and only
+                then the date it was posted. These were filed under an earlier
+                season than their own dates name, which usually means they were
+                posted before the roll for a search that closes after it.
+                <strong>Nothing has been moved.</strong> A posting&rsquo;s
+                season is part of its address on this site, so re-filing one is
+                yours to decide &mdash; correct it in the tracking workbook, or
+                leave it and it will drop off this list when its deadline
+                passes.</p>
+              <div id="oa-aa-yc-list"><p class="oa-hint">Loading&hellip;</p></div>
+            </section>
+
             <section class="oa-panel" id="oa-aa-news" hidden>
               <h3 class="oa-panel-h">&#128240; Updates awaiting publication</h3>
               <p class="oa-hint">Logged in <code>changelog.json</code> but not yet

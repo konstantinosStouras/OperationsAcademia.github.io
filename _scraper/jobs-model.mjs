@@ -321,6 +321,134 @@ export function marketStart(now = new Date()) {
   return `${marketYear(now) - 1}-07-01`;
 }
 
+/* ------------------------------------------- WHICH SEASON A POSTING IS FOR
+
+   THE DEADLINE, NOT THE DAY IT WENT UP (owner, 2026-08-26). The market year
+   used to be read off the POSTING date, which is the day the advertisement
+   appeared and not the thing a season is about. A school that advertises in
+   May for a search closing in September is recruiting for the season that
+   opens in July, and every one of its postings filed under the season that
+   had just closed — the one page they are of no use on.
+
+   So the deadline decides, and the cascade is exactly the owner's:
+
+     1. the FINAL apply-by (`applyByDate`) — the hard closing date;
+     2. failing that, the SUGGESTED apply-by (`reviewDate`) — the
+        first-review / full-consideration date;
+     3. failing both, the POSTING date, which is where this started.
+
+   Step 1 fails precisely when the search is open-ended. `applyByDate` is
+   empty exactly then — "Until filled." is the ABSENCE of a closing date, not
+   a date (`deadlineOpen` above turns on the same reading) — so "if that
+   field is Until filled" and "if that field is empty" are one test, and the
+   cascade needs no separate look at the prose.
+
+   IT ONLY EVER MOVES A POSTING FORWARD, which is what makes it safe to apply
+   over a season that has already been imported: a deadline is on or after
+   the day the advertisement went up, `marketYear` rises with the date, so
+   the answer is never EARLIER than the posting date's own. The tracking
+   sheet's tab cycle stays a floor on top of it for the same reason it always
+   was (jobmarket-sheet.mjs) — and measured over the 543 served postings the
+   two AGREE on fourteen of the seventeen rows whose deadline outruns their
+   posting date, so the deadline generalises the floor rather than fighting
+   it.
+
+   WHERE IT OVERSHOOTS, AND WHY NOTHING IS RE-FILED BEHIND THE MAINTAINER'S
+   BACK. A search advertised in September that stays open until the following
+   July has a deadline a few weeks past the roll, and reading that literally
+   files a plainly 2025-2026 search under 2026-2027 (two rows on the site
+   today: Nanyang 2025-09-24 closing 2026-07-28, Tulane 2025-09-04 closing
+   2026-07-01). Nothing here can tell those apart from a genuine early
+   advertisement without guessing, and a posting's `year` is half its `id`
+   (`jobId`) — which is a card's anchor, the Edit button's join key, and,
+   through `keyOf`, the thing that keeps `mergeRows` from re-stamping
+   `addedAt` and re-alerting every subscriber. So the cascade classifies a
+   row AT BIRTH, where no id has been minted and nothing has joined to it,
+   and a posting already published is REPORTED instead (`marketYearReview`
+   below, drawn on /admin-area) for the maintainer to settle.               */
+
+/**
+ * The market year a posting belongs to, and which of its dates said so.
+ *
+ * Returns `{ year, from }` where `from` is `'final'`, `'review'` or
+ * `'posted'` — the report on /admin-area names it, so a flagged posting says
+ * WHY it should move rather than only that it should.
+ *
+ * `now` is the last resort, for a row carrying no date at all.
+ */
+export function marketYearOf(row, { now = new Date() } = {}) {
+  const at = (v) => {
+    const d = day(v);
+    return d ? marketYear(new Date(`${d}T12:00:00Z`)) : 0;
+  };
+  const final = at(row && row.applyByDate);
+  if (final) return { year: final, from: 'final' };
+  const review = at(row && row.reviewDate);
+  if (review) return { year: review, from: 'review' };
+  const posted = at(row && row.posted);
+  if (posted) return { year: posted, from: 'posted' };
+  return { year: marketYear(now), from: 'posted' };
+}
+
+/** What the cascade calls this row, never below the floor it already has.
+    The floor is the whole safety argument above: forward only, so no
+    published posting is pulled back into a season that has closed. */
+export function marketYearAtLeast(row, floor = 0, opts = {}) {
+  const { year, from } = marketYearOf(row, opts);
+  const f = Number(floor);
+  return Number.isFinite(f) && f > year ? { year: Math.trunc(f), from: 'floor' } : { year, from };
+}
+
+/** How the report words the date that decided. */
+export const MARKET_YEAR_SOURCE = {
+  final: 'its final apply-by date',
+  review: 'its suggested apply-by date',
+  posted: 'the date it was posted',
+  floor: 'the season it was filed under',
+};
+
+/**
+ * The published postings whose stored market year is BEHIND what their own
+ * dates say — the review list the owner asked for: "postings that were
+ * possibly posted under the previous job market year and were actually
+ * belonging to the current job market year".
+ *
+ * FORWARD ONLY, and deliberately. A row whose stored year is AHEAD of the
+ * cascade is the tracking sheet's tab cycle (or a poster's own tag) doing
+ * its documented job, and pulling it back would move a live posting into a
+ * closed season — the one direction this rule promises never to take.
+ *
+ * Pure and deterministic, so build-jobs.mjs may write it on every run and an
+ * unchanged corpus commits nothing.
+ */
+export function marketYearReview(rows, { now = new Date() } = {}) {
+  const out = [];
+  for (const r of rows || []) {
+    const stored = Math.trunc(Number(r.year) || 0);
+    const { year, from } = marketYearOf(r, { now });
+    if (!stored || year <= stored) continue;
+    out.push({
+      id: String(r.id || ''),
+      ref: String(r.ref || ''),
+      institution: String(r.institution || ''),
+      department: String(r.department || ''),
+      posted: String(r.posted || ''),
+      applyByDate: String(r.applyByDate || ''),
+      reviewDate: String(r.reviewDate || ''),
+      stored,
+      should: year,
+      from,
+      current: year >= marketYear(now),
+    });
+  }
+  /* the ones that belong to the season under way first — those are the
+     postings a reader is looking at today — then newest advertisement first */
+  return out.sort((a, b) => Number(b.current) - Number(a.current)
+    || b.should - a.should
+    || String(b.posted).localeCompare(String(a.posted))
+    || String(a.id).localeCompare(String(b.id)));
+}
+
 /**
  * Is this posting still open for applications at `now`?
  *
@@ -480,10 +608,6 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
   // the minimum a card needs to be worth rendering
   if (!institution || !department || !country || !type || !levels.length) return null;
 
-  const year = Number.isFinite(+doc.year) && +doc.year >= 2000 && +doc.year <= 2100
-    ? Math.trunc(+doc.year)
-    : marketYear(now);
-
   /* `posted` is the page's primary sort key, so a value the client picks is a
      value the client can use to pin its own card to the top of the list for
      ever. The form does not send `postedOn` and the rules do not mention it,
@@ -520,6 +644,27 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
      and the selftest gate stopped the whole publish. Healing at read makes the
      stored shape irrelevant. */
   if (applyByDate && OPEN_ENDED_RX.test(applyBy)) applyByDate = '';
+
+  /* WHICH SEASON THIS POSTING IS FOR. A stored year WINS OUTRIGHT, and that
+     is not deference to the client — it is `jobId`. The year is half a row's
+     id, the id is a card's anchor and the Edit button's join key, and a row
+     whose id moves is a row `mergeRows` cannot match: the old one is carried
+     on as an orphan and the posting is published TWICE. So a posting that
+     already has a season keeps it, and one whose dates disagree is REPORTED
+     to the maintainer instead (`marketYearReview`, drawn on /admin-area).
+
+     The cascade below is therefore for a document that has NO season — a
+     migrated row, anything not written by the form — and it is the same one
+     the form itself now applies before it sends (`postingYear` in
+     assets/oa-jobform.js), so the two agree at birth. It reads the dates as
+     they stand after the open-ended heal a few lines up, which is where
+     "Until filled" becomes an EMPTY `applyByDate` and so the point at which
+     step 1 of the cascade correctly fails. */
+  const stored = Number.isFinite(+doc.year) && +doc.year >= 2000 && +doc.year <= 2100
+    ? Math.trunc(+doc.year)
+    : 0;
+  const year = stored || marketYearOf(
+    { applyByDate, reviewDate: day(doc.reviewDate), posted }, { now }).year;
 
   const row = {
     id: '',
