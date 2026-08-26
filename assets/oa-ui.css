@@ -859,6 +859,26 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-aa-news-ul { margin: 0 0 10px; padding-left: 20px; }
 .oa-aa-news-ul li { margin: 0 0 6px; }
 
+/* The market-year report. It paints a ground, so it names its ink — every
+   value a theme token with its old light value as the fallback, which is what
+   keeps the frozen archives (which define none of them) rendering as they
+   did. Same card shape as .oa-fb-card below; the left edge is the one thing
+   that marks it as a thing to look at rather than a thing to clear. */
+.oa-aa-yc-ul { margin: 0; padding: 0; list-style: none; }
+
+.oa-aa-yc {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #e6e6e6);
+  border-left: 3px solid var(--brand, #0b6b52);
+  border-radius: 4px;
+  background: var(--bg-2, #fff);
+  color: var(--ink, #1c2430);
+}
+
+.oa-aa-yc-h { margin: 0 0 4px; font-size: 15px; }
+.oa-aa-yc p:last-child { margin-bottom: 0; }
+
 .oa-fb-card {
   margin: 0 0 14px;
   padding: 14px 16px;

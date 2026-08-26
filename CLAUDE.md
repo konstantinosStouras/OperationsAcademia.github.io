@@ -167,9 +167,11 @@ Three rules came out of it, and they are separate on purpose:
    like a quiet market, every other signal says the sheet is healthy, and it is
    the one failure here a person has to go and fix.
 
-**Which season a posting belongs to: the tab is a FLOOR.** The site's roll rule
-reads the market year off the posting's date, which is right except for a
-school advertising early — 24 of that tab's 89 postings are dated April to June
+**Which season a posting belongs to: the tab is a FLOOR** — on top of the
+APPLY-BY CASCADE, since 2026-08-26 (see "Which season a posting is FOR" above;
+what follows is why the floor exists, and it still does). The site's roll rule
+used to read the market year off the posting's date alone, which is right
+except for a school advertising early — 24 of that tab's 89 postings are dated April to June
 2026, two saying "an expected start date of July 1, 2027" in their own comment,
 and by date alone all 24 file under the season that has just closed, which is
 the one page they are of no use on. The tab settles it (`cycleYear`), because
@@ -183,6 +185,102 @@ site, so it is made visible deliberately: `stalenessOf`/`shouldWarn` e-mail the
 maintainer once (then weekly) when the sheet has gained nothing for three weeks,
 cannot be read, reads as empty, or has a tab that gave nothing. Nothing already
 published is ever removed by one of those failures.
+
+## Which season a posting is FOR — the deadline, not the day it went up
+
+The market year used to be read off the POSTING DATE, everywhere. That is
+wrong for exactly the postings that matter most in the spring (owner,
+2026-08-26): a school advertising in May for a search closing in September is
+recruiting for the season that opens in July, and by its posting date all 24
+such rows on the 2026 tab filed under the season that had just closed — the
+one page they are of no use on.
+
+**The cascade, in the owner's own order** (`marketYearOf` in
+`_scraper/jobs-model.mjs`, returning `{ year, from }`):
+
+1. the **final apply-by** (`applyByDate`) — the hard closing date;
+2. failing that, the **suggested apply-by** (`reviewDate`) — the first-review
+   / full-consideration date;
+3. failing both, the **posting date**, which is where this started.
+
+Step 1 fails precisely when the search is open-ended. `applyByDate` is empty
+exactly then — "Until filled." is the ABSENCE of a closing date, not a date,
+which is the same reading `deadlineOpen` already turns on — so "if that field
+is Until filled" and "if that field is empty" are one test and the cascade
+needs no separate look at the prose.
+
+**It only ever moves a posting FORWARD**, and that is what makes it safe to
+apply over a season already imported: a deadline is on or after the day the
+advertisement went up and `marketYear` rises with the date, so the answer is
+never EARLIER than the posting date's own. The tracking sheet's tab cycle
+stays a floor on top of it (`marketYearAtLeast`, applied in `rowsFromTab`),
+and the two hardly ever argue — measured over the 543 served postings,
+**fourteen of the seventeen** rows whose deadline outruns their posting date
+already carry the year the cascade gives them. The tab had been standing in
+for a deadline nobody was reading.
+
+### Nothing already published is re-filed — it is REPORTED
+
+A row's `year` is half its `id` (`jobId`), `keyOf` keys a ref-less row by that
+id — which today is every row served — and `mergeRows` joins on it. So a
+published posting whose season moved is one the merge can no longer match: the
+old row is carried on as an ORPHAN beside the new one and **the posting is
+published twice**, with the card anchor and the Edit button's join key
+pointing at a row nobody sees. `collapseSameDay` cannot fold them either,
+because its key carries the year.
+
+So the cascade classifies a row **at birth**, where no id has been minted and
+nothing has joined to it:
+
+* `rowFromSubmission` applies it to a document with **no** season; a stored
+  one wins outright, which is not deference to the client but `jobId`;
+* `rowsFromTab` applies it to every workbook row, under the tab-cycle floor;
+* `postingYear()` in `assets/oa-jobform.js` is the **browser twin** — a new
+  posting is filed by the dates the poster types and the note beside them says
+  which market it will be listed under, repainting as those dates change. It
+  has to exist because the form SENDS `year` and a stored year then wins.
+  `testFormMarketYearParity` pins the two against one fixture list, the way
+  `typeGuess`/`typeFromNames` are pinned — and the fixture makes each of the
+  three steps name a DIFFERENT season, because a fixture whose answers
+  coincide passes a form reading the wrong date, which is what the first draft
+  of it did. An EDIT keeps the season it was filed under, everywhere.
+
+…and the disagreements among what is already published are **reported**:
+`marketYearReview` (forward only — a stored year AHEAD of the cascade is the
+tab cycle doing its documented job) → `data/jobs-yearcheck.json`, written by
+`build-jobs.mjs` on its own diff → the **"Market year to check"** panel and
+tile on `/admin-area`.
+
+**A served file rather than a Firestore queue, deliberately.** The list is
+DERIVED, so it needs no rules deploy, has no document to fall out of step with
+the data, and stores no decision: the next build recomputes it and a posting
+the maintainer settles simply leaves the list. It carries only what
+`data/jobs.json` already publishes, which is what keeps it clear of the
+no-e-mail rule every served file is held to. Its tile is **due-able** — it is
+something the maintainer can clear — but it is out of `pendingCounts()`, which
+runs on EVERY page for the account-menu badge: a served-file fetch in that
+`Promise.all` would make every page pay a read for a number only this page
+shows (the Registered-users rule, one paragraph over).
+
+**Where it overshoots, and why that is the maintainer's call.** A search
+advertised in September that stays open until the following July has a
+deadline a few weeks past the roll, and reading it literally files a plainly
+2025-2026 search under 2026-2027. Two of the four postings the report names
+today are that shape (Nanyang, posted 2025-09-24 closing 2026-07-28; Tulane,
+posted 2025-09-04 closing 2026-07-01) and two are the genuine article
+(McGill and Mannheim, both advertised AFTER the July roll and still filed
+under the season before it). Nothing here can tell them apart without
+guessing — the only signal is how far into its own season the posting was
+made, and a magic April-to-June window is not a rule worth writing. A person
+reading four cards can, which is what the panel is for.
+
+Tests: `testMarketYearCascade` and `testFormMarketYearParity` in
+`_scraper/selftest.mjs` (the cascade, the forward-only property asserted over
+every served posting, that a stored year is kept, the report's field list and
+that it carries no address, and the wiring in all three files), and the
+market-year block in `_scraper/page-test.mjs` (the tile, the cards, both
+seasons named, the link to the posting, and a name carrying markup rendered
+inert).
 
 ## The HigherEdJobs postings are checked against their own ads
 
@@ -2606,6 +2704,9 @@ the workflow rather than a terminal.
     node _scraper/selftest.mjs --publishing   # the same, in a data writer's
                                     # role: a duplicate NAME is reported rather
                                     # than stopping the site publishing
+                                    # (it also pins the apply-by cascade that
+                                    # decides a posting's market year, and the
+                                    # posting form's browser twin of it)
     node _scraper/country-audit.mjs # every posting names the country its
                                     # university is in, against the addresses
                                     # in the site's own Universities directory

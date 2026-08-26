@@ -85,9 +85,26 @@
      itself, and posters read it as being about the job rather than about
      the date. It is derived here and merely STATED on the form.
 
-     A NEW posting takes the season under way. An EDIT keeps the season it was
-     filed in: a correction is not a re-filing, the same reasoning that leaves
-     `createdAt` alone. That also closes a quiet bug in the old form — the
+     A NEW posting is filed by ITS DEADLINE, not by the day it is being typed
+     (owner, 2026-08-26). A school advertising in May for a search closing in
+     September is recruiting for the season that opens in July, and reading
+     the calendar alone filed it under the season that had just closed. The
+     cascade is the pipeline's own — final apply-by, else suggested apply-by,
+     else today — and this is its BROWSER TWIN: `marketYearOf` in
+     _scraper/jobs-model.mjs is what `rowFromSubmission` applies to a document
+     that arrives with no year, and selftest.mjs pins the two against one
+     fixture list, the way `typeGuess`/`typeFromNames` are pinned. It has to
+     be here as well as there because the form SENDS `year`, and a stored year
+     wins outright in the pipeline (a row's id is built from it).
+
+     An EDIT keeps the season it was filed in: a correction is not a
+     re-filing, the same reasoning that leaves `createdAt` alone. It is also
+     the one thing that MUST not move — the year is half the row id (`jobId`),
+     and a published posting whose id moves is one `mergeRows` can no longer
+     match, so the old row is carried on beside the new and the posting
+     appears twice. A live posting whose dates now say a different season is
+     REPORTED to the maintainer instead (the "Market year to check" panel on
+     /admin-area). That also closes a quiet bug in the old form — the
      dropdown reloaded at its DEFAULT when an older posting was opened for
      editing, so fixing a typo silently moved it into the current market.
 
@@ -96,8 +113,41 @@
      `year` to be an int in 2000-2100. */
   var EDIT_YEAR = 0;
 
+  /** The market year an ISO day falls in — the roll is 1 July, and a season is
+      numbered by the year it ends (MARKET_ROLL_MONTH in jobs-model.mjs). */
+  function marketYearOfDay(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '').trim());
+    if (!m) return 0;
+    return Number(m[1]) + (Number(m[2]) >= 7 ? 1 : 0);
+  }
+
+  /* The three dates in the order the cascade asks about them. "Until filled"
+     is the ABSENCE of a closing date rather than a date, so a ticked box
+     empties the first one and step 2 takes over — the same reading the
+     pipeline's empty `applyByDate` carries. */
   function postingYear() {
-    return (EDIT_ID && EDIT_YEAR) || jobMarketYears().current;
+    if (EDIT_ID && EDIT_YEAR) return EDIT_YEAR;
+    var uf = $('f-untilFilled');
+    var final = (uf && uf.checked) ? '' : val('f-applyByDate');
+    return marketYearOfDay(final)
+      || marketYearOfDay(val('f-reviewDate'))
+      || jobMarketYears().current;
+  }
+
+  function val(id) { var el = $(id); return el ? String(el.value || '').trim() : ''; }
+
+  /* NAME THE DATE THAT DECIDED. The note is the only thing on the form that
+     says which market the posting will be listed under, so saying "worked out
+     from the apply-by date" while the poster has typed neither is a promise
+     the form is not keeping — the season is today's until a date is given. */
+  function yearNoteWhy() {
+    if (EDIT_ID && EDIT_YEAR) return 'the season it was filed in';
+    var uf = $('f-untilFilled');
+    if (!(uf && uf.checked) && marketYearOfDay(val('f-applyByDate'))) {
+      return 'your final apply-by date';
+    }
+    if (marketYearOfDay(val('f-reviewDate'))) return 'your suggested apply-by date';
+    return 'today\u2019s date, until you give an apply-by date';
   }
 
   function paintYearNote() {
@@ -105,8 +155,8 @@
     if (!el) return;
     var y = postingYear();
     el.textContent = (EDIT_ID ? 'Listed under the ' : 'Will be listed under the ') +
-      (y - 1) + '\u2013' + y + ' job market \u2014 worked out from the date, ' +
-      'so there is nothing to choose.';
+      (y - 1) + '\u2013' + y + ' job market \u2014 worked out from ' +
+      yearNoteWhy() + ', so there is nothing to choose.';
   }
 
 
@@ -729,6 +779,19 @@
       var d = $('f-applyByDate');
       d.disabled = this.checked;
       if (this.checked) { d.value = ''; setError(d, ''); }
+      paintYearNote();
+    });
+
+    /* The season is read off these two dates, so the note beside them has to
+       follow them — it is the only thing on the form that says which market
+       the posting will be listed under, and a note that still names the
+       calendar's season while the poster types a September deadline is worse
+       than none. */
+    ['f-applyByDate', 'f-reviewDate'].forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      el.addEventListener('change', paintYearNote);
+      el.addEventListener('input', paintYearNote);
     });
 
     /* Say what has happened rather than offering a control that cannot work —

@@ -237,6 +237,10 @@
      draws the same '?' the queue tiles draw), a number is the count. */
   var lastUsers = null;
 
+  /* The same treatment for the market-year report: kept OUT of lastCounts so
+     no badge arithmetic can sum it, painted from this page's own read. */
+  var lastYearCheck = null;
+
   function paintTiles(c) {
     var host = $('oa-aa-tiles');
     if (!host) return;
@@ -252,6 +256,14 @@
          clear. It WAS a span, deliberately, because it opened nothing — since
          2026-08-24 it opens the roster, so it is a link like the others and
          keeps only the class that holds it out of the sums. */
+      /* The market-year report sits between the queues and the statistic: it
+         IS something the maintainer clears — by settling each posting — but
+         it is read from a served file rather than from Firestore, so it is
+         not in `c` and never reaches the badge. */
+      '<a class="oa-aa-tile' + (lastYearCheck > 0 ? ' is-due' : '') + '" href="#oa-aa-yc">' +
+        '<span class="oa-aa-tile-n">' +
+        (typeof lastYearCheck === 'number' ? lastYearCheck : '?') + '</span>' +
+        '<span class="oa-aa-tile-l">Market year to check</span></a>' +
       '<a class="oa-aa-tile oa-aa-tile-stat" href="#oa-aa-users">' +
         '<span class="oa-aa-tile-n">' + (typeof lastUsers === 'number' ? lastUsers : '?') + '</span>' +
         '<span class="oa-aa-tile-l">Registered users</span></a>';
@@ -627,6 +639,80 @@
 
   /* ----------------------------------------------------------------- wiring */
 
+  /* ------------------------------------- postings filed under the wrong season
+
+     WHICH MARKET YEAR A POSTING IS FOR is read off its apply-by dates now,
+     not off the day it went up (owner, 2026-08-26; marketYearOf in
+     _scraper/jobs-model.mjs). That settles every posting from here on and
+     deliberately does not re-file the ones already published — a row's `year`
+     is half its `id`, and an id that moves is one the build can no longer
+     match, so the posting would be published twice. The build therefore
+     REPORTS the disagreements into `data/jobs-yearcheck.json` and this panel
+     draws them.
+
+     TWO THINGS IT IS NOT. It is not a Firestore queue: the list is derived,
+     so it needs no rules deploy and no stored decision — the next build
+     recomputes it, and a posting the maintainer settles simply leaves the
+     list. And it is not in `pendingCounts()`: that function feeds the "Admin
+     area N" badge on EVERY page, so a served-file fetch in its Promise.all
+     would make every page pay a read for a number only this page shows (the
+     Registered-users rule). Its tile is painted here, from this page's own
+     read. */
+
+  var YEARCHECK = '/data/jobs-yearcheck.json';
+
+  /** What the report says decided the season, in the panel's own words. */
+  var YEAR_FROM = {
+    final: 'its final apply-by date',
+    review: 'its suggested apply-by date',
+    posted: 'the date it was posted'
+  };
+
+  function yearCheckRows() {
+    return fetchJson(YEARCHECK).then(function (doc) {
+      var rows = (doc && doc.postings) || [];
+      return Array.isArray(rows) ? rows : [];
+    });
+  }
+
+  function yearCard(p) {
+    var when = esc(p.applyByDate || p.reviewDate || p.posted || '');
+    var why = YEAR_FROM[String(p.from)] || 'its own dates';
+    return '<li class="oa-aa-yc">' +
+      '<p class="oa-aa-yc-h"><strong>' + esc(p.institution) + '</strong>' +
+      (p.department ? ' &mdash; ' + esc(p.department) : '') + '</p>' +
+      '<p class="oa-hint">Filed under <strong>' + esc((p.stored - 1) + '\u2013' + p.stored) +
+      '</strong>; ' + esc(why) + ' (' + when + ') puts it in <strong>' +
+      esc((p.should - 1) + '\u2013' + p.should) + '</strong>. Posted ' +
+      esc(p.posted) + '.</p>' +
+      '<p><a class="button oa-btn-ghost" href="jobs.html#job-' + esc(p.id) + '">' +
+      'Open the posting</a></p>' +
+      '</li>';
+  }
+
+  /** Draws the panel and returns how many are listed (null when the report
+      could not be read — unknown, never zero, the badge rule). */
+  function renderYearCheck() {
+    var list = $('oa-aa-yc-list');
+    return yearCheckRows().then(function (rows) {
+      lastYearCheck = rows.length;
+      if (list) {
+        list.innerHTML = rows.length
+          ? '<ul class="oa-aa-yc-ul">' + rows.map(yearCard).join('') + '</ul>'
+          : '<p class="oa-hint">Nothing to check &mdash; every posting is filed ' +
+            'under the season its apply-by dates name.</p>';
+      }
+      return rows.length;
+    })['catch'](function () {
+      if (list) {
+        list.innerHTML = '<p class="oa-hint">Could not read ' + esc(YEARCHECK) +
+          ' &mdash; it is written by the jobs build, so a site that has not ' +
+          'rebuilt since this shipped has none yet.</p>';
+      }
+      return null;
+    });
+  }
+
   var startedFor = null;
 
   function start() {
@@ -667,6 +753,13 @@
         lastUsers = n;
         if (lastCounts) paintTiles(lastCounts);
       })['catch'](function () { /* rules not deployed / offline — unknown, never 0 */ });
+
+      show($('oa-aa-yc'), true);
+      renderYearCheck().then(function (n) {
+        /* whichever read answers last paints last, exactly as the registered
+           count does — paintTiles always draws this card from lastYearCheck */
+        if (typeof n === 'number' && lastCounts) paintTiles(lastCounts);
+      });
 
       show($('oa-aa-news'), true);
       renderNews(db);

@@ -48,7 +48,8 @@ import { isMain } from './_main.mjs';
 import { createRequire } from 'node:module';
 
 import {
-  text, url, jobId, canonCountry, canonPlace, longDate, marketYear, universitiesLink,
+  text, url, jobId, canonCountry, canonPlace, longDate, marketYearAtLeast,
+  universitiesLink,
   displayOrder, collapseSameDay, isoStamp, publicRow, OPEN_ENDED_RX,
   extractReviewDate, extractFinalDate, healReviewDate,
 } from './jobs-model.mjs';
@@ -931,27 +932,6 @@ export function rowsFromTab(csv, {
       continue;
     }
 
-    /* WHICH SEASON A POSTING BELONGS TO. The site's own roll rule reads it off
-       the posting's date — a job advertised from 1 July 2026 belongs to market
-       year 2027 — and that is right for all but one case, which the tracking
-       sheet produces every spring: a school advertising EARLY for the season
-       after next. Twenty-four of the 2026 Jobs tab's eighty-nine postings are
-       dated April to June 2026, the two oldest saying so in their own comment
-       ("an expected start date of July 1, 2027"). By date alone all
-       twenty-four file under the season that has just closed, which is the one
-       page they are of no use on.
-
-       The tab settles it, because naming the cycle is the whole reason it
-       exists — this one was created, by the sheet's own contributors, when
-       they agreed the 2026-2027 market had opened. So the tab's cycle is a
-       FLOOR on the market year, never a ceiling: it can carry a posting
-       forward into the season its tab was made for, and can never push one
-       back into a season that has closed. A row added late to an old tab
-       therefore keeps the later year its date gives it, and nothing already
-       published moves. */
-    const year = Math.max(marketYear(new Date(`${posted}T12:00:00Z`)), cycleYear || 0);
-    if (minYear && year < minYear) { skipped++; continue; }
-
     const area = text(redactEmails(cell(raw, index, 'area')), 220);
     const rank = text(redactEmails(cell(raw, index, 'rank')), 160);
     const notes = text(redactEmails(cell(raw, index, 'notes')), 600);
@@ -984,6 +964,25 @@ export function rowsFromTab(csv, {
     /* the suggested date must fall BEFORE the final one — equal is the
        closing date said twice, later contradicts it (healReviewDate's rule) */
     const reviewDate = review.date && (!deadline || review.date < deadline) ? review.date : '';
+
+    /* WHICH SEASON A POSTING BELONGS TO — THE DEADLINE, not the day it went
+       up (owner, 2026-08-26). `marketYearOf` is the shared cascade: the final
+       apply-by, else the suggested one, else the posting date. It is read
+       HERE rather than above the deadline parsing because the two dates it
+       asks about are what that parsing produces — an open-ended cell leaves
+       `deadline` EMPTY, which is exactly how step 1 of the cascade knows to
+       fall through to the suggested date.
+
+       THE TAB'S CYCLE STAYS A FLOOR ON TOP OF IT, unchanged, and the two
+       hardly ever argue: measured over the served corpus, fourteen of the
+       seventeen rows whose deadline outruns their posting date already carry
+       the year the cascade gives them — the tab was standing in for a
+       deadline nobody was reading. A floor and never a ceiling, so a row
+       added late to an old tab keeps the later year its dates give it, and
+       nothing already published moves. */
+    const year = marketYearAtLeast(
+      { applyByDate: deadline, reviewDate, posted }, cycleYear || 0).year;
+    if (minYear && year < minYear) { skipped++; continue; }
 
     /* One spelling per university, school and department — the same canon the
        form and the other importer apply, so a row this workbook contributes

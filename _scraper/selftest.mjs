@@ -21,6 +21,7 @@ import {
   universitiesLink, ownUniversitiesLink,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
+  marketYearOf, marketYearAtLeast, marketYearReview, MARKET_YEAR_SOURCE,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
@@ -465,9 +466,26 @@ function testMarketYear() {
   ok(marketFloor(new Date('2026-08-15T00:00:00Z')) <= 2026,
     'the shipped window still carries the previous season, whose "until filled" postings are live');
 
-  // a submission with no year of its own is stamped with the market
-  const r = rowFromSubmission({ ...GOOD, year: undefined }, { now: new Date('2026-08-15T00:00:00Z') });
-  eq(r.year, 2027, 'an unyeared submission lands in the current market');
+  /* A SUBMISSION WITH NO YEAR OF ITS OWN IS FILED BY ITS DEADLINE, not by the
+     day the build happened to run (owner, 2026-08-26). GOOD closes on
+     2025-11-30, so it is a 2025-2026 posting however long it sits unbuilt —
+     the old rule stamped it with `now` and made the answer depend on when the
+     pipeline last ran. */
+  const now26 = { now: new Date('2026-08-15T00:00:00Z') };
+  const r = rowFromSubmission({ ...GOOD, year: undefined }, now26);
+  eq(r.year, 2026, 'an unyeared submission is filed by its final apply-by date');
+
+  eq(rowFromSubmission({ ...GOOD, year: undefined, applyByDate: '', untilFilled: true,
+    reviewDate: '2026-09-08' }, now26).year, 2027,
+    'no final date: the SUGGESTED apply-by decides — step 2 of the cascade');
+  eq(rowFromSubmission({ ...GOOD, year: undefined, applyByDate: '', untilFilled: true,
+    reviewDate: '' }, now26).year, 2026,
+    'neither date: the posting date decides — step 3, where this used to start ' +
+    '(GOOD was stored 2025-08-14, so an "until filled" search from then is 2025-2026)');
+  eq(rowFromSubmission({ ...GOOD, applyByDate: '2026-09-08' }, now26).year, 2026,
+    'a STORED year still wins outright: it is half the row id, and a row whose ' +
+    'id moves is published twice (marketYearOf\'s header). The disagreement is ' +
+    'reported by marketYearReview instead.');
 }
 
 async function testPageHeadingRule() {
@@ -912,6 +930,226 @@ async function testAccountMerge() {
    edited would silently move it into the current market — which is what the
    defaulted dropdown did, and is why edit mode keeps the stored value. */
 
+/* ------------------------------------------ which season a posting is FOR
+
+   THE DEADLINE, NOT THE DAY IT WENT UP (owner, 2026-08-26): "the Final apply
+   by deadline should be the key date that determines the job market year a
+   job posting belongs to … if that field is Until filled, then check the date
+   in Suggested apply by … if both fail, then check the posting date."
+
+   Three things are pinned here, and the third is the one that keeps the site
+   publishing: the cascade itself, that it only ever moves a posting FORWARD,
+   and that a posting already published is REPORTED rather than re-filed. */
+
+async function testMarketYearCascade() {
+  const now = new Date('2026-08-26T12:00:00Z');
+  const served = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  // 1. the cascade, in the owner's own order
+  eq(marketYearOf({ applyByDate: '2026-10-15', reviewDate: '2026-09-08', posted: '2026-05-01' }, { now }),
+    { year: 2027, from: 'final' },
+    'the FINAL apply-by decides, over both the suggested date and the posting date');
+  eq(marketYearOf({ applyByDate: '', reviewDate: '2026-09-08', posted: '2026-05-01' }, { now }),
+    { year: 2027, from: 'review' },
+    '"Until filled" is an EMPTY final date, so step 2 reads the suggested one');
+  eq(marketYearOf({ applyByDate: '', reviewDate: '', posted: '2026-05-01' }, { now }),
+    { year: 2026, from: 'posted' },
+    'neither date: the posting date, which is where this rule used to start');
+  eq(marketYearOf({}, { now }).year, marketYear(now),
+    'and a row with no date at all falls back to the season under way');
+
+  // the roll itself is the shared one — 1 July, numbered by the year it ends
+  eq(marketYearOf({ applyByDate: '2026-06-30' }, { now }).year, 2026,
+    '30 June closes the season it is in');
+  eq(marketYearOf({ applyByDate: '2026-07-01' }, { now }).year, 2027,
+    'and 1 July opens the next one, the same roll marketYear() applies');
+
+  /* THE CASE THE OWNER DESCRIBED, end to end: a school advertising in May for
+     a search that closes in September. By its posting date it filed under the
+     season that had just closed — the one page it is of no use on. */
+  eq(marketYearOf({ applyByDate: '2026-09-08', posted: '2026-05-04' }, { now }),
+    { year: 2027, from: 'final' },
+    'advertised in May, closing in September: a 2026-2027 posting');
+
+  // 2. forward only — the whole safety argument for applying it at ingest
+  for (const r of served) {
+    const posted = String(r.posted || '');
+    if (!posted) continue;
+    ok(marketYearOf(r, { now }).year >= marketYear(new Date(posted + 'T12:00:00Z')),
+      `${r.id}: the cascade never files a posting EARLIER than its posting date`);
+  }
+  eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2028).year, 2028,
+    'a floor above the cascade wins — the tracking sheet tab keeps its say');
+  eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2028).from, 'floor',
+    'and says so, so a report can name what decided');
+  eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 2026).year, 2027,
+    'a floor BELOW it never pulls a posting back into a closed season');
+  eq(marketYearAtLeast({ applyByDate: '2026-09-08' }, 0).year, 2027,
+    'and no floor at all is the bare cascade');
+
+  /* 3. what is already published is REPORTED, never moved. `year` is half a
+     row's `id` (jobId), `keyOf` keys a ref-less row by that id, and mergeRows
+     therefore could not match a row whose season changed: the old one is
+     carried on as an orphan beside the new and the posting is published
+     TWICE. So rowFromSubmission honours a stored year outright. */
+  const doc = { institution: 'Test University', department: 'Operations Management',
+    country: 'United States', type: 'University', levels: ['Assistant Professor'],
+    createdAt: new Date('2026-05-04T09:00:00Z'), applyByDate: '2026-09-08' };
+  eq(rowFromSubmission({ ...doc, year: 2026 }, { now }).year, 2026,
+    'a stored season is kept, whatever the dates now say');
+  eq(rowFromSubmission(doc, { now }).year, 2027,
+    'a document with NO season is filed by the cascade');
+  eq(rowFromSubmission({ ...doc, year: 1200 }, { now }).year, 2027,
+    'and so is one whose stored season is out of the range the rules allow');
+
+  const flagged = marketYearReview([
+    { id: 'a', year: 2026, posted: '2026-07-28', applyByDate: '2026-10-15' },
+    { id: 'b', year: 2027, posted: '2026-07-28', applyByDate: '2026-10-15' },
+    { id: 'c', year: 2028, posted: '2026-08-06', reviewDate: '2026-09-08' },
+    { id: 'd', posted: '2026-07-28', applyByDate: '2026-10-15' },
+  ], { now });
+  eq(flagged.map((f) => f.id), ['a'],
+    'only a posting filed BEHIND its own dates is reported: one already right ' +
+    'is silent, one AHEAD is the tab cycle doing its job, and one with no ' +
+    'stored season is not a disagreement');
+  eq(flagged[0].stored, 2026, 'the report names the season it is filed under');
+  eq(flagged[0].should, 2027, 'and the one its dates give it');
+  eq(flagged[0].from, 'final', 'and which date decided, so the card can say why');
+  ok(MARKET_YEAR_SOURCE[flagged[0].from],
+    'every source the cascade can return has words for the report');
+  for (const k of ['final', 'review', 'posted', 'floor']) {
+    ok(MARKET_YEAR_SOURCE[k], `MARKET_YEAR_SOURCE covers "${k}"`);
+  }
+
+  // the season under way is what a reader is looking at, so it sorts first
+  const order = marketYearReview([
+    { id: 'old', year: 2025, posted: '2025-01-01', applyByDate: '2025-09-01' },
+    { id: 'new', year: 2026, posted: '2026-07-28', applyByDate: '2026-10-15' },
+  ], { now });
+  eq(order.map((f) => f.id), ['new', 'old'],
+    'the current season is reported first — those are the postings on the page today');
+
+  /* Pure and deterministic: the build writes the file on its own diff, so a
+     second pass over the same rows must produce the same list. */
+  eq(JSON.stringify(marketYearReview(served, { now })),
+    JSON.stringify(marketYearReview(served, { now })),
+    'the report is deterministic, so an unchanged corpus commits nothing');
+
+  /* 4. the served report, and what it may carry. Everything under data/ is
+     public, so this file holds only what data/jobs.json already publishes. */
+  const check = JSON.parse(await readFile(
+    path.join(HERE, '..', 'data', 'jobs-yearcheck.json'), 'utf8'));
+  ok(Array.isArray(check.postings), 'data/jobs-yearcheck.json lists postings');
+  const KEYS = ['id', 'ref', 'institution', 'department', 'posted', 'applyByDate',
+    'reviewDate', 'stored', 'should', 'from', 'current'];
+  const byId = new Map(served.map((r) => [r.id, r]));
+  for (const p of check.postings) {
+    eq(Object.keys(p).sort(), KEYS.slice().sort(),
+      `${p.id}: the report carries the pinned fields and nothing else`);
+    ok(byId.has(p.id), `${p.id}: every reported posting is one the site publishes`);
+    ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(JSON.stringify(p)),
+      `${p.id}: nothing under data/ may carry an e-mail address`);
+    ok(!/javascript:|data:text/i.test(JSON.stringify(p)),
+      `${p.id}: nor a script URL — the panel renders this to the maintainer`);
+    ok(p.should > p.stored, `${p.id}: reported only where the season should move FORWARD`);
+  }
+
+  // 5. the wiring — the build writes it, the panel draws it, neither counts it
+  //    into the badge (a served-file read must not ride pendingCounts).
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/marketYearReview\(rows, \{ now \}\)/.test(build),
+    'build-jobs reports over the rows it is about to WRITE, not the raw ones');
+  ok(/jobs-yearcheck\.json/.test(build), 'and writes the report beside jobs.json');
+
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  ok(/data\/jobs-yearcheck\.json/.test(panel), 'the Admin area reads that same file');
+  ok(/lastYearCheck/.test(panel) && !/yearCheck: /.test(panel),
+    'and paints its tile from its own read, never through pendingCounts');
+  const counts = panel.slice(panel.indexOf('function pendingCounts'),
+    panel.indexOf('function registeredCount'));
+  ok(!/yearcheck/i.test(counts),
+    'nothing in pendingCounts fetches it — that function runs on EVERY page ' +
+    'for the account-menu badge, and a figure only this page shows must not ' +
+    'make every page pay a read for it (the Registered-users rule)');
+
+  const page = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/id="oa-aa-yc"/.test(page) && /id="oa-aa-yc-list"/.test(page),
+    'admin-area.html carries the panel the renderer mounts into');
+  ok(/Nothing has been moved/.test(page),
+    'and says outright that nothing was re-filed behind the maintainer\'s back');
+}
+
+/* THE BROWSER TWIN. `postingYear()` in assets/oa-jobform.js applies the same
+   cascade before the form SENDS `year`, and a stored year then wins in the
+   pipeline — so if the two disagreed, the pipeline could never correct it.
+   Pinned over one fixture list, the way typeGuess/typeFromNames are. */
+async function testFormMarketYearParity() {
+  const now = new Date('2026-08-26T12:00:00Z');
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  const src = js.slice(js.indexOf('function marketYearOfDay'), js.indexOf('function yearNoteWhy'));
+  ok(src.includes('function postingYear') && src.includes('function val'),
+    'the fixture runs the FORM\'s own source, not a copy of it');
+
+  const fields = {};
+  const build = (editId, editYear) => new Function(
+    '$', 'EDIT_ID', 'EDIT_YEAR', 'jobMarketYears', src + '\nreturn postingYear;')(
+    (id) => (id in fields ? { value: fields[id], checked: fields[id] === true } : null),
+    editId, editYear, () => ({ current: 2099 }));
+  const postingYear = build('', 0);
+
+  /* EVERY CASE MUST SEPARATE THE STEP THAT ANSWERS IT FROM THE ONES THAT DO
+     NOT — a fixture whose three answers coincide passes a form that reads the
+     wrong date, which is exactly what the first draft of this test did. So
+     the final date, the suggested date and the fallback name three DIFFERENT
+     seasons wherever the case is about which of them wins, and "today" is
+     pinned somewhere no real date could reach. */
+  const FALLBACK = 2099;
+  const CASES = [
+    // the final date wins over a suggested date naming another season
+    { applyByDate: '2026-10-15', reviewDate: '2025-10-15', want: 2027 },
+    // ... and over one naming a LATER season, so it is not merely "the max"
+    { applyByDate: '2026-10-15', reviewDate: '2027-10-15', want: 2027 },
+    // no final date: the suggested one, not the fallback
+    { applyByDate: '', reviewDate: '2026-09-08', want: 2027 },
+    { applyByDate: '', reviewDate: '2025-09-08', want: 2026 },
+    // neither: the fallback, and nothing else
+    { applyByDate: '', reviewDate: '', want: FALLBACK },
+    // the roll itself, on both sides of 1 July
+    { applyByDate: '2026-06-30', reviewDate: '', want: 2026 },
+    { applyByDate: '2026-07-01', reviewDate: '', want: 2027 },
+  ];
+  for (const c of CASES) {
+    fields['f-applyByDate'] = c.applyByDate;
+    fields['f-reviewDate'] = c.reviewDate;
+    fields['f-untilFilled'] = !c.applyByDate;
+    const label = JSON.stringify({ final: c.applyByDate, review: c.reviewDate });
+    eq(postingYear(), c.want, `the form files ${label} under ${c.want}`);
+    /* AND THE PIPELINE AGREES. The form has no posting date to read — a new
+       posting is stamped with the moment it is stored — so the pipeline is
+       asked the same question with `now` standing in for step 3. */
+    if (c.want !== FALLBACK) {
+      eq(marketYearOf({ applyByDate: c.applyByDate, reviewDate: c.reviewDate },
+        { now }).year, c.want, `and _scraper/jobs-model.mjs says the same for ${label}`);
+    }
+  }
+
+  /* A TICKED "until filled" IS THE ABSENCE OF A CLOSING DATE, even when the
+     box beside it still holds one — the form disables it rather than clearing
+     it on every path, and the pipeline reads `untilFilled` the same way. */
+  fields['f-applyByDate'] = '2026-10-15';
+  fields['f-reviewDate'] = '2025-09-08';
+  fields['f-untilFilled'] = true;
+  eq(postingYear(), 2026,
+    'a ticked "until filled" drops to the suggested date, whatever the date box holds');
+
+  // an EDIT is the one case the form must never re-derive
+  fields['f-applyByDate'] = '2027-10-15';
+  fields['f-reviewDate'] = '';
+  fields['f-untilFilled'] = false;
+  eq(build('doc1', 2026)(), 2026,
+    'an edit keeps the season it was filed under — the year is half the row id');
+}
+
 async function testDerivedMarketYear() {
   for (const [page, script, noun] of [
     ['post-a-job.html', 'oa-jobform.js', 'posting'],
@@ -929,8 +1167,27 @@ async function testDerivedMarketYear() {
         path.join(HERE, '..', ...dir, 'assets', script), 'utf8');
       ok(/out\.year = postingYear\(\);/.test(js),
         `${where}: the year is derived, not read from the form`);
-      ok(/return \(EDIT_ID && EDIT_YEAR\) \|\| jobMarketYears\(\)\.current;/.test(js),
-        `${where}: an edit keeps the season it was filed in, a new one takes today's`);
+      /* An EDIT keeps the season it was filed in — everywhere, and this is
+         the load-bearing half: a row's `year` is half its `id`, so a
+         published posting whose season moved would be published twice.
+
+         What a NEW one takes differs by form, and by tree. The live posting
+         form reads its APPLY-BY DATES (owner, 2026-08-26); the candidate
+         form has no such date and keeps the calendar; and `/v2/` is a frozen
+         archive, so its copies keep exactly what they shipped with. */
+      const cascade = page === 'post-a-job.html' && !dir.length;
+      ok(/if \(EDIT_ID && EDIT_YEAR\) return EDIT_YEAR;/.test(js)
+        || /return \(EDIT_ID && EDIT_YEAR\) \|\|/.test(js),
+        `${where}: an edit keeps the season it was filed in`);
+      if (cascade) {
+        ok(/marketYearOfDay\(final\)/.test(js) && /marketYearOfDay\(val\('f-reviewDate'\)\)/.test(js),
+          `${where}: a new posting is filed by its final apply-by, then its suggested one`);
+        ok(/jobMarketYears\(\)\.current;/.test(js),
+          `${where}: and only then by today — step 3 of the cascade`);
+      } else {
+        ok(/return \(EDIT_ID && EDIT_YEAR\) \|\| jobMarketYears\(\)\.current;/.test(js),
+          `${where}: a new one takes today's season — it has no apply-by date to read`);
+      }
       ok(/EDIT_YEAR = Number\(v\.year\) \|\| 0;/.test(js),
         `${where}: and the stored season is captured when the document loads`);
       ok(!/\$\('f-year'\)/.test(js), `${where}: nothing still reads the removed field`);
@@ -3766,9 +4023,13 @@ function testJobMarketSheetTabCycle() {
   /* By date alone, a posting advertised in April 2026 belongs to the market
      that is closing — the one page it is of no use on. */
   const byDate = rowsFromTab(rows, { tab: '2026 Jobs', kind: 'jobs', minYear: 2026 });
-  eq(byDate.rows.filter((r) => r.year === 2026).length, 4,
-    'four of these five are dated before their own cycle opened, so by date alone ' +
-    'they file under the market that has just closed');
+  eq(byDate.rows.filter((r) => r.year === 2026).length, 3,
+    'three of these five are dated before their own cycle opened AND name no ' +
+    'deadline that outruns it, so with no tab to go on they file under the ' +
+    'market that has just closed');
+  eq(byDate.rows.find((r) => r.institution === 'KU Leuven').year, 2027,
+    'the fourth needs no tab at all: advertised 5 June 2026 and closing on ' +
+    '20 August, its own deadline says which season it is for (owner, 2026-08-26)');
 
   const byTab = rowsFromTab(rows, { tab: '2026 Jobs', kind: 'jobs', minYear: 2026,
     cycleYear: 2027 });
@@ -8408,6 +8669,8 @@ if (isMain(import.meta.url)) {
   await testMyPostingsPage();
   await testAccountMerge();
   await testDerivedMarketYear();
+  await testMarketYearCascade();
+  await testFormMarketYearParity();
   await testCountries();
   await testSchools();
   await testSubmissionKeyCeilings();
