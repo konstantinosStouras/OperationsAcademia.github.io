@@ -273,6 +273,9 @@
        holds the values that have been ticked, so chips, Clear, the URL and the
        cross-filter counts all treat the two the same. */
     var sel = {};
+    // the page-declared action buttons currently in the bar, so render() can
+    // refresh them (rebuilt by buildBar, which empties the bar)
+    var actionEls = [];
     // what is typed but not yet committed, per text filter
     var drafts = {};
     // pending debounce per text filter, so a rebuild can cancel it (below)
@@ -490,10 +493,63 @@
          rather than a <label> so that anything enumerating this bar's labels —
          a screen reader, or the test that pins their names — still sees only
          the real ones. */
-      barEl.appendChild(el('div', { class: 'oa-filter oa-filter-actions' }, [
+      var actionsCell = el('div', { class: 'oa-filter oa-filter-actions' }, [
         el('span', { 'aria-hidden': 'true', class: 'oa-label-spacer', html: '&nbsp;' }),
         clear,
-      ]));
+      ]);
+
+      /* PAGE-DECLARED ACTIONS, rendered by the engine because the engine OWNS
+         this bar: buildBar() empties barEl (Clear filters calls it), so a
+         control a page appended for itself would silently disappear the first
+         time somebody cleared their filters — and reappear nowhere. A page
+         declares what it wants here instead, and gets it back on every
+         rebuild.
+
+         `refresh` is called from render(), beside the Clear button's own
+         disabled state, so an action that reads the CURRENT result — the jobs
+         page's Excel download says how many postings it would write — is never
+         a step behind the list. */
+      actionEls = [];
+      (cfg.actions || []).forEach(function (a) {
+        if (!a) return;
+        var btn = el('button', {
+          type: 'button',
+          class: 'oa-action ' + (a.className || ''),
+          text: a.label || '',
+          onclick: function () { if (a.onClick) a.onClick(apiSnapshot(), btn); },
+        });
+        actionEls.push({ def: a, btn: btn });
+        actionsCell.appendChild(btn);
+      });
+
+      barEl.appendChild(actionsCell);
+    }
+
+    /* What an action is handed: the postings on screen, in the order they are
+       on screen, and what is filtering them. A SNAPSHOT — `view` is rebuilt in
+       place by apply(), so handing the array itself out would let a caller
+       hold a reference that changes under it. */
+    function apiSnapshot() {
+      return {
+        view: view.slice(),
+        rows: rows.slice(),
+        total: rows.length,
+        filters: activeFilters(),
+      };
+    }
+
+    /** Every filter with something selected, in bar order: what a reader would
+        have to describe to say what they were looking at. The half-typed word
+        counts, because it is narrowing the list they can see. */
+    function activeFilters() {
+      var out = [];
+      filters.forEach(function (f) {
+        var values = [];
+        sel[f.key].forEach(function (v) { values.push(v); });
+        if (f.type === 'text' && drafts[f.key]) values.push(drafts[f.key]);
+        if (values.length) out.push({ key: f.key, label: f.label, values: values });
+      });
+      return out;
     }
 
     /* A chip is ONE button: clicking anywhere on the blue area drops that value
@@ -737,6 +793,14 @@
       liveEl.textContent = view.length + ' ' + STR.unit + ' match';
       var clear = barEl.querySelector('.oa-clear');
       if (clear) clear.disabled = !anySelected();
+      var snap = null;
+      actionEls.forEach(function (a) {
+        if (!a.def.refresh) return;
+        if (!snap) snap = apiSnapshot();
+        try { a.def.refresh(a.btn, snap); } catch (e) {
+          if (window.console) console.error('OAList: action refresh failed', e);
+        }
+      });
     }
 
     function scrollTop() {
@@ -919,6 +983,12 @@
          able to arrive late without refetching the dataset. */
       rerender: function () { render(); },
       rows: function () { return rows.slice(); },
+      /* What the list is SHOWING, in the order it is showing it — the whole
+         filtered set, not the current page. What a download of "these
+         postings" has to mean. */
+      view: function () { return view.slice(); },
+      /** Every filter with something selected. */
+      activeFilters: activeFilters,
       state: sel,
     };
   }

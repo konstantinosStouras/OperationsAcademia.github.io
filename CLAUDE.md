@@ -1557,6 +1557,86 @@ annotates a department the same record already carries as its own, and one
 alias reaches both hand-compiled sources, survives a regeneration of either,
 and canonicalises a posting typed with the annotation too.
 
+## The job postings, as an Excel file
+
+A registered reader can take the list away: a small **"↓ Excel"** button under
+*Clear filters* on `jobs.html` writes an `.xlsx` of exactly the postings the
+page is showing (owner, 2026-08-26). Filter first and the file is that search;
+filter nothing and it is every posting on the page.
+
+    assets/oa-xlsx.js       a minimal OOXML workbook writer (dual-mode)
+    assets/oa-jobexport.js  what may be exported, and the button (dual-mode)
+    assets/oa-list.js       `actions` — a page-declared control in the filter bar
+    _scraper/_xlsx-read.mjs read one back, for the two guards
+
+**The Contact details cannot be in it, and that is structural rather than
+remembered.** The owner's instruction was explicit — the poster's name, their
+e-mail, the area coordinator or department chair and theirs, and any private
+note are "private information for the admin only" — and the exclusion holds
+three separate times: those fields are not in `PUBLIC_FIELDS`, so they never
+reach `data/jobs.json` and therefore never reach the browser; every column in
+`COLUMNS` names the field it reads in `from`, so a field with no column is not
+exported however the served file grows; and `selftest.mjs` pins the two against
+each other BOTH WAYS, plus a sweep of the built workbook's own bytes for
+anything e-mail-shaped. **A new column means a new `from`** — one without a
+rule fails the build rather than the reader's privacy.
+
+**Three PUBLIC fields are withheld anyway**, and they are named with a reason
+each in the module: `owner` (a digest of the poster's account — the one column
+that would let a downloader group the site's postings by the person who filed
+them), `ref` (the reference the poster quotes to the maintainer about their own
+submission) and `source` (internal bookkeeping).
+
+**And the page's own buckets are withheld for a different reason.** "Closing
+soon", "Review ahead" and "Last 7 days" are computed against TODAY (`DERIVE` in
+`oa-list.js`), and a workbook is opened weeks after it is saved — a cell
+reading "Closing soon" beside a deadline that passed a month ago is worse than
+no cell. The real dates go instead, which is what lets the reader compute the
+bucket and have it be true when they do.
+
+**It is a workbook and not a CSV because of one word in the instruction**:
+"any deadlines should be marked as Excel date types". A date in a CSV is a
+string Excel re-reads under the reader's own locale — how `05/10/2026` becomes
+the tenth of May in Salt Lake City and the fifth of October in Coventry, the
+exact ambiguity `deadlineDay` refuses to guess at on the way IN. So
+`oa-xlsx.js` writes real OOXML: a STORE zip, inline strings, real booleans,
+date SERIALS under an ISO number format, and clickable hyperlinks with their
+own per-sheet rels. There is no build step and no CDN here, so a library was
+never an option; the shape is the sibling repository's
+`lab/search-v2/admin/xlsx.js` (stouras.com) — **keep the two in step in SHAPE,
+not in code**, like `oa-news.js` and `lit-news.js` — and this one adds the
+dates and the links that file never needed. Excel's own limits are ENFORCED
+rather than hoped for (32,767 characters a cell, unique tab names, the
+schema's child order), because exceeding one produces not an error but a file
+that opens to a repair dialog.
+
+**The data is the FIRST sheet.** `pandas.read_excel` and R's `read_xlsx` both
+default to sheet 0, so a notes sheet in front of it would be the first thing to
+trip up the "easy processing" the file is for. *Columns* describes every column
+in a sentence, and *About this file* records which filters produced it, how
+many postings the page held in all, and what is deliberately not in it.
+
+**The engine renders the button, and that is not tidiness.** `buildBar()`
+empties the filter bar every time Clear filters is pressed, so a control the
+page appended for itself would disappear at the first press and reappear
+nowhere. `cfg.actions` declares one instead; `render()` calls its `refresh`
+beside the Clear button's own disabled state, which is what keeps "Download
+these 52 postings" honest as the list narrows.
+
+**The gate is the site's own `whenSignedIn`**, not the sign-in lock. The lock
+over the filter bar already hides the button from a signed-out visitor and the
+lock card now names the download as a reason to register — but a nudge is not
+an authorisation, so the module refuses on its own: pressing it signed out
+offers the sign-in box and downloads nothing, and a press during the restore
+window is QUEUED rather than lost. The data is a public file either way; an
+account is how this community site knows who uses it.
+
+`page-test.mjs` measures the money path in a real browser — signed out
+downloads nothing and opens the box, signed in downloads bytes that really are
+a workbook holding exactly the rows on screen, narrowing the search narrows the
+file, and at 390px the button is a 42px full-width target like every other
+control in the bar.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

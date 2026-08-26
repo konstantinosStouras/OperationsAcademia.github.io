@@ -15,6 +15,7 @@
 import http from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { unzipStore, sheetCells, lastRow } from './_xlsx-read.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marketYear } from './jobs-model.mjs';
@@ -5007,6 +5008,155 @@ for (const w of [320, 360, 390, 430]) {
       const w = document.querySelector('.oa-u-wrap');
       return !!w && getComputedStyle(w).overflowX === 'auto';
     }), 'roster at 390px: …which is what that container is for');
+    await ctx.close();
+  }
+}
+
+/* ------------------------------------------- the Excel download, measured
+
+   A registered reader may download the postings the jobs page is SHOWING as a
+   real .xlsx (owner, 2026-08-26). `selftest.mjs` pins what may be in the file
+   and proves the bytes are a workbook; this proves the two things only a
+   browser can answer — that pressing it produces one, and that pressing it
+   signed OUT produces the sign-in box instead.
+
+   Driven against _fake-firebase.js, because the gate is the site's own
+   `whenSignedIn` and a page with no SDK at all resolves to "signed out and say
+   why", which is a third state rather than either of the two under test. */
+{
+  const SHIM = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+  const READER = { uid: 'reader-uid-00000000', email: 'reader@example.edu',
+    emailVerified: true, displayName: 'A Reader', providerData: [] };
+
+  async function jobsPage(user, width = 1280) {
+    const ctx = await browser.newContext({
+      viewport: { width, height: 1000 }, acceptDownloads: true });
+    const q = await ctx.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs: [] })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card');
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForTimeout(300);
+    return { ctx, q, errors };
+  }
+
+  /* -- signed OUT: the button refuses, and says how to earn it ------------- */
+  {
+    const { ctx, q, errors } = await jobsPage(null);
+    let downloaded = false;
+    q.on('download', () => { downloaded = true; });
+    const before = await q.evaluate(() => {
+      const b = document.querySelector('.oa-export');
+      return { there: !!b, title: b ? b.title : '',
+        locked: !!document.querySelector('.v3-lock.is-locked') };
+    });
+    ok(before.there, 'jobs export: the button is in the filter bar');
+    ok(before.locked, 'jobs export: signed out, the bar it sits in is locked');
+    ok(/with an account/.test(before.title),
+      'jobs export: …and it says the download is free with one, rather than looking broken');
+    /* Through the lock's pointer-events:none deliberately — the lock is a
+       NUDGE, and what is under test is the module's own gate. */
+    await q.evaluate(() => document.querySelector('.oa-export').click());
+    await q.waitForTimeout(1200);
+    ok(!downloaded, 'jobs export: pressing it signed out downloads NOTHING');
+    ok(await q.evaluate(() => !!document.querySelector('.oa-modal')),
+      'jobs export: it offers the sign-in box instead');
+    /* The lock card is the only place a signed-out reader can be told the
+       download exists at all, so it has to say so. */
+    ok(await q.$eval('#v3-lock-card', (n) => /Excel/i.test(n.textContent)),
+      'jobs export: and the sign-in card names it as a reason to register');
+    eq(errors, [], 'jobs export: signed-out run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- signed IN: a real workbook, holding what the page is showing -------- */
+  {
+    const { ctx, q, errors } = await jobsPage(READER);
+    const shown = await q.$eval('.oa-count', (n) =>
+      Number(n.textContent.split('/')[1].trim().split(' ')[0]));
+
+    const btn = await q.evaluate(() => {
+      const b = document.querySelector('.oa-export');
+      const r = b.getBoundingClientRect();
+      const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
+      const clear = document.querySelector('.oa-clear').getBoundingClientRect();
+      return { title: b.title, disabled: b.disabled, h: Math.round(r.height),
+        w: Math.round(r.width), rightGap: Math.round(cell.right - r.right),
+        below: Math.round(r.top - clear.bottom),
+        locked: !!document.querySelector('.v3-lock.is-locked') };
+    });
+    ok(!btn.locked, 'jobs export: signed in, the filter bar is live');
+    ok(!btn.disabled && btn.title.includes(String(shown)),
+      `jobs export: the button names what it would write (${shown} postings)`);
+    /* SMALL AND DISCRETE was the instruction: it is under Clear rather than
+       beside it, right-aligned, and shorter than the button the bar is for. */
+    ok(btn.h <= 34 && btn.w < 120,
+      `jobs export: it is small (${btn.w}x${btn.h}) — an extra, not a control`);
+    ok(Math.abs(btn.rightGap) <= 1.5 && btn.below >= 0 && btn.below <= 20,
+      'jobs export: …tucked under Clear filters at the bar\'s right edge');
+
+    const first = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('.oa-export');
+    const dl = await first;
+    ok(/^operations-academia-job-postings-.*\.xlsx$/.test(dl.suggestedFilename()),
+      `jobs export: it downloads a named .xlsx (${dl.suggestedFilename()})`);
+    const file = await dl.path();
+    const bytes = new Uint8Array(await readFile(file));
+    eq(Array.from(bytes.slice(0, 4)), [0x50, 0x4b, 0x03, 0x04],
+      'jobs export: and the bytes really are a workbook');
+
+    const parts = unzipStore(bytes);
+    const cells = sheetCells(parts['xl/worksheets/sheet1.xml']);
+    eq(lastRow(cells) - 1, shown,
+      'jobs export: it carries exactly the postings the page was showing');
+    const EMAILISH = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+    ok(!EMAILISH.test(parts['xl/worksheets/sheet1.xml']),
+      'jobs export: and no contact address reaches the reader\'s machine');
+
+    /* NARROWING THE LIST NARROWS THE FILE. A button in the filter panel that
+       ignored the filters would be the surprise, not the feature. */
+    const country = await q.$eval('.oa-card:first-child .oa-card-title', (n) => n.textContent);
+    await q.fill('#oaf-institution', country.slice(0, 8));
+    await q.waitForTimeout(500);
+    const narrowed = await q.$eval('.oa-count', (n) =>
+      Number(n.textContent.split('/')[1].trim().split(' ')[0]));
+    ok(narrowed > 0 && narrowed < shown,
+      `jobs export: a search narrowed the list (${narrowed} of ${shown})`);
+    ok((await q.$eval('.oa-export', (b) => b.title)).includes(String(narrowed)),
+      'jobs export: …and the button already says the new number');
+    const second = q.waitForEvent('download', { timeout: 30000 });
+    await q.click('.oa-export');
+    const dl2 = await second;
+    const parts2 = unzipStore(new Uint8Array(await readFile(await dl2.path())));
+    const cells2 = sheetCells(parts2['xl/worksheets/sheet1.xml']);
+    eq(lastRow(cells2) - 1, narrowed, 'jobs export: the file follows the filters');
+    const about = sheetCells(parts2['xl/worksheets/sheet3.xml']);
+    ok(Object.keys(about).map((k) => about[k].v).join(' ').includes(country.slice(0, 8)),
+      'jobs export: …and says which search produced it');
+
+    eq(errors, [], 'jobs export: signed-in run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a phone: a control in this bar is a touch target (rule 3) ----------- */
+  {
+    const { ctx, q } = await jobsPage(READER, 390);
+    const m = await q.evaluate(() => {
+      const b = document.querySelector('.oa-export');
+      const r = b.getBoundingClientRect();
+      const bar = document.querySelector('.oa-filters').getBoundingClientRect();
+      return { h: Math.round(r.height), w: Math.round(r.width),
+        barW: Math.round(bar.width),
+        over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(m.h >= 40, `jobs export at 390px: a 40px+ target (${m.h}px)`);
+    ok(m.w > m.barW * 0.7, 'jobs export at 390px: full width, like every other control');
+    ok(m.over <= 1, 'jobs export at 390px: the page still does not scroll sideways');
     await ctx.close();
   }
 }
