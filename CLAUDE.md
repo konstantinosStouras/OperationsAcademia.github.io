@@ -538,6 +538,52 @@ naming the postings it may repeat (measured in page-test.mjs, hostile input
 included) and the review e-mail says the same thing. Approve still publishes;
 Reject still keeps the crawled copy off.
 
+**The same advertisement twice is not a decision to make** (owner, 2026-08-26:
+"check the Link to the advert — if it already exists in a previous posting that
+is live or in the queue, then remove that new job from the queue"). A crawled
+row whose **advert link** already belongs to a posting the site is showing, or
+to one already waiting in the queue, is DROPPED at ingest rather than queued —
+`advertRepeat` in `jobreview.mjs` decides it, the sheet sync applies it, and
+the maintainer never sees the card.
+
+**Deciding on a shared link is exactly what this repository threw away once**,
+so it is scoped by MEASUREMENT rather than by hope. The section below records a
+file-level "no two postings name the same advertisement" rule written, measured
+and abandoned because City University of Hong Kong links its whole vacancies
+page from two market YEARS' postings and UCD links one CoreHR endpoint from
+two. Measured over the 542 served postings on 2026-08-26, grouped by (market
+year, university, advert link): **481 groups hold exactly one posting and
+exactly one holds two** — UCD's endpoint, carrying MIS and Supply Chain
+Management. Within a year at one university the link identifies the
+advertisement 481 times out of 482, and the one exception is told apart by its
+DEPARTMENT. So the three contradictions, each keeping a real posting:
+
+* the market year and the university must match (the CityU case);
+* two rows that both name a department, differently, are two advertisements
+  behind one endpoint (the UCD case);
+* two rows whose entry levels share nothing are two searches from one
+  department (the Houston lesson `collapseSameDay` already carries).
+
+Run over the whole served corpus, **none of the 542 is judged a repeat of
+another** — the check that says the guards are not merely plausible. Anything
+short of a match still gets the amber `dup` flag it got before; this only
+removes what it can show is one advertisement twice.
+
+**Dropped means REJECTED, never deleted.** `partition` re-queues a row whose
+document is gone, so deleting would re-drop it every sync for ever; a rejection
+is the one state that both keeps it off the site and stays out of the pending
+list the panel draws. The reason goes in `note` and the posting it repeats in
+`dup` — **both already allowed by the rules, so this needed no redeploy**, and
+no document is left in a shape the panel is then refused permission to update
+(the `sync-user-directory` lesson). The comparison set is what is live PLUS the
+rows already queued PLUS the fresh rows the same run has just accepted, so a
+workbook listing one advertisement twice queues it once.
+
+It keys on the ADVERT link alone, never on "posted at" — `duplicatesOf` can
+afford the wider net because a person reads its answer; this one cannot.
+Pinned both ways in `selftest.mjs`, including the UCD and CityU cases and the
+sync's own source (rejects, never deletes).
+
 **A crawled posting that mentions "business" is flagged under Business School,
 and its card NAMES the school** (owner, 2026-08-23). `typeFromNames` used to
 read only the employer's name and the field column, so Berkeley advertising a

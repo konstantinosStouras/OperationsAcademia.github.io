@@ -63,6 +63,7 @@ import {
   COLLECTION as REVIEW_COL, EDITABLE, SHOWN, DOC_KEYS, PENDING, APPROVED, REJECTED,
   queueDoc, refreshQueued, cleanEdit, cleanEdits, applyEdits, partition,
   needMail, changedKeys, approvedRow, duplicatesOf, sameDups, businessCheck, sameBiz,
+  advertRepeat, repeatNote,
 } from './jobreview.mjs';
 import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
@@ -6816,6 +6817,70 @@ function testReviewDuplicates() {
   eq(duplicatesOf({ ...crawled, adUrl: 'https://www.operationsacademia.org/',
     unit: '', department: '' }, site), [],
     'our own home page in the link column identifies nothing');
+
+  /* ---- THE SAME ADVERTISEMENT TWICE IS DROPPED, NOT FLAGGED -------------
+
+     Owner, 2026-08-26: "check the Link to the advert — if it already exists in
+     a previous posting that is live or in the queue, then remove that new job
+     from the queue." `duplicatesOf` raises a flag; `advertRepeat` decides, so
+     its guards are what keep a real posting out of the bin. */
+  const sameAd = { ...crawled, adUrl: 'https://apply.interfolio.com/12345' };
+  ok(!!advertRepeat(sameAd, site), 'a crawled row advertising a listed vacancy is a repeat');
+  eq(advertRepeat(sameAd, site).id, 'OA-1', 'and it names the posting it repeats');
+
+  eq(advertRepeat({ ...sameAd, year: 2026 }, site), null,
+    'the SAME link in another market year is not — CityU links one vacancies ' +
+    'page from two seasons, the case this rule was once abandoned over');
+  eq(advertRepeat({ ...sameAd, unit: 'Supply Chain Management',
+    department: 'Supply Chain Management' }, site), null,
+    'nor is a different department behind one endpoint — the UCD CoreHR case, ' +
+    'the only shared link in the whole served corpus');
+  eq(advertRepeat({ ...sameAd, levels: ['Post-Doc'] }, site), null,
+    'nor two searches whose entry levels share nothing — the Houston lesson');
+  eq(advertRepeat({ ...sameAd, institution: 'Emory University' }, site), null,
+    'nor the same link at another university');
+  eq(advertRepeat({ ...crawled, adUrl: '' }, site), null,
+    'a row naming no advertisement is never dropped');
+  eq(advertRepeat({ ...crawled, adUrl: 'https://www.operationsacademia.org/' },
+    [{ ...site[0], adUrl: 'https://operationsacademia.org' }]), null,
+    'and our own home page identifies nothing, so it drops nothing');
+
+  /* The DECIDING half reads only the advertisement link, never "posted at" —
+     `duplicatesOf` can afford the wider net because a person reads its
+     answer. */
+  eq(advertRepeat({ ...crawled, adUrl: '', postedAtUrl: 'https://apply.interfolio.com/12345' },
+    site), null,
+    'the drop keys on the advert link alone, not on where it was posted');
+
+  /* A row already IN THE QUEUE counts as listed, not only a live one — half
+     the owner's sentence, and the half a site-only comparison would miss. */
+  const queued = [{ ...site[0], id: 'Q-1', ref: '', source: SHEET_SOURCE }];
+  eq(advertRepeat(sameAd, queued).id, 'Q-1',
+    'a vacancy already waiting in the queue is "already listed" too');
+
+  ok(/already live or already in the queue/.test(repeatNote(site[0])),
+    'the dropped document says why it went');
+  ok(repeatNote(site[0]).includes('OA-JOB-260820-HLA8'),
+    'and names the posting it repeats, so the maintainer can find it');
+  ok(repeatNote(null).length > 0 && repeatNote(null).length < 1000,
+    'and stays inside the note field the rules already allow, even with nothing to name');
+
+  /* THE WIRING: the sync drops rather than queues, and REJECTS rather than
+     deletes — `partition` re-queues a row whose document is gone, so a delete
+     would re-drop it every sync for ever. Read from the source, because
+     reproducing it needs the workbook and Firestore. */
+  const syncSrc = readFileSync(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(/advertRepeat\(doc\.row, listed\)/.test(syncSrc),
+    'the sheet sync checks every fresh queue document for a repeated advertisement');
+  ok(/doc\.status = REJECTED/.test(syncSrc),
+    'and drops it by REJECTING it, which keeps it out of the pending list for good');
+  ok(/\[\.\.\.site, \.\.\.split\.pending\.map/.test(syncSrc),
+    'comparing against what is live AND what is already queued');
+  ok(/listed\.push\(doc\.row\)/.test(syncSrc),
+    'and against the fresh rows it has just accepted, so one advertisement ' +
+    'listed twice in the workbook is queued once');
+  ok(!/doc\.status = REJECTED[\s\S]{0,400}?\bdelete\b/.test(syncSrc),
+    'nothing deletes the document');
 
   const entry = duplicatesOf(crawled, site)[0];
   eq(Object.keys(entry).sort(),

@@ -65,8 +65,9 @@ import {
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
 import { applyAdverts, emptyCache as emptyAdvertsCache } from './adverts.mjs';
 import {
-  COLLECTION as REVIEW_COL, partition, needMail, PENDING,
+  COLLECTION as REVIEW_COL, partition, needMail, PENDING, REJECTED,
   duplicatesOf, sameDups, businessCheck, sameBiz,
+  advertRepeat, repeatNote,
 } from './jobreview.mjs';
 import { fillSchoolFromDirectory, campusCountries, healCountry } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
@@ -704,7 +705,48 @@ async function main() {
            Pending rows are re-checked every sync, so a flag appears when the
            duplicate is posted later and clears when it is taken down. */
         const site = await readJson(JOBS_FILE, []);
+
+        /* THE SAME ADVERTISEMENT TWICE IS NOT A DECISION TO MAKE (owner,
+           2026-08-26): "check the Link to the advert — if it already exists in
+           a previous posting that is live or in the queue, then remove that
+           new job from the queue". So a fresh crawled row that advertises a
+           vacancy already listed is DROPPED here rather than queued, and the
+           maintainer never sees it.
+
+           What it is compared against is both halves of "already listed": the
+           postings the site is showing AND the rows already waiting in the
+           queue — plus the fresh rows this very run has just accepted, so the
+           workbook listing one advertisement twice queues it once.
+
+           Dropped means REJECTED, not deleted: `partition` re-queues a row
+           whose document is gone, so deleting would re-drop it every sync for
+           ever, while a rejection is the one state that both keeps it off the
+           site and stays out of the pending list the panel draws. The reason
+           goes in `note` and the posting it repeats in `dup` — both already
+           allowed by the rules, so nothing here needs a redeploy.
+
+           `advertRepeat` carries the guards (jobreview.mjs): same year, same
+           university, and neither the departments nor the entry levels
+           contradicting. Measured over the 542 served postings, NONE is judged
+           a repeat of another — including UCD's two departments behind one
+           CoreHR endpoint, the case this repository already learned from. */
+        const listed = [...site, ...split.pending.map((d) => d.row)].filter(Boolean);
+        const dropped = [];
         for (const doc of split.queue) {
+          if (doc.status === PENDING) {
+            const repeat = advertRepeat(doc.row, listed);
+            if (repeat) {
+              doc.status = REJECTED;
+              doc.reviewedAt = isoStamp(now);
+              doc.note = repeatNote(repeat);
+              doc.dup = [repeat];
+              dropped.push({ rowId: doc.rowId, row: doc.row, of: repeat });
+              continue;                       // never becomes something to review
+            }
+            /* Accepted, so a LATER fresh row repeating this one is dropped
+               too — the workbook can list one advertisement twice. */
+            listed.push(doc.row);
+          }
           doc.dup = duplicatesOf(doc.row, site);
           /* THE BUSINESS-SCHOOL FLAG (owner, 2026-08-23): a posting whose
              text says "business" is typed Business School at ingest, and its
@@ -713,7 +755,17 @@ async function main() {
              maintainer. The same vocabulary fillSchoolFromDirectory read. */
           doc.biz = businessCheck(doc.row, vocab);
         }
-        const flaggedFresh = split.queue.filter((d) => d.dup.length);
+        for (const d of dropped) {
+          log(`  x dropped, same advertisement as ${d.of.ref || d.of.id}` +
+              `  ${d.row.posted}  ${d.row.institution}` +
+              (d.row.department ? ' — ' + d.row.department : ''));
+        }
+        if (dropped.length) {
+          log(`${dropped.length} crawled posting(s) advertise a vacancy already ` +
+              'listed and were dropped rather than queued');
+        }
+        const flaggedFresh = split.queue.filter((d) => d.dup && d.dup.length
+          && d.status === PENDING);
 
         /* Pending postings are re-checked every sync, JUDGED ON THE ROW THE
            SHEET NOW GIVES — the refreshed copy where one is being written
@@ -754,6 +806,10 @@ async function main() {
           + split.queue.filter((d) => d.status === PENDING).length;
 
         for (const d of split.queue) {
+          /* A dropped repeat is REJECTED too, and this line's else-branch reads
+             "kept, already public" — which it is not. It has already been
+             named above, so it is skipped rather than described wrongly. */
+          if (d.status === REJECTED) continue;
           log(`  ${d.status === PENDING ? '~ queued for review' : '= kept, already public'}` +
               `  ${d.row.posted}  ${d.row.institution}` +
               (d.row.department ? ' — ' + d.row.department : ''));
