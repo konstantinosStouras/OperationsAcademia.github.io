@@ -390,6 +390,11 @@
          _scraper/jobreview.mjs re-exports the same file. It loads AFTER
          oa-schools.js, whose institutionKey it folds names with. -->
     <script defer src="assets/oa-advert-dup.js"></script>
+    <!-- Approving a posting shows it on the jobs page straight away: the row
+         the build is about to publish is echoed into this browser's own
+         storage, exactly as a saved EDIT already is. Optional — without it an
+         approval simply waits for the build, as before. -->
+    <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-jobreview.js"></script>
     <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
