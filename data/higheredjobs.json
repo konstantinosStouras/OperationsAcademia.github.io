@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-25T08:02:55Z",
+ "generated": "2026-08-26T08:03:59Z",
  "ads": {
   "179445424": {
    "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179445424",
@@ -208,6 +208,22 @@
    "salary": "",
    "jobNumber": "",
    "checkedAt": "2026-08-24T08:07:52Z"
+  },
+  "179537363": {
+   "url": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179537363",
+   "status": "ok",
+   "via": "page",
+   "title": "Assistant or Associate Professor of Operations Management",
+   "institution": "California State University, Stanislaus",
+   "location": "Turlock, CA",
+   "type": "Full-Time",
+   "posted": "2026-08-25",
+   "applyByDate": "",
+   "applyByProse": "",
+   "category": "Management",
+   "salary": "",
+   "jobNumber": "",
+   "checkedAt": "2026-08-26T08:03:59Z"
   }
  }
 }
