@@ -67,7 +67,7 @@ import { applyAdverts, emptyCache as emptyAdvertsCache } from './adverts.mjs';
 import {
   COLLECTION as REVIEW_COL, partition, needMail, PENDING, REJECTED,
   duplicatesOf, sameDups, businessCheck, sameBiz,
-  advertRepeat, repeatNote,
+  advertRepeat, findAdvertRepeats, repeatNote,
 } from './jobreview.mjs';
 import { fillSchoolFromDirectory, campusCountries, healCountry } from './vocab.mjs';
 import { shell, esc, send, transport, toPlain, firestore, SITE, CONTACT } from './_mail.mjs';
@@ -236,6 +236,41 @@ async function writeQueue(db, split, reflag = []) {
   if (queued) log(`queued ${queued} posting(s) for review`);
   if (refreshed) log(`${refreshed} queued posting(s) caught up with the sheet`);
   if (reflagged) log(`${reflagged} queued posting(s) had their flags brought up to date`);
+}
+
+/**
+ * Drop postings ALREADY in the queue that advertise a vacancy already listed.
+ *
+ * A fresh crawled repeat is refused in the document that would have created it
+ * (`create()` below writes it already rejected); one that has been WAITING has
+ * a document of its own, so it is moved out of PENDING here.
+ *
+ * IN A TRANSACTION, and only from PENDING. Every other write in this file is
+ * careful never to overwrite a decision made in the browser while the run was
+ * in flight — `refreshQueued` carries only the `row`, the re-flags only the
+ * flag fields — and this one writes a DECISION, so it has to check first. A
+ * posting the maintainer approved a second ago is theirs, and is left alone.
+ */
+async function rejectRepeats(db, rejects) {
+  const col = db.collection(REVIEW_COL);
+  let n = 0;
+  for (const { rowId, patch } of rejects) {
+    const ref = col.doc(rowId);
+    try {
+      const wrote = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists) return false;
+        if (((snap.data() || {}).status || '') !== PENDING) return false;
+        tx.set(ref, patch, { merge: true });
+        return true;
+      });
+      if (wrote) n++;
+    } catch (e) {
+      warn(`could not drop ${rowId}: ${e.message}`);
+    }
+  }
+  if (n) log(`${n} posting(s) under review dropped as one advertisement twice`);
+  return n;
 }
 
 /* -------------------------------------------------------------------- files */
@@ -730,8 +765,56 @@ async function main() {
            contradicting. Measured over the 542 served postings, NONE is judged
            a repeat of another — including UCD's two departments behind one
            CoreHR endpoint, the case this repository already learned from. */
-        const listed = [...site, ...split.pending.map((d) => d.row)].filter(Boolean);
+        /* THE QUEUE IS SWEPT FIRST, then the fresh rows are measured against
+           what survived it (owner, 2026-08-26: "Apply for all jobs under
+           review"). Applying this only to newly-crawled rows would have left
+           every repeat already waiting in the queue waiting for ever — every
+           posting under review the day this shipped was crawled before the
+           rule existed.
+
+           `findAdvertRepeats` is what makes a SET safe to sweep, and a
+           per-row check is not: two queued rows naming one advertisement are
+           each a repeat of the other, so checking them independently against
+           the same list would drop BOTH and lose the posting. It keeps the
+           first it is given and measures the rest against it, so the rows go
+           in OLDEST FIRST — the one that has been waiting longest is the one
+           that stays. */
+        const freshRowFor = new Map(split.refresh.map((d) => [d.rowId, d.row]));
+        const pendingPairs = split.pending
+          .slice()
+          .sort((a, b) => String(a.queuedAt || '').localeCompare(String(b.queuedAt || '')))
+          /* judged on the row the SHEET NOW GIVES, like the flags below */
+          .map((doc) => ({ doc, row: freshRowFor.get(doc.rowId) || doc.row }));
+        const docForRow = new Map(pendingPairs.map((p) => [p.row, p.doc]));
+        const swept = findAdvertRepeats(pendingPairs.map((p) => p.row), site);
+
         const dropped = [];
+        const rejects = [];
+        const droppedIds = new Set();
+        for (const d of swept.drop) {
+          const doc = docForRow.get(d.row);
+          if (!doc) continue;
+          droppedIds.add(doc.rowId);
+          rejects.push({
+            rowId: doc.rowId,
+            patch: {
+              status: REJECTED,
+              reviewedAt: isoStamp(now),
+              note: repeatNote(d.of),
+              dup: [d.of],
+            },
+          });
+          dropped.push({ rowId: doc.rowId, row: d.row, of: d.of, queued: true });
+        }
+        /* A posting being dropped is not also brought up to date with the
+           sheet: refreshing the row of a document this same run rejects is a
+           write that changes nothing anybody will read. */
+        split.refresh = split.refresh.filter((d) => !droppedIds.has(d.rowId));
+
+        /* Now the fresh rows, against the site plus the queue that survived —
+           plus each fresh row this run accepts, so the workbook listing one
+           advertisement twice queues it once. */
+        const listed = [...site, ...swept.keep].filter(Boolean);
         for (const doc of split.queue) {
           if (doc.status === PENDING) {
             const repeat = advertRepeat(doc.row, listed);
@@ -756,13 +839,16 @@ async function main() {
           doc.biz = businessCheck(doc.row, vocab);
         }
         for (const d of dropped) {
-          log(`  x dropped, same advertisement as ${d.of.ref || d.of.id}` +
+          log(`  x ${d.queued ? 'taken out of the queue' : 'dropped'}, same advertisement ` +
+              `as ${d.of.ref || d.of.id}` +
               `  ${d.row.posted}  ${d.row.institution}` +
               (d.row.department ? ' — ' + d.row.department : ''));
         }
         if (dropped.length) {
-          log(`${dropped.length} crawled posting(s) advertise a vacancy already ` +
-              'listed and were dropped rather than queued');
+          const q = dropped.filter((d) => d.queued).length;
+          log(`${dropped.length} crawled posting(s) advertise a vacancy already listed` +
+              (q ? ` — ${q} of them already under review` : '') +
+              ' and were dropped rather than left for you to decide');
         }
         const flaggedFresh = split.queue.filter((d) => d.dup && d.dup.length
           && d.status === PENDING);
@@ -775,6 +861,7 @@ async function main() {
         const freshRow = new Map(split.refresh.map((d) => [d.rowId, d.row]));
         const reflag = [];
         for (const doc of split.pending) {
+          if (droppedIds.has(doc.rowId)) continue;   // leaving the queue, not being re-flagged
           const row = freshRow.get(doc.rowId) || doc.row;
           const patch = {};
           const dup = duplicatesOf(row, site);
@@ -788,13 +875,16 @@ async function main() {
                'flagged on its review card');
         }
 
-        if (split.queue.length || split.refresh.length || reflag.length) {
+        if (split.queue.length || split.refresh.length || reflag.length || rejects.length) {
           if (DRY) {
             log(`--dry-run: would queue ${split.queue.length} posting(s) for review` +
                 (split.refresh.length ? ` and refresh ${split.refresh.length}` : '') +
-                (reflag.length ? ` and re-flag ${reflag.length}` : '') + '.');
+                (reflag.length ? ` and re-flag ${reflag.length}` : '') +
+                (rejects.length ? ` and drop ${rejects.length} as one advertisement twice` : '') +
+                '.');
           } else {
             await writeQueue(queue.db, split, reflag);
+            if (rejects.length) await rejectRepeats(queue.db, rejects);
           }
         }
         /* Grandfathered rows are in `queue` (they get a document) AND in
@@ -802,7 +892,7 @@ async function main() {
            out of both lines below: printed as waiting, they would tell the
            maintainer they had sixteen more decisions to make than they do —
            and the first real run said "545 awaiting you" when 529 were. */
-        const waiting = split.pending.length
+        const waiting = split.pending.filter((d) => !droppedIds.has(d.rowId)).length
           + split.queue.filter((d) => d.status === PENDING).length;
 
         for (const d of split.queue) {

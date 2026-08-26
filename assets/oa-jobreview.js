@@ -463,6 +463,164 @@
     });
   }
 
+  /* ------------------------------------------ one advertisement, one posting */
+
+  /**
+   * The row as it will PUBLISH — the maintainer's unsaved edits included.
+   *
+   * The sync judges the sheet's own row because that is all it has; the panel
+   * has the card in front of it, so a link the maintainer has just corrected
+   * is the link this check reads. `fieldValue` is the same reader the cards
+   * draw from, and the department line is joined exactly as `settlePlace`
+   * derives it, so the two sides cannot disagree about what a row says.
+   */
+  function judgedRow(doc) {
+    var row = doc.row || {};
+    var school = fieldValue(doc, 'school');
+    var unit = fieldValue(doc, 'unit');
+    return {
+      id: doc.rowId,
+      ref: row.ref || '',
+      source: row.source || '',
+      year: row.year,
+      posted: row.posted || '',
+      institution: fieldValue(doc, 'institution'),
+      school: school,
+      unit: unit,
+      department: joinDepartment(school, unit) || row.department || '',
+      levels: fieldValue(doc, 'levels'),
+      adUrl: fieldValue(doc, 'adUrl')
+    };
+  }
+
+  /**
+   * "Check for duplicate adverts" (owner, 2026-08-26).
+   *
+   * The sheet sync drops a crawled row whose advertisement link already
+   * belongs to a posting that is live or already queued. This is the SAME
+   * rule, on demand — `window.OAAdvertDup`, the very file `_scraper/jobreview.mjs`
+   * re-exports, so the button and the pipeline can never answer differently.
+   *
+   * Four things it does deliberately:
+   *
+   *   - it sweeps the WHOLE crawled queue, not the page on screen. A repeat is
+   *     always in the same market year as what it repeats, so no page could
+   *     show a pair the sweep should have left alone;
+   *   - OLDEST FIRST, so the posting that has been waiting longest is the one
+   *     that stays, exactly as the sync orders it;
+   *   - it REPORTS BEFORE IT WRITES. Every drop is named in the confirmation
+   *     with the posting it repeats, so nothing leaves the queue unseen;
+   *   - it REJECTS, never deletes. `partition` re-queues a row whose document
+   *     is gone, so a delete would re-drop it on every sync for ever.
+   */
+  function checkDuplicates(db) {
+    var msg = $('oa-review-bulk-msg');
+    var btn = $('oa-review-dupes');
+    if (!window.OAAdvertDup) {
+      msg.className = 'oa-form-msg is-err';
+      msg.textContent = 'The duplicate-advert rule did not load — reload the page.';
+      return;
+    }
+
+    var docs = state.crawled.slice().sort(function (a, b) {
+      return String(a.queuedAt || '').localeCompare(String(b.queuedAt || ''));
+    });
+
+    btn.disabled = true;
+    msg.className = 'oa-form-msg';
+    msg.textContent = 'Reading the postings already on the site…';
+
+    /* no-cache REVALIDATES: Pages serves data/ with ten minutes of freshness,
+       and a sweep run against a stale copy of the site would keep a repeat of
+       something published nine minutes ago. */
+    fetch('data/jobs.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (site) {
+        var rows = docs.map(judgedRow);
+        var swept = OAAdvertDup.findAdvertRepeats(rows, Array.isArray(site) ? site : []);
+        var drops = swept.drop.map(function (d) {
+          return { doc: docs[rows.indexOf(d.row)], of: d.of, row: d.row };
+        }).filter(function (d) { return !!d.doc; });
+
+        if (!drops.length) {
+          msg.className = 'oa-form-msg is-ok';
+          msg.textContent = 'Checked all ' + docs.length + ' postings under review against ' +
+            'the ' + (Array.isArray(site) ? site.length : 0) + ' on the site: none of them ' +
+            'advertises a vacancy that is already listed.';
+          btn.disabled = false;
+          return;
+        }
+
+        var lines = drops.map(function (d) {
+          return '\u2022 ' + (d.row.institution || d.doc.rowId) +
+            (d.row.department ? ' — ' + d.row.department : '') +
+            '\n    repeats ' + (d.of.ref || d.of.id) +
+            (d.of.institution ? ' (' + d.of.institution + ')' : '');
+        }).join('\n');
+
+        if (!window.confirm('Take these ' + drops.length + ' postings out of the queue?\n\n' +
+            lines + '\n\nEach advertises the same vacancy as a posting that is already ' +
+            'live or already under review. They are rejected, not deleted, so they will ' +
+            'not be queued again; nothing already on the site changes.')) {
+          msg.className = 'oa-form-msg';
+          msg.textContent = drops.length + ' repeated ' +
+            (drops.length === 1 ? 'advertisement' : 'advertisements') + ' found — nothing removed.';
+          btn.disabled = false;
+          return;
+        }
+
+        msg.textContent = 'Removing 0 of ' + drops.length + '…';
+        var done = 0, failed = 0;
+        var chain = Promise.resolve();
+        drops.forEach(function (d) {
+          chain = chain.then(function () {
+            /* The write the sync makes, field for field: `note` and `dup` are
+               already in the rules' key list, so this needs no redeploy. */
+            return db.collection(COL).doc(d.doc.rowId).set({
+              status: 'rejected',
+              reviewedAt: new Date().toISOString(),
+              note: OAAdvertDup.repeatNote(d.of),
+              dup: [d.of],
+            }, { merge: true })
+              .then(function () { done++; retire(db, 'crawled', d.doc); })
+              .catch(function () { failed++; })
+              .then(function () {
+                msg.textContent = 'Removing ' + (done + failed) + ' of ' + drops.length + '…';
+              });
+          });
+        });
+
+        chain.then(function () {
+          /* REPAINT FIRST, THEN SAY WHAT HAPPENED. render() clears this line —
+             a message left over from another tab is worse than none — so an
+             outcome written before the redraw is wiped by it, and the
+             maintainer watches the queue shrink under a blank strip.
+
+             The sweep also spans every market year, so the tab on screen may
+             have just been emptied: repaint on a year that still exists rather
+             than on one whose postings have all gone. */
+          if (!failed) {
+            var left = yearsOf(state.crawled, SOURCES.crawled);
+            paint(db, 'crawled', left.indexOf(state.year) >= 0 ? state.year : null);
+          } else btn.disabled = false;
+          msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
+          msg.textContent = failed
+            ? done + ' removed, ' + failed + ' could not be saved — reload and try again.'
+            : done + ' repeated ' + (done === 1 ? 'posting' : 'postings') +
+              ' taken out of the queue. Nothing on the site changed.';
+        });
+      })
+      .catch(function (err) {
+        msg.className = 'oa-form-msg is-err';
+        msg.textContent = 'Could not read the postings on the site (' +
+          esc(err.message || err) + ') — nothing was removed.';
+        btn.disabled = false;
+      });
+  }
+
   /* ---------------------------------------------------- the two source tabs */
 
   /* Which tab holds which postings, and how to read each shape: the crawled
@@ -762,14 +920,16 @@
     });
 
     chain.then(function () {
+      /* The rows are gone from the tab's own state, so redraw what is left
+         rather than leaving the page showing what was just cleared — and
+         redraw BEFORE the outcome is written, because render() clears this
+         line and would otherwise wipe what it says. */
+      if (!failed) paint(db, 'user', state.year);
       msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
       msg.textContent = failed
         ? done + ' marked reviewed, ' + failed + ' could not be saved — reload and try those again.'
         : 'All ' + done + ' marked reviewed. They are still live; they have just ' +
           'left this list.';
-      /* The rows are gone from the tab's own state, so redraw what is left
-         rather than leaving the page showing what was just cleared. */
-      if (!failed) paint(db, 'user', state.year);
     });
   }
 
@@ -837,16 +997,34 @@
        says which it is. */
     var bulk = $('oa-review-bulk');
     var btn = $('oa-review-all');
+    var dupBtn = $('oa-review-dupes');
+
+    /* ONE POSTING IS ENOUGH FOR THE DUPLICATE CHECK, which is why it does not
+       share the bulk button's `> 1`: a single queued posting can perfectly
+       well repeat one that is already LIVE, and that is the case the owner
+       reported. It belongs to the crawled tab alone — a user-added posting is
+       already on the site, and taking it off is the poster's decision or the
+       Take-down control, never a sweep. Both live in the same row, so the row
+       is shown when EITHER applies and each button hides itself. */
     var bulkOn = docs.length > 1;
-    show(bulk, bulkOn);
+    var dupOn = source === 'crawled' && state.crawled.length > 0;
+    show(bulk, bulkOn || dupOn);
+    show(btn, bulkOn);
+    show(dupBtn, dupOn);
     if (bulkOn && btn) {
       btn.textContent = source === 'crawled'
         ? 'Approve all ' + docs.length + ' shown & publish'
         : 'Mark all ' + docs.length + ' shown reviewed';
       btn.disabled = false;
-      var bm = $('oa-review-bulk-msg');
-      if (bm) { bm.className = 'oa-form-msg'; bm.textContent = ''; }
     }
+    if (dupOn && dupBtn) {
+      dupBtn.disabled = false;
+      /* Claimed on every render, like the bulk button: the tabs redraw and a
+         stale handler would be holding the previous tab's `db`. */
+      dupBtn.onclick = function () { checkDuplicates(db); };
+    }
+    var bm = $('oa-review-bulk-msg');
+    if (bm) { bm.className = 'oa-form-msg'; bm.textContent = ''; }
 
     unmountPickers();
 
