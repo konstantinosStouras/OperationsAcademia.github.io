@@ -11,7 +11,7 @@
 
 import { isMain } from './_main.mjs';
 import { readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -3060,6 +3060,49 @@ function testChanges() {
     'both sides of the change are shown');
   ok(!renderChangesHtml({ edits: [], takedowns: [], added: 0 }),
     'nothing changed renders as nothing');
+
+  /* ---- "22 edited" every day, and nobody had edited anything ----------
+
+     The owner was getting a daily "[OA] Job postings changed: 22 edited"
+     for postings no human had touched (2026-08-25). Two causes, both here.
+
+     ONE: `addedAt` was diffed. It records when the DATASET first saw the
+     posting, mergeRows carries it over from the previous row precisely so a
+     re-read never re-stamps it, and nobody edits it — 17 of the 23 phantom
+     edits were this one field. It belongs with `id` and `adPending` in the
+     list diffRows skips, and the block that sends the e-mail already claimed
+     "bookkeeping writes never produce an e-mail". */
+  eq(diffRows(a, { ...a, addedAt: '2026-08-25T09:00:00.000Z' }).length, 0,
+    'addedAt is bookkeeping, not an edit — it never produces a change e-mail');
+  ok(diffRows(a, { ...a, comments: 'new' }).length === 1,
+    'while a field a person can actually change still is one');
+
+  /* TWO: build-jobs diffed the RAW rows read from the sources against the
+     served file, not the rows it was about to WRITE. Every heal the build
+     applies on the way out (healCountry, healReviewDate, stripRowEmails,
+     healPlace) therefore reported itself as a fresh edit on every write, for
+     ever, because the source keeps saying what it always said. Pinned at the
+     source, because reproducing it needs Firestore and the workbook. */
+  const buildSrc = readFileSync(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/collectChanges\(existing,\s*rows,/.test(buildSrc),
+    'the change e-mail diffs the rows the build WRITES, not the raw ones it read');
+  ok(!/collectChanges\(existing,\s*freshVisible/.test(buildSrc),
+    'and never freshVisible again — that is what mailed 23 phantom edits a day');
+
+  /* The behavioural half of the same claim: a rebuild that changes nothing
+     reports nothing. `rows` on an unchanged run IS the served file, so this
+     is the exact comparison build-jobs now makes. */
+  const served = [a, { ...a, id: 'y', ref: 'OA-JOB-2', institution: 'Emory University' }];
+  eq(collectChanges(served, served, [], []).edits.length, 0,
+    'an unchanged rebuild reports no edits at all');
+  eq(collectChanges(served, served, [], []).added, 0, 'and nothing new');
+
+  /* The same slip made the LOG overcount in the other direction: it counted a
+     row that the collapse then folded away, so a run that added 3 postings
+     announced "+12 new". Counting what is written cannot do that. */
+  const collapsedAway = [a];
+  eq(collectChanges(served, collapsedAway, [], []).added, 0,
+    'a row that never reaches the written set is never counted as new');
 }
 
 /* -------------------------------------------- the posting page loads fast */

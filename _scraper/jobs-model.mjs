@@ -1224,7 +1224,17 @@ export function diffRows(before, after) {
     // `adPending` flips as a side effect of the build filing an upload into
     // Drive — bookkeeping, not an edit the poster made, so it never produces
     // a change e-mail on its own.
-    if (k === 'id' || k === 'adPending') continue;
+    //
+    // `addedAt` is the same kind of thing and was missing from this list: it
+    // records when the DATASET first saw the posting, it is the only cursor
+    // the e-mail alerts have, and mergeRows carries it over from the previous
+    // row precisely so that a re-read never re-stamps it. Nobody edits it, so
+    // an "edit" naming it is always noise — 17 of the 23 phantom edits in the
+    // daily admin e-mail were exactly this (owner, 2026-08-25). The block that
+    // sends that e-mail already claims "bookkeeping writes never produce an
+    // e-mail"; this is half of what makes the claim true (build-jobs diffing
+    // the rows it WRITES rather than the raw ones is the other half).
+    if (k === 'id' || k === 'adPending' || k === 'addedAt') continue;
     const a = before ? before[k] : undefined;
     const b = after ? after[k] : undefined;
     const av = Array.isArray(a) ? a.join(', ') : (a === undefined || a === null ? '' : String(a));
