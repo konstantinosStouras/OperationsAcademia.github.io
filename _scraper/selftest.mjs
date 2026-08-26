@@ -70,6 +70,7 @@ import {
   REVIEWED_AT as SUB_REVIEWED_AT, partitionSubmissions, isWaiting, createdDay,
 } from './submissions-review.mjs';
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
+import { unzipStore, sheetCells, lastRow } from './_xlsx-read.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // the dual-mode browser modules (oa-countries.js, oa-alert-match.js) are the
@@ -7994,6 +7995,241 @@ async function testCandidateProfilePolicy() {
     'and never the file just filed');
 }
 
+/* ------------------------------------------------- the Excel download
+
+   A registered reader may download the postings the jobs page is showing as a
+   real .xlsx (owner, 2026-08-26). Two things have to be true and neither is
+   visible from a page: that a poster's CONTACT DETAILS cannot reach the file,
+   and that a file this repository writes by hand is one Excel will actually
+   open. So the workbook is BUILT here from the real data/jobs.json and read
+   back out of its own bytes.
+
+   The zip is written STORE (assets/oa-xlsx.js says why), so reading it needs
+   no inflate — which is what lets this check be offline and dependency-free
+   like everything else in this file. */
+
+async function testJobExport() {
+  const X = require(path.join(HERE, '..', 'assets', 'oa-xlsx.js'));
+  const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+
+  /* ---- the writer: dates, links, types, and Excel's own limits ---------- */
+
+  /* The epoch is 1899-12-30 and the reason is the phantom 29 February 1900
+     Excel inherited from Lotus. Anchor it on days Excel itself is known for
+     rather than on a formula restated here, or the check just repeats the
+     code. */
+  eq(X.dateSerial('1900-01-01'), 2, 'xlsx: 1 January 1900 is serial 2');
+  eq(X.dateSerial('1900-03-01'), 61, 'xlsx: 1 March 1900 is serial 61');
+  eq(X.dateSerial('2026-09-08'), 46273, 'xlsx: a real deadline is its own serial');
+  eq(X.dateSerial('2025-12-31') + 1, X.dateSerial('2026-01-01'),
+    'xlsx: consecutive days are consecutive serials');
+  eq(X.dateSerial('2025-02-31'), null, 'xlsx: an impossible day is refused, never rolled over');
+  eq(X.dateSerial('until filled'), null, 'xlsx: prose is not a date');
+  eq(X.dateSerial(''), null, 'xlsx: an empty day is not a date');
+
+  eq(X.safeUrl('https://example.edu/ad'), 'https://example.edu/ad', 'xlsx: an https target');
+  eq(X.safeUrl('javascript:alert(1)'), '', 'xlsx: a javascript: URL is never a hyperlink');
+  eq(X.safeUrl('/jobs.html'), '', 'xlsx: a hyperlink must be absolute — a workbook has no origin');
+  eq(X.colLetter(0) + X.colLetter(25) + X.colLetter(26), 'AZAA', 'xlsx: column letters');
+  eq(X.sheetNames([{ name: 'Data' }, { name: 'Data' }]), ['Data', 'Data (2)'],
+    'xlsx: two sheets may not share a name — Excel refuses the file');
+  eq(X.sheetNames([{ name: 'A[b]c*d?e:f/g\\h' }]), ['A b c d e f g h'],
+    'xlsx: the characters Excel forbids in a tab name are dropped');
+
+  const probe = X.build([{
+    name: 'Probe',
+    rows: [
+      ['Header'],
+      [{ date: '2026-09-08' }, { link: 'https://example.edu/ad', text: 'the ad' },
+        true, 42, '', { link: 'javascript:alert(1)', text: 'nope' }],
+    ],
+  }]);
+  eq(Array.from(probe.slice(0, 4)), [0x50, 0x4b, 0x03, 0x04], 'xlsx: the file is a zip');
+  const parts = unzipStore(probe);
+  for (const need of ['[Content_Types].xml', '_rels/.rels', 'xl/workbook.xml',
+    'xl/_rels/workbook.xml.rels', 'xl/styles.xml', 'xl/worksheets/sheet1.xml',
+    'xl/worksheets/_rels/sheet1.xml.rels']) {
+    ok(parts[need], `xlsx: the package carries ${need}`);
+  }
+  const probeCells = sheetCells(parts['xl/worksheets/sheet1.xml']);
+  eq(probeCells.A2.v, '46273', 'xlsx: a date cell holds the serial, not the text');
+  eq(probeCells.A2.t, 'n', 'xlsx: …as a NUMBER, which is what makes it a date to Excel');
+  ok(parts['xl/styles.xml'].includes('numFmtId="164"') &&
+     /numFmtId="164"[^>]*formatCode="yyyy/.test(parts['xl/styles.xml']),
+    'xlsx: and it is drawn under an ISO date format, which no locale can misread');
+  eq(probeCells.B2.v, 'the ad', 'xlsx: a link cell shows its label');
+  ok(parts['xl/worksheets/sheet1.xml'].includes('<hyperlink ref="B2"'),
+    'xlsx: …and is a real hyperlink, so it is clickable in Excel');
+  ok(parts['xl/worksheets/_rels/sheet1.xml.rels'].includes('Target="https://example.edu/ad"') &&
+     parts['xl/worksheets/_rels/sheet1.xml.rels'].includes('TargetMode="External"'),
+    'xlsx: …pointing at the advertisement itself');
+  eq(probeCells.C2.t, 'b', 'xlsx: a boolean is a real Excel boolean, not 1/0');
+  eq(probeCells.D2.v, '42', 'xlsx: a number is a number');
+  ok(!probeCells.E2, 'xlsx: an empty value is an EMPTY cell, never a 0');
+  eq(probeCells.F2.v, 'nope', 'xlsx: a refused URL degrades to its label');
+  ok(!parts['xl/worksheets/_rels/sheet1.xml.rels'].includes('javascript'),
+    'xlsx: …and NOTHING in the package points at it — a workbook opens outside the sandbox');
+  /* autoFilter before hyperlinks: CT_Worksheet is a SEQUENCE, and Excel
+     rejects a worksheet whose children are out of order. */
+  const wsXml = parts['xl/worksheets/sheet1.xml'];
+  ok(wsXml.indexOf('<autoFilter') < wsXml.indexOf('<hyperlinks>'),
+    'xlsx: the worksheet children are in the schema\'s own order');
+
+  const long = X.build([{ name: 'L', rows: [['h'], ['x'.repeat(X.MAX_CELL_CHARS + 500)]] }]);
+  eq(sheetCells(unzipStore(long)['xl/worksheets/sheet1.xml']).A2.v.length, X.MAX_CELL_CHARS,
+    'xlsx: a cell is truncated to what Excel can hold rather than corrupting the file');
+
+  /* ---- the columns: what may be exported, pinned BOTH ways -------------- */
+
+  const froms = new Set();
+  E.COLUMNS.forEach((c) => (c.from || []).forEach((f) => froms.add(f)));
+  const headers = E.COLUMNS.map((c) => c.header);
+
+  eq([...froms].filter((f) => !PUBLIC_FIELDS.includes(f)), [],
+    'export: every column reads a field the BUILD publishes (PUBLIC_FIELDS)');
+  eq([...froms].filter((f) => E.CONTACT_FIELDS.includes(f)), [],
+    'export: and not one of them is a Contact detail');
+  eq([...froms].filter((f) => E.WITHHELD.includes(f)), [],
+    'export: nor one of the three public fields deliberately withheld');
+  eq(E.CONTACT_FIELDS.filter((f) => PUBLIC_FIELDS.includes(f)), [],
+    'export: the contact block is not in PUBLIC_FIELDS either — the file it reads cannot carry one');
+  eq(headers.length, new Set(headers).size, 'export: no two columns share a heading');
+  eq(E.COLUMNS.filter((c) => !c.note || !c.type || !c.from || !c.from.length).map((c) => c.header),
+    [], 'export: every column says what it is, what type it is and what it reads');
+
+  /* The three derived buckets are computed against TODAY, so a workbook saved
+     in September would still say "Closing soon" in December. None of them may
+     be exported — the real dates are, which is what makes the file honest a
+     month later. */
+  eq(headers.filter((h) => /closing soon|expired|until filled|review ahead|last 7 days/i.test(h)),
+    [], 'export: no column is one of the page\'s own today-relative buckets');
+
+  /* ---- the workbook, over the REAL served file -------------------------- */
+
+  const rows = JSON.parse(await readFile(JOBS, 'utf8'));
+  const meta = { at: new Date('2026-08-26T09:30:00Z'), market: '2026-2027',
+    total: rows.length, filters: [{ label: 'Location', values: ['Ireland', 'France'] }] };
+  const sheets = E.sheets(rows, meta);
+
+  eq(sheets.map((s) => s.name), ['Job postings', 'Columns', 'About this file'],
+    'export: the DATA is the first sheet — read_excel and read_xlsx both default to it');
+  eq(sheets[0].rows.length, rows.length + 1, 'export: one row per posting, under one header row');
+  eq(sheets[0].rows[0], headers, 'export: the header row is the columns');
+  eq(sheets[1].rows.length, E.COLUMNS.length + 1,
+    'export: the dictionary describes every column, and only them');
+
+  const book = X.build(sheets);
+  const files = unzipStore(book);
+  const data = sheetCells(files['xl/worksheets/sheet1.xml']);
+  const dateCols = E.COLUMNS.map((c, i) => (c.type === 'Date' ? X.colLetter(i) : null))
+    .filter(Boolean);
+  ok(dateCols.length >= 3, 'export: the deadlines and the posting date are date columns');
+
+  /* Every value in a date column is either an EMPTY cell (the posting names no
+     such date) or a real date — never text that Excel would re-read under the
+     reader's own locale, which is the whole reason this is a workbook. */
+  const dateStyle = String(sheetCells(unzipStore(X.build([{ name: 'd',
+    rows: [['h'], [{ date: '2026-01-01' }]] }]))['xl/worksheets/sheet1.xml']).A2.s);
+  const badDates = [];
+  for (let r = 2; r <= rows.length + 1; r++) {
+    for (const col of dateCols) {
+      const cell = data[col + r];
+      if (!cell) continue;
+      if (cell.t !== 'n' || cell.s !== dateStyle || !/^\d+$/.test(cell.v)) {
+        badDates.push(col + r);
+      }
+    }
+  }
+  eq(badDates.slice(0, 5), [], 'export: every deadline in the file is a real Excel date');
+
+  let dated = 0;
+  E.COLUMNS.forEach((c, i) => {
+    if (c.type !== 'Date') return;
+    for (let r = 2; r <= rows.length + 1; r++) if (data[X.colLetter(i) + r]) dated++;
+  });
+  ok(dated > 100, `export: and the corpus really exercises them (${dated} dated cells)`);
+
+  ok(files['xl/worksheets/_rels/sheet1.xml.rels'] &&
+     files['xl/worksheets/_rels/sheet1.xml.rels'].includes('TargetMode="External"'),
+    'export: the advertisement links are clickable');
+
+  /* NOTHING THAT LOOKS LIKE AN ADDRESS, anywhere in the package. The build
+     already strips one out of a posting's prose (stripRowEmails) and the
+     contact block never reaches the served file at all — this is the check
+     that says so about the thing the reader actually receives. */
+  const EMAILISH = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+  const leaks = Object.keys(files).filter((n) => /worksheets\/sheet/.test(n) &&
+    EMAILISH.test(files[n]));
+  eq(leaks, [], 'export: no e-mail address anywhere in the workbook');
+
+  const about = sheetCells(files['xl/worksheets/sheet3.xml']);
+  const aboutText = Object.keys(about).map((k) => about[k].v).join(' | ');
+  ok(/Contact details/.test(aboutText) && /never published/.test(aboutText),
+    'export: and the file SAYS what it does not carry, rather than leaving it to be assumed');
+  ok(aboutText.includes('Ireland  or  France'),
+    'export: the About sheet names the filters that were in force');
+  ok(aboutText.includes(String(rows.length)),
+    'export: …and how many postings the page held in all');
+
+  const none = E.sheets(rows.slice(0, 3), { at: meta.at, market: '2026-2027', total: 3, filters: [] });
+  ok(JSON.stringify(none[2].rows).includes('None — this is every posting'),
+    'export: with nothing filtering, it says so rather than leaving the row blank');
+
+  eq(E.fileName({ at: new Date('2026-08-26T09:30:00Z'), market: '2026-2027' }),
+    'operations-academia-job-postings-2026-2027-2026-08-26.xlsx',
+    'export: the file names itself by market and by the day it was taken');
+
+  /* An empty result set is still a valid workbook — a reader who has filtered
+     down to nothing must get a file that opens, not a repair dialog. */
+  const empty = unzipStore(X.build(E.sheets([], { market: '2026-2027', total: rows.length })));
+  ok(empty['xl/worksheets/sheet1.xml'], 'export: a filtered-to-nothing download is still a workbook');
+}
+
+/* --------------------------------------------------- …and how it is wired */
+
+async function testJobExportWiring() {
+  const jobs = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  const list = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
+  const listCss = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  const mod = await readFile(path.join(HERE, '..', 'assets', 'oa-jobexport.js'), 'utf8');
+
+  for (const src of ['assets/oa-xlsx.js', 'assets/oa-jobexport.js']) {
+    ok(jobs.includes(`<script defer src="${src}"></script>`),
+      `export: jobs.html loads ${src}, deferred like every other script on it`);
+  }
+  ok(/actions:\s*window\.OAJobExport/.test(jobs),
+    'export: the jobs mount declares the action');
+
+  /* The ENGINE renders it, and that is not a style choice: buildBar() empties
+     the bar whenever the filters are cleared, so a button the page appended
+     for itself would disappear at the first press of Clear. */
+  ok(/cfg\.actions/.test(list) && /actionsCell\.appendChild\(btn\)/.test(list),
+    'export: the engine renders page-declared actions into the filter bar itself');
+  ok(/actionEls\s*=\s*\[\]/.test(list),
+    'export: …and rebuilds them with the bar, so Clear filters cannot lose one');
+  ok(/a\.def\.refresh\(a\.btn, snap\)/.test(list),
+    'export: render() refreshes an action, so its count is never a step behind the list');
+  ok(/view:\s*function\s*\(\)\s*\{\s*return view\.slice\(\)/.test(list),
+    'export: the engine exposes what the list is SHOWING, which is what gets downloaded');
+
+  /* The gate. The bar is already covered by the page's sign-in lock, but a
+     nudge is not an authorisation — the module refuses on its own. */
+  ok(/whenSignedIn/.test(mod),
+    'export: the download goes through the site\'s own signed-in gate');
+  ok(!/OAAccounts\.hint\(\)\s*===\s*'in'\s*\)\s*\{[^}]*download/.test(mod),
+    'export: …and never on the localStorage hint alone');
+
+  ok(/\.oa-action\s*\{/.test(listCss) && /color:\s*var\(--mut/.test(listCss),
+    'export: the button names its own ink as well as its ground (CLAUDE.md)');
+  ok(/body\.v3 \.oa-action\s*\{/.test(v3css),
+    'export: …and is themed for the live design');
+  ok(/max-width:\s*640px[\s\S]{0,2200}?\.oa-action\s*\{[\s\S]{0,220}?height:\s*42px/.test(listCss),
+    'export: on a phone it is a 42px target like every other control in the bar');
+  ok(/\.oa-clear,\s*\.oa-action\s*\{\s*display:\s*none/.test(listCss),
+    'export: and it does not print');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -8076,5 +8312,7 @@ if (isMain(import.meta.url)) {
   await testTwoDeadlinesWiring();
   await testSubmissionNotices();
   await testCandidateProfilePolicy();
+  await testJobExport();
+  await testJobExportWiring();
   process.exit(finish() ? 0 : 1);
 }
