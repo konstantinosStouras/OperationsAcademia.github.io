@@ -181,6 +181,15 @@
               <p class="oa-rv-bulk" id="oa-review-bulk" hidden>
                 <button type="button" class="button blue" id="oa-review-all">
                   Approve all <span data-n></span> shown &amp; publish</button>
+                <!-- One advertisement, one posting. The sheet sync drops a
+                     crawled row whose advert link already belongs to a live or
+                     queued posting; this is the same rule on demand, over the
+                     WHOLE crawled queue rather than the page on screen — a
+                     repeat is always in the same market year as what it
+                     repeats, so there is nothing a page could show that the
+                     sweep should leave out. It reports before it writes. -->
+                <button type="button" class="button" id="oa-review-dupes" hidden>
+                  Check for duplicate adverts</button>
                 <span class="oa-form-msg" id="oa-review-bulk-msg" role="status"></span>
               </p>
               <div id="oa-review-list"></div>
@@ -376,6 +385,11 @@
     <script defer src="assets/oa-schools.js"></script>
     <script defer src="assets/oa-combo.js"></script>
     <script defer src="assets/oa-place-picker.js"></script>
+    <!-- "Check for duplicate adverts" reads THE PIPELINE'S OWN RULE, never a
+         browser copy of it: assets/oa-advert-dup.js is the one definition, and
+         _scraper/jobreview.mjs re-exports the same file. It loads AFTER
+         oa-schools.js, whose institutionKey it folds names with. -->
+    <script defer src="assets/oa-advert-dup.js"></script>
     <script defer src="assets/oa-jobreview.js"></script>
     <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>

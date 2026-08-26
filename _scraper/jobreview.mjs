@@ -478,89 +478,20 @@ export function sameDups(a, b) {
 
 /* ------------------------------------------- the same advertisement, twice */
 
-/** The row's ADVERTISEMENT link, normalised — the one field the owner named.
-    `dupLinks` also reads `postedAtUrl` because a FLAG can afford the wider
-    net; this decides on its own, so it keeps to the link that identifies the
-    advertisement itself. Our own home page identifies nothing (a workbook row
-    that names no advertisement carries it), and neither does an empty cell. */
-function advertLink(row) {
-  const v = String((row && row.adUrl) || '').trim().toLowerCase()
-    .replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '');
-  return v && !/^operationsacademia\.org$/.test(v) ? v : '';
-}
+/* ONE DEFINITION, SHARED WITH THE BROWSER. The rule that decides whether a
+   crawled posting is simply a repeat of one already listed lives in
+   `assets/oa-advert-dup.js`, a dual-mode module, because TWO things act on it
+   and must never disagree: this pipeline (the sheet sync drops a repeat rather
+   than queueing it) and the Admin area's "Check for duplicate adverts" button,
+   which sweeps the queue on demand. A browser copy would drift the first time
+   either was corrected — the drift every other shared module here exists to
+   prevent — so both read the same file and the selftest pins them together.
 
-/**
- * The posting a freshly-crawled row is simply a REPEAT of — same year, same
- * university, the same advertisement, and nothing about the two contradicting
- * that reading. Unlike `duplicatesOf`, which raises a flag for the maintainer,
- * this one DECIDES: the sheet sync drops the new row instead of queueing it
- * (owner, 2026-08-26 — "if it already exists in a previous posting that is
- * live or in the queue, then remove that new job from the queue").
- *
- * DECIDING ON A SHARED LINK IS EXACTLY WHAT THIS REPOSITORY THREW AWAY ONCE,
- * so it is scoped by measurement rather than by hope. CLAUDE.md records a
- * file-level "no two postings name the same advertisement" rule written,
- * measured, and abandoned because City University of Hong Kong links its whole
- * vacancies page from two market YEARS' postings and UCD links one CoreHR
- * endpoint from two. Measured over the 542 served postings on 2026-08-26,
- * grouping by (market year, university, advertisement link): 481 groups hold
- * exactly ONE posting and exactly one holds two — UCD's endpoint, carrying
- * MIS and Supply Chain Management. So within a year at one university the
- * link identifies the advertisement 481 times out of 482, and the single
- * exception is told apart by its DEPARTMENT.
- *
- * Hence the three contradictions, each of which keeps a real posting:
- *   - the market year and the university must match (the CityU case);
- *   - two rows that both name a department, differently, are two
- *     advertisements behind one endpoint (the UCD case);
- *   - two rows whose entry levels share nothing are two searches from one
- *     department (the Houston lesson `collapseSameDay` already carries).
- * Anything short of a match still gets the amber flag it got before — this
- * only removes what it can show is the same advertisement twice.
- */
-export function advertRepeat(row, others) {
-  if (!row || !row.institution) return null;
-  const link = advertLink(row);
-  if (!link) return null;
-
-  const key = institutionKey(row.institution);
-  const levels = Array.isArray(row.levels) ? row.levels : [];
-  const unit = foldedName(row.unit);
-  const line = foldedName(row.department);
-
-  for (const s of others || []) {
-    if (!s || !s.institution) continue;
-    if (String(s.id || '') === String(row.id || '')) continue;
-    if (Number(s.year) !== Number(row.year)) continue;
-    if (institutionKey(s.institution) !== key) continue;
-    if (advertLink(s) !== link) continue;
-
-    const sLevels = Array.isArray(s.levels) ? s.levels : [];
-    if (levels.length && sLevels.length && !levels.some((l) => sLevels.includes(l))) continue;
-
-    /* The department, read from the bare unit where both name one and from
-       the shown line otherwise — two names for one place fold equal, and a
-       row that names none contradicts nothing. */
-    const sUnit = foldedName(s.unit);
-    if (unit && sUnit) { if (unit !== sUnit) continue; }
-    else if (line && foldedName(s.department) !== line) continue;
-
-    return dupEntry(s);
-  }
-  return null;
-}
-
-/** What the dropped document says it is, for the maintainer who goes looking.
-    It is written into `note`, which the rules already allow — no new key, so
-    no rules change and no document the panel is then refused permission to
-    update (the sync-user-directory lesson). */
-export function repeatNote(of) {
-  return 'Dropped automatically: it advertises the same vacancy as '
-    + `${(of && (of.ref || of.id)) || 'a posting already listed'}`
-    + `${of && of.institution ? ' (' + of.institution + ')' : ''}`
-    + ', which is already live or already in the queue. Approve that one '
-    + 'instead; nothing was published from this row.';
-}
+   The guards, and the measurement that scoped them, are in that file's header.
+   Re-exported under the same names, so nothing that imported them moved. */
+export const {
+  advertLink, advertRepeat, findAdvertRepeats, repeatNote,
+} = require('../assets/oa-advert-dup.js');
 
 /* -------------------------------------------------------- business school */
 
