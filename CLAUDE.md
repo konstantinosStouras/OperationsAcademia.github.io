@@ -664,6 +664,42 @@ university the directory cannot answer for still gets the flag, saying the
 directory has none — the fix is a row in `assets/oa-institutions.js`, the same
 rule as everywhere: grow the database, never guess.
 
+**The comments are the posting's DESCRIPTION, and the rank is the Entry
+level** (owner, 2026-08-26). The crawler used to open every card's comments
+with two columns of the workbook that are not descriptions of the job — the
+rank and the town, "AP · Smithfield, RI ·" — on the reasoning that the row's
+shape had nowhere else to put them. It has: the rank IS the Entry level, and
+the town is the university's, which the site's own Universities directory
+holds. So `rowsFromTab` carries only what the sheet says ABOUT THE JOB — its
+notes column, and a deadline cell that could not be believed as a date, whose
+words are about this posting's own closing date. **`city` stays MAPPED and is
+never read**: the tab that heads its school column "Location" needs the second
+"Location" to have a name of its own, or the town is back in play as the
+institution (see "A header that names one column wrongly").
+
+**And a search advertised across ranks ticks BOTH boxes.** `levelsFromRank`
+decides the first four levels by precedence — a visiting assistant
+professorship is a visiting post, not an assistant professorship — and the
+tenure-track reading that is left is the one exception, because the workbook
+routinely advertises one search at several ranks. The owner's rulings, all
+pinned in `testJobMarketSheetParsing`: **"AP" is an assistant professorship**
+(the sheet's own shorthand); **"Junior level (Assistant or untenured Associate
+Professor)"**, **"Open Rank"**, **"Assistant/ Associate"**, **"Assistant/Open
+rank"**, **"Assistant/ Associate Professor"** and **"AP/Assoc/Full"** are
+Assistant Professor AND Other Ranks together. That is why the senior tokens are
+matched BARE (`associate`, `assoc`, `full`) rather than demanding the word
+"Professor" beside them — most of these never spell it out. The invariant it
+must not cost, and the reason Other Ranks is still tested against what is LEFT
+once the entry-level title is removed: **a post advertised ONLY at entry level
+never carries Other Ranks**, or the Entry level filter stops narrowing
+anything.
+
+Nothing has to be repaired by hand for either: the workbook is re-read every
+half hour and `data/jobmarket.json` rebuilt from it, a PENDING queue document's
+copy of the row is refreshed by `refreshQueued` on every sync, and an APPROVED
+one is re-derived at publish time (`approvedRow` reads the fresh row and lays
+the maintainer's edits over it). An edit the maintainer typed is still theirs.
+
 **A deadline the pipeline is unsure of publishes as "Until filled."** (owner,
 2026-08-23). `sheetDay` guesses US order on an ambiguous all-numeric cell —
 right for a date Google itself wrote, wrong for a contributor typing
