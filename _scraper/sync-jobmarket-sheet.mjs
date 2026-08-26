@@ -786,7 +786,17 @@ async function main() {
           /* judged on the row the SHEET NOW GIVES, like the flags below */
           .map((doc) => ({ doc, row: freshRowFor.get(doc.rowId) || doc.row }));
         const docForRow = new Map(pendingPairs.map((p) => [p.row, p.doc]));
-        const swept = findAdvertRepeats(pendingPairs.map((p) => p.row), site);
+        /* WHAT COUNTS AS "ALREADY LISTED" IS NOT data/jobs.json ALONE (owner,
+           2026-08-26). A posting the maintainer has APPROVED is out of the
+           queue and not yet in the served file — the build publishes it
+           minutes later — so for that window a twin of it was measured
+           against a set holding NEITHER copy, and nothing could match. The
+           DECISION is what makes a posting public, not the deployment, so
+           this run's approved rows (`split.publish`, already through
+           `approvedRow`) join the set. A row that has published is in both,
+           and matches the same either way. */
+        const listedNow = [...site, ...split.publish].filter(Boolean);
+        const swept = findAdvertRepeats(pendingPairs.map((p) => p.row), listedNow);
 
         const dropped = [];
         const rejects = [];
@@ -811,10 +821,10 @@ async function main() {
            write that changes nothing anybody will read. */
         split.refresh = split.refresh.filter((d) => !droppedIds.has(d.rowId));
 
-        /* Now the fresh rows, against the site plus the queue that survived —
-           plus each fresh row this run accepts, so the workbook listing one
-           advertisement twice queues it once. */
-        const listed = [...site, ...swept.keep].filter(Boolean);
+        /* Now the fresh rows, against everything already listed plus the
+           queue that survived — plus each fresh row this run accepts, so the
+           workbook listing one advertisement twice queues it once. */
+        const listed = [...listedNow, ...swept.keep].filter(Boolean);
         for (const doc of split.queue) {
           if (doc.status === PENDING) {
             const repeat = advertRepeat(doc.row, listed);

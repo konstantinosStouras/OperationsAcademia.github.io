@@ -418,8 +418,9 @@
     var n = docs.length;
 
     if (!window.confirm('Publish all ' + n + ' postings on this page?\n\n' +
-        'They appear on the jobs page in a couple of minutes. You can still take ' +
-        'any of them down afterwards from the posting itself.')) return;
+        'They are on your own jobs page at once and reach everyone else at the ' +
+        'next build. You can still take any of them down afterwards from the ' +
+        'posting itself.')) return;
 
     btn.disabled = true;
     msg.className = 'oa-form-msg';
@@ -430,13 +431,16 @@
     docs.forEach(function (doc, i) {
       chain = chain.then(function () {
         var card = cards[i];
+        var edits = card ? readEdits(card, doc) : (doc.edits || {});
+        var reviewedAt = new Date().toISOString();
         return db.collection(COL).doc(doc.rowId).set({
-          edits: card ? readEdits(card, doc) : (doc.edits || {}),
+          edits: edits,
           status: 'approved',
-          reviewedAt: new Date().toISOString(),
+          reviewedAt: reviewedAt,
         }, { merge: true })
           .then(function () {
             done++;
+            echoApproval(doc, edits, reviewedAt);
             if (card) {
               card.innerHTML = '<p class="oa-form-msg is-ok">Approved &mdash; ' +
                 esc((doc.row || {}).institution || doc.rowId) + '</p>';
@@ -457,10 +461,54 @@
       msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
       msg.textContent = failed
         ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
-        : 'All ' + done + ' approved. They reach the jobs page in a couple of ' +
-          'minutes — publishing starts the moment you approve.';
+        : 'All ' + done + ' approved, and on your own jobs page straight away. ' +
+          'Everyone else sees them at the next build.';
       btn.disabled = !!failed;
     });
+  }
+
+  /* ------------------------------------- the posting you just made public */
+
+  /**
+   * Show an approved posting on the jobs page NOW (owner, 2026-08-26: "when I
+   * press a job under review to become public, it should immediately show up
+   * in the list of job postings available to the public").
+   *
+   * Approving writes Firestore; the BUILD turns that into a row in
+   * data/jobs.json, and until it runs the posting is in neither place — out of
+   * the queue and not yet on the site. The maintainer presses Approve, goes to
+   * the jobs page and finds nothing, which reads exactly like an approval that
+   * did not save.
+   *
+   * So it is echoed, the way a saved EDIT already is (assets/oa-fresh.js): the
+   * published row is left in this browser's localStorage and every page that
+   * renders jobs.json overlays it at read time. Honest by construction, the
+   * same three ways — PER BROWSER (nothing here can show a visitor an
+   * unpublished posting, because nothing here leaves the machine), STANDS DOWN
+   * against the build rather than against hope, and echoes exactly what the
+   * build will publish: `OAFresh.approvedRow` is a parity-pinned twin of
+   * jobreview.mjs's own, given the site's `canonColumns` to settle the names
+   * with.
+   *
+   * Entirely optional: without oa-fresh.js or oa-schools.js the approval works
+   * exactly as before and simply waits for the build.
+   */
+  function echoApproval(doc, edits, reviewedAt) {
+    if (!window.OAFresh || !window.OAFresh.approvedRow) return;
+    if (!window.OASchools || !OASchools.canonColumns) return;
+    var row = doc.row || {};
+    if (!row.id) return;
+    try {
+      OAFresh.stash({
+        docId: doc.rowId,
+        ref: row.ref || '',
+        added: OAFresh.approvedRow(row, {
+          edits: edits || doc.edits || {},
+          queuedAt: doc.queuedAt || '',
+          reviewedAt: reviewedAt || '',
+        }, { canonColumns: OASchools.canonColumns }),
+      });
+    } catch (e) { /* an echo is a courtesy: never let it cost the approval */ }
   }
 
   /* ------------------------------------------ one advertisement, one posting */
@@ -530,26 +578,55 @@
     msg.className = 'oa-form-msg';
     msg.textContent = 'Reading the postings already on the site…';
 
-    /* no-cache REVALIDATES: Pages serves data/ with ten minutes of freshness,
-       and a sweep run against a stale copy of the site would keep a repeat of
-       something published nine minutes ago. */
-    fetch('data/jobs.json', { cache: 'no-cache' })
+    /* WHAT COUNTS AS "ALREADY LISTED" IS NOT data/jobs.json ALONE (owner,
+       2026-08-26: a Stanford MS&E posting was approved, and pressing this
+       button then failed to catch its twin still under review).
+
+       A posting the maintainer has APPROVED is out of the queue and not yet
+       in the served file — the build publishes it minutes later — so for that
+       window its twin was measured against a set holding NEITHER copy and
+       nothing could match. That is not a race to paper over: `data/jobs.json`
+       is a built file that lags every approval by up to a build, so the
+       decision, not the deployment, is what "already posted" has to mean.
+
+       So the set is the served file PLUS every approved queue document. One
+       equality query, no composite index, and it reads the collection the
+       panel is already looking at; an approval that HAS published is in both
+       and matches the same either way. */
+    var live = fetch('data/jobs.json', { cache: 'no-cache' })
+      /* no-cache REVALIDATES: Pages serves data/ with ten minutes of
+         freshness, and a sweep run against a stale copy of the site would
+         keep a repeat of something published nine minutes ago. */
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
-      .then(function (site) {
+      .then(function (rows) { return Array.isArray(rows) ? rows : []; });
+
+    var approved = db.collection(COL).where('status', '==', 'approved').get()
+      .then(function (snap) {
+        return snap.docs.map(function (d) { return d.data(); })
+          .filter(function (d) { return d && d.rowId; })
+          .map(judgedRow);
+      })
+      /* An approved-queue read that fails must not lose the sweep: the served
+         file alone is the old behaviour, which is still worth having. */
+      .catch(function () { return []; });
+
+    Promise.all([live, approved])
+      .then(function (got) {
+        var site = got[0].concat(got[1]);
         var rows = docs.map(judgedRow);
-        var swept = OAAdvertDup.findAdvertRepeats(rows, Array.isArray(site) ? site : []);
+        var swept = OAAdvertDup.findAdvertRepeats(rows, site);
         var drops = swept.drop.map(function (d) {
           return { doc: docs[rows.indexOf(d.row)], of: d.of, row: d.row };
         }).filter(function (d) { return !!d.doc; });
 
         if (!drops.length) {
           msg.className = 'oa-form-msg is-ok';
-          msg.textContent = 'Checked all ' + docs.length + ' postings under review against ' +
-            'the ' + (Array.isArray(site) ? site.length : 0) + ' on the site: none of them ' +
-            'advertises a vacancy that is already listed.';
+          msg.textContent = 'Checked all ' + docs.length + ' postings under review ' +
+            'against the ' + site.length + ' already published or approved: none of ' +
+            'them advertises a vacancy that is already listed.';
           btn.disabled = false;
           return;
         }
@@ -1141,6 +1218,7 @@
 
         db.collection(COL).doc(doc.rowId).set(patch, { merge: true })
           .then(function () {
+            if (act === 'approve') echoApproval(doc, edits, patch.reviewedAt);
             if (act === 'save') {
               doc.edits = edits;
               msg.className = 'oa-form-msg is-ok';
@@ -1150,17 +1228,24 @@
               });
               return;
             }
-            /* The card leaves the queue, but the POSTING is not on the site
-               until two workflows have run: the sheet read writes the approved
-               rows, the build merges them. A Cloud Function starts the first
-               the moment this write lands and the second follows it, so that is
-               a couple of minutes rather than the best part of an hour — but it
-               is not instant, and saying so is the difference between "it
-               worked" and the maintainer reloading jobs.html and thinking it
-               did not. */
+            /* WHAT THIS SAYS HAS TO BE TRUE OF THIS INSTALLATION. It used to
+               say "publishing starts now", on the strength of the Cloud
+               Function that dispatches the build the moment an approval lands
+               — and that function has never fired here (the
+               `oa-jobreview-decided` dispatch has zero runs, ever), because
+               deploying Functions is a hand step nothing in CI performs. So
+               the posting waited for the build's own schedule while the card
+               claimed it was already on its way, which is the failure this
+               repository names everywhere: a doorbell that was never deployed
+               looks exactly like a site that is simply slow.
+
+               It now says what is true either way — the echo puts it in front
+               of the maintainer at once, and the build puts it in front of
+               everyone else — without promising a minute nobody has wired. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
               (act === 'approve'
-                ? 'Approved. It reaches the jobs page in a couple of minutes — publishing starts now.'
+                ? 'Approved &mdash; and on your own jobs page straight away. ' +
+                  'Everyone else sees it at the next build.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
             retire(db, 'crawled', doc);

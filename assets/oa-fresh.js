@@ -103,6 +103,116 @@
       .test(String(v == null ? '' : v));
   }
 
+  /* ------------------------------- the posting you just APPROVED, published */
+
+  /** jobs-model text(), the browser twin. */
+  function text(v, max) {
+    return String(v == null ? '' : v)
+      .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, max || 400);
+  }
+
+  /** A line that says the search has no closing date rather than naming one —
+      jobreview.mjs OPEN_ENDED. */
+  var OPEN_ENDED = /until\s*filled|open\s*until|rolling/i;
+  /** jobs-model EMAIL_RX. Nothing under data/ may carry an address, and the
+      echo must not show one the build is about to remove. */
+  var EMAIL_RX = /[A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g;
+
+  /**
+   * jobreview.mjs approvedRow(), the browser twin — the row an APPROVED queue
+   * document publishes: the maintainer's edits applied, the deadline line and
+   * the three names settled against each other, e-mails out, and the posting
+   * DATED FROM ITS APPROVAL.
+   *
+   * PARITY-PINNED in selftest.mjs against the real `approvedRow` over a case
+   * table, which is what makes this safe to show anybody: an echo that
+   * differed from what the build publishes would be a private fiction, and
+   * that is exactly what this module's third promise forbids.
+   *
+   * `canonColumns` is INJECTED rather than imported — the browser passes
+   * OASchools.canonColumns, Node passes the module's own — so this file keeps
+   * no dependency of its own and the parity test can drive it offline, exactly
+   * as the storage and the meta fetch are injected elsewhere here.
+   *
+   * `edits` arrive ALREADY CLEAN: they are what the panel just wrote, read
+   * through the same field list `cleanEdits` uses (FIELDS in oa-jobreview.js,
+   * pinned against EDITABLE both ways), so re-cleaning them here would be a
+   * second answer to a settled question.
+   */
+  function approvedRow(row, doc, opts) {
+    var o = opts || {};
+    var canon = o.canonColumns || function (place) { return place; };
+    var clean = (doc && doc.edits) || {};
+    var out = {}, k;
+    for (k in (row || {})) if (Object.prototype.hasOwnProperty.call(row, k)) out[k] = row[k];
+    for (k in clean) if (Object.prototype.hasOwnProperty.call(clean, k)) out[k] = clean[k];
+
+    /* A line the maintainer wrote that says the search stays open takes the
+       date with it — the one direction where their words are the fact. */
+    if ('applyBy' in clean && !('applyByDate' in clean) && OPEN_ENDED.test(clean.applyBy)) {
+      out.applyByDate = '';
+    }
+    /* A first-review date on or after the closing date is the closing date
+       said twice, or a contradiction, and is not published. */
+    if (out.reviewDate && out.applyByDate && out.reviewDate >= out.applyByDate) {
+      out.reviewDate = '';
+    }
+
+    /* settleDeadline: the LINE IS DERIVED, never echoed as edited. */
+    var date = text(out.applyByDate, 10);
+    if (date) {
+      out.applyByDate = date;
+      out.applyBy = longDate(date);
+    } else {
+      var line = text(out.applyBy, 400);
+      out.applyByDate = '';
+      out.applyBy = OPEN_ENDED.test(line) ? line : 'Until filled.';
+    }
+
+    /* settlePlace: one spelling per place, and the line is the two names
+       joined. A row that never had parts keeps the line it arrived with — the
+       sheet's own fallback — and one that HAD parts and no longer has any is a
+       deliberate clearing. */
+    var place = canon({
+      institution: out.institution || '',
+      school: out.school || '',
+      unit: out.unit || '',
+    }) || {};
+    out.institution = place.institution || '';
+    out.school = place.school || '';
+    out.unit = place.unit || '';
+    var joined = [out.school, out.unit].filter(Boolean).join(', ');
+    out.department = joined
+      || ((row && (row.school || row.unit)) ? '' : (out.department || ''));
+    if (out.institution && ownUniversitiesLink(out.furtherInfoUrl)) {
+      out.furtherInfoUrl = universitiesLink(out.institution);
+    }
+
+    /* stripRowEmails: every own string field except the URLs. */
+    for (k in out) {
+      if (!Object.prototype.hasOwnProperty.call(out, k)) continue;
+      if (typeof out[k] !== 'string' || /Url$/.test(k)) continue;
+      if (out[k].indexOf('@') >= 0) out[k] = out[k].replace(EMAIL_RX, '[e-mail removed]');
+    }
+
+    /* DATED FROM ITS APPROVAL, because that is the day it reached the site and
+       the day the e-mail alerts window on. A grandfathered document — whose
+       reviewedAt and queuedAt are the same instant — keeps the date it had. */
+    var reviewed = String((doc && doc.reviewedAt) || '');
+    var queued = String((doc && doc.queuedAt) || '');
+    if (reviewed && reviewed !== queued) {
+      var t = Date.parse(reviewed);
+      if (!isNaN(t)) {
+        var stamp = new Date(t).toISOString().replace(/\.\d{3}Z$/, 'Z');
+        if (!out.addedAt || out.addedAt < stamp) out.addedAt = stamp;
+      }
+    }
+    return out;
+  }
+
   /* --------------------------------------------------------------- storage */
 
   function storage() {
@@ -137,8 +247,9 @@
    * Remember what was just saved. `docId` is the Firestore document the form
    * edited; `ref` the posting's OA-JOB reference where it has one (a
    * migrated or sheet-mirror posting's row id IS its document id, so either
-   * key finds the served row). `removed: true` echoes a takedown. `fields`
-   * come from echoFields() below.
+   * key finds the served row). `removed: true` echoes a takedown, `added` a
+   * WHOLE ROW the build has not published yet. `fields` come from echoFields()
+   * below.
    */
   function stash(entry, opts) {
     var o = opts || {};
@@ -149,7 +260,8 @@
       t: now,
       ref: String(entry.ref || ''),
       removed: !!entry.removed,
-      f: entry.removed ? {} : pickFields(entry.fields || {}),
+      added: entry.added || null,
+      f: (entry.removed || entry.added) ? {} : pickFields(entry.fields || {}),
     };
     // oldest out beyond the cap — nobody edits twenty postings in an hour,
     // and a bug that does must not fill this browser's storage
@@ -245,6 +357,19 @@
         return;
       }
 
+      /* A POSTING JUST APPROVED IS NOT ON THE SITE YET, so there is nothing to
+         overlay onto — the whole row has to be put there. It is the echo's
+         one ADD, and it earns that by being the row the build itself will
+         publish: `approvedRow` above is parity-pinned against jobreview.mjs's
+         own, so this browser is not inventing a posting, it is showing the
+         one already decided a build early. The moment the build publishes it
+         the served row wins and the echo is spent, like every other. */
+      if (e.added) {
+        if (row) { spent.push(docId); return; }    // the build published it
+        out = out.concat([e.added]);
+        return;
+      }
+
       if (!row) return;                            // not served (yet): nothing to echo onto
 
       var landed = Object.keys(e.f || {}).every(function (k) {
@@ -307,6 +432,7 @@
     BUILD_GRACE_MS: BUILD_GRACE_MS,
     stash: stash,
     echoFields: echoFields,
+    approvedRow: approvedRow,
     composeApplyBy: composeApplyBy,
     universitiesLink: universitiesLink,
     ownUniversitiesLink: ownUniversitiesLink,
