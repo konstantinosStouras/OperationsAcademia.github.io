@@ -175,9 +175,9 @@
         <div class="v3-lock-card" id="v3-lock-card" hidden>
           <div class="v3-lock-card-inner">
             <h3>&#128274; Sign in to use the filters</h3>
-            <p>Searching and filtering the full list is free &mdash; it just needs an
-            account, which takes a moment to create. Everything below stays readable
-            either way.</p>
+            <p>Searching, filtering and downloading the full list as an Excel file is
+            free &mdash; it just needs an account, which takes a moment to create.
+            Everything below stays readable either way.</p>
             <div class="v3-cta-row">
               <button type="button" class="v3-btn primary" id="v3-lock-signin">Sign in</button>
               <button type="button" class="v3-btn ghost" id="v3-lock-register">Create account</button>
@@ -248,6 +248,8 @@
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
+    <script defer src="assets/oa-xlsx.js"></script>
+    <script defer src="assets/oa-jobexport.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
@@ -353,6 +355,22 @@
         perPage: 10,
         urlPrefix: '',            // owns the legacy ?filterA= deep links
         prepare: function (rows) { return rows.filter(inCurrentMarket); },
+
+        /* THE EXCEL DOWNLOAD (owner, 2026-08-26). Declared on the mount
+           because the ENGINE owns the filter bar and empties it whenever the
+           filters are cleared — a button this page appended for itself would
+           vanish the first time somebody pressed Clear. It writes what the
+           list is SHOWING, in the order it is showing it, and never a
+           poster's Contact details: see the header of assets/oa-jobexport.js
+           for why that holds three times over. Registered readers only, which
+           is the module's own gate as well as this page's sign-in lock. */
+        actions: window.OAJobExport
+          ? [OAJobExport.action({
+              market: function () {
+                return (marketYear() - 1) + '-' + marketYear();
+              },
+            })]
+          : [],
 
         // newest posting first, but a Featured posting always leads
         sort: function (a, b) {

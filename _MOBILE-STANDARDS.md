@@ -23,6 +23,13 @@ classes — `.oa-jobbtn`, `.oa-card-actions` — as oa-jobedit.js,
 oa-candidateedit.js and the placements hook already do, so it inherits the
 mobile sizing the same way.
 
+A control a page wants in the FILTER BAR is declared through the engine's
+`actions` option rather than appended to the bar (`buildBar()` empties it
+whenever the filters are cleared, so an appended one would vanish at the first
+press of Clear). It is drawn as `.oa-action`, which carries rules 3 and 4 on a
+phone — 42px tall, full width — however small and quiet it is on a desktop.
+The jobs page's Excel download is the first of them.
+
 ## The rules (each one was earned)
 
 All apply at the phone breakpoint (`max-width: 640px` in oa-list.css) unless

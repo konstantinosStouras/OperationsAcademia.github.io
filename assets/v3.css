@@ -842,6 +842,21 @@ body.v3 .oa-filter-actions {
 }
 body.v3 .oa-filter-actions .oa-label-spacer { display: block; }
 body.v3 .oa-clear { width: 100%; height: 44px; }
+/* The Excel download sits UNDER Clear in the same cell, right-aligned and
+   auto-width — small and discrete, as the owner asked (2026-08-26), rather
+   than a second full-width button competing with the one the bar is for. It
+   is inside the bar deliberately: the bar is what the page's sign-in lock
+   covers, so a control only registered readers may use is already behind it. */
+body.v3 .oa-action {
+  align-self: flex-end;
+  width: auto;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mut);
+  border: 1px solid transparent;
+}
+body.v3 .oa-action:hover:not([disabled]) { color: var(--brand); border-color: var(--brand); }
 @media (min-width: 1000px) {
   /* the free-text searches are the primary way in — give them room */
   body.v3 .oa-filter:not(.oa-pick) { grid-column: span 2; }
@@ -860,6 +875,13 @@ body.v3 .oa-clear { width: 100%; height: 44px; }
   body.v3 .oa-filters { grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 14px 18px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
+  /* and the action with them: a thumb gets the whole row and a real target */
+  body.v3 .oa-action {
+    align-self: stretch;
+    width: 100%;
+    border-radius: 10px;
+    border-color: var(--line);
+  }
 }
 /* a profile picture fills the avatar disc; the initials show only without one */
 .oa-avatar { overflow: hidden; }

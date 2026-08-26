@@ -10,6 +10,13 @@
       "url": "https://www.operationsacademia.org/jobs.html"
     },
     {
+      "id": "jobs-excel-download",
+      "date": "2026-08-26",
+      "title": "Download the job postings as an Excel file",
+      "summary": "Registered users can now take the whole job list away as a proper Excel workbook: a small \u201c\u2193 Excel\u201d button under Clear filters on the job postings page writes an .xlsx of exactly the postings you are looking at \u2014 filter first and you get that search, filter nothing and you get every posting the page is showing. It is built for working through: one row per posting with the university, school, department, country, entry levels, characteristics and comments in their own columns; the suggested first-review date, the final closing date, the posting date and the day we listed it as REAL Excel dates you can sort, filter and subtract; and the advertisement, the site it is posted on and the university\u2019s directory entry as clickable links. A second sheet explains every column and a third records which filters produced the file. A poster\u2019s contact details \u2014 their name and e-mail, the area coordinator or department chair, and any private note \u2014 are never published and are not in the file.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
       "id": "messages-from-the-maintainer",
       "date": "2026-08-24",
       "title": "Messages between you and the site’s maintainer",

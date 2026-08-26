@@ -291,6 +291,30 @@
 .oa-clear:hover { background: var(--bg-3, #f1f1f1); }
 .oa-clear[disabled] { opacity: 0.45; cursor: default; }
 
+/* A page-declared action in the filter bar (OAList's `actions`) — today the
+   jobs page's Excel download. Deliberately QUIETER than Clear: Clear is one of
+   the controls the bar is for, and this is an extra beside them. It names its
+   own ink as well as its ground for the reason the whole site now does — see
+   "Anything that paints its own ground must name its own ink" in CLAUDE.md. */
+.oa-action {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: var(--mut, #646c78);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.oa-action:hover:not([disabled]) {
+  color: var(--ink-2, #444);
+  border-color: var(--line, #d9d9d9);
+}
+
+.oa-action[disabled] { opacity: 0.45; cursor: default; }
+
 /* ---------------------------------------------------------------- result bar */
 
 .oa-resultbar {
@@ -535,6 +559,18 @@
 
   .oa-clear { height: 42px; padding: 0 16px; border-radius: 6px; }
 
+  /* Small and discrete is a MOUSE instruction. On a phone this is a control in
+     the filter bar like any other, so it takes the 42px target and the full
+     width rule 3 and rule 4 of _MOBILE-STANDARDS.md give the rest of them. */
+  .oa-action {
+    height: 42px;
+    width: 100%;
+    padding: 0 16px;
+    border-radius: 6px;
+    border-color: var(--line, #d9d9d9);
+    font-size: 13px;
+  }
+
   /* pager chevrons at finger size */
   .oa-pager button { width: 42px; height: 40px; font-size: 24px; }
 
@@ -549,7 +585,7 @@
 }
 
 @media print {
-  .oa-filters, .oa-pager, .oa-clear { display: none; }
+  .oa-filters, .oa-pager, .oa-clear, .oa-action { display: none; }
   /* !important because oa-ui.css restores `[hidden] { display: none !important }`
      for the whole site and is loaded after this file — without matching it, a
      printed list was institution and department headings and nothing else. */
