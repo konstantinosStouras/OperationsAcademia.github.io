@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-26T10:33:14.327Z",
+ "generated": "2026-08-26T10:48:54.049Z",
  "universities": [
   {
    "v": "Tulane University",
@@ -526,6 +526,10 @@
    "n": 1
   },
   {
+   "v": "Bryant University",
+   "n": 1
+  },
+  {
    "v": "Bucknell University",
    "n": 1
   },
@@ -914,6 +918,10 @@
    "n": 1
   },
   {
+   "v": "Northwestern University",
+   "n": 1
+  },
+  {
    "v": "NTU",
    "n": 1
   },
@@ -1071,6 +1079,10 @@
   },
   {
    "v": "Stanford GSB",
+   "n": 1
+  },
+  {
+   "v": "Stanford University",
    "n": 1
   },
   {
@@ -1678,10 +1690,6 @@
    "n": 0
   },
   {
-   "v": "Northwestern University",
-   "n": 0
-  },
-  {
    "v": "NOVA School of Business and Economics",
    "n": 0
   },
@@ -1751,10 +1759,6 @@
   },
   {
    "v": "St.Gallen Institute of Management in Asia (SGI)",
-   "n": 0
-  },
-  {
-   "v": "Stanford University",
    "n": 0
   },
   {
@@ -2196,6 +2200,10 @@
    "n": 1
   },
   {
+   "v": "Kellogg School of Management",
+   "n": 1
+  },
+  {
    "v": "Kenan-Flagler Business School",
    "n": 1
   },
@@ -2257,6 +2265,10 @@
   },
   {
    "v": "School of Computing",
+   "n": 1
+  },
+  {
+   "v": "School of Engineering",
    "n": 1
   },
   {
@@ -2584,10 +2596,6 @@
    "n": 0
   },
   {
-   "v": "Kellogg School of Management",
-   "n": 0
-  },
-  {
    "v": "Korea University Business School",
    "n": 0
   },
@@ -2801,10 +2809,6 @@
   },
   {
    "v": "School of Economics and Management",
-   "n": 0
-  },
-  {
-   "v": "School of Engineering",
    "n": 0
   },
   {
@@ -3046,6 +3050,10 @@
    "n": 3
   },
   {
+   "v": "Operations",
+   "n": 3
+  },
+  {
    "v": "SCM and Logistics",
    "n": 3
   },
@@ -3131,10 +3139,6 @@
   },
   {
    "v": "OM/OR",
-   "n": 2
-  },
-  {
-   "v": "Operations",
    "n": 2
   },
   {
@@ -3386,6 +3390,10 @@
    "n": 1
   },
   {
+   "v": "Global Supply Chain Management",
+   "n": 1
+  },
+  {
    "v": "Healthcare",
    "n": 1
   },
@@ -3579,6 +3587,10 @@
   },
   {
    "v": "Management Area",
+   "n": 1
+  },
+  {
+   "v": "Management Science and Engineering",
    "n": 1
   },
   {
@@ -4207,10 +4219,6 @@
   },
   {
    "v": "Management Information Systems, Operations Supply Chain and Business Analytics",
-   "n": 0
-  },
-  {
-   "v": "Management Science and Engineering)",
    "n": 0
   },
   {
@@ -4956,6 +4964,17 @@
    "bySchool": {
     "Marriott School of Business": [
      "Marketing and Global Supply Chain"
+    ]
+   }
+  },
+  "Bryant University": {
+   "schools": [],
+   "units": [
+    "Global Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Global Supply Chain Management"
     ]
    }
   },
@@ -8331,12 +8350,17 @@
   "Stanford University": {
    "schools": [
     "Department of Management Science and Engineering (MS&E)",
+    "School of Engineering",
     "Stanford Graduate School of Business"
    ],
    "units": [
+    "Management Science and Engineering",
     "Operations, Information, and Technology (OIT) area"
    ],
    "bySchool": {
+    "School of Engineering": [
+     "Management Science and Engineering"
+    ],
     "Stanford Graduate School of Business": [
      "Operations, Information, and Technology (OIT) area"
     ]
@@ -11830,10 +11854,11 @@
    "Operations and Quantitative Methods"
   ],
   "School of Economics and Management": [
-   "Management Science and Engineering)"
+   "Management Science and Engineering"
   ],
   "School of Engineering": [
-   "Industrial and Systems Engineering"
+   "Industrial and Systems Engineering",
+   "Management Science and Engineering"
   ],
   "School of Engineering and Applied Science": [
    "Operations Research and Financial Engineering"

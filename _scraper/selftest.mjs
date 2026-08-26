@@ -28,7 +28,7 @@ import {
   removalSpecs, buildOwned, ownerTag, specMatches, healPlace,
   parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
-  stripEmails, stripRowEmails, patchDeadlines,
+  stripEmails, stripRowEmails, patchDeadlines, canonColumns,
 } from './jobs-model.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
@@ -6775,6 +6775,97 @@ async function testFreshEcho() {
     eq(F.composeApplyBy(c), composeApplyBy(c),
       'the echoed Apply-by line is the line the build will publish');
   }
+  /* ---- AND THE POSTING JUST APPROVED, which the echo ADDS ---------------
+
+     Owner, 2026-08-26: "when I press a job under review to become public, it
+     should immediately show up in the list of job postings available to the
+     public." Approving writes Firestore; the BUILD turns that into a row, and
+     until it runs the posting is in neither place — out of the queue and not
+     yet on the site, which reads exactly like an approval that did not save.
+
+     So the panel echoes the row. That is only defensible while the echoed row
+     IS the row the build publishes, so `OAFresh.approvedRow` is pinned against
+     jobreview.mjs's own over a case table covering every branch it has. A
+     mismatch here is a private fiction shown to the maintainer for a build,
+     which is what this module's third promise forbids. */
+  const APPROVE_CASES = [
+    ['a plain posting', { id: 'p-1', year: 2027, posted: '2026-08-21',
+      institution: 'Stanford University', school: 'School of Engineering',
+      unit: 'Management Science and Engineering', department: 'stale',
+      levels: ['Assistant Professor'], country: 'United States',
+      applyByDate: '2026-10-05', applyBy: '', comments: 'Two letters.',
+      source: 'jobmarket-sheet' }, {}],
+    ['no closing date at all', { id: 'p-2', year: 2026, posted: '2026-01-02',
+      institution: 'Tulane University', school: '', unit: 'Management Science',
+      department: 'Management Science', applyBy: '' }, {}],
+    ['its own open-ended words kept', { id: 'p-3', year: 2026, posted: '2026-01-02',
+      institution: 'Emory University', school: '', unit: '', department: 'OM',
+      applyBy: 'Open until filled. Apply early.' }, {}],
+    ['an edit moves the names, and our link follows', { id: 'p-4', year: 2026,
+      posted: '2026-01-02', institution: 'MIT Sloan', school: '',
+      unit: 'Operations Management', department: 'OM',
+      furtherInfoUrl: universitiesLink('MIT Sloan') },
+      { edits: { institution: 'Massachusetts Institute of Technology (MIT)' } }],
+    ['a review date on the closing date is dropped', { id: 'p-5', year: 2026,
+      posted: '2026-01-02', institution: 'Duke University', school: '', unit: 'OM',
+      applyByDate: '2026-05-01', reviewDate: '2026-05-01' }, {}],
+    ['a review date before it is kept', { id: 'p-6', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM',
+      applyByDate: '2026-05-01', reviewDate: '2026-04-01' }, {}],
+    ['an e-mail never reaches the echo either', { id: 'p-7', year: 2026,
+      posted: '2026-01-02', institution: 'Yale University', school: '', unit: 'Operations',
+      comments: 'Write to dean@yale.edu about it', adUrl: 'https://x.example/a@b' }, {}],
+    ['dated from the approval', { id: 'p-8', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM', addedAt: '2026-08-01T00:00:00Z' },
+      { queuedAt: '2026-08-02T00:00:00Z', reviewedAt: '2026-08-26T10:40:00.000Z' }],
+    ['a grandfathered document keeps its date', { id: 'p-9', year: 2026,
+      posted: '2026-01-02', institution: 'Duke University', school: '', unit: 'OM',
+      addedAt: '2026-08-01T00:00:00Z' },
+      { queuedAt: '2026-08-02T00:00:00Z', reviewedAt: '2026-08-02T00:00:00Z' }],
+    ['an edited line saying "until filled" takes the date with it', { id: 'p-10',
+      year: 2026, posted: '2026-01-02', institution: 'Duke University', school: '',
+      unit: 'OM', applyByDate: '2026-05-01' }, { edits: { applyBy: 'Until filled.' } }],
+    ['a row with no parts keeps the line it arrived with', { id: 'p-11', year: 2026,
+      posted: '2026-01-02', institution: 'Duke University', school: '', unit: '',
+      department: 'OM/SCM' }, {}],
+    ['edited entry levels', { id: 'p-12', year: 2026, posted: '2026-01-02',
+      institution: 'Duke University', school: '', unit: 'OM', levels: ['Other Ranks'] },
+      { edits: { levels: ['Assistant Professor'] } }],
+  ];
+  for (const [name, row, doc] of APPROVE_CASES) {
+    const want = approvedRow(row, doc);
+    const got = F.approvedRow(row, doc, { canonColumns });
+    eq(JSON.stringify(got, Object.keys(want).sort()),
+      JSON.stringify(want, Object.keys(want).sort()),
+      `the echoed approved row is the row the build publishes — ${name}`);
+    eq(Object.keys(got).filter((k) => !(k in want)), [],
+      `and carries nothing the build would not — ${name}`);
+  }
+
+  /* An added echo INSERTS; it stands down the moment the build serves the
+     row, which is the same bargain every other echo here makes. */
+  {
+    const NOW = Date.parse('2026-08-26T12:00:00Z');
+    const added = { id: 'p-add', year: 2026, institution: 'Late University' };
+    const map = { 'p-add': { t: NOW - 1000, ref: '', removed: false, added, f: {} } };
+    const before = [{ id: 'other', institution: 'Already Served' }];
+    const got = F.overlay(before, JSON.parse(JSON.stringify(map)), { now: NOW });
+    eq(got.rows.length, 2, 'an approved posting the build has not served yet is ADDED');
+    eq(got.spent, [], 'and the echo stays until it has');
+    const served = F.overlay(before.concat([{ id: 'p-add', institution: 'Late University' }]),
+      JSON.parse(JSON.stringify(map)), { now: NOW });
+    eq(served.rows.length, 2, 'once the build serves it the echo adds nothing');
+    eq(served.spent, ['p-add'], 'and is spent');
+    /* A build that STARTED comfortably after the approval — past
+       BUILD_GRACE_MS — has the last word, as for every echo here. */
+    const older = { 'p-add': { ...map['p-add'], t: NOW - 5 * 60 * 1000 } };
+    const late = F.overlay(before, JSON.parse(JSON.stringify(older)),
+      { now: NOW, builtAt: new Date(NOW - 60 * 1000).toISOString() });
+    eq(late.spent, ['p-add'],
+      'a build that STARTED after the approval has the last word, as for every echo');
+    eq(late.rows.length, 1, 'and the echo adds nothing once it has stood down');
+  }
+
   eq(F.universitiesLink('Penn State'), universitiesLink('Penn State'),
     'the regenerated Further-info link is the build\'s own');
   for (const u of [universitiesLink('X'), 'https://example.edu/jobs/1', '']) {
@@ -7224,8 +7315,13 @@ function testReviewDuplicates() {
     'the postings ALREADY under review are swept too, not only the fresh ones');
   ok(/\.sort\(\(a, b\) => String\(a\.queuedAt \|\| ''\)/.test(syncSrc),
     'oldest first, so the one that has been waiting longest is the one that stays');
-  ok(/\[\.\.\.site, \.\.\.swept\.keep\]/.test(syncSrc),
-    'comparing against what is live AND what survived in the queue');
+  ok(/\[\.\.\.site, \.\.\.split\.publish\]/.test(syncSrc),
+    'a posting the maintainer APPROVED counts as already listed, though the ' +
+    'build has not published it yet — the decision, not the deployment');
+  ok(/findAdvertRepeats\(pendingPairs\.map\(\(p\) => p\.row\), listedNow\)/.test(syncSrc),
+    'and the queue sweep measures against that set, not against the served file alone');
+  ok(/\[\.\.\.listedNow, \.\.\.swept\.keep\]/.test(syncSrc),
+    'comparing against what is listed AND what survived in the queue');
   ok(/listed\.push\(doc\.row\)/.test(syncSrc),
     'and against the fresh rows it has just accepted, so one advertisement ' +
     'listed twice in the workbook is queued once');
@@ -7276,11 +7372,57 @@ function testReviewDuplicates() {
     'and rejects with the same fields the sync writes — never a delete');
   ok(/state\.crawled\.slice\(\)\.sort\(/.test(rvSrc),
     'over the WHOLE crawled queue, oldest first, not just the page on screen');
+  /* THE STANFORD MS&E CASE (owner, 2026-08-26): one of two identical postings
+     was approved, and the button then failed to catch the other. An approved
+     posting is out of the queue (the panel lists PENDING only) and not yet in
+     the served file, so its twin was measured against a set holding neither
+     copy. The set has to be what the maintainer has DECIDED is public, which
+     `data/jobs.json` only becomes a build later. */
+  ok(/where\('status', '==', 'approved'\)/.test(rvSrc),
+    'the sweep counts an APPROVED posting as already listed, though the build ' +
+    'has not published it yet — the Stanford MS&E case');
+  ok(/got\[0\]\.concat\(got\[1\]\)/.test(rvSrc),
+    'the served file and the approved queue are ONE comparison set');
+  ok(/\.catch\(function \(\) \{ return \[\]; \}\)/.test(rvSrc),
+    'and a refused approved-queue read degrades to the served file alone, ' +
+    'never to a lost sweep');
   ok(/var dupOn = source === 'crawled' && state\.crawled\.length > 0/.test(rvSrc),
     'drawn on the crawled tab alone — a user-added posting is already live — ' +
     'and for ONE posting too, which can repeat something already published');
 
+  /* ---- AND AN APPROVAL SHOWS AT ONCE (owner, 2026-08-26) --------------
+
+     The card used to say "publishing starts now", on the strength of a Cloud
+     Function that dispatches the build the moment an approval lands — and
+     deploying Functions is a hand step nothing in CI performs, so the posting
+     waited for the build's own schedule while the card said otherwise. The
+     echo makes the first half true for the maintainer; the copy must not
+     claim the second half. */
+  ok(/echoApproval\(doc, edits, patch\.reviewedAt\)/.test(rvSrc),
+    'approving one posting echoes the row the build will publish');
+  ok(/echoApproval\(doc, edits, reviewedAt\)/.test(rvSrc),
+    'and so does approving the whole page');
+  ok(/OAFresh\.approvedRow\(row, \{/.test(rvSrc)
+     && /canonColumns: OASchools\.canonColumns/.test(rvSrc),
+    'through the parity-pinned twin, given the site\'s own canonColumns');
+  ok(/catch \(e\) \{ \/\* an echo is a courtesy: never let it cost the approval \*\/ \}/
+    .test(rvSrc),
+    'and an echo that throws never costs the approval itself');
+  /* The COPY, not the commentary: the comment above the card's message quotes
+     the old wording to say why it went, and a naive search finds that. */
+  const rvCopy = rvSrc.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(!/publishing starts now|publishing starts the moment you approve/.test(rvCopy),
+    'nothing the maintainer READS claims a doorbell this installation has not deployed');
+  for (const claim of ['on your own jobs page straight away', 'at the next build']) {
+    ok(rvSrc.indexOf(claim) >= 0, `the card says what is true instead: "${claim}"`);
+  }
+
   const adminPage = readFileSync(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(/<script defer src="assets\/oa-fresh\.js">/.test(adminPage),
+    'the Admin area loads the echo module');
+  ok(adminPage.indexOf('<script defer src="assets/oa-fresh.js">')
+     < adminPage.indexOf('<script defer src="assets/oa-jobreview.js">'),
+    'before the panel that stashes into it');
   ok(/id="oa-review-dupes"/.test(adminPage), 'the Admin area carries the button');
   /* SCRIPT TAGS, not the first mention: the panel is named in a comment two
      hundred lines above its own tag, so a bare indexOf compares a sentence

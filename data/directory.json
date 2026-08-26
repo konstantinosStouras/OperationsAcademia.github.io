@@ -803,6 +803,18 @@
   ]
  },
  {
+  "id": "bryant-university____global-supply-chain-management",
+  "institution": "Bryant University",
+  "department": "Global Supply Chain Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-23"
+ },
+ {
   "id": "bucknell-university____management-markets-innovation-and-design",
   "institution": "Bucknell University",
   "department": "Management (Markets, Innovation, And Design)",
@@ -5324,8 +5336,11 @@
   "sources": [
    "directory",
    "omlist",
+   "postings",
    "seed"
   ],
+  "n": 1,
+  "lastPosted": "2026-08-25",
   "lat": 42.0571541,
   "lng": -87.6716362
  },
@@ -6801,8 +6816,8 @@
   "sources": [
    "postings"
   ],
-  "n": 1,
-  "lastPosted": "2024-09-23"
+  "n": 2,
+  "lastPosted": "2026-08-21"
  },
  {
   "id": "stanford-university__stanford-graduate-school-of-business__operations-information-and-technology-oit-area",

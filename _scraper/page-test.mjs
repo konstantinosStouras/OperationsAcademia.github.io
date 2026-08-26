@@ -4536,6 +4536,94 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- an approved posting is on the jobs page AT ONCE ----------------------
+
+     Owner, 2026-08-26: "when I press a job under review to become public, it
+     should immediately show up in the list of job postings available to the
+     public." Approving writes Firestore; the BUILD turns that into a row in
+     data/jobs.json, and until it runs the posting is in neither place — out of
+     the queue and not yet on the site, which reads exactly like an approval
+     that did not save. (The Cloud Function that would ring the build the
+     moment a decision lands has never fired on this repository: deploying
+     Functions is a hand step nothing in CI performs.)
+
+     So the panel echoes the published row into this browser, exactly as a
+     saved EDIT already is echoed. Measured end to end here, in one browser
+     context so the localStorage the echo lives in is the same one the jobs
+     page reads: approve on /admin-area, go to /jobs, see the posting. */
+  {
+    const AT = 'https://example.edu/approve-me';
+    const extra = [{
+      path: 'jobReviews/ap1',
+      data: {
+        rowId: 'ap1', status: 'pending', queuedAt: '2026-08-20',
+        row: {
+          id: 'ap1', year: 2027, posted: '2026-08-21', country: 'United States',
+          institution: 'Approved Instantly University', school: 'School of Engineering',
+          unit: 'Management Science and Engineering', department: 'stale line',
+          levels: ['Assistant Professor'], adUrl: AT, applyByDate: '2026-10-05',
+          type: 'University', comments: 'Two letters, please.',
+        },
+      },
+    }];
+
+    const { ctx, q, errors } = await adminAreaPage(ADMIN, 'about:blank', extra);
+    /* An EMPTY site, so anything the jobs page shows can only be the echo. */
+    await q.route('**/data/jobs.json', (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: '[]' }));
+    await q.goto(BASE + 'admin-area.html', { waitUntil: 'load' });
+
+    const card = q.locator('#oa-review-list .oa-rv-card',
+      { hasText: 'Approved Instantly University' });
+    await card.waitFor({ timeout: 10000 });
+    /* Held as an ELEMENT before the click: approving replaces the card's own
+       markup with its confirmation, which no longer carries the institution
+       name the locator filtered on. */
+    const cardEl = await card.elementHandle();
+    await cardEl.$('button[data-act="approve"]').then((b) => b.click());
+    await q.waitForFunction(() =>
+      window.__fb.docs['jobReviews/ap1'].status === 'approved', null, { timeout: 10000 });
+    ok(true, 'approve now: the decision is written');
+
+    await q.waitForFunction((el) => /on your own jobs page straight away/
+      .test(el.textContent || ''), cardEl, { timeout: 10000 });
+    ok(true, 'approve now: and the card says where to find it');
+
+    const stashed = await q.evaluate(() =>
+      JSON.parse(localStorage.getItem('oaFreshJobs') || '{}'));
+    ok(stashed.ap1 && stashed.ap1.added && stashed.ap1.added.id === 'ap1',
+      'approve now: the published row is echoed into this browser');
+    eq((stashed.ap1 || {}).added.department,
+      'School of Engineering, Management Science and Engineering',
+      'approve now: with the line DERIVED from its two names, not the stale one');
+    eq((stashed.ap1 || {}).added.applyBy, 'October 5, 2026',
+      'approve now: and the Apply-by line the build would compose');
+
+    /* THE POINT OF ALL OF IT: the same browser, the real jobs page. */
+    await q.goto(BASE + 'jobs.html', { waitUntil: 'load' });
+    await q.waitForFunction(() =>
+      /Approved Instantly University/.test(document.body.textContent || ''),
+      null, { timeout: 15000 });
+    ok(true, 'approve now: the posting is on the jobs page, before any build has run');
+
+    /* AND IT IS THIS BROWSER'S ALONE. A second context has the same served
+       file and no echo, so it must show nothing — the promise that keeps this
+       honest is that nothing here can put an unpublished posting in front of
+       a visitor. */
+    const other = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const o = await other.newPage();
+    await o.route('**/data/jobs.json', (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: '[]' }));
+    await o.goto(BASE + 'jobs.html', { waitUntil: 'load' });
+    await o.waitForTimeout(1500);
+    ok(!/Approved Instantly University/.test(await o.textContent('body') || ''),
+      'approve now: and nobody else sees it until the build publishes it');
+    await other.close();
+
+    eq(errors, [], 'approve now: no uncaught script error');
+    await ctx.close();
+  }
+
   /* -- "Check for duplicate adverts" ---------------------------------------
 
      Owner, 2026-08-26: "Check all jobs currently under review for duplicates
@@ -4550,9 +4638,18 @@ for (const w of [320, 360, 390, 430]) {
        rp1  the oldest of two rows naming one advertisement — must SURVIVE
        rp2  the younger of that pair                        — must GO
        rp3  a row repeating something already LIVE          — must GO
+       rp4  a row repeating one the maintainer has APPROVED — must GO
+       rp5  the approved twin of rp4 (status: approved)     — not in the queue
 
      rp3's university carries a "The" the live posting does not, so the fold
-     that makes them one university is measured rather than assumed. */
+     that makes them one university is measured rather than assumed.
+
+     rp4/rp5 ARE THE STANFORD MS&E CASE (owner, 2026-08-26): one of two
+     identical postings was approved, and pressing the button then failed to
+     catch the other. An approved posting is out of the queue — the panel
+     lists PENDING only — and not yet in the served file, because the build
+     publishes it minutes later, so its twin was measured against a set
+     holding NEITHER copy. */
   {
     const AD = 'https://example.edu/one-advert';
     const LIVE_AD = 'https://example.edu/live-advert';
@@ -4567,6 +4664,13 @@ for (const w of [320, 360, 390, 430]) {
         }, over || {}),
       },
     });
+    const MSE_AD = 'https://msande.example.edu/faculty-openings';
+    const mse = (over) => ({
+      institution: 'Stanford University', school: 'School of Engineering',
+      unit: 'Management Science and Engineering',
+      department: 'School of Engineering, Management Science and Engineering',
+      levels: ['Assistant Professor'], adUrl: MSE_AD, ...over,
+    });
     const extra = [
       pair('rp1', '2026-08-10'),
       pair('rp2', '2026-08-12'),
@@ -4574,6 +4678,17 @@ for (const w of [320, 360, 390, 430]) {
         institution: 'The Live Repeat University', unit: 'Marketing',
         department: 'Marketing', adUrl: LIVE_AD,
       }),
+      pair('rp4', '2026-08-13', mse()),
+      /* Approved, so NOT in the queue the panel lists and NOT in the served
+         file below — the exact window the bug lived in. */
+      {
+        path: 'jobReviews/rp5',
+        data: {
+          rowId: 'rp5', status: 'approved', queuedAt: '2026-08-09',
+          reviewedAt: '2026-08-26T10:40:00.000Z',
+          row: mse({ id: 'rp5', year: 2026, posted: '2026-08-09', country: 'United States' }),
+        },
+      },
     ];
     const LIVE = [{
       id: 'LIVE-1', ref: 'OA-JOB-LIVE-1', source: 'oa-form', year: 2026,
@@ -4589,9 +4704,10 @@ for (const w of [320, 360, 390, 430]) {
 
     await q.waitForFunction(() => {
       const b = document.querySelector('#oa-review-sources button[data-source="crawled"]');
-      return b && b.textContent === 'Auto-crawled jobs (6)';
+      return b && b.textContent === 'Auto-crawled jobs (7)';
     }, null, { timeout: 10000 });
-    ok(true, 'duplicate adverts: the queue opens with all six crawled postings');
+    ok(true, 'duplicate adverts: the queue opens with all seven PENDING postings — ' +
+      'the approved twin is not among them, which is what made the bug invisible');
 
     /* The button is on the crawled tab and not on the user one: a user-added
        posting is already on the site, and taking it off is its poster's
@@ -4619,8 +4735,11 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForFunction(() =>
       /nothing removed/.test((document.getElementById('oa-review-bulk-msg') || {}).textContent || ''),
       null, { timeout: 15000 });
-    ok(/Take these 2 postings out of the queue/.test(asked),
+    ok(/Take these 3 postings out of the queue/.test(asked),
       'duplicate adverts: it names how many it would remove — ' + JSON.stringify(asked.slice(0, 60)));
+    ok(/Stanford University/.test(asked),
+      'duplicate adverts: the twin of an APPROVED posting is among them — the ' +
+      'Stanford MS&E case, which the served file alone could not catch');
     ok(/OA-JOB-LIVE-1/.test(asked),
       'duplicate adverts: and names the LIVE posting one of them repeats, across a "The"');
     ok(/rp1/.test(asked) || /Repeat University/.test(asked),
@@ -4629,7 +4748,8 @@ for (const w of [320, 360, 390, 430]) {
       window.__fb.docs['jobReviews/rp1'].status,
       window.__fb.docs['jobReviews/rp2'].status,
       window.__fb.docs['jobReviews/rp3'].status,
-    ]), ['pending', 'pending', 'pending'],
+      window.__fb.docs['jobReviews/rp4'].status,
+    ]), ['pending', 'pending', 'pending', 'pending'],
       'duplicate adverts: dismissing the confirmation writes nothing at all');
 
     /* And now for real: the two repeats are REJECTED — never deleted, because
@@ -4641,10 +4761,14 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForFunction(() => {
       const d = window.__fb.docs;
       return d['jobReviews/rp2'].status === 'rejected' &&
-             d['jobReviews/rp3'].status === 'rejected';
+             d['jobReviews/rp3'].status === 'rejected' &&
+             d['jobReviews/rp4'].status === 'rejected';
     }, null, { timeout: 15000 });
     eq(await q.evaluate(() => window.__fb.docs['jobReviews/rp1'].status), 'pending',
       'duplicate adverts: the oldest of two rows naming one advertisement survives');
+    eq(await q.evaluate(() => window.__fb.docs['jobReviews/rp5'].status), 'approved',
+      'duplicate adverts: and the APPROVED posting it repeats is untouched — the ' +
+      'sweep reads it, never rewrites a decision already made');
     eq(await q.evaluate(() => {
       const d = window.__fb.docs['jobReviews/rp3'];
       return [typeof d.note, (d.dup || [])[0] && d.dup[0].ref, typeof d.reviewedAt];
@@ -4665,7 +4789,7 @@ for (const w of [320, 360, 390, 430]) {
     /* AND THE OUTCOME SURVIVES THE REDRAW. render() clears this line, so an
        outcome written before the repaint is wiped by it and the queue shrinks
        under a blank strip — the message has to come after. */
-    ok(/2 repeated postings taken out of the queue/.test(
+    ok(/3 repeated postings taken out of the queue/.test(
       await q.textContent('#oa-review-bulk-msg') || ''),
       'duplicate adverts: and it still says what it did once the queue has redrawn');
 
