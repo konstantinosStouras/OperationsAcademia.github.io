@@ -49,7 +49,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, jobId, canonCountry, canonPlace, longDate, marketYear, universitiesLink,
-  displayOrder, collapseSameDay, isoStamp, publicRow, LEVELS, OPEN_ENDED_RX,
+  displayOrder, collapseSameDay, isoStamp, publicRow, OPEN_ENDED_RX,
   extractReviewDate, extractFinalDate, healReviewDate,
 } from './jobs-model.mjs';
 import { parseCsv, redactEmails } from './import-sheet.mjs';
@@ -394,6 +394,13 @@ export function deadlineDay(v, posted = '') {
 export const COLUMNS = {
   institution: ['university', 'institution', 'university/institution', 'university name',
     'school', 'employer', 'organisation', 'organization', 'university / institution'],
+  /* `city` is MAPPED AND NEVER READ, on purpose. Nothing a posting publishes
+     comes from it any more (owner, 2026-08-26: the town does not belong in the
+     comments), but the column has to keep a name of its own or the "Location"
+     beside the school column has nowhere to land — and an unclaimed duplicate
+     is exactly what the header repair below uses it as. Deleting it would put
+     the town back in play as the institution, the school or an unmapped
+     column the run then asks about every morning. */
   city:        ['city', 'city/state', 'city, state', 'city and state', 'location',
     'place', 'town', 'city/region', 'state', 'city/town'],
   country:     ['country', 'country location', 'nation'],
@@ -758,11 +765,15 @@ function cell(row, index, field) {
 
 /* ------------------------------------------------------- rank -> entry level
 
-   The site offers five entry levels; the sheet types a job title. The mapping
-   is by PRECEDENCE, not by collecting every token, because the titles overlap:
-   "Visiting Assistant Professor" is a visiting position, not an assistant
-   professorship with a qualifier, and an alert for "Assistant Professor" that
-   returned every visiting post would be worse than useless.                   */
+   The site offers five entry levels; the sheet types a job title. The first
+   four are decided by PRECEDENCE, not by collecting every token, because the
+   titles overlap: "Visiting Assistant Professor" is a visiting position, not
+   an assistant professorship with a qualifier, and an alert for "Assistant
+   Professor" that returned every visiting post would be worse than useless.
+
+   The tenure-track reading, which is what is left, is the exception: a search
+   advertised across ranks names TWO of the site's levels and ticks both (see
+   below).                                                                     */
 
 export function levelsFromRank(rank, kind = '') {
   const s = text(rank, 160).toLowerCase();
@@ -785,17 +796,42 @@ export function levelsFromRank(rank, kind = '') {
     return ['Non-tenure track (teaching) position'];
   }
 
+  /* WHAT IS LEFT IS A TENURE-TRACK SEARCH, and it is the one kind that can
+     name TWO of the site's levels at once — because it is routinely
+     advertised across ranks. The owner ruled on the sheet's own shorthands
+     (2026-08-26): "AP" is an assistant professorship; "Open Rank",
+     "Assistant/ Associate", "Assistant/Open rank", "AP/Assoc/Full" and
+     "Junior level (Assistant or untenured Associate Professor)" are open to
+     an entry-level candidate AND to a senior one, so both boxes are ticked.
+     So the two tests below are collected rather than raced — unlike the
+     precedence above, where a visiting post is not also an assistant
+     professorship. */
   const out = [];
-  if (/assistant professor|\bap\b|\bttap\b|tenure.?track|entry.?level/.test(s)) {
+  /* Entry level. A bare "assistant" counts here, which it can afford to: the
+     readings that make it something else — visiting, teaching, post-doc —
+     have all returned already, so what reaches this line is a tenure-track
+     rank column. "AP"/"asst"/"TTAP" are the sheet's abbreviations of the same
+     thing, and a search advertised at ALL ranks includes this one. */
+  if (/\bassistant\b|\basst\b|\bap\b|\bttap\b|tenure.?track|entry.?level|\bjunior\b|open.?rank|all ranks|any rank/.test(s)) {
     out.push('Assistant Professor');
   }
   /* "Other Ranks" is tested against what is LEFT once the entry-level title is
      taken out. Without that, the bare `professor` alternative — which is there
      to catch a full professorship — matches the word inside "Assistant
      Professor", and every entry-level post is also filed under Other Ranks,
-     which is precisely the noise the Entry level filter exists to remove. */
-  const rest = s.replace(/assistant\s+professors?/g, ' ');
-  if (/open.?rank|all ranks|any rank|associate professor|full professor|\bprofessor\b|chair|\bsenior\b|reader/.test(rest)) {
+     which is precisely the noise the Entry level filter exists to remove. That
+     is the invariant this pass must keep: a post advertised ONLY at entry
+     level never carries Other Ranks, however many senior words surround it.
+     "full-time" goes the same way, being a contract and not a rank.
+
+     The senior tokens are matched BARE — "Assistant/ Associate", "AP/Assoc/
+     Full" — because that is how the workbook writes an open search, and
+     demanding the word "Professor" beside them read half of them as
+     entry-level-only. */
+  const rest = s
+    .replace(/assistant\s+professors?/g, ' ')
+    .replace(/full\s*-?\s*time/g, ' ');
+  if (/open.?rank|all ranks|any rank|\bassociate\b|\bassoc\b|\bfull\b|\bprofessor\b|chair|\bsenior\b|reader/.test(rest)) {
     out.push('Other Ranks');
   }
   return out.length ? out : ['Other Ranks'];
@@ -918,7 +954,6 @@ export function rowsFromTab(csv, {
 
     const area = text(redactEmails(cell(raw, index, 'area')), 220);
     const rank = text(redactEmails(cell(raw, index, 'rank')), 160);
-    const city = text(redactEmails(cell(raw, index, 'city')), 120);
     const notes = text(redactEmails(cell(raw, index, 'notes')), 600);
 
     const linkCell = text(cell(raw, index, 'link'), 500);
@@ -955,16 +990,20 @@ export function rowsFromTab(csv, {
        merges with the postings around it instead of adding a spelling. */
     const place = canonPlace({ institution, ...splitDepartment(area) });
 
-    /* What the sheet knows that the site's own shape has no field for: the job
-       title as advertised (five entry levels cannot carry "Professor of
-       Practice — Decision & Information Sciences") and the town. Dropping
-       either would lose the most useful thing on the row, so both are carried
-       in the line the card already shows for prose — as is a deadline cell
-       that could not be believed as a date, so the sheet's own words reach
-       the review card instead of vanishing behind "Until filled." */
+    /* THE COMMENTS ARE THE POSTING'S DESCRIPTION, and nothing else (owner,
+       2026-08-26). They carry what the sheet says ABOUT THE JOB — its own
+       notes column, and a deadline cell that could not be believed as a date,
+       whose words are about this posting's closing date and would otherwise
+       vanish behind "Until filled."
+
+       They deliberately carry NEITHER the rank column NOR the town, which
+       they used to: every crawled card opened "AP · Smithfield, RI ·" — two
+       pieces of bookkeeping ahead of anything a reader could use. Both are
+       already on the posting where they belong. The rank IS the Entry level
+       (`levelsFromRank` reads it, and reads the sheet's shorthands), and the
+       place is the university, whose town the site's own Universities
+       directory holds. */
     const comments = [
-      rank && !LEVELS.includes(rank) ? rank : '',
-      city,
       notes,
       // the remainder, not the whole cell: what extractReviewDate captured is
       // already on the card as the suggested apply-by

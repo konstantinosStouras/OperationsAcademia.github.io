@@ -3378,7 +3378,35 @@ function testJobMarketSheetParsing() {
   eq(levelsFromRank('Open-Rank Clinical Professor'), ['Non-tenure track (teaching) position'],
     'a clinical professorship, whatever its rank');
   eq(levelsFromRank('Assistant Professor'), ['Assistant Professor'], 'a tenure-track post');
-  eq(levelsFromRank('Open Rank'), ['Other Ranks'], 'an open-rank search');
+
+  /* A SEARCH ADVERTISED ACROSS RANKS TICKS BOTH BOXES (owner, 2026-08-26),
+     because it is open to both kinds of candidate — and the workbook writes
+     that half a dozen ways, mostly WITHOUT the word "Professor" beside the
+     senior rank, which is why the tokens below are matched bare. */
+  eq(levelsFromRank('AP'), ['Assistant Professor'],
+    'the sheet\'s "AP" is an assistant professorship — its own shorthand');
+  eq(levelsFromRank('Open Rank'), ['Assistant Professor', 'Other Ranks'],
+    'an open-rank search is open to an entry-level candidate too');
+  eq(levelsFromRank('Assistant/ Associate'), ['Assistant Professor', 'Other Ranks'],
+    'as is one advertised at two ranks with neither spelled out');
+  eq(levelsFromRank('Assistant/Open rank'), ['Assistant Professor', 'Other Ranks'],
+    'however the two are joined');
+  eq(levelsFromRank('Assistant/ Associate Professor'), ['Assistant Professor', 'Other Ranks'],
+    'and with the rank spelled out once');
+  eq(levelsFromRank('AP/Assoc/Full'), ['Assistant Professor', 'Other Ranks'],
+    'the tab\'s commonest wording, all three ranks abbreviated');
+  eq(levelsFromRank('Junior level (Assistant or untenured Associate Professor)'),
+    ['Assistant Professor', 'Other Ranks'],
+    'and the long way round, which names neither rank adjacently');
+
+  /* THE INVARIANT THE COLLECTION MUST NOT COST: a post advertised ONLY at
+     entry level never carries Other Ranks, or the Entry level filter stops
+     narrowing anything. */
+  eq(levelsFromRank('Assistant Professor of Operations Management'), ['Assistant Professor'],
+    'a plain assistant professorship is not also filed under Other Ranks');
+  eq(levelsFromRank('Full-time Assistant Professor'), ['Assistant Professor'],
+    'and "full-time" is a contract, not a rank');
+  eq(levelsFromRank('Full'), ['Other Ranks'], 'while a full professorship is senior alone');
   eq(levelsFromRank('non TTAP'), ['Non-tenure track (teaching) position'],
     'the sheet\'s "non TTAP" is a NON-tenure-track post — it differs from the ' +
     'tenure-track one by that word alone');
@@ -3492,9 +3520,14 @@ function testJobMarketSheetRows() {
   eq(clarkson.country, 'United States', '"USA" is published as "United States"');
   eq(clarkson.levels, ['Visiting Faculty (various levels)'], 'the rank becomes an entry level');
   eq(clarkson.department, 'Operations and Information Systems', 'the field becomes the department');
-  eq(clarkson.comments, 'Visiting Assistant Professor · Potsdam, NY',
-    'the job title as advertised and the town are kept — the row\'s shape has ' +
-    'nowhere else to put them, and dropping them would lose the most useful part');
+  /* THE COMMENTS ARE THE POSTING'S DESCRIPTION (owner, 2026-08-26). This row
+     says nothing about the job beyond its rank and its town, and NEITHER of
+     those belongs here any more: the rank is the Entry level asserted two
+     lines above, and the town is the university's. The card used to open
+     "Visiting Assistant Professor · Potsdam, NY". */
+  eq(clarkson.comments, '',
+    'the rank column and the town are no longer carried as prose — a row with ' +
+    'nothing to say about the job says nothing');
   eq(withHead.unmapped.map((u) => u.header), ['Checked'],
     'a column whose meaning is not known is reported in the run\'s log');
   ok(!/\bChecked\b|·\s*1\b/.test(clarkson.comments),
@@ -3714,8 +3747,11 @@ function testJobMarketSheetMislabelledHeader() {
 
   const hku = out.rows.find((r) => r.institution === 'University of Hong Kong');
   ok(hku, 'the school is published under its own name');
-  eq(hku.comments, 'AP/Assoc/Full · Hong Kong · an expected start date of July 1, 2027',
-    'the town is the town and the comment is the comment');
+  eq(hku.comments, 'an expected start date of July 1, 2027',
+    'the comment column is the comment, and the rank and the town — read from ' +
+    'the repaired header exactly as before — are kept OFF it');
+  eq(hku.levels, ['Assistant Professor', 'Other Ranks'],
+    'and "AP/Assoc/Full" ticks both boxes (testJobMarketSheetParsing)');
   eq(hku.country, 'Hong Kong', 'and the country column is still the country');
 
   const leuven = out.rows.find((r) => r.institution === 'KU Leuven');
@@ -6864,6 +6900,24 @@ function testReviewDuplicates() {
     'and names the posting it repeats, so the maintainer can find it');
   ok(repeatNote(null).length > 0 && repeatNote(null).length < 1000,
     'and stays inside the note field the rules already allow, even with nothing to name');
+
+  /* AND THE DROP SURVIVES THE ENTRY LEVELS MOVING UNDER IT. Two of its four
+     contradictions are read off the row (the department and the levels), and
+     `levelsFromRank` now ticks BOTH boxes for every open-rank search (owner,
+     2026-08-26) — so postings that used to share no level share one today,
+     and the guard that kept them apart is weaker than it was when the corpus
+     was measured. Measured again the other way round: with EVERY served
+     posting ticking both levels, so the levels contradiction can never fire,
+     the whole corpus still holds not one repeat. The rule stands on the year,
+     the university and the department, which is what the CityU and UCD cases
+     always said it stood on. */
+  const servedJobs = JSON.parse(readFileSync(JOBS, 'utf8'));
+  const levelBlind = servedJobs.map((r) => ({ ...r, levels: ['Assistant Professor', 'Other Ranks'] }));
+  const repeats = levelBlind.filter((r) => advertRepeat(r, levelBlind));
+  eq(repeats.map((r) => r.id), [],
+    'no served posting is judged a repeat of another even with the entry-level ' +
+    'contradiction taken away — so a search now ticking two boxes cannot start ' +
+    'dropping real postings');
 
   /* THE WIRING: the sync drops rather than queues, and REJECTS rather than
      deletes — `partition` re-queues a row whose document is gone, so a delete
