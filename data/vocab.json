@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:46:08.546Z",
+ "generated": "2026-08-27T10:09:26.351Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -139,10 +139,6 @@
   },
   {
    "v": "University College Dublin",
-   "n": 3
-  },
-  {
-   "v": "University of Mannheim",
    "n": 3
   },
   {
@@ -403,6 +399,10 @@
   },
   {
    "v": "University of Kansas",
+   "n": 2
+  },
+  {
+   "v": "University of Mannheim",
    "n": 2
   },
   {
@@ -3014,10 +3014,6 @@
    "n": 8
   },
   {
-   "v": "Operations Management",
-   "n": 7
-  },
-  {
    "v": "Business Analytics",
    "n": 6
   },
@@ -3031,6 +3027,10 @@
   },
   {
    "v": "OM/IS",
+   "n": 6
+  },
+  {
+   "v": "Operations Management",
    "n": 6
   },
   {
@@ -9887,7 +9887,6 @@
    ],
    "bySchool": {
     "": [
-     "Operations Management",
      "Supply Chain Management"
     ],
     "Business School": [

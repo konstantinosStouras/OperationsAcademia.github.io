@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T10:08:03.350Z",
+ "generated": "2026-08-27T10:09:26.351Z",
  "postings": [
   {
    "id": "2026-mcgill-university-20260728",
@@ -12,19 +12,6 @@
    "stored": 2026,
    "should": 2027,
    "from": "review",
-   "current": true
-  },
-  {
-   "id": "2026-university-of-mannheim-20260720",
-   "ref": "",
-   "institution": "University of Mannheim",
-   "department": "Operations Management",
-   "posted": "2026-07-20",
-   "applyByDate": "2026-09-15",
-   "reviewDate": "",
-   "stored": 2026,
-   "should": 2027,
-   "from": "final",
    "current": true
   },
   {
