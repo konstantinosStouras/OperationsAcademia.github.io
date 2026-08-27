@@ -202,6 +202,18 @@
   "lastPosted": "2025-07-03"
  },
  {
+  "id": "american-university-kogod-school-of-business____information-technology-business-analytics-ai",
+  "institution": "American University Kogod School of Business",
+  "department": "information technology, business analytics, AI",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "american-university-of-beirut____ie-or-data-science",
   "institution": "American University of Beirut",
   "department": "IE/OR/Data Science",
@@ -2359,6 +2371,19 @@
   "lng": 126.9503079
  },
  {
+  "id": "ewha-womans-university__college-of-business-administration__business-administration",
+  "institution": "Ewha Womans University",
+  "school": "College of Business Administration",
+  "department": "Business Administration",
+  "type": "Business School",
+  "country": "South Korea",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-11"
+ },
+ {
   "id": "fairmont-state-university____is",
   "institution": "Fairmont State University",
   "department": "IS",
@@ -3561,8 +3586,8 @@
    "directory",
    "postings"
   ],
-  "n": 2,
-  "lastPosted": "2024-09-20",
+  "n": 3,
+  "lastPosted": "2026-08-21",
   "lat": 39.1734058,
   "lng": -86.5189087
  },
@@ -4259,6 +4284,19 @@
   "lastPosted": "2025-06-20"
  },
  {
+  "id": "longwood-university__college-of-business-and-economics__accounting-economics-finance-and-information-systems",
+  "institution": "Longwood University",
+  "school": "College of Business and Economics",
+  "department": "Accounting, Economics, Finance, and Information Systems",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-21"
+ },
+ {
   "id": "lousiana-tech-univ____supply-chain-management",
   "institution": "Lousiana Tech Univ",
   "department": "Supply Chain Management",
@@ -4521,6 +4559,18 @@
   "lastPosted": "2014-10-21",
   "lat": 47.5737975,
   "lng": -52.7329053
+ },
+ {
+  "id": "miami-university____emerging-technology-in-business-and-design",
+  "institution": "Miami University",
+  "department": "Emerging Technology in Business and Design",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-21"
  },
  {
   "id": "miami-university____information-systems-and-technology",
@@ -5354,8 +5404,11 @@
   "address": "2145 Sheridan Rd, Evanston, IL 60208",
   "facultyUrl": "http://www.mccormick.northwestern.edu/industrial/people/faculty/index.html",
   "sources": [
-   "directory"
+   "directory",
+   "postings"
   ],
+  "n": 1,
+  "lastPosted": "2026-08-12",
   "lat": 42.0574908,
   "lng": -87.6758491
  },
@@ -6490,8 +6543,8 @@
    "postings",
    "seed"
   ],
-  "n": 2,
-  "lastPosted": "2025-08-12",
+  "n": 3,
+  "lastPosted": "2026-08-20",
   "lat": 1.2962727,
   "lng": 103.8501578
  },
@@ -6836,8 +6889,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2014-06-05",
+  "n": 2,
+  "lastPosted": "2026-08-12",
   "lat": 37.4280825,
   "lng": -122.1615019
  },
@@ -6962,11 +7015,15 @@
   "school": "Whitman School of Management",
   "department": "Supply Chain Management",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://whitman.syracuse.edu/academic-areas/supply-chain-management/supply-chain-faculty",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-13"
  },
  {
   "id": "tbs-education____information-operations-and-management-sciences",
@@ -7425,13 +7482,14 @@
    "PhD",
    "Masters",
    "MBA",
-   "Undergrad"
+   "Undergrad",
+   "Exec Ed"
   ],
   "sources": [
    "postings"
   ],
   "n": 1,
-  "lastPosted": "2026-08-24"
+  "lastPosted": "2026-08-27"
  },
  {
   "id": "chinese-university-of-hong-kong__faculty-of-engineering__systems-engineering-and-engineering-management",
@@ -8403,8 +8461,8 @@
    "postings",
    "seed"
   ],
-  "n": 1,
-  "lastPosted": "2025-08-27",
+  "n": 2,
+  "lastPosted": "2026-08-21",
   "lat": 51.5048691,
   "lng": -0.0194149
  },
@@ -8431,6 +8489,18 @@
   ],
   "n": 1,
   "lastPosted": "2025-09-11"
+ },
+ {
+  "id": "university-of-alabama-at-birmingham____applied-statistics-and-ba",
+  "institution": "University of Alabama at Birmingham",
+  "department": "Applied Statistics and BA",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-23"
  },
  {
   "id": "university-of-alabama-birmingham____scm-distribution-mkt",
@@ -9349,6 +9419,19 @@
   "lastPosted": "2026-08-12"
  },
  {
+  "id": "university-of-houston__c-t-bauer-college-of-business__business-analytics",
+  "institution": "University of Houston",
+  "school": "C. T. Bauer College of Business",
+  "department": "Business Analytics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-05-29"
+ },
+ {
   "id": "university-of-houston__c-t-bauer-college-of-business__department-of-decision-and-information-sciences",
   "institution": "University of Houston",
   "school": "C. T. Bauer College of Business",
@@ -10165,11 +10248,15 @@
   "school": "Ed G. Smith College of Business",
   "department": "Supply Chain Management and Analytics",
   "type": "Business School",
+  "country": "United States",
   "deptUrl": "https://www.umsl.edu/business/departments/supply-chain/faculty.html",
   "sources": [
    "omlist",
+   "postings",
    "seed"
-  ]
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-21"
  },
  {
   "id": "university-of-navarra__iese-business-school__operations-information-and-technology",
@@ -10889,6 +10976,18 @@
   ],
   "lat": 31.3300115,
   "lng": -89.3340423
+ },
+ {
+  "id": "university-of-stirling____project-management",
+  "institution": "University of Stirling",
+  "department": "Project Management",
+  "type": "University",
+  "country": "United Kingdom",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-05-29"
  },
  {
   "id": "university-of-tennessee____ba",

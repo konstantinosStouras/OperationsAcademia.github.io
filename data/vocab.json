@@ -1,20 +1,20 @@
 {
- "generated": "2026-08-26T10:48:54.049Z",
+ "generated": "2026-08-27T09:21:24.372Z",
  "universities": [
+  {
+   "v": "University of Houston",
+   "n": 9
+  },
   {
    "v": "Tulane University",
    "n": 8
   },
   {
-   "v": "University of Houston",
+   "v": "University College London",
    "n": 8
   },
   {
    "v": "National University of Singapore",
-   "n": 7
-  },
-  {
-   "v": "University College London",
    "n": 7
   },
   {
@@ -286,6 +286,10 @@
    "n": 2
   },
   {
+   "v": "Miami University",
+   "n": 2
+  },
+  {
    "v": "Michigan State University",
    "n": 2
   },
@@ -302,6 +306,10 @@
    "n": 2
   },
   {
+   "v": "Northwestern University",
+   "n": 2
+  },
+  {
    "v": "Oregon State University",
    "n": 2
   },
@@ -314,11 +322,19 @@
    "n": 2
   },
   {
+   "v": "Singapore Management University",
+   "n": 2
+  },
+  {
    "v": "Southern Methodist University",
    "n": 2
   },
   {
    "v": "Spartanburg Methodist College",
+   "n": 2
+  },
+  {
+   "v": "Stanford University",
    "n": 2
   },
   {
@@ -443,6 +459,10 @@
   },
   {
    "v": "Ajman University",
+   "n": 1
+  },
+  {
+   "v": "American University Kogod School of Business",
    "n": 1
   },
   {
@@ -666,6 +686,10 @@
    "n": 1
   },
   {
+   "v": "Ewha Womans University",
+   "n": 1
+  },
+  {
    "v": "Ferris State University",
    "n": 1
   },
@@ -738,6 +762,10 @@
    "n": 1
   },
   {
+   "v": "Indiana University",
+   "n": 1
+  },
+  {
    "v": "Indiana University (Kelley)",
    "n": 1
   },
@@ -806,6 +834,10 @@
    "n": 1
   },
   {
+   "v": "Longwood University",
+   "n": 1
+  },
+  {
    "v": "Lousiana Tech Univ",
    "n": 1
   },
@@ -827,10 +859,6 @@
   },
   {
    "v": "McMaster University",
-   "n": 1
-  },
-  {
-   "v": "Miami University",
    "n": 1
   },
   {
@@ -915,10 +943,6 @@
   },
   {
    "v": "Northwestern",
-   "n": 1
-  },
-  {
-   "v": "Northwestern University",
    "n": 1
   },
   {
@@ -1038,10 +1062,6 @@
    "n": 1
   },
   {
-   "v": "Singapore Management University",
-   "n": 1
-  },
-  {
    "v": "Singapore University of Technology and Design",
    "n": 1
   },
@@ -1082,10 +1102,6 @@
    "n": 1
   },
   {
-   "v": "Stanford University",
-   "n": 1
-  },
-  {
    "v": "State University of New York at Geneseo",
    "n": 1
   },
@@ -1099,6 +1115,10 @@
   },
   {
    "v": "SUNY Korea",
+   "n": 1
+  },
+  {
+   "v": "Syracuse University",
    "n": 1
   },
   {
@@ -1183,6 +1203,10 @@
   },
   {
    "v": "University of Alabama - Birmingham",
+   "n": 1
+  },
+  {
+   "v": "University of Alabama at Birmingham",
    "n": 1
   },
   {
@@ -1286,6 +1310,10 @@
    "n": 1
   },
   {
+   "v": "University of Missouri-St. Louis",
+   "n": 1
+  },
+  {
    "v": "University of Nebraska at Kearney",
    "n": 1
   },
@@ -1323,6 +1351,10 @@
   },
   {
    "v": "University of Southern Indiana",
+   "n": 1
+  },
+  {
+   "v": "University of Stirling",
    "n": 1
   },
   {
@@ -1614,10 +1646,6 @@
    "n": 0
   },
   {
-   "v": "Indiana University",
-   "n": 0
-  },
-  {
    "v": "Indiana University Bloomington",
    "n": 0
   },
@@ -1766,10 +1794,6 @@
    "n": 0
   },
   {
-   "v": "Syracuse University",
-   "n": 0
-  },
-  {
    "v": "Technion – Israel Institute of Technology",
    "n": 0
   },
@@ -1887,10 +1911,6 @@
   },
   {
    "v": "University of Michigan-Dearborn",
-   "n": 0
-  },
-  {
-   "v": "University of Missouri-St. Louis",
    "n": 0
   },
   {
@@ -2052,6 +2072,10 @@
    "n": 5
   },
   {
+   "v": "C. T. Bauer College of Business",
+   "n": 3
+  },
+  {
    "v": "Darla Moore School of Business",
    "n": 3
   },
@@ -2062,10 +2086,6 @@
   {
    "v": "Knauss School of Business",
    "n": 3
-  },
-  {
-   "v": "C. T. Bauer College of Business",
-   "n": 2
   },
   {
    "v": "Fox School of Business",
@@ -2089,6 +2109,10 @@
   },
   {
    "v": "School of Management and Economics",
+   "n": 2
+  },
+  {
+   "v": "UCL School of Management",
    "n": 2
   },
   {
@@ -2124,6 +2148,14 @@
    "n": 1
   },
   {
+   "v": "College of Business Administration",
+   "n": 1
+  },
+  {
+   "v": "College of Business and Economics",
+   "n": 1
+  },
+  {
    "v": "Cornell SC Johnson College of Business",
    "n": 1
   },
@@ -2149,6 +2181,10 @@
   },
   {
    "v": "Desautels Faculty of Management",
+   "n": 1
+  },
+  {
+   "v": "Ed G. Smith College of Business",
    "n": 1
   },
   {
@@ -2200,6 +2236,10 @@
    "n": 1
   },
   {
+   "v": "Kelley School of Business",
+   "n": 1
+  },
+  {
    "v": "Kellogg School of Management",
    "n": 1
   },
@@ -2212,11 +2252,19 @@
    "n": 1
   },
   {
+   "v": "Lee Kong Chian School of Business",
+   "n": 1
+  },
+  {
    "v": "Leonard N. Stern School of Business",
    "n": 1
   },
   {
    "v": "Mays Business School",
+   "n": 1
+  },
+  {
+   "v": "McCormick School of Engineering",
    "n": 1
   },
   {
@@ -2280,6 +2328,10 @@
    "n": 1
   },
   {
+   "v": "Stanford Graduate School of Business",
+   "n": 1
+  },
+  {
    "v": "Stephen M. Ross School of Business",
    "n": 1
   },
@@ -2292,10 +2344,6 @@
    "n": 1
   },
   {
-   "v": "UCL School of Management",
-   "n": 1
-  },
-  {
    "v": "UNSW Business School - School of Information Systems and Technology Management",
    "n": 1
   },
@@ -2305,6 +2353,10 @@
   },
   {
    "v": "Walter A. Haas School of Business",
+   "n": 1
+  },
+  {
+   "v": "Whitman School of Management",
    "n": 1
   },
   {
@@ -2357,14 +2409,6 @@
   },
   {
    "v": "College of Administrative Sciences and Economics (CASE)",
-   "n": 0
-  },
-  {
-   "v": "College of Business Administration",
-   "n": 0
-  },
-  {
-   "v": "College of Business and Economics",
    "n": 0
   },
   {
@@ -2441,10 +2485,6 @@
   },
   {
    "v": "Econometric Institute",
-   "n": 0
-  },
-  {
-   "v": "Ed G. Smith College of Business",
    "n": 0
   },
   {
@@ -2592,10 +2632,6 @@
    "n": 0
   },
   {
-   "v": "Kelley School of Business",
-   "n": 0
-  },
-  {
    "v": "Korea University Business School",
    "n": 0
   },
@@ -2613,10 +2649,6 @@
   },
   {
    "v": "LeBow College of Business",
-   "n": 0
-  },
-  {
-   "v": "Lee Kong Chian School of Business",
    "n": 0
   },
   {
@@ -2657,10 +2689,6 @@
   },
   {
    "v": "McCombs School of Business",
-   "n": 0
-  },
-  {
-   "v": "McCormick School of Engineering",
    "n": 0
   },
   {
@@ -2880,10 +2908,6 @@
    "n": 0
   },
   {
-   "v": "Stanford Graduate School of Business",
-   "n": 0
-  },
-  {
    "v": "Suliman S. Olayan School of Business",
    "n": 0
   },
@@ -2940,10 +2964,6 @@
    "n": 0
   },
   {
-   "v": "Whitman School of Management",
-   "n": 0
-  },
-  {
    "v": "Wilbur O. and Ann Powers College of Business",
    "n": 0
   },
@@ -2959,7 +2979,7 @@
   },
   {
    "v": "Supply Chain Management",
-   "n": 44
+   "n": 45
   },
   {
    "v": "BA",
@@ -2986,6 +3006,10 @@
    "n": 8
   },
   {
+   "v": "Business Analytics",
+   "n": 6
+  },
+  {
    "v": "Information Systems and Operations Management",
    "n": 6
   },
@@ -2998,15 +3022,15 @@
    "n": 6
   },
   {
+   "v": "Operations Management",
+   "n": 6
+  },
+  {
    "v": "AI",
    "n": 5
   },
   {
    "v": "Business",
-   "n": 5
-  },
-  {
-   "v": "Business Analytics",
    "n": 5
   },
   {
@@ -3018,15 +3042,15 @@
    "n": 5
   },
   {
-   "v": "Operations Management",
-   "n": 5
-  },
-  {
    "v": "SCM/Logistics",
    "n": 4
   },
   {
    "v": "Analytics and Operations",
+   "n": 3
+  },
+  {
+   "v": "Business Administration",
    "n": 3
   },
   {
@@ -3071,10 +3095,6 @@
   },
   {
    "v": "BA/OM",
-   "n": 2
-  },
-  {
-   "v": "Business Administration",
    "n": 2
   },
   {
@@ -3154,6 +3174,10 @@
    "n": 2
   },
   {
+   "v": "Operations and Technology",
+   "n": 2
+  },
+  {
    "v": "OR",
    "n": 2
   },
@@ -3170,12 +3194,20 @@
    "n": 2
   },
   {
+   "v": "Supply Chain Management and Analytics",
+   "n": 2
+  },
+  {
    "v": "sustainability",
    "n": 2
   },
   {
    "v": "Sustainable Management",
    "n": 2
+  },
+  {
+   "v": "Accounting, Economics, Finance, and Information Systems",
+   "n": 1
   },
   {
    "v": "AI and Analytics",
@@ -3207,6 +3239,10 @@
   },
   {
    "v": "Applied Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "Applied Statistics and BA",
    "n": 1
   },
   {
@@ -3382,6 +3418,10 @@
    "n": 1
   },
   {
+   "v": "Emerging Technology in Business and Design",
+   "n": 1
+  },
+  {
    "v": "Empirical business problems",
    "n": 1
   },
@@ -3434,6 +3474,10 @@
    "n": 1
   },
   {
+   "v": "Industrial Engineering and Management Sciences",
+   "n": 1
+  },
+  {
    "v": "Industrial Systems Engineering and Management",
    "n": 1
   },
@@ -3467,6 +3511,10 @@
   },
   {
    "v": "Information Technology",
+   "n": 1
+  },
+  {
+   "v": "information technology, business analytics, AI",
    "n": 1
   },
   {
@@ -3702,6 +3750,10 @@
    "n": 1
   },
   {
+   "v": "Operations and Decision Technologies",
+   "n": 1
+  },
+  {
    "v": "Operations and Information Technology Management",
    "n": 1
   },
@@ -3715,10 +3767,6 @@
   },
   {
    "v": "Operations and Project Management (AI focus)",
-   "n": 1
-  },
-  {
-   "v": "Operations and Technology",
    "n": 1
   },
   {
@@ -3743,6 +3791,10 @@
   },
   {
    "v": "Operations, Information and Technology",
+   "n": 1
+  },
+  {
+   "v": "Operations, Information, and Technology (OIT) area",
    "n": 1
   },
   {
@@ -3795,6 +3847,10 @@
   },
   {
    "v": "Project and SCM",
+   "n": 1
+  },
+  {
+   "v": "Project Management",
    "n": 1
   },
   {
@@ -3907,10 +3963,6 @@
   },
   {
    "v": "Supply Chain and Operations",
-   "n": 1
-  },
-  {
-   "v": "Supply Chain Management and Analytics",
    "n": 1
   },
   {
@@ -4099,10 +4151,6 @@
   },
   {
    "v": "Industrial Engineering and Management",
-   "n": 0
-  },
-  {
-   "v": "Industrial Engineering and Management Sciences",
    "n": 0
   },
   {
@@ -4314,10 +4362,6 @@
    "n": 0
   },
   {
-   "v": "Operations and Decision Technologies",
-   "n": 0
-  },
-  {
    "v": "Operations and Logistics",
    "n": 0
   },
@@ -4399,10 +4443,6 @@
   },
   {
    "v": "Operations, Business Analytics, and Information Systems",
-   "n": 0
-  },
-  {
-   "v": "Operations, Information, and Technology (OIT) area",
    "n": 0
   },
   {
@@ -4592,6 +4632,17 @@
     "": [
      "Business Intelligence /DA",
      "Logistics/Supply Chain"
+    ]
+   }
+  },
+  "American University Kogod School of Business": {
+   "schools": [],
+   "units": [
+    "information technology, business analytics, AI"
+   ],
+   "bySchool": {
+    "": [
+     "information technology, business analytics, AI"
     ]
    }
   },
@@ -5910,6 +5961,19 @@
    "units": [],
    "bySchool": {}
   },
+  "Ewha Womans University": {
+   "schools": [
+    "College of Business Administration"
+   ],
+   "units": [
+    "Business Administration"
+   ],
+   "bySchool": {
+    "College of Business Administration": [
+     "Business Administration"
+    ]
+   }
+  },
   "Fairmont State University": {
    "schools": [],
    "units": [
@@ -6882,6 +6946,19 @@
     ]
    }
   },
+  "Longwood University": {
+   "schools": [
+    "College of Business and Economics"
+   ],
+   "units": [
+    "Accounting, Economics, Finance, and Information Systems"
+   ],
+   "bySchool": {
+    "College of Business and Economics": [
+     "Accounting, Economics, Finance, and Information Systems"
+    ]
+   }
+  },
   "Lousiana Tech Univ": {
    "schools": [],
    "units": [
@@ -7022,10 +7099,12 @@
   "Miami University": {
    "schools": [],
    "units": [
+    "Emerging Technology in Business and Design",
     "Information Systems and Technology"
    ],
    "bySchool": {
     "": [
+     "Emerging Technology in Business and Design",
      "Information Systems and Technology"
     ]
    }
@@ -9104,6 +9183,17 @@
     ]
    }
   },
+  "University of Alabama at Birmingham": {
+   "schools": [],
+   "units": [
+    "Applied Statistics and BA"
+   ],
+   "bySchool": {
+    "": [
+     "Applied Statistics and BA"
+    ]
+   }
+  },
   "University of Alaska Fairbanks": {
    "schools": [],
    "units": [
@@ -9546,6 +9636,7 @@
     "C. T. Bauer College of Business"
    ],
    "units": [
+    "Business Analytics",
     "Decision and IIS",
     "Department of Decision and Information Sciences",
     "ISE (supply chain and logistics tech)",
@@ -9565,6 +9656,7 @@
      "SCM/OM"
     ],
     "C. T. Bauer College of Business": [
+     "Business Analytics",
      "Department of Decision and Information Sciences",
      "The Bauer Human-Centered Artificial Intelligence Institute"
     ]
@@ -10400,6 +10492,17 @@
    "bySchool": {
     "College of Business": [
      "Management and International Business"
+    ]
+   }
+  },
+  "University of Stirling": {
+   "schools": [],
+   "units": [
+    "Project Management"
+   ],
+   "bySchool": {
+    "": [
+     "Project Management"
     ]
    }
   },
@@ -11311,6 +11414,7 @@
    "Operations Management"
   ],
   "C. T. Bauer College of Business": [
+   "Business Analytics",
    "Department of Decision and Information Sciences",
    "The Bauer Human-Centered Artificial Intelligence Institute"
   ],
@@ -11359,10 +11463,12 @@
    "Supply Chain Management and Analytics"
   ],
   "College of Business Administration": [
+   "Business Administration",
    "Business Analytics and Statistics",
    "Decision Sciences and Information Systems"
   ],
   "College of Business and Economics": [
+   "Accounting, Economics, Finance, and Information Systems",
    "Management"
   ],
   "College of Business and Innovation": [
