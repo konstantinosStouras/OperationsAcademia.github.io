@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T15:49:35.286Z",
+ "generated": "2026-08-27T15:54:02.022Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1098,6 +1098,10 @@
    "n": 1
   },
   {
+   "v": "St John Fisher University",
+   "n": 1
+  },
+  {
    "v": "St. Cloud State University",
    "n": 1
   },
@@ -1159,6 +1163,10 @@
   },
   {
    "v": "The Hong Kong University of Science and Technology",
+   "n": 1
+  },
+  {
+   "v": "The University of Memphis",
    "n": 1
   },
   {
@@ -3318,6 +3326,10 @@
    "n": 1
   },
   {
+   "v": "Business Analytics, Operations Management, Project Management",
+   "n": 1
+  },
+  {
    "v": "Business and Public Administration",
    "n": 1
   },
@@ -3679,6 +3691,10 @@
   },
   {
    "v": "Marketing and SCM",
+   "n": 1
+  },
+  {
+   "v": "Marketing and Supply Chain Management",
    "n": 1
   },
   {
@@ -4347,10 +4363,6 @@
   },
   {
    "v": "Marketing and Supply Chain",
-   "n": 0
-  },
-  {
-   "v": "Marketing and Supply Chain Management",
    "n": 0
   },
   {
@@ -8429,6 +8441,17 @@
     ]
    }
   },
+  "St John Fisher University": {
+   "schools": [],
+   "units": [
+    "Business Analytics, Operations Management, Project Management"
+   ],
+   "bySchool": {
+    "": [
+     "Business Analytics, Operations Management, Project Management"
+    ]
+   }
+  },
   "St. Cloud State University": {
    "schools": [],
    "units": [
@@ -8919,6 +8942,17 @@
      "Management Science",
      "Marketing and Logistics",
      "Operations and Business Analytics"
+    ]
+   }
+  },
+  "The University of Memphis": {
+   "schools": [],
+   "units": [
+    "Marketing and Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Marketing and Supply Chain Management"
     ]
    }
   },

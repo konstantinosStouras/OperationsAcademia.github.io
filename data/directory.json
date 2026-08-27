@@ -6848,6 +6848,18 @@
   "lng": 103.8476699
  },
  {
+  "id": "st-john-fisher-university____business-analytics-operations-management-project-management",
+  "institution": "St John Fisher University",
+  "department": "Business Analytics, Operations Management, Project Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "st-john-s-university__peter-j-tobin-college-of-business__business-analytics-and-information-systems",
   "institution": "St. John's University",
   "school": "Peter J. Tobin College of Business",
@@ -7843,6 +7855,18 @@
   "lastPosted": "2025-09-10",
   "lat": 22.2679201,
   "lng": 114.1290719
+ },
+ {
+  "id": "university-of-memphis____marketing-and-supply-chain-management",
+  "institution": "The University of Memphis",
+  "department": "Marketing and Supply Chain Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
  },
  {
   "id": "university-of-michigan-flint__school-of-management__management-and-marketing",
