@@ -1885,6 +1885,54 @@ Clear is the ENGINE's button, so the red reaches every list page — jobs,
 previous markets, recent faculty, the universities directory and the one-pager's
 mounts. That is the point of the engine owning the bar.
 
+### …and both buttons share a line
+
+Owner, the same day: *"pushing 'entry level' search field on the top line, so
+that 'clear filters' and 'Download Excel' buttons appear in the same line,
+within the 2nd line."* Those are one change, not two, and the arithmetic is
+why. Measured at 1280px, the jobs bar had **five** tracks: the university
+search spans two of them, so the top line was full at four controls and Entry
+level fell to the second — which then carried four pickers and had a single
+track left for the actions, far too narrow for two buttons abreast.
+
+A **sixth track** (`minmax(150px, 1fr)`, scoped to `#oa-jobs`) fixes both ends
+at once: the top line takes the search and four pickers — Entry level among
+them — and the second takes three pickers and hands the actions cell the three
+that are left. `150px` is measured, not guessed: the longest picker label
+("All characteristics") still fits its button, and nothing on the page
+truncates or scrolls sideways at any width from 320px up.
+
+**`grid-column: auto / -1` does not do what the comment above it claimed.** It
+had always read as "Clear stretches from wherever it lands to the bar's right
+edge", and an auto start with a definite end spans exactly **one** track — so
+the cell was a single 157px column and the two buttons wrapped inside it,
+which is precisely the stacking the owner was asking to undo. It is
+`span 3 / -1` on the jobs bar now.
+
+The cell itself is a **wrapping flex row**: the empty label spacer takes the
+full width (which is how it still reserves one label's height above the
+buttons — the reason it exists), Clear takes whatever the download leaves, and
+the download keeps the right edge, so the bar ends flush however wide either
+label becomes. Both are 44px tall: two controls sharing a line share a
+baseline, and the download is still the smaller of the two on the axis that
+was ever in question — its width (136px against Clear's 357px at 1280px).
+
+**Its `gap` is `0 10px`, and the row half being zero is load-bearing.** The
+spacer reproduces a label's height and its 3px margin exactly, which is what
+lands Clear on the same baseline as the pickers beside it; a row gap would
+push it that much lower and break the one thing the spacer exists for. And
+because the download now holds the right edge, the flush-edge check measures
+the **cell** rather than Clear — what the bar promises is that its last line
+ends flush, which is true under either arrangement.
+
+The span rule runs from the **phone breakpoint up**, not from 1000px: at four
+or five tracks the actions cell simply takes a line of its own, still flush
+right with both buttons abreast. Only a phone stacks them — side by side each
+would be half a screen — where the mobile rules give both the full width and a
+42px target. `page-test.mjs` measures the row count, Entry level's line and
+the two buttons' shared baseline at desktop width, and the full-width targets
+at 390px.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

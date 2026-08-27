@@ -8773,7 +8773,7 @@ async function testJobExportWiring() {
     'export: it wears a green border, so it reads as something to press');
   ok(/\.oa-action\s*\{/.test(listCss) && /color:\s*var\(--ok/.test(listCss),
     'export: the button names its own ink as well as its ground (CLAUDE.md)');
-  ok(/body\.v3 \.oa-action\s*\{[\s\S]{0,260}?border:\s*1px solid var\(--ok\)/.test(v3css),
+  ok(/body\.v3 \.oa-action\s*\{[\s\S]{0,500}?border:\s*1px solid var\(--ok\)/.test(v3css),
     'export: …and is themed green for the live design too');
   ok(/max-width:\s*640px[\s\S]{0,2200}?\.oa-action\s*\{[\s\S]{0,220}?height:\s*42px/.test(listCss),
     'export: on a phone it is a 42px target like every other control in the bar');

@@ -284,14 +284,36 @@ ok(legacyCountry.some((c) => /United States/.test(c)),
 const legacyRows = await page.$$eval('.oa-card', (ns) => ns.length);
 ok(legacyRows > 0, 'and still shows the postings it was shared to show');
 
+/* THE INSTITUTION THESE DEEP LINKS ARE TESTED WITH IS READ OFF THE PAGE.
+
+   It used to be named here — "University of Mannheim" — and on 2026-08-27 the
+   whole suite stopped dead at the ?filterD= check below, on master, with
+   nothing but a data commit between green and red. Both of that university's
+   postings are filed under market year 2026; the market rolled to 2027 in
+   July, the jobs page scopes itself to the market under way, and so the deep
+   link selected an institution with nothing in scope. The assertion failed,
+   and the print check a few lines on threw outright for want of a card.
+
+   A fixture NAMED in a test is a fact about the data, and this data is
+   rebuilt from Firestore every morning — the same trap this repository has
+   already recorded twice for its own guards ("a guard about specific rows
+   names those rows; a guard over a whole file asserts a RULE any legitimate
+   row satisfies"). What is under test here is that a legacy deep link still
+   selects AN institution, so the institution comes from whatever the page is
+   showing. */
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+const DEEP_UNI = (await page.$eval('.oa-card-title', (n) => n.textContent)).trim();
+ok(DEEP_UNI.length > 2, `a posting to deep-link with (${DEEP_UNI})`);
+
 // the legacy Awesome Table deep link the footer and the "Further info" column
 // still emit must keep working
-await page.goto(BASE + V2 + 'jobs.html?filterA=University%20of%20Mannheim',
+await page.goto(BASE + V2 + 'jobs.html?filterA=' + encodeURIComponent(DEEP_UNI),
   { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
-const mannheim = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
-ok(mannheim.length > 0 && mannheim.every((t) => /Mannheim/.test(t)),
+const viaA = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent.trim()));
+ok(viaA.length > 0 && viaA.every((t) => t.includes(DEEP_UNI)),
   'the legacy ?filterA= deep link still selects an institution');
 
 /* ------------------------------------------ the Deadline filter's own words
@@ -511,13 +533,14 @@ await page.waitForTimeout(400);
 ok(page.url().includes('utm_source=newsletter'),
   'a foreign query parameter is not erased from the address bar');
 
-// the Universities map deep-links institutions as ?filterD=
-await page.goto(BASE + V2 + 'jobs.html?filterD=University%20of%20Mannheim',
+// the Universities map deep-links institutions as ?filterD= (the name comes
+// from the page — see DEEP_UNI above for why it is not written down here)
+await page.goto(BASE + V2 + 'jobs.html?filterD=' + encodeURIComponent(DEEP_UNI),
   { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card, .oa-empty');
 await page.waitForTimeout(300);
-const viaD = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
-ok(viaD.length > 0 && viaD.every((t) => /Mannheim/.test(t)),
+const viaD = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent.trim()));
+ok(viaD.length > 0 && viaD.every((t) => t.includes(DEEP_UNI)),
   'the Universities map\'s ?filterD= deep link selects an institution');
 
 // safeUrl refuses every protocol-relative and backslash disguise
@@ -2228,11 +2251,16 @@ for (const [name, expect] of [
         const row = rows.find((r) => Math.abs(r.top - t) < 1.5);
         if (row) row.n++; else rows.push({ top: t, n: 1 });
       });
-      const clear = document.querySelector('.oa-clear').getBoundingClientRect();
+      /* THE ACTIONS CELL closes the row, not Clear itself. Clear held the
+         right edge while it was alone in that cell; since 2026-08-27 the
+         Excel download sits beside it and holds it, with Clear taking
+         whatever is left. What the bar promises is that its last line ends
+         flush — measure the cell, which is true under either arrangement. */
+      const acts = document.querySelector('.oa-filter-actions').getBoundingClientRect();
       return {
         lines: rows.length,
         cells: new Set([...bar.children].map((c) => Math.round(c.getBoundingClientRect().top))).size,
-        clearGap: edge - clear.right,
+        clearGap: edge - acts.right,
         chips: document.querySelectorAll('.oa-chip').length,
       };
     });
@@ -2240,7 +2268,7 @@ for (const [name, expect] of [
     eq(geo.lines, geo.cells,
       `jobs @${width}: every control sits on its row's baseline with chips showing`);
     ok(Math.abs(geo.clearGap) <= 1.5,
-      `jobs @${width}: Clear still closes its row (${geo.clearGap.toFixed(1)}px short of the edge)`);
+      `jobs @${width}: the actions still close their row (${geo.clearGap.toFixed(1)}px short of the edge)`);
     await j.click('.oa-clear');
     await j.waitForTimeout(200);
   }
@@ -5139,8 +5167,10 @@ for (const w of [320, 360, 390, 430]) {
       const clear = c.getBoundingClientRect();
       return { title: b.title, text: b.textContent.trim(), disabled: b.disabled,
         h: Math.round(r.height), w: Math.round(r.width),
+        x: Math.round(r.x), top: Math.round(r.top),
         rightGap: Math.round(cell.right - r.right),
-        below: Math.round(r.top - clear.bottom), clearW: Math.round(clear.width),
+        clearW: Math.round(clear.width), clearH: Math.round(clear.height),
+        clearX: Math.round(clear.x), clearTop: Math.round(clear.top),
         locked: !!document.querySelector('.v3-lock.is-locked') };
     });
     ok(!btn.locked, 'jobs export: signed in, the filter bar is live');
@@ -5151,14 +5181,48 @@ for (const w of [320, 360, 390, 430]) {
        than a magic number, because that is what the instruction actually
        says. It grew when the label gained its verb (2026-08-27, the owner on
        the old one: "not very intuitive for the average user") — "Excel" names
-       a format and never the act. Still under Clear rather than beside it,
-       and right-aligned. */
+       a format and never the act.
+
+       BESIDE Clear, not under it (owner, same day): the two share a line, a
+       baseline and a height, the download keeps the right edge and Clear
+       takes the rest of the cell, so the bar still ends flush. Heights are
+       compared rather than capped, because "same line" is the property and
+       two controls of different heights on one line read as a mistake. */
     ok(/download/i.test(btn.text) && /excel/i.test(btn.text),
       `jobs export: the label says what it does and what you get (${JSON.stringify(btn.text)})`);
-    ok(btn.h <= 34 && btn.w < btn.clearW,
-      `jobs export: it stays smaller than Clear (${btn.w}x${btn.h} vs ${btn.clearW})`);
-    ok(Math.abs(btn.rightGap) <= 1.5 && btn.below >= 0 && btn.below <= 20,
-      'jobs export: …tucked under Clear filters at the bar\'s right edge');
+    ok(btn.w < btn.clearW,
+      `jobs export: it stays narrower than Clear (${btn.w} vs ${btn.clearW})`);
+    ok(Math.abs(btn.top - btn.clearTop) <= 2 && btn.h === btn.clearH,
+      `jobs export: on ONE line with Clear filters, same height ` +
+      `(${btn.h} vs ${btn.clearH}, tops ${btn.top}/${btn.clearTop})`);
+    ok(btn.x > btn.clearX && Math.abs(btn.rightGap) <= 1.5,
+      'jobs export: …to its right, holding the bar\'s right edge');
+
+    /* TWO ROWS, WITH ENTRY LEVEL ON THE FIRST (owner, 2026-08-27: "pushing
+       'entry level' search field on the top line, so that 'clear filters' and
+       'Download Excel' buttons appear in the same line, within the 2nd line").
+       The two halves are one measurement: the buttons only fit on a line
+       together because a sixth track freed one on the second row, and the
+       sixth track is what carries Entry level up to the first. Asserting the
+       row COUNT rather than a pixel keeps it honest if the design's spacing
+       ever moves. */
+    const bar = await q.evaluate(() => {
+      const tops = new Map();
+      for (const cell of document.querySelector('.oa-filters').children) {
+        const top = Math.round(cell.getBoundingClientRect().top);
+        const lab = cell.querySelector('.oa-label, label');
+        const name = (lab ? lab.textContent : 'actions').trim();
+        if (!tops.has(top)) tops.set(top, []);
+        tops.get(top).push(name);
+      }
+      const rows = [...tops.entries()].sort((a, b) => a[0] - b[0]).map((e) => e[1]);
+      return { count: rows.length, first: rows[0] || [], last: rows[rows.length - 1] || [] };
+    });
+    eq(bar.count, 2, `the jobs filter bar is two rows deep (${bar.count})`);
+    ok(bar.first.some((n) => /entry level/i.test(n)),
+      `Entry level is on the top line (${bar.first.join(' · ')})`);
+    ok(bar.last.includes('actions'),
+      'and the two buttons close the second one');
 
     const first = q.waitForEvent('download', { timeout: 30000 });
     await q.click('.oa-export');
