@@ -97,13 +97,21 @@ jobs:
       - name: Offline checks
         run: node _scraper/selftest.mjs --publishing
 
-      - name: Publish queued postings
-        if: steps.gate.outputs.ready == 'true'
+      # THE WHOLE BUILD, IN ONE STEP, because the Commit step below has to be
+      # able to run it AGAIN. data/ is generated, so a rejected push has
+      # nothing to rebase — the recovery is to take the other writer's tip and
+      # rebuild on it, and a workflow step cannot re-run the steps before it.
+      # While "what a build is" lived in four YAML steps the retry could not
+      # perform one. _scraper/build-all.mjs is now the single definition; it
+      # keeps the per-step Firebase gate (the three Firestore builders are
+      # skipped without the secret, the offline directory build always runs)
+      # and prints a heading per builder so the log reads as it did.
+      - name: Publish everything queued
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          # The Drive credentials, for filing uploaded adverts into the
-          # season's "Jobs Files" folder. Missing = the build still publishes
-          # postings, just without their File links, and warns.
+          # The Drive credentials, for filing uploaded adverts and candidates'
+          # CVs into the season's folders. Missing = the build still
+          # publishes, just without the File links, and warns.
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
@@ -114,36 +122,7 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
         run: |
-          node _scraper/build-jobs.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
-
-      - name: Publish candidate profiles
-        if: steps.gate.outputs.ready == 'true'
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          # same Drive credentials: CVs and research summaries are filed into
-          # the season's "Candidates Files" folder
-          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
-          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
-          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
-        run: |
-          node _scraper/build-candidates.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
-
-      - name: Publish confirmed placements
-        if: steps.gate.outputs.ready == 'true'
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          node _scraper/build-placements.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
-
-      # The Universities directory follows the postings: OFFLINE (it reads
-      # only the files the steps above just rewrote, plus the committed
-      # archive and seed), deterministic, and NOT gated on Firebase — so a
-      # posting from a university the directory does not carry creates its
-      # card in the same run that published the posting, which is the rule
-      # the page states. An unchanged input set writes byte-identical files
-      # and the commit below simply has nothing to say about them.
-      - name: Rebuild the Universities directory
-        run: node _scraper/build-directory.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+          node _scraper/build-all.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Re-check the file we are about to commit
         id: recheck
@@ -164,7 +143,20 @@ jobs:
 
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run
+        env:
+          # the SAME credentials the build step carries: a rejected push
+          # REBUILDS on the new tip, and a rebuild reads Firestore
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
         run: |
+          REF='${{ github.ref_name }}'
+
           if [ -z "$(git status --porcelain data)" ]; then
             echo "no change — nothing to commit"
             exit 0
@@ -174,16 +166,64 @@ jobs:
           git add data
           git commit -m "OA data: publish queued submissions"
 
-          # plain fast-forward, with rebase-and-retry: a concurrent writer may
-          # have moved the branch on while this run was working
+          # A REJECTED PUSH IS REBUILT, NEVER REBASED.
+          #
+          # Everything under data/ is a build OUTPUT. `git pull --rebase` used
+          # to sit here, and it asked git to reconcile two independently
+          # GENERATED copies of the same file: data/jobs-meta.json carries a
+          # `generated` timestamp and row counts, so the same lines always
+          # differ and the rebase conflicted BY CONSTRUCTION — the run then
+          # died mid-rebase with git's own message (2026-08-26). Where it had
+          # SUCCEEDED it would have been worse than failing: it would have
+          # pushed a data/ snapshot built BEFORE the other writer's commit,
+          # dropping their rows with nothing to show it had happened.
+          #
+          # So the recovery is the one that suits generated files: throw our
+          # commit away, take their tip, and rebuild on top of it. The build
+          # is idempotent and derives everything from Firestore plus the
+          # committed files, so the result carries BOTH writers' work.
           for i in 1 2 3 4 5; do
-            if git push origin HEAD:${{ github.ref_name }}; then
+            if git push origin HEAD:"$REF"; then
               echo "pushed"
               exit 0
             fi
-            echo "push rejected — rebasing onto the new tip (attempt $i)"
-            git pull --rebase origin ${{ github.ref_name }} || exit 1
+
+            echo "push rejected — rebuilding on the new tip (attempt $i)"
             sleep $((i * 3))
+            git fetch origin "$REF" || exit 1
+            git reset --hard FETCH_HEAD || exit 1
+
+            if ! node _scraper/build-all.mjs; then
+              echo "::error title=Publishing has STOPPED::the rebuild on the new \
+              tip failed, so nothing was committed. The build's own errors are above."
+              exit 1
+            fi
+
+            # THE SAME GATE THE FIRST PASS PASSED THROUGH. The commit before
+            # the loop is only reached because the re-check step above was
+            # green; a rebuilt dataset has not been checked yet, and a retry
+            # that skipped it could commit exactly what that gate exists to
+            # refuse.
+            if ! node _scraper/selftest.mjs --publishing; then
+              echo "::error title=Publishing has STOPPED::the dataset rebuilt on \
+              the new tip failed the selftest, so nothing was committed — and \
+              nothing will publish until it is green. A guard that fires on a \
+              legitimate NEW posting is the guard's bug, not the posting's."
+              exit 1
+            fi
+
+            if [ -z "$(git status --porcelain data)" ]; then
+              # Not a failure, and the commonest outcome of a real race: the
+              # writer that beat us had already published everything we had.
+              echo "the other writer published it all — nothing left to commit"
+              exit 0
+            fi
+            git add data
+            git commit -m "OA data: publish queued submissions"
           done
-          echo "could not push after 5 attempts"
+
+          echo "::error title=Publishing has STOPPED::could not push after 5 \
+          attempts, so nothing was committed. Every attempt rebuilt cleanly on \
+          the newest tip, so this is contention, not a broken dataset — the next \
+          scheduled run republishes."
           exit 1

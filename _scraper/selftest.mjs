@@ -10,6 +10,7 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import { BUILDERS, plan } from './build-all.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -4818,9 +4819,18 @@ async function testDirectoryWiring() {
   const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
   ok(/MOBILE_PAGES = \[[^\]]*'universities\.html'/.test(pt),
     'universities.html mounts OAList now, so it is in MOBILE_PAGES — the standards\' own gate');
+  /* THROUGH THE ONE DEFINITION OF THE BUILD. The workflow used to name the
+     four builders as four steps; it calls build-all.mjs now, so the claim is
+     followed one level down rather than weakened — the run that publishes the
+     postings still rebuilds the directory, and still does it LAST, over the
+     files the others just wrote. */
   const wf = await readFile(path.join(HERE, '..', '.github', 'workflows', 'oa-jobs-build.yml'), 'utf8');
-  ok(wf.includes('build-directory.mjs'),
+  ok(wf.includes('build-all.mjs'), 'oa-jobs-build.yml runs the whole build through build-all.mjs');
+  const names = BUILDERS.map((b) => b.script);
+  ok(names.includes('build-directory.mjs'),
     'oa-jobs-build.yml rebuilds the directory in the run that publishes the postings');
+  eq(names[names.length - 1], 'build-directory.mjs',
+    'and does it LAST — it reads the files the Firestore builders just rewrote');
 
   /* THE OM-LIST ENRICHMENT IS WIRED END TO END (owner, 2026-08-24): the
      curated module is name-clean under the site's own canon, the build feeds
@@ -8072,6 +8082,77 @@ async function testReviewWiring() {
       `${name} runs on workflow_run, so its checkout must name the branch tip ` +
       '(github.ref_name) — the default github.sha is the TRIGGERING run\'s head');
   }
+
+  /* ------------- A REJECTED PUSH IS REBUILT, NEVER REBASED (2026-08-26)
+
+     Everything under data/ is a build OUTPUT, so a rejected push has nothing
+     to reconcile. `git pull --rebase` sat here and asked git to merge two
+     independently GENERATED copies of the same file: data/jobs-meta.json
+     carries a `generated` timestamp, so the same lines always differ and the
+     rebase conflicted BY CONSTRUCTION — and where it had SUCCEEDED it would
+     have been worse, pushing a snapshot built BEFORE the other writer's
+     commit and dropping their rows with nothing to show it.
+
+     The recovery that suits generated files is to throw our own commit away,
+     take their tip, and rebuild on top of it. Four things have to hold for
+     that, and each alone is enough to break it, so each is pinned. */
+  const commitStep = (buildSrc.match(/\n      - name: Commit\n([\s\S]*)$/) || [])[1] || '';
+  ok(commitStep, 'oa-jobs-build.yml has a Commit step to read');
+  /* read with the comments stripped: the step EXPLAINS the rebase it no longer
+     does, and a guard that cannot tell the explanation from the command would
+     have to be satisfied by deleting the explanation. */
+  const commitScript = commitStep.split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
+  ok(!/git\s+(?:pull|rebase)\b/.test(commitScript),
+    'the retry never rebases data/ — a generated file has no common history to ' +
+    'reconcile, and the conflict lands in whichever line carries the timestamp');
+  ok(/git reset --hard FETCH_HEAD/.test(commitStep),
+    'it discards our commit and takes the other writer\'s tip instead');
+  ok(/node _scraper\/build-all\.mjs/.test(commitStep),
+    'then REBUILDS on it — which is only possible because the build is one ' +
+    'script: a workflow step cannot re-run the steps before it, so while "what ' +
+    'a build is" lived in four YAML steps the retry could not perform one');
+  ok(/node _scraper\/selftest\.mjs --publishing/.test(commitStep),
+    'and puts the rebuilt dataset through the same gate the first pass passed — ' +
+    'a retry that skipped it could commit exactly what that gate exists to refuse');
+
+  /* THE REBUILD NEEDS THE BUILD'S OWN CREDENTIALS, and losing them would fail
+     SILENTLY rather than loudly: without FIREBASE_SERVICE_ACCOUNT the three
+     Firestore builders are skipped (see plan() below), so the rebuild would
+     leave the other writer's data/ exactly as it found it, find nothing to
+     commit, and exit 0 reporting "the other writer published it all" — while
+     this run's postings went nowhere. */
+  const envOf = (step) => {
+    const m = step.match(/(?:^|\n) {8}env:\n([\s\S]*?)\n {8}run:/);
+    return m ? [...m[1].matchAll(/^ +([A-Z][A-Z0-9_]*):/gm)].map((x) => x[1]).sort() : [];
+  };
+  const buildStep =
+    (buildSrc.match(/\n      - name: Publish everything queued\n([\s\S]*?)\n      - name: /) || [])[1] || '';
+  ok(envOf(buildStep).includes('FIREBASE_SERVICE_ACCOUNT'),
+    'the build step is given the credential that decides whether anything is read at all');
+  eq(envOf(commitStep), envOf(buildStep),
+    'and the Commit step carries exactly the same set — its retry rebuilds, and a ' +
+    'rebuild reads Firestore, Drive and SMTP just as the first pass did');
+
+  /* AND THE GATE THE FOUR STEPS USED TO CARRY IS STILL A GATE. Each build
+     step had `if: steps.gate.outputs.ready == 'true'` except the directory
+     one, which reads only committed files and therefore always ran. Folding
+     them into one script had to keep that distinction: drop it one way and a
+     run without the secret tries to read Firestore with nothing to read it
+     with, drop it the other and a posting's new card waits for a secret its
+     build never needed. */
+  eq(plan({ firebase: false }).map((b) => b.script), ['build-directory.mjs'],
+    'without the service account only the offline directory build runs');
+  eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
+    'with it, the whole build does');
+
+  /* A BUILDER NOBODY CALLS IS A FILE THAT SILENTLY STOPS RUNNING. Nothing in
+     the workflows names the four scripts any more — build-all.mjs is the one
+     caller — so a fifth builder added beside them would simply never run, and
+     the only symptom would be a dataset that stopped moving. */
+  const builderFiles = (await readdir(HERE))
+    .filter((f) => /^build-.*\.mjs$/.test(f) && f !== 'build-all.mjs').sort();
+  eq(BUILDERS.map((b) => b.script).sort(), builderFiles,
+    'build-all.mjs runs every builder in _scraper — it is the only thing that calls one');
 
   /* AND EVERY NAMING SWEEP IS IN THAT ROLE — the half the flag cannot deliver
      on its own.

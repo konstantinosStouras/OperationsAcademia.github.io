@@ -1408,14 +1408,67 @@ file: a workflow the build listens to may not also dispatch to it, whichever
 workflow that is; any data writer running on `workflow_run` must name the
 branch tip; and the build keeps answering `oa-jobs-changed`.
 
-**The retry loop is still wrong and is left for its own change.** `git pull
---rebase` asks git to reconcile two independently GENERATED copies of a file;
-where it conflicts the run dies mid-rebase, and where it SUCCEEDS it is worse —
-it would push a `data/` snapshot built before the other writer's commit,
-dropping their rows. The right recovery for build outputs is to discard the
-generated commit, take the new tip and re-run the build (idempotent, reads
-Firestore plus the committed files). That needs the four `build-*.mjs` calls
-reachable from the Commit step, which is a restructure rather than a one-liner.
+### A rejected push is REBUILT, never rebased
+
+Everything under `data/` is a build OUTPUT, so a rejected push has nothing to
+reconcile. `git pull --rebase` sat in the Commit step and asked git to merge
+two independently GENERATED copies of the same file: `data/jobs-meta.json`
+carries a `generated` timestamp and row counts, so the same lines always
+differ and the rebase **conflicted by construction** — which is how the
+duplicate build above ended its run red. And where it had SUCCEEDED it would
+have been worse than failing: it would have pushed a `data/` snapshot built
+BEFORE the other writer's commit, dropping their rows with nothing anywhere to
+show it had happened.
+
+The recovery that suits generated files is the other one: **throw our commit
+away, take their tip, and rebuild on top of it** — `git fetch` → `git reset
+--hard FETCH_HEAD` → build → re-check → commit, five times before giving up.
+The result carries BOTH writers' work, because the build derives everything
+from Firestore plus the committed files rather than from what we had a minute
+ago.
+
+**That needed the build to be ONE thing, which is why `_scraper/build-all.mjs`
+exists.** A workflow step cannot re-run the steps before it, so while "what a
+build is" lived in four YAML steps the retry could not perform one — reaching
+for a rebase was the only move available to it. The four builders are now a
+list in one script, in dependency order, and the workflow calls it twice: once
+as its own step, once from inside the loop. **A new builder goes in `BUILDERS`
+and nowhere else** — nothing in the workflows names a `build-*.mjs` any more,
+so one added beside them would simply never run, and the only symptom would be
+a dataset that quietly stopped moving (the selftest pins the list against the
+directory).
+
+Four properties hold it together, each pinned in `testReviewWiring` and each
+verified by reintroducing the bug:
+
+* **no rebase** (read with the comments stripped — the step still EXPLAINS the
+  rebase it no longer does, and a guard that could not tell the explanation
+  from the command would have to be satisfied by deleting the explanation);
+* **the rebuilt dataset goes through the SAME `selftest --publishing` gate**
+  the first pass passed, or a retry could commit exactly what that gate exists
+  to refuse;
+* **the Commit step carries the build step's whole credential set.** Losing it
+  fails silently rather than loudly: without `FIREBASE_SERVICE_ACCOUNT` the
+  three Firestore builders are skipped, so the rebuild would leave the other
+  writer's `data/` as it found it, see nothing to commit, and exit 0 saying
+  *"the other writer published it all"* while this run's postings went nowhere;
+* **the per-step Firebase gate survives the fold** — `plan()` skips the three
+  Firestore builders without the secret and always runs the offline directory
+  build, which is exactly the `if: steps.gate.outputs.ready == 'true'` the four
+  steps carried.
+
+Re-running is safe, and not by luck: the build already fires on a schedule, a
+dispatch and a `workflow_run`, so running it twice in quick succession is its
+ordinary life. Every builder REPLACES `data/` from its sources;
+`transferUploads` files an advert into Drive only while the document still has
+`adUploadPath && !adUrl`; and the "what changed" e-mail diffs the previous
+SERVED file against the one about to be written, so rebuilding on the new tip
+makes it more accurate rather than duplicating it — what the other writer
+already published is no longer a change.
+
+Finding nothing to commit after a rebuild is a **success**, not a failure, and
+the commonest outcome of a real race: the writer that beat us had already
+published everything we held.
 
 **The functions are deployed BY HAND** (`firebase deploy --only functions
 --project operations-academia`, from the repository root), and a doorbell that
