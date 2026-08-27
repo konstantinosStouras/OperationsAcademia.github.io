@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:24:04.187Z",
+ "generated": "2026-08-27T09:25:35.962Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -783,6 +783,10 @@
   },
   {
    "v": "James Madison University",
+   "n": 1
+  },
+  {
+   "v": "Johns Hopkins University",
    "n": 1
   },
   {
@@ -1654,10 +1658,6 @@
    "n": 0
   },
   {
-   "v": "Johns Hopkins University",
-   "n": 0
-  },
-  {
    "v": "Kedge Business School",
    "n": 0
   },
@@ -2144,6 +2144,10 @@
    "n": 1
   },
   {
+   "v": "Carey Business School",
+   "n": 1
+  },
+  {
    "v": "Carlos Alvarez College of Business",
    "n": 1
   },
@@ -2389,10 +2393,6 @@
   },
   {
    "v": "Cardiff Business School",
-   "n": 0
-  },
-  {
-   "v": "Carey Business School",
    "n": 0
   },
   {
@@ -3778,6 +3778,10 @@
    "n": 1
   },
   {
+   "v": "Operations Management and Business Analytics",
+   "n": 1
+  },
+  {
    "v": "Operations Research and AI",
    "n": 1
   },
@@ -4395,10 +4399,6 @@
   },
   {
    "v": "Operations Group of the Division of Strategy, Entrepreneurship, and Operations",
-   "n": 0
-  },
-  {
-   "v": "Operations Management and Business Analytics",
    "n": 0
   },
   {
