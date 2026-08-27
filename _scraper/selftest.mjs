@@ -10,7 +10,7 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8014,6 +8014,64 @@ async function testReviewWiring() {
     path.join(HERE, '..', '.github', 'workflows', 'oa-checks.yml'), 'utf8');
   ok(/node _scraper\/selftest\.mjs\s*$/m.test(prCheck),
     'while the PR check runs it strict — the one place a naming duplicate is meant to fail');
+
+  /* ------------------------------- ONE EVENT, ONE BUILD (2026-08-26)
+
+     `oa-jobs-build.yml` is chained to the sheet read by `workflow_run`, AND
+     the sheet read used to `curl` a `repository_dispatch` at the end of its
+     own run. Both fired: one sheet read started two builds three seconds
+     apart, from the same base, doing identical work. The shared
+     `oa-jobs-data-*` concurrency group cannot dedupe them — with
+     `cancel-in-progress: false` the second QUEUES rather than being dropped —
+     so the loser rebuilt data/, had its push rejected, and its rebase
+     conflicted in the generated data/jobs-meta.json.
+
+     Pinned as a RULE rather than as "the sheet has no curl": a workflow the
+     build already listens to must not also ring its doorbell, whichever
+     workflow that turns out to be. */
+  const wfDir = path.join(HERE, '..', '.github', 'workflows');
+  const buildSrc = await readFile(path.join(wfDir, 'oa-jobs-build.yml'), 'utf8');
+
+  const chainedNames = [...buildSrc.matchAll(/workflows:\s*\[([^\]]*)\]/g)]
+    .flatMap((m) => m[1].split(',')
+      .map((v) => v.trim().replace(/^["']|["']$/g, ''))
+      .filter(Boolean));
+  ok(chainedNames.length > 0,
+    'oa-jobs-build is chained to the sheet read by workflow_run — that IS the doorbell');
+
+  for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
+    const src = await readFile(path.join(wfDir, file), 'utf8');
+    const name = (src.match(/^name:\s*(.+)$/m) || [])[1];
+    if (!name || !chainedNames.includes(name.trim())) continue;
+    ok(!/"event_type"\s*:\s*"oa-jobs-changed"/.test(src),
+      `${file} is already chained to oa-jobs-build by workflow_run, so it must ` +
+      'not ALSO dispatch oa-jobs-changed — that fires the build twice for one event');
+  }
+
+  /* …and the build KEEPS that dispatch trigger, which is a different producer:
+     the Cloud Function's doorbell for a posting made or edited on the site. It
+     reads as dead code now that nothing in CI sends it (the functions are not
+     deployed), and tidying it away would silently break the instant path the
+     moment they are. */
+  ok(/repository_dispatch:\s*\n\s*types:\s*\[oa-jobs-changed\]/.test(buildSrc),
+    'oa-jobs-build still answers oa-jobs-changed — the Cloud Function\'s own doorbell');
+
+  /* ---------------------- A CHAINED BUILD STARTS FROM THE BRANCH TIP
+
+     `actions/checkout` defaults to `github.sha`, and on a `workflow_run` event
+     that is the head of the run that TRIGGERED it. The producer commits before
+     it finishes, so that SHA is already stale: the build rebuilt data/ from it
+     and its push was rejected. Both of the 2026-08-26 failures were on this
+     path. Naming the ref the Commit step pushes to makes the push a
+     fast-forward. */
+  for (const name of WRITERS) {
+    const src = await readFile(path.join(wfDir, name), 'utf8');
+    if (!/^\s*workflow_run:/m.test(src)) continue;
+    const checkout = src.match(/uses: actions\/checkout@[^\n]*\n([\s\S]*?)(?=\n\s*- )/);
+    ok(checkout && /ref:\s*\$\{\{\s*github\.ref_name\s*\}\}/.test(checkout[1]),
+      `${name} runs on workflow_run, so its checkout must name the branch tip ` +
+      '(github.ref_name) — the default github.sha is the TRIGGERING run\'s head');
+  }
 
   /* AND EVERY NAMING SWEEP IS IN THAT ROLE — the half the flag cannot deliver
      on its own.

@@ -1366,6 +1366,57 @@ schedule that a decision could have started**.
 The schedules stay as the safety net and every job is idempotent, so a missed
 doorbell costs a delay and never a posting.
 
+### One event, one build
+
+The sheet read rang the build's doorbell by `curl` AND `oa-jobs-build.yml` was
+already chained to it by `workflow_run: [completed]`. Both fired, so one sheet
+read started **two builds three seconds apart** (2026-08-26: #856 from the
+curl, #857 from the chain), from the same base, doing identical work.
+
+**The shared `oa-jobs-data-*` concurrency group cannot dedupe that** —
+`cancel-in-progress: false` QUEUES the second run rather than dropping it,
+which is right for two genuinely different fires and useless for one event
+counted twice. The loser rebuilt `data/`, had its push rejected, and its
+rebase **conflicted in `data/jobs-meta.json`** — a generated file carrying a
+timestamp, so the same lines always differ and a textual rebase of it cannot
+succeed.
+
+Nothing was ever lost (the next 20-minute tick republishes), but the run went
+red, and a red run of that build reads exactly like its own "Publishing has
+STOPPED" alarm — the one failure this repository has trained itself to drop
+everything for. **Crying wolf on that alarm is the cost worth removing.**
+
+Two causes, both removed:
+
+* **the duplicate doorbell.** The curl is gone; the `workflow_run` chain was
+  always the more robust half (it fires whatever the conclusion, and needs no
+  token). `repository_dispatch: [oa-jobs-changed]` STAYS on the build — that
+  is the Cloud Function's own doorbell for a posting made or edited on the
+  site, a different producer. It reads as dead code while the functions are
+  undeployed, and tidying it away would silently break the instant path the
+  moment they are, so the selftest pins it.
+* **the stale checkout.** `actions/checkout` defaults to `github.sha`, and on
+  a `workflow_run` event that is the head of the run that TRIGGERED it — which
+  the producer has already moved past by committing before it finished. So the
+  build rebuilt `data/` from a base one commit behind BY CONSTRUCTION, and both
+  of that day's failures were on this path. It names `ref: ${{ github.ref_name }}`
+  now — the same ref the Commit step pushes to — which makes the push a
+  fast-forward.
+
+`testReviewWiring` pins all three as rules rather than as facts about one
+file: a workflow the build listens to may not also dispatch to it, whichever
+workflow that is; any data writer running on `workflow_run` must name the
+branch tip; and the build keeps answering `oa-jobs-changed`.
+
+**The retry loop is still wrong and is left for its own change.** `git pull
+--rebase` asks git to reconcile two independently GENERATED copies of a file;
+where it conflicts the run dies mid-rebase, and where it SUCCEEDS it is worse —
+it would push a `data/` snapshot built before the other writer's commit,
+dropping their rows. The right recovery for build outputs is to discard the
+generated commit, take the new tip and re-run the build (idempotent, reads
+Firestore plus the committed files). That needs the four `build-*.mjs` calls
+reachable from the Commit step, which is a restructure rather than a one-liner.
+
 **The functions are deployed BY HAND** (`firebase deploy --only functions
 --project operations-academia`, from the repository root), and a doorbell that
 was never deployed looks exactly like a site that is simply slow — there is no

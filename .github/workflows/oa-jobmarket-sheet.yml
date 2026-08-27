@@ -152,18 +152,26 @@ jobs:
           echo "could not push after 5 attempts"
           exit 1
 
-      # The postings only reach the site when oa-jobs-build.yml rebuilds
-      # data/jobs.json from the database AND this dataset. Ringing its doorbell
-      # is what makes a sheet edit visible within minutes of this run rather
-      # than at the next 20-minute tick.
-      - name: Publish what the sheet added
-        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          curl -sS -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/dispatches" \
-            -d '{"event_type":"oa-jobs-changed"}' || \
-            echo "::warning::could not ring the build — the next scheduled run picks it up"
+      # NO DOORBELL HERE. The postings only reach the site when
+      # oa-jobs-build.yml rebuilds data/jobs.json from the database AND this
+      # dataset, and that build is ALREADY chained to this workflow by its own
+      # `workflow_run: [completed]` trigger — so it starts the moment this run
+      # finishes, whatever the conclusion, which is the same latency the curl
+      # that used to sit here bought.
+      #
+      # It fired BOTH, and that was the bug (2026-08-26). One sheet read
+      # started two builds three seconds apart — #856 from this curl, #857
+      # from the workflow_run chain — doing identical work from the same base.
+      # The shared `oa-jobs-data-*` concurrency group cannot dedupe them:
+      # `cancel-in-progress: false` QUEUES a second run rather than dropping
+      # it. The loser rebuilt data/, had its push rejected, and its rebase
+      # conflicted in data/jobs-meta.json — which is generated and carries a
+      # timestamp, so the same lines always differ. Publishing was never at
+      # risk (the next tick republishes) but the run went red, and a red run
+      # of that build reads exactly like its own "Publishing has STOPPED"
+      # alarm, which is the one failure this repository has trained itself to
+      # drop everything for.
+      #
+      # `repository_dispatch: [oa-jobs-changed]` stays on the build itself:
+      # that is the Cloud Function's doorbell for a posting made or edited on
+      # the site, a different producer with nothing to do with this workflow.

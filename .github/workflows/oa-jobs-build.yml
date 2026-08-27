@@ -59,6 +59,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+        with:
+          # THE TIP OF THE BRANCH WE WILL PUSH TO, named explicitly — not the
+          # default, which is `github.sha`. On a `workflow_run` event that is
+          # the head of the run that TRIGGERED us, and the sheet read commits
+          # before it finishes, so by the time this job starts that SHA is
+          # already one commit behind. The build then rebuilt data/ from a
+          # stale base and its push was rejected: two of the failures on
+          # 2026-08-26 were exactly this, and both were on the workflow_run
+          # path. Checking out what the Commit step below pushes to (the same
+          # `github.ref_name`) makes that push a fast-forward.
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-node@v5
         with:
