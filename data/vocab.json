@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:25:35.962Z",
+ "generated": "2026-08-27T09:28:38.545Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1386,6 +1386,10 @@
    "n": 1
   },
   {
+   "v": "University of Washington",
+   "n": 1
+  },
+  {
    "v": "University of Washington-Tacoma (Milgard School of Business)",
    "n": 1
   },
@@ -1990,10 +1994,6 @@
    "n": 0
   },
   {
-   "v": "University of Washington",
-   "n": 0
-  },
-  {
    "v": "University of Waterloo",
    "n": 0
   },
@@ -2285,6 +2285,10 @@
   },
   {
    "v": "Miami Herbert Business School",
+   "n": 1
+  },
+  {
+   "v": "Michael G. Foster School of Business",
    "n": 1
   },
   {
@@ -2701,10 +2705,6 @@
   },
   {
    "v": "Michael F. Price College of Business",
-   "n": 0
-  },
-  {
-   "v": "Michael G. Foster School of Business",
    "n": 0
   },
   {
@@ -3651,6 +3651,10 @@
   },
   {
    "v": "Management Science/ Department. Management and Technology",
+   "n": 1
+  },
+  {
+   "v": "Marketing and International Business",
    "n": 1
   },
   {
@@ -10773,11 +10777,13 @@
     "Michael G. Foster School of Business"
    ],
    "units": [
-    "Information Systems and Operations Management"
+    "Information Systems and Operations Management",
+    "Marketing and International Business"
    ],
    "bySchool": {
     "Michael G. Foster School of Business": [
-     "Information Systems and Operations Management"
+     "Information Systems and Operations Management",
+     "Marketing and International Business"
     ]
    }
   },
@@ -11817,7 +11823,8 @@
    "Marketing and Supply Chain Management"
   ],
   "Michael G. Foster School of Business": [
-   "Information Systems and Operations Management"
+   "Information Systems and Operations Management",
+   "Marketing and International Business"
   ],
   "Michael Smurfit Graduate Business School": [
    "Management Area"
