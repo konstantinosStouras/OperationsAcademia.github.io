@@ -1,5 +1,36 @@
 [
  {
+  "id": "2027-alma-college-20260826",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-26",
+  "institution": "Alma College",
+  "department": "Business Administration",
+  "school": "",
+  "unit": "Business Administration",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "October 29, 2026",
+  "applyByDate": "2026-10-29",
+  "comments": "Full-time, tenure-track Assistant/Associate Professor of Business Analytics and Sports Management",
+  "country": "United States",
+  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179539061&Title=Assistant%2FAssociate%20Professor%20of%20Business%20Analytics%20and%20Sports%20Management",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Alma%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-27T15:56:54Z",
+  "owner": ""
+ },
+ {
   "id": "2027-american-university-kogod-school-of-business-20260826",
   "year": 2027,
   "years": [
