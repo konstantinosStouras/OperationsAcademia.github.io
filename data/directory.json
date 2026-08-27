@@ -8999,6 +8999,18 @@
   "lng": 0.121576
  },
  {
+  "id": "university-of-central-arkansas____logistics-and-supply-chain-management",
+  "institution": "University of Central Arkansas",
+  "department": "Logistics and Supply Chain Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
+ },
+ {
   "id": "university-of-chicago__booth-school-of-business",
   "institution": "University of Chicago",
   "school": "Booth School of Business",
@@ -11083,6 +11095,19 @@
   ],
   "n": 2,
   "lastPosted": "2026-01-31"
+ },
+ {
+  "id": "university-of-tennessee-knoxville__haslam-college-of-business__business-analytics-and-statistics",
+  "institution": "University of Tennessee - Knoxville",
+  "school": "Haslam College of Business",
+  "department": "Business Analytics and Statistics",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-06-13"
  },
  {
   "id": "university-of-texas-at-arlington____ai",

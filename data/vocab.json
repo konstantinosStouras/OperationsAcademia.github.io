@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:28:38.545Z",
+ "generated": "2026-08-27T09:32:07.245Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -143,6 +143,10 @@
   },
   {
    "v": "University of South Florida",
+   "n": 3
+  },
+  {
+   "v": "University of Tennessee - Knoxville",
    "n": 3
   },
   {
@@ -411,10 +415,6 @@
   },
   {
    "v": "University of Oklahoma",
-   "n": 2
-  },
-  {
-   "v": "University of Tennessee - Knoxville",
    "n": 2
   },
   {
@@ -1247,6 +1247,10 @@
   },
   {
    "v": "University of Cambridge",
+   "n": 1
+  },
+  {
+   "v": "University of Central Arkansas",
    "n": 1
   },
   {
@@ -2220,6 +2224,10 @@
    "n": 1
   },
   {
+   "v": "Haslam College of Business",
+   "n": 1
+  },
+  {
    "v": "Heinz College of Information Systems and Public Policy",
    "n": 1
   },
@@ -2569,10 +2577,6 @@
   },
   {
    "v": "Haskayne School of Business",
-   "n": 0
-  },
-  {
-   "v": "Haslam College of Business",
    "n": 0
   },
   {
@@ -3142,6 +3146,10 @@
    "n": 2
   },
   {
+   "v": "Logistics and Supply Chain Management",
+   "n": 2
+  },
+  {
    "v": "Management, Marketing and Strategy",
    "n": 2
   },
@@ -3295,6 +3303,10 @@
   },
   {
    "v": "Business Analytics and Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Business Analytics and Statistics",
    "n": 1
   },
   {
@@ -3615,10 +3627,6 @@
   },
   {
    "v": "Logistics and Supply Chain",
-   "n": 1
-  },
-  {
-   "v": "Logistics and Supply Chain Management",
    "n": 1
   },
   {
@@ -4031,10 +4039,6 @@
   },
   {
    "v": "Business Analytics and Operations",
-   "n": 0
-  },
-  {
-   "v": "Business Analytics and Statistics",
    "n": 0
   },
   {
@@ -9458,6 +9462,17 @@
     ]
    }
   },
+  "University of Central Arkansas": {
+   "schools": [],
+   "units": [
+    "Logistics and Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Logistics and Supply Chain Management"
+    ]
+   }
+  },
   "University of Chicago": {
    "schools": [
     "Booth School of Business"
@@ -10534,13 +10549,19 @@
    }
   },
   "University of Tennessee - Knoxville": {
-   "schools": [],
+   "schools": [
+    "Haslam College of Business"
+   ],
    "units": [
+    "Business Analytics and Statistics",
     "Supply Chain Management"
    ],
    "bySchool": {
     "": [
      "Supply Chain Management"
+    ],
+    "Haslam College of Business": [
+     "Business Analytics and Statistics"
     ]
    }
   },
@@ -11658,6 +11679,7 @@
   ],
   "Haslam College of Business": [
    "Business Analytics",
+   "Business Analytics and Statistics",
    "Supply Chain"
   ],
   "Hebrew University Business School": [
