@@ -39,17 +39,29 @@ build log instead of e-mailed, so the record still exists.
 The function needs permission to fire a `repository_dispatch` event — nothing
 more.
 
-1. GitHub → your avatar → **Settings** → **Developer settings** →
+**It is in your ACCOUNT settings, not the repository's.** The repository has a
+Settings tab of its own and it is the wrong one — it has no Developer settings
+section, so the path below simply is not there. Tell them apart by the address:
+the repository's is `github.com/<you>/<repo>/settings`, your account's is
+`github.com/settings`. Straight there:
+
+**<https://github.com/settings/personal-access-tokens/new>**
+
+1. Or navigate: your **avatar**, top right of any GitHub page → **Settings** →
+   the very **bottom** of the left sidebar → **Developer settings** →
    **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
 2. Token name: `OA instant publish`.
-3. **Expiration**: custom, one year (the maximum). Put a note in your calendar —
+3. **Resource owner**: your own account (`konstantinosStouras`) — not an
+   organisation, or the repository will not be on the list in step 5.
+4. **Expiration**: custom, one year (the maximum). Put a note in your calendar —
    when it expires the function logs `dispatch refused (401)` and the site
    silently falls back to the 20-minute schedule, which is easy not to notice.
-4. **Repository access**: *Only select repositories* →
+   It happened: the token died and nothing said so for nine days.
+5. **Repository access**: *Only select repositories* →
    `OperationsAcademia.github.io`.
-5. **Permissions** → Repository permissions → **Contents: Read and write**.
+6. **Permissions** → Repository permissions → **Contents: Read and write**.
    Nothing else. (This is the permission `repository_dispatch` requires.)
-6. Generate, and copy the `github_pat_…` value.
+7. Generate, and copy the `github_pat_…` value — GitHub shows it once.
 
 ## 2. Give it to the function as a secret
 
@@ -61,6 +73,12 @@ firebase functions:secrets:set GH_DISPATCH_TOKEN --project operations-academia
 
 Paste the PAT when prompted. The secret lives in Google Secret Manager, not in
 any file.
+
+**Step 3 is not optional, even when you are only replacing the token.** Each
+deployed function pins a secret VERSION (`GH_DISPATCH_TOKEN` version 1, say),
+so a new version is invisible to it until it is deployed again. Setting the
+secret and stopping there leaves the functions on the dead token, still logging
+`dispatch refused`, with every surface saying the deploy succeeded.
 
 ## 3. Deploy the function
 
