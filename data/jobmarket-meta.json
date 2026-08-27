@@ -1,14 +1,14 @@
 {
- "generated": "2026-08-27T15:52:49.896Z",
- "count": 480,
+ "generated": "2026-08-27T15:54:34.836Z",
+ "count": 481,
  "newestPosted": "2026-08-26",
  "oldestPosted": "2025-01-03",
  "years": {
   "2026": 426,
-  "2027": 54
+  "2027": 55
  },
  "countries": {
-  "United States": 365,
+  "United States": 366,
   "United Kingdom": 17,
   "China": 12,
   "Canada": 8,
@@ -45,7 +45,7 @@
  "levels": {
   "Assistant Professor": 352,
   "Other Ranks": 171,
-  "Non-tenure track (teaching) position": 76,
+  "Non-tenure track (teaching) position": 77,
   "Post-Doc": 14,
   "Visiting Faculty (various levels)": 8
  },
