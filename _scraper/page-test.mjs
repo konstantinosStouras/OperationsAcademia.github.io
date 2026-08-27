@@ -5135,19 +5135,28 @@ for (const w of [320, 360, 390, 430]) {
       const b = document.querySelector('.oa-export');
       const r = b.getBoundingClientRect();
       const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
-      const clear = document.querySelector('.oa-clear').getBoundingClientRect();
-      return { title: b.title, disabled: b.disabled, h: Math.round(r.height),
-        w: Math.round(r.width), rightGap: Math.round(cell.right - r.right),
-        below: Math.round(r.top - clear.bottom),
+      const c = document.querySelector('.oa-clear');
+      const clear = c.getBoundingClientRect();
+      return { title: b.title, text: b.textContent.trim(), disabled: b.disabled,
+        h: Math.round(r.height), w: Math.round(r.width),
+        rightGap: Math.round(cell.right - r.right),
+        below: Math.round(r.top - clear.bottom), clearW: Math.round(clear.width),
         locked: !!document.querySelector('.v3-lock.is-locked') };
     });
     ok(!btn.locked, 'jobs export: signed in, the filter bar is live');
     ok(!btn.disabled && btn.title.includes(String(shown)),
       `jobs export: the button names what it would write (${shown} postings)`);
-    /* SMALL AND DISCRETE was the instruction: it is under Clear rather than
-       beside it, right-aligned, and shorter than the button the bar is for. */
-    ok(btn.h <= 34 && btn.w < 120,
-      `jobs export: it is small (${btn.w}x${btn.h}) — an extra, not a control`);
+    /* SMALLER THAN CLEAR was the instruction — "an extra beside the controls
+       the bar is for" — and it is measured against Clear's own width rather
+       than a magic number, because that is what the instruction actually
+       says. It grew when the label gained its verb (2026-08-27, the owner on
+       the old one: "not very intuitive for the average user") — "Excel" names
+       a format and never the act. Still under Clear rather than beside it,
+       and right-aligned. */
+    ok(/download/i.test(btn.text) && /excel/i.test(btn.text),
+      `jobs export: the label says what it does and what you get (${JSON.stringify(btn.text)})`);
+    ok(btn.h <= 34 && btn.w < btn.clearW,
+      `jobs export: it stays smaller than Clear (${btn.w}x${btn.h} vs ${btn.clearW})`);
     ok(Math.abs(btn.rightGap) <= 1.5 && btn.below >= 0 && btn.below <= 20,
       'jobs export: …tucked under Clear filters at the bar\'s right edge');
 
@@ -5208,6 +5217,87 @@ for (const w of [320, 360, 390, 430]) {
     ok(m.h >= 40, `jobs export at 390px: a 40px+ target (${m.h}px)`);
     ok(m.w > m.barW * 0.7, 'jobs export at 390px: full width, like every other control');
     ok(m.over <= 1, 'jobs export at 390px: the page still does not scroll sideways');
+    ok(await q.evaluate(() => {
+      const b = document.querySelector('.oa-export');
+      const want = getComputedStyle(document.documentElement).getPropertyValue('--ok').trim();
+      const probe = document.createElement('span');
+      probe.style.color = want; document.body.appendChild(probe);
+      const resolved = getComputedStyle(probe).color; probe.remove();
+      return getComputedStyle(b).borderTopColor === resolved;
+    }), 'jobs export at 390px: …and keeps its green border — a thumb needs the ' +
+      'affordance more than a mouse does, not less');
+    await ctx.close();
+  }
+
+  /* -- THE TWO BUTTONS ARE THE COLOUR THEY MEAN, in both themes -----------
+
+     Owner, 2026-08-27, from a screenshot of the dark theme: Clear filters is
+     "very subtle" and the Excel download "not very intuitive for the average
+     user". Both are now coloured — Clear RED (it throws a search away), the
+     download GREEN (the colour a spreadsheet wears everywhere else, and what
+     the owner asked for) — and this measures what the
+     browser actually paints rather than what a stylesheet says, because these
+     rules live in TWO files (the engine's and the live design's override) and
+     only the second one reaches this page.
+
+     The tokens are resolved through the page's own custom properties, so the
+     check follows the palette instead of hard-coding a hex that a later theme
+     change would silently make wrong. The theme audit further down already
+     holds every one of these colours to AA on its own ground. */
+  {
+    const { ctx, q } = await jobsPage(READER);
+    for (const theme of ['light', 'dark']) {
+      await q.evaluate((v) => document.documentElement.setAttribute('data-theme', v), theme);
+      /* something has to be selected, or Clear is disabled and 45% faded */
+      await q.fill('#oaf-institution', 'a');
+      await q.waitForTimeout(400);
+      /* PARK THE POINTER FIRST. The hover pass below leaves Playwright's mouse
+         sitting on the download, and pressing Clear rebuilds the bar UNDER it
+         — so the second theme's "at rest" reading would be taken on a button
+         that is still hovered, and its ink would be --on-brand rather than
+         --ok: a green-on-green failure reported against a rule that is
+         perfectly correct. */
+      await q.mouse.move(4, 4);
+      await q.waitForTimeout(80);
+      const paint = await q.evaluate(() => {
+        const token = (name) => {
+          const want = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+          const probe = document.createElement('span');
+          probe.style.color = want; document.body.appendChild(probe);
+          const out = getComputedStyle(probe).color; probe.remove();
+          return out;
+        };
+        const clear = getComputedStyle(document.querySelector('.oa-clear'));
+        const exp = getComputedStyle(document.querySelector('.oa-export'));
+        return {
+          err: token('--err'), ok: token('--ok'),
+          clearBorder: clear.borderTopColor, clearInk: clear.color,
+          clearDisabled: document.querySelector('.oa-clear').disabled,
+          expBorder: exp.borderTopColor, expInk: exp.color, expGround: exp.backgroundColor,
+        };
+      });
+      ok(!paint.clearDisabled,
+        `filter buttons (${theme}): Clear is live, so its real colours are on screen`);
+      eq(paint.clearBorder, paint.err, `filter buttons (${theme}): Clear filters has a RED border`);
+      eq(paint.clearInk, paint.err, `filter buttons (${theme}): …and red ink, not a lone 1px outline`);
+      eq(paint.expBorder, paint.ok, `filter buttons (${theme}): the Excel download has a GREEN border`);
+      eq(paint.expInk, paint.ok, `filter buttons (${theme}): …with ink to match`);
+      ok(!/^(transparent|rgba\(0, 0, 0, 0\))$/.test(paint.expGround),
+        `filter buttons (${theme}): …on a ground of its own, so it reads as a button`);
+
+      /* hover FILLS it: the strongest signal a static page can give that a
+         thing is pressable, and the one a caption never has */
+      await q.hover('.oa-export');
+      await q.waitForTimeout(120);
+      const hov = await q.evaluate(() => {
+        const exp = getComputedStyle(document.querySelector('.oa-export'));
+        return { ground: exp.backgroundColor, ink: exp.color };
+      });
+      eq(hov.ground, paint.ok, `filter buttons (${theme}): hovering the download fills it green`);
+      ok(hov.ink !== paint.ok, `filter buttons (${theme}): …and flips its ink so the label survives`);
+      await q.evaluate(() => document.querySelector('.oa-clear').click());
+      await q.waitForTimeout(200);
+    }
     await ctx.close();
   }
 }

@@ -352,11 +352,17 @@
     return {
       key: 'export',
       className: 'oa-export',
-      label: '↓ Excel',
+      /* It said "↓ Excel", which names a FORMAT and never the act — "not very
+         intuitive for the average user" (owner, 2026-08-27), and a reader who
+         does not already know the list can be downloaded has no way to guess
+         it from that. The verb is what makes a button obvious, so the label
+         carries it and the format stays beside it; it is still a good deal
+         narrower than the Clear button it sits under, which is what "small"
+         asked for. The rest of what it does — how many postings, and that an
+         account is what unlocks it — cannot fit in any label and goes in the
+         tooltip and the accessible name below. */
+      label: '↓ Download Excel',
 
-      /* The label is deliberately short — the owner asked for something small
-         and discrete — so the button says what it does everywhere a label
-         cannot: its tooltip, its accessible name, and the count in both. */
       refresh: function (btn, api) {
         var A = G.OAAccounts;
         var n = api.view.length;

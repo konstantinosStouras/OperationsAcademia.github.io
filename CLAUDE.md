@@ -1761,10 +1761,10 @@ and canonicalises a posting typed with the annotation too.
 
 ## The job postings, as an Excel file
 
-A registered reader can take the list away: a small **"↓ Excel"** button under
-*Clear filters* on `jobs.html` writes an `.xlsx` of exactly the postings the
-page is showing (owner, 2026-08-26). Filter first and the file is that search;
-filter nothing and it is every posting on the page.
+A registered reader can take the list away: a small **"↓ Download Excel"**
+button under *Clear filters* on `jobs.html` writes an `.xlsx` of exactly the
+postings the page is showing (owner, 2026-08-26). Filter first and the file is
+that search; filter nothing and it is every posting on the page.
 
     assets/oa-xlsx.js       a minimal OOXML workbook writer (dual-mode)
     assets/oa-jobexport.js  what may be exported, and the button (dual-mode)
@@ -1838,6 +1838,52 @@ downloads nothing and opens the box, signed in downloads bytes that really are
 a workbook holding exactly the rows on screen, narrowing the search narrows the
 file, and at 390px the button is a 42px full-width target like every other
 control in the bar.
+
+### Small is not the same instruction as quiet
+
+The first build read the "small and discrete" instruction as *both*, and shipped
+muted ink on no ground at all with the label **"↓ Excel"**. From a screenshot of
+the dark theme (owner, 2026-08-27): that download is "not very intuitive for the
+average user", and *Clear filters* beside it — a neutral 1px outline on a card
+of neutral outlines — is "very subtle". Neither was a contrast failure: both
+clear AA on their own ground and always did, which the theme audit confirms on
+every run. They were **affordance** failures, and no contrast audit can see one.
+
+So the two controls in that bar are now the colour they MEAN, and the colour is
+doing the work a label cannot:
+
+* **Clear filters is RED** (`--err`) — border and ink. It is the button that
+  throws a search away, so red is what it is, not decoration. Still 45% faded
+  while disabled, which is honest: with nothing selected there is nothing to
+  clear, and its hover state is gated on `:not([disabled])` for the same reason
+  — the old rule lit up whether or not the button did anything.
+* **The Excel download is GREEN** (`--ok`) — border, ink and a pale ground
+  (`--ok-soft`), filling solid on hover. Filling is the strongest signal a
+  static page has that a thing is pressable, and it is exactly what a caption
+  never does.
+* **The label gained its VERB.** "Excel" names a format and never the act.
+  It is wider for it, and *smaller than Clear* is what "small" actually asked
+  for — so `page-test.mjs` measures it against Clear's own width rather than
+  against the magic 120px it used to carry.
+
+**Both rules live in TWO stylesheets and only one of them reaches the site.**
+`assets/oa-list.css` is the engine's own, inherited by every page that mounts
+OAList; `assets/v3.css` overrides it for the live design, and that override is
+what `jobs.html` paints. A fix applied to one alone is invisible on the site or
+lost on the next page — so `selftest.mjs` pins both files, and `page-test.mjs`
+measures what the browser really paints, **in both themes**, resolving `--err`
+and `--ok` through the page's own custom properties rather than hard-coding a
+hex a later palette change would silently falsify.
+
+`--err-soft` and `--ok-soft` were added to the palette for the two washes, and
+are defined in BOTH themes — the dark ones translucent like `--brand-soft`, so
+the tint works over whatever surface the button lands on. They are kept pale on
+purpose: the ink sitting on them is `--err`/`--ok`, and a heavier green tint
+drops the download under the 4.5:1 floor the theme audit measures.
+
+Clear is the ENGINE's button, so the red reaches every list page — jobs,
+previous markets, recent faculty, the universities directory and the one-pager's
+mounts. That is the point of the engine owning the bar.
 
 ## Mobile standards for tables and lists — MUST consult
 
