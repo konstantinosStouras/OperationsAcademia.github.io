@@ -1,14 +1,14 @@
 {
- "generated": "2026-08-26T22:29:33Z",
+ "generated": "2026-08-27T03:32:29Z",
  "current": "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8",
  "sheets": [
   {
    "id": "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8",
    "from": "seed",
    "discoveredAt": "",
-   "lastReadAt": "2026-08-26T22:29:33Z",
-   "rows": 576,
-   "newestPosted": "2026-08-25",
+   "lastReadAt": "2026-08-27T03:32:29Z",
+   "rows": 577,
+   "newestPosted": "2026-08-26",
    "tabs": [
     "2025 Jobs",
     "2025 NTT/PD",
@@ -26,10 +26,10 @@
   }
  ],
  "staleness": {
-  "lastCheckedAt": "2026-08-26T22:29:33Z",
+  "lastCheckedAt": "2026-08-27T03:32:29Z",
   "lastWarnedAt": "",
   "lastReason": "",
-  "newestPosted": "2026-08-25"
+  "newestPosted": "2026-08-26"
  },
  "note": "Written by _scraper/sync-jobmarket-sheet.mjs. Committed so the chain of workbooks survives a runner that keeps nothing between runs; edit only to point the sync at a different starting workbook."
 }
