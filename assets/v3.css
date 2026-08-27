@@ -1062,9 +1062,30 @@ figcaption .v3-portrait-links a:hover { color: var(--brand); }
 
 /* nothing to search yet (owner, 2026-08-17): while a dataset is EMPTY the
    bar, count and pager stay away — only the empty-state card speaks; the
-   engine flips .oa-data-empty per render, so data arriving brings them back */
+   engine flips .oa-data-empty per render, so data arriving brings them back.
+
+   .v3-lock is named too, and it has to be: armLock() in jobs.html wraps the
+   engine's bar in that div and moves the sign-in card in beside it, so hiding
+   the bar alone left a "Sign in to search these postings" card floating over
+   nothing. The one-posting focus below hides the same three for the same
+   reason (assets/oa-list.css). */
 body.v3 .oa-data-empty .oa-filters,
+body.v3 .oa-data-empty .v3-lock,
 body.v3 .oa-data-empty .oa-resultbar { display: none; }
+
+/* ONE posting, shown on its own (?job=<id>, cfg.focusParam in
+   assets/oa-list.js): the same three go away for the same reason — a filter
+   bar over a list of one narrows nothing, a pager reading "1 - 1 / 1" is
+   noise, and the sign-in lock wraps the bar rather than replacing it.
+
+   HERE, not in oa-list.css where the engine's own chrome lives, and that is
+   not tidiness: `body.v3 .oa-filters { display: grid }` above outranks any
+   selector that file can write, so the rule belongs where it can win. The way
+   back (.oa-focus-clear) is deliberately OUTSIDE all three, or a signed-out
+   reader following a shared link would be locked into it. */
+body.v3 .oa-focus .oa-filters,
+body.v3 .oa-focus .v3-lock,
+body.v3 .oa-focus .oa-resultbar { display: none; }
 
 body.v3 .oa-filter > label { color: var(--mut); }
 body.v3 .oa-filters input[type='search'],

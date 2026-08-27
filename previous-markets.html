@@ -224,6 +224,7 @@
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
+    <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -244,22 +245,18 @@
       'use strict';
       var U = window.OAList.safeUrl;
 
-      /* The market year, derived — never typed. Keep in step with
-         _scraper/jobs-model.mjs (marketYear/marketLabel): a market year runs
-         1 July of the previous year to 30 June of its own and is numbered by
-         the year it ends, so the roll is 1 JULY, getUTCMonth() (0-based) 6. */
-      function marketYear() {
-        var d = new Date();
-        return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
-      }
-      /* The SAME test the jobs page applies, so a posting is on exactly one of
-         the two pages: whatever is still current there is not archive here. */
-      function inCurrentMarket(row) {
-        var start = (marketYear() - 1) + '-07-01';
-        var deadline = String(row.applyByDate || '');
-        return (!!deadline && deadline >= new Date().toISOString().slice(0, 10)) ||
-          String(row.posted || '') >= start || Number(row.year) >= marketYear();
-      }
+      /* The market year and the window the JOBS page shows, from ONE
+         definition: assets/oa-jobnav.js, which jobs.html and /admin-area's
+         market-year report read too. A posting is on exactly one of the two
+         pages — whatever is still current there is not archive here — so the
+         test that decides it cannot be a copy each; this page and jobs.html
+         carried one apiece, byte-identical to each other and to
+         jobs-model.mjs's, and the report was about to need a third.
+         selftest.mjs pins the module against jobs-model.mjs over every served
+         posting. */
+      var NAV = window.OAJobNav;
+      function marketYear() { return NAV.marketYear(); }
+      function inCurrentMarket(row) { return NAV.inCurrentMarket(row); }
 
       /* A stored link that names this site by its full URL is re-pointed at
          the page it means, so it keeps working wherever the site is served
@@ -360,6 +357,15 @@
             mount: '#oa-past',
             data: '/data/past-postings.json',
             perPage: 10,
+
+            /* ?job=<id> shows ONE posting on its own. A posting flagged by
+               /admin-area's market-year report is one whose season disagrees
+               with its own dates — exactly the population most likely to have
+               rolled off the jobs page — so half of those links land HERE,
+               and the maintainer has to arrive on the card itself with its
+               Edit and Take down controls, not at the top of an archive
+               running back to 2014. */
+            focusParam: NAV.FOCUS_PARAM,
             strings: {
               loading: 'Loading past job postings…',
               emptyData: 'No past job postings are listed at the moment.',
@@ -368,8 +374,16 @@
               emptyFilteredHint: 'Try removing a filter, or clear them all to see every posting.',
               loadError: 'The past job postings could not be loaded.',
               loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
-              unit: 'postings'
+              unit: 'postings',
+              focusOne: 'Showing one past posting on its own.',
+              focusClear: 'Show all past postings',
+              focusMissing: 'That posting is not on this page.',
+              focusMissingHint: 'This page carries the seasons that have closed. ' +
+                'A posting still open for applications is on Job postings — and ' +
+                'one that has been taken down is on neither.'
             },
+            /* The way out CARRIES THE POSTING — see the jobs page. */
+            focusOther: { href: 'jobs.html', label: 'Job postings' },
             prepare: function (rows) {
               /* THE ARCHIVE'S OWN ROWS, named before the postings from
                  data/jobs.json are folded in beside them. Those are real

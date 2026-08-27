@@ -520,6 +520,79 @@
 
 .oa-loading { padding: 42px 10px; text-align: center; color: var(--mut, #767676); }
 
+/* ------------------------------------------------------ ONE posting, on its own
+
+   The ?job=<id> focus (cfg.focusParam in assets/oa-list.js): /admin-area's
+   market-year report links a NAMED posting, and the reader has to land on that
+   card with its Edit and Take down controls — not at the top of a list of ten
+   that may not even contain it.
+
+   So the surrounding controls go, exactly as they do for an empty dataset one
+   rule up: a filter bar over a list of one narrows nothing, a pager reading
+   "1 - 1 / 1" is noise, and — on the jobs page — the sign-in lock is wrapped
+   AROUND that bar (.v3-lock, armLock() in jobs.html), so hiding the bar alone
+   would leave a lock card sitting over nothing. It paints its own ground, so it
+   names its own ink; every value is a theme token with its old light value as
+   the fallback. */
+/* The three that go away are hidden in v3.css, beside the .oa-data-empty rule
+   they mirror, and NOT here — `body.v3 .oa-filters { display: grid }` is one
+   specificity point above anything this file can write, so a rule here would
+   silently do nothing on the one page with no sign-in lock to hide instead.
+   Measured, not guessed: previous-markets.html showed its bar over a
+   single-posting view while jobs.html did not, because there the wrapper was
+   what got hidden. */
+
+.oa-focusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--line, #e2e2e2);
+  border-left: 3px solid var(--brand, #0b6b52);
+  border-radius: 4px;
+  background: var(--bg-2, #fff);
+  color: var(--ink-2, #444);
+  font-size: 13.5px;
+}
+
+.oa-focusbar[hidden] { display: none; }
+
+.oa-focus-clear {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border: 1px solid var(--line, #d9d9d9);
+  border-radius: 4px;
+  background: var(--bg-2, #fff);
+  color: var(--ink, #222);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oa-focus-clear:hover { background: var(--bg-3, #f1f1f1); }
+
+/* The way out of "not on this page", carrying the posting with it. */
+.oa-focus-other { display: block; margin-top: 10px; font-weight: 600; }
+
+/* The id we were asked for, when this page does not carry it. It comes off the
+   URL, so it is rendered as TEXT and never as markup. */
+.oa-focus-id {
+  display: block;
+  margin-top: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--mut, #767676);
+  overflow-wrap: anywhere;
+}
+
+@media screen and (max-width: 640px) {
+  /* the mobile standard: a control is a full-width, finger-sized target */
+  .oa-focus-clear { width: 100%; min-height: 42px; }
+}
+
 /* --------------------------------------------------------------- responsive */
 
 @media screen and (max-width: 980px) {

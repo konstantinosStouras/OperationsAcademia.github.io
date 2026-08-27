@@ -492,11 +492,15 @@ function testMarketYear() {
 async function testPageHeadingRule() {
   const html = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
 
-  const m = html.match(/getUTCFullYear\(\)\s*\+\s*\(\s*d\.getUTCMonth\(\)\s*>=\s*(\d+)\s*\?\s*1\s*:\s*0\s*\)/);
-  ok(m, 'jobs.html derives the heading year rather than hard-coding a season');
-  // read from the model, never written down again — the page's copy of the
-  // rule is the one that drifts, so it is pinned to the constant itself
-  if (m) eq(Number(m[1]), MARKET_ROLL_MONTH, 'the page rolls in the same month as marketYear()');
+  /* The page no longer carries the roll rule; it reads it, from
+     assets/oa-jobnav.js, which testJobNavModule() pins against marketYear()
+     and inCurrentMarket() themselves. A copy of a rule on a page this suite
+     cannot execute is the copy that drifts, so the fix is to delete the copy
+     rather than to keep pinning it. */
+  ok(/var NAV = window\.OAJobNav;/.test(html) && /NAV\.marketYear\(\)/.test(html),
+    'jobs.html derives the heading year from the shared market rule');
+  ok(!/getUTCMonth\(\)/.test(html),
+    'and carries no copy of the roll month of its own');
 
   ok(/id="oa-jobs-heading"/.test(html), 'the heading element is addressable');
 
@@ -596,13 +600,15 @@ function testCollapseSameDay() {
    rules) or an invariant that spans two files — the cheapest guard that keeps
    a later edit from silently reopening the bug. */
 async function testFleetPins() {
-  // jobs.html's inline inCurrentMarket() mirrors the model's — the page ships
-  // no build step, so the copy is pinned here instead (like the heading rule).
+  /* jobs.html filters the list to the current market year — through the
+     SHARED rule (assets/oa-jobnav.js), not a copy of its own. See
+     testJobNavModule(), which pins that module against the two functions
+     below over every posting the site serves. */
   const jobsHtml = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
-  ok(/function inCurrentMarket\(row\)/.test(jobsHtml),
-    'jobs.html filters the list to the current market year');
-  ok(jobsHtml.includes("'-07-01'"),
-    "the page's market start is 1 July, the model's own roll day");
+  ok(/function inCurrentMarket\(row\) \{ return NAV\.inCurrentMarket\(row\); \}/.test(jobsHtml),
+    'jobs.html filters the list to the current market year, through the shared rule');
+  ok(!jobsHtml.includes("'-07-01'"),
+    'and writes the roll day down nowhere of its own');
   ok(/prepare:\s*function \(rows\) \{ return rows\.filter\(inCurrentMarket\); \}/.test(jobsHtml),
     'and the filter is wired into the list as its prepare step');
   // the model's own predicate, all three legs
@@ -644,33 +650,52 @@ async function testFleetPins() {
   const pastHtml = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
   ok(/!inCurrentMarket\(r\)/.test(pastHtml),
     'the past-markets archive is the complement of the jobs page');
-  /* Every page carrying an inline copy of the rule, in BOTH designs the site
-     serves: the live one at the root (whose one-pager holds the jobs teaser,
-     so it carries the rule as well as jobs.html does) and the 2026 design
-     archived at /v2/, whose pages still filter by season. */
+
+  /* THE LIVE PAGES READ THE RULE; THEY DO NOT CARRY IT. The three that filter
+     by season — jobs.html, previous-markets.html and the one-pager's jobs
+     teaser — had a byte-identical copy of marketYear() and inCurrentMarket()
+     each, and /admin-area's market-year report needed a fourth to say WHICH
+     page a flagged posting is on. Four copies of one answer is what
+     oa-countries.js, oa-schools.js and oa-news.js all exist to prevent, so
+     there is one now and the pages read it. */
   for (const [rel, html] of [
     ['jobs.html', jobsHtml],
     ['previous-markets.html', pastHtml],
     ['index.html', await readFile(path.join(HERE, '..', 'index.html'), 'utf8')],
-    ['v2/jobs.html', await readFile(path.join(HERE, '..', 'v2', 'jobs.html'), 'utf8')],
-    ['v2/previous-markets.html',
-      await readFile(path.join(HERE, '..', 'v2', 'previous-markets.html'), 'utf8')],
   ]) {
+    ok(html.includes('assets/oa-jobnav.js'), `${rel}: loads the shared market rule`);
+    ok(/function inCurrentMarket\(row\) \{ return NAV\.inCurrentMarket\(row\); \}/.test(html),
+      `${rel}: and filters through it rather than through a copy`);
+    ok(!/var deadline = String\(row\.applyByDate \|\| ''\);/.test(html),
+      `${rel}: so the deadline leg is written down here nowhere`);
+  }
+  /* The 2026 design ARCHIVED at /v2/ keeps its own frozen assets, by the rule
+     the three trees are held to — so its pages keep their inline copies, and
+     those are still pinned. */
+  for (const rel of ['v2/jobs.html', 'v2/previous-markets.html']) {
+    const html = await readFile(path.join(HERE, '..', ...rel.split('/')), 'utf8');
     ok(/var deadline = String\(row\.applyByDate \|\| ''\);/.test(html) &&
        /deadline >= (?:d|new Date\(\))\.toISOString\(\)\.slice\(0, 10\)/.test(html),
-      `${rel}: its inline copy carries the deadline leg, like the model`);
+      `${rel}: the archive's frozen copy carries the deadline leg, like the model`);
   }
 
   /* The candidates list mirrors the same two inline rules the jobs list does —
      the derived heading season and the current-market filter. It is a SECTION
      of the one-pager on the live site and a page of its own in the archive;
      both copies are pinned. */
-  for (const rel of ['index.html', 'v2/candidates.html']) {
-    const candHtml = await readFile(path.join(HERE, '..', ...rel.split('/')), 'utf8');
+  {
+    const candHtml = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+    ok(/function marketLabel\(\) \{ return NAV\.marketLabel\(NAV\.marketYear\(\)\); \}/.test(candHtml),
+      'index.html: the candidates list derives its season from the shared rule');
+    ok(/function inCurrentMarket\(row\) \{ return NAV\.inCurrentMarket\(row\); \}/.test(candHtml),
+      'index.html: and filters to the current market through it');
+  }
+  {
+    const candHtml = await readFile(path.join(HERE, '..', 'v2', 'candidates.html'), 'utf8');
     ok(/getUTCMonth\(\)\s*>=\s*6/.test(candHtml),
-      `${rel}: the candidates list derives its season with the July roll`);
+      'v2/candidates.html: the archive derives its season with the July roll');
     ok(/function inCurrentMarket\(row\)/.test(candHtml) && candHtml.includes("'-07-01'"),
-      `${rel}: it filters to the current market with the model's own rule`);
+      "v2/candidates.html: and filters with the model's own rule");
   }
 
   /* oa-nav.js derives its menu label from the SAME market-roll month as
@@ -1021,6 +1046,21 @@ async function testMarketYearCascade() {
   for (const k of ['final', 'review', 'posted', 'floor']) {
     ok(MARKET_YEAR_SOURCE[k], `MARKET_YEAR_SOURCE covers "${k}"`);
   }
+  /* …and the PANEL has words for every source the REPORT can carry. Its
+     YEAR_FROM is deliberately three keys, not four: marketYearReview calls
+     marketYearOf, never marketYearAtLeast, so `floor` cannot reach a card and
+     a fourth entry would describe a state that does not exist. Switching the
+     report to the floor-aware call would make the card read "its own dates"
+     for those rows — silently — so the two are pinned to each other here. */
+  const yfSrc = (await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8'));
+  const yearFrom = yfSrc.slice(yfSrc.indexOf('var YEAR_FROM = {'),
+    yfSrc.indexOf('};', yfSrc.indexOf('var YEAR_FROM = {')));
+  const drawn = new Set((yearFrom.match(/^\s*(\w+):/gm) || [])
+    .map((m) => m.trim().replace(':', '')));
+  const reachable = new Set(marketYearReview(served, { now }).map((f) => f.from)
+    .concat(['final', 'review', 'posted']));
+  eq([...drawn].sort(), [...reachable].sort(),
+    'the panel words exactly the sources the report can carry — both ways');
 
   // the season under way is what a reader is looking at, so it sorts first
   const order = marketYearReview([
@@ -1149,6 +1189,266 @@ async function testFormMarketYearParity() {
   fields['f-untilFilled'] = false;
   eq(build('doc1', 2026)(), 2026,
     'an edit keeps the season it was filed under — the year is half the row id');
+}
+
+/* ---------------------------------------------------- ONE market rule, shared
+
+   assets/oa-jobnav.js is the browser's copy of the two questions the pipeline
+   answers in _scraper/jobs-model.mjs: which season is under way, and which of
+   the two list pages a posting is on. It exists because there were FOUR
+   copies of that rule — jobs.html, previous-markets.html, the one-pager's
+   jobs teaser, and /admin-area was about to need a fourth to say which page a
+   flagged posting could be opened on. This suite is what makes the copy safe:
+   the parity is measured over every posting the site actually serves, not
+   over a fixture list, because the two halves disagreeing is exactly the
+   failure the module was written to remove. */
+async function testJobNavModule() {
+  const NAV = require(path.join(HERE, '..', 'assets', 'oa-jobnav.js'));
+  const served = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  // 1. the roll, against the constant rather than against a written-down 6
+  eq(NAV.MARKET_ROLL_MONTH, MARKET_ROLL_MONTH,
+    'the browser rule rolls in the month marketYear() rolls in');
+  eq(NAV.marketLabel(2027), marketLabel(2027),
+    'and spells a season the way the data does — a hyphen, byte for byte');
+
+  /* 2. PARITY, over every served posting at four instants: two ordinary days,
+     and the two sides of the roll itself, where an off-by-one would show. */
+  const WHEN = ['2026-08-27T12:00:00Z', '2025-12-01T12:00:00Z',
+    '2026-06-30T23:00:00Z', '2026-07-01T00:00:00Z'];
+  let checked = 0;
+  for (const iso of WHEN) {
+    const now = new Date(iso);
+    eq(NAV.marketYear(now), marketYear(now), `${iso}: the season under way agrees`);
+    eq(NAV.marketStart(now), marketStart(now), `${iso}: and so does the day it opened`);
+    for (const r of served) {
+      if (NAV.inCurrentMarket(r, now) !== inCurrentMarket(r, now)) {
+        eq(NAV.inCurrentMarket(r, now), inCurrentMarket(r, now),
+          `${iso} ${r.id}: the browser and the pipeline place it on the same page`);
+      }
+      if (NAV.deadlineOpen(r, now) !== deadlineOpen(r, now)) {
+        eq(NAV.deadlineOpen(r, now), deadlineOpen(r, now),
+          `${iso} ${r.id}: and read its deadline the same way`);
+      }
+      checked++;
+    }
+  }
+  ok(checked === served.length * WHEN.length,
+    `every one of the ${served.length} served postings agrees at all ${WHEN.length} instants`);
+
+  /* 3. WHICH PAGE, AND THE LINK TO IT — the owner's own report (2026-08-27).
+     Nanyang is filed under 2025-2026 with a deadline that has passed, so it
+     is on Previous markets; the market-year report linked it as
+     `jobs.html#job-<id>`, which opened a list that could not contain it. */
+  const NOW = new Date('2026-08-27T12:00:00Z');
+  const NANYANG = { id: '2026-nanyang-technological-university-20250924',
+    posted: '2025-09-24', applyByDate: '2026-07-28', year: 2026 };
+  const MCGILL = { id: '2026-mcgill-university-20260728',
+    posted: '2026-07-28', applyByDate: '', year: 2026 };
+  eq(NAV.pageFor(NANYANG, NOW), 'previous-markets.html',
+    'a posting whose season has closed is opened on Previous markets');
+  eq(NAV.pageFor(MCGILL, NOW), 'jobs.html',
+    'and one still in the season under way on the jobs page');
+  eq(NAV.hrefFor(NANYANG, NOW),
+    'previous-markets.html?job=2026-nanyang-technological-university-20250924',
+    'the link names the page AND the one posting — never a bare list');
+  ok(!NAV.hrefFor(NANYANG, NOW).includes('#'),
+    'and never a fragment: a card only exists while it is on the page being ' +
+    'shown, one of ten, in a list built after the browser has looked for it');
+  eq(NAV.pageLabelFor(NANYANG, NOW), 'Previous markets',
+    'and the card can say where it is sending the maintainer');
+  eq(NAV.otherPage('/previous-markets.html'), 'jobs.html',
+    'each page can name the other for the "not here" message');
+  eq(NAV.otherPage('/jobs.html'), 'previous-markets.html', 'both ways');
+
+  // an id is a query VALUE, so it is encoded — a row id is built from a name
+  ok(NAV.hrefFor({ id: 'a b&c', posted: '2026-08-01', year: 2026 }, NOW)
+    .endsWith('?job=a%20b%26c'), 'the id is encoded into the link, never interpolated');
+  eq(NAV.FOCUS_PARAM, 'job', 'and the parameter has one name, shared with the engine');
+
+  /* 4. THE WIRING. The engine owns the parameter, the pages declare it, and
+     the report links through the module. */
+  const list = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
+  ok(/cfg\.focusParam/.test(list) && /function focusRow\(\)/.test(list),
+    'the list engine implements the one-posting focus');
+  ok(/view = one \? \[one\] : \[\];/.test(list),
+    'and takes the row ahead of every filter, so a search cannot hide it');
+  ok(/focusMissing/.test(list),
+    'with an empty state of its own — not "try removing a filter", beside a bar ' +
+    'the focus has already hidden');
+  ok(/focusDropHash = \/\^#job-\.\/\.test\(location\.hash\);/.test(list),
+    'the legacy fragment is dropped by its SHAPE — deriving the flag from ' +
+    'which source won leaves it on a URL carrying both, and a reload after ' +
+    '"Show all postings" would focus again, on the OTHER posting');
+  ok(/function focusOtherLink\(\)/.test(list) && /encodeURIComponent\(focusId\)/.test(list),
+    'and the "not on this page" way out carries the id, so the recovery path ' +
+    'is not the bare list this whole mode exists to stop landing people on');
+  for (const [rel, other] of [
+    ['jobs.html', 'previous-markets.html'],
+    ['previous-markets.html', 'jobs.html'],
+  ]) {
+    const html = await readFile(path.join(HERE, '..', rel), 'utf8');
+    ok(/focusParam: NAV\.FOCUS_PARAM/.test(html),
+      `${rel}: declares the focus parameter from the shared name`);
+    ok(new RegExp("focusOther: \\{ href: '" + other + "'").test(html),
+      `${rel}: and names the OTHER page itself — the engine cannot know it`);
+    ok(/focusMissingHint:/.test(html) &&
+       !/focusMissingHint:[\s\S]{0,400}?<a href=/.test(html),
+      `${rel}: the hint is prose; the LINK is the engine's, or it would carry ` +
+      'no posting id');
+  }
+  const panelSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  ok(/var wasOpen = !!\(list\.querySelector\('\.oa-aa-yc-done'\) \|\| \{\}\)\.open;/
+    .test(panelSrc),
+    'the settled panel stays open across a re-render — "Bring it back" is only ' +
+    'reachable from inside it, and every write re-renders');
+  /* THE HIDING RULE LIVES IN v3.css, and that is measured rather than
+     preferred: `body.v3 .oa-filters { display: grid }` is one specificity
+     point above anything oa-list.css can write, so the same rule there is
+     silently inert — which is how previous-markets.html showed its filter bar
+     over a single-posting view while jobs.html did not (there the LOCK
+     WRAPPER was what got hidden). Both selectors are needed for the same
+     reason the empty-dataset rule beside it needs both. */
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  for (const sel of ['.oa-focus .oa-filters', '.oa-focus .v3-lock',
+    '.oa-data-empty .v3-lock']) {
+    ok(v3css.includes('body.v3 ' + sel),
+      `v3.css hides "${sel}" at a specificity that can win`);
+  }
+  const css = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  ok(!/^\s*\.oa-focus \.oa-filters/m.test(css),
+    'and oa-list.css does not try to, where it would lose');
+  ok(/\.oa-focus-clear/.test(css),
+    'while the way back is styled with the engine\'s own chrome — outside all ' +
+    'three, so a signed-out reader can press it');
+
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  ok(/NAV\.hrefFor\(row\)/.test(panel),
+    'the market-year report asks the module where a posting can be opened');
+  /* read with the comments stripped: the panel still EXPLAINS the fragment it
+     no longer emits, and a guard that could not tell the explanation from the
+     link would have to be satisfied by deleting the explanation */
+  ok(!/jobs\.html#job-/.test(panel.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and no longer links a fragment on a page half these postings are not on');
+  const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(admin.includes('assets/oa-jobnav.js'), 'admin-area.html loads the module');
+}
+
+/* ------------------------------------------- clearing the market-year report
+
+   The report is DERIVED and stays derived. What is stored is what the
+   maintainer has READ: `yearChecks/{posting id}`, keyed on the pair of
+   seasons the card showed. Before it there was no way to clear the list at
+   all (owner, 2026-08-27) — its two exits moved a posting that was usually
+   filed correctly, or waited for a deadline that was not what put it there. */
+async function testYearCheckDecisions() {
+  const YC = require(path.join(HERE, '..', 'assets', 'oa-yearcheck.js'));
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  const block = rules.slice(rules.indexOf('match /yearChecks/'));
+  ok(rules.includes('match /yearChecks/'), 'the rules carry the collection');
+
+  ok(/allow read: if isAdmin\(\);/.test(block.slice(0, 300)),
+    'only the maintainer reads it — nothing public consumes a note about their desk');
+  ok(/allow write: if isAdmin\(\)/.test(block.slice(0, 700)),
+    'and only the maintainer writes one');
+  ok(/allow delete: if isAdmin\(\);/.test(block.slice(0, 2000)),
+    'with a delete of its own, or Bring it back would be a one-way door — ' +
+    '`request.resource` is null on a delete, so `allow write` cannot cover one');
+
+  /* EVERY KEY THE MODULE WRITES, taken from the module rather than restated:
+     a key with no rule is a permission-denied at save time and a maintainer
+     told to redeploy rules that are already deployed. */
+  const allowed = new Set(
+    (block.slice(block.indexOf('hasOnly(['), block.indexOf('])', block.indexOf('hasOnly([')))
+      .match(/'[^']+'/g) || []).map((q) => q.slice(1, -1)));
+  for (const key of YC.DOC_KEYS) {
+    ok(allowed.has(key), `oa-yearcheck.js may write "${key}", and the rules allow it`);
+  }
+  eq([...allowed].sort(), [...YC.DOC_KEYS].sort(),
+    'and the rules allow nothing the module does not write');
+  ok(block.slice(0, 1400).includes(`'${YC.SETTLED}'`),
+    `the rules name the "${YC.SETTLED}" status, the only decision there is`);
+
+  /* …and DOC_KEYS is what settlementFor() ACTUALLY produces. Pinning the
+     rules against a declared list leaves that half unchecked (testRowOverrides
+     and testUsersAndMessages record the same lesson). */
+  const P = { id: '2026-x-20260101', stored: 2026, should: 2027 };
+  const body = YC.settlementFor(P, new Date('2026-08-27T09:30:00Z'));
+  eq(Object.keys(body).sort(), [...YC.DOC_KEYS].sort(),
+    'and DOC_KEYS is what a settlement really carries, read from the function');
+  eq(body.status, YC.SETTLED, 'a settlement says it settles');
+  eq([body.stored, body.should], [2026, 2027],
+    'and records the pair of seasons the maintainer answered');
+  ok(body.should > body.stored,
+    'should is always the LATER season — the shape marketYearReview can produce, ' +
+    'and what the rules refuse a document without');
+  ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(JSON.stringify(body)),
+    'and nothing that could be a person');
+
+  /* THE DECISION IS KEYED ON THE DISAGREEMENT. Correct a deadline afterwards
+     and the report asks a different question, so the posting comes back. */
+  ok(YC.covers(body, P), 'a settled posting is settled while the report says the same');
+  ok(!YC.covers(body, { ...P, should: 2028 }),
+    'a posting whose dates have moved is a disagreement nobody has read');
+  ok(!YC.covers(body, { ...P, stored: 2025 }), 'either way round');
+  ok(!YC.covers({ ...body, status: 'something-else' }, P),
+    'and a document that does not say "settled" settles nothing');
+  ok(!YC.covers(null, P), 'ABSENCE MEANS SHOW — the opposite way round from the ' +
+    'review queue, because these postings are already published: the risk here ' +
+    'is hiding a disagreement, not leaking one');
+
+  const REPORT = [P, { id: 'b', stored: 2026, should: 2028 }, { id: 'c', stored: 2026, should: 2027 }];
+  const split = YC.partition(REPORT, { [P.id]: body, b: body });
+  eq(split.settled.map((r) => r.p.id), [P.id], 'a settled posting leaves the list');
+  eq(split.open.map((r) => r.p.id), ['b', 'c'], 'and the rest are still waiting');
+  ok(split.open[0].resettled,
+    'one that was settled and has since changed says so, rather than looking ' +
+    'like a decision that was ignored');
+  ok(!split.open[1].resettled, 'and one nobody has read yet does not');
+  eq(YC.partition(REPORT, null).open.length, REPORT.length,
+    'a decisions read that failed leaves every posting open, never an empty list');
+  eq(YC.partition(REPORT, {}).settled.length, 0, 'as does one that found nothing');
+  ok(YC.partition(null, {}).open.length === 0, 'and no report is no rows, not a throw');
+
+  /* THE PANEL. It draws the settle controls only when it could read the
+     decisions, counts only what is WAITING into its tile, and keeps both
+     reads out of pendingCounts() — that function runs on EVERY page for the
+     account-menu badge (the Registered-users rule). */
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  ok(/OAYearCheck\.COLLECTION/.test(panel) && !/collection\('yearChecks'\)/.test(panel),
+    'the panel names the collection through the module, never a literal');
+  ok(/lastYearCheck = split\.open\.length;/.test(panel),
+    'the tile counts what is still waiting, not what has ever been reported');
+  ok(/data-act="settle"/.test(panel) && /data-act="unsettle"/.test(panel),
+    'it offers both the decision and the way back');
+  ok(/yearActions\s*$|yearActions$|yearActions/m.test(panel) &&
+     /yearActions = !!docs/.test(panel),
+    'and offers neither while the decisions could not be read');
+  ok(/oa-aa-yc-done/.test(panel),
+    'a settled posting goes into a collapsed panel below the list, one click ' +
+    'from back — the newsOverrides rule: never a one-way door');
+  const counts = panel.slice(panel.indexOf('function pendingCounts'),
+    panel.indexOf('function registeredCount'));
+  ok(!/yearcheck/i.test(counts) && !/yearChecks/.test(counts),
+    'neither the report nor its decisions rides the every-page badge read');
+
+  const admin = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
+  ok(admin.includes('assets/oa-yearcheck.js'), 'admin-area.html loads the module');
+  ok(/Reviewed &mdash; leave it here/.test(admin),
+    'and the panel copy names the button the maintainer is looking for');
+
+  const js = await readFile(path.join(HERE, '..', 'assets', 'oa-yearcheck.js'), 'utf8');
+  ok(js.includes('module.exports = factory()'),
+    'the module is dual-mode, so this suite runs the browser\'s own code');
+
+  /* NOTHING UNDER data/ CHANGED. The report is still the derived file the
+     build writes, and no decision may reach it — everything there is served
+     to anyone who asks. */
+  ok(!existsSync(path.join(HERE, '..', 'data', 'yearchecks.json')),
+    'the decisions are not a served file — they are the maintainer\'s, not the public\'s');
+  const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(!/yearChecks/.test(build),
+    'and the build knows nothing about them: what is FLAGGED stays derived');
 }
 
 async function testDerivedMarketYear() {
@@ -3485,8 +3785,9 @@ async function testLegacyTables() {
   ok(pmHtml.includes("fetch('/data/jobs.json'"),
     'previous-markets.html folds in the jobs rows that left the current market');
   ok(pmHtml.includes("legacyParam: 'filterD'"), 'previous-markets.html honours ?filterD');
-  ok(pmHtml.includes('getUTCMonth() >= 6'),
-    'previous-markets.html carries the market-roll rule the jobs page uses');
+  ok(pmHtml.includes('assets/oa-jobnav.js') &&
+     /function marketYear\(\) \{ return NAV\.marketYear\(\); \}/.test(pmHtml),
+    'previous-markets.html reads the market-roll rule the jobs page reads');
 
   const uniHtml = await readFile(path.join(HERE, '..', 'universities.html'), 'utf8');
   ok(uniHtml.includes('assets/leaflet/leaflet.js') && uniHtml.includes('OAUniMap.mount'),
@@ -8795,6 +9096,8 @@ if (isMain(import.meta.url)) {
   testCollapseSameDay();
   testAssignIds();
   testChanges();
+  await testJobNavModule();
+  await testYearCheckDecisions();
   await testPageHeadingRule();
   await testPageSpeedWiring();
   await testFleetPins();

@@ -722,6 +722,7 @@
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -744,25 +745,16 @@
       'use strict';
       var U = window.OAList.safeUrl;
 
-      /* The market year, derived — never typed. Keep in step with
-         _scraper/jobs-model.mjs (marketYear/marketLabel): a market year runs
-         1 July of the previous year to 30 June of its own and is numbered by
-         the year it ends, so the roll is 1 JULY, getUTCMonth() (0-based) 6. */
-      function marketYear() {
-        var d = new Date();
-        return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
-      }
-      function marketLabel() { var y = marketYear(); return (y - 1) + '-' + y; }
-      function inCurrentMarket(row) {
-        var start = (marketYear() - 1) + '-07-01';
-        /* An OPEN deadline keeps a posting on the page whatever season it was
-           filed in (owner, 2026-08-17) — applications close on the day named,
-           so today still counts. An empty applyByDate is the ABSENCE of a
-           deadline ("Until filled"), not an open one, so the roll clears it. */
-        var deadline = String(row.applyByDate || '');
-        return (!!deadline && deadline >= new Date().toISOString().slice(0, 10)) ||
-          String(row.posted || '') >= start || Number(row.year) >= marketYear();
-      }
+      /* The market year, how a season is spelled, and the window this page's
+         jobs teaser shows — all from ONE definition, assets/oa-jobnav.js,
+         which jobs.html, previous-markets.html and /admin-area's market-year
+         report read too. Four copies of one rule were four places for it to
+         drift; selftest.mjs pins the module against jobs-model.mjs over every
+         served posting. */
+      var NAV = window.OAJobNav;
+      function marketYear() { return NAV.marketYear(); }
+      function marketLabel() { return NAV.marketLabel(NAV.marketYear()); }
+      function inCurrentMarket(row) { return NAV.inCurrentMarket(row); }
 
       document.getElementById('oa-jobs-heading').textContent =
         'Job postings (' + marketLabel() + ')';
