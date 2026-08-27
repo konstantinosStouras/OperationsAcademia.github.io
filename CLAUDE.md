@@ -1433,12 +1433,15 @@ written to sees.
 cards below it — so removing a message is not a way to clear it, and the panel
 below does not inflate it either.
 
-The sibling `/lit/` carries the same two collections in the same SHAPE and does
-**not** carry this control; the two are kept in step in shape, not in code, so
-that is a deliberate divergence rather than an oversight, and the obvious next
-change if the same request is made there. Disclosed on the Privacy Policy
-beside the roster, because "removing hides it from you and the maintainer keeps
-their copy" is exactly the sort of thing a policy that says nothing gets wrong.
+The sibling `/lit/` carries the same two collections in the same SHAPE, and it
+carries this control too (owner, the same day) — same rule, same collapsed
+panel, same faded-and-labelled copy on the maintainer's side. In step in shape,
+not in code, as always: there the card is an overlay inside one huge
+`index.html` rather than a page of its own, and its Remove button is an inline
+`onclick`, so the document id goes through that page's `escAttr` rather than
+`esc`. Disclosed on the Privacy Policy beside the roster, because "removing
+hides it from you and the maintainer keeps their copy" is exactly the sort of
+thing a policy that says nothing gets wrong.
 
 **Inert until the rules are redeployed** — which now happens by itself after a
 green check on master (see "…and the FIRESTORE rules publish themselves"); until
