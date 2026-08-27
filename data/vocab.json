@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T10:09:26.351Z",
+ "generated": "2026-08-27T15:44:52.578Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -395,10 +395,6 @@
   },
   {
    "v": "University of Illinois at Urbana-Champaign",
-   "n": 2
-  },
-  {
-   "v": "University of Kansas",
    "n": 2
   },
   {
@@ -1282,6 +1278,10 @@
    "n": 1
   },
   {
+   "v": "University of Kansas",
+   "n": 1
+  },
+  {
    "v": "University of Kentucky",
    "n": 1
   },
@@ -2116,10 +2116,6 @@
    "n": 2
   },
   {
-   "v": "School of Business",
-   "n": 2
-  },
-  {
    "v": "School of Management and Economics",
    "n": 2
   },
@@ -2329,6 +2325,10 @@
   },
   {
    "v": "School Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "School of Business",
    "n": 1
   },
   {
@@ -3246,10 +3246,6 @@
    "n": 1
   },
   {
-   "v": "Analytics, Information and Operations Management",
-   "n": 1
-  },
-  {
    "v": "Analytics, Information, Operations research",
    "n": 1
   },
@@ -4035,6 +4031,10 @@
   },
   {
    "v": "Accounting, Operations and Information Systems",
+   "n": 0
+  },
+  {
+   "v": "Analytics, Information and Operations Management",
    "n": 0
   },
   {

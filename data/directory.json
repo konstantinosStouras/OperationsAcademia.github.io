@@ -9651,11 +9651,8 @@
   "mapUrl": "https://goo.gl/maps/i0LUk",
   "facultyUrl": "https://business.ku.edu/people/academic-areas/analytics-information-systems-and-operations/",
   "sources": [
-   "directory",
-   "postings"
+   "directory"
   ],
-  "n": 1,
-  "lastPosted": "2026-08-12",
   "lat": 38.958542,
   "lng": -95.2476138
  },

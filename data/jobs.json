@@ -1390,36 +1390,6 @@
   "owner": ""
  },
  {
-  "id": "2027-university-of-kansas-20260812",
-  "year": 2027,
-  "years": [
-   2027
-  ],
-  "posted": "2026-08-12",
-  "institution": "University of Kansas",
-  "department": "School of Business, Analytics, Information and Operations Management",
-  "school": "School of Business",
-  "unit": "Analytics, Information and Operations Management",
-  "type": "University",
-  "levels": [
-   "Non-tenure track (teaching) position"
-  ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
-  "comments": "",
-  "country": "United States",
-  "adUrl": "https://www.higheredjobs.com/faculty/details.cfm?JobCode=179526054&Title=POOL%20-%20Instructor%20-%20Business%20Analytics%2C%20Information%20%26%20Operations",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Kansas",
-  "characteristics": [],
-  "featured": false,
-  "source": "jobmarket-sheet",
-  "addedAt": "2026-08-12T00:00:00Z",
-  "owner": ""
- },
- {
   "id": "2027-university-of-virginia-20260812",
   "year": 2027,
   "years": [
@@ -6683,7 +6653,7 @@
   "owner": ""
  },
  {
-  "id": "2026-new-york-university-stern-20260120",
+  "id": "2026-new-york-university-20260120",
   "year": 2026,
   "years": [
    2026
@@ -6699,7 +6669,7 @@
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "Postdoc · New York",
+  "comments": "",
   "country": "United States",
   "adUrl": "https://apply.interfolio.com/180096",
   "adLabel": "link to Job ad",
@@ -9138,7 +9108,7 @@
   "owner": ""
  },
  {
-  "id": "2026-university-of-south-carolina-darla-moore-20251027",
+  "id": "2026-university-of-south-carolina-20251027",
   "year": 2026,
   "years": [
    2026
@@ -9150,11 +9120,12 @@
   "unit": "OM&SCM",
   "type": "University",
   "levels": [
+   "Assistant Professor",
    "Other Ranks"
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "Open Rank (empirical) · Columbia, SC",
+  "comments": "",
   "country": "United States",
   "adUrl": "https://uscjobs.sc.edu/postings/196393",
   "adLabel": "link to Job ad",
@@ -9808,7 +9779,7 @@
   "owner": ""
  },
  {
-  "id": "2026-university-of-pennsylvania-wharton-20251014",
+  "id": "2026-university-of-pennsylvania-20251014",
   "year": 2026,
   "years": [
    2026
@@ -9824,7 +9795,7 @@
   ],
   "applyBy": "November 1, 2025",
   "applyByDate": "2025-11-01",
-  "comments": "AP · Philadelphia, PA",
+  "comments": "",
   "country": "United States",
   "adUrl": "https://apply.interfolio.com/175700",
   "adLabel": "link to Job ad",
@@ -10565,7 +10536,7 @@
   "owner": ""
  },
  {
-  "id": "2026-iowa-state-university-ivy-20251006",
+  "id": "2026-iowa-state-university-20251006",
   "year": 2026,
   "years": [
    2026
@@ -10575,13 +10546,14 @@
   "department": "Ivy College of Business, IS/BA",
   "school": "Ivy College of Business",
   "unit": "IS/BA",
-  "type": "University",
+  "type": "Business School",
   "levels": [
-   "Assistant Professor"
+   "Assistant Professor",
+   "Other Ranks"
   ],
   "applyBy": "October 30, 2025",
   "applyByDate": "2025-10-30",
-  "comments": "AP/Associate · Ames, IA",
+  "comments": "",
   "country": "United States",
   "adUrl": "https://isu.wd1.myworkdayjobs.com/en-US/IowaStateJobs/job/Assistant-or-Associate-Professor-in-Management-Information-Systems--MIS--and-Business-Analytics--BA-_R17874",
   "adLabel": "link to Job ad",
@@ -11096,7 +11068,7 @@
   "owner": ""
  },
  {
-  "id": "2026-university-of-miami-herbert-20251002",
+  "id": "2026-university-of-miami-20251002",
   "year": 2026,
   "years": [
    2026
@@ -11108,11 +11080,12 @@
   "unit": "BA: FinTech, AI, Healthcare",
   "type": "University",
   "levels": [
+   "Assistant Professor",
    "Other Ranks"
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "Open Rank · Coral Gables, FL",
+  "comments": "",
   "country": "United States",
   "adUrl": "",
   "adLabel": "link to Job ad",
@@ -11122,7 +11095,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-23T10:28:05Z",
+  "addedAt": "2025-10-02T00:00:00Z",
   "owner": ""
  },
  {
@@ -13454,7 +13427,7 @@
   "owner": ""
  },
  {
-  "id": "2026-southern-methodist-university-cox-school-of-busi-20250829",
+  "id": "2026-southern-methodist-university-20250829",
   "year": 2026,
   "years": [
    2026
@@ -13464,13 +13437,14 @@
   "department": "Edwin L. Cox School of Business, ITOM",
   "school": "Edwin L. Cox School of Business",
   "unit": "ITOM",
-  "type": "Business School",
+  "type": "University",
   "levels": [
+   "Assistant Professor",
    "Other Ranks"
   ],
   "applyBy": "October 1, 2025",
   "applyByDate": "2025-10-01",
-  "comments": "Open Rank (Not rookie) · Dallas, TX",
+  "comments": "",
   "country": "United States",
   "adUrl": "",
   "adLabel": "link to Job ad",
@@ -13614,7 +13588,7 @@
   "owner": ""
  },
  {
-  "id": "2026-darla-moore-school-of-business-20250822",
+  "id": "2026-university-of-south-carolina-20250822",
   "year": 2026,
   "years": [
    2026
@@ -13624,13 +13598,13 @@
   "department": "Darla Moore School of Business, OSC(Empirical Healthcare Focus)",
   "school": "Darla Moore School of Business",
   "unit": "OSC(Empirical Healthcare Focus)",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Assistant Professor"
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "AP · Columbia, SC",
+  "comments": "",
   "country": "United States",
   "adUrl": "https://uscjobs.sc.edu/postings/193782",
   "adLabel": "link to Job ad",
@@ -13640,7 +13614,7 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-08-23T10:28:23Z",
+  "addedAt": "2025-08-22T00:00:00Z",
   "owner": ""
  },
  {
@@ -14657,7 +14631,7 @@
   "owner": ""
  },
  {
-  "id": "2026-the-hong-kong-polytechnic-university-polyu-20250802",
+  "id": "2026-the-hong-kong-polytechnic-university-20250802",
   "year": 2026,
   "years": [
    2026
@@ -14669,11 +14643,12 @@
   "unit": "SCM/OM",
   "type": "University",
   "levels": [
+   "Assistant Professor",
    "Other Ranks"
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "Open Rank · Hong Kong",
+  "comments": "",
   "country": "Hong Kong",
   "adUrl": "https://careercenter.informs.org/c-academic-jobs.html?locale=en&page=1&sort=date&country=&state=&city=&zip=&latitude=&longitude=&job_type_filter=Academic&keywords=&city_state_zip=&job_id=4880",
   "adLabel": "link to Job ad",
@@ -17356,7 +17331,7 @@
   "owner": ""
  },
  {
-  "id": "2026-ivey-business-school-20250523",
+  "id": "2026-western-university-20250523",
   "year": 2026,
   "years": [
    2025,
@@ -17367,13 +17342,13 @@
   "department": "Ivey Business School, Management Science",
   "school": "Ivey Business School",
   "unit": "Management Science",
-  "type": "Business School",
+  "type": "University",
   "levels": [
    "Non-tenure track (teaching) position"
   ],
   "applyBy": "Until filled.",
   "applyByDate": "",
-  "comments": "London, ON",
+  "comments": "",
   "country": "Canada",
   "adUrl": "https://grad.uwo.ca/doc/postdoc/opportunities/Postdoctoral%20Associate%20Position%20in%20MS%20Ivey%20Western.pdf",
   "adLabel": "link to Job ad",
