@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T15:44:52.578Z",
+ "generated": "2026-08-27T15:49:35.286Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -491,6 +491,10 @@
   },
   {
    "v": "Austin Peay State University",
+   "n": 1
+  },
+  {
+   "v": "Babson College",
    "n": 1
   },
   {
@@ -3086,6 +3090,10 @@
    "n": 3
   },
   {
+   "v": "Operations and Information Management",
+   "n": 3
+  },
+  {
    "v": "SCM and Logistics",
    "n": 3
   },
@@ -3183,10 +3191,6 @@
   },
   {
    "v": "Operations and Decision Technologies",
-   "n": 2
-  },
-  {
-   "v": "Operations and Information Management",
    "n": 2
   },
   {
@@ -4815,6 +4819,17 @@
    "bySchool": {
     "": [
      "BA"
+    ]
+   }
+  },
+  "Babson College": {
+   "schools": [],
+   "units": [
+    "Operations and Information Management"
+   ],
+   "bySchool": {
+    "": [
+     "Operations and Information Management"
     ]
    }
   },

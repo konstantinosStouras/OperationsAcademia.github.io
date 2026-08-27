@@ -500,6 +500,18 @@
   "lastPosted": "2025-09-27"
  },
  {
+  "id": "babson-college____operations-and-information-management",
+  "institution": "Babson College",
+  "department": "Operations and Information Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "ball-state-university____isom",
   "institution": "Ball State University",
   "department": "ISOM",
