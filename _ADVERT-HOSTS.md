@@ -13,10 +13,10 @@ read changes nothing (its postings keep what the tracking sheet said).
 
 | Postings | Website | Years | How it is read |
 |---:|---|---|---|
-| 156 | higheredjobs.com | 2026, 2027 | higheredjobs pipeline |
+| 158 | higheredjobs.com | 2026, 2027 | higheredjobs pipeline |
 | 36 | apply.interfolio.com | 2026, 2027 | adverts pipeline (generic) |
 | 27 | jobs.chronicle.com | 2026, 2027 | adverts pipeline (generic) |
-| 18 | careercenter.informs.org | 2026, 2027 | adverts pipeline (generic) |
+| 19 | careercenter.informs.org | 2026, 2027 | adverts pipeline (generic) |
 | 15 | careers.insidehighered.com | 2026, 2027 | adverts pipeline (generic) |
 | 9 | poms.org | 2026 | adverts pipeline (PDF — unreadable) |
 | 8 | connect.informs.org | 2026 | adverts pipeline (generic) |
