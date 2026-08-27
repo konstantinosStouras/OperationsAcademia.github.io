@@ -2,6 +2,9 @@
  {
   "id": "2027-american-university-kogod-school-of-business-20260826",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-26",
   "institution": "American University Kogod School of Business",
   "department": "information technology, business analytics, AI",
@@ -29,6 +32,9 @@
  {
   "id": "2027-california-state-university-stanislaus-20260825",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-25",
   "institution": "California State University, Stanislaus",
   "department": "Supply Chain Management, Operations Management",
@@ -57,6 +63,9 @@
  {
   "id": "2027-northwestern-university-kellogg-20260825",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-25",
   "institution": "Northwestern University",
   "department": "Kellogg School of Management, Operations",
@@ -84,6 +93,9 @@
  {
   "id": "2027-upenn-wharton-20260825",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-25",
   "institution": "University of Pennsylvania",
   "department": "Wharton School, Operations, Information and Decisions",
@@ -111,6 +123,9 @@
  {
   "id": "2027-bryant-university-20260823",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-23",
   "institution": "Bryant University",
   "department": "Global Supply Chain Management",
@@ -138,6 +153,9 @@
  {
   "id": "2027-university-of-alabama-at-birmingham-20260823",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-23",
   "institution": "University of Alabama at Birmingham",
   "department": "Applied Statistics and BA",
@@ -165,6 +183,9 @@
  {
   "id": "2027-city-university-of-hong-kong-20260822",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-22",
   "institution": "City University of Hong Kong",
   "department": "College of Business, Decision Analytics and Operations",
@@ -193,6 +214,9 @@
  {
   "id": "2027-singapore-university-of-technology-and-design-20260822",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-22",
   "institution": "Singapore University of Technology and Design",
   "department": "Engineering Systems and Design",
@@ -221,6 +245,9 @@
  {
   "id": "2027-university-of-california-los-angeles-20260822",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-22",
   "institution": "University of California, Los Angeles (UCLA)",
   "department": "Anderson School of Management, Decision, Operations and Technology Management",
@@ -230,8 +257,9 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 5, 2026",
-  "applyByDate": "2026-10-05",
+  "applyBy": "November 5, 2026",
+  "applyByDate": "2026-11-05",
+  "reviewDate": "2026-10-05",
   "comments": "Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at 11:59pm (Pacific Time) Apply by this date to ensure full consideration by the committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time) Applications will continue to be accepted until this date, but those received after the review date will only be considered if the position has not yet been filled.",
   "country": "United States",
   "adUrl": "https://recruit.apo.ucla.edu/JPF11233",
@@ -248,6 +276,9 @@
  {
   "id": "2027-ball-state-university-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "Ball State University",
   "department": "ISOM",
@@ -275,6 +306,9 @@
  {
   "id": "2027-cottey-college-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "Cottey College",
   "department": "Operation Management",
@@ -302,6 +336,9 @@
  {
   "id": "2027-indiana-university-bloomington-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "Indiana University",
   "department": "Kelley School of Business, Operations and Decision Technologies",
@@ -330,6 +367,9 @@
  {
   "id": "2027-longwood-university-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "Longwood University",
   "department": "College of Business and Economics, Accounting, Economics, Finance, and Information Systems",
@@ -357,6 +397,9 @@
  {
   "id": "2027-miami-university-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "Miami University",
   "department": "Emerging Technology in Business and Design",
@@ -384,6 +427,9 @@
  {
   "id": "2027-stanford-ms-e-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "Stanford University",
   "department": "School of Engineering, Management Science and Engineering",
@@ -413,6 +459,9 @@
  {
   "id": "2027-university-of-missouri-st-louis-20260821",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-21",
   "institution": "University of Missouri-St. Louis",
   "department": "Ed G. Smith College of Business, Supply Chain Management and Analytics",
@@ -440,6 +489,9 @@
  {
   "id": "2027-singapore-management-university-20260820",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-20",
   "institution": "Singapore Management University",
   "department": "Lee Kong Chian School of Business, Operations Management",
@@ -469,6 +521,9 @@
  {
   "id": "2027-clemson-university-20260818",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-18",
   "institution": "Clemson University",
   "department": "School of Mathematical and Statistical Sciences, Data Science and Decision Intelligence",
@@ -496,6 +551,9 @@
  {
   "id": "2027-national-university-of-singapore-is-20260818",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-18",
   "institution": "National University of Singapore",
   "department": "School of Computing, Information Systems and Analytics",
@@ -524,6 +582,9 @@
  {
   "id": "2027-university-of-chicago-booth-20260818",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-18",
   "institution": "University of Chicago",
   "department": "Booth School of Business, Operations Management",
@@ -552,6 +613,9 @@
  {
   "id": "2027-utah-valley-university-20260815",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-15",
   "institution": "Utah Valley University",
   "department": "Woodbury School of Business, Strategic Management and Operations",
@@ -579,6 +643,9 @@
  {
   "id": "2027-mit-sloan-20260814",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-14",
   "institution": "Massachusetts Institute of Technology (MIT)",
   "department": "MIT Sloan School of Management, Operations Management",
@@ -606,6 +673,9 @@
  {
   "id": "2027-university-of-iowa-20260814",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-14",
   "institution": "University of Iowa",
   "department": "Tippie College of Business, Business Analytics",
@@ -634,6 +704,9 @@
  {
   "id": "2027-syracuse-university-20260813",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-13",
   "institution": "Syracuse University",
   "department": "Whitman School of Management, Supply Chain Management",
@@ -662,6 +735,9 @@
  {
   "id": "2027-utah-valley-university-20260813",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-13",
   "institution": "Utah Valley University",
   "department": "Operations and Supply Chain Management",
@@ -689,6 +765,9 @@
  {
   "id": "2027-northwestern-university-iems-20260812",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-12",
   "institution": "Northwestern University",
   "department": "McCormick School of Engineering, Industrial Engineering and Management Sciences",
@@ -718,6 +797,9 @@
  {
   "id": "2027-rutgers-business-school-newark-and-new-brunswick-20260812",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-12",
   "institution": "Rutgers Business School–Newark and New Brunswick",
   "department": "Management Science and Information Systems",
@@ -745,6 +827,9 @@
  {
   "id": "2027-stanford-gsb-20260812",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-12",
   "institution": "Stanford University",
   "department": "Stanford Graduate School of Business, Operations, Information, and Technology (OIT) area",
@@ -772,6 +857,9 @@
  {
   "id": "2027-university-of-houston-20260812",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-12",
   "institution": "University of Houston",
   "department": "C. T. Bauer College of Business",
@@ -799,6 +887,9 @@
  {
   "id": "2027-university-of-kansas-20260812",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-12",
   "institution": "University of Kansas",
   "department": "School of Business, Analytics, Information and Operations Management",
@@ -826,6 +917,9 @@
  {
   "id": "2027-ewha-womans-university-20260811",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-11",
   "institution": "Ewha Womans University",
   "department": "College of Business Administration, Business Administration",
@@ -854,6 +948,9 @@
  {
   "id": "2027-the-pennsylvania-state-university-20260811",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-11",
   "institution": "The Pennsylvania State University",
   "department": "Supply Chain Management",
@@ -881,6 +978,9 @@
  {
   "id": "2027-princeton-university-20260808",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-08",
   "institution": "Princeton University",
   "department": "School of Engineering and Applied Science, Operations Research and Financial Engineering",
@@ -908,6 +1008,9 @@
  {
   "id": "2027-rollins-college-20260805",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-05",
   "institution": "Rollins College",
   "department": "Supply Chain Management",
@@ -935,6 +1038,9 @@
  {
   "id": "2027-st-john-s-university-20260805",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-05",
   "institution": "St. John's University",
   "department": "Business Analytics",
@@ -962,6 +1068,9 @@
  {
   "id": "2027-university-of-california-davis-20260805",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-05",
   "institution": "University of California, Davis",
   "department": "Graduate School of Management, Business Analytics",
@@ -989,6 +1098,9 @@
  {
   "id": "2027-university-of-virginia-20260805",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-08-05",
   "institution": "University of Virginia",
   "department": "Darden School of Business, Technology and Operations Management",
@@ -1016,6 +1128,9 @@
  {
   "id": "2027-georgia-southern-university-20260730",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-07-30",
   "institution": "Georgia Southern University",
   "department": "Parker College of Business, Logistics and Supply Chain Management",
@@ -1043,6 +1158,9 @@
  {
   "id": "2027-morgan-state-university-20260730",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-07-30",
   "institution": "Morgan State University",
   "department": "Supply Chain Management",
@@ -1070,6 +1188,9 @@
  {
   "id": "2027-ut-san-antonio-20260726",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-07-26",
   "institution": "UT San Antonio",
   "department": "Carlos Alvarez College of Business, Operations and Analytics Department",
@@ -1097,6 +1218,9 @@
  {
   "id": "2027-university-of-california-berkeley-20260722",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-07-22",
   "institution": "University of California, Berkeley",
   "department": "Walter A. Haas School of Business, Operations and Information Technology Management",
@@ -1124,6 +1248,9 @@
  {
   "id": "2027-clarkson-university-20260720",
   "year": 2027,
+  "years": [
+   2027
+  ],
   "posted": "2026-07-20",
   "institution": "Clarkson University",
   "department": "David D. Reh School of Business, Operations and Information Systems",
@@ -1151,6 +1278,10 @@
  {
   "id": "2027-indiana-university-bloomington-20260622",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-22",
   "institution": "Indiana University",
   "department": "Kelley School of Business, Operations and Decision Technologies",
@@ -1180,6 +1311,10 @@
  {
   "id": "2027-university-of-tennesse-knoxville-20260622",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-22",
   "institution": "University of Tennessee - Knoxville",
   "department": "Haslam College of Business, Business Analytics and Statistics",
@@ -1208,6 +1343,10 @@
  {
   "id": "2027-hofstra-university-20260613",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-13",
   "institution": "Hofstra University",
   "department": "Frank G. Zarb School of Business, Information Systems and Business Analytics",
@@ -1236,6 +1375,10 @@
  {
   "id": "2027-university-of-central-arkansas-20260613",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-13",
   "institution": "University of Central Arkansas",
   "department": "Logistics and Supply Chain Management",
@@ -1263,6 +1406,10 @@
  {
   "id": "2027-university-of-tennessee-knoxville-20260613",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-13",
   "institution": "University of Tennessee - Knoxville",
   "department": "Haslam College of Business, Business Analytics and Statistics",
@@ -1291,6 +1438,10 @@
  {
   "id": "2027-university-of-washington-20260608",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-08",
   "institution": "University of Washington",
   "department": "Michael G. Foster School of Business, Marketing and International Business",
@@ -1319,6 +1470,10 @@
  {
   "id": "2027-johns-hopkins-university-20260605",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-05",
   "institution": "Johns Hopkins University",
   "department": "Carey Business School, Operations Management and Business Analytics",
@@ -1346,6 +1501,10 @@
  {
   "id": "2027-air-force-institute-of-technology-20260604",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-06-04",
   "institution": "Air Force Institute of Technology",
   "department": "Graduate School of Engineering and Management, Air Force Headquarters",
@@ -1374,6 +1533,10 @@
  {
   "id": "2027-university-of-houston-20260529",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-05-29",
   "institution": "University of Houston",
   "department": "C. T. Bauer College of Business, Business Analytics",
@@ -1401,6 +1564,10 @@
  {
   "id": "2027-university-of-stirling-20260529",
   "year": 2027,
+  "years": [
+   2026,
+   2027
+  ],
   "posted": "2026-05-29",
   "institution": "University of Stirling",
   "department": "Project Management",
@@ -1428,6 +1595,9 @@
  {
   "id": "2026-palm-beach-atlantic-university-20260522",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-22",
   "institution": "Palm Beach Atlantic University",
   "department": "Data Analytics",
@@ -1456,6 +1626,9 @@
  {
   "id": "2026-air-force-institute-of-technology-20260516",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "Air Force Institute of Technology",
   "department": "SCM and Logistics",
@@ -1484,6 +1657,9 @@
  {
   "id": "2026-black-hills-state-university-20260516",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "Black Hills State University",
   "department": "BA/OM",
@@ -1511,6 +1687,9 @@
  {
   "id": "2026-hood-college-20260516",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "Hood College",
   "department": "CS and Information Technology",
@@ -1538,6 +1717,9 @@
  {
   "id": "2026-north-idaho-college-20260516",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "North Idaho College",
   "department": "Business",
@@ -1565,6 +1747,9 @@
  {
   "id": "2026-university-of-colorado-boulder-20260516",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "University of Colorado Boulder",
   "department": "SCM/Analytics/OM",
@@ -1592,6 +1777,9 @@
  {
   "id": "2026-university-of-texas-at-arlington-20260516",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "University of Texas at Arlington",
   "department": "Business Statistics",
@@ -1619,6 +1807,9 @@
  {
   "id": "2026-university-of-texas-at-arlington-20260516-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "University of Texas at Arlington",
   "department": "ISBA",
@@ -1646,6 +1837,9 @@
  {
   "id": "2026-university-of-texas-at-arlington-20260516-3",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-05-16",
   "institution": "University of Texas at Arlington",
   "department": "OM",
@@ -1673,6 +1867,9 @@
  {
   "id": "2026-montclair-state-university-20260430",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-30",
   "institution": "Montclair State University",
   "department": "Business Statistics",
@@ -1700,6 +1897,9 @@
  {
   "id": "2026-university-of-leeds-uk-20260429",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-29",
   "institution": "University of Leeds, UK",
   "department": "Optimisation for Decision Support in Disaster Response",
@@ -1727,6 +1927,9 @@
  {
   "id": "2026-rockhurst-university-20260423",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-23",
   "institution": "Rockhurst University",
   "department": "Business Intelligence and Analytics",
@@ -1754,6 +1957,9 @@
  {
   "id": "2026-stony-brook-university-20260423",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-23",
   "institution": "Stony Brook University",
   "department": "College of Business, Operations and Decision Analytics",
@@ -1781,6 +1987,9 @@
  {
   "id": "2026-university-of-hong-kong-20260423",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-23",
   "institution": "University of Hong Kong",
   "department": "BA",
@@ -1809,6 +2018,9 @@
  {
   "id": "2026-university-of-nevada-las-vegas-20260423",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-23",
   "institution": "University of Nevada Las Vegas",
   "department": "Supply Chain Management",
@@ -1836,6 +2048,9 @@
  {
   "id": "2026-campbellsville-university-20260409",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-09",
   "institution": "Campbellsville University",
   "department": "Business IT",
@@ -1864,6 +2079,9 @@
  {
   "id": "2026-university-at-buffalo-20260409",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-04-09",
   "institution": "University at Buffalo",
   "department": "SCM and OM",
@@ -1891,6 +2109,9 @@
  {
   "id": "2026-university-of-bath-20260330",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-30",
   "institution": "University of Bath",
   "department": "Operations Management / Supply Chain Management / Project Management",
@@ -1918,6 +2139,9 @@
  {
   "id": "2026-university-of-illinois-at-urbana-champaign-20260330",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-30",
   "institution": "University of Illinois at Urbana-Champaign",
   "department": "IS/OM/SCM/BA",
@@ -1945,6 +2169,9 @@
  {
   "id": "2026-western-illinois-university-20260326",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-26",
   "institution": "Western Illinois University",
   "department": "Supply Chain Management and Analytics",
@@ -1972,6 +2199,9 @@
  {
   "id": "2026-st-cloud-state-university-20260322",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-22",
   "institution": "St. Cloud State University",
   "department": "SCM/OM/Healthcare OM",
@@ -1999,6 +2229,9 @@
  {
   "id": "2026-california-state-university-sacramento-20260319",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-19",
   "institution": "California State University, Sacramento",
   "department": "AI",
@@ -2026,6 +2259,9 @@
  {
   "id": "2026-cedarville-university-20260319",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-19",
   "institution": "Cedarville University",
   "department": "Statistics",
@@ -2053,6 +2289,9 @@
  {
   "id": "2026-eastern-new-mexico-university-20260319",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-19",
   "institution": "Eastern New Mexico University",
   "department": "Production and OM",
@@ -2080,6 +2319,9 @@
  {
   "id": "2026-fayetteville-state-university-20260319",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-19",
   "institution": "Fayetteville State University",
   "department": "Supply Chain Management",
@@ -2107,6 +2349,9 @@
  {
   "id": "2026-houston-christian-university-20260319",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-19",
   "institution": "Houston Christian University",
   "department": "Business Data Analytics",
@@ -2134,6 +2379,9 @@
  {
   "id": "2026-university-of-oklahoma-20260318",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-18",
   "institution": "University of Oklahoma",
   "department": "Supply Chain Management",
@@ -2162,6 +2410,9 @@
  {
   "id": "2026-auburn-university-20260317",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-17",
   "institution": "Auburn University",
   "department": "BA",
@@ -2189,6 +2440,9 @@
  {
   "id": "2026-lbs-20260317",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-17",
   "institution": "LBS",
   "department": "OM/OR",
@@ -2216,6 +2470,9 @@
  {
   "id": "2026-university-of-evansville-20260317",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-17",
   "institution": "University of Evansville",
   "department": "Supply Chain Management",
@@ -2243,6 +2500,9 @@
  {
   "id": "2026-wingate-university-20260317",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-17",
   "institution": "Wingate University",
   "department": "DA/BA./Business Stat",
@@ -2270,6 +2530,9 @@
  {
   "id": "2026-university-of-houston-20260314",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-14",
   "institution": "University of Houston",
   "department": "OM",
@@ -2297,6 +2560,9 @@
  {
   "id": "2026-fisher-college-20260313",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-13",
   "institution": "Fisher College",
   "department": "OM",
@@ -2324,6 +2590,9 @@
  {
   "id": "2026-houston-christian-university-20260313",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-13",
   "institution": "Houston Christian University",
   "department": "OM",
@@ -2351,6 +2620,9 @@
  {
   "id": "2026-university-of-wisconsin-green-bay-20260313",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-13",
   "institution": "University of Wisconsin - Green Bay",
   "department": "SCM and Logistics",
@@ -2378,6 +2650,9 @@
  {
   "id": "2026-county-college-of-morris-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "County College of Morris",
   "department": "AI",
@@ -2405,6 +2680,9 @@
  {
   "id": "2026-hkust-gz-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "HKUST(GZ)",
   "department": "DS and Analytics Thrust",
@@ -2433,6 +2711,9 @@
  {
   "id": "2026-it-university-of-copenhagen-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "IT University of Copenhagen",
   "department": "BA",
@@ -2461,6 +2742,9 @@
  {
   "id": "2026-technical-university-of-munich-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "Technical University of Munich",
   "department": "Operations Research and AI",
@@ -2488,6 +2772,9 @@
  {
   "id": "2026-texas-tech-university-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "Texas Tech University",
   "department": "Marketing and SCM",
@@ -2516,6 +2803,9 @@
  {
   "id": "2026-university-of-utah-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "University of Utah",
   "department": "Operations and IS",
@@ -2544,6 +2834,9 @@
  {
   "id": "2026-valley-city-state-university-20260310",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-10",
   "institution": "Valley City State University",
   "department": "data analytics and AI",
@@ -2571,6 +2864,9 @@
  {
   "id": "2026-nevada-state-university-20260307",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-07",
   "institution": "Nevada State University",
   "department": "SCM/Quantitative Analysis",
@@ -2598,6 +2894,9 @@
  {
   "id": "2026-ucl-global-business-school-for-health-20260307",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-07",
   "institution": "UCL Global Business School for Health",
   "department": "Supply Chain Management",
@@ -2625,6 +2924,9 @@
  {
   "id": "2026-ucl-global-business-school-for-health-20260307-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-07",
   "institution": "UCL Global Business School for Health",
   "department": "Sustainable SCM",
@@ -2652,6 +2954,9 @@
  {
   "id": "2026-university-of-houston-downtown-20260307",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-07",
   "institution": "University of Houston - Downtown",
   "department": "MIS",
@@ -2679,6 +2984,9 @@
  {
   "id": "2026-university-of-maryland-20260307",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-07",
   "institution": "University of Maryland",
   "department": "Supply Chain Management",
@@ -2706,6 +3014,9 @@
  {
   "id": "2026-winona-state-university-20260307",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-07",
   "institution": "Winona State University",
   "department": "MIS",
@@ -2733,6 +3044,9 @@
  {
   "id": "2026-new-york-institute-of-technology-20260304",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-04",
   "institution": "New York Institute of Technology",
   "department": "MS/MIS/Stat",
@@ -2760,6 +3074,9 @@
  {
   "id": "2026-hofstra-university-20260301",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-01",
   "institution": "Hofstra University",
   "department": "IS",
@@ -2787,6 +3104,9 @@
  {
   "id": "2026-savannah-state-university-20260301",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-01",
   "institution": "Savannah State University",
   "department": "General Business",
@@ -2814,6 +3134,9 @@
  {
   "id": "2026-university-of-kentucky-20260301",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-01",
   "institution": "University of Kentucky",
   "department": "SCM and Marketing",
@@ -2841,6 +3164,9 @@
  {
   "id": "2026-valdosta-state-university-20260301",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-03-01",
   "institution": "Valdosta State University",
   "department": "BA",
@@ -2868,6 +3194,9 @@
  {
   "id": "2026-augustana-university-20260227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-27",
   "institution": "Augustana University",
   "department": "Business",
@@ -2895,6 +3224,9 @@
  {
   "id": "2026-chatham-university-20260227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-27",
   "institution": "Chatham University",
   "department": "Sustainable Management",
@@ -2922,6 +3254,9 @@
  {
   "id": "2026-institut-mines-telecom-20260227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-27",
   "institution": "Institut Mines-Télécom",
   "department": "Supply Chain, Logistics, Sustainable Transport, and Economics",
@@ -2949,6 +3284,9 @@
  {
   "id": "2026-spartanburg-methodist-college-20260227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-27",
   "institution": "Spartanburg Methodist College",
   "department": "Business Stat/DA/SCM/OM",
@@ -2976,6 +3314,9 @@
  {
   "id": "2026-university-of-pennsylvania-20260227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-27",
   "institution": "University of Pennsylvania",
   "department": "OID",
@@ -3003,6 +3344,9 @@
  {
   "id": "2026-state-university-of-new-york-at-geneseo-20260226",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-26",
   "institution": "State University of New York at Geneseo",
   "department": "BA",
@@ -3030,6 +3374,9 @@
  {
   "id": "2026-texas-southern-university-20260226",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-26",
   "institution": "Texas Southern University",
   "department": "MIS",
@@ -3057,6 +3404,9 @@
  {
   "id": "2026-arkansas-tech-university-20260225",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-25",
   "institution": "Arkansas Tech University",
   "department": "OM/SCM",
@@ -3084,6 +3434,9 @@
  {
   "id": "2026-american-university-of-kurdistan-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "American University of Kurdistan",
   "department": "BA/MIS",
@@ -3112,6 +3465,9 @@
  {
   "id": "2026-binghamton-university-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "Binghamton University",
   "department": "MIS",
@@ -3139,6 +3495,9 @@
  {
   "id": "2026-eastern-illinois-university-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "Eastern Illinois University",
   "department": "OM",
@@ -3166,6 +3525,9 @@
  {
   "id": "2026-san-bernardino-community-college-district-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "San Bernardino Community College District",
   "department": "Business Math",
@@ -3193,6 +3555,9 @@
  {
   "id": "2026-texas-christian-university-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "Texas Christian University",
   "department": "Analytics/Business IS",
@@ -3220,6 +3585,9 @@
  {
   "id": "2026-tusculum-university-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "Tusculum University",
   "department": "Supply Chain Management",
@@ -3247,6 +3615,9 @@
  {
   "id": "2026-wilson-college-20260224",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-24",
   "institution": "Wilson College",
   "department": "Supply Chain Management",
@@ -3274,6 +3645,9 @@
  {
   "id": "2026-college-of-staten-island-20260221",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-21",
   "institution": "College of Staten Island",
   "department": "Healthcare/Sustainability",
@@ -3301,6 +3675,9 @@
  {
   "id": "2026-fayetteville-state-university-20260221",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-21",
   "institution": "Fayetteville State University",
   "department": "Healthcare",
@@ -3328,6 +3705,9 @@
  {
   "id": "2026-lenoir-rhyne-university-20260221",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-21",
   "institution": "Lenoir-Rhyne University",
   "department": "OM",
@@ -3355,6 +3735,9 @@
  {
   "id": "2026-middle-georgia-state-university-20260221",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-21",
   "institution": "Middle Georgia State University",
   "department": "Supply Chain Management",
@@ -3382,6 +3765,9 @@
  {
   "id": "2026-washburn-university-20260221",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-21",
   "institution": "Washburn University",
   "department": "DA/Quantitative Methods",
@@ -3409,6 +3795,9 @@
  {
   "id": "2026-prince-mohammad-bin-fahd-university-20260219",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-19",
   "institution": "Prince Mohammad Bin Fahd University",
   "department": "Information Technology",
@@ -3436,6 +3825,9 @@
  {
   "id": "2026-university-of-south-florida-20260219",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-19",
   "institution": "University of South Florida",
   "department": "IS",
@@ -3463,6 +3855,9 @@
  {
   "id": "2026-north-carolina-state-university-20260218",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-18",
   "institution": "North Carolina State University",
   "department": "Operations and Supply Chain Management",
@@ -3490,6 +3885,9 @@
  {
   "id": "2026-shorter-university-20260218",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-18",
   "institution": "Shorter University",
   "department": "General Business",
@@ -3517,6 +3915,9 @@
  {
   "id": "2026-ajman-university-20260216",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-16",
   "institution": "Ajman University",
   "department": "Data Analytics",
@@ -3545,6 +3946,9 @@
  {
   "id": "2026-abilene-christian-university-20260214",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-14",
   "institution": "Abilene Christian University",
   "department": "IS",
@@ -3572,6 +3976,9 @@
  {
   "id": "2026-endicott-college-20260214",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-14",
   "institution": "Endicott College",
   "department": "Business",
@@ -3599,6 +4006,9 @@
  {
   "id": "2026-university-of-texas-at-arlington-20260214",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-14",
   "institution": "University of Texas at Arlington",
   "department": "AI",
@@ -3627,6 +4037,9 @@
  {
   "id": "2026-texas-southern-university-20260212",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-12",
   "institution": "Texas Southern University",
   "department": "Operations and Logistics Management",
@@ -3654,6 +4067,9 @@
  {
   "id": "2026-university-of-wisconsin-green-bay-20260212",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-12",
   "institution": "University of Wisconsin - Green Bay",
   "department": "Sustainable Management",
@@ -3681,6 +4097,9 @@
  {
   "id": "2026-georgia-state-university-20260211",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-11",
   "institution": "Georgia State University",
   "department": "Operations and Supply Chain Management",
@@ -3708,6 +4127,9 @@
  {
   "id": "2026-cedarville-university-20260210",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-10",
   "institution": "Cedarville University",
   "department": "OM",
@@ -3735,6 +4157,9 @@
  {
   "id": "2026-university-of-colorado-denver-20260210",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-10",
   "institution": "University of Colorado Denver",
   "department": "IS and Technology",
@@ -3762,6 +4187,9 @@
  {
   "id": "2026-university-of-utah-20260210",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-10",
   "institution": "University of Utah",
   "department": "Operations and Supply Chain Management",
@@ -3789,6 +4217,9 @@
  {
   "id": "2026-kimep-university-20260209",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-09",
   "institution": "KIMEP University",
   "department": "OM",
@@ -3817,6 +4248,9 @@
  {
   "id": "2026-ferris-state-university-20260207",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-07",
   "institution": "Ferris State University",
   "department": "DA",
@@ -3844,6 +4278,9 @@
  {
   "id": "2026-bucknell-university-20260206",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-06",
   "institution": "Bucknell University",
   "department": "Management (Markets, Innovation, And Design)",
@@ -3872,6 +4309,9 @@
  {
   "id": "2026-appalachian-state-university-20260205",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-05",
   "institution": "Appalachian State University",
   "department": "CIS",
@@ -3899,6 +4339,9 @@
  {
   "id": "2026-queens-university-of-charlotte-20260205",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-05",
   "institution": "Queens University of Charlotte",
   "department": "BA",
@@ -3926,6 +4369,9 @@
  {
   "id": "2026-university-of-alaska-fairbanks-20260205",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-05",
   "institution": "University of Alaska Fairbanks",
   "department": "Business Administration",
@@ -3953,6 +4399,9 @@
  {
   "id": "2026-the-catholic-university-of-america-20260204",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-04",
   "institution": "The Catholic University of America",
   "department": "Business",
@@ -3980,6 +4429,9 @@
  {
   "id": "2026-fairmont-state-university-20260203",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-03",
   "institution": "Fairmont State University",
   "department": "IT Management",
@@ -4007,6 +4459,9 @@
  {
   "id": "2026-indiana-university-northwest-20260203",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-03",
   "institution": "Indiana University Northwest",
   "department": "MIS",
@@ -4034,6 +4489,9 @@
  {
   "id": "2026-seton-hall-university-20260203",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-03",
   "institution": "Seton Hall University",
   "department": "SCM/BA",
@@ -4061,6 +4519,9 @@
  {
   "id": "2026-seton-hall-university-20260203-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-03",
   "institution": "Seton Hall University",
   "department": "IT Management",
@@ -4088,6 +4549,9 @@
  {
   "id": "2026-university-of-wisconsin-stout-20260203",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-03",
   "institution": "University of Wisconsin-Stout",
   "department": "OM",
@@ -4115,6 +4579,9 @@
  {
   "id": "2026-chicago-booth-20260202",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-02-02",
   "institution": "Chicago Booth",
   "department": "OM",
@@ -4142,6 +4609,9 @@
  {
   "id": "2026-aalto-university-20260131",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "Aalto University",
   "department": "Production/OM",
@@ -4169,6 +4639,9 @@
  {
   "id": "2026-aalto-university-20260131-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "Aalto University",
   "department": "Supply Chain Management",
@@ -4196,6 +4669,9 @@
  {
   "id": "2026-cornell-university-20260131",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "Cornell University",
   "department": "Cornell SC Johnson College of Business, Operations, Technology, and Information Management Area",
@@ -4223,6 +4699,9 @@
  {
   "id": "2026-middle-georgia-state-university-20260131",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "Middle Georgia State University",
   "department": "Management",
@@ -4250,6 +4729,9 @@
  {
   "id": "2026-north-central-college-20260131",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "North Central College",
   "department": "SCM/BA/Stat",
@@ -4278,6 +4760,9 @@
  {
   "id": "2026-university-of-alberta-20260131",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "University of Alberta",
   "department": "BA",
@@ -4305,6 +4790,9 @@
  {
   "id": "2026-university-of-tennessee-knoxville-20260131",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-31",
   "institution": "University of Tennessee - Knoxville",
   "department": "Supply Chain Management",
@@ -4332,6 +4820,9 @@
  {
   "id": "2026-colorado-school-of-mines-20260130",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-30",
   "institution": "Colorado School of Mines",
   "department": "BA/OR",
@@ -4359,6 +4850,9 @@
  {
   "id": "2026-indiana-university-northwest-20260130",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-30",
   "institution": "Indiana University Northwest",
   "department": "MIS",
@@ -4386,6 +4880,9 @@
  {
   "id": "2026-park-university-20260130",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-30",
   "institution": "Park University",
   "department": "Stat, Analytics and SCM",
@@ -4413,6 +4910,9 @@
  {
   "id": "2026-tennessee-tech-university-20260130",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-30",
   "institution": "Tennessee Tech University",
   "department": "IS",
@@ -4440,6 +4940,9 @@
  {
   "id": "2026-abdullah-al-salem-university-aasu-20260127",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-27",
   "institution": "Abdullah Al Salem University (AASU)",
   "department": "SCM/Logistics",
@@ -4468,6 +4971,9 @@
  {
   "id": "2026-southwest-minnesota-state-university-20260127",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-27",
   "institution": "Southwest Minnesota State University",
   "department": "Business Technology",
@@ -4495,6 +5001,9 @@
  {
   "id": "2026-texas-a-m-international-university-20260127",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-27",
   "institution": "Texas A&M International University",
   "department": "Transportation/Logistics",
@@ -4522,6 +5031,9 @@
  {
   "id": "2026-university-of-houston-downtown-20260127",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-27",
   "institution": "University of Houston-Downtown",
   "department": "Supply Chain Management",
@@ -4549,6 +5061,9 @@
  {
   "id": "2026-university-of-south-carolina-20260127",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-27",
   "institution": "University of South Carolina",
   "department": "IT",
@@ -4576,6 +5091,9 @@
  {
   "id": "2026-clemson-university-20260126",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-26",
   "institution": "Clemson University",
   "department": "DS and Analytics/MIS",
@@ -4603,6 +5121,9 @@
  {
   "id": "2026-iim-ahmedabad-20260126",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-26",
   "institution": "IIM Ahmedabad",
   "department": "Management",
@@ -4631,6 +5152,9 @@
  {
   "id": "2026-northwestern-20260126",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-26",
   "institution": "Northwestern",
   "department": "Science and Innovation",
@@ -4658,6 +5182,9 @@
  {
   "id": "2026-ucl-global-business-school-for-health-20260126",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-26",
   "institution": "UCL Global Business School for Health",
   "department": "Operations and Project Management (AI focus)",
@@ -4685,6 +5212,9 @@
  {
   "id": "2026-augusta-university-20260123",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-23",
   "institution": "Augusta University",
   "department": "MIS",
@@ -4712,6 +5242,9 @@
  {
   "id": "2026-augusta-university-20260123-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-23",
   "institution": "Augusta University",
   "department": "OM and SCM",
@@ -4740,6 +5273,9 @@
  {
   "id": "2026-dakota-state-university-20260123",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-23",
   "institution": "Dakota State University",
   "department": "Production and OM",
@@ -4767,6 +5303,9 @@
  {
   "id": "2026-kennesaw-state-university-20260123",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-23",
   "institution": "Kennesaw State University",
   "department": "DS and Analytics",
@@ -4795,6 +5334,9 @@
  {
   "id": "2026-new-york-university-shanghai-20260123",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-23",
   "institution": "New York University Shanghai",
   "department": "OM",
@@ -4822,6 +5364,9 @@
  {
   "id": "2026-new-york-university-20260120",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-20",
   "institution": "New York University",
   "department": "Leonard N. Stern School of Business, OM and AI",
@@ -4849,6 +5394,9 @@
  {
   "id": "2026-university-of-michigan-20260120",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-20",
   "institution": "University of Michigan",
   "department": "Sports Analytics",
@@ -4876,6 +5424,9 @@
  {
   "id": "2026-california-state-university-bakersfield-20260119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-19",
   "institution": "California State University, Bakersfield",
   "department": "MIS/BA/AI",
@@ -4903,6 +5454,9 @@
  {
   "id": "2026-nc-state-university-20260119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-19",
   "institution": "NC State University",
   "department": "ITAO",
@@ -4931,6 +5485,9 @@
  {
   "id": "2026-north-carolina-a-t-state-university-20260119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-19",
   "institution": "North Carolina A&T State University",
   "department": "Business IS and Analytics",
@@ -4958,6 +5515,9 @@
  {
   "id": "2026-san-diego-state-university-20260119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-19",
   "institution": "San Diego State University",
   "department": "AI",
@@ -4985,6 +5545,9 @@
  {
   "id": "2026-university-of-northern-iowa-20260119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-19",
   "institution": "University of Northern Iowa",
   "department": "BA",
@@ -5012,6 +5575,9 @@
  {
   "id": "2026-desales-university-20260118",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-18",
   "institution": "DeSales University",
   "department": "BA",
@@ -5039,6 +5605,9 @@
  {
   "id": "2026-florida-international-university-20260118",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-18",
   "institution": "Florida International University",
   "department": "IS",
@@ -5067,6 +5636,9 @@
  {
   "id": "2026-palm-beach-atlantic-university-20260118",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-18",
   "institution": "Palm Beach Atlantic University",
   "department": "Data Analytics",
@@ -5095,6 +5667,9 @@
  {
   "id": "2026-university-of-maryland-20260116",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-16",
   "institution": "University of Maryland",
   "department": "OM/IS",
@@ -5123,6 +5698,9 @@
  {
   "id": "2026-american-university-of-phnom-penh-20260115",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-15",
   "institution": "American University of Phnom Penh",
   "department": "MIS",
@@ -5150,6 +5728,9 @@
  {
   "id": "2026-fairmont-state-university-20260115",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-15",
   "institution": "Fairmont State University",
   "department": "IS",
@@ -5177,6 +5758,9 @@
  {
   "id": "2026-le-moyne-college-20260115",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-15",
   "institution": "Le Moyne College",
   "department": "IS",
@@ -5204,6 +5788,9 @@
  {
   "id": "2026-minnesota-state-university-20260115",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-15",
   "institution": "Minnesota State University",
   "department": "MIS and BA",
@@ -5231,6 +5818,9 @@
  {
   "id": "2026-purdue-university-fort-wayne-20260115",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-15",
   "institution": "Purdue University Fort Wayne",
   "department": "MIS and BA",
@@ -5258,6 +5848,9 @@
  {
   "id": "2026-university-of-missouri-kansas-city-20260115",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-15",
   "institution": "University of Missouri-Kansas City",
   "department": "Supply Chain Management",
@@ -5285,6 +5878,9 @@
  {
   "id": "2026-virginia-tech-20260114",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-14",
   "institution": "Virginia Tech",
   "department": "Healthcare Operations",
@@ -5313,6 +5909,9 @@
  {
   "id": "2026-abu-dhabi-university-20260112",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-12",
   "institution": "Abu Dhabi University",
   "department": "OM",
@@ -5340,6 +5939,9 @@
  {
   "id": "2026-china-europe-international-business-school-20260112",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-12",
   "institution": "China Europe International Business School",
   "department": "OM",
@@ -5368,6 +5970,9 @@
  {
   "id": "2026-ipade-business-school-20260108",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-08",
   "institution": "IPADE Business School",
   "department": "OM and IS",
@@ -5395,6 +6000,9 @@
  {
   "id": "2026-georgia-gwinnett-college-20260106",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-06",
   "institution": "Georgia Gwinnett College",
   "department": "Supply Chain Management",
@@ -5422,6 +6030,9 @@
  {
   "id": "2026-texas-a-m-university-20260106",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-06",
   "institution": "Texas A&M University",
   "department": "Mays Business School, Information and Operations Management",
@@ -5449,6 +6060,9 @@
  {
   "id": "2026-new-york-university-abu-dhabi-20260103",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-03",
   "institution": "New York University Abu Dhabi",
   "department": "IS",
@@ -5476,6 +6090,9 @@
  {
   "id": "2026-northeastern-university-20260103",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-03",
   "institution": "Northeastern University",
   "department": "SCM and IT",
@@ -5504,6 +6121,9 @@
  {
   "id": "2026-palm-beach-atlantic-university-20260103",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2026-01-03",
   "institution": "Palm Beach Atlantic University",
   "department": "Data Analytics",
@@ -5532,6 +6152,9 @@
  {
   "id": "2026-csu-san-marcos-20251228",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-28",
   "institution": "CSU San Marcos",
   "department": "OM",
@@ -5559,6 +6182,9 @@
  {
   "id": "2026-beijing-normal-hong-kong-baptist-university-bnbu-20251227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-27",
   "institution": "Beijing Normal-Hong Kong Baptist University (BNBU)",
   "department": "BA",
@@ -5587,6 +6213,9 @@
  {
   "id": "2026-university-of-maine-at-augusta-20251227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-27",
   "institution": "University of Maine at Augusta",
   "department": "Business Management",
@@ -5614,6 +6243,9 @@
  {
   "id": "2026-university-of-south-florida-20251227",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-27",
   "institution": "University of South Florida",
   "department": "IS",
@@ -5641,6 +6273,9 @@
  {
   "id": "2026-kaist-20251226",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-26",
   "institution": "KAIST",
   "department": "Organization/Man. Sci",
@@ -5669,6 +6304,9 @@
  {
   "id": "2026-psu-behrend-20251223",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-23",
   "institution": "PSU Behrend",
   "department": "Project and SCM",
@@ -5696,6 +6334,9 @@
  {
   "id": "2026-washington-university-in-st-louis-20251222",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-22",
   "institution": "Washington University in St. Louis",
   "department": "SCM/OM",
@@ -5723,6 +6364,9 @@
  {
   "id": "2026-marquette-university-20251218",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-18",
   "institution": "Marquette University",
   "department": "OSCM",
@@ -5751,6 +6395,9 @@
  {
   "id": "2026-norfolk-state-university-20251218",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-18",
   "institution": "Norfolk State University",
   "department": "BA",
@@ -5778,6 +6425,9 @@
  {
   "id": "2026-tbs-education-20251218",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-18",
   "institution": "TBS Education",
   "department": "IO/OM/OR",
@@ -5806,6 +6456,9 @@
  {
   "id": "2026-texas-a-m-university-20251213",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-13",
   "institution": "Texas A&M University",
   "department": "IS",
@@ -5833,6 +6486,9 @@
  {
   "id": "2026-university-of-north-texas-20251211",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-11",
   "institution": "University of North Texas",
   "department": "BA",
@@ -5860,6 +6516,9 @@
  {
   "id": "2026-flame-university-20251210",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-10",
   "institution": "FLAME University",
   "department": "BA",
@@ -5887,6 +6546,9 @@
  {
   "id": "2026-flame-university-20251210-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-10",
   "institution": "FLAME University",
   "department": "OM",
@@ -5914,6 +6576,9 @@
  {
   "id": "2026-rutgers-university-20251208",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-08",
   "institution": "Rutgers University",
   "department": "SCM (second position)",
@@ -5941,6 +6606,9 @@
  {
   "id": "2026-purdue-university-20251203",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-03",
   "institution": "Purdue University",
   "department": "Heathcare (OM included)",
@@ -5969,6 +6637,9 @@
  {
   "id": "2026-coastal-carolina-university-20251202",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-12-02",
   "institution": "Coastal Carolina University",
   "department": "OM",
@@ -5997,6 +6668,9 @@
  {
   "id": "2026-university-of-melbourne-20251129",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-29",
   "institution": "University of Melbourne",
   "department": "SCM/Management",
@@ -6024,6 +6698,9 @@
  {
   "id": "2026-cal-poly-san-luis-obispo-20251125",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-25",
   "institution": "Cal Poly San Luis Obispo",
   "department": "Supply Chain Management",
@@ -6051,6 +6728,9 @@
  {
   "id": "2026-villanova-university-20251124",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-24",
   "institution": "Villanova University",
   "department": "BA/AI",
@@ -6078,6 +6758,9 @@
  {
   "id": "2026-auburn-university-20251120",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-20",
   "institution": "Auburn University",
   "department": "IS/BA",
@@ -6105,6 +6788,9 @@
  {
   "id": "2026-florida-polytechnic-university-20251120",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-20",
   "institution": "Florida Polytechnic University",
   "department": "BA/DS",
@@ -6133,6 +6819,9 @@
  {
   "id": "2026-rutgers-university-20251119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-19",
   "institution": "Rutgers University",
   "department": "AI/ML/DS/Stats",
@@ -6160,6 +6849,9 @@
  {
   "id": "2026-southern-utah-university-20251119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-19",
   "institution": "Southern Utah University",
   "department": "BA",
@@ -6187,6 +6879,9 @@
  {
   "id": "2026-utah-tech-university-20251119",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-19",
   "institution": "Utah Tech University",
   "department": "BA/IS/DS",
@@ -6214,6 +6909,9 @@
  {
   "id": "2026-rutgers-university-20251118",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-18",
   "institution": "Rutgers University",
   "department": "IE",
@@ -6242,6 +6940,9 @@
  {
   "id": "2026-rutgers-university-stats-20251118",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-18",
   "institution": "Rutgers University (Stats)",
   "department": "Reinforcement Learning",
@@ -6269,6 +6970,9 @@
  {
   "id": "2026-stony-brook-university-20251118",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-18",
   "institution": "Stony Brook University",
   "department": "OM/DS",
@@ -6297,6 +7001,9 @@
  {
   "id": "2026-butler-university-20251116",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-16",
   "institution": "Butler University",
   "department": "Supply Chain Management",
@@ -6324,6 +7031,9 @@
  {
   "id": "2026-goldey-beacom-college-20251116",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-16",
   "institution": "Goldey-Beacom College",
   "department": "BA",
@@ -6351,6 +7061,9 @@
  {
   "id": "2026-southern-arkansas-university-20251116",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-16",
   "institution": "Southern Arkansas University",
   "department": "Supply Chain Management",
@@ -6379,6 +7092,9 @@
  {
   "id": "2026-valdosta-state-university-20251116",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-16",
   "institution": "Valdosta State University",
   "department": "BA",
@@ -6406,6 +7122,9 @@
  {
   "id": "2026-sam-houston-state-university-20251113",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-13",
   "institution": "Sam Houston State University",
   "department": "Supply Chain Management",
@@ -6433,6 +7152,9 @@
  {
   "id": "2026-macewan-university-20251111",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-11",
   "institution": "MacEwan University",
   "department": "Management Science",
@@ -6460,6 +7182,9 @@
  {
   "id": "2026-macewan-university-20251111-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-11",
   "institution": "MacEwan University",
   "department": "SCM/Logistics",
@@ -6487,6 +7212,9 @@
  {
   "id": "2026-oakland-university-20251111",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-11",
   "institution": "Oakland University",
   "department": "Quant Methods/Man. Sci",
@@ -6514,6 +7242,9 @@
  {
   "id": "2026-rowan-university-20251111",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-11",
   "institution": "Rowan University",
   "department": "SCM/Logistics",
@@ -6542,6 +7273,9 @@
  {
   "id": "2026-university-of-hartford-20251111",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-11",
   "institution": "University of Hartford",
   "department": "BA (Marketing or SCM)",
@@ -6569,6 +7303,9 @@
  {
   "id": "2026-university-of-virgin-islands-20251111",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-11",
   "institution": "University of Virgin Islands",
   "department": "Decision Sciences",
@@ -6597,6 +7334,9 @@
  {
   "id": "2026-arizona-state-university-20251109",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-09",
   "institution": "Arizona State University",
   "department": "W. P. Carey School of Business, Supply Chain Management",
@@ -6624,6 +7364,9 @@
  {
   "id": "2026-arizona-state-university-20251109-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-11-09",
   "institution": "Arizona State University",
   "department": "W. P. Carey School of Business, Supply Chain Management",
@@ -6651,6 +7394,9 @@
  {
   "id": "2026-university-of-alabama-birmingham-20251030",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-30",
   "institution": "University of Alabama - Birmingham",
   "department": "SCM, distribution/MKT",
@@ -6679,6 +7425,9 @@
  {
   "id": "2026-university-of-south-carolina-20251027",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-27",
   "institution": "University of South Carolina",
   "department": "Darla Moore School of Business, OM&SCM",
@@ -6707,6 +7456,9 @@
  {
   "id": "2026-university-of-california-berkeley-20251024",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-24",
   "institution": "University of California, Berkeley",
   "department": "IEOR, decision analytics",
@@ -6734,6 +7486,9 @@
  {
   "id": "2026-university-of-california-berkeley-20251024-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-24",
   "institution": "University of California, Berkeley",
   "department": "IEOR",
@@ -6761,6 +7516,9 @@
  {
   "id": "2026-virgina-darden-20251023",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-23",
   "institution": "Virgina Darden",
   "department": "DADS",
@@ -6789,6 +7547,9 @@
  {
   "id": "2026-arizona-state-university-20251021",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-21",
   "institution": "Arizona State University",
   "department": "IS",
@@ -6816,6 +7577,9 @@
  {
   "id": "2026-arizona-state-university-20251021-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-21",
   "institution": "Arizona State University",
   "department": "IS",
@@ -6843,6 +7607,9 @@
  {
   "id": "2026-tennessee-state-university-20251021",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-21",
   "institution": "Tennessee State University",
   "department": "Supply Chain Management",
@@ -6871,6 +7638,9 @@
  {
   "id": "2026-indiana-state-university-20251019",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-19",
   "institution": "Indiana State University",
   "department": "BA",
@@ -6898,6 +7668,9 @@
  {
   "id": "2026-arizona-state-university-20251018",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-18",
   "institution": "Arizona State University",
   "department": "Learning, Optimization, and Decision Analytics",
@@ -6925,6 +7698,9 @@
  {
   "id": "2026-grand-valley-state-university-20251016",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-16",
   "institution": "Grand Valley State University",
   "department": "Management",
@@ -6952,6 +7728,9 @@
  {
   "id": "2026-university-of-arizona-20251016",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-16",
   "institution": "University of Arizona",
   "department": "MIS",
@@ -6979,6 +7758,9 @@
  {
   "id": "2026-university-of-michigan-flint-20251016",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-16",
   "institution": "University of Michigan - Flint",
   "department": "OM/SCM",
@@ -7006,6 +7788,9 @@
  {
   "id": "2026-spartanburg-methodist-college-20251014",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-14",
   "institution": "Spartanburg Methodist College",
   "department": "Statistics/Data Analytics",
@@ -7033,6 +7818,9 @@
  {
   "id": "2026-university-of-nebraska-at-kearney-20251014",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-14",
   "institution": "University of Nebraska at Kearney",
   "department": "Supply Chain Management",
@@ -7061,6 +7849,9 @@
  {
   "id": "2026-university-of-pennsylvania-20251014",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-14",
   "institution": "University of Pennsylvania",
   "department": "Wharton School, OM/IS (rookie)",
@@ -7088,6 +7879,9 @@
  {
   "id": "2026-westfield-state-university-20251014",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-14",
   "institution": "Westfield State University",
   "department": "Management (Operations and Supply Chain Management)",
@@ -7116,6 +7910,9 @@
  {
   "id": "2026-columbia-university-20251013",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-13",
   "institution": "Columbia University",
   "department": "IEOR",
@@ -7144,6 +7941,9 @@
  {
   "id": "2026-pennsylvania-state-university-20251013",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-13",
   "institution": "Pennsylvania State University",
   "department": "SCM (sourcing focus)",
@@ -7171,6 +7971,9 @@
  {
   "id": "2026-oklahoma-state-university-20251011",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-11",
   "institution": "Oklahoma State University",
   "department": "MIS",
@@ -7198,6 +8001,9 @@
  {
   "id": "2026-university-of-washington-tacoma-milgard-school-o-20251011",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-11",
   "institution": "University of Washington-Tacoma (Milgard School of Business)",
   "department": "SCM/BA",
@@ -7225,6 +8031,9 @@
  {
   "id": "2026-american-university-of-beirut-school-of-business-20251010",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-10",
   "institution": "American University of Beirut (School of Business)",
   "department": "OM/Analytics/Statistics",
@@ -7253,6 +8062,9 @@
  {
   "id": "2026-bits-school-of-management-20251010",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-10",
   "institution": "BITS School of Management",
   "department": "OM",
@@ -7281,6 +8093,9 @@
  {
   "id": "2026-pennsylvania-state-university-20251010",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-10",
   "institution": "Pennsylvania State University",
   "department": "SCM (Tech focus)",
@@ -7309,6 +8124,9 @@
  {
   "id": "2026-universitat-pompeu-fabra-20251010",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-10",
   "institution": "Universitat Pompeu Fabra",
   "department": "OM/OR",
@@ -7336,6 +8154,9 @@
  {
   "id": "2026-university-of-texas-at-dallas-20251010",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-10",
   "institution": "University of Texas at Dallas",
   "department": "OM/IS (Healthcare Management)",
@@ -7363,6 +8184,9 @@
  {
   "id": "2026-university-of-houston-20251009",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-09",
   "institution": "University of Houston",
   "department": "ISE (supply chain and logistics tech)",
@@ -7391,6 +8215,9 @@
  {
   "id": "2026-harvard-business-school-20251008",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-08",
   "institution": "Harvard Business School",
   "department": "OM",
@@ -7418,6 +8245,9 @@
  {
   "id": "2026-north-central-college-20251008",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-08",
   "institution": "North Central College",
   "department": "OM",
@@ -7446,6 +8276,9 @@
  {
   "id": "2026-texas-state-university-20251008",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-08",
   "institution": "Texas State University",
   "department": "Analytics",
@@ -7473,6 +8306,9 @@
  {
   "id": "2026-virginia-tech-20251008",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-08",
   "institution": "Virginia Tech",
   "department": "OR",
@@ -7501,6 +8337,9 @@
  {
   "id": "2026-university-of-michigan-20251007",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-07",
   "institution": "University of Michigan",
   "department": "IOE",
@@ -7528,6 +8367,9 @@
  {
   "id": "2026-university-of-southern-california-20251007",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-07",
   "institution": "University of Southern California",
   "department": "ISE",
@@ -7555,6 +8397,9 @@
  {
   "id": "2026-american-university-of-beirut-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "American University of Beirut",
   "department": "IE/OR/Data Science",
@@ -7583,6 +8428,9 @@
  {
   "id": "2026-georgia-tech-isye-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "Georgia Tech (ISyE)",
   "department": "ISyE",
@@ -7611,6 +8459,9 @@
  {
   "id": "2026-iowa-state-university-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "Iowa State University",
   "department": "Ivy College of Business, IS/BA",
@@ -7639,6 +8490,9 @@
  {
   "id": "2026-judge-business-school-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "Judge Business School",
   "department": "OM / Tech",
@@ -7667,6 +8521,9 @@
  {
   "id": "2026-national-university-of-singapore-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "National University of Singapore",
   "department": "IS",
@@ -7695,6 +8552,9 @@
  {
   "id": "2026-university-of-pittsburgh-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "University of Pittsburgh",
   "department": "Industrial Engineering",
@@ -7722,6 +8582,9 @@
  {
   "id": "2026-university-of-wisconsin-la-crosse-20251006",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-06",
   "institution": "University of Wisconsin - La Crosse",
   "department": "OM/SCM",
@@ -7749,6 +8612,9 @@
  {
   "id": "2026-depauw-university-20251004",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-04",
   "institution": "Depauw University",
   "department": "BA",
@@ -7776,6 +8642,9 @@
  {
   "id": "2026-tsinghua-university-20251004",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-04",
   "institution": "Tsinghua University",
   "department": "OM/IS",
@@ -7804,6 +8673,9 @@
  {
   "id": "2026-ozyegin-university-20251003",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-03",
   "institution": "Özyeğin University",
   "department": "OM",
@@ -7832,6 +8704,9 @@
  {
   "id": "2026-smith-school-of-business-20251003",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-03",
   "institution": "Smith School of Business",
   "department": "Digital Technology",
@@ -7859,6 +8734,9 @@
  {
   "id": "2026-university-of-missouri-20251003",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-03",
   "institution": "University of Missouri",
   "department": "Analytics/Operations/SCM",
@@ -7886,6 +8764,9 @@
  {
   "id": "2026-university-of-texas-at-dallas-20251003",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-03",
   "institution": "University of Texas at Dallas",
   "department": "OM",
@@ -7914,6 +8795,9 @@
  {
   "id": "2026-eastern-illinois-university-20251002",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "Eastern Illinois University",
   "department": "OM",
@@ -7941,6 +8825,9 @@
  {
   "id": "2026-michigan-state-university-20251002",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "Michigan State University",
   "department": "SCM, AI",
@@ -7969,6 +8856,9 @@
  {
   "id": "2026-oregon-state-university-20251002",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "Oregon State University",
   "department": "Business Analytics",
@@ -7997,6 +8887,9 @@
  {
   "id": "2026-oregon-state-university-20251002-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "Oregon State University",
   "department": "Business IS",
@@ -8024,6 +8917,9 @@
  {
   "id": "2026-university-of-miami-20251002",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "University of Miami",
   "department": "Miami Herbert Business School, BA: FinTech, AI, Healthcare",
@@ -8052,6 +8948,9 @@
  {
   "id": "2026-university-of-south-florida-20251002",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "University of South Florida",
   "department": "IS",
@@ -8079,6 +8978,9 @@
  {
   "id": "2026-university-of-utah-20251002",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-02",
   "institution": "University of Utah",
   "department": "OM/SCM",
@@ -8107,6 +9009,9 @@
  {
   "id": "2026-temple-university-20251001",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-10-01",
   "institution": "Temple University",
   "department": "Fox School of Business, Statistics, Operations, and Data Science",
@@ -8134,6 +9039,9 @@
  {
   "id": "2026-henderson-state-university-20250930",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-30",
   "institution": "Henderson State University",
   "department": "OM",
@@ -8161,6 +9069,9 @@
  {
   "id": "2026-howard-university-20250930",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-30",
   "institution": "Howard University",
   "department": "BA",
@@ -8189,6 +9100,9 @@
  {
   "id": "2026-howard-university-20250930-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-30",
   "institution": "Howard University",
   "department": "open disciplinary focus",
@@ -8217,6 +9131,9 @@
  {
   "id": "2026-james-madison-university-20250930",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-30",
   "institution": "James Madison University",
   "department": "BA",
@@ -8244,6 +9161,9 @@
  {
   "id": "2026-austin-peay-state-university-20250927",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-27",
   "institution": "Austin Peay State University",
   "department": "BA",
@@ -8271,6 +9191,9 @@
  {
   "id": "2026-california-state-university-fresno-20250927",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-27",
   "institution": "California State University, Fresno",
   "department": "IS/Decision Sciences",
@@ -8298,6 +9221,9 @@
  {
   "id": "2026-koc-university-20250927",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-27",
   "institution": "Koc University",
   "department": "OM/IS",
@@ -8325,6 +9251,9 @@
  {
   "id": "2026-la-salle-university-20250927",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-27",
   "institution": "La Salle University",
   "department": "BA",
@@ -8352,6 +9281,9 @@
  {
   "id": "2026-missouri-southern-state-university-20250927",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-27",
   "institution": "Missouri Southern State University",
   "department": "Data Analytics",
@@ -8379,6 +9311,9 @@
  {
   "id": "2026-city-university-of-hong-kong-20250926",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-26",
   "institution": "City University of Hong Kong",
   "department": "OM/Statistics",
@@ -8407,6 +9342,9 @@
  {
   "id": "2026-columbia-business-school-20250925",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-25",
   "institution": "Columbia Business School",
   "department": "OM/SCM",
@@ -8435,6 +9373,9 @@
  {
   "id": "2026-lehigh-university-20250925",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-25",
   "institution": "Lehigh University",
   "department": "OM",
@@ -8463,6 +9404,9 @@
  {
   "id": "2026-belmont-university-20250924",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-24",
   "institution": "Belmont University",
   "department": "Supply Chain Management",
@@ -8491,6 +9435,9 @@
  {
   "id": "2026-lousiana-tech-univ-20250923",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-23",
   "institution": "Lousiana Tech Univ",
   "department": "Supply Chain Management",
@@ -8518,6 +9465,9 @@
  {
   "id": "2026-university-of-california-riverside-20250923",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-23",
   "institution": "University of California Riverside",
   "department": "IS",
@@ -8546,6 +9496,9 @@
  {
   "id": "2026-university-of-houston-20250923",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-23",
   "institution": "University of Houston",
   "department": "SCM/OM",
@@ -8574,6 +9527,9 @@
  {
   "id": "2026-university-of-houston-20250923-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-23",
   "institution": "University of Houston",
   "department": "OM/IS",
@@ -8601,6 +9557,9 @@
  {
   "id": "2026-university-of-houston-20250923-3",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-23",
   "institution": "University of Houston",
   "department": "OM/SCM",
@@ -8628,6 +9587,9 @@
  {
   "id": "2026-university-of-virginia-20250923",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-23",
   "institution": "University of Virginia",
   "department": "OM",
@@ -8656,6 +9618,9 @@
  {
   "id": "2026-neeley-school-of-business-texas-christian-univ-20250919",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-19",
   "institution": "Neeley School of Business (Texas Christian Univ)",
   "department": "Supply Chain Management",
@@ -8684,6 +9649,9 @@
  {
   "id": "2026-uni-of-illinois-at-urbana-champaign-gies-20250919",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-19",
   "institution": "Uni. of Illinois at Urbana-Champaign (Gies)",
   "department": "OM&IS",
@@ -8712,6 +9680,9 @@
  {
   "id": "2026-bilkent-university-20250918",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-18",
   "institution": "Bilkent University",
   "department": "OM",
@@ -8740,6 +9711,9 @@
  {
   "id": "2026-indiana-university-kelley-20250918",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-18",
   "institution": "Indiana University (Kelley)",
   "department": "IS",
@@ -8768,6 +9742,9 @@
  {
   "id": "2026-missouri-state-university-20250918",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-18",
   "institution": "Missouri State University",
   "department": "Supply Chain Management",
@@ -8795,6 +9772,9 @@
  {
   "id": "2026-southern-methodist-university-20250918",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-18",
   "institution": "Southern Methodist University",
   "department": "IT/OM",
@@ -8822,6 +9802,9 @@
  {
   "id": "2026-london-business-school-20250916",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-16",
   "institution": "London Business School",
   "department": "OM",
@@ -8849,6 +9832,9 @@
  {
   "id": "2026-peking-university-20250916",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-16",
   "institution": "Peking University",
   "department": "OM and IS",
@@ -8877,6 +9863,9 @@
  {
   "id": "2026-southeastern-louisiana-university-20250916",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-16",
   "institution": "Southeastern Louisiana University",
   "department": "Supply Chain Management",
@@ -8905,6 +9894,9 @@
  {
   "id": "2026-university-of-bath-20250916",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-16",
   "institution": "University of Bath",
   "department": "OM",
@@ -8932,6 +9924,9 @@
  {
   "id": "2026-university-of-iowa-20250916",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-16",
   "institution": "University of Iowa",
   "department": "BA",
@@ -8959,6 +9954,9 @@
  {
   "id": "2026-university-of-new-mexico-20250916",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-16",
   "institution": "University of New Mexico",
   "department": "OM",
@@ -8986,6 +9984,9 @@
  {
   "id": "2026-boston-college-20250915",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-15",
   "institution": "Boston College",
   "department": "BA",
@@ -9014,6 +10015,9 @@
  {
   "id": "2026-georgetown-university-20250915",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-15",
   "institution": "Georgetown University",
   "department": "Sustainability",
@@ -9042,6 +10046,9 @@
  {
   "id": "2026-mit-sloan-20250915",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-15",
   "institution": "MIT Sloan",
   "department": "OM",
@@ -9069,6 +10076,9 @@
  {
   "id": "2026-ohio-state-university-20250915",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-15",
   "institution": "Ohio State University",
   "department": "OM/BA",
@@ -9097,6 +10107,9 @@
  {
   "id": "2026-western-connecticut-state-university-20250914",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-14",
   "institution": "Western Connecticut State University",
   "department": "OM",
@@ -9124,6 +10137,9 @@
  {
   "id": "2026-shanghai-jiao-tong-university-20250912",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-12",
   "institution": "Shanghai Jiao Tong University",
   "department": "BA/OM/OR/Stochastic models/Data-driven/AI",
@@ -9152,6 +10168,9 @@
  {
   "id": "2026-ntu-20250911",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-11",
   "institution": "NTU",
   "department": "OM",
@@ -9180,6 +10199,9 @@
  {
   "id": "2026-ucl-gbsh-20250911",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-11",
   "institution": "UCL GBSH",
   "department": "OM",
@@ -9207,6 +10229,9 @@
  {
   "id": "2026-university-of-alabama-20250911",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-11",
   "institution": "University of Alabama",
   "department": "OM",
@@ -9235,6 +10260,9 @@
  {
   "id": "2026-bayes-business-school-20250910",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-10",
   "institution": "Bayes Business School",
   "department": "OM/AI",
@@ -9262,6 +10290,9 @@
  {
   "id": "2026-nyu-stern-20250910",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-10",
   "institution": "NYU Stern",
   "department": "Technology",
@@ -9289,6 +10320,9 @@
  {
   "id": "2026-national-university-of-singapore-isem-20250909",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-09",
   "institution": "National University of Singapore (ISEM)",
   "department": "simulation, sustainability, AI + X",
@@ -9317,6 +10351,9 @@
  {
   "id": "2026-university-of-minnesota-20250909",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-09",
   "institution": "University of Minnesota",
   "department": "OM/SCM",
@@ -9344,6 +10381,9 @@
  {
   "id": "2026-tum-school-of-management-20250908",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-08",
   "institution": "TUM School of Management",
   "department": "OM/SCM/MIS/F/AI",
@@ -9371,6 +10411,9 @@
  {
   "id": "2026-berry-college-20250906",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-06",
   "institution": "Berry College",
   "department": "OM/SCM",
@@ -9398,6 +10441,9 @@
  {
   "id": "2026-skema-business-school-20250906",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-06",
   "institution": "SKEMA Business School",
   "department": "OM",
@@ -9425,6 +10471,9 @@
  {
   "id": "2026-catolica-lisbon-20250905",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-05",
   "institution": "Católica Lisbon",
   "department": "IS/OR/DS",
@@ -9453,6 +10502,9 @@
  {
   "id": "2026-indiana-state-university-20250904",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-04",
   "institution": "Indiana State University",
   "department": "BA",
@@ -9480,6 +10532,9 @@
  {
   "id": "2026-university-of-oklahoma-20250902",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-02",
   "institution": "University of Oklahoma",
   "department": "Supply Chain Management",
@@ -9508,6 +10563,9 @@
  {
   "id": "2026-ut-austin-mccombs-20250902",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-09-02",
   "institution": "UT Austin McCombs",
   "department": "IS/AI/OR (Health Cluster)",
@@ -9536,6 +10594,9 @@
  {
   "id": "2026-florida-state-university-20250831",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-31",
   "institution": "Florida State University",
   "department": "IS/Analytics",
@@ -9563,6 +10624,9 @@
  {
   "id": "2026-imperial-college-london-20250829",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-29",
   "institution": "Imperial College London",
   "department": "OM",
@@ -9591,6 +10655,9 @@
  {
   "id": "2026-southern-methodist-university-20250829",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-29",
   "institution": "Southern Methodist University",
   "department": "Edwin L. Cox School of Business, ITOM",
@@ -9619,6 +10686,9 @@
  {
   "id": "2026-ubc-sauder-school-of-business-20250827",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-27",
   "institution": "UBC Sauder School of Business",
   "department": "OM",
@@ -9647,6 +10717,9 @@
  {
   "id": "2026-university-of-evansville-20250823",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-23",
   "institution": "University of Evansville",
   "department": "Supply Chain Management",
@@ -9674,6 +10747,9 @@
  {
   "id": "2026-cuhk-shenzhen-20250822",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-22",
   "institution": "CUHK Shenzhen",
   "department": "OR/OM/CS/DS/ML/AI",
@@ -9702,6 +10778,9 @@
  {
   "id": "2026-university-of-south-carolina-20250822",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-22",
   "institution": "University of South Carolina",
   "department": "Darla Moore School of Business, OSC(Empirical Healthcare Focus)",
@@ -9729,6 +10808,9 @@
  {
   "id": "2026-frankfurt-school-of-finance-and-management-20250821",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-21",
   "institution": "Frankfurt School of Finance and Management",
   "department": "BA/OM",
@@ -9756,6 +10838,9 @@
  {
   "id": "2026-universidad-de-los-andes-20250821",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-21",
   "institution": "Universidad de los Andes",
   "department": "OM/SCM/MIS",
@@ -9784,6 +10869,9 @@
  {
   "id": "2026-baruch-college-cuny-20250820",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-20",
   "institution": "Baruch College - CUNY",
   "department": "OR/OM/DA",
@@ -9811,6 +10899,9 @@
  {
   "id": "2026-mit-sloan-20250816",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-16",
   "institution": "MIT Sloan",
   "department": "OR/Stat",
@@ -9838,6 +10929,9 @@
  {
   "id": "2026-university-of-wisconsin-madison-20250815",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-15",
   "institution": "University of Wisconsin - Madison",
   "department": "Wisconsin School of Business, Operations and Information Management",
@@ -9865,6 +10959,9 @@
  {
   "id": "2026-university-of-hong-kong-20250814",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-14",
   "institution": "University of Hong Kong",
   "department": "Data and Systems Engineering",
@@ -9893,6 +10990,9 @@
  {
   "id": "2026-university-of-notre-dame-20250813",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-13",
   "institution": "University of Notre Dame",
   "department": "Mendoza College of Business, IT, Analytics, and Operations",
@@ -9921,6 +11021,9 @@
  {
   "id": "2026-singapore-management-university-20250812",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-12",
   "institution": "Singapore Management University",
   "department": "OM",
@@ -9949,6 +11052,9 @@
  {
   "id": "2026-california-state-university-long-beach-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "California State University, Long Beach",
   "department": "IS",
@@ -9976,6 +11082,9 @@
  {
   "id": "2026-chinese-university-of-hong-kong-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "Chinese University of Hong Kong",
   "department": "OM/IS",
@@ -10004,6 +11113,9 @@
  {
   "id": "2026-cornell-university-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "Cornell University",
   "department": "Applied Economics and Management",
@@ -10031,6 +11143,9 @@
  {
   "id": "2026-fayetteville-state-university-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "Fayetteville State University",
   "department": "ISBA",
@@ -10059,6 +11174,9 @@
  {
   "id": "2026-miami-university-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "Miami University",
   "department": "Information Systems and Technology",
@@ -10086,6 +11204,9 @@
  {
   "id": "2026-the-hong-kong-university-of-science-and-technolo-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "The Hong Kong University of Science and Technology",
   "department": "ISOM",
@@ -10114,6 +11235,9 @@
  {
   "id": "2026-university-of-michigan-20250811",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-11",
   "institution": "University of Michigan",
   "department": "Information",
@@ -10141,6 +11265,9 @@
  {
   "id": "2026-iese-business-school-20250810",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-10",
   "institution": "IESE Business School",
   "department": "OM",
@@ -10169,6 +11296,9 @@
  {
   "id": "2026-colorado-state-university-20250808",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-08",
   "institution": "Colorado State University",
   "department": "College of Business, Supply Chain Management",
@@ -10196,6 +11326,9 @@
  {
   "id": "2026-wake-forest-university-20250806",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-06",
   "institution": "Wake Forest University",
   "department": "Business Analytics",
@@ -10223,6 +11356,9 @@
  {
   "id": "2026-chicago-booth-20250804",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-04",
   "institution": "Chicago Booth",
   "department": "OM",
@@ -10251,6 +11387,9 @@
  {
   "id": "2026-concordia-university-chicago-20250804",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-04",
   "institution": "Concordia University Chicago",
   "department": "Data Analytics",
@@ -10279,6 +11418,9 @@
  {
   "id": "2026-eastern-new-mexico-university-20250804",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-04",
   "institution": "Eastern New Mexico University",
   "department": "OM",
@@ -10306,6 +11448,9 @@
  {
   "id": "2026-monash-university-20250804",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-04",
   "institution": "Monash University",
   "department": "OR/OM",
@@ -10333,6 +11478,9 @@
  {
   "id": "2026-northern-state-university-20250804",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-04",
   "institution": "Northern State University",
   "department": "quantitative analytics",
@@ -10360,6 +11508,9 @@
  {
   "id": "2026-suny-korea-20250804",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-04",
   "institution": "SUNY Korea",
   "department": "Technology Management",
@@ -10387,6 +11538,9 @@
  {
   "id": "2026-stanford-gsb-20250802",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-02",
   "institution": "Stanford GSB",
   "department": "OM",
@@ -10415,6 +11569,9 @@
  {
   "id": "2026-the-hong-kong-polytechnic-university-20250802",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-08-02",
   "institution": "The Hong Kong Polytechnic University",
   "department": "SCM/OM",
@@ -10443,6 +11600,9 @@
  {
   "id": "2026-rutgers-university-20250731",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-31",
   "institution": "Rutgers University",
   "department": "Supply Chain Management",
@@ -10470,6 +11630,9 @@
  {
   "id": "2026-san-jose-state-university-20250731",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-31",
   "institution": "San José State University",
   "department": "BA and Marketing",
@@ -10497,6 +11660,9 @@
  {
   "id": "2026-university-of-vienna-20250721",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-21",
   "institution": "University of Vienna",
   "department": "OR",
@@ -10524,6 +11690,9 @@
  {
   "id": "2026-vienna-university-of-economics-and-business-20250721",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-21",
   "institution": "Vienna University of Economics and Business",
   "department": "Transport and Logistics Management",
@@ -10551,6 +11720,9 @@
  {
   "id": "2026-the-college-of-new-jersey-20250717",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-17",
   "institution": "The College of New Jersey",
   "department": "OM/SCM",
@@ -10578,6 +11750,9 @@
  {
   "id": "2026-university-of-san-diego-20250717",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-17",
   "institution": "University of San Diego",
   "department": "OM/BA",
@@ -10605,6 +11780,9 @@
  {
   "id": "2026-judge-business-school-20250715",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-15",
   "institution": "Judge Business School",
   "department": "OT/IS",
@@ -10633,6 +11811,9 @@
  {
   "id": "2026-ucl-school-of-management-20250715",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-15",
   "institution": "UCL School of Management",
   "department": "OM",
@@ -10660,6 +11841,9 @@
  {
   "id": "2026-indian-school-of-business-isb-20250713",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-13",
   "institution": "Indian School of Business (ISB)",
   "department": "OM",
@@ -10687,6 +11871,9 @@
  {
   "id": "2026-national-university-of-singapore-20250713",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-13",
   "institution": "National University of Singapore",
   "department": "NUS Business School, Analytics and Operations",
@@ -10715,6 +11902,9 @@
  {
   "id": "2026-university-of-north-carolina-at-wilmington-20250711",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-11",
   "institution": "University of North Carolina at Wilmington",
   "department": "Supply Chain Management",
@@ -10743,6 +11933,9 @@
  {
   "id": "2026-hec-paris-20250704",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-04",
   "institution": "HEC Paris",
   "department": "AI",
@@ -10771,6 +11964,9 @@
  {
   "id": "2026-alabama-a-m-university-20250703",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "Alabama A&M University",
   "department": "MIS",
@@ -10799,6 +11995,9 @@
  {
   "id": "2026-alabama-a-m-university-20250703-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "Alabama A&M University",
   "department": "SCM/Logistics",
@@ -10827,6 +12026,9 @@
  {
   "id": "2026-american-university-in-the-emirates-20250703",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "American University in the Emirates",
   "department": "Logistics/Supply Chain",
@@ -10855,6 +12057,9 @@
  {
   "id": "2026-american-university-in-the-emirates-20250703-2",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "American University in the Emirates",
   "department": "Business Intelligence /DA",
@@ -10883,6 +12088,9 @@
  {
   "id": "2026-grand-valley-state-university-20250703",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "Grand Valley State University",
   "department": "Management",
@@ -10910,6 +12118,9 @@
  {
   "id": "2026-hofstra-university-20250703",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "Hofstra University",
   "department": "IS",
@@ -10937,6 +12148,9 @@
  {
   "id": "2026-university-of-houston-20250703",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "University of Houston",
   "department": "Decision and IIS",
@@ -10964,6 +12178,9 @@
  {
   "id": "2026-university-of-tennessee-knoxville-20250703",
   "year": 2026,
+  "years": [
+   2026
+  ],
   "posted": "2025-07-03",
   "institution": "University of Tennessee, Knoxville",
   "department": "Supply Chain Management",
@@ -10991,6 +12208,10 @@
  {
   "id": "2026-auburn-university-20250630",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-30",
   "institution": "Auburn University",
   "department": "BA/IS",
@@ -11018,6 +12239,10 @@
  {
   "id": "2026-hec-paris-20250629",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-29",
   "institution": "HEC Paris",
   "department": "OM",
@@ -11046,6 +12271,10 @@
  {
   "id": "2026-canadian-university-dubai-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Canadian University Dubai",
   "department": "BA/DS",
@@ -11073,6 +12302,10 @@
  {
   "id": "2026-coppin-state-university-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Coppin State University",
   "department": "Decision Sciences",
@@ -11100,6 +12333,10 @@
  {
   "id": "2026-prince-mohammad-bin-fahd-university-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Prince Mohammad Bin Fahd University",
   "department": "OM/SCM",
@@ -11128,6 +12365,10 @@
  {
   "id": "2026-prince-mohammad-bin-fahd-university-20250624-2",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Prince Mohammad Bin Fahd University",
   "department": "MIS",
@@ -11156,6 +12397,10 @@
  {
   "id": "2026-stockholm-school-of-economics-sse-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Stockholm School of Economics (SSE)",
   "department": "Supply Chain Management",
@@ -11183,6 +12428,10 @@
  {
   "id": "2026-stonehill-college-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Stonehill College",
   "department": "Data Analytics",
@@ -11211,6 +12460,10 @@
  {
   "id": "2026-tilburg-university-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "Tilburg University",
   "department": "IS",
@@ -11238,6 +12491,10 @@
  {
   "id": "2026-university-of-auckland-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "University of Auckland",
   "department": "OM/SCM",
@@ -11265,6 +12522,10 @@
  {
   "id": "2026-university-of-southern-indiana-20250624",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-24",
   "institution": "University of Southern Indiana",
   "department": "CIS",
@@ -11292,6 +12553,10 @@
  {
   "id": "2026-cunef-university-20250622",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-22",
   "institution": "CUNEF University",
   "department": "OM",
@@ -11319,6 +12584,10 @@
  {
   "id": "2026-mcmaster-university-20250622",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-22",
   "institution": "McMaster University",
   "department": "",
@@ -11346,6 +12615,10 @@
  {
   "id": "2026-lone-star-college-system-20250620",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-20",
   "institution": "Lone Star College System",
   "department": "Business",
@@ -11374,6 +12647,10 @@
  {
   "id": "2026-saint-louis-university-20250620",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-20",
   "institution": "Saint Louis University",
   "department": "OM and IT",
@@ -11401,6 +12678,10 @@
  {
   "id": "2026-savannah-college-of-art-and-design-20250620",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-20",
   "institution": "Savannah College of Art and Design",
   "department": "Creative Business Leadership",
@@ -11429,6 +12710,10 @@
  {
   "id": "2026-university-of-warwick-20250620",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-20",
   "institution": "University of Warwick",
   "department": "IS",
@@ -11457,6 +12742,10 @@
  {
   "id": "2026-university-of-hong-kong-20250619",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-19",
   "institution": "University of Hong Kong",
   "department": "BA",
@@ -11485,6 +12774,10 @@
  {
   "id": "2026-texas-state-university-20250616",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-16",
   "institution": "Texas State University",
   "department": "IS",
@@ -11512,6 +12805,10 @@
  {
   "id": "2026-university-college-dublin-20250613",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-13",
   "institution": "University College Dublin",
   "department": "MIS",
@@ -11539,6 +12836,10 @@
  {
   "id": "2026-university-college-dublin-20250613-2",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-13",
   "institution": "University College Dublin",
   "department": "Supply Chain Management",
@@ -11566,6 +12867,10 @@
  {
   "id": "2026-university-of-cincinnati-20250612",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-12",
   "institution": "University of Cincinnati",
   "department": "IS",
@@ -11593,6 +12898,10 @@
  {
   "id": "2026-university-of-tennessee-at-chattanooga-20250612",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-12",
   "institution": "University of Tennessee at Chattanooga",
   "department": "AI and Analytics",
@@ -11620,6 +12929,10 @@
  {
   "id": "2026-university-of-tennessee-20250610",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-10",
   "institution": "University of Tennessee",
   "department": "BA",
@@ -11647,6 +12960,10 @@
  {
   "id": "2026-marian-university-20250609",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-09",
   "institution": "Marian University",
   "department": "Business Statistics",
@@ -11674,6 +12991,10 @@
  {
   "id": "2026-santa-clara-university-20250607",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-07",
   "institution": "Santa Clara University",
   "department": "IS and Analytics",
@@ -11701,6 +13022,10 @@
  {
   "id": "2026-university-of-arkansas-20250607",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-07",
   "institution": "University of Arkansas",
   "department": "IS",
@@ -11728,6 +13053,10 @@
  {
   "id": "2026-yeshiva-university-20250607",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-07",
   "institution": "Yeshiva University",
   "department": "Data Analytics",
@@ -11755,6 +13084,10 @@
  {
   "id": "2026-american-university-of-phnom-penh-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "American University of Phnom Penh",
   "department": "MIS",
@@ -11783,6 +13116,10 @@
  {
   "id": "2026-college-of-charleston-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "College of Charleston",
   "department": "Supply Chain Management",
@@ -11810,6 +13147,10 @@
  {
   "id": "2026-columbia-basin-college-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "Columbia Basin College",
   "department": "Logistics and Supply Chain",
@@ -11837,6 +13178,10 @@
  {
   "id": "2026-eth-zurich-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "ETH Zurich",
   "department": "Empirical business problems",
@@ -11864,6 +13209,10 @@
  {
   "id": "2026-lincoln-memorial-university-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "Lincoln Memorial University",
   "department": "BA",
@@ -11891,6 +13240,10 @@
  {
   "id": "2026-texas-state-university-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "Texas State University",
   "department": "IS and Analytics",
@@ -11918,6 +13271,10 @@
  {
   "id": "2026-university-of-florida-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "University of Florida",
   "department": "ISE-Smart Manufacturing",
@@ -11946,6 +13303,10 @@
  {
   "id": "2026-university-of-texas-at-austin-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "University of Texas at Austin",
   "department": "IROM",
@@ -11973,6 +13334,10 @@
  {
   "id": "2026-wheaton-college-of-massachusetts-20250606",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-06",
   "institution": "Wheaton College of Massachusetts",
   "department": "BA",
@@ -12000,6 +13365,10 @@
  {
   "id": "2026-university-of-mannheim-20250605",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-05",
   "institution": "University of Mannheim",
   "department": "Supply Chain Management",
@@ -12027,6 +13396,10 @@
  {
   "id": "2026-cuhk-shenzhen-20250601",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-06-01",
   "institution": "CUHK Shenzhen",
   "department": "Platform Operations. and Data-Driven Market Design",
@@ -12054,6 +13427,10 @@
  {
   "id": "2026-ball-state-university-20250529",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-29",
   "institution": "Ball State University",
   "department": "ISOM",
@@ -12081,6 +13458,10 @@
  {
   "id": "2026-caldwell-university-20250529",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-29",
   "institution": "Caldwell University",
   "department": "",
@@ -12108,6 +13489,10 @@
  {
   "id": "2026-clarkson-university-20250529",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-29",
   "institution": "Clarkson University",
   "department": "IS",
@@ -12135,6 +13520,10 @@
  {
   "id": "2026-east-tennessee-state-university-20250529",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-29",
   "institution": "East Tennessee State University",
   "department": "Supply Chain Management",
@@ -12162,6 +13551,10 @@
  {
   "id": "2026-university-of-iowa-20250529",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-29",
   "institution": "University of Iowa",
   "department": "BA",
@@ -12189,6 +13582,10 @@
  {
   "id": "2026-carnegie-mellon-university-20250526",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-26",
   "institution": "Carnegie Mellon University",
   "department": "Contextualized Evaluation of AI for Healthcare",
@@ -12216,6 +13613,10 @@
  {
   "id": "2026-a-sharqiyah-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "A’Sharqiyah University",
   "department": "IS and DA",
@@ -12243,6 +13644,10 @@
  {
   "id": "2026-a-sharqiyah-university-20250525-2",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "A’Sharqiyah University",
   "department": "SCM and Logistics",
@@ -12270,6 +13675,10 @@
  {
   "id": "2026-coastal-carolina-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Coastal Carolina University",
   "department": "Operations",
@@ -12297,6 +13706,10 @@
  {
   "id": "2026-kean-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Kean University",
   "department": "SCM and OM",
@@ -12324,6 +13737,10 @@
  {
   "id": "2026-park-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Park University",
   "department": "SCM, Analytics",
@@ -12351,6 +13768,10 @@
  {
   "id": "2026-prairie-view-a-m-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Prairie View A&M University",
   "department": "SCM/Quantitative Mgt",
@@ -12379,6 +13800,10 @@
  {
   "id": "2026-saint-mary-s-college-of-california-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Saint Mary's College of California",
   "department": "BA and DS",
@@ -12406,6 +13831,10 @@
  {
   "id": "2026-university-of-colorado-boulder-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "University of Colorado Boulder",
   "department": "BA and ML",
@@ -12433,6 +13862,10 @@
  {
   "id": "2026-university-of-iowa-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "University of Iowa",
   "department": "BA",
@@ -12460,6 +13893,10 @@
  {
   "id": "2026-virginia-commonwealth-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Virginia Commonwealth University",
   "department": "SCM and Analytics",
@@ -12487,6 +13924,10 @@
  {
   "id": "2026-virginia-tech-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Virginia Tech",
   "department": "Data Science",
@@ -12514,6 +13955,10 @@
  {
   "id": "2026-william-and-mary-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "William and Mary",
   "department": "BA",
@@ -12541,6 +13986,10 @@
  {
   "id": "2026-xi-an-jiaotong-liverpool-university-20250525",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-25",
   "institution": "Xi'an Jiaotong-Liverpool University",
   "department": "sustainability",
@@ -12569,6 +14018,10 @@
  {
   "id": "2026-clarkson-university-20250524",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-24",
   "institution": "Clarkson University",
   "department": "IS",
@@ -12596,6 +14049,10 @@
  {
   "id": "2026-warwick-business-school-20250524",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-24",
   "institution": "Warwick Business School",
   "department": "OM",
@@ -12623,6 +14080,10 @@
  {
   "id": "2026-western-university-20250523",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-23",
   "institution": "Western University",
   "department": "Ivey Business School, Management Science",
@@ -12650,6 +14111,10 @@
  {
   "id": "2026-hong-kong-university-of-science-and-technology-g-20250522",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-22",
   "institution": "Hong Kong University of Science and Technology (Guangzhou)",
   "department": "DS and Analytics",
@@ -12678,6 +14143,10 @@
  {
   "id": "2026-kennesaw-state-university-20250522",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-22",
   "institution": "Kennesaw State University",
   "department": "IS (FinTech)",
@@ -12705,6 +14174,10 @@
  {
   "id": "2026-kennesaw-state-university-20250522-2",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-22",
   "institution": "Kennesaw State University",
   "department": "IS (Cybersecurity)",
@@ -12732,6 +14205,10 @@
  {
   "id": "2026-texas-state-university-20250522",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-22",
   "institution": "Texas State University",
   "department": "IS and Analytics",
@@ -12759,6 +14236,10 @@
  {
   "id": "2026-donghua-university-20250520",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-20",
   "institution": "Donghua University",
   "department": "OM, SCM, Logistics",
@@ -12787,6 +14268,10 @@
  {
   "id": "2026-warwick-business-school-20250520",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-20",
   "institution": "Warwick Business School",
   "department": "OM",
@@ -12814,6 +14299,10 @@
  {
   "id": "2026-bocconi-20250519",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-19",
   "institution": "Bocconi",
   "department": "Management Science/ Department. Management and Technology",
@@ -12841,6 +14330,10 @@
  {
   "id": "2026-kuhne-logistics-university-20250519",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-19",
   "institution": "Kühne Logistics University",
   "department": "OM and Business Analytics",
@@ -12868,6 +14361,10 @@
  {
   "id": "2026-university-of-manitoba-20250519",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-19",
   "institution": "University of Manitoba",
   "department": "Supply Chain Management",
@@ -12896,6 +14393,10 @@
  {
   "id": "2026-ie-business-school-20250518",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-18",
   "institution": "IE Business School",
   "department": "OM",
@@ -12923,6 +14424,10 @@
  {
   "id": "2026-ie-business-school-20250518-2",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-05-18",
   "institution": "IE Business School",
   "department": "DS",
@@ -12950,6 +14455,10 @@
  {
   "id": "2026-wayne-state-university-20250119",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-01-19",
   "institution": "Wayne State University",
   "department": "Supply Chain Management",
@@ -12977,6 +14486,10 @@
  {
   "id": "2026-bowling-green-state-university-20250115",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-01-15",
   "institution": "Bowling Green State University",
   "department": "Supply Chain Management",
@@ -13004,6 +14517,10 @@
  {
   "id": "2026-chicago-booth-20250115",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-01-15",
   "institution": "Chicago Booth",
   "department": "OM/SCM",
@@ -13031,6 +14548,10 @@
  {
   "id": "2026-tennessee-tech-university-20250103",
   "year": 2026,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-01-03",
   "institution": "Tennessee Tech University",
   "department": "Decision Sciences",

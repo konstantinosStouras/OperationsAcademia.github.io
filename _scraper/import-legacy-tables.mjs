@@ -55,7 +55,7 @@ import {
 } from './import-sheet.mjs';
 import { rowsFromSheets, stampAddedAt } from './import-sheet.mjs';
 import {
-  text, url, day, slug, buildMeta, keyOf, healPlace, canonColumns, canonInstitution,
+  text, url, day, slug, buildMeta, keyOf, healPlace, withMarketYears, canonColumns, canonInstitution,
 } from './jobs-model.mjs';
 
 /* ------------------------------------------------------------- the sheets */
@@ -508,7 +508,7 @@ of the DISPLAY tabs instead.`);
     for (const r of rows) years[r.year] = (years[r.year] || 0) + 1;
     console.log(`past postings: ${rows.length} rows, markets ${JSON.stringify(years)}`);
     const meta = buildMeta(rows, { generated: newestPosted(rows) });
-    await write('past-postings.json', rows.map(healPlace), meta);
+    await write('past-postings.json', rows.map((r) => withMarketYears(healPlace(r))), meta);
   }
 }
 
@@ -583,7 +583,15 @@ async function healNames(outDir) {
      Montréal's long form healed to its short one and sat where the É had),
      and a healed file must be byte-what-the-build-would-write. */
   const JOBS = {
-    file: 'past-postings.json', heal: healPlace, meta: true, what: 'posting',
+    /* the names AND the span. `years` — every season a posting is listed
+       under (marketYearsOf) — is derived on every build for data/jobs.json,
+       and this archive has no build of its own: nine of its rows were
+       advertised in one season and closed in the next, and the year filter
+       previous-markets.html reads is the one place that shows it. Both heals
+       are pure and idempotent, and both return the row ITSELF when they
+       change nothing, which is what the change count below reads. */
+    file: 'past-postings.json', heal: (r) => withMarketYears(healPlace(r)),
+    meta: true, what: 'posting',
     sort: (a, b) => (b.year - a.year) || String(b.posted).localeCompare(String(a.posted)) ||
       a.institution.localeCompare(b.institution),
   };
@@ -616,7 +624,7 @@ async function healNames(outDir) {
       console.log(`  ${r.id}: ${r.name || r.institution}${r.department ? ' — ' + r.department : ''}`);
     }
     if (dry) {
-      console.log(`--dry-run: ${changed.length} ${spec.what}(s) in ${spec.file} would be renamed`);
+      console.log(`--dry-run: ${changed.length} ${spec.what}(s) in ${spec.file} would be corrected`);
       continue;
     }
     guardNoEmail(spec.file, healed);
@@ -626,7 +634,7 @@ async function healNames(outDir) {
       await writeFile(file.replace(/\.json$/, '-meta.json'),
         JSON.stringify(buildMeta(healed, { generated: newestPosted(healed) }), null, 1) + '\n');
     }
-    console.log(`${spec.file}: renamed ${changed.length} ${spec.what}(s)`);
+    console.log(`${spec.file}: corrected ${changed.length} ${spec.what}(s)`);
   }
   return ok;
 }

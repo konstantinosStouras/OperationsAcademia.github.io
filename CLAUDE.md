@@ -168,7 +168,7 @@ Three rules came out of it, and they are separate on purpose:
    the one failure here a person has to go and fix.
 
 **Which season a posting belongs to: the tab is a FLOOR** — on top of the
-APPLY-BY CASCADE, since 2026-08-26 (see "Which season a posting is FOR" above;
+APPLY-BY CASCADE, since 2026-08-26 (see "Which seasons a posting is IN" above;
 what follows is why the floor exists, and it still does). The site's roll rule
 used to read the market year off the posting's date alone, which is right
 except for a school advertising early — 24 of that tab's 89 postings are dated April to June
@@ -186,7 +186,7 @@ maintainer once (then weekly) when the sheet has gained nothing for three weeks,
 cannot be read, reads as empty, or has a tab that gave nothing. Nothing already
 published is ever removed by one of those failures.
 
-## Which season a posting is FOR — the deadline, not the day it went up
+## Which seasons a posting is IN — the deadline decides, and they OVERLAP
 
 The market year used to be read off the POSTING DATE, everywhere. That is
 wrong for exactly the postings that matter most in the spring (owner,
@@ -260,6 +260,79 @@ maintainer can clear — but it is out of `pendingCounts()`, which runs on EVERY
 page for the account-menu badge: a served-file fetch in that `Promise.all`
 would make every page pay a read for a number only this page shows (the
 Registered-users rule, one paragraph over).
+
+### …and a posting is in TWO seasons at once, because they overlap
+
+Deciding which season a posting is FOR does not make it the only season the
+posting is IN (owner, 2026-08-27): *"a school advertising in May for a search
+that closes in September should be posted in the current job market year
+immediately public on the website AND also continue to be shown for the next
+job market year, since there is overlap between the two years."* It is being
+advertised now, in the season under way, and it is recruiting for the one that
+opens in July. A model that can name only one of those has to be wrong about
+one of them — and the one it was wrong about is the one the poster is looking
+at today.
+
+So `year` stays exactly what it was — ONE season, the cascade's answer, minted
+at birth and never moved, for the `jobId` reason above — and **`years` is the
+whole span**: `marketYearsOf(row)` in `_scraper/jobs-model.mjs`, ascending,
+every season from the one it was ADVERTISED in (`posted`), through the one it
+is FILED under (`year`), to the one its DEADLINE falls in. 96 of the 568
+served postings span two seasons; none spans three, and none can span far —
+`deadlineDay` refuses a closing date more than 730 days from the posting date,
+so `MARKET_SPAN_MAX` (3) is a guard against junk rather than a policy.
+
+**It is DERIVED, on every build, from fields the row already publishes**, so
+it needs no decision, no document and no migration. `withMarketYears` is the
+one writer, pure and idempotent and by-value, and it is applied wherever a row
+is made or carried:
+
+* `rowFromSubmission`, last — after `healReviewDate`, which is what settles
+  the suggested date the span may be read from;
+* `rowsFromTab`, so `data/jobmarket.json` states it too;
+* `build-jobs.mjs` over the **merged set**, which is the only place a carried
+  ORPHAN — a posting with no document behind it — can gain one;
+* `import-legacy-tables.mjs`, on write and in `--heal-names`, because the
+  archive has no daily build (nine of its 159 rows span two seasons);
+* `sync-jobmarket-sheet.mjs --heal-names`, which is how the committed file
+  gained the field without waiting for the workbook to change.
+
+**AFTER the heal count in build-jobs, deliberately, and skipped in
+`diffRows`.** The field is derived from `posted`, `year` and the two apply-by
+dates, so the run that first writes it changes every row exactly once:
+counting that as a heal would have named 568 innocent postings in the log, and
+diffing it would have mailed the maintainer 568 phantom edits — both mistakes
+this file already records, one paragraph apart.
+
+**What reads it.** The archive's "Job market year" filter is `field: 'years'`
+(`previous-markets.html`), so a search advertised in one season that closes in
+the next is found under either — the values are the same year strings, so
+`?filterB=2025` still works, and the page fills the span in for a row from
+either of its two files that predates the field. The card names both seasons.
+The Excel download keeps "Market year" as one sortable number and says the
+rest in **"Also listed under"**. `postingYears()` in `assets/oa-jobform.js` is
+the browser twin, so the note under the form promises the seasons before the
+posting is sent; `testFormMarketYearParity` pins it against `marketYearsOf`
+over one fixture list, both halves built against the same day (the fallback
+leg is "today", and a stub that differs measures itself).
+
+**`inCurrentMarket` is deliberately UNCHANGED.** Its three legs already put a
+spanning posting on the jobs page in both seasons — the posting-date leg
+during the first, the `year >= current` leg through the second — so the
+overlap needed nothing there, and widening leg 3 to the span would have
+revived expired postings from a closed season onto the live page. The archive
+is still exactly the complement of that predicate; what changed is only which
+year buckets the archive files a row under.
+
+**AND IT CHANGES WHAT THE REPORT ABOVE MEANS, WITHOUT RETIRING IT.** A flagged
+posting is no longer MISSING from the season its dates name — it is listed
+under both — so the card reports a disagreement to READ rather than a posting
+to rescue, and "leave it where it is" is a complete answer. That is what makes
+settling one the ordinary outcome rather than correcting the workbook, which
+is why the panel says so and why the decisions are stored at all. (Retiring
+the report was tried in the same change and reverted: the overlap answers
+"where is this posting listed", not "is its filing right", and the owner had
+just asked for the panel to be made clearable rather than removed.)
 
 ### …and the DECISIONS are stored, because it could not be cleared
 
@@ -370,14 +443,21 @@ Tests: `testMarketYearCascade`, `testFormMarketYearParity`,
 (the cascade, the forward-only property asserted over every served posting,
 that a stored year is kept, the report's field list and that it carries no
 address, the shared window rule's parity with the pipeline, the decision
-keys pinned both ways against the rules, and the wiring in every file), and
+keys pinned both ways against the rules, and the wiring in every file), the
+SPAN in the same block (the owner's own case and its inverse, that it always
+contains the stored year, that `withMarketYears` is by-value and idempotent,
+that all THREE served files state it, the wiring in all five writers, and
+that `diffRows` never calls it an edit), and
 in `_scraper/page-test.mjs` the market-year block (the tile, the cards, both
 seasons named, a link per posting computed from the shared module, the
 settle → collapsed-panel → Bring-it-back cycle with the tile following, and a
 name carrying markup rendered inert) plus the `?job=` block, which drives the
 deep link on BOTH pages in a real browser — one card, opened, the bar and the
 lock out of the way, a way back a signed-out reader can press, the legacy
-`#job-` form, and the "not on this page" state.
+`#job-` form, and the "not on this page" state — and the archive's own
+overlap check, a spanning posting found under the season it is NOT filed
+under, narrowed by university because the list paginates and "not on page 1"
+is not "not listed".
 
 **A browser check must not move with the corpus.** Two pins in that suite named
 "University of Mannheim" outright; its postings rolled out of the season the

@@ -12,8 +12,8 @@
     {
       "id": "market-year-from-the-deadline",
       "date": "2026-08-26",
-      "title": "A posting is filed under the season its apply-by date falls in",
-      "summary": "Which job market a posting belongs to used to be read off the day it went up. That is wrong for the postings that matter most in the spring: a school advertising in May for a search that closes in September is recruiting for the season opening in July, and by its posting date it was filed under the season that had just closed — the one page it is of no use on. The deadline decides now: the final apply-by date, or the suggested apply-by date where the search runs until filled, and only then the date it was posted. The posting form works it out from the dates you type and says which market you will be listed under before you send it.",
+      "title": "A posting is listed under every job market year it is open in",
+      "summary": "Which job market a posting belongs to used to be read off the day it went up, and that is wrong for the postings that matter most in the spring: a school advertising in May for a search that closes in September is recruiting for the season opening in July, and by its posting date it was filed under the season that had just closed — the one page it is of no use on. Two things settle it now. The deadline says which market the posting is FOR: the final apply-by date, or the suggested apply-by date where the search runs until filled, and only then the date it was posted. And because the two seasons overlap, a posting that is open across the roll is listed under BOTH — it goes on the site straight away, under the market under way, and stays there through the next one. The archive’s “Job market year” filter finds it under either season, the Excel download says which other market it is listed under, and the posting form works it out from the dates you type and says which markets you will be listed under before you send it.",
       "url": "https://www.operationsacademia.org/jobs.html"
     },
     {

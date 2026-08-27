@@ -2717,9 +2717,43 @@ for (const [pageName, pick] of [
     'previous-markets: the archive plus every jobs row that left the current market');
 
   const years = [...new Set([...past, ...folded].map((r) => Number(r.year)))];
-  const shownYear = Number(await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent));
-  eq(shownYear, Math.max(...years),
+  /* The cell names EVERY season the posting is listed under (`years`, the
+     overlap — owner 2026-08-27), so it is read as the numbers it carries
+     rather than as one number: a leading card that spans two seasons would
+     make Number('2025 and 2026') NaN and the check meaningless. */
+  const shownYears = (await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent))
+    .match(/\d{4}/g).map(Number);
+  ok(shownYears.includes(Math.max(...years)),
     'previous-markets: the newest past market leads the archive');
+
+  /* THE OVERLAP, end to end. A posting advertised in one season for a search
+     closing in the next is listed under BOTH, so filtering on the season it
+     is NOT filed under must find it — under the old `year` filter it answered
+     only the later one and a reader browsing the season it was advertised in
+     never saw it. Driven off the served files, so it measures the site's own
+     data rather than a fixture. */
+  const spanning = [...past, ...folded].filter((r) => (r.years || []).length > 1);
+  ok(spanning.length > 0, 'previous-markets: the archive really carries spanning postings');
+  if (spanning.length) {
+    const one = spanning[0];
+    const other = one.years.find((y) => Number(y) !== Number(one.year));
+    ok(other, 'previous-markets: …and one of them is a season it is not filed under');
+    const alsoUnder = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+    alsoUnder.on('pageerror', (e) => jsErrors.push('previous-markets overlap: ' + e.message));
+    /* narrowed by university as well, because the list PAGINATES: a season
+       holds far more than one page of postings, and "not on page 1" is not
+       "not listed" */
+    await alsoUnder.goto(BASE + 'previous-markets.html?year=' + other +
+      '&university=' + encodeURIComponent(one.institution),
+      { waitUntil: 'domcontentloaded' });
+    await alsoUnder.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
+    const names = await alsoUnder.$$eval('.oa-card .oa-card-title',
+      (ns) => ns.map((n) => n.textContent.trim()));
+    ok(names.some((n) => n.includes(one.institution)),
+      `previous-markets: ${one.institution} (filed under ${one.year}) is found ` +
+      `under ${other} as well — the seasons overlap`);
+    await alsoUnder.close();
+  }
 
   // ?filterD= is how the Universities map has always linked here
   const someInst = past[past.length - 1].institution.split(' ')[0];
