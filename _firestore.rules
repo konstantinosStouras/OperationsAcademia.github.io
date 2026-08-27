@@ -599,6 +599,53 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ------------------------------------- the market-year report's decisions
+    //
+    // `data/jobs-yearcheck.json` names the published postings whose stored
+    // season is behind what their own apply-by dates say (marketYearReview in
+    // _scraper/jobs-model.mjs). The REPORT stays derived — nothing here
+    // decides what is flagged — and this collection records only what the
+    // maintainer has READ: one document per posting they have looked at and
+    // left where it is.
+    //
+    // It exists because the report had no way to be cleared (owner,
+    // 2026-08-27). Its two exits were "correct it in the workbook", which
+    // MOVES a posting that is often filed correctly, and "wait for the
+    // deadline", which does not clear it at all — the roll is what put it
+    // there. So the tile sat at 4 for ever.
+    //
+    // THE DECISION IS KEYED ON THE DISAGREEMENT. `stored` and `should` are the
+    // two seasons the card showed when the button was pressed, and
+    // OAYearCheck.covers() honours the document only while the report still
+    // says exactly that. Correct a deadline afterwards and the posting comes
+    // back unsettled, because the maintainer has not seen the new pair. That
+    // is why they are in the document rather than only in the report, and why
+    // `should` must be the LATER season: it is the shape marketYearReview can
+    // produce, and a document that could not have come from the report is one
+    // this panel would silence a posting on for ever.
+    //
+    // Admin-read as well as admin-write, unlike newsOverrides: nothing public
+    // reads it, and the pair of seasons is a note about the maintainer's own
+    // desk.
+    match /yearChecks/{id} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+                   && request.resource.data.keys()
+                        .hasOnly(['status', 'stored', 'should', 't'])
+                   && request.resource.data.status == 'settled'
+                   && request.resource.data.stored is int
+                   && request.resource.data.should is int
+                   && request.resource.data.stored > 1900
+                   && request.resource.data.should > request.resource.data.stored
+                   && str('t', 40);
+      /* The way back is the "Settled" panel under the list on /admin-area,
+         which draws every settled posting one click from Bring it back — and
+         that click is this delete. Without the line it would be a one-way
+         door: `request.resource` is null on a delete, so `allow write` cannot
+         cover one (its keys() call errors and the condition is false). */
+      allow delete: if isAdmin();
+    }
+
     // ---------------------------------------------- the archives' overrides
     //
     // WHY THIS EXISTS. Three datasets on this site have no write path at all:

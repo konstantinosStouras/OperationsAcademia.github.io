@@ -105,8 +105,10 @@
      appears twice. A live posting whose dates now say a different season is
      LISTED UNDER THAT ONE TOO rather than moved into it (`years`, the overlap
      — marketYearsOf in _scraper/jobs-model.mjs), which is why nothing has to
-     move for the site to be right about it. That also closes a quiet bug in
-     the old form — the dropdown reloaded at its DEFAULT when an older posting
+     move for the site to be right about it; the disagreement is still reported
+     to the maintainer (the "Market year to check" panel on /admin-area), which
+     is where one that really was mis-filed is settled. That also closes a
+     quiet bug in the old form — the dropdown reloaded at its DEFAULT when an older posting
      was opened for editing, so fixing a typo silently moved it into the
      current market.
 

@@ -33,7 +33,7 @@ import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
   stripRowEmails, withMarketYears,
   healReviewDate,
-  marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
+  marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
@@ -45,6 +45,9 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
 const JOBS = path.join(DATA, 'jobs.json');
 const META = path.join(DATA, 'jobs-meta.json');
+/* The postings whose stored season disagrees with their own apply-by dates.
+   A REPORT, not a decision — see the write below. */
+const YEARCHECK = path.join(DATA, 'jobs-yearcheck.json');
 const VOCAB = path.join(DATA, 'vocab.json');
 /* The name corrections the maintainer has APPROVED from posters' suggestions
    (Firestore `nameFixes`, reviewed on admin-area.html). Served, because the
@@ -967,6 +970,53 @@ async function main() {
       );
       log(`wrote ${path.relative(process.cwd(), JOBS)} and jobs-meta.json`);
     }
+  }
+
+  /* ----------------------------------- postings filed under the wrong season
+
+     WHICH MARKET YEAR A POSTING IS FOR is read off its deadline now, not off
+     the day it went up (marketYearOf in jobs-model.mjs, owner 2026-08-26).
+     That settles every posting from here on, and it deliberately does NOT
+     re-file the ones already published: a row's `year` is half its `id`, and
+     an id that moves is one `mergeRows` cannot match — the old row is carried
+     on as an orphan beside the new one and the posting appears TWICE, with
+     the card anchor and the Edit button's join key both pointing at a row
+     nobody sees.
+
+     So the disagreements are REPORTED, which is what the owner asked for:
+     "flag me under review any job postings that were possibly posted under
+     the previous job market year and were actually belonging to the current
+     job market year". FORWARD ONLY — a stored year AHEAD of the cascade is
+     the tracking sheet's tab cycle doing its documented job, and pulling one
+     back would move a live posting into a season that has closed.
+
+     It is a served file rather than a Firestore queue on purpose: it is
+     DERIVED, so it needs no rules deploy, no document to fall out of step
+     with the data, and no maintainer decision to store — the next build
+     recomputes it, and a posting the maintainer settles simply leaves the
+     list. Nothing in it is anything `data/jobs.json` does not already
+     publish, which is what keeps it clear of the no-e-mail rule the served
+     files are held to.
+
+     Written on its OWN diff (`generated` excluded), so a run in which nothing
+     disagrees commits nothing. */
+  const yearCheck = marketYearReview(rows, { now });
+  const bareCheck = (v) => JSON.stringify((v && v.postings) || []);
+  const yearCheckDoc = { generated: now.toISOString(), postings: yearCheck };
+  if (yearCheck.length) {
+    log(`${yearCheck.length} posting(s) are filed under a season their own ` +
+        'apply-by dates disagree with — listed on /admin-area for review:');
+    for (const p of yearCheck.slice(0, 8)) {
+      log(`  ? ${p.id}  ${p.stored} -> ${p.should} (${p.from})`);
+    }
+  }
+  if (bareCheck(await readJson(YEARCHECK, null)) === bareCheck(yearCheckDoc)) {
+    // unchanged — say nothing, and above all write nothing
+  } else if (DRY) {
+    log('--dry-run: not writing jobs-yearcheck.json.');
+  } else {
+    await writeFile(YEARCHECK, JSON.stringify(yearCheckDoc, null, 1) + '\n');
+    log(`wrote ${path.relative(process.cwd(), YEARCHECK)} (${yearCheck.length} to review)`);
   }
 
   /* vocab.json is written on ITS OWN diff, not with jobs.json: it also reads

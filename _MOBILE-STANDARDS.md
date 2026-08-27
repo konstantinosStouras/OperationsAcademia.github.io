@@ -53,9 +53,11 @@ marked global.
    zoomed. Every text input, search box and picker button is ≥16px on phones.
 
 3. **Touch targets are ≥40px tall.** Controls are 42px on phones (35px is a
-   mouse target): search inputs, picker buttons, Clear, pager chevrons.
-   Action pills (`.oa-jobbtn`) get `padding: 8px 14px` and full opacity —
-   there is no hover on a phone to reveal or enlarge anything.
+   mouse target): search inputs, picker buttons, Clear, pager chevrons, and
+   "Show all postings" on a one-posting view (`.oa-focus-clear` — the ONLY
+   control on screen there, since the focus hides the bar). Action pills
+   (`.oa-jobbtn`) get `padding: 8px 14px` and full opacity — there is no hover
+   on a phone to reveal or enlarge anything.
 
 4. **Filters must not be a wall.** Value pickers sit two per row on phones;
    only the primary free-text search keeps the full width. Seven stacked

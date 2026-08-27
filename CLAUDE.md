@@ -245,6 +245,22 @@ nothing has joined to it:
   coincide passes a form reading the wrong date, which is what the first draft
   of it did. An EDIT keeps the season it was filed under, everywhere.
 
+…and the disagreements among what is already published are **reported**:
+`marketYearReview` (forward only — a stored year AHEAD of the cascade is the
+tab cycle doing its documented job) → `data/jobs-yearcheck.json`, written by
+`build-jobs.mjs` on its own diff → the **"Market year to check"** panel and
+tile on `/admin-area`.
+
+**The LIST is a served file, and stays one.** It is DERIVED — nothing decides
+what is flagged, the next build recomputes it, and a posting corrected in the
+tracking workbook simply leaves it. It carries only what `data/jobs.json`
+already publishes, which is what keeps it clear of the no-e-mail rule every
+served file is held to. Its tile is **due-able** — it is something the
+maintainer can clear — but it is out of `pendingCounts()`, which runs on EVERY
+page for the account-menu badge: a served-file fetch in that `Promise.all`
+would make every page pay a read for a number only this page shows (the
+Registered-users rule, one paragraph over).
+
 ### …and a posting is in TWO seasons at once, because they overlap
 
 Deciding which season a posting is FOR does not make it the only season the
@@ -261,7 +277,7 @@ So `year` stays exactly what it was — ONE season, the cascade's answer, minted
 at birth and never moved, for the `jobId` reason above — and **`years` is the
 whole span**: `marketYearsOf(row)` in `_scraper/jobs-model.mjs`, ascending,
 every season from the one it was ADVERTISED in (`posted`), through the one it
-is FILED under (`year`), to the one its DEADLINE falls in. 97 of the 569
+is FILED under (`year`), to the one its DEADLINE falls in. 96 of the 568
 served postings span two seasons; none spans three, and none can span far —
 `deadlineDay` refuses a closing date more than 730 days from the posting date,
 so `MARKET_SPAN_MAX` (3) is a guard against junk rather than a policy.
@@ -284,8 +300,8 @@ is made or carried:
 **AFTER the heal count in build-jobs, deliberately, and skipped in
 `diffRows`.** The field is derived from `posted`, `year` and the two apply-by
 dates, so the run that first writes it changes every row exactly once:
-counting that as a heal would have named 569 innocent postings in the log, and
-diffing it would have mailed the maintainer 569 phantom edits — both mistakes
+counting that as a heal would have named 568 innocent postings in the log, and
+diffing it would have mailed the maintainer 568 phantom edits — both mistakes
 this file already records, one paragraph apart.
 
 **What reads it.** The archive's "Job market year" filter is `field: 'years'`
@@ -308,40 +324,150 @@ revived expired postings from a closed season onto the live page. The archive
 is still exactly the complement of that predicate; what changed is only which
 year buckets the archive files a row under.
 
-### The report that asked the maintainer to move a posting is RETIRED
+**AND IT CHANGES WHAT THE REPORT ABOVE MEANS, WITHOUT RETIRING IT.** A flagged
+posting is no longer MISSING from the season its dates name — it is listed
+under both — so the card reports a disagreement to READ rather than a posting
+to rescue, and "leave it where it is" is a complete answer. That is what makes
+settling one the ordinary outcome rather than correcting the workbook, which
+is why the panel says so and why the decisions are stored at all. (Retiring
+the report was tried in the same change and reverted: the overlap answers
+"where is this posting listed", not "is its filing right", and the owner had
+just asked for the panel to be made clearable rather than removed.)
 
-There was a **"Market year to check"** panel: `marketYearReview` →
-`data/jobs-yearcheck.json` → a panel and tile on `/admin-area`, listing every
-posting whose stored season was behind its own dates for the maintainer to
-settle by hand.
+### …and the DECISIONS are stored, because it could not be cleared
 
-The overlap took its job away. The case the panel existed for is the
-overshoot — a search advertised in September that stays open until the
-following July has a deadline a few weeks past the roll, and reading it
-literally files a plainly 2025-2026 search under 2026-2027 (Nanyang, posted
-2025-09-24 closing 2026-07-28; Tulane, 2025-09-04 closing 2026-07-01).
-Nothing here can tell those apart from a genuine early advertisement without
-guessing, and a magic April-to-June window is not a rule worth writing. Under
-the overlap there is nothing to tell apart: the posting is listed under the
-season it was advertised in AND the season its deadline falls in, which is
-true of both readings at once. All four postings the panel named the day it
-went were that shape, and a panel listing postings with nothing to decide is
-worse than no panel.
+Owner, 2026-08-27: *"I reviewed these jobs but can't clear that queue."* The
+panel offered exactly two exits and neither is the answer for a posting that
+is filed correctly. **Correct it in the workbook** MOVES it, and by the
+paragraph below two of the four the report named that day were plainly where
+they belonged. **Wait for the deadline** does not clear it either: Nanyang's
+passed on 28 July and it was still listed, because what put it there is the
+ROLL, not the deadline. So the tile sat at 4 for ever, while its own comment
+in `oa-adminarea.js` already called it "something the maintainer clears — by
+settling each posting", which nothing implemented.
 
-Nothing replaced it. If one is ever wanted here again, the question worth
-asking is the other one — which postings the overlap has WIDENED — and the
-served file already carries the answer in `years`.
+    yearChecks/{posting id}   what the maintainer has READ — nothing else
+      status: 'settled'       …and left where it is
+      stored / should         the pair of seasons the CARD showed
+      t                       when
 
-Tests: `testMarketYearCascade` and `testFormMarketYearParity` in
-`_scraper/selftest.mjs` (the cascade, the forward-only property asserted over
-every served posting, that a stored year is kept, the span over the owner's
-own case and its inverse, that it always contains the stored year, that
-`withMarketYears` is by-value and idempotent, that all THREE served files
-state it, the wiring in all five writers, that `diffRows` never calls it an
-edit, and that nothing still fetches or draws the retired report), and in
-`_scraper/page-test.mjs` the archive's own overlap check — a spanning posting
-found under the season it is NOT filed under, narrowed by university because
-the list paginates and "not on page 1" is not "not listed".
+`assets/oa-yearcheck.js` is the pure half (dual-mode, `DOC_KEYS` pinned both
+ways against `_firestore.rules`). Three rules hold it together:
+
+* **The decision is keyed on the DISAGREEMENT, not on the posting.**
+  `covers()` honours a document only while the report still says exactly that
+  pair. Correct a deadline afterwards and the posting comes back, saying so —
+  the maintainer has not seen the new pair. That is the `resolutionHash`
+  discipline the sibling repository's feedback resolutions use, and it is the
+  whole safety argument: a settle cannot silence a disagreement nobody read.
+* **Absence means SHOW** — the opposite way round from the job-review queue,
+  and deliberately. There, absence means withhold, because a queue that fails
+  to write must not leak an unreviewed posting onto the site. Here the
+  postings are ALREADY published and the risk runs the other way, so a
+  decisions read that fails leaves every posting listed with the settling
+  controls withheld, never an empty list.
+* **Settling is never a one-way door** (the `newsOverrides` rule): a settled
+  posting leaves the list — the list is meant to get shorter — into a
+  collapsed panel below it, one click from Bring it back, which DELETES the
+  document. There is no second stored state, because absence already means
+  "not read yet".
+
+**The "no rules deploy" argument no longer holds**, which is what makes this a
+change of position rather than a contradiction: it was written when deploying
+rules meant an interactive `firebase deploy` nothing in CI could perform, and
+since 2026-08-24 the rules publish themselves. **Inert until they do**, as
+always.
+
+### "Open the posting" opens THE POSTING, on the page that has it
+
+The same report, 2026-08-27: the link *"takes me to the full list of jobs, as
+opposed to the page of this specific posting so that I can edit it, or remove
+it"* — and for Nanyang it opened the list of THIS season, which by definition
+could not contain a posting filed under the last one.
+
+It was `jobs.html#job-<id>`, and **neither half of it worked**. A card only
+exists while it is one of the ten being RENDERED, of a list built from a fetch
+that has not landed when the browser looks for the fragment — `v3.js` resolves
+the hash at boot and finds nothing, and nothing else ever looked. And the PAGE
+was wrong for half of them: a posting flagged here is one whose season
+disagrees with its own dates, which is exactly the population most likely to
+have rolled out of the window `jobs.html` shows.
+
+* **`?job=<id>` is the list engine's own `cfg.focusParam`** (`assets/oa-list.js`).
+  It is **not a filter**: the row is taken from `rows` ahead of every filter
+  and every page, so a search the reader left running cannot hide it. The card
+  is opened and scrolled to once; the filter bar, the sign-in lock wrapped
+  around it and the result bar go away (a bar over a list of one narrows
+  nothing); a `.oa-focusbar` above the card offers the way back, and it is
+  **outside all three**, or a signed-out reader following a shared link would
+  be locked into it. An id the page does not carry gets an empty state of its
+  own — never "try removing a filter", beside a bar the focus has hidden — and
+  the PAGE supplies the hint naming the other one, which the engine cannot
+  know. A link already copied as `#job-<id>` is honoured once and rewritten to
+  the parameter.
+* **`assets/oa-jobnav.js` says WHICH page**, from the row itself and at the
+  moment the card is drawn — a build runs every twenty minutes and a deadline
+  passes at midnight, so deciding in the browser is the only reading that
+  cannot be stale. It is also **the one definition** of `marketYear` /
+  `marketStart` / `marketLabel` / `inCurrentMarket` for the whole live site:
+  `jobs.html`, `previous-markets.html` and the one-pager's jobs teaser carried
+  a byte-identical copy each and the report needed a fourth, which is the
+  four-copies-of-one-answer shape `oa-countries.js`, `oa-schools.js` and
+  `oa-news.js` all exist to prevent. `testJobNavModule` pins it against
+  `jobs-model.mjs` over **every served posting at four instants**, the two
+  sides of the roll included — not over a fixture list, because the two halves
+  disagreeing is the whole failure it removes. `/v2/` keeps its own frozen
+  copies, by the rule the three trees are held to.
+* **The hiding rule lives in `v3.css`, not `oa-list.css`**, and that was
+  measured rather than preferred: `body.v3 .oa-filters { display: grid }` is
+  one specificity point above anything the engine's own stylesheet can write,
+  so the same rule there is silently inert — which is how
+  `previous-markets.html` showed its bar over a single-posting view while
+  `jobs.html` did not (there the LOCK WRAPPER was what got hidden). The
+  `.oa-data-empty` rule beside it had the matching gap and got `.v3-lock` too.
+
+**Where it overshoots, and why that is the maintainer's call.** A search
+advertised in September that stays open until the following July has a
+deadline a few weeks past the roll, and reading it literally files a plainly
+2025-2026 search under 2026-2027. Two of the four postings the report names
+today are that shape (Nanyang, posted 2025-09-24 closing 2026-07-28; Tulane,
+posted 2025-09-04 closing 2026-07-01) and two are the genuine article
+(McGill and Mannheim, both advertised AFTER the July roll and still filed
+under the season before it). Nothing here can tell them apart without
+guessing — the only signal is how far into its own season the posting was
+made, and a magic April-to-June window is not a rule worth writing. A person
+reading four cards can, which is what the panel is for.
+
+Tests: `testMarketYearCascade`, `testFormMarketYearParity`,
+`testJobNavModule` and `testYearCheckDecisions` in `_scraper/selftest.mjs`
+(the cascade, the forward-only property asserted over every served posting,
+that a stored year is kept, the report's field list and that it carries no
+address, the shared window rule's parity with the pipeline, the decision
+keys pinned both ways against the rules, and the wiring in every file), the
+SPAN in the same block (the owner's own case and its inverse, that it always
+contains the stored year, that `withMarketYears` is by-value and idempotent,
+that all THREE served files state it, the wiring in all five writers, and
+that `diffRows` never calls it an edit), and
+in `_scraper/page-test.mjs` the market-year block (the tile, the cards, both
+seasons named, a link per posting computed from the shared module, the
+settle → collapsed-panel → Bring-it-back cycle with the tile following, and a
+name carrying markup rendered inert) plus the `?job=` block, which drives the
+deep link on BOTH pages in a real browser — one card, opened, the bar and the
+lock out of the way, a way back a signed-out reader can press, the legacy
+`#job-` form, and the "not on this page" state — and the archive's own
+overlap check, a spanning posting found under the season it is NOT filed
+under, narrowed by university because the list paginates and "not on page 1"
+is not "not listed".
+
+**A browser check must not move with the corpus.** Two pins in that suite named
+"University of Mannheim" outright; its postings rolled out of the season the
+page shows, both went red, and the `.oa-card` print check downstream of them
+threw and took the whole suite with it — nothing but a data commit between
+green and red. They read the institution off the RENDERED page now (`DEEP_UNI`
+— what is under test is that a legacy deep link still selects AN institution),
+which is stronger than recomputing the window in Node because it cannot
+disagree with what the page is showing. The market-year fixture's own "rolled"
+row is dated for the same reason: to stay in the past whatever day this runs.
 
 ## The HigherEdJobs postings are checked against their own ads
 

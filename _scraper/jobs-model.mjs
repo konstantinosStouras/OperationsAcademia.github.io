@@ -376,17 +376,20 @@ export function marketStart(now = new Date()) {
    so a spanning posting is listed under both seasons rather than only the
    later one.
 
-   THAT IS ALSO WHAT DISSOLVED THE OVERSHOOT. A search advertised in September
-   that stays open until the following July has a deadline a few weeks past
-   the roll, and reading it literally filed a plainly 2025-2026 search under
-   2026-2027 (Nanyang, posted 2025-09-24 closing 2026-07-28; Tulane, 2025-09-04
-   closing 2026-07-01). Nothing here can tell those apart from a genuine early
-   advertisement without guessing, so they were REPORTED to the maintainer to
-   settle by hand — a panel on /admin-area, and a decision nobody could act on
-   without moving an id. Under the overlap there is nothing to settle: the
-   posting is listed under the season it was advertised in AND the season its
-   deadline falls in, which is true of both readings at once. The report was
-   retired with the reason it existed for.                                  */
+   THE REPORT STILL HAS A JOB, AND THE OVERLAP CHANGES WHAT IT MEANS. A search
+   advertised in September that stays open until the following July has a
+   deadline a few weeks past the roll, and reading it literally would file a
+   plainly 2025-2026 search under 2026-2027 (Nanyang, posted 2025-09-24 closing
+   2026-07-28; Tulane, 2025-09-04 closing 2026-07-01). Nothing here can tell
+   those apart from a genuine early advertisement without guessing, so the
+   disagreement is REPORTED to the maintainer (`marketYearReview` below, drawn
+   on /admin-area, settled per posting in `yearChecks/{id}`).
+
+   What the overlap changes is the STAKE. The flagged posting is no longer
+   missing from the season its dates name — it is listed under both — so the
+   card reports a disagreement to read rather than a posting to rescue, and
+   "leave it where it is" is a complete answer. That is what makes settling
+   one, rather than moving it, the ordinary outcome.                        */
 
 /**
  * The market year a posting belongs to, and which of its dates said so.
@@ -503,6 +506,56 @@ export function withMarketYears(row) {
   }
   if (!placed) out.years = years;
   return out;
+}
+
+/** How the report words the date that decided. */
+export const MARKET_YEAR_SOURCE = {
+  final: 'its final apply-by date',
+  review: 'its suggested apply-by date',
+  posted: 'the date it was posted',
+  floor: 'the season it was filed under',
+};
+
+/**
+ * The published postings whose stored market year is BEHIND what their own
+ * dates say — the review list the owner asked for: "postings that were
+ * possibly posted under the previous job market year and were actually
+ * belonging to the current job market year".
+ *
+ * FORWARD ONLY, and deliberately. A row whose stored year is AHEAD of the
+ * cascade is the tracking sheet's tab cycle (or a poster's own tag) doing
+ * its documented job, and pulling it back would move a live posting into a
+ * closed season — the one direction this rule promises never to take.
+ *
+ * Pure and deterministic, so build-jobs.mjs may write it on every run and an
+ * unchanged corpus commits nothing.
+ */
+export function marketYearReview(rows, { now = new Date() } = {}) {
+  const out = [];
+  for (const r of rows || []) {
+    const stored = Math.trunc(Number(r.year) || 0);
+    const { year, from } = marketYearOf(r, { now });
+    if (!stored || year <= stored) continue;
+    out.push({
+      id: String(r.id || ''),
+      ref: String(r.ref || ''),
+      institution: String(r.institution || ''),
+      department: String(r.department || ''),
+      posted: String(r.posted || ''),
+      applyByDate: String(r.applyByDate || ''),
+      reviewDate: String(r.reviewDate || ''),
+      stored,
+      should: year,
+      from,
+      current: year >= marketYear(now),
+    });
+  }
+  /* the ones that belong to the season under way first — those are the
+     postings a reader is looking at today — then newest advertisement first */
+  return out.sort((a, b) => Number(b.current) - Number(a.current)
+    || b.should - a.should
+    || String(b.posted).localeCompare(String(a.posted))
+    || String(a.id).localeCompare(String(b.id)));
 }
 
 /**
@@ -708,7 +761,10 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
      on as an orphan and the posting is published TWICE. So a posting that
      already has a season keeps it — and a posting whose dates name ANOTHER
      season is listed under that one too rather than moved into it, which is
-     `years` a few lines down (`marketYearsOf`, the overlap).
+     `years` a few lines down (`marketYearsOf`, the overlap). The disagreement
+     itself is still reported to the maintainer (`marketYearReview`, drawn on
+     /admin-area), which is where a posting that really was mis-filed is
+     settled.
 
      The cascade below is therefore for a document that has NO season — a
      migrated row, anything not written by the form — and it is the same one
