@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:21:24.372Z",
+ "generated": "2026-08-27T09:24:04.187Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -159,6 +159,10 @@
   },
   {
    "v": "Aalto University",
+   "n": 2
+  },
+  {
+   "v": "Air Force Institute of Technology",
    "n": 2
   },
   {
@@ -451,10 +455,6 @@
   },
   {
    "v": "Abu Dhabi University",
-   "n": 1
-  },
-  {
-   "v": "Air Force Institute of Technology",
    "n": 1
   },
   {
@@ -2204,6 +2204,10 @@
    "n": 1
   },
   {
+   "v": "Graduate School of Engineering and Management",
+   "n": 1
+  },
+  {
    "v": "Graduate School of Management",
    "n": 1
   },
@@ -2545,10 +2549,6 @@
   },
   {
    "v": "Graduate School of Business",
-   "n": 0
-  },
-  {
-   "v": "Graduate School of Engineering and Management",
    "n": 0
   },
   {
@@ -3215,6 +3215,10 @@
   },
   {
    "v": "AI/ML/DS/Stats",
+   "n": 1
+  },
+  {
+   "v": "Air Force Headquarters",
    "n": 1
   },
   {
@@ -4581,6 +4585,7 @@
     "Graduate School of Engineering and Management"
    ],
    "units": [
+    "Air Force Headquarters",
     "Operational Sciences",
     "SCM and Logistics"
    ],
@@ -4589,6 +4594,7 @@
      "SCM and Logistics"
     ],
     "Graduate School of Engineering and Management": [
+     "Air Force Headquarters",
      "Operational Sciences"
     ]
    }
@@ -11625,6 +11631,7 @@
    "Operations Management and Information Systems"
   ],
   "Graduate School of Engineering and Management": [
+   "Air Force Headquarters",
    "Operational Sciences"
   ],
   "Graduate School of Management": [
