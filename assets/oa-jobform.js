@@ -103,15 +103,25 @@
      and a published posting whose id moves is one `mergeRows` can no longer
      match, so the old row is carried on beside the new and the posting
      appears twice. A live posting whose dates now say a different season is
-     REPORTED to the maintainer instead (the "Market year to check" panel on
-     /admin-area). That also closes a quiet bug in the old form — the
-     dropdown reloaded at its DEFAULT when an older posting was opened for
-     editing, so fixing a typo silently moved it into the current market.
+     LISTED UNDER THAT ONE TOO rather than moved into it (`years`, the overlap
+     — marketYearsOf in _scraper/jobs-model.mjs), which is why nothing has to
+     move for the site to be right about it; the disagreement is still reported
+     to the maintainer (the "Market year to check" panel on /admin-area), which
+     is where one that really was mis-filed is settled. That also closes a
+     quiet bug in the old form — the dropdown reloaded at its DEFAULT when an older posting
+     was opened for editing, so fixing a typo silently moved it into the
+     current market.
 
      The value is not decoration: the jobs page shows the market under way
      (inCurrentMarket in _scraper/jobs-model.mjs) and _firestore.rules requires
      `year` to be an int in 2000-2100. */
   var EDIT_YEAR = 0;
+  /* The day the posting went up, where the document says so. Only the SEASON
+     is read from it, and only to say which markets the posting is listed
+     under; a posting made through this form carries no `postedOn` (the
+     pipeline stamps it when the submission is stored), so this stays empty
+     and the span is read off the other two dates. */
+  var EDIT_POSTED = '';
 
   /** The market year an ISO day falls in — the roll is 1 July, and a season is
       numbered by the year it ends (MARKET_ROLL_MONTH in jobs-model.mjs). */
@@ -136,6 +146,41 @@
 
   function val(id) { var el = $(id); return el ? String(el.value || '').trim() : ''; }
 
+  /* EVERY SEASON THE POSTING IS LISTED UNDER — the overlap (owner,
+     2026-08-27: "a school advertising in May for a search that closes in
+     September should be posted in the current job market year immediately …
+     AND also continue to be shown for the next job market year, since there
+     is overlap between the two years").
+
+     `postingYear` above says which season it is FOR, and that one alone is
+     sent: it is half the row id and must not move. The SPAN is derived by the
+     build from what the row already carries — this twin exists so the note can
+     promise it before the posting is sent, and `marketYearsOf` in
+     _scraper/jobs-model.mjs is what actually writes it. Three dates can each
+     name a season: the one it is filed under, the one its deadline falls in,
+     and the one it is being ADVERTISED in — today for a new posting, since
+     the pipeline stamps `posted` when the submission is stored. MARKET_SPAN_MAX
+     is 3 there, and the fall-back to the bare years it names is the same. */
+  function postingYears() {
+    var uf = $('f-untilFilled');
+    var final = (uf && uf.checked) ? '' : val('f-applyByDate');
+    var named = [
+      postingYear(),
+      marketYearOfDay(final) || marketYearOfDay(val('f-reviewDate')),
+      EDIT_ID ? marketYearOfDay(EDIT_POSTED) : jobMarketYears().current
+    ].filter(function (y) { return y > 0; });
+    if (!named.length) return [];
+    var lo = Math.min.apply(null, named);
+    var hi = Math.max.apply(null, named);
+    if (hi - lo + 1 > 3) {
+      return named.filter(function (y, i) { return named.indexOf(y) === i; })
+        .sort(function (a, b) { return a - b; });
+    }
+    var out = [];
+    for (var y = lo; y <= hi; y++) out.push(y);
+    return out;
+  }
+
   /* NAME THE DATE THAT DECIDED. The note is the only thing on the form that
      says which market the posting will be listed under, so saying "worked out
      from the apply-by date" while the poster has typed neither is a promise
@@ -150,12 +195,25 @@
     return 'today\u2019s date, until you give an apply-by date';
   }
 
+  function seasonLabel(y) { return (y - 1) + '\u2013' + y; }
+
   function paintYearNote() {
     var el = $('oa-year-note');
     if (!el) return;
-    var y = postingYear();
-    el.textContent = (EDIT_ID ? 'Listed under the ' : 'Will be listed under the ') +
-      (y - 1) + '\u2013' + y + ' job market \u2014 worked out from ' +
+    var lead = EDIT_ID ? 'Listed under the ' : 'Will be listed under the ';
+    var ys = postingYears();
+    /* TWO SEASONS IS THE ORDINARY SPRING CASE rather than an edge one, so the
+       note says so outright: a poster advertising in May for a September
+       deadline was being told their posting belonged to a season that had not
+       started yet, which reads as "not until July". It is listed under both. */
+    if (ys.length > 1) {
+      el.textContent = lead + ys.map(seasonLabel).join(' and ') +
+        ' job markets \u2014 the seasons your dates span, because the two ' +
+        'overlap. It is listed under both, so there is nothing to choose.';
+      return;
+    }
+    el.textContent = lead + seasonLabel(ys.length ? ys[0] : postingYear()) +
+      ' job market \u2014 worked out from ' +
       yearNoteWhy() + ', so there is nothing to choose.';
   }
 
@@ -659,6 +717,7 @@
     }
 
     EDIT_YEAR = Number(v.year) || 0;
+    EDIT_POSTED = String(v.postedOn || '');
     paintYearNote();                 // the posting's own season, never today's
 
     EDIT_REF = v.ref || '';

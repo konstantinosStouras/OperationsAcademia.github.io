@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T10:09:26.351Z",
+ "generated": "2026-08-27T15:58:56.147Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -398,10 +398,6 @@
    "n": 2
   },
   {
-   "v": "University of Kansas",
-   "n": 2
-  },
-  {
    "v": "University of Mannheim",
    "n": 2
   },
@@ -466,6 +462,10 @@
    "n": 1
   },
   {
+   "v": "Alma College",
+   "n": 1
+  },
+  {
    "v": "American University Kogod School of Business",
    "n": 1
   },
@@ -495,6 +495,10 @@
   },
   {
    "v": "Austin Peay State University",
+   "n": 1
+  },
+  {
+   "v": "Babson College",
    "n": 1
   },
   {
@@ -1098,6 +1102,10 @@
    "n": 1
   },
   {
+   "v": "St John Fisher University",
+   "n": 1
+  },
+  {
    "v": "St. Cloud State University",
    "n": 1
   },
@@ -1159,6 +1167,10 @@
   },
   {
    "v": "The Hong Kong University of Science and Technology",
+   "n": 1
+  },
+  {
+   "v": "The University of Memphis",
    "n": 1
   },
   {
@@ -1279,6 +1291,10 @@
   },
   {
    "v": "University of Hartford",
+   "n": 1
+  },
+  {
+   "v": "University of Kansas",
    "n": 1
   },
   {
@@ -2116,10 +2132,6 @@
    "n": 2
   },
   {
-   "v": "School of Business",
-   "n": 2
-  },
-  {
    "v": "School of Management and Economics",
    "n": 2
   },
@@ -2329,6 +2341,10 @@
   },
   {
    "v": "School Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "School of Business",
    "n": 1
   },
   {
@@ -3050,15 +3066,15 @@
    "n": 5
   },
   {
+   "v": "Business Administration",
+   "n": 4
+  },
+  {
    "v": "SCM/Logistics",
    "n": 4
   },
   {
    "v": "Analytics and Operations",
-   "n": 3
-  },
-  {
-   "v": "Business Administration",
    "n": 3
   },
   {
@@ -3083,6 +3099,10 @@
   },
   {
    "v": "Operations",
+   "n": 3
+  },
+  {
+   "v": "Operations and Information Management",
    "n": 3
   },
   {
@@ -3186,10 +3206,6 @@
    "n": 2
   },
   {
-   "v": "Operations and Information Management",
-   "n": 2
-  },
-  {
    "v": "Operations and Information Systems",
    "n": 2
   },
@@ -3243,10 +3259,6 @@
   },
   {
    "v": "Analytics",
-   "n": 1
-  },
-  {
-   "v": "Analytics, Information and Operations Management",
    "n": 1
   },
   {
@@ -3315,6 +3327,10 @@
   },
   {
    "v": "Business Analytics and Information Systems",
+   "n": 1
+  },
+  {
+   "v": "Business Analytics, Operations Management, Project Management",
    "n": 1
   },
   {
@@ -3682,6 +3698,10 @@
    "n": 1
   },
   {
+   "v": "Marketing and Supply Chain Management",
+   "n": 1
+  },
+  {
    "v": "Mathematics",
    "n": 1
   },
@@ -4038,6 +4058,10 @@
    "n": 0
   },
   {
+   "v": "Analytics, Information and Operations Management",
+   "n": 0
+  },
+  {
    "v": "Analytics, Information, Operations",
    "n": 0
   },
@@ -4346,10 +4370,6 @@
    "n": 0
   },
   {
-   "v": "Marketing and Supply Chain Management",
-   "n": 0
-  },
-  {
    "v": "Mathematics, Analytics and Optimization",
    "n": 0
   },
@@ -4644,6 +4664,17 @@
    "units": [],
    "bySchool": {}
   },
+  "Alma College": {
+   "schools": [],
+   "units": [
+    "Business Administration"
+   ],
+   "bySchool": {
+    "": [
+     "Business Administration"
+    ]
+   }
+  },
   "American University in the Emirates": {
    "schools": [],
    "units": [
@@ -4815,6 +4846,17 @@
    "bySchool": {
     "": [
      "BA"
+    ]
+   }
+  },
+  "Babson College": {
+   "schools": [],
+   "units": [
+    "Operations and Information Management"
+   ],
+   "bySchool": {
+    "": [
+     "Operations and Information Management"
     ]
    }
   },
@@ -8414,6 +8456,17 @@
     ]
    }
   },
+  "St John Fisher University": {
+   "schools": [],
+   "units": [
+    "Business Analytics, Operations Management, Project Management"
+   ],
+   "bySchool": {
+    "": [
+     "Business Analytics, Operations Management, Project Management"
+    ]
+   }
+  },
   "St. Cloud State University": {
    "schools": [],
    "units": [
@@ -8904,6 +8957,17 @@
      "Management Science",
      "Marketing and Logistics",
      "Operations and Business Analytics"
+    ]
+   }
+  },
+  "The University of Memphis": {
+   "schools": [],
+   "units": [
+    "Marketing and Supply Chain Management"
+   ],
+   "bySchool": {
+    "": [
+     "Marketing and Supply Chain Management"
     ]
    }
   },

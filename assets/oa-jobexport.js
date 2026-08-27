@@ -163,9 +163,26 @@
       cell: function (r) { return date(r.addedAt); } },
 
     { header: 'Market year', from: ['year'], type: 'Number', w: 12,
-      note: 'The job market year the posting belongs to, numbered by the year it ' +
-        'ends: 2027 is 1 July 2026 to 30 June 2027.',
+      note: 'The job market year the posting is FOR, numbered by the year it ' +
+        'ends: 2027 is 1 July 2026 to 30 June 2027. One number, so it sorts.',
       cell: function (r) { var n = Number(r.year); return isFinite(n) && n ? n : ''; } },
+
+    /* THE OVERLAP, beside the number rather than inside it. A search
+       advertised in May that closes in September was open in two seasons and
+       the site lists it under both (`years`) — but a column that answered
+       "2026; 2027" could not be sorted or subtracted, and this file exists to
+       be worked through. So the number above stays one number and this says
+       what else it is listed under; empty, like every other cell here, means
+       "does not apply" — the posting belongs to one season only. */
+    { header: 'Also listed under', from: ['years'], type: 'Text', w: 16,
+      note: 'Any OTHER market year the posting is listed under. A search ' +
+        'advertised in one season that closes in the next is open during both, ' +
+        'so it appears under each; empty means it belongs to one season only.',
+      cell: function (r) {
+        var a = Object.prototype.toString.call(r.years) === '[object Array]' ? r.years : [];
+        var n = Number(r.year);
+        return a.filter(function (y) { return Number(y) !== n; }).join('; ');
+      } },
 
     { header: 'Characteristics', from: ['characteristics'], type: 'Text', w: 34,
       note: 'What the department offers — research seminars, PhD, Masters, MBA, ' +

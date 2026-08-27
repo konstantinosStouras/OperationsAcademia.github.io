@@ -191,6 +191,18 @@
   "lng": 46.6759664
  },
  {
+  "id": "alma-college____business-administration",
+  "institution": "Alma College",
+  "department": "Business Administration",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "american-university-in-the-emirates____business-intelligence-da",
   "institution": "American University in the Emirates",
   "department": "Business Intelligence /DA",
@@ -498,6 +510,18 @@
   ],
   "n": 1,
   "lastPosted": "2025-09-27"
+ },
+ {
+  "id": "babson-college____operations-and-information-management",
+  "institution": "Babson College",
+  "department": "Operations and Information Management",
+  "type": "University",
+  "country": "Greece",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
  },
  {
   "id": "ball-state-university____isom",
@@ -6836,6 +6860,18 @@
   "lng": 103.8476699
  },
  {
+  "id": "st-john-fisher-university____business-analytics-operations-management-project-management",
+  "institution": "St John Fisher University",
+  "department": "Business Analytics, Operations Management, Project Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "st-john-s-university__peter-j-tobin-college-of-business__business-analytics-and-information-systems",
   "institution": "St. John's University",
   "school": "Peter J. Tobin College of Business",
@@ -7831,6 +7867,18 @@
   "lastPosted": "2025-09-10",
   "lat": 22.2679201,
   "lng": 114.1290719
+ },
+ {
+  "id": "university-of-memphis____marketing-and-supply-chain-management",
+  "institution": "The University of Memphis",
+  "department": "Marketing and Supply Chain Management",
+  "type": "University",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
  },
  {
   "id": "university-of-michigan-flint__school-of-management__management-and-marketing",
@@ -9651,11 +9699,8 @@
   "mapUrl": "https://goo.gl/maps/i0LUk",
   "facultyUrl": "https://business.ku.edu/people/academic-areas/analytics-information-systems-and-operations/",
   "sources": [
-   "directory",
-   "postings"
+   "directory"
   ],
-  "n": 1,
-  "lastPosted": "2026-08-12",
   "lat": 38.958542,
   "lng": -95.2476138
  },

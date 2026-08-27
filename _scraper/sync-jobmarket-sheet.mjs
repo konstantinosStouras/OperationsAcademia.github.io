@@ -53,7 +53,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  marketFloor, isoStamp, healPlace, healReviewDate, stripRowEmails,
+  marketFloor, isoStamp, healPlace, healReviewDate, stripRowEmails, withMarketYears,
 } from './jobs-model.mjs';
 import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
@@ -1070,7 +1070,14 @@ async function healNames() {
     .map((r) => (vocab ? fillSchoolFromDirectory(r, vocab) : r))
     .map((r) => healCountry(r, byCountry))
     .map(healReviewDate)
-    .map(stripRowEmails);
+    .map(stripRowEmails)
+    /* …and the SEASONS it is listed under, last, off the dates as they finally
+       stand — `rowsFromTab` writes it in exactly this position (owner,
+       2026-08-27: a posting advertised in one season for a search closing in
+       the next belongs to both). Idempotent like the rest, so this is also how
+       the committed file gains the field without waiting for a workbook to
+       change. */
+    .map(withMarketYears);
   const changed = healed.filter((r, i) =>
     JSON.stringify(r) !== JSON.stringify(rows[i]));
   if (!changed.length) {
@@ -1078,7 +1085,7 @@ async function healNames() {
     return true;
   }
   for (const r of changed.slice(0, 10)) log(`  ${r.id}: ${r.institution} — ${r.department}`);
-  if (DRY) { log(`--dry-run: ${changed.length} posting(s) would be renamed`); return true; }
+  if (DRY) { log(`--dry-run: ${changed.length} posting(s) would be corrected`); return true; }
   await writeFile(ROWS_FILE, serialiseSheetRows(healed));
   /* the meta's `sheets` and `tabs` say WHICH WORKBOOK these postings came from,
      and only a real sync knows that — rebuilding the meta from scratch here
@@ -1089,7 +1096,7 @@ async function healNames() {
     sheets: meta.sheets || [],
     tabs: meta.tabs || [],
   }), null, 1) + '\n');
-  log(`data/jobmarket.json: renamed ${changed.length} posting(s)`);
+  log(`data/jobmarket.json: corrected ${changed.length} posting(s)`);
   return true;
 }
 

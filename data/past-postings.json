@@ -2,6 +2,10 @@
  {
   "id": "2025-university-of-san-diego-20250714",
   "year": 2025,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2025-07-14",
   "institution": "University of San Diego",
   "department": "Knauss School of Business",
@@ -31,6 +35,9 @@
  {
   "id": "2025-technical-university-of-munich-20250320",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2025-03-20",
   "institution": "Technical University of Munich",
   "department": "Computer Science",
@@ -61,6 +68,9 @@
  {
   "id": "2025-university-of-wisconsin-madison-20250309",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2025-03-09",
   "institution": "University of Wisconsin-Madison",
   "department": "Wisconsin School of Business, Operations and Information Management",
@@ -94,6 +104,9 @@
  {
   "id": "2025-bucknell-university-20250205",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2025-02-05",
   "institution": "Bucknell University",
   "department": "Freeman College of Management",
@@ -122,6 +135,9 @@
  {
   "id": "2025-harvard-university-20250130",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2025-01-30",
   "institution": "Harvard University",
   "department": "Climate and Sustainability Impact Lab, Digital Data Design Institute",
@@ -153,6 +169,9 @@
  {
   "id": "2025-university-of-utah-20250108",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2025-01-08",
   "institution": "University of Utah",
   "department": "David Eccles School of Business, Operations and Information Systems",
@@ -185,6 +204,9 @@
  {
   "id": "2025-university-of-houston-20241121",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-11-21",
   "institution": "University of Houston",
   "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
@@ -218,6 +240,9 @@
  {
   "id": "2025-university-of-houston-20241109",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-11-09",
   "institution": "University of Houston",
   "department": "C. T. Bauer College of Business, Department of Decision and Information Sciences",
@@ -251,6 +276,9 @@
  {
   "id": "2025-loyola-university-chicago-20241106",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-11-06",
   "institution": "Loyola University Chicago",
   "department": "Quinlan School of Business",
@@ -283,6 +311,9 @@
  {
   "id": "2025-nanyang-technological-university-20241029",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-29",
   "institution": "Nanyang Technological University",
   "department": "College of Computing and Data Science",
@@ -312,6 +343,9 @@
  {
   "id": "2025-university-of-wisconsin-madison-20241021",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-21",
   "institution": "University of Wisconsin-Madison",
   "department": "Wisconsin School of Business, Operations and Information Management",
@@ -345,6 +379,9 @@
  {
   "id": "2025-columbia-university-20241018",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-18",
   "institution": "Columbia University",
   "department": "Industrial Engineering and Operations Research",
@@ -377,6 +414,9 @@
  {
   "id": "2025-university-of-oklahoma-20241017",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-17",
   "institution": "University of Oklahoma",
   "department": "Michael F. Price College of Business, Marketing, Supply Chain Management, and Healthcare",
@@ -410,6 +450,9 @@
  {
   "id": "2025-united-states-military-academy-west-point-20241015",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-15",
   "institution": "United States Military Academy - West Point",
   "department": "United States Military Academy, Systems Engineering",
@@ -442,6 +485,9 @@
  {
   "id": "2025-washington-university-in-st-louis-20241015",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-15",
   "institution": "Washington University in St. Louis",
   "department": "Olin Business School, Boeing Center for Supply Chain Innovation",
@@ -475,6 +521,9 @@
  {
   "id": "2025-university-of-miami-20241011",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-11",
   "institution": "University of Miami",
   "department": "Miami Herbert Business School, Management Area",
@@ -509,6 +558,9 @@
  {
   "id": "2025-city-university-of-hong-kong-20241010",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-10",
   "institution": "City University of Hong Kong",
   "department": "College of Business, Management Science",
@@ -543,6 +595,9 @@
  {
   "id": "2025-washington-university-in-st-louis-20241010",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-10",
   "institution": "Washington University in St. Louis",
   "department": "Olin Business School",
@@ -577,6 +632,9 @@
  {
   "id": "2025-nyu-shanghai-20241003",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-03",
   "institution": "NYU Shanghai",
   "department": "Business, Operations and Business Analytics",
@@ -608,6 +666,9 @@
  {
   "id": "2025-the-university-of-sydney-20241003",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-03",
   "institution": "The University of Sydney",
   "department": "Business Analytics",
@@ -639,6 +700,9 @@
  {
   "id": "2025-university-of-oklahoma-20241002",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-10-02",
   "institution": "University of Oklahoma",
   "department": "Michael F. Price College of Business, Marketing and Supply Chain Management",
@@ -673,6 +737,9 @@
  {
   "id": "2025-essec-20240926",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-26",
   "institution": "ESSEC",
   "department": "Operations Management",
@@ -706,6 +773,9 @@
  {
   "id": "2025-nyu-shanghai-20240926",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-26",
   "institution": "NYU Shanghai",
   "department": "Business, Information Systems/Technology",
@@ -737,6 +807,9 @@
  {
   "id": "2025-stony-brook-university-20240926",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-26",
   "institution": "Stony Brook University",
   "department": "College of Business, Operations and Decision Analytics",
@@ -768,6 +841,10 @@
  {
   "id": "2025-ozyegin-university-20240923",
   "year": 2025,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2024-09-23",
   "institution": "Özyeğin University",
   "department": "Faculty of Business, Operations Management",
@@ -803,6 +880,9 @@
  {
   "id": "2025-stanford-university-20240923",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-23",
   "institution": "Stanford University",
   "department": "School of Engineering, Management Science and Engineering",
@@ -837,6 +917,9 @@
  {
   "id": "2025-the-hong-kong-university-of-science-and-technolo-20240922",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-22",
   "institution": "The Hong Kong University of Science and Technology (Guangzhou)",
   "department": "Smart Manufacturing Thrust, Systems hub",
@@ -866,6 +949,9 @@
  {
   "id": "2025-indiana-university-20240920",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-20",
   "institution": "Indiana University",
   "department": "Kelley School of Business, Operations and Decision Technologies",
@@ -900,6 +986,9 @@
  {
   "id": "2025-university-of-california-los-angeles-20240920",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-20",
   "institution": "University of California, Los Angeles",
   "department": "Anderson School of Management, Decisions, Operations and Technology Management",
@@ -932,6 +1021,9 @@
  {
   "id": "2025-university-of-cincinnati-20240920",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-20",
   "institution": "University of Cincinnati",
   "department": "Carl H. Lindner College of Business, Operations, Business Analytics and Information Systems",
@@ -963,6 +1055,9 @@
  {
   "id": "2025-university-of-nebraska-lincoln-20240920",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-20",
   "institution": "University of Nebraska - Lincoln",
   "department": "College of Business, Supply Chain Management and Analytics",
@@ -995,6 +1090,9 @@
  {
   "id": "2025-york-university-20240920",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-20",
   "institution": "York University",
   "department": "Schulich School of Business, Operations Management and Information Systems",
@@ -1028,6 +1126,9 @@
  {
   "id": "2025-university-of-chicago-20240919",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-19",
   "institution": "University of Chicago",
   "department": "Booth School of Business, Operations Management",
@@ -1061,6 +1162,9 @@
  {
   "id": "2025-georgetown-university-20240918",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-18",
   "institution": "Georgetown University",
   "department": "McDonough School of Business, Operations and Analytics",
@@ -1093,6 +1197,9 @@
  {
   "id": "2025-university-of-texas-at-austin-20240918",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-18",
   "institution": "University of Texas at Austin",
   "department": "McCombs School of Business, Information, Risk, and Operations Management",
@@ -1121,6 +1228,9 @@
  {
   "id": "2025-university-of-colorado-boulder-20240917",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-17",
   "institution": "University of Colorado Boulder",
   "department": "Leeds School of Business, Operations Management",
@@ -1153,6 +1263,9 @@
  {
   "id": "2025-wake-forest-university-20240916",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-16",
   "institution": "Wake Forest University",
   "department": "School of Business, Operations",
@@ -1185,6 +1298,9 @@
  {
   "id": "2025-the-pennsylvania-state-university-20240913",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-13",
   "institution": "The Pennsylvania State University",
   "department": "Smeal College of Business, Supply Chain and Information Systems",
@@ -1218,6 +1334,9 @@
  {
   "id": "2025-bucknell-university-20240911",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-11",
   "institution": "Bucknell University",
   "department": "Freeman College of Management, Analytics and Operations Management",
@@ -1247,6 +1366,9 @@
  {
   "id": "2025-london-business-school-20240911",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-11",
   "institution": "London Business School",
   "department": "Management Science and Operations",
@@ -1278,6 +1400,9 @@
  {
   "id": "2025-university-of-south-carolina-20240909",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-09",
   "institution": "University of South Carolina",
   "department": "Darla Moore School of Business, Management Science",
@@ -1310,6 +1435,9 @@
  {
   "id": "2025-arizona-state-university-20240905",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-05",
   "institution": "Arizona State University",
   "department": "W. P. Carey School of Business, Information Systems",
@@ -1343,6 +1471,10 @@
  {
   "id": "2025-texas-a-m-university-20240905",
   "year": 2025,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2024-09-05",
   "institution": "Texas A&M University",
   "department": "Mays Business School, Information and Operations Management",
@@ -1376,6 +1508,9 @@
  {
   "id": "2025-the-hong-kong-polytechnic-university-20240905",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-09-05",
   "institution": "The Hong Kong Polytechnic University",
   "department": "Logistics and Maritime Studies",
@@ -1406,6 +1541,9 @@
  {
   "id": "2025-shanghai-university-of-finance-and-economics-20240831",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-31",
   "institution": "Shanghai University of Finance and Economics",
   "department": "College of Business, Operations Management",
@@ -1439,6 +1577,9 @@
  {
   "id": "2025-university-of-virginia-20240829",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-29",
   "institution": "University of Virginia",
   "department": "Darden School of Business",
@@ -1468,6 +1609,9 @@
  {
   "id": "2025-frankfurt-school-of-finance-and-management-20240828",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-28",
   "institution": "Frankfurt School of Finance and Management",
   "department": "Management",
@@ -1497,6 +1641,9 @@
  {
   "id": "2025-ie-business-school-20240827",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-27",
   "institution": "IE Business School",
   "department": "Operations and Business Analytics",
@@ -1530,6 +1677,9 @@
  {
   "id": "2025-nova-school-of-business-and-economics-20240826",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-26",
   "institution": "Nova School of Business and Economics",
   "department": "Operations Management",
@@ -1565,6 +1715,9 @@
  {
   "id": "2025-university-of-toronto-20240825",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-25",
   "institution": "University of Toronto",
   "department": "Scarborough and Rotman School of Management, Management",
@@ -1598,6 +1751,9 @@
  {
   "id": "2025-frankfurt-school-of-finance-and-management-20240823",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-23",
   "institution": "Frankfurt School of Finance and Management",
   "department": "Technology and Operations Management",
@@ -1630,6 +1786,9 @@
  {
   "id": "2025-national-university-of-singapore-20240819",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-19",
   "institution": "National University of Singapore",
   "department": "NUS Business School, Analytics and Operations",
@@ -1663,6 +1822,9 @@
  {
   "id": "2025-naval-postgraduate-school-20240819",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-19",
   "institution": "Naval Postgraduate School",
   "department": "Operations Research",
@@ -1695,6 +1857,10 @@
  {
   "id": "2025-tulane-university-20240819",
   "year": 2025,
+  "years": [
+   2025,
+   2026
+  ],
   "posted": "2024-08-19",
   "institution": "Tulane University",
   "department": "A. B. Freeman School of Business, Management Science",
@@ -1725,6 +1891,9 @@
  {
   "id": "2025-boston-college-20240814",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-14",
   "institution": "Boston College",
   "department": "Carroll School of Management, Business Analytics",
@@ -1758,6 +1927,9 @@
  {
   "id": "2025-ku-leuven-20240813",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-13",
   "institution": "KU Leuven",
   "department": "Faculty of Economics and Business",
@@ -1789,6 +1961,9 @@
  {
   "id": "2025-university-of-alberta-20240813",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-13",
   "institution": "University of Alberta",
   "department": "Alberta School of Business, Accounting and Business Analytics",
@@ -1822,6 +1997,9 @@
  {
   "id": "2025-university-of-michigan-20240812",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-12",
   "institution": "University of Michigan",
   "department": "Stephen M. Ross School of Business, Technology and Operations Management",
@@ -1855,6 +2033,9 @@
  {
   "id": "2025-university-college-london-20240811",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-11",
   "institution": "University College London",
   "department": "UCL School of Management",
@@ -1888,6 +2069,9 @@
  {
   "id": "2025-duke-university-20240807",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-07",
   "institution": "Duke University",
   "department": "Fuqua School of Business, Operations Management",
@@ -1921,6 +2105,9 @@
  {
   "id": "2025-iese-20240807",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-07",
   "institution": "IESE",
   "department": "IESE Business School, Operations, Information and Technology",
@@ -1955,6 +2142,9 @@
  {
   "id": "2025-university-of-chicago-20240807",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-07",
   "institution": "University of Chicago",
   "department": "Booth School of Business, Operations Management",
@@ -1989,6 +2179,9 @@
  {
   "id": "2025-indian-school-of-business-20240805",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-05",
   "institution": "Indian School of Business",
   "department": "Indian School of Business, Operations Management",
@@ -2021,6 +2214,9 @@
  {
   "id": "2025-imperial-college-london-20240801",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-08-01",
   "institution": "Imperial College London",
   "department": "Imperial College Business School, Analytics and Operations",
@@ -2054,6 +2250,9 @@
  {
   "id": "2025-the-chinese-university-of-hong-kong-shenzhen-20240730",
   "year": 2025,
+  "years": [
+   2025
+  ],
   "posted": "2024-07-30",
   "institution": "The Chinese University of Hong Kong, Shenzhen",
   "department": "School of Management and Economics, Information Systems and Operations Management",
@@ -2088,6 +2287,9 @@
  {
   "id": "2020-university-of-mannheim-20190715",
   "year": 2020,
+  "years": [
+   2020
+  ],
   "posted": "2019-07-15",
   "institution": "University of Mannheim",
   "department": "Business School, Chair of Production Management",
@@ -2117,6 +2319,9 @@
  {
   "id": "2015-university-of-wisconsin-milwaukee-20150210",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2015-02-10",
   "institution": "University of Wisconsin-Milwaukee",
   "department": "Sheldon B. Lubar School of Business, Supply Chain, Operations Management and Business Statistics",
@@ -2143,6 +2348,9 @@
  {
   "id": "2015-western-university-20150205",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2015-02-05",
   "institution": "Western University",
   "department": "Ivey Business School",
@@ -2168,6 +2376,9 @@
  {
   "id": "2015-university-of-california-los-angeles-20150202",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2015-02-02",
   "institution": "University of California, Los Angeles",
   "department": "Anderson School of Management, Decisions, Operations and Technology Management",
@@ -2194,6 +2405,9 @@
  {
   "id": "2015-stevens-institute-of-technology-20141217",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-12-17",
   "institution": "Stevens Institute of Technology",
   "department": "Wesley J. Howe School of Technology Management, Operations Management",
@@ -2220,6 +2434,9 @@
  {
   "id": "2015-hec-paris-20141215",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-12-15",
   "institution": "HEC Paris",
   "department": "Operations Management and Information Technology",
@@ -2245,6 +2462,9 @@
  {
   "id": "2015-nova-school-of-business-and-economics-20141203",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-12-03",
   "institution": "Nova School of Business and Economics",
   "department": "",
@@ -2271,6 +2491,9 @@
  {
   "id": "2015-koc-university-20141123",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-11-23",
   "institution": "Koç University",
   "department": "College of Administrative Sciences and Economics (CASE)",
@@ -2297,6 +2520,9 @@
  {
   "id": "2015-florida-international-university-20141117",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-11-17",
   "institution": "Florida International University",
   "department": "College of Business Administration, Decision Sciences and Information Systems",
@@ -2323,6 +2549,9 @@
  {
   "id": "2015-university-of-calgary-20141113",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-11-13",
   "institution": "University of Calgary",
   "department": "Haskayne School of Business, Operations and Supply Chain Management",
@@ -2350,6 +2579,9 @@
  {
   "id": "2015-universite-catholique-de-louvain-20141105",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-11-05",
   "institution": "Université catholique de Louvain",
   "department": "Louvain School of Management, Center for Operations Research and Econometrics",
@@ -2378,6 +2610,9 @@
  {
   "id": "2015-university-of-pennsylvania-20141105",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-11-05",
   "institution": "University of Pennsylvania",
   "department": "Wharton School, Operations and Information Management",
@@ -2405,6 +2640,9 @@
  {
   "id": "2015-university-of-toledo-20141031",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-31",
   "institution": "University of Toledo",
   "department": "College of Business and Innovation, Information, Operations and Technology Management",
@@ -2431,6 +2669,9 @@
  {
   "id": "2015-university-of-southern-california-20141028",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-28",
   "institution": "University of Southern California",
   "department": "Marshall School of Business, Data Sciences and Operations",
@@ -2458,6 +2699,9 @@
  {
   "id": "2015-american-university-of-beirut-20141025",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-25",
   "institution": "American University of Beirut",
   "department": "Suliman S. Olayan School of Business, Business Information and Decision Systems",
@@ -2486,6 +2730,9 @@
  {
   "id": "2015-queen-s-university-20141023",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-23",
   "institution": "Queen's University",
   "department": "Queen's School of Business, Management Science and Operations Management",
@@ -2512,6 +2759,9 @@
  {
   "id": "2015-baruch-college-the-city-university-of-new-york-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "Baruch College, The City University of New York",
   "department": "Zicklin School of Business, Management",
@@ -2539,6 +2789,9 @@
  {
   "id": "2015-florida-state-university-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "Florida State University",
   "department": "College of Business, Marketing",
@@ -2565,6 +2818,9 @@
  {
   "id": "2015-lehigh-university-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "Lehigh University",
   "department": "College of Business, Management",
@@ -2591,6 +2847,9 @@
  {
   "id": "2015-shanghai-university-of-finance-and-economics-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "Shanghai University of Finance and Economics",
   "department": "School of International Business Administration, Operations Management",
@@ -2618,6 +2877,9 @@
  {
   "id": "2015-university-of-michigan-dearborn-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "University of Michigan-Dearborn",
   "department": "College of Business, Decision Sciences/Operations Management",
@@ -2644,6 +2906,9 @@
  {
   "id": "2015-university-of-notre-dame-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "University of Notre Dame",
   "department": "Mendoza College of Business, Management",
@@ -2670,6 +2935,9 @@
  {
   "id": "2015-university-of-richmond-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "University of Richmond",
   "department": "Robins School of Business, Management",
@@ -2697,6 +2965,9 @@
  {
   "id": "2015-university-of-tennessee-20141022",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-22",
   "institution": "University of Tennessee",
   "department": "College of Business Administration, Business Analytics and Statistics",
@@ -2723,6 +2994,9 @@
  {
   "id": "2015-boston-college-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "Boston College",
   "department": "Carroll School of Management, Operations Management",
@@ -2750,6 +3024,9 @@
  {
   "id": "2015-cornell-university-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "Cornell University",
   "department": "Cornell SC Johnson College of Business, Operations, Technology, and Information Management Area",
@@ -2777,6 +3054,9 @@
  {
   "id": "2015-cornell-university-cornell-tech-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "Cornell University/ Cornell Tech",
   "department": "Samuel Curtis Johnson Graduate School of Management",
@@ -2802,6 +3082,9 @@
  {
   "id": "2015-mcgill-university-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "McGill University",
   "department": "Desautels Faculty of Management",
@@ -2828,6 +3111,9 @@
  {
   "id": "2015-memorial-university-of-newfoundland-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "Memorial University of Newfoundland",
   "department": "Faculty of Business Administration",
@@ -2853,6 +3139,9 @@
  {
   "id": "2015-providence-college-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "Providence College",
   "department": "School of Business, Finance",
@@ -2879,6 +3168,9 @@
  {
   "id": "2015-texas-christian-university-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "Texas Christian University",
   "department": "Neeley School of Business, Information Systems and Supply Chain Management",
@@ -2905,6 +3197,9 @@
  {
   "id": "2015-university-of-rochester-20141021",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-21",
   "institution": "University of Rochester",
   "department": "W. E. Simon Graduate School of Business Administration, Operations Management and/or Economics of Information Systems",
@@ -2931,6 +3226,9 @@
  {
   "id": "2015-university-of-wisconsin-madison-20141019",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-19",
   "institution": "University of Wisconsin-Madison",
   "department": "Wisconsin School of Business, Operations and Information Management",
@@ -2957,6 +3255,9 @@
  {
   "id": "2015-skolkovo-institute-of-science-and-technology-sko-20141017",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-17",
   "institution": "Skolkovo Institute of Science and Technology (Skoltech)",
   "department": "",
@@ -2983,6 +3284,9 @@
  {
   "id": "2015-university-of-tennessee-20141017",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-17",
   "institution": "University of Tennessee",
   "department": "College of Business Administration, Business Analytics and Statistics",
@@ -3009,6 +3313,9 @@
  {
   "id": "2015-university-of-michigan-20141015",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-15",
   "institution": "University of Michigan",
   "department": "Stephen M. Ross School of Business, Interdisciplinary Position (Management and Organizations, Strategy and Technology and Operations)",
@@ -3035,6 +3342,9 @@
  {
   "id": "2015-the-university-of-hong-kong-hku-20141013",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-13",
   "institution": "The University of Hong Kong (HKU)",
   "department": "Faculty of Business and Economics, Information and Innovation Management",
@@ -3062,6 +3372,9 @@
  {
   "id": "2015-universite-libre-de-bruxelles-20141013",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-13",
   "institution": "Universite libre de Bruxelles",
   "department": "Solvay Brussels School of Economics and Management",
@@ -3087,6 +3400,9 @@
  {
   "id": "2015-university-of-california-san-diego-20141013",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-13",
   "institution": "University of California, San Diego",
   "department": "Rady School of Management, Innovation, Technology and Operations",
@@ -3113,6 +3429,9 @@
  {
   "id": "2015-university-of-california-los-angeles-20141011",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-11",
   "institution": "University of California, Los Angeles",
   "department": "Anderson School of Management, Decisions, Operations and Technology Management",
@@ -3139,6 +3458,9 @@
  {
   "id": "2015-western-university-20141010",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-10",
   "institution": "Western University",
   "department": "Ivey Business School",
@@ -3164,6 +3486,9 @@
  {
   "id": "2015-fudan-university-20141009",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-09",
   "institution": "Fudan University",
   "department": "School of Management, Management Science",
@@ -3191,6 +3516,9 @@
  {
   "id": "2015-boston-university-20141008",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-08",
   "institution": "Boston University",
   "department": "School of Management, Operations and Technology Management",
@@ -3217,6 +3545,9 @@
  {
   "id": "2015-singapore-management-university-20141008",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-08",
   "institution": "Singapore Management University",
   "department": "Lee Kong Chian School of Business, Operations Management",
@@ -3243,6 +3574,9 @@
  {
   "id": "2015-university-of-california-berkeley-20141008",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-08",
   "institution": "University of California, Berkeley",
   "department": "Walter A. Haas School of Business, Operations and Information Technology Management",
@@ -3269,6 +3603,9 @@
  {
   "id": "2015-university-of-miami-20141008",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-08",
   "institution": "University of Miami",
   "department": "Miami Herbert Business School, Management Area",
@@ -3295,6 +3632,9 @@
  {
   "id": "2015-university-of-auckland-20141007",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-07",
   "institution": "University of Auckland",
   "department": "Business School, Information Systems and Operations Management",
@@ -3321,6 +3661,9 @@
  {
   "id": "2015-carnegie-mellon-university-20141001",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-01",
   "institution": "Carnegie Mellon University",
   "department": "Tepper School of Business, Operations Management",
@@ -3347,6 +3690,9 @@
  {
   "id": "2015-pompeu-fabra-university-20141001",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-10-01",
   "institution": "Pompeu Fabra University",
   "department": "Economics and Business",
@@ -3372,6 +3718,9 @@
  {
   "id": "2015-university-of-michigan-20140930",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-30",
   "institution": "University of Michigan",
   "department": "Stephen M. Ross School of Business, Technology and Operations Management",
@@ -3398,6 +3747,9 @@
  {
   "id": "2015-binghamton-university-20140927",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-27",
   "institution": "Binghamton University",
   "department": "School of Management, Business Analytics and Operations",
@@ -3424,6 +3776,9 @@
  {
   "id": "2015-erasmus-university-20140927",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-27",
   "institution": "Erasmus University",
   "department": "Rotterdam School of Management, Technology and Operations Management",
@@ -3450,6 +3805,9 @@
  {
   "id": "2015-california-state-polytechnic-university-pomona-20140926",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-26",
   "institution": "California State Polytechnic University Pomona",
   "department": "Technology and Operations Management",
@@ -3475,6 +3833,9 @@
  {
   "id": "2015-ozyegin-university-20140924",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-24",
   "institution": "Özyeğin University",
   "department": "Graduate School of Business",
@@ -3500,6 +3861,9 @@
  {
   "id": "2015-harvard-kennedy-school-20140923",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-23",
   "institution": "Harvard Kennedy School",
   "department": "",
@@ -3526,6 +3890,9 @@
  {
   "id": "2015-hec-montreal-20140923",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-23",
   "institution": "HEC Montréal",
   "department": "Logistics and Operations Management",
@@ -3551,6 +3918,9 @@
  {
   "id": "2015-columbia-university-20140922",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-22",
   "institution": "Columbia University",
   "department": "Graduate School of Business, Decision, Risk, and Operations",
@@ -3577,6 +3947,9 @@
  {
   "id": "2015-the-chinese-university-of-hong-kong-20140919",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-19",
   "institution": "The Chinese University of Hong Kong",
   "department": "CUHK Business School",
@@ -3603,6 +3976,9 @@
  {
   "id": "2015-university-of-north-carolina-chapel-hill-20140919",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-19",
   "institution": "University of North Carolina-Chapel Hill",
   "department": "Kenan-Flagler Business School, Operations",
@@ -3630,6 +4006,9 @@
  {
   "id": "2015-university-of-texas-at-dallas-20140917",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-17",
   "institution": "University of Texas at Dallas",
   "department": "Naveen Jindal School of Management, Information Systems and Operations Management",
@@ -3657,6 +4036,9 @@
  {
   "id": "2015-university-of-mannheim-20140916",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-16",
   "institution": "University of Mannheim",
   "department": "Business School, Chair of Production Management",
@@ -3683,6 +4065,9 @@
  {
   "id": "2015-insead-20140915",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-15",
   "institution": "INSEAD",
   "department": "Technology and Operations Management",
@@ -3709,6 +4094,9 @@
  {
   "id": "2015-the-pennsylvania-state-university-20140915",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-15",
   "institution": "The Pennsylvania State University",
   "department": "Smeal College of Business, Supply Chain and Information Systems",
@@ -3736,6 +4124,9 @@
  {
   "id": "2015-university-college-london-ucl-20140915",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-15",
   "institution": "University College London (UCL)",
   "department": "Management Science and Innovation",
@@ -3761,6 +4152,9 @@
  {
   "id": "2015-university-of-wisconsin-madison-20140912",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-12",
   "institution": "University of Wisconsin-Madison",
   "department": "Wisconsin School of Business, Operations and Information Management",
@@ -3788,6 +4182,9 @@
  {
   "id": "2015-washington-university-in-st-louis-20140912",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-12",
   "institution": "Washington University in St. Louis",
   "department": "Olin Business School, Operations and Manufacturing Management",
@@ -3814,6 +4211,9 @@
  {
   "id": "2015-ecole-polytechnique-federale-de-lausanne-epfl-20140911",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-11",
   "institution": "École polytechnique fédérale de Lausanne (EPFL)",
   "department": "College of Management CDM, Chair of Technology and Operations Management TOM",
@@ -3840,6 +4240,9 @@
  {
   "id": "2015-university-of-illinois-at-urbana-champaign-20140911",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-11",
   "institution": "University of Illinois at Urbana-Champaign",
   "department": "",
@@ -3866,6 +4269,9 @@
  {
   "id": "2015-indiana-university-20140910",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-10",
   "institution": "Indiana University",
   "department": "Kelley School of Business, Operations and Decision Technologies",
@@ -3892,6 +4298,9 @@
  {
   "id": "2015-the-university-of-alabama-20140909",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-09",
   "institution": "The University of Alabama",
   "department": "Culverhouse College of Commerce, Information Systems, Statistics, and Management Science",
@@ -3918,6 +4327,9 @@
  {
   "id": "2015-emory-university-20140908",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-08",
   "institution": "Emory University",
   "department": "Goizueta Business School, Information Systems & Operations Management",
@@ -3944,6 +4356,9 @@
  {
   "id": "2015-katholieke-universiteit-ku-leuven-20140908",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-08",
   "institution": "Katholieke Universiteit (KU) Leuven",
   "department": "Research Center for Operations Management",
@@ -3969,6 +4384,9 @@
  {
   "id": "2015-clemson-university-20140907",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-07",
   "institution": "Clemson University",
   "department": "College of Business and Behavioral Science, Management",
@@ -3995,6 +4413,9 @@
  {
   "id": "2015-new-york-university-20140905",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-05",
   "institution": "New York University",
   "department": "Leonard N. Stern School of Business",
@@ -4021,6 +4442,9 @@
  {
   "id": "2015-ewha-school-of-business-20140904",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-04",
   "institution": "Ewha School of Business",
   "department": "",
@@ -4047,6 +4471,9 @@
  {
   "id": "2015-hong-kong-university-of-science-and-technology-h-20140904",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-04",
   "institution": "Hong Kong University of Science and Technology (HKUST)",
   "department": "Business School, Information Systems, Business Statistics and Operations Management",
@@ -4073,6 +4500,9 @@
  {
   "id": "2015-university-of-waterloo-20140904",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-04",
   "institution": "University of Waterloo",
   "department": "Management Science",
@@ -4099,6 +4529,9 @@
  {
   "id": "2015-yale-school-of-management-operations-management-20140904",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-04",
   "institution": "Yale School of Management (Operations Management group)",
   "department": "",
@@ -4126,6 +4559,9 @@
  {
   "id": "2015-texas-a-m-university-20140902",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-09-02",
   "institution": "Texas A&M University",
   "department": "Mays Business School",
@@ -4152,6 +4588,9 @@
  {
   "id": "2015-indian-school-of-business-isb-20140829",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-08-29",
   "institution": "Indian School of Business (ISB)",
   "department": "Operations",
@@ -4178,6 +4617,9 @@
  {
   "id": "2015-national-university-of-singapore-20140826",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-08-26",
   "institution": "National University of Singapore",
   "department": "NUS Business School",
@@ -4203,6 +4645,9 @@
  {
   "id": "2015-simon-fraser-university-20140820",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-08-20",
   "institution": "Simon Fraser University",
   "department": "Beedie School of Business, Technology and Operations Management",
@@ -4229,6 +4674,9 @@
  {
   "id": "2015-duke-university-20140819",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-08-19",
   "institution": "Duke University",
   "department": "Fuqua School of Business",
@@ -4254,6 +4702,9 @@
  {
   "id": "2015-university-of-washington-20140810",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-08-10",
   "institution": "University of Washington",
   "department": "Michael G. Foster School of Business",
@@ -4280,6 +4731,9 @@
  {
   "id": "2015-northwestern-university-20140724",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-07-24",
   "institution": "Northwestern University",
   "department": "Kellogg School of Management",
@@ -4306,6 +4760,9 @@
  {
   "id": "2015-university-of-chicago-20140724",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-07-24",
   "institution": "University of Chicago",
   "department": "Booth School of Business",
@@ -4332,6 +4789,9 @@
  {
   "id": "2015-iese-20140722",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-07-22",
   "institution": "IESE",
   "department": "",
@@ -4359,6 +4819,9 @@
  {
   "id": "2015-insead-20140711",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-07-11",
   "institution": "INSEAD",
   "department": "Humanitarian Research Group (HRG), Social Innovation Center",
@@ -4382,6 +4845,9 @@
  {
   "id": "2015-university-college-dublin-20140704",
   "year": 2015,
+  "years": [
+   2015
+  ],
   "posted": "2014-07-04",
   "institution": "University College Dublin",
   "department": "School of Business",
@@ -4407,6 +4873,10 @@
  {
   "id": "2015-stanford-university-20140605",
   "year": 2015,
+  "years": [
+   2014,
+   2015
+  ],
   "posted": "2014-06-05",
   "institution": "Stanford University",
   "department": "Stanford Graduate School of Business, Operations, Information, and Technology (OIT) area",
@@ -4434,6 +4904,10 @@
  {
   "id": "2015-university-of-colorado-boulder-20140512",
   "year": 2015,
+  "years": [
+   2014,
+   2015
+  ],
   "posted": "2014-05-12",
   "institution": "University of Colorado Boulder",
   "department": "Leeds School of Business",
@@ -4459,6 +4933,10 @@
  {
   "id": "2015-hull-university-business-school-20140508",
   "year": 2015,
+  "years": [
+   2014,
+   2015
+  ],
   "posted": "2014-05-08",
   "institution": "Hull University Business School",
   "department": "",
@@ -4483,6 +4961,10 @@
  {
   "id": "2015-carnegie-mellon-university-20140428",
   "year": 2015,
+  "years": [
+   2014,
+   2015
+  ],
   "posted": "2014-04-28",
   "institution": "Carnegie Mellon University",
   "department": "Tepper School of Business",
@@ -4509,6 +4991,10 @@
  {
   "id": "2015-kogod-school-of-business-20140408",
   "year": 2015,
+  "years": [
+   2014,
+   2015
+  ],
   "posted": "2014-04-08",
   "institution": "Kogod School of Business",
   "department": "",

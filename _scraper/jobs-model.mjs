@@ -50,7 +50,7 @@ export const { canonPlace, canonColumns, canonSchool, canonUnit, canonInstitutio
     midnight hides every posting it adds from every subscriber whose last
     digest went out later that day, permanently. */
 export const PUBLIC_FIELDS = [
-  'id', 'year', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
+  'id', 'year', 'years', 'posted', 'institution', 'department', 'school', 'unit', 'type', 'levels',
   'applyBy', 'applyByDate', 'reviewDate', 'comments', 'country',
   'adUrl', 'adPending', 'adLabel', 'postedAtUrl', 'postedAtLabel', 'furtherInfoUrl',
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
@@ -353,19 +353,43 @@ export function marketStart(now = new Date()) {
    posting date, so the deadline generalises the floor rather than fighting
    it.
 
-   WHERE IT OVERSHOOTS, AND WHY NOTHING IS RE-FILED BEHIND THE MAINTAINER'S
-   BACK. A search advertised in September that stays open until the following
-   July has a deadline a few weeks past the roll, and reading that literally
-   files a plainly 2025-2026 search under 2026-2027 (two rows on the site
-   today: Nanyang 2025-09-24 closing 2026-07-28, Tulane 2025-09-04 closing
-   2026-07-01). Nothing here can tell those apart from a genuine early
-   advertisement without guessing, and a posting's `year` is half its `id`
-   (`jobId`) — which is a card's anchor, the Edit button's join key, and,
-   through `keyOf`, the thing that keeps `mergeRows` from re-stamping
-   `addedAt` and re-alerting every subscriber. So the cascade classifies a
-   row AT BIRTH, where no id has been minted and nothing has joined to it,
-   and a posting already published is REPORTED instead (`marketYearReview`
-   below, drawn on /admin-area) for the maintainer to settle.               */
+   AND A POSTING CAN BE IN TWO SEASONS AT ONCE, BECAUSE THE SEASONS OVERLAP
+   (owner, 2026-08-27). Reading the deadline decides which season a posting is
+   FOR; it does not make that the only season it belongs IN. A school
+   advertising in May for a search closing in September is recruiting for the
+   season opening in July AND is advertising right now, in the season under
+   way — "there is overlap between the two years" — so it belongs to both, and
+   a model that can only name one has to be wrong about one of them.
+
+   So `year` stays exactly what it was: ONE season, decided by the cascade at
+   birth, and never moved afterwards. It is half a row's `id` (`jobId`) —
+   a card's anchor, the Edit button's join key, and, through `keyOf`, the
+   thing that keeps `mergeRows` from re-stamping `addedAt` and re-alerting
+   every subscriber — so an id that moves publishes the posting TWICE, once
+   as an orphan nobody can reach.
+
+   `years` is the whole span (`marketYearsOf` below): every season the posting
+   touches, from the one it was advertised in, through the one it is filed
+   under, to the one its deadline falls in. It is DERIVED on every build from
+   fields the row already publishes, so it needs no decision, no document and
+   no migration — and it is what the archive's "Job market year" filter reads,
+   so a spanning posting is listed under both seasons rather than only the
+   later one.
+
+   THE REPORT STILL HAS A JOB, AND THE OVERLAP CHANGES WHAT IT MEANS. A search
+   advertised in September that stays open until the following July has a
+   deadline a few weeks past the roll, and reading it literally would file a
+   plainly 2025-2026 search under 2026-2027 (Nanyang, posted 2025-09-24 closing
+   2026-07-28; Tulane, 2025-09-04 closing 2026-07-01). Nothing here can tell
+   those apart from a genuine early advertisement without guessing, so the
+   disagreement is REPORTED to the maintainer (`marketYearReview` below, drawn
+   on /admin-area, settled per posting in `yearChecks/{id}`).
+
+   What the overlap changes is the STAKE. The flagged posting is no longer
+   missing from the season its dates name — it is listed under both — so the
+   card reports a disagreement to read rather than a posting to rescue, and
+   "leave it where it is" is a complete answer. That is what makes settling
+   one, rather than moving it, the ordinary outcome.                        */
 
 /**
  * The market year a posting belongs to, and which of its dates said so.
@@ -397,6 +421,91 @@ export function marketYearAtLeast(row, floor = 0, opts = {}) {
   const { year, from } = marketYearOf(row, opts);
   const f = Number(floor);
   return Number.isFinite(f) && f > year ? { year: Math.trunc(f), from: 'floor' } : { year, from };
+}
+
+/**
+ * How many seasons a single posting may be listed under. THREE, and it is a
+ * guard against junk rather than a policy: measured over the 569 served
+ * postings the widest real span is TWO, and it cannot honestly be much more —
+ * `deadlineDay` refuses a closing date more than DEADLINE_WINDOW_DAYS (730)
+ * from the posting date, so a span of four would need dates no ingest lets
+ * through. A row that manages it anyway is listed under the seasons its own
+ * three dates name, without the years between them filled in.
+ */
+export const MARKET_SPAN_MAX = 3;
+
+/**
+ * EVERY season this posting belongs to, ascending — the overlap.
+ *
+ * Three dates can each name a season and they need not agree, which is the
+ * whole point:
+ *
+ *   the season it was ADVERTISED in   `posted`
+ *   the season it is FILED under      `year`, the cascade's answer at birth
+ *   the season its DEADLINE falls in  the cascade over the two apply-by dates
+ *
+ * The span runs from the earliest of those to the latest, filling the seasons
+ * between (a search open across a whole year is open during it), because that
+ * is what "which seasons is this posting in" means to a reader browsing one.
+ *
+ * PURE, and deliberately free of `now`: it reads only what the row itself
+ * carries. A row with no dates at all is listed under its stored year alone —
+ * never under today's season, which is what `marketYearOf`'s last-resort
+ * fallback would have made of a 2014 posting on every rebuild.
+ *
+ * Always contains `year` where the row has one, so nothing a consumer already
+ * filed under the primary season can fall out of it.
+ */
+export function marketYearsOf(row) {
+  const at = (v) => {
+    const d = day(v);
+    return d ? marketYear(new Date(`${d}T12:00:00Z`)) : 0;
+  };
+  const stored = Math.trunc(Number(row && row.year)) || 0;
+  const deadline = at(row && row.applyByDate) || at(row && row.reviewDate);
+  const advertised = at(row && row.posted);
+
+  const named = [stored, deadline, advertised].filter((y) => y > 0);
+  if (!named.length) return [];
+
+  const lo = Math.min(...named);
+  const hi = Math.max(...named);
+  if (hi - lo + 1 > MARKET_SPAN_MAX) return [...new Set(named)].sort((a, b) => a - b);
+
+  const out = [];
+  for (let y = lo; y <= hi; y++) out.push(y);
+  return out;
+}
+
+/**
+ * The row with its span written on it — the one place `years` is set.
+ *
+ * Pure and IDEMPOTENT, so every writer can apply it and the build can apply
+ * it again over the merged set: a row already carrying the right span comes
+ * back byte-identical and the rebuild commits nothing. That is the
+ * `healCountry`/`healPlace` discipline, and it is what makes a carried
+ * ORPHAN — a posting with no document behind it, which never goes back
+ * through an ingest — gain its span like everything else.
+ */
+export function withMarketYears(row) {
+  if (!row) return row;
+  const years = marketYearsOf(row);
+  if (!years.length) return row;
+  const have = Array.isArray(row.years) ? row.years : null;
+  if (have && have.length === years.length && have.every((y, i) => y === years[i])) return row;
+  /* written straight after `year`, not appended. publicRow reorders the served
+     postings anyway, but data/past-postings.json is serialised as it stands —
+     and a derived field landing after the addedAt stamp makes a diff that has
+     to be read twice. */
+  const out = {};
+  let placed = false;
+  for (const [k, v] of Object.entries(row)) {
+    if (k === 'years') continue;
+    out[k] = v;
+    if (k === 'year') { out.years = years; placed = true; }
+  }
+  if (!placed) out.years = years;
+  return out;
 }
 
 /** How the report words the date that decided. */
@@ -650,8 +759,12 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
      id, the id is a card's anchor and the Edit button's join key, and a row
      whose id moves is a row `mergeRows` cannot match: the old one is carried
      on as an orphan and the posting is published TWICE. So a posting that
-     already has a season keeps it, and one whose dates disagree is REPORTED
-     to the maintainer instead (`marketYearReview`, drawn on /admin-area).
+     already has a season keeps it — and a posting whose dates name ANOTHER
+     season is listed under that one too rather than moved into it, which is
+     `years` a few lines down (`marketYearsOf`, the overlap). The disagreement
+     itself is still reported to the maintainer (`marketYearReview`, drawn on
+     /admin-area), which is where a posting that really was mis-filed is
+     settled.
 
      The cascade below is therefore for a document that has NO season — a
      migrated row, anything not written by the form — and it is the same one
@@ -725,7 +838,10 @@ export function rowFromSubmission(doc, { now = new Date(), fixes = [] } = {}) {
     owner: ownerTag(doc.uid) || text(doc.owner, 64),
   };
   row.id = jobId(row);
-  return stripRowEmails(healReviewDate(row));
+  /* `years` LAST: healReviewDate is what settles the suggested date (and can
+     read one out of the apply-by prose), and the span is read off the dates
+     as they finally stand. */
+  return withMarketYears(stripRowEmails(healReviewDate(row)));
 }
 
 /** Any of the three shapes a stored timestamp arrives in, or null.
@@ -764,6 +880,11 @@ export function publicRow(row) {
     // is 90-odd lines of noise in a file whose diff is meant to be readable.
     // `adPending` is the same: meaningful only while true, noise on every
     // other row — and so is `reviewDate`, which most postings never state.
+    //
+    // `years` is written on EVERY row on purpose, even where it is the stored
+    // year said once. The archive's "Job market year" filter reads it as a
+    // multi-valued field, and a row that omitted it would answer no year at
+    // all rather than its own.
     if ((k === 'ref' || k === 'adPending' || k === 'reviewDate') && !row[k]) continue;
     out[k] = row[k];
   }
@@ -1379,7 +1500,13 @@ export function diffRows(before, after) {
     // sends that e-mail already claims "bookkeeping writes never produce an
     // e-mail"; this is half of what makes the claim true (build-jobs diffing
     // the rows it WRITES rather than the raw ones is the other half).
-    if (k === 'id' || k === 'adPending' || k === 'addedAt') continue;
+    //
+    // `years` is the third: it is DERIVED from `posted`, `year` and the two
+    // apply-by dates on every build (marketYearsOf), so it can only "change"
+    // when one of those did — and each of those is itself in this list and
+    // reports the edit properly. Diffing it would have reported all 569
+    // postings as edited on the single run that first wrote the field.
+    if (k === 'id' || k === 'adPending' || k === 'addedAt' || k === 'years') continue;
     const a = before ? before[k] : undefined;
     const b = after ? after[k] : undefined;
     const av = Array.isArray(a) ? a.join(', ') : (a === undefined || a === null ? '' : String(a));
