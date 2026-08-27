@@ -9063,14 +9063,45 @@ async function testJobExportWiring() {
   ok(!/OAAccounts\.hint\(\)\s*===\s*'in'\s*\)\s*\{[^}]*download/.test(mod),
     'export: …and never on the localStorage hint alone');
 
-  ok(/\.oa-action\s*\{/.test(listCss) && /color:\s*var\(--mut/.test(listCss),
+  /* A BUTTON, not a caption (owner, 2026-08-27). Both halves are asserted:
+     the label carries the verb — "Excel" alone named a format and never the
+     act — and the rule paints a green border, a ground and its own ink. What
+     a reader actually SEES is measured in page-test.mjs, in both themes; this
+     is the pin that the intent survives an edit to either stylesheet. */
+  ok(/label:\s*'↓ Download Excel'/.test(mod),
+    'export: the button says what it DOES, not just what format it writes');
+  ok(/\.oa-action\s*\{[\s\S]{0,320}?border:\s*1px solid var\(--ok/.test(listCss),
+    'export: it wears a green border, so it reads as something to press');
+  ok(/\.oa-action\s*\{/.test(listCss) && /color:\s*var\(--ok/.test(listCss),
     'export: the button names its own ink as well as its ground (CLAUDE.md)');
-  ok(/body\.v3 \.oa-action\s*\{/.test(v3css),
-    'export: …and is themed for the live design');
+  ok(/body\.v3 \.oa-action\s*\{[\s\S]{0,500}?border:\s*1px solid var\(--ok\)/.test(v3css),
+    'export: …and is themed green for the live design too');
   ok(/max-width:\s*640px[\s\S]{0,2200}?\.oa-action\s*\{[\s\S]{0,220}?height:\s*42px/.test(listCss),
     'export: on a phone it is a 42px target like every other control in the bar');
   ok(/\.oa-clear,\s*\.oa-action\s*\{\s*display:\s*none/.test(listCss),
     'export: and it does not print');
+
+  /* CLEAR FILTERS IS RED, in both stylesheets — the engine's own and the live
+     design's override, which is the one the jobs page actually paints. A fix
+     applied to only one of them is invisible on the site (oa-list.css) or
+     lost on any page that mounts the engine without v3.css (v3.css alone). */
+  ok(/\.oa-clear\s*\{[\s\S]{0,340}?border:\s*1px solid var\(--err/.test(listCss) &&
+     /\.oa-clear\s*\{[\s\S]{0,340}?color:\s*var\(--err/.test(listCss),
+    'clear filters: red border and red ink in the engine stylesheet');
+  ok(/body\.v3 \.oa-clear\s*\{[\s\S]{0,200}?border:\s*1px solid var\(--err\)/.test(v3css),
+    'clear filters: …and in the live design, which is what the site paints');
+  /* A disabled control must not light up on hover: with nothing selected
+     there is nothing to clear, and the old rule promised otherwise. */
+  ok(/\.oa-clear:hover:not\(\[disabled\]\)/.test(listCss),
+    'clear filters: its hover state is gated on the button doing anything');
+
+  /* Both washes are DEFINED in both themes, or the button paints no ground at
+     all in one of them and the fallback in oa-list.css — a light hex — would
+     land on a dark card. */
+  for (const tok of ['--err-soft', '--ok-soft']) {
+    eq(v3css.split(tok + ':').length - 1, 2,
+      `palette: ${tok} is defined in the light theme and the dark one`);
+  }
 }
 
 if (isMain(import.meta.url)) {

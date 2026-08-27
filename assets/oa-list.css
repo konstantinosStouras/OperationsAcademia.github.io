@@ -277,40 +277,58 @@
    rendered at all. */
 .oa-filter-actions .oa-label-spacer { display: none; }
 
+/* RED, because a neutral outline on a neutral ground is not a control anybody
+   finds (owner, from a screenshot of the dark theme: "very subtle"). Red is
+   also what it means — this is the button that throws a search away — so the
+   colour is a label rather than decoration, and it is the ink as well as the
+   border: a lone 1px outline is most of what was already there. Muted while
+   disabled by the opacity below, which is honest: with nothing selected there
+   is nothing to clear. */
 .oa-clear {
   height: 35px;
   padding: 0 12px;
-  border: 1px solid var(--line, #d9d9d9);
+  border: 1px solid var(--err, #b3413d);
   background: var(--bg-2, #fff);
   font: inherit;
   font-size: 13px;
-  color: var(--ink-2, #444);
+  font-weight: 600;
+  color: var(--err, #b3413d);
   cursor: pointer;
 }
 
-.oa-clear:hover { background: var(--bg-3, #f1f1f1); }
+/* :not([disabled]) because the old rule lit up on hover whether or not the
+   button did anything, which is exactly the promise a disabled control must
+   not make. */
+.oa-clear:hover:not([disabled]) { background: var(--err-soft, #fdf1f0); }
 .oa-clear[disabled] { opacity: 0.45; cursor: default; }
 
 /* A page-declared action in the filter bar (OAList's `actions`) — today the
-   jobs page's Excel download. Deliberately QUIETER than Clear: Clear is one of
-   the controls the bar is for, and this is an extra beside them. It names its
-   own ink as well as its ground for the reason the whole site now does — see
-   "Anything that paints its own ground must name its own ink" in CLAUDE.md. */
+   jobs page's Excel download. It used to be muted ink on no ground at all,
+   which read as a caption rather than as something to press (owner, 2026-08-27:
+   "not very intuitive for the average user"); it is a real button now — GREEN,
+   the colour a spreadsheet wears everywhere else — and it fills on hover so
+   the press is unmistakable. Still SMALLER than Clear: it is an extra beside
+   the controls the bar is for, not one of them. It names its own ink as well
+   as its ground for the reason the whole site now does — see "Anything that
+   paints its own ground must name its own ink" in CLAUDE.md. */
 .oa-action {
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid transparent;
-  background: none;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--ok, #2e7d4f);
+  border-radius: 6px;
+  background: var(--ok-soft, #f2f9f5);
   font: inherit;
   font-size: 12px;
-  color: var(--mut, #646c78);
+  font-weight: 600;
+  color: var(--ok, #2e7d4f);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .oa-action:hover:not([disabled]) {
-  color: var(--ink-2, #444);
-  border-color: var(--line, #d9d9d9);
+  background: var(--ok, #2e7d4f);
+  color: var(--on-brand, #fff);
+  border-color: var(--ok, #2e7d4f);
 }
 
 .oa-action[disabled] { opacity: 0.45; cursor: default; }
@@ -640,7 +658,6 @@
     width: 100%;
     padding: 0 16px;
     border-radius: 6px;
-    border-color: var(--line, #d9d9d9);
     font-size: 13px;
   }
 

@@ -382,9 +382,12 @@ lock out of the way, a way back a signed-out reader can press, the legacy
 **A browser check must not move with the corpus.** Two pins in that suite named
 "University of Mannheim" outright; its postings rolled out of the season the
 page shows, both went red, and the `.oa-card` print check downstream of them
-threw and took the whole suite with it. They derive the institution from the
-served file through `inCurrentMarket` now, and the market-year fixture's own
-"rolled" row is dated so that it stays in the past whatever day the suite runs.
+threw and took the whole suite with it — nothing but a data commit between
+green and red. They read the institution off the RENDERED page now (`DEEP_UNI`
+— what is under test is that a legacy deep link still selects AN institution),
+which is stronger than recomputing the window in Node because it cannot
+disagree with what the page is showing. The market-year fixture's own "rolled"
+row is dated for the same reason: to stay in the past whatever day this runs.
 
 ## The HigherEdJobs postings are checked against their own ads
 
@@ -1865,10 +1868,10 @@ and canonicalises a posting typed with the annotation too.
 
 ## The job postings, as an Excel file
 
-A registered reader can take the list away: a small **"↓ Excel"** button under
-*Clear filters* on `jobs.html` writes an `.xlsx` of exactly the postings the
-page is showing (owner, 2026-08-26). Filter first and the file is that search;
-filter nothing and it is every posting on the page.
+A registered reader can take the list away: a small **"↓ Download Excel"**
+button under *Clear filters* on `jobs.html` writes an `.xlsx` of exactly the
+postings the page is showing (owner, 2026-08-26). Filter first and the file is
+that search; filter nothing and it is every posting on the page.
 
     assets/oa-xlsx.js       a minimal OOXML workbook writer (dual-mode)
     assets/oa-jobexport.js  what may be exported, and the button (dual-mode)
@@ -1942,6 +1945,100 @@ downloads nothing and opens the box, signed in downloads bytes that really are
 a workbook holding exactly the rows on screen, narrowing the search narrows the
 file, and at 390px the button is a 42px full-width target like every other
 control in the bar.
+
+### Small is not the same instruction as quiet
+
+The first build read the "small and discrete" instruction as *both*, and shipped
+muted ink on no ground at all with the label **"↓ Excel"**. From a screenshot of
+the dark theme (owner, 2026-08-27): that download is "not very intuitive for the
+average user", and *Clear filters* beside it — a neutral 1px outline on a card
+of neutral outlines — is "very subtle". Neither was a contrast failure: both
+clear AA on their own ground and always did, which the theme audit confirms on
+every run. They were **affordance** failures, and no contrast audit can see one.
+
+So the two controls in that bar are now the colour they MEAN, and the colour is
+doing the work a label cannot:
+
+* **Clear filters is RED** (`--err`) — border and ink. It is the button that
+  throws a search away, so red is what it is, not decoration. Still 45% faded
+  while disabled, which is honest: with nothing selected there is nothing to
+  clear, and its hover state is gated on `:not([disabled])` for the same reason
+  — the old rule lit up whether or not the button did anything.
+* **The Excel download is GREEN** (`--ok`) — border, ink and a pale ground
+  (`--ok-soft`), filling solid on hover. Filling is the strongest signal a
+  static page has that a thing is pressable, and it is exactly what a caption
+  never does.
+* **The label gained its VERB.** "Excel" names a format and never the act.
+  It is wider for it, and *smaller than Clear* is what "small" actually asked
+  for — so `page-test.mjs` measures it against Clear's own width rather than
+  against the magic 120px it used to carry.
+
+**Both rules live in TWO stylesheets and only one of them reaches the site.**
+`assets/oa-list.css` is the engine's own, inherited by every page that mounts
+OAList; `assets/v3.css` overrides it for the live design, and that override is
+what `jobs.html` paints. A fix applied to one alone is invisible on the site or
+lost on the next page — so `selftest.mjs` pins both files, and `page-test.mjs`
+measures what the browser really paints, **in both themes**, resolving `--err`
+and `--ok` through the page's own custom properties rather than hard-coding a
+hex a later palette change would silently falsify.
+
+`--err-soft` and `--ok-soft` were added to the palette for the two washes, and
+are defined in BOTH themes — the dark ones translucent like `--brand-soft`, so
+the tint works over whatever surface the button lands on. They are kept pale on
+purpose: the ink sitting on them is `--err`/`--ok`, and a heavier green tint
+drops the download under the 4.5:1 floor the theme audit measures.
+
+Clear is the ENGINE's button, so the red reaches every list page — jobs,
+previous markets, recent faculty, the universities directory and the one-pager's
+mounts. That is the point of the engine owning the bar.
+
+### …and both buttons share a line
+
+Owner, the same day: *"pushing 'entry level' search field on the top line, so
+that 'clear filters' and 'Download Excel' buttons appear in the same line,
+within the 2nd line."* Those are one change, not two, and the arithmetic is
+why. Measured at 1280px, the jobs bar had **five** tracks: the university
+search spans two of them, so the top line was full at four controls and Entry
+level fell to the second — which then carried four pickers and had a single
+track left for the actions, far too narrow for two buttons abreast.
+
+A **sixth track** (`minmax(150px, 1fr)`, scoped to `#oa-jobs`) fixes both ends
+at once: the top line takes the search and four pickers — Entry level among
+them — and the second takes three pickers and hands the actions cell the three
+that are left. `150px` is measured, not guessed: the longest picker label
+("All characteristics") still fits its button, and nothing on the page
+truncates or scrolls sideways at any width from 320px up.
+
+**`grid-column: auto / -1` does not do what the comment above it claimed.** It
+had always read as "Clear stretches from wherever it lands to the bar's right
+edge", and an auto start with a definite end spans exactly **one** track — so
+the cell was a single 157px column and the two buttons wrapped inside it,
+which is precisely the stacking the owner was asking to undo. It is
+`span 3 / -1` on the jobs bar now.
+
+The cell itself is a **wrapping flex row**: the empty label spacer takes the
+full width (which is how it still reserves one label's height above the
+buttons — the reason it exists), Clear takes whatever the download leaves, and
+the download keeps the right edge, so the bar ends flush however wide either
+label becomes. Both are 44px tall: two controls sharing a line share a
+baseline, and the download is still the smaller of the two on the axis that
+was ever in question — its width (136px against Clear's 357px at 1280px).
+
+**Its `gap` is `0 10px`, and the row half being zero is load-bearing.** The
+spacer reproduces a label's height and its 3px margin exactly, which is what
+lands Clear on the same baseline as the pickers beside it; a row gap would
+push it that much lower and break the one thing the spacer exists for. And
+because the download now holds the right edge, the flush-edge check measures
+the **cell** rather than Clear — what the bar promises is that its last line
+ends flush, which is true under either arrangement.
+
+The span rule runs from the **phone breakpoint up**, not from 1000px: at four
+or five tracks the actions cell simply takes a line of its own, still flush
+right with both buttons abreast. Only a phone stacks them — side by side each
+would be half a screen — where the mobile rules give both the full width and a
+42px target. `page-test.mjs` measures the row count, Entry level's line and
+the two buttons' shared baseline at desktop width, and the full-width targets
+at 390px.
 
 ## Mobile standards for tables and lists — MUST consult
 
