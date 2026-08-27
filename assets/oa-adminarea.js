@@ -650,14 +650,20 @@
      REPORTS the disagreements into `data/jobs-yearcheck.json` and this panel
      draws them.
 
-     TWO THINGS IT IS NOT. It is not a Firestore queue: the list is derived,
-     so it needs no rules deploy and no stored decision — the next build
-     recomputes it, and a posting the maintainer settles simply leaves the
-     list. And it is not in `pendingCounts()`: that function feeds the "Admin
-     area N" badge on EVERY page, so a served-file fetch in its Promise.all
-     would make every page pay a read for a number only this page shows (the
-     Registered-users rule). Its tile is painted here, from this page's own
-     read. */
+     THE REPORT IS DERIVED; THE DECISIONS ARE STORED. Nothing here decides what
+     is flagged — the next build recomputes the list, and a posting corrected
+     in the tracking workbook simply leaves it. But a posting the maintainer
+     has READ and left where it is had no way out at all (owner, 2026-08-27:
+     "I reviewed these jobs but can't clear that queue"), so the tile sat at 4
+     for ever. `yearChecks/{id}` records that reading, and only that; the
+     reasoning, including why the "no rules deploy" argument against a
+     collection no longer holds, is in assets/oa-yearcheck.js.
+
+     IT IS STILL NOT IN `pendingCounts()`: that function feeds the "Admin area
+     N" badge on EVERY page, so a served-file fetch and a Firestore read in its
+     Promise.all would make every page pay for a number only this page shows
+     (the Registered-users rule). Its tile is painted here, from this page's
+     own two reads. */
 
   var YEARCHECK = '/data/jobs-yearcheck.json';
 
@@ -675,39 +681,207 @@
     });
   }
 
-  function yearCard(p) {
+  /** Every settled posting, as an id -> document map.
+
+      ABSENCE MEANS SHOW, so a refused or failed read resolves to `null`
+      rather than rejecting: the panel then draws every posting open with the
+      settling controls withheld and says why. The opposite way round from the
+      job-review queue, and deliberately — these postings are already
+      published, so the risk here is hiding a disagreement, not leaking one. */
+  function yearCheckDocs(db) {
+    if (!window.OAYearCheck) return Promise.resolve(null);
+    return db.collection(OAYearCheck.COLLECTION).get().then(function (snap) {
+      var out = {};
+      snap.forEach(function (d) { out[d.id] = d.data() || {}; });
+      return out;
+    })['catch'](function () { return null; });
+  }
+
+  /** Where this posting can actually be opened, and what that page is called.
+
+      NOT `jobs.html#job-<id>`, which is what this was and which never worked
+      (owner, 2026-08-27). Two faults in one link: a fragment can only find a
+      card that happens to be on the page being shown — one of ten, in a list
+      built from a fetch that has not landed when the browser looks — and half
+      of these postings are not on the jobs page at all. A posting flagged here
+      is one whose season disagrees with its own dates, which is exactly the
+      population most likely to have rolled out of the window jobs.html shows;
+      the owner's own example was Nanyang, filed under 2025-2026 and therefore
+      on Previous markets, where the link could not reach it.
+
+      assets/oa-jobnav.js answers both, from the row itself and at the moment
+      the card is drawn — a build runs every twenty minutes and a deadline
+      passes at midnight, so a posting can move between the two pages between
+      builds. `year` is the season the posting is FILED under (the report calls
+      it `stored`), because that is what the two pages sort themselves by. */
+  function yearWhere(p) {
+    var row = {
+      id: p.id, posted: p.posted, applyByDate: p.applyByDate, year: p.stored
+    };
+    var NAV = window.OAJobNav;
+    if (!NAV) return { href: 'jobs.html', page: 'Job postings', current: true };
+    return {
+      href: NAV.hrefFor(row),
+      page: NAV.pageLabelFor(row),
+      current: NAV.inCurrentMarket(row)
+    };
+  }
+
+  function season(y) {
+    return esc((y - 1) + '\u2013' + y);
+  }
+
+  /* Whether the settling controls may be drawn at all: false while the
+     decisions could not be read, so the panel never offers a button whose
+     write it already knows would be refused. */
+  var yearActions = false;
+
+  function yearCard(row, settled) {
+    var p = row.p;
     var when = esc(p.applyByDate || p.reviewDate || p.posted || '');
     var why = YEAR_FROM[String(p.from)] || 'its own dates';
-    return '<li class="oa-aa-yc">' +
+    var at = yearWhere(p);
+    return '<li class="oa-aa-yc' + (settled ? ' is-settled' : '') +
+      '" data-id="' + esc(p.id) + '">' +
       '<p class="oa-aa-yc-h"><strong>' + esc(p.institution) + '</strong>' +
       (p.department ? ' &mdash; ' + esc(p.department) : '') + '</p>' +
-      '<p class="oa-hint">Filed under <strong>' + esc((p.stored - 1) + '\u2013' + p.stored) +
+      '<p class="oa-hint">Filed under <strong>' + season(p.stored) +
       '</strong>; ' + esc(why) + ' (' + when + ') puts it in <strong>' +
-      esc((p.should - 1) + '\u2013' + p.should) + '</strong>. Posted ' +
-      esc(p.posted) + '.</p>' +
-      '<p><a class="button oa-btn-ghost" href="jobs.html#job-' + esc(p.id) + '">' +
-      'Open the posting</a></p>' +
+      season(p.should) + '</strong>. Posted ' + esc(p.posted) + '.' +
+      (at.current ? '' : ' Its season has closed, so it is listed on ' +
+        '<strong>Previous markets</strong>.') +
+      (row.resettled
+        ? ' <strong>Its dates have changed since you settled it</strong>, so it ' +
+          'is back &mdash; the seasons above are not the pair you read.'
+        : '') +
+      '</p>' +
+      (settled && row.doc && row.doc.t
+        ? '<p class="oa-hint">Settled ' + esc(String(row.doc.t).slice(0, 10)) + '.</p>'
+        : '') +
+      '<p class="oa-aa-yc-actions">' +
+      '<a class="button oa-btn-ghost" href="' + esc(at.href) + '">' +
+      'Open it on ' + esc(at.page) + '</a>' +
+      (yearActions
+        ? (settled
+            ? ' <button type="button" class="button oa-btn-ghost" data-act="unsettle">' +
+              'Bring it back</button>'
+            : ' <button type="button" class="button blue" data-act="settle">' +
+              'Reviewed &mdash; leave it here</button>')
+        : '') +
+      '<span class="oa-form-msg" role="status"></span>' +
+      '</p>' +
       '</li>';
   }
 
-  /** Draws the panel and returns how many are listed (null when the report
-      could not be read — unknown, never zero, the badge rule). */
-  function renderYearCheck() {
+  /** Draws the panel and returns how many are still WAITING (null when the
+      report could not be read — unknown, never zero, the badge rule). */
+  function renderYearCheck(db) {
     var list = $('oa-aa-yc-list');
-    return yearCheckRows().then(function (rows) {
-      lastYearCheck = rows.length;
-      if (list) {
-        list.innerHTML = rows.length
-          ? '<ul class="oa-aa-yc-ul">' + rows.map(yearCard).join('') + '</ul>'
-          : '<p class="oa-hint">Nothing to check &mdash; every posting is filed ' +
-            'under the season its apply-by dates name.</p>';
+    return Promise.all([yearCheckRows(), yearCheckDocs(db)]).then(function (both) {
+      var rows = both[0];
+      var docs = both[1];
+      yearActions = !!docs && !!window.OAYearCheck;
+      var split = window.OAYearCheck
+        ? OAYearCheck.partition(rows, docs || {})
+        : { open: rows.map(function (p) { return { p: p }; }), settled: [] };
+      lastYearCheck = split.open.length;
+      if (!list) return split.open.length;
+
+      var out = split.open.length
+        ? '<ul class="oa-aa-yc-ul">' +
+          split.open.map(function (r) { return yearCard(r, false); }).join('') + '</ul>'
+        : '<p class="oa-hint">Nothing to check &mdash; every posting is filed ' +
+          'under the season its apply-by dates name, or you have read it and ' +
+          'left it where it is.</p>';
+
+      if (!docs) {
+        out += '<p class="oa-form-msg is-err">Your decisions could not be read, ' +
+          'so every posting is shown and none can be settled from here. If this ' +
+          'says permission-denied, reload the page first &mdash; the rules ' +
+          'publish themselves on every green check.</p>';
       }
-      return rows.length;
+
+      /* SETTLING IS NEVER A ONE-WAY DOOR (the newsOverrides rule): a settled
+         posting leaves the list — the list is meant to get shorter — but into
+         a collapsed panel that only this page draws, one click from back.
+
+         IT STAYS OPEN ACROSS A RE-RENDER, and that is not a nicety: "Bring it
+         back" is only reachable from INSIDE the panel, and every write
+         re-renders — so a fresh <details> with no `open` would snap shut on
+         the very action it exists for, and a maintainer restoring three
+         postings would have to re-open it between each one. */
+      var wasOpen = !!(list.querySelector('.oa-aa-yc-done') || {}).open;
+      if (split.settled.length) {
+        out += '<details class="oa-aa-yc-done"' + (wasOpen ? ' open' : '') +
+          '><summary>Settled (' +
+          split.settled.length + ') &mdash; read and left where they are' +
+          '</summary><ul class="oa-aa-yc-ul">' +
+          split.settled.map(function (r) { return yearCard(r, true); }).join('') +
+          '</ul></details>';
+      }
+      list.innerHTML = out;
+      return split.open.length;
     })['catch'](function () {
       if (list) {
         list.innerHTML = '<p class="oa-hint">Could not read ' + esc(YEARCHECK) +
           ' &mdash; it is written by the jobs build, so a site that has not ' +
           'rebuilt since this shipped has none yet.</p>';
+      }
+      return null;
+    });
+  }
+
+  /** Settle / bring back, on the card. One delegated listener, wired once —
+      the panel re-renders after every write, so a listener per button would
+      be a listener per render. */
+  function wireYearCheckActions(db) {
+    var list = $('oa-aa-yc-list');
+    if (!list || list.dataset.oaWired) return;
+    list.dataset.oaWired = '1';
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
+      if (!btn || !window.OAYearCheck) return;
+      var card = btn.closest('.oa-aa-yc');
+      var id = card && card.getAttribute('data-id');
+      if (!id) return;
+
+      var settle = btn.getAttribute('data-act') === 'settle';
+      var msg = card.querySelector('.oa-form-msg');
+      btn.disabled = true;
+
+      /* Bringing one back DELETES the document rather than writing another
+         status: the report is derived, so absence is exactly "not read yet"
+         and there is no second state to keep. */
+      var ref = db.collection(OAYearCheck.COLLECTION).doc(id);
+      var write = settle
+        ? findReported(id).then(function (p) {
+            if (!p) throw new Error('gone');
+            return ref.set(OAYearCheck.settlementFor(p));
+          })
+        : ref['delete']();
+
+      write.then(function () {
+        return renderYearCheck(db);
+      }).then(function () {
+        if (lastCounts) paintTiles(lastCounts);
+      })['catch'](function (err) {
+        btn.disabled = false;
+        if (msg) {
+          msg.className = 'oa-form-msg is-err';
+          msg.textContent = 'Could not save that (' + ((err && err.code) || 'error') + ').';
+        }
+      });
+    });
+  }
+
+  /** The reported posting as the build most recently wrote it — never the
+      card's own markup. A settle records the pair of seasons the maintainer
+      answered, so it has to be read from the report rather than parsed back
+      out of the sentence describing it. */
+  function findReported(id) {
+    return yearCheckRows().then(function (rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (String(rows[i].id) === String(id)) return rows[i];
       }
       return null;
     });
@@ -755,7 +929,8 @@
       })['catch'](function () { /* rules not deployed / offline — unknown, never 0 */ });
 
       show($('oa-aa-yc'), true);
-      renderYearCheck().then(function (n) {
+      wireYearCheckActions(db);
+      renderYearCheck(db).then(function (n) {
         /* whichever read answers last paints last, exactly as the registered
            count does — paintTiles always draws this card from lastYearCheck */
         if (typeof n === 'number' && lastCounts) paintTiles(lastCounts);

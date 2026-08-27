@@ -18,7 +18,7 @@ import { readFile } from 'node:fs/promises';
 import { unzipStore, sheetCells, lastRow } from './_xlsx-read.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { marketYear } from './jobs-model.mjs';
+import { marketYear, inCurrentMarket } from './jobs-model.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -2325,6 +2325,154 @@ for (const [name, expect] of [
   await j.close();
 }
 
+/* ------------------------------------------- ?job=<id> opens ONE posting
+
+   Owner, 2026-08-27: pressing "Open the posting" on /admin-area's market-year
+   report "takes me to the full list of jobs, as opposed to the page of this
+   specific posting so that I can edit it, or remove it" — and for the posting
+   they named, Nanyang, it opened the list of THIS season, which by definition
+   could not contain a posting filed under the last one.
+
+   The link was `jobs.html#job-<id>`. Neither half of it worked: a card only
+   exists while it is one of the ten being rendered, of a list built from a
+   fetch that has not landed when the browser looks for the fragment; and half
+   these postings are on the OTHER page. What is measured here is the fix, on
+   both pages and against the real served files — the posting is on screen, it
+   is the only one, its own controls are on it, and there is a way back.     */
+
+for (const [pageName, pick] of [
+  ['jobs.html', (rows) => rows.filter((r) => inCurrentMarket(r))],
+  ['previous-markets.html', (rows) => rows.filter((r) => !inCurrentMarket(r))],
+]) {
+  const jobs = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'));
+  /* A posting the PAGE really carries, chosen with the pipeline's own window
+     rule rather than with a date written down here — the two pages partition
+     the corpus, so each one's example has to come from its own half. Deep in
+     the list on purpose: the whole complaint is that the reader landed at the
+     top of a list the posting was not on. */
+  const half = pick(jobs.filter((r) => r && r.id && r.institution));
+  const target = half[Math.min(25, half.length - 1)];
+
+  const d = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  const dErrors = [];
+  d.on('pageerror', (e) => dErrors.push(e.message));
+  await d.goto(`${BASE}${pageName}?job=${encodeURIComponent(target.id)}`,
+    { waitUntil: 'domcontentloaded' });
+  await d.waitForSelector('.oa-card', { timeout: 15000 });
+
+  eq(await d.$$eval('.oa-card', (n) => n.length), 1,
+    `${pageName}: ?job= shows exactly one posting — not a list to hunt through`);
+  eq(await d.$eval('.oa-card', (n) => n.id), 'job-' + target.id,
+    `${pageName}: and it is the posting that was asked for`);
+  eq(await d.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
+    `${pageName}: opened, so its details are on screen without another click`);
+
+  /* The surrounding controls go, for the reason an empty dataset's do: a
+     filter bar over a list of one narrows nothing and a pager reading
+     "1 - 1 / 1" is noise. On the jobs page the sign-in lock is wrapped AROUND
+     that bar, so hiding the bar alone would leave a lock card over nothing. */
+  ok(await d.evaluate(() => {
+    const el = document.querySelector('.oa-filters');
+    return !el || el.getBoundingClientRect().height === 0;
+  }), `${pageName}: the filter bar is out of the way while one posting is shown`);
+  ok(await d.evaluate(() => {
+    const el = document.querySelector('.v3-lock');
+    return !el || el.getBoundingClientRect().height === 0;
+  }), `${pageName}: and so is the sign-in lock that wraps it`);
+
+  // …and there is a way back, which a signed-out reader can press: it is
+  // outside the lock, unlike anything rendered into the bar
+  const clear = await d.locator('.oa-focusbar .oa-focus-clear');
+  eq(await clear.count(), 1, `${pageName}: a way back to the whole list is offered`);
+  ok(await clear.isEnabled(), `${pageName}: and a signed-out reader can press it`);
+  await clear.click();
+  await d.waitForFunction(() => document.querySelectorAll('.oa-card').length > 1,
+    null, { timeout: 15000 });
+  ok(!(await d.evaluate(() => location.search)).includes('job='),
+    `${pageName}: pressing it drops the parameter too — a reload is the list, ` +
+    'not the one posting again');
+
+  /* A LINK ALREADY COPIED still works: `#job-<id>` is what the report emitted
+     before this existed, and nothing had ever acted on it.
+
+     Through about:blank, because the page is already sitting on this very
+     path: a goto that changes only the fragment is a SAME-DOCUMENT
+     navigation, so nothing re-runs and the check would be measuring the state
+     left by the step above. */
+  await d.goto('about:blank');
+  await d.goto(`${BASE}${pageName}#job-${target.id}`, { waitUntil: 'domcontentloaded' });
+  await d.waitForFunction(() => document.querySelectorAll('.oa-card').length === 1,
+    null, { timeout: 15000 });
+  eq(await d.$eval('.oa-card', (n) => n.id), 'job-' + target.id,
+    `${pageName}: an old #job- link finds the posting for the first time`);
+  ok((await d.evaluate(() => location.search)).includes('job=') &&
+     !(await d.evaluate(() => location.hash)),
+    `${pageName}: and is rewritten to the parameter, so the way back is not undone by a reload`);
+
+  /* An id this page does not carry is NOT an over-filtered search: saying
+     "try removing a filter" beside a bar that is not on screen is the exact
+     mis-message the engine's own comment was written about. */
+  await d.goto(`${BASE}${pageName}?job=no-such-posting-20260101`,
+    { waitUntil: 'domcontentloaded' });
+  await d.waitForSelector('.oa-empty', { timeout: 15000 });
+  const missing = await d.$eval('.oa-empty', (n) => n.innerText);
+  ok(/not on this page/.test(missing),
+    `${pageName}: an id it does not carry says so`);
+  ok(!/removing a filter/.test(missing),
+    `${pageName}: and never sends the reader to a filter bar it has hidden`);
+  const away = await d.$$eval('.oa-empty a', (n) => n.map((x) => x.getAttribute('href')));
+  eq(away.length, 1,
+    `${pageName}: with a link to the other page, which only the page can name`);
+  ok(away[0] && away[0].includes('job=no-such-posting-20260101'),
+    `${pageName}: and it CARRIES the posting — a bare list is the very thing ` +
+    'this mode exists to stop landing people on');
+  ok(away[0] && away[0].indexOf(pageName) !== 0,
+    `${pageName}: pointing at the other page, not back at this one`);
+
+  /* Both forms on one URL: the query wins, and pressing "Show all postings"
+     has to STICK. Deriving the drop from which source won left the fragment
+     behind, so a reload focused again — on the other posting. */
+  await d.goto(`${BASE}${pageName}?job=${encodeURIComponent(target.id)}#job-not-this-one`,
+    { waitUntil: 'domcontentloaded' });
+  await d.waitForFunction(() => document.querySelectorAll('.oa-card').length === 1,
+    null, { timeout: 15000 });
+  eq(await d.$eval('.oa-card', (n) => n.id), 'job-' + target.id,
+    `${pageName}: with both forms present the query parameter wins`);
+  await d.click('.oa-focusbar .oa-focus-clear');
+  await d.waitForFunction(() => document.querySelectorAll('.oa-card').length > 1,
+    null, { timeout: 15000 });
+  eq(await d.evaluate(() => location.hash + location.search), '',
+    `${pageName}: and "Show all postings" takes the fragment with it, so a ` +
+    'reload is the list and not a different posting');
+
+  /* …AND THE CONTROLS ARE ON IT. "so that I can edit it, or remove it" is the
+     other half of the complaint: landing on the posting is only useful if the
+     maintainer can act on it there. The permission map comes from a Firestore
+     read CI cannot make, so it is injected — what is being measured is that
+     the focused card goes through the ENGINE'S OWN card() and therefore
+     through cfg.onCard, not that Firestore answered. */
+  await d.goto(`${BASE}${pageName}?job=${encodeURIComponent(target.id)}`,
+    { waitUntil: 'domcontentloaded' });
+  await d.waitForSelector('.oa-card', { timeout: 15000 });
+  await d.evaluate((id) => {
+    window.OAJobEdit.__setPermissionsForTest({
+      ready: true, admin: true, byId: { [id]: id }, byRef: {},
+    });
+  }, target.id);
+  await d.waitForFunction(() => document.querySelectorAll('.oa-card-actions').length === 1,
+    null, { timeout: 10000 });
+  eq(await d.$$eval('.oa-card-actions .oa-jobbtn', (n) => n.map((x) => x.textContent)),
+    ['Edit', 'Take down'],
+    `${pageName}: the posting arrives with Edit and Take down on it`);
+  eq(await d.$eval('.oa-card-actions', (n) => n.closest('.oa-card').id),
+    'job-' + target.id, `${pageName}: on the card that was opened, and only it`);
+  eq(await d.$$eval('.oa-card', (n) => n.length), 1,
+    `${pageName}: and a late redraw for the permissions does not restore the list`);
+
+  eq(dErrors, [], `${pageName}: deep-link run — no uncaught script error`);
+  await d.close();
+}
+
 /* --------------------------- the edit you just saved, shown before the build
 
    Owner, 2026-08-24: "when the admin edits a posted job, the edits should be
@@ -4088,6 +4236,16 @@ for (const w of [320, 360, 390, 430]) {
       institution: 'Hostile University <img src=x onerror=window.__xssyc=1>',
       department: 'Operations', posted: '2026-01-10', applyByDate: '',
       reviewDate: '2026-09-08', stored: 2026, should: 2027, from: 'review', current: true },
+    /* THE OWNER'S OWN CASE (2026-08-27), and the reason the link had to name a
+       PAGE: a posting whose season has closed is not on jobs.html at all, so
+       `jobs.html#job-<id>` opened a list that could not contain it. Its dates
+       are chosen to stay in the past whatever day this suite runs — posted
+       before any future roll, with a deadline long gone — so the assertion
+       does not move with the calendar. */
+    { id: '2025-rolled-university-20240901', ref: '', institution: 'Rolled University',
+      department: 'Supply Chain Management', posted: '2024-09-01',
+      applyByDate: '2025-01-15', reviewDate: '', stored: 2025, should: 2026,
+      from: 'final', current: false },
   ];
 
   const ADMIN = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
@@ -4541,13 +4699,115 @@ for (const w of [320, 360, 390, 430]) {
       'filed under and the one its dates give it');
     ok(/final apply-by date/.test(ycText) && /suggested apply-by date/.test(ycText),
       'admin area: and says which date decided, so the maintainer can judge it');
+    /* -- "Open the posting" opens THE POSTING, on the page that has it -----
+       Owner, 2026-08-27: the link went to "the full list of jobs, as opposed
+       to the page of this specific posting so that I can edit it, or remove
+       it" — and for Nanyang, whose season has closed, it went to the list of
+       THIS season, which by definition could not contain it.
+
+       So every card names a page AND one posting. The expectation is computed
+       with the site's own shared rule rather than written down here: the two
+       pages partition the corpus by a predicate evaluated at `new Date()`, so
+       a literal href would start failing on a date nobody chose. */
+    const NAVMOD = createRequire(import.meta.url)(
+      path.join(ROOT, 'assets', 'oa-jobnav.js'));
+    for (const p of YEARCHECK) {
+      const want = NAVMOD.hrefFor(
+        { id: p.id, posted: p.posted, applyByDate: p.applyByDate, year: p.stored });
+      eq(await q.locator(`#oa-aa-yc-list a[href="${want}"]`).count(), 1,
+        `admin area: ${p.institution.slice(0, 24)} is opened at ${want}`);
+    }
+    eq(await q.locator('#oa-aa-yc-list a[href^="jobs.html#job-"]').count(), 0,
+      'admin area: and no card still links a fragment, which nothing ever acted on');
     eq(await q.locator(
-      '#oa-aa-yc-list a[href="jobs.html#job-2026-mcgill-university-20260728"]').count(), 1,
-      'admin area: with a way straight to the posting');
+      '#oa-aa-yc-list a[href="previous-markets.html?job=2025-rolled-university-20240901"]')
+      .count(), 1,
+      'admin area: a posting whose season has closed is opened on Previous ' +
+      'markets — the owner’s own case, which the jobs page could not show');
+    ok(/listed on Previous markets/.test(ycText),
+      'admin area: and its card says so, rather than sending the maintainer somewhere silently');
+
     eq(await q.evaluate(() => window.__xssyc === undefined), true,
       'admin area: a reported name carrying markup is rendered inert, like the dup banner');
     ok(/Nothing has been moved/.test(await q.locator('#oa-aa-yc').innerText()),
       'admin area: and the panel says outright that nothing was re-filed');
+
+    /* -- and the report can be CLEARED (owner, 2026-08-27) ------------------
+       "I reviewed these jobs but can't clear that queue." It had no way to be:
+       its two exits were correcting the workbook, which MOVES a posting that
+       is often filed correctly, and waiting for a deadline that is not what
+       put it on the list. A settle records what was read — the pair of seasons
+       on the card — and nothing else. */
+    const MCG = '2026-mcgill-university-20260728';
+    const tileNow = () => q.$eval('#oa-aa-tiles a[href="#oa-aa-yc"] .oa-aa-tile-n',
+      (n) => n.textContent);
+    eq(await tileNow(), String(YEARCHECK.length),
+      'admin area: the tile counts every posting still waiting');
+
+    await q.click(`#oa-aa-yc-list li[data-id="${MCG}"] button[data-act="settle"]`);
+    await q.waitForFunction((id) => {
+      const d = window.__fb.docs['yearChecks/' + id];
+      return d && d.status === 'settled';
+    }, MCG, { timeout: 10000 });
+    const settled = await q.evaluate((id) => window.__fb.docs['yearChecks/' + id], MCG);
+    eq(Object.keys(settled).sort(), ['should', 'status', 'stored', 't'],
+      'admin area: a settlement carries the pair of seasons that was read, and nothing else');
+    eq([settled.stored, settled.should], [2026, 2027],
+      'admin area: the pair being the one the card showed — so a later correction ' +
+      'to the dates brings the posting back');
+
+    await q.waitForFunction((id) =>
+      !!document.querySelector(`.oa-aa-yc-done li[data-id="${id}"]`) &&
+      !document.querySelector(`.oa-aa-yc-ul > li[data-id="${id}"]:not(.is-settled)`),
+      MCG, { timeout: 10000 });
+    ok(true, 'admin area: it leaves the list — into the collapsed panel below it, ' +
+      'never off the page: the newsOverrides rule, removing is not a one-way door');
+    await q.waitForFunction((n) => {
+      const el = document.querySelector('#oa-aa-tiles a[href="#oa-aa-yc"] .oa-aa-tile-n');
+      return el && el.textContent === String(n);
+    }, YEARCHECK.length - 1, { timeout: 10000 });
+    ok(true, 'admin area: and the tile comes down by one — the queue really clears');
+
+    /* …and it is really OUT OF THE WAY: the disclosure is closed, so the
+       settled posting is off the list until the maintainer opens it. That is
+       the half the owner asked for — the list is meant to get shorter. */
+    eq(await q.$eval('.oa-aa-yc-done', (n) => n.open), false,
+      'admin area: the settled panel starts closed, so the queue really is shorter');
+    await q.click('.oa-aa-yc-done > summary');
+
+    /* Settle a SECOND one from the open list, so the restore below has
+       something to hide: "Bring it back" is only reachable from inside the
+       disclosure, and every write re-renders it. */
+    const ROLLED = '2025-rolled-university-20240901';
+    await q.click(`#oa-aa-yc-list li[data-id="${ROLLED}"] button[data-act="settle"]`);
+    await q.waitForFunction((id) => !!window.__fb.docs['yearChecks/' + id],
+      ROLLED, { timeout: 10000 });
+    await q.waitForFunction(() =>
+      document.querySelectorAll('.oa-aa-yc-done .oa-aa-yc').length === 2,
+      null, { timeout: 10000 });
+    ok(await q.$eval('.oa-aa-yc-done', (n) => n.open),
+      'admin area: the settled panel stays open across the re-render a write causes');
+
+    await q.click(`.oa-aa-yc-done li[data-id="${MCG}"] button[data-act="unsettle"]`);
+    await q.waitForFunction(() =>
+      document.querySelectorAll('.oa-aa-yc-done .oa-aa-yc').length === 1,
+      null, { timeout: 10000 });
+    ok(await q.$eval('.oa-aa-yc-done', (n) => n.open),
+      'admin area: and after a restore too — the panel does not snap shut on ' +
+      'the one action that is only reachable from inside it');
+    // put the second one back as well, so the tile assertions below still hold
+    await q.click(`.oa-aa-yc-done li[data-id="${ROLLED}"] button[data-act="unsettle"]`);
+    await q.waitForFunction((id) => !window.__fb.docs['yearChecks/' + id],
+      ROLLED, { timeout: 10000 });
+    await q.waitForFunction((id) => !window.__fb.docs['yearChecks/' + id],
+      MCG, { timeout: 10000 });
+    ok(true, 'admin area: Bring it back DELETES the decision — the report is derived, ' +
+      'so absence is exactly "not read yet" and there is no second state to keep');
+    await q.waitForFunction((n) => {
+      const el = document.querySelector('#oa-aa-tiles a[href="#oa-aa-yc"] .oa-aa-tile-n');
+      return el && el.textContent === String(n);
+    }, YEARCHECK.length, { timeout: 10000 });
+    ok(true, 'admin area: and the posting is waiting again');
 
     // taking a profile down really writes, and the desk follows
     q.once('dialog', (d) => d.accept());

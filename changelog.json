@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "open-one-posting",
+      "date": "2026-08-27",
+      "title": "A link can open one posting on its own",
+      "summary": "Adding ?job=<posting id> to the jobs page — or to Previous markets — now shows that posting by itself, opened, with a way back to the whole list. It used to be a page anchor, which could only ever find a posting that happened to be among the ten being shown, on a list built after the browser had gone looking for it; and it always pointed at the jobs page, which shows only the season under way, so a link to a posting whose season had closed opened a list that could not contain it. Both pages read one shared rule now for which season is under way and which of them carries a given posting, so they cannot disagree about where a posting lives.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
       "id": "messages-remove-from-your-list",
       "date": "2026-08-27",
       "title": "Remove any message from your list — and put it back",
@@ -13,14 +20,14 @@
       "id": "market-year-from-the-deadline",
       "date": "2026-08-26",
       "title": "A posting is filed under the season its apply-by date falls in",
-      "summary": "Which job market a posting belongs to used to be read off the day it went up. That is wrong for the postings that matter most in the spring: a school advertising in May for a search that closes in September is recruiting for the season opening in July, and by its posting date it was filed under the season that had just closed \u2014 the one page it is of no use on. The deadline decides now: the final apply-by date, or the suggested apply-by date where the search runs until filled, and only then the date it was posted. The posting form works it out from the dates you type and says which market you will be listed under before you send it.",
+      "summary": "Which job market a posting belongs to used to be read off the day it went up. That is wrong for the postings that matter most in the spring: a school advertising in May for a search that closes in September is recruiting for the season opening in July, and by its posting date it was filed under the season that had just closed — the one page it is of no use on. The deadline decides now: the final apply-by date, or the suggested apply-by date where the search runs until filled, and only then the date it was posted. The posting form works it out from the dates you type and says which market you will be listed under before you send it.",
       "url": "https://www.operationsacademia.org/jobs.html"
     },
     {
       "id": "jobs-excel-download",
       "date": "2026-08-26",
       "title": "Download the job postings as an Excel file",
-      "summary": "Registered users can now take the whole job list away as a proper Excel workbook: a small \u201c\u2193 Excel\u201d button under Clear filters on the job postings page writes an .xlsx of exactly the postings you are looking at \u2014 filter first and you get that search, filter nothing and you get every posting the page is showing. It is built for working through: one row per posting with the university, school, department, country, entry levels, characteristics and comments in their own columns; the suggested first-review date, the final closing date, the posting date and the day we listed it as REAL Excel dates you can sort, filter and subtract; and the advertisement, the site it is posted on and the university\u2019s directory entry as clickable links. A second sheet explains every column and a third records which filters produced the file. A poster\u2019s contact details \u2014 their name and e-mail, the area coordinator or department chair, and any private note \u2014 are never published and are not in the file.",
+      "summary": "Registered users can now take the whole job list away as a proper Excel workbook: a small “↓ Excel” button under Clear filters on the job postings page writes an .xlsx of exactly the postings you are looking at — filter first and you get that search, filter nothing and you get every posting the page is showing. It is built for working through: one row per posting with the university, school, department, country, entry levels, characteristics and comments in their own columns; the suggested first-review date, the final closing date, the posting date and the day we listed it as REAL Excel dates you can sort, filter and subtract; and the advertisement, the site it is posted on and the university’s directory entry as clickable links. A second sheet explains every column and a third records which filters produced the file. A poster’s contact details — their name and e-mail, the area coordinator or department chair, and any private note — are never published and are not in the file.",
       "url": "https://www.operationsacademia.org/jobs.html"
     },
     {

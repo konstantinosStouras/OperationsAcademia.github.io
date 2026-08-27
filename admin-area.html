@@ -264,12 +264,18 @@
                  remove controls live on whats-new.html; this panel only says
                  what is waiting and points there. -->
             <!-- Postings whose stored season disagrees with their own
-                 apply-by dates. A REPORT, not a queue: the list is derived by
-                 the jobs build into data/jobs-yearcheck.json, so there is no
-                 document to decide and nothing to deploy — settle a posting
-                 and it leaves the list at the next build. It is deliberately
-                 not re-filed automatically: a posting's year is half its id,
-                 and an id that moves is published twice. -->
+                 apply-by dates. The LIST is derived by the jobs build into
+                 data/jobs-yearcheck.json — nothing here decides what is
+                 flagged — and it is deliberately not re-filed automatically:
+                 a posting's year is half its id, and an id that moves is
+                 published twice.
+
+                 What IS stored is what the maintainer has read: yearChecks/
+                 {posting id}, keyed on the pair of seasons the card showed
+                 (assets/oa-yearcheck.js). Without it the report had no way to
+                 be cleared at all — its only exits moved a posting that was
+                 usually filed correctly, or waited for a deadline that was
+                 not what put it on the list. -->
             <section class="oa-panel" id="oa-aa-yc" hidden>
               <h3 class="oa-panel-h">&#128197; Market year to check</h3>
               <p class="oa-hint">A posting belongs to the season its
@@ -280,9 +286,14 @@
                 posted before the roll for a search that closes after it.
                 <strong>Nothing has been moved.</strong> A posting&rsquo;s
                 season is part of its address on this site, so re-filing one is
-                yours to decide &mdash; correct it in the tracking workbook, or
-                leave it and it will drop off this list when its deadline
-                passes.</p>
+                yours to decide: correct it in the tracking workbook and it
+                leaves this list at the next build, or open it here to edit or
+                take it down. If it is filed correctly as it stands &mdash; a
+                September search that simply stays open past the roll &mdash;
+                press <strong>Reviewed &mdash; leave it here</strong> and it
+                moves into the settled list below. It comes back only if its
+                dates change, because then it is a different disagreement and
+                you have not read it.</p>
               <div id="oa-aa-yc-list"><p class="oa-hint">Loading&hellip;</p></div>
             </section>
 
@@ -422,6 +433,15 @@
     <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
     <script defer src="assets/oa-users.js"></script>
+    <!-- The market-year report links each flagged posting to the page that
+         actually carries it, so it reads the same window rule jobs.html and
+         previous-markets.html sort themselves by (oa-jobnav.js), and it
+         records what the maintainer has read (oa-yearcheck.js). Both are
+         optional here: without oa-jobnav the card falls back to the jobs page,
+         and without oa-yearcheck nothing can be settled but every posting is
+         still listed — absence means SHOW. -->
+    <script defer src="assets/oa-jobnav.js"></script>
+    <script defer src="assets/oa-yearcheck.js"></script>
     <script defer src="assets/oa-adminarea.js"></script>
   </body>
 </html>

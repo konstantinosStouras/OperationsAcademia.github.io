@@ -879,6 +879,30 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-aa-yc-h { margin: 0 0 4px; font-size: 15px; }
 .oa-aa-yc p:last-child { margin-bottom: 0; }
 
+.oa-aa-yc-actions { margin: 10px 0 0; }
+.oa-aa-yc-actions .button { margin-right: 8px; }
+
+/* SETTLED — read, and left where it is. It leaves the list above (the list is
+   meant to get shorter) but not the page: the disclosure below it is drawn for
+   the maintainer alone, one click from Bring it back. The same "never a
+   one-way door" shape as the Removed-updates panel on /whats-new. */
+.oa-aa-yc-done { margin: 14px 0 0; }
+
+.oa-aa-yc-done > summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2, #454c56);
+}
+
+.oa-aa-yc-done > summary:hover { color: var(--ink, #1c2430); }
+
+.oa-aa-yc.is-settled {
+  border-left-color: var(--line, #e6e6e6);
+  background: var(--bg-3, #f6f7f9);
+}
+
 .oa-fb-card {
   margin: 0 0 14px;
   padding: 14px 16px;

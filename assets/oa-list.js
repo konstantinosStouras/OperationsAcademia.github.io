@@ -256,7 +256,13 @@
       emptyDataHint: 'Please check back soon — new postings are added as they arrive.',
       loadError: 'The job postings could not be loaded.',
       loadErrorHint: 'Please reload the page, or let us know if it keeps happening.',
-      unit: 'postings'
+      unit: 'postings',
+      /* the one-posting focus (cfg.focusParam) — see the block above apply() */
+      focusOne: 'Showing one posting on its own.',
+      focusClear: 'Show all postings',
+      focusMissing: 'That posting is not on this page.',
+      focusMissingHint: '',
+      focusOtherLead: 'Look for it on '
     };
     if (cfg.strings) {
       for (var sk in cfg.strings) {
@@ -267,6 +273,29 @@
     var view = [];
     var page = 0;
     var expanded = {};
+
+    /* ------------------------------------------------ the one-posting focus
+
+       `cfg.focusParam` names a URL parameter carrying ONE row's id, and while
+       it is set the list shows that row and nothing else: the filter bar and
+       the result bar go away (the same treatment an empty dataset gets), the
+       card is opened, and a bar above it offers the way back to the whole
+       list.
+
+       IT IS NOT A FILTER, and that is the point. A filter narrows what is
+       already passing, so a posting that fails one — or that sits on page 4 of
+       10 — is not on screen; the whole reason /admin-area links here is to put
+       a NAMED posting in front of the maintainer with its Edit and Take down
+       controls on it, whatever the reader last searched for. So the row is
+       taken from `rows`, ahead of every filter and every page. */
+    var focusParam = cfg.focusParam || '';
+    var focusId = '';
+    var focusOpened = false;   // the card is opened once, not on every render
+    var focusScrolled = false; // …and scrolled to once, on the render that finds it
+    /* A focus that arrived as `#job-<id>` — see readUrl(). The fragment is
+       dropped from the URL on the first sync, or "Show all postings" would
+       clear the state and a reload would put it straight back. */
+    var focusDropHash = false;
 
     /* EVERY filter's selection is a Set, text ones included — a text filter now
        holds the terms that have been committed with Enter, exactly as a picker
@@ -289,6 +318,7 @@
     host.innerHTML = '';
     var barEl = el('div', { class: 'oa-filters' });
     var resEl = el('div', { class: 'oa-resultbar' });
+    var focusEl = el('div', { class: 'oa-focusbar', hidden: true });
     var listEl = el('ul', { class: 'oa-cards' });
     var liveEl = el('div', {
       class: 'oa-sr',
@@ -298,6 +328,7 @@
     });
     host.appendChild(barEl);
     host.appendChild(resEl);
+    host.appendChild(focusEl);
     host.appendChild(listEl);
     host.appendChild(liveEl);
 
@@ -346,9 +377,38 @@
       return names.map(function (n) { return { value: n, count: counts[n] }; });
     }
 
+    /** The focused row, or null — either nothing is focused, or the id names
+        a posting this page does not carry (it rolled into the other season, or
+        it has been taken down since the link was drawn). */
+    function focusRow() {
+      if (!focusId) return null;
+      for (var i = 0; i < rows.length; i++) {
+        if (String(rows[i].id) === focusId) return rows[i];
+      }
+      return null;
+    }
+
+    /** Back to the whole list. The parameter goes with it, so a reload — or a
+        link copied from here — is the list and not the one posting again. */
+    function clearFocus() {
+      if (!focusId) return;
+      focusId = '';
+      focusOpened = false;
+      focusScrolled = false;
+      page = 0;
+      apply();
+    }
+
     function apply() {
-      view = passing(null);
-      if (cfg.sort) view.sort(cfg.sort);
+      var one = focusRow();
+      if (focusId) {
+        /* ahead of every filter and every page — see the block by focusId */
+        view = one ? [one] : [];
+        if (one && !focusOpened) { expanded[one.id] = true; focusOpened = true; }
+      } else {
+        view = passing(null);
+        if (cfg.sort) view.sort(cfg.sort);
+      }
       var maxPage = Math.max(0, Math.ceil(view.length / perPage) - 1);
       if (page > maxPage) page = maxPage;
       render();
@@ -741,6 +801,12 @@
       // hides the filter bar, count and pager (v3.css) until data exists —
       // an over-filtered search (rows exist, view empty) keeps them all.
       host.classList.toggle('oa-data-empty', !rows.length);
+      /* ONE posting, shown on its own: the same treatment, for the same
+         reason — a filter bar over a list of one narrows nothing, and a
+         pager reading "1 - 1 / 1" is noise. The bar above the card says
+         what is happening and offers the way back (oa-list.css). */
+      host.classList.toggle('oa-focus', !!focusId);
+      renderFocusBar();
 
       // result bar
       resEl.innerHTML = '';
@@ -771,19 +837,40 @@
       // cards
       listEl.innerHTML = '';
       if (!view.length) {
-        // an empty DATASET is not an over-filtered search: saying "try removing
-        // a filter" beside a disabled Clear button and an untouched bar sends
-        // the reader hunting for something that is not there
+        /* THREE empty states, not two. A focused id this page does not carry
+           is not an over-filtered search either: "try removing a filter" is
+           advice about a bar that is not even on screen, and the reader is
+           not searching — they followed a link to one posting. The engine
+           says so and the PAGE says where else to look, because only the page
+           knows what the other one is called. */
         listEl.appendChild(
-          rows.length
+          focusId
             ? el('li', { class: 'oa-empty' }, [
-                el('strong', { text: STR.emptyFiltered }),
-                el('span', { text: STR.emptyFilteredHint }),
+                el('strong', { text: STR.focusMissing }),
+                STR.focusMissingHint
+                  ? el('span', { html: STR.focusMissingHint })
+                  : null,
+                /* THE WAY OUT CARRIES THE POSTING WITH IT. A bare link to the
+                   other page lands the reader at the top of a list of five
+                   hundred, which is the complaint this whole mode exists to
+                   remove, reappearing on the recovery path. The PAGE names the
+                   other page — only it can — and the engine adds the id, which
+                   it is holding. Built as a node with its href set as a
+                   property, so an id off the URL is never interpolated into
+                   markup. */
+                focusOtherLink(),
+                /* and the id as TEXT, for the same reason */
+                el('span', { class: 'oa-focus-id', text: focusId }),
               ])
-            : el('li', { class: 'oa-empty' }, [
-                el('strong', { text: STR.emptyData }),
-                el('span', { text: STR.emptyDataHint }),
-              ])
+            : rows.length
+              ? el('li', { class: 'oa-empty' }, [
+                  el('strong', { text: STR.emptyFiltered }),
+                  el('span', { text: STR.emptyFilteredHint }),
+                ])
+              : el('li', { class: 'oa-empty' }, [
+                  el('strong', { text: STR.emptyData }),
+                  el('span', { text: STR.emptyDataHint }),
+                ])
         );
       } else {
         view.slice(page * perPage, (page + 1) * perPage).forEach(function (r) {
@@ -801,11 +888,52 @@
           if (window.console) console.error('OAList: action refresh failed', e);
         }
       });
+      maybeScrollToFocus();
+    }
+
+    /** "Look for it on <the other page>", carrying the id. Null when the page
+        declared no other page — the engine cannot know what one is called. */
+    function focusOtherLink() {
+      var other = cfg.focusOther;
+      if (!focusId || !other || !other.href) return null;
+      var a = el('a', { class: 'oa-focus-other',
+        text: STR.focusOtherLead + (other.label || 'the other page') });
+      a.href = other.href + (other.href.indexOf('?') === -1 ? '?' : '&') +
+        encodeURIComponent(prefix + focusParam) + '=' + encodeURIComponent(focusId);
+      return a;
+    }
+
+    /** The bar above a focused card: what is being shown, and the way back.
+        Rebuilt on every render so the button is never a stale closure. */
+    function renderFocusBar() {
+      focusEl.innerHTML = '';
+      focusEl.hidden = !focusId;
+      if (!focusId) return;
+      focusEl.appendChild(el('span', {
+        class: 'oa-focus-msg',
+        text: view.length ? STR.focusOne : STR.focusMissing,
+      }));
+      focusEl.appendChild(el('button', {
+        type: 'button',
+        class: 'oa-focus-clear',
+        text: STR.focusClear,
+        onclick: clearFocus,
+      }));
     }
 
     function scrollTop() {
       var y = host.getBoundingClientRect().top + window.pageYOffset - 80;
       window.scrollTo(window.pageXOffset, y < 0 ? 0 : y);
+    }
+
+    /** A focused posting is scrolled to ONCE, on the render that first draws
+        it. The list sits well below the fold on both pages, so a link that
+        opens one posting has to land on it — but re-scrolling on every render
+        would yank the page away from a maintainer who is reading the card. */
+    function maybeScrollToFocus() {
+      if (!focusId || focusScrolled || !view.length) return;
+      focusScrolled = true;
+      scrollTop();
     }
 
     function card(r) {
@@ -885,6 +1013,10 @@
         if (f.legacyParam) p['delete'](f.legacyParam);
       });
       p['delete'](prefix + 'page');
+      /* The engine owns the focus parameter too, or "Show all postings" would
+         drop the card and leave the URL still naming it — one reload and the
+         reader is back on the single posting they had just left. */
+      if (focusParam) p['delete'](prefix + focusParam);
       filters.forEach(function (f) {
         if (f.type === 'text') {
           /* One parameter per term, like a facet — a shared link carries every
@@ -902,8 +1034,16 @@
         }
       });
       if (page > 0) p.set(prefix + 'page', String(page + 1));
+      if (focusParam && focusId) p.set(prefix + focusParam, focusId);
       var qs = p.toString();
-      var url = location.pathname + (qs ? '?' + qs : '') + location.hash;
+      /* A `#job-` fragment goes: it is this engine's own, it is said in the
+         query string now, and leaving both would make the state un-clearable
+         — "Show all postings" would drop the card while the URL still named
+         one, and a reload would put it straight back. Every other hash is
+         somebody else's and is carried through untouched. */
+      var hash = focusDropHash ? '' : location.hash;
+      focusDropHash = false;
+      var url = location.pathname + (qs ? '?' + qs : '') + hash;
       history.replaceState(null, '', url);
     }
 
@@ -952,6 +1092,29 @@
       });
       var pg = parseInt(p.get(prefix + 'page'), 10);
       if (pg > 1) page = pg - 1;
+      if (!focusParam) return;
+      focusId = String(p.get(prefix + focusParam) || '').trim();
+
+      /* A LINK ALREADY COPIED still works. `#job-<id>` is what /admin-area
+         emitted before this existed, and it is also the anchor a rendered
+         card carries (card() ids every `li` that way), so somebody's
+         bookmark may hold one. Nothing ever acted on it — v3.js looks the
+         fragment up at boot, before the list has fetched anything, and finds
+         nothing — so reading it here is the first time such a link does what
+         it says. The query parameter wins where both are present.
+
+         THE FRAGMENT IS DROPPED BY ITS SHAPE, not by which source won.
+         Setting the flag inside the branch below would leave it on a URL
+         carrying BOTH forms: "Show all postings" would clear the state, the
+         hash would survive the sync, and a reload would focus again — on the
+         OTHER posting. `#job-` is this engine's own fragment now, so it goes
+         whenever the engine is the thing reading it. */
+      focusDropHash = /^#job-./.test(location.hash);
+      if (!focusId && focusDropHash) {
+        try {
+          focusId = decodeURIComponent(location.hash.slice(5)).trim();
+        } catch (e) { focusId = location.hash.slice(5); }
+      }
     }
 
     /* -------------------------------------------------------------- load */
@@ -989,6 +1152,21 @@
       view: function () { return view.slice(); },
       /** Every filter with something selected. */
       activeFilters: activeFilters,
+      /** The id currently shown on its own, or '' — what a page needs to say
+          "you are looking at one posting" in its own chrome. */
+      focused: function () { return focusId; },
+      /** Show one posting on its own, from the page rather than from the URL.
+          Same state either way: the URL follows, so the view is shareable. */
+      focus: function (id) {
+        if (!focusParam) return;
+        var next = String(id == null ? '' : id).trim();
+        if (next === focusId) return;
+        focusId = next;
+        focusOpened = false;
+        focusScrolled = false;
+        page = 0;
+        apply();
+      },
       state: sel,
     };
   }
