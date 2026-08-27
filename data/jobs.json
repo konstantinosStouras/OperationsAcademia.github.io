@@ -1892,6 +1892,34 @@
   "owner": ""
  },
  {
+  "id": "2027-essec-business-school-20260617",
+  "year": 2027,
+  "posted": "2026-06-17",
+  "institution": "ESSEC",
+  "department": "Operations Management",
+  "school": "",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "December 1, 2026",
+  "applyByDate": "2026-12-01",
+  "comments": "We aim to conduct interviews early 2027. While we are not interviewing candidates at the INFORMS Annual Meeting 2026, candidates interested in an informal meeting with ESSEC faculty to learn more about the school/position can contact us by email ([e-mail removed]) to set up an appointment at the conference.",
+  "country": "France",
+  "adUrl": "https://docs.google.com/forms/d/e/1FAIpQLScKGwFHes4KMhN5Kp1M6-pY1vmrwqJMKKE_u3T2E3TO2MIoEA/viewform",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=ESSEC",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-27T09:37:48Z",
+  "owner": ""
+ },
+ {
   "id": "2027-hofstra-university-20260613",
   "year": 2027,
   "posted": "2026-06-13",
