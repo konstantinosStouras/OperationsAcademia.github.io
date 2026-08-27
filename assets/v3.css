@@ -63,6 +63,12 @@
   --gold: #b98a3e;
   --ok: #2e7d4f;
   --err: #b3413d;
+  /* the soft wash each of those two paints its own button with — the filter
+     bar's Clear (red) and its Excel download (green). Kept this pale on
+     purpose: the ink sitting on it is --err/--ok, and a heavier tint drops
+     the green under the AA floor page-test.mjs measures (4.72:1 here). */
+  --err-soft: #fdf1f0;
+  --ok-soft: #f2f9f5;
   --warn-bg: #fdf6e8;
   --warn-line: #ecd9ac;
   --shadow: 0 1px 2px rgba(23, 27, 33, 0.05), 0 14px 34px -20px rgba(23, 27, 33, 0.28);
@@ -89,6 +95,10 @@
   --gold: #d9a55e;
   --ok: #6fbf92;
   --err: #e08a86;
+  /* translucent rather than a mixed hex, like --brand-soft above: the tint
+     then works over whatever surface the button lands on */
+  --err-soft: rgba(224, 138, 134, 0.14);
+  --ok-soft: rgba(111, 191, 146, 0.14);
   --warn-bg: #221b0e;
   --warn-line: #4d3d1d;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 16px 40px -22px rgba(0, 0, 0, 0.65);
@@ -837,27 +847,74 @@ body.v3 .oa-filter-actions {
   margin-left: 0;
   align-self: start;
   grid-column: auto / -1;
-  flex-direction: column;
+  /* ONE LINE, not two (owner, 2026-08-27). The cell used to be a column with
+     the download tucked under Clear; both are controls a reader presses, and
+     stacking them made the bar three rows deep for no gain. It is a wrapping
+     ROW now — the empty label spacer takes the full width, so it still
+     reserves exactly one label's height above the buttons and forces them
+     onto the line below it, which is the whole reason that spacer exists. */
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: stretch;
+  /* ROW gap 0, deliberately. The spacer reproduces a label's height and its
+     3px margin exactly, which is what lands Clear on the same baseline as
+     every control beside it; a row gap here would push it that much lower and
+     break the one thing the spacer exists to guarantee (page-test measures
+     it — "every control sits on its row's baseline"). The 10px is between the
+     two buttons only. */
+  gap: 0 10px;
 }
-body.v3 .oa-filter-actions .oa-label-spacer { display: block; }
-body.v3 .oa-clear { width: 100%; height: 44px; }
-/* The Excel download sits UNDER Clear in the same cell, right-aligned and
-   auto-width — small and discrete, as the owner asked (2026-08-26), rather
-   than a second full-width button competing with the one the bar is for. It
+body.v3 .oa-filter-actions .oa-label-spacer { display: block; flex: 0 0 100%; }
+/* Clear takes whatever the download leaves, so the bar still ends flush at
+   its right edge however wide the label is in a future translation. */
+body.v3 .oa-clear { flex: 1 1 auto; width: auto; height: 44px; }
+/* The Excel download sits BESIDE Clear in the same cell, holding the bar's
+   right edge — auto-width, and smaller than the button the bar is for (owner,
+   2026-08-26), rather than a second full-width control competing with it. It
    is inside the bar deliberately: the bar is what the page's sign-in lock
-   covers, so a control only registered readers may use is already behind it. */
+   covers, so a control only registered readers may use is already behind it.
+
+   GREEN and filled on hover since 2026-08-27, when the owner reported that as
+   muted ink on no ground it read as a caption rather than as a button. Small
+   and QUIET are two different instructions, and only the first one was ever
+   asked for. It moved out from UNDER Clear the same day — see the sixth-track
+   note in the media query below, which is what made room for it. */
 body.v3 .oa-action {
-  align-self: flex-end;
+  flex: 0 0 auto;
   width: auto;
-  margin-top: 8px;
+  /* the same height as Clear beside it: two controls sharing a line share a
+     baseline, and it stays the SMALLER of the two on the axis that was ever
+     in question — its width */
+  height: 44px;
   border-radius: 999px;
-  background: transparent;
-  color: var(--mut);
-  border: 1px solid transparent;
+  background: var(--ok-soft);
+  color: var(--ok);
+  border: 1px solid var(--ok);
+  font-weight: 600;
+  font-size: 13px;
 }
-body.v3 .oa-action:hover:not([disabled]) { color: var(--brand); border-color: var(--brand); }
+body.v3 .oa-action:hover:not([disabled]) {
+  background: var(--ok);
+  color: var(--on-brand);
+  border-color: var(--ok);
+}
 @media (min-width: 1000px) {
+  /* A SIXTH TRACK for the jobs bar, and it is the whole of what puts Entry
+     level on the top line (owner, 2026-08-27). Measured at five tracks: the
+     university search spans two, so the top line was full at four controls
+     and Entry level fell to the second — which then held four pickers and had
+     one track left for the actions, too narrow for two buttons side by side.
+     At six the top line carries the search and four pickers, the second holds
+     three and hands the actions three tracks, and the bar is two rows deep
+     with both buttons on one line.
+
+     Scoped to the jobs page because it is the only bar with eight filters;
+     the other mounts have four or five and a narrower track would just make
+     their controls smaller for nothing. 150px is measured, not guessed — the
+     longest picker label ("All characteristics") still fits its button. */
+  body.v3 #oa-jobs .oa-filters {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
   /* the free-text searches are the primary way in — give them room */
   body.v3 .oa-filter:not(.oa-pick) { grid-column: span 2; }
   /* ...but Clear is not one of them. It carries .oa-filter as well now (for the
@@ -869,19 +926,37 @@ body.v3 .oa-action:hover:not([disabled]) { color: var(--brand); border-color: va
      height. */
   body.v3 .oa-filter.oa-filter-actions { grid-column: auto / -1; }
 }
+/* THE ACTIONS CELL TAKES THE THREE TRACKS ITS LINE HAS LEFT, which is what
+   gives Clear and the download room to sit side by side. `auto / -1` — what
+   it carried, and what the comment above the cell has always claimed — does
+   NOT do this: an auto start with a definite end spans exactly ONE track, so
+   the cell was a single 157px column and the two buttons wrapped inside it,
+   which is the stacking the owner asked to undo.
+
+   From the phone breakpoint UP, not from 1000px: at four or five tracks the
+   cell takes a line of its own and is still flush right with both buttons
+   abreast — measured at 1000px and 900px. Only a phone stacks them, where
+   side by side each would be half a screen wide. */
+@media (min-width: 641px) {
+  body.v3 #oa-jobs .oa-filter-actions { grid-column: span 3 / -1; }
+}
 @media (max-width: 640px) {
   /* the mobile standard, in grid form: pickers two per row, every text
      search and the Clear button full width */
   body.v3 .oa-filters { grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 14px 18px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
-  /* and the action with them: a thumb gets the whole row and a real target */
+  /* and the action with them: a thumb gets the whole row and a real target,
+     so on a phone the two go back to being stacked — side by side, each would
+     be half a screen wide. The border keeps its green: a phone reader needs
+     the affordance more than a mouse one, not less. */
+  body.v3 .oa-clear,
   body.v3 .oa-action {
-    align-self: stretch;
+    flex: 0 0 100%;
     width: 100%;
     border-radius: 10px;
-    border-color: var(--line);
   }
+  body.v3 .oa-action { height: 44px; }
 }
 /* a profile picture fills the avatar disc; the initials show only without one */
 .oa-avatar { overflow: hidden; }
@@ -1098,11 +1173,18 @@ body.v3 .oa-opt-n { color: var(--mut); background: var(--bg-3); border-radius: 9
 body.v3 .oa-filter-hint { color: var(--mut); }
 body.v3 .oa-chip { background: var(--brand); color: var(--on-brand); border-radius: 999px; }
 body.v3 .oa-chip:hover { background: var(--brand-2); }
+/* RED — see the note on .oa-clear in assets/oa-list.css. On this design the
+   bar is a white card of neutral outlines, so a neutral Clear was invisible
+   inside it (owner, 2026-08-27); red is both the contrast it lacked and what
+   the button actually does. */
 body.v3 .oa-clear {
-  background: transparent; color: var(--ink-2);
-  border: 1px solid var(--line); border-radius: 999px;
+  background: transparent; color: var(--err);
+  border: 1px solid var(--err); border-radius: 999px;
+  font-weight: 600;
 }
-body.v3 .oa-clear:hover:not([disabled]) { color: var(--brand); border-color: var(--brand); }
+body.v3 .oa-clear:hover:not([disabled]) {
+  background: var(--err-soft); color: var(--err); border-color: var(--err);
+}
 
 body.v3 .oa-resultbar { color: var(--mut); }
 body.v3 .oa-pager button {

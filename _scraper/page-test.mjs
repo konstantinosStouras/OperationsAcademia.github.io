@@ -284,38 +284,37 @@ ok(legacyCountry.some((c) => /United States/.test(c)),
 const legacyRows = await page.$$eval('.oa-card', (ns) => ns.length);
 ok(legacyRows > 0, 'and still shows the postings it was shared to show');
 
-/* The legacy Awesome Table deep link the footer and the "Further info" column
-   still emit must keep working — and BOTH it and the ?filterD= check further
-   down are about the PARAMETER, never about a particular school.
+/* THE INSTITUTION THESE DEEP LINKS ARE TESTED WITH IS READ OFF THE PAGE.
 
-   THE INSTITUTION IS TAKEN FROM THE LIST, never hardcoded — the same rule the
-   country above follows, written down there for the same reason. Both named
-   "University of Mannheim" until 2026-08-27, when master's own build took that
-   school's last current-market posting off the site and the run went red on
-   data nobody had touched. This page shows the season under way, so an
-   institution that is on it today can legitimately be gone tomorrow: pinning
-   one is the browser-check form of a guard that names a row instead of a rule,
-   which this repository has now been caught by three times. */
+   It used to be named here — "University of Mannheim" — and on 2026-08-27 the
+   whole suite stopped dead at the ?filterD= check below, on master, with
+   nothing but a data commit between green and red. Both of that university's
+   postings are filed under market year 2026; the market rolled to 2027 in
+   July, the jobs page scopes itself to the market under way, and so the deep
+   link selected an institution with nothing in scope. The assertion failed,
+   and the print check a few lines on threw outright for want of a card.
+
+   A fixture NAMED in a test is a fact about the data, and this data is
+   rebuilt from Firestore every morning — the same trap this repository has
+   already recorded twice for its own guards ("a guard about specific rows
+   names those rows; a guard over a whole file asserts a RULE any legitimate
+   row satisfies"). What is under test here is that a legacy deep link still
+   selects AN institution, so the institution comes from whatever the page is
+   showing. */
 await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.oa-card');
-const deepInst = (await page.$eval('.oa-card-title', (n) => n.textContent)).trim();
-const deepTotal = Number((await page.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
+const DEEP_UNI = (await page.$eval('.oa-card-title', (n) => n.textContent)).trim();
+ok(DEEP_UNI.length > 2, `a posting to deep-link with (${DEEP_UNI})`);
 
-/* the WHOLE card, because these filters search the institution AND the
-   department: a row selected on its department is a hit the deep link is
-   supposed to return, not a failure */
-const cardsFor = async (param) => {
-  await page.goto(BASE + V2 + `jobs.html?${param}=` + encodeURIComponent(deepInst),
-    { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('.oa-card, .oa-empty');
-  await page.waitForTimeout(300);
-  return page.$$eval('.oa-card', (ns) => ns.map((n) => n.textContent));
-};
-
-const viaA = await cardsFor('filterA');
-ok(viaA.length > 0 && viaA.length <= deepTotal && viaA.every((t) => t.includes(deepInst)),
-  `the legacy ?filterA= deep link still selects an institution ` +
-  `(${viaA.length} of ${deepTotal} for "${deepInst}")`);
+// the legacy Awesome Table deep link the footer and the "Further info" column
+// still emit must keep working
+await page.goto(BASE + V2 + 'jobs.html?filterA=' + encodeURIComponent(DEEP_UNI),
+  { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(300);
+const viaA = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent.trim()));
+ok(viaA.length > 0 && viaA.every((t) => t.includes(DEEP_UNI)),
+  'the legacy ?filterA= deep link still selects an institution');
 
 /* ------------------------------------------ the Deadline filter's own words
 
@@ -534,13 +533,15 @@ await page.waitForTimeout(400);
 ok(page.url().includes('utm_source=newsletter'),
   'a foreign query parameter is not erased from the address bar');
 
-// the Universities map deep-links institutions as ?filterD= — the same
-// institution the ?filterA= check above took from the list, for the same
-// reason it is taken rather than named
-const viaD = await cardsFor('filterD');
-ok(viaD.length > 0 && viaD.length <= deepTotal && viaD.every((t) => t.includes(deepInst)),
-  `the Universities map's ?filterD= deep link selects an institution ` +
-  `(${viaD.length} of ${deepTotal} for "${deepInst}")`);
+// the Universities map deep-links institutions as ?filterD= (the name comes
+// from the page — see DEEP_UNI above for why it is not written down here)
+await page.goto(BASE + V2 + 'jobs.html?filterD=' + encodeURIComponent(DEEP_UNI),
+  { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card, .oa-empty');
+await page.waitForTimeout(300);
+const viaD = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent.trim()));
+ok(viaD.length > 0 && viaD.every((t) => t.includes(DEEP_UNI)),
+  'the Universities map\'s ?filterD= deep link selects an institution');
 
 // safeUrl refuses every protocol-relative and backslash disguise
 eq(await page.evaluate(() =>
@@ -2250,11 +2251,16 @@ for (const [name, expect] of [
         const row = rows.find((r) => Math.abs(r.top - t) < 1.5);
         if (row) row.n++; else rows.push({ top: t, n: 1 });
       });
-      const clear = document.querySelector('.oa-clear').getBoundingClientRect();
+      /* THE ACTIONS CELL closes the row, not Clear itself. Clear held the
+         right edge while it was alone in that cell; since 2026-08-27 the
+         Excel download sits beside it and holds it, with Clear taking
+         whatever is left. What the bar promises is that its last line ends
+         flush — measure the cell, which is true under either arrangement. */
+      const acts = document.querySelector('.oa-filter-actions').getBoundingClientRect();
       return {
         lines: rows.length,
         cells: new Set([...bar.children].map((c) => Math.round(c.getBoundingClientRect().top))).size,
-        clearGap: edge - clear.right,
+        clearGap: edge - acts.right,
         chips: document.querySelectorAll('.oa-chip').length,
       };
     });
@@ -2262,7 +2268,7 @@ for (const [name, expect] of [
     eq(geo.lines, geo.cells,
       `jobs @${width}: every control sits on its row's baseline with chips showing`);
     ok(Math.abs(geo.clearGap) <= 1.5,
-      `jobs @${width}: Clear still closes its row (${geo.clearGap.toFixed(1)}px short of the edge)`);
+      `jobs @${width}: the actions still close their row (${geo.clearGap.toFixed(1)}px short of the edge)`);
     await j.click('.oa-clear');
     await j.waitForTimeout(200);
   }
@@ -5162,21 +5168,66 @@ for (const w of [320, 360, 390, 430]) {
       const b = document.querySelector('.oa-export');
       const r = b.getBoundingClientRect();
       const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
-      const clear = document.querySelector('.oa-clear').getBoundingClientRect();
-      return { title: b.title, disabled: b.disabled, h: Math.round(r.height),
-        w: Math.round(r.width), rightGap: Math.round(cell.right - r.right),
-        below: Math.round(r.top - clear.bottom),
+      const c = document.querySelector('.oa-clear');
+      const clear = c.getBoundingClientRect();
+      return { title: b.title, text: b.textContent.trim(), disabled: b.disabled,
+        h: Math.round(r.height), w: Math.round(r.width),
+        x: Math.round(r.x), top: Math.round(r.top),
+        rightGap: Math.round(cell.right - r.right),
+        clearW: Math.round(clear.width), clearH: Math.round(clear.height),
+        clearX: Math.round(clear.x), clearTop: Math.round(clear.top),
         locked: !!document.querySelector('.v3-lock.is-locked') };
     });
     ok(!btn.locked, 'jobs export: signed in, the filter bar is live');
     ok(!btn.disabled && btn.title.includes(String(shown)),
       `jobs export: the button names what it would write (${shown} postings)`);
-    /* SMALL AND DISCRETE was the instruction: it is under Clear rather than
-       beside it, right-aligned, and shorter than the button the bar is for. */
-    ok(btn.h <= 34 && btn.w < 120,
-      `jobs export: it is small (${btn.w}x${btn.h}) — an extra, not a control`);
-    ok(Math.abs(btn.rightGap) <= 1.5 && btn.below >= 0 && btn.below <= 20,
-      'jobs export: …tucked under Clear filters at the bar\'s right edge');
+    /* SMALLER THAN CLEAR was the instruction — "an extra beside the controls
+       the bar is for" — and it is measured against Clear's own width rather
+       than a magic number, because that is what the instruction actually
+       says. It grew when the label gained its verb (2026-08-27, the owner on
+       the old one: "not very intuitive for the average user") — "Excel" names
+       a format and never the act.
+
+       BESIDE Clear, not under it (owner, same day): the two share a line, a
+       baseline and a height, the download keeps the right edge and Clear
+       takes the rest of the cell, so the bar still ends flush. Heights are
+       compared rather than capped, because "same line" is the property and
+       two controls of different heights on one line read as a mistake. */
+    ok(/download/i.test(btn.text) && /excel/i.test(btn.text),
+      `jobs export: the label says what it does and what you get (${JSON.stringify(btn.text)})`);
+    ok(btn.w < btn.clearW,
+      `jobs export: it stays narrower than Clear (${btn.w} vs ${btn.clearW})`);
+    ok(Math.abs(btn.top - btn.clearTop) <= 2 && btn.h === btn.clearH,
+      `jobs export: on ONE line with Clear filters, same height ` +
+      `(${btn.h} vs ${btn.clearH}, tops ${btn.top}/${btn.clearTop})`);
+    ok(btn.x > btn.clearX && Math.abs(btn.rightGap) <= 1.5,
+      'jobs export: …to its right, holding the bar\'s right edge');
+
+    /* TWO ROWS, WITH ENTRY LEVEL ON THE FIRST (owner, 2026-08-27: "pushing
+       'entry level' search field on the top line, so that 'clear filters' and
+       'Download Excel' buttons appear in the same line, within the 2nd line").
+       The two halves are one measurement: the buttons only fit on a line
+       together because a sixth track freed one on the second row, and the
+       sixth track is what carries Entry level up to the first. Asserting the
+       row COUNT rather than a pixel keeps it honest if the design's spacing
+       ever moves. */
+    const bar = await q.evaluate(() => {
+      const tops = new Map();
+      for (const cell of document.querySelector('.oa-filters').children) {
+        const top = Math.round(cell.getBoundingClientRect().top);
+        const lab = cell.querySelector('.oa-label, label');
+        const name = (lab ? lab.textContent : 'actions').trim();
+        if (!tops.has(top)) tops.set(top, []);
+        tops.get(top).push(name);
+      }
+      const rows = [...tops.entries()].sort((a, b) => a[0] - b[0]).map((e) => e[1]);
+      return { count: rows.length, first: rows[0] || [], last: rows[rows.length - 1] || [] };
+    });
+    eq(bar.count, 2, `the jobs filter bar is two rows deep (${bar.count})`);
+    ok(bar.first.some((n) => /entry level/i.test(n)),
+      `Entry level is on the top line (${bar.first.join(' · ')})`);
+    ok(bar.last.includes('actions'),
+      'and the two buttons close the second one');
 
     const first = q.waitForEvent('download', { timeout: 30000 });
     await q.click('.oa-export');
@@ -5235,6 +5286,87 @@ for (const w of [320, 360, 390, 430]) {
     ok(m.h >= 40, `jobs export at 390px: a 40px+ target (${m.h}px)`);
     ok(m.w > m.barW * 0.7, 'jobs export at 390px: full width, like every other control');
     ok(m.over <= 1, 'jobs export at 390px: the page still does not scroll sideways');
+    ok(await q.evaluate(() => {
+      const b = document.querySelector('.oa-export');
+      const want = getComputedStyle(document.documentElement).getPropertyValue('--ok').trim();
+      const probe = document.createElement('span');
+      probe.style.color = want; document.body.appendChild(probe);
+      const resolved = getComputedStyle(probe).color; probe.remove();
+      return getComputedStyle(b).borderTopColor === resolved;
+    }), 'jobs export at 390px: …and keeps its green border — a thumb needs the ' +
+      'affordance more than a mouse does, not less');
+    await ctx.close();
+  }
+
+  /* -- THE TWO BUTTONS ARE THE COLOUR THEY MEAN, in both themes -----------
+
+     Owner, 2026-08-27, from a screenshot of the dark theme: Clear filters is
+     "very subtle" and the Excel download "not very intuitive for the average
+     user". Both are now coloured — Clear RED (it throws a search away), the
+     download GREEN (the colour a spreadsheet wears everywhere else, and what
+     the owner asked for) — and this measures what the
+     browser actually paints rather than what a stylesheet says, because these
+     rules live in TWO files (the engine's and the live design's override) and
+     only the second one reaches this page.
+
+     The tokens are resolved through the page's own custom properties, so the
+     check follows the palette instead of hard-coding a hex that a later theme
+     change would silently make wrong. The theme audit further down already
+     holds every one of these colours to AA on its own ground. */
+  {
+    const { ctx, q } = await jobsPage(READER);
+    for (const theme of ['light', 'dark']) {
+      await q.evaluate((v) => document.documentElement.setAttribute('data-theme', v), theme);
+      /* something has to be selected, or Clear is disabled and 45% faded */
+      await q.fill('#oaf-institution', 'a');
+      await q.waitForTimeout(400);
+      /* PARK THE POINTER FIRST. The hover pass below leaves Playwright's mouse
+         sitting on the download, and pressing Clear rebuilds the bar UNDER it
+         — so the second theme's "at rest" reading would be taken on a button
+         that is still hovered, and its ink would be --on-brand rather than
+         --ok: a green-on-green failure reported against a rule that is
+         perfectly correct. */
+      await q.mouse.move(4, 4);
+      await q.waitForTimeout(80);
+      const paint = await q.evaluate(() => {
+        const token = (name) => {
+          const want = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+          const probe = document.createElement('span');
+          probe.style.color = want; document.body.appendChild(probe);
+          const out = getComputedStyle(probe).color; probe.remove();
+          return out;
+        };
+        const clear = getComputedStyle(document.querySelector('.oa-clear'));
+        const exp = getComputedStyle(document.querySelector('.oa-export'));
+        return {
+          err: token('--err'), ok: token('--ok'),
+          clearBorder: clear.borderTopColor, clearInk: clear.color,
+          clearDisabled: document.querySelector('.oa-clear').disabled,
+          expBorder: exp.borderTopColor, expInk: exp.color, expGround: exp.backgroundColor,
+        };
+      });
+      ok(!paint.clearDisabled,
+        `filter buttons (${theme}): Clear is live, so its real colours are on screen`);
+      eq(paint.clearBorder, paint.err, `filter buttons (${theme}): Clear filters has a RED border`);
+      eq(paint.clearInk, paint.err, `filter buttons (${theme}): …and red ink, not a lone 1px outline`);
+      eq(paint.expBorder, paint.ok, `filter buttons (${theme}): the Excel download has a GREEN border`);
+      eq(paint.expInk, paint.ok, `filter buttons (${theme}): …with ink to match`);
+      ok(!/^(transparent|rgba\(0, 0, 0, 0\))$/.test(paint.expGround),
+        `filter buttons (${theme}): …on a ground of its own, so it reads as a button`);
+
+      /* hover FILLS it: the strongest signal a static page can give that a
+         thing is pressable, and the one a caption never has */
+      await q.hover('.oa-export');
+      await q.waitForTimeout(120);
+      const hov = await q.evaluate(() => {
+        const exp = getComputedStyle(document.querySelector('.oa-export'));
+        return { ground: exp.backgroundColor, ink: exp.color };
+      });
+      eq(hov.ground, paint.ok, `filter buttons (${theme}): hovering the download fills it green`);
+      ok(hov.ink !== paint.ok, `filter buttons (${theme}): …and flips its ink so the label survives`);
+      await q.evaluate(() => document.querySelector('.oa-clear').click());
+      await q.waitForTimeout(200);
+    }
     await ctx.close();
   }
 }

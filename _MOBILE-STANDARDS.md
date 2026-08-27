@@ -27,8 +27,15 @@ A control a page wants in the FILTER BAR is declared through the engine's
 `actions` option rather than appended to the bar (`buildBar()` empties it
 whenever the filters are cleared, so an appended one would vanish at the first
 press of Clear). It is drawn as `.oa-action`, which carries rules 3 and 4 on a
-phone — 42px tall, full width — however small and quiet it is on a desktop.
-The jobs page's Excel download is the first of them.
+phone — 42px tall, full width — however small it is on a desktop. The jobs
+page's Excel download is the first of them.
+
+**Small is a SIZE, not a volume.** That button shipped muted and ungrounded on
+the reading that "small and discrete" meant both, and no average reader could
+tell it was a button (owner, 2026-08-27). It keeps its colour and its ground at
+every width — a phone reader needs the affordance more than a mouse one, not
+less — so a phone rule may take a control's SIZE up and must never take its
+appearance down.
 
 ## The rules (each one was earned)
 
