@@ -297,6 +297,35 @@ async function selftest() {
   ok(M.newJobsFor(rows, { topics: ['updates'] }, '').length === 0,
     'an updates-only alert is sent no postings');
 
+  /* THE JOB WINDOW IS A MARK ON THE POSTINGS, and the loss it ends is worth
+     naming: an alert carrying jobs AND updates, whose run saw no new postings
+     — a stale read, or simply a build committing while this ran — sent its
+     update digest and advanced `lastSentAt` to NOW. Every posting published in
+     between was then behind the mark for ever. Read from the postings instead,
+     an empty jobs list writes no job mark at all, so nothing can be skipped.
+
+     Read out of this file's own source, because the branch that writes it
+     needs Firestore and a mailbox to reach. */
+  const mailerSrc = await readFile(path.join(HERE, 'alerts-mailer.mjs'), 'utf8');
+  ok(/const since = a\.lastJobAt \|\| a\.lastSentAt \|\| a\.createdAt/.test(mailerSrc),
+    'the job window reads lastJobAt first, falling back to what an alert already has');
+  ok(/const newestJob = M\.latestAddedAt\(jobs\);\s*\n\s*if \(newestJob\) patch\.lastJobAt = newestJob;/
+    .test(mailerSrc),
+    'and it is advanced to the newest posting actually sent, never to the clock');
+  ok(!/patch\.lastJobAt = now/.test(mailerSrc),
+    'a wall clock never becomes the job mark — that is the loss this ends');
+  ok(M.latestAddedAt(rows) === '2026-08-14T00:00:00Z',
+    'the mark a send leaves is the newest addedAt it carried');
+  ok(M.newJobsFor(rows, { topics: ['jobs'] }, M.latestAddedAt(rows)).length === 0,
+    'and nothing already sent is sent twice');
+  ok(M.newJobsFor(rows, { topics: ['jobs'] }, M.latestAddedAt([rows[0]])).length === 1,
+    'while a posting published after the mark is still waiting for its digest');
+  /* THE IDLE BRANCH LEAVES THE WINDOW ALONE. "Nothing new" writes lastCheckedAt
+     and nothing else, so a quiet run cannot swallow the next approval either. */
+  ok(/const idle = \{ lastCheckedAt: now\.toISOString\(\) \};/.test(mailerSrc) &&
+     !/const idle = \{[^}]*lastJobAt/.test(mailerSrc),
+    'a run with nothing to send moves no window at all');
+
   const log = [
     { id: 'a', date: '2026-08-15', title: 'T', summary: 'S' },
     { id: 'b', date: '2026-08-01', title: 'U', summary: 'S' },
@@ -685,12 +714,31 @@ async function main() {
       continue;
     }
 
-    // The page stamps createdAt on every alert it saves now, but alerts saved
-    // before it did carry neither mark — and an empty `since` matches every
-    // posting ever imported, so the first digest such a subscriber gets would
-    // be the entire back-catalogue. Cap it at 31 days, mirroring the
-    // change-log cap two lines below.
-    const since = a.lastSentAt || a.createdAt || (M.daysBefore(now, 31) + 'T00:00:00Z');
+    /* THE JOB WINDOW IS A MARK ON THE POSTINGS, NOT A WALL CLOCK.
+       `lastJobAt` is the newest `addedAt` this alert has actually been sent —
+       the same shape as `lastUpdateDate` and `lastCandidateAt`, and for the
+       same stated reason: a mark set from the clock can outrun a posting that
+       was published while it ran, and everything behind it is then lost in
+       silence rather than delayed.
+
+       Jobs were the one topic still windowed on `lastSentAt`, and that is
+       exactly how an approval reached nobody. A run reading a stale checkout
+       (the instant path did, by construction — see oa-alerts-mail.yml) found
+       no new postings, sent the alert's UPDATE digest, and advanced
+       `lastSentAt` to now; the posting approved minutes earlier was dated
+       before that and never matched again. Any overlap between the build and
+       this job does the same thing, so the mark is taken from the postings
+       themselves and no timing can slip one behind it.
+
+       `lastSentAt` stays what it always was — WHEN a digest last went out,
+       which is what `isDue` is measured on. Only the window moved.
+
+       An alert that has never had one falls back to `lastSentAt`, so nothing
+       already sent is re-sent; then `createdAt`; then a 31-day cap, because an
+       empty `since` matches every posting ever imported and the first digest
+       such a subscriber gets would be the whole back-catalogue. */
+    const since = a.lastJobAt || a.lastSentAt || a.createdAt ||
+      (M.daysBefore(now, 31) + 'T00:00:00Z');
     const jobs = M.newJobsFor(rows, a.criteria, since)
       .sort((x, y) => String(y.addedAt).localeCompare(String(x.addedAt)));
 
@@ -815,6 +863,15 @@ async function main() {
         lastCheckedAt: now.toISOString(),
         lastSentCount: jobs.length + news.length + candRows.length,
       };
+      /* …and the newest posting actually sent, which is what the next job
+         window starts after. Written ONLY when postings went out: a digest
+         that carried updates alone must not move the job mark, or it swallows
+         whatever was published in between — the very loss this mark exists to
+         end. The whole matched set counts, not the first MAX_ROWS listed: the
+         e-mail names the rest and points at the site, so they have been
+         announced. */
+      const newestJob = M.latestAddedAt(jobs);
+      if (newestJob) patch.lastJobAt = newestJob;
       // record the newest change-log entry actually sent, so the next window
       // starts after it rather than at a timestamp. The frozen floor is written
       // first and only stands when nothing was sent — a real send always knows

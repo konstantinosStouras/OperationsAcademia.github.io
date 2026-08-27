@@ -49,6 +49,23 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v5
+        with:
+          # THE TIP OF THE BRANCH, named explicitly — not the default, which is
+          # `github.sha`. On a `workflow_run` event that is the head of the run
+          # that TRIGGERED us, and the build commits data/jobs.json before it
+          # finishes: so on the instant path this job checked out the commit
+          # BEFORE the postings it was fired to announce, every single time.
+          #
+          # That is not merely a delay. An alert carrying the updates topic as
+          # well would send its change-log digest from that stale read, advance
+          # its high-water mark to now — and the approval, dated minutes
+          # earlier, then sat behind the mark for ever. Approve a posting, and
+          # the subscribers who asked to hear about new postings never did.
+          # (The mailer no longer windows jobs on that wall clock either — see
+          # `lastJobAt` in _scraper/alerts-mailer.mjs — so the two halves of
+          # this fix are independent, which is deliberate.)
+          ref: ${{ github.ref_name }}
+
       - uses: actions/setup-node@v5
         with:
           node-version: '22'

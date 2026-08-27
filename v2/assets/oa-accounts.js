@@ -954,13 +954,16 @@
   var MERGE_APP = 'oa-merge';
 
   /* The fields of an alert that are the SUBSCRIPTION. The mailer's high-water
-     marks (lastSentAt / lastCheckedAt / lastUpdateDate) travel with it on
-     purpose: an alert that arrives without them looks brand new, and
+     marks (lastSentAt / lastJobAt / lastCheckedAt / lastUpdateDate) travel with
+     it on purpose: an alert that arrives without them looks brand new, and
      newJobsFor() with an empty `since` matches the entire catalogue — so
-     dropping them would answer a merge with one enormous e-mail. */
+     dropping them would answer a merge with one enormous e-mail. `lastJobAt`
+     is the JOB window specifically (lastSentAt is only when a digest last
+     went out), so a merge that dropped it would re-announce every posting back
+     to the newest mark it still had. */
   var ALERT_FIELDS = ['name', 'email', 'frequency', 'enabled', 'criteria',
-                      'createdAt', 'lastSentAt', 'lastCheckedAt', 'lastUpdateDate',
-                      'lastCandidateAt', 'lastSentCount'];
+                      'createdAt', 'lastSentAt', 'lastJobAt', 'lastCheckedAt',
+                      'lastUpdateDate', 'lastCandidateAt', 'lastSentCount'];
 
   /** "1 job posting" / "3 job postings". Written out rather than "(s)": these
       lines are the only account of what a merge did, and they should read as
