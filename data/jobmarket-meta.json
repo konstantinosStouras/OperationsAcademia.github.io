@@ -1,25 +1,26 @@
 {
- "generated": "2026-08-26T22:29:33.707Z",
- "count": 457,
- "newestPosted": "2026-08-25",
+ "generated": "2026-08-27T09:19:51.316Z",
+ "count": 469,
+ "newestPosted": "2026-08-26",
  "oldestPosted": "2025-01-03",
  "years": {
   "2026": 426,
-  "2027": 31
+  "2027": 43
  },
  "countries": {
-  "United States": 345,
-  "United Kingdom": 16,
+  "United States": 354,
+  "United Kingdom": 17,
   "China": 12,
   "Canada": 8,
   "Hong Kong": 8,
-  "Singapore": 7,
+  "Singapore": 8,
   "United Arab Emirates": 6,
   "France": 5,
   "Germany": 5,
   "India": 5,
   "Spain": 5,
   "Saudi Arabia": 3,
+  "South Korea": 3,
   "Turkey": 3,
   "Australia": 2,
   "Austria": 2,
@@ -28,7 +29,6 @@
   "Ireland": 2,
   "Lebanon": 2,
   "Oman": 2,
-  "South Korea": 2,
   "Chile": 1,
   "Denmark": 1,
   "Iraq": 1,
@@ -43,11 +43,11 @@
   "Switzerland": 1
  },
  "levels": {
-  "Assistant Professor": 336,
-  "Other Ranks": 164,
-  "Non-tenure track (teaching) position": 72,
+  "Assistant Professor": 343,
+  "Other Ranks": 168,
+  "Non-tenure track (teaching) position": 75,
   "Post-Doc": 14,
-  "Visiting Faculty (various levels)": 6
+  "Visiting Faculty (various levels)": 7
  },
  "sheets": [
   "1zJPoPCUm11AZ5B74pzmaZKGNSUqU7onIIRQSzIxDkq8"
