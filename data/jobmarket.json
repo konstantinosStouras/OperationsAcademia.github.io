@@ -30,6 +30,37 @@
   "owner": ""
  },
  {
+  "id": "2027-babson-college-20260826",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-26",
+  "institution": "Babson College",
+  "department": "Operations and Information Management",
+  "school": "",
+  "unit": "Operations and Information Management",
+  "type": "University",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "comments": "Full-time, tenure-track Assistant Professor in Information Systems (including digital technologies and analytics) starting in the 2027-28 academic year. Our expectation is to hire at the Assistant level, but individuals with exceptional experience could be considered at the Associate level.",
+  "country": "United States",
+  "adUrl": "https://www.higheredjobs.com/institution/details.cfm?JobCode=179538935&Title=Assistant%20Professor%20in%20Information%20Systems",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Babson%20College",
+  "characteristics": [],
+  "featured": false,
+  "source": "jobmarket-sheet",
+  "addedAt": "2026-08-27T15:48:19Z",
+  "owner": ""
+ },
+ {
   "id": "2027-california-state-university-stanislaus-20260825",
   "year": 2027,
   "years": [
@@ -257,9 +288,8 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "November 5, 2026",
-  "applyByDate": "2026-11-05",
-  "reviewDate": "2026-10-05",
+  "applyBy": "October 5, 2026",
+  "applyByDate": "2026-10-05",
   "comments": "Open date: August 21, 2026 Next review date: Monday, Oct 5, 2026 at 11:59pm (Pacific Time) Apply by this date to ensure full consideration by the committee. Final date: Thursday, Nov 5, 2026 at 11:59pm (Pacific Time) Applications will continue to be accepted until this date, but those received after the review date will only be considered if the position has not yet been filled.",
   "country": "United States",
   "adUrl": "https://recruit.apo.ucla.edu/JPF11233",
