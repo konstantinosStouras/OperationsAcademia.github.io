@@ -1864,12 +1864,13 @@
   "department": "Desautels Faculty of Management, Operations Management",
   "school": "Desautels Faculty of Management",
   "unit": "Operations Management",
-  "type": "University",
+  "type": "Business School",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 15, 2026",
-  "applyByDate": "2026-10-15",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
   "comments": "Tenure-track position in Operations Management.",
   "country": "Canada",
   "adUrl": "https://drive.google.com/open?id=19ycjWPZ76lQKZXUsGo0vFMJj_28YLEFl",
@@ -1977,39 +1978,6 @@
   "characteristics": [],
   "featured": false,
   "source": "jobmarket-sheet",
-  "addedAt": "2026-07-20T00:00:00Z",
-  "owner": ""
- },
- {
-  "id": "2026-university-of-mannheim-20260720",
-  "year": 2026,
-  "years": [
-   2026,
-   2027
-  ],
-  "posted": "2026-07-20",
-  "institution": "University of Mannheim",
-  "department": "Operations Management",
-  "school": "",
-  "unit": "Operations Management",
-  "type": "University",
-  "levels": [
-   "Other Ranks"
-  ],
-  "applyBy": "September 15, 2026",
-  "applyByDate": "2026-09-15",
-  "comments": "",
-  "country": "Germany",
-  "adUrl": "https://drive.google.com/open?id=1kqmS-itVXheKCRz4cT_DzStMyOMzp0Jn",
-  "adLabel": "link to Job ad",
-  "postedAtUrl": "https://www.bwl.uni-mannheim.de/media/Lehrstuehle/bwl/Stolletz/Jobs/2026_07_16_PhD_OperationsAnalytics.pdf/flipbook",
-  "postedAtLabel": "link",
-  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Mannheim",
-  "characteristics": [
-   "PhD"
-  ],
-  "featured": false,
-  "source": "sheet-import",
   "addedAt": "2026-07-20T00:00:00Z",
   "owner": ""
  },

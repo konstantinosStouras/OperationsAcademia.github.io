@@ -9864,18 +9864,11 @@
   "school": "Business School",
   "department": "Operations Management",
   "type": "Business School",
-  "country": "Germany",
   "deptUrl": "https://www.mannheim-business-school.com/en/the-mannheim-experience/faculty-research/faculty/",
-  "characteristics": [
-   "PhD"
-  ],
   "sources": [
    "omlist",
-   "postings",
    "seed"
-  ],
-  "n": 1,
-  "lastPosted": "2026-07-20"
+  ]
  },
  {
   "id": "university-of-maryland____om-is",
