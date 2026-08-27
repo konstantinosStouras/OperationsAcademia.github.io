@@ -1279,6 +1279,65 @@ permission-denied, and they say **reload first**, because the copy of the panel
 reporting a missing deploy may itself predate it — which is exactly what
 happened the morning it went live.
 
+### A reader can take a message off their own list
+
+Owner, 2026-08-27: *any past message may be removed from the user's list of
+messages.* Two rules already written down in this file meet here, and between
+them they settle the whole shape:
+
+* **a thread whose history either party can rewrite is not a record of
+  anything** — the sentence the items rule was built around. So this cannot be
+  a delete. The words stay where they were said, the maintainer's copy of the
+  conversation is whole, and what changes is ONE reader's own list, which is
+  theirs to tidy;
+* **hiding is never a one-way door** (`newsOverrides`, `rowOverrides`,
+  `directoryEdits`). Filter the message off the page entirely and there is
+  nothing left to press to bring it back. So the removed ones sit in a
+  **collapsed panel below the list**, one click from Restore, and the list
+  itself stays clean.
+
+**One boolean, `hiddenForUser`, and the owner may touch nothing else on a
+message.** `diff(resource.data).affectedKeys().hasOnly(['hiddenForUser'])` is
+what keeps "remove it from my list" from becoming "edit what you said to me":
+the body, `from` and the timestamp are all outside it. `ITEM_OWNER_KEYS` in
+`oa-users.js` is pinned against that branch both ways, exactly as `ITEM_KEYS`
+is against the create rule.
+
+**It is always written as a boolean and the field is never deleted.** The rule
+tests `hiddenForUser is bool`, so restoring with `FieldValue.delete()` would be
+refused — and "you can always put it back" would be false exactly once, which
+is the failure this repository has already shipped twice under a different
+name. Restore writes `false`.
+
+**The Admin area still shows a removed message**, faded at the same 0.55
+`.oa-dir-hidden` uses and labelled *Removed from their list*. That is not a
+leak of anything — the maintainer wrote or received it — it is so that a
+maintainer quoting back a message the other person can no longer see is not
+talking past them.
+
+**The reply box is drawn OUTSIDE the list**, after the removed panel. A reader
+who removes every message still has a thread and must still be able to answer
+in it; the empty list then says where the messages went, which is a different
+state from the "you have no messages" one a person the maintainer has never
+written to sees.
+
+**The badge does not move.** It counts what is UNREAD, not what the page lists
+— the one badge on this site whose number is deliberately not the number of
+cards below it — so removing a message is not a way to clear it, and the panel
+below does not inflate it either.
+
+The sibling `/lit/` carries the same two collections in the same SHAPE and does
+**not** carry this control; the two are kept in step in shape, not in code, so
+that is a deliberate divergence rather than an oversight, and the obvious next
+change if the same request is made there. Disclosed on the Privacy Policy
+beside the roster, because "removing hides it from you and the maintainer keeps
+their copy" is exactly the sort of thing a policy that says nothing gets wrong.
+
+**Inert until the rules are redeployed** — which now happens by itself after a
+green check on master (see "…and the FIRESTORE rules publish themselves"); until
+then the button reports that it is not switched on rather than a bare
+permission-denied.
+
 ### The roster is seeded from Auth, or it lists whoever happened to come back
 
 "31 Registered users" over a roster listing **one person** (owner, 2026-08-25).
@@ -1332,11 +1391,14 @@ a tab held two seasons, and an empty space where a control belongs reads as the
 control being MISSING — which is how it was reported.
 
 Tests: `testUsersAndMessages` in `_scraper/selftest.mjs` (the rules against the
-module BOTH WAYS for all three key sets, the pinned address, the write-once
-`first`, the owner's two narrowed updates, CSV injection, nulls-last sorting,
-and the wiring on all four pages) and the roster/messaging block in
-`_scraper/page-test.mjs` (the money path in a real browser, hostile input
-included, plus the 390px gate).
+module BOTH WAYS for all FOUR key sets — the roster row, the thread head, a
+message, and the one key its READER may change — the pinned address, the
+write-once `first`, the owner's narrowed updates, that a reader can hide a
+message and never delete one, CSV injection, nulls-last sorting, and the wiring
+on all four pages) and the roster/messaging block in `_scraper/page-test.mjs`
+(the money path in a real browser, hostile input included, the remove/restore
+round trip asserted to leave the body, `from` and the timestamp untouched, a
+thread whose messages are all removed still answerable, plus the 390px gate).
 
 ## What "immediate" costs, and where the waiting used to be
 

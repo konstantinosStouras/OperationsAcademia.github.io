@@ -4880,6 +4880,11 @@ for (const w of [320, 360, 390, 430]) {
     /* Bea has replied and is waiting — the one thing here that is a QUEUE */
     { path: 'messages/u-msg-2', data: { uid: 'u-msg-2', lastAt: 5000, lastFrom: 'user',
         needsAdmin: true, userUnread: 1 } },
+    /* one message she has already taken OFF her own list. It is still in the
+       thread — the maintainer's copy is the record — so the Admin area shows
+       it and her page files it under "Removed messages". */
+    { path: 'messages/u-msg-2/items/m0', data: { from: 'admin', body: 'An older note.',
+        t: 3000, hiddenForUser: true } },
     { path: 'messages/u-msg-2/items/m1', data: { from: 'admin', body: 'Hello Bea.', t: 4000 } },
     { path: 'messages/u-msg-2/items/m2', data: { from: 'user', body: 'Hello back.', t: 5000 } },
 
@@ -4964,6 +4969,20 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForSelector('#oa-aa-users-thread .oa-u-msg', { timeout: 10000 });
     ok((await q.textContent('#oa-aa-users-thread')).indexOf('Hello back.') !== -1,
       'roster: …and the maintainer can read the reply that is waiting for them');
+
+    /* A message the reader has REMOVED from their own list is still here, and
+       is drawn as exactly that. Removing is a hide, not a delete: the words
+       stay where they were said, and a maintainer quoting back something the
+       other person can no longer see is talking past them. */
+    ok((await q.textContent('#oa-aa-users-thread')).indexOf('An older note.') !== -1,
+      'roster: a message the reader removed from THEIR list is still in the ' +
+      'maintainer’s copy — removing is a hide, never a delete');
+    eq(await q.locator('#oa-aa-users-thread .oa-u-msg.is-gone').count(), 1,
+      'roster: …drawn faded');
+    ok((await q.textContent('#oa-aa-users-thread .oa-u-msg.is-gone'))
+      .indexOf('Removed from their list') !== -1,
+      'roster: …and labelled, so the maintainer knows what the other person ' +
+      'can no longer see');
     await q.click('#oa-u-close');
     await q.fill('#oa-u-filter', '');
     await q.waitForFunction(() =>
@@ -5065,6 +5084,88 @@ for (const w of [320, 360, 390, 430]) {
       'messages: and it RAISES the maintainer’s flag — the queue on the Admin ' +
       'area cannot be emptied by the person waiting in it');
     eq(reply.head.lastFrom, 'user', '…recording who spoke last');
+
+    /* ------------------------------------------------------------------
+       REMOVING A MESSAGE FROM YOUR OWN LIST (owner, 2026-08-27).
+       ------------------------------------------------------------------ */
+
+    /* It arrives already true of the seed: the message she removed before is
+       off the list and waiting in the panel below it. */
+    ok((await q.textContent('#oa-msg-list .oa-u-thread')).indexOf('An older note.') === -1,
+      'messages: a message the reader has removed is OFF their list');
+    ok((await q.textContent('.oa-msg-removed')).indexOf('An older note.') !== -1,
+      'messages: …and is in the collapsed “Removed messages” panel — hiding is ' +
+      'never a one-way door, so there is something left on the page to press');
+
+    /* Removing one writes the ONE boolean the rules allow, and nothing else:
+       the body, `from` and the timestamp must come back untouched, or "the
+       maintainer keeps the record" is not true. */
+    const before = await q.evaluate(() => window.__fb.dump()['messages/u-msg-2/items/m1']);
+    await q.click('#oa-msg-list .oa-u-thread .oa-u-hide[data-act="remove"]');
+    await q.waitForFunction(() =>
+      (window.__fb.dump()['messages/u-msg-2/items/m1'] || {}).hiddenForUser === true,
+      null, { timeout: 10000 });
+    const after = await q.evaluate(() => window.__fb.dump()['messages/u-msg-2/items/m1']);
+    eq({ from: after.from, body: after.body, t: after.t },
+      { from: before.from, body: before.body, t: before.t },
+      'messages: removing writes ONE boolean and touches nothing else — not the ' +
+      'body, not `from`, not the timestamp');
+    await q.waitForFunction(() => {
+      const l = document.querySelector('#oa-msg-list .oa-u-thread');
+      return l && l.textContent.indexOf('Hello Bea.') === -1;
+    }, null, { timeout: 10000 });
+    ok(true, 'messages: …and it leaves the list at once');
+
+    /* It went into the panel, and the panel really opens. */
+    await q.click('.oa-msg-removed > summary');
+    await q.waitForSelector('.oa-msg-removed .oa-u-hide[data-act="restore"]', { timeout: 10000 });
+    ok((await q.textContent('.oa-msg-removed')).indexOf('Hello Bea.') !== -1,
+      'messages: the removed message is in the panel, with Restore beside it');
+
+    /* Restore writes `false` and never a field deletion — the rules test
+       `hiddenForUser is bool`, so deleting the key would be refused and
+       "you can always put it back" would be false exactly once. */
+    /* Scoped to the CARD: the panel holds the seeded removal too, and
+       page.click() takes the first match — which would restore the wrong one
+       and leave this measuring nothing. */
+    await q.locator('.oa-msg-removed .oa-u-msg', { hasText: 'Hello Bea.' })
+      .locator('.oa-u-hide[data-act="restore"]').click();
+    await q.waitForFunction(() =>
+      (window.__fb.dump()['messages/u-msg-2/items/m1'] || {}).hiddenForUser === false,
+      null, { timeout: 10000 });
+    await q.waitForFunction(() => {
+      const l = document.querySelector('#oa-msg-list .oa-u-thread');
+      return l && l.textContent.indexOf('Hello Bea.') !== -1;
+    }, null, { timeout: 10000 });
+    ok(true, 'messages: Restore puts it back on the list — and writes the ' +
+      'boolean false, never a deleted field the rules would refuse');
+
+    /* A READER WHO REMOVES EVERYTHING STILL HAS A THREAD. The reply box lives
+       outside the list for exactly this: they must still be able to answer. */
+    const onList = () =>
+      q.locator('#oa-msg-list .oa-u-thread .oa-u-hide[data-act="remove"]').count();
+    for (let left = await onList(); left > 0; left = await onList()) {
+      await q.locator('#oa-msg-list .oa-u-thread .oa-u-hide[data-act="remove"]')
+        .first().click();
+      /* Wait for the RE-RENDER rather than for a stopwatch: the write and the
+         re-read are a round trip, and a fixed pause is how a green test starts
+         failing on a slower machine. */
+      const want = left - 1;
+      await q.waitForFunction(
+        (n) => document.querySelectorAll(
+          '#oa-msg-list .oa-u-thread .oa-u-hide[data-act="remove"]').length === n,
+        want, { timeout: 10000 });
+    }
+    ok(await q.locator('#oa-msg-body').count() === 1
+      && await q.locator('#oa-msg-send').count() === 1,
+      'messages: a reader who has removed EVERY message can still reply — the ' +
+      'reply box is drawn outside the list, not inside it');
+    ok((await q.textContent('#oa-msg-list')).indexOf('removed every message') !== -1,
+      'messages: …and the empty list says where they went rather than reading ' +
+      'as a thread that was never there');
+    ok(await q.locator('#oa-msg-empty').isHidden(),
+      'messages: which is NOT the "you have no messages" state — that one is ' +
+      'for a person the maintainer has never written to');
 
     eq(errors, [], 'messages: reader run — no uncaught script error');
     await ctx.close();

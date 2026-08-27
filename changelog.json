@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "messages-remove-from-your-list",
+      "date": "2026-08-27",
+      "title": "Remove any message from your list — and put it back",
+      "summary": "Every message in your personal area now carries a Remove control, so a conversation you have finished with does not have to sit there for ever. Removing is not deleting and it is not a one-way door: the message drops out of your list into a collapsed “Removed messages” panel underneath it, one click from Restore. It changes only what you see — the message stays part of the conversation and the site’s maintainer keeps their own copy, so neither side can rewrite what was said. You can still reply in a thread whose messages you have all removed.",
+      "url": "https://www.operationsacademia.org/messages.html"
+    },
+    {
       "id": "market-year-from-the-deadline",
       "date": "2026-08-26",
       "title": "A posting is filed under the season its apply-by date falls in",

@@ -4629,9 +4629,79 @@ async function testUsersAndMessages() {
     && /isOwner\(uid\) && request\.resource\.data\.from == 'user'/.test(items),
     '`from` is pinned to whoever is actually writing — neither side can put ' +
     'words in the other’s mouth');
-  ok(/allow update, delete: if isAdmin\(\);/.test(items),
-    'only the maintainer may retract a message: a thread whose history either ' +
+  ok(/allow delete: if isAdmin\(\);/.test(items),
+    'only the maintainer may RETRACT a message: a thread whose history either ' +
     'party can rewrite is not a record of anything');
+
+  /* ------------- a reader may take a message off their OWN list ----------- */
+
+  /* THE OWNER'S UPDATE IS ONE KEY WIDE. `hasOnly` on the diff is what keeps
+     "remove it from my list" from becoming "edit what you said to me": the
+     body, `from` and the timestamp are all outside it, so the maintainer's
+     copy of the conversation cannot be rewritten by the person reading it. */
+  const ownerItem = items.slice(items.indexOf('allow update'));
+  ok(/isOwner\(uid\)/.test(ownerItem)
+    && /affectedKeys\(\)\s*\n?\s*\.hasOnly\(\['hiddenForUser'\]\)/.test(ownerItem),
+    'a reader may take a message off their own list \u2014 and may touch NOTHING ' +
+    'else on it: not the body, not `from`, not the timestamp');
+  ok(/request\.resource\.data\.hiddenForUser is bool/.test(ownerItem),
+    '\u2026and it is always a BOOLEAN, never a deleted field \u2014 restoring by ' +
+    'deleting the key would be refused, and "you can always put it back" ' +
+    'would be false exactly once');
+  eq([...keysOf(items, items.indexOf('allow update'))].sort(),
+    [...U.ITEM_OWNER_KEYS].sort(),
+    'the owner\u2019s branch allows exactly the one key oa-messages.js writes there');
+
+  /* REMOVING IS A HIDE, NOT A DELETE \u2014 the whole shape of the feature, and
+     the rules are where that is true rather than only in the copy. */
+  ok(!/isOwner\(uid\)/.test(items.slice(items.indexOf('allow delete'))),
+    'a reader can never DELETE a message: removing is a hide, so the words ' +
+    'stay where they were said and the maintainer keeps the record');
+
+  ok(/hiddenForUser: !!hide/.test(msgs) && !/FieldValue|deleteField/.test(msgs),
+    'the page writes the boolean the rules test for, and never a field ' +
+    'deletion the rules would refuse');
+  ok(/hiddenForUser === true \? removed : kept/.test(msgs),
+    '\u2026and splits the thread into what is on the list and what has been ' +
+    'taken off it');
+
+  /* HIDING IS NEVER A ONE-WAY DOOR \u2014 the trap newsOverrides and rowOverrides
+     both record. Filtered off the page entirely there would be nothing left
+     to press, so the removed ones sit in a collapsed panel with Restore. */
+  ok(/oa-msg-removed/.test(msgs) && /Removed messages \(/.test(msgs)
+    && /Restore/.test(msgs),
+    'HIDING IS NEVER A ONE-WAY DOOR: the removed messages sit in a collapsed ' +
+    'panel below the list, one click from Restore');
+
+  /* A reader who removes everything still has a thread and must still be able
+     to answer in it \u2014 so the reply box is drawn OUTSIDE the list. */
+  ok(msgs.indexOf('oa-msg-reply') > msgs.indexOf('oa-msg-removed'),
+    'the reply box is drawn after the removed panel, outside the list: a ' +
+    'reader who has removed every message can still answer');
+  ok(/id="oa-msg-body"/.test(msgs.slice(msgs.indexOf('oa-msg-reply'))),
+    '\u2026and it really is the reply box that sits there');
+
+  /* Remove is keyed on the DOCUMENT id read off the snapshot, never on a
+     position in the list \u2014 a message arriving mid-read must not be able to
+     point a button at its neighbour. */
+  ok(/m\.id = d\.id/.test(msgs) && /data-id="' \+ esc\(m\.id\)/.test(msgs),
+    'Remove is keyed on the message\u2019s own document id, taken from the ' +
+    'snapshot rather than from an index');
+
+  /* The maintainer's copy is the RECORD, and their panel says what the other
+     person can still see \u2014 quoting back a message they no longer have is
+     talking past them. */
+  const ui = await readFile(path.join(HERE, '..', 'assets', 'oa-ui.css'), 'utf8');
+  ok(/m\.hiddenForUser === true/.test(users) && /Removed from their list/.test(users),
+    'the Admin area still shows a removed message, faded and labelled as ' +
+    'exactly that: the maintainer can see what the other person no longer has');
+  ok(/is-gone/.test(users) && /\.oa-u-msg\.is-gone/.test(ui),
+    '\u2026at the same 0.55 .oa-dir-hidden uses, so "set aside" looks the same ' +
+    'wherever this site says it');
+  ok(/\.oa-msg-removed \{/.test(ui) && /background: var\(--bg-3/.test(
+      ui.slice(ui.indexOf('.oa-msg-removed {'))),
+    'and the removed panel paints its own ground, so it names its own ink \u2014 ' +
+    'the rule oa-ui.css\u2019s own header states');
   ok(/exists\(\/databases\/\$\(database\)\/documents\/messages\/\$\(uid\)\)/.test(items),
     'A REPLY NEEDS A THREAD TO REPLY TO — without it an owner could write ' +
     'unbounded documents under their own uid that no thread head points at, ' +

@@ -1927,6 +1927,49 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 .oa-u-when { float: right; font-size: 12px; color: var(--mut, #646c78); }
 .oa-u-msg p { margin: 6px 0 0; font-size: 15px; line-height: 1.55; }
 
+/* A message the reader has taken off their own list. Faded at the SAME 0.55
+   `.oa-dir-hidden` uses for a hidden directory row, so "this is set aside" looks
+   the same wherever the site says it. */
+.oa-u-msg.is-gone { opacity: 0.55; }
+
+/* Remove / Restore. `clear` because `.oa-u-when` floats right and this is the
+   last line of the card — without it the button rides up beside the date on a
+   one-line message. */
+.oa-u-act { clear: both; margin: 8px 0 0; }
+.oa-u-hide {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--mut, #646c78);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.oa-u-hide:hover:not([disabled]) { color: var(--brand, #3a424d); }
+.oa-u-hide[disabled] { opacity: 0.55; cursor: default; }
+
+/* …and where the removed ones wait. Collapsed, below the list, drawn only when
+   there is something in it — the door this repository keeps open twice already
+   (newsOverrides, rowOverrides). It paints its own ground, so it names its own
+   ink: the rule this stylesheet's own header states. */
+.oa-msg-removed {
+  margin: 14px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft, #ececec);
+  border-radius: 6px;
+  background: var(--bg-3, #f7f8fa);
+  color: var(--ink, #23272e);
+}
+.oa-msg-removed > summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink, #23272e);
+}
+.oa-msg-removed .oa-hint { margin: 8px 0; }
+.oa-msg-removed .oa-u-thread { margin-bottom: 0; }
+
 .oa-msg-reply textarea,
 #oa-aa-users-compose textarea { width: 100%; font-size: 16px; }
 
@@ -1936,4 +1979,8 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   .oa-u-count { margin-right: 0; width: 100%; }
   .oa-u-table { font-size: 13px; }
   .oa-u-table th, .oa-u-table td { padding: 7px 8px; }
+  /* Remove / Restore is a text button, and a text button on a phone is a tap
+     target before it is a link: padded to a finger rather than a cursor. */
+  .oa-u-act { margin-top: 4px; }
+  .oa-u-hide { padding: 8px 0; display: inline-block; }
 }
