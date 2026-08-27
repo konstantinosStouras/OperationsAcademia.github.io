@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:43:50.709Z",
+ "generated": "2026-08-27T09:46:08.546Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -275,6 +275,10 @@
   },
   {
    "v": "Indiana State University",
+   "n": 2
+  },
+  {
+   "v": "Indiana University",
    "n": 2
   },
   {
@@ -763,10 +767,6 @@
   },
   {
    "v": "IIM Ahmedabad",
-   "n": 1
-  },
-  {
-   "v": "Indiana University",
    "n": 1
   },
   {
@@ -2104,6 +2104,10 @@
    "n": 2
   },
   {
+   "v": "Kelley School of Business",
+   "n": 2
+  },
+  {
    "v": "Max M. Fisher College of Business",
    "n": 2
   },
@@ -2253,10 +2257,6 @@
   },
   {
    "v": "Judge Business School",
-   "n": 1
-  },
-  {
-   "v": "Kelley School of Business",
    "n": 1
   },
   {
@@ -3182,6 +3182,10 @@
    "n": 2
   },
   {
+   "v": "Operations and Decision Technologies",
+   "n": 2
+  },
+  {
    "v": "Operations and Information Management",
    "n": 2
   },
@@ -3771,10 +3775,6 @@
   },
   {
    "v": "Operations and Decision Analytics",
-   "n": 1
-  },
-  {
-   "v": "Operations and Decision Technologies",
    "n": 1
   },
   {
