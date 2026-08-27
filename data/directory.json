@@ -191,6 +191,18 @@
   "lng": 46.6759664
  },
  {
+  "id": "alma-college____business-administration",
+  "institution": "Alma College",
+  "department": "Business Administration",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "american-university-in-the-emirates____business-intelligence-da",
   "institution": "American University in the Emirates",
   "department": "Business Intelligence /DA",

@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T15:54:02.022Z",
+ "generated": "2026-08-27T15:58:56.147Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -459,6 +459,10 @@
   },
   {
    "v": "Ajman University",
+   "n": 1
+  },
+  {
+   "v": "Alma College",
    "n": 1
   },
   {
@@ -3062,15 +3066,15 @@
    "n": 5
   },
   {
+   "v": "Business Administration",
+   "n": 4
+  },
+  {
    "v": "SCM/Logistics",
    "n": 4
   },
   {
    "v": "Analytics and Operations",
-   "n": 3
-  },
-  {
-   "v": "Business Administration",
    "n": 3
   },
   {
@@ -4659,6 +4663,17 @@
    "schools": [],
    "units": [],
    "bySchool": {}
+  },
+  "Alma College": {
+   "schools": [],
+   "units": [
+    "Business Administration"
+   ],
+   "bySchool": {
+    "": [
+     "Business Administration"
+    ]
+   }
   },
   "American University in the Emirates": {
    "schools": [],
