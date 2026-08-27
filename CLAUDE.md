@@ -774,16 +774,40 @@ Approving writes Firestore; the BUILD turns that into a row in
 queue and not on the site — which reads exactly like an approval that did not
 save.
 
-**The doorbell that was supposed to close that gap has never rung.**
-`publishOnReview` and `publishOnChange` are in `_functions/index.js` and neither
-is deployed: the `oa-jobreview-decided` dispatch has **zero runs, ever**, and
-all 251 `oa-jobs-changed` dispatches were sent by `github-actions[bot]` — the
-sheet workflow's own final curl — never by the function. So an approval waits
-for the build's 20-minute schedule while the card said "publishing starts now".
-That is this file's own recorded trap: *a doorbell that was never deployed looks
-exactly like a site that is simply slow*. One `firebase deploy --only functions
---project operations-academia` fixes it for everybody; nothing in CI performs
-it.
+**The doorbell that was supposed to close that gap has never rung, and the
+reason took two wrong guesses to find.** The observation is not in doubt: the
+`oa-jobreview-decided` dispatch has **zero runs, ever**, and all 251
+`oa-jobs-changed` dispatches were sent by `github-actions[bot]` — the sheet
+workflow's own final curl — never by a function. So an approval waits for the
+build's 20-minute schedule while the card said "publishing starts now".
+
+*Not* because the functions were undeployed, which is what that evidence was
+first read as. `firebase deploy --only functions` reported `updating` for
+`publishOnChange` and `publishOnReview`; they have existed since 2026-08-18 and
+2026-08-23, they fire on every write, and `publishOnReview` logs
+`skip: not a decision` for a pending document exactly as designed. **They fail
+at the last line**:
+
+    publishonchange: {"http":401,"body":"{\"message\":\"Bad credentials\"}"}
+
+`GH_DISPATCH_TOKEN` — the fine-grained PAT the three doorbells POST with — is
+invalid. GitHub says *Bad credentials*, which is a dead token, not a scope
+problem (that answers 403 or 404). Fine-grained PATs default to **30-day
+expiry**, which `_SETUP-INSTANT-PUBLISH.md` warns about in the same words the
+log uses. The remedy is that document's steps 1–3, and **the redeploy is not
+optional**: each function pins a secret VERSION (`GH_DISPATCH_TOKEN` version 1
+in the deployed config), so a new secret version is invisible until the
+functions are deployed again.
+
+**So the trap this file records is real but sharper than it was written.** A
+doorbell that was never deployed looks exactly like a site that is simply slow
+— and so does a deployed one whose credential died, except that this second
+shape ALSO looks, from every surface a person sees, exactly like the first. The
+only place the truth appears is `firebase functions:log`, which nobody reads
+until something is already wrong. That is why nothing in the copy may promise
+the doorbell's speed (see the panel's wording, pinned in `selftest.mjs`), and it
+is the standing argument for making this failure visible somewhere a person
+actually looks.
 
 So the approval is **echoed**, the way a saved EDIT already is
 (`assets/oa-fresh.js`): the published row is left in that browser's
