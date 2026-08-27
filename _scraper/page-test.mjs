@@ -284,15 +284,38 @@ ok(legacyCountry.some((c) => /United States/.test(c)),
 const legacyRows = await page.$$eval('.oa-card', (ns) => ns.length);
 ok(legacyRows > 0, 'and still shows the postings it was shared to show');
 
-// the legacy Awesome Table deep link the footer and the "Further info" column
-// still emit must keep working
-await page.goto(BASE + V2 + 'jobs.html?filterA=University%20of%20Mannheim',
-  { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('.oa-card, .oa-empty');
-await page.waitForTimeout(300);
-const mannheim = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
-ok(mannheim.length > 0 && mannheim.every((t) => /Mannheim/.test(t)),
-  'the legacy ?filterA= deep link still selects an institution');
+/* The legacy Awesome Table deep link the footer and the "Further info" column
+   still emit must keep working — and BOTH it and the ?filterD= check further
+   down are about the PARAMETER, never about a particular school.
+
+   THE INSTITUTION IS TAKEN FROM THE LIST, never hardcoded — the same rule the
+   country above follows, written down there for the same reason. Both named
+   "University of Mannheim" until 2026-08-27, when master's own build took that
+   school's last current-market posting off the site and the run went red on
+   data nobody had touched. This page shows the season under way, so an
+   institution that is on it today can legitimately be gone tomorrow: pinning
+   one is the browser-check form of a guard that names a row instead of a rule,
+   which this repository has now been caught by three times. */
+await page.goto(BASE + V2 + 'jobs.html', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.oa-card');
+const deepInst = (await page.$eval('.oa-card-title', (n) => n.textContent)).trim();
+const deepTotal = Number((await page.$eval('.oa-count', (n) => n.textContent)).split('/')[1].trim());
+
+/* the WHOLE card, because these filters search the institution AND the
+   department: a row selected on its department is a hit the deep link is
+   supposed to return, not a failure */
+const cardsFor = async (param) => {
+  await page.goto(BASE + V2 + `jobs.html?${param}=` + encodeURIComponent(deepInst),
+    { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.oa-card, .oa-empty');
+  await page.waitForTimeout(300);
+  return page.$$eval('.oa-card', (ns) => ns.map((n) => n.textContent));
+};
+
+const viaA = await cardsFor('filterA');
+ok(viaA.length > 0 && viaA.length <= deepTotal && viaA.every((t) => t.includes(deepInst)),
+  `the legacy ?filterA= deep link still selects an institution ` +
+  `(${viaA.length} of ${deepTotal} for "${deepInst}")`);
 
 /* ------------------------------------------ the Deadline filter's own words
 
@@ -511,14 +534,13 @@ await page.waitForTimeout(400);
 ok(page.url().includes('utm_source=newsletter'),
   'a foreign query parameter is not erased from the address bar');
 
-// the Universities map deep-links institutions as ?filterD=
-await page.goto(BASE + V2 + 'jobs.html?filterD=University%20of%20Mannheim',
-  { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('.oa-card, .oa-empty');
-await page.waitForTimeout(300);
-const viaD = await page.$$eval('.oa-card-title', (ns) => ns.map((n) => n.textContent));
-ok(viaD.length > 0 && viaD.every((t) => /Mannheim/.test(t)),
-  'the Universities map\'s ?filterD= deep link selects an institution');
+// the Universities map deep-links institutions as ?filterD= — the same
+// institution the ?filterA= check above took from the list, for the same
+// reason it is taken rather than named
+const viaD = await cardsFor('filterD');
+ok(viaD.length > 0 && viaD.length <= deepTotal && viaD.every((t) => t.includes(deepInst)),
+  `the Universities map's ?filterD= deep link selects an institution ` +
+  `(${viaD.length} of ${deepTotal} for "${deepInst}")`);
 
 // safeUrl refuses every protocol-relative and backslash disguise
 eq(await page.evaluate(() =>
