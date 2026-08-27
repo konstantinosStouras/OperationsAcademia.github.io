@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-26T10:47:41.857Z",
+ "generated": "2026-08-27T10:08:03.350Z",
  "postings": [
   {
    "id": "2026-mcgill-university-20260728",
@@ -7,11 +7,11 @@
    "institution": "McGill University",
    "department": "Desautels Faculty of Management, Operations Management",
    "posted": "2026-07-28",
-   "applyByDate": "2026-10-15",
-   "reviewDate": "",
+   "applyByDate": "",
+   "reviewDate": "2026-10-15",
    "stored": 2026,
    "should": 2027,
-   "from": "final",
+   "from": "review",
    "current": true
   },
   {

@@ -1688,12 +1688,13 @@
   "department": "Desautels Faculty of Management, Operations Management",
   "school": "Desautels Faculty of Management",
   "unit": "Operations Management",
-  "type": "University",
+  "type": "Business School",
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "October 15, 2026",
-  "applyByDate": "2026-10-15",
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-10-15",
   "comments": "Tenure-track position in Operations Management.",
   "country": "Canada",
   "adUrl": "https://drive.google.com/open?id=19ycjWPZ76lQKZXUsGo0vFMJj_28YLEFl",

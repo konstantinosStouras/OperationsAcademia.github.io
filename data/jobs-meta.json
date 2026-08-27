@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:46:08.546Z",
+ "generated": "2026-08-27T10:08:03.350Z",
  "count": 569,
  "years": {
   "2026": 496,
@@ -7,8 +7,8 @@
   "2028": 1
  },
  "types": {
-  "University": 354,
-  "Business School": 179
+  "University": 353,
+  "Business School": 180
  },
  "levels": {
   "Assistant Professor": 411,
