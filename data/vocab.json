@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:32:07.245Z",
+ "generated": "2026-08-27T09:34:23.428Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -95,6 +95,10 @@
   },
   {
    "v": "Fayetteville State University",
+   "n": 3
+  },
+  {
+   "v": "Hofstra University",
    "n": 3
   },
   {
@@ -243,10 +247,6 @@
   },
   {
    "v": "Grand Valley State University",
-   "n": 2
-  },
-  {
-   "v": "Hofstra University",
    "n": 2
   },
   {
@@ -2208,6 +2208,10 @@
    "n": 1
   },
   {
+   "v": "Frank G. Zarb School of Business",
+   "n": 1
+  },
+  {
    "v": "Gies College of Business",
    "n": 1
   },
@@ -3519,6 +3523,10 @@
   },
   {
    "v": "Information Systems and Analytics",
+   "n": 1
+  },
+  {
+   "v": "Information Systems and Business Analytics",
    "n": 1
   },
   {
@@ -6355,13 +6363,19 @@
    }
   },
   "Hofstra University": {
-   "schools": [],
+   "schools": [
+    "Frank G. Zarb School of Business"
+   ],
    "units": [
+    "Information Systems and Business Analytics",
     "IS"
    ],
    "bySchool": {
     "": [
      "IS"
+    ],
+    "Frank G. Zarb School of Business": [
+     "Information Systems and Business Analytics"
     ]
    }
   },
@@ -11630,6 +11644,9 @@
   "Fox School of Business": [
    "Operations and Supply Chain Management",
    "Statistics, Operations, and Data Science"
+  ],
+  "Frank G. Zarb School of Business": [
+   "Information Systems and Business Analytics"
   ],
   "Freeman College of Management": [
    "Accounting and Financial Management Area, Business Analytics"
