@@ -31,9 +31,9 @@ import { createRequire } from 'node:module';
 
 import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
-  stripRowEmails,
+  stripRowEmails, withMarketYears,
   healReviewDate,
-  marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml,
+  marketYear, inCurrentMarket, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
@@ -45,9 +45,6 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
 const JOBS = path.join(DATA, 'jobs.json');
 const META = path.join(DATA, 'jobs-meta.json');
-/* The postings whose stored season disagrees with their own apply-by dates.
-   A REPORT, not a decision — see the write below. */
-const YEARCHECK = path.join(DATA, 'jobs-yearcheck.json');
 const VOCAB = path.join(DATA, 'vocab.json');
 /* The name corrections the maintainer has APPROVED from posters' suggestions
    (Firestore `nameFixes`, reviewed on admin-area.html). Served, because the
@@ -842,19 +839,36 @@ async function main() {
      fresh submission's comments used to stop the WHOLE site publishing
      (2026-08-24, from 03:14). The ingests strip too; this is the merged-set
      backstop, the healCountry pattern. */
-  const rows = visible.map((r) => stripRowEmails(healReviewDate(healCountry(r, byCountry))));
+  const healedRows = visible.map((r) => stripRowEmails(healReviewDate(healCountry(r, byCountry))));
   /* BY VALUE, not by identity. `healCountry` returns the row itself when it
      changes nothing, but `stripRowEmails` spreads unconditionally — so every
      row was a new object and this counted ALL of them, every run, then named
      the first eight as though they were the healed ones. It read
      "541 posting(s) healed … CUHK, PolyU, Tulane" on a run that healed none of
      them, which is worse than saying nothing. */
-  const recountried = rows.filter((r, i) => serialise([r]) !== serialise([visible[i]]));
+  const recountried = healedRows.filter((r, i) => serialise([r]) !== serialise([visible[i]]));
   if (recountried.length) {
     log(`${recountried.length} posting(s) healed against the directory or their own ` +
         'deadline prose: ' +
         recountried.slice(0, 8).map((r) => `${r.institution} (${r.country})`).join(', '));
   }
+
+  /* …AND THE SEASONS EACH POSTING IS LISTED UNDER — `years`, the overlap
+     (marketYearsOf in jobs-model.mjs, owner 2026-08-27). A posting advertised
+     in May for a search closing in September is in the season under way AND in
+     the one that opens in July, so it is listed under both; `year` still names
+     the one it is FOR and never moves, because it is half the row's id.
+
+     Over the MERGED SET, for the third time and for the same reason: a
+     carried ORPHAN — a posting with no document behind it — never goes back
+     through an ingest, so this is the only place it can gain a span.
+
+     AFTER the heal count deliberately. `years` is derived from fields the row
+     already carries, so the run that first writes it changes every row once,
+     and counting that as a heal would name 569 innocent postings in the log —
+     the mistake the comment above this one records. The admin change e-mail
+     is clear of it for the same reason, in `diffRows`. */
+  const rows = healedRows.map(withMarketYears);
 
   /* ------------------------------------- the form's option lists
 
@@ -953,53 +967,6 @@ async function main() {
       );
       log(`wrote ${path.relative(process.cwd(), JOBS)} and jobs-meta.json`);
     }
-  }
-
-  /* ----------------------------------- postings filed under the wrong season
-
-     WHICH MARKET YEAR A POSTING IS FOR is read off its deadline now, not off
-     the day it went up (marketYearOf in jobs-model.mjs, owner 2026-08-26).
-     That settles every posting from here on, and it deliberately does NOT
-     re-file the ones already published: a row's `year` is half its `id`, and
-     an id that moves is one `mergeRows` cannot match — the old row is carried
-     on as an orphan beside the new one and the posting appears TWICE, with
-     the card anchor and the Edit button's join key both pointing at a row
-     nobody sees.
-
-     So the disagreements are REPORTED, which is what the owner asked for:
-     "flag me under review any job postings that were possibly posted under
-     the previous job market year and were actually belonging to the current
-     job market year". FORWARD ONLY — a stored year AHEAD of the cascade is
-     the tracking sheet's tab cycle doing its documented job, and pulling one
-     back would move a live posting into a season that has closed.
-
-     It is a served file rather than a Firestore queue on purpose: it is
-     DERIVED, so it needs no rules deploy, no document to fall out of step
-     with the data, and no maintainer decision to store — the next build
-     recomputes it, and a posting the maintainer settles simply leaves the
-     list. Nothing in it is anything `data/jobs.json` does not already
-     publish, which is what keeps it clear of the no-e-mail rule the served
-     files are held to.
-
-     Written on its OWN diff (`generated` excluded), so a run in which nothing
-     disagrees commits nothing. */
-  const yearCheck = marketYearReview(rows, { now });
-  const bareCheck = (v) => JSON.stringify((v && v.postings) || []);
-  const yearCheckDoc = { generated: now.toISOString(), postings: yearCheck };
-  if (yearCheck.length) {
-    log(`${yearCheck.length} posting(s) are filed under a season their own ` +
-        'apply-by dates disagree with — listed on /admin-area for review:');
-    for (const p of yearCheck.slice(0, 8)) {
-      log(`  ? ${p.id}  ${p.stored} -> ${p.should} (${p.from})`);
-    }
-  }
-  if (bareCheck(await readJson(YEARCHECK, null)) === bareCheck(yearCheckDoc)) {
-    // unchanged — say nothing, and above all write nothing
-  } else if (DRY) {
-    log('--dry-run: not writing jobs-yearcheck.json.');
-  } else {
-    await writeFile(YEARCHECK, JSON.stringify(yearCheckDoc, null, 1) + '\n');
-    log(`wrote ${path.relative(process.cwd(), YEARCHECK)} (${yearCheck.length} to review)`);
   }
 
   /* vocab.json is written on ITS OWN diff, not with jobs.json: it also reads

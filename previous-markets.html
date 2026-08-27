@@ -261,6 +261,27 @@
           String(row.posted || '') >= start || Number(row.year) >= marketYear();
       }
 
+      /* EVERY SEASON A POSTING IS LISTED UNDER (`years`, written by the build
+         — marketYearsOf in _scraper/jobs-model.mjs). A posting advertised in
+         one season for a search closing in the next belongs to both, so the
+         year filter offers it under each and the card names both.
+
+         The fallback is not decoration: this page folds TWO files together,
+         and a row from either that predates the field would otherwise answer
+         no year at all and drop out of the filter entirely. */
+      function marketYears(row) {
+        var ys = Object.prototype.toString.call(row.years) === '[object Array]'
+          ? row.years.map(Number).filter(Boolean) : [];
+        if (!ys.length && Number(row.year)) ys = [Number(row.year)];
+        return ys;
+      }
+      function marketYearsText(row) {
+        var ys = marketYears(row);
+        if (!ys.length) return '';
+        if (ys.length === 1) return String(ys[0]);
+        return ys.slice(0, -1).join(', ') + ' and ' + ys[ys.length - 1];
+      }
+
       /* A stored link that names this site by its full URL is re-pointed at
          the page it means, so it keeps working wherever the site is served
          from. Only a slug that exists is rewritten. */
@@ -381,6 +402,10 @@
               var have = {};
               rows.forEach(function (r) { have[r.id] = true; });
               archive.forEach(function (r) { if (!have[r.id]) rows.push(r); });
+              /* the ONE place the two files meet, so the one place to make
+                 sure every row states its seasons — the year filter reads
+                 `years`, and a row without one would answer no year at all */
+              rows.forEach(function (r) { r.years = marketYears(r); });
               /* Keep BOTH: the file as served (so a correction can be undone
                  without another fetch) and the array the engine holds (so a
                  late override can rewrite it in place). */
@@ -402,7 +427,16 @@
               { key: 'university', label: 'University/Institution', type: 'text',
                 fields: ['institution', 'department'],
                 placeholder: 'Search by university or department…', legacyParam: 'filterD' },
-              { key: 'year',    label: 'Job market year', field: 'year',
+              /* EVERY season the posting is listed under, not only the one it
+                 is filed under (`years`, the overlap — marketYearsOf in
+                 _scraper/jobs-model.mjs, owner 2026-08-27). A search
+                 advertised in one season that closes in the next was open
+                 during both, so a reader browsing either finds it; the values
+                 are the same year strings the filter always offered, so
+                 ?filterB=2025 still selects 2025. `prepare` below fills the
+                 span in for a row from either file that predates the field,
+                 so nothing here can answer no year at all. */
+              { key: 'year',    label: 'Job market year', field: 'years',
                 placeholder: 'Any year', legacyParam: 'filterB' },
               { key: 'type',    label: 'Type',            field: 'type',
                 placeholder: 'All types', legacyParam: 'filterC' },
@@ -420,7 +454,7 @@
               subtitle: function (r) { return r.department; },
               rows: function (r) {
                 return [
-                  { label: 'Job market year', value: r.year ? String(r.year) : '' },
+                  { label: 'Job market year', value: marketYearsText(r) },
                   { label: 'Entry level',     value: (r.levels || []).join(', ') },
                   /* the suggested (first-review) date — the archive's legacy
                      rows carry none, and an empty row is skipped */

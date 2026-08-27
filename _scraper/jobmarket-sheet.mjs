@@ -48,7 +48,7 @@ import { isMain } from './_main.mjs';
 import { createRequire } from 'node:module';
 
 import {
-  text, url, jobId, canonCountry, canonPlace, longDate, marketYearAtLeast,
+  text, url, jobId, canonCountry, canonPlace, longDate, marketYearAtLeast, withMarketYears,
   universitiesLink,
   displayOrder, collapseSameDay, isoStamp, publicRow, OPEN_ENDED_RX,
   extractReviewDate, extractFinalDate, healReviewDate,
@@ -1059,8 +1059,11 @@ export function rowsFromTab(csv, {
     row.id = jobId(row);
     /* the fill-empty pass over the whole row — it also reads the comments
        (the notes column travels there), where a contributor sometimes puts
-       the review sentence instead of the deadline cell */
-    rows.push(healReviewDate(row));
+       the review sentence instead of the deadline cell — and then the SPAN,
+       which is read off the dates as they finally stand: data/jobmarket.json
+       is served in its own right, so it states every season a posting is
+       listed under exactly as data/jobs.json does. */
+    rows.push(withMarketYears(healReviewDate(row)));
   }
 
   return { rows, skipped, unmapped: head.unmapped || [], missing: [], unlinked,

@@ -2541,9 +2541,44 @@ for (const [name, expect] of [
     'previous-markets: the archive plus every jobs row that left the current market');
 
   const years = [...new Set([...past, ...folded].map((r) => Number(r.year)))];
-  const shownYear = Number(await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent));
-  eq(shownYear, Math.max(...years),
+  /* The cell names EVERY season the posting is listed under (`years`, the
+     overlap — owner 2026-08-27), so it is read as the numbers it carries
+     rather than as one number: a leading card that spans two seasons would
+     make Number('2025 and 2026') NaN and the check meaningless. */
+  const shownYears = (await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent))
+    .match(/\d{4}/g).map(Number);
+  ok(shownYears.includes(Math.max(...years)),
     'previous-markets: the newest past market leads the archive');
+
+  /* THE OVERLAP, end to end. A posting advertised in one season for a search
+     closing in the next is listed under BOTH, so filtering on the EARLIER of
+     its seasons must find it — under the old `year` filter it answered only
+     the later one and a reader browsing the season it was advertised in never
+     saw it. Driven off the served files, so it measures the site's own data. */
+  const spanning = [...past, ...folded].filter((r) => (r.years || []).length > 1);
+  ok(spanning.length > 0, 'previous-markets: the archive really carries spanning postings');
+  if (spanning.length) {
+    const one = spanning[0];
+    /* the season it is NOT filed under — the one the old `year` filter could
+       not answer, which is the whole of what changed */
+    const other = one.years.find((y) => Number(y) !== Number(one.year));
+    ok(other, 'previous-markets: …and one of them is a season it is not filed under');
+    const alsoUnder = await browser.newPage({ viewport: { width: 1300, height: 950 } });
+    alsoUnder.on('pageerror', (e) => jsErrors.push('previous-markets overlap: ' + e.message));
+    /* narrowed by university as well, because the list PAGINATES: a season
+       holds far more than one page of postings, and "not on page 1" is not
+       "not listed" */
+    await alsoUnder.goto(BASE + 'previous-markets.html?year=' + other +
+      '&university=' + encodeURIComponent(one.institution),
+      { waitUntil: 'domcontentloaded' });
+    await alsoUnder.waitForSelector('.oa-card, .oa-empty', { timeout: 15000 });
+    const names = await alsoUnder.$$eval('.oa-card .oa-card-title',
+      (ns) => ns.map((n) => n.textContent.trim()));
+    ok(names.some((n) => n.includes(one.institution)),
+      `previous-markets: ${one.institution} (filed under ${one.year}) is found ` +
+      `under ${other} as well — the seasons overlap`);
+    await alsoUnder.close();
+  }
 
   // ?filterD= is how the Universities map has always linked here
   const someInst = past[past.length - 1].institution.split(' ')[0];
@@ -4048,20 +4083,6 @@ for (const w of [320, 360, 390, 430]) {
   const preReveal = !validReveal || today < cmeta.revealAt;
   const metaHeld = preReveal ? (Number(cmeta.heldCount) || 0) : 0;
 
-  /* WHICH SEASON A POSTING IS FOR is read off its apply-by dates (owner,
-     2026-08-26). A posting already published is reported rather than
-     re-filed — its year is half its id — and this is what the build writes. */
-  const YEARCHECK = [
-    { id: '2026-mcgill-university-20260728', ref: '', institution: 'McGill University',
-      department: 'Desautels Faculty of Management, Operations Management',
-      posted: '2026-07-28', applyByDate: '2026-10-15', reviewDate: '',
-      stored: 2026, should: 2027, from: 'final', current: true },
-    { id: '2026-hostile-university-20260101', ref: '',
-      institution: 'Hostile University <img src=x onerror=window.__xssyc=1>',
-      department: 'Operations', posted: '2026-01-10', applyByDate: '',
-      reviewDate: '2026-09-08', stored: 2026, should: 2027, from: 'review', current: true },
-  ];
-
   const ADMIN = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
     emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
   const NOBODY = { uid: 'visitor-uid-00000000', email: 'someone@example.edu',
@@ -4161,21 +4182,17 @@ for (const w of [320, 360, 390, 430]) {
     const q = await ctx.newPage();
     const errors = [];
     q.on('pageerror', (e) => errors.push(e.message));
+    /* every address the page asks for, so a retired served file can be pinned
+       as UNREQUESTED — a fetch of a file that is no longer written is a 404 in
+       the console and nothing else says so */
+    const asked = [];
+    q.on('request', (r) => asked.push(r.url()));
     const docs = extra.length ? seedDocs.concat(extra) : seedDocs;
     await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs })};`);
     await q.route('**/firebasejs/**', (r) =>
       r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
-    /* The market-year report is a SERVED FILE the jobs build writes, so it is
-       seeded here rather than read from data/ — the committed one changes
-       whenever a posting's deadline does, and a browser check must not move
-       with the corpus. One row carries markup in a name: the report is
-       derived from postings people typed, so the panel must render it inert
-       (the dup/biz banners' rule). */
-    await q.route('**/data/jobs-yearcheck.json', (r) => r.fulfill({
-      status: 200, contentType: 'application/json',
-      body: JSON.stringify({ generated: '2026-08-26T00:00:00Z', postings: YEARCHECK }) }));
     await q.goto(BASE + url, { waitUntil: 'load' });
-    return { ctx, q, errors };
+    return { ctx, q, errors, asked };
   }
 
   /* -- the badge, on a page that is NOT the admin area ---------------------- */
@@ -4207,7 +4224,7 @@ for (const w of [320, 360, 390, 430]) {
 
   /* -- the desk itself ------------------------------------------------------ */
   {
-    const { ctx, q, errors } = await adminAreaPage(ADMIN, 'admin-area.html');
+    const { ctx, q, errors, asked } = await adminAreaPage(ADMIN, 'admin-area.html');
     await q.waitForFunction(() => {
       const g = document.getElementById('oa-aa-guest');
       const a = document.getElementById('oa-aa-admin');
@@ -4473,18 +4490,18 @@ for (const w of [320, 360, 390, 430]) {
        Registered-users statistic (owner, 2026-08-23) */
     await q.waitForFunction((want) => {
       const els = document.querySelectorAll('#oa-aa-tiles .oa-aa-tile-n');
-      return els.length === 8 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
-    }, ['5', seededHeld, '2', newsPending, 0, 0, YEARCHECK.length, seededUsers].join(','),
+      return els.length === 7 && Array.prototype.map.call(els, (e) => e.textContent).join(',') === want;
+    }, ['5', seededHeld, '2', newsPending, 0, 0, seededUsers].join(','),
       { timeout: 10000 });
-    ok(true, 'admin area: the eight tiles agree with the data beneath them — the ' +
+    ok(true, 'admin area: the seven tiles agree with the data beneath them — the ' +
       'approved fix no longer counts as waiting, nobody is waiting on a message ' +
-      'reply, the market-year report is on screen and so is the registered-user tally');
+      'reply, and the strip ends on the registered-user tally');
     /* The Registered-users card became a LINK on 2026-08-24, when the roster
        panel gave it somewhere to go — it was a span precisely because it
        opened nothing. What still makes it a statistic is the class, which
        keeps it out of every badge sum, and that it is never marked due. */
     ok(await q.locator('#oa-aa-tiles a.oa-aa-tile-stat[href="#oa-aa-users"]').count() === 1 &&
-       await q.locator('#oa-aa-tiles a.oa-aa-tile').count() === 8 &&
+       await q.locator('#oa-aa-tiles a.oa-aa-tile').count() === 7 &&
        await q.locator('#oa-aa-tiles .oa-aa-tile-stat.is-due').count() === 0,
       'admin area: the Registered-users card opens the roster and is still a ' +
       'statistic — never marked due, and out of every total');
@@ -4492,34 +4509,22 @@ for (const w of [320, 360, 390, 430]) {
       (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}).admin),
       5 + seededHeld + 2 + newsPending,
       'admin area: and the cached menu badge is corrected from the same numbers — ' +
-      'neither the registered-user count nor the market-year report is in any of them');
+      'the registered-user count is in none of them');
 
-    /* -- the market-year report (owner, 2026-08-26) -------------------------
-       A posting is filed by its apply-by date now. What is already published
-       is REPORTED rather than moved, because a row's year is half its id and
-       an id that moves is a posting published twice — so the panel's job is
-       to name the disagreement, say which date decided, and open the posting.
-       Its tile IS due-able (it is something the maintainer clears), but it is
-       read from a served file, so it must never reach the badge above. */
-    ok(await q.locator('#oa-aa-tiles a.oa-aa-tile[href="#oa-aa-yc"].is-due').count() === 1,
-      'admin area: the market-year tile is marked due — unlike the statistic beside it');
-    await q.waitForFunction((n) =>
-      document.querySelectorAll('#oa-aa-yc-list .oa-aa-yc').length === n,
-      YEARCHECK.length, { timeout: 10000 });
-    ok(true, 'admin area: every reported posting is drawn');
-    const ycText = await q.locator('#oa-aa-yc-list').innerText();
-    ok(/McGill University/.test(ycText) && /2025.2026/.test(ycText) && /2026.2027/.test(ycText),
-      'admin area: the card names the posting and BOTH seasons — the one it is ' +
-      'filed under and the one its dates give it');
-    ok(/final apply-by date/.test(ycText) && /suggested apply-by date/.test(ycText),
-      'admin area: and says which date decided, so the maintainer can judge it');
-    eq(await q.locator(
-      '#oa-aa-yc-list a[href="jobs.html#job-2026-mcgill-university-20260728"]').count(), 1,
-      'admin area: with a way straight to the posting');
-    eq(await q.evaluate(() => window.__xssyc === undefined), true,
-      'admin area: a reported name carrying markup is rendered inert, like the dup banner');
-    ok(/Nothing has been moved/.test(await q.locator('#oa-aa-yc').innerText()),
-      'admin area: and the panel says outright that nothing was re-filed');
+    /* -- the market-year report is RETIRED (owner, 2026-08-27) -------------
+       There was a "Market year to check" panel here: the build listed every
+       posting whose stored season was behind its own apply-by dates and the
+       maintainer settled each by hand. The overlap took its job away — a
+       posting is listed under EVERY season it touches (`years`), so a stored
+       season behind the dates no longer hides it from the season those dates
+       name, and there was nothing left to settle. Pinned so it cannot come
+       back by accident, tile and all. */
+    eq(await q.locator('#oa-aa-yc').count(), 0,
+      'admin area: the market-year panel is gone');
+    eq(await q.locator('#oa-aa-tiles a[href="#oa-aa-yc"]').count(), 0,
+      'admin area: and so is its tile');
+    eq(asked.filter((u) => /jobs-yearcheck/.test(u)), [],
+      'admin area: and nothing fetches the report it was drawn from');
 
     // taking a profile down really writes, and the desk follows
     q.once('dialog', (d) => d.accept());

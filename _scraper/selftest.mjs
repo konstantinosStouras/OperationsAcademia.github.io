@@ -22,7 +22,7 @@ import {
   universitiesLink, ownUniversitiesLink,
   buildMeta, serialise, publicRow, displayOrder, longDate,
   marketYear, marketLabel, marketFloor, collapseSameDay, MARKET_WINDOW, MARKET_ROLL_MONTH,
-  marketYearOf, marketYearAtLeast, marketYearReview, MARKET_YEAR_SOURCE,
+  marketYearOf, marketYearAtLeast, marketYearsOf, withMarketYears, MARKET_SPAN_MAX,
   submissionFromRow, composeApplyBy, assignIds, inCurrentMarket, deadlineOpen, marketStart,
   diffRows, collectChanges, renderChangesHtml,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, unclaimedSheetRows, sheetHandover,
@@ -938,9 +938,16 @@ async function testAccountMerge() {
    job posting belongs to … if that field is Until filled, then check the date
    in Suggested apply by … if both fail, then check the posting date."
 
-   Three things are pinned here, and the third is the one that keeps the site
+   AND THE SEASONS OVERLAP, so a posting can be in two at once (owner,
+   2026-08-27): "a school advertising in May for a search that closes in
+   September should be posted in the current job market year immediately
+   public on the website AND also continue to be shown for the next job market
+   year, since there is overlap between the two years."
+
+   Four things are pinned here, and the last is the one that keeps the site
    publishing: the cascade itself, that it only ever moves a posting FORWARD,
-   and that a posting already published is REPORTED rather than re-filed. */
+   the SPAN it is listed under, and that no posting already published is
+   re-filed to get any of it. */
 
 async function testMarketYearCascade() {
   const now = new Date('2026-08-26T12:00:00Z');
@@ -1003,81 +1010,138 @@ async function testMarketYearCascade() {
   eq(rowFromSubmission({ ...doc, year: 1200 }, { now }).year, 2027,
     'and so is one whose stored season is out of the range the rules allow');
 
-  const flagged = marketYearReview([
-    { id: 'a', year: 2026, posted: '2026-07-28', applyByDate: '2026-10-15' },
-    { id: 'b', year: 2027, posted: '2026-07-28', applyByDate: '2026-10-15' },
-    { id: 'c', year: 2028, posted: '2026-08-06', reviewDate: '2026-09-08' },
-    { id: 'd', posted: '2026-07-28', applyByDate: '2026-10-15' },
-  ], { now });
-  eq(flagged.map((f) => f.id), ['a'],
-    'only a posting filed BEHIND its own dates is reported: one already right ' +
-    'is silent, one AHEAD is the tab cycle doing its job, and one with no ' +
-    'stored season is not a disagreement');
-  eq(flagged[0].stored, 2026, 'the report names the season it is filed under');
-  eq(flagged[0].should, 2027, 'and the one its dates give it');
-  eq(flagged[0].from, 'final', 'and which date decided, so the card can say why');
-  ok(MARKET_YEAR_SOURCE[flagged[0].from],
-    'every source the cascade can return has words for the report');
-  for (const k of ['final', 'review', 'posted', 'floor']) {
-    ok(MARKET_YEAR_SOURCE[k], `MARKET_YEAR_SOURCE covers "${k}"`);
+  /* 4. THE OVERLAP. `year` names the season a posting is FOR; `years` names
+     every season it is IN, which is what a reader browsing one of them wants
+     and what the cascade alone could not say. */
+  eq(marketYearsOf({ year: 2027, posted: '2026-05-04', applyByDate: '2026-09-08' }),
+    [2026, 2027],
+    'the owner\'s case: advertised in May, closing in September — the season ' +
+    'under way AND the one that opens in July, not one or the other');
+  eq(marketYearsOf({ year: 2026, posted: '2025-09-24', applyByDate: '2026-07-28' }),
+    [2026, 2027],
+    'and the other way round: a September search open past the roll is listed ' +
+    'in the season that follows it too, which is what retired the report that ' +
+    'used to ask the maintainer to move it');
+  eq(marketYearsOf({ year: 2028, posted: '2026-08-06', reviewDate: '2026-09-08' }),
+    [2027, 2028],
+    'a tab-cycle floor ahead of the dates spans as readily as one behind them — ' +
+    'the Kansas row is live now and is FOR the season after next');
+  eq(marketYearsOf({ year: 2026, posted: '2025-10-01', applyByDate: '2025-11-30' }),
+    [2026], 'an ordinary posting names one season, said once');
+  eq(marketYearsOf({ year: 2020 }), [2020],
+    'a row with no dates at all is listed under its stored season — NEVER ' +
+    'today\'s, which is what marketYearOf\'s last-resort fallback would have ' +
+    'made of a 2014 posting on every rebuild');
+  eq(marketYearsOf({}), [], 'and a row that names no season at all claims none');
+  eq(marketYearsOf({ year: 2026, posted: '2025-09-24', applyByDate: '2027-09-01' }),
+    [2026, 2027, 2028],
+    'the seasons BETWEEN are filled in: a search open across a whole year was ' +
+    'open during it');
+  eq(marketYearsOf({ year: 2000, posted: '2025-09-24', applyByDate: '2026-09-01' }),
+    [2000, 2026, 2027],
+    `a span wider than MARKET_SPAN_MAX (${MARKET_SPAN_MAX}) falls back to the ` +
+    'years its own dates name rather than filling in a quarter-century');
+
+  for (const r of served) {
+    const ys = marketYearsOf(r);
+    ok(ys.includes(Number(r.year)),
+      `${r.id}: the span always contains the season the posting is filed under`);
+    eq(ys.slice().sort((a, b) => a - b), ys, `${r.id}: ascending`);
+    eq(ys.length, new Set(ys).size, `${r.id}: and each season named once`);
   }
 
-  // the season under way is what a reader is looking at, so it sorts first
-  const order = marketYearReview([
-    { id: 'old', year: 2025, posted: '2025-01-01', applyByDate: '2025-09-01' },
-    { id: 'new', year: 2026, posted: '2026-07-28', applyByDate: '2026-10-15' },
-  ], { now });
-  eq(order.map((f) => f.id), ['new', 'old'],
-    'the current season is reported first — those are the postings on the page today');
+  /* 5. `withMarketYears` is the ONE writer of the field, and is pure,
+     idempotent and by-value — every ingest applies it and the build applies
+     it again over the merged set, so a rebuild that changes nothing must
+     produce a byte-identical file and commit nothing. */
+  const spanned = withMarketYears({ year: 2027, posted: '2026-05-04', applyByDate: '2026-09-08' });
+  eq(spanned.years, [2026, 2027], 'it writes the span it computed');
+  eq(Object.keys(spanned).indexOf('years'), Object.keys(spanned).indexOf('year') + 1,
+    'straight after `year`, so a diff of data/past-postings.json reads in order');
+  eq(withMarketYears(spanned), spanned,
+    'a row already carrying the right span comes back ITSELF, not a copy — ' +
+    'which is what the build\'s change count and its e-mail read');
+  eq(withMarketYears({ year: 2027, years: [2027], posted: '2026-05-04', applyByDate: '2026-09-08' }).years,
+    [2026, 2027], 'and a stale span is rewritten rather than trusted');
+  const noYear = { institution: 'X' };
+  eq(withMarketYears(noYear), noYear, 'a row that names no season is left exactly alone');
 
-  /* Pure and deterministic: the build writes the file on its own diff, so a
-     second pass over the same rows must produce the same list. */
-  eq(JSON.stringify(marketYearReview(served, { now })),
-    JSON.stringify(marketYearReview(served, { now })),
-    'the report is deterministic, so an unchanged corpus commits nothing');
+  /* 6. what rowFromSubmission publishes: the stored season kept, the span
+     derived beside it. */
+  const spanDoc = rowFromSubmission(
+    { ...doc, year: 2027, createdAt: new Date('2026-05-04T09:00:00Z') }, { now });
+  eq(spanDoc.year, 2027, 'the season it is FOR');
+  eq(spanDoc.years, [2026, 2027], 'and both seasons it is listed under');
+  ok(PUBLIC_FIELDS.includes('years'), 'which is a published field');
+  eq(PUBLIC_FIELDS.indexOf('years'), PUBLIC_FIELDS.indexOf('year') + 1,
+    'written beside the season it widens');
+  eq(publicRow(spanDoc).years, [2026, 2027], 'and reaches the served file');
 
-  /* 4. the served report, and what it may carry. Everything under data/ is
-     public, so this file holds only what data/jobs.json already publishes. */
-  const check = JSON.parse(await readFile(
-    path.join(HERE, '..', 'data', 'jobs-yearcheck.json'), 'utf8'));
-  ok(Array.isArray(check.postings), 'data/jobs-yearcheck.json lists postings');
-  const KEYS = ['id', 'ref', 'institution', 'department', 'posted', 'applyByDate',
-    'reviewDate', 'stored', 'should', 'from', 'current'];
-  const byId = new Map(served.map((r) => [r.id, r]));
-  for (const p of check.postings) {
-    eq(Object.keys(p).sort(), KEYS.slice().sort(),
-      `${p.id}: the report carries the pinned fields and nothing else`);
-    ok(byId.has(p.id), `${p.id}: every reported posting is one the site publishes`);
-    ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(JSON.stringify(p)),
-      `${p.id}: nothing under data/ may carry an e-mail address`);
-    ok(!/javascript:|data:text/i.test(JSON.stringify(p)),
-      `${p.id}: nor a script URL — the panel renders this to the maintainer`);
-    ok(p.should > p.stored, `${p.id}: reported only where the season should move FORWARD`);
+  /* 7. EVERY SERVED FILE STATES IT, and states the same thing — three writers
+     produce these rows (the build, the sheet sync, the legacy import) and a
+     field only one of them wrote is undone by whichever writes next, which is
+     the healCountry lesson. */
+  for (const file of ['jobs.json', 'jobmarket.json', 'past-postings.json']) {
+    const rows = JSON.parse(await readFile(path.join(HERE, '..', 'data', file), 'utf8'));
+    const wrong = rows.filter((r) => JSON.stringify(r.years) !== JSON.stringify(marketYearsOf(r)));
+    eq(wrong.slice(0, 4).map((r) => `${r.id}: ${JSON.stringify(r.years)}`), [],
+      `data/${file}: every posting states the seasons it is listed under`);
   }
 
-  // 5. the wiring — the build writes it, the panel draws it, neither counts it
-  //    into the badge (a served-file read must not ride pendingCounts).
+  /* 8. THE WIRING, read from the source. */
   const build = await readFile(path.join(HERE, 'build-jobs.mjs'), 'utf8');
-  ok(/marketYearReview\(rows, \{ now \}\)/.test(build),
-    'build-jobs reports over the rows it is about to WRITE, not the raw ones');
-  ok(/jobs-yearcheck\.json/.test(build), 'and writes the report beside jobs.json');
+  ok(/healedRows\.map\(withMarketYears\)/.test(build),
+    'build-jobs spans the MERGED set — a carried orphan never goes back ' +
+    'through an ingest, so this is the only place it can gain one');
+  const sheet = await readFile(path.join(HERE, 'jobmarket-sheet.mjs'), 'utf8');
+  ok(/withMarketYears\(healReviewDate\(row\)\)/.test(sheet),
+    'the tracking sheet\'s own rows are spanned as they are read');
+  const legacy = await readFile(path.join(HERE, 'import-legacy-tables.mjs'), 'utf8');
+  ok(/withMarketYears\(healPlace\(r\)\)/.test(legacy),
+    'and so is the archive, which has no daily build to heal it');
+  const sync = await readFile(path.join(HERE, 'sync-jobmarket-sheet.mjs'), 'utf8');
+  ok(/\.map\(withMarketYears\)/.test(sync),
+    'and --heal-names can give the committed file the field without waiting ' +
+    'for the workbook to change');
 
-  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
-  ok(/data\/jobs-yearcheck\.json/.test(panel), 'the Admin area reads that same file');
-  ok(/lastYearCheck/.test(panel) && !/yearCheck: /.test(panel),
-    'and paints its tile from its own read, never through pendingCounts');
-  const counts = panel.slice(panel.indexOf('function pendingCounts'),
-    panel.indexOf('function registeredCount'));
-  ok(!/yearcheck/i.test(counts),
-    'nothing in pendingCounts fetches it — that function runs on EVERY page ' +
-    'for the account-menu badge, and a figure only this page shows must not ' +
-    'make every page pay a read for it (the Registered-users rule)');
+  const archive = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+  ok(/label: 'Job market year', field: 'years'/.test(archive),
+    'the archive\'s year filter reads the SPAN, so a posting open across the ' +
+    'roll is found under either season');
+  ok(/legacyParam: 'filterB'/.test(archive),
+    'and keeps its deep-link name — the values are the same year strings');
 
-  const page = await readFile(path.join(HERE, '..', 'admin-area.html'), 'utf8');
-  ok(/id="oa-aa-yc"/.test(page) && /id="oa-aa-yc-list"/.test(page),
-    'admin-area.html carries the panel the renderer mounts into');
-  ok(/Nothing has been moved/.test(page),
-    'and says outright that nothing was re-filed behind the maintainer\'s back');
+  /* 9. THE REPORT IS RETIRED, and its file with it. The overlap answers the
+     question it asked: a stored season behind the dates no longer hides the
+     posting from the season those dates name, so every posting it listed the
+     day it went was one the site now serves under both. A panel listing
+     postings with nothing to decide is worse than no panel. */
+  ok(!existsSync(path.join(HERE, '..', 'data', 'jobs-yearcheck.json')),
+    'data/jobs-yearcheck.json is gone');
+  ok(!/jobs-yearcheck/.test(build), 'the build no longer writes it');
+  for (const f of ['assets/oa-adminarea.js', 'admin-area.html', 'assets/oa-jobform.js']) {
+    /* WITH THE COMMENTS STRIPPED, the rebase guard's rule: each of these
+       files EXPLAINS the panel it no longer draws, and a check that cannot
+       tell the explanation from the code would have to be satisfied by
+       deleting the explanation. */
+    const src = (await readFile(path.join(HERE, '..', f), 'utf8'))
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .split('\n').map((l) => l.replace(/(^|\s)\/\/.*$/, '')).join('\n');
+    ok(!/jobs-yearcheck\.json|oa-aa-yc\b|Market year to check/.test(src),
+      `${f}: nothing still fetches, draws or promises the retired report`);
+  }
+
+  /* 10. the derived field is never an EDIT. It is computed from `posted`,
+     `year` and the two apply-by dates on every build, so diffing it would
+     have reported all 569 postings as edited on the run that first wrote it —
+     the phantom-edit e-mail, again (owner, 2026-08-25). */
+  eq(diffRows({ id: 'x', year: 2026, years: [2026] },
+    { id: 'x', year: 2026, years: [2026, 2027] }), [],
+    'a span that widened is not an edit anyone made');
+  eq(diffRows({ id: 'x', year: 2026, years: [2026] },
+    { id: 'x', year: 2027, years: [2026, 2027] }).map((d) => d.field), ['year'],
+    'the field it was derived FROM still reports, so nothing is hidden');
 }
 
 /* THE BROWSER TWIN. `postingYear()` in assets/oa-jobform.js applies the same
@@ -1092,10 +1156,11 @@ async function testFormMarketYearParity() {
     'the fixture runs the FORM\'s own source, not a copy of it');
 
   const fields = {};
-  const build = (editId, editYear) => new Function(
-    '$', 'EDIT_ID', 'EDIT_YEAR', 'jobMarketYears', src + '\nreturn postingYear;')(
+  const build = (editId, editYear, editPosted = '', pick = 'postingYear') => new Function(
+    '$', 'EDIT_ID', 'EDIT_YEAR', 'EDIT_POSTED', 'jobMarketYears',
+    src + `\nreturn ${pick};`)(
     (id) => (id in fields ? { value: fields[id], checked: fields[id] === true } : null),
-    editId, editYear, () => ({ current: 2099 }));
+    editId, editYear, editPosted, () => ({ current: 2099 }));
   const postingYear = build('', 0);
 
   /* EVERY CASE MUST SEPARATE THE STEP THAT ANSWERS IT FROM THE ONES THAT DO
@@ -1149,6 +1214,61 @@ async function testFormMarketYearParity() {
   fields['f-untilFilled'] = false;
   eq(build('doc1', 2026)(), 2026,
     'an edit keeps the season it was filed under — the year is half the row id');
+
+  /* AND THE SPAN, the same way. `postingYears()` is what the note promises
+     before the posting is sent, and `marketYearsOf` is what the build then
+     writes — so the two are asked the same question about the same row. The
+     form has no posting date for a NEW posting (the pipeline stamps it when
+     the submission is stored), so `posted` here is the day the poster is
+     typing, which is exactly what the form's third leg reads. */
+  const TODAY = '2026-05-04';                 // a spring day, the owner's case
+  const spanBuild = (editId, editYear, editPosted) =>
+    build(editId, editYear, editPosted, 'postingYears');
+  const SPANS = [
+    // advertised in May, closing in September: the season under way AND the next
+    { applyByDate: '2026-09-08', reviewDate: '', want: [2026, 2027] },
+    // …and by the suggested date alone, once the search runs until filled
+    { applyByDate: '', reviewDate: '2026-09-08', untilFilled: true, want: [2026, 2027] },
+    // an autumn posting closing inside its own season names it once
+    { applyByDate: '2026-12-01', reviewDate: '', posted: '2026-10-01', want: [2027] },
+    // no date at all: the season being typed in, and nothing else
+    { applyByDate: '', reviewDate: '', untilFilled: true, want: [2026] },
+  ];
+  for (const c of SPANS) {
+    const posted = c.posted || TODAY;
+    const today = new Date(`${posted}T12:00:00Z`);
+    fields['f-applyByDate'] = c.applyByDate;
+    fields['f-reviewDate'] = c.reviewDate;
+    fields['f-untilFilled'] = !!c.untilFilled;
+    /* BOTH halves of the form built against the SAME day, or the fallback
+       leg — "today, until you give an apply-by date" — answers two different
+       questions and the comparison below is measuring the stub. */
+    const asOf = (pick) => new Function(
+      '$', 'EDIT_ID', 'EDIT_YEAR', 'EDIT_POSTED', 'jobMarketYears',
+      src + `\nreturn ${pick};`)(
+      (id) => (id in fields ? { value: fields[id], checked: fields[id] === true } : null),
+      '', 0, '', () => ({ current: marketYear(today) }))();
+    const years = asOf('postingYears');
+    const label = JSON.stringify({ ...c, posted });
+    eq(years, c.want, `the form promises ${JSON.stringify(c.want)} for ${label}`);
+    /* THE PIPELINE WRITES THE SAME. `year` is what the form sends, so the row
+       the build sees carries the cascade's own answer beside the dates. */
+    const row = { year: asOf('postingYear'), posted,
+      applyByDate: c.untilFilled ? '' : c.applyByDate, reviewDate: c.reviewDate };
+    eq(marketYearsOf(row), c.want,
+      `and _scraper/jobs-model.mjs writes the same for ${label}`);
+  }
+
+  /* An EDIT reads the day the posting went up where the document carries one
+     — a mirror or a migrated row — and the span then spells out what the
+     build will write for it. */
+  fields['f-applyByDate'] = '2026-09-08';
+  fields['f-reviewDate'] = '';
+  fields['f-untilFilled'] = false;
+  eq(spanBuild('doc1', 2027, '2026-05-04')(), [2026, 2027],
+    'an edit spans the season it went up in and the season it closes in');
+  eq(spanBuild('doc1', 2027, '')(), [2027],
+    'and a document that does not say when it went up promises only what it knows');
 }
 
 async function testDerivedMarketYear() {
@@ -2533,7 +2653,12 @@ async function testEveryDatasetNamesPlacesTheSameWay() {
   for (const [call, what] of [
     [/await write\('universities\.json', uni,/, 'the map'],
     [/await write\('recent-faculty\.json', placements,/, 'the faculty list'],
-    [/await write\('past-postings\.json', rows\.map\(healPlace\),/, 'the postings archive'],
+    /* …and the archive's rows carry their SPAN out of the same call — it has
+       no daily build to heal it, so a --fetch that wrote the names without
+       `years` would take the year filter's answer away for every row it
+       rewrote. */
+    [/await write\('past-postings\.json', rows\.map\(\(r\) => withMarketYears\(healPlace\(r\)\)\),/,
+      'the postings archive'],
   ]) {
     ok(call.test(importer), `import-legacy-tables.mjs canonicalises ${what} as it writes it`);
   }
