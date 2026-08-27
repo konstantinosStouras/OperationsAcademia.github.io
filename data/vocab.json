@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-27T09:38:57.063Z",
+ "generated": "2026-08-27T09:43:50.709Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -71,6 +71,10 @@
   },
   {
    "v": "University of South Carolina",
+   "n": 4
+  },
+  {
+   "v": "University of Tennessee - Knoxville",
    "n": 4
   },
   {
@@ -147,10 +151,6 @@
   },
   {
    "v": "University of South Florida",
-   "n": 3
-  },
-  {
-   "v": "University of Tennessee - Knoxville",
    "n": 3
   },
   {
@@ -2096,6 +2096,10 @@
    "n": 2
   },
   {
+   "v": "Haslam College of Business",
+   "n": 2
+  },
+  {
    "v": "Ivey Business School",
    "n": 2
   },
@@ -2225,10 +2229,6 @@
   },
   {
    "v": "Harvard Business School",
-   "n": 1
-  },
-  {
-   "v": "Haslam College of Business",
    "n": 1
   },
   {
@@ -3106,6 +3106,10 @@
    "n": 2
   },
   {
+   "v": "Business Analytics and Statistics",
+   "n": 2
+  },
+  {
    "v": "CIS",
    "n": 2
   },
@@ -3307,10 +3311,6 @@
   },
   {
    "v": "Business Analytics and Information Systems",
-   "n": 1
-  },
-  {
-   "v": "Business Analytics and Statistics",
    "n": 1
   },
   {
