@@ -245,6 +245,7 @@
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
+    <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -266,24 +267,16 @@
       'use strict';
       var U = window.OAList.safeUrl;
 
-      /* The market year, derived — never typed. Keep in step with
-         _scraper/jobs-model.mjs (marketYear/marketLabel): a market year runs
-         1 July of the previous year to 30 June of its own and is numbered by
-         the year it ends, so the roll is 1 JULY, getUTCMonth() (0-based) 6. */
-      function marketYear() {
-        var d = new Date();
-        return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
-      }
-      function inCurrentMarket(row) {
-        var start = (marketYear() - 1) + '-07-01';
-        /* An OPEN deadline keeps a posting on the page whatever season it was
-           filed in (owner, 2026-08-17) — applications close on the day named,
-           so today still counts. An empty applyByDate is the ABSENCE of a
-           deadline ("Until filled"), not an open one, so the roll clears it. */
-        var deadline = String(row.applyByDate || '');
-        return (!!deadline && deadline >= new Date().toISOString().slice(0, 10)) ||
-          String(row.posted || '') >= start || Number(row.year) >= marketYear();
-      }
+      /* The market year and the window this page shows, from ONE definition:
+         assets/oa-jobnav.js, which previous-markets.html and /admin-area's
+         market-year report read too. This page and that one carried a copy
+         each of both functions, byte-identical to each other and to
+         jobs-model.mjs's — and the report needed a third, which is how a rule
+         becomes three answers that disagree silently. selftest.mjs pins the
+         module against jobs-model.mjs over every served posting. */
+      var NAV = window.OAJobNav;
+      function marketYear() { return NAV.marketYear(); }
+      function inCurrentMarket(row) { return NAV.inCurrentMarket(row); }
       document.getElementById('oa-jobs-heading').textContent =
         'Job postings (' + (marketYear() - 1) + '-' + marketYear() + ')';
 
@@ -355,6 +348,26 @@
         perPage: 10,
         urlPrefix: '',            // owns the legacy ?filterA= deep links
         prepare: function (rows) { return rows.filter(inCurrentMarket); },
+
+        /* ?job=<id> shows ONE posting on its own, with its Edit and Take down
+           controls on it. /admin-area's market-year report links here that
+           way; it used to link jobs.html#job-<id>, and a fragment can only
+           find a card that happens to be on the page being shown — of ten, of
+           a list built after the browser has looked for it. */
+        focusParam: NAV.FOCUS_PARAM,
+        strings: {
+          focusOne: 'Showing one posting on its own.',
+          focusClear: 'Show all postings',
+          focusMissing: 'That posting is not on this page.',
+          focusMissingHint: 'The jobs page shows the market year under way. A ' +
+            'posting whose season has closed is on Previous markets — and one ' +
+            'that has been taken down is on neither.',
+        },
+        /* The way out CARRIES THE POSTING: the engine adds the id, which it is
+           holding, so the recovery path does not land the reader at the top of
+           the other page's whole list — which is the complaint this mode
+           exists to remove. Only the page can name the other page. */
+        focusOther: { href: 'previous-markets.html', label: 'Previous markets' },
 
         /* THE EXCEL DOWNLOAD (owner, 2026-08-26). Declared on the mount
            because the ENGINE owns the filter bar and empties it whenever the
