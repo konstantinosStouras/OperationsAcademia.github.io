@@ -19,9 +19,31 @@
      · set `userUnread` to zero (marking it read);
      · record a reply on the thread head — `lastAt`, `lastFrom: 'user'` and
        `needsAdmin: true`, which it may only RAISE. The queue on the Admin
-       area cannot be emptied by the person waiting in it.
+       area cannot be emptied by the person waiting in it;
+     · take a message off THEIR OWN list — `hiddenForUser`, one boolean, and
+       nothing else on the message.
    Everything else is refused, including editing or deleting a message: a
    thread whose history either party can rewrite is not a record of anything.
+
+   REMOVING A MESSAGE IS A HIDE, AND HIDING IS NEVER A ONE-WAY DOOR (owner,
+   2026-08-27: any past message may be removed from the reader's list). Two
+   rules from elsewhere in this repository meet here and settle the shape:
+
+     · a thread whose history either party can rewrite is not a record of
+       anything — so this cannot be a delete. The words stay where they were
+       said and the maintainer's copy of the conversation is whole; what
+       changes is one reader's own list, which is theirs to tidy. The Admin
+       area shows a removed message faded and says so, because a maintainer
+       quoting back something the other person can no longer see is talking
+       past them.
+     · filter it out of the page entirely and there is nothing left to press
+       to bring it back — the trap `newsOverrides` and `rowOverrides` both
+       record. So the removed messages sit in a collapsed panel below the
+       list, one click from Restore, and the list itself stays clean.
+
+   And the reply box lives OUTSIDE the list rather than inside it: a reader
+   who removes every message still has a thread, and must still be able to
+   answer in it.
 
    INERT UNTIL THE RULES ARE REDEPLOYED:
        firebase deploy --only firestore:rules --project operations-academia
@@ -50,6 +72,29 @@
 
   var loadedFor = null;
 
+  /** One message, drawn the same either side of the removed line. `id` is
+      what a Remove or Restore is keyed on — the DOCUMENT id, taken from the
+      snapshot rather than from an index, so re-ordering or a message arriving
+      mid-read cannot point a button at the wrong one. */
+  function msgHTML(m, act) {
+    var mine = m.from === 'user';
+    /* Deliberately NOT faded in the removed panel: everything in there is
+       removed, so the fade would carry no signal and only cost legibility.
+       `.oa-u-msg.is-gone` is for the Admin area, where a removed message sits
+       among live ones and the fade is the whole point. */
+    return '<li class="oa-u-msg is-' + (mine ? 'me' : 'them') + '">' +
+      '<span class="oa-u-who">' + (mine ? 'You' : 'Operations Academia') + '</span>' +
+      '<span class="oa-u-when">' + esc(day(m.t)) + '</span>' +
+      '<p>' + esc(m.body).replace(/\n/g, '<br>') + '</p>' +
+      '<p class="oa-u-act"><button type="button" class="oa-u-hide" ' +
+        'data-act="' + act + '" data-id="' + esc(m.id) + '" ' +
+        'aria-label="' + (act === 'remove'
+          ? 'Remove this message from your list'
+          : 'Put this message back on your list') + '">' +
+        (act === 'remove' ? 'Remove' : 'Restore') + '</button></p>' +
+      '</li>';
+  }
+
   function render(db, uid, head, items) {
     var list = $('oa-msg-list');
     if (!list) return;
@@ -63,14 +108,43 @@
     show($('oa-msg-empty'), false);
     show(list, true);
 
+    /* Restoring one of several re-renders the page, and a panel that snapped
+       shut each time would have to be re-opened for every message in it. Read
+       its state off the DOM before it is replaced. */
+    var openPanel = !!(list.querySelector('.oa-msg-removed') || {}).open;
+
+    /* The reader's own list, and what they have taken off it. A removed
+       message is HIDDEN here and nowhere else: it is still in the thread, the
+       maintainer still has it, and it is one click from coming back. */
+    var kept = [], removed = [];
+    items.forEach(function (m) {
+      (m.hiddenForUser === true ? removed : kept).push(m);
+    });
+
     list.innerHTML =
-      '<ul class="oa-u-thread">' + items.map(function (m) {
-        var mine = m.from === 'user';
-        return '<li class="oa-u-msg is-' + (mine ? 'me' : 'them') + '">' +
-          '<span class="oa-u-who">' + (mine ? 'You' : 'Operations Academia') + '</span>' +
-          '<span class="oa-u-when">' + esc(day(m.t)) + '</span>' +
-          '<p>' + esc(m.body).replace(/\n/g, '<br>') + '</p></li>';
-      }).join('') + '</ul>' +
+      (kept.length
+        ? '<ul class="oa-u-thread">' +
+            kept.map(function (m) { return msgHTML(m, 'remove'); }).join('') + '</ul>'
+        : '<div class="oa-note"><p>You have removed every message from this ' +
+          'list. They are still in the conversation — open ' +
+          '<strong>Removed messages</strong> below to put any of them back.</p></div>') +
+      /* HIDING IS NEVER A ONE-WAY DOOR. Filter them out of the page entirely
+         and there is nothing left to press to bring one back — the trap
+         newsOverrides and rowOverrides both record. So they sit here,
+         collapsed, out of the way and one click from Restore. */
+      (removed.length
+        ? '<details class="oa-msg-removed"' + (openPanel ? ' open' : '') + '>' +
+            '<summary>Removed messages (' + removed.length + ')</summary>' +
+            '<p class="oa-hint">These are off your list. They are still part of ' +
+              'the conversation and the site’s maintainer still has them; ' +
+              'nobody else can read them either way.</p>' +
+            '<ul class="oa-u-thread">' +
+              removed.map(function (m) { return msgHTML(m, 'restore'); }).join('') +
+            '</ul>' +
+          '</details>'
+        : '') +
+      /* OUTSIDE the list, deliberately: a reader who has removed every message
+         still has a thread and must still be able to answer in it. */
       '<div class="oa-msg-reply">' +
         '<label for="oa-msg-body"><strong>Reply</strong></label>' +
         '<textarea id="oa-msg-body" rows="4" maxlength="' + MAXLEN.body + '" ' +
@@ -82,9 +156,17 @@
     var b = $('oa-msg-send');
     if (b) b.addEventListener('click', function () { reply(db, uid, head); });
 
+    Array.prototype.forEach.call(list.querySelectorAll('.oa-u-hide'), function (btn) {
+      btn.addEventListener('click', function () {
+        setHidden(db, uid, btn.getAttribute('data-id'),
+          btn.getAttribute('data-act') === 'remove', btn);
+      });
+    });
+
     /* THE BADGE COUNTS WHAT IS UNREAD, not how many messages the page lists —
        the one badge on this site whose number is deliberately not the number
        of cards below it, because a read conversation is not an empty one.
+       Removing a message does not touch it either, for the same reason.
        Corrected here from the document already loaded, the same
        exact-where-the-data-is-already-loaded rule my-postings and alerts
        follow. */
@@ -100,6 +182,29 @@
           if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('messages', 0);
         })['catch'](function () { /* rules not deployed — the badge stays honest */ });
     }
+  }
+
+  /** Take a message off this reader's list, or put it back. ONE key, always a
+      boolean and never a field deletion — the rules test `hiddenForUser is
+      bool`, so restoring by deleting the field would be refused and "you can
+      always put it back" would be false exactly once. */
+  function setHidden(db, uid, id, hide, btn) {
+    if (!id) return;
+    if (btn) btn.disabled = true;
+    db.collection(THREADS).doc(uid).collection(ITEMS).doc(id)
+      .update({ hiddenForUser: !!hide })
+      .then(function () { return load(db, uid); })
+      ['catch'](function (err) {
+        if (btn) btn.disabled = false;
+        var out = $('oa-msg-out');
+        if (out) {
+          out.className = 'oa-form-msg is-err';
+          out.textContent = err && err.code === 'permission-denied'
+            ? 'That is not switched on yet — please try again later.'
+            : 'Could not ' + (hide ? 'remove' : 'restore') + ' that message (' +
+              (err && (err.code || err.message)) + ').';
+        }
+      });
   }
 
   function reply(db, uid, head) {
@@ -163,7 +268,14 @@
       if (!stillOurs(uid)) return;
       var head = both[0] && both[0].exists ? (both[0].data() || {}) : null;
       var items = [];
-      both[1].forEach(function (d) { items.push(d.data() || {}); });
+      /* Carry the DOCUMENT id beside the data: it is what Remove and Restore
+         write to, and reading it off the snapshot means a button can never
+         point at a neighbouring message. */
+      both[1].forEach(function (d) {
+        var m = d.data() || {};
+        m.id = d.id;
+        items.push(m);
+      });
       show($('oa-msg-loading'), false);
       render(db, uid, head, items);
     })['catch'](function (err) {

@@ -72,6 +72,14 @@
   /** Every key on one message — pinned against the items rule. */
   var ITEM_KEYS = ['from', 'body', 't'];
 
+  /** …and the ONE key the READER may change on a message that already exists:
+      whether it is on their own list. Removing a message is a HIDE and never
+      a delete — the words stay where they were said and the maintainer's copy
+      of the conversation is whole, because a thread whose history either party
+      can rewrite is not a record of anything. Pinned against the items rule's
+      owner branch by selftest.mjs, both ways. */
+  var ITEM_OWNER_KEYS = ['hiddenForUser'];
+
   var MAXLEN = { name: 200, email: 200, body: 5000 };
 
   /* ------------------------------------------------------------ pure parts */
@@ -148,6 +156,7 @@
     ROW_KEYS: ROW_KEYS,
     THREAD_KEYS: THREAD_KEYS,
     ITEM_KEYS: ITEM_KEYS,
+    ITEM_OWNER_KEYS: ITEM_OWNER_KEYS,
     MAXLEN: MAXLEN,
     csvCell: csvCell,
     csvOf: csvOf,
@@ -542,10 +551,19 @@
           host.innerHTML =
             '<h4 class="oa-aa-group-h">Conversation with ' + esc(who) + '</h4>' +
             '<ul class="oa-u-thread">' + items.map(function (m) {
-              return '<li class="oa-u-msg is-' + (m.from === 'user' ? 'them' : 'me') + '">' +
+              /* A message the reader has taken off THEIR list is still here,
+                 and is shown as exactly that. The maintainer's copy is the
+                 record — that is the whole reason removing is a hide — and a
+                 maintainer who quotes back a message the other person can no
+                 longer see is talking past them. */
+              var gone = m.hiddenForUser === true;
+              return '<li class="oa-u-msg is-' + (m.from === 'user' ? 'them' : 'me') +
+                (gone ? ' is-gone' : '') + '">' +
                 '<span class="oa-u-who">' + (m.from === 'user' ? esc(who) : 'You') +
                 '</span><span class="oa-u-when">' + esc(day(m.t)) + '</span>' +
-                '<p>' + esc(m.body).replace(/\n/g, '<br>') + '</p></li>';
+                '<p>' + esc(m.body).replace(/\n/g, '<br>') + '</p>' +
+                (gone ? '<p class="oa-hint">Removed from their list — they can ' +
+                  'restore it; you still have it.</p>' : '') + '</li>';
             }).join('') + '</ul>' +
             '<p><button type="button" class="button oa-btn-ghost" id="oa-u-close">Close</button> ' +
             '<button type="button" class="button oa-btn-ghost" id="oa-u-seen">Mark answered</button> ' +

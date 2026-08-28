@@ -503,6 +503,15 @@ service cloud.firestore {
       // side can put words in the other's mouth; the body is bounded; and
       // only the maintainer may edit or retract one, because a thread whose
       // history either party can rewrite is not a record of anything.
+      //
+      // A READER MAY REMOVE A MESSAGE FROM THEIR OWN LIST, and that is a
+      // HIDE and not a delete, for exactly the reason above: the words stay
+      // where they were said, and the maintainer's copy of the conversation
+      // is whole. `hiddenForUser` is one boolean, writable by the owner and
+      // by nobody else, and the owner may touch NOTHING else on a message —
+      // not the body, not `from`, not the timestamp. It is always written as
+      // a boolean and never deleted as a field, so `is bool` is a total test
+      // rather than one with a hole in it where restoring would live.
       match /items/{itemId} {
         allow read: if isAdmin() || isOwner(uid);
         allow create: if request.resource.data.keys().hasOnly(['from', 'body', 't'])
@@ -523,7 +532,12 @@ service cloud.firestore {
                         || (isOwner(uid) && request.resource.data.from == 'user'
                             && exists(/databases/$(database)/documents/messages/$(uid)))
                       );
-        allow update, delete: if isAdmin();
+        allow update: if isAdmin()
+                      || (isOwner(uid)
+                          && request.resource.data.diff(resource.data).affectedKeys()
+                               .hasOnly(['hiddenForUser'])
+                          && request.resource.data.hiddenForUser is bool);
+        allow delete: if isAdmin();
       }
     }
 
