@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-28T11:55:56.922Z",
+ "generated": "2026-08-28T12:00:29.390Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -127,6 +127,10 @@
   },
   {
    "v": "Prince Mohammad Bin Fahd University",
+   "n": 3
+  },
+  {
+   "v": "Southern Methodist University",
    "n": 3
   },
   {
@@ -331,10 +335,6 @@
   },
   {
    "v": "Singapore Management University",
-   "n": 2
-  },
-  {
-   "v": "Southern Methodist University",
    "n": 2
   },
   {
@@ -2112,6 +2112,10 @@
    "n": 3
   },
   {
+   "v": "Edwin L. Cox School of Business",
+   "n": 2
+  },
+  {
    "v": "Fox School of Business",
    "n": 2
   },
@@ -2217,10 +2221,6 @@
   },
   {
    "v": "Ed G. Smith College of Business",
-   "n": 1
-  },
-  {
-   "v": "Edwin L. Cox School of Business",
    "n": 1
   },
   {
@@ -3570,6 +3570,10 @@
    "n": 1
   },
   {
+   "v": "Information Technology and Operations Management",
+   "n": 1
+  },
+  {
    "v": "information technology, business analytics, AI",
    "n": 1
   },
@@ -4259,10 +4263,6 @@
   },
   {
    "v": "Information Systems, Statistics, and Management Science",
-   "n": 0
-  },
-  {
-   "v": "Information Technology and Operations Management",
    "n": 0
   },
   {
