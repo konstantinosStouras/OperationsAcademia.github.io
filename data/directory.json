@@ -4866,6 +4866,19 @@
   ]
  },
  {
+  "id": "morningside-university__rosen-school-of-business__business-administration",
+  "institution": "Morningside University",
+  "school": "Rosen School of Business",
+  "department": "Business Administration",
+  "type": "Business School",
+  "country": "United States",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2026-08-26"
+ },
+ {
   "id": "nanyang-technological-university__college-of-computing-and-data-science",
   "institution": "Nanyang Technological University",
   "school": "College of Computing and Data Science",
