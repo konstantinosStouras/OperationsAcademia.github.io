@@ -936,8 +936,8 @@ async function testAccountMerge() {
   // alert looks brand new and newJobsFor() with an empty `since` matches the
   // whole catalogue — one enormous e-mail as the reward for merging.
   const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
-  for (const f of ['lastSentAt', 'lastCheckedAt', 'lastUpdateDate', 'lastCandidateAt',
-    'criteria', 'enabled']) {
+  for (const f of ['lastSentAt', 'lastJobAt', 'lastCheckedAt', 'lastUpdateDate',
+    'lastCandidateAt', 'criteria', 'enabled']) {
     ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
   }
 }
@@ -7666,6 +7666,38 @@ function testReviewQueue() {
      JSON.stringify(approvedRow(RV_ROW, decided)) ===
      JSON.stringify(partition([RV_ROW], [decided], {}).publish[0]),
     'the sheet sync and the build publish an approval identically, so the file cannot flap');
+
+  /* …AND THE POSTING REACHES THE SUBSCRIBERS WHO ASKED FOR IT (owner,
+     2026-08-27: "when I approve any of them and become public, they should be
+     sent to those users with email alerts").
+
+     The dating above is only half of the promise, and the halves were tested
+     apart: the queue knew a posting was dated from its approval, the matcher
+     knew how to window, and nothing anywhere joined the two. So this drives
+     the whole path in one — approve, publish, window, match — against the same
+     matcher the browser and the mailer both read.
+
+     The subscriber's last digest went out BETWEEN the crawl and the approval,
+     which is exactly the shape that used to reach nobody: dated from the
+     crawl the posting was already behind their mark. */
+  const AM = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const lastDigest = '2026-08-20T00:00:00Z';           // crawled 18th, approved 22nd
+  ok(String(RV_ROW.addedAt) < lastDigest,
+    'the fixture really is a posting crawled before the subscriber last heard from us');
+  ok(AM.newJobsFor([published], { topics: ['jobs'] }, lastDigest).length === 1,
+    'an approved posting is announced to an alert whose last digest predates the approval');
+  ok(AM.newJobsFor([RV_ROW], { topics: ['jobs'] }, lastDigest).length === 0,
+    'and dated from the CRAWL instead it would have reached nobody — the bug, reproduced');
+
+  /* A rejection is not an announcement, and a grandfathered approval is not a
+     re-announcement: sixteen postings were public before the gate existed and
+     re-dating them would blast every subscriber about postings they know. */
+  ok(partition([RV_ROW], [{ ...decided, status: REJECTED }], {}).publish.length === 0,
+    'a rejected posting is published to nobody, so nothing can announce it');
+  ok(AM.newJobsFor(
+    [approvedRow(RV_ROW, { ...decided, reviewedAt: decided.queuedAt })],
+    { topics: ['jobs'] }, lastDigest).length === 0,
+    'a grandfathered posting is not re-announced');
 }
 
 function testReviewDuplicates() {
@@ -8560,7 +8592,21 @@ async function testReviewWiring() {
      and its push was rejected. Both of the 2026-08-26 failures were on this
      path. Naming the ref the Commit step pushes to makes the push a
      fast-forward. */
-  for (const name of WRITERS) {
+  /* …and it is not only the WRITERS that this catches. A workflow chained to a
+     data build READS what that build committed, and `github.sha` is the commit
+     BEFORE it: `oa-alerts-mail.yml` therefore announced, on every instant fire,
+     a `data/jobs.json` that by construction could not hold the postings it had
+     just been fired about. So the rule is about every consumer of data/, in
+     either direction — a stale read is as silent as a stale base, and here it
+     was worse, because an alert that also carried updates sent its digest from
+     that read and moved its own high-water mark past the approval.
+
+     `oa-deploy-rules.yml` is deliberately NOT in this list: it is chained to
+     the CHECKS, which commit nothing, and publishing the ruleset that was
+     actually tested is the point of it. Its head_sha IS the commit under
+     test. */
+  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml'];
+  for (const name of DATA_CHAINED) {
     const src = await readFile(path.join(wfDir, name), 'utf8');
     if (!/^\s*workflow_run:/m.test(src)) continue;
     const checkout = src.match(/uses: actions\/checkout@[^\n]*\n([\s\S]*?)(?=\n\s*- )/);
@@ -8568,6 +8614,16 @@ async function testReviewWiring() {
       `${name} runs on workflow_run, so its checkout must name the branch tip ` +
       '(github.ref_name) — the default github.sha is the TRIGGERING run\'s head');
   }
+
+  /* AND THE CHAIN ITSELF: the alerts mailer must go on answering the build's
+     completion. Losing that trigger costs an hour rather than a posting (the
+     hourly cron is the safety net), but "as soon as something appears" is what
+     the alerts page promises a subscriber. */
+  const alertsWf = await readFile(path.join(wfDir, 'oa-alerts-mail.yml'), 'utf8');
+  const buildName = (buildSrc.match(/^name:\s*(.+)$/m) || [])[1];
+  ok(buildName && alertsWf.includes(`workflows: ["${buildName.trim()}"]`),
+    'the alerts mailer is chained to the build BY ITS CURRENT NAME — renaming a ' +
+    'workflow silently unchains every workflow_run listening for it');
 
   /* ------------- A REJECTED PUSH IS REBUILT, NEVER REBASED (2026-08-26)
 

@@ -1595,6 +1595,73 @@ file: a workflow the build listens to may not also dispatch to it, whichever
 workflow that is; any data writer running on `workflow_run` must name the
 branch tip; and the build keeps answering `oa-jobs-changed`.
 
+### …and the READER of a chained build was stale too — the approval nobody heard about
+
+Owner, 2026-08-27: *"there are many job postings in my under review area. When
+I approve any of them and become public, they should be sent to those users
+with email alerts."* The dating was right — `approvedRow` has stamped an
+approved posting from its approval since the day that bug was fixed, and the
+served file proves it (411 postings dated the morning of the mass approval, 28
+dated the day this was reported). The MACHINERY was right. The mailer never saw
+the postings.
+
+`oa-alerts-mail.yml` runs on the build's `workflow_run` completion and checked
+out **`github.sha`**, which on that event is the head of the run that TRIGGERED
+it — and the build **commits `data/jobs.json` before it finishes**. So the
+instant path read the commit BEFORE the postings it had just been fired to
+announce, every single time, by construction. It is the identical trap the
+build itself was fixed for one day earlier; the guard written that day iterated
+`WRITERS`, and a READER of `data/` chained to a writer slipped straight through
+it. **A stale read is as silent as a stale base**, and here it was worse.
+
+**Worse, because an empty jobs list was not a harmless no-op.** The job window
+was the only one of the three still measured on a WALL CLOCK: `since =
+lastSentAt`. An alert carrying jobs AND updates found no new postings in the
+stale file, sent its change-log digest anyway, and advanced `lastSentAt` to
+NOW — so the posting approved minutes earlier, correctly dated, was behind the
+mark for ever. The hourly cron that would otherwise have caught it an hour
+later found nothing left to catch. **Approve a posting; the subscribers who
+asked to hear about new postings never do.**
+
+Two fixes, deliberately independent, because either one alone leaves a race:
+
+* **`ref: ${{ github.ref_name }}`** on the alerts checkout, exactly as on the
+  build. The guard now iterates `[...WRITERS, 'oa-alerts-mail.yml']` and its
+  comment says the rule is about every consumer of `data/`, in either
+  direction. `oa-deploy-rules.yml` is deliberately NOT in that list: it is
+  chained to the CHECKS, which commit nothing, and publishing the ruleset that
+  was actually tested is the whole point of it.
+* **`lastJobAt`** — the job window is now a mark on the POSTINGS, the newest
+  `addedAt` a digest actually carried, which is the shape `lastUpdateDate` and
+  `lastCandidateAt` have had all along and for this exact stated reason ("never
+  at a wall clock a profile published mid-run could slip behind"). Jobs were the
+  one topic left out. `lastSentAt` still means WHEN a digest went out, which is
+  what `isDue` measures, and the fallback chain `lastJobAt || lastSentAt ||
+  createdAt || 31 days` migrates every existing subscription without re-sending
+  anything. It needs **no rules change** — alerts live under the blanket
+  `users/{uid}/**` owner rule — and the alerts page saves with `{merge:true}`,
+  so editing an alert cannot wipe it.
+
+**A merge carries it.** `ALERT_FIELDS` in `oa-accounts.js` copies the
+high-water marks with a subscription precisely so a merged alert does not look
+brand new; `lastJobAt` joined them, in the live file AND in `/v2/`'s frozen
+copy, which the selftest pins byte-for-byte.
+
+**The halves were tested apart, which is how this survived.** The queue knew a
+posting was dated from its approval; the matcher knew how to window; nothing
+joined the two. `testJobReview` now drives the whole path in one — approve,
+publish, window, match — against the same matcher the browser and the mailer
+read, with the crawl-dated row asserted NOT to match as the positive control,
+plus a rejection announcing nothing and a grandfathered approval never
+re-announced. `alerts-mailer.mjs --selftest` pins the mark from the file's own
+source (the branch that writes it needs Firestore and a mailbox), including
+that a wall clock never becomes the job mark and that the idle branch moves no
+window at all.
+
+The alerts workflow is also pinned to the build **by its current name**:
+`workflow_run` matches on the literal string, so renaming a workflow silently
+unchains every listener.
+
 ### A rejected push is REBUILT, never rebased
 
 Everything under `data/` is a build OUTPUT, so a rejected push has nothing to
