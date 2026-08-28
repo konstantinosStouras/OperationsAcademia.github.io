@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-28T12:00:29.390Z",
+ "generated": "2026-08-28T12:01:40.519Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -315,6 +315,10 @@
   },
   {
    "v": "MIT Sloan",
+   "n": 2
+  },
+  {
+   "v": "Morgan State University",
    "n": 2
   },
   {
@@ -891,10 +895,6 @@
   },
   {
    "v": "Montclair State University",
-   "n": 1
-  },
-  {
-   "v": "Morgan State University",
    "n": 1
   },
   {
@@ -4031,6 +4031,10 @@
   },
   {
    "v": "Supply Chain and Operations",
+   "n": 1
+  },
+  {
+   "v": "Supply Chain and Project Management",
    "n": 1
   },
   {
@@ -7328,11 +7332,13 @@
     "Earl G. Graves School of Business and Management"
    ],
    "units": [
-    "Information Science and Systems"
+    "Information Science and Systems",
+    "Supply Chain and Project Management"
    ],
    "bySchool": {
     "": [
-     "Information Science and Systems"
+     "Information Science and Systems",
+     "Supply Chain and Project Management"
     ]
    }
   },
