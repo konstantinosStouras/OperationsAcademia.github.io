@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-28T17:26:21.721Z",
+ "generated": "2026-08-28T17:40:14.134Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -383,10 +383,6 @@
   },
   {
    "v": "University of Bath",
-   "n": 2
-  },
-  {
-   "v": "University of Chicago",
    "n": 2
   },
   {
@@ -1278,6 +1274,10 @@
    "n": 1
   },
   {
+   "v": "University of Chicago",
+   "n": 1
+  },
+  {
    "v": "University of Cincinnati",
    "n": 1
   },
@@ -2112,10 +2112,6 @@
    "n": 3
   },
   {
-   "v": "Booth School of Business",
-   "n": 2
-  },
-  {
    "v": "Edwin L. Cox School of Business",
    "n": 2
   },
@@ -2169,6 +2165,10 @@
   },
   {
    "v": "Bayes Business School",
+   "n": 1
+  },
+  {
+   "v": "Booth School of Business",
    "n": 1
   },
   {
@@ -3042,10 +3042,6 @@
    "n": 8
   },
   {
-   "v": "Operations Management",
-   "n": 7
-  },
-  {
    "v": "Business Analytics",
    "n": 6
   },
@@ -3059,6 +3055,10 @@
   },
   {
    "v": "OM/IS",
+   "n": 6
+  },
+  {
+   "v": "Operations Management",
    "n": 6
   },
   {
