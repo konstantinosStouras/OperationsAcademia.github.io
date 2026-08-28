@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-28T11:51:40.825Z",
+ "generated": "2026-08-28T11:55:56.922Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -115,6 +115,10 @@
   },
   {
    "v": "Lehigh University",
+   "n": 3
+  },
+  {
+   "v": "North Central College",
    "n": 3
   },
   {
@@ -307,10 +311,6 @@
   },
   {
    "v": "MIT Sloan",
-   "n": 2
-  },
-  {
-   "v": "North Central College",
    "n": 2
   },
   {
@@ -2356,6 +2356,10 @@
    "n": 1
   },
   {
+   "v": "School of Business and Entrepreneurship",
+   "n": 1
+  },
+  {
    "v": "School of Business and Leadership",
    "n": 1
   },
@@ -3678,6 +3682,10 @@
    "n": 1
   },
   {
+   "v": "Management and Marketing",
+   "n": 1
+  },
+  {
    "v": "Management and Operations",
    "n": 1
   },
@@ -4315,10 +4323,6 @@
   },
   {
    "v": "Management and International Business",
-   "n": 0
-  },
-  {
-   "v": "Management and Marketing",
    "n": 0
   },
   {
@@ -7543,8 +7547,11 @@
    }
   },
   "North Central College": {
-   "schools": [],
+   "schools": [
+    "School of Business and Entrepreneurship"
+   ],
    "units": [
+    "Management and Marketing",
     "OM",
     "SCM/BA/Stat"
    ],
@@ -7552,6 +7559,9 @@
     "": [
      "OM",
      "SCM/BA/Stat"
+    ],
+    "School of Business and Entrepreneurship": [
+     "Management and Marketing"
     ]
    }
   },
@@ -12083,6 +12093,9 @@
   ],
   "School of Business and Economics": [
    "Marketing and Supply Chain Management"
+  ],
+  "School of Business and Entrepreneurship": [
+   "Management and Marketing"
   ],
   "School of Business and Leadership": [
    "Business Analytics"
