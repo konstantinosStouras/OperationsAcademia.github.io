@@ -38,6 +38,45 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-chicago-20260828",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-28",
+  "institution": "University of Chicago",
+  "department": "Booth School of Business, Operations Management",
+  "school": "Booth School of Business",
+  "unit": "Operations Management",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor"
+  ],
+  "applyBy": "November 14, 2026",
+  "applyByDate": "2026-11-14",
+  "reviewDate": "2026-11-13",
+  "comments": "",
+  "country": "United States",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/191650",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Chicago",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-28T17:25:54Z",
+  "ref": "OA-JOB-260828-C749",
+  "owner": "1a036c48030f1389"
+ },
+ {
   "id": "2027-the-chinese-university-of-hong-kong-20260827",
   "year": 2027,
   "years": [
