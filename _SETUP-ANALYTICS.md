@@ -1,4 +1,4 @@
-# The analytics page — what it needs, and what can never come back
+# The analytics page — what it needs, and how each source is switched on
 
 `analytics.html` draws its own charts now, from one served file
 (`data/analytics.json`) built daily by `_scraper/build-analytics.mjs`. This is
@@ -24,10 +24,9 @@ why three years went by without it being noticed. That failure shape is the
 whole reason the page now draws its own marks and says out loud when its
 figures have stopped moving.
 
-**Nothing is being collected today, either.** The UA tag lives in
-`assets/js/ypo-parakolouthisi.js`, which is loaded only by the `/v1/` and
-`/v2/` archive pages. The live redesign at the root carries **no analytics tag
-at all**.
+**The dead UA tag is still in the archives.** `assets/js/ypo-parakolouthisi.js`
+is loaded only by the `/v1/` and `/v2/` pages and reports to a property that no
+longer exists. The live site's own tag is `assets/oa-ga4.js` — see source 2.
 
 ---
 
@@ -151,25 +150,109 @@ surfaces (an old export, a colleague's download, a backup), drop it in as:
 
 ---
 
-## The one thing that cannot be fixed, by anybody
+## Source 4 — which universities are reading  ·  **needs one deploy**
 
-**The two university charts cannot be revived.** "Which universities visited"
-came from Universal Analytics' `networkDomain` / `networkLocation` dimensions
-— the visitor's reverse-DNS.
+This is the figure the page lost and has got back, and the story is worth
+three paragraphs because the wrong conclusion was written down here first.
 
-**GA4 does not have that dimension, and there is no replacement.** Google
-removed it, and the first-party record cannot stand in either: a browser
-cannot see its own reverse-DNS, so no amount of code here can recover it.
+**Where it used to come from.** "Which universities visited" was measured from
+Universal Analytics' `networkDomain` / `networkLocation` dimensions — a
+**reverse-DNS lookup of the visitor's IP address**, so a reader on their
+university's network resolved to `ox.ac.uk`, `mit.edu`, `nus.edu.sg` and was
+counted there.
 
-So those figures would have been an **archive** from here on — and then the
-archive turned out to be empty too (source 3 above). The page carries the
-labelling either way: `universities.frozen` is true in the served file and the
-card reads "Archive — 2014 to 2023" with its date range. With no rows behind
-it the card simply never draws, which is a clean absence rather than an empty
-box, and is the whole reason the section is rendered conditionally.
+**GA4 has no such dimension and Google offers no replacement.** That much is
+true, and this file used to stop there and call the figures unrecoverable.
+That was wrong. What is actually true is that a *browser* cannot see its own
+reverse-DNS — and nothing said the browser had to. Anything **server-side**
+receives the connection and can see the address it came from, and this site
+has Cloud Functions.
 
-**There is nothing to go and look for.** That is the settled answer, not a
-suggestion to try harder.
+**So the site does the lookup itself**, and rather better than UA did: the
+answer is checked against this site's **own directory of operations
+departments** rather than against whatever string an ISP happens to publish.
+
+| | |
+|---|---|
+| `assets/oa-visit.js` | one ping per browsing session, from every public page. No body, no identifier, no cookie, no page path — the whole of the request is that it happened. Not loaded on `admin-area.html`, so the maintainer's own desk never feeds the figures. |
+| `recordVisit` (`_functions/index.js`) | reads the address, reverse-resolves it, keeps the **university name**, discards the rest. |
+| `data/university-domains.json` | domain → university, **derived** from each department's own page in the Universities directory by `_scraper/build-netmap.mjs`. Vendored into `_functions/` because `firebase deploy` ships only that directory. |
+| `universityVisits/{YYYY-MM-DD}` | counters only — `seen`, `resolved`, `academic`, and one tally per university. Closed to every client in `_firestore.rules`. |
+
+**The IP is never stored.** It is resolved in memory and goes out of scope
+when the request ends; it is not written and not logged. An ISP or a
+residential address is not counted at all — the chart is about universities,
+and an ISP's name is both useless here and closer to personal data than a
+university's is.
+
+### To switch it on
+
+```bash
+firebase deploy --only functions --project operations-academia
+```
+
+That is the whole of it — no secret, no variable. **Nothing is collected until
+that runs**, and the collection stays empty, so the builder logs
+`visits: universityVisits is empty` and the page simply does not draw the
+figure. (The same command also deploys the three instant-publish doorbells,
+which have never been deployed either — see `_SETUP-INSTANT-PUBLISH.md`.)
+
+**Check the URL the deploy prints** against `ENDPOINT` at the top of
+`assets/oa-visit.js`, which expects the classic form:
+
+```
+https://us-central1-operations-academia.cloudfunctions.net/recordVisit
+```
+
+Second-generation functions are reachable at that address *and* at a
+`…a.run.app` one; if the CLI prints something else, paste it in there. Nothing
+breaks if it is wrong — the ping just fails silently, which is exactly the
+failure this file keeps warning about, so **verify it rather than assume it**:
+
+```bash
+node _scraper/build-analytics.mjs --scan
+```
+
+An hour after the deploy that should report a non-zero `visits:` line. If it
+still says the collection is empty, open the site, then look at
+`firebase functions:log` for `recordVisit`.
+
+### Read it as a sample, because it is one
+
+Reverse DNS answers far less often in 2026 than it did in 2014: campuses
+increasingly egress through a commercial CDN or a cloud VPN, and a great deal
+of reading happens on phones. So every ping counts towards `seen` whether or
+not a name came back, and **the page prints what it placed against it** — *"of
+12,000 visits, 3,455 (29%) were placed at a university listed here"*. Without
+that denominator a short chart reads as "no universities visit", which is
+precisely the misreading the rest of this page was rebuilt to prevent.
+
+If the share looks low, the day documents say which of two things to fix:
+`resolved` counts every address DNS answered for at all, so **`resolved` high
+and the tallies low** means the domain map does not know those universities
+(give their departments a `deptUrl`), while **`resolved` low** means the
+networks themselves are giving no name away, which nothing here can change.
+
+To make a university recognisable, give its department a `deptUrl` on
+`universities.html` — the map is rebuilt from the directory on every data
+build. A domain two universities both claim is **dropped** rather than picked
+between, and reported in the run log.
+
+---
+
+## The 2014–2023 archive is gone, and that part is settled
+
+The figures above start from the day the resolver is deployed. The decade UA
+measured is not recoverable — not because of the dimension, but because the
+spreadsheet holding the copy was **overwritten with empty results by its own
+add-on** on 2024-07-15, two weeks after Google deleted the property. All 30
+tabs were read on 2026-08-29; every `Report_N` tab says `Total Results Found
+0`. Source 3 above has the forensics.
+
+If an untouched export ever surfaces it drops in as
+`data/analytics-history.json` and is drawn as its own **frozen** section — a
+closed period, labelled with its date range and **never merged** with the live
+figures, because the two count different decades under different rules.
 
 ---
 

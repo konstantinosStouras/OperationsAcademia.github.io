@@ -5953,10 +5953,15 @@ for (const w of [320, 360, 390, 430]) {
       { path: '/jobs.html', title: 'Job postings', views: 48210, avgSec: 142 },
       { path: '/', title: 'Operations Academia', views: 31022, avgSec: 73 },
     ],
+    /* THE LIVE SHAPE: resolved from the visitors' own networks, and therefore
+       a SAMPLE — `seen` is every visit, `resolved` the ones a name came back
+       for. The caption has to carry that share or a short chart reads as
+       "hardly any universities visit". */
     universities: {
-      frozen: true, from: '2014-03-01', to: '2023-06-30',
+      frozen: false, from: '2026-08-01', to: '2026-08-28',
       all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }],
-      recent: [],
+      recent: [{ name: 'Duke University', visits: 40 }],
+      recentDays: 7, seen: 12000, resolved: 4900, academic: 900, placed: 3455,
     },
     totals: { visitors: 1, sessions: 1, pageviews: 1, days: Object.keys(demoDays).length, universities: 2 },
     range: { from: '2024-01-01', to: '2026-08-28' },
@@ -5985,6 +5990,9 @@ for (const w of [320, 360, 390, 430]) {
       tables: document.querySelectorAll('.oa-chart-table').length,
       tiles: document.querySelectorAll('.oa-tile').length,
       frozen: [...document.querySelectorAll('.oa-figure-frozen')].map((e) => e.textContent.trim()),
+      unisub: [...document.querySelectorAll('.oa-figure')]
+        .filter((s) => /Which universities/.test((s.querySelector('h2') || {}).textContent || ''))
+        .map((s) => (s.querySelector('.oa-figure-sub') || {}).textContent || '')[0] || '',
       iframes: document.querySelectorAll('iframe').length,
       overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     }));
@@ -5995,10 +6003,31 @@ for (const w of [320, 360, 390, 430]) {
     eq(seen.tables, seen.svgs,
       `analytics (${theme}): every chart also gives its numbers as a table — a chart ` +
       'is accessible because the values are available as text, not because it validated');
-    eq(seen.frozen, ['Archive — 2014 to 2023'],
-      `analytics (${theme}): the universities section is labelled as an archive — its ` +
-      'numbers came from a dimension no analytics product still offers, so a reader ' +
-      'must never take them for current');
+    /* THE CORRECTION (owner, 2026-08-29). This figure used to be an archive
+       labelled "no analytics product still offers this". A browser cannot see
+       its own reverse-DNS; a Cloud Function can, and this site has them, so
+       the measurement is current again — and a current figure must not carry
+       an archive chip. */
+    eq(seen.frozen, [],
+      `analytics (${theme}): a LIVE universities section carries no archive label`);
+    /* THE SHARE IS OF WHAT THE SENTENCE CLAIMS, and the fixture is built to
+       tell the two apart: 12,000 visits, 4,900 that reverse-resolved to a name
+       of ANY kind (internet providers included) and 3,455 actually placed at a
+       university. Dividing by `resolved` would print 41% under a sentence
+       about universities; the right answer is 29%, so a caption that reached
+       for the wrong field fails here rather than reading plausibly. */
+    ok(/of 12,000 visits, 3,455 \(29%\) were placed at a university listed here/.test(seen.unisub),
+      `analytics (${theme}): …and says what share of visits it placed — a ranking ` +
+      'printed without its denominator reads as "these are the universities that ' +
+      'visit", which is a claim this measurement cannot make');
+    ok(/no address is kept/.test(seen.unisub),
+      `analytics (${theme}): …and says outright that no address is kept`);
+    ok(/900 more came from a university this site has no department page for/.test(seen.unisub),
+      `analytics (${theme}): …and counts the academic networks it could not name ` +
+      'apart from the ones it could, because those are different facts');
+    ok(/not recorded at all/.test(seen.unisub),
+      `analytics (${theme}): …and says that a commercial or home connection is not ` +
+      'recorded, which is the part a reader has no other way to learn');
     ok(!seen.overflowX, `analytics (${theme}): the page never scrolls sideways`);
 
     /* THE TWO LINES MUST BE TELLABLE APART. The daily chart draws a count and
@@ -6070,6 +6099,39 @@ for (const w of [320, 360, 390, 430]) {
     eq(after.pressed, ['true', 'false', 'false', 'false'],
       `analytics (${theme}): …and exactly one range reads as chosen`);
 
+    await ctx.close();
+  }
+
+  /* --- an ARCHIVED section still labels itself -------------------------- */
+
+  /* `frozen` did not stop meaning anything when the measurement came back —
+     it means "a closed period, measured under another rule", which is what
+     the 2014-2023 figures would be if they ever turned up. The label has to
+     go on saying so, or a decade of UA counts would be read as this month's. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics archive: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, {
+      ...demo,
+      universities: {
+        frozen: true, from: '2014-03-01', to: '2023-06-30',
+        all: [{ name: 'Duke University', visits: 2100 }], recent: [],
+      },
+    });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const arch = await q.evaluate(() => ({
+      frozen: [...document.querySelectorAll('.oa-figure-frozen')].map((e) => e.textContent.trim()),
+      sub: [...document.querySelectorAll('.oa-figure')]
+        .filter((s) => /Which universities/.test((s.querySelector('h2') || {}).textContent || ''))
+        .map((s) => (s.querySelector('.oa-figure-sub') || {}).textContent || '')[0] || '',
+    }));
+    eq(arch.frozen, ['Archive — 2014 to 2023'],
+      'analytics: an archived universities section is still labelled as one, with its range');
+    ok(/is not being added to/.test(arch.sub),
+      'analytics: …and says it is closed, rather than claiming nothing could ever replace it');
     await ctx.close();
   }
 

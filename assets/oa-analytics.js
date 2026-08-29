@@ -18,11 +18,16 @@
      - configured but old  -> a warning naming the last day it has, because a
                               pipeline that quietly stopped is the failure this
                               page is now built to make impossible to miss.
-     - the universities    -> labelled FROZEN, with its own date range. UA's
-                              networkDomain is the only thing that ever
-                              produced those numbers and no analytics product
-                              offers a replacement, so they are an archive and
-                              must never be read as current.
+     - the universities    -> drawn with the SHARE OF VISITS it could place,
+                              never as a bare ranking. It is measured from the
+                              visitor's own network (see oa-netorg.js) and
+                              reverse DNS answers for perhaps a third of
+                              visits, so a chart without its denominator would
+                              read as "hardly any universities" instead of as
+                              the sample it is. An ARCHIVED copy of the figure,
+                              were one ever to exist, is labelled frozen with
+                              its own date range and never mixed with the live
+                              one — two rules, one ranking, no meaning.
    --------------------------------------------------------------------------- */
 (function () {
   'use strict';
@@ -82,8 +87,12 @@
       s.busiest ? pretty(s.busiest.day) : '');
     html += tile('Typical day', s.days ? C.full(Math.round(s.mean)) : '—', 'visitors, on average');
     if (data.totals && data.totals.universities) {
+      var u = data.universities || {};
       html += tile('Universities seen', C.full(data.totals.universities),
-        'in the 2014–2023 archive');
+        u.frozen
+          ? (u.from ? 'in the ' + u.from.slice(0, 4) + '–' + u.to.slice(0, 4) + ' archive'
+            : 'archived')
+          : 'recognised from their networks');
     }
     html += '</div>';
     host.innerHTML = html;
@@ -303,20 +312,61 @@
     renderUniversities();
   }
 
-  /** The frozen archive. Drawn last and labelled, because these numbers can
-      never be brought up to date: they came from Universal Analytics'
-      networkDomain — the visitor's reverse-DNS — and no analytics product
-      sells that dimension any more. */
+  /** Which universities read the site.
+   *
+   *  IT IS A SAMPLE AND IT SAYS SO. The university is worked out from the
+   *  visitor's own network, which is only knowable when their address
+   *  reverse-resolves to a name — true of a campus office, false of a phone
+   *  on mobile data or a campus behind a commercial CDN. So the caption
+   *  always carries the SHARE of visits it could place. A ranking printed
+   *  without that share reads as "these are the universities that visit",
+   *  which is a claim this measurement cannot make, and the reason the rest
+   *  of this page exists is that a figure nobody can check goes wrong quietly.
+   *
+   *  A frozen ARCHIVE — a closed, differently-measured period — is drawn the
+   *  same way but labelled, and the builder never merges the two. */
   function renderUniversities() {
     var u = (state.data && state.data.universities) || {};
     if (!u.all || !u.all.length) return;
+
     var span = u.from && u.to ? pretty(u.from) + ' to ' + pretty(u.to) : '';
-    var f = figure('Which universities visited',
-      'Visits by university, counted from the visitor\'s own network. ' +
-      (span ? 'Covers ' + span + '. ' : '') +
-      'This one cannot be brought up to date: it was measured from a dimension ' +
-      'Universal Analytics offered and no analytics product has replaced.',
-      { frozen: 'Archive — 2014 to 2023' });
+    var sub;
+    var opts = null;
+
+    if (u.frozen) {
+      sub = 'Visits by university, counted from the visitor\'s own network. ' +
+        (span ? 'Covers ' + span + '. ' : '') +
+        'An archive: it was measured differently from the figures above and ' +
+        'is not being added to.';
+      opts = { frozen: 'Archive' + (u.from ? ' — ' + u.from.slice(0, 4) + ' to ' + u.to.slice(0, 4) : '') };
+    } else {
+      /* THE DENOMINATOR IS WHAT THE SENTENCE CLAIMS. `resolved` counts every
+         address reverse DNS answered for, an internet provider included, so
+         dividing by it would print "29% came from a university" over a figure
+         that counts BT Broadband. What is placed AT a university is the sum of
+         the bars themselves — one visit increments exactly one of them. */
+      var seen = Number(u.seen) || 0;
+      /* the builder publishes the true total; summing the ROWS is the
+         fallback, and would be a little low whenever the list is longer than
+         the cut the served file makes */
+      var placed = Number(u.placed) ||
+        u.all.reduce(function (n, x) { return n + (Number(x.visits) || 0); }, 0);
+      var acad = Number(u.academic) || 0;
+      var share = seen ? Math.round((placed / seen) * 100) : 0;
+      sub = 'Visits by university, worked out from the visitor\'s own network — ' +
+        'nobody is identified and no address is kept. ' +
+        (span ? 'Covers ' + span + '. ' : '');
+      if (seen) {
+        sub += 'It is a sample rather than a count: of ' + C.full(seen) + ' visits, ' +
+          C.full(placed) + ' (' + share + '%) were placed at a university listed here' +
+          (acad ? ', and ' + C.full(acad) + ' more came from a university this site ' +
+            'has no department page for' : '') +
+          '. The rest were on commercial or home connections, which are not ' +
+          'recorded at all. Read the shape rather than the totals.';
+      }
+    }
+
+    var f = figure('Which universities visited', sub, opts);
     root.appendChild(f.section);
     C.bars(f.body, { unit: 'visits', limit: 25, items: u.all.map(function (x) {
       return { label: x.name, value: x.visits };

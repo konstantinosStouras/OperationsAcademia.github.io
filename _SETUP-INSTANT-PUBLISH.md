@@ -69,9 +69,14 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys BOTH functions. Always pass `--project`: the CLI remembers an
-"active project" per directory, and a deploy from this folder has already gone
-into another project's database once (see CLAUDE.md).
+This deploys EVERY function in `_functions/`, which is four: the three
+doorbells above, and **`recordVisit`** — the university-visit resolver behind
+the Analytics page's "which universities visited" chart, which needs no secret
+and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4).
+
+Always pass `--project`: the CLI remembers an "active project" per directory,
+and a deploy from this folder has already gone into another project's database
+once (see CLAUDE.md).
 
 First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
 Artifact Registry, Eventarc) — say yes. It takes a few minutes.
