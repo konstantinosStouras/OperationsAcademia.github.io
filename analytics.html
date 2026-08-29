@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Analytics — Operations Academia</title>
-    <meta name="description" content="Representative metrics of how Operations Academia is used — which universities visit, how often, and which pages they read.">
+    <meta name="description" content="How busy the Operations job market site is, day by day — the weekly rhythm, the hiring season across the year, and the pages people actually read.">
     <link rel="canonical" href="https://www.operationsacademia.org/analytics.html">
 
     <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
@@ -20,7 +20,7 @@
     <meta property="og:site_name" content="Operations Academia">
     <meta property="og:locale" content="en_GB">
     <meta property="og:title" content="How Operations Academia is used">
-    <meta property="og:description" content="Representative metrics of how Operations Academia is used — which universities visit, how often, and which pages they read.">
+    <meta property="og:description" content="How busy the Operations job market site is, day by day — the weekly rhythm, the hiring season across the year, and the pages people actually read.">
     <meta property="og:url" content="https://www.operationsacademia.org/analytics.html">
     <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
@@ -30,12 +30,12 @@
     <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="How Operations Academia is used">
-    <meta name="twitter:description" content="Representative metrics of how Operations Academia is used — which universities visit, how often, and which pages they read.">
+    <meta name="twitter:description" content="How busy the Operations job market site is, day by day — the weekly rhythm, the hiring season across the year, and the pages people actually read.">
     <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg">
     <meta name="twitter:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
     <link rel="image_src" href="https://www.operationsacademia.org/images/share-square.jpg">
     <meta itemprop="name" content="How Operations Academia is used">
-    <meta itemprop="description" content="Representative metrics of how Operations Academia is used — which universities visit, how often, and which pages they read.">
+    <meta itemprop="description" content="How busy the Operations job market site is, day by day — the weekly rhythm, the hiring season across the year, and the pages people actually read.">
     <meta itemprop="image" content="https://www.operationsacademia.org/images/share-square.jpg">
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <script>
@@ -86,6 +86,7 @@
          oa-firebase.js asks for it. -->
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
+    <link href="assets/oa-analytics.css" rel="stylesheet">
   </head>
 
   <body class="v3">
@@ -150,48 +151,40 @@
         <div class="v3-container">
           <span class="v3-kicker">Analytics</span>
           <h1 class="v3-h1">How the site is used</h1>
-          <p class="v3-lede" style="margin-top:14px">A few representative measures of activity on Operations Academia, updated daily. Visits from companies and other service providers are excluded throughout.</p>
+          <p class="v3-lede" style="margin-top:14px">How busy the site is, day by day &mdash; and the two patterns worth knowing about it: the week, and the hiring season. Rebuilt daily from the site&rsquo;s own record.</p>
           <div class="v3-cta-row" style="margin-top:24px">
             <a class="v3-btn ghost" href="./#about">&larr; Back to the overview</a>
           </div>
-          <p class="v3-mut" style="font-size:14px;margin-top:18px">The charts are published from the site&rsquo;s own analytics spreadsheet, so they render in their own light styling whichever theme you are reading in.</p>
+          <p class="v3-mut" style="font-size:14px;margin-top:18px">The charts are drawn by this page from one small served file, so they follow whichever theme you are reading in, and every one of them will also give you its numbers as a table.</p>
         </div>
       </section>
 
       <div class="v3-container" style="padding-bottom:90px">
-        <section style="margin-bottom:44px">
-          <h2 class="v3-h3">University visits during the last 7 days</h2>
-          <div class="v3-embed">
-            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTWggAd-lHzkKLA_c3PhXLrAwAMkYuNYJkflrEL7zXzRYIQrrqg3l46_OASdhiRa2pgi1zwOb3WZWSb/pubchart?oid=1558575702&amp;format=interactive" width="600" height="1095" loading="lazy"
-              frameborder="0" scrolling="no" seamless title="Operations Academia usage chart"></iframe>
-          </div>
-        </section>
+        <!-- Everything below is drawn by assets/oa-analytics.js from
+             data/analytics.json.
 
-        <section style="margin-bottom:44px">
-          <h2 class="v3-h3">Daily visits since the site was created</h2>
-          <div class="v3-embed">
-            <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTWggAd-lHzkKLA_c3PhXLrAwAMkYuNYJkflrEL7zXzRYIQrrqg3l46_OASdhiRa2pgi1zwOb3WZWSb/pubchart?oid=1129943984&amp;format=interactive" width="800" height="400" loading="lazy"
-              frameborder="0" scrolling="no" seamless title="Operations Academia usage chart"></iframe>
-          </div>
-        </section>
+             THIS USED TO BE FOUR <iframe>s pointing at Google Sheets
+             `pubchart` charts, and they had been dead since 2023: the
+             spreadsheets behind them were filled by the Google Analytics
+             Spreadsheet Add-on, which spoke only the Universal Analytics
+             Reporting API — switched off on 1 July 2023, with the properties
+             deleted a year later. A dead embed renders as an empty box and
+             reports nothing to anybody, which is how three years went by.
 
-        <section style="margin-bottom:44px">
-          <h2 class="v3-h3">The most visited pages</h2>
-          <p class="v3-mut">Pageviews and average time spent on each, sorted by average visit
-          duration.</p>
-          <div class="v3-embed">
-            <iframe src="https://docs.google.com/spreadsheets/d/1lnrl5hsmj0WreUkxJ2iE-hsYo1aSgmrQO0RaKhCm0sY/pubchart?oid=2051501200&amp;format=interactive" width="600" height="400" loading="lazy"
-              frameborder="0" scrolling="no" seamless title="Operations Academia usage chart"></iframe>
-          </div>
-        </section>
-
-        <section>
-          <h2 class="v3-h3">Which universities have visited, since 1 March 2014</h2>
-          <div class="v3-embed">
-            <iframe src="https://docs.google.com/spreadsheets/d/1lnrl5hsmj0WreUkxJ2iE-hsYo1aSgmrQO0RaKhCm0sY/pubchart?oid=1398621443&amp;format=interactive" width="900" height="800" loading="lazy"
-              frameborder="0" scrolling="no" seamless title="Operations Academia usage chart"></iframe>
-          </div>
-        </section>
+             Drawing the marks here also takes the reader's theme (an embed
+             cannot — the old lede had to apologise for it), gives every chart
+             a table of its own numbers, makes no third-party connection, and
+             sizes to a phone instead of being fixed at 900px. -->
+        <div id="oa-analytics">
+          <noscript>
+            <div class="oa-an-note">
+              <h2>These charts need JavaScript</h2>
+              <p>The figures are drawn in the browser from
+              <code>data/analytics.json</code>, which is a plain served file you
+              are welcome to read directly.</p>
+            </div>
+          </noscript>
+        </div>
       </div>
     </main>
     <footer class="v3-footer">
@@ -249,10 +242,14 @@
 
     <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
 
+    <script defer src="assets/oa-ga4.js"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
+    <script defer src="assets/oa-analytics-model.js"></script>
+    <script defer src="assets/oa-charts.js"></script>
+    <script defer src="assets/oa-analytics.js"></script>
 
   </body>
 </html>

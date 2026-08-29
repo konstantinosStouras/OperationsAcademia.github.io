@@ -69,6 +69,16 @@
      the green under the AA floor page-test.mjs measures (4.72:1 here). */
   --err-soft: #fdf1f0;
   --ok-soft: #f2f9f5;
+  /* The SPONSOR mark (owner, 2026-08-29). Purple because it is the one hue
+     this deliberately neutral charcoal palette never uses anywhere else, so
+     the badge is visible at a glance without being loud — "professional and
+     discrete but visible" was the instruction. Read as INK on --sponsor-soft
+     (6.48:1) and on the card (7.38:1), both well clear of the 4.5:1 floor
+     page-test.mjs measures. --sponsor-line carries no text and so has no
+     floor of its own. */
+  --sponsor: #6b3fa0;
+  --sponsor-soft: #f3eefb;
+  --sponsor-line: #d9c9f0;
   --warn-bg: #fdf6e8;
   --warn-line: #ecd9ac;
   --shadow: 0 1px 2px rgba(23, 27, 33, 0.05), 0 14px 34px -20px rgba(23, 27, 33, 0.28);
@@ -99,6 +109,13 @@
      then works over whatever surface the button lands on */
   --err-soft: rgba(224, 138, 134, 0.14);
   --ok-soft: rgba(111, 191, 146, 0.14);
+  /* the sponsor mark's dark half — the ink lightened to clear AA on a dark
+     ground (7.26:1 on the tinted pill, 7.98:1 on the page), and the two
+     tints TRANSLUCENT for the reason the two above are: the wash then works
+     over whatever surface the badge lands on rather than only over --bg-2. */
+  --sponsor: #c9aef0;
+  --sponsor-soft: rgba(183, 148, 246, 0.14);
+  --sponsor-line: rgba(183, 148, 246, 0.42);
   --warn-bg: #221b0e;
   --warn-line: #4d3d1d;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 16px 40px -22px rgba(0, 0, 0, 0.65);
@@ -1230,11 +1247,30 @@ body.v3 .oa-card-head { background: none; }
 body.v3 .oa-card-title { color: var(--ink); font-weight: 600; }
 body.v3 .oa-card-sub { color: var(--mut); }
 body.v3 .oa-card-body { border-top: 1px solid var(--line-soft); }
+/* THE LOCKED CARD, in the live design. oa-list.css carries the same rule for
+   the engine's own readers; a fix applied to ONE of the two stylesheets is
+   either invisible on the site or lost on the next page, which is why both
+   are pinned in selftest.mjs — the Excel button and the sponsor rail are here
+   for the same reason. */
+body.v3 .oa-card-lock-blur { color: var(--mut); }
+body.v3 .oa-card-lock-note { color: var(--brand); }
 body.v3 .oa-kv th { color: var(--mut); }
 body.v3 .oa-kv td { color: var(--ink-2); }
 body.v3 .oa-kv tr { border-color: var(--line-soft); }
 body.v3 .oa-label { border-radius: 999px; }
 body.v3 .oa-label-primary { background: var(--brand); color: var(--on-brand); }
+/* The sponsor mark, in the live design (oa-list.css carries the same rule for
+   the engine's own readers — a fix applied to ONE of these two stylesheets is
+   either invisible on the site or lost on the next page, which is why both are
+   pinned in selftest.mjs). `background-color`, never the `background`
+   shorthand: the shorthand blanks a background-image, the trap recorded in
+   CLAUDE.md that cost every select on this site its chevron. */
+body.v3 .oa-label-sponsor {
+  background-color: var(--sponsor-soft);
+  color: var(--sponsor);
+  border: 1px solid var(--sponsor-line);
+}
+body.v3 .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor); }
 body.v3 .oa-loading, body.v3 .oa-empty {
   background: var(--bg-2); border: 1px dashed var(--line);
   border-radius: var(--radius); color: var(--mut);
@@ -1815,6 +1851,14 @@ body.v3 .oa-filter > .oa-label-spacer {
   gap: 44px;
   align-items: start;
 }
+/* A GRID ITEM'S AUTOMATIC MINIMUM IS ITS CONTENT, so a track it is too wide
+   for does not clip it — it BLOWS THE GRID OUT, and the page scrolls
+   sideways. Latent here since the panel was built: nothing in it had ever
+   been unbreakable, and the locked card's one-line strip (assets/oa-gate.js)
+   is the first thing that is. Fixed where the defect is rather than by making
+   every future panel's content breakable, which is a rule nobody could keep.
+   Measured by the 390px gate in page-test.mjs, which is what caught it. */
+.v3-jobs-left, .v3-jobs-right { min-width: 0; }
 .v3-jobs-left .v3-launcher { margin: 26px 0 0; padding: 20px 22px; max-width: none; }
 .v3-jobs-left .v3-launcher-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .v3-jobs-left .v3-launcher select {
@@ -1863,6 +1907,19 @@ body.v3 .v3-panel .oa-card {
   border-bottom: 1px solid var(--line);
 }
 body.v3 .v3-panel .oa-card:last-child { border-bottom: 0; }
+/* …and the locked strip keeps the head's gutter inside the panel, where the
+   card itself has none. Written with the extra class so it wins outright
+   (0,4,1) rather than relying on being later in the file — the specificity
+   AND load order trap the rail above records. */
+body.v3 .v3-panel .oa-card.oa-card-gated .oa-card-lock { padding-bottom: 14px; }
+/* …and the sponsor's rail SURVIVES that reset. The rule above sets
+   `border: 0` on a panel card and sits ~600 lines BELOW the sponsor rule, at
+   the same specificity (0,3,1 each) — so load order decided it and the rail
+   was silently blanked on the one-pager's teaser while working perfectly on
+   the jobs page. Exactly the "specificity AND load order" trap CLAUDE.md
+   records for the Leaflet attribution box. The extra class wins outright
+   (0,4,1) rather than relying on being later in the file. */
+body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor); }
 @media (hover: hover) and (pointer: fine) {
   body.v3 .v3-panel .oa-card:hover {
     box-shadow: none; border-color: var(--line); background: var(--bg-3);

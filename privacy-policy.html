@@ -201,12 +201,30 @@
           operating system and browser type. This information is statistical data about users&rsquo;
           browsing actions and patterns, it does not identify any individual. It is used to inform
           improvements to the website, for system administration, and to report aggregate information
-          to third parties. We use a third party product &ldquo;Google Analytics&rdquo;, a web
-          analytics service provided by Google, Inc. (&ldquo;Google&rdquo;), to help us analyse how our
-          Site is used. In doing so information about your use of our Site, including your IP address,
-          may be transmitted to, and stored by, Google. This information will be subject to
+          to third parties.</p>
+
+          <h2>Google Analytics, and why this Site sets no analytics cookies</h2>
+          <p>We use <strong>Google Analytics 4</strong>, a web analytics service provided by Google,
+          Inc. (&ldquo;Google&rdquo;), to understand how the Site is used. Information about your visit
+          &mdash; the pages you open, roughly where in the world you are, and your browser and device
+          type &mdash; is sent to Google and is subject to
           <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google&rsquo;s
-          Privacy Policy</a>.</p>
+          Privacy Policy</a>. Google truncates IP addresses before storing them.</p>
+          <p><strong>It is configured to store nothing at all on your device.</strong> Google Analytics
+          normally writes a cookie so that it can recognise you when you come back; we switch that off
+          (<code>client_storage: &lsquo;none&rsquo;</code>), so no analytics cookie, and no other
+          analytics identifier, is ever written to your browser by this Site. That is why you are not
+          asked to accept cookies when you arrive: there are none to accept. The trade-off is ours
+          rather than yours &mdash; without an identifier we cannot tell a returning reader from a new
+          one, so our own visitor numbers are approximate.</p>
+          <p>We have also turned off Google Signals and advertising personalisation, so nothing
+          collected here is used to build advertising audiences or to follow you across devices or
+          other websites. We do not run advertising on this Site and we do not sell or share this
+          information.</p>
+          <p>If your browser sends a <a href="https://globalprivacycontrol.org/" target="_blank"
+          rel="noopener">Global Privacy Control</a> signal, or the older &ldquo;Do Not Track&rdquo;
+          signal, Google Analytics is not loaded at all on your visit &mdash; not merely asked to
+          behave, but never contacted.</p>
           <p>We additionally record basic usage of the Site &mdash; the pages you visit, the time you
           spend on them, the links and buttons you click, and which form fields you interact with
           (never the text you type into them). When you are signed in to an Operations Academia account
@@ -309,6 +327,7 @@
 
     <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
 
+    <script defer src="assets/oa-ga4.js"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>

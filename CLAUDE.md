@@ -2425,6 +2425,534 @@ would be half a screen — where the mobile rules give both the full width and a
 the two buttons' shared baseline at desktop width, and the full-width targets
 at 390px.
 
+## A department that SPONSORED the site, and what that may change
+
+CUHK Business School's Department of Decisions, Operations and Technology
+sponsored operationsacademia.org from 1 September 2025 to 1 September 2027
+(owner, 2026-08-29). Their postings **lead the jobs page** and carry a purple
+**"Sponsored"** mark — "professional and discrete but visible to all users of
+the website".
+
+    assets/oa-sponsors.js   who sponsored, when, and the whole rule (dual-mode)
+
+**IT IS A CURATED TABLE READ IN THE BROWSER, not a field in `data/jobs.json`,
+and the reason is that a sponsorship ENDS.** The window is tested when the card
+is drawn, so on 1 September 2027 the mark stops appearing by itself — nothing
+to run, nothing to remember. That is `oa-jobnav.js`'s own argument ("a build
+runs every twenty minutes and a deadline passes at midnight, so deciding in the
+browser is the only reading that cannot be stale") applied to a date somebody
+is paying for. Three more reasons, each already recorded elsewhere in this
+file: a derived field on every row would have mailed the maintainer 575 phantom
+edits the first time it was written (the `withMarketYears` lesson, which is why
+`diffRows` skips it); a served side file would need a builder, a place in
+`BUILDERS`, and one more way for a red guard to stop the whole site publishing;
+and `/v1/` and `/v2/` never load the file, so the archives do not move.
+
+**What the mark may change is exactly two things — the badge and the
+position.** It never changes what a posting SAYS, never hides or demotes
+anybody else's, and never survives its own end date. The Excel download gains a
+`Sponsored` column whose `from` names the three PUBLISHED fields the answer is
+computed from, because there is no `sponsored` in the served file and
+deliberately never will be.
+
+**The sort is TOTAL, not "while no filter is set".** The owner's words were
+"top of the list … without any user-defined search filters being applied yet",
+which describes when they will SEE it rather than asking for a conditional
+comparator — and a list that re-ordered itself as the reader typed would be a
+worse surprise than a sponsor leading a search they are almost never in (narrow
+by anywhere but Hong Kong and they are gone). `featured` has always worked this
+way, and sponsored ranks ABOVE it: a sponsorship is a commitment the site made
+to somebody, Featured is a note the maintainer left themselves. That ordering
+is not hypothetical — the served file carries exactly one featured row.
+
+**BOTH lists lead with the sponsor** — and that is a correction. The first
+build left the one-pager's teaser date-ordered, reasoning that "the ten most
+recent postings" would become false; the owner sent a screenshot of the mark
+sitting on the SECOND card and said *fix*. The heading names WHICH ten, not
+what order they are in, and the teaser's `prepare` still selects them by date
+before the comparator runs — so a posting outside the newest ten is still not
+shown and the heading stays true. `featured` keeps its old split, which is now
+the odd one out rather than the precedent.
+
+### The rule says NO, four times over
+
+A sponsor mark is a claim the site makes on somebody's behalf, so the expensive
+failure is not a missing badge — it is a badge on a posting that has not earned
+one. The served file carries **eight** CUHK-family rows and exactly one of them
+is the sponsor's:
+
+* **`…, Shenzhen` and `CUHK Shenzhen` (five rows) are a DIFFERENT UNIVERSITY.**
+  `institutionKey` keeps them apart on its own, which is the whole reason the
+  match goes through it rather than through a substring.
+* **`OM/IS` is not a department name.** It is the crowdsourced tracking
+  workbook's field code, and reading it as the sponsor's department would be
+  precisely the guess "curated, never guessed" forbids. Adding it is a
+  one-line owner decision, not an inference.
+* **A posting advertised BEFORE the window is not retrospectively theirs**, and
+  a row with no posting date is never marked at all.
+* **The mark is drawn only while the sponsorship is RUNNING** — present tense,
+  which is what makes it honest.
+
+**…and one place it had to say yes.** One row files the SCHOOL in the
+institution field (`institution: "CUHK Business School"`), which
+`institutionKey` correctly keeps as a key of its own and could therefore never
+reach the record. That is an ordinary thing for a poster to do, so the record
+carries an `alsoFiledAs` list — curated one measured spelling at a time, like
+every alias table here, which is what stops it reaching "CUHK Shenzhen".
+
+### The dependency that was missing, and why the tests could not see it
+
+`oa-sponsors.js` asks `oa-schools.js` whether two spellings are one university
+— and **neither `jobs.html` nor `index.html` loaded that file.** Only the
+forms, the alerts page, `/admin-area` and the directory did. So in the browser
+the factory was handed `undefined`.
+
+The first draft fell back to a plain fold, and that is what made it dangerous:
+"The Chinese University of Hong Kong" still matched itself, so **every check in
+`selftest.mjs` passed** — Node resolves the dependency through `require` —
+while the SITE silently stopped recognising "CUHK", "Chinese University of Hong
+Kong" and "The Chinese University of Hong Kong (CUHK)". Three spellings, marked
+in the tests and unmarked on the page, with nothing anywhere to say so. It is
+the two-halves-disagreeing failure `oa-jobnav.js` was written to remove, and
+**a fallback that is right most of the time is the worst possible shape for
+it.**
+
+Both halves are fixed and both are pinned: the pages load `oa-schools.js`
+FIRST, and `uniKey` returns nothing at all without it — this says no when it
+cannot tell, like every other curated table here. The guard EVALUATES the
+module with no `OASchools` on the root rather than reading its source for a
+`return fold(v)`, because a source check would pass the moment somebody wrote
+the same fallback a different way.
+
+**Anything else built on a curated module must load that module on the page
+that reads it, and must be tested with it ABSENT.**
+
+### The badge, and the two stylesheets
+
+An **outline pill** (purple ink, pale purple ground, hairline border) plus a
+**3px rail** down the card's left edge — the owner picked both. The outline is
+load-bearing rather than decorative: every other label here is a solid block of
+colour, so an outline reads as a different KIND of thing at a glance, and it is
+what keeps it from being taken for a second `Featured`.
+
+Purple because it is the one hue this deliberately neutral charcoal palette
+never uses anywhere else. `--sponsor` / `--sponsor-soft` / `--sponsor-line` are
+defined in **both** themes, following the `--ok` / `--err` idiom exactly — a
+solid hex in light, a TRANSLUCENT wash in dark so the tint works over whatever
+surface the badge lands on. Measured: 6.48:1 light, 7.26:1 dark, against a
+4.5:1 floor.
+
+**The rules live in TWO stylesheets and only one of them reaches the site** —
+`oa-list.css` is the engine's, `v3.css` is the live design's override — so a
+fix applied to one alone is invisible on the site or lost on the next page.
+
+**And a THIRD rule is needed for a card inside a panel**, which is how the
+rail was shipped broken. `body.v3 .v3-panel .oa-card { border: 0 }` has the
+same specificity as `body.v3 .oa-card.oa-sponsored` (0,4,1 against 0,4,1 —
+three classes and an element each) and sits ~600 lines LATER in the same file,
+so load order decided it: the rail painted perfectly on the jobs page and was
+silently blanked on the one-pager's teaser. The browser guard measured it on
+`jobs.html` and nowhere else, so everything stayed green. It is the
+"specificity AND load order" trap this file already records for the Leaflet
+attribution box, and the lesson generalises: **a rule that can be beaten by a
+rule of equal weight further down the file is not a rule** — win on
+specificity, and measure the thing on every surface it is drawn on, not just
+the first.
+That is the trap already recorded under the Excel button, and `selftest.mjs`
+pins both files. The badge names its own INK as well as its ground, or the base
+`.oa-label`'s `#fff` would paint it white on white; the rail is a `border-left`
+width on the card's own border rather than an extra element, so it cannot
+overlap the rounded corners or the focus ring; and both rules use
+`background-color`, never the `background` shorthand that blanks a
+background-image.
+
+### To renew, retire or add a sponsor
+
+Edit `SPONSORS` in `assets/oa-sponsors.js` — university, school, department,
+and the two dates (`from` inclusive, `to` **exclusive**). Nothing else, and
+nothing under `data/`. Retiring one early is a date change; letting one lapse
+needs no action at all.
+
+Tests: `testSponsors` in `_scraper/selftest.mjs` (the record's shape, who it
+marks and who it must not over the whole served file, both edges of the window,
+the folded spellings, the comparator's antisymmetry measured over the real
+list, the badge, the wiring on both pages, the load ORDER, the module driven
+with its dependency absent, both stylesheets, both themes' tokens, and the
+export column) and the sponsor block in `_scraper/page-test.mjs` (the rendered
+lead card, the pill, the measured 3px rail, the contrast in both themes, and
+that the home teaser is still ordered by date alone). **The browser block asks
+the module what to expect rather than naming CUHK**, so it stays green on the
+day the sponsorship lapses — a guard about a corpus must not move with the
+corpus.
+
+## What a reader who has not REGISTERED may read
+
+Owner, 2026-08-29, from two screenshots of the site signed out: *"they should
+only be able to see the list of (1) the sponsor and (2) the list of last 9
+universities which posted, but if they click, the card should not expand. It
+should only expand when a user is registered and has opened the full list …
+a non-registered and non-signed-in user should never be able to view details
+of job postings or candidates."*
+
+    assets/oa-gate.js     who is reading, and what a click does (dual-mode)
+
+**WHO is hiring stays open to everybody; WHAT the posting says does not.** The
+card keeps its badges, its university and its department — a list of blurred
+names would be no list at all, and the first half of that sentence asks for
+the sponsor and the nine universities beside it to be READ. What goes is the
+body: the entry level, the two deadlines, the comments, the advertisement.
+For a candidate it is the same split, and it matters more — the name is what a
+hiring committee is looking for, and the CV, the INFORMS days and the e-mail
+address are that person's own.
+
+**IT IS A NUDGE, NOT AN ACCESS CONTROL, AND IT CANNOT BE ONE HERE.** This is a
+static site on GitHub Pages: `data/jobs.json` and `data/candidates.json` are
+served to anybody who asks for them, and no rule in this repository can change
+that without a backend to put them behind. So what the gate decides is WHAT
+THE SITE SHOWS — a real product decision, the difference between a page that
+reads as a directory of open positions and one that reads as a list of
+universities with a reason to register — and **no page, no comment and no
+e-mail may describe it as privacy or security.** `selftest.mjs` pins that
+nothing does, and the module says it at the top where the next reader will
+look.
+
+### The values are ABSENT, not blurred
+
+A blur over the real text is a picture of a lock rather than a lock: it is
+selectable, copyable, and one keystroke of devtools from being read. So the
+engine returns before the details table is built at all, and what the strip
+blurs is **the row LABELS that posting would have shown** — the page's own
+static wording, true per card (a posting with no suggested date does not
+advertise one), and at that radius unreadable. It says "there is a table here
+and an account opens it" in the one glance a reader gives a card, which is the
+whole job. `user-select: none` is not there to stop anybody copying it; it is
+there because a blurred run that highlights when dragged over reads as a
+rendering fault.
+
+### Three states, and only one of them is a lock
+
+    locked      signed out. The strip blurs, the padlock is drawn, a press
+                offers the sign-in box — and remembers WHICH card, so signing
+                in lands the reader on the posting they pressed rather than at
+                the top of a list they must find it in again.
+    gated       signed in, on the one-pager's TEASER. Nothing is withheld; the
+                card is a way IN. A press carries them to the full list with
+                that posting open (`?job=<id>`), which is what "it should only
+                expand when a user is registered and has opened the full list"
+                asks for, literally.
+    open        signed in, on a full list. Exactly what it always did.
+
+`oa-card-gated` and `oa-card-locked` are two classes for that reason, and the
+padlock is keyed on the second. **A single class named "locked" on a signed-in
+reader's card is a statement in the document that is not true**, and the
+styling keyed on it then says it out loud — which is how the first build
+shipped a padlock in front of "Open it on the full list".
+
+### Where it is mounted, and where it deliberately is not
+
+`jobs.html`, the one-pager's jobs teaser AND its candidates, and
+`previous-markets.html` — **a closed season is still a job posting**, and
+leaving the archive open would have made the gate on the jobs page a matter of
+waiting rather than of registering. Confirmed placements, recent faculty and
+the Universities directory are none of the two things the owner named, and are
+untouched. The `/v1/` and `/v2/` archives keep their own frozen assets and
+never load this file, by the rule the three trees are held to.
+
+### The parts that could quietly become lies
+
+**The sign-in card's copy.** It ended "Everything below stays readable either
+way", which was true of the list it was written for and became false the
+moment the cards stopped opening. A promise the page breaks is worse than no
+promise, so it now says what a reader without an account DOES get. It still
+names the Excel download, because that card is the only place a signed-out
+reader is told the download exists.
+
+**One definition of "is this reader signed in".** `assets/oa-jobexport.js`
+carried its own and now asks the gate, so the button that downloads the list
+and the cards that show it can never disagree about who is reading. No silent
+fallback when the module is missing — it says no, and the load order is pinned
+— because a fallback that is right most of the time is the worst possible
+shape for one, which is the lesson `oa-sponsors.js` learnt when its own
+dependency was absent on two pages and every test went on passing.
+
+**The decision is taken from the auth HINT first**, like the account chip:
+anything painted from a remembered value must be painted in its final form or
+not at all, and a gate that waited for the SDK would flash locked cards at
+every signed-in reader and details at every signed-out one. `OAGate.watch()`
+re-renders when the real state arrives, which is what the engine's
+`rerender()` was added for.
+
+**Nobody can sign in** — no accounts module, a blocked CDN, an ad blocker —
+and the reader is still not registered, so they are still locked; but the
+strip says *"Sign-in is unavailable at the moment"* and the head is disabled,
+rather than offering a control that would do nothing when pressed. That is the
+wording `oa-jobexport.js` already gives its disabled button.
+
+### When a browser check needs a detail on screen, SIGN THE READER IN
+
+The gate turned several existing checks into contradictions — a signed-out
+page modelling a signed-in poster, a `?job=` deep link asserting a card was
+open. `signedInPage()` near the top of `page-test.mjs` stands
+`_scraper/_fake-firebase.js` up as one helper so a block needs three lines
+instead of fifteen, and it waits for the session to RESOLVE, since measuring
+between the hint and the answer is measuring a state neither reader is in.
+**Anything asserting on a card's rows, its links or its printed body has to
+say who is reading**; a page opened without the helper is a signed-out reader,
+which is the other half of what has to be covered.
+
+`OAGate.__setForTest` exists for the NODE checks only — there is no SDK there
+to sign anybody in — and it can only ever reveal what is already in a public
+served file, which is the argument `OAJobEdit.__setPermissionsForTest` is
+written under.
+
+## The analytics page draws its own charts, because the old ones died in 2023
+
+`analytics.html` was four Google Sheets `pubchart` `<iframe>`s. The
+spreadsheets behind them were filled by the **Google Analytics Spreadsheet
+Add-on**, which spoke only the **Universal Analytics Reporting API** — and UA
+stopped processing data on **1 July 2023**, with the properties themselves
+**deleted on 1 July 2024**. So the add-on had been erroring for three years and
+the charts had been frozen or blank for as long.
+
+**Nothing said so, and that is the whole lesson.** A dead embed renders as an
+empty box; a page that has stopped measuring and a site nobody visits look
+identical from outside. It is the `og:url` failure and the never-deployed
+doorbell wearing different clothes: *a thing that reports nothing when it fails
+stays broken for as long as nobody happens to look*.
+
+    assets/oa-analytics-model.js   the shape of a day, and what may come from where (pure, dual-mode)
+    assets/oa-charts.js            the inline-SVG chart set (line, columns, bars)
+    assets/oa-analytics.js         the page — fetch one file, draw six figures
+    assets/oa-analytics.css        its chrome, theme tokens throughout
+    _scraper/build-analytics.mjs   writes data/analytics.json from its gated sources
+    .github/workflows/oa-analytics.yml   daily
+    _SETUP-ANALYTICS.md            what each source needs, and what can never come back
+
+### Three sources, and a day belongs to exactly ONE of them
+
+| | what it is | what it needs |
+|---|---|---|
+| `history` | `data/analytics-history.json` — which will never exist; see "the archive is CONFIRMED GONE" below | nothing, and nothing can be done: the spreadsheets were read and hold no measurement |
+| `usage` | the site's own `usageSessions` (assets/oa-usage.js, every page since 2026-08-17) | `FIREBASE_SERVICE_ACCOUNT`, **already a secret here** — so this one works today |
+| `ga4` | Google Analytics 4 through the Data API | `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT`, and a tag on the live site |
+
+`mergeDays` picks ONE source per day by `SOURCE_ORDER` and **never adds two
+together**. Two sources measuring the same Tuesday are two measurements of one
+number, not two numbers; summing them would double every day of the overlap —
+a chart that looks right, moves in the right direction, and is wrong by a
+factor of two.
+
+**An unreachable source changes nothing.** The committed file stands, and the
+days already served are carried forward as a floor (`carry` in `assemble`), so
+a GA4 timeout costs a day of freshness rather than the history. That matters
+more here than in the postings pipeline, because this file *is* the whole page:
+a half-written one is a blank dashboard.
+
+**Nothing is collected on the live site today.** The UA tag lives in
+`assets/js/ypo-parakolouthisi.js`, loaded only by the `/v1/` and `/v2/`
+archives; the root redesign carries **no analytics tag at all**. Firebase
+issues `G-2CX86W7PHB` and `oa-firebase.js` deliberately omits it. Adding a GA4
+tag means cookies, a consent banner and a Privacy Policy change on an EU-facing
+site — **a decision about visitors, not a bug fix**, so it was left to the
+owner rather than shipped.
+
+### What can never be revived, and is therefore labelled
+
+**The two university charts.** "Which universities visited" came from UA's
+`networkDomain` / `networkLocation` — the visitor's reverse-DNS. **GA4 has no
+such dimension and nothing replaces it**, and a browser cannot see its own
+reverse-DNS either, so the first-party record cannot stand in. Those figures
+are an **archive**: `universities.frozen` is true in the served file and the
+card carries "Archive — 2014 to 2023" with its date range, so nobody reads them
+as current. **And since 2026-08-29 there is nothing left to label** — the
+archived copy was checked and is empty too, so the card never draws at all. The
+conditional rendering is what makes that a clean absence rather than an empty
+box; see the section below for what happened to it.
+
+### The two rules the charts themselves had to learn
+
+* **A month the record has not covered is not a month with no visitors.** Under
+  the default 90-day range the hiring-season chart drew eight zero-height bars
+  — on a job-market site that reads as "nobody visits in September", which is
+  backwards rather than merely missing. It reads the **whole record**, says so
+  in its own subtitle, and an `empty` bucket draws no bar at all (the table
+  says `—`, never `0`). The weekly rhythm stays range-responsive: 90 days is a
+  fine sample of weekdays, where it is no sample at all of a year.
+* **The dark theme re-steps the chart accent, and that was measured.** The
+  daily chart draws a count and its trailing 7-day mean, so the two must be
+  tellable apart. `--brand` against `--gold` separates at ΔE 31.6 in light and
+  collapses to **14.9 in dark** — under the floor at which two overlaid lines
+  can be told apart even with full colour vision. `--oa-chart-accent` is
+  `#d98a24` there (ΔE 21.2, still ≥3:1 on the dark surface). This is the one
+  place on the site where two of its colours must be distinguished **from each
+  other** rather than from their background, which is a stricter test than
+  contrast. The mean is dashed as well, so identity is never colour alone.
+
+Drawing the marks here also takes the reader's theme (the old lede had to
+apologise — "they render in their own light styling whichever theme you are
+reading in"), gives every chart a `<table>` of its own numbers, makes no
+third-party connection on a page that otherwise makes none, and sizes to a
+phone instead of being fixed at 900px.
+
+### It has its own workflow, and the builder guard was widened for it
+
+`build-analytics.mjs` is deliberately **not** in `build-all.mjs`'s `BUILDERS`:
+that build fires several times an hour and commits `data/` as one unit, and a
+once-a-day read of a whole collection folded into it would make every posting's
+publish wait on it and share its failure. The selftest's "a builder nobody
+calls silently stops running" guard asserted `BUILDERS` equalled every
+`build-*.mjs` on disk, so it widened to match its own stated purpose: **every
+builder has a caller — `BUILDERS`, or a workflow naming it — and never both**
+(both halves verified by reintroducing each bug). The second half is not
+tidiness: a builder in both would run twice on one event from two bases, racing
+its own commit, which is the duplicate-doorbell outage one layer down.
+
+Tests: `testAnalytics` in `_scraper/selftest.mjs` (the one-source-per-day rule,
+the trailing mean, the UTC weekday read — `new Date('YYYY-MM-DD')` rendered
+locally shifts every bar by one for readers west of Greenwich — staleness,
+the served file's shape and its freedom from addresses, the wiring, the
+re-stepped accent, and that the workflow names the branch tip and never
+rebases) and the analytics block in `_scraper/page-test.mjs`, which drives the
+page in **both themes** with a realistic three-year corpus: the two lines
+measured apart from what the browser actually paints, all twelve months drawn,
+the frozen label, the empty state naming the cause and `_SETUP-ANALYTICS.md`,
+a stale dataset naming its last day, markup in a page title rendered inert, and
+the 390px gate. **The page-test check for "no iframes" reads the page with its
+HTML comments STRIPPED** — the page still explains the four embeds it no longer
+has, and a guard that could not tell the explanation from the thing would have
+to be satisfied by deleting the explanation.
+
+### GA4 runs COOKIELESS, which is what stands in for a consent banner
+
+Owner, 2026-08-29: **add GA4, but do not put a banner on the website.** Those
+two are compatible exactly one way, and it is worth understanding before
+anyone edits `assets/oa-ga4.js`.
+
+The tag configures gtag with **`client_storage: 'none'`** — GA4 keeps nothing
+on the visitor's device: no `_ga` cookie, no localStorage, nothing. The
+ePrivacy rule a cookie banner exists to satisfy is about **storing** things on
+someone's device rather than about analytics as such, so a tag that stores
+nothing has nothing to ask permission for. The Privacy Policy says this in as
+many words, because a policy silent on it is the one thing that would make the
+missing banner look like an oversight rather than a design.
+
+**The cost is real and it has a consequence in the pipeline.** With no
+identifier on the device GA4 cannot recognise a returning visitor, so its
+`totalUsers` is nearer "sessions" than "people" — a day GA4 owned would report
+two or three times the visitors that day really had. So **`SOURCE_ORDER` was
+flipped to `['usage', 'ga4', 'history']`**: the site's own first-party record
+keeps a stable per-browser id and CAN count distinct visitors, so it wins a
+day both measured. GA4 earns second place on **coverage** — it sees visitors
+whose browser never reaches Firestore at all (an ad blocker, a private window
+with storage refused). Coverage, not identity.
+
+**The two decisions are ONE decision, and the selftest pins them together.**
+Turning `COOKIELESS` back to `false` re-introduces the `_ga` cookie and with
+it the consent requirement, and simultaneously makes GA4 the better count of
+people — so it must move with both a banner and `'ga4'` going back in front.
+`testGa4Tag` fails if the flag flips alone.
+
+Three further narrowings, each pinned: Google Signals and ad personalisation
+off; a Global Privacy Control or Do Not Track signal means gtag is **never
+fetched**, not fetched and asked to behave; and it reports only from
+`operationsacademia.org` — `page-test.mjs` opens every page in a real browser,
+so without that guard every CI run would post hits to the live property,
+indistinguishable from real ones for ever. `anonymize_ip` is deliberately
+absent and *explained*: it is a Universal Analytics parameter GA4 ignores, and
+carrying it would imply a choice that was not made.
+
+**Every served page carries the tag and no redirect stub does** — the six
+meta-refresh stubs go to a fragment of the home page within a moment, so a hit
+there would double-count the page they lead to. The selftest walks the
+directory rather than a list, so a page added without the tag fails the build;
+its only other symptom would be a gap in the figures nobody could see.
+
+The **Property ID `384653143`** ("Operations Academia - GA4") is committed as
+the workflow's default rather than made a setup step: it appears in console
+URLs, it is useless without the service-account credential beside it, and a
+repo variable still overrides it. The `G-` Measurement ID lives in
+`oa-ga4.js`; the two are different numbers for different jobs — the tag
+collects, the secret reads back — and the site measures correctly with only
+the first.
+
+### Only PUBLIC paths reach the served file
+
+Owner, 2026-08-29: *do not show any admin pages or any past version pages, any
+test pages, or any admin related data to public visitors.* The first build had
+leaked all three into `data/analytics.json` — `/admin-area.html` (87 views) and
+`/admin-area` (6), `/v3/` (21) and `/v3/post-a-job.html` (2).
+
+**It is enforced in the BUILDER, not in the page**, and that distinction is the
+whole point: `data/analytics.json` is served by Pages to anyone who asks — the
+rule this repository already applies to e-mail addresses — so a path filtered
+only at render time would still be sitting in a public file for anyone who
+opened it directly. A non-public path must never be WRITTEN. The page applies
+the same predicate as a second line, for a reader holding a copy cached from
+before the fix.
+
+**A non-public session is dropped WHOLE, not merely left out of the pages
+list.** A session on the admin desk is not "how the site is used" by anybody
+these public figures describe, and counting its pageviews would publish the
+maintainer's own admin time — the "admin-related data" half of the
+instruction. Someone who visits the desk AND public pages still counts, through
+those other sessions. The GA4 leg does the same server-side with a
+`dimensionFilter` on both reports, so the day totals mean "visitors who read a
+public page".
+
+**Normalise, THEN filter, and that order is load-bearing.** Pages serves both
+`/admin-area` and `/admin-area.html` for one file and the build recorded both,
+so a filter matching only the spelling somebody thought of would have leaked
+the desk under its other name. The canonical form is the one the pages' own
+canonical tags use — WITH the extension, `/index.html` folding to `/`.
+
+**Two bugs the tests caught rather than opinions I held:**
+
+* `^/(test|…)[^/]*` matched **`/testimonials.html`**, which would have silently
+  hidden a legitimate page. That is the quieter failure of the two — a leak is
+  visible to anyone who reads the file, a page missing from a list is visible
+  to nobody — so every word must be the whole segment;
+* a case-sensitive match let `/ADMIN-AREA` through. Pages would 404 on it, but
+  "should never happen" is not a reason to publish it if it does.
+
+**And normalising exposed a wrong number.** `/jobs.html` (467) and `/jobs`
+(211) are one file, and plain first-claim-wins published **467** — a third of
+the count lost in the direction nobody checks, because the row is still there
+and still looks sensible. `mergePages` now separates two questions that were
+briefly given one answer: WITHIN a source two spellings are one page and their
+views ADD (with the average time re-weighted by views); ACROSS sources the
+first claim stands whole, because two sources measuring one page are two
+measurements of one number. Both pinned.
+
+Tests: the block in `testAnalytics` pins the predicate both ways (withheld and
+still-published, including `/testimonials.html` and `/version-history.html`),
+the chokepoint, the two merge rules — and asserts over **the committed
+`data/analytics.json` itself** that every path it publishes is public and
+already normalised, which is the check that would have caught the leak.
+
+### The archive is CONFIRMED GONE, and the spreadsheet says how
+
+Checked 2026-08-29, and the answer is final — **do not send anyone looking
+again.** The owner exported all 30 tabs; every one of the 141,540 rows was
+read. Not one surviving measurement. The tabs are structurally intact and hold
+zeroes, `#REF!`, `#VALUE!` and `#N/A`.
+
+The workbook records the cause in its own cells: every `Report_N` tab says
+`Last Run On 2024-07-15 05:32` and `Total Results Found 0`, against UA view
+`ga:81760839` for 2014-03-01 onwards. Google deleted UA properties on **1 July
+2024**; two weeks later the add-on ran on its schedule, asked a view that no
+longer existed, got zero rows — **and wrote those zero rows over ten years of
+data.**
+
+**So the data was not lost when Google deleted the property. It was lost when
+the spreadsheet refreshed itself.** A scheduled job that overwrites its only
+copy with whatever the source returns cannot tell "no results" from "no data".
+That is precisely why `build-analytics.mjs` carries the opposite rule —
+*an unreachable source changes nothing*, the committed file stands, and the
+days already served are carried forward as a floor. The history source's
+reader stays wired as a documented recovery path rather than being deleted,
+the same reasoning that keeps `repository_dispatch: [oa-jobs-changed]` in
+place while the functions are undeployed.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
@@ -3401,13 +3929,22 @@ the workflow rather than a terminal.
                                     # university is in, against the addresses
                                     # in the site's own Universities directory
                                     # (--all lists the ones it cannot place)
+    node _scraper/build-analytics.mjs --selftest   # the analytics assembly
+                                    # (the selftest also pins WHAT AN
+                                    # UNREGISTERED READER MAY READ — the gate's
+                                    # decision, its wiring on every gated list,
+                                    # both stylesheets, and that no page calls
+                                    # it privacy or security)
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules
     node _scraper/page-test.mjs     # Playwright browser checks, incl. the
                                     # 390px mobile gate over every list page,
                                     # the picker's alphabetical order and its
-                                    # measured contrast in BOTH themes
+                                    # measured contrast in BOTH themes, and
+                                    # WHO IS SHOWN WHAT — both readers, real,
+                                    # one with no Firebase and one through the
+                                    # site's own sign-in path
                                     # (PW_CHROMIUM=<path> pins the browser)
 
 All five run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs

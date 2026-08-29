@@ -140,6 +140,57 @@ async function contrastOf(page, sel) {
   return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
 }
 
+/* ------------------------------------- opening a page as a SIGNED-IN reader
+
+   Since 2026-08-29 the lists themselves are gated: a reader who has not
+   registered sees which universities are hiring and nothing more, and the
+   card does not open on them (assets/oa-gate.js). So every check below that
+   is about a card's CONTENTS — its rows, its links, its printed body — has to
+   say who is reading, and the honest way to say it is to sign them in rather
+   than to reach past the gate.
+
+   `_scraper/_fake-firebase.js` is the shim the Admin-area and Excel blocks
+   already drive, stood up here as one helper so a block needs three lines
+   instead of fifteen. It waits for the session to RESOLVE, because the gate
+   is painted from the localStorage hint first and reconciled when the SDK
+   answers — measuring in between is measuring a state neither reader is in.
+
+   A SIGNED-OUT READER IS ALSO THE SHIM, with no user. A page opened with no
+   Firebase at all is a THIRD state — nobody can sign in, so the gate says so
+   and disables the head rather than offering a control that would do nothing
+   — and it is the state every plain `browser.newPage()` is in here, because
+   CI has no network. The Excel block records the same trap. Which of the
+   three is being measured has to be chosen deliberately.                    */
+const FAKE_FB = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+const A_READER = { uid: 'reader-uid-00000000', email: 'reader@example.edu',
+  emailVerified: true, displayName: 'A Reader', providerData: [] };
+
+async function signedInPage(url, opts = {}) {
+  const ctx = await browser.newContext({
+    viewport: opts.viewport || { width: 1280, height: 1000 },
+    acceptDownloads: !!opts.acceptDownloads,
+  });
+  const p = await ctx.newPage();
+  const errors = [];
+  p.on('pageerror', (e) => errors.push(e.message));
+  const who = ('user' in opts) ? opts.user : A_READER;   // null = signed out
+  await p.addInitScript(
+    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [] })};`);
+  await p.route('**/firebasejs/**', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_FB }));
+  await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
+  if (opts.wait !== false) {
+    await p.waitForSelector(opts.selector || '.oa-card', { timeout: 15000 });
+    await p.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await p.waitForTimeout(250);
+  }
+  return { ctx, page: p, errors };
+}
+
+/** The same page, read by somebody who has not signed in but could. */
+const signedOutPage = (url, opts = {}) => signedInPage(url, { ...opts, user: null });
+
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const jsErrors = [];
@@ -2066,23 +2117,36 @@ for (const [name, expect] of [
    posting, and that pressing Edit does not also toggle the card open.        */
 
 {
-  const j = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
-  const jErrors = [];
-  j.on('pageerror', (e) => jErrors.push(e.message));
-  await j.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
-  await j.waitForSelector('.oa-card');
-  await j.waitForTimeout(600);
+  /* THE VISITOR IS A DIFFERENT PERSON FROM THE POSTER, so they get a page of
+     their own. This block used to model a signed-in poster by injecting a
+     permission map into a signed-OUT page, which was an approximation the
+     reader gate has now made a contradiction: signed out, a card does not
+     open at all, so "pressing Edit does not also toggle the card open" could
+     not be asked. The poster below is signed in for real. */
+  {
+    const v = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    v.on('pageerror', (e) => jsErrors.push('jobs visitor: ' + e.message));
+    await v.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+    await v.waitForSelector('.oa-card');
+    await v.waitForTimeout(600);
+    eq(await v.$$eval('.oa-card-actions', (n) => n.length), 0,
+      'jobs: a visitor who is not signed in sees no Edit or Take down');
+    await v.close();
+  }
 
-  eq(await j.$$eval('.oa-card-actions', (n) => n.length), 0,
-    'jobs: a visitor who is not signed in sees no Edit or Take down');
+  const { ctx: jCtx, page: j, errors: jErrors } = await signedInPage('jobs.html');
+  await j.waitForTimeout(400);
 
   /* ------------------------------ the filter bar: several terms, one row --
      Owner, from three screenshots: the search took ONE institution at a time,
      and a filter with values chosen knocked the bar out of line.
 
      THE BAR IS SIGN-IN GATED on this page — .v3-lock puts pointer-events:none
-     over it until an account resolves — and these checks are about the bar,
-     not the gate, which has its own coverage. The lock is defeated by
+     over it until an account resolves. This reader IS signed in, so the lock
+     comes off by itself; the override stays because it comes off when the SDK
+     answers and the first paint is taken from the localStorage hint, which a
+     fresh context has none of. These checks are about the bar, not the gate,
+     which has its own coverage. The lock is defeated by
      OVERRIDING ITS EFFECT rather than by removing the class: jobs.html
      re-applies the class from OAAccounts.onChange when auth finally resolves,
      whose timing is set by a network fetch, so stripping it once (or even
@@ -2322,7 +2386,7 @@ for (const [name, expect] of [
     'form: and the button says what it does');
 
   eq(jErrors, [], 'jobs: no uncaught script errors');
-  await j.close();
+  await jCtx.close();
 }
 
 /* ------------------------------------------- ?job=<id> opens ONE posting
@@ -2364,8 +2428,29 @@ for (const [pageName, pick] of [
     `${pageName}: ?job= shows exactly one posting — not a list to hunt through`);
   eq(await d.$eval('.oa-card', (n) => n.id), 'job-' + target.id,
     `${pageName}: and it is the posting that was asked for`);
-  eq(await d.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
-    `${pageName}: opened, so its details are on screen without another click`);
+  /* WHO IS READING DECIDES WHETHER IT OPENS (assets/oa-gate.js). A link to
+     one posting still narrows the page to that posting for anybody — that is
+     what the mode is for, and the way back below has to work for them — but
+     the details themselves are a registered reader's. So the two shapes are
+     measured as the two shapes: signed out the card is locked, and the
+     signed-in half is driven through the real sign-in path below. */
+  eq(await d.$eval('.oa-card', (n) => n.classList.contains('oa-card-locked')), true,
+    `${pageName}: signed out, the one posting is on screen and still locked`);
+  eq(await d.$$eval('.oa-card-body', (n) => n.length), 0,
+    `${pageName}: …with none of its details in the document`);
+  ok(await d.$('.oa-card-lock-note'),
+    `${pageName}: …and the card says what would open it`);
+  {
+    const { ctx, page: q } = await signedInPage(
+      `${pageName}?job=${encodeURIComponent(target.id)}`);
+    eq(await q.$$eval('.oa-card', (n) => n.length), 1,
+      `${pageName}: signed in, ?job= still shows exactly one posting`);
+    eq(await q.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
+      `${pageName}: opened, so its details are on screen without another click`);
+    ok(await q.$eval('.oa-card-body', (n) => !n.hidden),
+      `${pageName}: …and they really are rendered`);
+    await ctx.close();
+  }
 
   /* The surrounding controls go, for the reason an empty dataset's do: a
      filter bar over a list of one narrows nothing and a pager reading
@@ -2696,10 +2781,12 @@ for (const [pageName, pick] of [
 }
 
 {
-  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
-  p.on('pageerror', (e) => jsErrors.push('previous-markets: ' + e.message));
-  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.oa-card', { timeout: 15000 });
+  /* SIGNED IN, because this block reads a card's own detail rows — the "Job
+     market year" cell — and a closed season is still a job posting, so a
+     reader who has not registered does not get one (assets/oa-gate.js). The
+     counts and the filters below are the same either way. */
+  const { ctx: pmCtx, page: p, errors: pmErrors } = await signedInPage(
+    'previous-markets.html', { viewport: { width: 1300, height: 950 } });
 
   /* the total = the committed archive + the jobs.json rows that have left the
      current market window — the same formula the page runs, recomputed here
@@ -2721,6 +2808,8 @@ for (const [pageName, pick] of [
      overlap — owner 2026-08-27), so it is read as the numbers it carries
      rather than as one number: a leading card that spans two seasons would
      make Number('2025 and 2026') NaN and the check meaningless. */
+  await p.click('.oa-card:first-child .oa-card-head');
+  await p.waitForTimeout(200);
   const shownYears = (await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent))
     .match(/\d{4}/g).map(Number);
   ok(shownYears.includes(Math.max(...years)),
@@ -2767,7 +2856,8 @@ for (const [pageName, pick] of [
     `previous-markets: ?filterD narrows the archive (got ${dCount} of ${total})`);
   ok(viaD.url().includes('university='), 'previous-markets: the legacy link is renamed in the bar');
   await viaD.close();
-  await p.close();
+  eq(pmErrors, [], 'previous-markets: no uncaught script errors');
+  await pmCtx.close();
 }
 
 /* ------------------------------- Edit / Take down on the FROZEN ARCHIVES
@@ -3428,11 +3518,13 @@ for (const [pageName, sel, least, mapBtn] of [
    three are one edit away from not holding. */
 
 {
-  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
-  p.on('pageerror', (e) => jsErrors.push('overrides/xss: ' + e.message));
-  // an archive season, so the row is one this editor owns (see above)
-  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.oa-card');
+  /* SIGNED IN, because the property under test is about the card's DETAIL
+     rows and those are a registered reader's since the gate shipped. It is
+     also the truer reading: the override map is the maintainer's, and a
+     signed-out visitor never sees a body to smuggle anything into. */
+  const { ctx: xCtx, page: p, errors: xErrs } = await signedInPage(
+    // an archive season, so the row is one this editor owns (see above)
+    'previous-markets.html?year=2015');
   await p.waitForTimeout(400);
 
   const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
@@ -3467,9 +3559,8 @@ for (const [pageName, sel, least, mapBtn] of [
     'and a javascript: URL never becomes a link');
   eq(await p.evaluate(() => window.__xss), 0, 'nothing an override carries executes');
 
-  eq(jsErrors.filter((e) => e.startsWith('overrides/xss')), [],
-    'and the page raises no error over it');
-  await p.close();
+  eq(xErrs, [], 'and the page raises no error over it');
+  await xCtx.close();
 }
 
 /* ------------------------------- Edit / Take down on the universities map
@@ -3822,6 +3913,388 @@ for (const [from, hash] of [
     ok(cr >= 4.5, `account menu (${theme}): the badge reads at ${cr}:1`);
   }
   await a.close();
+}
+
+/* --------------------------------------- the SPONSOR mark, as it renders
+
+   selftest.mjs pins the rule, the wiring and the stylesheets. This is the
+   half only a browser can answer, and it is the half the owner actually
+   bought: that on the real jobs page the sponsor's posting is FIRST, that it
+   wears the pill and the rail, and that the purple is readable in both
+   themes.
+
+   It asserts on the LIVE data rather than a fixture, which is deliberate but
+   has one consequence worth writing down: the sponsorship ends on
+   2027-09-01, and on that day the badge correctly stops being drawn. So the
+   block asks the module itself what it expects — if nothing on the page is
+   sponsored it checks that nothing is MARKED either, which is the true
+   assertion on both sides of that date and cannot go red on the morning the
+   deal lapses. A guard about a corpus must not move with the corpus.        */
+{
+  const sp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await sp.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await sp.waitForSelector('.oa-card', { timeout: 15000 });
+
+  /* The module has to have LOADED — a page that forgot the script tag would
+     throw inside the sort and render nothing, which is worth naming rather
+     than watching a later selector time out. */
+  ok(await sp.evaluate(() => !!window.OASponsors),
+    'sponsors: the module is on the jobs page');
+  ok(await sp.evaluate(() => !!window.OASchools),
+    'sponsors: …and so is oa-schools.js, which it is built on');
+  ok(await sp.evaluate(() => window.OASponsors.isSponsored(
+    { institution: 'CUHK', unit: 'Decisions, Operations and Technology',
+      posted: '2026-08-27' }, '2026-08-29')),
+    'sponsors: …so the browser resolves an acronym exactly as the tests do');
+
+  const expected = await sp.evaluate(async () => {
+    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+    const inMarket = rows.filter((r) => window.OAJobNav.inCurrentMarket(r));
+    const marked = inMarket.filter((r) => window.OASponsors.isSponsored(r));
+    return { any: marked.length > 0, first: marked.length ? marked[0].institution : '' };
+  });
+
+  const firstCard = await sp.evaluate(() => {
+    const c = document.querySelector('.oa-card');
+    const b = c && c.querySelector('.oa-label-sponsor');
+    return {
+      title: c ? c.querySelector('.oa-card-title').textContent.trim() : '',
+      badge: b ? b.textContent.trim() : null,
+      railed: !!(c && c.classList.contains('oa-sponsored')),
+      marks: document.querySelectorAll('.oa-label-sponsor').length,
+      rails: document.querySelectorAll('.oa-card.oa-sponsored').length,
+    };
+  });
+
+  if (expected.any) {
+    eq(firstCard.title, expected.first,
+      'sponsors: the sponsor\'s posting LEADS the jobs page, whatever its date');
+    eq(firstCard.badge, 'Sponsored', 'sponsors: …wearing the badge');
+    eq(firstCard.railed, true, 'sponsors: …and the rail down its edge');
+    /* the rail and the pill go together — one without the other is a
+       half-applied treatment nobody chose */
+    eq(firstCard.marks, firstCard.rails,
+      'sponsors: every marked card carries both the pill and the rail');
+
+    /* The rail is a real 3px edge, not a rule that lost to the card's own
+       border. Measured, because `border-left` is exactly the kind of
+       declaration a later specificity change silently undoes. */
+    const rail = await sp.evaluate(() => {
+      const c = document.querySelector('.oa-card.oa-sponsored');
+      const cs = getComputedStyle(c);
+      return { w: cs.borderLeftWidth, colour: cs.borderLeftColor,
+        other: cs.borderTopWidth };
+    });
+    eq(rail.w, '3px', 'sponsors: the rail is 3px');
+    ok(rail.w !== rail.other, 'sponsors: …and only on the left edge');
+
+    for (const theme of ['light', 'dark']) {
+      await sp.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      await sp.waitForTimeout(150);
+      const cr = await contrastOf(sp, '.oa-label-sponsor');
+      ok(cr >= 4.5, `sponsors (${theme}): the badge reads at ${cr}:1 (AA is 4.5)`);
+      /* It must paint its OWN ground: the base .oa-label sets #fff, so a
+         badge that inherited the card would be white on white in light
+         theme. This is CLAUDE.md's own rule, measured. */
+      const own = await sp.evaluate(() => {
+        const el = document.querySelector('.oa-label-sponsor');
+        const cs = getComputedStyle(el);
+        return { bg: cs.backgroundColor, ink: cs.color, border: cs.borderLeftWidth };
+      });
+      ok(!/rgba\(0, 0, 0, 0\)/.test(own.bg),
+        `sponsors (${theme}): the badge paints its own ground`);
+      ok(own.ink !== 'rgb(255, 255, 255)',
+        `sponsors (${theme}): …and names its own ink rather than the base label's white`);
+      ok(parseFloat(own.border) >= 1,
+        `sponsors (${theme}): …and keeps the hairline that makes it an OUTLINE pill`);
+    }
+    await sp.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+  } else {
+    /* The window has closed (or the sponsor has no live posting). Then the
+       page must be exactly what it was before this shipped. */
+    eq(firstCard.marks, 0,
+      'sponsors: with no sponsorship running, nothing on the page is marked');
+    eq(firstCard.rails, 0, 'sponsors: …and no card carries a rail');
+  }
+
+  /* THE HOME PAGE badges but does NOT reorder — its teaser promises the ten
+     most recent postings, and a lead row would make that heading false. */
+  const hp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await hp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+  await hp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+  const home = await hp.evaluate(() => {
+    const cards = [...document.querySelectorAll('#oa-jobs-recent .oa-card')];
+    return {
+      dates: cards.length,
+      first: cards.length ? cards[0].querySelector('.oa-card-title').textContent.trim() : '',
+      railed: !!(cards.length && cards[0].classList.contains('oa-sponsored')),
+      marked: document.querySelectorAll('#oa-jobs-recent .oa-label-sponsor').length,
+    };
+  });
+  ok(home.dates > 0, 'sponsors: the home page teaser still renders');
+  if (expected.any) {
+    eq(home.first, expected.first,
+      'sponsors: the sponsor LEADS the home teaser too (owner, from a screenshot)');
+    eq(home.railed, true,
+      'sponsors: …and its card carries the rail INSIDE the panel, which resets every border');
+
+    /* THE BUG THIS MISSED THE FIRST TIME. The rail was measured on jobs.html
+       and nowhere else, so `body.v3 .v3-panel .oa-card { border: 0 }` — same
+       specificity, ~600 lines later — blanked it on this page while every
+       check stayed green. Measure the painted width HERE, on the card the
+       screenshot was taken of. */
+    const rail = await hp.evaluate(() => {
+      const c = document.querySelector('#oa-jobs-recent .oa-card.oa-sponsored');
+      if (!c) return null;
+      const cs = getComputedStyle(c);
+      return { w: cs.borderLeftWidth, other: cs.borderTopWidth };
+    });
+    ok(rail, 'sponsors: the teaser marks the sponsored card');
+    if (rail) {
+      eq(rail.w, '3px', 'sponsors: the teaser rail is a real 3px edge, not blanked by the panel reset');
+      ok(rail.w !== rail.other, 'sponsors: …and still only on the left');
+    }
+
+    /* The SELECTION is still the ten newest — the heading says which ten, and
+       reordering them must not change which ten. */
+    const newestTen = await hp.evaluate(async () => {
+      const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+      return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+        .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+        .slice(0, 10).map((r) => r.institution).sort();
+    });
+    const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
+      .map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort());
+    eq(shown, newestTen,
+      'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
+  }
+  await hp.close();
+  await sp.close();
+}
+
+/* ------------------------- what an UNREGISTERED reader sees, measured
+
+   Owner, 2026-08-29, from two screenshots of the site signed out: the details
+   of a job posting were on the page for anybody. The rule is that a reader who
+   has not registered sees who is hiring — the sponsor's posting and the
+   universities behind the ones beside it — and a candidate's NAME, and nothing
+   else; the card does not open on them; expanding one in place belongs to a
+   registered reader who has opened the full list.
+
+   `selftest.mjs` pins the decision, the wiring and the words. This is the half
+   only a browser can answer: WHO IS SHOWN WHAT. Both readers are real — the
+   signed-out one has no Firebase at all, the signed-in one comes through
+   _fake-firebase.js and the site's own auth path — because the property is a
+   difference between them and a check that saw only one of the two would pass
+   on a page that had lost the distinction entirely.                          */
+{
+  const GATED = [
+    ['jobs.html', '#oa-jobs', 'Sign in to read this posting'],
+    ['previous-markets.html', '#oa-past', 'Sign in to read this posting'],
+  ];
+
+  for (const [pageName, host, note] of GATED) {
+    /* -- signed OUT, but ABLE to sign in --------------------------------- */
+    const { ctx: outCtx, page: out, errors: outErrs } = await signedOutPage(pageName);
+    await out.waitForSelector(`${host} .oa-card`, { timeout: 15000 });
+    await out.waitForTimeout(300);
+
+    const shut = await out.evaluate((h) => {
+      const cards = [...document.querySelectorAll(`${h} .oa-card`)];
+      const first = cards[0];
+      return {
+        cards: cards.length,
+        /* WHO is hiring stays readable — that is the whole of what an
+           unregistered reader is promised, and a list of blurred names would
+           be no list at all. */
+        title: first ? first.querySelector('.oa-card-title').textContent.trim() : '',
+        sub: first ? first.querySelector('.oa-card-sub').textContent.trim() : '',
+        locked: cards.filter((c) => c.classList.contains('oa-card-locked')).length,
+        bodies: document.querySelectorAll(`${h} .oa-card-body`).length,
+        kv: document.querySelectorAll(`${h} .oa-kv`).length,
+        notes: [...document.querySelectorAll(`${h} .oa-card-lock-note`)]
+          .map((n) => n.textContent.trim()),
+        expanded: cards.filter((c) =>
+          c.querySelector('.oa-card-head').hasAttribute('aria-expanded')).length,
+      };
+    }, host);
+
+    ok(shut.cards > 1, `${pageName}: signed out, the postings are still listed`);
+    ok(shut.title.length > 2, `${pageName}: …and the university is readable`);
+    ok(shut.sub.length > 2, `${pageName}: …with the school and department beside it`);
+    eq(shut.locked, shut.cards, `${pageName}: every card on the page is locked`);
+    /* NOT HIDDEN — ABSENT. A blurred copy of the real values is a picture of a
+       lock: selectable, copyable, and one keystroke of devtools from being
+       read. The engine returns before the table is built at all. */
+    eq([shut.bodies, shut.kv], [0, 0],
+      `${pageName}: and not one detail of any of them is in the document`);
+    eq(shut.expanded, 0,
+      `${pageName}: a head that discloses nothing no longer claims to`);
+    eq([...new Set(shut.notes)], [note],
+      `${pageName}: each card says what would open it, in the page's own words`);
+
+    /* THE CARD DOES NOT EXPAND — the owner's own sentence. Press it and what
+       arrives is the sign-in box, not a body. */
+    await out.click(`${host} .oa-card:first-child .oa-card-head`);
+    await out.waitForTimeout(600);
+    eq(await out.$$eval(`${host} .oa-card-body`, (n) => n.length), 0,
+      `${pageName}: pressing a card opens NOTHING`);
+    ok(await out.$('.oa-modal'), `${pageName}: …it offers the sign-in box instead`);
+    eq(outErrs, [], `${pageName}: signed-out run — no uncaught script error`);
+    await outCtx.close();
+
+    /* -- signed IN ------------------------------------------------------- */
+    const { ctx, page: q, errors } = await signedInPage(pageName);
+    await q.waitForSelector(`${host} .oa-card`, { timeout: 15000 });
+    await q.waitForTimeout(300);
+    eq(await q.$$eval(`${host} .oa-card-locked`, (n) => n.length), 0,
+      `${pageName}: signed in, nothing is locked`);
+    await q.click(`${host} .oa-card:first-child .oa-card-head`);
+    await q.waitForTimeout(250);
+    ok(await q.$eval(`${host} .oa-card:first-child .oa-card-body`, (n) => !n.hidden),
+      `${pageName}: …and a card opens where it stands, which is what the full list is`);
+    ok((await q.$$eval(`${host} .oa-card:first-child .oa-kv th`,
+      (ns) => ns.map((n) => n.textContent))).length >= 2,
+      `${pageName}: …with its details on it`);
+    eq(errors, [], `${pageName}: signed-in run — no uncaught script error`);
+    await ctx.close();
+  }
+
+  /* -- the one-pager: the teaser NEVER expands, whoever is reading -------- */
+  {
+    const { ctx: outCtx, page: out } = await signedOutPage('index.html',
+      { selector: '#oa-jobs-recent .oa-card' });
+    await out.waitForTimeout(300);
+    const teaser = await out.evaluate(() => {
+      const cards = [...document.querySelectorAll('#oa-jobs-recent .oa-card')];
+      return { cards: cards.length,
+        locked: cards.filter((c) => c.classList.contains('oa-card-locked')).length,
+        bodies: document.querySelectorAll('#oa-jobs-recent .oa-card-body').length,
+        names: cards.map((c) => c.querySelector('.oa-card-title').textContent.trim()) };
+    });
+    /* "the sponsor and the list of last 9 universities which posted" — the
+       ten the panel has always shown, with the sponsor's leading them. */
+    eq(teaser.cards, 10, 'gate: the teaser still shows ten postings');
+    eq(teaser.locked, 10, 'gate: signed out, every one of them is locked');
+    eq(teaser.bodies, 0, 'gate: …and none of their details is in the document');
+    ok(teaser.names.every((n) => n.length > 2),
+      'gate: …while every university behind them is readable');
+    await outCtx.close();
+
+    /* Signed in, it is a way IN rather than a lock: no blur, no padlock, and
+       the click carries the reader to the full list with that posting open —
+       "it should only expand when a user is registered and has opened the
+       full list", which is the sentence this behaviour comes from. */
+    const { ctx, page: q, errors } = await signedInPage('index.html',
+      { selector: '#oa-jobs-recent .oa-card' });
+    const inb = await q.evaluate(() => {
+      const c = document.querySelector('#oa-jobs-recent .oa-card');
+      return { gated: c.classList.contains('oa-card-gated'),
+        locked: c.classList.contains('oa-card-locked'),
+        blur: !!c.querySelector('.oa-card-lock-blur'),
+        padlock: getComputedStyle(c.querySelector('.oa-card-lock-note'), '::before').content,
+        note: c.querySelector('.oa-card-lock-note').textContent.trim(),
+        bodies: document.querySelectorAll('#oa-jobs-recent .oa-card-body').length };
+    });
+    eq([inb.gated, inb.locked], [true, false],
+      'gate: signed in, the teaser card is gated but not LOCKED — nothing is withheld');
+    eq([inb.blur, inb.bodies], [false, 0],
+      'gate: …so nothing is blurred, and it still does not expand here');
+    ok(!/1F512|🔒/.test(inb.padlock),
+      'gate: …and no padlock is drawn in front of an invitation');
+    ok(/full list/i.test(inb.note), 'gate: …the card says where the click goes');
+
+    const target = await q.$eval('#oa-jobs-recent .oa-card', (c) => c.id.replace(/^job-/, ''));
+    await q.click('#oa-jobs-recent .oa-card:first-child .oa-card-head');
+    await q.waitForURL(/[?&]job=/, { timeout: 10000 });
+    ok(q.url().includes('job=' + encodeURIComponent(target)),
+      'gate: pressing it opens THAT posting on the full list');
+    await q.waitForSelector('.oa-card-body', { timeout: 15000 });
+    eq(await q.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
+      'gate: …and it arrives open, which is where expanding was always meant to happen');
+    eq(errors, [], 'gate: the one-pager raises no error over any of it');
+    await ctx.close();
+  }
+
+  /* -- nobody can sign in at all ----------------------------------------- */
+  {
+    /* A blocked CDN, an ad blocker, an offline reader — and in CI, every page
+       opened without the shim. They are still not registered, so they are
+       still locked; but the strip must say WHY rather than offering a control
+       that would do nothing, which is the wording oa-jobexport.js already
+       gives its disabled button. */
+    const none = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    await none.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+    await none.waitForSelector('.oa-card', { timeout: 15000 });
+    await none.waitForTimeout(500);
+    const said = await none.evaluate(() => ({
+      note: document.querySelector('.oa-card-lock-note').textContent.trim(),
+      disabled: document.querySelector('.oa-card-head').disabled,
+      bodies: document.querySelectorAll('.oa-card-body').length,
+      cards: document.querySelectorAll('.oa-card').length,
+    }));
+    ok(said.cards > 1, 'gate: with no sign-in to be had, the postings are still listed');
+    eq(said.bodies, 0, 'gate: …still without their details');
+    ok(/unavailable/i.test(said.note),
+      'gate: …and the card says sign-in cannot be reached, rather than inviting it');
+    eq(said.disabled, true,
+      'gate: …with the head disabled rather than dead under the pointer');
+    await none.close();
+  }
+
+  /* -- the CANDIDATES, whose details are a person's own ------------------- */
+  {
+    /* The profiles are HELD until the reveal date, so on most days the served
+       file is empty and there is nothing on screen to gate. The rule is
+       measured against a seeded file rather than against the calendar. */
+    const SEED = [{ id: 'c1', name: 'A Candidate', affiliation: 'Somewhere University',
+      position: 'PhD Candidate', year: String(marketYear()),
+      posted: new Date().toISOString().slice(0, 10),
+      researchAreas: ['Operations'], informsDays: ['Sunday'],
+      email: 'someone@example.edu', cvUrl: 'https://example.edu/cv.pdf' }];
+    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+
+    const { ctx: outCtx, page: out } = await signedOutPage('index.html', { wait: false });
+    await seed(out);
+    await out.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await out.evaluate(() => document.querySelector('#oa-candidates')
+      .scrollIntoView({ block: 'center' }));
+    await out.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await out.waitForTimeout(300);
+    const c = await out.evaluate(() => {
+      const card = document.querySelector('#oa-candidates .oa-card');
+      return { name: card.querySelector('.oa-card-title').textContent.trim(),
+        locked: card.classList.contains('oa-card-locked'),
+        bodies: document.querySelectorAll('#oa-candidates .oa-card-body').length,
+        // the address is the field that must never be on a public page
+        html: document.querySelector('#oa-candidates').innerHTML };
+    });
+    eq(c.name, 'A Candidate', 'gate: a candidate\'s NAME is readable signed out');
+    eq([c.locked, c.bodies], [true, 0],
+      'gate: …and their profile is not — no CV, no INFORMS days, no address');
+    ok(!/someone@example\.edu/.test(c.html),
+      'gate: the e-mail address is not in the document at all');
+    await outCtx.close();
+
+    const { ctx, page: q } = await signedInPage('index.html', { wait: false });
+    await seed(q);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates')
+      .scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await q.click('#oa-candidates .oa-card .oa-card-head');
+    await q.waitForTimeout(250);
+    ok(await q.$eval('#oa-candidates .oa-card-body', (n) => !n.hidden),
+      'gate: signed in, the profile opens');
+    ok(await q.$$eval('#oa-candidates .oa-kv a[href^="mailto:"]', (n) => n.length) >= 1,
+      'gate: …and carries the way to contact them, which is what it is for');
+    await ctx.close();
+  }
 }
 
 /* ------------------------------- readable in BOTH themes, on every page
@@ -5760,6 +6233,267 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 }
+
+/* ----------------------------------------------------- the analytics page
+
+   It was four Google Sheets <iframe>s, dead since Universal Analytics was
+   switched off in July 2023 and rendering as four empty boxes ever since. It
+   draws its own marks now, so what is measured here is the half a unit test
+   cannot see: that a reader with no data is TOLD so rather than shown blank
+   cards, that the frozen archive is labelled, that the two lines can be told
+   apart in BOTH themes, and that the seasonality chart never reports a month
+   the record has not covered as a month with no visitors. */
+{
+  /* a realistic corpus rather than a fixture of three days: the weekday and
+     seasonal shapes are the whole point of two of these charts, and a chart
+     over three days cannot show either */
+  const demoDays = {};
+  let seed = 42;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const start = Date.UTC(2024, 0, 1);
+  const end = Date.UTC(2026, 7, 28);
+  for (let t = start; t <= end; t += 86400000) {
+    const d = new Date(t);
+    const season = [0.75, 0.7, 0.8, 0.85, 0.7, 0.5, 0.45, 0.7, 1.5, 1.7, 1.35, 0.85][d.getUTCMonth()];
+    const week = (d.getUTCDay() === 0 || d.getUTCDay() === 6) ? 0.45 : 1;
+    const v = Math.max(1, Math.round(38 * season * week * (0.8 + rnd() * 0.45)));
+    demoDays[d.toISOString().slice(0, 10)] = [v, Math.round(v * 1.2), Math.round(v * 2.7)];
+  }
+  const demo = {
+    version: 1,
+    generated: new Date(end).toISOString(),
+    dayFields: ['visitors', 'sessions', 'pageviews'],
+    sources: [{ source: 'usage', days: Object.keys(demoDays).length }],
+    days: demoDays,
+    pages: [
+      { path: '/jobs.html', title: 'Job postings', views: 48210, avgSec: 142 },
+      { path: '/', title: 'Operations Academia', views: 31022, avgSec: 73 },
+    ],
+    universities: {
+      frozen: true, from: '2014-03-01', to: '2023-06-30',
+      all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }],
+      recent: [],
+    },
+    totals: { visitors: 1, sessions: 1, pageviews: 1, days: Object.keys(demoDays).length, universities: 2 },
+    range: { from: '2024-01-01', to: '2026-08-28' },
+    recentDays: 7,
+  };
+
+  const serveDemo = (pg, body) => pg.route('**/data/analytics.json', (r) => r.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify(body),
+  }));
+
+  /* --- with data, in BOTH themes ---------------------------------------- */
+
+  for (const theme of ['light', 'dark']) {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 }, colorScheme: theme });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push(`analytics ${theme}: ` + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await q.addInitScript((t) => { try { localStorage.setItem('oaV3Theme', t); } catch (e) { /**/ } }, theme);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+
+    const seen = await q.evaluate(() => ({
+      figures: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
+      svgs: document.querySelectorAll('.oa-chart-svg').length,
+      tables: document.querySelectorAll('.oa-chart-table').length,
+      tiles: document.querySelectorAll('.oa-tile').length,
+      frozen: [...document.querySelectorAll('.oa-figure-frozen')].map((e) => e.textContent.trim()),
+      iframes: document.querySelectorAll('iframe').length,
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    }));
+
+    eq(seen.iframes, 0, `analytics (${theme}): the page embeds nothing`);
+    ok(seen.svgs >= 3, `analytics (${theme}): the charts are drawn as inline SVG`);
+    ok(seen.tiles >= 4, `analytics (${theme}): the headline figures are shown`);
+    eq(seen.tables, seen.svgs,
+      `analytics (${theme}): every chart also gives its numbers as a table — a chart ` +
+      'is accessible because the values are available as text, not because it validated');
+    eq(seen.frozen, ['Archive — 2014 to 2023'],
+      `analytics (${theme}): the universities section is labelled as an archive — its ` +
+      'numbers came from a dimension no analytics product still offers, so a reader ' +
+      'must never take them for current');
+    ok(!seen.overflowX, `analytics (${theme}): the page never scrolls sideways`);
+
+    /* THE TWO LINES MUST BE TELLABLE APART. The daily chart draws a count and
+       its rolling mean; the site's own --brand and --gold separate well in
+       light and collapse in dark, which is why the stylesheet re-steps the
+       accent there. Measured from what the browser actually paints, so a
+       later palette change cannot silently undo it. */
+    const lines = await q.evaluate(() => {
+      const px = (el) => getComputedStyle(el).stroke;
+      const a = document.querySelector('.oa-line.oa-brand');
+      const b = document.querySelector('.oa-line.oa-accent');
+      return a && b ? { a: px(a), b: px(b) } : null;
+    });
+    ok(lines && lines.a !== lines.b,
+      `analytics (${theme}): the daily line and its rolling mean are different colours`);
+    if (lines) {
+      const rgb = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const [ar, ag, ab] = rgb(lines.a);
+      const [br, bg, bb] = rgb(lines.b);
+      const dist = Math.abs(ar - br) + Math.abs(ag - bg) + Math.abs(ab - bb);
+      ok(dist > 90,
+        `analytics (${theme}): …and far enough apart to read as two lines (channel ` +
+        `distance ${dist}) — in dark the site's own two colours sit at delta-E 14.9, ` +
+        'below the floor at which two overlaid lines can be told apart');
+    }
+
+    /* the mean is DASHED as well as coloured, so the pair does not rely on
+       colour alone */
+    const dashed = await q.evaluate(() =>
+      getComputedStyle(document.querySelector('.oa-line.oa-accent')).strokeDasharray);
+    ok(dashed && dashed !== 'none',
+      `analytics (${theme}): the rolling mean is dashed too — identity is never colour alone`);
+
+    /* A MONTH THE RECORD HAS NOT COVERED IS NOT A MONTH WITH NO VISITORS.
+       Under the default 90-day range the season chart used to draw eight
+       zero-height bars, which on a job-market site reads as "nobody visits in
+       September" — backwards rather than merely missing. It reads the whole
+       record instead, so every month has a bar. */
+    const season = await q.evaluate(() => {
+      const figs = [...document.querySelectorAll('.oa-figure')];
+      const f = figs.find((x) => /hiring season/i.test(x.querySelector('h2').textContent));
+      if (!f) return null;
+      return {
+        sub: f.querySelector('.oa-figure-sub').textContent,
+        bars: f.querySelectorAll('.oa-bar[d]:not([d=""])').length,
+        ticks: [...f.querySelectorAll('.oa-tick-x')].map((t) => t.textContent),
+      };
+    });
+    ok(season && season.ticks.length === 12,
+      `analytics (${theme}): the season chart names all twelve months`);
+    eq(season && season.bars, 12,
+      `analytics (${theme}): …and draws a bar for each — over the WHOLE record, because ` +
+      'a window shorter than a year cannot answer a question about the year');
+    ok(season && /whole record/i.test(season.sub),
+      `analytics (${theme}): …and says so, rather than letting the range above imply otherwise`);
+
+    /* the range control drives every figure at once */
+    const before = await q.evaluate(() =>
+      document.querySelector('.oa-tile-value').textContent);
+    await q.evaluate(() => document.querySelectorAll('.oa-range button')[0].click());
+    await q.waitForTimeout(250);
+    const after = await q.evaluate(() => ({
+      value: document.querySelector('.oa-tile-value').textContent,
+      pressed: [...document.querySelectorAll('.oa-range button')]
+        .map((b) => b.getAttribute('aria-pressed')),
+    }));
+    ok(after.value !== before,
+      `analytics (${theme}): narrowing the range moves the headline figures`);
+    eq(after.pressed, ['true', 'false', 'false', 'false'],
+      `analytics (${theme}): …and exactly one range reads as chosen`);
+
+    await ctx.close();
+  }
+
+  /* --- with NOTHING, which is the state it ships in --------------------- */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics empty: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, {
+      version: 1, generated: '', dayFields: ['visitors', 'sessions', 'pageviews'],
+      sources: [], days: {}, pages: [],
+      universities: { frozen: true, from: '', to: '', all: [], recent: [] },
+      totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
+      range: { from: '', to: '' }, recentDays: 7,
+    });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-an-note', { timeout: 15000 });
+    const note = await q.evaluate(() => document.querySelector('#oa-analytics').textContent);
+    ok(/Nothing is being measured yet/i.test(note),
+      'analytics: with no data the page SAYS so — four empty boxes reporting nothing ' +
+      'to anybody is how the old charts stayed dead for three years');
+    ok(/Universal Analytics/.test(note) && /_SETUP-ANALYTICS\.md/.test(note),
+      'analytics: …and names both the cause and where to read what to do about it');
+    eq(await q.evaluate(() => document.querySelectorAll('.oa-chart-svg').length), 0,
+      'analytics: and draws no empty chart beside it');
+    await ctx.close();
+  }
+
+  /* --- a dataset that has STOPPED moving -------------------------------- */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics stale: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, { ...demo, days: { '2020-01-01': [5, 6, 12] } });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-an-note.warn', { timeout: 15000 });
+    const warn = await q.evaluate(() => document.querySelector('.oa-an-note.warn').textContent);
+    ok(/stopped moving/i.test(warn) && /2020/.test(warn),
+      'analytics: a dataset that stopped years ago says so, and names its last day — ' +
+      'from outside, a pipeline that has stopped and a quiet site look identical');
+    await ctx.close();
+  }
+
+  /* --- hostile input ---------------------------------------------------- */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics hostile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, {
+      ...demo,
+      pages: [{ path: 'javascript:alert(1)', title: '<img src=x onerror=alert(1)>', views: 9, avgSec: 1 }],
+      universities: {
+        frozen: true, from: '2014-03-01', to: '2023-06-30',
+        all: [{ name: '<script>alert(1)</script>', visits: 5 }], recent: [],
+      },
+    });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const hostile = await q.evaluate(() => ({
+      injected: document.querySelectorAll('#oa-analytics img, #oa-analytics script').length,
+      jsHref: [...document.querySelectorAll('#oa-analytics a')]
+        .filter((a) => /^javascript:/i.test(a.getAttribute('href') || '')).length,
+      textShown: document.querySelector('#oa-analytics').textContent.includes('<script>'),
+    }));
+    eq(hostile.injected, 0, 'analytics: markup in a page title or a name is rendered inert');
+    eq(hostile.jsHref, 0, 'analytics: and a javascript: path never becomes a link');
+    ok(hostile.textShown, 'analytics: …it is shown as the text it is');
+    await ctx.close();
+  }
+
+  /* --- the phone -------------------------------------------------------- */
+
+  {
+    const ctx = await browser.newContext({
+      viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+    });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics mobile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const mob = await q.evaluate(() => {
+      const doc = document.documentElement;
+      return {
+        overflowX: doc.scrollWidth > doc.clientWidth,
+        targets: [...document.querySelectorAll('.oa-range button')]
+          .map((b) => Math.round(b.getBoundingClientRect().height)),
+        widest: Math.max(...[...document.querySelectorAll('.oa-figure')]
+          .map((f) => Math.round(f.getBoundingClientRect().right))),
+        vw: doc.clientWidth,
+      };
+    });
+    ok(!mob.overflowX, 'analytics mobile: the page never scrolls sideways');
+    ok(mob.targets.length > 0 && mob.targets.every((h) => h >= 42),
+      'analytics mobile: every range control is a 42px target, the standard every ' +
+      'control on this site is held to on a phone');
+    ok(mob.widest <= mob.vw, 'analytics mobile: no figure runs past the viewport');
+    await ctx.close();
+  }
+}
+
 
 /* ------------------------------------------------------------------ done */
 

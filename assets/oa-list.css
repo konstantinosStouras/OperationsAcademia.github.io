@@ -470,6 +470,35 @@
 .oa-label-primary { background-color: var(--brand); }
 .oa-label-open { background-color: #2e7d5b; }
 
+/* THE SPONSOR MARK (owner, 2026-08-29) — an OUTLINE pill, deliberately not a
+   solid one. Every other label here is a solid block of colour, so an outline
+   is legible as a different KIND of thing at a glance: a standing fact about
+   the department rather than a status the site has given the posting. It is
+   also what keeps it from being read as a second Featured badge, which is the
+   solid pill directly above.
+
+   The three tokens keep a literal fallback, exactly as every rule in
+   oa-ui.css does, so /v1/ and /v2/ — which define no palette and keep their
+   own frozen copy of this file — would render it correctly if they ever
+   loaded it. `color` is named here and not inherited: this rule paints its
+   own ground, and the base .oa-label above sets #fff, which on a pale purple
+   wash would be invisible. */
+.oa-label-sponsor {
+  background-color: var(--sponsor-soft, #f3eefb);
+  color: var(--sponsor, #6b3fa0);
+  border: 1px solid var(--sponsor-line, #d9c9f0);
+  padding: 0.18em 0.62em 0.26em;
+}
+
+/* …and the RAIL down the card's edge, so a sponsored posting is findable
+   while scrolling past a hundred of them rather than only once the reader
+   has stopped on it. Set as a border-LEFT WIDTH change on the card's own
+   border, never an extra element or a pseudo-element, so it cannot overlap
+   the card's rounded corners or its focus ring. */
+.oa-card.oa-sponsored {
+  border-left: 3px solid var(--sponsor, #6b3fa0);
+}
+
 /* The three values below were 1.375rem / 0.9rem / 1.375rem — the vendor's own
    numbers, but `rem` resolves against the ROOT font size and nothing else on
    this page does: main.css leaves html at the browser's default and pins the
@@ -499,6 +528,75 @@
 
 .oa-card-body { padding: 0 32px 6px 22px; }
 .oa-card-body[hidden] { display: none; }
+
+/* ------------------------------------------------- THE LOCKED CARD
+
+   A reader who is not registered sees who is hiring and nothing else
+   (assets/oa-gate.js). The card draws no body at all — the values are never
+   put into the document, because a blur over real text is a picture of a lock
+   rather than a lock — so what is blurred here is the LIST OF ROW LABELS the
+   posting would have shown: true, the page's own static wording, and at this
+   radius unreadable, which is the whole job. It says "there is a table here
+   and an account opens it" in the one glance a reader gives a card.
+
+   `user-select: none` is not there to stop anybody copying it. It is there
+   because a blurred run of text that highlights when dragged over reads as a
+   rendering fault; the strip is decoration, and decoration should not select.
+
+   Both this file and v3.css carry the rule. A fix applied to one of them is
+   either invisible on the site or lost on the next page — the trap CLAUDE.md
+   records for the Excel button, the sponsor rail and the Leaflet attribution
+   box — and selftest.mjs pins both. */
+.oa-card-lock {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 0 22px 16px;
+}
+
+.oa-card-lock-blur {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mut, #646c78);
+  white-space: nowrap;
+  overflow: hidden;
+  filter: blur(3.5px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.oa-card-lock-note {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand, #3a424d);
+  white-space: nowrap;
+}
+
+/* THE PADLOCK IS ON THE LOCKED NOTE ONLY. The same strip carries the
+   one-pager's "Open it on the full list", which a SIGNED-IN reader is shown —
+   nothing is locked for them, and a padlock in front of it says otherwise. */
+.oa-card-lock.is-blurred .oa-card-lock-note::before {
+  content: '\1F512';
+  margin-right: 6px;
+}
+
+/* the head no longer opens anything, so it stops reserving the gap a body
+   would have needed under it */
+.oa-card-gated .oa-card-head { padding-bottom: 10px; }
+
+/* Nobody can sign in (a blocked CDN, an ad blocker): the head is disabled
+   rather than dead, and it must not go on inviting a press it cannot honour. */
+.oa-card-gated .oa-card-head[disabled] { cursor: default; }
+.oa-card-gated .oa-card-head[disabled]:hover .oa-card-title { text-decoration: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* a blur is not motion, and readers who ask for less of it still get the
+     strip — this is only here so the note is never the thing that moves */
+  .oa-card-lock-note { transition: none; }
+}
 
 .oa-kv {
   width: 100%;
@@ -669,6 +767,11 @@
   .oa-card { border-radius: 6px; }
   .oa-card-head { padding: 12px 16px 18px; }
   .oa-card-body { padding: 0 16px 6px; }
+  /* the strip follows the head's gutter, and WRAPS: at 390px the note and a
+     row of labels do not share a line, and a note pushed off the edge is the
+     one thing on a locked card the reader has to be able to read */
+  .oa-card-lock { padding: 0 16px 14px; flex-wrap: wrap; gap: 6px 14px; }
+  .oa-card-lock-blur { flex-basis: 100%; }
   .oa-kv th, .oa-kv td { display: block; width: auto; padding: 4px 0; }
   .oa-kv th { padding-top: 12px; }
   .oa-kv tr + tr th { border-top: 1px solid var(--line-soft, #f0f0f0); }
@@ -680,6 +783,9 @@
      for the whole site and is loaded after this file — without matching it, a
      printed list was institution and department headings and nothing else. */
   .oa-card-body[hidden] { display: block !important; }
+  /* a blurred run of labels is mush on paper, and a lock that says "sign in"
+     cannot be pressed there either */
+  .oa-card-lock { display: none; }
 }
 
 /* --------------------------------------------- Edit / Take down on a posting

@@ -167,17 +167,27 @@
 
       <div class="v3-container" style="padding-bottom:90px">
 
-        <!-- The filters unlock on sign-in (the list itself is public). The
-             lock is a nudge, not security — everything here is a public
-             file; an account is simply how this community site knows who
-             uses it. The card below is moved over the engine's filter bar
-             by the script once the list has mounted. -->
+        <!-- The filters unlock on sign-in, and since 2026-08-29 so do the
+             postings themselves: a reader who has not registered sees which
+             universities are hiring and nothing more (assets/oa-gate.js).
+
+             THE COPY HAD TO CHANGE WITH THE BEHAVIOUR. It used to end
+             "Everything below stays readable either way", which was true of
+             the list this card was written for and is now false — and a
+             promise the page breaks is worse than no promise. What it must
+             still not claim is SECURITY: every dataset here is a served file
+             anybody may fetch, so this is what the site SHOWS, and the words
+             say that rather than implying a lock nothing could enforce.
+
+             The card is moved over the engine's filter bar by the script
+             once the list has mounted. -->
         <div class="v3-lock-card" id="v3-lock-card" hidden>
           <div class="v3-lock-card-inner">
-            <h3>&#128274; Sign in to use the filters</h3>
-            <p>Searching, filtering and downloading the full list as an Excel file is
-            free &mdash; it just needs an account, which takes a moment to create.
-            Everything below stays readable either way.</p>
+            <h3>&#128274; Sign in to read the postings</h3>
+            <p>The universities hiring this season are listed below either way. Opening a
+            posting &mdash; its entry level, its deadlines and how to apply &mdash; along with
+            searching, filtering and downloading the full list as an Excel file, is
+            free with an account, which takes a moment to create.</p>
             <div class="v3-cta-row">
               <button type="button" class="v3-btn primary" id="v3-lock-signin">Sign in</button>
               <button type="button" class="v3-btn ghost" id="v3-lock-register">Create account</button>
@@ -240,12 +250,21 @@
     </footer>
 
 
+    <script defer src="assets/oa-ga4.js"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-schools.js FIRST: oa-sponsors.js asks it whether two spellings
+         are one university, and a factory handed no OASchools cannot
+         answer. Deferred like every other script here, and the same file
+         post-a-job.html already loads, so a reader who has used the form
+         has it cached. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-sponsors.js"></script>
+    <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -385,10 +404,14 @@
             })]
           : [],
 
-        // newest posting first, but a Featured posting always leads
+        /* Newest posting first — but a SPONSOR's posting leads the list,
+           then a Featured one. The whole order lives in one place
+           (assets/oa-sponsors.js), because the badge and the position are
+           two halves of one fact and a page that ranked by its own copy of
+           the rule would be the four-copies-of-one-answer shape oa-jobnav.js
+           and oa-countries.js both exist to prevent. */
         sort: function (a, b) {
-          if (!!b.featured !== !!a.featured) return b.featured ? 1 : -1;
-          return (b.posted || '').localeCompare(a.posted || '');
+          return OASponsors.compare(a, b);
         },
 
         filters: [
@@ -425,13 +448,29 @@
             placeholder: 'Any date' }
         ],
 
-        onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+        /* WHO MAY OPEN A POSTING (owner, 2026-08-29). Signed out, the card
+           lists the university and draws its details as an unreadable strip;
+           signed in, it opens where it stands, which is what "registered, and
+           has opened the full list" means on the page that IS the full list.
+           One definition for every list on the site — assets/oa-gate.js. */
+        cardOpen: OAGate.cardOpen({ note: 'Sign in to read this posting' }),
+
+        onCard: function (li, r) {
+          /* the rail down a sponsored card's edge — toggled rather than
+             added, so a re-render can never leave a stale one behind */
+          OASponsors.markCard(li, r);
+          window.OAJobEdit && OAJobEdit.onCard(li, r);
+        },
 
         card: {
           title:    function (r) { return r.institution; },
           subtitle: function (r) { return r.department; },
           badges:   function (r) {
             var out = [];
+            /* the sponsor's mark leads the row, as their posting leads the
+               list; the module owns the word and the class */
+            var sp = OASponsors.badge(r);
+            if (sp) out.push(sp);
             if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
             return out;
           },
@@ -454,6 +493,11 @@
       });
 
       if (window.OAJobEdit) OAJobEdit.attach(jobs);
+      /* The gate is painted from the auth HINT so a signed-in reader never
+         sees a flash of locked cards; this is what reconciles it a moment
+         later, and what opens the posting whose lock was pressed once the
+         reader who pressed it has signed in. */
+      OAGate.watch(jobs);
       armLock();
     });
     </script>

@@ -3,11 +3,46 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "reader-gate",
+      "date": "2026-08-29",
+      "title": "Reading a posting now needs an account — posting one still does not",
+      "summary": "Who is hiring stays open to everybody: the sponsor's posting, every university advertising this season and every candidate's name are on the site whether or not you have an account. What a posting SAYS — its entry level, its deadlines, the advertisement itself — and what a candidate's profile holds — their CV, their INFORMS days, their e-mail address — now open for registered readers, on the full list. A card you cannot open shows the shape of what is inside it and a way in; an account is free and takes a moment. Two things are worth being plain about. This is not privacy: everything the site publishes is a public file that anybody can still fetch directly, so nothing here has been made confidential and nobody should treat it as though it had. And nothing about POSTING changed — filing a job, a candidate profile or a placement works exactly as it did, and your own postings are still yours to edit and take down.",
+      "url": "/jobs.html"
+    },
+    {
+      "id": "analytics-public-pages-only",
+      "date": "2026-08-29",
+      "title": "The analytics page lists only pages the public can visit",
+      "summary": "The “most visited pages” figure was built from every page a visit touched, which meant the site’s own maintenance area and an archived copy of an older version of the site appeared in it — and, because the figures are published as a plain file anyone can open, they were readable there too. Only public pages are counted now, and the filtering happens where the file is built rather than where it is drawn, so nothing non-public is written in the first place. Two smaller things came out of the same change: a visit to the maintenance area no longer counts towards the site’s published visitor and pageview totals, and pages that the web server answers under two addresses — /jobs and /jobs.html are one file — are now added together instead of being listed twice, which had been under-reporting the jobs page by about a third.",
+      "url": "/analytics.html"
+    },
+    {
+      "id": "analytics-ga4-cookieless",
+      "date": "2026-08-29",
+      "title": "The site measures its visitors again — and still sets no cookies",
+      "summary": "Operations Academia has measured nothing since July 2023, when Google retired the analytics product it used. Google Analytics is running again, configured so that it stores nothing whatever on your device: no analytics cookie, no identifier, nothing kept between visits. That is why you are not asked to accept cookies when you arrive — there are none to accept. Google Signals and advertising personalisation are switched off, so nothing collected here builds advertising audiences or follows you to other sites, and if your browser sends a Global Privacy Control or Do Not Track signal the analytics script is not loaded at all. The Privacy Policy explains all of it. The trade-off falls on us rather than on you: without an identifier we cannot tell a returning reader from a new one, so our own visitor counts lean on the site's own first-party record instead.",
+      "url": "/privacy-policy.html"
+    },
+    {
+      "id": "analytics-rebuilt",
+      "date": "2026-08-29",
+      "title": "The analytics page works again, and draws its own charts",
+      "summary": "The four charts on /analytics had shown nothing since 2023: they were Google Sheets embeds fed by the Google Analytics Spreadsheet Add-on, and Universal Analytics — the only API it spoke — was switched off in July that year, with the properties deleted a year later. A dead embed renders as an empty box and reports nothing to anybody, which is why it went unnoticed. The page now draws its own charts from one small served file: visitors day by day with a seven-day average, the weekly rhythm, the hiring season across the calendar year, and the most-visited pages. They follow your theme, they work on a phone, and every one of them will also give you its numbers as a table. Where the figures have stopped moving the page says so, rather than looking merely flat. The old “which universities visited” charts are not among them: they were measured from something Google Analytics no longer offers, and the spreadsheet that held the 2014–2023 copy was overwritten with empty results by its own add-on in July 2024, so that decade is gone.",
+      "url": "/analytics.html"
+    },
+    {
       "id": "poster-told-when-live",
       "date": "2026-08-29",
       "title": "You are told by e-mail when your job posting goes live",
       "summary": "Post a job and you now hear from us once — the moment your posting is really on the site. The e-mail carries the posting exactly as a visitor sees it (university, school and department, entry levels, country, both apply-by dates and the market years it is listed under) with a link that opens that one posting on whichever page carries it, and a link to correct it if anything reads wrongly. It is sent once per posting and never again, so a correction that re-publishes your posting does not send a second one, and there is nothing to unsubscribe from: it is about your own submission rather than a subscription. Until now the thank-you screen said in as many words that no confirmation would be sent, so the only way to know your posting had appeared was to go and look. Your contact details, and any area coordinator or department chair you name, are still shown to the site's maintainer only and are never published.",
       "url": "https://www.operationsacademia.org/post-a-job.html"
+    },
+    {
+      "id": "sponsored-postings",
+      "date": "2026-08-29",
+      "title": "Postings from a department that sponsors this site are marked",
+      "summary": "CUHK Business School’s Department of Decisions, Operations and Technology has sponsored Operations Academia from 1 September 2025 to 1 September 2027. Their postings now carry a purple “Sponsored” mark and lead the job postings list before you have narrowed it. The mark says one thing and only that thing — that this department paid for the site over a named period. It changes nothing about the posting itself, hides nothing belonging to anybody else, and every filter, search and download works exactly as it did: narrow the list by anything at all and the ordering is whatever your search asks for. It also ends by itself. The sponsorship’s dates are read when the page is drawn rather than stamped into a posting, so the mark simply stops appearing the day the sponsorship does, and a posting advertised before it began is never marked.",
+      "url": "https://www.operationsacademia.org/jobs.html"
     },
     {
       "id": "open-one-posting",

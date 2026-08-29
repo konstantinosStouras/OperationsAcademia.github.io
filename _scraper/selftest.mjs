@@ -8761,14 +8761,34 @@ async function testReviewWiring() {
   eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
     'with it, the whole build does');
 
-  /* A BUILDER NOBODY CALLS IS A FILE THAT SILENTLY STOPS RUNNING. Nothing in
-     the workflows names the four scripts any more — build-all.mjs is the one
-     caller — so a fifth builder added beside them would simply never run, and
-     the only symptom would be a dataset that stopped moving. */
+  /* A BUILDER NOBODY CALLS IS A FILE THAT SILENTLY STOPS RUNNING — the whole
+     point of this check, and the only symptom would be a dataset that quietly
+     stopped moving. So every build-*.mjs must have a caller, and there are
+     exactly two legitimate kinds:
+
+       - it is in BUILDERS, and oa-jobs-build.yml runs the lot; or
+       - it has a WORKFLOW OF ITS OWN that names it.
+
+     The second is not a loophole, it is the case build-analytics.mjs is:
+     a once-a-day read of a whole collection, which folded into BUILDERS would
+     make every posting's publish wait on it and share its failure. What the
+     rule actually forbids is a builder with NO caller, and it still does. */
   const builderFiles = (await readdir(HERE))
     .filter((f) => /^build-.*\.mjs$/.test(f) && f !== 'build-all.mjs').sort();
-  eq(BUILDERS.map((b) => b.script).sort(), builderFiles,
-    'build-all.mjs runs every builder in _scraper — it is the only thing that calls one');
+  const inBuilders = BUILDERS.map((b) => b.script);
+  const wfText = (await Promise.all((await readdir(wfDir))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((f) => readFile(path.join(wfDir, f), 'utf8')))).join('\n');
+  const orphans = builderFiles.filter(
+    (f) => !inBuilders.includes(f) && !wfText.includes(f));
+  eq(orphans, [], 'every builder in _scraper has a caller — BUILDERS, or a workflow naming it');
+
+  /* …and the two kinds do not OVERLAP. A builder that is in BUILDERS *and*
+     named by a workflow would run twice on one event, from two bases, racing
+     its own commit — which is exactly the duplicate-doorbell outage recorded
+     in CLAUDE.md, one layer down. */
+  const doubled = inBuilders.filter((f) => wfText.includes(f));
+  eq(doubled, [], 'a builder is called by BUILDERS or by its own workflow, never both');
 
   /* AND EVERY NAMING SWEEP IS IN THAT ROLE — the half the flag cannot deliver
      on its own.
@@ -9668,6 +9688,889 @@ async function testJobExportWiring() {
   }
 }
 
+/* ------------------------------------------------- WHO SPONSORED THE SITE
+
+   assets/oa-sponsors.js records that a department paid for this site over a
+   named period, and the two things that follow from it: their postings LEAD
+   the jobs page and carry a "Sponsored" badge (owner, 2026-08-29 — CUHK
+   Business School's Department of Decisions, Operations and Technology, 1
+   September 2025 to 1 September 2027, "professional and discrete but visible
+   to all users of the website").
+
+   This suite is what makes a curated table safe. Three things are pinned and
+   each of them is a way the feature could be quietly WRONG rather than
+   broken:
+
+     - it must say NO. A sponsor mark is a claim the site makes on somebody's
+       behalf, so the expensive failure is a badge on a posting that has not
+       earned one — and the site carries four other CUHK-ish postings, three
+       of them a DIFFERENT UNIVERSITY (…, Shenzhen), which is precisely the
+       shape a careless match would sweep in;
+     - it must EXPIRE. The whole reason this is read in the browser rather
+       than stamped into data/jobs.json is that a sponsorship ends on a date;
+       if that is not measured, "it expires by itself" is a claim nobody has
+       checked and the badge outlives the deal;
+     - the badge must be PAINTED, in both stylesheets. oa-list.css is the
+       engine's and v3.css is the live design's override, and a rule in only
+       one of them is either invisible on the site or lost on the next page —
+       CLAUDE.md records that trap under the Excel button. */
+/* --------------------------------- what a reader who has not registered SEES
+
+   Owner, 2026-08-29, from two screenshots of the site signed out: an
+   unregistered reader may see the sponsor's posting and the universities
+   behind the ones beside it — and a candidate's name — and nothing more. The
+   card does not open on them, the details are drawn as an unreadable strip,
+   and expanding a posting in place belongs to a registered reader who has
+   opened the full list.
+
+   THE ONE THING THIS BLOCK MUST NOT LET ANYBODY CLAIM is that it is security.
+   Every dataset here is a served file on GitHub Pages that anybody may fetch,
+   and no rule in this repository can change that without a backend to put it
+   behind — so this is a decision about what the site SHOWS, and the pinned
+   copy below is what keeps the pages from promising more than that. It is the
+   same honesty the sign-in lock over the filter bar was written with; what
+   changed is that its old last sentence ("Everything below stays readable
+   either way") became false the moment the cards stopped opening.
+
+   Who actually sees which shape is measured in a real browser by
+   page-test.mjs — this pins the decision, the wiring and the words.         */
+async function testReaderGate() {
+  const GATE = require(path.join(HERE, '..', 'assets', 'oa-gate.js'));
+
+  /* ---- the decision ----------------------------------------------------- */
+
+  /* In Node there is no window and no accounts module, which is the "cannot
+     tell" case: it says NO. A gate that unlocked when it could not find out
+     would unlock for every reader whose CDN is blocked, which is the
+     "fallback that is right most of the time" shape oa-sponsors.js was
+     caught by and this repository now refuses everywhere. */
+  eq(GATE.signedIn(), false, 'gate: with nothing to ask, it says the reader is not signed in');
+  eq(GATE.locked(), true, 'gate: …so the reader is locked');
+  eq(GATE.unavailable(), true, 'gate: …and it knows nobody can sign in from here');
+
+  const rows = [{ id: 'a', institution: 'Somewhere' }];
+  const lockedShape = GATE.cardOpen({ note: 'Sign in to read this posting' })(rows[0]);
+  ok(lockedShape && lockedShape.blur === true,
+    'gate: a locked card draws the blurred strip');
+  eq(lockedShape.note, GATE.NOTE_UNAVAILABLE,
+    'gate: …and with no way to sign in it says so, rather than offering a dead control');
+  eq(lockedShape.run, null,
+    'gate: a note with nothing behind it carries no click — the head is disabled instead');
+
+  /* The test hook, which is what lets the browser checks put a reader on
+     either side of this without a Firebase to sign them in. */
+  GATE.__setForTest(true);
+  eq([GATE.locked(), GATE.unavailable()], [true, false],
+    'gate: forced locked — and then a sign-in IS offered, since the block is the test');
+  const forcedLock = GATE.cardOpen({ note: 'Sign in to read this posting' })(rows[0]);
+  eq(forcedLock.note, 'Sign in to read this posting',
+    'gate: …so the page\'s own wording is what the strip carries');
+  ok(typeof forcedLock.run === 'function', 'gate: …and pressing it does something');
+
+  GATE.__setForTest(false);
+  eq(GATE.locked(), false, 'gate: forced unlocked');
+  eq(GATE.cardOpen({})(rows[0]), null,
+    'gate: a signed-in reader with no fuller list opens the card where it stands');
+
+  /* THE TEASER (owner: "it should only expand when a user is registered and
+     has opened the full list"). Signed in, a card on the one-pager is a way
+     IN to the posting rather than the posting: it carries the reader to the
+     full list with that posting open. No padlock, no blur — nothing is
+     locked for them. */
+  const full = GATE.cardOpen({ full: (r) => 'jobs.html?job=' + r.id })(rows[0]);
+  ok(full && full.blur === false,
+    'gate: the signed-in teaser card is gated but NOT locked — nothing is blurred');
+  eq(full.note, GATE.NOTE_FULL, 'gate: …and it says where the click goes');
+  /* A row the page cannot name a page for falls back to opening in place,
+     rather than to a click that navigates nowhere. */
+  eq(GATE.cardOpen({ full: () => '' })(rows[0]), null,
+    'gate: …and with no href to offer it simply opens the card here');
+  GATE.__setForTest(null);
+
+  /* ---- the ENGINE ------------------------------------------------------- */
+
+  const engine = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
+  /* THE VALUES ARE NEVER PUT INTO THE DOCUMENT. A blurred copy of the real
+     text is a picture of a lock rather than a lock, and it would also be
+     selectable, copyable and readable in one keystroke of devtools — so the
+     locked branch returns before the table is built, and what it previews is
+     the row LABELS. Read from the source because the alternative is to prove
+     a negative in a browser about markup that is not there. */
+  const locked = engine.slice(engine.indexOf('THE LOCKED CARD'),
+    engine.indexOf("var table = el('table', { class: 'oa-kv' });"));
+  ok(locked.length > 500, 'gate: the engine\'s locked branch is where this expects it');
+  ok(!/kv\.value|kv\.html/.test(locked),
+    'gate: the locked card never reads a row\'s VALUE — only the labels it would have shown');
+  ok(/lockPreview/.test(locked) && /aria-hidden/.test(locked),
+    'gate: the blurred strip is decoration and says so to assistive technology');
+  ok(/return lockedLi/.test(locked),
+    'gate: …and it returns before the details table is built at all');
+  ok(/'aria-expanded': gate \? null/.test(engine) && /'aria-controls': gate \? null/.test(engine),
+    'gate: a head that no longer discloses anything stops claiming to');
+
+  /* ---- BOTH stylesheets ------------------------------------------------- */
+
+  /* oa-list.css is the engine's own and v3.css overrides it for the live
+     design: a rule written in only one of them is either invisible on the
+     site or lost on the next page. The Excel button, the sponsor rail and
+     the Leaflet attribution box are all here for this reason. */
+  const listCss = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  const v3Css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(/\.oa-card-lock-blur\s*\{[^}]*filter:\s*blur\(/.test(listCss),
+    'gate: oa-list.css blurs the strip');
+  ok(/\.oa-card-lock-blur\s*\{[^}]*user-select:\s*none/.test(listCss),
+    'gate: …and it does not select, because decoration that highlights reads as a fault');
+  ok(/body\.v3 \.oa-card-lock-blur/.test(v3Css) && /body\.v3 \.oa-card-lock-note/.test(v3Css),
+    'gate: v3.css carries the live design\'s half of the same rule');
+  /* THE PADLOCK IS ON THE LOCKED NOTE ONLY. The same strip carries the
+     one-pager's "Open it on the full list", which a SIGNED-IN reader sees —
+     a padlock in front of that says something untrue. */
+  ok(/\.oa-card-lock\.is-blurred \.oa-card-lock-note::before/.test(listCss),
+    'gate: the padlock is drawn only where something really is locked');
+  ok(!/^\s*\.oa-card-lock-note::before/m.test(listCss),
+    'gate: …never on the strip\'s note as such');
+  ok(/@media print[\s\S]{0,700}?\.oa-card-lock \{ display: none/.test(listCss),
+    'gate: a blurred run of labels is not printed — it is mush on paper');
+
+  /* ---- the WIRING ------------------------------------------------------- */
+
+  const jobs = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const past = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home],
+    ['previous-markets.html', past]]) {
+    ok(html.includes('<script defer src="assets/oa-gate.js"></script>'),
+      `gate: ${rel} loads the module, deferred like every other script on it`);
+    /* It asks OAAccounts who is reading, so it has to be loaded after it —
+       the load-order half of the sponsors lesson, where a module handed an
+       undefined dependency went on passing every check in Node. */
+    ok(html.indexOf('assets/oa-accounts.js') < html.indexOf('assets/oa-gate.js'),
+      `gate: ${rel} loads the accounts module before the gate that asks it`);
+    ok(/cardOpen:\s*OAGate\.cardOpen\(/.test(html),
+      `gate: ${rel} declares the gate on its list, through the module`);
+    /* The gate is painted from the auth hint before the session restores, so
+       every list HAS to be able to change shape late. Without this a
+       signed-in reader keeps the locked cards until they navigate. */
+    ok(/OAGate\.watch\(/.test(html),
+      `gate: ${rel} re-renders its list when the auth state finally resolves`);
+  }
+  /* EVERY list a job posting or a candidate is drawn in. Read as a set rather
+     than one page at a time: the archive is where postings GO when a season
+     rolls, and leaving it open would have made the gate on the jobs page a
+     matter of waiting rather than of registering. */
+  eq((home.match(/cardOpen:\s*OAGate\.cardOpen\(/g) || []).length, 2,
+    'gate: the one-pager gates BOTH its lists — the job teaser and the candidates');
+  /* …and the teaser is the one that sends a signed-in reader to the full
+     list, through the site's single answer to "which page carries this
+     posting" rather than a fourth copy of that rule. */
+  ok(/full:\s*function\s*\(r\)\s*\{\s*return NAV\.hrefFor\(r\);/.test(home),
+    'gate: the teaser opens a posting on the page OAJobNav says carries it');
+  ok(!/cardOpen[\s\S]{0,400}?full:/.test(jobs) && !/cardOpen[\s\S]{0,400}?full:/.test(past),
+    'gate: the full lists open a posting where it stands — they ARE the full list');
+
+  /* ---- ONE definition of "is this reader signed in" --------------------- */
+
+  const exp = await readFile(path.join(HERE, '..', 'assets', 'oa-jobexport.js'), 'utf8');
+  ok(/function signedIn\(\)\s*\{[\s\S]{0,200}?G\.OAGate[\s\S]{0,120}?\}/.test(exp),
+    'gate: the Excel download asks the gate who is signed in, not its own copy');
+  ok(!/A\.hint\(\)\s*===\s*'in'/.test(exp),
+    'gate: …so the button and the cards can never disagree about who is reading');
+  ok(jobs.indexOf('assets/oa-gate.js') < jobs.indexOf('assets/oa-jobexport.js'),
+    'gate: jobs.html loads the gate before the export that reads it');
+
+  /* ---- THE COPY, which is the part that could quietly become a lie ------ */
+
+  /* READ WITH THE COMMENTS STRIPPED, and bounded at BOTH ends. The block
+     above the card EXPLAINS the sentence it no longer says, and quotes it to
+     do so — a guard that could not tell the explanation from the copy would
+     have to be satisfied by deleting the explanation, which is the shape
+     CLAUDE.md records under the no-rebase check. And the first draft of this
+     slice ended at the first `v3-cta-row`, which is in the HERO, hundreds of
+     lines ABOVE the card: it came back empty and every check below it passed
+     on nothing. Hence the length assertion, which is what caught it. */
+  const jobsCopy = jobs.replace(/<!--[\s\S]*?-->/g, '');
+  const card = jobsCopy.slice(jobsCopy.indexOf('class="v3-lock-card"'),
+    jobsCopy.indexOf('<div id="oa-jobs">'));
+  ok(card.length > 200 && card.length < 2000,
+    'gate: the sign-in card is where this expects it');
+  ok(!/stays readable either way/i.test(jobsCopy),
+    'gate: the sign-in card no longer promises the postings stay readable — they do not');
+  ok(/universities hiring this season are listed below/i.test(card),
+    'gate: …it says what a reader without an account DOES get');
+  ok(/Excel/i.test(card),
+    'gate: …and still names the download, the only place a signed-out reader is told of it');
+  /* NOTHING may describe this as security. The data is public and stays
+     public; a page that implied otherwise would be making a promise the
+     architecture cannot keep. */
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home],
+    ['previous-markets.html', past]]) {
+    const prose = html.replace(/<!--[\s\S]*?-->/g, '');
+    ok(!/(private|secure|protected|confidential)/i.test(
+      prose.slice(prose.indexOf('v3-lock-card') >= 0 ? prose.indexOf('v3-lock-card') : 0,
+        prose.indexOf('v3-lock-card') >= 0 ? prose.indexOf('v3-lock-card') + 1200 : 0)),
+      `gate: ${rel} never calls the gate privacy or security — the files are served to anybody`);
+  }
+  const gateSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-gate.js'), 'utf8');
+  ok(/NOT AN ACCESS CONTROL/.test(gateSrc),
+    'gate: and the module itself says so at the top, where the next reader will look');
+}
+
+async function testSponsors() {
+  const SP = require(path.join(HERE, '..', 'assets', 'oa-sponsors.js'));
+  const served = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  /* ---- the record itself ------------------------------------------------ */
+
+  ok(SP.SPONSORS.length >= 1, 'sponsors: the table names at least one sponsor');
+  for (const s of SP.SPONSORS) {
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(s.from) && /^\d{4}-\d{2}-\d{2}$/.test(s.to),
+      `sponsors: ${s.institution} names both ends of its window as ISO days`);
+    ok(s.from < s.to, `sponsors: ${s.institution}'s window runs forwards`);
+    ok(Array.isArray(s.units) && s.units.length > 0,
+      `sponsors: ${s.institution} names the department(s) it sponsors from`);
+    /* The university must be one the site can actually resolve, or the entry
+       silently matches nothing for ever — a table that says a place is a
+       sponsor and never marks one of its postings is worse than no table. */
+    ok(!!SCHOOLS.institutionKey(s.institution),
+      `sponsors: ${s.institution} resolves to an institution key`);
+  }
+
+  /* ---- WHO IT MARKS, over the file the site actually serves -------------- */
+
+  const INSIDE = '2026-08-29';          // a day inside the CUHK window
+  const marked = served.filter((r) => SP.isSponsored(r, INSIDE));
+  eq(marked.length, 1, 'sponsors: exactly one served posting is sponsored today');
+  eq(marked[0].id, '2027-the-chinese-university-of-hong-kong-20260827',
+    'sponsors: …and it is the CUHK Decisions, Operations and Technology posting');
+
+  /* THE ONE THAT MATTERS. institutionKey folds "The", resolves the acronym
+     and keeps a separately-named campus separate — so a Shenzhen posting is a
+     different university and must never be swept in. If institutionKey ever
+     stops keeping them apart, three innocent postings start claiming a
+     sponsorship, and nothing else in this repository would notice. */
+  const shenzhen = served.filter(
+    (r) => /hong kong,\s*shenzhen/i.test(r.institution || ''));
+  ok(shenzhen.length >= 1, 'sponsors: the served file still carries a Shenzhen posting to test against');
+  eq(shenzhen.filter((r) => SP.isSponsored(r, INSIDE)).map((r) => r.id), [],
+    'sponsors: CUHK Shenzhen is a DIFFERENT university and is never marked');
+
+  /* Same university, a department the record does not name. The tracking
+     workbook writes a field code ("OM/IS") where the site asks for a
+     department, and guessing that one names the other is exactly the
+     "curated, never guessed" line every other table here is held to. */
+  const omis = served.find((r) => (r.unit || r.department) === 'OM/IS' &&
+    SCHOOLS.institutionKey(r.institution) === SCHOOLS.institutionKey(
+      'The Chinese University of Hong Kong'));
+  if (omis) {
+    ok(!SP.isSponsored(omis, INSIDE),
+      'sponsors: a department the record does not name is not marked, however close');
+  }
+
+  /* ---- IT EXPIRES, which is the whole reason it is read in the browser --- */
+
+  const CUHK = marked[0];
+  eq(SP.isSponsored(CUHK, '2025-08-31'), false,
+    'sponsors: nothing is marked the day BEFORE the sponsorship begins');
+  eq(SP.isSponsored(CUHK, '2025-09-01'), true,
+    'sponsors: …and it is marked from its first day (`from` is inclusive)');
+  eq(SP.isSponsored(CUHK, '2027-08-31'), true,
+    'sponsors: still marked on the last day of the window');
+  eq(SP.isSponsored(CUHK, '2027-09-01'), false,
+    'sponsors: and NOT on the day it ends (`to` is exclusive) — it expires by itself');
+
+  /* The second gate: a posting advertised before they became a sponsor is not
+     retrospectively one of theirs, and a row with no date is never guessed at. */
+  eq(SP.isSponsored({ ...CUHK, posted: '2025-08-31' }, INSIDE), false,
+    'sponsors: a posting made before the window is not marked inside it');
+  eq(SP.isSponsored({ ...CUHK, posted: '' }, INSIDE), false,
+    'sponsors: a posting with no date is never marked — this says no when it cannot tell');
+
+  /* ---- the matching is FOLDED, not literal ------------------------------ */
+
+  for (const name of ['CUHK', 'Chinese University of Hong Kong',
+    'The Chinese University of Hong Kong']) {
+    ok(SP.isSponsored({ ...CUHK, institution: name }, INSIDE),
+      `sponsors: "${name}" reaches the record — one spelling per place, as everywhere`);
+  }
+  ok(SP.isSponsored({ ...CUHK, unit: 'Decisions, Operations & Technology' }, INSIDE),
+    'sponsors: "&" reads as "and", the same reading the site\'s own search takes');
+  ok(SP.isSponsored({ ...CUHK, unit: '', department: 'Decisions, Operations and Technology' }, INSIDE),
+    'sponsors: a row that names its department in the joined field is read too');
+  ok(!SP.isSponsored({ ...CUHK, institution: 'University of Hong Kong' }, INSIDE),
+    'sponsors: a DIFFERENT Hong Kong university is not a near-enough match');
+
+  /* ---- the ORDER --------------------------------------------------------- */
+
+  const older = { id: 'x', institution: 'Somewhere', unit: 'OM', posted: '2026-08-28' };
+  eq(SP.compare(CUHK, older, INSIDE) < 0, true,
+    'sponsors: a sponsored posting leads a NEWER unsponsored one');
+  eq(SP.compare(older, CUHK, INSIDE) > 0, true, 'sponsors: …in either argument order');
+  eq(SP.compare(CUHK, { ...older, featured: true }, INSIDE) < 0, true,
+    'sponsors: a sponsorship outranks the maintainer\'s own Featured flag');
+  eq(SP.compare({ ...older, featured: true }, { ...older, id: 'y' }, INSIDE) < 0, true,
+    'sponsors: and Featured still leads everything below it');
+  eq(SP.compare({ ...older, id: 'a', posted: '2026-01-01' },
+    { ...older, id: 'b', posted: '2026-06-01' }, INSIDE) > 0, true,
+    'sponsors: with neither, the newest posting still leads');
+  /* Once the window closes the comparator must fall back to exactly what the
+     page did before this shipped, or the jobs page keeps a stale lead row. */
+  eq(SP.compare(CUHK, older, '2027-09-02') > 0, true,
+    'sponsors: after the window the sponsor no longer leads — the order simply reverts');
+
+  /* A comparator that is not ANTISYMMETRIC sorts differently in different
+     engines, and Array#sort is free to do anything at all with one. Drive
+     every pair of the real list through it rather than a fixture: ties are
+     ties (two postings of the same day rank equal, which is what leaves the
+     stable sort to keep them in the order they arrived), but no pair may
+     ever claim BOTH that a leads b and that b leads a. */
+  const sample = served.slice(0, 40);
+  const broken = [];
+  for (let i = 0; i < sample.length; i++) {
+    for (let j = 0; j < sample.length; j++) {
+      const ab = SP.compare(sample[i], sample[j], INSIDE);
+      const ba = SP.compare(sample[j], sample[i], INSIDE);
+      if (Math.sign(ab) !== -Math.sign(ba)) broken.push(sample[i].id + ' vs ' + sample[j].id);
+    }
+  }
+  eq(broken.slice(0, 3), [], 'sponsors: the comparator is antisymmetric over the real list');
+  /* …and sorting an already-sorted list changes nothing, which is the
+     property a reader actually sees: the page does not reshuffle itself. */
+  const sorted = sample.slice().sort((a, b) => SP.compare(a, b, INSIDE)).map((r) => r.id);
+  const again = sample.slice().sort((a, b) => SP.compare(a, b, INSIDE))
+    .sort((a, b) => SP.compare(a, b, INSIDE)).map((r) => r.id);
+  eq(again, sorted, 'sponsors: …so sorting is idempotent');
+
+  /* ---- the BADGE, and that the module owns the word --------------------- */
+
+  eq(SP.badge(CUHK, INSIDE), { text: 'Sponsored', cls: 'oa-label-sponsor' },
+    'sponsors: the badge is the owner\'s word and the class the stylesheets paint');
+  eq(SP.badge(older, INSIDE), null, 'sponsors: …and nothing at all for everyone else');
+
+  /* ---- the WIRING ------------------------------------------------------- */
+
+  const jobs = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
+    ok(html.includes('<script defer src="assets/oa-sponsors.js"></script>'),
+      `sponsors: ${rel} loads the module, deferred like every other script on it`);
+    /* The windows are generous on purpose: both pages carry a paragraph of
+       reasoning between the hook and the call, and a guard that could only be
+       satisfied by DELETING the explanation is the shape CLAUDE.md records
+       under the no-rebase check. What is pinned is that the badge comes from
+       the module inside the badges callback, not how tersely it is written. */
+    ok(/badges:\s*function[\s\S]{0,900}?OASponsors\.badge\(r\)/.test(html),
+      `sponsors: ${rel} draws the badge THROUGH the module, never its own copy of the word`);
+    ok(/onCard:\s*function[\s\S]{0,600}?OASponsors\.markCard\(li, r\)/.test(html),
+      `sponsors: ${rel} puts the rail on the card`);
+    ok(!/['"]Sponsored['"]/.test(html.replace(/OASponsors/g, '')),
+      `sponsors: ${rel} never writes the badge's own text — one definition, like every other`);
+  }
+
+  /* BOTH lists lead with the sponsor (owner, 2026-08-29, from a screenshot of
+     the one-pager: the mark was on the card and the card was second). The
+     first build left the teaser date-ordered on the reasoning that "the ten
+     most recent postings" would become false — but that heading names WHICH
+     ten, not what order they are in, and the teaser's `prepare` still selects
+     them by date before this comparator ever runs. So a posting outside the
+     newest ten is still not shown, and the heading stays true. */
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
+    ok(/sort:\s*function\s*\(a, b\)\s*\{\s*return OASponsors\.compare\(a, b\);/.test(html),
+      `sponsors: ${rel} sorts through the module`);
+  }
+  /* …and the teaser's SELECTION is still by date, which is what keeps its own
+     heading honest. */
+  ok(/prepare:[\s\S]{0,400}?localeCompare\(a\.posted[\s\S]{0,80}?slice\(0, 10\)/.test(home),
+    'sponsors: the teaser still SELECTS the ten most recent by date before ordering them');
+  ok(!/b\.featured\s*\?\s*1\s*:\s*-1/.test(jobs),
+    'sponsors: …and the jobs page kept no second, private copy of the Featured rule');
+
+  /* The module must be loaded BEFORE the export reads it: oa-jobexport.js
+     takes it as a factory argument, and a UMD factory handed `undefined`
+     silently exports a column that answers "no" for everybody. */
+  ok(jobs.indexOf('assets/oa-sponsors.js') < jobs.indexOf('assets/oa-jobexport.js'),
+    'sponsors: jobs.html loads the module before the export that reads it');
+
+  /* ---- AND THE SAME FOR ITS OWN DEPENDENCY, which is the one this suite
+     was green without.
+
+     oa-sponsors.js asks oa-schools.js whether two spellings are one
+     university. NEITHER of these pages loaded that file — only the forms,
+     the alerts page, /admin-area and the directory did — so in the browser
+     the factory was handed `undefined`. The first draft fell back to a plain
+     fold, which still matched "The Chinese University of Hong Kong" against
+     itself: every check in this suite passed (Node resolves the dependency
+     through require) while the SITE silently stopped recognising "CUHK",
+     "Chinese University of Hong Kong" and "The Chinese University of Hong
+     Kong (CUHK)". Three spellings, marked in the tests and unmarked on the
+     page, with nothing anywhere to say so.
+
+     So both halves are pinned: the pages load it FIRST, and the module says
+     nothing at all without it. */
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
+    ok(html.includes('<script defer src="assets/oa-schools.js"></script>'),
+      `sponsors: ${rel} loads oa-schools.js, which the sponsor rule is built on`);
+    ok(html.indexOf('assets/oa-schools.js') < html.indexOf('assets/oa-sponsors.js'),
+      `sponsors: …BEFORE oa-sponsors.js, whose factory is handed it`);
+  }
+
+  /* Drive the BROWSER branch: evaluate the file with no OASchools on the root
+     and check it refuses to answer rather than answering badly. Reading the
+     source for a `return fold(v)` would pass the moment somebody wrote the
+     same fallback a different way; this measures the behaviour. */
+  const sponsorSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-sponsors.js'), 'utf8');
+  const bare = {};
+  // eslint-disable-next-line no-new-func
+  new Function('self', sponsorSrc)(bare);
+  const NOSCHOOLS = bare.OASponsors;
+  ok(!!NOSCHOOLS, 'sponsors: the module still LOADS without oa-schools.js — it must not throw on a page that forgot it');
+  eq(NOSCHOOLS.isSponsored(CUHK, INSIDE), false,
+    'sponsors: …but marks nothing at all, rather than half-recognising some spellings');
+  for (const name of ['CUHK', 'Chinese University of Hong Kong']) {
+    eq(NOSCHOOLS.isSponsored({ ...CUHK, institution: name }, INSIDE), false,
+      `sponsors: …including "${name}", the exact spelling a silent fold used to drop`);
+  }
+
+  /* ---- the CSS, in BOTH stylesheets ------------------------------------- */
+
+  const listCss = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+
+  /* It paints its own ground, so it must name its own ink — the base
+     .oa-label sets #fff, which on a pale purple wash is invisible. This is
+     the rule CLAUDE.md states three times over. */
+  for (const [name, css, sel] of [
+    ['oa-list.css', listCss, '\\.oa-label-sponsor'],
+    ['v3.css', v3css, 'body\\.v3 \\.oa-label-sponsor'],
+  ]) {
+    const rule = new RegExp(sel + '\\s*\\{[\\s\\S]{0,400}?\\}');
+    const m = rule.exec(css);
+    ok(!!m, `sponsors: ${name} paints the badge`);
+    if (m) {
+      ok(/background-color:\s*var\(--sponsor-soft/.test(m[0]),
+        `sponsors: ${name} gives the badge its ground`);
+      ok(/[^-]color:\s*var\(--sponsor[,)]/.test(m[0]),
+        `sponsors: …and names its own ink (CLAUDE.md: anything that paints a ground must)`);
+      ok(/border:\s*1px solid var\(--sponsor-line/.test(m[0]),
+        `sponsors: …and its hairline, which is what makes it an OUTLINE pill and not a second Featured`);
+      ok(!/[^-]background:\s/.test(m[0]),
+        `sponsors: ${name} uses background-color, never the shorthand that blanks a background-image`);
+    }
+  }
+  ok(/\.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor/.test(listCss),
+    'sponsors: the rail down the card edge, in the engine stylesheet');
+  ok(/body\.v3 \.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor\)/.test(v3css),
+    'sponsors: …and in the live design, which is the one the site paints');
+  /* AND INSIDE A PANEL. `body.v3 .v3-panel .oa-card { border: 0 }` has the
+     SAME specificity as the rule above (0,3,1 each) and sits ~600 lines
+     later, so load order silently blanked the rail on the one-pager's teaser
+     while it worked on the jobs page. A rule that can be beaten by a rule of
+     equal weight further down the file is not a rule. */
+  ok(/body\.v3 \.v3-panel \.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor\)/.test(v3css),
+    'sponsors: the rail survives the panel card reset, which blanks every border');
+  ok(v3css.indexOf('body.v3 .v3-panel .oa-card.oa-sponsored') >
+     v3css.indexOf('body.v3 .v3-panel .oa-card {'),
+    'sponsors: …and is declared AFTER the reset it has to beat');
+
+  /* Every token defined in BOTH themes, or the badge paints no ground at all
+     in one of them and oa-list.css's light-hex fallback lands on a dark card. */
+  for (const tok of ['--sponsor', '--sponsor-soft', '--sponsor-line']) {
+    eq(v3css.split(tok + ':').length - 1, 2,
+      `palette: ${tok} is defined in the light theme and the dark one`);
+  }
+
+  /* ---- the EXPORT ------------------------------------------------------- */
+
+  const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+  const col = E.COLUMNS.find((c) => c.header === 'Sponsored');
+  ok(!!col, 'sponsors: the Excel download carries a Sponsored column');
+  if (col) {
+    eq(col.cell(CUHK), true, 'sponsors: …TRUE for the sponsor\'s posting');
+    eq(col.cell(older), false, 'sponsors: …and a real boolean FALSE for everyone else');
+    /* Its `from` names the published fields the answer is DERIVED from —
+       there is no `sponsored` in data/jobs.json and deliberately never will
+       be. testJobExport pins every `from` against PUBLIC_FIELDS, so naming a
+       field that does not exist would fail there rather than here. */
+    ok((col.from || []).length > 0 && col.from.every((f) => PUBLIC_FIELDS.includes(f)),
+      'sponsors: …reading only fields the build actually publishes');
+  }
+  ok(!PUBLIC_FIELDS.includes('sponsored'),
+    'sponsors: nothing is stamped into data/jobs.json — a sponsorship expires, a built field cannot');
+
+  /* ---- the FROZEN ARCHIVES do not move ---------------------------------- */
+
+  for (const rel of ['v1', 'v2']) {
+    const dir = path.join(HERE, '..', rel);
+    const hits = [];
+    for (const f of await readdir(dir, { recursive: true }).catch(() => [])) {
+      if (typeof f === 'string' && /oa-sponsors\.js$/.test(f)) hits.push(f);
+    }
+    eq(hits, [], `sponsors: /${rel}/ does not carry the module — an archive does not move`);
+  }
+}
+
+/* --------------------------------------------------------------- analytics
+
+   The page was four Google Sheets <iframe>s and they had been dead since 2023
+   (Universal Analytics was switched off in July that year and its properties
+   deleted the next). A dead embed renders as an empty box, so what is pinned
+   here is mostly the honesty the replacement is built for: that a day is never
+   counted twice, that an unreachable source cannot shorten the history, and
+   that nothing on the page claims the frozen archive is current. */
+async function testAnalytics() {
+  const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
+
+  /* --- a day belongs to exactly ONE source ------------------------------- */
+
+  const days = {};
+  A.mergeDays(days, { '2026-08-02': [5, 6, 14], '2026-08-01': [10, 12, 30] }, 'ga4');
+  A.mergeDays(days, { '2026-08-02': [99, 99, 99], '2026-08-03': [7, 8, 20] }, 'usage');
+  eq(days['2026-08-02'], [5, 6, 14],
+    'the higher-authority source keeps a day two sources both measured');
+  eq(A.summarise(A.series(days)).visitors, 22,
+    'a contested day is counted ONCE — summing two measurements of one Tuesday ' +
+    'would double every day of the overlap, and the chart would look fine');
+
+  /* THE ORDER IS PART OF THE COOKIELESS DECISION, not a detail. GA4 runs with
+     `client_storage: 'none'` so that the site needs no consent banner, and a
+     browser storing nothing cannot recognise a returning visitor — so GA4's
+     "users" is nearer "sessions", and it must not own a day the first-party
+     record also measured. Pinned here against the tag's own setting below, so
+     the two cannot drift apart silently. */
+  eq(A.SOURCE_ORDER, ['usage', 'ga4', 'history'],
+    'the first-party record outranks cookieless GA4 for a day both measured');
+
+  /* a row of three zeroes is DROPPED rather than stored — the file would
+     otherwise carry a decade of days that only say "we have no idea", and the
+     charts would plot them as real zeroes */
+  ok(A.dayRow(0, 0, 0) === null, 'a day with no measurement in it is not a day');
+  eq(A.dayRow(3, 0, 0), [3, 0, 0], 'a day with any measurement is kept');
+
+  /* --- the series is SORTED, whatever order the file holds --------------- */
+
+  const jumbled = { '2026-08-03': [3, 3, 3], '2026-08-01': [1, 1, 1], '2026-08-02': [2, 2, 2] };
+  eq(A.series(jumbled).map((r) => r.day), ['2026-08-01', '2026-08-02', '2026-08-03'],
+    'the series sorts by day — JSON key order is an implementation detail, and a ' +
+    'chart plotted in insertion order would be scribble');
+  eq(A.series(jumbled, { from: '2026-08-02' }).map((r) => r.day),
+    ['2026-08-02', '2026-08-03'], 'and clips to a range');
+
+  /* --- the rolling mean is TRAILING, and says so by emitting null -------- */
+
+  eq(A.rollingMean([1, 2, 3, 4], 2), [null, 1.5, 2.5, 3.5],
+    'the mean is trailing and emits null until it has a full window — a centred ' +
+    'one would need days that have not happened, so the line would droop at the ' +
+    'right-hand end, which is exactly where a reader looks');
+
+  /* --- the weekday bucket reads the day in UTC --------------------------- */
+
+  /* 2026-08-03 IS a Monday. Read with `new Date('2026-08-03')` and rendered in
+     a local zone, every reader west of Greenwich gets the day before and the
+     whole chart shifts by one bar — silently, and only for some readers. */
+  const wk = A.byWeekday([{ day: '2026-08-03', visitors: 10, sessions: 0, pageviews: 0 }]);
+  eq(wk[0].name, 'Monday', 'the weekday buckets start on Monday');
+  eq(wk[0].total, 10, 'and a Monday lands in the Monday bucket, read in UTC');
+  eq(wk.reduce((n, b) => n + b.days, 0), 1, 'each day is counted in exactly one bucket');
+
+  /* it is a MEAN, not a total: a range rarely holds the same number of each
+     weekday, and a total would rank the weekdays by how many the range had */
+  const twoMondays = A.byWeekday([
+    { day: '2026-08-03', visitors: 10, sessions: 0, pageviews: 0 },
+    { day: '2026-08-10', visitors: 20, sessions: 0, pageviews: 0 },
+    { day: '2026-08-04', visitors: 30, sessions: 0, pageviews: 0 },
+  ]);
+  eq(twoMondays[0].mean, 15, 'two Mondays average rather than sum');
+  eq(twoMondays[1].mean, 30, 'and one Tuesday does not out-rank them merely by being one');
+
+  const mo = A.byMonth([{ day: '2026-09-15', visitors: 7, sessions: 0, pageviews: 0 }]);
+  eq(mo[8].name, 'September', 'the months are in calendar order');
+  eq(mo[8].total, 7, 'and September lands in September');
+
+  /* --- staleness: the failure this whole page exists to make visible ----- */
+
+  const fresh = { days: { '2026-08-28': [1, 1, 1] } };
+  ok(A.staleness(fresh, Date.parse('2026-08-29T00:00:00Z')) === null,
+    'a dataset that gained a day yesterday is not stale');
+  const old = A.staleness({ days: { '2026-01-01': [1, 1, 1] } },
+    Date.parse('2026-08-29T00:00:00Z'));
+  ok(old && old.age > A.STALE_DAYS,
+    'one that stopped in January is, and the page says so — a pipeline that has ' +
+    'quietly stopped and a site nobody visits look identical from outside, which ' +
+    'is how the old charts stayed dead for three years');
+  ok(A.staleness({ days: {} }, Date.now()) === null,
+    'but an EMPTY dataset is unconfigured, not stale — a different sentence');
+
+  /* --- the served file is valid before anything is configured ------------ */
+
+  const served = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'analytics.json'), 'utf8'));
+  eq(served.dayFields, A.DAY_FIELDS,
+    'the served file names its own day fields — self-describing rather than ' +
+    'something a reader has to read the model to learn');
+  ok(served.universities && served.universities.frozen === true,
+    'the universities section is marked frozen: it came from Universal Analytics\' ' +
+    'networkDomain, GA4 has no such dimension and none replaces it, so those ' +
+    'numbers can never be brought up to date by anybody');
+  ok(typeof served.version === 'number' && served.days && served.totals,
+    'and it is a complete, valid dataset even with every source switched off');
+
+  /* nothing under data/ may carry an address — the rule every served file
+     here is held to, and this one is built from a collection of sessions */
+  const rawServed = await readFile(path.join(HERE, '..', 'data', 'analytics.json'), 'utf8');
+  ok(!/[\w.+-]+@[\w-]+\.[\w.]+/.test(rawServed),
+    'the analytics file carries no e-mail address');
+  ok(!/[?&]/.test(Object.keys(served.days).join('')), 'the day keys are plain dates');
+
+  /* --- the page's wiring ------------------------------------------------- */
+
+  const html = await readFile(path.join(HERE, '..', 'analytics.html'), 'utf8');
+  /* READ WITH THE COMMENTS STRIPPED. The page still EXPLAINS the four embeds
+     it no longer has, and a guard that could not tell the explanation from the
+     thing would have to be satisfied by deleting the explanation — the rule
+     the no-rebase check in testReviewWiring already had to learn. */
+  const htmlLive = html.replace(/<!--[\s\S]*?-->/g, '');
+  ok(!/<iframe/i.test(htmlLive),
+    'analytics.html embeds nothing — the four dead Google Sheets charts are gone');
+  ok(!/docs\.google\.com/.test(htmlLive),
+    'and it names no spreadsheet: those stopped being fed when UA was retired');
+  ok(/<iframe/i.test(html) && /Universal Analytics/.test(html),
+    'but the page still records WHY they went — the comment is the explanation, ' +
+    'and the check above must never be satisfiable by deleting it');
+  for (const src of ['assets/oa-analytics-model.js', 'assets/oa-charts.js', 'assets/oa-analytics.js']) {
+    ok(new RegExp('<script defer src="' + src.replace(/[/.]/g, '\\$&') + '"').test(html),
+      `analytics.html loads ${src}, deferred like every other script on this site`);
+  }
+  ok(/<link href="assets\/oa-analytics\.css" rel="stylesheet">/.test(html),
+    'and its stylesheet');
+  ok(/id="oa-analytics"/.test(html), 'the mount point is present');
+  ok(/<noscript>/.test(html),
+    'and a noscript state, because the figures are drawn in the browser');
+
+  /* the lede must not still apologise for an embed's own styling */
+  ok(!/render in their own light styling/.test(html),
+    'the apology for the embeds\' fixed light styling went with the embeds');
+
+  /* --- the page module ---------------------------------------------------*/
+
+  const page = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.js'), 'utf8');
+  ok(/cache: 'no-cache'/.test(page),
+    'it fetches data/ with no-cache — Pages serves data/ with ten minutes of ' +
+    'freshness, so without it a returning reader is shown what they already had');
+  ok(/OAAnalytics/.test(page) && /OACharts/.test(page),
+    'and reads the shared model rather than carrying its own copy of the rules');
+
+  /* ------------------------------ nothing non-public reaches a served file
+
+     Owner, 2026-08-29: no admin pages, no past-version pages, no test pages,
+     no admin-related data shown to public visitors. The first build leaked all
+     three — /admin-area.html (87 views) and /admin-area (6), /v3/ and
+     /v3/post-a-job.html — into data/analytics.json, which Pages serves to
+     anyone who asks. */
+
+  eq(A.normPath('/admin-area'), A.normPath('/admin-area.html'),
+    'both spellings of one page fold to one path — Pages serves a file under ' +
+    'each, and a filter matching only the spelling somebody thought of would ' +
+    'have leaked the admin desk under its other name');
+  eq(A.normPath('/index.html'), '/', 'the home page is one row, not two');
+  eq(A.normPath('/jobs'), '/jobs.html',
+    'the canonical form is the one the pages own canonical tags name');
+  eq(A.normPath('/post-a-job.html?ref=abc123'), '/post-a-job.html',
+    'a query string never survives — it can carry a posting id and this file is public');
+
+  for (const bad of ['/admin-area', '/admin-area.html', '/admin-area/', '/ADMIN-AREA',
+    '/v1/', '/v2/index.html', '/v3/post-a-job.html', '/v9/anything',
+    '/test/x', '/preview/y', '/staging/z', '/_scraper/build.mjs']) {
+    ok(!A.isPublicPath(bad), `withheld from the public file: ${bad}`);
+  }
+  for (const good of ['/', '/index.html', '/jobs', '/jobs.html', '/universities.html',
+    '/post-a-job.html', '/previous-markets.html', '/analytics.html']) {
+    ok(A.isPublicPath(good), `still published: ${good}`);
+  }
+  /* the guard must not swallow a legitimate page that merely starts the same */
+  ok(A.isPublicPath('/version-history.html'),
+    'a page whose name merely begins like an archive is not an archive');
+  ok(A.isPublicPath('/testimonials.html'),
+    'and one that merely begins with "test" is not a test page');
+
+  /* the CHOKEPOINT: a source that forgot to filter still cannot leak */
+  const leaky = A.mergePages(new Map(), [
+    { path: '/admin-area.html', views: 87 },
+    { path: '/v3/', views: 21 },
+    { path: '/jobs', views: 467 },
+    { path: '/jobs.html', views: 1 },
+  ]);
+  const got = Array.from(leaky.keys()).sort();
+  eq(got, ['/jobs.html'],
+    'mergePages is the chokepoint every source funnels through — a leg that ' +
+    'forgets to filter, or one added later, still cannot put an admin or ' +
+    'archived path into a world-readable file');
+
+  /* WITHIN one source, two spellings of a page are ONE page and their views
+     ADD. Pages serves /jobs and /jobs.html from one file, and the first build
+     recorded 467 and 211 — a plain first-claim-wins published 467, losing a
+     third of the count in the direction nobody checks, because the row is
+     still there and still looks sensible. */
+  eq(leaky.get('/jobs.html').views, 468,
+    'two spellings of one page inside a source SUM rather than one winning');
+  const weighted = A.mergePages(new Map(), [
+    { path: '/jobs.html', views: 400, avgSec: 100 },
+    { path: '/jobs', views: 100, avgSec: 50 },
+  ]).get('/jobs.html');
+  eq(weighted.avgSec, 90,
+    '…and the average time is re-weighted by views, so a spelling with three ' +
+    'visits does not drag the mean as hard as one with three hundred');
+
+  /* ACROSS sources the rule is the opposite and must stay so: the first claim
+     stands whole, because two sources measuring one page are two measurements
+     of one number and adding them would double it. */
+  const twoSources = A.mergePages(new Map(), [{ path: '/jobs.html', views: 400, avgSec: 10 }]);
+  A.mergePages(twoSources, [{ path: '/jobs.html', views: 9999, avgSec: 1 }]);
+  eq(twoSources.get('/jobs.html').views, 400,
+    'but ACROSS sources the first claim stands — adding them would double the page');
+
+  /* AND THE SERVED FILE ITSELF. The check that would have caught the leak. */
+  for (const row of served.pages || []) {
+    ok(A.isPublicPath(row.path),
+      `data/analytics.json publishes only public paths — found ${row.path}`);
+    eq(row.path, A.normPath(row.path),
+      `…each already normalised, so one page is one row — ${row.path}`);
+  }
+  const paths = (served.pages || []).map((r) => r.path);
+  eq(paths.length, new Set(paths).size, 'and no path is listed twice');
+
+  /* the page defends itself too, for a file cached before this shipped */
+  ok(/isPublicPath/.test(page),
+    'the page filters as a second line — the builder is the defence, but a ' +
+    'reader may still hold a copy fetched before it shipped');
+  ok(/var publicPages = \(data\.pages \|\| \[\]\)\.filter/.test(page),
+    '…and filters BEFORE deciding the figure exists, or a cached file of only ' +
+    'admin rows would draw a heading over an empty chart');
+
+  /* --- the colour that had to be re-stepped ------------------------------ */
+
+  const css = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8');
+  ok(/\[data-theme='dark'\][\s\S]*--oa-chart-accent/.test(css),
+    'the dark theme re-steps the chart accent: --brand and --gold separate at ' +
+    'delta-E 31.6 in light and collapse to 14.9 in dark, below the floor at which ' +
+    'two overlaid lines can be told apart even with full colour vision');
+  ok(!/#fff\b|#ffffff\b/i.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and nothing in it paints a hardcoded white — anything that paints its own ' +
+    'ground must name its own ink, in both themes');
+
+  /* --- the setup guide names what is actually needed --------------------- */
+
+  const setup = await readFile(path.join(HERE, '..', '_SETUP-ANALYTICS.md'), 'utf8');
+  for (const needed of ['GA4_PROPERTY_ID', 'GA4_SERVICE_ACCOUNT', 'FIREBASE_SERVICE_ACCOUNT']) {
+    ok(setup.includes(needed), `_SETUP-ANALYTICS.md names ${needed}`);
+  }
+  ok(/networkDomain/.test(setup),
+    'and states plainly which figures can never come back, and why');
+
+  /* --- the workflow ------------------------------------------------------ */
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-analytics.yml'), 'utf8');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wf),
+    'the analytics workflow checks out the branch TIP, never github.sha — the ' +
+    'stale-checkout trap this repository has now hit twice');
+  ok(!/pull --rebase/.test(wf.replace(/#.*$/gm, '')),
+    'and never rebases: data/ is a build output, so a rejected push is REBUILT');
+  ok(/GA4_PROPERTY_ID/.test(wf) && /FIREBASE_SERVICE_ACCOUNT/.test(wf),
+    'it passes every gated source its credential');
+}
+
+/* ------------------------------------------------------- the GA4 tag
+
+   Added 2026-08-29 on the owner's instruction: GA4 yes, consent banner no.
+   Those two are only compatible because the tag stores NOTHING on the
+   visitor's device, so what is pinned here is mostly that pairing — a future
+   edit that re-enables cookies without a banner would be a compliance
+   problem no test elsewhere would notice. */
+async function testGa4Tag() {
+  const tag = await readFile(path.join(HERE, '..', 'assets', 'oa-ga4.js'), 'utf8');
+
+  ok(/client_storage:\s*COOKIELESS\s*\?\s*'none'/.test(tag),
+    'the tag can run cookieless at all');
+  /* THE ID IS LIVE, and a tag that stops collecting reports nothing to
+     anybody — the exact failure that let the old charts sit dead for three
+     years. So the shape is pinned: blanking it, or mistyping it back to a
+     placeholder, fails here rather than silently going quiet. */
+  const mid = (tag.match(/var MEASUREMENT_ID = '([^']*)'/) || [])[1];
+  ok(/^G-[A-Z0-9]{10}$/.test(mid || ''),
+    'the Measurement ID is present and well-formed — an inert tag collects ' +
+    'nothing and says so nowhere, which is how three years went by last time');
+
+  ok(/var COOKIELESS = true;/.test(tag),
+    'AND IT IS SWITCHED ON. This is what stands in for a consent banner: the ' +
+    'ePrivacy rule is about storing things on a device, so storing nothing is ' +
+    'what makes "GA4 without a banner" coherent. Flipping this to false ' +
+    're-introduces the _ga cookie and with it the consent requirement.');
+  ok(/allow_google_signals:\s*false/.test(tag) &&
+     /allow_ad_personalization_signals:\s*false/.test(tag),
+    'no advertising audiences or cross-device profiles are built from it');
+  ok(/globalPrivacyControl/.test(tag) && /doNotTrack/.test(tag),
+    'a visitor asking not to be tracked is not tracked — and gtag is never ' +
+    'even fetched, rather than fetched and asked to behave');
+  ok(/HOSTS\.indexOf\(location\.hostname\) === -1/.test(tag),
+    'it only reports from the real site: page-test.mjs opens every page in a ' +
+    'real browser, so without this guard every CI run would post hits to the ' +
+    'live property, indistinguishable from real ones for ever');
+  ok(/anonymize_ip/.test(tag) && !/anonymize_ip:/.test(tag),
+    'anonymize_ip is EXPLAINED as a Universal Analytics parameter GA4 ignores, ' +
+    'and deliberately not passed — carrying it would imply a choice not made');
+
+  /* THE ORDER AND THE COOKIELESS FLAG ARE ONE DECISION. A browser storing
+     nothing cannot recognise a returning visitor, so GA4's "users" is nearer
+     "sessions" and must not own a day the first-party record also measured.
+     Pinned together here so neither half can move alone. */
+  const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
+  ok(A.SOURCE_ORDER.indexOf('usage') < A.SOURCE_ORDER.indexOf('ga4'),
+    'while the tag is cookieless the first-party record outranks GA4');
+
+  /* --- every real page carries it, and no redirect stub does --------------- */
+
+  const root = path.join(HERE, '..');
+  const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
+  const missing = [];
+  const onStub = [];
+  for (const f of pages) {
+    const html = await readFile(path.join(root, f), 'utf8');
+    const isStub = /http-equiv=["']?refresh/i.test(html);
+    const tagged = html.includes('assets/oa-ga4.js');
+    if (isStub && tagged) onStub.push(f);
+    if (!isStub && !tagged) missing.push(f);
+  }
+  eq(missing, [],
+    'every served page carries the tag — a page added without it measures ' +
+    'nothing, and the only symptom is a gap in the figures nobody can see');
+  eq(onStub, [],
+    'and no redirect stub does: those meta-refresh to a fragment of the home ' +
+    'page within a moment, so a hit there would double-count the page they go to');
+  ok(pages.filter((f) => f !== 'index.html').length > 10 && missing.length === 0,
+    'the sweep really walked the site rather than passing on an empty list');
+
+  /* deferred, like every script on this site — the rule CLAUDE.md states as
+     "adding a script tag means adding defer to it" */
+  const idx = await readFile(path.join(root, 'index.html'), 'utf8');
+  ok(/<script defer src="assets\/oa-ga4\.js"><\/script>/.test(idx),
+    'the tag is deferred: nothing on screen waits for third-party JavaScript');
+
+  /* --- the Privacy Policy says what actually happens ---------------------- */
+
+  const pp = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/Google Analytics 4/.test(pp),
+    'the Privacy Policy names GA4 — it described Universal Analytics for the ' +
+    'three years after that tag stopped existing');
+  ok(/client_storage/.test(pp) && /no analytics cookie/i.test(pp),
+    'and states that nothing is stored on the device, which is the reason no ' +
+    'banner is shown — a policy silent on that is the one thing that would ' +
+    'make the absence of a banner look like an oversight');
+  ok(/Global Privacy Control/.test(pp),
+    'and that a do-not-track signal is honoured');
+  ok(/Google Signals|Google signals/.test(pp),
+    'and that advertising features are off');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -9757,5 +10660,9 @@ if (isMain(import.meta.url)) {
   await testCandidateProfilePolicy();
   await testJobExport();
   await testJobExportWiring();
+  await testSponsors();
+  await testReaderGate();
+  await testAnalytics();
+  await testGa4Tag();
   process.exit(finish() ? 0 : 1);
 }

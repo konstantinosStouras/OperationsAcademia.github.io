@@ -718,11 +718,20 @@
     <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
 
     <!-- ================================================================ scripts -->
+    <script defer src="assets/oa-ga4.js"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-schools.js FIRST: oa-sponsors.js asks it whether two spellings
+         are one university, and a factory handed no OASchools cannot
+         answer. Deferred like every other script here, and the same file
+         post-a-job.html already loads, so a reader who has used the form
+         has it cached. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-sponsors.js"></script>
+    <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -967,14 +976,48 @@
               return (b.posted || '').localeCompare(a.posted || '');
             }).slice(0, 10);
           },
-          sort: function (a, b) { return (b.posted || '').localeCompare(a.posted || ''); },
+          /* The SELECTION is still the ten most recent (prepare, above) —
+             what changes here is only their ORDER, so the sponsor leads the
+             card without the heading becoming false. A posting outside the
+             newest ten is still not shown, sponsored or not. */
+          sort: function (a, b) { return OASponsors.compare(a, b); },
           filters: [],
-          onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+
+          /* THE TEASER NEVER EXPANDS (owner, 2026-08-29): "it should only
+             expand when a user is registered and has opened the full list".
+             So a card here is a way IN to the posting rather than the posting
+             — signed out it lists the university and blurs what it would have
+             shown, signed in it carries the reader to the full list with that
+             posting open, which is what `?job=<id>` has done since the
+             market-year report needed it.
+
+             The href comes from OAJobNav, which is the site's ONE answer to
+             "which page carries this posting" — a copy of that rule here is
+             the four-copies-of-one-answer shape that module exists to
+             prevent, and it would send a reader to a page that by definition
+             cannot hold their posting the day its season rolls. */
+          cardOpen: OAGate.cardOpen({
+            note: 'Sign in to read this posting',
+            fullNote: 'Open it on the full list \u2192',
+            full: function (r) { return NAV.hrefFor(r); }
+          }),
+
+          onCard: function (li, r) {
+            OASponsors.markCard(li, r);
+            window.OAJobEdit && OAJobEdit.onCard(li, r);
+          },
           card: {
             title:    function (r) { return r.institution; },
             subtitle: function (r) { return r.department; },
             badges:   function (r) {
               var out = [];
+              /* A sponsor is MARKED here but does not LEAD here: this teaser
+                 is "the ten most recent postings" and reordering it would
+                 make that heading false, where the jobs page's list has no
+                 such promise. Exactly the split Featured already has — it is
+                 badged on this page and leads only on jobs.html. */
+              var sp = OASponsors.badge(r);
+              if (sp) out.push(sp);
               if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
               return out;
             },
@@ -996,6 +1039,7 @@
           }
         });
         if (window.OAJobEdit) OAJobEdit.attach(jobs);
+        OAGate.watch(jobs);
         // no filters, one fixed page: the bar and the result bar hold nothing
         var host = document.getElementById('oa-jobs-recent');
         var bar = host.querySelector('.oa-filters');
@@ -1041,6 +1085,15 @@
             { key: 'posted',      label: 'Date posted',      derive: 'datePosted',
               placeholder: 'Any date' }
           ],
+          /* A candidate's name is what a hiring committee is looking for and
+             stays readable; their CV, their INFORMS days and their e-mail
+             address are the details, and they are for registered readers
+             (owner, 2026-08-29 — "never be able to view details of job
+             postings or candidates"). There is no fuller list to send anyone
+             to: candidates live on this page, so a signed-in reader opens the
+             card where it stands. */
+          cardOpen: OAGate.cardOpen({ note: 'Sign in to see this profile' }),
+
           onCard: function (li, r) { window.OACandidateEdit && OACandidateEdit.onCard(li, r); },
           card: {
             title:    function (r) { return r.name; },
@@ -1064,6 +1117,7 @@
           }
         });
         if (window.OACandidateEdit) OACandidateEdit.attach(cands);
+        OAGate.watch(cands);
       });
 
       V3.lazy('#oa-placements', function () {
