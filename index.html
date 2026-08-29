@@ -724,6 +724,13 @@
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-schools.js FIRST: oa-sponsors.js asks it whether two spellings
+         are one university, and a factory handed no OASchools cannot
+         answer. Deferred like every other script here, and the same file
+         post-a-job.html already loads, so a reader who has used the form
+         has it cached. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-sponsors.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -968,14 +975,28 @@
               return (b.posted || '').localeCompare(a.posted || '');
             }).slice(0, 10);
           },
-          sort: function (a, b) { return (b.posted || '').localeCompare(a.posted || ''); },
+          /* The SELECTION is still the ten most recent (prepare, above) —
+             what changes here is only their ORDER, so the sponsor leads the
+             card without the heading becoming false. A posting outside the
+             newest ten is still not shown, sponsored or not. */
+          sort: function (a, b) { return OASponsors.compare(a, b); },
           filters: [],
-          onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+          onCard: function (li, r) {
+            OASponsors.markCard(li, r);
+            window.OAJobEdit && OAJobEdit.onCard(li, r);
+          },
           card: {
             title:    function (r) { return r.institution; },
             subtitle: function (r) { return r.department; },
             badges:   function (r) {
               var out = [];
+              /* A sponsor is MARKED here but does not LEAD here: this teaser
+                 is "the ten most recent postings" and reordering it would
+                 make that heading false, where the jobs page's list has no
+                 such promise. Exactly the split Featured already has — it is
+                 badged on this page and leads only on jobs.html. */
+              var sp = OASponsors.badge(r);
+              if (sp) out.push(sp);
               if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
               return out;
             },

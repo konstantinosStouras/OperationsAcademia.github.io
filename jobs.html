@@ -247,6 +247,13 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-schools.js FIRST: oa-sponsors.js asks it whether two spellings
+         are one university, and a factory handed no OASchools cannot
+         answer. Deferred like every other script here, and the same file
+         post-a-job.html already loads, so a reader who has used the form
+         has it cached. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-sponsors.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -386,10 +393,14 @@
             })]
           : [],
 
-        // newest posting first, but a Featured posting always leads
+        /* Newest posting first — but a SPONSOR's posting leads the list,
+           then a Featured one. The whole order lives in one place
+           (assets/oa-sponsors.js), because the badge and the position are
+           two halves of one fact and a page that ranked by its own copy of
+           the rule would be the four-copies-of-one-answer shape oa-jobnav.js
+           and oa-countries.js both exist to prevent. */
         sort: function (a, b) {
-          if (!!b.featured !== !!a.featured) return b.featured ? 1 : -1;
-          return (b.posted || '').localeCompare(a.posted || '');
+          return OASponsors.compare(a, b);
         },
 
         filters: [
@@ -426,13 +437,22 @@
             placeholder: 'Any date' }
         ],
 
-        onCard: function (li, r) { window.OAJobEdit && OAJobEdit.onCard(li, r); },
+        onCard: function (li, r) {
+          /* the rail down a sponsored card's edge — toggled rather than
+             added, so a re-render can never leave a stale one behind */
+          OASponsors.markCard(li, r);
+          window.OAJobEdit && OAJobEdit.onCard(li, r);
+        },
 
         card: {
           title:    function (r) { return r.institution; },
           subtitle: function (r) { return r.department; },
           badges:   function (r) {
             var out = [];
+            /* the sponsor's mark leads the row, as their posting leads the
+               list; the module owns the word and the class */
+            var sp = OASponsors.badge(r);
+            if (sp) out.push(sp);
             if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
             return out;
           },

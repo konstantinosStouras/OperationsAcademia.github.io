@@ -3824,6 +3824,163 @@ for (const [from, hash] of [
   await a.close();
 }
 
+/* --------------------------------------- the SPONSOR mark, as it renders
+
+   selftest.mjs pins the rule, the wiring and the stylesheets. This is the
+   half only a browser can answer, and it is the half the owner actually
+   bought: that on the real jobs page the sponsor's posting is FIRST, that it
+   wears the pill and the rail, and that the purple is readable in both
+   themes.
+
+   It asserts on the LIVE data rather than a fixture, which is deliberate but
+   has one consequence worth writing down: the sponsorship ends on
+   2027-09-01, and on that day the badge correctly stops being drawn. So the
+   block asks the module itself what it expects — if nothing on the page is
+   sponsored it checks that nothing is MARKED either, which is the true
+   assertion on both sides of that date and cannot go red on the morning the
+   deal lapses. A guard about a corpus must not move with the corpus.        */
+{
+  const sp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await sp.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+  await sp.waitForSelector('.oa-card', { timeout: 15000 });
+
+  /* The module has to have LOADED — a page that forgot the script tag would
+     throw inside the sort and render nothing, which is worth naming rather
+     than watching a later selector time out. */
+  ok(await sp.evaluate(() => !!window.OASponsors),
+    'sponsors: the module is on the jobs page');
+  ok(await sp.evaluate(() => !!window.OASchools),
+    'sponsors: …and so is oa-schools.js, which it is built on');
+  ok(await sp.evaluate(() => window.OASponsors.isSponsored(
+    { institution: 'CUHK', unit: 'Decisions, Operations and Technology',
+      posted: '2026-08-27' }, '2026-08-29')),
+    'sponsors: …so the browser resolves an acronym exactly as the tests do');
+
+  const expected = await sp.evaluate(async () => {
+    const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+    const inMarket = rows.filter((r) => window.OAJobNav.inCurrentMarket(r));
+    const marked = inMarket.filter((r) => window.OASponsors.isSponsored(r));
+    return { any: marked.length > 0, first: marked.length ? marked[0].institution : '' };
+  });
+
+  const firstCard = await sp.evaluate(() => {
+    const c = document.querySelector('.oa-card');
+    const b = c && c.querySelector('.oa-label-sponsor');
+    return {
+      title: c ? c.querySelector('.oa-card-title').textContent.trim() : '',
+      badge: b ? b.textContent.trim() : null,
+      railed: !!(c && c.classList.contains('oa-sponsored')),
+      marks: document.querySelectorAll('.oa-label-sponsor').length,
+      rails: document.querySelectorAll('.oa-card.oa-sponsored').length,
+    };
+  });
+
+  if (expected.any) {
+    eq(firstCard.title, expected.first,
+      'sponsors: the sponsor\'s posting LEADS the jobs page, whatever its date');
+    eq(firstCard.badge, 'Sponsored', 'sponsors: …wearing the badge');
+    eq(firstCard.railed, true, 'sponsors: …and the rail down its edge');
+    /* the rail and the pill go together — one without the other is a
+       half-applied treatment nobody chose */
+    eq(firstCard.marks, firstCard.rails,
+      'sponsors: every marked card carries both the pill and the rail');
+
+    /* The rail is a real 3px edge, not a rule that lost to the card's own
+       border. Measured, because `border-left` is exactly the kind of
+       declaration a later specificity change silently undoes. */
+    const rail = await sp.evaluate(() => {
+      const c = document.querySelector('.oa-card.oa-sponsored');
+      const cs = getComputedStyle(c);
+      return { w: cs.borderLeftWidth, colour: cs.borderLeftColor,
+        other: cs.borderTopWidth };
+    });
+    eq(rail.w, '3px', 'sponsors: the rail is 3px');
+    ok(rail.w !== rail.other, 'sponsors: …and only on the left edge');
+
+    for (const theme of ['light', 'dark']) {
+      await sp.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      await sp.waitForTimeout(150);
+      const cr = await contrastOf(sp, '.oa-label-sponsor');
+      ok(cr >= 4.5, `sponsors (${theme}): the badge reads at ${cr}:1 (AA is 4.5)`);
+      /* It must paint its OWN ground: the base .oa-label sets #fff, so a
+         badge that inherited the card would be white on white in light
+         theme. This is CLAUDE.md's own rule, measured. */
+      const own = await sp.evaluate(() => {
+        const el = document.querySelector('.oa-label-sponsor');
+        const cs = getComputedStyle(el);
+        return { bg: cs.backgroundColor, ink: cs.color, border: cs.borderLeftWidth };
+      });
+      ok(!/rgba\(0, 0, 0, 0\)/.test(own.bg),
+        `sponsors (${theme}): the badge paints its own ground`);
+      ok(own.ink !== 'rgb(255, 255, 255)',
+        `sponsors (${theme}): …and names its own ink rather than the base label's white`);
+      ok(parseFloat(own.border) >= 1,
+        `sponsors (${theme}): …and keeps the hairline that makes it an OUTLINE pill`);
+    }
+    await sp.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+  } else {
+    /* The window has closed (or the sponsor has no live posting). Then the
+       page must be exactly what it was before this shipped. */
+    eq(firstCard.marks, 0,
+      'sponsors: with no sponsorship running, nothing on the page is marked');
+    eq(firstCard.rails, 0, 'sponsors: …and no card carries a rail');
+  }
+
+  /* THE HOME PAGE badges but does NOT reorder — its teaser promises the ten
+     most recent postings, and a lead row would make that heading false. */
+  const hp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await hp.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+  await hp.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+  const home = await hp.evaluate(() => {
+    const cards = [...document.querySelectorAll('#oa-jobs-recent .oa-card')];
+    return {
+      dates: cards.length,
+      first: cards.length ? cards[0].querySelector('.oa-card-title').textContent.trim() : '',
+      railed: !!(cards.length && cards[0].classList.contains('oa-sponsored')),
+      marked: document.querySelectorAll('#oa-jobs-recent .oa-label-sponsor').length,
+    };
+  });
+  ok(home.dates > 0, 'sponsors: the home page teaser still renders');
+  if (expected.any) {
+    eq(home.first, expected.first,
+      'sponsors: the sponsor LEADS the home teaser too (owner, from a screenshot)');
+    eq(home.railed, true,
+      'sponsors: …and its card carries the rail INSIDE the panel, which resets every border');
+
+    /* THE BUG THIS MISSED THE FIRST TIME. The rail was measured on jobs.html
+       and nowhere else, so `body.v3 .v3-panel .oa-card { border: 0 }` — same
+       specificity, ~600 lines later — blanked it on this page while every
+       check stayed green. Measure the painted width HERE, on the card the
+       screenshot was taken of. */
+    const rail = await hp.evaluate(() => {
+      const c = document.querySelector('#oa-jobs-recent .oa-card.oa-sponsored');
+      if (!c) return null;
+      const cs = getComputedStyle(c);
+      return { w: cs.borderLeftWidth, other: cs.borderTopWidth };
+    });
+    ok(rail, 'sponsors: the teaser marks the sponsored card');
+    if (rail) {
+      eq(rail.w, '3px', 'sponsors: the teaser rail is a real 3px edge, not blanked by the panel reset');
+      ok(rail.w !== rail.other, 'sponsors: …and still only on the left');
+    }
+
+    /* The SELECTION is still the ten newest — the heading says which ten, and
+       reordering them must not change which ten. */
+    const newestTen = await hp.evaluate(async () => {
+      const rows = await (await fetch('/data/jobs.json', { cache: 'no-cache' })).json();
+      return rows.filter((r) => window.OAJobNav.inCurrentMarket(r))
+        .sort((a, b) => String(b.posted || '').localeCompare(String(a.posted || '')))
+        .slice(0, 10).map((r) => r.institution).sort();
+    });
+    const shown = await hp.evaluate(() => [...document.querySelectorAll('#oa-jobs-recent .oa-card')]
+      .map((c) => c.querySelector('.oa-card-title').textContent.trim()).sort());
+    eq(shown, newestTen,
+      'sponsors: …and the teaser still SHOWS the ten most recent — only their order changed');
+  }
+  await hp.close();
+  await sp.close();
+}
+
 /* ------------------------------- readable in BOTH themes, on every page
 
    The reports that led here (2026-08-18): the vocabulary dropdown drew
