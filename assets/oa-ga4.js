@@ -52,7 +52,7 @@
   /* The `G-…` Measurement ID of the "Operations Academia - GA4" property.
      NOT the Property ID (384653143) — that is a different number, it belongs
      to the Data API, and it lives in the workflow rather than here. */
-  var MEASUREMENT_ID = 'PASTE_MEASUREMENT_ID';
+  var MEASUREMENT_ID = 'G-RE8C5LD2FM';
 
   /* Store nothing on the visitor's device. See the header — this is what
      stands in for a consent banner, not a preference. */

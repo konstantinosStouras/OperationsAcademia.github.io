@@ -89,9 +89,9 @@ must move together: add a consent banner, and put `'ga4'` back in front in
 
 | | |
 |---|---|
-| Property | "Operations Academia - GA4" |
+| Property | "Operations Academia - GA4" · stream id `5432892882` |
 | Property ID | `384653143` — **not a secret**, committed as the default in `oa-analytics.yml`; a repo variable `GA4_PROPERTY_ID` overrides it |
-| Measurement ID | `MEASUREMENT_ID` in `assets/oa-ga4.js` |
+| Measurement ID | `G-RE8C5LD2FM` — in `MEASUREMENT_ID`, `assets/oa-ga4.js` |
 | Data API credential | repo secret `GA4_SERVICE_ACCOUNT`, granted **Viewer** on the property |
 
 The tag and the Data API are **independent**: the tag collects, the secret

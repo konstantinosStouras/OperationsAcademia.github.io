@@ -9824,6 +9824,15 @@ async function testGa4Tag() {
 
   ok(/client_storage:\s*COOKIELESS\s*\?\s*'none'/.test(tag),
     'the tag can run cookieless at all');
+  /* THE ID IS LIVE, and a tag that stops collecting reports nothing to
+     anybody — the exact failure that let the old charts sit dead for three
+     years. So the shape is pinned: blanking it, or mistyping it back to a
+     placeholder, fails here rather than silently going quiet. */
+  const mid = (tag.match(/var MEASUREMENT_ID = '([^']*)'/) || [])[1];
+  ok(/^G-[A-Z0-9]{10}$/.test(mid || ''),
+    'the Measurement ID is present and well-formed — an inert tag collects ' +
+    'nothing and says so nowhere, which is how three years went by last time');
+
   ok(/var COOKIELESS = true;/.test(tag),
     'AND IT IS SWITCHED ON. This is what stands in for a consent banner: the ' +
     'ePrivacy rule is about storing things on a device, so storing nothing is ' +
