@@ -57,7 +57,11 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
-          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
+          # The "Operations Academia - GA4" property. NOT a secret — it is an
+          # internal id that appears in console URLs and is useless without the
+          # service-account credential beside it — so it is committed rather
+          # than made a setup step. A repository variable still overrides it.
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID || '384653143' }}
         run: |
           node _scraper/build-analytics.mjs \
             ${{ inputs.scan && '--scan' || '' }} \
@@ -95,4 +99,4 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
-          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID || '384653143' }}

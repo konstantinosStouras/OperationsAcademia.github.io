@@ -2487,6 +2487,83 @@ HTML comments STRIPPED** — the page still explains the four embeds it no longe
 has, and a guard that could not tell the explanation from the thing would have
 to be satisfied by deleting the explanation.
 
+### GA4 runs COOKIELESS, which is what stands in for a consent banner
+
+Owner, 2026-08-29: **add GA4, but do not put a banner on the website.** Those
+two are compatible exactly one way, and it is worth understanding before
+anyone edits `assets/oa-ga4.js`.
+
+The tag configures gtag with **`client_storage: 'none'`** — GA4 keeps nothing
+on the visitor's device: no `_ga` cookie, no localStorage, nothing. The
+ePrivacy rule a cookie banner exists to satisfy is about **storing** things on
+someone's device rather than about analytics as such, so a tag that stores
+nothing has nothing to ask permission for. The Privacy Policy says this in as
+many words, because a policy silent on it is the one thing that would make the
+missing banner look like an oversight rather than a design.
+
+**The cost is real and it has a consequence in the pipeline.** With no
+identifier on the device GA4 cannot recognise a returning visitor, so its
+`totalUsers` is nearer "sessions" than "people" — a day GA4 owned would report
+two or three times the visitors that day really had. So **`SOURCE_ORDER` was
+flipped to `['usage', 'ga4', 'history']`**: the site's own first-party record
+keeps a stable per-browser id and CAN count distinct visitors, so it wins a
+day both measured. GA4 earns second place on **coverage** — it sees visitors
+whose browser never reaches Firestore at all (an ad blocker, a private window
+with storage refused). Coverage, not identity.
+
+**The two decisions are ONE decision, and the selftest pins them together.**
+Turning `COOKIELESS` back to `false` re-introduces the `_ga` cookie and with
+it the consent requirement, and simultaneously makes GA4 the better count of
+people — so it must move with both a banner and `'ga4'` going back in front.
+`testGa4Tag` fails if the flag flips alone.
+
+Three further narrowings, each pinned: Google Signals and ad personalisation
+off; a Global Privacy Control or Do Not Track signal means gtag is **never
+fetched**, not fetched and asked to behave; and it reports only from
+`operationsacademia.org` — `page-test.mjs` opens every page in a real browser,
+so without that guard every CI run would post hits to the live property,
+indistinguishable from real ones for ever. `anonymize_ip` is deliberately
+absent and *explained*: it is a Universal Analytics parameter GA4 ignores, and
+carrying it would imply a choice that was not made.
+
+**Every served page carries the tag and no redirect stub does** — the six
+meta-refresh stubs go to a fragment of the home page within a moment, so a hit
+there would double-count the page they lead to. The selftest walks the
+directory rather than a list, so a page added without the tag fails the build;
+its only other symptom would be a gap in the figures nobody could see.
+
+The **Property ID `384653143`** ("Operations Academia - GA4") is committed as
+the workflow's default rather than made a setup step: it appears in console
+URLs, it is useless without the service-account credential beside it, and a
+repo variable still overrides it. The `G-` Measurement ID lives in
+`oa-ga4.js`; the two are different numbers for different jobs — the tag
+collects, the secret reads back — and the site measures correctly with only
+the first.
+
+### The archive is CONFIRMED GONE, and the spreadsheet says how
+
+Checked 2026-08-29, and the answer is final — **do not send anyone looking
+again.** The owner exported all 30 tabs; every one of the 141,540 rows was
+read. Not one surviving measurement. The tabs are structurally intact and hold
+zeroes, `#REF!`, `#VALUE!` and `#N/A`.
+
+The workbook records the cause in its own cells: every `Report_N` tab says
+`Last Run On 2024-07-15 05:32` and `Total Results Found 0`, against UA view
+`ga:81760839` for 2014-03-01 onwards. Google deleted UA properties on **1 July
+2024**; two weeks later the add-on ran on its schedule, asked a view that no
+longer existed, got zero rows — **and wrote those zero rows over ten years of
+data.**
+
+**So the data was not lost when Google deleted the property. It was lost when
+the spreadsheet refreshed itself.** A scheduled job that overwrites its only
+copy with whatever the source returns cannot tell "no results" from "no data".
+That is precisely why `build-analytics.mjs` carries the opposite rule —
+*an unreachable source changes nothing*, the committed file stands, and the
+days already served are carried forward as a floor. The history source's
+reader stays wired as a documented recovery path rather than being deleted,
+the same reasoning that keeps `repository_dispatch: [oa-jobs-changed]` in
+place while the functions are undeployed.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "analytics-ga4-cookieless",
+      "date": "2026-08-29",
+      "title": "The site measures its visitors again — and still sets no cookies",
+      "summary": "Operations Academia has measured nothing since July 2023, when Google retired the analytics product it used. Google Analytics is running again, configured so that it stores nothing whatever on your device: no analytics cookie, no identifier, nothing kept between visits. That is why you are not asked to accept cookies when you arrive — there are none to accept. Google Signals and advertising personalisation are switched off, so nothing collected here builds advertising audiences or follows you to other sites, and if your browser sends a Global Privacy Control or Do Not Track signal the analytics script is not loaded at all. The Privacy Policy explains all of it. The trade-off falls on us rather than on you: without an identifier we cannot tell a returning reader from a new one, so our own visitor counts lean on the site's own first-party record instead.",
+      "url": "/privacy-policy.html"
+    },
+    {
       "id": "analytics-rebuilt",
       "date": "2026-08-29",
       "title": "The analytics page works again, and draws its own charts",

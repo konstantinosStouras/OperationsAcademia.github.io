@@ -484,13 +484,13 @@ function selftest() {
     { source: 'history', days: { '2015-01-01': [3, 3, 9] }, pages: [], universities: [{ name: 'Duke University', visits: 40 }], from: '2014-03-01', to: '2023-06-30' },
   ]);
 
-  ok(a.days['2026-08-02'][0] === 5, 'the higher-authority source keeps a contested day');
-  ok(a.totals.visitors === 10 + 5 + 7 + 3, 'a contested day is counted ONCE, never summed');
-  ok(a.pages[0].views === 500, 'the higher-authority source owns a contested page');
+  ok(a.days['2026-08-02'][0] === 99, 'the higher-authority source keeps a contested day');
+  ok(a.totals.visitors === 10 + 99 + 7 + 3, 'a contested day is counted ONCE, never summed');
+  ok(a.pages[0].views === 5, 'the higher-authority source owns a contested page');
   ok(a.universities.frozen === true, 'the universities section is marked frozen');
   ok(a.universities.from === '2014-03-01', 'the frozen section carries the archive range');
   ok(a.range.from === '2015-01-01' && a.range.to === '2026-08-03', 'the range spans every source');
-  ok(a.sources.map((s) => s.source).join(',') === 'ga4,usage,history',
+  ok(a.sources.map((s) => s.source).join(',') === 'usage,ga4,history',
     'the sources are listed in precedence order');
 
   /* an empty build is a VALID file, not a crash: the page has to have

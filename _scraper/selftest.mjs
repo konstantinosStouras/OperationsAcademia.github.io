@@ -9652,7 +9652,14 @@ async function testAnalytics() {
     'a contested day is counted ONCE — summing two measurements of one Tuesday ' +
     'would double every day of the overlap, and the chart would look fine');
 
-  eq(A.SOURCE_ORDER, ['ga4', 'usage', 'history'], 'the precedence is explicit and ordered');
+  /* THE ORDER IS PART OF THE COOKIELESS DECISION, not a detail. GA4 runs with
+     `client_storage: 'none'` so that the site needs no consent banner, and a
+     browser storing nothing cannot recognise a returning visitor — so GA4's
+     "users" is nearer "sessions", and it must not own a day the first-party
+     record also measured. Pinned here against the tag's own setting below, so
+     the two cannot drift apart silently. */
+  eq(A.SOURCE_ORDER, ['usage', 'ga4', 'history'],
+    'the first-party record outranks cookieless GA4 for a day both measured');
 
   /* a row of three zeroes is DROPPED rather than stored — the file would
      otherwise carry a decade of days that only say "we have no idea", and the
@@ -9805,6 +9812,89 @@ async function testAnalytics() {
     'it passes every gated source its credential');
 }
 
+/* ------------------------------------------------------- the GA4 tag
+
+   Added 2026-08-29 on the owner's instruction: GA4 yes, consent banner no.
+   Those two are only compatible because the tag stores NOTHING on the
+   visitor's device, so what is pinned here is mostly that pairing — a future
+   edit that re-enables cookies without a banner would be a compliance
+   problem no test elsewhere would notice. */
+async function testGa4Tag() {
+  const tag = await readFile(path.join(HERE, '..', 'assets', 'oa-ga4.js'), 'utf8');
+
+  ok(/client_storage:\s*COOKIELESS\s*\?\s*'none'/.test(tag),
+    'the tag can run cookieless at all');
+  ok(/var COOKIELESS = true;/.test(tag),
+    'AND IT IS SWITCHED ON. This is what stands in for a consent banner: the ' +
+    'ePrivacy rule is about storing things on a device, so storing nothing is ' +
+    'what makes "GA4 without a banner" coherent. Flipping this to false ' +
+    're-introduces the _ga cookie and with it the consent requirement.');
+  ok(/allow_google_signals:\s*false/.test(tag) &&
+     /allow_ad_personalization_signals:\s*false/.test(tag),
+    'no advertising audiences or cross-device profiles are built from it');
+  ok(/globalPrivacyControl/.test(tag) && /doNotTrack/.test(tag),
+    'a visitor asking not to be tracked is not tracked — and gtag is never ' +
+    'even fetched, rather than fetched and asked to behave');
+  ok(/HOSTS\.indexOf\(location\.hostname\) === -1/.test(tag),
+    'it only reports from the real site: page-test.mjs opens every page in a ' +
+    'real browser, so without this guard every CI run would post hits to the ' +
+    'live property, indistinguishable from real ones for ever');
+  ok(/anonymize_ip/.test(tag) && !/anonymize_ip:/.test(tag),
+    'anonymize_ip is EXPLAINED as a Universal Analytics parameter GA4 ignores, ' +
+    'and deliberately not passed — carrying it would imply a choice not made');
+
+  /* THE ORDER AND THE COOKIELESS FLAG ARE ONE DECISION. A browser storing
+     nothing cannot recognise a returning visitor, so GA4's "users" is nearer
+     "sessions" and must not own a day the first-party record also measured.
+     Pinned together here so neither half can move alone. */
+  const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
+  ok(A.SOURCE_ORDER.indexOf('usage') < A.SOURCE_ORDER.indexOf('ga4'),
+    'while the tag is cookieless the first-party record outranks GA4');
+
+  /* --- every real page carries it, and no redirect stub does --------------- */
+
+  const root = path.join(HERE, '..');
+  const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
+  const missing = [];
+  const onStub = [];
+  for (const f of pages) {
+    const html = await readFile(path.join(root, f), 'utf8');
+    const isStub = /http-equiv=["']?refresh/i.test(html);
+    const tagged = html.includes('assets/oa-ga4.js');
+    if (isStub && tagged) onStub.push(f);
+    if (!isStub && !tagged) missing.push(f);
+  }
+  eq(missing, [],
+    'every served page carries the tag — a page added without it measures ' +
+    'nothing, and the only symptom is a gap in the figures nobody can see');
+  eq(onStub, [],
+    'and no redirect stub does: those meta-refresh to a fragment of the home ' +
+    'page within a moment, so a hit there would double-count the page they go to');
+  ok(pages.filter((f) => f !== 'index.html').length > 10 && missing.length === 0,
+    'the sweep really walked the site rather than passing on an empty list');
+
+  /* deferred, like every script on this site — the rule CLAUDE.md states as
+     "adding a script tag means adding defer to it" */
+  const idx = await readFile(path.join(root, 'index.html'), 'utf8');
+  ok(/<script defer src="assets\/oa-ga4\.js"><\/script>/.test(idx),
+    'the tag is deferred: nothing on screen waits for third-party JavaScript');
+
+  /* --- the Privacy Policy says what actually happens ---------------------- */
+
+  const pp = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/Google Analytics 4/.test(pp),
+    'the Privacy Policy names GA4 — it described Universal Analytics for the ' +
+    'three years after that tag stopped existing');
+  ok(/client_storage/.test(pp) && /no analytics cookie/i.test(pp),
+    'and states that nothing is stored on the device, which is the reason no ' +
+    'banner is shown — a policy silent on that is the one thing that would ' +
+    'make the absence of a banner look like an oversight');
+  ok(/Global Privacy Control/.test(pp),
+    'and that a do-not-track signal is honoured');
+  ok(/Google Signals|Google signals/.test(pp),
+    'and that advertising features are off');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -9895,5 +9985,6 @@ if (isMain(import.meta.url)) {
   await testJobExport();
   await testJobExportWiring();
   await testAnalytics();
+  await testGa4Tag();
   process.exit(finish() ? 0 : 1);
 }
