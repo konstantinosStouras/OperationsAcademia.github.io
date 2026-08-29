@@ -226,6 +226,7 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -485,6 +486,16 @@
               }
             },
 
+            /* A CLOSED SEASON IS STILL A JOB POSTING (assets/oa-gate.js).
+               The rule the owner gave is unqualified — a reader who has not
+               registered never sees the details of one — and this page is
+               where the postings go when they roll, so leaving it open would
+               have made the gate on the jobs page a matter of waiting rather
+               than of registering. The maintainer's own row editor and the
+               Edit / Take down controls are drawn from `onCard`, outside the
+               head, and they are only ever drawn for somebody signed in. */
+            cardOpen: OAGate.cardOpen({ note: 'Sign in to read this posting' }),
+
             onCard: function (li, r) {
               if (window.OAJobEdit) OAJobEdit.onCard(li, r);
               RowEdit.onCard('past-postings')(li, r);
@@ -492,6 +503,7 @@
           });
 
           if (window.OAJobEdit) OAJobEdit.attach(list);
+          OAGate.watch(list);
         });
     });
     </script>

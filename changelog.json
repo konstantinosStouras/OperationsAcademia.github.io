@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "reader-gate",
+      "date": "2026-08-29",
+      "title": "Reading a posting now needs an account — posting one still does not",
+      "summary": "Who is hiring stays open to everybody: the sponsor's posting, every university advertising this season and every candidate's name are on the site whether or not you have an account. What a posting SAYS — its entry level, its deadlines, the advertisement itself — and what a candidate's profile holds — their CV, their INFORMS days, their e-mail address — now open for registered readers, on the full list. A card you cannot open shows the shape of what is inside it and a way in; an account is free and takes a moment. Two things are worth being plain about. This is not privacy: everything the site publishes is a public file that anybody can still fetch directly, so nothing here has been made confidential and nobody should treat it as though it had. And nothing about POSTING changed — filing a job, a candidate profile or a placement works exactly as it did, and your own postings are still yours to edit and take down.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "analytics-ga4-cookieless",
       "date": "2026-08-29",
       "title": "The site measures its visitors again — and still sets no cookies",
