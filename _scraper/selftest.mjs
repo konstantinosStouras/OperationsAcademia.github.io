@@ -31,6 +31,7 @@ import {
   parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
   stripEmails, stripRowEmails, patchDeadlines, canonColumns,
+  postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE,
 } from './jobs-model.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
@@ -70,7 +71,9 @@ import {
 } from './jobreview.mjs';
 import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
-  REVIEWED_AT as SUB_REVIEWED_AT, partitionSubmissions, isWaiting, createdDay,
+  REVIEWED_AT as SUB_REVIEWED_AT, LIVE_MAILED_AT as SUB_LIVE_MAILED_AT,
+  LIVE_SINCE as SUB_LIVE_SINCE, SINCE as SUB_SINCE,
+  partitionSubmissions, partitionLive, rowsById, isWaiting, createdDay,
 } from './submissions-review.mjs';
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 import { unzipStore, sheetCells, lastRow } from './_xlsx-read.mjs';
@@ -9095,6 +9098,198 @@ async function testSubmissionNotices() {
     'and does not fire on the same minutes as the review mailer');
 }
 
+/* --------------------------------------- WHO posted it, and the poster's own e-mail
+
+   Owner, 2026-08-29, two requests in one message:
+
+     "include to the email sent to the admin (and only) who made such a posting.
+      If it was a user show their name and email … else show 'Posted by:
+      auto-crawler from..' e.g. the JM Google Sheet"
+
+     "any user who submits a job posting, should receive an email with the
+      details of their posting once it becomes publicly shown on the website,
+      and thank them for using OperationsAcademia.org and wishing them all the
+      best to fill their position."
+
+   The "(and only)" is the half a test has to hold: the poster's address is the
+   maintainer's to see and nobody else's, so it may reach exactly one message.
+   Everything else here is the two rules that make the second one honest —
+   "publicly shown" is measured against the served file, and a poster is
+   thanked once.                                                             */
+
+async function testPostedByAndLiveEmail() {
+  const read = async (f) => readFile(path.join(HERE, '..', f), 'utf8');
+  const subMailer = await read('_scraper/submissions-mailer.mjs');
+  const revMailer = await read('_scraper/jobreview-mailer.mjs');
+  const model = await read('_scraper/submissions-review.mjs');
+
+  /* ---- one definition of who posted a posting -------------------------- */
+
+  const person = { source: FORM_SOURCE, firstName: 'Ada', lastName: 'Lovelace',
+                   email: 'ada@x.edu' };
+  eq(postedBy(person).kind, 'user', 'a form posting was made by a person');
+  eq(postedBy(person).text, 'Ada Lovelace ada@x.edu', 'named, with the address they gave');
+  eq(postedBy({ source: 'jobmarket-sheet' }).kind, 'crawler',
+    'a tracking-sheet row was not');
+  ok(/auto-crawler from the OM Job Market tracking sheet/
+     .test(postedBy({ source: 'jobmarket-sheet' }).text),
+    'and says which crawler, in the owner’s own words');
+  eq(postedBy({}, { source: 'jobmarket-sheet' }).kind, 'crawler',
+    'the source may live on the ROW — a jobReviews document keeps it there');
+
+  /* THE SOURCE WINS. A tracking-sheet MIRROR the maintainer has edited is an
+     ordinary jobSubmissions document, so "a document exists, therefore a
+     person made it" would report the workbook's own rows as somebody's
+     submission. */
+  eq(postedBy({ source: 'jobmarket-sheet', firstName: 'Ada', email: 'ada@x.edu' }).kind,
+    'crawler', 'a claimed sheet mirror is still the crawler’s row, whatever else it carries');
+
+  /* …and a source nobody here knows reads as ITSELF rather than vanishing or
+     being guessed at as a person. */
+  ok(/auto-crawler from brand-new-thing/.test(postedBy({ source: 'brand-new-thing' }).text),
+    'an unknown source is named, never invented');
+  eq(postedBy({}).text, 'not recorded',
+    'and nothing at all says so rather than leaving the line blank');
+
+  eq(contactEmail({ email: 'not an address' }), '', 'a malformed address is no address');
+  eq(contactEmail({ authEmail: 'a@b.co' }), 'a@b.co',
+    'the sign-in address is the fallback when no other was typed');
+  eq(contactEmail({ email: 'typed@x.edu', authEmail: 'a@b.co' }), 'typed@x.edu',
+    'and the one they TYPED wins — it is the one they chose to be reached at');
+
+  ok(!CRAWLER_SOURCES[FORM_SOURCE],
+    'the form is not a crawler — that map is what DECIDES, so it must not list it');
+  ok(sourceLabel(FORM_SOURCE) && sourceLabel(FORM_SOURCE) !== FORM_SOURCE,
+    'though it still has a name fit for a sentence');
+
+  /* ---- the maintainer's two e-mails both answer it ---------------------- */
+
+  for (const [file, who] of [[subMailer, 'the submissions mailer'],
+    [revMailer, 'the review mailer']]) {
+    ok(/Posted by:/.test(file), `${who} prints the line`);
+    ok(/postedBy\(/.test(file), 'through the shared rule, never its own copy');
+  }
+
+  /* AND ONLY THERE. `postedBy` returns an address, so the one thing a test has
+     to hold is where that address may go: the maintainer's message. Not the
+     poster's own (it tells them nothing and it is a message people forward),
+     not a served file, not a page. */
+  /* A SLICE TAKEN ON THE WRONG MARKER PASSES EVERY NEGATIVE CHECK BY VACUITY,
+     and this file's own selftest fixtures name `chairEmail` a few hundred
+     lines further down — so the slice is bounded at BOTH ends and its length
+     is asserted, or "the poster's e-mail carries no address" would be a claim
+     about an empty string. */
+  const from = subMailer.indexOf('export function renderLivePostingEmail');
+  const posterHalf = subMailer.slice(from, subMailer.indexOf('\n}\n', from));
+  ok(from > 0 && posterHalf.length > 500,
+    'the poster’s renderer is where this thinks it is');
+  ok(!/postedBy\(/.test(posterHalf),
+    'the poster’s e-mail never renders who posted it — it is written TO them');
+  ok(!/chairEmail|chairName|doc\.email|doc\.authEmail|doc\.note/.test(posterHalf),
+    'and reaches for no admin-only field: it is built from the SERVED row, so the ' +
+    'chair’s details, the private note and the poster’s own address cannot be in it');
+
+  ok(!PUBLIC_FIELDS.includes('email') && !PUBLIC_FIELDS.includes('firstName')
+     && !PUBLIC_FIELDS.includes('chairEmail'),
+    'none of the contact fields is published, which is what makes the row safe to print');
+
+  /* ---- "publicly shown" is measured, not assumed ------------------------ */
+
+  const job = SUB_KINDS.find((k) => k.key === 'job');
+  const cand = SUB_KINDS.find((k) => k.key === 'candidate');
+  ok(job.tellsPoster === true, 'a job posting tells its poster when it goes live');
+  ok(!cand.tellsPoster,
+    'a candidate profile does not — it is HELD until the reveal date, which is a ' +
+    'different message with a different trigger');
+
+  const doc = {
+    id: 'p1',
+    data: { status: 'queued', createdAt: SUB_LIVE_SINCE + 'T09:00:00Z', ref: 'OA-JOB-9',
+      source: FORM_SOURCE, firstName: 'Ada', lastName: 'Lovelace', email: 'ada@x.edu',
+      institution: 'Tulane University', school: 'A. B. Freeman School of Business',
+      unit: 'Management Science', country: 'United States', type: 'Business School',
+      levels: ['Assistant Professor'], untilFilled: true, year: 2027 },
+  };
+  const row = job.row(doc.data);
+
+  eq(partitionLive(job, [doc], { published: rowsById([]) }).mail.length, 0,
+    'a posting the served file does not carry is not announced as live');
+  eq(partitionLive(job, [doc], { published: rowsById([row]) }).mail.length, 1,
+    '…and one it does carry is');
+
+  /* THE ROW IT PRINTS IS THE ROW THE SITE PRINTS. `partitionLive` hands the
+     SERVED row on, so a name the build canonicalised or a deadline it healed
+     reads in the e-mail exactly as a visitor reads it. */
+  const served = { ...row, institution: 'Tulane University (healed)' };
+  eq(partitionLive(job, [doc], { published: rowsById([served]) }).mail[0].published.institution,
+    'Tulane University (healed)',
+    'and what it carries is the SERVED row, not the poster’s own document');
+
+  /* ---- exactly once, which is what makes an EDIT safe -------------------- */
+  eq(partitionLive(job, [{ ...doc, data: { ...doc.data, [SUB_LIVE_MAILED_AT]: 'x' } }],
+    { published: rowsById([row]) }).mail.length, 0,
+    'a poster already thanked is never thanked again — correcting a posting sets its ' +
+    'status back to queued and re-publishes it, and that must not send a second e-mail');
+
+  ok(SUB_LIVE_MAILED_AT !== SUB_ANNOUNCED_AT && SUB_LIVE_MAILED_AT !== SUB_REVIEWED_AT,
+    'the poster’s mark is its own: an SMTP failure on the maintainer’s copy must ' +
+    'not make the poster unthankable, nor a tick on the Admin area silence either');
+  ok(SUB_LIVE_SINCE !== SUB_SINCE,
+    'and so is its grandfather date — two features with two ship dates');
+
+  /* ---- an address that is not there yet is not written off --------------- */
+  const noAddr = partitionLive(job, [{ id: 'p2', data: { ...doc.data, email: '', authEmail: '' } }],
+    { published: rowsById([row]) });
+  ok(!noAddr.mail.length && !noAddr.grandfather.length,
+    'a submission with no reachable address is skipped ENTIRELY — a stamp would make ' +
+    'an address added by a later correction unthankable for ever');
+
+  /* ---- NO RULES CHANGE, and that is a claim worth pinning ---------------- */
+  const rules = await read('_firestore.rules');
+  const block = rules.slice(rules.indexOf('match /jobSubmissions/'),
+                            rules.indexOf('match /candidateSubmissions/'));
+  ok(/allow write: if isAdmin\(\);/.test(block),
+    'the mailer’s stamp is an admin write the rules already allow');
+  ok(!/keys\(\)\.hasOnly\(/.test(block),
+    'and no rule pins jobSubmissions to a fixed key SET, so an admin-written stamp ' +
+    'cannot freeze a posting against its OWN owner — the sync-user-directory trap ' +
+    '(the merge rule’s affectedKeys().hasOnly is a diff, not a shape)');
+  const ownerUpdate = block.slice(block.indexOf('allow update: if isOwner'));
+  ok(!/keys\(\)\.size\(\)/.test(ownerUpdate.slice(0, ownerUpdate.indexOf('allow update',
+    1) + 1 || ownerUpdate.length)),
+    'nor is there a key ceiling on the owner’s own correct-and-withdraw update, which ' +
+    'is the write a stamp could otherwise push past it');
+
+  /* ---- the copy no longer promises silence ------------------------------ */
+  const form = await read('post-a-job.html');
+  ok(!/do not send a confirmation/i.test(form),
+    'the thank-you screen no longer says no e-mail is sent — it is now');
+  ok(/we will e-mail you/i.test(form),
+    'and says what actually happens instead');
+  const policy = await read('privacy-policy.html');
+  ok(/publicly shown/.test(policy) && /post a job/i.test(policy),
+    'the Privacy Policy discloses the message, because a site that sends one and says ' +
+    'so nowhere is wrong whatever its rules allow');
+
+  /* ---- the wiring -------------------------------------------------------- */
+  ok(model.includes(`export const LIVE_MAILED_AT = '${SUB_LIVE_MAILED_AT}';`),
+    'the model names the stamp, so the mailer cannot spell it differently');
+  ok(/renderLivePostingEmail|thankPosters/.test(subMailer),
+    'the mailer really sends it');
+  ok(subMailer.includes(SUB_LIVE_MAILED_AT), 'and stamps what the model named');
+  ok(/oa-jobnav\.js/.test(subMailer),
+    'the link is built by the site’s own page rule — a rolled season is on the archive');
+  ok(/replyTo: CONTACT/.test(subMailer),
+    'and a reply from the poster reaches a person, not the sending mailbox');
+
+  /* The panels must not learn the poster's mark: it is the mailer's, and a
+     browser writing it would silence an e-mail that had never been sent. */
+  for (const f of ['assets/oa-submissions.js', 'assets/oa-jobreview.js']) {
+    ok(!(await read(f)).includes(SUB_LIVE_MAILED_AT),
+      `${f} never writes the poster’s high-water mark`);
+  }
+}
+
 /* --------------------------------------- the candidate profile policy
 
    Owner, 2026-08-24: a registered candidate has ONE profile per market year,
@@ -9500,6 +9695,7 @@ if (isMain(import.meta.url)) {
   testTwoDeadlines();
   await testTwoDeadlinesWiring();
   await testSubmissionNotices();
+  await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();
   await testJobExport();
   await testJobExportWiring();
