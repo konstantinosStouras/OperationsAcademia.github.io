@@ -28,6 +28,13 @@
      ga4       Google Analytics 4 through the Data API. Needs GA4_PROPERTY_ID
                and GA4_SERVICE_ACCOUNT. Inert until both are set.
 
+   AND A FOURTH READ THAT IS NOT A DAY-SOURCE AT ALL: `visits`, Firestore
+   `universityVisits` — which universities have been reading, resolved from
+   the visitor's own network by this site's `recordVisit` Cloud Function. It
+   does not compete for a day with the three above because it measures
+   something none of them can measure; it is passed to assemble() separately
+   for exactly that reason. Empty until `firebase deploy --only functions`.
+
    A DAY BELONGS TO EXACTLY ONE SOURCE (mergeDays, by SOURCE_ORDER). Two
    sources measuring the same Tuesday are two measurements of one number, and
    adding them would double every day of the overlap — a chart that looks
@@ -282,10 +289,13 @@ async function fromUsage(db, { since, windowFrom }) {
     `properties/<id>:runReport` with the OAuth2 JWT flow, over plain fetch, so
     it needs no dependency beyond google-auth-library for the token.
 
-    THE UNIVERSITY DIMENSION IS NOT HERE, AND CANNOT BE. The old charts read
-    UA's `networkDomain` / `networkLocation` — the visitor's reverse-DNS.
-    **GA4 has no such dimension and no replacement**, so this leg returns no
-    universities at all and the archive stays the only source of them.
+    THE UNIVERSITY DIMENSION IS NOT HERE, AND NEVER WILL BE FROM GOOGLE. The
+    old charts read UA's `networkDomain` / `networkLocation` — the visitor's
+    reverse-DNS — and GA4 has no such dimension and no replacement, so this
+    leg returns no universities at all. That is a fact about GA4 and NOT about
+    the measurement: `fromVisits` below does the lookup this site's own
+    server-side Cloud Function performs, which is where those figures come
+    from now.
 
     WHAT IT DOES ANSWER, and the first-party record cannot: where readers are,
     what they read on, and how they got here. The site's own record stores a
@@ -499,11 +509,87 @@ async function fromGa4({ since, windowFrom, windowTo }) {
   };
 }
 
+/** Which universities have been reading — the site's OWN resolver.
+ *
+ *  NOT A `source` IN THE SOURCE_ORDER SENSE, and that is deliberate: the
+ *  three legs above are three measurements of the same DAYS and compete for
+ *  each one, while this measures something none of them can measure at all.
+ *  Offering it as a fourth day-source would put it into a precedence contest
+ *  it has no business in.
+ *
+ *  `universityVisits/{YYYY-MM-DD}` is written by the `recordVisit` Cloud
+ *  Function (see _functions/index.js): a counter per day per university, with
+ *  no address, no identifier and no per-visitor row anywhere in it. The whole
+ *  collection is read every run rather than incrementally — one small
+ *  document per day, and the served list is a SUM over all of them, so an
+ *  incremental read would have to keep a running total in a second place for
+ *  no gain.
+ *
+ *  `seen` IS AS IMPORTANT AS THE NAMES. Reverse DNS resolves far less often
+ *  in 2026 than it did in 2014 — campus traffic through a commercial CDN, a
+ *  cloud VPN, a phone on mobile data — so the chart is a SAMPLE and the page
+ *  has to be able to say how large a one. Without the denominator a thin
+ *  chart reads as "no universities visit", which is exactly the misreading
+ *  this page was rebuilt to prevent.
+ */
+async function fromVisits(db, { now = Date.now(), recentDays = RECENT_DAYS } = {}) {
+  if (!db) return null;
+
+  const snap = await db.collection('universityVisits').orderBy('day').limit(20000).get();
+  /* NOTHING COLLECTED YET is not the same as "nobody visited": until the
+     Cloud Functions are deployed the browser's ping has nowhere to land. So
+     an empty collection returns null, the committed file stands untouched,
+     and the page says nothing at all rather than drawing an empty chart. */
+  if (snap.empty) return null;
+
+  const all = new Map();
+  const recent = new Map();
+  let seen = 0, resolved = 0, academic = 0, from = '', to = '';
+  const cutoff = iso(new Date(now - Math.max(1, recentDays) * 86400000));
+
+  snap.forEach((doc) => {
+    const d = doc.data() || {};
+    const day = String(d.day || doc.id);
+    if (!A.isDay(day)) return;
+    if (!from || day < from) from = day;
+    if (!to || day > to) to = day;
+    seen += Math.max(0, Number(d.seen) || 0);
+    resolved += Math.max(0, Number(d.resolved) || 0);
+    academic += Math.max(0, Number(d.academic) || 0);
+    for (const [name, raw] of Object.entries(d.unis || {})) {
+      const n = Math.max(0, Math.round(Number(raw) || 0));
+      const label = String(name || '').trim();
+      if (!label || !n) continue;
+      all.set(label, (all.get(label) || 0) + n);
+      if (day >= cutoff) recent.set(label, (recent.get(label) || 0) + n);
+    }
+  });
+
+  const rank = (m) => Array.from(m.entries())
+    .map(([name, visits]) => ({ name, visits }))
+    .sort((a, b) => b.visits - a.visits || (a.name < b.name ? -1 : 1));
+
+  /* THE TRUE PLACED TOTAL, published rather than left to be re-derived. The
+     served list is CUT at TOP_UNIS, so a page that summed the rows it was
+     given would understate the share it prints the moment the tail is longer
+     than the cut — a number quietly a little too low, which is the shape of
+     wrong this whole page exists to avoid. */
+  let placed = 0;
+  for (const n of all.values()) placed += n;
+
+  return {
+    all: rank(all),
+    recent: rank(recent),
+    seen, resolved, academic, placed, from, to,
+    recentDays,
+  };
+}
+
 /* ---------------------------------------------------------------------- main */
 
 /** Assemble the served dataset from whatever answered. Pure given its inputs,
     so the selftest can drive the whole shape with no network at all. */
-export function assemble(results, { now = Date.now(), carry = null } = {}) {
+export function assemble(results, { now = Date.now(), carry = null, visits = null } = {}) {
   const data = A.emptyDataset();
   data.generated = new Date(now).toISOString();
 
@@ -514,7 +600,9 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
     .filter(Boolean);
 
   const pages = new Map();
-  const unis = new Map();
+  /* `archived` and not `unis`: since the resolver came back these rows are
+     the ARCHIVE leg's, and the live figures arrive separately as `visits`. */
+  const archived = new Map();
   const breakdowns = {};
   let engagement = null;
   let pagesWindow = null;
@@ -536,8 +624,8 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
     }
     for (const u of r.universities || []) {
       const name = String((u && u.name) || '').trim();
-      if (!name || unis.has(name)) continue;
-      unis.set(name, { name, visits: Math.max(0, Math.round(Number(u.visits) || 0)) });
+      if (!name || archived.has(name)) continue;
+      archived.set(name, { name, visits: Math.max(0, Math.round(Number(u.visits) || 0)) });
     }
     /* a leg that contributed nothing AND names no range is the empty-file
        fallback, not a source anyone consulted — listing it would have the
@@ -570,11 +658,10 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
     if (!pagesWindow && carry.pagesWindow && pages.size > beforeCarry) {
       pagesWindow = carry.pagesWindow;
     }
-    for (const u of carry.universities || []) {
-      const name = String((u && u.name) || '').trim();
-      if (!name || unis.has(name)) continue;
-      unis.set(name, { name, visits: Math.max(0, Math.round(Number(u.visits) || 0)) });
-    }
+    /* the carried UNIVERSITIES are handled below rather than here: the block
+       carries a frozen flag, a range and its coverage counts as one object,
+       and re-offering only its rows would republish a live section as an
+       archive */
     /* only when NOTHING live answered: with a live source present its own
        record is the true one, and the carried label would overstate it */
     if (!data.sources.length) data.sources = (carry.sources || []).slice();
@@ -585,19 +672,68 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
   data.breakdowns = breakdowns;
   data.engagement = engagement;
 
-  const uniRows = Array.from(unis.values()).sort((a, b) => b.visits - a.visits);
-  const hist = live.find((r) => r.source === 'history');
-  data.universities = {
-    /* FROZEN, and the page says so: UA's networkDomain is the only thing that
-       ever produced this and it no longer exists in any product — and since
-       2026-08-29 the archived copy is known to be empty as well. */
-    frozen: true,
-    from: (hist && hist.from) || (carry && carry.from) || '',
-    to: (hist && hist.to) || (carry && carry.to) || '',
-    all: uniRows.slice(0, TOP_UNIS),
-    recent: [],
-  };
+  /* ------------------------------------------------------------ universities
 
+     THREE WAYS THIS BLOCK CAN BE FILLED, in strict order, and the first is
+     the correction this whole feature is:
+
+       1. the site's OWN resolver (fromVisits) — current, and NOT frozen. The
+          old figures came from Universal Analytics' `networkDomain`, a
+          reverse-DNS lookup of the visitor's address; GA4 dropped it, and
+          from that it was concluded here — and told to the owner — that they
+          could never be shown again. What is actually true is that a BROWSER
+          cannot see its own reverse-DNS. A Cloud Function can, and this site
+          has them, so the measurement is back.
+       2. the 2014-2023 archive, if it ever appears. It never will (checked
+          2026-08-29, and empty), but the reader stays wired: an archive would
+          be a different, closed period and is therefore labelled frozen and
+          never mixed with (1).
+       3. whatever the previous build served, verbatim — the rule every source
+          here follows. A run whose Firestore read failed must cost a day of
+          freshness, not the whole list.
+
+     (1) AND (2) ARE NEVER MERGED. UA counted a decade of visits under one
+     rule and this counts a sample of them under another; adding the two
+     lists would produce a ranking that means nothing and cannot be
+     explained on the page. */
+  const hist = live.find((r) => r.source === 'history');
+  const archivedRows = Array.from(archived.values()).sort((a, b) => b.visits - a.visits);
+  const carriedU = (carry && carry.universities) || null;
+
+  if (visits) {
+    data.universities = {
+      frozen: false,
+      from: visits.from || '',
+      to: visits.to || '',
+      all: visits.all.slice(0, TOP_UNIS),
+      recent: visits.recent.slice(0, TOP_UNIS),
+      recentDays: visits.recentDays || RECENT_DAYS,
+      /* the coverage the chart is a sample of — see fromVisits */
+      seen: visits.seen,
+      resolved: visits.resolved,
+      academic: visits.academic,
+      placed: visits.placed,
+    };
+  } else if (hist && archivedRows.length) {
+    data.universities = {
+      frozen: true,
+      from: hist.from || '',
+      to: hist.to || '',
+      all: archivedRows.slice(0, TOP_UNIS),
+      recent: [],
+    };
+  } else if (carriedU && ((carriedU.all || []).length || carriedU.seen)) {
+    data.universities = {
+      ...A.emptyDataset().universities,
+      ...carriedU,
+      all: (carriedU.all || []).slice(0, TOP_UNIS),
+      recent: (carriedU.recent || []).slice(0, TOP_UNIS),
+    };
+  } else {
+    data.universities = A.emptyDataset().universities;
+  }
+
+  const uniRows = data.universities.all;
   const rows = A.series(data.days);
   const totals = A.summarise(rows);
   data.totals = {
@@ -652,6 +788,7 @@ async function main() {
   }
 
   const db = await firestore();
+  let visits = null;
   if (db) {
     try {
       const usage = await fromUsage(db, { since, windowFrom });
@@ -661,8 +798,26 @@ async function main() {
     } catch (e) {
       warn(`the first-party usage read failed (${e.message}) — keeping what is committed`);
     }
+
+    try {
+      visits = await fromVisits(db);
+      if (visits) {
+        const pct = visits.seen ? Math.round((visits.resolved / visits.seen) * 100) : 0;
+        log(`visits: ${visits.all.length} universit(y/ies) over ${visits.seen} visit(s), ` +
+          `${visits.resolved} resolved (${pct}%), ${visits.academic} academic but unnamed`);
+      } else {
+        /* the ordinary state until `firebase deploy --only functions` has been
+           run — said plainly, because a silent zero here is indistinguishable
+           from "no university has ever read this site" */
+        log('visits: universityVisits is empty — the recordVisit function is ' +
+          'not collecting yet (firebase deploy --only functions)');
+      }
+    } catch (e) {
+      warn(`the university-visit read failed (${e.message}) — keeping what is committed`);
+    }
   } else {
     log('usage: no FIREBASE_SERVICE_ACCOUNT in this environment — skipped');
+    log('visits: no FIREBASE_SERVICE_ACCOUNT in this environment — skipped');
   }
 
   try {
@@ -684,6 +839,7 @@ async function main() {
      byte-for-byte what it read, which is what lets this workflow fire on a
      schedule in an environment that may or may not hold the credentials. */
   const data = assemble(results, {
+    visits,
     carry: {
       days: previous.days || {},
       pages: previous.pages || [],
@@ -692,9 +848,10 @@ async function main() {
       pagesWindow: previous.pagesWindow || null,
       breakdowns: previous.breakdowns || {},
       engagement: previous.engagement || null,
-      universities: (previous.universities && previous.universities.all) || [],
-      from: (previous.universities && previous.universities.from) || '',
-      to: (previous.universities && previous.universities.to) || '',
+      /* the WHOLE previous universities block, not just its rows: it carries
+         the range, the frozen flag and the coverage counts, and a carry that
+         dropped them would republish a live section as an archive */
+      universities: previous.universities || null,
       sources: previous.sources || [],
     },
   });
@@ -788,8 +945,35 @@ function selftest() {
   ok(a.days['2026-08-02'][0] === 99, 'the higher-authority source keeps a contested day');
   ok(a.totals.visitors === 10 + 99 + 7 + 3, 'a contested day is counted ONCE, never summed');
   ok(a.pages[0].views === 5, 'the higher-authority source owns a contested page');
-  ok(a.universities.frozen === true, 'the universities section is marked frozen');
+  ok(a.universities.frozen === true, 'an ARCHIVE-only universities section is marked frozen');
   ok(a.universities.from === '2014-03-01', 'the frozen section carries the archive range');
+
+  /* THE CORRECTION. The site's own resolver is current, so its section is NOT
+     frozen — and it never merges with the archive, which counted a different
+     decade under a different rule. */
+  const liveUnis = {
+    all: [{ name: 'University of Oxford', visits: 12 }, { name: 'Boston University', visits: 3 }],
+    recent: [{ name: 'University of Oxford', visits: 2 }],
+    seen: 100, resolved: 40, academic: 25, from: '2026-08-01', to: '2026-08-29',
+    recentDays: 7,
+  };
+  const v = assemble(
+    [{ source: 'history', days: {}, pages: [],
+       universities: [{ name: 'Duke University', visits: 40 }], from: '2014-03-01', to: '2023-06-30' }],
+    { visits: liveUnis });
+  ok(v.universities.frozen === false, 'a section fed by the live resolver is NOT frozen');
+  ok(v.universities.all.length === 2 && v.universities.all[0].name === 'University of Oxford',
+    'the live list is the resolver\'s own, highest first');
+  ok(!v.universities.all.some((u) => u.name === 'Duke University'),
+    'the archive is never MERGED into the live list — two rules, one ranking, no meaning');
+  ok(v.universities.seen === 100 && v.universities.resolved === 40,
+    'the coverage the chart is a sample of travels with it');
+  ok(v.totals.universities === 2, 'the tile counts the live names');
+
+  /* an unreachable Firestore must cost a day of freshness, not the section */
+  const carriedLive = assemble([], { carry: { universities: { ...liveUnis, frozen: false } } });
+  ok(carriedLive.universities.frozen === false && carriedLive.universities.all.length === 2,
+    'a run that could not read the visits republishes the section it was served');
   ok(a.range.from === '2015-01-01' && a.range.to === '2026-08-03', 'the range spans every source');
   ok(a.sources.map((s) => s.source).join(',') === 'usage,ga4,history',
     'the sources are listed in precedence order');
@@ -853,12 +1037,11 @@ function selftest() {
        },
        engagement: A.engagement({ source: 'usage', sessions: 2, seconds: 120, views: 5 }),
        universities: [] }],
-    { now: 0 });
+    { now: 0, visits: liveUnis });
   const run2 = assemble([], { now: 0, carry: {
     days: run1.days, pages: run1.pages, pagesWindow: run1.pagesWindow,
     breakdowns: run1.breakdowns, engagement: run1.engagement,
-    universities: run1.universities.all, from: run1.universities.from,
-    to: run1.universities.to, sources: run1.sources,
+    universities: run1.universities, sources: run1.sources,
   } });
   ok(JSON.stringify(run1) === JSON.stringify(run2),
     'a run with NO source rewrites byte-for-byte what it read');

@@ -3,10 +3,11 @@
 
        node _scraper/build-all.mjs [--dry-run]
 
-   It runs the four builders in the order they depend on each other: the three
-   that read Firestore (postings, candidates, placements) and then the
+   It runs the builders in the order they depend on each other: the three
+   that read Firestore (postings, candidates, placements), then the
    Universities directory, which is offline and reads the files they just
-   rewrote.
+   rewrote, then the university domain map, which is derived from the
+   directory in turn.
 
    WHY THIS EXISTS, rather than four steps in oa-jobs-build.yml as before.
    The commit step has to be able to RE-RUN the build. `data/` is generated,
@@ -58,11 +59,17 @@ export const BUILDERS = [
   { script: 'build-jobs.mjs', label: 'job postings', needsFirebase: true },
   { script: 'build-candidates.mjs', label: 'candidate profiles', needsFirebase: true },
   { script: 'build-placements.mjs', label: 'confirmed placements', needsFirebase: true },
-  /* LAST, and never gated: it reads only the files the three above just
+  /* AFTER THE THREE, and never gated: it reads only the files they just
      rewrote plus the committed archive and seed, so a posting from a
      university the directory does not carry creates its card in the same run
      that published the posting. */
   { script: 'build-directory.mjs', label: 'the Universities directory', needsFirebase: false },
+  /* AFTER the directory, because it is DERIVED from it: the domain a visitor's
+     network is matched against is the host of a department's own page, so a
+     university that gained a card in this very run can be recognised from its
+     network from this run on. Offline and ungated for the same reason as the
+     directory — it reads a committed file and writes two. */
+  { script: 'build-netmap.mjs', label: 'the university domain map', needsFirebase: false },
 ];
 
 /** Which builders a given environment can actually run. Pure, so the selftest

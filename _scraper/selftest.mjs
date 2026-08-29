@@ -11,6 +11,7 @@
 
 import { isMain } from './_main.mjs';
 import { BUILDERS, plan } from './build-all.mjs';
+import * as NETMAP from './build-netmap.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -5389,8 +5390,16 @@ async function testDirectoryWiring() {
   const names = BUILDERS.map((b) => b.script);
   ok(names.includes('build-directory.mjs'),
     'oa-jobs-build.yml rebuilds the directory in the run that publishes the postings');
-  eq(names[names.length - 1], 'build-directory.mjs',
-    'and does it LAST — it reads the files the Firestore builders just rewrote');
+  /* AFTER every builder that reads Firestore, because it reads the files they
+     just rewrote. Stated as the dependency rather than as "last", so a builder
+     that depends on the DIRECTORY in turn (build-netmap.mjs does) can be added
+     after it without this guard having to be weakened to let it. */
+  const lastFirebase = names.lastIndexOf(
+    BUILDERS.filter((b) => b.needsFirebase).slice(-1)[0].script);
+  ok(names.indexOf('build-directory.mjs') > lastFirebase,
+    'and does it after the Firestore builders — it reads the files they just rewrote');
+  ok(names.indexOf('build-netmap.mjs') > names.indexOf('build-directory.mjs'),
+    'the university domain map is built after the directory it is derived from');
 
   /* THE OM-LIST ENRICHMENT IS WIRED END TO END (owner, 2026-08-24): the
      curated module is name-clean under the site's own canon, the build feeds
@@ -8756,8 +8765,9 @@ async function testReviewWiring() {
      run without the secret tries to read Firestore with nothing to read it
      with, drop it the other and a posting's new card waits for a secret its
      build never needed. */
-  eq(plan({ firebase: false }).map((b) => b.script), ['build-directory.mjs'],
-    'without the service account only the offline directory build runs');
+  eq(plan({ firebase: false }).map((b) => b.script),
+    ['build-directory.mjs', 'build-netmap.mjs'],
+    'without the service account only the two OFFLINE builders run');
   eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
     'with it, the whole build does');
 
@@ -10307,10 +10317,17 @@ async function testAnalytics() {
   eq(served.dayFields, A.DAY_FIELDS,
     'the served file names its own day fields — self-describing rather than ' +
     'something a reader has to read the model to learn');
-  ok(served.universities && served.universities.frozen === true,
-    'the universities section is marked frozen: it came from Universal Analytics\' ' +
-    'networkDomain, GA4 has no such dimension and none replaces it, so those ' +
-    'numbers can never be brought up to date by anybody');
+  /* `frozen` means "an ARCHIVE of a closed period", not "unrecoverable". The
+     figures came from UA's networkDomain and GA4 has no such dimension, from
+     which it was once concluded here that they could never be shown again —
+     wrong, and corrected on 2026-08-29: a browser cannot see its own
+     reverse-DNS, but this site's own Cloud Function can. So what is pinned is
+     the INVARIANT rather than the flag's current value: a section carrying
+     live coverage counts is never labelled an archive. */
+  ok(served.universities && typeof served.universities.frozen === 'boolean',
+    'the served universities section says whether it is an archive or the current record');
+  ok(!(served.universities.seen > 0) || served.universities.frozen === false,
+    'a section fed by the live resolver is never marked frozen');
   ok(typeof served.version === 'number' && served.days && served.totals,
     'and it is a complete, valid dataset even with every source switched off');
 
@@ -10638,7 +10655,10 @@ async function testAnalytics() {
     ok(setup.includes(needed), `_SETUP-ANALYTICS.md names ${needed}`);
   }
   ok(/networkDomain/.test(setup),
-    'and states plainly which figures can never come back, and why');
+    'and explains where the university figures used to come from');
+  ok(/recordVisit/.test(setup) && /firebase deploy --only functions/.test(setup),
+    '…and what has replaced it, including the one command that switches it on — ' +
+    'a function nobody deployed looks exactly like a site nothing visits');
 
   /* --- the workflow ------------------------------------------------------ */
 
@@ -10745,6 +10765,227 @@ async function testGa4Tag() {
     'and that advertising features are off');
 }
 
+/* ------------------------------------------ which universities are visiting
+
+   THE CLAIM THIS CORRECTS. The old "which universities visited" charts came
+   from Universal Analytics' `networkDomain` — a reverse-DNS lookup of the
+   visitor's address. GA4 has no such dimension, and from that it was
+   concluded here, written into four files and told to the owner, that the
+   figures could never be shown again. The owner said otherwise, and was
+   right: what is true is that a BROWSER cannot see its own reverse-DNS, and
+   nothing said the browser had to. A server can, this site has Cloud
+   Functions, so the site now does for itself what UA used to do for it.
+
+   The privacy shape is where the care goes, so most of what is pinned here
+   is about what must NOT happen: the address is never stored, an ISP is never
+   counted, a stranger's page cannot ring the endpoint, and the admin desk
+   feeds none of it. */
+async function testUniversityVisits() {
+  const root = path.join(HERE, '..');
+  const N = require(path.join(root, 'assets', 'oa-netorg.js'));
+  const MAP = JSON.parse(await readFile(path.join(root, 'data', 'university-domains.json'), 'utf8'));
+
+  /* --- the registrable domain, which is what everything else keys on ----- */
+
+  eq(N.registrableDomain('www.sbs.ox.ac.uk'), 'ox.ac.uk',
+    'a multi-part academic suffix leaves the UNIVERSITY as the domain — without ' +
+    'the suffix list every British university would collapse into one entry');
+  eq(N.registrableDomain('MIT.EDU'), 'mit.edu', 'the answer is case-insensitive');
+  eq(N.registrableDomain('host.nus.edu.sg.'), 'nus.edu.sg', "a PTR record's trailing dot is not a label");
+  eq(N.registrableDomain('ac.uk'), '', 'the bare suffix is nobody');
+  eq(N.registrableDomain('1.2.3.4'), '', 'an address is not a name');
+  eq(N.registrableDomain('evil.com/path'), '', 'and neither is anything with a path in it');
+
+  /* --- classification: three answers, and the third is the important one -- */
+
+  const fixture = { 'ox.ac.uk': 'University of Oxford', 'mit.edu': 'Massachusetts Institute of Technology' };
+  eq(N.classify('gateway.sbs.ox.ac.uk', fixture).university, 'University of Oxford',
+    'a subdomain of a known university resolves to it');
+  ok(!N.classify('notmit.edu', fixture).university,
+    'A SUBDOMAIN NEVER MATCHES A DIFFERENT UNIVERSITY: the lookup is on the ' +
+    'registrable domain alone, so no suffix or substring search can let ' +
+    '"notmit.edu" be counted as MIT');
+  eq(N.classify('notmit.edu', fixture).academic, true,
+    '…it is an academic network this site has no page for, which is a different ' +
+    'fact from "not a university" and is counted apart');
+  eq(N.classify('dsl-12.telecom.example.com', fixture), null,
+    'AN ISP IS NEVER COUNTED. "one visit from BT Broadband" narrows a person far ' +
+    'harder than "one visit from Oxford", and it answers no question this chart asks');
+  eq(N.classify('', fixture), null, 'a host that never resolved is counted as nothing');
+  eq(N.classify('www.academia.edu', fixture), null,
+    'academia.edu ends in .edu and is a company — the case that makes the ' +
+    'denylist necessary rather than tidy');
+
+  /* --- the address, and the entry a spoof cannot forge ------------------- */
+
+  eq(N.clientIp('203.0.113.7'), '203.0.113.7', 'a single address is read straight');
+  eq(N.clientIp('1.2.3.4, 203.0.113.7'), '203.0.113.7',
+    'THE LAST routable entry, not the first: Cloud Run APPENDS the address it ' +
+    'saw to whatever the client sent, so reading from the left would take ' +
+    'whatever a visitor wrote in their own X-Forwarded-For');
+  eq(N.clientIp('203.0.113.7, 10.0.0.1'), '203.0.113.7',
+    'the private hop between is skipped rather than taken as the visitor');
+  eq(N.clientIp('  198.51.100.9:4433 '), '198.51.100.9', 'a port is not part of the address');
+  eq(N.clientIp('[2001:db8::1]:443'), '2001:db8::1', 'and a bracketed IPv6 port is stripped correctly');
+  eq(N.clientIp('2001:db8::1'), '2001:db8::1',
+    'while an unbracketed IPv6 address keeps every one of its colons');
+  eq(N.clientIp(''), '', 'no header, no address');
+  eq(N.clientIp('127.0.0.1, ::1'), '', 'and a request that only ever saw loopback yields nothing');
+  for (const priv of ['10.1.2.3', '172.16.0.1', '192.168.1.1', '169.254.1.1', '100.64.0.1', 'fd00::1', 'fe80::1']) {
+    ok(!N.isPublicIp(priv), `${priv} is not a routable visitor address`);
+  }
+  ok(N.isPublicIp('8.8.8.8') && N.isPublicIp('2001:db8::1'), 'a routable address is');
+
+  /* --- the map is DERIVED, and says no when it cannot tell --------------- */
+
+  const dir = JSON.parse(await readFile(path.join(root, 'data', 'directory.json'), 'utf8'));
+  const { map, dropped } = NETMAP.buildMap(dir);
+  eq(JSON.stringify(map), JSON.stringify(MAP),
+    'data/university-domains.json is exactly what the committed directory derives — ' +
+    'hand-editing it would be undone by the next build, the rule every generated ' +
+    'file here is held to');
+  ok(Object.keys(MAP).length > 100,
+    `the map covers the directory (${Object.keys(MAP).length} domains)`);
+  eq(dropped.filter((d) => d.claimed.length < 2), [],
+    'a domain is only ever dropped for being CLAIMED TWICE');
+  const denied = Object.keys(MAP).filter((d) => N.isDenied(d));
+  eq(denied, [],
+    'no hosted CMS, shortener or social profile became a university domain: a ' +
+    'department page on wordpress.com is not the university\'s network');
+  /* the denylist direction was measured — an academic-suffix ALLOWLIST
+     dropped 28 real universities, which is the quieter and worse failure */
+  ok(Object.keys(MAP).some((d) => !N.looksAcademic(d)),
+    'universities on plain national domains (ethz.ch, mcgill.ca, sdabocconi.it) are ' +
+    'KEPT — outside the English-speaking world that is the normal shape');
+
+  /* --- the vendored copies, which are what the deployed function reads --- */
+
+  for (const [src, vendored] of [
+    ['assets/oa-netorg.js', '_functions/netorg.js'],
+    ['data/university-domains.json', '_functions/university-domains.json'],
+  ]) {
+    eq(await readFile(path.join(root, vendored), 'utf8'),
+      await readFile(path.join(root, src), 'utf8'),
+      `${vendored} is byte-identical to ${src} — \`firebase deploy\` ships only ` +
+      '_functions, so a drifted copy would resolve visitors against a stale map ' +
+      'in production with nothing anywhere saying so');
+  }
+
+  /* --- the function: what it must never do ------------------------------- */
+
+  const fn = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+  const body = fn.slice(fn.indexOf('exports.recordVisit'));
+  ok(body.length > 500, 'the recordVisit handler was really found (or the checks below are vacuous)');
+
+  ok(/const patch = \{ day, t: Date\.now\(\), seen: inc \}/.test(body),
+    'the document is COUNTERS ONLY — a day, a stamp and tallies');
+  /* A SLICE TAKEN ON A MARKER THAT MOVED PASSES BY VACUITY, and `indexOf`
+     returning -1 would make `slice(-1)` the file's LAST CHARACTER — a check
+     of nothing that reports green. So the marker is asserted before it is
+     used, the rule this file already carries for every other source slice. */
+  const patchAt = body.indexOf('const patch = {');
+  ok(patchAt > 0, 'the counters block was found (or the address check below is vacuous)');
+  const afterPatch = body.slice(patchAt);
+  ok(afterPatch.length > 200 && !/\bip\b/.test(afterPatch),
+    'THE ADDRESS IS NEVER WRITTEN. It is resolved in memory and goes out of ' +
+    'scope; nothing below the lookup so much as names it');
+  ok(!/logger\.(info|log)\([^)]*ip/.test(body),
+    '…and it is never logged either, which would be the same disclosure by ' +
+    'another route');
+  ok(/patch\.unis = \{ \[hit\.university\]: inc \}/.test(body),
+    'the tally is a NESTED MAP, never a dotted field path: this site\'s own ' +
+    'directory carries names with full stops in them ("St. John\'s University"), ' +
+    'and a dotted path would be read as three fields');
+  ok(/if \(!VISIT_ORIGINS\.includes\(origin\)\) return done\(\)/.test(body),
+    'only this site\'s own pages may ring it');
+  ok(/sec-gpc.*dnt|dnt.*sec-gpc/s.test(body),
+    'a Global Privacy Control or Do Not Track header is honoured SERVER-SIDE too — ' +
+    'a signal a server trusts the client to have obeyed is not being honoured');
+  ok(/res\.status\(204\)/.test(body) && !/res\.json\(/.test(body),
+    'and it answers 204 whatever happened: a reply that varied would turn a ' +
+    'private server-side lookup into one any page could perform');
+
+  const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
+  ok(pkg.dependencies && pkg.dependencies['firebase-admin'],
+    'the functions declare firebase-admin — without it the deploy fails at runtime');
+
+  /* --- the rules: no client, in either direction ------------------------- */
+
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  ok(/match \/universityVisits\/\{day\} \{\s*allow read, write: if false;/.test(rules),
+    'universityVisits is closed to every client: a counter a browser could ' +
+    'increment is a published chart a browser could write');
+
+  /* --- the ping: on every public page, and structurally not on the desk -- */
+
+  const ping = await readFile(path.join(root, 'assets', 'oa-visit.js'), 'utf8');
+  ok(/sessionStorage/.test(ping) && /oaVisitPinged/.test(ping),
+    'ONCE PER SESSION, not once per page — the chart counts visits, and a ' +
+    'reader who opens six postings made one visit');
+  ok(/HOSTS\.indexOf\(location\.hostname\) === -1\) return/.test(ping),
+    'and only from the live site: page-test.mjs opens every page in a real ' +
+    'browser on every CI run, and each of those would otherwise file a visit');
+  ok(/globalPrivacyControl/.test(ping) && /doNotTrack/.test(ping),
+    'a refusal to be measured is honoured by NOT ASKING');
+  ok(/credentials: 'omit'/.test(ping),
+    'no cookies in either direction, matching the cookieless posture of the tag beside it');
+  ok(!/body:/.test(ping),
+    'and it sends NOTHING — no identifier, no path, no body. The whole of the ' +
+    'request is that it happened');
+
+  const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
+  const missing = [];
+  const shouldNot = [];
+  for (const f of pages) {
+    const html = await readFile(path.join(root, f), 'utf8');
+    const stub = /http-equiv=["']?refresh/i.test(html);
+    const has = html.includes('assets/oa-visit.js');
+    /* THE ADMIN DESK IS EXCLUDED STRUCTURALLY (owner, 2026-08-29: no admin
+       page feeds the public figures). A page that never runs the ping cannot
+       be filtered wrongly by a rule that drifts — which is a stronger
+       guarantee than the path predicate the pages list is filtered by, and
+       needs no second copy of that predicate in the browser. */
+    if ((stub || f === 'admin-area.html') && has) shouldNot.push(f);
+    if (!stub && f !== 'admin-area.html' && !has) missing.push(f);
+  }
+  eq(missing, [], 'every public page carries the visit ping');
+  eq(shouldNot, [],
+    'and neither the admin desk nor any redirect stub does — the exclusion is ' +
+    'the absence of a script tag, not a runtime check that could drift');
+  ok(pages.length > 20 && !missing.length,
+    'the sweep really walked the site rather than passing on an empty list');
+  const idx = await readFile(path.join(root, 'index.html'), 'utf8');
+  ok(/<script defer src="assets\/oa-visit\.js"><\/script>/.test(idx),
+    'it is deferred like every script here');
+
+  /* --- and the false claim is gone from everything a person reads -------- */
+
+  /* PRESENT-TENSE ONLY, and that is the point rather than a loosening. Each
+     of these files now RECOUNTS the wrong conclusion in order to correct it —
+     "it was concluded that they could never be shown again" — and a guard
+     that could not tell the explanation from the claim could only be
+     satisfied by deleting the explanation, which is a trap this repository
+     has already walked into once (the analytics page's "no iframes" check).
+     So what is forbidden is a file still ASSERTING it. */
+  const CLAIM = /\b(can never|cannot|will never|could not ever) be (brought up to date|shown again|revived|measured)|no analytics product has replaced|gone for good/i;
+  for (const f of ['assets/oa-analytics.js', 'assets/oa-analytics-model.js',
+    '_scraper/build-analytics.mjs', '_SETUP-ANALYTICS.md', 'changelog.json']) {
+    const t = await readFile(path.join(root, f), 'utf8');
+    ok(!CLAIM.test(t),
+      `${f} no longer says the university figures can never come back — they can, ` +
+      'and saying otherwise is what nearly kept them from being rebuilt');
+  }
+
+  /* --- the Privacy Policy discloses what is derived from an address ------- */
+
+  const pp = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/reverse|network/i.test(pp) && /universit/i.test(pp),
+    'the Privacy Policy says the visitor\'s network is turned into a university name');
+  ok(/not stored|never stored|not kept|never kept/i.test(pp),
+    '…and that the address itself is not kept — a site that derives something ' +
+    'from an IP and says so nowhere is wrong whatever its rules allow');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -10838,5 +11079,6 @@ if (isMain(import.meta.url)) {
   await testReaderGate();
   await testAnalytics();
   await testGa4Tag();
+  await testUniversityVisits();
   process.exit(finish() ? 0 : 1);
 }

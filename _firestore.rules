@@ -885,6 +885,24 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // ------------------------------------------ university visits (no client)
+    // One document per day, `universityVisits/{YYYY-MM-DD}`, holding COUNTERS
+    // ONLY: how many visits were seen, how many reverse-resolved, and one
+    // tally per university. It is written by the `recordVisit` Cloud Function
+    // and read by the nightly analytics build — both of which use the Admin
+    // SDK and bypass these rules entirely — so NO CLIENT MAY TOUCH IT, in
+    // either direction.
+    //
+    // Named explicitly although the catch-all below would already close it.
+    // A counter a browser could increment is a chart a browser could write,
+    // and this one is published; saying so here means the intent is in the
+    // rules rather than only in a comment somewhere else. Read is closed to
+    // the admin too: the served data/analytics.json already carries every
+    // figure this collection produces, so nothing needs a second route to it.
+    match /universityVisits/{day} {
+      allow read, write: if false;
+    }
+
     // Anything not named above is closed.
     match /{document=**} {
       allow read, write: if false;

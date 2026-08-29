@@ -165,3 +165,171 @@ exports.publishOnReview = onDocumentWritten(
     await ring(REVIEW_EVENT_TYPE, { id: event.params.id, status: after.status },
       'sheet read dispatched');
   });
+
+/* ===========================================================================
+   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and the only
+   one here that is not a doorbell.
+
+   THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to
+   show "which universities visited", measured from Universal Analytics'
+   `networkDomain` — a reverse-DNS lookup of the visitor's IP, so a reader on
+   their university's network resolved to `ox.ac.uk`, `mit.edu`, `nus.edu.sg`.
+   GA4 removed that dimension and offers nothing in its place, which is true;
+   from it the conclusion was drawn, and the owner was told, that the figures
+   could never be shown again. That was wrong, and the owner said so.
+
+   What is true is that a BROWSER cannot see its own reverse-DNS. Nothing says
+   it has to: this site has Cloud Functions, and anything server-side sees the
+   address the connection came from. So the site does for itself exactly what
+   UA used to do for it — and rather better, because the answer is checked
+   against the site's OWN curated directory of operations departments rather
+   than against whatever string an ISP happens to publish.
+
+   THE IP IS NEVER STORED. That is the shape of the thing, not a promise: the
+   address is resolved in memory, the university name is kept, and everything
+   else goes out of scope when the request ends. What reaches Firestore is a
+   COUNTER per day per university — no identifier, no cookie, no per-visitor
+   row, consistent with the cookieless posture the rest of the analytics runs
+   under (see assets/oa-ga4.js). A day document is
+   `universityVisits/{YYYY-MM-DD}`, admin-read and admin-written only; the
+   deployed rules deny every client, and only the Admin SDK — this function
+   and the nightly build — ever touches it.
+
+   IT COUNTS WHAT IT COULD NOT NAME, and that is what makes the chart honest.
+   Reverse DNS in 2026 resolves far less often than it did in 2014: many
+   campuses now egress through a commercial CDN or a cloud VPN, and a great
+   deal of reading happens on phones. So every ping increments `seen`,
+   whether or not anything came back — the page divides by it and says what
+   share of visits it could place. Without that denominator a thin chart would
+   read as "no universities visit", which is precisely the misreading the rest
+   of this page was rebuilt to prevent.
+
+   NOTHING HERE IS LIVE UNTIL THE FUNCTIONS ARE DEPLOYED, and in this
+   repository they never have been (CLAUDE.md records that all three doorbells
+   above are undeployed, which is why an approval waits for the schedule). One
+       firebase deploy --only functions --project operations-academia
+   switches on this function AND those three. Until then the browser's ping
+   simply fails, the collection stays empty, and the page says the figures are
+   not being collected yet rather than drawing an empty chart.
+   =========================================================================== */
+
+const { onRequest } = require('firebase-functions/v2/https');
+const admin = require('firebase-admin');
+const dns = require('node:dns');
+
+/* Both VENDORED by _scraper/build-netmap.mjs, because `firebase deploy` ships
+   only this directory: a deployed function cannot require ../assets. The
+   selftest pins the copies against their sources byte-for-byte, so a drifted
+   copy fails the build rather than resolving visitors against a stale map. */
+const netorg = require('./netorg.js');
+const UNI_DOMAINS = require('./university-domains.json');
+
+/** The only origins whose pages may ring this. A request from anywhere else
+    is answered 204 and does nothing — the figure is about this site's
+    readers, and an endpoint any page could call is an endpoint any page could
+    fill with noise. */
+const VISIT_ORIGINS = [
+  'https://operationsacademia.org',
+  'https://www.operationsacademia.org',
+];
+
+/** A reverse lookup that cannot hold the request open. c-ares is given one
+    try and a short timeout; the race is belt and braces, because a resolver
+    that never answers at all would otherwise pin an instance for its full
+    function timeout for a figure nobody is waiting on. */
+const RESOLVE_MS = 2000;
+async function reverseDns(ip) {
+  const resolver = new dns.promises.Resolver({ timeout: RESOLVE_MS, tries: 1 });
+  let timer = null;
+  const lookup = resolver.reverse(ip).then((names) => (names && names[0]) || '');
+  const bail = new Promise((resolve) => { timer = setTimeout(() => resolve(''), RESOLVE_MS + 250); });
+  return Promise.race([lookup, bail])
+    .catch(() => '')                       // ENOTFOUND: an address with no PTR
+    .finally(() => clearTimeout(timer));
+}
+
+function visitsDb() {
+  if (!admin.apps.length) admin.initializeApp();
+  return admin.firestore();
+}
+
+exports.recordVisit = onRequest(
+  {
+    region: 'us-central1',
+    cors: VISIT_ORIGINS,
+    invoker: 'public',
+    memory: '256MiB',
+    /* A hard ceiling on what a flood can cost. The figure is best-effort by
+       design, so shedding load is the right failure: a missed ping is one
+       uncounted visit, where an uncapped fan-out is a bill. */
+    maxInstances: 10,
+    concurrency: 40,
+    timeoutSeconds: 10,
+  },
+  async (req, res) => {
+    res.set('cache-control', 'no-store');
+
+    /* ALWAYS 204, WHATEVER HAPPENED. The response must tell the browser
+       nothing about the visitor — not whether their network resolved, not
+       whether this site has heard of their university — because a page that
+       could read that back would have turned a private server-side lookup
+       into a client-side one. It is also why the ping needs no reply. */
+    const done = () => { res.status(204).send(''); };
+
+    if (req.method === 'OPTIONS') return done();          // preflight, handled by cors
+    if (req.method !== 'POST') return done();
+
+    const origin = String(req.headers.origin || '');
+    if (!VISIT_ORIGINS.includes(origin)) return done();
+
+    /* Honoured here as well as in the browser. The page already declines to
+       ping under Global Privacy Control or Do Not Track, and a signal a
+       server ignores because it trusts the client to have obeyed it is not
+       being honoured at all. */
+    if (req.headers['sec-gpc'] === '1' || req.headers.dnt === '1') return done();
+
+    const ip = netorg.clientIp(req.headers['x-forwarded-for']);
+    if (!ip) return done();
+
+    const host = await reverseDns(ip);
+    /* `ip` is not referenced again, is written nowhere, and is not logged:
+       the whole of what survives this line is `host`, and below it only the
+       university that host belongs to. */
+
+    const hit = netorg.classify(host, UNI_DOMAINS);
+    const day = new Date().toISOString().slice(0, 10);
+    const inc = admin.firestore.FieldValue.increment(1);
+
+    /* The counters, and only counters.
+
+         seen      every ping — the denominator the page reports against
+         resolved  the ones DNS answered for AT ALL, an ISP included. It is
+                   not what the caption divides by (that would read "29% came
+                   from a university" over a figure that counts BT Broadband);
+                   it is the diagnostic that tells a maintainer looking at a
+                   thin chart whether reverse DNS is failing or the domain map
+                   simply does not know those universities. Two very different
+                   fixes, and nothing else on the page distinguishes them.
+         academic  an academic network this site publishes no department page
+                   for — a different fact from "not a university", and the
+                   thing that would otherwise be invisible.
+         unis      one tally per named university.
+
+       A NESTED MAP, never a dotted field path. `unis['St. John's University']`
+       as a path would be read as three fields, and this site's own directory
+       carries names with full stops in them. set({merge:true}) deep-merges a
+       map, so the key is taken literally. */
+    const patch = { day, t: Date.now(), seen: inc };
+    if (host) patch.resolved = inc;
+    if (hit && hit.university) patch.unis = { [hit.university]: inc };
+    else if (hit && hit.academic) patch.academic = inc;
+
+    try {
+      await visitsDb().collection('universityVisits').doc(day).set(patch, { merge: true });
+    } catch (e) {
+      /* Never surfaced and never retried: this is a statistic, and a visitor
+         must not wait on it or learn that it failed. */
+      logger.warn('visit not recorded', { error: e.message });
+    }
+    return done();
+  });

@@ -41,13 +41,17 @@
    summing them would silently double every day of the overlap — a chart that
    looks fine, moves in the right direction, and is wrong by a factor of two.
 
-   WHAT CANNOT BE REVIVED, AND IS THEREFORE MARKED FROZEN. The two university
-   charts came from UA's `networkDomain` / `networkLocation` dimensions — the
-   visitor's reverse-DNS. **GA4 does not have that dimension and no
-   replacement exists**, and a browser cannot see its own reverse-DNS either,
-   so the first-party record cannot stand in. Those two charts are a
-   historical archive from here on; `frozen` on the section says so on the
-   page rather than leaving a reader to assume the numbers are current.
+   THE UNIVERSITIES ARE A FOURTH MEASUREMENT, not a fourth day-source, and
+   they are LIVE AGAIN. They came from UA's `networkDomain` — the visitor's
+   reverse-DNS — and GA4 has no such dimension, from which it was concluded
+   here that the figures could never be shown again. That was wrong, and the
+   owner said so. A BROWSER cannot see its own reverse-DNS; a server can, and
+   this site has Cloud Functions, so it now resolves the address itself and
+   keeps a counter per day per university (assets/oa-netorg.js,
+   `recordVisit` in _functions/index.js). `frozen` therefore means what it
+   always should have: this section is an ARCHIVE of a closed period rather
+   than the current record — and the two are never merged, because they count
+   different decades under different rules.
    --------------------------------------------------------------------------- */
 
 (function (root, factory) {

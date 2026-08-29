@@ -163,7 +163,7 @@ jobs:
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data
+          git add data _functions
           git commit -m "OA data: publish queued submissions"
 
           # A REJECTED PUSH IS REBUILT, NEVER REBASED.
@@ -218,7 +218,7 @@ jobs:
               echo "the other writer published it all — nothing left to commit"
               exit 0
             fi
-            git add data
+            git add data _functions
             git commit -m "OA data: publish queued submissions"
           done
 

@@ -2726,7 +2726,7 @@ stays broken for as long as nobody happens to look*.
     assets/oa-analytics.css        its chrome, theme tokens throughout
     _scraper/build-analytics.mjs   writes data/analytics.json from its gated sources
     .github/workflows/oa-analytics.yml   daily
-    _SETUP-ANALYTICS.md            what each source needs, and what can never come back
+    _SETUP-ANALYTICS.md            what each source needs, and how it is switched on
 
 ### Three sources, and a day belongs to exactly ONE of them
 
@@ -2735,6 +2735,12 @@ stays broken for as long as nobody happens to look*.
 | `history` | `data/analytics-history.json` — which will never exist; see "the archive is CONFIRMED GONE" below | nothing, and nothing can be done: the spreadsheets were read and hold no measurement |
 | `usage` | the site's own `usageSessions` (assets/oa-usage.js, every page since 2026-08-17) | `FIREBASE_SERVICE_ACCOUNT`, **already a secret here** — so this one works today |
 | `ga4` | Google Analytics 4 through the Data API | `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT`, and a tag on the live site |
+
+**A FOURTH READ IS NOT IN THAT TABLE AND MUST NOT JOIN IT**: `visits`, the
+`universityVisits` counters — which universities are reading, from the
+visitor's own network (the section below). It measures something none of the
+three can measure, so it is passed to `assemble()` separately rather than
+entered into a precedence contest over days it has no claim on.
 
 `mergeDays` picks ONE source per day by `SOURCE_ORDER` and **never adds two
 together**. Two sources measuring the same Tuesday are two measurements of one
@@ -2748,26 +2754,132 @@ a GA4 timeout costs a day of freshness rather than the history. That matters
 more here than in the postings pipeline, because this file *is* the whole page:
 a half-written one is a blank dashboard.
 
-**Nothing is collected on the live site today.** The UA tag lives in
-`assets/js/ypo-parakolouthisi.js`, loaded only by the `/v1/` and `/v2/`
-archives; the root redesign carries **no analytics tag at all**. Firebase
-issues `G-2CX86W7PHB` and `oa-firebase.js` deliberately omits it. Adding a GA4
-tag means cookies, a consent banner and a Privacy Policy change on an EU-facing
-site — **a decision about visitors, not a bug fix**, so it was left to the
-owner rather than shipped.
+**The dead UA tag is still in the archives and nowhere else.**
+`assets/js/ypo-parakolouthisi.js` is loaded only by `/v1/` and `/v2/`; the live
+site's own tag is `assets/oa-ga4.js` (`G-RE8C5LD2FM`), added on the owner's
+instruction on 2026-08-29 — GA4 yes, banner no — which is what the cookieless
+section below is about. Firebase issues a Measurement ID of its own
+(`G-2CX86W7PHB`) and `oa-firebase.js` deliberately omits it: one property, one
+tag, or every page would report twice.
 
-### What can never be revived, and is therefore labelled
+### The university charts, and the conclusion that was wrong
 
-**The two university charts.** "Which universities visited" came from UA's
-`networkDomain` / `networkLocation` — the visitor's reverse-DNS. **GA4 has no
-such dimension and nothing replaces it**, and a browser cannot see its own
-reverse-DNS either, so the first-party record cannot stand in. Those figures
-are an **archive**: `universities.frozen` is true in the served file and the
-card carries "Archive — 2014 to 2023" with its date range, so nobody reads them
-as current. **And since 2026-08-29 there is nothing left to label** — the
-archived copy was checked and is empty too, so the card never draws at all. The
-conditional rendering is what makes that a clean absence rather than an empty
-box; see the section below for what happened to it.
+**"Which universities visited" came from UA's `networkDomain` — a reverse-DNS
+lookup of the visitor's IP.** GA4 has no such dimension and nothing replaces
+it. That much was checked, and from it the conclusion was drawn — and written
+into this file, the model, the builder, the page and the changelog, and told to
+the owner — that **the figures could never be shown again**. The owner said
+otherwise (2026-08-29) and was right.
+
+**What is true is that a BROWSER cannot see its own reverse-DNS.** What that
+overlooks is that nothing says the browser has to: anything server-side
+receives the connection and can see the address it came from, and this site has
+Cloud Functions. So the site now does for itself exactly what UA used to do for
+it — and rather better, because the answer is checked against the site's OWN
+curated directory of operations departments rather than against whatever string
+an ISP happens to publish. The failure shape is one this file names everywhere
+else: *a check that answers the question you asked, taken for an answer to the
+question you meant.*
+
+    assets/oa-visit.js       one ping per browsing SESSION, from every public page
+    _functions/index.js      recordVisit — resolves, classifies, counts
+    assets/oa-netorg.js      which university a hostname belongs to (dual-mode)
+    _scraper/build-netmap.mjs   domain -> university, DERIVED from the directory
+    universityVisits/{day}   counters only; no client may read or write it
+
+**THE IP IS NEVER STORED, and that is the shape rather than a promise.** It is
+resolved in memory, the university name is kept, and everything else goes out
+of scope when the request ends — not written, not logged. What reaches
+Firestore is a counter per day per university: no identifier, no cookie, no
+per-visitor row, consistent with the cookieless posture the GA4 tag runs under.
+The selftest reads the handler's own source and fails if anything below the
+lookup so much as names the address.
+
+**An ISP is not counted at all.** `classify` has three answers — a university
+the site publishes a department page for, an academic network it cannot name,
+or nothing — and the third is the important one: "one visit from BT Broadband"
+narrows a person far harder than "one visit from Oxford", and it answers no
+question the chart asks.
+
+**CURATED, NEVER GUESSED.** `data/university-domains.json` is DERIVED from the
+`deptUrl` of each row in the Universities directory, so the universities the
+site can NAME are exactly the ones it publishes a department page for, and it
+grows the way everything else here grows: somebody adds a department. A domain
+two universities both claim is **dropped** rather than picked between, and
+reported — attributing a visit to the wrong university is worse than not naming
+it, because a chart is read as fact and nothing on it would look wrong. The
+lookup is on the REGISTRABLE DOMAIN alone, so `some-lab.mit.edu` is MIT and
+`notmit.edu` can never be.
+
+**It is a DENYLIST, and that direction was measured.** Requiring an academic
+suffix instead dropped **28 real universities** — ETH Zurich (`ethz.ch`),
+McGill, Toronto, Bocconi, Erasmus (`rsm.nl`), TUM, Copenhagen Business School,
+UCD Smurfit — because outside the English-speaking world a university is very
+often on a plain national domain. Losing a university silently is the quieter
+and worse failure; a stray hosting domain in the map costs nothing, since
+nobody's IP reverse-resolves to `wordpress.com`. `academia.edu` is why a
+denylist is needed regardless: it ends in `.edu` and is a company.
+
+**THE ADMIN DESK IS EXCLUDED STRUCTURALLY.** `admin-area.html` does not load
+`oa-visit.js` at all — an inclusion list the selftest pins, not a runtime path
+check that could drift from `NON_PUBLIC`. The archives never load it either,
+since they carry their own frozen assets. **Adding a page means adding the
+tag**, exactly as with the GA4 one.
+
+**READ IT AS A SAMPLE, BECAUSE IT IS ONE.** Reverse DNS answers far less often
+in 2026 than it did in 2014 — campus egress through a commercial CDN or a cloud
+VPN, and a great deal of reading on phones. So every ping increments `seen`
+whether or not a name came back, and the page prints what it placed against it:
+*"of 12,000 visits, 3,455 (29%) were placed at a university listed here, and 900
+more came from a university this site has no department page for. The rest were
+on commercial or home connections, which are not recorded at all."* Without that
+denominator a short chart reads as "no universities visit", which is precisely
+the misreading the rest of this page was rebuilt to prevent.
+
+**THE DENOMINATOR IS WHAT THE SENTENCE CLAIMS — the caption divides by the BARS,
+never by `resolved`.** `resolved` counts every address reverse DNS answered for,
+an internet provider included, so dividing by it would print "29% came from a
+university" over a figure that counts BT Broadband. It is published anyway, and
+for one reason: it is the only thing that tells a maintainer looking at a thin
+chart whether reverse DNS is failing or the domain map simply does not know
+those universities. Two very different fixes, and nothing else on the page
+separates them. Academic networks it could not name are counted apart for the
+same kind of reason — that is a different fact from "not a university".
+
+**`frozen` still means something, and it is not "unrecoverable".** It means an
+ARCHIVE of a closed period, measured under another rule — which is what the
+2014-2023 figures would be if they ever turned up. The builder **never merges**
+the two: adding a decade of UA counts to a month of resolver counts gives a
+ranking that means nothing and cannot be explained on the page.
+
+**IT IS INERT UNTIL THE FUNCTIONS ARE DEPLOYED**, and in this repository they
+never have been — the three instant-publish doorbells above are undeployed,
+which is why an approval still waits for the schedule. One `firebase deploy
+--only functions --project operations-academia` switches on all four. Until
+then the ping fails silently, the collection stays empty, the builder logs
+`visits: universityVisits is empty`, and the page draws no figure rather than
+an empty one. **A doorbell nobody deployed looks exactly like a site that is
+simply slow**, and this is the same trap wearing the chart's clothes.
+
+**`build-netmap.mjs` is in `BUILDERS`, after `build-directory.mjs`**, because
+it is derived from the directory that builder writes — so a university that
+gained a card in a run is recognisable from its network from that run on. It
+writes into `_functions/` as well as `data/`, which is why the jobs build's two
+`git add` lines name both. The vendored `netorg.js` and `university-domains.json`
+are pinned byte-for-byte against their sources: `firebase deploy` ships only
+`_functions/`, so a drifted copy would resolve visitors against a stale map in
+production with nothing anywhere saying so.
+
+Tests: `testUniversityVisits` in `_scraper/selftest.mjs` (the classifier and
+its three answers, the last-entry X-Forwarded-For rule and why, the derived map
+against the committed directory, the vendored copies, the handler's source read
+back for what it must never do, the rules, the ping's presence on every public
+page and its absence from the desk, and — the guard that would have stopped
+this being written wrongly a second time — that no file still ASSERTS the
+figures cannot come back, matched present-tense so the files may go on
+RECOUNTING the mistake in order to correct it), plus the universities block in
+`_scraper/page-test.mjs` (a live section carrying no archive chip and printing
+its own coverage, and an archived one still labelled with its range).
 
 ### The two rules the charts themselves had to learn
 
@@ -4055,6 +4167,7 @@ the workflow rather than a terminal.
                                     # decision, its wiring on every gated list,
                                     # both stylesheets, and that no page calls
                                     # it privacy or security)
+    node _scraper/build-netmap.mjs --selftest      # domain -> university, derived
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

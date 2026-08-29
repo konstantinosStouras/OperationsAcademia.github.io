@@ -23,11 +23,16 @@
        source yet          -> NOT DRAWN, and named in the provenance note at
                               the foot instead. An empty axis is the shape of
                               the defect this page was rebuilt to remove.
-     - the universities    -> labelled FROZEN, with its own date range. UA's
-                              networkDomain is the only thing that ever
-                              produced those numbers and no analytics product
-                              offers a replacement, so they are an archive and
-                              must never be read as current.
+     - the universities    -> drawn with the SHARE OF VISITS it could place,
+                              never as a bare ranking. It is measured from the
+                              visitor's own network (see oa-netorg.js) and
+                              reverse DNS answers for perhaps a third of
+                              visits, so a chart without its denominator would
+                              read as "hardly any universities" instead of as
+                              the sample it is. An ARCHIVED copy of the figure,
+                              were one ever to exist, is labelled frozen with
+                              its own date range and never mixed with the live
+                              one — two rules, one ranking, no meaning.
 
    EVERY FIGURE STATES WHERE IT COMES FROM AND WHAT SPAN IT COVERS. The day
    rows go back as far as the record does; the dimension tallies are recomputed
@@ -83,10 +88,11 @@
     {
       id: 'countries', kind: 'bars',
       title: 'Where readers are',
-      sub: 'Visits by country. This is the nearest thing left to the old “which ' +
-        'universities visited” charts: those were measured from the visitor’s ' +
-        'reverse-DNS, which no analytics product still offers, and a country is ' +
-        'what can honestly be measured instead.',
+      sub: 'Visits by country, as Google Analytics reports them. It is the ' +
+        'coarser companion to “Which universities visited” below, which resolves ' +
+        'the visitor’s own network to a named university where it can — this one ' +
+        'places every visit, including the ones on a commercial or home ' +
+        'connection that the university figure deliberately does not record.',
       unit: 'visits', limit: 12,
     },
     {
@@ -191,8 +197,12 @@
         (span(eng) || 'on average'));
     }
     if (data.totals && data.totals.universities) {
+      var u = data.universities || {};
       html += tile('Universities seen', C.full(data.totals.universities),
-        'in the 2014–2023 archive');
+        u.frozen
+          ? (u.from ? 'in the ' + u.from.slice(0, 4) + '–' + u.to.slice(0, 4) + ' archive'
+            : 'archived')
+          : 'recognised from their networks');
     }
     html += '</div>';
     host.innerHTML = html;
@@ -507,20 +517,63 @@
     provenance(f.section, rec);
   }
 
-  /** The frozen archive. Drawn last and labelled, because these numbers can
-      never be brought up to date: they came from Universal Analytics'
-      networkDomain — the visitor's reverse-DNS — and no analytics product
-      sells that dimension any more. */
+  /** Which universities read the site.
+   *
+   *  IT IS A SAMPLE AND IT SAYS SO. The university is worked out from the
+   *  visitor's own network, which is only knowable when their address
+   *  reverse-resolves to a name — true of a campus office, false of a phone
+   *  on mobile data or a campus behind a commercial CDN. So the caption
+   *  always carries the SHARE of visits it could place. A ranking printed
+   *  without that share reads as "these are the universities that visit",
+   *  which is a claim this measurement cannot make, and the reason the rest
+   *  of this page exists is that a figure nobody can check goes wrong quietly.
+   *
+   *  A frozen ARCHIVE — a closed, differently-measured period — is drawn the
+   *  same way but labelled, and the builder never merges the two. */
   function renderUniversities() {
     var u = (state.data && state.data.universities) || {};
     if (!u.all || !u.all.length) return;
+
+    /* `range`, never `span`: this file now has a span() FUNCTION for the
+       dimension records, and a local of that name would shadow it. */
     var range = u.from && u.to ? pretty(u.from) + ' to ' + pretty(u.to) : '';
-    var f = figure('Which universities visited',
-      'Visits by university, counted from the visitor\'s own network. ' +
-      (range ? 'Covers ' + range + '. ' : '') +
-      'This one cannot be brought up to date: it was measured from a dimension ' +
-      'Universal Analytics offered and no analytics product has replaced.',
-      { frozen: 'Archive — 2014 to 2023' });
+    var sub;
+    var opts = null;
+
+    if (u.frozen) {
+      sub = 'Visits by university, counted from the visitor\'s own network. ' +
+        (range ? 'Covers ' + range + '. ' : '') +
+        'An archive: it was measured differently from the figures above and ' +
+        'is not being added to.';
+      opts = { frozen: 'Archive' + (u.from ? ' — ' + u.from.slice(0, 4) + ' to ' + u.to.slice(0, 4) : '') };
+    } else {
+      /* THE DENOMINATOR IS WHAT THE SENTENCE CLAIMS. `resolved` counts every
+         address reverse DNS answered for, an internet provider included, so
+         dividing by it would print "29% came from a university" over a figure
+         that counts BT Broadband. What is placed AT a university is the sum of
+         the bars themselves — one visit increments exactly one of them. */
+      var seen = Number(u.seen) || 0;
+      /* the builder publishes the true total; summing the ROWS is the
+         fallback, and would be a little low whenever the list is longer than
+         the cut the served file makes */
+      var placed = Number(u.placed) ||
+        u.all.reduce(function (n, x) { return n + (Number(x.visits) || 0); }, 0);
+      var acad = Number(u.academic) || 0;
+      var share = seen ? Math.round((placed / seen) * 100) : 0;
+      sub = 'Visits by university, worked out from the visitor\'s own network — ' +
+        'nobody is identified and no address is kept. ' +
+        (range ? 'Covers ' + range + '. ' : '');
+      if (seen) {
+        sub += 'It is a sample rather than a count: of ' + C.full(seen) + ' visits, ' +
+          C.full(placed) + ' (' + share + '%) were placed at a university listed here' +
+          (acad ? ', and ' + C.full(acad) + ' more came from a university this site ' +
+            'has no department page for' : '') +
+          '. The rest were on commercial or home connections, which are not ' +
+          'recorded at all. Read the shape rather than the totals.';
+      }
+    }
+
+    var f = figure('Which universities visited', sub, opts);
     root.appendChild(f.section);
     C.bars(f.body, { unit: 'visits', limit: 25, xTitle: 'University',
       items: u.all.map(function (x) {
@@ -556,6 +609,23 @@
       'in. That has a cost we would rather state than hide — with no identifier ' +
       'it cannot tell a returning reader from a new one, so everything it reports is ' +
       'counted in <b>visits</b> rather than in people.</p>';
+
+    /* THE UNIVERSITIES ARE NOT A `DIMENSION`, and they belong in this note
+       anyway: it promises to say where EVERY figure comes from, and this is
+       the one whose source is neither of the two analytics systems named
+       above — the site resolves it itself, which is exactly the thing a
+       reader would otherwise have no way to learn. It is listed as HAVE or
+       as MISSING on the same rule as the rest: drawn, or named. */
+    var uni = data.universities || {};
+    var uniHas = (uni.all || []).length;
+    if (uniHas) {
+      have.push('<li><b>Which universities visited</b> — ' +
+        (uni.frozen ? 'an archive of an earlier measurement'
+          : 'this site’s own resolver, from the visitor’s network') +
+        (span(uni) ? ', ' + esc(span(uni)) : '') + '</li>');
+    } else {
+      missing.push('<li>Which universities visited</li>');
+    }
 
     if (have.length) html += '<ul class="oa-an-list">' + have.join('') + '</ul>';
     if (missing.length) {

@@ -225,6 +225,24 @@
           rel="noopener">Global Privacy Control</a> signal, or the older &ldquo;Do Not Track&rdquo;
           signal, Google Analytics is not loaded at all on your visit &mdash; not merely asked to
           behave, but never contacted.</p>
+          <h2>Which universities read the Site</h2>
+          <p>The Site publishes a chart of the universities its readers come from, on its
+          <a href="analytics.html">Analytics</a> page. It is worked out like this: once per browsing
+          session your browser sends us a request carrying no name, no identifier, no cookie and no
+          message of any kind. Our server looks at the network address that request arrived from and
+          asks the public directory of the internet what that network is called &mdash; the same
+          look-up an e-mail server or a web log performs. If the answer is a university we list a
+          department for, we add <strong>one</strong> to that university&rsquo;s count for the day.</p>
+          <p><strong>Your address is never stored.</strong> It is used for that one look-up, in memory,
+          and is gone when the request ends; it is not written to any file or database and it is not
+          written to any log. What we keep is a daily tally &mdash; how many visits there were, how
+          many could be placed, and a number against each university. There is no record of an
+          individual visit and nothing that could be traced back to you.</p>
+          <p>If your network turns out to belong to a company, an internet provider or a mobile
+          operator rather than a university, <strong>nothing at all is recorded</strong> &mdash; not
+          the address, and not the name of the provider. If your browser sends a Global Privacy
+          Control or &ldquo;Do Not Track&rdquo; signal, no request is sent in the first place.</p>
+
           <p>We additionally record basic usage of the Site &mdash; the pages you visit, the time you
           spend on them, the links and buttons you click, and which form fields you interact with
           (never the text you type into them). When you are signed in to an Operations Academia account
@@ -328,6 +346,7 @@
     <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
 
     <script defer src="assets/oa-ga4.js"></script>
+    <script defer src="assets/oa-visit.js"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
