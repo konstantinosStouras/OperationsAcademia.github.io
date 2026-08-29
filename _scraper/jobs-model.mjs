@@ -263,6 +263,116 @@ export function ownerTag(uid) {
   return createHash('sha256').update(s).digest('hex').slice(0, 16);
 }
 
+/* ------------------------------------------------------- WHO posted a posting
+
+   Two roads reach the jobs page and only a person walks one of them: a poster
+   fills the form in on post-a-job.html, or the crawler reads a row out of the
+   maintainer's tracking workbook. From the maintainer's inbox the two were
+   indistinguishable — the review e-mail and the submission e-mail carried the
+   same fields and neither said where the posting had come from, so "did
+   somebody send this, and who?" could only be answered by opening the Admin
+   area and finding the card (owner, 2026-08-29).
+
+   ONE DEFINITION, because both mailers need the same answer and two copies of
+   one rule disagree silently — the reason `oa-countries.js`, `oa-schools.js`
+   and `oa-jobnav.js` all exist. It lives here because this file already owns
+   `source`, which is the field that settles it.
+
+   IT IS FOR THE MAINTAINER'S EYES AND NOTHING ELSE. The address it returns is
+   the one the poster typed so the site could reach them; PUBLIC_FIELDS is what
+   keeps it out of data/, `stripRowEmails` is what keeps it out of the text
+   there, and the only callers are the two mailers addressed to the maintainer.
+   It must never be rendered into a served file, a public page, or the e-mail
+   the POSTER receives — an address quoted back at its own owner tells them
+   nothing and teaches the habit of putting one in a message that could be
+   forwarded.
+
+   THE SOURCE WINS OVER THE DOCUMENT. A tracking-sheet MIRROR is an ordinary
+   `jobSubmissions` document once the maintainer edits it (sheetMirrorDoc /
+   sheetHandover below), so "the document exists, therefore a person made it"
+   would report the workbook's rows as somebody's submission. A source this
+   pipeline knows to be a crawler is a crawler whatever else the document
+   carries; only then is a person looked for.                                */
+
+/** The crawlers, and what to call each one in a sentence. A source not listed
+    here is either the site's own form or something new — see `postedBy`. */
+export const CRAWLER_SOURCES = {
+  'jobmarket-sheet': 'the OM Job Market tracking sheet (Google Sheets)',
+  'sheet-import': 'the legacy Google Form response sheet',
+  'legacy-import': 'the legacy Awesome Tables spreadsheets',
+};
+
+/** The source the site's own posting form stamps. */
+export const FORM_SOURCE = 'oa-form';
+
+/** Every source, in the words a message uses. The crawlers plus the form —
+    which is deliberately NOT in CRAWLER_SOURCES, because that map is what
+    DECIDES whether a posting was made by a machine. */
+export const SOURCE_LABELS = {
+  ...CRAWLER_SOURCES,
+  [FORM_SOURCE]: 'the posting form on the site',
+};
+
+/** What to call a source in a sentence — its own name when it is not one this
+    pipeline knows, so a source added tomorrow reads as itself rather than
+    disappearing. */
+export function sourceLabel(source) {
+  const s = text(source, 40);
+  if (!s) return '';
+  return SOURCE_LABELS[s] || s;
+}
+
+/**
+ * An address a person actually gave, or ''.
+ *
+ * The address the poster typed for us to reach them (`email`) first, then the
+ * account they signed in with (`authEmail`) — the form pre-fills the first
+ * from the second, so they are usually the same and the typed one is the one
+ * they chose. Shape-checked rather than trusted: it becomes an href and, in
+ * the live pass below, an envelope recipient.
+ */
+export function contactEmail(doc) {
+  for (const k of ['email', 'authEmail']) {
+    const v = text(doc && doc[k], 200);
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return v;
+  }
+  return '';
+}
+
+/**
+ * Who put this posting on the site.
+ *
+ * `{ kind, name, email, source, label, text }` — `kind` is 'user' or
+ * 'crawler', `text` the one line an e-mail prints. `doc` is the submission or
+ * review document; `row` is the posting, consulted only for its `source` when
+ * the document has none (a `jobReviews` document keeps the source inside its
+ * snapshot of the row).
+ */
+export function postedBy(doc, row = null) {
+  const d = doc || {};
+  const source = text(d.source, 40) || text(row && row.source, 40);
+
+  if (source && CRAWLER_SOURCES[source]) {
+    const label = sourceLabel(source);
+    return { kind: 'crawler', name: '', email: '', source, label,
+             text: `auto-crawler from ${label}` };
+  }
+
+  const name = [text(d.firstName, 100), text(d.lastName, 100)].filter(Boolean).join(' ');
+  const email = contactEmail(d);
+  if (name || email) {
+    return { kind: 'user', name, email, source, label: sourceLabel(source),
+             text: [name, email].filter(Boolean).join(' ') };
+  }
+
+  /* No person on the document and a source nobody here recognises. Saying
+     "auto-crawler" would be a guess and saying nothing would leave the line
+     blank in a message whose whole point is to answer this question. */
+  const label = sourceLabel(source);
+  return { kind: 'crawler', name: '', email: '', source, label,
+           text: label ? `auto-crawler from ${label}` : 'not recorded' };
+}
+
 /* --------------------------------------------------------- the market year
 
    ONE definition, because there were two: rowFromSubmission derived the year

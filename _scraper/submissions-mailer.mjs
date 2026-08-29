@@ -2,11 +2,19 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — tell the maintainer somebody has posted something.
 
-       jobSubmissions       \
-                              ->  THIS  ->  one e-mail per submission
-       candidateSubmissions /                        |
-                                          the maintainer looks at it on
-                                          operationsacademia.org/admin-area
+       jobSubmissions       \                        the maintainer looks at it
+                              ->  THIS  -> (1) ->  on /admin-area
+       candidateSubmissions /             \
+                                           (2) ->  the POSTER hears that their
+                                                   posting is publicly shown
+
+   TWO MESSAGES, TWO AUDIENCES, ONE READ. (1) is the maintainer's notice that
+   somebody has posted something — and, since 2026-08-29, it says WHO
+   (`postedBy`): a person's name and address, or the crawler and the workbook
+   it read. (2) is the poster's own, sent once their posting is really on the
+   site, thanking them and showing them what a visitor now sees. They share
+   this run's two reads and nothing else: separate recipients, separate
+   renderers, separate high-water marks.
 
    WHAT WAS MISSING. The tracking sheet's postings are announced
    (jobreview-mailer.mjs) and everything posted through the site's own forms
@@ -17,7 +25,7 @@
    been sitting there.
 
    ONE E-MAIL PER SUBMISSION, and `announcedAt` on the document is the
-   high-water mark, so nothing is announced twice and a run that dies half-way
+   high-water mark (`liveMailedAt` for the poster's), so nothing is sent twice and a run that dies half-way
    resumes rather than repeats — the same shape as the review queue's mailer,
    for the same reasons. Above `BURST` a batch goes as one list rather than as
    a mail bomb from the site's own address.
@@ -43,14 +51,17 @@
 
 import { isMain } from './_main.mjs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import {
-  KINDS, SINCE, ANNOUNCED_AT, partitionSubmissions, idsOf, createdDay,
+  KINDS, SINCE, ANNOUNCED_AT, LIVE_SINCE, LIVE_MAILED_AT,
+  partitionSubmissions, partitionLive, idsOf, rowsById, createdDay,
 } from './submissions-review.mjs';
+import { postedBy, longDate, marketLabel } from './jobs-model.mjs';
 import {
-  shell, esc, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
+  shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
 } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -84,6 +95,33 @@ function line(label, value) {
 }
 
 /**
+ * WHO posted it — the line the owner asked for (2026-08-29): a person's name
+ * and the address they gave, so the maintainer's inbox answers "who sent
+ * this?" without their opening the Admin area and finding the card.
+ *
+ * TO THE MAINTAINER AND NOBODY ELSE — the owner's own "(and only)". This
+ * message goes to one address, the one `isAdmin()` authorises for every admin
+ * surface on the site; the poster's address is never in a served file
+ * (PUBLIC_FIELDS), never on a public page, and never in the e-mail the POSTER
+ * receives. It is a `mailto:` so replying to the person is one click rather
+ * than a copy-paste out of a table.
+ *
+ * `postedBy` is the shared rule (jobs-model.mjs), so this e-mail and the
+ * review queue's cannot disagree about what a source is called — and a
+ * tracking-sheet MIRROR the maintainer has taken over reads as the crawler's
+ * row that it is, rather than as somebody's submission with no name on it.
+ */
+function postedByHtml(doc) {
+  const who = postedBy(doc);
+  const shown = who.email
+    ? (who.name ? esc(who.name) + ' ' : '') +
+      '<a href="mailto:' + esc(who.email) + '">' + esc(who.email) + '</a>'
+    : esc(who.text);
+  return '<p style="margin:0 0 14px;color:#5a5f6b;font-size:13px">' +
+    '<strong style="color:#222">Posted by:</strong> ' + shown + '</p>';
+}
+
+/**
  * One submission.
  *
  * It says what it IS before it says what to do about it, and it is honest
@@ -103,6 +141,7 @@ export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' 
 
   const bodyHtml =
     '<p>A <strong>' + esc(kind.one) + '</strong> has been posted through the site.</p>' +
+    postedByHtml(doc) +
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
       kind.summarise(doc, row).map(([l, v]) => line(l, v)).join('') +
       line('Posted', createdDay(doc)) +
@@ -133,14 +172,22 @@ export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' 
  */
 export function renderSubmissionDigest(items, { site = SITE } = {}) {
   const reviewUrl = site + '/admin-area';
+  /* WHO, per row: a digest is still the only thing the maintainer reads about
+     these, so the answer cannot be dropped for arriving in company. Plain
+     text rather than a mailto here — twelve links in a list is a wall of
+     blue, and the per-submission card is one click away. */
   const rows = items.map(({ kind, entry }) => {
     const title = kind.headline(entry.data || {}, entry.row || null);
+    const who = postedBy(entry.data || {});
     return '<tr>' +
       '<td style="padding:3px 12px 3px 0;vertical-align:top;white-space:nowrap;' +
         'color:#5a5f6b">' + esc(createdDay(entry.data) || '') + '</td>' +
       '<td style="padding:3px 12px 3px 0;vertical-align:top;white-space:nowrap;' +
         'color:#5a5f6b">' + esc(kind.one) + '</td>' +
-      '<td style="padding:3px 0;vertical-align:top">' + esc(title || entry.id) + '</td>' +
+      '<td style="padding:3px 12px 3px 0;vertical-align:top">' +
+        esc(title || entry.id) + '</td>' +
+      '<td style="padding:3px 0;vertical-align:top;color:#5a5f6b">' +
+        esc(who.text) + '</td>' +
       '</tr>';
   }).join('');
 
@@ -150,7 +197,11 @@ export function renderSubmissionDigest(items, { site = SITE } = {}) {
     '<p><strong>' + items.length + '</strong> new ' + esc(kinds) +
     ' have been posted through the site.</p>' +
     '<p>They came in together, so they are listed here rather than sent one by one.</p>' +
-    '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' + rows + '</table>' +
+    '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' +
+      '<tr>' + ['Posted', 'Kind', 'What', 'Posted by'].map((h) =>
+        '<th style="text-align:left;padding:0 12px 4px 0;font-weight:600;color:#222;' +
+        'white-space:nowrap">' + esc(h) + '</th>').join('') + '</tr>' +
+      rows + '</table>' +
     '<p><a href="' + esc(reviewUrl) + '" style="display:inline-block;background:#426394;' +
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
       'Look at them on the site</a></p>' +
@@ -161,6 +212,97 @@ export function renderSubmissionDigest(items, { site = SITE } = {}) {
   return {
     subject: items.length + ' new submissions on Operations Academia',
     html: shell({ title: items.length + ' new submissions', bodyHtml, manageUrl: reviewUrl }),
+  };
+}
+
+/* ------------------------------------------- the poster's own e-mail
+
+   Owner, 2026-08-29. Everything above this line goes to the maintainer; this
+   one goes to the person who filled the form in, once their posting is really
+   on the site. See `partitionLive` in submissions-review.mjs for WHEN, which
+   is the half that matters — the message is only honest because the condition
+   is "the row is in the served file this run just read".                   */
+
+/** WHICH PAGE the posting is on, and the link that opens THAT one — the site's
+    own `OAJobNav`, so the address in the e-mail is the address the Admin
+    area's cards use and the jobs page's `?job=` focus understands. A posting
+    whose season has rolled lives on Previous markets, and a link to the jobs
+    page would open a list that cannot contain it. */
+const JOBNAV = createRequire(import.meta.url)('../assets/oa-jobnav.js');
+
+/** The one link a poster is given for their own posting. */
+export function livePostingUrl(row, { site = SITE, now = new Date() } = {}) {
+  return site + '/' + JOBNAV.hrefFor(row || {}, now);
+}
+
+/**
+ * "Your posting is on the site" — sent once, to the person who posted it.
+ *
+ * WHAT IT SHOWS IS WHAT THE SITE SHOWS. The row comes from `data/jobs.json`,
+ * not from their document, so a name the build canonicalised, a deadline it
+ * healed and the market years it derived all read here exactly as a visitor
+ * reads them — and if any of that is wrong, the same message is where they
+ * find the link to correct it.
+ *
+ * WHAT IT DOES NOT SHOW is anything private. Their own address is not quoted
+ * back at them (it tells them nothing, and this is a message people forward),
+ * and the chair's name and address they gave us are ADMIN-ONLY by the same
+ * `PUBLIC_FIELDS` rule that keeps them out of `data/` — so the summary is
+ * built from the SERVED row and can only ever contain published fields.
+ */
+export function renderLivePostingEmail(entry, { site = SITE, now = new Date() } = {}) {
+  const doc = entry.data || {};
+  const r = entry.published || entry.row || {};
+  const title = [r.institution, r.department].filter(Boolean).join(' — ');
+  const url = livePostingUrl(r, { site, now });
+  const editUrl = site + '/post-a-job.html?edit=' + encodeURIComponent(entry.id);
+  const mineUrl = site + '/my-postings.html';
+  const ad = safeUrl(r.adUrl);
+
+  const first = String(doc.firstName || '').trim();
+  const hello = first ? 'Dear ' + esc(first) + ',' : 'Hello,';
+
+  /* The seasons the posting is listed under — `years` is the SPAN, and a
+     search advertised in one season that closes in the next is genuinely on
+     both pages, so saying only one of them would be wrong. */
+  const years = Array.isArray(r.years) && r.years.length
+    ? r.years : (r.year ? [r.year] : []);
+  const seasons = years.map((y) => marketLabel(Number(y))).join(' and ');
+
+  const bodyHtml =
+    '<p>' + hello + '</p>' +
+    '<p>Your job posting is now <strong>live on operationsacademia.org</strong> ' +
+    'and can be seen by everyone visiting the site.</p>' +
+    '<p><a href="' + esc(url) + '" style="display:inline-block;background:#426394;' +
+      'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
+      'See your posting on the site</a></p>' +
+    '<p style="margin:18px 0 6px;font-weight:600">Your posting, as it appears</p>' +
+    '<table style="border-collapse:collapse;font-size:14px;margin:0 0 14px">' +
+      line('Institution', r.institution) +
+      line('School / department', r.department) +
+      line('Type', r.type) +
+      line('Entry level', (r.levels || []).join(', ')) +
+      line('Country', r.country) +
+      line('Advertised', /^\d{4}-\d{2}-\d{2}$/.test(String(r.posted || ''))
+        ? longDate(r.posted) : r.posted) +
+      line('Listed under', seasons) +
+      line('Suggested apply by', r.reviewDate ? longDate(r.reviewDate) : '') +
+      line('Final apply by', r.applyBy) +
+      line('Advertisement', ad) +
+      line('Reference', doc.ref || r.ref || '') +
+    '</table>' +
+    '<p>Thank you for using <strong>OperationsAcademia.org</strong>. We wish you ' +
+    'every success with your search, and hope you fill the position with an ' +
+    'excellent candidate.</p>' +
+    '<p style="color:#5a5f6b;font-size:13px">Something to change? You can ' +
+    '<a href="' + esc(editUrl) + '">correct this posting</a> at any time, and ' +
+    '<a href="' + esc(mineUrl) + '">My postings</a> lists everything you have ' +
+    'posted — corrections and takedowns reach the site within a few minutes. ' +
+    'Please quote the reference above if you write to us about it.</p>';
+
+  return {
+    subject: 'Your job posting is live: ' + (title || r.id || 'Operations Academia'),
+    html: shell({ title: 'Your job posting is live', bodyHtml, manageUrl: null }),
   };
 }
 
@@ -183,11 +325,19 @@ async function main() {
   const now = new Date();
 
   /* Read every kind first, so a batch spanning both is announced as ONE
-     digest rather than as two that each fall under the burst threshold. */
+     digest rather than as two that each fall under the burst threshold.
+
+     TWO PASSES OFF ONE READ. The maintainer's announcement and the poster's
+     "it is live now" both need the same two things — the live documents and
+     the served dataset — so they are derived together and sent separately.
+     Each keeps its OWN high-water mark, so neither can suppress the other. */
   const all = [];
   const toStamp = [];
+  const live = [];
+  const liveStamp = [];
   for (const kind of KINDS) {
-    const published = idsOf(await readJson(kind.dataset, []));
+    const rows = await readJson(kind.dataset, []);
+    const published = idsOf(rows);
     const snap = await db.collection(kind.collection)
       .where('status', 'in', ['queued', 'published']).get();
     const entries = snap.docs.map((d) => ({ id: d.id, data: d.data() }));
@@ -203,11 +353,28 @@ async function main() {
 
     for (const e of announce) all.push({ kind, entry: e });
     for (const e of grandfather) toStamp.push({ kind, id: e.id });
+
+    /* …and who is owed a thank-you. `published` here is the ROW, not the id:
+       the poster is shown what the site shows. */
+    const told = partitionLive(kind, entries, { published: rowsById(rows), now });
+    if (kind.tellsPoster) {
+      log(`${kind.collection}: ${told.mail.length} poster(s) to tell their posting is live` +
+          (told.grandfather.length
+            ? `, ${told.grandfather.length} posted before ${LIVE_SINCE} (stamped, not mailed)`
+            : ''));
+    }
+    for (const e of told.mail) live.push({ kind, entry: e });
+    for (const e of told.grandfather) liveStamp.push({ kind, id: e.id });
   }
 
   if (SCAN) {
     for (const { kind, entry } of all) {
-      log(`  ${kind.one}  ${entry.id}  ${kind.headline(entry.data || {}, entry.row)}`);
+      log(`  to the maintainer: ${kind.one}  ${entry.id}  ` +
+          `${kind.headline(entry.data || {}, entry.row)}`);
+    }
+    for (const { kind, entry } of live) {
+      log(`  to the poster: ${kind.one}  ${entry.id}  ` +
+          `${kind.headline(entry.data || {}, entry.row)}`);
     }
     log('--scan: sent nothing, wrote nothing.');
     return 0;
@@ -229,31 +396,61 @@ async function main() {
     log(`${toStamp.length} submission(s) already on the site were stamped without an e-mail.`);
   }
 
-  if (!all.length) return 0;
+  /* The same rule for the poster's mark, and for the same reason: the backlog
+     that predates the feature is written off once, silently, rather than
+     re-derived by every run for ever. */
+  if (liveStamp.length && !DRY) {
+    const at = new Date().toISOString();
+    for (const { kind, id } of liveStamp) {
+      try {
+        await db.collection(kind.collection).doc(id)
+          .set({ [LIVE_MAILED_AT]: at }, { merge: true });
+      } catch (e) {
+        warn(`could not stamp the pre-${LIVE_SINCE} ${kind.one} ${id}: ${e.message}`);
+      }
+    }
+    log(`${liveStamp.length} posting(s) from before ${LIVE_SINCE} were stamped ` +
+        'without thanking anybody.');
+  }
+
+  if (!all.length && !live.length) return 0;
 
   const tx = await transport();
   if (!tx && !DRY) {
-    warn('SMTP is not configured — the submissions stay unannounced and will be ' +
-         'mailed once it is. See _SETUP-EMAIL.md');
+    warn('SMTP is not configured — the submissions stay unannounced, the posters ' +
+         'unthanked, and both are mailed once it is. See _SETUP-EMAIL.md');
     return 0;
   }
 
-  /* A batch is one message. `at` is computed ONCE so the whole batch shares a
-     mark, and a stamp that fails is warned about rather than thrown: the
-     e-mail has gone, and leaving the rest unstamped would send it again. */
+  await announceToMaintainer(db, tx, all, revealAt);
+  await thankPosters(db, tx, live);
+  return 0;
+}
+
+/**
+ * The maintainer's announcement — a digest for a batch, one card each
+ * otherwise.
+ *
+ * A batch is one message. `at` is computed ONCE so the whole batch shares a
+ * mark, and a stamp that fails is warned about rather than thrown: the e-mail
+ * has gone, and leaving the rest unstamped would send it again.
+ */
+async function announceToMaintainer(db, tx, all, revealAt) {
+  if (!all.length) return;
+
   if (all.length > BURST) {
     const { subject, html } = renderSubmissionDigest(all);
     if (DRY) {
       log(`--dry-run: ${all.length} submissions would go as ONE digest`);
       log('subject: ' + subject);
       log(toPlain(html));
-      return 0;
+      return;
     }
     try {
       await send(tx, { from: fromAddress(), to: TO, subject, html, text: toPlain(html) });
     } catch (e) {
       warn(`could not e-mail the digest: ${e.message}`);
-      return 0;
+      return;
     }
     const at = new Date().toISOString();
     for (const { kind, entry } of all) {
@@ -266,7 +463,7 @@ async function main() {
       }
     }
     log(`announced ${all.length} submission(s) as one digest.`);
-    return 0;
+    return;
   }
 
   for (const { kind, entry } of all) {
@@ -296,8 +493,59 @@ async function main() {
            'it may be announced twice');
     }
   }
+}
 
-  return 0;
+/**
+ * …and the poster hears that their posting is on the site.
+ *
+ * ONE AT A TIME, NEVER A DIGEST. The maintainer's messages are batched above a
+ * burst because they are all one person's inbox and one person's decisions;
+ * these go to a different person each, so there is nothing to batch — and a
+ * poster is written to exactly once, whatever else the run is doing.
+ *
+ * `Reply-To` is the maintainer, because a poster's natural reply to "your
+ * posting is live" is a question about it, and the send address is a mailbox
+ * nobody reads.
+ *
+ * SENT FIRST, STAMPED AFTER, like every other mark here — the failure that
+ * matters is a poster who is never told, and a duplicate after a crash between
+ * the two is the lesser one.
+ */
+async function thankPosters(db, tx, live) {
+  if (!live.length) return;
+
+  let sent = 0;
+  for (const { kind, entry } of live) {
+    const { subject, html } = renderLivePostingEmail(entry);
+
+    if (DRY) {
+      log(`\n--- would send to the poster (${entry.to}) ---`);
+      log('subject: ' + subject);
+      log(toPlain(html));
+      continue;
+    }
+
+    try {
+      await send(tx, { from: fromAddress(), to: entry.to, replyTo: CONTACT,
+                       subject, html, text: toPlain(html) });
+    } catch (e) {
+      /* Unstamped on purpose: the next run tries again. */
+      warn(`could not tell the poster of ${entry.id} that it is live: ${e.message}`);
+      continue;
+    }
+
+    try {
+      await db.collection(kind.collection).doc(entry.id)
+        .set({ [LIVE_MAILED_AT]: new Date().toISOString() }, { merge: true });
+    } catch (e) {
+      warn(`told the poster of ${entry.id} but could not stamp it (${e.message}) — ` +
+           'they may be told twice');
+    }
+    sent++;
+  }
+
+  if (DRY) log(`--dry-run: would have told ${live.length} poster(s).`);
+  else log(`told ${sent} poster(s) their posting is live.`);
 }
 
 /* ---------------------------------------------------------------- selftest */
@@ -314,9 +562,10 @@ function selftest() {
     id: 'j1',
     data: {
       status: 'queued', createdAt: '2026-09-02T09:00:00Z', ref: 'OA-JOB-1',
+      source: 'oa-form', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@x.edu',
       institution: 'Tulane University', school: 'A. B. Freeman School of Business',
       unit: 'Management Science', country: 'United States', type: 'Business School',
-      levels: ['Assistant Professor'], applyBy: 'Until filled.',
+      levels: ['Assistant Professor'], applyBy: 'Until filled.', untilFilled: true,
       adUrl: 'https://example.org/ad', year: 2027,
     },
   };
@@ -362,6 +611,24 @@ function selftest() {
   ok(!/posted through the site[\s\S]*posted through the site/.test(digest.html),
     'said once, not once per submission');
 
+  /* --- WHO posted it (owner, 2026-08-29) --------------------------------- */
+  ok(/Posted by:/.test(one.html), 'the maintainer is told who posted it');
+  ok(/Ada Lovelace/.test(one.html) && /ada@x\.edu/.test(one.html),
+    'by name and by the address they gave');
+  ok(/mailto:ada@x\.edu/.test(one.html), 'as a mailto, so replying is one click');
+  const crawled = renderSubmissionEmail(job, {
+    id: 'm1',
+    data: { ...jobDoc.data, source: 'jobmarket-sheet',
+            firstName: '', lastName: '', email: '', authEmail: '' },
+    row: null,
+  }, { site: 'https://x.test' });
+  ok(/auto-crawler from the OM Job Market tracking sheet/.test(crawled.html),
+    'and a claimed tracking-sheet mirror reads as the crawler, not as a nameless person');
+  ok(/Posted by/.test(digest.html) &&
+     (digest.html.match(/Ada Lovelace/g) || []).length === BURST + 1,
+    'a digest answers the same question for every row — it is the only thing sent ' +
+    'about those');
+
   /* --- who is waiting ---------------------------------------------------- */
   const entries = [
     jobDoc,
@@ -396,6 +663,89 @@ function selftest() {
   ], { publishedIds: new Set() });
   ok(ordered.announce.map((e) => e.id).join('') === 'ab',
     'a backlog is worked through oldest first, in the order it arrived');
+
+  /* --- the POSTER's own e-mail (owner, 2026-08-29) ------------------------ */
+
+  /* Built the way the mailer builds it: the served row, keyed by id, is what
+     decides "publicly shown" AND what the message prints. */
+  const liveDoc = {
+    id: 'j7',
+    data: { ...jobDoc.data, createdAt: LIVE_SINCE + 'T09:00:00Z',
+            firstName: 'Ada', lastName: 'Lovelace', email: 'ada@x.edu',
+            chairName: 'Grace Hopper', chairEmail: 'grace@x.edu',
+            note: 'call me on 555 1234' },
+  };
+  const liveRow = job.row(liveDoc.data);
+  const shown = rowsById([liveRow]);
+
+  const told = partitionLive(job, [liveDoc], { published: shown });
+  ok(told.mail.length === 1 && told.mail[0].to === 'ada@x.edu',
+    'a posting the site is showing means its poster is written to, at the address they gave');
+
+  const post = renderLivePostingEmail(told.mail[0], { site: 'https://x.test' });
+  ok(/Your job posting is live/.test(post.subject) && /Tulane/.test(post.subject),
+    'the subject says what it is and names the posting');
+  ok(/Dear Ada,/.test(post.html), 'it greets them by name');
+  ok(/live on operationsacademia\.org/.test(post.html),
+    'and says the posting is publicly shown, which is the whole trigger');
+  ok(/Thank you for using/.test(post.html) && /OperationsAcademia\.org/.test(post.html),
+    'it thanks them for using the site, in the owner\'s own words');
+  ok(/wish you/.test(post.html) && /fill the position/.test(post.html),
+    'and wishes them well filling the position');
+  ok(/Management Science/.test(post.html) && /Until filled/.test(post.html),
+    'the details of the posting are in it');
+  ok(post.html.includes('https://x.test/jobs.html?job=' + liveRow.id),
+    'with a link to the posting itself, on the page that carries it');
+  ok(/post-a-job\.html\?edit=j7/.test(post.html) && /my-postings\.html/.test(post.html),
+    'and a way to correct it');
+
+  /* THE POSTER'S E-MAIL CARRIES NOTHING PRIVATE. It is built from the SERVED
+     row, so the fields PUBLIC_FIELDS keeps out of data/ cannot reach it — the
+     chair's name and address, the private note, and the poster's own address,
+     which tells them nothing and is exactly what a forwarded message should
+     not carry. */
+  for (const secret of ['grace@x.edu', 'Grace Hopper', '555 1234', 'ada@x.edu']) {
+    ok(!post.html.includes(secret),
+      `the poster's e-mail never carries ${secret} — it is built from the published row`);
+  }
+
+  /* A ROLLED SEASON IS ON THE OTHER PAGE. Linking a 2024 posting to jobs.html
+     opens a list that by definition cannot contain it — the exact defect
+     oa-jobnav.js was written for. */
+  const rolled = { id: 'old-1', year: 2024, years: [2024], posted: '2023-09-01',
+                   applyByDate: '2023-11-01', institution: 'Old University' };
+  ok(livePostingUrl(rolled, { site: 'https://x.test' })
+       .startsWith('https://x.test/previous-markets.html?job='),
+    'a posting whose season has rolled is linked on the archive, not the jobs page');
+
+  /* --- and it is sent ONCE ------------------------------------------------ */
+  ok(!partitionLive(job, [{ ...liveDoc, data: { ...liveDoc.data, [LIVE_MAILED_AT]: 'x' } }],
+    { published: shown }).mail.length,
+    'a poster already told is never told again — which is what makes an EDIT safe, ' +
+    'since correcting a posting re-publishes it');
+  ok(!partitionLive(job, [liveDoc], { published: rowsById([]) }).mail.length,
+    'and a posting the site is NOT showing yet is not announced as live');
+  ok(!partitionLive(job, [{ ...liveDoc, data: { ...liveDoc.data, status: 'withdrawn' } }],
+    { published: shown }).mail.length, 'a withdrawn posting thanks nobody');
+  const noAddress = partitionLive(job, [{ id: 'j8',
+    data: { ...liveDoc.data, email: '', authEmail: '' } }], { published: shown });
+  ok(!noAddress.mail.length && !noAddress.grandfather.length,
+    'a submission with no reachable address is skipped ENTIRELY — never stamped, ' +
+    'so an address added by a later correction can still be written to');
+
+  /* --- the grandfather rule, again, and for its own date ------------------ */
+  const older = { id: 'j9', data: { ...liveDoc.data, createdAt: '2026-01-05T09:00:00Z' } };
+  const back = partitionLive(job, [older], { published: rowsById([job.row(older.data)]) });
+  ok(!back.mail.length && back.grandfather.length === 1,
+    'a posting from before the feature shipped is stamped, not mailed — the backlog is ' +
+    'not a reason to write to a year of posters');
+  ok(LIVE_SINCE !== SINCE,
+    'and it has its own date: two features with two ship dates cannot share one');
+
+  /* --- a candidate profile is not a job posting --------------------------- */
+  ok(!partitionLive(cand, [{ ...candDoc, data: { ...candDoc.data, email: 'ada@x.edu',
+      createdAt: LIVE_SINCE + 'T09:00:00Z' } }], { published: rowsById([]) }).mail.length,
+    'candidate profiles are held until the reveal date, so nothing here claims one is live');
 
   console.log(fails.length
     ? `submissions-mailer selftest: ${pass} passed, ${fails.length} FAILED\n  ` + fails.join('\n  ')
