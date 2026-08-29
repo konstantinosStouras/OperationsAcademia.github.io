@@ -267,15 +267,29 @@
       }),
     });
 
-    /* 4 — the pages */
-    if (data.pages && data.pages.length) {
+    /* 4 — the pages.
+
+       FILTERED BEFORE THE FIGURE IS DECIDED ON, not inside it: with a cached
+       file whose only rows were admin paths, testing `data.pages.length` first
+       would draw the heading and an empty chart under it. What decides whether
+       there is a figure is whether there is anything the public may see.
+
+       This is a SECOND LINE, not the defence itself. The builder is what keeps
+       an admin or archived path out of data/analytics.json, because that file
+       is world-readable and a render-time filter would leave the path sitting
+       in it. This catches only what the builder cannot: a reader whose browser
+       still holds a copy fetched before that shipped. */
+    var publicPages = (data.pages || []).filter(function (p) {
+      return A.isPublicPath(p && p.path);
+    });
+    if (publicPages.length) {
       var f4 = figure('The most visited pages',
         'Pageviews, and how long a reader spends on each.');
       root.appendChild(f4.section);
       C.bars(f4.body, {
         unit: 'views',
         limit: 12,
-        items: data.pages.map(function (p) {
+        items: publicPages.map(function (p) {
           return {
             label: p.title || p.path,
             href: p.path && p.path.charAt(0) === '/' ? p.path : null,

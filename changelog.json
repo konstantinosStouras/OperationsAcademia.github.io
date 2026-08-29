@@ -10,6 +10,13 @@
       "url": "/jobs.html"
     },
     {
+      "id": "analytics-public-pages-only",
+      "date": "2026-08-29",
+      "title": "The analytics page lists only pages the public can visit",
+      "summary": "The “most visited pages” figure was built from every page a visit touched, which meant the site’s own maintenance area and an archived copy of an older version of the site appeared in it — and, because the figures are published as a plain file anyone can open, they were readable there too. Only public pages are counted now, and the filtering happens where the file is built rather than where it is drawn, so nothing non-public is written in the first place. Two smaller things came out of the same change: a visit to the maintenance area no longer counts towards the site’s published visitor and pageview totals, and pages that the web server answers under two addresses — /jobs and /jobs.html are one file — are now added together instead of being listed twice, which had been under-reporting the jobs page by about a third.",
+      "url": "/analytics.html"
+    },
+    {
       "id": "analytics-ga4-cookieless",
       "date": "2026-08-29",
       "title": "The site measures its visitors again — and still sets no cookies",

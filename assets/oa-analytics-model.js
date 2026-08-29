@@ -161,6 +161,80 @@
       (a, b) => SOURCE_ORDER.indexOf(a.source) - SOURCE_ORDER.indexOf(b.source));
   }
 
+  /* ------------------------------------------- what the public may be shown
+
+     Owner, 2026-08-29: do not show any admin pages, any past-version pages,
+     any test pages, or any admin-related data to public visitors.
+
+     THIS IS ENFORCED IN THE BUILDER, NOT IN THE PAGE, and that distinction is
+     the whole point. data/analytics.json is served by Pages to anyone who asks
+     — the same rule this repository already applies to e-mail addresses — so a
+     path filtered only at render time would still be sitting in a public file
+     for anyone who opened it directly. A non-public path must never be
+     WRITTEN. The page applies the same predicate anyway, as a second line for
+     a file a reader has cached from before this shipped.
+
+     NORMALISE FIRST, THEN FILTER, and that order is load-bearing. GitHub Pages
+     serves both `/admin-area` and `/admin-area.html` for one file, and the
+     first build recorded 87 views of one and 6 of the other — so a filter that
+     matched only the spelling someone thought of would have leaked the page
+     under its other name. The canonical form here is the one the pages' own
+     canonical and og:url tags use: WITH the extension (see the sitemap section
+     of CLAUDE.md), with `/index.html` folding to `/`. Collapsing the pair also
+     stops one page appearing twice in the chart, which it did. */
+
+  /* MATCHED CASE-INSENSITIVELY, and each pattern ends the SEGMENT it names.
+     Both of those were bugs the tests caught rather than opinions:
+
+       - `/ADMIN-AREA` slipped through a case-sensitive match. Pages would 404
+         on it, so nothing should ever record it — but "should never happen" is
+         not a reason to publish it if it does, and over-filtering costs a row
+         while under-filtering costs the leak this list exists to stop.
+       - `^/(test|…)[^/]*` matched `/testimonials.html`, which would have
+         SILENTLY HIDDEN a legitimate page from the public chart. That is the
+         quieter failure of the two: a leak is visible to anyone who looks at
+         the file, a page missing from a list is visible to nobody. So each
+         word must be the whole segment. */
+  const NON_PUBLIC = [
+    /* the maintainer's desk — noindex, admin-read, and its VIEW COUNT is
+       itself admin-related data: it says how much the maintainer works */
+    /^\/admin-area(\.html?)?(\/|$)/i,
+    /* every past-version tree. `\d+` rather than a list, so /v4/ is covered
+       the day it exists — an archive that has to be added to a filter to stay
+       out of the public record is one that will be forgotten */
+    /^\/v\d+(\/|$)/i,
+    /* test, preview and staging paths — the WHOLE segment, never a prefix */
+    /^\/(test|tests|preview|previews|staging|sandbox|demo)(\.html?)?(\/|$)/i,
+    /* Jekyll serves no underscore directory, but a path is cheap to exclude
+       and a leak is not: if one ever became reachable it must not also be
+       advertised */
+    /^\/_/,
+  ];
+
+  /** One page, one row — and one NAME, so a filter cannot be evaded by the
+      spelling nobody thought of. Query strings and fragments go too: a query
+      can carry a posting id, and this file is public. */
+  function normPath(raw) {
+    let p = String(raw || '').trim();
+    if (!p) return '';
+    p = p.split('?')[0].split('#')[0];
+    if (p.charAt(0) !== '/') p = '/' + p;
+    p = p.replace(/\/{2,}/g, '/');
+    if (/\/index\.html?$/i.test(p)) p = p.replace(/index\.html?$/i, '');
+    if (p === '') p = '/';
+    /* extensionless -> the .html the page's own canonical names; a trailing
+       slash is a directory and keeps it */
+    if (p !== '/' && !/\/$/.test(p) && !/\.[a-z0-9]{2,5}$/i.test(p)) p += '.html';
+    return p.slice(0, 120);
+  }
+
+  /** May this path appear in a file the whole world can read? */
+  function isPublicPath(raw) {
+    const p = normPath(raw);
+    if (!p) return false;
+    return !NON_PUBLIC.some((rx) => rx.test(p));
+  }
+
   /* ------------------------------------------------------------- day series */
 
   /** The days as a sorted array of { day, visitors, sessions, pageviews },
@@ -287,14 +361,50 @@
   /** Top pages, highest authority first and merged by path — the same
       one-source-per-key rule the days follow, for the same reason. */
   function mergePages(into, pages) {
+    /* NORMALISED AND FILTERED HERE TOO — every source's pages funnel through
+       this one function, so a leg that forgets (or a leg added later) still
+       cannot put an admin or archived path into a world-readable file. The
+       legs filter as well, so nothing reaches here in the first place; this is
+       the chokepoint that makes that a property of the SHAPE rather than of
+       every author remembering.
+
+       WITHIN one source two spellings of a page are ONE page and their views
+       ADD; ACROSS sources the first claim stands and the later source is
+       ignored entirely. Those are different questions and were briefly given
+       the same answer, which cost the jobs page a third of its count: the
+       first build recorded 467 views of `/jobs.html` and 211 of `/jobs` — the
+       same file, because Pages serves it under both — and a plain
+       first-claim-wins published 467. That is a wrong number in the direction
+       nobody checks, since the row is still there and still looks sensible.
+       `mine` is what separates the two rules. */
+    const mine = new Set();
     for (const p of pages || []) {
-      const path = String((p && p.path) || '').trim();
-      if (!path || into.has(path)) continue;
+      const path = normPath((p && p.path) || '');
+      if (!path || !isPublicPath(path)) continue;
+      if (into.has(path) && !mine.has(path)) continue;   // an earlier source owns it
+
+      const views = num(p && p.views);
+      const avgSec = Math.max(0, Math.round(Number((p && p.avgSec) || 0)));
+
+      if (mine.has(path)) {
+        const cur = into.get(path);
+        const total = cur.views + views;
+        /* the mean has to be re-weighted by views, or a spelling with three
+           visits would drag the average as hard as one with three hundred */
+        cur.avgSec = total
+          ? Math.round((cur.avgSec * cur.views + avgSec * views) / total)
+          : 0;
+        cur.views = total;
+        if (!cur.title && p && p.title) cur.title = String(p.title).trim().slice(0, 120);
+        continue;
+      }
+
+      mine.add(path);
       into.set(path, {
         path,
         title: String((p && p.title) || '').trim().slice(0, 120),
-        views: num(p && p.views),
-        avgSec: Math.max(0, Math.round(Number((p && p.avgSec) || 0))),
+        views,
+        avgSec,
       });
     }
     return into;
@@ -311,6 +421,7 @@
 
   return {
     DAY_FIELDS, SOURCE_ORDER, WEEKDAYS, MONTHS, STALE_DAYS,
+    NON_PUBLIC, normPath, isPublicPath,
     isDay, dayRow, emptyDataset, mergeDays, orderSources,
     series, rollingMean, byWeekday, byMonth, summarise, staleness,
     mergePages, topPages,
