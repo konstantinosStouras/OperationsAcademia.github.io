@@ -2252,6 +2252,148 @@ would be half a screen — where the mobile rules give both the full width and a
 the two buttons' shared baseline at desktop width, and the full-width targets
 at 390px.
 
+## A department that SPONSORED the site, and what that may change
+
+CUHK Business School's Department of Decisions, Operations and Technology
+sponsored operationsacademia.org from 1 September 2025 to 1 September 2027
+(owner, 2026-08-29). Their postings **lead the jobs page** and carry a purple
+**"Sponsored"** mark — "professional and discrete but visible to all users of
+the website".
+
+    assets/oa-sponsors.js   who sponsored, when, and the whole rule (dual-mode)
+
+**IT IS A CURATED TABLE READ IN THE BROWSER, not a field in `data/jobs.json`,
+and the reason is that a sponsorship ENDS.** The window is tested when the card
+is drawn, so on 1 September 2027 the mark stops appearing by itself — nothing
+to run, nothing to remember. That is `oa-jobnav.js`'s own argument ("a build
+runs every twenty minutes and a deadline passes at midnight, so deciding in the
+browser is the only reading that cannot be stale") applied to a date somebody
+is paying for. Three more reasons, each already recorded elsewhere in this
+file: a derived field on every row would have mailed the maintainer 575 phantom
+edits the first time it was written (the `withMarketYears` lesson, which is why
+`diffRows` skips it); a served side file would need a builder, a place in
+`BUILDERS`, and one more way for a red guard to stop the whole site publishing;
+and `/v1/` and `/v2/` never load the file, so the archives do not move.
+
+**What the mark may change is exactly two things — the badge and the
+position.** It never changes what a posting SAYS, never hides or demotes
+anybody else's, and never survives its own end date. The Excel download gains a
+`Sponsored` column whose `from` names the three PUBLISHED fields the answer is
+computed from, because there is no `sponsored` in the served file and
+deliberately never will be.
+
+**The sort is TOTAL, not "while no filter is set".** The owner's words were
+"top of the list … without any user-defined search filters being applied yet",
+which describes when they will SEE it rather than asking for a conditional
+comparator — and a list that re-ordered itself as the reader typed would be a
+worse surprise than a sponsor leading a search they are almost never in (narrow
+by anywhere but Hong Kong and they are gone). `featured` has always worked this
+way, and sponsored ranks ABOVE it: a sponsorship is a commitment the site made
+to somebody, Featured is a note the maintainer left themselves. That ordering
+is not hypothetical — the served file carries exactly one featured row.
+
+**The home page's teaser is BADGED but NOT re-ordered.** It promises the ten
+most recent postings and a lead row would make its own heading false. Precisely
+the split `featured` already had.
+
+### The rule says NO, four times over
+
+A sponsor mark is a claim the site makes on somebody's behalf, so the expensive
+failure is not a missing badge — it is a badge on a posting that has not earned
+one. The served file carries **eight** CUHK-family rows and exactly one of them
+is the sponsor's:
+
+* **`…, Shenzhen` and `CUHK Shenzhen` (five rows) are a DIFFERENT UNIVERSITY.**
+  `institutionKey` keeps them apart on its own, which is the whole reason the
+  match goes through it rather than through a substring.
+* **`OM/IS` is not a department name.** It is the crowdsourced tracking
+  workbook's field code, and reading it as the sponsor's department would be
+  precisely the guess "curated, never guessed" forbids. Adding it is a
+  one-line owner decision, not an inference.
+* **A posting advertised BEFORE the window is not retrospectively theirs**, and
+  a row with no posting date is never marked at all.
+* **The mark is drawn only while the sponsorship is RUNNING** — present tense,
+  which is what makes it honest.
+
+**…and one place it had to say yes.** One row files the SCHOOL in the
+institution field (`institution: "CUHK Business School"`), which
+`institutionKey` correctly keeps as a key of its own and could therefore never
+reach the record. That is an ordinary thing for a poster to do, so the record
+carries an `alsoFiledAs` list — curated one measured spelling at a time, like
+every alias table here, which is what stops it reaching "CUHK Shenzhen".
+
+### The dependency that was missing, and why the tests could not see it
+
+`oa-sponsors.js` asks `oa-schools.js` whether two spellings are one university
+— and **neither `jobs.html` nor `index.html` loaded that file.** Only the
+forms, the alerts page, `/admin-area` and the directory did. So in the browser
+the factory was handed `undefined`.
+
+The first draft fell back to a plain fold, and that is what made it dangerous:
+"The Chinese University of Hong Kong" still matched itself, so **every check in
+`selftest.mjs` passed** — Node resolves the dependency through `require` —
+while the SITE silently stopped recognising "CUHK", "Chinese University of Hong
+Kong" and "The Chinese University of Hong Kong (CUHK)". Three spellings, marked
+in the tests and unmarked on the page, with nothing anywhere to say so. It is
+the two-halves-disagreeing failure `oa-jobnav.js` was written to remove, and
+**a fallback that is right most of the time is the worst possible shape for
+it.**
+
+Both halves are fixed and both are pinned: the pages load `oa-schools.js`
+FIRST, and `uniKey` returns nothing at all without it — this says no when it
+cannot tell, like every other curated table here. The guard EVALUATES the
+module with no `OASchools` on the root rather than reading its source for a
+`return fold(v)`, because a source check would pass the moment somebody wrote
+the same fallback a different way.
+
+**Anything else built on a curated module must load that module on the page
+that reads it, and must be tested with it ABSENT.**
+
+### The badge, and the two stylesheets
+
+An **outline pill** (purple ink, pale purple ground, hairline border) plus a
+**3px rail** down the card's left edge — the owner picked both. The outline is
+load-bearing rather than decorative: every other label here is a solid block of
+colour, so an outline reads as a different KIND of thing at a glance, and it is
+what keeps it from being taken for a second `Featured`.
+
+Purple because it is the one hue this deliberately neutral charcoal palette
+never uses anywhere else. `--sponsor` / `--sponsor-soft` / `--sponsor-line` are
+defined in **both** themes, following the `--ok` / `--err` idiom exactly — a
+solid hex in light, a TRANSLUCENT wash in dark so the tint works over whatever
+surface the badge lands on. Measured: 6.48:1 light, 7.26:1 dark, against a
+4.5:1 floor.
+
+**The rules live in TWO stylesheets and only one of them reaches the site** —
+`oa-list.css` is the engine's, `v3.css` is the live design's override — so a
+fix applied to one alone is invisible on the site or lost on the next page.
+That is the trap already recorded under the Excel button, and `selftest.mjs`
+pins both files. The badge names its own INK as well as its ground, or the base
+`.oa-label`'s `#fff` would paint it white on white; the rail is a `border-left`
+width on the card's own border rather than an extra element, so it cannot
+overlap the rounded corners or the focus ring; and both rules use
+`background-color`, never the `background` shorthand that blanks a
+background-image.
+
+### To renew, retire or add a sponsor
+
+Edit `SPONSORS` in `assets/oa-sponsors.js` — university, school, department,
+and the two dates (`from` inclusive, `to` **exclusive**). Nothing else, and
+nothing under `data/`. Retiring one early is a date change; letting one lapse
+needs no action at all.
+
+Tests: `testSponsors` in `_scraper/selftest.mjs` (the record's shape, who it
+marks and who it must not over the whole served file, both edges of the window,
+the folded spellings, the comparator's antisymmetry measured over the real
+list, the badge, the wiring on both pages, the load ORDER, the module driven
+with its dependency absent, both stylesheets, both themes' tokens, and the
+export column) and the sponsor block in `_scraper/page-test.mjs` (the rendered
+lead card, the pill, the measured 3px rail, the contrast in both themes, and
+that the home teaser is still ordered by date alone). **The browser block asks
+the module what to expect rather than naming CUHK**, so it stays green on the
+day the sponsorship lapses — a guard about a corpus must not move with the
+corpus.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
