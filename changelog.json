@@ -3,10 +3,17 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "analytics-ga4-cookieless",
+      "date": "2026-08-29",
+      "title": "The site measures its visitors again — and still sets no cookies",
+      "summary": "Operations Academia has measured nothing since July 2023, when Google retired the analytics product it used. Google Analytics is running again, configured so that it stores nothing whatever on your device: no analytics cookie, no identifier, nothing kept between visits. That is why you are not asked to accept cookies when you arrive — there are none to accept. Google Signals and advertising personalisation are switched off, so nothing collected here builds advertising audiences or follows you to other sites, and if your browser sends a Global Privacy Control or Do Not Track signal the analytics script is not loaded at all. The Privacy Policy explains all of it. The trade-off falls on us rather than on you: without an identifier we cannot tell a returning reader from a new one, so our own visitor counts lean on the site's own first-party record instead.",
+      "url": "/privacy-policy.html"
+    },
+    {
       "id": "analytics-rebuilt",
       "date": "2026-08-29",
       "title": "The analytics page works again, and draws its own charts",
-      "summary": "The four charts on /analytics had shown nothing since 2023: they were Google Sheets embeds fed by the Google Analytics Spreadsheet Add-on, and Universal Analytics — the only API it spoke — was switched off in July that year, with the properties deleted a year later. A dead embed renders as an empty box and reports nothing to anybody, which is why it went unnoticed. The page now draws its own charts from one small served file: visitors day by day with a seven-day average, the weekly rhythm, the hiring season across the calendar year, the most-visited pages, and the universities archive. They follow your theme, they work on a phone, and every one of them will also give you its numbers as a table. Where a figure cannot be brought up to date it says so rather than looking merely flat.",
+      "summary": "The four charts on /analytics had shown nothing since 2023: they were Google Sheets embeds fed by the Google Analytics Spreadsheet Add-on, and Universal Analytics — the only API it spoke — was switched off in July that year, with the properties deleted a year later. A dead embed renders as an empty box and reports nothing to anybody, which is why it went unnoticed. The page now draws its own charts from one small served file: visitors day by day with a seven-day average, the weekly rhythm, the hiring season across the calendar year, and the most-visited pages. They follow your theme, they work on a phone, and every one of them will also give you its numbers as a table. Where the figures have stopped moving the page says so, rather than looking merely flat. The old “which universities visited” charts are not among them: they were measured from something Google Analytics no longer offers, and the spreadsheet that held the 2014–2023 copy was overwritten with empty results by its own add-on in July 2024, so that decade is gone.",
       "url": "/analytics.html"
     },
     {

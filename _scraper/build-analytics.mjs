@@ -17,9 +17,10 @@
    credential is absent — the discipline every builder here follows, so this
    can be committed and scheduled before anything is configured:
 
-     history   data/analytics-history.json, committed once from the old
-               spreadsheets. Needs nothing. FROZEN — UA is gone, so it can
-               never grow and is never re-fetched.
+     history   data/analytics-history.json — which will never exist. The
+               spreadsheets were read on 2026-08-29 and hold nothing; see
+               _SETUP-ANALYTICS.md for the forensics. Kept as the recovery
+               path, not as an outstanding task.
      usage     Firestore `usageSessions`, the site's own first-party record
                (assets/oa-usage.js, every page since 2026-08-17). Needs
                FIREBASE_SERVICE_ACCOUNT, which is already a secret here — so
@@ -93,11 +94,24 @@ function serialise(data) {
 
 const iso = (d) => d.toISOString().slice(0, 10);
 
+/** Two serialised datasets carrying the same figures — `generated` blanked on
+    both sides, because it moves on every run by construction and is the one
+    field whose change means nothing happened. Compared as TEXT rather than by
+    parsing, so a difference anywhere else in the file — a key order, a nested
+    value, a field added later and forgotten here — still counts as a change.
+    Missing a real change would be far worse than committing a spare stamp. */
+function sameFigures(a, b) {
+  const blank = (t) => t.replace(/"generated": "[^"]*"/, '"generated": ""');
+  return blank(a) === blank(b);
+}
+
 /* ------------------------------------------------------------------ sources */
 
 /** The committed archive of the years UA measured. Needs no credential and
-    cannot fail the run: a missing file just means the site's history has not
-    been imported yet, which is a sentence the page already knows how to say. */
+    cannot fail the run: the file is absent permanently, which the page already
+    knows how to say. Deliberately not "not imported YET" — there is nothing
+    left to import, and framing a settled impossibility as a pending task is
+    how a maintainer loses an afternoon. */
 async function fromHistory() {
   const raw = await readJson(HISTORY, null);
   if (!raw) return null;
@@ -336,11 +350,31 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
   }
   data.sources = A.orderSources(data.sources);
 
-  /* The days ALREADY SERVED, folded in last and claiming only what nothing
+  /* WHAT WAS ALREADY SERVED, folded in last and claiming only what nothing
      else did. This is what makes an unreachable source cost a day of freshness
      rather than the whole history: a run in which GA4 times out still writes
-     every day GA4 had already given us. */
-  if (carry) A.mergeDays(data.days, carry, 'carried');
+     every day GA4 had already given us.
+
+     IT IS NOT A SOURCE, AND THAT DISTINCTION IS THE BUG THIS FIXES. It used to
+     be re-offered to assemble() as a `history` LEG whenever nothing answered,
+     which meant a credential-less run rewrote the file claiming the ARCHIVE
+     had supplied days the first-party record supplied — false provenance, and
+     a `sources` block that flip-flopped between 'usage' and 'history' on
+     alternate runs, committing churn each time. The carried data keeps
+     whatever `sources` the previous file recorded, because nothing about
+     where those numbers came from has changed. */
+  if (carry) {
+    A.mergeDays(data.days, carry.days || {}, 'carried');
+    A.mergePages(pages, carry.pages || []);
+    for (const u of carry.universities || []) {
+      const name = String((u && u.name) || '').trim();
+      if (!name || unis.has(name)) continue;
+      unis.set(name, { name, visits: Math.max(0, Math.round(Number(u.visits) || 0)) });
+    }
+    /* only when NOTHING live answered: with a live source present its own
+       record is the true one, and the carried label would overstate it */
+    if (!data.sources.length) data.sources = (carry.sources || []).slice();
+  }
 
   data.pages = A.topPages(pages, TOP_PAGES);
 
@@ -348,10 +382,11 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
   const hist = live.find((r) => r.source === 'history');
   data.universities = {
     /* FROZEN, and the page says so: UA's networkDomain is the only thing that
-       ever produced this and it no longer exists in any product. */
+       ever produced this and it no longer exists in any product — and since
+       2026-08-29 the archived copy is known to be empty as well. */
     frozen: true,
-    from: (hist && hist.from) || '',
-    to: (hist && hist.to) || '',
+    from: (hist && hist.from) || (carry && carry.from) || '',
+    to: (hist && hist.to) || (carry && carry.to) || '',
     all: uniRows.slice(0, TOP_UNIS),
     recent: [],
   };
@@ -393,7 +428,9 @@ async function main() {
       `${history.universities.length} universit(y/ies) — frozen archive`);
     results.push(history);
   } else {
-    log('history: data/analytics-history.json is not present — see _SETUP-ANALYTICS.md');
+    /* not a to-do: the archive was checked on 2026-08-29 and is empty for
+       good, so this line says so rather than pointing at a setup step */
+    log('history: no archive file (the 2014-2023 data is gone — _SETUP-ANALYTICS.md)');
   }
 
   const db = await firestore();
@@ -421,20 +458,20 @@ async function main() {
     warn(`the GA4 read failed (${e.message}) — keeping what is committed`);
   }
 
-  /* Everything already served is the floor. When NO source answered at all,
-     the previously-published rows are re-offered as the archive leg too, so a
-     credential-less environment rewrites exactly what it read rather than
-     blanking the page. */
-  const fallback = results.length ? [] : [{
-    source: 'history',
-    days: previous.days || {},
-    pages: previous.pages || [],
-    universities: (previous.universities && previous.universities.all) || [],
-    from: (previous.universities && previous.universities.from) || '',
-    to: (previous.universities && previous.universities.to) || '',
-  }];
-
-  const data = assemble(results.concat(fallback), { carry: previous.days || {} });
+  /* Everything already served is the floor — carried as DATA, never as a
+     source (see assemble). A run in which nothing answered therefore rewrites
+     byte-for-byte what it read, which is what lets this workflow fire on a
+     schedule in an environment that may or may not hold the credentials. */
+  const data = assemble(results, {
+    carry: {
+      days: previous.days || {},
+      pages: previous.pages || [],
+      universities: (previous.universities && previous.universities.all) || [],
+      from: (previous.universities && previous.universities.from) || '',
+      to: (previous.universities && previous.universities.to) || '',
+      sources: previous.sources || [],
+    },
+  });
 
   const rows = A.series(data.days);
   const summary = A.summarise(rows);
@@ -448,8 +485,15 @@ async function main() {
 
   const body = serialise(data);
   const before = existsSync(OUT) ? await readFile(OUT, 'utf8') : '';
-  if (body === before) {
-    log('data/analytics.json is unchanged.');
+
+  /* COMPARE WITHOUT THE TIMESTAMP. `generated` is stamped fresh on every run,
+     so a literal `body === before` is never true and this workflow would
+     commit a timestamp-only change every single day for ever — exactly the
+     noise `serialise` says it exists to prevent, defeated one line later.
+     What decides whether there is anything to write is whether any FIGURE
+     moved; if none did, the committed file stands, stamp and all. */
+  if (before && sameFigures(body, before)) {
+    log('data/analytics.json is unchanged (only its timestamp would move).');
     return 0;
   }
   if (DRY) {
@@ -484,13 +528,13 @@ function selftest() {
     { source: 'history', days: { '2015-01-01': [3, 3, 9] }, pages: [], universities: [{ name: 'Duke University', visits: 40 }], from: '2014-03-01', to: '2023-06-30' },
   ]);
 
-  ok(a.days['2026-08-02'][0] === 5, 'the higher-authority source keeps a contested day');
-  ok(a.totals.visitors === 10 + 5 + 7 + 3, 'a contested day is counted ONCE, never summed');
-  ok(a.pages[0].views === 500, 'the higher-authority source owns a contested page');
+  ok(a.days['2026-08-02'][0] === 99, 'the higher-authority source keeps a contested day');
+  ok(a.totals.visitors === 10 + 99 + 7 + 3, 'a contested day is counted ONCE, never summed');
+  ok(a.pages[0].views === 5, 'the higher-authority source owns a contested page');
   ok(a.universities.frozen === true, 'the universities section is marked frozen');
   ok(a.universities.from === '2014-03-01', 'the frozen section carries the archive range');
   ok(a.range.from === '2015-01-01' && a.range.to === '2026-08-03', 'the range spans every source');
-  ok(a.sources.map((s) => s.source).join(',') === 'ga4,usage,history',
+  ok(a.sources.map((s) => s.source).join(',') === 'usage,ga4,history',
     'the sources are listed in precedence order');
 
   /* an empty build is a VALID file, not a crash: the page has to have
@@ -504,15 +548,47 @@ function selftest() {
      blank dashboard */
   const c = assemble(
     [{ source: 'ga4', days: { '2026-08-04': [9, 9, 9] }, pages: [], universities: [] }],
-    { carry: { '2026-08-01': [10, 12, 30], '2026-08-04': [1, 1, 1] } });
+    { carry: { days: { '2026-08-01': [10, 12, 30], '2026-08-04': [1, 1, 1] } } });
   ok(c.totals.days === 2, 'the days already served are carried forward');
   ok(c.days['2026-08-04'][0] === 9, 'a fresh reading still beats the carried one');
+
+  /* A RUN THAT READS NOTHING REWRITES EXACTLY WHAT IT READ. The carried data
+     is not a SOURCE: it used to be re-offered as a `history` leg whenever no
+     credential was present, so a credential-less run relabelled the file's
+     provenance from 'usage' to 'history' — days the first-party record had
+     supplied, attributed to an archive that is empty — and the two kinds of
+     run then flip-flopped the committed file between them, every day. */
+  const run1 = assemble(
+    [{ source: 'usage', days: { '2026-08-20': [10, 12, 30] },
+       pages: [{ path: '/jobs.html', views: 5, avgSec: 10 }], universities: [] }],
+    { now: 0 });
+  const run2 = assemble([], { now: 0, carry: {
+    days: run1.days, pages: run1.pages,
+    universities: run1.universities.all, from: run1.universities.from,
+    to: run1.universities.to, sources: run1.sources,
+  } });
+  ok(JSON.stringify(run1) === JSON.stringify(run2),
+    'a run with NO source rewrites byte-for-byte what it read');
+  ok(run2.sources.length === 1 && run2.sources[0].source === 'usage',
+    '…keeping the provenance it was given, rather than claiming the archive supplied it');
+  ok(run2.pages.length === 1 && run2.totals.days === 1,
+    '…and carrying the pages and days rather than blanking them');
 
   /* two runs over the same inputs must be byte-identical or the daily
      workflow commits noise for ever */
   const s1 = serialise(assemble([{ source: 'ga4', days: { '2026-08-02': [5, 6, 14], '2026-08-01': [1, 1, 1] }, pages: [], universities: [] }], { now: 0 }));
   const s2 = serialise(assemble([{ source: 'ga4', days: { '2026-08-01': [1, 1, 1], '2026-08-02': [5, 6, 14] }, pages: [], universities: [] }], { now: 0 }));
   ok(s1 === s2, 'the serialiser is stable whatever order the days arrived in');
+
+  /* the daily-churn guard: only a moved FIGURE is a change, never the stamp */
+  const base = serialise(assemble([{ source: 'usage', days: { '2026-08-20': [1, 1, 1] }, pages: [], universities: [] }], { now: 0 }));
+  const later = serialise(assemble([{ source: 'usage', days: { '2026-08-20': [1, 1, 1] }, pages: [], universities: [] }], { now: 86400000 }));
+  ok(base !== later, 'the stamp really does move between runs (or the next check is vacuous)');
+  ok(sameFigures(base, later),
+    'a run whose figures did not move is NOT a change — otherwise the daily ' +
+    'workflow commits a timestamp every day for ever');
+  const moved = serialise(assemble([{ source: 'usage', days: { '2026-08-20': [2, 1, 1] }, pages: [], universities: [] }], { now: 0 }));
+  ok(!sameFigures(base, moved), 'but a moved figure IS a change');
 
   console.log(`build-analytics selftest: ${pass} passed, ${fails.length} failed`);
   fails.forEach((f) => console.log('  FAIL ' + f));

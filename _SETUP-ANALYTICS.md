@@ -2,7 +2,7 @@
 
 `analytics.html` draws its own charts now, from one served file
 (`data/analytics.json`) built daily by `_scraper/build-analytics.mjs`. This is
-the setup guide for its three sources. **Nothing here is required for the page
+the setup guide for its sources. **Nothing here is required for the page
 to work** — it is honest and functional with no source at all — but each one
 you switch on adds figures to it.
 
@@ -52,68 +52,92 @@ against GA4 for that reason.
 
 ---
 
-## Source 2 — Google Analytics 4  ·  **needs five things from you**
+## Source 2 — Google Analytics 4  ·  **live, and cookieless**
 
-Only worth doing if you want the industry-standard numbers and are content to
-run cookies. In return it sees the visitors the first-party record misses.
+Switched on 2026-08-29 on the owner's instruction: **GA4 yes, consent banner
+no.** Those two are only compatible one way, and it is worth understanding
+before anyone changes it.
 
-**1. Decide whether you want it at all.** GA4 sets cookies and profiles
-visitors. The site is EU-facing (Dublin, Fontainebleau), so switching it on
-means a consent banner and a Privacy Policy change — neither of which exists
-today, and neither of which I have added, because that is a decision about
-your visitors rather than a bug fix.
+`assets/oa-ga4.js` configures gtag with **`client_storage: 'none'`** — GA4
+keeps nothing on the visitor's device. No `_ga` cookie, no localStorage,
+nothing. The ePrivacy rule a cookie banner exists to satisfy is about
+**storing** things on someone's device, not about analytics as such, so a tag
+that stores nothing has nothing to ask permission for. That is what makes the
+absence of a banner coherent rather than merely convenient, and the Privacy
+Policy says so in as many words.
 
-**2. The Measurement ID** — `G-XXXXXXXXXX`. Firebase already issues
-`G-2CX86W7PHB` for the `operations-academia` project, and `assets/oa-firebase.js`
-deliberately omits it with a comment saying why. **Tell me whether that is the
-property you want, or whether you made another one in 2023.** Nothing has ever
-sent it an event, so whichever it is, it is empty.
+Three further narrowings, none costing anything worth having: Google Signals
+and ad personalisation are off; a Global Privacy Control or Do Not Track
+signal means gtag is never even fetched; and it only reports from
+`operationsacademia.org` — a page opened from localhost or by the CI browser
+checks sends nothing, without which every CI run would post hits to the live
+property.
 
-**3. The tag on the live site.** One `gtag.js` snippet in every root page's
-`<head>`. **I have not added this** — see (1). It is a two-line change once you
-say the word.
+**What it costs, and the consequence it carries.** With no identifier on the
+device GA4 cannot recognise a returning visitor, so its `totalUsers` is far
+closer to "sessions" than to "people". So **`SOURCE_ORDER` puts the
+first-party record AHEAD of GA4** (`['usage', 'ga4', 'history']`): for a day
+both measured, the source that can actually count distinct visitors wins. GA4
+earns its second place on coverage — it sees visitors whose browser never
+reaches Firestore at all.
 
-**4. The Property ID** — a plain number like `123456789`, from GA4 →
-Admin → Property details. **This is not the Measurement ID**; the Data API
-wants the number. Set it as the repository variable `GA4_PROPERTY_ID`.
+**If cookies are ever turned back on** (`COOKIELESS = false`), two things
+must move together: add a consent banner, and put `'ga4'` back in front in
+`SOURCE_ORDER`. The selftest pins the pairing so neither half moves alone.
 
-**5. A service account that may read it:**
+### The configuration
 
-```
-# in Google Cloud, on any project
-gcloud iam service-accounts create oa-analytics-reader
-gcloud iam service-accounts keys create key.json \
-  --iam-account oa-analytics-reader@<project>.iam.gserviceaccount.com
-# then enable the API
-gcloud services enable analyticsdata.googleapis.com
-```
+| | |
+|---|---|
+| Property | "Operations Academia - GA4" · stream id `5432892882` |
+| Property ID | `384653143` — **not a secret**, committed as the default in `oa-analytics.yml`; a repo variable `GA4_PROPERTY_ID` overrides it |
+| Measurement ID | `G-RE8C5LD2FM` — in `MEASUREMENT_ID`, `assets/oa-ga4.js` |
+| Data API credential | repo secret `GA4_SERVICE_ACCOUNT`, granted **Viewer** on the property |
 
-Then — **the step everyone misses** — in **GA4 → Admin → Property access
-management**, add that service account's e-mail address as a **Viewer**. The
-builder names this in its own error message if it gets a 403, because a key
-that exists but was never granted access looks exactly like a broken key.
-
-Paste `key.json` whole as the repository secret **`GA4_SERVICE_ACCOUNT`**.
-
-**What GA4 will not give you: history.** It cannot be backfilled. Data starts
-the day the tag goes live, and the years 2014–2023 are gone from Google's side.
+The tag and the Data API are **independent**: the tag collects, the secret
+reads back. The site measures correctly with only the tag; the dashboard just
+cannot plot GA4's numbers until the credential exists.
 
 ---
 
-## Source 3 — the historical archive  ·  **needs one export from you**
+## Source 3 — the historical archive  ·  **CHECKED, AND IT IS EMPTY**
 
-The old spreadsheets may still hold the rows the add-on pulled before it died.
-That is now the **only** copy of 2014–2023 anywhere. The two the page used
-were:
+**Do not go looking for this again.** It was checked on 2026-08-29 and the
+answer is final.
+
+The owner exported the whole workbook (30 tabs) and every one of its 141,540
+rows was read. There is not one surviving measurement in it. The tabs are
+structurally intact — headings, formulas, chart definitions — and hold nothing
+but zeroes, `#REF!`, `#VALUE!` and `#N/A`.
+
+**The workbook records how it happened, in its own cells.** Every `Report_N`
+tab carries:
 
 ```
-1lnrl5hsmj0WreUkxJ2iE-hsYo1aSgmrQO0RaKhCm0sY
-2PACX-1vTWggAd-lHzkKLA_c3PhXLrAwAMkYuNYJkflrEL7zXzRYIQrrqg3l46_OASdhiRa2pgi1zwOb3WZWSb   (a publish-to-web id)
+Last Run On            2024-07-15 05:32
+Total Results Found    0
+View (Profile) ID      ga:81760839          (a Universal Analytics view)
+Start Date             2014-03-01
 ```
 
-**Please check whether they still open and still have their data tabs.** If
-they do, export each tab as CSV and I will commit them as
-`data/analytics-history.json`, in this shape:
+Google deleted Universal Analytics properties on **1 July 2024**. Two weeks
+later the add-on ran on its schedule, asked a view that no longer existed for
+2014-to-date, got **zero rows** — and wrote those zero rows over ten years of
+data. The presentation tabs the charts read are formulas pointing at the
+report tabs, so they resolved to `#REF!` and the charts went blank.
+
+**So the data was not lost when Google deleted the property. It was lost two
+weeks later, when the spreadsheet refreshed itself.** A scheduled job that
+overwrites its only copy with whatever the source returns has no way to tell
+"no results" from "no data", and that is the whole lesson: this pipeline
+carries the opposite rule deliberately — *an unreachable source changes
+nothing*, and the committed file stands (see `build-analytics.mjs`).
+
+`data/analytics-history.json` will therefore never exist, and the reader for
+it stays in place as a documented recovery path rather than being deleted —
+the same reasoning CLAUDE.md records for keeping `repository_dispatch:
+[oa-jobs-changed]` wired while the functions are undeployed. If a copy ever
+surfaces (an old export, a colleague's download, a backup), drop it in as:
 
 ```json
 {
@@ -124,9 +148,6 @@ they do, export each tab as CSV and I will commit them as
   "universities": [{ "name": "Duke University", "visits": 412 }]
 }
 ```
-
-Once committed it is **frozen** and never re-fetched — UA is gone, so it can
-never grow.
 
 ---
 
@@ -140,10 +161,15 @@ came from Universal Analytics' `networkDomain` / `networkLocation` dimensions
 removed it, and the first-party record cannot stand in either: a browser
 cannot see its own reverse-DNS, so no amount of code here can recover it.
 
-So those figures are an **archive** from here on. The page labels them
-"Archive — 2014 to 2023" with the date range on the card, so nobody reads them
-as current. If the spreadsheets are gone, they are gone for good — which is
-why source 3 is worth ten minutes of your time before anything else here.
+So those figures would have been an **archive** from here on — and then the
+archive turned out to be empty too (source 3 above). The page carries the
+labelling either way: `universities.frozen` is true in the served file and the
+card reads "Archive — 2014 to 2023" with its date range. With no rows behind
+it the card simply never draws, which is a clean absence rather than an empty
+box, and is the whole reason the section is rendered conditionally.
+
+**There is nothing to go and look for.** That is the settled answer, not a
+suggestion to try harder.
 
 ---
 

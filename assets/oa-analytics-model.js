@@ -18,9 +18,16 @@
 
    THE THREE SOURCES, AND WHY A DAY BELONGS TO EXACTLY ONE OF THEM.
 
-     history   the rows the old spreadsheets already hold, committed once as
-               data/analytics-history.json. Frozen: UA is gone, so this can
-               never grow again and never needs re-fetching.
+     history   data/analytics-history.json — and it will never exist. The
+               spreadsheets were exported and read on 2026-08-29: all 30 tabs,
+               141,540 rows, not one surviving measurement. Their own cells say
+               why (every report tab: "Last Run On 2024-07-15, Total Results
+               Found 0") — Google deleted the UA property on 1 July 2024 and
+               the add-on's next run wrote zero rows over ten years of data.
+               The leg stays wired as the recovery path if a copy ever
+               surfaces, and because assemble() selects sources THROUGH
+               SOURCE_ORDER, so removing the name would break the archive leg
+               rather than tidy it.
      usage     the site's OWN first-party record — usageSessions in Firestore,
                written by assets/oa-usage.js on every page since 2026-08-17.
                No cookies, no third party, and the credential it needs
@@ -51,19 +58,41 @@
   'use strict';
 
   /* A day row is [visitors, sessions, pageviews]. An ARRAY rather than an
-     object because the file carries one entry per day back to 2014 — about
-     4,500 of them — and `{"v":3,"s":4,"p":11}` is a little over twice the
-     bytes of `[3,4,11]` for the same three numbers. DAY_FIELDS is published
-     inside the file itself, so the shape is self-describing rather than
-     something a reader has to come here to learn. */
+     object because the file carries one entry per day and is downloaded by
+     every reader of the page: `{"v":3,"s":4,"p":11}` is a little over twice
+     the bytes of `[3,4,11]` for the same three numbers, and the record grows
+     by a row a day for as long as the site runs. (It was originally justified
+     by a decade of history back to 2014 — that history turned out to be gone,
+     but a row a day is still a row a day, so the shape stands on the reason
+     it has rather than the one it was given.) DAY_FIELDS is published inside
+     the file itself, so the shape is self-describing rather than something a
+     reader has to come here to learn. */
   const DAY_FIELDS = ['visitors', 'sessions', 'pageviews'];
 
-  /* Highest authority first. GA4 sees every visitor; the first-party record
-     sees only the browsers that reach Firestore (an ad blocker, a private
-     window with storage refused, a network that cannot); the archive is a
-     different measurement system altogether and covers years neither of the
-     other two can. */
-  const SOURCE_ORDER = ['ga4', 'usage', 'history'];
+  /* Highest authority first, and the order CHANGED when GA4 was switched on
+     cookieless (owner, 2026-08-29: add GA4, but no consent banner).
+
+     `client_storage: 'none'` in assets/oa-ga4.js keeps nothing on the
+     visitor's device, which is what removes the need for a banner — and it
+     also removes GA4's only means of recognising a returning visitor. Its
+     `totalUsers` is then far closer to "sessions" than to "people", and a day
+     it owned would report two or three times the visitors the same day really
+     had. The site's own record keeps a stable per-browser id and CAN count
+     distinct visitors, so it goes first.
+
+     GA4 still earns its place second: it sees visitors whose browser never
+     reaches Firestore at all — an ad blocker, a private window with storage
+     refused, a network that cannot — which the first-party record silently
+     misses. Coverage, not identity.
+
+     The archive is last: a different measurement system altogether, covering
+     years neither of the other two can (and, since 2024-07-15, holding
+     nothing — its own add-on overwrote it with empty results).
+
+     IF COOKIELESS IS EVER TURNED OFF, put 'ga4' back in front: with an
+     identifier on the device it becomes the better count of people as well as
+     the wider one. The two decisions belong together. */
+  const SOURCE_ORDER = ['usage', 'ga4', 'history'];
 
   const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
   const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
