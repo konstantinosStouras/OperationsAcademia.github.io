@@ -161,10 +161,15 @@ came from Universal Analytics' `networkDomain` / `networkLocation` dimensions
 removed it, and the first-party record cannot stand in either: a browser
 cannot see its own reverse-DNS, so no amount of code here can recover it.
 
-So those figures are an **archive** from here on. The page labels them
-"Archive — 2014 to 2023" with the date range on the card, so nobody reads them
-as current. If the spreadsheets are gone, they are gone for good — which is
-why source 3 is worth ten minutes of your time before anything else here.
+So those figures would have been an **archive** from here on — and then the
+archive turned out to be empty too (source 3 above). The page carries the
+labelling either way: `universities.frozen` is true in the served file and the
+card reads "Archive — 2014 to 2023" with its date range. With no rows behind
+it the card simply never draws, which is a clean absence rather than an empty
+box, and is the whole reason the section is rendered conditionally.
+
+**There is nothing to go and look for.** That is the settled answer, not a
+suggestion to try harder.
 
 ---
 

@@ -58,11 +58,15 @@
   'use strict';
 
   /* A day row is [visitors, sessions, pageviews]. An ARRAY rather than an
-     object because the file carries one entry per day back to 2014 — about
-     4,500 of them — and `{"v":3,"s":4,"p":11}` is a little over twice the
-     bytes of `[3,4,11]` for the same three numbers. DAY_FIELDS is published
-     inside the file itself, so the shape is self-describing rather than
-     something a reader has to come here to learn. */
+     object because the file carries one entry per day and is downloaded by
+     every reader of the page: `{"v":3,"s":4,"p":11}` is a little over twice
+     the bytes of `[3,4,11]` for the same three numbers, and the record grows
+     by a row a day for as long as the site runs. (It was originally justified
+     by a decade of history back to 2014 — that history turned out to be gone,
+     but a row a day is still a row a day, so the shape stands on the reason
+     it has rather than the one it was given.) DAY_FIELDS is published inside
+     the file itself, so the shape is self-describing rather than something a
+     reader has to come here to learn. */
   const DAY_FIELDS = ['visitors', 'sessions', 'pageviews'];
 
   /* Highest authority first, and the order CHANGED when GA4 was switched on

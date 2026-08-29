@@ -2399,7 +2399,7 @@ stays broken for as long as nobody happens to look*.
 
 | | what it is | what it needs |
 |---|---|---|
-| `history` | the rows the old spreadsheets hold, committed once as `data/analytics-history.json` | an export from the maintainer — **frozen**, UA is gone so it can never grow |
+| `history` | `data/analytics-history.json` — which will never exist; see "the archive is CONFIRMED GONE" below | nothing, and nothing can be done: the spreadsheets were read and hold no measurement |
 | `usage` | the site's own `usageSessions` (assets/oa-usage.js, every page since 2026-08-17) | `FIREBASE_SERVICE_ACCOUNT`, **already a secret here** — so this one works today |
 | `ga4` | Google Analytics 4 through the Data API | `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT`, and a tag on the live site |
 
@@ -2431,8 +2431,10 @@ such dimension and nothing replaces it**, and a browser cannot see its own
 reverse-DNS either, so the first-party record cannot stand in. Those figures
 are an **archive**: `universities.frozen` is true in the served file and the
 card carries "Archive — 2014 to 2023" with its date range, so nobody reads them
-as current. If the old spreadsheets are gone, they are gone for good — which is
-why importing them is the one part of the setup worth doing first.
+as current. **And since 2026-08-29 there is nothing left to label** — the
+archived copy was checked and is empty too, so the card never draws at all. The
+conditional rendering is what makes that a clean absence rather than an empty
+box; see the section below for what happened to it.
 
 ### The two rules the charts themselves had to learn
 
