@@ -2702,6 +2702,60 @@ repo variable still overrides it. The `G-` Measurement ID lives in
 collects, the secret reads back — and the site measures correctly with only
 the first.
 
+### Only PUBLIC paths reach the served file
+
+Owner, 2026-08-29: *do not show any admin pages or any past version pages, any
+test pages, or any admin related data to public visitors.* The first build had
+leaked all three into `data/analytics.json` — `/admin-area.html` (87 views) and
+`/admin-area` (6), `/v3/` (21) and `/v3/post-a-job.html` (2).
+
+**It is enforced in the BUILDER, not in the page**, and that distinction is the
+whole point: `data/analytics.json` is served by Pages to anyone who asks — the
+rule this repository already applies to e-mail addresses — so a path filtered
+only at render time would still be sitting in a public file for anyone who
+opened it directly. A non-public path must never be WRITTEN. The page applies
+the same predicate as a second line, for a reader holding a copy cached from
+before the fix.
+
+**A non-public session is dropped WHOLE, not merely left out of the pages
+list.** A session on the admin desk is not "how the site is used" by anybody
+these public figures describe, and counting its pageviews would publish the
+maintainer's own admin time — the "admin-related data" half of the
+instruction. Someone who visits the desk AND public pages still counts, through
+those other sessions. The GA4 leg does the same server-side with a
+`dimensionFilter` on both reports, so the day totals mean "visitors who read a
+public page".
+
+**Normalise, THEN filter, and that order is load-bearing.** Pages serves both
+`/admin-area` and `/admin-area.html` for one file and the build recorded both,
+so a filter matching only the spelling somebody thought of would have leaked
+the desk under its other name. The canonical form is the one the pages' own
+canonical tags use — WITH the extension, `/index.html` folding to `/`.
+
+**Two bugs the tests caught rather than opinions I held:**
+
+* `^/(test|…)[^/]*` matched **`/testimonials.html`**, which would have silently
+  hidden a legitimate page. That is the quieter failure of the two — a leak is
+  visible to anyone who reads the file, a page missing from a list is visible
+  to nobody — so every word must be the whole segment;
+* a case-sensitive match let `/ADMIN-AREA` through. Pages would 404 on it, but
+  "should never happen" is not a reason to publish it if it does.
+
+**And normalising exposed a wrong number.** `/jobs.html` (467) and `/jobs`
+(211) are one file, and plain first-claim-wins published **467** — a third of
+the count lost in the direction nobody checks, because the row is still there
+and still looks sensible. `mergePages` now separates two questions that were
+briefly given one answer: WITHIN a source two spellings are one page and their
+views ADD (with the average time re-weighted by views); ACROSS sources the
+first claim stands whole, because two sources measuring one page are two
+measurements of one number. Both pinned.
+
+Tests: the block in `testAnalytics` pins the predicate both ways (withheld and
+still-published, including `/testimonials.html` and `/version-history.html`),
+the chokepoint, the two merge rules — and asserts over **the committed
+`data/analytics.json` itself** that every path it publishes is public and
+already normalised, which is the check that would have caught the leak.
+
 ### The archive is CONFIRMED GONE, and the spreadsheet says how
 
 Checked 2026-08-29, and the answer is final — **do not send anyone looking
