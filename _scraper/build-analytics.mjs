@@ -166,13 +166,30 @@ async function firestore() {
     page. Pageviews are counted per session document because each document is
     one page — oa-usage.js files a session per page, not per visit.
 
-    It reads only documents newer than what the dataset already holds, so a
-    daily run costs a bounded query rather than the whole collection. */
-async function fromUsage(db, { since }) {
+    It reads the days the dataset does not already hold, and never fewer than
+    the dimension window below — so a daily run costs a bounded query rather
+    than the whole collection, and the tallies it recomputes cover a stated
+    span rather than whatever slice the incremental read happened to fetch. */
+async function fromUsage(db, { since, windowFrom }) {
   if (!db) return null;
   const seen = new Map();        // day -> { uids:Set, sessions, views, pages:Map }
   let scanned = 0;
   let withheld = 0;              // sessions on admin / archived / test paths
+
+  /* THE DIMENSIONS ARE WINDOWED AND THE DAYS ARE NOT, and that difference is
+     the whole reason the read reaches back further than the incremental one.
+
+     A day row can be merged with what is already served, so it is enough to
+     re-read the few days that might still be moving. A TALLY cannot: adding
+     this run's hour-of-day counts to the last run's would double every
+     session in the overlap, and taking only the fresh ones would silently
+     turn "when people read the site" into "when people read it this week".
+     So the tallies are recomputed from scratch over one stated window every
+     run, and the page prints the window under the chart. */
+  const hours = A.hourBuckets();
+  const winPages = new Map();
+  let winSessions = 0, winSeconds = 0, winViews = 0;
+  let winFrom = '', winTo = '';
 
   let q = db.collection('usageSessions').orderBy('start');
   if (since) q = q.where('start', '>=', since);
@@ -200,44 +217,66 @@ async function fromUsage(db, { since }) {
 
     let bucket = seen.get(day);
     if (!bucket) {
-      bucket = { uids: new Set(), sessions: 0, views: 0, pages: new Map() };
+      bucket = { uids: new Set(), sessions: 0, views: 0 };
       seen.set(day, bucket);
     }
     if (d.uid) bucket.uids.add(String(d.uid));
     bucket.sessions++;
     bucket.views++;
-    if (page) {
-      const p = bucket.pages.get(page) || { views: 0, sec: 0 };
-      p.views++;
-      p.sec += Math.max(0, Math.min(3600, Number(d.dur || 0)));
-      bucket.pages.set(page, p);
+
+    if (!windowFrom || started >= windowFrom) {
+      /* the hour is read in UTC, exactly as the weekday buckets are: a local
+         read shifts every bar for readers west of Greenwich, and unlike a
+         weekday nobody would notice which way */
+      hours[new Date(started).getUTCHours()].value++;
+      winSessions++;
+      winViews++;
+      winSeconds += Math.max(0, Math.min(3600, Number(d.dur || 0)));
+      if (page) {
+        const acc = winPages.get(page) || { path: page, title: '', views: 0, sec: 0 };
+        acc.views++;
+        acc.sec += Math.max(0, Math.min(3600, Number(d.dur || 0)));
+        winPages.set(page, acc);
+      }
+      /* the window REPORTED is the one the data actually covers, never the
+         nominal ninety days. A nominal one slides every midnight and would
+         rewrite the served file daily on a site nobody had visited */
+      if (!winFrom || day < winFrom) winFrom = day;
+      if (!winTo || day > winTo) winTo = day;
     }
   });
 
   const days = {};
-  const pages = new Map();
-  for (const [day, b] of seen) {
-    days[day] = [b.uids.size || b.sessions, b.sessions, b.views];
-    for (const [path_, p] of b.pages) {
-      const acc = pages.get(path_) || { path: path_, title: '', views: 0, sec: 0 };
-      acc.views += p.views;
-      acc.sec += p.sec;
-      pages.set(path_, acc);
-    }
-  }
+  for (const [day, b] of seen) days[day] = [b.uids.size || b.sessions, b.sessions, b.views];
+
   return {
     source: 'usage',
     days,
-    pages: Array.from(pages.values())
+    pages: Array.from(winPages.values())
       .map((p) => ({ path: p.path, title: '', views: p.views, avgSec: p.views ? p.sec / p.views : 0 })),
+    pagesWindow: { from: winFrom, to: winTo },
     universities: [],
+    breakdowns: {
+      /* THE HOURS ARE THE FIRST-PARTY RECORD'S ALONE. It stamps the instant a
+         session began, so the hour is exact; GA4 would answer the same
+         question on the property's own clock, and one chart whose meaning
+         changed time zone with its source would be worse than no chart. */
+      hours: A.breakdown('hours', {
+        source: 'usage', from: winFrom, to: winTo,
+        metric: 'visits', zone: 'UTC', items: hours, limit: 24,
+      }),
+    },
+    engagement: A.engagement({
+      source: 'usage', from: winFrom, to: winTo,
+      sessions: winSessions, seconds: winSeconds, views: winViews,
+    }),
     scanned,
     withheld,
   };
 }
 
 /** Google Analytics 4, through the Data API.
-   
+
     NOT the Reporting API the dead spreadsheet add-on used — that one was
     Universal Analytics' and no longer exists. This speaks
     `properties/<id>:runReport` with the OAuth2 JWT flow, over plain fetch, so
@@ -246,8 +285,32 @@ async function fromUsage(db, { since }) {
     THE UNIVERSITY DIMENSION IS NOT HERE, AND CANNOT BE. The old charts read
     UA's `networkDomain` / `networkLocation` — the visitor's reverse-DNS.
     **GA4 has no such dimension and no replacement**, so this leg returns no
-    universities at all and the archive stays the only source of them. */
-async function fromGa4({ since }) {
+    universities at all and the archive stays the only source of them.
+
+    WHAT IT DOES ANSWER, and the first-party record cannot: where readers are,
+    what they read on, and how they got here. The site's own record stores a
+    page, an instant and a duration and asks nothing else, so those four
+    dimensions have exactly one possible source and no precedence question
+    arises. Each is a separate, bounded report; a report that fails is skipped
+    and the rest of the leg still lands, because a country list is not worth a
+    day of the daily figures.
+
+    AND EVERY ONE OF THEM COUNTS SESSIONS, NEVER USERS. Running cookieless the
+    tag keeps no identifier on the device, so GA4 cannot tell a returning
+    reader from a new one and its `totalUsers` is nearly its session count.
+    Publishing a country's number as "visitors" would be exactly the
+    overstatement SOURCE_ORDER exists to avoid. The page says visits.
+
+    GA4's `newVsReturning` IS DELIBERATELY NOT ASKED FOR, for the same reason:
+    cookieless, it reports very nearly every session as new, so the figure
+    would be a measurement of the tag's own configuration rather than of the
+    readers. The first-party record COULD answer it — its per-browser id is
+    stable — but only by reading the whole collection to find each browser's
+    first day, which is exactly the unbounded read the incremental query is
+    shaped to avoid. A figure that would be wrong from one source and
+    expensive from the other is better not drawn than drawn with a caveat
+    nobody reads. */
+async function fromGa4({ since, windowFrom, windowTo }) {
   const propertyId = String(process.env.GA4_PROPERTY_ID || '').replace(/\D/g, '');
   const c = creds('GA4_SERVICE_ACCOUNT');
   if (!propertyId || !c) return null;
@@ -288,13 +351,16 @@ async function fromGa4({ since }) {
 
   const startDate = since ? iso(new Date(since)) : '2015-08-14';   // GA4's own floor
   const endDate = 'today';
+  const winStart = iso(new Date(windowFrom));
 
   /* Ask GOOGLE to leave the non-public paths out, rather than fetching them
-     and dropping them here. Applied to BOTH reports, so the day totals are
-     "visitors who read a public page" and the pages list cannot carry an admin
-     path even for the instant before it is filtered. `A.NON_PUBLIC` is the
-     same list the first-party leg uses; GA4 wants a string pattern, so each is
-     handed over as its source without the anchors it cannot take. */
+     and dropping them here. Applied to EVERY report, so the day totals are
+     "visitors who read a public page", the pages list cannot carry an admin
+     path even for the instant before it is filtered, and the dimension
+     tallies describe the same population the rest of the page does.
+     `A.NON_PUBLIC` is the same list the first-party leg uses; GA4 wants a
+     string pattern, so each is handed over as its source without the anchors
+     it cannot take. */
   const excludeAdmin = {
     notExpression: {
       orGroup: {
@@ -328,8 +394,18 @@ async function fromGa4({ since }) {
     if (built) days[day] = built;
   }
 
+  /* The window this leg's tallies really cover: the ninety-day ask, clipped to
+     the days GA4 actually holds. Reported rather than the nominal span for the
+     same reason the first-party leg reports its own — a nominal window slides
+     at every midnight and would rewrite the served file daily on a site
+     nobody had visited. */
+  const known = Object.keys(days).sort();
+  const inWindow = known.filter((d) => d >= winStart && (!windowTo || d <= windowTo));
+  const winFrom = inWindow[0] || '';
+  const winTo = inWindow[inWindow.length - 1] || '';
+
   const paged = await runReport({
-    dateRanges: [{ startDate, endDate }],
+    dateRanges: [{ startDate: winStart, endDate }],
     dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
     metrics: [{ name: 'screenPageViews' }, { name: 'userEngagementDuration' }],
     orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
@@ -351,7 +427,76 @@ async function fromGa4({ since }) {
     });
   }
 
-  return { source: 'ga4', days, pages, universities: [] };
+  /** One dimension, ranked by sessions over the window. Non-fatal on its own:
+      a country list that 500s must not cost the daily figures, which have
+      already been fetched above. */
+  async function dimension(name, limit) {
+    try {
+      const res = await runReport({
+        dateRanges: [{ startDate: winStart, endDate }],
+        dimensions: [{ name }],
+        metrics: [{ name: 'sessions' }],
+        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+        dimensionFilter: excludeAdmin,
+        limit,
+      });
+      return (res.rows || []).map((row) => ({
+        name: row.dimensionValues?.[0]?.value || '',
+        value: Number(row.metricValues?.[0]?.value || 0),
+      }));
+    } catch (e) {
+      warn(`the GA4 ${name} report failed (${e.message}) — that figure is skipped`);
+      return [];
+    }
+  }
+
+  /* The four dimensions, and the size of each ask. The LIMIT here is not the
+     number the page draws — it is how much of the tail is counted, so that a
+     share is a share of everything rather than of the rows that fitted. */
+  const [countries, devices, channels, referrers] = await Promise.all([
+    dimension('country', 300),
+    dimension('deviceCategory', 10),
+    dimension('sessionDefaultChannelGroup', 30),
+    dimension('sessionSource', 100),
+  ]);
+
+  const win = { from: winFrom, to: winTo };
+  const breakdowns = {
+    countries: A.breakdown('countries', { source: 'ga4', ...win, items: countries, limit: 12 }),
+    devices: A.breakdown('devices', { source: 'ga4', ...win, items: devices, limit: 6 }),
+    channels: A.breakdown('channels', { source: 'ga4', ...win, items: channels, limit: 6 }),
+    referrers: A.breakdown('referrers', { source: 'ga4', ...win, items: referrers, limit: 10 }),
+  };
+
+  /* How long a visit lasts, and how much of the site it covers. GA4 reports
+     the mean directly, so the seconds are multiplied back out — the model
+     divides again, which keeps ONE definition of the average rather than two
+     that could drift. */
+  let engagement = null;
+  try {
+    const eng = await runReport({
+      dateRanges: [{ startDate: winStart, endDate }],
+      metrics: [{ name: 'sessions' }, { name: 'averageSessionDuration' },
+        { name: 'screenPageViews' }],
+      dimensionFilter: excludeAdmin,
+      limit: 1,
+    });
+    const m = eng.rows?.[0]?.metricValues || [];
+    const sessions = Number(m[0]?.value || 0);
+    engagement = A.engagement({
+      source: 'ga4', ...win,
+      sessions,
+      seconds: Number(m[1]?.value || 0) * sessions,
+      views: Number(m[2]?.value || 0),
+    });
+  } catch (e) {
+    warn(`the GA4 engagement report failed (${e.message}) — that figure is skipped`);
+  }
+
+  return {
+    source: 'ga4', days, pages, pagesWindow: win,
+    universities: [], breakdowns, engagement,
+  };
 }
 
 /* ---------------------------------------------------------------------- main */
@@ -370,9 +515,25 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
 
   const pages = new Map();
   const unis = new Map();
+  const breakdowns = {};
+  let engagement = null;
+  let pagesWindow = null;
   for (const r of ordered) {
     const record = A.mergeDays(data.days, r.days, r.source);
+    const before = pages.size;
     A.mergePages(pages, r.pages);
+    /* ONE SOURCE OWNS EACH DIMENSION, WHOLE — the first claim stands, and a
+       later source is ignored rather than merged into it. See the model: two
+       systems counting "visits from Germany" disagree about what a visit and
+       a country are, so an assembled answer measures nothing. */
+    for (const id of A.BREAKDOWN_IDS) {
+      A.mergeBreakdown(breakdowns, id, (r.breakdowns || {})[id]);
+    }
+    if (!engagement && r.engagement) engagement = r.engagement;
+    /* the window belongs to whichever source's pages actually got in */
+    if (!pagesWindow && r.pagesWindow && pages.size > before) {
+      pagesWindow = { source: r.source, from: r.pagesWindow.from || '', to: r.pagesWindow.to || '' };
+    }
     for (const u of r.universities || []) {
       const name = String((u && u.name) || '').trim();
       if (!name || unis.has(name)) continue;
@@ -400,7 +561,15 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
      where those numbers came from has changed. */
   if (carry) {
     A.mergeDays(data.days, carry.days || {}, 'carried');
+    const beforeCarry = pages.size;
     A.mergePages(pages, carry.pages || []);
+    for (const id of A.BREAKDOWN_IDS) {
+      A.mergeBreakdown(breakdowns, id, (carry.breakdowns || {})[id]);
+    }
+    if (!engagement && carry.engagement) engagement = carry.engagement;
+    if (!pagesWindow && carry.pagesWindow && pages.size > beforeCarry) {
+      pagesWindow = carry.pagesWindow;
+    }
     for (const u of carry.universities || []) {
       const name = String((u && u.name) || '').trim();
       if (!name || unis.has(name)) continue;
@@ -412,6 +581,9 @@ export function assemble(results, { now = Date.now(), carry = null } = {}) {
   }
 
   data.pages = A.topPages(pages, TOP_PAGES);
+  data.pagesWindow = pagesWindow || { source: '', from: '', to: '' };
+  data.breakdowns = breakdowns;
+  data.engagement = engagement;
 
   const uniRows = Array.from(unis.values()).sort((a, b) => b.visits - a.visits);
   const hist = live.find((r) => r.source === 'history');
@@ -451,9 +623,20 @@ async function main() {
      minus a week, so a day that was still being written when the last run
      read it is recomputed rather than frozen half-counted. */
   const lastDay = A.series(previous.days || {}).slice(-1)[0];
-  const since = lastDay
+  const incremental = lastDay
     ? Date.parse(lastDay.day + 'T00:00:00Z') - 7 * 86400000
     : 0;
+
+  /* THE DIMENSION WINDOW, and why the read reaches back to it even when the
+     incremental one would not. A day row merges with what is already served;
+     a TALLY does not — adding this run's hour-of-day counts to the last run's
+     would double every session in the overlap, and taking only the fresh ones
+     would turn "when people read the site" into "when people read it this
+     week". So the tallies are recomputed from scratch over one window every
+     run. Ninety days is long enough to be a season and short enough that the
+     read stays bounded as the site grows. */
+  const windowFrom = Date.now() - A.BREAKDOWN_DAYS * 86400000;
+  const since = Math.min(incremental || windowFrom, windowFrom);
 
   const results = [];
 
@@ -471,7 +654,7 @@ async function main() {
   const db = await firestore();
   if (db) {
     try {
-      const usage = await fromUsage(db, { since });
+      const usage = await fromUsage(db, { since, windowFrom });
       log(`usage: ${usage.scanned} session document(s) -> ${Object.keys(usage.days).length} day(s)` +
         (usage.withheld ? `, ${usage.withheld} withheld (admin / archived / test paths)` : ''));
       results.push(usage);
@@ -483,9 +666,11 @@ async function main() {
   }
 
   try {
-    const ga4 = await fromGa4({ since });
+    const ga4 = await fromGa4({ since, windowFrom, windowTo: iso(new Date()) });
     if (ga4) {
-      log(`ga4: ${Object.keys(ga4.days).length} day(s), ${ga4.pages.length} page(s)`);
+      const dims = A.BREAKDOWN_IDS.filter((id) => (ga4.breakdowns || {})[id]);
+      log(`ga4: ${Object.keys(ga4.days).length} day(s), ${ga4.pages.length} page(s)` +
+        (dims.length ? `, ${dims.join(' / ')}` : ', no dimension answered'));
       results.push(ga4);
     } else {
       log('ga4: GA4_PROPERTY_ID / GA4_SERVICE_ACCOUNT are not set — skipped');
@@ -502,6 +687,11 @@ async function main() {
     carry: {
       days: previous.days || {},
       pages: previous.pages || [],
+      /* carried for the same reason the days are: a source that timed out this
+         afternoon must cost a day of freshness, never the figure itself */
+      pagesWindow: previous.pagesWindow || null,
+      breakdowns: previous.breakdowns || {},
+      engagement: previous.engagement || null,
       universities: (previous.universities && previous.universities.all) || [],
       from: (previous.universities && previous.universities.from) || '',
       to: (previous.universities && previous.universities.to) || '',
@@ -516,6 +706,15 @@ async function main() {
     log(`\n${rows.length} day(s) ${summary.from || '—'} .. ${summary.to || '—'}`);
     log(`${summary.visitors} visitor(s), ${summary.pageviews} pageview(s)`);
     log(`${data.pages.length} page(s), ${data.universities.all.length} universit(y/ies)`);
+    for (const id of A.BREAKDOWN_IDS) {
+      const b = data.breakdowns[id];
+      if (b) log(`  ${id}: ${b.items.length} of ${b.total} ${b.metric} (${b.source}` +
+        `${b.from ? ', ' + b.from + ' .. ' + b.to : ''})`);
+    }
+    if (data.engagement) {
+      log(`  engagement: ${data.engagement.avgSessionSec}s a visit, ` +
+        `${data.engagement.viewsPerSession} page(s) (${data.engagement.source})`);
+    }
     if (SCAN) return 0;
   }
 
@@ -558,9 +757,31 @@ function selftest() {
   const fails = [];
   const ok = (c, what) => (c ? pass++ : fails.push(what));
 
+  const hours = A.hourBuckets();
+  hours[9].value = 12;
   const a = assemble([
-    { source: 'usage', days: { '2026-08-02': [99, 99, 99], '2026-08-03': [7, 8, 20] }, pages: [{ path: '/jobs.html', views: 5, avgSec: 10 }], universities: [] },
-    { source: 'ga4', days: { '2026-08-01': [10, 12, 30], '2026-08-02': [5, 6, 14] }, pages: [{ path: '/jobs.html', views: 500, avgSec: 90 }], universities: [] },
+    { source: 'usage', days: { '2026-08-02': [99, 99, 99], '2026-08-03': [7, 8, 20] },
+      pages: [{ path: '/jobs.html', views: 5, avgSec: 10 }],
+      pagesWindow: { from: '2026-08-02', to: '2026-08-03' },
+      breakdowns: {
+        hours: A.breakdown('hours', { source: 'usage', items: hours, limit: 24 }),
+        /* the first-party record has no idea where a reader is; if it ever
+           claimed to, this is the line that would say so */
+        countries: A.breakdown('countries', { source: 'usage', items: [{ name: 'Nowhere', value: 1 }] }),
+      },
+      engagement: A.engagement({ source: 'usage', sessions: 10, seconds: 1000, views: 25 }),
+      universities: [] },
+    { source: 'ga4', days: { '2026-08-01': [10, 12, 30], '2026-08-02': [5, 6, 14] },
+      pages: [{ path: '/jobs.html', views: 500, avgSec: 90 }],
+      pagesWindow: { from: '2026-05-01', to: '2026-08-03' },
+      breakdowns: {
+        countries: A.breakdown('countries', {
+          source: 'ga4', items: [{ name: 'United States', value: 40 }, { name: 'Ireland', value: 10 }] }),
+        devices: A.breakdown('devices', {
+          source: 'ga4', items: [{ name: 'desktop', value: 30 }, { name: 'mobile', value: 20 }] }),
+      },
+      engagement: A.engagement({ source: 'ga4', sessions: 100, seconds: 100, views: 100 }),
+      universities: [] },
     { source: 'history', days: { '2015-01-01': [3, 3, 9] }, pages: [], universities: [{ name: 'Duke University', visits: 40 }], from: '2014-03-01', to: '2023-06-30' },
   ]);
 
@@ -572,6 +793,35 @@ function selftest() {
   ok(a.range.from === '2015-01-01' && a.range.to === '2026-08-03', 'the range spans every source');
   ok(a.sources.map((s) => s.source).join(',') === 'usage,ga4,history',
     'the sources are listed in precedence order');
+
+  /* --- one source owns a DIMENSION, whole ------------------------------- */
+
+  ok(a.breakdowns.countries.source === 'usage' && a.breakdowns.countries.total === 1,
+    'a contested dimension goes WHOLE to the higher-authority source — never ' +
+    'merged with the other, because two systems counting "visits from Germany" ' +
+    'do not agree about what a visit or a country is');
+  ok(a.breakdowns.devices.source === 'ga4',
+    '…and a dimension only one source has is taken from that source');
+  ok(a.breakdowns.hours.items.length === 24 && a.breakdowns.hours.items[9].value === 12,
+    'the hours keep clock order rather than being ranked — 24 buckets, 09:00 where ' +
+    'it belongs');
+  ok(a.engagement.source === 'usage' && a.engagement.avgSessionSec === 100,
+    'engagement likewise belongs to one source, and it is the higher one');
+  ok(a.pagesWindow.source === 'usage' && a.pagesWindow.from === '2026-08-02',
+    'and the window reported for the pages is the window of whichever source ' +
+    'actually supplied them — the figure and its span cannot come from ' +
+    'different places');
+
+  /* an id the model does not know is not a shape anybody has checked, and this
+     file is world-readable */
+  ok(A.breakdown('whatever', { source: 'ga4', items: [{ name: 'x', value: 1 }] }) === null,
+    'a dimension nobody declared is never built');
+  const only = {};
+  A.mergeBreakdown(only, 'devices', A.breakdown('devices', { source: 'ga4', items: [{ name: 'a', value: 1 }] }));
+  A.mergeBreakdown(only, 'devices', A.breakdown('devices', { source: 'usage', items: [{ name: 'b', value: 99 }] }));
+  ok(only.devices.source === 'ga4',
+    'and a later claim on a dimension is refused rather than preferred for ' +
+    'being larger');
 
   /* an empty build is a VALID file, not a crash: the page has to have
      something to fetch before anything is configured */
@@ -596,10 +846,17 @@ function selftest() {
      run then flip-flopped the committed file between them, every day. */
   const run1 = assemble(
     [{ source: 'usage', days: { '2026-08-20': [10, 12, 30] },
-       pages: [{ path: '/jobs.html', views: 5, avgSec: 10 }], universities: [] }],
+       pages: [{ path: '/jobs.html', views: 5, avgSec: 10 }],
+       pagesWindow: { from: '2026-08-20', to: '2026-08-20' },
+       breakdowns: {
+         countries: A.breakdown('countries', { source: 'ga4', items: [{ name: 'Ireland', value: 3 }] }),
+       },
+       engagement: A.engagement({ source: 'usage', sessions: 2, seconds: 120, views: 5 }),
+       universities: [] }],
     { now: 0 });
   const run2 = assemble([], { now: 0, carry: {
-    days: run1.days, pages: run1.pages,
+    days: run1.days, pages: run1.pages, pagesWindow: run1.pagesWindow,
+    breakdowns: run1.breakdowns, engagement: run1.engagement,
     universities: run1.universities.all, from: run1.universities.from,
     to: run1.universities.to, sources: run1.sources,
   } });
@@ -609,6 +866,9 @@ function selftest() {
     '…keeping the provenance it was given, rather than claiming the archive supplied it');
   ok(run2.pages.length === 1 && run2.totals.days === 1,
     '…and carrying the pages and days rather than blanking them');
+  ok(run2.breakdowns.countries && run2.engagement && run2.pagesWindow.from === '2026-08-20',
+    '…the dimensions, the engagement figure and the window with them: a source ' +
+    'that was down this afternoon must cost a day of freshness, never a chart');
 
   /* two runs over the same inputs must be byte-identical or the daily
      workflow commits noise for ever */

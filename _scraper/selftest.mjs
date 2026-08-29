@@ -10388,6 +10388,164 @@ async function testAnalytics() {
     '…and filters BEFORE deciding the figure exists, or a cached file of only ' +
     'admin rows would draw a heading over an empty chart');
 
+  /* ------------------------------------ the dimensions, and where each may come from
+
+     Owner, 2026-08-29: several more plots, using Google Analytics. The day
+     rows answer "how many, and when"; these answer "who, from where, on what,
+     and at what hour" — and the rule that keeps them honest is the day rule
+     again, one notch stricter. */
+
+  const CH = require(path.join(HERE, '..', 'assets', 'oa-charts.js'));
+
+  /* ONE SOURCE OWNS A DIMENSION, WHOLE. Two analytics systems counting the
+     same Tuesday at least agree about what a Tuesday is; two systems counting
+     "visits from Germany" disagree about the boundary of a session, the
+     meaning of a country and the clock an hour is read on, so an assembled
+     answer measures nothing. */
+  const dims = {};
+  ok(A.mergeBreakdown(dims, 'countries',
+    A.breakdown('countries', { source: 'ga4', items: [{ name: 'Ireland', value: 3 }] })),
+    'a dimension record is taken from the source that answered for it');
+  ok(!A.mergeBreakdown(dims, 'countries',
+    A.breakdown('countries', { source: 'usage', items: [{ name: 'Nowhere', value: 999 }] })),
+    '…and a second claim on it is refused — never merged, never summed, and ' +
+    'never preferred for being larger');
+  eq(dims.countries.items[0].name, 'Ireland', '…the first claim standing whole');
+
+  ok(A.breakdown('whatever', { source: 'ga4', items: [{ name: 'x', value: 1 }] }) === null,
+    'a dimension nobody declared is never built — this file is world-readable, ' +
+    'and "whatever a source sent" is not a shape anybody has checked');
+  ok(A.breakdown('countries', { source: 'ga4', items: [] }) === null,
+    'and a record with nothing in it is null rather than an empty chart');
+
+  /* A SHARE IS A SHARE OF THE WHOLE. `total` is summed before the cut, so the
+     leader of a top-ten is not reported as a proportion of the ten that fitted
+     — the classic way such a chart comes to overstate its leader. */
+  const cut = A.breakdown('countries', {
+    source: 'ga4', limit: 2,
+    items: [{ name: 'United States', value: 400 }, { name: 'Ireland', value: 120 },
+      { name: 'Germany', value: 90 }, { name: 'Singapore', value: 390 }],
+  });
+  eq(cut.total, 1000, 'the total counts every row the source returned, not the ones shown');
+  eq(cut.items.length, 2, '…while only the top rows are served');
+  eq(Math.round(A.withShare(cut)[0].share * 100), 40,
+    '…so the leader reads 40%, not the 51% it would be over the visible rows');
+
+  /* hours are a CLOCK; everything else is a ranking */
+  const hb = A.hourBuckets();
+  hb[9].value = 12; hb[3].value = 40;
+  const hrs = A.breakdown('hours', { source: 'usage', items: hb, limit: 24 });
+  eq(hrs.items.map((h) => h.name).slice(0, 3), ['00', '01', '02'],
+    'the hours stay in clock order — ranking them would make the chart unreadable');
+  eq(hrs.items[9].value, 12, '…each bucket where it belongs');
+
+  /* the labels come out of somebody else's traffic, and land in a public file */
+  eq(A.cleanLabel('  Hong  Kong\n'), 'Hong Kong', 'a label is tidied before it is served');
+  eq(A.cleanLabel('mail@example.com'), '',
+    'and one shaped like an address is dropped WHOLE — nothing under data/ may ' +
+    'carry one, and a truncated address is still an address');
+  eq(A.cleanLabel('x'.repeat(200)).length, 60, 'a label is capped');
+  eq(A.prettyLabel('(direct)'), 'Typed or bookmarked',
+    'Google\'s house style for "no referrer" is said in English');
+  eq(A.prettyLabel('(not set)'), 'Not recorded',
+    '…and "we could not tell" is not dressed up as a place');
+
+  /* an address-shaped label contributes nothing to the total either, or the
+     shares of everything else would be quietly wrong */
+  const withBad = A.breakdown('referrers', {
+    source: 'ga4', items: [{ name: 'google', value: 10 }, { name: 'a@b.com', value: 90 }],
+  });
+  eq(withBad.total, 10, 'a dropped label takes its count with it');
+
+  /* --- seconds, said the way a person says them ------------------------- */
+
+  /* Owner, 2026-08-29: "convert seconds to e.g. hours, minute, seconds if
+     seconds is too long". 1,952 is the real figure the page was printing raw
+     under its most-read pages. */
+  eq(CH.duration(1952), '32m 32s', 'a long average is said in minutes and seconds');
+  eq(CH.duration(45), '45s', 'and a short one is still said in seconds, which is its unit');
+  eq(CH.duration(60), '1m', 'a round minute carries no trailing zero seconds');
+  eq(CH.duration(3660), '1h 01m',
+    'the smaller unit is zero-padded, so "1h 1m" cannot be misread as "1h 10m" ' +
+    'and a column of these stays aligned');
+  eq(CH.duration(7325), '2h 02m',
+    'and seconds are dropped once hours are involved — carrying them would imply ' +
+    'a precision an average session length does not have');
+  eq(CH.duration(0), '0s', 'nothing is said as nothing, never as an empty string');
+  eq(CH.durationLong(1952), '32 minutes 32 seconds', 'and spelled out where there is room');
+  eq(CH.pct(0.4), '40%', 'a share is said as a percentage');
+  eq(CH.pct(0.0004), '<0.1%',
+    'and a category too small to round to a tenth is not reported as absent');
+
+  ok(/C\.duration\(/.test(page),
+    'the page says its times through that one formatter rather than printing ' +
+    'raw seconds — the defect the owner reported');
+  /* READ WITH THE COMMENTS STRIPPED. The page still records WHAT it used to
+     print and why that was wrong, and a guard that could not tell the
+     explanation from the thing would have to be satisfied by deleting the
+     explanation — the rule the no-iframe check above already had to learn. */
+  ok(!/seconds on average/.test(page.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and the sentence that printed them is gone from the page itself');
+  ok(/seconds on average/.test(page),
+    '…while the page still records what it used to say, so the check above can ' +
+    'never be satisfied by deleting the explanation');
+
+  /* --- the page and the model name the SAME dimensions ------------------ */
+
+  /* Two lists of what this page draws would drift the first time one was added
+     to, and the symptom would be a figure the file carries and the page never
+     shows — invisible to everybody. So they are pinned against each other,
+     both ways. */
+  const drawn = [...page.matchAll(/^\s*id: '([a-z]+)', kind: '(\w+)',$/gm)].map((m) => m[1]);
+  eq(drawn.slice().sort(), A.BREAKDOWN_IDS.slice().sort(),
+    'every dimension the model may carry is drawn by the page, and every ' +
+    'dimension the page draws is one the model may carry');
+  ok(/renderProvenance/.test(page) && /oa-an-missing/.test(page),
+    'and the ones no source has answered for are NAMED at the foot rather than ' +
+    'drawn as an empty axis — a dashboard that shows only what it happens to ' +
+    'have is the failure this page is a rebuild of');
+
+  /* --- each dimension is asked of the source that can answer it ---------- */
+
+  const builder = await readFile(path.join(HERE, 'build-analytics.mjs'), 'utf8');
+  for (const asked of ['country', 'deviceCategory', 'sessionDefaultChannelGroup', 'sessionSource']) {
+    ok(new RegExp("dimension\\('" + asked + "'").test(builder),
+      `the GA4 leg asks for ${asked} — the first-party record has no such field`);
+  }
+  ok(/hours: A\.breakdown\('hours'[\s\S]{0,400}source: 'usage'/.test(builder),
+    'the HOURS come from the site\'s own record, which stamps the instant a ' +
+    'session began');
+  ok(!/dimension\('hour'/.test(builder),
+    '…and are deliberately NOT also asked of GA4, which reports them on the ' +
+    'property\'s own clock: one chart whose meaning changed time zone with its ' +
+    'source would be worse than no chart');
+  ok(/newVsReturning/.test(builder) && !/dimension\('newVsReturning'/.test(builder),
+    'new-versus-returning is EXPLAINED as absent rather than silently missing: ' +
+    'cookieless GA4 reports nearly every session as new, and the first-party ' +
+    'record could only answer it with the unbounded read the incremental query ' +
+    'is shaped to avoid');
+  ok(/windowFrom/.test(builder) && /BREAKDOWN_DAYS/.test(builder),
+    'the tallies are recomputed over a stated window every run — they cannot be ' +
+    'accumulated across runs the way days can, or the overlap would be counted twice');
+
+  /* --- what the served file may carry ------------------------------------ */
+
+  for (const id of Object.keys(served.breakdowns || {})) {
+    ok(A.BREAKDOWN_IDS.includes(id), `data/analytics.json carries only declared dimensions — ${id}`);
+    const rec = served.breakdowns[id];
+    ok(rec && Array.isArray(rec.items) && rec.total > 0, `…and ${id} is a complete record`);
+    ok(rec.metric !== 'visitors',
+      `${id} counts VISITS, never visitors: running cookieless, GA4 keeps no ` +
+      'identifier on the device and cannot tell a returning reader from a new one');
+    for (const it of rec.items) {
+      eq(A.cleanLabel(it.name), it.name, `…each label already tidy — ${id}: ${it.name}`);
+    }
+  }
+  ok(!served.engagement || served.engagement.avgSessionSec >= 0,
+    'the engagement record is a set of scalars or absent, never a zero pretending ' +
+    'to be a measurement');
+
+  /* --- the categorical ramp ---------------------------------------------- */
   /* --- the colour that had to be re-stepped ------------------------------ */
 
   const css = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8');
@@ -10398,6 +10556,22 @@ async function testAnalytics() {
   ok(!/#fff\b|#ffffff\b/i.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
     'and nothing in it paints a hardcoded white — anything that paints its own ' +
     'ground must name its own ink, in both themes');
+
+  /* The share bars need a categorical ramp, and it is re-stepped in dark for
+     exactly the reason the accent is: the light ramp on #15181d reads as six
+     identical blocks. A token defined in only one theme is the "anything that
+     paints its own ground must name its own ink" rule wearing a hat. */
+  const darkBlock = (css.match(/\[data-theme='dark'\]\s*\{[\s\S]*?\}/) || [''])[0];
+  for (let i = 1; i <= 6; i++) {
+    ok(new RegExp('--oa-cat-' + i + ':').test(css),
+      `the categorical ramp defines --oa-cat-${i}`);
+    ok(new RegExp('--oa-cat-' + i + ':').test(darkBlock),
+      `…and re-steps it for the dark surface — --oa-cat-${i}`);
+  }
+  ok(/oa-share-seg/.test(css) && /oa-bar-row:focus-visible/.test(css),
+    'and the new marks carry their own hover and focus states: a figure that ' +
+    'answers a pointer must answer a keyboard, and a focus nobody can see is ' +
+    'not an answer');
 
   /* --- the setup guide names what is actually needed --------------------- */
 
