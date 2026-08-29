@@ -8760,14 +8760,34 @@ async function testReviewWiring() {
   eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
     'with it, the whole build does');
 
-  /* A BUILDER NOBODY CALLS IS A FILE THAT SILENTLY STOPS RUNNING. Nothing in
-     the workflows names the four scripts any more — build-all.mjs is the one
-     caller — so a fifth builder added beside them would simply never run, and
-     the only symptom would be a dataset that stopped moving. */
+  /* A BUILDER NOBODY CALLS IS A FILE THAT SILENTLY STOPS RUNNING — the whole
+     point of this check, and the only symptom would be a dataset that quietly
+     stopped moving. So every build-*.mjs must have a caller, and there are
+     exactly two legitimate kinds:
+
+       - it is in BUILDERS, and oa-jobs-build.yml runs the lot; or
+       - it has a WORKFLOW OF ITS OWN that names it.
+
+     The second is not a loophole, it is the case build-analytics.mjs is:
+     a once-a-day read of a whole collection, which folded into BUILDERS would
+     make every posting's publish wait on it and share its failure. What the
+     rule actually forbids is a builder with NO caller, and it still does. */
   const builderFiles = (await readdir(HERE))
     .filter((f) => /^build-.*\.mjs$/.test(f) && f !== 'build-all.mjs').sort();
-  eq(BUILDERS.map((b) => b.script).sort(), builderFiles,
-    'build-all.mjs runs every builder in _scraper — it is the only thing that calls one');
+  const inBuilders = BUILDERS.map((b) => b.script);
+  const wfText = (await Promise.all((await readdir(wfDir))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((f) => readFile(path.join(wfDir, f), 'utf8')))).join('\n');
+  const orphans = builderFiles.filter(
+    (f) => !inBuilders.includes(f) && !wfText.includes(f));
+  eq(orphans, [], 'every builder in _scraper has a caller — BUILDERS, or a workflow naming it');
+
+  /* …and the two kinds do not OVERLAP. A builder that is in BUILDERS *and*
+     named by a workflow would run twice on one event, from two bases, racing
+     its own commit — which is exactly the duplicate-doorbell outage recorded
+     in CLAUDE.md, one layer down. */
+  const doubled = inBuilders.filter((f) => wfText.includes(f));
+  eq(doubled, [], 'a builder is called by BUILDERS or by its own workflow, never both');
 
   /* AND EVERY NAMING SWEEP IS IN THAT ROLE — the half the flag cannot deliver
      on its own.
@@ -9912,6 +9932,181 @@ async function testSponsors() {
   }
 }
 
+/* --------------------------------------------------------------- analytics
+
+   The page was four Google Sheets <iframe>s and they had been dead since 2023
+   (Universal Analytics was switched off in July that year and its properties
+   deleted the next). A dead embed renders as an empty box, so what is pinned
+   here is mostly the honesty the replacement is built for: that a day is never
+   counted twice, that an unreachable source cannot shorten the history, and
+   that nothing on the page claims the frozen archive is current. */
+async function testAnalytics() {
+  const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
+
+  /* --- a day belongs to exactly ONE source ------------------------------- */
+
+  const days = {};
+  A.mergeDays(days, { '2026-08-02': [5, 6, 14], '2026-08-01': [10, 12, 30] }, 'ga4');
+  A.mergeDays(days, { '2026-08-02': [99, 99, 99], '2026-08-03': [7, 8, 20] }, 'usage');
+  eq(days['2026-08-02'], [5, 6, 14],
+    'the higher-authority source keeps a day two sources both measured');
+  eq(A.summarise(A.series(days)).visitors, 22,
+    'a contested day is counted ONCE — summing two measurements of one Tuesday ' +
+    'would double every day of the overlap, and the chart would look fine');
+
+  eq(A.SOURCE_ORDER, ['ga4', 'usage', 'history'], 'the precedence is explicit and ordered');
+
+  /* a row of three zeroes is DROPPED rather than stored — the file would
+     otherwise carry a decade of days that only say "we have no idea", and the
+     charts would plot them as real zeroes */
+  ok(A.dayRow(0, 0, 0) === null, 'a day with no measurement in it is not a day');
+  eq(A.dayRow(3, 0, 0), [3, 0, 0], 'a day with any measurement is kept');
+
+  /* --- the series is SORTED, whatever order the file holds --------------- */
+
+  const jumbled = { '2026-08-03': [3, 3, 3], '2026-08-01': [1, 1, 1], '2026-08-02': [2, 2, 2] };
+  eq(A.series(jumbled).map((r) => r.day), ['2026-08-01', '2026-08-02', '2026-08-03'],
+    'the series sorts by day — JSON key order is an implementation detail, and a ' +
+    'chart plotted in insertion order would be scribble');
+  eq(A.series(jumbled, { from: '2026-08-02' }).map((r) => r.day),
+    ['2026-08-02', '2026-08-03'], 'and clips to a range');
+
+  /* --- the rolling mean is TRAILING, and says so by emitting null -------- */
+
+  eq(A.rollingMean([1, 2, 3, 4], 2), [null, 1.5, 2.5, 3.5],
+    'the mean is trailing and emits null until it has a full window — a centred ' +
+    'one would need days that have not happened, so the line would droop at the ' +
+    'right-hand end, which is exactly where a reader looks');
+
+  /* --- the weekday bucket reads the day in UTC --------------------------- */
+
+  /* 2026-08-03 IS a Monday. Read with `new Date('2026-08-03')` and rendered in
+     a local zone, every reader west of Greenwich gets the day before and the
+     whole chart shifts by one bar — silently, and only for some readers. */
+  const wk = A.byWeekday([{ day: '2026-08-03', visitors: 10, sessions: 0, pageviews: 0 }]);
+  eq(wk[0].name, 'Monday', 'the weekday buckets start on Monday');
+  eq(wk[0].total, 10, 'and a Monday lands in the Monday bucket, read in UTC');
+  eq(wk.reduce((n, b) => n + b.days, 0), 1, 'each day is counted in exactly one bucket');
+
+  /* it is a MEAN, not a total: a range rarely holds the same number of each
+     weekday, and a total would rank the weekdays by how many the range had */
+  const twoMondays = A.byWeekday([
+    { day: '2026-08-03', visitors: 10, sessions: 0, pageviews: 0 },
+    { day: '2026-08-10', visitors: 20, sessions: 0, pageviews: 0 },
+    { day: '2026-08-04', visitors: 30, sessions: 0, pageviews: 0 },
+  ]);
+  eq(twoMondays[0].mean, 15, 'two Mondays average rather than sum');
+  eq(twoMondays[1].mean, 30, 'and one Tuesday does not out-rank them merely by being one');
+
+  const mo = A.byMonth([{ day: '2026-09-15', visitors: 7, sessions: 0, pageviews: 0 }]);
+  eq(mo[8].name, 'September', 'the months are in calendar order');
+  eq(mo[8].total, 7, 'and September lands in September');
+
+  /* --- staleness: the failure this whole page exists to make visible ----- */
+
+  const fresh = { days: { '2026-08-28': [1, 1, 1] } };
+  ok(A.staleness(fresh, Date.parse('2026-08-29T00:00:00Z')) === null,
+    'a dataset that gained a day yesterday is not stale');
+  const old = A.staleness({ days: { '2026-01-01': [1, 1, 1] } },
+    Date.parse('2026-08-29T00:00:00Z'));
+  ok(old && old.age > A.STALE_DAYS,
+    'one that stopped in January is, and the page says so — a pipeline that has ' +
+    'quietly stopped and a site nobody visits look identical from outside, which ' +
+    'is how the old charts stayed dead for three years');
+  ok(A.staleness({ days: {} }, Date.now()) === null,
+    'but an EMPTY dataset is unconfigured, not stale — a different sentence');
+
+  /* --- the served file is valid before anything is configured ------------ */
+
+  const served = JSON.parse(await readFile(path.join(HERE, '..', 'data', 'analytics.json'), 'utf8'));
+  eq(served.dayFields, A.DAY_FIELDS,
+    'the served file names its own day fields — self-describing rather than ' +
+    'something a reader has to read the model to learn');
+  ok(served.universities && served.universities.frozen === true,
+    'the universities section is marked frozen: it came from Universal Analytics\' ' +
+    'networkDomain, GA4 has no such dimension and none replaces it, so those ' +
+    'numbers can never be brought up to date by anybody');
+  ok(typeof served.version === 'number' && served.days && served.totals,
+    'and it is a complete, valid dataset even with every source switched off');
+
+  /* nothing under data/ may carry an address — the rule every served file
+     here is held to, and this one is built from a collection of sessions */
+  const rawServed = await readFile(path.join(HERE, '..', 'data', 'analytics.json'), 'utf8');
+  ok(!/[\w.+-]+@[\w-]+\.[\w.]+/.test(rawServed),
+    'the analytics file carries no e-mail address');
+  ok(!/[?&]/.test(Object.keys(served.days).join('')), 'the day keys are plain dates');
+
+  /* --- the page's wiring ------------------------------------------------- */
+
+  const html = await readFile(path.join(HERE, '..', 'analytics.html'), 'utf8');
+  /* READ WITH THE COMMENTS STRIPPED. The page still EXPLAINS the four embeds
+     it no longer has, and a guard that could not tell the explanation from the
+     thing would have to be satisfied by deleting the explanation — the rule
+     the no-rebase check in testReviewWiring already had to learn. */
+  const htmlLive = html.replace(/<!--[\s\S]*?-->/g, '');
+  ok(!/<iframe/i.test(htmlLive),
+    'analytics.html embeds nothing — the four dead Google Sheets charts are gone');
+  ok(!/docs\.google\.com/.test(htmlLive),
+    'and it names no spreadsheet: those stopped being fed when UA was retired');
+  ok(/<iframe/i.test(html) && /Universal Analytics/.test(html),
+    'but the page still records WHY they went — the comment is the explanation, ' +
+    'and the check above must never be satisfiable by deleting it');
+  for (const src of ['assets/oa-analytics-model.js', 'assets/oa-charts.js', 'assets/oa-analytics.js']) {
+    ok(new RegExp('<script defer src="' + src.replace(/[/.]/g, '\\$&') + '"').test(html),
+      `analytics.html loads ${src}, deferred like every other script on this site`);
+  }
+  ok(/<link href="assets\/oa-analytics\.css" rel="stylesheet">/.test(html),
+    'and its stylesheet');
+  ok(/id="oa-analytics"/.test(html), 'the mount point is present');
+  ok(/<noscript>/.test(html),
+    'and a noscript state, because the figures are drawn in the browser');
+
+  /* the lede must not still apologise for an embed's own styling */
+  ok(!/render in their own light styling/.test(html),
+    'the apology for the embeds\' fixed light styling went with the embeds');
+
+  /* --- the page module ---------------------------------------------------*/
+
+  const page = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.js'), 'utf8');
+  ok(/cache: 'no-cache'/.test(page),
+    'it fetches data/ with no-cache — Pages serves data/ with ten minutes of ' +
+    'freshness, so without it a returning reader is shown what they already had');
+  ok(/OAAnalytics/.test(page) && /OACharts/.test(page),
+    'and reads the shared model rather than carrying its own copy of the rules');
+
+  /* --- the colour that had to be re-stepped ------------------------------ */
+
+  const css = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8');
+  ok(/\[data-theme='dark'\][\s\S]*--oa-chart-accent/.test(css),
+    'the dark theme re-steps the chart accent: --brand and --gold separate at ' +
+    'delta-E 31.6 in light and collapse to 14.9 in dark, below the floor at which ' +
+    'two overlaid lines can be told apart even with full colour vision');
+  ok(!/#fff\b|#ffffff\b/i.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'and nothing in it paints a hardcoded white — anything that paints its own ' +
+    'ground must name its own ink, in both themes');
+
+  /* --- the setup guide names what is actually needed --------------------- */
+
+  const setup = await readFile(path.join(HERE, '..', '_SETUP-ANALYTICS.md'), 'utf8');
+  for (const needed of ['GA4_PROPERTY_ID', 'GA4_SERVICE_ACCOUNT', 'FIREBASE_SERVICE_ACCOUNT']) {
+    ok(setup.includes(needed), `_SETUP-ANALYTICS.md names ${needed}`);
+  }
+  ok(/networkDomain/.test(setup),
+    'and states plainly which figures can never come back, and why');
+
+  /* --- the workflow ------------------------------------------------------ */
+
+  const wf = await readFile(
+    path.join(HERE, '..', '.github', 'workflows', 'oa-analytics.yml'), 'utf8');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wf),
+    'the analytics workflow checks out the branch TIP, never github.sha — the ' +
+    'stale-checkout trap this repository has now hit twice');
+  ok(!/pull --rebase/.test(wf.replace(/#.*$/gm, '')),
+    'and never rebases: data/ is a build output, so a rejected push is REBUILT');
+  ok(/GA4_PROPERTY_ID/.test(wf) && /FIREBASE_SERVICE_ACCOUNT/.test(wf),
+    'it passes every gated source its credential');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -10002,5 +10197,6 @@ if (isMain(import.meta.url)) {
   await testJobExport();
   await testJobExportWiring();
   await testSponsors();
+  await testAnalytics();
   process.exit(finish() ? 0 : 1);
 }

@@ -5893,6 +5893,267 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ----------------------------------------------------- the analytics page
+
+   It was four Google Sheets <iframe>s, dead since Universal Analytics was
+   switched off in July 2023 and rendering as four empty boxes ever since. It
+   draws its own marks now, so what is measured here is the half a unit test
+   cannot see: that a reader with no data is TOLD so rather than shown blank
+   cards, that the frozen archive is labelled, that the two lines can be told
+   apart in BOTH themes, and that the seasonality chart never reports a month
+   the record has not covered as a month with no visitors. */
+{
+  /* a realistic corpus rather than a fixture of three days: the weekday and
+     seasonal shapes are the whole point of two of these charts, and a chart
+     over three days cannot show either */
+  const demoDays = {};
+  let seed = 42;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const start = Date.UTC(2024, 0, 1);
+  const end = Date.UTC(2026, 7, 28);
+  for (let t = start; t <= end; t += 86400000) {
+    const d = new Date(t);
+    const season = [0.75, 0.7, 0.8, 0.85, 0.7, 0.5, 0.45, 0.7, 1.5, 1.7, 1.35, 0.85][d.getUTCMonth()];
+    const week = (d.getUTCDay() === 0 || d.getUTCDay() === 6) ? 0.45 : 1;
+    const v = Math.max(1, Math.round(38 * season * week * (0.8 + rnd() * 0.45)));
+    demoDays[d.toISOString().slice(0, 10)] = [v, Math.round(v * 1.2), Math.round(v * 2.7)];
+  }
+  const demo = {
+    version: 1,
+    generated: new Date(end).toISOString(),
+    dayFields: ['visitors', 'sessions', 'pageviews'],
+    sources: [{ source: 'usage', days: Object.keys(demoDays).length }],
+    days: demoDays,
+    pages: [
+      { path: '/jobs.html', title: 'Job postings', views: 48210, avgSec: 142 },
+      { path: '/', title: 'Operations Academia', views: 31022, avgSec: 73 },
+    ],
+    universities: {
+      frozen: true, from: '2014-03-01', to: '2023-06-30',
+      all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }],
+      recent: [],
+    },
+    totals: { visitors: 1, sessions: 1, pageviews: 1, days: Object.keys(demoDays).length, universities: 2 },
+    range: { from: '2024-01-01', to: '2026-08-28' },
+    recentDays: 7,
+  };
+
+  const serveDemo = (pg, body) => pg.route('**/data/analytics.json', (r) => r.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify(body),
+  }));
+
+  /* --- with data, in BOTH themes ---------------------------------------- */
+
+  for (const theme of ['light', 'dark']) {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 }, colorScheme: theme });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push(`analytics ${theme}: ` + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await q.addInitScript((t) => { try { localStorage.setItem('oaV3Theme', t); } catch (e) { /**/ } }, theme);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+
+    const seen = await q.evaluate(() => ({
+      figures: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
+      svgs: document.querySelectorAll('.oa-chart-svg').length,
+      tables: document.querySelectorAll('.oa-chart-table').length,
+      tiles: document.querySelectorAll('.oa-tile').length,
+      frozen: [...document.querySelectorAll('.oa-figure-frozen')].map((e) => e.textContent.trim()),
+      iframes: document.querySelectorAll('iframe').length,
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    }));
+
+    eq(seen.iframes, 0, `analytics (${theme}): the page embeds nothing`);
+    ok(seen.svgs >= 3, `analytics (${theme}): the charts are drawn as inline SVG`);
+    ok(seen.tiles >= 4, `analytics (${theme}): the headline figures are shown`);
+    eq(seen.tables, seen.svgs,
+      `analytics (${theme}): every chart also gives its numbers as a table — a chart ` +
+      'is accessible because the values are available as text, not because it validated');
+    eq(seen.frozen, ['Archive — 2014 to 2023'],
+      `analytics (${theme}): the universities section is labelled as an archive — its ` +
+      'numbers came from a dimension no analytics product still offers, so a reader ' +
+      'must never take them for current');
+    ok(!seen.overflowX, `analytics (${theme}): the page never scrolls sideways`);
+
+    /* THE TWO LINES MUST BE TELLABLE APART. The daily chart draws a count and
+       its rolling mean; the site's own --brand and --gold separate well in
+       light and collapse in dark, which is why the stylesheet re-steps the
+       accent there. Measured from what the browser actually paints, so a
+       later palette change cannot silently undo it. */
+    const lines = await q.evaluate(() => {
+      const px = (el) => getComputedStyle(el).stroke;
+      const a = document.querySelector('.oa-line.oa-brand');
+      const b = document.querySelector('.oa-line.oa-accent');
+      return a && b ? { a: px(a), b: px(b) } : null;
+    });
+    ok(lines && lines.a !== lines.b,
+      `analytics (${theme}): the daily line and its rolling mean are different colours`);
+    if (lines) {
+      const rgb = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const [ar, ag, ab] = rgb(lines.a);
+      const [br, bg, bb] = rgb(lines.b);
+      const dist = Math.abs(ar - br) + Math.abs(ag - bg) + Math.abs(ab - bb);
+      ok(dist > 90,
+        `analytics (${theme}): …and far enough apart to read as two lines (channel ` +
+        `distance ${dist}) — in dark the site's own two colours sit at delta-E 14.9, ` +
+        'below the floor at which two overlaid lines can be told apart');
+    }
+
+    /* the mean is DASHED as well as coloured, so the pair does not rely on
+       colour alone */
+    const dashed = await q.evaluate(() =>
+      getComputedStyle(document.querySelector('.oa-line.oa-accent')).strokeDasharray);
+    ok(dashed && dashed !== 'none',
+      `analytics (${theme}): the rolling mean is dashed too — identity is never colour alone`);
+
+    /* A MONTH THE RECORD HAS NOT COVERED IS NOT A MONTH WITH NO VISITORS.
+       Under the default 90-day range the season chart used to draw eight
+       zero-height bars, which on a job-market site reads as "nobody visits in
+       September" — backwards rather than merely missing. It reads the whole
+       record instead, so every month has a bar. */
+    const season = await q.evaluate(() => {
+      const figs = [...document.querySelectorAll('.oa-figure')];
+      const f = figs.find((x) => /hiring season/i.test(x.querySelector('h2').textContent));
+      if (!f) return null;
+      return {
+        sub: f.querySelector('.oa-figure-sub').textContent,
+        bars: f.querySelectorAll('.oa-bar[d]:not([d=""])').length,
+        ticks: [...f.querySelectorAll('.oa-tick-x')].map((t) => t.textContent),
+      };
+    });
+    ok(season && season.ticks.length === 12,
+      `analytics (${theme}): the season chart names all twelve months`);
+    eq(season && season.bars, 12,
+      `analytics (${theme}): …and draws a bar for each — over the WHOLE record, because ` +
+      'a window shorter than a year cannot answer a question about the year');
+    ok(season && /whole record/i.test(season.sub),
+      `analytics (${theme}): …and says so, rather than letting the range above imply otherwise`);
+
+    /* the range control drives every figure at once */
+    const before = await q.evaluate(() =>
+      document.querySelector('.oa-tile-value').textContent);
+    await q.evaluate(() => document.querySelectorAll('.oa-range button')[0].click());
+    await q.waitForTimeout(250);
+    const after = await q.evaluate(() => ({
+      value: document.querySelector('.oa-tile-value').textContent,
+      pressed: [...document.querySelectorAll('.oa-range button')]
+        .map((b) => b.getAttribute('aria-pressed')),
+    }));
+    ok(after.value !== before,
+      `analytics (${theme}): narrowing the range moves the headline figures`);
+    eq(after.pressed, ['true', 'false', 'false', 'false'],
+      `analytics (${theme}): …and exactly one range reads as chosen`);
+
+    await ctx.close();
+  }
+
+  /* --- with NOTHING, which is the state it ships in --------------------- */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics empty: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, {
+      version: 1, generated: '', dayFields: ['visitors', 'sessions', 'pageviews'],
+      sources: [], days: {}, pages: [],
+      universities: { frozen: true, from: '', to: '', all: [], recent: [] },
+      totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
+      range: { from: '', to: '' }, recentDays: 7,
+    });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-an-note', { timeout: 15000 });
+    const note = await q.evaluate(() => document.querySelector('#oa-analytics').textContent);
+    ok(/Nothing is being measured yet/i.test(note),
+      'analytics: with no data the page SAYS so — four empty boxes reporting nothing ' +
+      'to anybody is how the old charts stayed dead for three years');
+    ok(/Universal Analytics/.test(note) && /_SETUP-ANALYTICS\.md/.test(note),
+      'analytics: …and names both the cause and where to read what to do about it');
+    eq(await q.evaluate(() => document.querySelectorAll('.oa-chart-svg').length), 0,
+      'analytics: and draws no empty chart beside it');
+    await ctx.close();
+  }
+
+  /* --- a dataset that has STOPPED moving -------------------------------- */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics stale: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, { ...demo, days: { '2020-01-01': [5, 6, 12] } });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-an-note.warn', { timeout: 15000 });
+    const warn = await q.evaluate(() => document.querySelector('.oa-an-note.warn').textContent);
+    ok(/stopped moving/i.test(warn) && /2020/.test(warn),
+      'analytics: a dataset that stopped years ago says so, and names its last day — ' +
+      'from outside, a pipeline that has stopped and a quiet site look identical');
+    await ctx.close();
+  }
+
+  /* --- hostile input ---------------------------------------------------- */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics hostile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, {
+      ...demo,
+      pages: [{ path: 'javascript:alert(1)', title: '<img src=x onerror=alert(1)>', views: 9, avgSec: 1 }],
+      universities: {
+        frozen: true, from: '2014-03-01', to: '2023-06-30',
+        all: [{ name: '<script>alert(1)</script>', visits: 5 }], recent: [],
+      },
+    });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const hostile = await q.evaluate(() => ({
+      injected: document.querySelectorAll('#oa-analytics img, #oa-analytics script').length,
+      jsHref: [...document.querySelectorAll('#oa-analytics a')]
+        .filter((a) => /^javascript:/i.test(a.getAttribute('href') || '')).length,
+      textShown: document.querySelector('#oa-analytics').textContent.includes('<script>'),
+    }));
+    eq(hostile.injected, 0, 'analytics: markup in a page title or a name is rendered inert');
+    eq(hostile.jsHref, 0, 'analytics: and a javascript: path never becomes a link');
+    ok(hostile.textShown, 'analytics: …it is shown as the text it is');
+    await ctx.close();
+  }
+
+  /* --- the phone -------------------------------------------------------- */
+
+  {
+    const ctx = await browser.newContext({
+      viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
+    });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics mobile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const mob = await q.evaluate(() => {
+      const doc = document.documentElement;
+      return {
+        overflowX: doc.scrollWidth > doc.clientWidth,
+        targets: [...document.querySelectorAll('.oa-range button')]
+          .map((b) => Math.round(b.getBoundingClientRect().height)),
+        widest: Math.max(...[...document.querySelectorAll('.oa-figure')]
+          .map((f) => Math.round(f.getBoundingClientRect().right))),
+        vw: doc.clientWidth,
+      };
+    });
+    ok(!mob.overflowX, 'analytics mobile: the page never scrolls sideways');
+    ok(mob.targets.length > 0 && mob.targets.every((h) => h >= 42),
+      'analytics mobile: every range control is a 42px target, the standard every ' +
+      'control on this site is held to on a phone');
+    ok(mob.widest <= mob.vw, 'analytics mobile: no figure runs past the viewport');
+    await ctx.close();
+  }
+}
+
+
 /* ------------------------------------------------------------------ done */
 
 

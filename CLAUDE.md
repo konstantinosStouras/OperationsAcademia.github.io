@@ -2514,6 +2514,121 @@ the module what to expect rather than naming CUHK**, so it stays green on the
 day the sponsorship lapses — a guard about a corpus must not move with the
 corpus.
 
+## The analytics page draws its own charts, because the old ones died in 2023
+
+`analytics.html` was four Google Sheets `pubchart` `<iframe>`s. The
+spreadsheets behind them were filled by the **Google Analytics Spreadsheet
+Add-on**, which spoke only the **Universal Analytics Reporting API** — and UA
+stopped processing data on **1 July 2023**, with the properties themselves
+**deleted on 1 July 2024**. So the add-on had been erroring for three years and
+the charts had been frozen or blank for as long.
+
+**Nothing said so, and that is the whole lesson.** A dead embed renders as an
+empty box; a page that has stopped measuring and a site nobody visits look
+identical from outside. It is the `og:url` failure and the never-deployed
+doorbell wearing different clothes: *a thing that reports nothing when it fails
+stays broken for as long as nobody happens to look*.
+
+    assets/oa-analytics-model.js   the shape of a day, and what may come from where (pure, dual-mode)
+    assets/oa-charts.js            the inline-SVG chart set (line, columns, bars)
+    assets/oa-analytics.js         the page — fetch one file, draw six figures
+    assets/oa-analytics.css        its chrome, theme tokens throughout
+    _scraper/build-analytics.mjs   writes data/analytics.json from three gated sources
+    .github/workflows/oa-analytics.yml   daily
+    _SETUP-ANALYTICS.md            what each source needs, and what can never come back
+
+### Three sources, and a day belongs to exactly ONE of them
+
+| | what it is | what it needs |
+|---|---|---|
+| `history` | the rows the old spreadsheets hold, committed once as `data/analytics-history.json` | an export from the maintainer — **frozen**, UA is gone so it can never grow |
+| `usage` | the site's own `usageSessions` (assets/oa-usage.js, every page since 2026-08-17) | `FIREBASE_SERVICE_ACCOUNT`, **already a secret here** — so this one works today |
+| `ga4` | Google Analytics 4 through the Data API | `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT`, and a tag on the live site |
+
+`mergeDays` picks ONE source per day by `SOURCE_ORDER` and **never adds two
+together**. Two sources measuring the same Tuesday are two measurements of one
+number, not two numbers; summing them would double every day of the overlap —
+a chart that looks right, moves in the right direction, and is wrong by a
+factor of two.
+
+**An unreachable source changes nothing.** The committed file stands, and the
+days already served are carried forward as a floor (`carry` in `assemble`), so
+a GA4 timeout costs a day of freshness rather than the history. That matters
+more here than in the postings pipeline, because this file *is* the whole page:
+a half-written one is a blank dashboard.
+
+**Nothing is collected on the live site today.** The UA tag lives in
+`assets/js/ypo-parakolouthisi.js`, loaded only by the `/v1/` and `/v2/`
+archives; the root redesign carries **no analytics tag at all**. Firebase
+issues `G-2CX86W7PHB` and `oa-firebase.js` deliberately omits it. Adding a GA4
+tag means cookies, a consent banner and a Privacy Policy change on an EU-facing
+site — **a decision about visitors, not a bug fix**, so it was left to the
+owner rather than shipped.
+
+### What can never be revived, and is therefore labelled
+
+**The two university charts.** "Which universities visited" came from UA's
+`networkDomain` / `networkLocation` — the visitor's reverse-DNS. **GA4 has no
+such dimension and nothing replaces it**, and a browser cannot see its own
+reverse-DNS either, so the first-party record cannot stand in. Those figures
+are an **archive**: `universities.frozen` is true in the served file and the
+card carries "Archive — 2014 to 2023" with its date range, so nobody reads them
+as current. If the old spreadsheets are gone, they are gone for good — which is
+why importing them is the one part of the setup worth doing first.
+
+### The two rules the charts themselves had to learn
+
+* **A month the record has not covered is not a month with no visitors.** Under
+  the default 90-day range the hiring-season chart drew eight zero-height bars
+  — on a job-market site that reads as "nobody visits in September", which is
+  backwards rather than merely missing. It reads the **whole record**, says so
+  in its own subtitle, and an `empty` bucket draws no bar at all (the table
+  says `—`, never `0`). The weekly rhythm stays range-responsive: 90 days is a
+  fine sample of weekdays, where it is no sample at all of a year.
+* **The dark theme re-steps the chart accent, and that was measured.** The
+  daily chart draws a count and its trailing 7-day mean, so the two must be
+  tellable apart. `--brand` against `--gold` separates at ΔE 31.6 in light and
+  collapses to **14.9 in dark** — under the floor at which two overlaid lines
+  can be told apart even with full colour vision. `--oa-chart-accent` is
+  `#d98a24` there (ΔE 21.2, still ≥3:1 on the dark surface). This is the one
+  place on the site where two of its colours must be distinguished **from each
+  other** rather than from their background, which is a stricter test than
+  contrast. The mean is dashed as well, so identity is never colour alone.
+
+Drawing the marks here also takes the reader's theme (the old lede had to
+apologise — "they render in their own light styling whichever theme you are
+reading in"), gives every chart a `<table>` of its own numbers, makes no
+third-party connection on a page that otherwise makes none, and sizes to a
+phone instead of being fixed at 900px.
+
+### It has its own workflow, and the builder guard was widened for it
+
+`build-analytics.mjs` is deliberately **not** in `build-all.mjs`'s `BUILDERS`:
+that build fires several times an hour and commits `data/` as one unit, and a
+once-a-day read of a whole collection folded into it would make every posting's
+publish wait on it and share its failure. The selftest's "a builder nobody
+calls silently stops running" guard asserted `BUILDERS` equalled every
+`build-*.mjs` on disk, so it widened to match its own stated purpose: **every
+builder has a caller — `BUILDERS`, or a workflow naming it — and never both**
+(both halves verified by reintroducing each bug). The second half is not
+tidiness: a builder in both would run twice on one event from two bases, racing
+its own commit, which is the duplicate-doorbell outage one layer down.
+
+Tests: `testAnalytics` in `_scraper/selftest.mjs` (the one-source-per-day rule,
+the trailing mean, the UTC weekday read — `new Date('YYYY-MM-DD')` rendered
+locally shifts every bar by one for readers west of Greenwich — staleness,
+the served file's shape and its freedom from addresses, the wiring, the
+re-stepped accent, and that the workflow names the branch tip and never
+rebases) and the analytics block in `_scraper/page-test.mjs`, which drives the
+page in **both themes** with a realistic three-year corpus: the two lines
+measured apart from what the browser actually paints, all twelve months drawn,
+the frozen label, the empty state naming the cause and `_SETUP-ANALYTICS.md`,
+a stale dataset naming its last day, markup in a page title rendered inert, and
+the 390px gate. **The page-test check for "no iframes" reads the page with its
+HTML comments STRIPPED** — the page still explains the four embeds it no longer
+has, and a guard that could not tell the explanation from the thing would have
+to be satisfied by deleting the explanation.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,
@@ -3490,6 +3605,7 @@ the workflow rather than a terminal.
                                     # university is in, against the addresses
                                     # in the site's own Universities directory
                                     # (--all lists the ones it cannot place)
+    node _scraper/build-analytics.mjs --selftest   # the analytics assembly
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules
