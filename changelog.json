@@ -17,6 +17,13 @@
       "url": "https://www.operationsacademia.org/post-a-job.html"
     },
     {
+      "id": "sponsored-postings",
+      "date": "2026-08-29",
+      "title": "Postings from a department that sponsors this site are marked",
+      "summary": "CUHK Business School’s Department of Decisions, Operations and Technology has sponsored Operations Academia from 1 September 2025 to 1 September 2027. Their postings now carry a purple “Sponsored” mark and lead the job postings list before you have narrowed it. The mark says one thing and only that thing — that this department paid for the site over a named period. It changes nothing about the posting itself, hides nothing belonging to anybody else, and every filter, search and download works exactly as it did: narrow the list by anything at all and the ordering is whatever your search asks for. It also ends by itself. The sponsorship’s dates are read when the page is drawn rather than stamped into a posting, so the mark simply stops appearing the day the sponsorship does, and a posting advertised before it began is never marked.",
+      "url": "https://www.operationsacademia.org/jobs.html"
+    },
+    {
       "id": "open-one-posting",
       "date": "2026-08-27",
       "title": "A link can open one posting on its own",

@@ -9630,6 +9630,308 @@ async function testJobExportWiring() {
   }
 }
 
+/* ------------------------------------------------- WHO SPONSORED THE SITE
+
+   assets/oa-sponsors.js records that a department paid for this site over a
+   named period, and the two things that follow from it: their postings LEAD
+   the jobs page and carry a "Sponsored" badge (owner, 2026-08-29 — CUHK
+   Business School's Department of Decisions, Operations and Technology, 1
+   September 2025 to 1 September 2027, "professional and discrete but visible
+   to all users of the website").
+
+   This suite is what makes a curated table safe. Three things are pinned and
+   each of them is a way the feature could be quietly WRONG rather than
+   broken:
+
+     - it must say NO. A sponsor mark is a claim the site makes on somebody's
+       behalf, so the expensive failure is a badge on a posting that has not
+       earned one — and the site carries four other CUHK-ish postings, three
+       of them a DIFFERENT UNIVERSITY (…, Shenzhen), which is precisely the
+       shape a careless match would sweep in;
+     - it must EXPIRE. The whole reason this is read in the browser rather
+       than stamped into data/jobs.json is that a sponsorship ends on a date;
+       if that is not measured, "it expires by itself" is a claim nobody has
+       checked and the badge outlives the deal;
+     - the badge must be PAINTED, in both stylesheets. oa-list.css is the
+       engine's and v3.css is the live design's override, and a rule in only
+       one of them is either invisible on the site or lost on the next page —
+       CLAUDE.md records that trap under the Excel button. */
+async function testSponsors() {
+  const SP = require(path.join(HERE, '..', 'assets', 'oa-sponsors.js'));
+  const served = JSON.parse(await readFile(JOBS, 'utf8'));
+
+  /* ---- the record itself ------------------------------------------------ */
+
+  ok(SP.SPONSORS.length >= 1, 'sponsors: the table names at least one sponsor');
+  for (const s of SP.SPONSORS) {
+    ok(/^\d{4}-\d{2}-\d{2}$/.test(s.from) && /^\d{4}-\d{2}-\d{2}$/.test(s.to),
+      `sponsors: ${s.institution} names both ends of its window as ISO days`);
+    ok(s.from < s.to, `sponsors: ${s.institution}'s window runs forwards`);
+    ok(Array.isArray(s.units) && s.units.length > 0,
+      `sponsors: ${s.institution} names the department(s) it sponsors from`);
+    /* The university must be one the site can actually resolve, or the entry
+       silently matches nothing for ever — a table that says a place is a
+       sponsor and never marks one of its postings is worse than no table. */
+    ok(!!SCHOOLS.institutionKey(s.institution),
+      `sponsors: ${s.institution} resolves to an institution key`);
+  }
+
+  /* ---- WHO IT MARKS, over the file the site actually serves -------------- */
+
+  const INSIDE = '2026-08-29';          // a day inside the CUHK window
+  const marked = served.filter((r) => SP.isSponsored(r, INSIDE));
+  eq(marked.length, 1, 'sponsors: exactly one served posting is sponsored today');
+  eq(marked[0].id, '2027-the-chinese-university-of-hong-kong-20260827',
+    'sponsors: …and it is the CUHK Decisions, Operations and Technology posting');
+
+  /* THE ONE THAT MATTERS. institutionKey folds "The", resolves the acronym
+     and keeps a separately-named campus separate — so a Shenzhen posting is a
+     different university and must never be swept in. If institutionKey ever
+     stops keeping them apart, three innocent postings start claiming a
+     sponsorship, and nothing else in this repository would notice. */
+  const shenzhen = served.filter(
+    (r) => /hong kong,\s*shenzhen/i.test(r.institution || ''));
+  ok(shenzhen.length >= 1, 'sponsors: the served file still carries a Shenzhen posting to test against');
+  eq(shenzhen.filter((r) => SP.isSponsored(r, INSIDE)).map((r) => r.id), [],
+    'sponsors: CUHK Shenzhen is a DIFFERENT university and is never marked');
+
+  /* Same university, a department the record does not name. The tracking
+     workbook writes a field code ("OM/IS") where the site asks for a
+     department, and guessing that one names the other is exactly the
+     "curated, never guessed" line every other table here is held to. */
+  const omis = served.find((r) => (r.unit || r.department) === 'OM/IS' &&
+    SCHOOLS.institutionKey(r.institution) === SCHOOLS.institutionKey(
+      'The Chinese University of Hong Kong'));
+  if (omis) {
+    ok(!SP.isSponsored(omis, INSIDE),
+      'sponsors: a department the record does not name is not marked, however close');
+  }
+
+  /* ---- IT EXPIRES, which is the whole reason it is read in the browser --- */
+
+  const CUHK = marked[0];
+  eq(SP.isSponsored(CUHK, '2025-08-31'), false,
+    'sponsors: nothing is marked the day BEFORE the sponsorship begins');
+  eq(SP.isSponsored(CUHK, '2025-09-01'), true,
+    'sponsors: …and it is marked from its first day (`from` is inclusive)');
+  eq(SP.isSponsored(CUHK, '2027-08-31'), true,
+    'sponsors: still marked on the last day of the window');
+  eq(SP.isSponsored(CUHK, '2027-09-01'), false,
+    'sponsors: and NOT on the day it ends (`to` is exclusive) — it expires by itself');
+
+  /* The second gate: a posting advertised before they became a sponsor is not
+     retrospectively one of theirs, and a row with no date is never guessed at. */
+  eq(SP.isSponsored({ ...CUHK, posted: '2025-08-31' }, INSIDE), false,
+    'sponsors: a posting made before the window is not marked inside it');
+  eq(SP.isSponsored({ ...CUHK, posted: '' }, INSIDE), false,
+    'sponsors: a posting with no date is never marked — this says no when it cannot tell');
+
+  /* ---- the matching is FOLDED, not literal ------------------------------ */
+
+  for (const name of ['CUHK', 'Chinese University of Hong Kong',
+    'The Chinese University of Hong Kong']) {
+    ok(SP.isSponsored({ ...CUHK, institution: name }, INSIDE),
+      `sponsors: "${name}" reaches the record — one spelling per place, as everywhere`);
+  }
+  ok(SP.isSponsored({ ...CUHK, unit: 'Decisions, Operations & Technology' }, INSIDE),
+    'sponsors: "&" reads as "and", the same reading the site\'s own search takes');
+  ok(SP.isSponsored({ ...CUHK, unit: '', department: 'Decisions, Operations and Technology' }, INSIDE),
+    'sponsors: a row that names its department in the joined field is read too');
+  ok(!SP.isSponsored({ ...CUHK, institution: 'University of Hong Kong' }, INSIDE),
+    'sponsors: a DIFFERENT Hong Kong university is not a near-enough match');
+
+  /* ---- the ORDER --------------------------------------------------------- */
+
+  const older = { id: 'x', institution: 'Somewhere', unit: 'OM', posted: '2026-08-28' };
+  eq(SP.compare(CUHK, older, INSIDE) < 0, true,
+    'sponsors: a sponsored posting leads a NEWER unsponsored one');
+  eq(SP.compare(older, CUHK, INSIDE) > 0, true, 'sponsors: …in either argument order');
+  eq(SP.compare(CUHK, { ...older, featured: true }, INSIDE) < 0, true,
+    'sponsors: a sponsorship outranks the maintainer\'s own Featured flag');
+  eq(SP.compare({ ...older, featured: true }, { ...older, id: 'y' }, INSIDE) < 0, true,
+    'sponsors: and Featured still leads everything below it');
+  eq(SP.compare({ ...older, id: 'a', posted: '2026-01-01' },
+    { ...older, id: 'b', posted: '2026-06-01' }, INSIDE) > 0, true,
+    'sponsors: with neither, the newest posting still leads');
+  /* Once the window closes the comparator must fall back to exactly what the
+     page did before this shipped, or the jobs page keeps a stale lead row. */
+  eq(SP.compare(CUHK, older, '2027-09-02') > 0, true,
+    'sponsors: after the window the sponsor no longer leads — the order simply reverts');
+
+  /* A comparator that is not ANTISYMMETRIC sorts differently in different
+     engines, and Array#sort is free to do anything at all with one. Drive
+     every pair of the real list through it rather than a fixture: ties are
+     ties (two postings of the same day rank equal, which is what leaves the
+     stable sort to keep them in the order they arrived), but no pair may
+     ever claim BOTH that a leads b and that b leads a. */
+  const sample = served.slice(0, 40);
+  const broken = [];
+  for (let i = 0; i < sample.length; i++) {
+    for (let j = 0; j < sample.length; j++) {
+      const ab = SP.compare(sample[i], sample[j], INSIDE);
+      const ba = SP.compare(sample[j], sample[i], INSIDE);
+      if (Math.sign(ab) !== -Math.sign(ba)) broken.push(sample[i].id + ' vs ' + sample[j].id);
+    }
+  }
+  eq(broken.slice(0, 3), [], 'sponsors: the comparator is antisymmetric over the real list');
+  /* …and sorting an already-sorted list changes nothing, which is the
+     property a reader actually sees: the page does not reshuffle itself. */
+  const sorted = sample.slice().sort((a, b) => SP.compare(a, b, INSIDE)).map((r) => r.id);
+  const again = sample.slice().sort((a, b) => SP.compare(a, b, INSIDE))
+    .sort((a, b) => SP.compare(a, b, INSIDE)).map((r) => r.id);
+  eq(again, sorted, 'sponsors: …so sorting is idempotent');
+
+  /* ---- the BADGE, and that the module owns the word --------------------- */
+
+  eq(SP.badge(CUHK, INSIDE), { text: 'Sponsored', cls: 'oa-label-sponsor' },
+    'sponsors: the badge is the owner\'s word and the class the stylesheets paint');
+  eq(SP.badge(older, INSIDE), null, 'sponsors: …and nothing at all for everyone else');
+
+  /* ---- the WIRING ------------------------------------------------------- */
+
+  const jobs = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
+    ok(html.includes('<script defer src="assets/oa-sponsors.js"></script>'),
+      `sponsors: ${rel} loads the module, deferred like every other script on it`);
+    /* The windows are generous on purpose: both pages carry a paragraph of
+       reasoning between the hook and the call, and a guard that could only be
+       satisfied by DELETING the explanation is the shape CLAUDE.md records
+       under the no-rebase check. What is pinned is that the badge comes from
+       the module inside the badges callback, not how tersely it is written. */
+    ok(/badges:\s*function[\s\S]{0,900}?OASponsors\.badge\(r\)/.test(html),
+      `sponsors: ${rel} draws the badge THROUGH the module, never its own copy of the word`);
+    ok(/onCard:\s*function[\s\S]{0,600}?OASponsors\.markCard\(li, r\)/.test(html),
+      `sponsors: ${rel} puts the rail on the card`);
+    ok(!/['"]Sponsored['"]/.test(html.replace(/OASponsors/g, '')),
+      `sponsors: ${rel} never writes the badge's own text — one definition, like every other`);
+  }
+
+  /* The ORDER is the jobs page's alone. The one-pager's teaser is "the ten
+     most recent postings" and reordering it would make its own heading false
+     — which is exactly the split `featured` already has. */
+  ok(/sort:\s*function\s*\(a, b\)\s*\{\s*return OASponsors\.compare\(a, b\);/.test(jobs),
+    'sponsors: the jobs page sorts through the module');
+  ok(!/OASponsors\.compare/.test(home),
+    'sponsors: the home page teaser is NOT reordered — it promises the newest ten');
+  ok(!/b\.featured\s*\?\s*1\s*:\s*-1/.test(jobs),
+    'sponsors: …and the jobs page kept no second, private copy of the Featured rule');
+
+  /* The module must be loaded BEFORE the export reads it: oa-jobexport.js
+     takes it as a factory argument, and a UMD factory handed `undefined`
+     silently exports a column that answers "no" for everybody. */
+  ok(jobs.indexOf('assets/oa-sponsors.js') < jobs.indexOf('assets/oa-jobexport.js'),
+    'sponsors: jobs.html loads the module before the export that reads it');
+
+  /* ---- AND THE SAME FOR ITS OWN DEPENDENCY, which is the one this suite
+     was green without.
+
+     oa-sponsors.js asks oa-schools.js whether two spellings are one
+     university. NEITHER of these pages loaded that file — only the forms,
+     the alerts page, /admin-area and the directory did — so in the browser
+     the factory was handed `undefined`. The first draft fell back to a plain
+     fold, which still matched "The Chinese University of Hong Kong" against
+     itself: every check in this suite passed (Node resolves the dependency
+     through require) while the SITE silently stopped recognising "CUHK",
+     "Chinese University of Hong Kong" and "The Chinese University of Hong
+     Kong (CUHK)". Three spellings, marked in the tests and unmarked on the
+     page, with nothing anywhere to say so.
+
+     So both halves are pinned: the pages load it FIRST, and the module says
+     nothing at all without it. */
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
+    ok(html.includes('<script defer src="assets/oa-schools.js"></script>'),
+      `sponsors: ${rel} loads oa-schools.js, which the sponsor rule is built on`);
+    ok(html.indexOf('assets/oa-schools.js') < html.indexOf('assets/oa-sponsors.js'),
+      `sponsors: …BEFORE oa-sponsors.js, whose factory is handed it`);
+  }
+
+  /* Drive the BROWSER branch: evaluate the file with no OASchools on the root
+     and check it refuses to answer rather than answering badly. Reading the
+     source for a `return fold(v)` would pass the moment somebody wrote the
+     same fallback a different way; this measures the behaviour. */
+  const sponsorSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-sponsors.js'), 'utf8');
+  const bare = {};
+  // eslint-disable-next-line no-new-func
+  new Function('self', sponsorSrc)(bare);
+  const NOSCHOOLS = bare.OASponsors;
+  ok(!!NOSCHOOLS, 'sponsors: the module still LOADS without oa-schools.js — it must not throw on a page that forgot it');
+  eq(NOSCHOOLS.isSponsored(CUHK, INSIDE), false,
+    'sponsors: …but marks nothing at all, rather than half-recognising some spellings');
+  for (const name of ['CUHK', 'Chinese University of Hong Kong']) {
+    eq(NOSCHOOLS.isSponsored({ ...CUHK, institution: name }, INSIDE), false,
+      `sponsors: …including "${name}", the exact spelling a silent fold used to drop`);
+  }
+
+  /* ---- the CSS, in BOTH stylesheets ------------------------------------- */
+
+  const listCss = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  const v3css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+
+  /* It paints its own ground, so it must name its own ink — the base
+     .oa-label sets #fff, which on a pale purple wash is invisible. This is
+     the rule CLAUDE.md states three times over. */
+  for (const [name, css, sel] of [
+    ['oa-list.css', listCss, '\\.oa-label-sponsor'],
+    ['v3.css', v3css, 'body\\.v3 \\.oa-label-sponsor'],
+  ]) {
+    const rule = new RegExp(sel + '\\s*\\{[\\s\\S]{0,400}?\\}');
+    const m = rule.exec(css);
+    ok(!!m, `sponsors: ${name} paints the badge`);
+    if (m) {
+      ok(/background-color:\s*var\(--sponsor-soft/.test(m[0]),
+        `sponsors: ${name} gives the badge its ground`);
+      ok(/[^-]color:\s*var\(--sponsor[,)]/.test(m[0]),
+        `sponsors: …and names its own ink (CLAUDE.md: anything that paints a ground must)`);
+      ok(/border:\s*1px solid var\(--sponsor-line/.test(m[0]),
+        `sponsors: …and its hairline, which is what makes it an OUTLINE pill and not a second Featured`);
+      ok(!/[^-]background:\s/.test(m[0]),
+        `sponsors: ${name} uses background-color, never the shorthand that blanks a background-image`);
+    }
+  }
+  ok(/\.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor/.test(listCss),
+    'sponsors: the rail down the card edge, in the engine stylesheet');
+  ok(/body\.v3 \.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor\)/.test(v3css),
+    'sponsors: …and in the live design, which is the one the site paints');
+
+  /* Every token defined in BOTH themes, or the badge paints no ground at all
+     in one of them and oa-list.css's light-hex fallback lands on a dark card. */
+  for (const tok of ['--sponsor', '--sponsor-soft', '--sponsor-line']) {
+    eq(v3css.split(tok + ':').length - 1, 2,
+      `palette: ${tok} is defined in the light theme and the dark one`);
+  }
+
+  /* ---- the EXPORT ------------------------------------------------------- */
+
+  const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+  const col = E.COLUMNS.find((c) => c.header === 'Sponsored');
+  ok(!!col, 'sponsors: the Excel download carries a Sponsored column');
+  if (col) {
+    eq(col.cell(CUHK), true, 'sponsors: …TRUE for the sponsor\'s posting');
+    eq(col.cell(older), false, 'sponsors: …and a real boolean FALSE for everyone else');
+    /* Its `from` names the published fields the answer is DERIVED from —
+       there is no `sponsored` in data/jobs.json and deliberately never will
+       be. testJobExport pins every `from` against PUBLIC_FIELDS, so naming a
+       field that does not exist would fail there rather than here. */
+    ok((col.from || []).length > 0 && col.from.every((f) => PUBLIC_FIELDS.includes(f)),
+      'sponsors: …reading only fields the build actually publishes');
+  }
+  ok(!PUBLIC_FIELDS.includes('sponsored'),
+    'sponsors: nothing is stamped into data/jobs.json — a sponsorship expires, a built field cannot');
+
+  /* ---- the FROZEN ARCHIVES do not move ---------------------------------- */
+
+  for (const rel of ['v1', 'v2']) {
+    const dir = path.join(HERE, '..', rel);
+    const hits = [];
+    for (const f of await readdir(dir, { recursive: true }).catch(() => [])) {
+      if (typeof f === 'string' && /oa-sponsors\.js$/.test(f)) hits.push(f);
+    }
+    eq(hits, [], `sponsors: /${rel}/ does not carry the module — an archive does not move`);
+  }
+}
+
 /* --------------------------------------------------------------- analytics
 
    The page was four Google Sheets <iframe>s and they had been dead since 2023
@@ -9894,6 +10196,7 @@ if (isMain(import.meta.url)) {
   await testCandidateProfilePolicy();
   await testJobExport();
   await testJobExportWiring();
+  await testSponsors();
   await testAnalytics();
   process.exit(finish() ? 0 : 1);
 }

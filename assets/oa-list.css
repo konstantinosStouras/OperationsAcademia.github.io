@@ -470,6 +470,35 @@
 .oa-label-primary { background-color: var(--brand); }
 .oa-label-open { background-color: #2e7d5b; }
 
+/* THE SPONSOR MARK (owner, 2026-08-29) — an OUTLINE pill, deliberately not a
+   solid one. Every other label here is a solid block of colour, so an outline
+   is legible as a different KIND of thing at a glance: a standing fact about
+   the department rather than a status the site has given the posting. It is
+   also what keeps it from being read as a second Featured badge, which is the
+   solid pill directly above.
+
+   The three tokens keep a literal fallback, exactly as every rule in
+   oa-ui.css does, so /v1/ and /v2/ — which define no palette and keep their
+   own frozen copy of this file — would render it correctly if they ever
+   loaded it. `color` is named here and not inherited: this rule paints its
+   own ground, and the base .oa-label above sets #fff, which on a pale purple
+   wash would be invisible. */
+.oa-label-sponsor {
+  background-color: var(--sponsor-soft, #f3eefb);
+  color: var(--sponsor, #6b3fa0);
+  border: 1px solid var(--sponsor-line, #d9c9f0);
+  padding: 0.18em 0.62em 0.26em;
+}
+
+/* …and the RAIL down the card's edge, so a sponsored posting is findable
+   while scrolling past a hundred of them rather than only once the reader
+   has stopped on it. Set as a border-LEFT WIDTH change on the card's own
+   border, never an extra element or a pseudo-element, so it cannot overlap
+   the card's rounded corners or its focus ring. */
+.oa-card.oa-sponsored {
+  border-left: 3px solid var(--sponsor, #6b3fa0);
+}
+
 /* The three values below were 1.375rem / 0.9rem / 1.375rem — the vendor's own
    numbers, but `rem` resolves against the ROOT font size and nothing else on
    this page does: main.css leaves html at the browser's default and pins the

@@ -58,11 +58,11 @@
    --------------------------------------------------------------------------- */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./oa-xlsx.js'));
+    module.exports = factory(require('./oa-xlsx.js'), require('./oa-sponsors.js'));
   } else {
-    root.OAJobExport = factory(root.OAXlsx);
+    root.OAJobExport = factory(root.OAXlsx, root.OASponsors);
   }
-}(typeof self !== 'undefined' ? self : this, function (OAXlsx) {
+}(typeof self !== 'undefined' ? self : this, function (OAXlsx, OASponsors) {
   'use strict';
 
   /* The window, named INSIDE the factory. The UMD wrapper's `root` is a
@@ -216,6 +216,26 @@
     { header: 'Featured', from: ['featured'], type: 'Yes/No', w: 10,
       note: 'TRUE where the posting is featured on the site. A real Excel boolean.',
       cell: function (r) { return !!r.featured; } },
+
+    /* SPONSORED is DERIVED, not read — which is why its `from` names the
+       three published fields the answer is computed from rather than a
+       field of its own. There is no `sponsored` in data/jobs.json and there
+       deliberately never will be: a sponsorship has an end date, so it is
+       decided when the row is drawn (assets/oa-sponsors.js) rather than
+       stamped at build time, where it would go stale between builds and
+       mail the maintainer 575 phantom edits the day it first landed.
+
+       A workbook is opened weeks after it is saved, so this is the one
+       column here whose value can age — but unlike the page's "Closing
+       soon" buckets, which are withheld for exactly that reason, this one
+       records something that WAS true of the posting when it was
+       downloaded, which is what a reader wants from it. */
+    { header: 'Sponsored', from: ['institution', 'unit', 'department', 'posted'],
+      type: 'Yes/No', w: 11,
+      note: 'TRUE where the posting is from a department sponsoring this site, ' +
+        'and the sponsorship was running when the file was downloaded. ' +
+        'A real Excel boolean.',
+      cell: function (r) { return !!(OASponsors && OASponsors.isSponsored(r)); } },
 
     /* LAST, because it is a key rather than something to read: it is what
        lets a reader who downloads this every week join their own notes onto a
