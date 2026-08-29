@@ -2532,6 +2532,126 @@ the module what to expect rather than naming CUHK**, so it stays green on the
 day the sponsorship lapses — a guard about a corpus must not move with the
 corpus.
 
+## What a reader who has not REGISTERED may read
+
+Owner, 2026-08-29, from two screenshots of the site signed out: *"they should
+only be able to see the list of (1) the sponsor and (2) the list of last 9
+universities which posted, but if they click, the card should not expand. It
+should only expand when a user is registered and has opened the full list …
+a non-registered and non-signed-in user should never be able to view details
+of job postings or candidates."*
+
+    assets/oa-gate.js     who is reading, and what a click does (dual-mode)
+
+**WHO is hiring stays open to everybody; WHAT the posting says does not.** The
+card keeps its badges, its university and its department — a list of blurred
+names would be no list at all, and the first half of that sentence asks for
+the sponsor and the nine universities beside it to be READ. What goes is the
+body: the entry level, the two deadlines, the comments, the advertisement.
+For a candidate it is the same split, and it matters more — the name is what a
+hiring committee is looking for, and the CV, the INFORMS days and the e-mail
+address are that person's own.
+
+**IT IS A NUDGE, NOT AN ACCESS CONTROL, AND IT CANNOT BE ONE HERE.** This is a
+static site on GitHub Pages: `data/jobs.json` and `data/candidates.json` are
+served to anybody who asks for them, and no rule in this repository can change
+that without a backend to put them behind. So what the gate decides is WHAT
+THE SITE SHOWS — a real product decision, the difference between a page that
+reads as a directory of open positions and one that reads as a list of
+universities with a reason to register — and **no page, no comment and no
+e-mail may describe it as privacy or security.** `selftest.mjs` pins that
+nothing does, and the module says it at the top where the next reader will
+look.
+
+### The values are ABSENT, not blurred
+
+A blur over the real text is a picture of a lock rather than a lock: it is
+selectable, copyable, and one keystroke of devtools from being read. So the
+engine returns before the details table is built at all, and what the strip
+blurs is **the row LABELS that posting would have shown** — the page's own
+static wording, true per card (a posting with no suggested date does not
+advertise one), and at that radius unreadable. It says "there is a table here
+and an account opens it" in the one glance a reader gives a card, which is the
+whole job. `user-select: none` is not there to stop anybody copying it; it is
+there because a blurred run that highlights when dragged over reads as a
+rendering fault.
+
+### Three states, and only one of them is a lock
+
+    locked      signed out. The strip blurs, the padlock is drawn, a press
+                offers the sign-in box — and remembers WHICH card, so signing
+                in lands the reader on the posting they pressed rather than at
+                the top of a list they must find it in again.
+    gated       signed in, on the one-pager's TEASER. Nothing is withheld; the
+                card is a way IN. A press carries them to the full list with
+                that posting open (`?job=<id>`), which is what "it should only
+                expand when a user is registered and has opened the full list"
+                asks for, literally.
+    open        signed in, on a full list. Exactly what it always did.
+
+`oa-card-gated` and `oa-card-locked` are two classes for that reason, and the
+padlock is keyed on the second. **A single class named "locked" on a signed-in
+reader's card is a statement in the document that is not true**, and the
+styling keyed on it then says it out loud — which is how the first build
+shipped a padlock in front of "Open it on the full list".
+
+### Where it is mounted, and where it deliberately is not
+
+`jobs.html`, the one-pager's jobs teaser AND its candidates, and
+`previous-markets.html` — **a closed season is still a job posting**, and
+leaving the archive open would have made the gate on the jobs page a matter of
+waiting rather than of registering. Confirmed placements, recent faculty and
+the Universities directory are none of the two things the owner named, and are
+untouched. The `/v1/` and `/v2/` archives keep their own frozen assets and
+never load this file, by the rule the three trees are held to.
+
+### The parts that could quietly become lies
+
+**The sign-in card's copy.** It ended "Everything below stays readable either
+way", which was true of the list it was written for and became false the
+moment the cards stopped opening. A promise the page breaks is worse than no
+promise, so it now says what a reader without an account DOES get. It still
+names the Excel download, because that card is the only place a signed-out
+reader is told the download exists.
+
+**One definition of "is this reader signed in".** `assets/oa-jobexport.js`
+carried its own and now asks the gate, so the button that downloads the list
+and the cards that show it can never disagree about who is reading. No silent
+fallback when the module is missing — it says no, and the load order is pinned
+— because a fallback that is right most of the time is the worst possible
+shape for one, which is the lesson `oa-sponsors.js` learnt when its own
+dependency was absent on two pages and every test went on passing.
+
+**The decision is taken from the auth HINT first**, like the account chip:
+anything painted from a remembered value must be painted in its final form or
+not at all, and a gate that waited for the SDK would flash locked cards at
+every signed-in reader and details at every signed-out one. `OAGate.watch()`
+re-renders when the real state arrives, which is what the engine's
+`rerender()` was added for.
+
+**Nobody can sign in** — no accounts module, a blocked CDN, an ad blocker —
+and the reader is still not registered, so they are still locked; but the
+strip says *"Sign-in is unavailable at the moment"* and the head is disabled,
+rather than offering a control that would do nothing when pressed. That is the
+wording `oa-jobexport.js` already gives its disabled button.
+
+### When a browser check needs a detail on screen, SIGN THE READER IN
+
+The gate turned several existing checks into contradictions — a signed-out
+page modelling a signed-in poster, a `?job=` deep link asserting a card was
+open. `signedInPage()` near the top of `page-test.mjs` stands
+`_scraper/_fake-firebase.js` up as one helper so a block needs three lines
+instead of fifteen, and it waits for the session to RESOLVE, since measuring
+between the hint and the answer is measuring a state neither reader is in.
+**Anything asserting on a card's rows, its links or its printed body has to
+say who is reading**; a page opened without the helper is a signed-out reader,
+which is the other half of what has to be covered.
+
+`OAGate.__setForTest` exists for the NODE checks only — there is no SDK there
+to sign anybody in — and it can only ever reveal what is already in a public
+served file, which is the argument `OAJobEdit.__setPermissionsForTest` is
+written under.
+
 ## The analytics page draws its own charts, because the old ones died in 2023
 
 `analytics.html` was four Google Sheets `pubchart` `<iframe>`s. The
@@ -3869,6 +3989,11 @@ the workflow rather than a terminal.
                                     # in the site's own Universities directory
                                     # (--all lists the ones it cannot place)
     node _scraper/build-analytics.mjs --selftest   # the analytics assembly
+                                    # (the selftest also pins WHAT AN
+                                    # UNREGISTERED READER MAY READ — the gate's
+                                    # decision, its wiring on every gated list,
+                                    # both stylesheets, and that no page calls
+                                    # it privacy or security)
     node _scraper/build-netmap.mjs --selftest      # domain -> university, derived
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
@@ -3876,7 +4001,10 @@ the workflow rather than a terminal.
     node _scraper/page-test.mjs     # Playwright browser checks, incl. the
                                     # 390px mobile gate over every list page,
                                     # the picker's alphabetical order and its
-                                    # measured contrast in BOTH themes
+                                    # measured contrast in BOTH themes, and
+                                    # WHO IS SHOWN WHAT — both readers, real,
+                                    # one with no Firebase and one through the
+                                    # site's own sign-in path
                                     # (PW_CHROMIUM=<path> pins the browser)
 
 All five run in CI on every push (`.github/workflows/oa-checks.yml`); the jobs

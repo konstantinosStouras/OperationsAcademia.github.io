@@ -936,9 +936,59 @@
       scrollTop();
     }
 
+    /* ------------------------------------------------ cfg.cardOpen (the gate)
+
+       WHAT A CLICK ON A CARD'S HEAD DOES. Called for each card as it is drawn;
+       return nothing to open it where it stands, which is the default and what
+       every list did before this existed, or a descriptor to do something else:
+
+           { note:  what the strip under the head says
+             blur:  draw the details as an unreadable strip (the locked shape)
+             run:   what the click does — or null, when there is nothing it can
+                    usefully do (nobody can sign in, so the strip explains
+                    rather than offering a control that would sit there dead) }
+
+       A card with a descriptor RENDERS NO BODY AT ALL. Not a hidden one, not
+       a blurred copy of the real values — the values are not put into the
+       document, because a blur over real text is a picture of a lock rather
+       than a lock, and this engine should not be in the business of drawing
+       one. What IS drawn is the LABELS of the rows this posting would have
+       shown: they are the page's own static wording rather than anything the
+       row says, they are true (a card without a suggested date does not
+       advertise one), and blurred they give the reader the shape of what an
+       account is worth. See assets/oa-gate.js for who decides, and for why
+       this is a decision about what the site SHOWS and never about access —
+       every dataset here is a served file anybody may fetch.
+
+       The head keeps `aria-expanded`/`aria-controls` only while it really is a
+       disclosure; a button that navigates or opens a dialog and claims to
+       expand a region that is not there is worse than an unlabelled one, so
+       the locked head carries its purpose as its title instead. */
+    function cardOpen(r) {
+      if (typeof cfg.cardOpen !== 'function') return null;
+      var d;
+      try { d = cfg.cardOpen(r); } catch (e) {
+        if (window.console) console.error('OAList: cardOpen failed', e);
+        return null;
+      }
+      return (d && typeof d === 'object') ? d : null;
+    }
+
+    /** The row labels a card WOULD have shown — never a value, and only the
+        rows that would really have been drawn (the engine skips an empty one,
+        so a card must not preview a row it does not have). */
+    function lockPreview(r) {
+      var out = [];
+      ((cfg.card.rows && cfg.card.rows(r)) || []).forEach(function (kv) {
+        if (kv && (kv.value || kv.html) && kv.label) out.push(kv.label);
+      });
+      return out.join('  ·  ');
+    }
+
     function card(r) {
       var c = cfg.card;
-      var open = !!expanded[r.id];
+      var gate = cardOpen(r);
+      var open = !gate && !!expanded[r.id];
       var bodyId = 'oa-body-' + r.id;
 
       var badges = el('div', { class: 'oa-badges' });
@@ -951,13 +1001,52 @@
       var head = el('button', {
         type: 'button',
         class: 'oa-card-head',
-        'aria-expanded': open ? 'true' : 'false',
-        'aria-controls': bodyId,
+        'aria-expanded': gate ? null : (open ? 'true' : 'false'),
+        'aria-controls': gate ? null : bodyId,
+        title: gate ? gate.note : null,
       }, [
         badges.childNodes.length ? badges : null,
         el('p', { class: 'oa-card-title', text: c.title(r) }),
         el('p', { class: 'oa-card-sub', text: c.subtitle(r) }),
       ]);
+
+      /* THE LOCKED CARD — head, a strip, and no body. The note is real text
+         rather than an aria-hidden decoration: it is the only thing on the
+         card that says what the click will do, and it has to reach a screen
+         reader too. The blurred run beside it is decoration and says so. */
+      if (gate) {
+        var strip = el('div', {
+          class: 'oa-card-lock' + (gate.blur ? ' is-blurred' : ''),
+        }, [
+          gate.blur
+            ? el('span', {
+                class: 'oa-card-lock-blur', 'aria-hidden': 'true',
+                text: lockPreview(r),
+              })
+            : null,
+          el('span', { class: 'oa-card-lock-note', text: gate.note }),
+        ]);
+        if (typeof gate.run === 'function') {
+          head.addEventListener('click', function () { gate.run(r); });
+        } else {
+          head.disabled = true;
+        }
+        /* TWO classes, and the distinction is not cosmetic. `oa-card-gated`
+           says the card does not open HERE — true of a signed-in reader's
+           teaser card, which opens on the full list instead. `oa-card-locked`
+           says the reader may not read it at all. A single class named
+           "locked" on a signed-in reader's card is a statement in the
+           document that is not true, and the styling keyed on it (the
+           padlock) then says it out loud. */
+        var lockedLi = el('li', {
+          class: 'oa-card oa-card-gated' + (gate.blur ? ' oa-card-locked' : ''),
+          id: 'job-' + r.id,
+        }, [head, strip]);
+        if (typeof cfg.onCard === 'function') {
+          try { cfg.onCard(lockedLi, r); } catch (e2) { if (window.console) console.error(e2); }
+        }
+        return lockedLi;
+      }
 
       var table = el('table', { class: 'oa-kv' });
       var tbody = el('tbody');
@@ -1145,6 +1234,16 @@
          the first paint, so the controls a signed-in user may see have to be
          able to arrive late without refetching the dataset. */
       rerender: function () { render(); },
+      /* Open ONE card, from the page rather than from a click. What lets a
+         reader who pressed a locked card and then signed in land on the
+         posting they pressed, rather than on the list they would have to find
+         it in again (assets/oa-gate.js `watch`). */
+      open: function (id) {
+        var key = String(id == null ? '' : id);
+        if (!key) return;
+        expanded[key] = true;
+        render();
+      },
       rows: function () { return rows.slice(); },
       /* What the list is SHOWING, in the order it is showing it — the whole
          filtered set, not the current page. What a download of "these
