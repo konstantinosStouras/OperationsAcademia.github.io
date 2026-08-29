@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "poster-told-when-live",
+      "date": "2026-08-29",
+      "title": "You are told by e-mail when your job posting goes live",
+      "summary": "Post a job and you now hear from us once — the moment your posting is really on the site. The e-mail carries the posting exactly as a visitor sees it (university, school and department, entry levels, country, both apply-by dates and the market years it is listed under) with a link that opens that one posting on whichever page carries it, and a link to correct it if anything reads wrongly. It is sent once per posting and never again, so a correction that re-publishes your posting does not send a second one, and there is nothing to unsubscribe from: it is about your own submission rather than a subscription. Until now the thank-you screen said in as many words that no confirmation would be sent, so the only way to know your posting had appeared was to go and look. Your contact details, and any area coordinator or department chair you name, are still shown to the site's maintainer only and are never published.",
+      "url": "https://www.operationsacademia.org/post-a-job.html"
+    },
+    {
       "id": "sponsored-postings",
       "date": "2026-08-29",
       "title": "Postings from a department that sponsors this site are marked",

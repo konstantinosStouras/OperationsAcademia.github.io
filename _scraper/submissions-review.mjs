@@ -17,15 +17,24 @@
    SO: THE SUBMISSION ITSELF CARRIES THE BOOKKEEPING. Not a new collection —
    `jobSubmissions` and `candidateSubmissions` are already admin-readable and
    admin-writable in _firestore.rules, so the queue is a QUERY, not a copy, and
-   nothing here needs the rules redeployed. Two stamps:
+   nothing here needs the rules redeployed. Three stamps, one per thing that
+   can happen to a submission, and NEVER shared:
 
-     announcedAt   the mailer's high-water mark. Set only after an e-mail has
-                   actually been handed to a transport, so a run that cannot
-                   send announces the same submission next time rather than
-                   losing it.
+     announcedAt   the mailer's high-water mark for the MAINTAINER's e-mail.
+                   Set only after an e-mail has actually been handed to a
+                   transport, so a run that cannot send announces the same
+                   submission next time rather than losing it.
      reviewedAt    the maintainer pressed "Reviewed" on the Admin area. It
                    takes the card off the list and nothing else — the posting
                    was already live, this is a to-do list, not a gate.
+     liveMailedAt  the POSTER was told their posting is publicly shown (owner,
+                   2026-08-29 — see `partitionLive` at the foot of this file).
+
+   Three marks rather than one because they answer three questions with three
+   different failure modes: an SMTP hiccup on the maintainer's copy must not
+   make the poster unthankable, a tick on the Admin area must not silence
+   either e-mail, and a correction that re-publishes a posting must not thank
+   its poster a second time.
 
    WHY NOT A GATE. Withholding a poster's own posting until somebody approves
    it would break a promise the forms make in as many words ("within a few
@@ -37,7 +46,7 @@
    Firestore, no network, so selftest.mjs drives all of it offline.
    --------------------------------------------------------------------------- */
 
-import { rowFromSubmission, MIRROR_STATUS } from './jobs-model.mjs';
+import { rowFromSubmission, MIRROR_STATUS, contactEmail } from './jobs-model.mjs';
 import { rowFromCandidateSubmission } from './candidates-model.mjs';
 
 /**
@@ -88,6 +97,11 @@ export const KINDS = [
     many: 'job postings',
     editPath: 'post-a-job.html?edit=',
     dataset: 'jobs.json',
+    /* The poster is written to when this becomes publicly shown — see
+       `partitionLive` below. A capability rather than a branch in the mailer,
+       and false for candidates because their profiles are HELD until the
+       reveal date, which is a different message with a different trigger. */
+    tellsPoster: true,
     row: (doc, opts) => rowFromSubmission(doc, opts),
     summarise: (doc, row) => [
       ['Institution', (row && row.institution) || doc.institution || ''],
@@ -194,4 +208,116 @@ export function partitionSubmissions(kind, entries, { since = SINCE, publishedId
 /** The ids a served dataset carries, for `publishedIds` above. */
 export function idsOf(rows) {
   return new Set((rows || []).map((r) => r && r.id).filter(Boolean));
+}
+
+/* ------------------------------------- and the POSTER hears when it goes live
+
+   Owner, 2026-08-29: *"any user who submits a job posting should receive an
+   email with the details of their posting once it becomes publicly shown on
+   the website, and thank them for using OperationsAcademia.org and wishing
+   them all the best to fill their position."*
+
+   The site told the poster nothing after the thank-you screen — which said, in
+   as many words, that no confirmation e-mail would be sent. They had a
+   reference number and a promise of "a few minutes", and no way to know the
+   minutes had passed short of going and looking.
+
+   "PUBLICLY SHOWN" IS MEASURED, NEVER ASSUMED. The condition is that the
+   posting's row is in the served `data/jobs.json` this run has just read — the
+   same set `partitionSubmissions` already reads for its grandfather rule. So
+   the e-mail cannot go out ahead of the build, cannot go out for a posting a
+   guard held back, and cannot claim a link that would 404: the row it names is
+   the row the reader will be shown, and the details it prints are the ones the
+   site is printing.
+
+   ITS OWN HIGH-WATER MARK, `liveMailedAt`, stamped only after a send succeeds
+   — so a run that cannot send tries again next time, and a poster is thanked
+   exactly once. That is what makes the EDIT path safe: correcting a posting
+   sets its status back to 'queued' and re-publishes it, and the stamp is
+   already there, so nobody is thanked twice for one job. Withdrawing and
+   re-posting is the same document too.
+
+   NO RULES CHANGE. `jobSubmissions` has no `hasOnly()` and its update rule
+   places no ceiling on the key count, so a stamp written by the Admin SDK
+   cannot freeze the document against its own owner — the trap
+   `sync-user-directory.mjs` records. `announcedAt` and `reviewedAt` are
+   already written the same way, and selftest.mjs pins that this stays true.
+
+   JOB POSTINGS ONLY, and deliberately. A candidate profile is HELD until the
+   reveal date and appears with everyone else's on the day; "your profile is
+   live" is a different message with a different trigger, and the owner asked
+   for the posting one. The capability is a field on the kind, so a second kind
+   is one entry here rather than a branch in the mailer.                     */
+
+/** The one-off grandfather date for the poster's e-mail — the day it shipped.
+    Every posting ever made through the form is live and unthanked on the first
+    run, and thanking a year of them at once would be a mail-out nobody asked
+    for from an address that has never written to them. Anything created before
+    this is stamped silently; everything after it is thanked when it appears.
+
+    SEPARATE from `SINCE`, which grandfathers the MAINTAINER's announcement and
+    was set when that shipped. One date cannot do both jobs: they are two
+    features with two ship dates, and sharing the older one would have this
+    mailer thank ten days of postings on its first run. */
+export const LIVE_SINCE = '2026-08-29';
+
+/** The poster's own high-water mark. */
+export const LIVE_MAILED_AT = 'liveMailedAt';
+
+/**
+ * The served rows, keyed by id — `idsOf`'s companion.
+ *
+ * The live pass needs the ROW and not merely its id: the e-mail shows the
+ * poster what the SITE says, not what their document said, so a heal or a
+ * canonicalisation the build applied on the way out is what they read.
+ */
+export function rowsById(rows) {
+  const out = new Map();
+  for (const r of rows || []) if (r && r.id) out.set(r.id, r);
+  return out;
+}
+
+/**
+ * Split live submissions of one kind into `{ mail, grandfather }` for the
+ * poster's "it is on the site now" e-mail.
+ *
+ * `mail` carries `{ id, data, row, published, to }` — `published` being the
+ * served row, `to` the address to write to. `grandfather` is stamped and not
+ * written to (see LIVE_SINCE).
+ *
+ * A submission with no reachable address is skipped ENTIRELY — neither mailed
+ * nor stamped — because the address can be added by a later correction, and a
+ * stamp would make that correction unthankable for ever.
+ */
+export function partitionLive(kind, entries, { since = LIVE_SINCE, published = null, now = new Date() } = {}) {
+  const rows = published instanceof Map ? published : rowsById(published || []);
+  const mail = [];
+  const grandfather = [];
+
+  if (!kind || !kind.tellsPoster) return { mail, grandfather };
+
+  for (const e of entries || []) {
+    const doc = e.data || {};
+    if (!isLive(doc) || doc[LIVE_MAILED_AT]) continue;
+
+    const to = contactEmail(doc);
+    if (!to) continue;
+
+    let row = null;
+    try { row = kind.row(doc, { now }); } catch { row = null; }
+    const shown = row && rows.get(row.id);
+    if (!shown) continue;                       // not publicly shown yet
+
+    const day = createdDay(doc);
+    if (!day || day < since) grandfather.push({ ...e, row, published: shown, to });
+    else mail.push({ ...e, row, published: shown, to });
+  }
+
+  const byDay = (a, b) =>
+    String(createdDay(a.data) || '').localeCompare(String(createdDay(b.data) || ''))
+    || String(a.id).localeCompare(String(b.id));
+  mail.sort(byDay);
+  grandfather.sort(byDay);
+
+  return { mail, grandfather };
 }
