@@ -363,14 +363,21 @@
      The browser half: one small button in the filter panel.
      ====================================================================== */
 
-  /** Signed in, as far as anything on this page can know. */
+  /* Signed in, as far as anything on this page can know — asked of the ONE
+     definition, in assets/oa-gate.js, which is the same answer the CARDS are
+     drawn from, so the button that downloads the list and the list itself can
+     never disagree about who is reading.
+     It resolves from the localStorage hint before the session restores, the
+     way the account chip is painted.
+
+     No silent fallback if the module is missing: it says no, and the load
+     order is pinned in selftest.mjs. A fallback that is right most of the
+     time is the worst possible shape for one — the lesson oa-sponsors.js
+     learnt when its own dependency was absent on two pages and every test
+     went on passing. */
   function signedIn() {
-    var A = G.OAAccounts;
-    if (!A) return false;
-    if (A.resolved && A.resolved()) return !!A.user();
-    // before the session restores, the localStorage memory of the last one —
-    // the same hint the account chip is painted from
-    return A.hint && A.hint() === 'in';
+    var Gate = G.OAGate;
+    return !!(Gate && Gate.signedIn());
   }
 
   function countLabel(n, total) {
@@ -409,7 +416,7 @@
            blocked CDN, an ad blocker — is the same thing here: nobody can sign
            in, so nobody can download. Say so rather than offering a button
            that would silently do nothing when pressed. */
-        if (!A || (A.failed && A.failed())) {
+        if (!A || !G.OAGate || (A.failed && A.failed())) {
           btn.disabled = true;
           btn.title = 'Sign-in is unavailable at the moment, so the download is too.';
         } else {

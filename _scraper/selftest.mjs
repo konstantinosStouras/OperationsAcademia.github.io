@@ -9656,6 +9656,208 @@ async function testJobExportWiring() {
        engine's and v3.css is the live design's override, and a rule in only
        one of them is either invisible on the site or lost on the next page —
        CLAUDE.md records that trap under the Excel button. */
+/* --------------------------------- what a reader who has not registered SEES
+
+   Owner, 2026-08-29, from two screenshots of the site signed out: an
+   unregistered reader may see the sponsor's posting and the universities
+   behind the ones beside it — and a candidate's name — and nothing more. The
+   card does not open on them, the details are drawn as an unreadable strip,
+   and expanding a posting in place belongs to a registered reader who has
+   opened the full list.
+
+   THE ONE THING THIS BLOCK MUST NOT LET ANYBODY CLAIM is that it is security.
+   Every dataset here is a served file on GitHub Pages that anybody may fetch,
+   and no rule in this repository can change that without a backend to put it
+   behind — so this is a decision about what the site SHOWS, and the pinned
+   copy below is what keeps the pages from promising more than that. It is the
+   same honesty the sign-in lock over the filter bar was written with; what
+   changed is that its old last sentence ("Everything below stays readable
+   either way") became false the moment the cards stopped opening.
+
+   Who actually sees which shape is measured in a real browser by
+   page-test.mjs — this pins the decision, the wiring and the words.         */
+async function testReaderGate() {
+  const GATE = require(path.join(HERE, '..', 'assets', 'oa-gate.js'));
+
+  /* ---- the decision ----------------------------------------------------- */
+
+  /* In Node there is no window and no accounts module, which is the "cannot
+     tell" case: it says NO. A gate that unlocked when it could not find out
+     would unlock for every reader whose CDN is blocked, which is the
+     "fallback that is right most of the time" shape oa-sponsors.js was
+     caught by and this repository now refuses everywhere. */
+  eq(GATE.signedIn(), false, 'gate: with nothing to ask, it says the reader is not signed in');
+  eq(GATE.locked(), true, 'gate: …so the reader is locked');
+  eq(GATE.unavailable(), true, 'gate: …and it knows nobody can sign in from here');
+
+  const rows = [{ id: 'a', institution: 'Somewhere' }];
+  const lockedShape = GATE.cardOpen({ note: 'Sign in to read this posting' })(rows[0]);
+  ok(lockedShape && lockedShape.blur === true,
+    'gate: a locked card draws the blurred strip');
+  eq(lockedShape.note, GATE.NOTE_UNAVAILABLE,
+    'gate: …and with no way to sign in it says so, rather than offering a dead control');
+  eq(lockedShape.run, null,
+    'gate: a note with nothing behind it carries no click — the head is disabled instead');
+
+  /* The test hook, which is what lets the browser checks put a reader on
+     either side of this without a Firebase to sign them in. */
+  GATE.__setForTest(true);
+  eq([GATE.locked(), GATE.unavailable()], [true, false],
+    'gate: forced locked — and then a sign-in IS offered, since the block is the test');
+  const forcedLock = GATE.cardOpen({ note: 'Sign in to read this posting' })(rows[0]);
+  eq(forcedLock.note, 'Sign in to read this posting',
+    'gate: …so the page\'s own wording is what the strip carries');
+  ok(typeof forcedLock.run === 'function', 'gate: …and pressing it does something');
+
+  GATE.__setForTest(false);
+  eq(GATE.locked(), false, 'gate: forced unlocked');
+  eq(GATE.cardOpen({})(rows[0]), null,
+    'gate: a signed-in reader with no fuller list opens the card where it stands');
+
+  /* THE TEASER (owner: "it should only expand when a user is registered and
+     has opened the full list"). Signed in, a card on the one-pager is a way
+     IN to the posting rather than the posting: it carries the reader to the
+     full list with that posting open. No padlock, no blur — nothing is
+     locked for them. */
+  const full = GATE.cardOpen({ full: (r) => 'jobs.html?job=' + r.id })(rows[0]);
+  ok(full && full.blur === false,
+    'gate: the signed-in teaser card is gated but NOT locked — nothing is blurred');
+  eq(full.note, GATE.NOTE_FULL, 'gate: …and it says where the click goes');
+  /* A row the page cannot name a page for falls back to opening in place,
+     rather than to a click that navigates nowhere. */
+  eq(GATE.cardOpen({ full: () => '' })(rows[0]), null,
+    'gate: …and with no href to offer it simply opens the card here');
+  GATE.__setForTest(null);
+
+  /* ---- the ENGINE ------------------------------------------------------- */
+
+  const engine = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
+  /* THE VALUES ARE NEVER PUT INTO THE DOCUMENT. A blurred copy of the real
+     text is a picture of a lock rather than a lock, and it would also be
+     selectable, copyable and readable in one keystroke of devtools — so the
+     locked branch returns before the table is built, and what it previews is
+     the row LABELS. Read from the source because the alternative is to prove
+     a negative in a browser about markup that is not there. */
+  const locked = engine.slice(engine.indexOf('THE LOCKED CARD'),
+    engine.indexOf("var table = el('table', { class: 'oa-kv' });"));
+  ok(locked.length > 500, 'gate: the engine\'s locked branch is where this expects it');
+  ok(!/kv\.value|kv\.html/.test(locked),
+    'gate: the locked card never reads a row\'s VALUE — only the labels it would have shown');
+  ok(/lockPreview/.test(locked) && /aria-hidden/.test(locked),
+    'gate: the blurred strip is decoration and says so to assistive technology');
+  ok(/return lockedLi/.test(locked),
+    'gate: …and it returns before the details table is built at all');
+  ok(/'aria-expanded': gate \? null/.test(engine) && /'aria-controls': gate \? null/.test(engine),
+    'gate: a head that no longer discloses anything stops claiming to');
+
+  /* ---- BOTH stylesheets ------------------------------------------------- */
+
+  /* oa-list.css is the engine's own and v3.css overrides it for the live
+     design: a rule written in only one of them is either invisible on the
+     site or lost on the next page. The Excel button, the sponsor rail and
+     the Leaflet attribution box are all here for this reason. */
+  const listCss = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
+  const v3Css = await readFile(path.join(HERE, '..', 'assets', 'v3.css'), 'utf8');
+  ok(/\.oa-card-lock-blur\s*\{[^}]*filter:\s*blur\(/.test(listCss),
+    'gate: oa-list.css blurs the strip');
+  ok(/\.oa-card-lock-blur\s*\{[^}]*user-select:\s*none/.test(listCss),
+    'gate: …and it does not select, because decoration that highlights reads as a fault');
+  ok(/body\.v3 \.oa-card-lock-blur/.test(v3Css) && /body\.v3 \.oa-card-lock-note/.test(v3Css),
+    'gate: v3.css carries the live design\'s half of the same rule');
+  /* THE PADLOCK IS ON THE LOCKED NOTE ONLY. The same strip carries the
+     one-pager's "Open it on the full list", which a SIGNED-IN reader sees —
+     a padlock in front of that says something untrue. */
+  ok(/\.oa-card-lock\.is-blurred \.oa-card-lock-note::before/.test(listCss),
+    'gate: the padlock is drawn only where something really is locked');
+  ok(!/^\s*\.oa-card-lock-note::before/m.test(listCss),
+    'gate: …never on the strip\'s note as such');
+  ok(/@media print[\s\S]{0,700}?\.oa-card-lock \{ display: none/.test(listCss),
+    'gate: a blurred run of labels is not printed — it is mush on paper');
+
+  /* ---- the WIRING ------------------------------------------------------- */
+
+  const jobs = await readFile(path.join(HERE, '..', 'jobs.html'), 'utf8');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const past = await readFile(path.join(HERE, '..', 'previous-markets.html'), 'utf8');
+
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home],
+    ['previous-markets.html', past]]) {
+    ok(html.includes('<script defer src="assets/oa-gate.js"></script>'),
+      `gate: ${rel} loads the module, deferred like every other script on it`);
+    /* It asks OAAccounts who is reading, so it has to be loaded after it —
+       the load-order half of the sponsors lesson, where a module handed an
+       undefined dependency went on passing every check in Node. */
+    ok(html.indexOf('assets/oa-accounts.js') < html.indexOf('assets/oa-gate.js'),
+      `gate: ${rel} loads the accounts module before the gate that asks it`);
+    ok(/cardOpen:\s*OAGate\.cardOpen\(/.test(html),
+      `gate: ${rel} declares the gate on its list, through the module`);
+    /* The gate is painted from the auth hint before the session restores, so
+       every list HAS to be able to change shape late. Without this a
+       signed-in reader keeps the locked cards until they navigate. */
+    ok(/OAGate\.watch\(/.test(html),
+      `gate: ${rel} re-renders its list when the auth state finally resolves`);
+  }
+  /* EVERY list a job posting or a candidate is drawn in. Read as a set rather
+     than one page at a time: the archive is where postings GO when a season
+     rolls, and leaving it open would have made the gate on the jobs page a
+     matter of waiting rather than of registering. */
+  eq((home.match(/cardOpen:\s*OAGate\.cardOpen\(/g) || []).length, 2,
+    'gate: the one-pager gates BOTH its lists — the job teaser and the candidates');
+  /* …and the teaser is the one that sends a signed-in reader to the full
+     list, through the site's single answer to "which page carries this
+     posting" rather than a fourth copy of that rule. */
+  ok(/full:\s*function\s*\(r\)\s*\{\s*return NAV\.hrefFor\(r\);/.test(home),
+    'gate: the teaser opens a posting on the page OAJobNav says carries it');
+  ok(!/cardOpen[\s\S]{0,400}?full:/.test(jobs) && !/cardOpen[\s\S]{0,400}?full:/.test(past),
+    'gate: the full lists open a posting where it stands — they ARE the full list');
+
+  /* ---- ONE definition of "is this reader signed in" --------------------- */
+
+  const exp = await readFile(path.join(HERE, '..', 'assets', 'oa-jobexport.js'), 'utf8');
+  ok(/function signedIn\(\)\s*\{[\s\S]{0,200}?G\.OAGate[\s\S]{0,120}?\}/.test(exp),
+    'gate: the Excel download asks the gate who is signed in, not its own copy');
+  ok(!/A\.hint\(\)\s*===\s*'in'/.test(exp),
+    'gate: …so the button and the cards can never disagree about who is reading');
+  ok(jobs.indexOf('assets/oa-gate.js') < jobs.indexOf('assets/oa-jobexport.js'),
+    'gate: jobs.html loads the gate before the export that reads it');
+
+  /* ---- THE COPY, which is the part that could quietly become a lie ------ */
+
+  /* READ WITH THE COMMENTS STRIPPED, and bounded at BOTH ends. The block
+     above the card EXPLAINS the sentence it no longer says, and quotes it to
+     do so — a guard that could not tell the explanation from the copy would
+     have to be satisfied by deleting the explanation, which is the shape
+     CLAUDE.md records under the no-rebase check. And the first draft of this
+     slice ended at the first `v3-cta-row`, which is in the HERO, hundreds of
+     lines ABOVE the card: it came back empty and every check below it passed
+     on nothing. Hence the length assertion, which is what caught it. */
+  const jobsCopy = jobs.replace(/<!--[\s\S]*?-->/g, '');
+  const card = jobsCopy.slice(jobsCopy.indexOf('class="v3-lock-card"'),
+    jobsCopy.indexOf('<div id="oa-jobs">'));
+  ok(card.length > 200 && card.length < 2000,
+    'gate: the sign-in card is where this expects it');
+  ok(!/stays readable either way/i.test(jobsCopy),
+    'gate: the sign-in card no longer promises the postings stay readable — they do not');
+  ok(/universities hiring this season are listed below/i.test(card),
+    'gate: …it says what a reader without an account DOES get');
+  ok(/Excel/i.test(card),
+    'gate: …and still names the download, the only place a signed-out reader is told of it');
+  /* NOTHING may describe this as security. The data is public and stays
+     public; a page that implied otherwise would be making a promise the
+     architecture cannot keep. */
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home],
+    ['previous-markets.html', past]]) {
+    const prose = html.replace(/<!--[\s\S]*?-->/g, '');
+    ok(!/(private|secure|protected|confidential)/i.test(
+      prose.slice(prose.indexOf('v3-lock-card') >= 0 ? prose.indexOf('v3-lock-card') : 0,
+        prose.indexOf('v3-lock-card') >= 0 ? prose.indexOf('v3-lock-card') + 1200 : 0)),
+      `gate: ${rel} never calls the gate privacy or security — the files are served to anybody`);
+  }
+  const gateSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-gate.js'), 'utf8');
+  ok(/NOT AN ACCESS CONTROL/.test(gateSrc),
+    'gate: and the module itself says so at the top, where the next reader will look');
+}
+
 async function testSponsors() {
   const SP = require(path.join(HERE, '..', 'assets', 'oa-sponsors.js'));
   const served = JSON.parse(await readFile(JOBS, 'utf8'));
@@ -10401,6 +10603,7 @@ if (isMain(import.meta.url)) {
   await testJobExport();
   await testJobExportWiring();
   await testSponsors();
+  await testReaderGate();
   await testAnalytics();
   await testGa4Tag();
   process.exit(finish() ? 0 : 1);
