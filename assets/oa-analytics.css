@@ -25,9 +25,46 @@
   --oa-chart-accent: var(--gold);
   --oa-chart-surface: var(--bg-2);
   --oa-chart-grid: var(--line-soft);
+
+  /* THE CATEGORICAL RAMP, for the share bars — where readers arrive from, what
+     they read on. It exists separately from the two chart colours above
+     because those two answer a different question: --brand and the accent have
+     to be told apart FROM EACH OTHER as two lines over one another, where
+     these have to be told apart in a row of touching blocks.
+
+     Six, and no more. A share chart that needs a seventh colour is a share
+     chart nobody can read, so `share()` folds the tail rather than growing the
+     ramp — the hues are stepped a long way apart round the wheel rather than
+     shaded, which is what keeps neighbours separable for a reader with any of
+     the common colour deficiencies. Colour is never the only channel anyway:
+     every part is named with its percentage in the legend beneath the bar, in
+     the same order, and every part is a focus stop with a tooltip.
+
+     MEASURED, in the theme each belongs to. Against the surface they sit on
+     (--bg-2) every one clears 3:1, the floor for a graphical object: 4.18:1 at
+     worst in light, 7.26:1 in dark. Against EACH OTHER — which is the harder
+     test, and the one --oa-chart-accent exists because of — the closest pair
+     in the whole ramp sits at delta-E 22.9 (light) and 23.4 (dark), above the
+     21.2 this file already accepts for two overlaid lines, and no two
+     NEIGHBOURING parts are closer than 41. */
+  --oa-cat-1: #3a424d;
+  --oa-cat-2: #a9701f;
+  --oa-cat-3: #2f6f7e;
+  --oa-cat-4: #7d4f74;
+  --oa-cat-5: #55702f;
+  --oa-cat-6: #8a4b3c;
 }
 [data-theme='dark'] {
   --oa-chart-accent: #d98a24;
+
+  /* Re-stepped for the dark surface exactly as the accent is: the light ramp
+     is far too dark to read as anything but six identical blocks on #15181d. */
+  --oa-cat-1: #c6ccd4;
+  --oa-cat-2: #d99a3f;
+  --oa-cat-3: #6fb3c4;
+  --oa-cat-4: #cb95bd;
+  --oa-cat-5: #a7c176;
+  --oa-cat-6: #dd9683;
 }
 
 /* ------------------------------------------------------------------ figures */
@@ -322,6 +359,97 @@
   font-size: 13px;
 }
 
+/* ------------------------------------------------------- the share bar */
+
+.oa-share-bar {
+  display: flex;
+  width: 100%;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-3);
+}
+.oa-share-seg {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  cursor: default;
+}
+/* a hairline of the SURFACE between the parts, so two neighbours are separated
+   by a seam rather than only by their hues — the same reasoning as the ring
+   round a marker where it crosses a line */
+.oa-share-seg + .oa-share-seg { box-shadow: inset 1px 0 0 var(--oa-chart-surface); }
+.oa-share-seg:hover, .oa-share-seg:focus-visible { filter: brightness(1.12); }
+.oa-share-seg:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.oa-share-legend { margin-top: 12px; }
+
+.oa-key.oa-cat-1 { background: var(--oa-cat-1); }
+.oa-key.oa-cat-2 { background: var(--oa-cat-2); }
+.oa-key.oa-cat-3 { background: var(--oa-cat-3); }
+.oa-key.oa-cat-4 { background: var(--oa-cat-4); }
+.oa-key.oa-cat-5 { background: var(--oa-cat-5); }
+.oa-key.oa-cat-6 { background: var(--oa-cat-6); }
+.oa-share-seg.oa-cat-1 { background: var(--oa-cat-1); }
+.oa-share-seg.oa-cat-2 { background: var(--oa-cat-2); }
+.oa-share-seg.oa-cat-3 { background: var(--oa-cat-3); }
+.oa-share-seg.oa-cat-4 { background: var(--oa-cat-4); }
+.oa-share-seg.oa-cat-5 { background: var(--oa-cat-5); }
+.oa-share-seg.oa-cat-6 { background: var(--oa-cat-6); }
+
+/* --------------------------------------------------- the legend as a control
+
+   Two lines over one another is the most a reader can hold at once, so either
+   can be put away. It is a real <button> with aria-pressed, which is what
+   gives a keyboard and a screen reader the same switch a pointer has; a
+   pressed-out entry keeps its place in the row rather than vanishing, or
+   bringing it back would have nothing to press. */
+
+.oa-chart-legend-on button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--mut);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.oa-chart-legend-on button:hover { color: var(--ink); background: var(--bg-3); }
+.oa-chart-legend-on button[aria-pressed='false'] { opacity: .45; text-decoration: line-through; }
+
+/* the line chart answers the keyboard, so it must show where the focus is */
+.oa-chart-plot:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 8px; }
+.oa-hit:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+/* ------------------------------------------------ a row of the bar list
+
+   The list used to be inert — the one figure on the page a reader could not
+   interrogate. Every row is a focus stop now and answers with its share. */
+
+.oa-bar-row { border-radius: 8px; padding: 2px 4px; margin-left: -4px; margin-right: -4px; }
+.oa-bar-row:hover { background: var(--bg-3); }
+.oa-bar-row:focus-visible { outline: 2px solid var(--brand); outline-offset: 0; }
+.oa-bar-row:hover .oa-bar-fill, .oa-bar-row:focus-visible .oa-bar-fill { filter: brightness(1.1); }
+
+/* ------------------------------------------------ where a figure came from */
+
+.oa-figure-src {
+  margin: 12px 0 0;
+  color: var(--mut);
+  font-size: 12.5px;
+}
+
+.oa-an-list { margin: 10px 0; padding-left: 20px; }
+.oa-an-list li { margin-bottom: 4px; }
+.oa-an-list b { color: var(--ink); }
+.oa-an-missing { color: var(--mut); }
+
+/* ------------------------------------------- which number the chart plots */
+
+.oa-switch { margin: 0 0 14px; }
+.oa-switch button { font-size: 12.5px; padding: 6px 12px; min-height: 34px; }
+
 /* ------------------------------------------------------------------- phone */
 
 @media (max-width: 640px) {
@@ -330,7 +458,12 @@
   .oa-tile-value { font-size: 25px; }
   /* the standard every control on this site is held to on a phone */
   .oa-range button { min-height: 42px; flex: 1 1 auto; }
+  .oa-switch button { min-height: 42px; }
   .oa-chart-tip { font-size: 12px; }
+  /* a share bar cut into six parts on a 390px screen has parts two pixels
+     wide, so the legend beneath it is doing the reading — give it room */
+  .oa-share-bar { height: 28px; }
+  .oa-share-legend { gap: 6px 12px; }
 }
 
 /* A month the record has never covered: no bar at all, and a label that says

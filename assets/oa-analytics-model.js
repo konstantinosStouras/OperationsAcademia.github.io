@@ -106,7 +106,74 @@
      nothing anywhere said which of the two it was. */
   const STALE_DAYS = 21;
 
+  /* --------------------------------------------------- the DIMENSION records
+
+     Everything above answers "how many, and when". These answer "who, from
+     where, on what, and at what hour" — the questions a job-market site
+     actually wants of its own traffic, and the ones the page had no figure
+     for at all.
+
+     EACH DIMENSION IS ASKED OF THE SOURCE THAT CAN ANSWER IT, AND OF ONE
+     SOURCE ONLY. That is the day rule again, and it bites harder here: two
+     analytics systems counting the same Tuesday at least agree about what a
+     Tuesday is, where two systems counting "sessions from Germany" disagree
+     about the boundary of a session, the meaning of a country and the clock
+     the hour is read on. Adding those, or preferring the larger, would
+     produce a number that is not a measurement of anything.
+
+     The split falls out of what each source HAS, so it needs no arbitration:
+
+       hours       the site's OWN record. It stamps every session with the
+                   instant it began, so the hour is exact and it is UTC.
+                   Deliberately NOT also asked of GA4: GA4 reports `hour` in
+                   the property's own reporting time zone, and one chart whose
+                   meaning silently changed clocks with its source would be
+                   worse than no chart.
+       countries   GA4, and only GA4. The first-party record never asks where
+                   a reader is — it stores a page, an instant and a duration —
+                   so there is nothing here to prefer it for.
+       devices     GA4. Same reason.
+       channels    GA4 (`sessionDefaultChannelGroup`): search, direct,
+                   referral, social, e-mail.
+       referrers   GA4 (`sessionSource`): which site sent them.
+
+     AND EVERY GA4 DIMENSION COUNTS VISITS, NEVER VISITORS. Running cookieless
+     (assets/oa-ga4.js), GA4 keeps no identifier on the device and therefore
+     cannot tell a returning reader from a new one — its `totalUsers` is much
+     nearer "sessions" than "people". Calling a country's number "visitors"
+     would be exactly the overstatement SOURCE_ORDER exists to avoid, so these
+     records carry `metric: 'visits'` and the page says visits. */
+
+  /* Every dimension record, and the top pages beside them, describes a
+     TRAILING WINDOW rather than all of time, and each record states its own.
+
+     That is not a preference — it is what makes the figure recomputable. A
+     dimension tally cannot be accumulated across runs the way days can: the
+     builder re-reads an overlapping slice every time (so a day still being
+     written is not frozen half-counted), and adding this run's tally to the
+     last one would double every session in the overlap. So each run computes
+     these from scratch over one stated window, and the page prints the window
+     under the chart. Ninety days is long enough to be a season and short
+     enough that the read stays bounded as the site grows.
+
+     IT ALSO FIXES A LATENT BUG IN THE PAGES FIGURE. `pages` was built from
+     whatever slice the incremental read happened to fetch — seven days, on
+     every run after the first — while the tiles beside it described the whole
+     record, and nothing on screen said the two meant different spans. */
+  const BREAKDOWN_DAYS = 90;
+
+  /* The dimension records the file may carry, in the order the page draws
+     them. A record for anything not on this list is dropped rather than
+     served: this file is world-readable, and "whatever a source sent" is not
+     a shape anybody has checked. */
+  const BREAKDOWN_IDS = ['hours', 'countries', 'devices', 'channels', 'referrers'];
+
+  /* 00..23. Strings, so the file and the axis agree about "09" without
+     anybody re-padding it, and so an hour is never mistaken for a count. */
+  const HOURS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'));
+
   const isDay = (s) => typeof s === 'string' && DAY_RE.test(s);
+
   const num = (n) => (typeof n === 'number' && isFinite(n) && n > 0 ? Math.round(n) : 0);
 
   /** A day row from whatever a source handed us, or null when there is no
@@ -129,6 +196,12 @@
       sources: [],
       days: {},
       pages: [],
+      /* which window `pages` describes — see BREAKDOWN_DAYS. Empty until a
+         source has supplied one, and the figure says so rather than letting
+         the tiles above it imply a span it does not have. */
+      pagesWindow: { source: '', from: '', to: '' },
+      breakdowns: {},
+      engagement: null,
       universities: { frozen: true, from: '', to: '', all: [], recent: [] },
       totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
     };
@@ -419,11 +492,124 @@
       .slice(0, Math.max(0, limit || 0));
   }
 
+  /* ------------------------------------------------- the dimension records */
+
+  /** One label from a dimension, fit to be published.
+
+      THE CAP AND THE ADDRESS RULE ARE NOT DECORATION. These strings come from
+      Google, out of fields a third party can influence — `sessionSource` is
+      whatever a referring site put in a header — and they land in a file this
+      site serves to anyone who asks. So: control characters and runs of
+      whitespace collapse, anything ADDRESS-SHAPED is dropped whole rather
+      than trimmed (nothing under data/ may carry one, and a truncated address
+      is still an address), and the result is capped. Returns '' for anything
+      that survives none of that, which the caller drops. */
+  function cleanLabel(raw) {
+    const t = String(raw == null ? '' : raw)
+      .replace(/[\u0000-\u001F\u007F]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!t) return '';
+    if (/[\w.+-]+@[\w-]+\.[\w.]+/.test(t)) return '';
+    return t.slice(0, 60);
+  }
+
+  /** GA4 answers "(not set)" / "(direct)" / "(none)" for a dimension it could
+      not determine, which is a real and honest category — a reader arriving by
+      typing the address IS direct traffic — but the parentheses are Google's
+      house style rather than English. Named here so every consumer says the
+      same thing, and so "(not set)" stays separable from a real value. */
+  const UNKNOWN_LABELS = {
+    '(direct)': 'Typed or bookmarked',
+    '(none)': 'Typed or bookmarked',
+    '(not set)': 'Not recorded',
+    '(other)': 'Other',
+  };
+  const prettyLabel = (raw) =>
+    UNKNOWN_LABELS[String(raw == null ? '' : raw).trim().toLowerCase()] || cleanLabel(raw);
+
+  /** A dimension record, ready to serve — or null when there is nothing in it.
+
+      `total` is the sum over EVERY item the source returned, taken BEFORE the
+      cut, so a share is a share of the whole and not of the top ten. Getting
+      that the other way round is the classic way a "top countries" chart comes
+      to claim its leader is 40% of all traffic when it is 40% of the ten
+      countries that happened to fit. */
+  function breakdown(id, { source, from = '', to = '', metric = 'visits', zone = '',
+    items = [], limit = 12 } = {}) {
+    if (BREAKDOWN_IDS.indexOf(id) === -1) return null;
+    const rows = [];
+    let total = 0;
+    for (const it of items || []) {
+      const name = prettyLabel(it && it.name);
+      if (!name) continue;
+      const value = num(it && it.value);
+      total += value;
+      rows.push({ name, value });
+    }
+    if (!rows.length || !total) return null;
+    /* hours are a CLOCK and must stay in clock order; everything else ranks */
+    if (id !== 'hours') rows.sort((a, b) => b.value - a.value);
+    return {
+      source: String(source || ''),
+      from, to, metric, zone,
+      total,
+      items: rows.slice(0, Math.max(1, limit)),
+    };
+  }
+
+  /** ONE SOURCE OWNS A DIMENSION, WHOLE. The first (highest-authority) claim
+      stands and a later source is ignored entirely — never merged, never
+      summed, never preferred for being larger. See the header block: two
+      systems counting "visits from Germany" do not agree about what a visit,
+      a country or an hour IS, so an assembled answer measures nothing. */
+  function mergeBreakdown(into, id, rec) {
+    if (!rec || BREAKDOWN_IDS.indexOf(id) === -1) return false;
+    if (Object.prototype.hasOwnProperty.call(into, id)) return false;
+    into[id] = rec;
+    return true;
+  }
+
+  /** 24 zeroed hour buckets. An hour with no sessions is a REAL zero — unlike
+      a month the record has never reached — because the window is whole days,
+      so every hour in it genuinely happened. Nobody reads a job board at 04:00
+      UTC, and the chart is allowed to say so. */
+  function hourBuckets() {
+    return HOURS.map((name) => ({ name, value: 0 }));
+  }
+
+  /** Each item's share of the record's own total, as a fraction. It reads the
+      pre-cut `total`, so the shares of a truncated list correctly fail to
+      reach 1 rather than being renormalised into a lie. */
+  function withShare(rec) {
+    if (!rec || !rec.total) return [];
+    return rec.items.map((it) => ({ name: it.name, value: it.value, share: it.value / rec.total }));
+  }
+
+  /** The engagement record — how long a visit lasts and how much of the site
+      it covers. Scalars rather than a list, so it has a shape of its own.
+      Null when there is nothing to report, which the page reads as "draw no
+      tile" rather than as a zero. */
+  function engagement({ source, from = '', to = '', sessions = 0, seconds = 0, views = 0 } = {}) {
+    const s = num(sessions);
+    if (!s) return null;
+    return {
+      source: String(source || ''),
+      from, to,
+      sessions: s,
+      avgSessionSec: Math.round(Math.max(0, Number(seconds) || 0) / s),
+      viewsPerSession: Math.round((Math.max(0, Number(views) || 0) / s) * 100) / 100,
+    };
+  }
+
   return {
     DAY_FIELDS, SOURCE_ORDER, WEEKDAYS, MONTHS, STALE_DAYS,
+    BREAKDOWN_DAYS, BREAKDOWN_IDS, HOURS, UNKNOWN_LABELS,
     NON_PUBLIC, normPath, isPublicPath,
     isDay, dayRow, emptyDataset, mergeDays, orderSources,
     series, rollingMean, byWeekday, byMonth, summarise, staleness,
     mergePages, topPages,
+    cleanLabel, prettyLabel, breakdown, mergeBreakdown, hourBuckets, withShare,
+    engagement,
   };
 }));
