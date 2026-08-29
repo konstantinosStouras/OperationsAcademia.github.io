@@ -10,6 +10,13 @@
       "url": "/analytics.html"
     },
     {
+      "id": "analytics-audience-plots",
+      "date": "2026-08-29",
+      "title": "The analytics page shows who is reading, and when",
+      "summary": "Five new charts on /analytics, and a page you can actually interrogate. It already showed how busy the site is day by day, the weekly rhythm and the hiring season across the year \u2014 all of that measured by the site on its own pages. Beside them now: what hour of the day people read it (two clear humps, Europe and the Americas, and a genuinely dead middle of the night), which countries they are in, how they arrived \u2014 a search, a link from another site, an e-mail, or the address typed from memory \u2014 which sites send the most readers, and whether they are on a desktop or a phone. Two new figures at the top say how long a typical visit lasts and how many pages it opens. Every chart answers a mouse or the keyboard: hover or tab through a row and it tells you its share of the whole, the daily chart will plot visitors, visits or pageviews at your choosing, its seven-day average can be switched off, and the arrow keys walk it day by day. Times are now said the way people say them \u2014 \u201c32m 32s\u201d rather than \u201c1952 seconds\u201d. Each figure states underneath it where it came from and what stretch of time it covers, because the audience figures are measured by Google Analytics over the last ninety days while the daily counts go back as far as the record does. Those Google-measured figures are counted in visits rather than in people, and the page says so: the analytics here stores nothing at all on your device, which is why you are never asked to accept anything, and the cost of that is it cannot recognise you when you come back. Anything no source can answer for yet is named at the foot of the page rather than drawn as an empty chart. The figures describe public pages only, as before.",
+      "url": "/analytics.html"
+    },
+    {
       "id": "reader-gate",
       "date": "2026-08-29",
       "title": "Reading a posting now needs an account — posting one still does not",

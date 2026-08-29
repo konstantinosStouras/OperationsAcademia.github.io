@@ -99,6 +99,67 @@ cannot plot GA4's numbers until the credential exists.
 
 ---
 
+## Which figure comes from which source
+
+The page draws two kinds of thing and they are gathered differently.
+
+**Day rows** — visitors, visits and pageviews per day — go back as far as the
+record does, and `mergeDays` gives each day to exactly one source.
+
+**Dimension tallies** — the hour of the day, the countries, the channels, the
+referring sites, the devices, and how long a visit lasts — cannot be
+accumulated the same way. Adding this run's counts to the last run's would
+double every session in the overlap the incremental read deliberately keeps,
+and taking only the fresh ones would turn *when people read the site* into
+*when people read it this week*. So they are **recomputed from scratch over a
+trailing window on every run** (`BREAKDOWN_DAYS`, 90 days), and each record
+states the span it actually covers. The page prints that span under every
+figure drawn from one, because the tiles above it describe the whole record
+and two spans on one screen with only one of them named invites a comparison
+nobody meant.
+
+Which source answers for which dimension is settled by what each one HAS, so
+no precedence question arises:
+
+| Figure | Source | Why it can only be that one |
+|---|---|---|
+| Visitors / visits / pageviews per day | usage, then GA4 | both measure it; the day goes to one of them, never to both |
+| The weekly rhythm, the hiring season | derived from the day rows | nothing extra is fetched for either |
+| **When in the day people read it** | **usage only** | it stamps the instant each session begins, so the hour is exact and it is UTC. GA4 would answer on the property's own clock, and one chart whose meaning changed time zone with its source is worse than no chart |
+| **Where readers are** | **GA4 only** | the first-party record stores a page, an instant and a duration, and asks nothing else |
+| **How readers arrive** (channel) | **GA4 only** | same |
+| **Which sites send readers** | **GA4 only** | same |
+| **What they read it on** (device) | **GA4 only** | same |
+| How long a visit lasts | usage, then GA4 | both measure it; one of them owns it |
+| **Which universities visited** | **the site's own resolver** | neither analytics system can answer it: GA4 dropped UA's reverse-DNS dimension and a browser cannot look up its own. A Cloud Function can, so the site does it itself — source 4 below |
+
+**Every GA4 figure counts VISITS, never visitors.** Running cookieless the tag
+keeps no identifier on the device, so GA4 cannot tell a returning reader from a
+new one and its `totalUsers` is nearly its session count. Publishing a
+country's number as "visitors" would be exactly the overstatement
+`SOURCE_ORDER` exists to avoid.
+
+**`newVsReturning` is deliberately not asked for at all.** Cookieless, GA4
+reports very nearly every session as new — the figure would measure the tag's
+configuration rather than the readers. The first-party record could answer it
+honestly (its per-browser id is stable) but only by reading the whole
+collection to find each browser's first day, which is the unbounded read the
+incremental query is shaped to avoid. A figure that would be wrong from one
+source and expensive from the other is better not drawn.
+
+**A dimension with no source is not drawn.** It is named in the note at the
+foot of the page instead, under "Not on this page yet". A heading over an empty
+axis is precisely the shape of the defect this page is a rebuild of, so the
+five GA4 figures simply appear on their own once the credential exists and the
+property has days in it.
+
+**And every figure describes public pages only.** The non-public filter is
+applied to the GA4 dimension reports as well as to the daily one, so the
+country and channel tallies describe the same population as everything else on
+the page.
+
+---
+
 ## Source 3 — the historical archive  ·  **CHECKED, AND IT IS EMPTY**
 
 **Do not go looking for this again.** It was checked on 2026-08-29 and the

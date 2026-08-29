@@ -39,6 +39,16 @@
 
   const NS = 'http://www.w3.org/2000/svg';
 
+  /* The tooltips are built as HTML, and every label in them comes from a
+     served file — a page title, a country, a referring host Google read out
+     of somebody else's header. So nothing reaches innerHTML unescaped. The
+     page escapes what it renders itself; this is the same rule one layer
+     down, where the markup is actually assembled. */
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
   /* The band a bar may occupy is the slot minus the surface gap; the bar
      itself is then capped, so a chart with six bars has air around them
      rather than six fat slabs. */
@@ -62,6 +72,51 @@
   }
 
   const full = (n) => Math.round(Number(n) || 0).toLocaleString('en-GB');
+
+  /** A length of time, said the way a person says it (owner, 2026-08-29:
+      "convert seconds to e.g. hours, minute, seconds if seconds is too long").
+
+      "1,952 seconds on average" is a number a reader has to divide by sixty
+      before it means anything, and the page was printing exactly that under
+      its most-read pages. Below a minute seconds ARE the natural unit and are
+      kept; above it the next unit down is zero-padded, so a column of these
+      stays aligned and "1h 5m" cannot be misread as "1h 50m". Seconds are
+      dropped once hours are involved — nobody reads the seconds of an hour,
+      and carrying them would imply a precision a session-duration average
+      does not have. */
+  function duration(sec) {
+    const s = Math.max(0, Math.round(Number(sec) || 0));
+    if (!s) return '0s';
+    if (s < 60) return s + 's';
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const r = s % 60;
+    if (h) return m ? h + 'h ' + String(m).padStart(2, '0') + 'm' : h + 'h';
+    return r ? m + 'm ' + String(r).padStart(2, '0') + 's' : m + 'm';
+  }
+
+  /** The same length spelled out, for a tooltip or a table cell where the
+      compact form would be the only thing on the line. */
+  function durationLong(sec) {
+    const s = Math.max(0, Math.round(Number(sec) || 0));
+    const unit = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+    if (s < 60) return unit(s, 'second');
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    if (h) return m ? unit(h, 'hour') + ' ' + unit(m, 'minute') : unit(h, 'hour');
+    const r = s % 60;
+    return r ? unit(m, 'minute') + ' ' + unit(r, 'second') : unit(m, 'minute');
+  }
+
+  /** A share as a percentage a reader can say out loud. Under a tenth of a
+      per cent reads "<0.1%" rather than "0.0%", which would claim a category
+      the source really returned is not there at all. */
+  function pct(share) {
+    const v = (Number(share) || 0) * 100;
+    if (!v) return '0%';
+    if (v < 0.1) return '<0.1%';
+    return (v < 10 ? v.toFixed(1) : Math.round(v)) + '%';
+  }
 
   /** Round a maximum up to something a reader can divide in their head, so
       the ticks land on 0 / 500 / 1,000 rather than 0 / 437 / 874. */
@@ -211,16 +266,19 @@
         open = true;
       });
       if (!d.length) return;
+      s.nodes = [];
       if (s.area) {
         /* a wash, never a saturated block */
         const first = s.values.findIndex((v) => v != null);
         const last = s.values.length - 1;
-        el('path', {
+        s.nodes.push(el('path', {
           class: 'oa-area oa-' + cls,
           d: d.join(' ') + ` L ${X(last).toFixed(1)} ${Y(0)} L ${X(first).toFixed(1)} ${Y(0)} Z`,
-        }, svg);
+        }, svg));
       }
-      el('path', { class: 'oa-line oa-' + cls + (s.dashed ? ' oa-dashed' : ''), d: d.join(' ') }, svg);
+      s.nodes.push(el('path', {
+        class: 'oa-line oa-' + cls + (s.dashed ? ' oa-dashed' : ''), d: d.join(' '),
+      }, svg));
     });
 
     /* the hover layer: a crosshair and one tooltip for the whole x, which is
@@ -247,9 +305,10 @@
       let html = '<b>' + pts[i].label2 + '</b>';
       let ty = pad.t;
       series.forEach((s, si) => {
-        const v = s.values[i];
+        const v = s.hidden ? null : s.values[i];
         if (v == null) {
           dots[si].setAttribute('cx', -9);
+          dots[si].classList.remove('on');
           return;
         }
         dots[si].setAttribute('cx', x);
@@ -272,22 +331,70 @@
     wrap.addEventListener('pointermove', move);
     wrap.addEventListener('pointerleave', leave);
 
-    if (series.length >= 2) legend(host, series);
+    /* THE KEYBOARD READS IT TOO. A crosshair driven only by a pointer is a
+       figure a keyboard reader can reach the numbers of solely by opening the
+       table below it — which is the fallback, not the chart. The plot takes
+       focus, the arrows walk the days, Home and End jump to the ends, and
+       Escape puts the crosshair away. */
+    let at_ = -1;
+    function place(i) {
+      at_ = Math.max(0, Math.min(pts.length - 1, i));
+      move({ clientX: svg.getBoundingClientRect().left +
+        (X(at_) / W) * svg.getBoundingClientRect().width });
+    }
+    wrap.tabIndex = 0;
+    wrap.setAttribute('role', 'application');
+    wrap.setAttribute('aria-label',
+      (opts.title || 'Chart') + ' — use the arrow keys to read each day');
+    wrap.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1, ArrowUp: 1, ArrowDown: -1 }[e.key];
+      if (step) { place(at_ < 0 ? 0 : at_ + step); e.preventDefault(); return; }
+      if (e.key === 'Home') { place(0); e.preventDefault(); return; }
+      if (e.key === 'End') { place(pts.length - 1); e.preventDefault(); return; }
+      if (e.key === 'Escape') { leave(); at_ = -1; }
+    });
+    wrap.addEventListener('blur', leave);
+
+    /* THE LEGEND IS A CONTROL, not a caption. Two lines over one another is
+       the most a reader can hold at once, and the whole point of the mean is
+       comparison — so either can be put away and brought back. Hiding is
+       never a one-way door here either: the entry stays, pressed-out. */
+    if (series.length >= 2) {
+      legend(host, series, (s, on) => {
+        s.hidden = !on;
+        (s.nodes || []).forEach((n) => { n.style.display = on ? '' : 'none'; });
+        leave();
+      });
+    }
     table(host,
       [opts.xTitle || 'Day'].concat(series.map((s) => s.name)),
       pts.map((p, i) => [p.label2].concat(series.map((s) => s.values[i] == null ? '—' : full(s.values[i])))));
   }
 
   /** A legend is the dependable identity channel and is always present for
-      two or more series — never colour-matching alone. */
-  function legend(host, series) {
+      two or more series — never colour-matching alone. Given an `onToggle` it
+      becomes a control as well: each entry is a real <button> carrying
+      aria-pressed, so a keyboard and a screen reader get the same switch a
+      pointer does. */
+  function legend(host, series, onToggle) {
     const box = document.createElement('div');
-    box.className = 'oa-chart-legend';
+    box.className = 'oa-chart-legend' + (onToggle ? ' oa-chart-legend-on' : '');
     series.forEach((s) => {
-      const item = document.createElement('span');
+      const item = document.createElement(onToggle ? 'button' : 'span');
+      if (onToggle) {
+        item.type = 'button';
+        item.setAttribute('aria-pressed', 'true');
+      }
       item.innerHTML = '<i class="oa-key oa-' + (s.kind || 'brand') +
         (s.dashed ? ' oa-dashed' : '') + '"></i>';
       item.appendChild(document.createTextNode(s.name));
+      if (onToggle) {
+        item.addEventListener('click', () => {
+          const on = item.getAttribute('aria-pressed') !== 'true';
+          item.setAttribute('aria-pressed', on ? 'true' : 'false');
+          onToggle(s, on);
+        });
+      }
       box.appendChild(item);
     });
     host.appendChild(box);
@@ -357,42 +464,81 @@
         el('text', { x: cx, y: y - 8, class: 'oa-value' }, svg).textContent = full(it.value);
       }
 
+      /* The hit area takes FOCUS as well as a pointer, so the same tooltip is
+         reachable by tabbing. A column chart whose numbers can only be had by
+         hovering is a chart half the readers cannot read. */
+      const shown = opts.format ? opts.format(it.value) : full(it.value);
       const hit = el('rect', {
         class: 'oa-hit', x: pad.l + slot * i, y: pad.t, width: slot, height: ih,
+        tabindex: 0, role: 'img',
+        'aria-label': it.label + ': ' + (it.empty ? 'no data' : shown +
+          (opts.unit ? ' ' + opts.unit : '')),
       }, svg);
-      hit.addEventListener('pointerenter', () => {
+      const say = () => {
         const box = svg.getBoundingClientRect();
         showTip(tip, wrap, (cx / W) * box.width, ((it.empty ? base - 6 : y - 6) / H) * box.height,
-          '<b>' + it.label + '</b>' +
+          '<b>' + esc(it.label) + '</b>' +
           (it.empty ? '' :
-            '<span>' + (opts.unit || '') + ' <b>' + full(it.value) + '</b></span>') +
-          (it.note ? '<span class="oa-tip-note">' + it.note + '</span>' : ''));
-      });
-      hit.addEventListener('pointerleave', () => { tip.hidden = true; });
+            '<span>' + esc(opts.unit || '') + ' <b>' + esc(shown) + '</b></span>') +
+          (it.note ? '<span class="oa-tip-note">' + esc(it.note) + '</span>' : ''));
+      };
+      const hide = () => { tip.hidden = true; };
+      hit.addEventListener('pointerenter', say);
+      hit.addEventListener('focus', say);
+      hit.addEventListener('pointerleave', hide);
+      hit.addEventListener('blur', hide);
     });
 
     table(host, [opts.xTitle || '', opts.unit || 'Value'],
       /* an em dash, never a 0: the table must not say the thing the bar was
          redrawn to stop saying */
-      items.map((i) => [i.label, i.empty ? '—' : full(i.value)]));
+      items.map((i) => [i.label, i.empty ? '—' : (opts.format ? opts.format(i.value) : full(i.value))]));
   }
 
   /* ------------------------------------------------------------------ bars */
 
   /** Horizontal bars, for things whose labels are names rather than dates —
-      the pages and the universities. The value rides the tip of the bar,
-      OUTSIDE it, so a label can never be clipped by its own mark. */
+      the pages, the countries, the referrers. The value rides the tip of the
+      bar, OUTSIDE it, so a label can never be clipped by its own mark.
+
+      EVERY ROW ANSWERS, and that is the part that was missing: this was the
+      one figure on the page a reader could not interrogate at all. A row now
+      takes a pointer AND focus, and says the one thing a ranked list never
+      shows on its face — what SHARE of the whole it is. The share is taken
+      from `opts.total` where the caller has the pre-cut total (see
+      `breakdown` in the model), so the leader of a top-ten is not reported as
+      a proportion of the ten that happened to fit. */
   function bars(host, opts) {
-    const items = (opts.items || []).slice(0, opts.limit || 12);
+    const all = opts.items || [];
+    const items = all.slice(0, opts.limit || 12);
     host.textContent = '';
     host.classList.add('oa-chart', 'oa-chart-bars');
     if (!items.length) return;
 
+    const wrap = document.createElement('div');
+    wrap.className = 'oa-chart-plot';
+    host.appendChild(wrap);
+    const tip = document.createElement('div');
+    tip.className = 'oa-chart-tip';
+    tip.setAttribute('role', 'status');
+    tip.hidden = true;
+    wrap.appendChild(tip);
+
     const top = Math.max.apply(null, items.map((i) => i.value)) || 1;
+    const total = Number(opts.total) ||
+      all.reduce((n, i) => n + (Number(i.value) || 0), 0);
+    const show = (v) => (opts.format ? opts.format(v) : full(v));
+
     const list = document.createElement('ol');
     list.className = 'oa-barlist';
     items.forEach((it) => {
       const li = document.createElement('li');
+      li.className = 'oa-bar-row';
+      li.tabIndex = 0;
+      const share = total ? it.value / total : 0;
+      li.setAttribute('aria-label', it.label + ': ' + show(it.value) +
+        (opts.unit ? ' ' + opts.unit : '') + (total ? ', ' + pct(share) : ''));
+
       const head = document.createElement('div');
       head.className = 'oa-bar-head';
       const name = document.createElement('span');
@@ -407,9 +553,10 @@
       }
       const val = document.createElement('span');
       val.className = 'oa-bar-val';
-      val.textContent = full(it.value) + (opts.unit ? ' ' + opts.unit : '');
+      val.textContent = show(it.value) + (opts.unit ? ' ' + opts.unit : '');
       head.appendChild(name);
       head.appendChild(val);
+
       const track = document.createElement('div');
       track.className = 'oa-bar-track';
       const fill = document.createElement('div');
@@ -424,10 +571,118 @@
         sub.textContent = it.sub;
         li.appendChild(sub);
       }
+
+      const say = () => {
+        const box = wrap.getBoundingClientRect();
+        const r = li.getBoundingClientRect();
+        showTip(tip, wrap, (r.left - box.left) + Math.min(140, r.width / 2),
+          (r.top - box.top) - 6,
+          '<b>' + esc(it.label) + '</b>' +
+          '<span>' + esc(show(it.value)) +
+          (opts.unit ? ' ' + esc(opts.unit) : '') + '</span>' +
+          (total ? '<span class="oa-tip-note">' + esc(pct(share)) +
+            ' of ' + esc(full(total)) + (opts.unit ? ' ' + esc(opts.unit) : '') +
+            '</span>' : '') +
+          (it.note ? '<span class="oa-tip-note">' + esc(it.note) + '</span>' : ''));
+      };
+      const hide = () => { tip.hidden = true; };
+      li.addEventListener('pointerenter', say);
+      li.addEventListener('focus', say);
+      li.addEventListener('pointerleave', hide);
+      li.addEventListener('blur', hide);
+
       list.appendChild(li);
     });
-    host.appendChild(list);
+    wrap.appendChild(list);
+
+    table(host,
+      [opts.xTitle || '', opts.unit || 'Value'].concat(total ? ['Share'] : [])
+        .concat(opts.subTitle ? [opts.subTitle] : []),
+      items.map((i) => [i.label, show(i.value)]
+        .concat(total ? [pct(total ? i.value / total : 0)] : [])
+        .concat(opts.subTitle ? [i.sub || '—'] : [])));
   }
 
-  return { line, columns, bars, compact, full, niceMax, BAR_MAX };
+  /* ------------------------------------------------------------ a share bar
+
+     ONE bar, cut into its parts — for a split that only means anything as a
+     proportion (which devices people read on, which channel brought them).
+
+     DELIBERATELY NOT A PIE. A pie asks a reader to compare angles, which is
+     the comparison people are worst at; a single stacked bar asks them to
+     compare lengths along one axis, which is the one they are best at, and it
+     survives a phone, where a pie's labels do not.
+
+     Colour is NOT the only channel: every part is named with its percentage
+     in the legend beneath, and the legend is in the same order as the bar. A
+     part too thin to carry a label still has a legend row, a focus stop and a
+     tooltip. */
+  function share(host, opts) {
+    const all = opts.items || [];
+    const items = all.slice(0, opts.limit || 6);
+    host.textContent = '';
+    host.classList.add('oa-chart', 'oa-chart-share');
+    if (!items.length) return;
+
+    const total = Number(opts.total) ||
+      all.reduce((n, i) => n + (Number(i.value) || 0), 0);
+    if (!total) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'oa-chart-plot';
+    host.appendChild(wrap);
+    const tip = document.createElement('div');
+    tip.className = 'oa-chart-tip';
+    tip.setAttribute('role', 'status');
+    tip.hidden = true;
+    wrap.appendChild(tip);
+
+    const bar = document.createElement('div');
+    bar.className = 'oa-share-bar';
+    bar.setAttribute('role', 'img');
+    bar.setAttribute('aria-label', (opts.title || 'Share') + ': ' +
+      items.map((i) => i.label + ' ' + pct(i.value / total)).join(', '));
+    wrap.appendChild(bar);
+
+    const legendBox = document.createElement('div');
+    legendBox.className = 'oa-chart-legend oa-share-legend';
+
+    items.forEach((it, i) => {
+      const cls = 'oa-cat-' + ((i % 6) + 1);
+      const frac = it.value / total;
+      const seg = document.createElement('span');
+      seg.className = 'oa-share-seg ' + cls;
+      seg.style.width = (frac * 100).toFixed(3) + '%';
+      seg.tabIndex = 0;
+      seg.setAttribute('aria-label', it.label + ': ' + pct(frac) +
+        ', ' + full(it.value) + (opts.unit ? ' ' + opts.unit : ''));
+
+      const say = () => {
+        const box = wrap.getBoundingClientRect();
+        const r = seg.getBoundingClientRect();
+        showTip(tip, wrap, (r.left - box.left) + r.width / 2, (r.top - box.top) - 6,
+          '<b>' + esc(it.label) + '</b>' +
+          '<span>' + esc(pct(frac)) + ' &middot; ' + esc(full(it.value)) +
+          (opts.unit ? ' ' + esc(opts.unit) : '') + '</span>');
+      };
+      const hide = () => { tip.hidden = true; };
+      seg.addEventListener('pointerenter', say);
+      seg.addEventListener('focus', say);
+      seg.addEventListener('pointerleave', hide);
+      seg.addEventListener('blur', hide);
+      bar.appendChild(seg);
+
+      const key = document.createElement('span');
+      key.innerHTML = '<i class="oa-key ' + cls + '"></i>';
+      key.appendChild(document.createTextNode(it.label + ' ' + pct(frac)));
+      legendBox.appendChild(key);
+    });
+
+    host.appendChild(legendBox);
+    table(host, [opts.xTitle || '', opts.unit || 'Value', 'Share'],
+      items.map((i) => [i.label, full(i.value), pct(i.value / total)]));
+  }
+
+  return { line, columns, bars, share, compact, full, duration, durationLong, pct,
+    niceMax, BAR_MAX };
 }));

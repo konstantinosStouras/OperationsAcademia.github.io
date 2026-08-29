@@ -6259,6 +6259,16 @@ for (const w of [320, 360, 390, 430]) {
     const v = Math.max(1, Math.round(38 * season * week * (0.8 + rnd() * 0.45)));
     demoDays[d.toISOString().slice(0, 10)] = [v, Math.round(v * 1.2), Math.round(v * 2.7)];
   }
+  /* the dimension records, whose whole point is that they come from a
+     DIFFERENT source and cover a DIFFERENT span from the day rows above —
+     which is why every figure drawn from one has to say so on the page */
+  const demoHours = Array.from({ length: 24 }, (_, h) => ({
+    name: String(h).padStart(2, '0'),
+    /* two humps, Europe and the Americas, and a genuinely dead 03:00 UTC:
+       an hour with no visits is a REAL zero here, unlike a month the record
+       has never reached */
+    value: [2, 1, 0, 0, 1, 4, 12, 31, 66, 90, 88, 74, 71, 80, 96, 99, 84, 60, 41, 33, 27, 19, 11, 5][h],
+  }));
   const demo = {
     version: 1,
     generated: new Date(end).toISOString(),
@@ -6266,13 +6276,42 @@ for (const w of [320, 360, 390, 430]) {
     sources: [{ source: 'usage', days: Object.keys(demoDays).length }],
     days: demoDays,
     pages: [
-      { path: '/jobs.html', title: 'Job postings', views: 48210, avgSec: 142 },
+      /* 1,952 seconds is the real figure this page was printing raw under its
+         feedback page — the owner asked for hours/minutes/seconds instead */
+      { path: '/jobs.html', title: 'Job postings', views: 48210, avgSec: 1952 },
       { path: '/', title: 'Operations Academia', views: 31022, avgSec: 73 },
     ],
+    pagesWindow: { source: 'usage', from: '2026-06-01', to: '2026-08-28' },
+    breakdowns: {
+      hours: { source: 'usage', from: '2026-06-01', to: '2026-08-28',
+        metric: 'visits', zone: 'UTC',
+        total: demoHours.reduce((n, h) => n + h.value, 0), items: demoHours },
+      /* `total` is deliberately LARGER than the listed items add up to: it is
+         the pre-cut total, so a share must be a share of the whole rather than
+         of the rows that happened to fit */
+      countries: { source: 'ga4', from: '2026-06-01', to: '2026-08-28',
+        metric: 'visits', zone: '', total: 1000,
+        items: [{ name: 'United States', value: 400 }, { name: 'Ireland', value: 120 },
+          { name: 'Germany', value: 90 }, { name: 'Singapore', value: 60 }] },
+      channels: { source: 'ga4', from: '2026-06-01', to: '2026-08-28',
+        metric: 'visits', zone: '', total: 1000,
+        items: [{ name: 'Organic Search', value: 520 }, { name: 'Typed or bookmarked', value: 300 },
+          { name: 'Referral', value: 180 }] },
+      referrers: { source: 'ga4', from: '2026-06-01', to: '2026-08-28',
+        metric: 'visits', zone: '', total: 1000,
+        items: [{ name: 'google', value: 500 }, { name: 'linkedin.com', value: 210 }] },
+      devices: { source: 'ga4', from: '2026-06-01', to: '2026-08-28',
+        metric: 'visits', zone: '', total: 1000,
+        items: [{ name: 'desktop', value: 610 }, { name: 'mobile', value: 350 },
+          { name: 'tablet', value: 40 }] },
+    },
+    engagement: { source: 'usage', from: '2026-06-01', to: '2026-08-28',
+      sessions: 1000, avgSessionSec: 322, viewsPerSession: 2.4 },
     /* THE LIVE SHAPE: resolved from the visitors' own networks, and therefore
        a SAMPLE — `seen` is every visit, `resolved` the ones a name came back
-       for. The caption has to carry that share or a short chart reads as
-       "hardly any universities visit". */
+       for at all, `placed` the ones that reached a named university. The
+       caption has to carry that share or a short chart reads as "hardly any
+       universities visit". */
     universities: {
       frozen: false, from: '2026-08-01', to: '2026-08-28',
       all: [{ name: 'Duke University', visits: 2100 }, { name: 'INSEAD', visits: 1355 }],
@@ -6304,6 +6343,7 @@ for (const w of [320, 360, 390, 430]) {
       figures: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
       svgs: document.querySelectorAll('.oa-chart-svg').length,
       tables: document.querySelectorAll('.oa-chart-table').length,
+      charts: document.querySelectorAll('.oa-chart').length,
       tiles: document.querySelectorAll('.oa-tile').length,
       frozen: [...document.querySelectorAll('.oa-figure-frozen')].map((e) => e.textContent.trim()),
       unisub: [...document.querySelectorAll('.oa-figure')]
@@ -6316,9 +6356,16 @@ for (const w of [320, 360, 390, 430]) {
     eq(seen.iframes, 0, `analytics (${theme}): the page embeds nothing`);
     ok(seen.svgs >= 3, `analytics (${theme}): the charts are drawn as inline SVG`);
     ok(seen.tiles >= 4, `analytics (${theme}): the headline figures are shown`);
-    eq(seen.tables, seen.svgs,
+    /* THE RULE IS PER CHART, NOT PER SVG, and it had been the weaker one: the
+       bar lists drew no table at all and the check passed because it compared
+       tables against the SVGs, which the bar lists do not have either. Counting
+       `.oa-chart` hosts is what the promise actually says. */
+    eq(seen.tables, seen.charts,
       `analytics (${theme}): every chart also gives its numbers as a table — a chart ` +
       'is accessible because the values are available as text, not because it validated');
+    ok(seen.charts > seen.svgs,
+      `analytics (${theme}): …including the ones drawn as HTML rather than SVG, which ` +
+      'is where that promise used to be quietly unmet');
     /* THE CORRECTION (owner, 2026-08-29). This figure used to be an archive
        labelled "no analytics product still offers this". A browser cannot see
        its own reverse-DNS; a Cloud Function can, and this site has them, so
@@ -6403,11 +6450,15 @@ for (const w of [320, 360, 390, 430]) {
     /* the range control drives every figure at once */
     const before = await q.evaluate(() =>
       document.querySelector('.oa-tile-value').textContent);
-    await q.evaluate(() => document.querySelectorAll('.oa-range button')[0].click());
+    /* SCOPED PAST THE METRIC SWITCH. The daily chart's Visitors/Visits/Pageviews
+       control is the same shape deliberately — one control idiom on the page —
+       so a bare `.oa-range button` now reaches seven buttons, not four. */
+    await q.evaluate(() =>
+      document.querySelectorAll('.oa-range:not(.oa-switch) button')[0].click());
     await q.waitForTimeout(250);
     const after = await q.evaluate(() => ({
       value: document.querySelector('.oa-tile-value').textContent,
-      pressed: [...document.querySelectorAll('.oa-range button')]
+      pressed: [...document.querySelectorAll('.oa-range:not(.oa-switch) button')]
         .map((b) => b.getAttribute('aria-pressed')),
     }));
     ok(after.value !== before,
@@ -6448,6 +6499,230 @@ for (const w of [320, 360, 390, 430]) {
       'analytics: an archived universities section is still labelled as one, with its range');
     ok(/is not being added to/.test(arch.sub),
       'analytics: …and says it is closed, rather than claiming nothing could ever replace it');
+    await ctx.close();
+  }
+
+  /* --- the dimension figures, the durations and the interactivity -------
+
+     Owner, 2026-08-29: several more plots, from Google Analytics, made
+     interactive, with seconds said in minutes and hours where seconds are too
+     long. What is measured here is the half a unit test cannot see: that the
+     figures are really drawn, that a reader can interrogate them with a
+     pointer AND a keyboard, and that no figure claims a span or a source it
+     does not have. */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics dims: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+
+    const heads = await q.evaluate(() =>
+      [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent));
+    for (const want of ['When in the day people read it', 'Where readers are',
+      'How readers arrive', 'Which sites send readers', 'What they read it on']) {
+      ok(heads.includes(want), `analytics: the "${want}" figure is drawn`);
+    }
+
+    /* THE HOURS ARE A CLOCK, and an hour with no visits is a REAL zero — the
+       opposite of the months, where a month the record has never reached must
+       draw no bar. Both rules live in the same `columns`, so both are
+       measured: 24 labels, and the two dead night hours drawing nothing. */
+    const hours = await q.evaluate(() => {
+      const f = [...document.querySelectorAll('.oa-figure')]
+        .find((x) => /When in the day/.test(x.querySelector('h2').textContent));
+      return {
+        ticks: [...f.querySelectorAll('.oa-tick-x')].map((t) => t.textContent),
+        bars: f.querySelectorAll('.oa-bar[d]:not([d=""])').length,
+        src: (f.querySelector('.oa-figure-src') || {}).textContent || '',
+      };
+    });
+    eq(hours.ticks.length, 24, 'analytics: the hour chart names all twenty-four hours');
+    eq(hours.ticks[0], '00', 'analytics: …in clock order, not ranked by size');
+    eq(hours.bars, 22,
+      'analytics: …and draws nothing for the two hours nobody visited, which here ' +
+      'IS a zero — unlike a month the record has never covered');
+    ok(/site.s own record/.test(hours.src) && /2026/.test(hours.src),
+      'analytics: the hour chart names its source and the span it covers — the ' +
+      'tallies are recomputed over a trailing window while the tiles above ' +
+      'describe the whole record, and a reader must not compare the two blind');
+
+    /* A SHARE OF THE WHOLE, NOT OF THE ROWS THAT FITTED. The fixture's country
+       total is 1,000 against four listed rows adding to 670, so the leader is
+       40% — and would read 60% if the share were taken over the visible rows,
+       which is the classic way a top-ten chart comes to overstate its leader. */
+    await q.hover('.oa-figure:has(h2:text-is("Where readers are")) .oa-bar-row');
+    await q.waitForTimeout(120);
+    const tipped = await q.evaluate(() => {
+      const f = [...document.querySelectorAll('.oa-figure')]
+        .find((x) => /Where readers are/.test(x.querySelector('h2').textContent));
+      const tip = f.querySelector('.oa-chart-tip');
+      return { hidden: tip.hidden, text: tip.textContent };
+    });
+    ok(!tipped.hidden, 'analytics: a row of a bar list answers a pointer — this was the ' +
+      'one figure on the page a reader could not interrogate at all');
+    ok(/40%/.test(tipped.text),
+      'analytics: …with its share of the WHOLE, not of the rows that fitted');
+
+    /* and the same answer by keyboard, which is the half a hover cannot give */
+    const byKey = await q.evaluate(() => {
+      const f = [...document.querySelectorAll('.oa-figure')]
+        .find((x) => /Which sites send readers/.test(x.querySelector('h2').textContent));
+      const row = f.querySelector('.oa-bar-row');
+      row.focus();
+      return { focusable: document.activeElement === row, hidden: f.querySelector('.oa-chart-tip').hidden };
+    });
+    ok(byKey.focusable && !byKey.hidden,
+      'analytics: …and to the keyboard, which a hover-only tooltip never does');
+
+    /* the share bar: one bar cut into its parts, a legend naming every part
+       with its percentage, and the parts adding up to the bar */
+    const shares = await q.evaluate(() => {
+      const f = [...document.querySelectorAll('.oa-figure')]
+        .find((x) => /What they read it on/.test(x.querySelector('h2').textContent));
+      const segs = [...f.querySelectorAll('.oa-share-seg')];
+      const bar = f.querySelector('.oa-share-bar').getBoundingClientRect();
+      return {
+        n: segs.length,
+        widths: segs.reduce((sum, s) => sum + s.getBoundingClientRect().width, 0),
+        bar: bar.width,
+        legend: [...f.querySelectorAll('.oa-share-legend span')].map((x) => x.textContent),
+        colours: segs.map((s) => getComputedStyle(s).backgroundColor),
+      };
+    });
+    eq(shares.n, 3, 'analytics: the share bar is cut into one part per category');
+    ok(Math.abs(shares.widths - shares.bar) < 2,
+      'analytics: …and the parts really do fill it');
+    ok(shares.legend.length === 3 && shares.legend.every((t) => /%/.test(t)),
+      'analytics: …every part named with its percentage in the legend, so colour ' +
+      'is never the only channel');
+    eq(new Set(shares.colours).size, 3,
+      'analytics: …and no two parts painted the same');
+
+    /* SECONDS, SAID THE WAY A PERSON SAYS THEM (owner, 2026-08-29). The
+       fixture carries the real 1,952-second figure the page was printing raw. */
+    const times = await q.evaluate(() => ({
+      body: document.querySelector('#oa-analytics').textContent,
+      subs: [...document.querySelectorAll('.oa-bar-sub')].map((x) => x.textContent),
+      tiles: [...document.querySelectorAll('.oa-tile')].map((t) => t.textContent),
+    }));
+    ok(times.subs.some((t) => /32m 32s/.test(t)),
+      'analytics: an average time on a page reads "32m 32s", not "1952 seconds"');
+    ok(!/1,?952 seconds/.test(times.body),
+      'analytics: …and the raw seconds are nowhere on the page');
+    ok(times.tiles.some((t) => /Typical visit/.test(t) && /5m 22s/.test(t)),
+      'analytics: the visit-length tile is said the same way');
+
+    /* the metric switch: one control, three questions */
+    const heading0 = await q.evaluate(() =>
+      document.querySelector('.oa-figure > h2').textContent);
+    await q.evaluate(() => {
+      const b = [...document.querySelectorAll('.oa-switch button')]
+        .find((x) => x.textContent === 'Pageviews');
+      b.click();
+    });
+    await q.waitForTimeout(250);
+    const switched = await q.evaluate(() => ({
+      heading: [...document.querySelectorAll('.oa-figure > h2')]
+        .find((h) => /day by day/.test(h.textContent)).textContent,
+      pressed: [...document.querySelectorAll('.oa-switch button')]
+        .map((b) => b.getAttribute('aria-pressed')),
+    }));
+    ok(/^Visitors, day by day/.test(heading0),
+      'analytics: the daily chart opens on visitors');
+    ok(/^Pageviews, day by day/.test(switched.heading),
+      'analytics: …and the switch really re-plots it, heading and all');
+    eq(switched.pressed, ['false', 'false', 'true'],
+      'analytics: …with exactly one of the three reading as chosen');
+
+    /* the legend is a control: either line can be put away and brought back */
+    const toggled = await q.evaluate(() => {
+      const btn = [...document.querySelectorAll('.oa-chart-legend-on button')]
+        .find((b) => /7-day/.test(b.textContent));
+      btn.click();
+      const line = document.querySelector('.oa-line.oa-accent');
+      const off = { pressed: btn.getAttribute('aria-pressed'), display: line.style.display };
+      btn.click();
+      return { off, backOn: line.style.display };
+    });
+    eq(toggled.off.pressed, 'false', 'analytics: a legend entry is a real switch');
+    eq(toggled.off.display, 'none', 'analytics: …that really puts its line away');
+    ok(toggled.backOn !== 'none',
+      'analytics: …and brings it back — hiding is never a one-way door here either');
+
+    /* the line chart answers the keyboard as well as the pointer */
+    const keyed = await q.evaluate(async () => {
+      const wrap = document.querySelector('.oa-figure .oa-chart-plot');
+      wrap.focus();
+      wrap.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+      await new Promise((r) => setTimeout(r, 60));
+      return { tabbable: wrap.tabIndex === 0, hidden: wrap.querySelector('.oa-chart-tip').hidden };
+    });
+    ok(keyed.tabbable && !keyed.hidden,
+      'analytics: the daily chart takes focus and the arrow keys read it — a ' +
+      'crosshair only a pointer can drive leaves the table as the only way in');
+
+    /* every figure says where it came from, and the note at the foot says it
+       once more for the page as a whole */
+    const prov = await q.evaluate(() => ({
+      perFigure: [...document.querySelectorAll('.oa-figure-src')].map((x) => x.textContent),
+      foot: [...document.querySelectorAll('.oa-an-note')].map((x) => x.textContent).join(' '),
+    }));
+    ok(prov.perFigure.some((t) => /Google Analytics/.test(t)),
+      'analytics: a figure Google measured says so under it');
+    ok(/Where these figures come from/.test(prov.foot),
+      'analytics: and the page as a whole accounts for its own sources');
+    ok(/cookieless/i.test(prov.foot) && /visits/.test(prov.foot),
+      'analytics: …including that Google Analytics runs cookieless here and ' +
+      'therefore counts visits rather than people');
+    ok(/public pages only/i.test(prov.foot),
+      'analytics: …and that the maintainer’s own area is in none of it');
+
+    await ctx.close();
+  }
+
+  /* --- a dataset with no dimensions at all, which is what ships today ---
+
+     The five figures above must be ABSENT rather than empty. A heading over a
+     bare axis is the exact shape of the defect this page is a rebuild of, so
+     the ones nothing has answered for are named in the note at the foot and
+     drawn nowhere. */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics no-dims: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, { ...demo, breakdowns: {}, engagement: null });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const bare = await q.evaluate(() => ({
+      heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
+      missing: [...document.querySelectorAll('.oa-an-missing li')].map((x) => x.textContent),
+      have: [...document.querySelectorAll('.oa-an-list:not(.oa-an-missing) li')]
+        .map((x) => x.textContent),
+      tiles: [...document.querySelectorAll('.oa-tile')].map((t) => t.textContent).join(' '),
+    }));
+    ok(!bare.heads.includes('Where readers are'),
+      'analytics: a figure no source has answered for is not drawn at all');
+    ok(bare.missing.includes('Where readers are') && bare.missing.length === 5,
+      'analytics: …it is NAMED as missing instead, because a dashboard that shows ' +
+      'only what it happens to have, with nothing saying what it does not, is the ' +
+      'failure this page is a rebuild of');
+    ok(!/Typical visit/.test(bare.tiles),
+      'analytics: and a tile with no measurement behind it is absent, never a zero');
+    /* THE UNIVERSITIES ARE IN THAT NOTE TOO. They are not a `DIMENSION`, so
+       nothing in the loop above would have named them — and this is the one
+       figure whose source is NEITHER analytics system, which is exactly the
+       thing a reader could not otherwise learn. */
+    ok(bare.have.some((x) => /Which universities visited/.test(x) &&
+      /own resolver/.test(x)),
+      'analytics: the provenance note says the universities figure is the site\'s ' +
+      'own resolver — a note that promises where every figure comes from must ' +
+      'not silently skip the one measured by neither analytics system');
     await ctx.close();
   }
 
@@ -6509,9 +6784,23 @@ for (const w of [320, 360, 390, 430]) {
         frozen: true, from: '2014-03-01', to: '2023-06-30',
         all: [{ name: '<script>alert(1)</script>', visits: 5 }], recent: [],
       },
+      /* a country and a referring host are strings GOOGLE read out of somebody
+         else's traffic, so they are exactly as untrusted as a page title —
+         and they reach a tooltip, which is assembled as HTML */
+      breakdowns: {
+        countries: { source: 'ga4', from: '', to: '', metric: 'visits', total: 9,
+          items: [{ name: '<img src=x onerror=alert(1)>', value: 9 }] },
+        devices: { source: 'ga4', from: '', to: '', metric: 'visits', total: 5,
+          items: [{ name: '<script>alert(1)</script>', value: 5 }] },
+      },
     });
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    /* drive the tooltips too: they are the one place this page assembles HTML
+       from a served string rather than setting textContent */
+    await q.hover('.oa-bar-row').catch(() => {});
+    await q.hover('.oa-share-seg').catch(() => {});
+    await q.waitForTimeout(120);
     const hostile = await q.evaluate(() => ({
       injected: document.querySelectorAll('#oa-analytics img, #oa-analytics script').length,
       jsHref: [...document.querySelectorAll('#oa-analytics a')]
