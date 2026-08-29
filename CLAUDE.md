@@ -2547,9 +2547,9 @@ identical from outside. It is the `og:url` failure and the never-deployed
 doorbell wearing different clothes: *a thing that reports nothing when it fails
 stays broken for as long as nobody happens to look*.
 
-    assets/oa-analytics-model.js   the shape of a day, and what may come from where (pure, dual-mode)
-    assets/oa-charts.js            the inline-SVG chart set (line, columns, bars)
-    assets/oa-analytics.js         the page — fetch one file, draw six figures
+    assets/oa-analytics-model.js   the shape of a day and of a dimension, and what may come from where (pure, dual-mode)
+    assets/oa-charts.js            the chart set (line, columns, bars, share) + duration/pct
+    assets/oa-analytics.js         the page — fetch one file, draw every figure
     assets/oa-analytics.css        its chrome, theme tokens throughout
     _scraper/build-analytics.mjs   writes data/analytics.json from its gated sources
     .github/workflows/oa-analytics.yml   daily
@@ -2755,6 +2755,126 @@ still-published, including `/testimonials.html` and `/version-history.html`),
 the chokepoint, the two merge rules — and asserts over **the committed
 `data/analytics.json` itself** that every path it publishes is public and
 already normalised, which is the check that would have caught the leak.
+
+### Several more plots, from Google Analytics — and one rule for all of them
+
+Owner, 2026-08-29: *"add several interesting plots and use insights of the OA
+website utilizing data from Google Analytics. What you show so far are data we
+collect from the website on our own. make any plots interactive and convert
+seconds to e.g. hours, minute, seconds if 'seconds' is too long."*
+
+Five figures joined the four that were there: **when in the day people read
+it**, **where readers are**, **how readers arrive**, **which sites send
+readers**, and **what they read it on** — plus two tiles, how long a visit
+lasts and how many pages it opens.
+
+**A DIMENSION IS ASKED OF ONE SOURCE, AND OF THE SOURCE THAT CAN ANSWER IT.**
+That is `mergeDays`' rule one notch stricter, and it bites harder here: two
+systems counting the same Tuesday at least agree about what a Tuesday is,
+where two systems counting "visits from Germany" disagree about the boundary
+of a session, the meaning of a country and the clock an hour is read on.
+Adding those, or preferring the larger, produces a number that is not a
+measurement of anything. `mergeBreakdown` therefore takes the first
+(highest-authority) claim WHOLE and refuses every later one.
+
+The split needs no arbitration, because it falls out of what each source has.
+The first-party record knows **when** — it stamps the instant every session
+begins — and nothing else; it stores a page, an instant and a duration and
+asks no more. GA4 knows **where, how and on what**, and cannot count people at
+all. So the hours are the site's own (exact, and UTC), the four audience
+figures are GA4's, and neither is ever assembled from both. GA4 is
+deliberately NOT also asked for `hour`: it answers on the property's own
+clock, and one chart whose meaning changed time zone with its source would be
+worse than no chart.
+
+**EVERY GA4 FIGURE COUNTS VISITS, NEVER VISITORS**, and that is the cookieless
+decision one layer down. With no identifier on the device GA4 cannot tell a
+returning reader from a new one, so calling a country's number "visitors"
+would be exactly the overstatement `SOURCE_ORDER` exists to avoid. The records
+carry `metric: 'visits'`, the page says visits, and the note at the foot says
+why. `newVsReturning` is not asked for at all: cookieless it would measure the
+tag's own configuration, and the first-party record could answer it only by
+reading its whole collection to find each browser's first day — the unbounded
+read the incremental query is shaped to avoid.
+
+**A TALLY CANNOT BE ACCUMULATED THE WAY A DAY CAN**, which is why every
+dimension states its own window. A day row merges with what is already served,
+so re-reading a few days is enough; adding this run's hour-of-day counts to
+the last run's would double every session in the overlap, and taking only the
+fresh ones would turn *when people read the site* into *when people read it
+this week*. So they are recomputed from scratch over a trailing
+`BREAKDOWN_DAYS` (90) window on every run, the read reaches back to it, and
+each record reports **the span its data actually covers** rather than the
+nominal ninety days — a nominal window slides at every midnight and would
+rewrite the served file daily on a site nobody had visited.
+
+**That fixed a latent bug in the pages figure, which is the reason to notice
+it.** `pages` was built from whatever slice the incremental read happened to
+fetch — seven days, on every run after the first — while the tiles beside it
+described the whole record, and nothing on screen said the two meant different
+spans. It carries `pagesWindow` now and the figure prints it.
+
+**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN.** It is named at the foot
+of the page under "Not on this page yet", and appears on its own once the
+figures exist. A heading over an empty axis is precisely the shape of the
+defect this whole page is a rebuild of, and the five GA4 figures are empty
+today because the tag was switched on the same morning.
+
+**The interactivity, and what each piece is for.** Every chart already had a
+tooltip except the one nobody could interrogate at all — the bar lists — so a
+row is now a focus stop that answers with **its share of the whole**, taken
+from the pre-cut `total` (the classic way a top-ten chart overstates its
+leader is to divide by the ten that fitted). The daily chart gained a
+**metric switch** (visitors / visits / pageviews — three questions, one
+control, rather than three lines nobody can separate), a **legend that is a
+switch** (`aria-pressed`, pressed-out rather than vanishing, because hiding is
+never a one-way door here either) and the **keyboard**: the plot takes focus
+and the arrows walk the days. The column charts' hit areas take focus too. A
+crosshair only a pointer can drive leaves the numbers table as the only way
+in, which is the fallback rather than the chart.
+
+**The share bars are deliberately not pies.** A pie asks a reader to compare
+angles, which is the comparison people are worst at; one stacked bar asks them
+to compare lengths on one axis, which is the one they are best at, and it
+survives a phone where a pie's labels do not. Colour is never the only
+channel: every part is named with its percentage in the legend beneath, in the
+same order, and every part is a focus stop. `--oa-cat-1…6` is a categorical
+ramp defined in BOTH themes and re-stepped in dark exactly as the accent is —
+measured, closest pair anywhere in the ramp ΔE 22.9 (light) / 23.4 (dark),
+above the 21.2 this file already accepts for two overlaid lines, and no two
+NEIGHBOURING parts closer than 41.
+
+**Seconds are said the way a person says them** (`duration` in oa-charts.js).
+The most-read pages list was printing "1,952 seconds on average" — a number a
+reader has to divide by sixty before it means anything. Below a minute seconds
+are its unit and are kept; above it the smaller unit is zero-padded, so a
+column stays aligned and "1h 1m" cannot be misread as "1h 10m"; seconds are
+dropped once hours are involved, because carrying them implies a precision an
+average does not have.
+
+**Two guards had been passing for the wrong reason and were tightened.** The
+browser check asserted "every chart gives its numbers as a table" by comparing
+tables against SVGs — and the bar lists had neither, so the promise was
+quietly unmet for the one figure that most needed it. It counts `.oa-chart`
+hosts now, and asserts there are more of those than SVGs. And a bare
+`.oa-range button` reached the new metric switch, which shares the range's
+shape on purpose, so the range assertions are scoped to
+`.oa-range:not(.oa-switch)`.
+
+Tests: the dimension block in `testAnalytics` (the one-source-per-dimension
+rule both ways, the pre-cut share, the clock order, the label rules including
+that an address-shaped label is dropped WHOLE and takes its count with it, the
+duration formatter, the page's `DIMENSIONS` table pinned against
+`BREAKDOWN_IDS` both ways, that the builder asks GA4 for the four dimensions
+and does NOT ask it for the hours, and the ramp defined in both themes) plus
+the extended analytics block in `page-test.mjs`, which drives the real page:
+the five figures drawn, twenty-four hour labels with the two dead night hours
+drawing nothing, a tooltip by pointer AND by keyboard reporting 40% where the
+visible rows would say 60%, the share parts filling their bar in three
+distinct colours, "32m 32s" on screen with the raw seconds nowhere, the metric
+switch re-plotting the chart, the legend putting a line away and bringing it
+back, and — with no dimensions at all — the five figures ABSENT and named as
+missing instead.
 
 ### The archive is CONFIRMED GONE, and the spreadsheet says how
 

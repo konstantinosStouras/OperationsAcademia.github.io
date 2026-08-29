@@ -152,7 +152,7 @@ export const PAGES = [
     file: 'analytics.html', url: '/analytics.html',
     title: 'Analytics — Operations Academia',
     ogTitle: 'How Operations Academia is used',
-    description: 'How busy the Operations job market site is, day by day — the weekly rhythm, the hiring season across the year, and the pages people actually read.',
+    description: 'How the Operations job market site is used: visitors day by day, the weekly rhythm, the hiring season across the year, where readers are, how they arrive and the pages they actually read.',
   },
   {
     file: 'survey.html', url: '/survey.html',
