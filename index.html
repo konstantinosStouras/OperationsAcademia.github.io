@@ -731,6 +731,7 @@
          has it cached. -->
     <script defer src="assets/oa-schools.js"></script>
     <script defer src="assets/oa-sponsors.js"></script>
+    <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
@@ -981,6 +982,26 @@
              newest ten is still not shown, sponsored or not. */
           sort: function (a, b) { return OASponsors.compare(a, b); },
           filters: [],
+
+          /* THE TEASER NEVER EXPANDS (owner, 2026-08-29): "it should only
+             expand when a user is registered and has opened the full list".
+             So a card here is a way IN to the posting rather than the posting
+             — signed out it lists the university and blurs what it would have
+             shown, signed in it carries the reader to the full list with that
+             posting open, which is what `?job=<id>` has done since the
+             market-year report needed it.
+
+             The href comes from OAJobNav, which is the site's ONE answer to
+             "which page carries this posting" — a copy of that rule here is
+             the four-copies-of-one-answer shape that module exists to
+             prevent, and it would send a reader to a page that by definition
+             cannot hold their posting the day its season rolls. */
+          cardOpen: OAGate.cardOpen({
+            note: 'Sign in to read this posting',
+            fullNote: 'Open it on the full list \u2192',
+            full: function (r) { return NAV.hrefFor(r); }
+          }),
+
           onCard: function (li, r) {
             OASponsors.markCard(li, r);
             window.OAJobEdit && OAJobEdit.onCard(li, r);
@@ -1018,6 +1039,7 @@
           }
         });
         if (window.OAJobEdit) OAJobEdit.attach(jobs);
+        OAGate.watch(jobs);
         // no filters, one fixed page: the bar and the result bar hold nothing
         var host = document.getElementById('oa-jobs-recent');
         var bar = host.querySelector('.oa-filters');
@@ -1063,6 +1085,15 @@
             { key: 'posted',      label: 'Date posted',      derive: 'datePosted',
               placeholder: 'Any date' }
           ],
+          /* A candidate's name is what a hiring committee is looking for and
+             stays readable; their CV, their INFORMS days and their e-mail
+             address are the details, and they are for registered readers
+             (owner, 2026-08-29 — "never be able to view details of job
+             postings or candidates"). There is no fuller list to send anyone
+             to: candidates live on this page, so a signed-in reader opens the
+             card where it stands. */
+          cardOpen: OAGate.cardOpen({ note: 'Sign in to see this profile' }),
+
           onCard: function (li, r) { window.OACandidateEdit && OACandidateEdit.onCard(li, r); },
           card: {
             title:    function (r) { return r.name; },
@@ -1086,6 +1117,7 @@
           }
         });
         if (window.OACandidateEdit) OACandidateEdit.attach(cands);
+        OAGate.watch(cands);
       });
 
       V3.lazy('#oa-placements', function () {

@@ -140,6 +140,57 @@ async function contrastOf(page, sel) {
   return page.evaluate(`(${CONTRAST_IN_PAGE})(${JSON.stringify(sel)})`);
 }
 
+/* ------------------------------------- opening a page as a SIGNED-IN reader
+
+   Since 2026-08-29 the lists themselves are gated: a reader who has not
+   registered sees which universities are hiring and nothing more, and the
+   card does not open on them (assets/oa-gate.js). So every check below that
+   is about a card's CONTENTS — its rows, its links, its printed body — has to
+   say who is reading, and the honest way to say it is to sign them in rather
+   than to reach past the gate.
+
+   `_scraper/_fake-firebase.js` is the shim the Admin-area and Excel blocks
+   already drive, stood up here as one helper so a block needs three lines
+   instead of fifteen. It waits for the session to RESOLVE, because the gate
+   is painted from the localStorage hint first and reconciled when the SDK
+   answers — measuring in between is measuring a state neither reader is in.
+
+   A SIGNED-OUT READER IS ALSO THE SHIM, with no user. A page opened with no
+   Firebase at all is a THIRD state — nobody can sign in, so the gate says so
+   and disables the head rather than offering a control that would do nothing
+   — and it is the state every plain `browser.newPage()` is in here, because
+   CI has no network. The Excel block records the same trap. Which of the
+   three is being measured has to be chosen deliberately.                    */
+const FAKE_FB = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+const A_READER = { uid: 'reader-uid-00000000', email: 'reader@example.edu',
+  emailVerified: true, displayName: 'A Reader', providerData: [] };
+
+async function signedInPage(url, opts = {}) {
+  const ctx = await browser.newContext({
+    viewport: opts.viewport || { width: 1280, height: 1000 },
+    acceptDownloads: !!opts.acceptDownloads,
+  });
+  const p = await ctx.newPage();
+  const errors = [];
+  p.on('pageerror', (e) => errors.push(e.message));
+  const who = ('user' in opts) ? opts.user : A_READER;   // null = signed out
+  await p.addInitScript(
+    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [] })};`);
+  await p.route('**/firebasejs/**', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_FB }));
+  await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
+  if (opts.wait !== false) {
+    await p.waitForSelector(opts.selector || '.oa-card', { timeout: 15000 });
+    await p.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await p.waitForTimeout(250);
+  }
+  return { ctx, page: p, errors };
+}
+
+/** The same page, read by somebody who has not signed in but could. */
+const signedOutPage = (url, opts = {}) => signedInPage(url, { ...opts, user: null });
+
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const jsErrors = [];
@@ -2066,23 +2117,36 @@ for (const [name, expect] of [
    posting, and that pressing Edit does not also toggle the card open.        */
 
 {
-  const j = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
-  const jErrors = [];
-  j.on('pageerror', (e) => jErrors.push(e.message));
-  await j.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
-  await j.waitForSelector('.oa-card');
-  await j.waitForTimeout(600);
+  /* THE VISITOR IS A DIFFERENT PERSON FROM THE POSTER, so they get a page of
+     their own. This block used to model a signed-in poster by injecting a
+     permission map into a signed-OUT page, which was an approximation the
+     reader gate has now made a contradiction: signed out, a card does not
+     open at all, so "pressing Edit does not also toggle the card open" could
+     not be asked. The poster below is signed in for real. */
+  {
+    const v = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    v.on('pageerror', (e) => jsErrors.push('jobs visitor: ' + e.message));
+    await v.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+    await v.waitForSelector('.oa-card');
+    await v.waitForTimeout(600);
+    eq(await v.$$eval('.oa-card-actions', (n) => n.length), 0,
+      'jobs: a visitor who is not signed in sees no Edit or Take down');
+    await v.close();
+  }
 
-  eq(await j.$$eval('.oa-card-actions', (n) => n.length), 0,
-    'jobs: a visitor who is not signed in sees no Edit or Take down');
+  const { ctx: jCtx, page: j, errors: jErrors } = await signedInPage('jobs.html');
+  await j.waitForTimeout(400);
 
   /* ------------------------------ the filter bar: several terms, one row --
      Owner, from three screenshots: the search took ONE institution at a time,
      and a filter with values chosen knocked the bar out of line.
 
      THE BAR IS SIGN-IN GATED on this page — .v3-lock puts pointer-events:none
-     over it until an account resolves — and these checks are about the bar,
-     not the gate, which has its own coverage. The lock is defeated by
+     over it until an account resolves. This reader IS signed in, so the lock
+     comes off by itself; the override stays because it comes off when the SDK
+     answers and the first paint is taken from the localStorage hint, which a
+     fresh context has none of. These checks are about the bar, not the gate,
+     which has its own coverage. The lock is defeated by
      OVERRIDING ITS EFFECT rather than by removing the class: jobs.html
      re-applies the class from OAAccounts.onChange when auth finally resolves,
      whose timing is set by a network fetch, so stripping it once (or even
@@ -2322,7 +2386,7 @@ for (const [name, expect] of [
     'form: and the button says what it does');
 
   eq(jErrors, [], 'jobs: no uncaught script errors');
-  await j.close();
+  await jCtx.close();
 }
 
 /* ------------------------------------------- ?job=<id> opens ONE posting
@@ -2364,8 +2428,29 @@ for (const [pageName, pick] of [
     `${pageName}: ?job= shows exactly one posting — not a list to hunt through`);
   eq(await d.$eval('.oa-card', (n) => n.id), 'job-' + target.id,
     `${pageName}: and it is the posting that was asked for`);
-  eq(await d.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
-    `${pageName}: opened, so its details are on screen without another click`);
+  /* WHO IS READING DECIDES WHETHER IT OPENS (assets/oa-gate.js). A link to
+     one posting still narrows the page to that posting for anybody — that is
+     what the mode is for, and the way back below has to work for them — but
+     the details themselves are a registered reader's. So the two shapes are
+     measured as the two shapes: signed out the card is locked, and the
+     signed-in half is driven through the real sign-in path below. */
+  eq(await d.$eval('.oa-card', (n) => n.classList.contains('oa-card-locked')), true,
+    `${pageName}: signed out, the one posting is on screen and still locked`);
+  eq(await d.$$eval('.oa-card-body', (n) => n.length), 0,
+    `${pageName}: …with none of its details in the document`);
+  ok(await d.$('.oa-card-lock-note'),
+    `${pageName}: …and the card says what would open it`);
+  {
+    const { ctx, page: q } = await signedInPage(
+      `${pageName}?job=${encodeURIComponent(target.id)}`);
+    eq(await q.$$eval('.oa-card', (n) => n.length), 1,
+      `${pageName}: signed in, ?job= still shows exactly one posting`);
+    eq(await q.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
+      `${pageName}: opened, so its details are on screen without another click`);
+    ok(await q.$eval('.oa-card-body', (n) => !n.hidden),
+      `${pageName}: …and they really are rendered`);
+    await ctx.close();
+  }
 
   /* The surrounding controls go, for the reason an empty dataset's do: a
      filter bar over a list of one narrows nothing and a pager reading
@@ -2696,10 +2781,12 @@ for (const [pageName, pick] of [
 }
 
 {
-  const p = await browser.newPage({ viewport: { width: 1300, height: 950 } });
-  p.on('pageerror', (e) => jsErrors.push('previous-markets: ' + e.message));
-  await p.goto(BASE + 'previous-markets.html', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.oa-card', { timeout: 15000 });
+  /* SIGNED IN, because this block reads a card's own detail rows — the "Job
+     market year" cell — and a closed season is still a job posting, so a
+     reader who has not registered does not get one (assets/oa-gate.js). The
+     counts and the filters below are the same either way. */
+  const { ctx: pmCtx, page: p, errors: pmErrors } = await signedInPage(
+    'previous-markets.html', { viewport: { width: 1300, height: 950 } });
 
   /* the total = the committed archive + the jobs.json rows that have left the
      current market window — the same formula the page runs, recomputed here
@@ -2721,6 +2808,8 @@ for (const [pageName, pick] of [
      overlap — owner 2026-08-27), so it is read as the numbers it carries
      rather than as one number: a leading card that spans two seasons would
      make Number('2025 and 2026') NaN and the check meaningless. */
+  await p.click('.oa-card:first-child .oa-card-head');
+  await p.waitForTimeout(200);
   const shownYears = (await p.$eval('.oa-card:first-child .oa-kv td', (n) => n.textContent))
     .match(/\d{4}/g).map(Number);
   ok(shownYears.includes(Math.max(...years)),
@@ -2767,7 +2856,8 @@ for (const [pageName, pick] of [
     `previous-markets: ?filterD narrows the archive (got ${dCount} of ${total})`);
   ok(viaD.url().includes('university='), 'previous-markets: the legacy link is renamed in the bar');
   await viaD.close();
-  await p.close();
+  eq(pmErrors, [], 'previous-markets: no uncaught script errors');
+  await pmCtx.close();
 }
 
 /* ------------------------------- Edit / Take down on the FROZEN ARCHIVES
@@ -3428,11 +3518,13 @@ for (const [pageName, sel, least, mapBtn] of [
    three are one edit away from not holding. */
 
 {
-  const p = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
-  p.on('pageerror', (e) => jsErrors.push('overrides/xss: ' + e.message));
-  // an archive season, so the row is one this editor owns (see above)
-  await p.goto(BASE + 'previous-markets.html?year=2015', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.oa-card');
+  /* SIGNED IN, because the property under test is about the card's DETAIL
+     rows and those are a registered reader's since the gate shipped. It is
+     also the truer reading: the override map is the maintainer's, and a
+     signed-out visitor never sees a body to smuggle anything into. */
+  const { ctx: xCtx, page: p, errors: xErrs } = await signedInPage(
+    // an archive season, so the row is one this editor owns (see above)
+    'previous-markets.html?year=2015');
   await p.waitForTimeout(400);
 
   const victim = await p.$eval('.oa-card', (n) => n.id.replace(/^job-/, ''));
@@ -3467,9 +3559,8 @@ for (const [pageName, sel, least, mapBtn] of [
     'and a javascript: URL never becomes a link');
   eq(await p.evaluate(() => window.__xss), 0, 'nothing an override carries executes');
 
-  eq(jsErrors.filter((e) => e.startsWith('overrides/xss')), [],
-    'and the page raises no error over it');
-  await p.close();
+  eq(xErrs, [], 'and the page raises no error over it');
+  await xCtx.close();
 }
 
 /* ------------------------------- Edit / Take down on the universities map
@@ -3979,6 +4070,231 @@ for (const [from, hash] of [
   }
   await hp.close();
   await sp.close();
+}
+
+/* ------------------------- what an UNREGISTERED reader sees, measured
+
+   Owner, 2026-08-29, from two screenshots of the site signed out: the details
+   of a job posting were on the page for anybody. The rule is that a reader who
+   has not registered sees who is hiring — the sponsor's posting and the
+   universities behind the ones beside it — and a candidate's NAME, and nothing
+   else; the card does not open on them; expanding one in place belongs to a
+   registered reader who has opened the full list.
+
+   `selftest.mjs` pins the decision, the wiring and the words. This is the half
+   only a browser can answer: WHO IS SHOWN WHAT. Both readers are real — the
+   signed-out one has no Firebase at all, the signed-in one comes through
+   _fake-firebase.js and the site's own auth path — because the property is a
+   difference between them and a check that saw only one of the two would pass
+   on a page that had lost the distinction entirely.                          */
+{
+  const GATED = [
+    ['jobs.html', '#oa-jobs', 'Sign in to read this posting'],
+    ['previous-markets.html', '#oa-past', 'Sign in to read this posting'],
+  ];
+
+  for (const [pageName, host, note] of GATED) {
+    /* -- signed OUT, but ABLE to sign in --------------------------------- */
+    const { ctx: outCtx, page: out, errors: outErrs } = await signedOutPage(pageName);
+    await out.waitForSelector(`${host} .oa-card`, { timeout: 15000 });
+    await out.waitForTimeout(300);
+
+    const shut = await out.evaluate((h) => {
+      const cards = [...document.querySelectorAll(`${h} .oa-card`)];
+      const first = cards[0];
+      return {
+        cards: cards.length,
+        /* WHO is hiring stays readable — that is the whole of what an
+           unregistered reader is promised, and a list of blurred names would
+           be no list at all. */
+        title: first ? first.querySelector('.oa-card-title').textContent.trim() : '',
+        sub: first ? first.querySelector('.oa-card-sub').textContent.trim() : '',
+        locked: cards.filter((c) => c.classList.contains('oa-card-locked')).length,
+        bodies: document.querySelectorAll(`${h} .oa-card-body`).length,
+        kv: document.querySelectorAll(`${h} .oa-kv`).length,
+        notes: [...document.querySelectorAll(`${h} .oa-card-lock-note`)]
+          .map((n) => n.textContent.trim()),
+        expanded: cards.filter((c) =>
+          c.querySelector('.oa-card-head').hasAttribute('aria-expanded')).length,
+      };
+    }, host);
+
+    ok(shut.cards > 1, `${pageName}: signed out, the postings are still listed`);
+    ok(shut.title.length > 2, `${pageName}: …and the university is readable`);
+    ok(shut.sub.length > 2, `${pageName}: …with the school and department beside it`);
+    eq(shut.locked, shut.cards, `${pageName}: every card on the page is locked`);
+    /* NOT HIDDEN — ABSENT. A blurred copy of the real values is a picture of a
+       lock: selectable, copyable, and one keystroke of devtools from being
+       read. The engine returns before the table is built at all. */
+    eq([shut.bodies, shut.kv], [0, 0],
+      `${pageName}: and not one detail of any of them is in the document`);
+    eq(shut.expanded, 0,
+      `${pageName}: a head that discloses nothing no longer claims to`);
+    eq([...new Set(shut.notes)], [note],
+      `${pageName}: each card says what would open it, in the page's own words`);
+
+    /* THE CARD DOES NOT EXPAND — the owner's own sentence. Press it and what
+       arrives is the sign-in box, not a body. */
+    await out.click(`${host} .oa-card:first-child .oa-card-head`);
+    await out.waitForTimeout(600);
+    eq(await out.$$eval(`${host} .oa-card-body`, (n) => n.length), 0,
+      `${pageName}: pressing a card opens NOTHING`);
+    ok(await out.$('.oa-modal'), `${pageName}: …it offers the sign-in box instead`);
+    eq(outErrs, [], `${pageName}: signed-out run — no uncaught script error`);
+    await outCtx.close();
+
+    /* -- signed IN ------------------------------------------------------- */
+    const { ctx, page: q, errors } = await signedInPage(pageName);
+    await q.waitForSelector(`${host} .oa-card`, { timeout: 15000 });
+    await q.waitForTimeout(300);
+    eq(await q.$$eval(`${host} .oa-card-locked`, (n) => n.length), 0,
+      `${pageName}: signed in, nothing is locked`);
+    await q.click(`${host} .oa-card:first-child .oa-card-head`);
+    await q.waitForTimeout(250);
+    ok(await q.$eval(`${host} .oa-card:first-child .oa-card-body`, (n) => !n.hidden),
+      `${pageName}: …and a card opens where it stands, which is what the full list is`);
+    ok((await q.$$eval(`${host} .oa-card:first-child .oa-kv th`,
+      (ns) => ns.map((n) => n.textContent))).length >= 2,
+      `${pageName}: …with its details on it`);
+    eq(errors, [], `${pageName}: signed-in run — no uncaught script error`);
+    await ctx.close();
+  }
+
+  /* -- the one-pager: the teaser NEVER expands, whoever is reading -------- */
+  {
+    const { ctx: outCtx, page: out } = await signedOutPage('index.html',
+      { selector: '#oa-jobs-recent .oa-card' });
+    await out.waitForTimeout(300);
+    const teaser = await out.evaluate(() => {
+      const cards = [...document.querySelectorAll('#oa-jobs-recent .oa-card')];
+      return { cards: cards.length,
+        locked: cards.filter((c) => c.classList.contains('oa-card-locked')).length,
+        bodies: document.querySelectorAll('#oa-jobs-recent .oa-card-body').length,
+        names: cards.map((c) => c.querySelector('.oa-card-title').textContent.trim()) };
+    });
+    /* "the sponsor and the list of last 9 universities which posted" — the
+       ten the panel has always shown, with the sponsor's leading them. */
+    eq(teaser.cards, 10, 'gate: the teaser still shows ten postings');
+    eq(teaser.locked, 10, 'gate: signed out, every one of them is locked');
+    eq(teaser.bodies, 0, 'gate: …and none of their details is in the document');
+    ok(teaser.names.every((n) => n.length > 2),
+      'gate: …while every university behind them is readable');
+    await outCtx.close();
+
+    /* Signed in, it is a way IN rather than a lock: no blur, no padlock, and
+       the click carries the reader to the full list with that posting open —
+       "it should only expand when a user is registered and has opened the
+       full list", which is the sentence this behaviour comes from. */
+    const { ctx, page: q, errors } = await signedInPage('index.html',
+      { selector: '#oa-jobs-recent .oa-card' });
+    const inb = await q.evaluate(() => {
+      const c = document.querySelector('#oa-jobs-recent .oa-card');
+      return { gated: c.classList.contains('oa-card-gated'),
+        locked: c.classList.contains('oa-card-locked'),
+        blur: !!c.querySelector('.oa-card-lock-blur'),
+        padlock: getComputedStyle(c.querySelector('.oa-card-lock-note'), '::before').content,
+        note: c.querySelector('.oa-card-lock-note').textContent.trim(),
+        bodies: document.querySelectorAll('#oa-jobs-recent .oa-card-body').length };
+    });
+    eq([inb.gated, inb.locked], [true, false],
+      'gate: signed in, the teaser card is gated but not LOCKED — nothing is withheld');
+    eq([inb.blur, inb.bodies], [false, 0],
+      'gate: …so nothing is blurred, and it still does not expand here');
+    ok(!/1F512|🔒/.test(inb.padlock),
+      'gate: …and no padlock is drawn in front of an invitation');
+    ok(/full list/i.test(inb.note), 'gate: …the card says where the click goes');
+
+    const target = await q.$eval('#oa-jobs-recent .oa-card', (c) => c.id.replace(/^job-/, ''));
+    await q.click('#oa-jobs-recent .oa-card:first-child .oa-card-head');
+    await q.waitForURL(/[?&]job=/, { timeout: 10000 });
+    ok(q.url().includes('job=' + encodeURIComponent(target)),
+      'gate: pressing it opens THAT posting on the full list');
+    await q.waitForSelector('.oa-card-body', { timeout: 15000 });
+    eq(await q.$eval('.oa-card-head', (n) => n.getAttribute('aria-expanded')), 'true',
+      'gate: …and it arrives open, which is where expanding was always meant to happen');
+    eq(errors, [], 'gate: the one-pager raises no error over any of it');
+    await ctx.close();
+  }
+
+  /* -- nobody can sign in at all ----------------------------------------- */
+  {
+    /* A blocked CDN, an ad blocker, an offline reader — and in CI, every page
+       opened without the shim. They are still not registered, so they are
+       still locked; but the strip must say WHY rather than offering a control
+       that would do nothing, which is the wording oa-jobexport.js already
+       gives its disabled button. */
+    const none = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    await none.goto(BASE + 'jobs.html', { waitUntil: 'domcontentloaded' });
+    await none.waitForSelector('.oa-card', { timeout: 15000 });
+    await none.waitForTimeout(500);
+    const said = await none.evaluate(() => ({
+      note: document.querySelector('.oa-card-lock-note').textContent.trim(),
+      disabled: document.querySelector('.oa-card-head').disabled,
+      bodies: document.querySelectorAll('.oa-card-body').length,
+      cards: document.querySelectorAll('.oa-card').length,
+    }));
+    ok(said.cards > 1, 'gate: with no sign-in to be had, the postings are still listed');
+    eq(said.bodies, 0, 'gate: …still without their details');
+    ok(/unavailable/i.test(said.note),
+      'gate: …and the card says sign-in cannot be reached, rather than inviting it');
+    eq(said.disabled, true,
+      'gate: …with the head disabled rather than dead under the pointer');
+    await none.close();
+  }
+
+  /* -- the CANDIDATES, whose details are a person's own ------------------- */
+  {
+    /* The profiles are HELD until the reveal date, so on most days the served
+       file is empty and there is nothing on screen to gate. The rule is
+       measured against a seeded file rather than against the calendar. */
+    const SEED = [{ id: 'c1', name: 'A Candidate', affiliation: 'Somewhere University',
+      position: 'PhD Candidate', year: String(marketYear()),
+      posted: new Date().toISOString().slice(0, 10),
+      researchAreas: ['Operations'], informsDays: ['Sunday'],
+      email: 'someone@example.edu', cvUrl: 'https://example.edu/cv.pdf' }];
+    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+
+    const { ctx: outCtx, page: out } = await signedOutPage('index.html', { wait: false });
+    await seed(out);
+    await out.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await out.evaluate(() => document.querySelector('#oa-candidates')
+      .scrollIntoView({ block: 'center' }));
+    await out.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await out.waitForTimeout(300);
+    const c = await out.evaluate(() => {
+      const card = document.querySelector('#oa-candidates .oa-card');
+      return { name: card.querySelector('.oa-card-title').textContent.trim(),
+        locked: card.classList.contains('oa-card-locked'),
+        bodies: document.querySelectorAll('#oa-candidates .oa-card-body').length,
+        // the address is the field that must never be on a public page
+        html: document.querySelector('#oa-candidates').innerHTML };
+    });
+    eq(c.name, 'A Candidate', 'gate: a candidate\'s NAME is readable signed out');
+    eq([c.locked, c.bodies], [true, 0],
+      'gate: …and their profile is not — no CV, no INFORMS days, no address');
+    ok(!/someone@example\.edu/.test(c.html),
+      'gate: the e-mail address is not in the document at all');
+    await outCtx.close();
+
+    const { ctx, page: q } = await signedInPage('index.html', { wait: false });
+    await seed(q);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates')
+      .scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await q.click('#oa-candidates .oa-card .oa-card-head');
+    await q.waitForTimeout(250);
+    ok(await q.$eval('#oa-candidates .oa-card-body', (n) => !n.hidden),
+      'gate: signed in, the profile opens');
+    ok(await q.$$eval('#oa-candidates .oa-kv a[href^="mailto:"]', (n) => n.length) >= 1,
+      'gate: …and carries the way to contact them, which is what it is for');
+    await ctx.close();
+  }
 }
 
 /* ------------------------------- readable in BOTH themes, on every page
