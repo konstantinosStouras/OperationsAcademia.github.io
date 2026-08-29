@@ -1,0 +1,98 @@
+# Rebuild data/analytics.json — the one file analytics.html plots.
+#
+# It is DELIBERATELY NOT part of oa-jobs-build.yml's BUILDERS list. That build
+# fires on a schedule, a dispatch and a workflow_run — several times an hour —
+# and it re-checks and commits data/ as one unit. The analytics read is a
+# once-a-day job over a whole collection, and folding it in would make every
+# posting's publish wait on it and share its failure. Its own workflow, its own
+# concurrency group, its own commit.
+#
+# EVERY SOURCE IS INDEPENDENTLY GATED and an unreachable one changes nothing:
+# the committed file stands, because a half-written one is a blank dashboard.
+# So this is a clean no-op with no credentials at all, which is what lets it be
+# committed and scheduled before anything is configured. See _SETUP-ANALYTICS.md
+name: OA — analytics
+
+on:
+  schedule:
+    # after the daily data builds, so a day's postings are settled first
+    - cron: '25 4 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build it and write nothing'
+        type: boolean
+        default: false
+      scan:
+        description: 'Report what each source would give, and stop'
+        type: boolean
+        default: false
+
+concurrency:
+  group: oa-analytics-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # the branch tip, never github.sha — the trap this repository has now
+          # hit twice: on a chained or queued run the default is a commit a
+          # writer has already moved past, so the push is not a fast-forward
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install what the gated sources need
+        run: npm i --no-save firebase-admin google-auth-library
+
+      - name: Build
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
+        run: |
+          node _scraper/build-analytics.mjs \
+            ${{ inputs.scan && '--scan' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
+        run: |
+          set -e
+          if [ -z "$(git status --porcelain data/analytics.json data/analytics-meta.json)" ]; then
+            echo "nothing changed."
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/analytics.json data/analytics-meta.json
+          git commit -m 'data: refresh the analytics figures'
+          # data/ is a build OUTPUT, so a rejected push has nothing to
+          # reconcile: take their tip and rebuild on top of it, never rebase
+          # two independently generated copies of a file carrying a timestamp
+          for i in 1 2 3; do
+            if git push; then exit 0; fi
+            git fetch origin "$GITHUB_REF_NAME"
+            git reset --hard FETCH_HEAD
+            node _scraper/build-analytics.mjs
+            if [ -z "$(git status --porcelain data/analytics.json data/analytics-meta.json)" ]; then
+              echo "the other writer published it all."
+              exit 0
+            fi
+            git add data/analytics.json data/analytics-meta.json
+            git commit -m 'data: refresh the analytics figures'
+          done
+          echo "::error::could not push after three rebuilds"
+          exit 1
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GA4_SERVICE_ACCOUNT: ${{ secrets.GA4_SERVICE_ACCOUNT }}
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}

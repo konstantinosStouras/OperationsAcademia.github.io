@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "analytics-rebuilt",
+      "date": "2026-08-29",
+      "title": "The analytics page works again, and draws its own charts",
+      "summary": "The four charts on /analytics had shown nothing since 2023: they were Google Sheets embeds fed by the Google Analytics Spreadsheet Add-on, and Universal Analytics — the only API it spoke — was switched off in July that year, with the properties deleted a year later. A dead embed renders as an empty box and reports nothing to anybody, which is why it went unnoticed. The page now draws its own charts from one small served file: visitors day by day with a seven-day average, the weekly rhythm, the hiring season across the calendar year, the most-visited pages, and the universities archive. They follow your theme, they work on a phone, and every one of them will also give you its numbers as a table. Where a figure cannot be brought up to date it says so rather than looking merely flat.",
+      "url": "/analytics.html"
+    },
+    {
       "id": "poster-told-when-live",
       "date": "2026-08-29",
       "title": "You are told by e-mail when your job posting goes live",
