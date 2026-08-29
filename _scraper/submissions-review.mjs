@@ -46,7 +46,7 @@
    Firestore, no network, so selftest.mjs drives all of it offline.
    --------------------------------------------------------------------------- */
 
-import { rowFromSubmission, MIRROR_STATUS, contactEmail } from './jobs-model.mjs';
+import { rowFromSubmission, MIRROR_STATUS, contactEmail, postedBy } from './jobs-model.mjs';
 import { rowFromCandidateSubmission } from './candidates-model.mjs';
 
 /**
@@ -277,6 +277,78 @@ export function rowsById(rows) {
   return out;
 }
 
+/** The served rows keyed BOTH ways — see `matchServed`. */
+export function servedIndex(rows) {
+  const byId = rowsById(rows);
+  const byRef = new Map();
+  for (const r of byId.values()) if (r.ref) byRef.set(r.ref, r);
+  return { byId, byRef };
+}
+
+/** Accepts an index, a Map of rows by id, or a plain array. */
+function asIndex(published) {
+  if (published && published.byId instanceof Map) return published;
+  const rows = published instanceof Map ? [...published.values()] : (published || []);
+  return servedIndex(rows);
+}
+
+/**
+ * WHICH SERVED ROW IS THIS SUBMISSION'S — the question the poster's e-mail
+ * lives or dies on, because the row it finds is the posting it describes and
+ * links to.
+ *
+ * IT MUST NOT BE THE DERIVED ID, and that was the defect this function
+ * exists to remove. `jobId(row)` is (market year, institution, posting date)
+ * and carries NO department, so two colleagues at one school posting on one
+ * day derive the SAME id; the build knows this and disambiguates with
+ * `assignIds` (`-2`, `-3`), but a pass that RE-derives the id looks up the
+ * base and gets the FIRST of them. Every later poster was then sent a
+ * stranger's posting — wrong department in the subject, a link to somebody
+ * else's card, their own reference number printed beside it — and stamped,
+ * so the right e-mail could never follow. It is not a rare shape: of the
+ * thirteen postings made through the form that the site is showing today,
+ * FOUR carry such a suffix, from two same-day groups six days apart.
+ *
+ * So the join goes, in order:
+ *
+ *   1. `ref`. The form issues it, it is unique per submission, it is in
+ *      PUBLIC_FIELDS so it is on the row too, and NOTHING else on the site
+ *      carries one (the workbook's rows and the legacy import have none).
+ *      That makes it the only key here that identifies a SUBMISSION rather
+ *      than a place and a day. A document with a ref is matched by it ALONE:
+ *      if the file does not carry that ref the posting is not published yet
+ *      — or was folded into a sibling by `collapseSameDay` — and the honest
+ *      answer is to wait, never to fall back to a key that can pick the
+ *      wrong row.
+ *   2. `publishedId`, the id the BUILD actually published, which build-jobs
+ *      stamps onto the document. Only documents that were queued at build
+ *      time carry it, so it is a second chance rather than the rule.
+ *   3. the derived id, and only when exactly ONE submission in the batch
+ *      derives it and the row it finds carries no ref of its own — i.e.
+ *      only where a collision is provably not happening.
+ *
+ * Returns null for "not yet, or not sure", and the caller then does nothing
+ * at all: no e-mail and no stamp, so the next run tries again. A collision
+ * can therefore cost a delayed message and never a wrong one.
+ */
+export function matchServed(doc, row, index, { derivedOnce = null } = {}) {
+  const idx = asIndex(index);
+  const ref = String((doc && doc.ref) || '').trim();
+
+  if (ref) return idx.byRef.get(ref) || null;
+
+  const pub = String((doc && doc.publishedId) || '').trim();
+  if (pub) return idx.byId.get(pub) || null;
+
+  if (!row || !row.id) return null;
+  if (derivedOnce && derivedOnce.get(row.id) !== 1) return null;
+  const found = idx.byId.get(row.id);
+  /* A row carrying a ref belongs to a submission that HAS one — not to this
+     ref-less document. Matching them would be the same cross-wiring by
+     another route. */
+  return found && !found.ref ? found : null;
+}
+
 /**
  * Split live submissions of one kind into `{ mail, grandfather }` for the
  * poster's "it is on the site now" e-mail.
@@ -289,24 +361,43 @@ export function rowsById(rows) {
  * nor stamped — because the address can be added by a later correction, and a
  * stamp would make that correction unthankable for ever.
  */
-export function partitionLive(kind, entries, { since = LIVE_SINCE, published = null, now = new Date() } = {}) {
-  const rows = published instanceof Map ? published : rowsById(published || []);
+export function partitionLive(kind, entries, { since = LIVE_SINCE, published = null, now = new Date(), fixes = [] } = {}) {
+  const index = asIndex(published);
   const mail = [];
   const grandfather = [];
 
   if (!kind || !kind.tellsPoster) return { mail, grandfather };
 
+  /* Everything the batch derives, counted — so `matchServed` can refuse the
+     derived-id fallback for an id two submissions both claim. */
+  const rowOf = new Map();
+  const derivedOnce = new Map();
+  for (const e of entries || []) {
+    const doc = e.data || {};
+    if (!isLive(doc) || doc[LIVE_MAILED_AT]) continue;
+    let row = null;
+    try { row = kind.row(doc, { now, fixes }); } catch { row = null; }
+    rowOf.set(e, row);
+    if (row && row.id) derivedOnce.set(row.id, (derivedOnce.get(row.id) || 0) + 1);
+  }
+
   for (const e of entries || []) {
     const doc = e.data || {};
     if (!isLive(doc) || doc[LIVE_MAILED_AT]) continue;
 
+    /* A posting the CRAWLER made is not somebody's submission to be thanked
+       for, even once the maintainer has claimed its mirror and it carries
+       their address: "thank you for using OperationsAcademia.org" would be
+       addressed to the person who runs the site, about a row they read out
+       of a spreadsheet. */
+    if (postedBy(doc, rowOf.get(e)).kind !== 'user') continue;
+
     const to = contactEmail(doc);
     if (!to) continue;
 
-    let row = null;
-    try { row = kind.row(doc, { now }); } catch { row = null; }
-    const shown = row && rows.get(row.id);
-    if (!shown) continue;                       // not publicly shown yet
+    const row = rowOf.get(e) || null;
+    const shown = matchServed(doc, row, index, { derivedOnce });
+    if (!shown) continue;                       // not publicly shown yet, or not sure which row
 
     const day = createdDay(doc);
     if (!day || day < since) grandfather.push({ ...e, row, published: shown, to });

@@ -57,9 +57,9 @@ import { fileURLToPath } from 'node:url';
 
 import {
   KINDS, SINCE, ANNOUNCED_AT, LIVE_SINCE, LIVE_MAILED_AT,
-  partitionSubmissions, partitionLive, idsOf, rowsById, createdDay,
+  partitionSubmissions, partitionLive, idsOf, servedIndex, createdDay,
 } from './submissions-review.mjs';
-import { postedBy, longDate, marketLabel } from './jobs-model.mjs';
+import { postedBy, longDate, marketLabel, assignIds } from './jobs-model.mjs';
 import {
   shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
 } from './_mail.mjs';
@@ -322,6 +322,11 @@ async function main() {
   }
 
   const revealAt = (await readJson('candidates-reveal.json', {})).revealAt || '';
+  /* The approved name corrections the BUILD applies (data/name-fixes.json).
+     Passed on so a row derived here cannot differ from the row the build
+     published — it only matters on the derived-id fallback, which is exactly
+     where a divergence would be silent. */
+  const fixes = (await readJson('name-fixes.json', {})).fixes || [];
   const now = new Date();
 
   /* Read every kind first, so a batch spanning both is announced as ONE
@@ -356,7 +361,9 @@ async function main() {
 
     /* …and who is owed a thank-you. `published` here is the ROW, not the id:
        the poster is shown what the site shows. */
-    const told = partitionLive(kind, entries, { published: rowsById(rows), now });
+    /* The two-way index: a submission is joined to its row by the REFERENCE
+       the form issued, never by a re-derived id — see `matchServed`. */
+    const told = partitionLive(kind, entries, { published: servedIndex(rows), now, fixes });
     if (kind.tellsPoster) {
       log(`${kind.collection}: ${told.mail.length} poster(s) to tell their posting is live` +
           (told.grandfather.length
@@ -519,7 +526,11 @@ async function thankPosters(db, tx, live) {
     const { subject, html } = renderLivePostingEmail(entry);
 
     if (DRY) {
-      log(`\n--- would send to the poster (${entry.to}) ---`);
+      /* The DOCUMENT, never the address. A dispatched --dry-run prints into
+         the Actions log of a PUBLIC repository, and this is the one line here
+         that holds a real person's e-mail — the same "nothing public may carry
+         an address" rule the served files are held to. */
+      log(`\n--- would send to the poster of ${entry.id} ---`);
       log('subject: ' + subject);
       log(toPlain(html));
       continue;
@@ -676,7 +687,7 @@ function selftest() {
             note: 'call me on 555 1234' },
   };
   const liveRow = job.row(liveDoc.data);
-  const shown = rowsById([liveRow]);
+  const shown = servedIndex([liveRow]);
 
   const told = partitionLive(job, [liveDoc], { published: shown });
   ok(told.mail.length === 1 && told.mail[0].to === 'ada@x.edu',
@@ -723,7 +734,7 @@ function selftest() {
     { published: shown }).mail.length,
     'a poster already told is never told again — which is what makes an EDIT safe, ' +
     'since correcting a posting re-publishes it');
-  ok(!partitionLive(job, [liveDoc], { published: rowsById([]) }).mail.length,
+  ok(!partitionLive(job, [liveDoc], { published: servedIndex([]) }).mail.length,
     'and a posting the site is NOT showing yet is not announced as live');
   ok(!partitionLive(job, [{ ...liveDoc, data: { ...liveDoc.data, status: 'withdrawn' } }],
     { published: shown }).mail.length, 'a withdrawn posting thanks nobody');
@@ -733,19 +744,100 @@ function selftest() {
     'a submission with no reachable address is skipped ENTIRELY — never stamped, ' +
     'so an address added by a later correction can still be written to');
 
+  /* --- SAME-DAY SIBLINGS ARE NOT CROSS-WIRED ------------------------------
+     The defect this pass shipped with, and the reason the guard below drives
+     the REAL assignIds: jobId is (year, institution, posted) with no
+     department, so three colleagues posting on one day derive ONE id, the
+     build renumbers them -2/-3, and a pass that re-derived the id sent every
+     one of them the first poster's posting. The old fixture built its served
+     row by calling the very function under test, so assignIds never ran and
+     no collision could occur. */
+  const TRIO = ['Information Systems', 'Management Science', 'Finance'];
+  const sibs = TRIO.map((unit, i) => ({
+    id: 'sib' + i,
+    data: { ...liveDoc.data, unit, ref: 'OA-JOB-SIB-' + i,
+            email: `poster${i}@x.edu`, chairEmail: '', chairName: '', note: '' },
+  }));
+  const sibRows = assignIds(sibs.map((d) => ({ row: job.row(d.data) })))
+    .map((e) => e.row || e);
+  ok(new Set(sibRows.map((r) => r.id)).size === 3
+     && sibRows.some((r) => /-2$/.test(r.id)) && sibRows.some((r) => /-3$/.test(r.id)),
+    'the build really does renumber same-day siblings — the fixture reproduces production');
+
+  const trio = partitionLive(job, sibs, { published: servedIndex(sibRows) });
+  ok(trio.mail.length === 3, 'all three siblings are due');
+  ok(trio.mail.every((m) => m.published.ref === m.data.ref),
+    'and EACH is matched to its OWN row — the reference the form issued is the join key, ' +
+    'never a re-derived id that three postings share');
+  ok(new Set(trio.mail.map((m) => m.published.id)).size === 3,
+    'so no two posters are pointed at one card');
+  for (const m of trio.mail) {
+    const mail = renderLivePostingEmail(m, { site: 'https://x.test' });
+    ok(mail.subject.includes(m.data.unit),
+      `poster of "${m.data.unit}" is sent their own posting, not a sibling's`);
+    ok(mail.html.includes('?job=' + m.published.id), 'and linked to their own card');
+  }
+
+  /* NOT SURE MEANS DO NOTHING — never a guess, and never a stamp, so a
+     collision costs a delayed e-mail rather than a wrong one. */
+  const orphan = partitionLive(job, [{ id: 'o1',
+    data: { ...liveDoc.data, ref: 'OA-JOB-NOT-PUBLISHED' } }], { published: servedIndex(sibRows) });
+  ok(!orphan.mail.length && !orphan.grandfather.length,
+    'a submission whose reference the served file does not carry is passed over ENTIRELY — ' +
+    'not matched to a same-day neighbour, and not stamped either');
+
+  /* `publishedId` — the id the build really published — is the second chance
+     for a document with no reference of its own. */
+  const byPub = partitionLive(job, [{ id: 'p1',
+    data: { ...liveDoc.data, ref: '', publishedId: sibRows[2].id } }],
+    { published: servedIndex(sibRows) });
+  ok(byPub.mail.length === 1 && byPub.mail[0].published.id === sibRows[2].id,
+    'a ref-less document is matched by the publishedId the build stamped on it');
+
+  /* …and the derived id is the last resort, refused the moment it is
+     ambiguous or lands on a row that belongs to somebody with a reference. */
+  const refless = TRIO.slice(0, 2).map((unit, i) => ({
+    id: 'rl' + i, data: { ...liveDoc.data, unit, ref: '', email: `rl${i}@x.edu` } }));
+  ok(!partitionLive(job, refless, { published: servedIndex(sibRows) }).mail.length,
+    'two ref-less submissions deriving one id are both passed over, never both mailed ' +
+    'the same row');
+
+  /* --- a crawled posting thanks nobody ------------------------------------ */
+  ok(!partitionLive(job, [{ id: 'mirror',
+    data: { ...liveDoc.data, source: 'jobmarket-sheet' } }],
+    { published: servedIndex([liveRow]) }).mail.length,
+    'a tracking-sheet mirror the maintainer has claimed is never thanked for posting it — ' +
+    'it is the crawler\'s row, and they run the site');
+
   /* --- the grandfather rule, again, and for its own date ------------------ */
   const older = { id: 'j9', data: { ...liveDoc.data, createdAt: '2026-01-05T09:00:00Z' } };
-  const back = partitionLive(job, [older], { published: rowsById([job.row(older.data)]) });
+  const back = partitionLive(job, [older], { published: servedIndex([job.row(older.data)]) });
   ok(!back.mail.length && back.grandfather.length === 1,
     'a posting from before the feature shipped is stamped, not mailed — the backlog is ' +
     'not a reason to write to a year of posters');
   ok(LIVE_SINCE !== SINCE,
     'and it has its own date: two features with two ship dates cannot share one');
 
-  /* --- a candidate profile is not a job posting --------------------------- */
-  ok(!partitionLive(cand, [{ ...candDoc, data: { ...candDoc.data, email: 'ada@x.edu',
-      createdAt: LIVE_SINCE + 'T09:00:00Z' } }], { published: rowsById([]) }).mail.length,
-    'candidate profiles are held until the reveal date, so nothing here claims one is live');
+  /* --- a candidate profile is not a job posting ---------------------------
+     THE SERVED SET HERE MUST CONTAIN THE PROFILE'S OWN ROW. Passing an empty
+     one made this pass for the wrong reason: with nothing published, no kind
+     could produce mail, so the check could not tell "candidates are excluded"
+     from "nothing matched" — flipping `tellsPoster: true` onto the candidate
+     kind left it green. Everything else it needs is here too (an address, a
+     date after LIVE_SINCE, a live status), so the ONLY thing standing between
+     this profile and an e-mail is the capability flag. */
+  const candLive = { ...candDoc,
+    data: { ...candDoc.data, email: 'ada@x.edu', ref: 'OA-CAND-1',
+            createdAt: LIVE_SINCE + 'T09:00:00Z' } };
+  const candRow = cand.row(candLive.data);
+  ok(candRow && candRow.ref === 'OA-CAND-1',
+    'the fixture really produces a matchable candidate row');
+  ok(!partitionLive(cand, [candLive], { published: servedIndex([candRow]) }).mail.length,
+    'candidate profiles are held until the reveal date, so nothing here claims one is live — ' +
+    'and this is measured against a served set that WOULD match, so only tellsPoster stops it');
+  ok(partitionLive({ ...cand, tellsPoster: true }, [candLive],
+    { published: servedIndex([candRow]) }).mail.length === 1,
+    '…proved by the capability alone flipping the answer');
 
   console.log(fails.length
     ? `submissions-mailer selftest: ${pass} passed, ${fails.length} FAILED\n  ` + fails.join('\n  ')

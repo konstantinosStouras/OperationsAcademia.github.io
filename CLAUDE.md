@@ -1291,6 +1291,42 @@ derived read exactly as a visitor reads them — and it is built from that row
 rather than from the document, which is structurally why the chair's details and
 the private note cannot be in it.
 
+**WHICH row is `matchServed`, and the first version of this shipped it wrong.**
+The obvious join is the id the submission derives — and it is the one thing that
+cannot be used, because `jobId` is (market year, institution, posting date) and
+names **no department**. Two colleagues at one school posting on one day derive
+the SAME id; the build knows this and renumbers them with `assignIds` (`-2`,
+`-3`); a pass that RE-derives the id looks up the base and gets the FIRST of
+them. Every later poster was sent a stranger's posting — wrong department in the
+subject, a link to somebody else's card, their own reference number printed
+beside it — and then stamped, so the right e-mail could never follow. It is not
+a corner: **four of the thirteen postings made through the form that the site is
+showing today carry such a suffix**, from two same-day groups six days apart, and
+an unclaimed workbook row can take the base id and push a user posting to `-2`
+just as easily.
+
+So the join is, in order: **`ref`** — the form issues it, it is unique per
+submission, it is in `PUBLIC_FIELDS` so the row carries it, and nothing else on
+the site has one (the workbook's rows and the legacy import have none), which
+makes it the only key here that identifies a SUBMISSION rather than a place and
+a day; then **`publishedId`**, the id the build actually published, stamped onto
+the document by build-jobs (only for documents queued at build time, so a second
+chance rather than the rule); then the **derived id**, and only when exactly one
+submission in the batch derives it and the row it finds carries no `ref` of its
+own.
+
+**"Not sure" means do nothing** — no e-mail AND no stamp, so the next run tries
+again. A collision can therefore cost a delayed message and never a wrong one.
+That is also why a reference the served file does not carry is simply passed
+over: the posting has not published yet, or `collapseSameDay` folded it into a
+sibling, and neither is a reason to fall back to a key that can pick somebody
+else's row.
+
+**The guard that missed it built its served row by calling the function under
+test** (`rowsById([job.row(doc.data)])`), so `assignIds` never ran and no
+collision could occur — a fixture that cannot reproduce production proves
+nothing about it. The tests drive the real `assignIds` now, in both suites.
+
 **The link is `OAJobNav.hrefFor`**, the site's own page rule, so a posting whose
 season has rolled opens on Previous markets rather than on a jobs page that by
 definition cannot contain it — the defect that module was written for.
@@ -1305,9 +1341,16 @@ like every other mark here.
 
 **A submission with no reachable address is skipped ENTIRELY** — neither mailed
 nor stamped — because an address can be added by a later correction, and a stamp
-would make that correction unthankable for ever. That is also what makes a
-claimed sheet mirror harmless here: it carries no person, so it is passed over
-rather than written off.
+would make that correction unthankable for ever.
+
+**And a posting the CRAWLER made is passed over whatever address it carries.**
+Once the maintainer edits a tracking-sheet mirror it is an ordinary
+`jobSubmissions` document, and it can perfectly well carry their own address —
+at which point "thank you for using OperationsAcademia.org, we wish you every
+success with your search" is addressed to the person who runs the site, about a
+row read out of a spreadsheet. `postedBy(doc, row).kind !== 'user'` is the test,
+which is the same shared rule the maintainer's "Posted by" line uses, so the two
+cannot disagree about what a crawled posting is.
 
 **It has its OWN grandfather date, `LIVE_SINCE`.** Every posting ever made
 through the form is live and unthanked on the first run, and thanking a year of
@@ -1330,13 +1373,23 @@ update, so an Admin-SDK stamp cannot freeze a posting against its own owner —
 the `sync-user-directory` trap. `announcedAt` and `reviewedAt` are already
 written the same way.
 
+**A dispatched `--dry-run` prints into the Actions log of a PUBLIC repository**,
+so the poster pass names the DOCUMENT it would write to and never the address —
+the served files' "nothing public carries an e-mail" rule applied to the one line
+here that held a real person's.
+
 Tests: `testPostedByAndLiveEmail` in `_scraper/selftest.mjs` (the shared rule
 both ways, the source-wins case, that the poster's e-mail carries nothing
-private, that "publicly shown" is measured against the served file, the
-once-only mark, the no-address skip, the rules claim, and the corrected copy on
-both pages), plus each mailer's own `--selftest` — the review one for the line
-and the workbook link, the submissions one for the whole poster e-mail rendered
-end to end.
+private, that "publicly shown" is measured against the served file, the join
+against the real `assignIds` with its collision and its "not sure, do nothing"
+branch, the once-only mark, the no-address skip, the crawled-posting skip, the
+rules claim, and the corrected copy on both pages), plus each mailer's own
+`--selftest` — the review one for the line and the workbook link, the
+submissions one for the whole poster e-mail rendered end to end, three same-day
+siblings each getting their OWN posting, and the candidate exclusion measured
+against a served set that WOULD match (an empty one made it pass for the wrong
+reason: with nothing published, no kind could produce mail, so flipping
+`tellsPoster` onto candidates left the suite green).
 
 ## Nothing on "What's new" publishes itself either
 
