@@ -18,9 +18,16 @@
 
    THE THREE SOURCES, AND WHY A DAY BELONGS TO EXACTLY ONE OF THEM.
 
-     history   the rows the old spreadsheets already hold, committed once as
-               data/analytics-history.json. Frozen: UA is gone, so this can
-               never grow again and never needs re-fetching.
+     history   data/analytics-history.json — and it will never exist. The
+               spreadsheets were exported and read on 2026-08-29: all 30 tabs,
+               141,540 rows, not one surviving measurement. Their own cells say
+               why (every report tab: "Last Run On 2024-07-15, Total Results
+               Found 0") — Google deleted the UA property on 1 July 2024 and
+               the add-on's next run wrote zero rows over ten years of data.
+               The leg stays wired as the recovery path if a copy ever
+               surfaces, and because assemble() selects sources THROUGH
+               SOURCE_ORDER, so removing the name would break the archive leg
+               rather than tidy it.
      usage     the site's OWN first-party record — usageSessions in Firestore,
                written by assets/oa-usage.js on every page since 2026-08-17.
                No cookies, no third party, and the credential it needs

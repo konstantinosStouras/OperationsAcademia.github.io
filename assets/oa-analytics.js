@@ -164,7 +164,8 @@
         '<h2>Nothing is being measured yet</h2>' +
         '<p>This page draws its charts from <code>data/analytics.json</code>, which is ' +
         'built once a day by <code>_scraper/build-analytics.mjs</code>. That file is ' +
-        'currently empty, because none of its three sources is switched on.</p>' +
+        'currently empty, because neither of its two live sources is switched ' +
+        'on yet.</p>' +
         '<p>The charts that used to be here were Google Sheets embeds fed by the ' +
         'Google&nbsp;Analytics Spreadsheet Add-on, which spoke only the Universal ' +
         'Analytics API — retired in July&nbsp;2023, with the properties themselves ' +

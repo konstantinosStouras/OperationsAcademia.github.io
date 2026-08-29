@@ -2,7 +2,7 @@
 
 `analytics.html` draws its own charts now, from one served file
 (`data/analytics.json`) built daily by `_scraper/build-analytics.mjs`. This is
-the setup guide for its three sources. **Nothing here is required for the page
+the setup guide for its sources. **Nothing here is required for the page
 to work** — it is honest and functional with no source at all — but each one
 you switch on adds figures to it.
 

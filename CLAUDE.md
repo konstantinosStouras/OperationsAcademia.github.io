@@ -2391,7 +2391,7 @@ stays broken for as long as nobody happens to look*.
     assets/oa-charts.js            the inline-SVG chart set (line, columns, bars)
     assets/oa-analytics.js         the page — fetch one file, draw six figures
     assets/oa-analytics.css        its chrome, theme tokens throughout
-    _scraper/build-analytics.mjs   writes data/analytics.json from three gated sources
+    _scraper/build-analytics.mjs   writes data/analytics.json from its gated sources
     .github/workflows/oa-analytics.yml   daily
     _SETUP-ANALYTICS.md            what each source needs, and what can never come back
 
