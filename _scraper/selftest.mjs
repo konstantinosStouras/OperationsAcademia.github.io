@@ -9779,6 +9779,93 @@ async function testAnalytics() {
   ok(/OAAnalytics/.test(page) && /OACharts/.test(page),
     'and reads the shared model rather than carrying its own copy of the rules');
 
+  /* ------------------------------ nothing non-public reaches a served file
+
+     Owner, 2026-08-29: no admin pages, no past-version pages, no test pages,
+     no admin-related data shown to public visitors. The first build leaked all
+     three — /admin-area.html (87 views) and /admin-area (6), /v3/ and
+     /v3/post-a-job.html — into data/analytics.json, which Pages serves to
+     anyone who asks. */
+
+  eq(A.normPath('/admin-area'), A.normPath('/admin-area.html'),
+    'both spellings of one page fold to one path — Pages serves a file under ' +
+    'each, and a filter matching only the spelling somebody thought of would ' +
+    'have leaked the admin desk under its other name');
+  eq(A.normPath('/index.html'), '/', 'the home page is one row, not two');
+  eq(A.normPath('/jobs'), '/jobs.html',
+    'the canonical form is the one the pages own canonical tags name');
+  eq(A.normPath('/post-a-job.html?ref=abc123'), '/post-a-job.html',
+    'a query string never survives — it can carry a posting id and this file is public');
+
+  for (const bad of ['/admin-area', '/admin-area.html', '/admin-area/', '/ADMIN-AREA',
+    '/v1/', '/v2/index.html', '/v3/post-a-job.html', '/v9/anything',
+    '/test/x', '/preview/y', '/staging/z', '/_scraper/build.mjs']) {
+    ok(!A.isPublicPath(bad), `withheld from the public file: ${bad}`);
+  }
+  for (const good of ['/', '/index.html', '/jobs', '/jobs.html', '/universities.html',
+    '/post-a-job.html', '/previous-markets.html', '/analytics.html']) {
+    ok(A.isPublicPath(good), `still published: ${good}`);
+  }
+  /* the guard must not swallow a legitimate page that merely starts the same */
+  ok(A.isPublicPath('/version-history.html'),
+    'a page whose name merely begins like an archive is not an archive');
+  ok(A.isPublicPath('/testimonials.html'),
+    'and one that merely begins with "test" is not a test page');
+
+  /* the CHOKEPOINT: a source that forgot to filter still cannot leak */
+  const leaky = A.mergePages(new Map(), [
+    { path: '/admin-area.html', views: 87 },
+    { path: '/v3/', views: 21 },
+    { path: '/jobs', views: 467 },
+    { path: '/jobs.html', views: 1 },
+  ]);
+  const got = Array.from(leaky.keys()).sort();
+  eq(got, ['/jobs.html'],
+    'mergePages is the chokepoint every source funnels through — a leg that ' +
+    'forgets to filter, or one added later, still cannot put an admin or ' +
+    'archived path into a world-readable file');
+
+  /* WITHIN one source, two spellings of a page are ONE page and their views
+     ADD. Pages serves /jobs and /jobs.html from one file, and the first build
+     recorded 467 and 211 — a plain first-claim-wins published 467, losing a
+     third of the count in the direction nobody checks, because the row is
+     still there and still looks sensible. */
+  eq(leaky.get('/jobs.html').views, 468,
+    'two spellings of one page inside a source SUM rather than one winning');
+  const weighted = A.mergePages(new Map(), [
+    { path: '/jobs.html', views: 400, avgSec: 100 },
+    { path: '/jobs', views: 100, avgSec: 50 },
+  ]).get('/jobs.html');
+  eq(weighted.avgSec, 90,
+    '…and the average time is re-weighted by views, so a spelling with three ' +
+    'visits does not drag the mean as hard as one with three hundred');
+
+  /* ACROSS sources the rule is the opposite and must stay so: the first claim
+     stands whole, because two sources measuring one page are two measurements
+     of one number and adding them would double it. */
+  const twoSources = A.mergePages(new Map(), [{ path: '/jobs.html', views: 400, avgSec: 10 }]);
+  A.mergePages(twoSources, [{ path: '/jobs.html', views: 9999, avgSec: 1 }]);
+  eq(twoSources.get('/jobs.html').views, 400,
+    'but ACROSS sources the first claim stands — adding them would double the page');
+
+  /* AND THE SERVED FILE ITSELF. The check that would have caught the leak. */
+  for (const row of served.pages || []) {
+    ok(A.isPublicPath(row.path),
+      `data/analytics.json publishes only public paths — found ${row.path}`);
+    eq(row.path, A.normPath(row.path),
+      `…each already normalised, so one page is one row — ${row.path}`);
+  }
+  const paths = (served.pages || []).map((r) => r.path);
+  eq(paths.length, new Set(paths).size, 'and no path is listed twice');
+
+  /* the page defends itself too, for a file cached before this shipped */
+  ok(/isPublicPath/.test(page),
+    'the page filters as a second line — the builder is the defence, but a ' +
+    'reader may still hold a copy fetched before it shipped');
+  ok(/var publicPages = \(data\.pages \|\| \[\]\)\.filter/.test(page),
+    '…and filters BEFORE deciding the figure exists, or a cached file of only ' +
+    'admin rows would draw a heading over an empty chart');
+
   /* --- the colour that had to be re-stepped ------------------------------ */
 
   const css = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8');

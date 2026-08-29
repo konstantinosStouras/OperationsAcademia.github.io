@@ -172,6 +172,7 @@ async function fromUsage(db, { since }) {
   if (!db) return null;
   const seen = new Map();        // day -> { uids:Set, sessions, views, pages:Map }
   let scanned = 0;
+  let withheld = 0;              // sessions on admin / archived / test paths
 
   let q = db.collection('usageSessions').orderBy('start');
   if (since) q = q.where('start', '>=', since);
@@ -184,6 +185,19 @@ async function fromUsage(db, { since }) {
     scanned++;
     const day = iso(new Date(started));
     if (!A.isDay(day)) return;
+
+    /* NON-PUBLIC SESSIONS ARE DROPPED WHOLE, not merely left out of the pages
+       list (owner, 2026-08-29). A session on the admin desk or in an archived
+       tree is not "how the site is used" by anybody the public figures are
+       about — counting its pageviews would put the maintainer's own admin time
+       into a number this page publishes, which is the "admin-related data"
+       half of the instruction. Dropping it here also means the path is never
+       carried anywhere downstream, so it cannot leak through a field somebody
+       adds later. A person who visits the admin desk AND public pages still
+       counts, through those other sessions. */
+    const page = A.normPath(d.page);
+    if (!A.isPublicPath(page)) { withheld++; return; }
+
     let bucket = seen.get(day);
     if (!bucket) {
       bucket = { uids: new Set(), sessions: 0, views: 0, pages: new Map() };
@@ -192,9 +206,6 @@ async function fromUsage(db, { since }) {
     if (d.uid) bucket.uids.add(String(d.uid));
     bucket.sessions++;
     bucket.views++;
-    /* the path only — a query string can carry a posting id, and this file is
-       served to everybody */
-    const page = String(d.page || '').split('?')[0].slice(0, 120);
     if (page) {
       const p = bucket.pages.get(page) || { views: 0, sec: 0 };
       p.views++;
@@ -221,6 +232,7 @@ async function fromUsage(db, { since }) {
       .map((p) => ({ path: p.path, title: '', views: p.views, avgSec: p.views ? p.sec / p.views : 0 })),
     universities: [],
     scanned,
+    withheld,
   };
 }
 
@@ -277,10 +289,32 @@ async function fromGa4({ since }) {
   const startDate = since ? iso(new Date(since)) : '2015-08-14';   // GA4's own floor
   const endDate = 'today';
 
+  /* Ask GOOGLE to leave the non-public paths out, rather than fetching them
+     and dropping them here. Applied to BOTH reports, so the day totals are
+     "visitors who read a public page" and the pages list cannot carry an admin
+     path even for the instant before it is filtered. `A.NON_PUBLIC` is the
+     same list the first-party leg uses; GA4 wants a string pattern, so each is
+     handed over as its source without the anchors it cannot take. */
+  const excludeAdmin = {
+    notExpression: {
+      orGroup: {
+        expressions: [
+          { filter: { fieldName: 'pagePath',
+            stringFilter: { matchType: 'BEGINS_WITH', value: '/admin-area' } } },
+          { filter: { fieldName: 'pagePath',
+            stringFilter: { matchType: 'FULL_REGEXP', value: '^/v[0-9]+(/|$)' } } },
+          { filter: { fieldName: 'pagePath',
+            stringFilter: { matchType: 'FULL_REGEXP', value: '^/(test|tests|preview|staging|sandbox|_)' } } },
+        ],
+      },
+    },
+  };
+
   const daily = await runReport({
     dateRanges: [{ startDate, endDate }],
     dimensions: [{ name: 'date' }],
     metrics: [{ name: 'totalUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }],
+    dimensionFilter: excludeAdmin,
     limit: 100000,
   });
 
@@ -299,6 +333,7 @@ async function fromGa4({ since }) {
     dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
     metrics: [{ name: 'screenPageViews' }, { name: 'userEngagementDuration' }],
     orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+    dimensionFilter: excludeAdmin,
     limit: 200,
   });
 
@@ -309,7 +344,7 @@ async function fromGa4({ since }) {
     const secs = Number(row.metricValues?.[1]?.value || 0);
     if (!p || !views) continue;
     pages.push({
-      path: p.split('?')[0],
+      path: A.normPath(p),
       title: row.dimensionValues?.[1]?.value || '',
       views,
       avgSec: views ? secs / views : 0,
@@ -437,7 +472,8 @@ async function main() {
   if (db) {
     try {
       const usage = await fromUsage(db, { since });
-      log(`usage: ${usage.scanned} session document(s) -> ${Object.keys(usage.days).length} day(s)`);
+      log(`usage: ${usage.scanned} session document(s) -> ${Object.keys(usage.days).length} day(s)` +
+        (usage.withheld ? `, ${usage.withheld} withheld (admin / archived / test paths)` : ''));
       results.push(usage);
     } catch (e) {
       warn(`the first-party usage read failed (${e.message}) — keeping what is committed`);
