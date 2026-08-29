@@ -1,14 +1,196 @@
 {
  "version": 1,
- "generated": "2026-08-29T16:42:29.814Z",
+ "generated": "2026-08-29T17:33:17.053Z",
  "dayFields": [
   "visitors",
   "sessions",
   "pageviews"
  ],
- "sources": [],
- "days": {},
- "pages": [],
+ "sources": [
+  {
+   "source": "usage",
+   "days": 13,
+   "from": "",
+   "to": ""
+  }
+ ],
+ "days": {
+  "2026-08-17": [
+   5,
+   27,
+   27
+  ],
+  "2026-08-18": [
+   40,
+   206,
+   206
+  ],
+  "2026-08-19": [
+   48,
+   160,
+   160
+  ],
+  "2026-08-20": [
+   73,
+   195,
+   195
+  ],
+  "2026-08-21": [
+   44,
+   154,
+   154
+  ],
+  "2026-08-22": [
+   34,
+   82,
+   82
+  ],
+  "2026-08-23": [
+   28,
+   130,
+   130
+  ],
+  "2026-08-24": [
+   59,
+   194,
+   194
+  ],
+  "2026-08-25": [
+   57,
+   214,
+   214
+  ],
+  "2026-08-26": [
+   58,
+   151,
+   151
+  ],
+  "2026-08-27": [
+   55,
+   179,
+   179
+  ],
+  "2026-08-28": [
+   61,
+   162,
+   162
+  ],
+  "2026-08-29": [
+   32,
+   80,
+   80
+  ]
+ },
+ "pages": [
+  {
+   "path": "/",
+   "title": "",
+   "views": 680,
+   "avgSec": 372
+  },
+  {
+   "path": "/jobs.html",
+   "title": "",
+   "views": 678,
+   "avgSec": 522
+  },
+  {
+   "path": "/post-a-job.html",
+   "title": "",
+   "views": 113,
+   "avgSec": 310
+  },
+  {
+   "path": "/universities.html",
+   "title": "",
+   "views": 90,
+   "avgSec": 313
+  },
+  {
+   "path": "/my-postings.html",
+   "title": "",
+   "views": 56,
+   "avgSec": 246
+  },
+  {
+   "path": "/account.html",
+   "title": "",
+   "views": 48,
+   "avgSec": 125
+  },
+  {
+   "path": "/recent-faculty.html",
+   "title": "",
+   "views": 34,
+   "avgSec": 516
+  },
+  {
+   "path": "/previous-markets.html",
+   "title": "",
+   "views": 23,
+   "avgSec": 82
+  },
+  {
+   "path": "/post-a-candidate.html",
+   "title": "",
+   "views": 20,
+   "avgSec": 346
+  },
+  {
+   "path": "/terms-and-conditions.html",
+   "title": "",
+   "views": 12,
+   "avgSec": 77
+  },
+  {
+   "path": "/alerts.html",
+   "title": "",
+   "views": 11,
+   "avgSec": 366
+  },
+  {
+   "path": "/whats-new.html",
+   "title": "",
+   "views": 11,
+   "avgSec": 1050
+  },
+  {
+   "path": "/analytics.html",
+   "title": "",
+   "views": 9,
+   "avgSec": 440
+  },
+  {
+   "path": "/feedback.html",
+   "title": "",
+   "views": 8,
+   "avgSec": 1952
+  },
+  {
+   "path": "/privacy-policy.html",
+   "title": "",
+   "views": 5,
+   "avgSec": 730
+  },
+  {
+   "path": "/survey.html",
+   "title": "",
+   "views": 4,
+   "avgSec": 8
+  },
+  {
+   "path": "/survey-faqs.html",
+   "title": "",
+   "views": 3,
+   "avgSec": 1
+  },
+  {
+   "path": "/messages.html",
+   "title": "",
+   "views": 3,
+   "avgSec": 1213
+  }
+ ],
  "universities": {
   "frozen": true,
   "from": "",
@@ -17,15 +199,15 @@
   "recent": []
  },
  "totals": {
-  "visitors": 0,
-  "sessions": 0,
-  "pageviews": 0,
-  "days": 0,
+  "visitors": 594,
+  "sessions": 1934,
+  "pageviews": 1934,
+  "days": 13,
   "universities": 0
  },
  "range": {
-  "from": "",
-  "to": ""
+  "from": "2026-08-17",
+  "to": "2026-08-29"
  },
  "recentDays": 7
 }
