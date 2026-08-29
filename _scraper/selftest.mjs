@@ -9808,13 +9808,21 @@ async function testSponsors() {
       `sponsors: ${rel} never writes the badge's own text — one definition, like every other`);
   }
 
-  /* The ORDER is the jobs page's alone. The one-pager's teaser is "the ten
-     most recent postings" and reordering it would make its own heading false
-     — which is exactly the split `featured` already has. */
-  ok(/sort:\s*function\s*\(a, b\)\s*\{\s*return OASponsors\.compare\(a, b\);/.test(jobs),
-    'sponsors: the jobs page sorts through the module');
-  ok(!/OASponsors\.compare/.test(home),
-    'sponsors: the home page teaser is NOT reordered — it promises the newest ten');
+  /* BOTH lists lead with the sponsor (owner, 2026-08-29, from a screenshot of
+     the one-pager: the mark was on the card and the card was second). The
+     first build left the teaser date-ordered on the reasoning that "the ten
+     most recent postings" would become false — but that heading names WHICH
+     ten, not what order they are in, and the teaser's `prepare` still selects
+     them by date before this comparator ever runs. So a posting outside the
+     newest ten is still not shown, and the heading stays true. */
+  for (const [rel, html] of [['jobs.html', jobs], ['index.html', home]]) {
+    ok(/sort:\s*function\s*\(a, b\)\s*\{\s*return OASponsors\.compare\(a, b\);/.test(html),
+      `sponsors: ${rel} sorts through the module`);
+  }
+  /* …and the teaser's SELECTION is still by date, which is what keeps its own
+     heading honest. */
+  ok(/prepare:[\s\S]{0,400}?localeCompare\(a\.posted[\s\S]{0,80}?slice\(0, 10\)/.test(home),
+    'sponsors: the teaser still SELECTS the ten most recent by date before ordering them');
   ok(!/b\.featured\s*\?\s*1\s*:\s*-1/.test(jobs),
     'sponsors: …and the jobs page kept no second, private copy of the Featured rule');
 
@@ -9894,6 +9902,16 @@ async function testSponsors() {
     'sponsors: the rail down the card edge, in the engine stylesheet');
   ok(/body\.v3 \.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor\)/.test(v3css),
     'sponsors: …and in the live design, which is the one the site paints');
+  /* AND INSIDE A PANEL. `body.v3 .v3-panel .oa-card { border: 0 }` has the
+     SAME specificity as the rule above (0,3,1 each) and sits ~600 lines
+     later, so load order silently blanked the rail on the one-pager's teaser
+     while it worked on the jobs page. A rule that can be beaten by a rule of
+     equal weight further down the file is not a rule. */
+  ok(/body\.v3 \.v3-panel \.oa-card\.oa-sponsored\s*\{[\s\S]{0,160}?border-left:\s*3px solid var\(--sponsor\)/.test(v3css),
+    'sponsors: the rail survives the panel card reset, which blanks every border');
+  ok(v3css.indexOf('body.v3 .v3-panel .oa-card.oa-sponsored') >
+     v3css.indexOf('body.v3 .v3-panel .oa-card {'),
+    'sponsors: …and is declared AFTER the reset it has to beat');
 
   /* Every token defined in BOTH themes, or the badge paints no ground at all
      in one of them and oa-list.css's light-hex fallback lands on a dark card. */
