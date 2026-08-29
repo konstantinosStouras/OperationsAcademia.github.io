@@ -2412,9 +2412,14 @@ way, and sponsored ranks ABOVE it: a sponsorship is a commitment the site made
 to somebody, Featured is a note the maintainer left themselves. That ordering
 is not hypothetical — the served file carries exactly one featured row.
 
-**The home page's teaser is BADGED but NOT re-ordered.** It promises the ten
-most recent postings and a lead row would make its own heading false. Precisely
-the split `featured` already had.
+**BOTH lists lead with the sponsor** — and that is a correction. The first
+build left the one-pager's teaser date-ordered, reasoning that "the ten most
+recent postings" would become false; the owner sent a screenshot of the mark
+sitting on the SECOND card and said *fix*. The heading names WHICH ten, not
+what order they are in, and the teaser's `prepare` still selects them by date
+before the comparator runs — so a posting outside the newest ten is still not
+shown and the heading stays true. `featured` keeps its old split, which is now
+the odd one out rather than the precedent.
 
 ### The rule says NO, four times over
 
@@ -2487,6 +2492,19 @@ surface the badge lands on. Measured: 6.48:1 light, 7.26:1 dark, against a
 **The rules live in TWO stylesheets and only one of them reaches the site** —
 `oa-list.css` is the engine's, `v3.css` is the live design's override — so a
 fix applied to one alone is invisible on the site or lost on the next page.
+
+**And a THIRD rule is needed for a card inside a panel**, which is how the
+rail was shipped broken. `body.v3 .v3-panel .oa-card { border: 0 }` has the
+same specificity as `body.v3 .oa-card.oa-sponsored` (0,4,1 against 0,4,1 —
+three classes and an element each) and sits ~600 lines LATER in the same file,
+so load order decided it: the rail painted perfectly on the jobs page and was
+silently blanked on the one-pager's teaser. The browser guard measured it on
+`jobs.html` and nowhere else, so everything stayed green. It is the
+"specificity AND load order" trap this file already records for the Leaflet
+attribution box, and the lesson generalises: **a rule that can be beaten by a
+rule of equal weight further down the file is not a rule** — win on
+specificity, and measure the thing on every surface it is drawn on, not just
+the first.
 That is the trap already recorded under the Excel button, and `selftest.mjs`
 pins both files. The badge names its own INK as well as its ground, or the base
 `.oa-label`'s `#fff` would paint it white on white; the rail is a `border-left`

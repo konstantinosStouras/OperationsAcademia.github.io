@@ -975,7 +975,11 @@
               return (b.posted || '').localeCompare(a.posted || '');
             }).slice(0, 10);
           },
-          sort: function (a, b) { return (b.posted || '').localeCompare(a.posted || ''); },
+          /* The SELECTION is still the ten most recent (prepare, above) —
+             what changes here is only their ORDER, so the sponsor leads the
+             card without the heading becoming false. A posting outside the
+             newest ten is still not shown, sponsored or not. */
+          sort: function (a, b) { return OASponsors.compare(a, b); },
           filters: [],
           onCard: function (li, r) {
             OASponsors.markCard(li, r);

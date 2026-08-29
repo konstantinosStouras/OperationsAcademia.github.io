@@ -1892,6 +1892,14 @@ body.v3 .v3-panel .oa-card {
   border-bottom: 1px solid var(--line);
 }
 body.v3 .v3-panel .oa-card:last-child { border-bottom: 0; }
+/* …and the sponsor's rail SURVIVES that reset. The rule above sets
+   `border: 0` on a panel card and sits ~600 lines BELOW the sponsor rule, at
+   the same specificity (0,3,1 each) — so load order decided it and the rail
+   was silently blanked on the one-pager's teaser while working perfectly on
+   the jobs page. Exactly the "specificity AND load order" trap CLAUDE.md
+   records for the Leaflet attribution box. The extra class wins outright
+   (0,4,1) rather than relying on being later in the file. */
+body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor); }
 @media (hover: hover) and (pointer: fine) {
   body.v3 .v3-panel .oa-card:hover {
     box-shadow: none; border-color: var(--line); background: var(--bg-3);
