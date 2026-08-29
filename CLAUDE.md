@@ -1218,6 +1218,126 @@ publishes it within a minute of its arrival. A backlog submission the site is
 NOT showing is announced — that is exactly the held-candidates case. Above
 `BURST` (12) a batch goes as one list, sharing the review mailer's reasoning.
 
+### …and the maintainer's e-mail says WHO posted it
+
+Owner, 2026-08-29: *"include to the email sent to the admin (and only) who made
+such a posting. If it was a user show their name and email … else show 'Posted
+by: auto-crawler from..' e.g. the JM Google Sheet."*
+
+Two roads reach the jobs page and only a person walks one of them, and from the
+maintainer's inbox the two were indistinguishable: the review e-mail and the
+submission e-mail carried the same fields and neither said where the posting had
+come from, so "did somebody send this, and who?" could only be answered by
+opening the Admin area and finding the card.
+
+**`postedBy(doc, row)` in `jobs-model.mjs` is the one definition**, because both
+mailers need the same answer and two copies of one rule disagree silently — the
+reason `oa-countries.js`, `oa-schools.js` and `oa-jobnav.js` all exist. It lives
+there because that file already owns `source`, which is the field that settles
+it.
+
+**THE SOURCE WINS OVER THE DOCUMENT.** A tracking-sheet MIRROR is an ordinary
+`jobSubmissions` document the moment the maintainer edits it (`sheetHandover`),
+so "a document exists, therefore a person made it" would report the workbook's
+own rows as somebody's submission with no name on it. A source `CRAWLER_SOURCES`
+knows is a crawler whatever else the document carries; only then is a person
+looked for. A source nobody here knows is named as ITSELF rather than guessed at
+or dropped, and a document with neither says *"not recorded"* — a blank line in
+a message whose whole point is to answer this question is worse than an honest
+one.
+
+The review mailer supplies the source as a FACT about its own collection
+(`jobReviews` holds the tracking sheet's rows and nothing else), so a document
+written before the row carried one still reads as the crawler; that is a fact,
+not a second rule, and `postedBy` goes on answering from the data for every
+other caller. It links the workbook where `data/jobmarket-sheets.json` names the
+current one — never a hard-coded id, because "one workbook per cycle" is that
+file's whole premise.
+
+**"(AND ONLY)" IS THE HALF A TEST HAS TO HOLD.** The address is the maintainer's
+to see and nobody else's: it is not in `PUBLIC_FIELDS`, so it never reaches
+`data/`; `stripRowEmails` keeps it out of the text there; and it must never be in
+the e-mail the POSTER receives, which is checked by slicing that renderer out of
+the mailer's source and asserting it reaches for no admin-only field. **That
+slice is bounded at BOTH ends and its length asserted** — this file's own
+selftest fixtures name `chairEmail` a few hundred lines further down, and a slice
+taken on the wrong marker passes every negative check by vacuity.
+
+### …and the POSTER hears when their posting goes live
+
+The same message: *"any user who submits a job posting, should receive an email
+with the details of their posting once it becomes publicly shown on the website,
+and thank them for using OperationsAcademia.org and wishing them all the best to
+fill their position."*
+
+The site told them nothing after the thank-you screen, which said in as many
+words that no confirmation e-mail would be sent. They had a reference number and
+a promise of "a few minutes", and no way to know the minutes had passed short of
+going and looking. That copy is now false and was corrected in the same change,
+along with the Privacy Policy — a site that sends a message and says so nowhere
+is wrong whatever its rules allow.
+
+    partitionLive        WHEN, in _scraper/submissions-review.mjs (pure)
+    renderLivePostingEmail  WHAT, in _scraper/submissions-mailer.mjs
+    thankPosters         the pass, off the same read as the maintainer's
+
+**"PUBLICLY SHOWN" IS MEASURED, NEVER ASSUMED.** The condition is that the
+posting's row is in the served `data/jobs.json` this run has just read — the same
+set `partitionSubmissions` already reads for its grandfather rule. So the e-mail
+cannot go out ahead of the build, cannot go out for a posting a guard held back,
+and cannot claim a link that would 404. **What it prints is the SERVED row**, so
+a name the build canonicalised, a deadline it healed and the market years it
+derived read exactly as a visitor reads them — and it is built from that row
+rather than from the document, which is structurally why the chair's details and
+the private note cannot be in it.
+
+**The link is `OAJobNav.hrefFor`**, the site's own page rule, so a posting whose
+season has rolled opens on Previous markets rather than on a jobs page that by
+definition cannot contain it — the defect that module was written for.
+
+**ONE MARK PER THING THAT CAN HAPPEN.** `liveMailedAt` joins `announcedAt` and
+`reviewedAt` rather than sharing either: an SMTP hiccup on the maintainer's copy
+must not make the poster unthankable, a tick on the Admin area must not silence
+an e-mail, and **a correction must not thank anybody twice** — saving an edit
+sets `status` back to `queued` and re-publishes the posting, and the stamp being
+already there is the whole of what makes that safe. Sent first, stamped after,
+like every other mark here.
+
+**A submission with no reachable address is skipped ENTIRELY** — neither mailed
+nor stamped — because an address can be added by a later correction, and a stamp
+would make that correction unthankable for ever. That is also what makes a
+claimed sheet mirror harmless here: it carries no person, so it is passed over
+rather than written off.
+
+**It has its OWN grandfather date, `LIVE_SINCE`.** Every posting ever made
+through the form is live and unthanked on the first run, and thanking a year of
+them at once is a mail-out nobody asked for from an address that has never
+written to them; those are stamped silently. Sharing `SINCE` — the maintainer
+announcement's, set when that shipped ten days earlier — would have done exactly
+that. **Two features, two ship dates, two dates.** Moving `LIVE_SINCE` back is
+the one-line way to reach postings made before it, and it will write to every
+poster the served file carries from that day on.
+
+**JOB POSTINGS ONLY, and deliberately.** A candidate profile is HELD until the
+reveal date and appears with everyone else's on the day; "your profile is live"
+is a different message with a different trigger. The capability is `tellsPoster`
+on the kind, so a second kind is one entry in `KINDS` rather than a branch in the
+mailer.
+
+**No rules change, and that is pinned rather than remembered.**
+`jobSubmissions` has no `keys().hasOnly()` and no key ceiling on its owner's
+update, so an Admin-SDK stamp cannot freeze a posting against its own owner —
+the `sync-user-directory` trap. `announcedAt` and `reviewedAt` are already
+written the same way.
+
+Tests: `testPostedByAndLiveEmail` in `_scraper/selftest.mjs` (the shared rule
+both ways, the source-wins case, that the poster's e-mail carries nothing
+private, that "publicly shown" is measured against the served file, the
+once-only mark, the no-address skip, the rules claim, and the corrected copy on
+both pages), plus each mailer's own `--selftest` — the review one for the line
+and the workbook link, the submissions one for the whole poster e-mail rendered
+end to end.
+
 ## Nothing on "What's new" publishes itself either
 
 `changelog.json` says WHAT was announced. Firestore `newsOverrides/{changelog

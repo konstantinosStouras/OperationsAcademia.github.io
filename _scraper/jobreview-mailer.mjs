@@ -40,11 +40,19 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import path from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
 import { COLLECTION, needMail, applyEdits } from './jobreview.mjs';
-import { longDate } from './jobs-model.mjs';
+import { longDate, postedBy } from './jobs-model.mjs';
+import { sheetEditUrl, SOURCE as SHEET_SOURCE } from './jobmarket-sheet.mjs';
 import {
-  shell, esc, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
+  shell, esc, safeUrl, send, transport, toPlain, firestore, fromAddress, SITE, CONTACT,
 } from './_mail.mjs';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const DATA = path.join(HERE, '..', 'data');
 
 const argv = process.argv.slice(2);
 const has = (f) => argv.includes(f);
@@ -149,7 +157,33 @@ function advertHtml(doc) {
     '</p>';
 }
 
-export function renderReviewEmail(doc, { site = SITE } = {}) {
+/**
+ * WHO put this posting in the queue — the line the owner asked for
+ * (2026-08-29), so the maintainer's inbox says where a posting came from
+ * without their having to open the Admin area and find the card.
+ *
+ * Every posting on this road is the crawler's by definition, so the line
+ * names the WORKBOOK rather than a person, and links to it where the sync's
+ * own registry says which one is current. `postedBy` is the shared rule
+ * (jobs-model.mjs), so this e-mail and the submissions one cannot disagree
+ * about what a source is called.
+ */
+function postedByHtml(doc, sheetUrl) {
+  /* This queue holds the tracking sheet's rows and nothing else, so the source
+     is known even for a document written before the row carried one — supplied
+     here as a FACT about the collection rather than guessed at inside
+     `postedBy`, which must go on answering from the data for every other
+     caller. */
+  const row = (doc && doc.row) || {};
+  const who = postedBy({ source: row.source || SHEET_SOURCE }, row);
+  const link = safeUrl(sheetUrl);
+  return '<p style="margin:0 0 14px;color:#5a5f6b;font-size:13px">' +
+    '<strong style="color:#222">Posted by:</strong> ' + esc(who.text) +
+    (link ? ' &middot; <a href="' + esc(link) + '">open the workbook</a>' : '') +
+    '</p>';
+}
+
+export function renderReviewEmail(doc, { site = SITE, sheetUrl = '' } = {}) {
   const r = shown(doc);
   const title = [r.institution, r.department].filter(Boolean).join(' — ');
   const reviewUrl = site + '/admin-area';
@@ -159,6 +193,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
   const bodyHtml =
     '<p>A job posting has been read from your tracking sheet and is waiting for ' +
     'you to approve it. <strong>It is not on the site yet.</strong></p>' +
+    postedByHtml(doc, sheetUrl) +
     dupHtml(doc) +
     bizHtml(doc) +
     advertHtml(doc) +
@@ -197,7 +232,7 @@ export function renderReviewEmail(doc, { site = SITE } = {}) {
  * waiting, and the decision is made on the page, where every field is editable
  * anyway.
  */
-export function renderDigestEmail(docs, { site = SITE } = {}) {
+export function renderDigestEmail(docs, { site = SITE, sheetUrl = '' } = {}) {
   const reviewUrl = site + '/admin-area';
   const rows = docs.map((d) => {
     const r = shown(d);
@@ -212,10 +247,22 @@ export function renderDigestEmail(docs, { site = SITE } = {}) {
       '</td></tr>';
   }).join('');
 
+  /* The whole batch came down one road, so the line the owner asked for is
+     said ONCE here rather than repeated against every row — which is the same
+     reasoning that makes a burst one message in the first place. */
+  const first = docs[0] || {};
+  const who = postedBy({ source: (first.row && first.row.source) || SHEET_SOURCE },
+                       first.row || {});
+  const sheet = safeUrl(sheetUrl);
+
   const bodyHtml =
     '<p><strong>' + docs.length + ' job postings</strong> have been read from your ' +
     'tracking sheet and are waiting for you to approve them. ' +
     '<strong>None of them is on the site yet.</strong></p>' +
+    '<p style="margin:0 0 14px;color:#5a5f6b;font-size:13px">' +
+      '<strong style="color:#222">Posted by:</strong> ' + esc(who.text) +
+      (sheet ? ' &middot; <a href="' + esc(sheet) + '">open the workbook</a>' : '') +
+    '</p>' +
     '<p>They came in together, so they are listed here rather than sent one by one.</p>' +
     '<table style="border-collapse:collapse;font-size:14px;margin:14px 0">' + rows + '</table>' +
     '<p><a href="' + esc(reviewUrl) + '" style="display:inline-block;background:#426394;' +
@@ -234,6 +281,24 @@ export function renderDigestEmail(docs, { site = SITE } = {}) {
 
 /* -------------------------------------------------------------------- main */
 
+/**
+ * Where the workbook these postings came from actually lives.
+ *
+ * Read from the sync's OWN registry (data/jobmarket-sheets.json), never
+ * hard-coded: "one workbook per cycle" is the whole premise of that file, and
+ * the intro-tab chain rolls the current one over by itself. A registry that
+ * cannot be read simply means no link — the e-mail is about the posting, not
+ * about the spreadsheet.
+ */
+async function currentSheetUrl() {
+  try {
+    const reg = JSON.parse(await readFile(path.join(DATA, 'jobmarket-sheets.json'), 'utf8'));
+    return reg && reg.current ? sheetEditUrl(reg.current) : '';
+  } catch {
+    return '';
+  }
+}
+
 async function main() {
   const db = await firestore();
   if (!db) {
@@ -241,6 +306,8 @@ async function main() {
     log('(this is the expected state until the project is set up: _SETUP-FIREBASE.md)');
     return 0;
   }
+
+  const sheetUrl = await currentSheetUrl();
 
   const snap = await db.collection(COLLECTION).where('status', '==', 'pending').get();
   const docs = snap.docs.map((d) => d.data()).filter((d) => d && d.rowId);
@@ -271,7 +338,7 @@ async function main() {
      postings. A failure to stamp is reported and the run carries on: the
      e-mail has gone, and leaving the rest unstamped would send it again. */
   if (due.length > BURST) {
-    const { subject, html } = renderDigestEmail(due);
+    const { subject, html } = renderDigestEmail(due, { sheetUrl });
     log(`${due.length} postings arrived together — announcing them as one list.`);
     if (DRY) {
       log(`--- digest\nTo: ${TO}\nSubject: ${subject}\n${toPlain(html)}\n`);
@@ -294,7 +361,7 @@ async function main() {
 
   let sent = 0;
   for (const doc of due) {
-    const { subject, html } = renderReviewEmail(doc);
+    const { subject, html } = renderReviewEmail(doc, { sheetUrl });
 
     if (DRY) {
       log(`--- ${doc.rowId}\nTo: ${TO}\nSubject: ${subject}\n${toPlain(html)}\n`);
@@ -337,6 +404,7 @@ function selftest() {
       id: 'x', institution: 'Example University', department: 'Operations',
       posted: '2026-08-15', year: 2027, applyBy: 'Until filled.', applyByDate: '',
       levels: ['Assistant Professor'], country: 'United States',
+      source: 'jobmarket-sheet',
       adUrl: 'https://www.higheredjobs.com/faculty/details.cfm?JobCode=1',
     },
     edits: {},
@@ -346,6 +414,27 @@ function selftest() {
   ok(/Example University/.test(mail.subject), 'the subject names the posting');
   ok(/not on the site yet/i.test(mail.html), 'the body says it is not published');
   ok(mail.html.includes('https://example.org/admin-area'), 'and links to the review page');
+
+  /* WHO PUT IT THERE (owner, 2026-08-29). Every posting on this road is the
+     crawler's, so the line names the WORKBOOK and never a person — and the
+     link to it is offered only when the sync's registry could say which
+     workbook is current, never invented. */
+  ok(/Posted by:/.test(mail.html), 'the e-mail says where the posting came from');
+  ok(/auto-crawler from the OM Job Market tracking sheet/.test(mail.html),
+    'naming the crawler and the workbook it read');
+  ok(!/Posted by:[\s\S]{0,80}@/.test(mail.html),
+    'and never a person — a sheet row has no submitter to name');
+  const linked = renderReviewEmail(doc, { sheetUrl: 'https://docs.google.com/x/edit' });
+  ok(/https:\/\/docs\.google\.com\/x\/edit/.test(linked.html),
+    'the workbook is linked where the registry names one');
+  ok(!/open the workbook/.test(mail.html),
+    'and not linked at all when it does not — never a guessed address');
+  ok(/auto-crawler from the OM Job Market tracking sheet/.test(
+       renderReviewEmail({ ...doc, row: { ...doc.row, source: '' } }).html),
+    'a document written before the row carried a source still reads as the crawler — ' +
+    'this queue holds nothing else');
+  ok(!renderReviewEmail(doc, { sheetUrl: 'javascript:alert(1)' }).html.includes('javascript:'),
+    'a URL that is not http(s) is dropped, not rendered as an href');
 
   /* The e-mail must show what APPROVING would publish, not the raw sheet row —
      otherwise a correction already typed in the browser is invisible in the
@@ -443,6 +532,8 @@ function selftest() {
     'the one flagged posting is marked as a possible duplicate, and only it');
   ok(!/half an hour/.test(digest.html) && !/half an hour/.test(mail.html),
     'no e-mail still promises the retired half-hour cadence — approving publishes in minutes');
+  ok((digest.html.match(/Posted by:/g) || []).length === 1,
+    'a digest says where they came from ONCE for the batch — one road, one answer');
 
   console.log(fails.length
     ? `jobreview-mailer selftest: ${pass} passed, ${fails.length} FAILED\n  ` + fails.join('\n  ')
