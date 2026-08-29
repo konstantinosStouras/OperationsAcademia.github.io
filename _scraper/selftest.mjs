@@ -73,7 +73,8 @@ import {
   KINDS as SUB_KINDS, ANNOUNCED_AT as SUB_ANNOUNCED_AT,
   REVIEWED_AT as SUB_REVIEWED_AT, LIVE_MAILED_AT as SUB_LIVE_MAILED_AT,
   LIVE_SINCE as SUB_LIVE_SINCE, SINCE as SUB_SINCE,
-  partitionSubmissions, partitionLive, rowsById, isWaiting, createdDay,
+  partitionSubmissions, partitionLive, servedIndex, matchServed,
+  isWaiting, createdDay,
 } from './submissions-review.mjs';
 import { safeName, driveFileName, explain, multipartBody } from './drive-upload.mjs';
 import { unzipStore, sheetCells, lastRow } from './_xlsx-read.mjs';
@@ -9232,22 +9233,67 @@ async function testPostedByAndLiveEmail() {
   };
   const row = job.row(doc.data);
 
-  eq(partitionLive(job, [doc], { published: rowsById([]) }).mail.length, 0,
+  eq(partitionLive(job, [doc], { published: servedIndex([]) }).mail.length, 0,
     'a posting the served file does not carry is not announced as live');
-  eq(partitionLive(job, [doc], { published: rowsById([row]) }).mail.length, 1,
+  eq(partitionLive(job, [doc], { published: servedIndex([row]) }).mail.length, 1,
     '…and one it does carry is');
+
+  /* THE JOIN KEY IS THE FORM'S OWN REFERENCE, NOT A RE-DERIVED ID.
+     `jobId` is (market year, institution, posting date) and names no
+     department, so colleagues at one school posting on one day derive ONE
+     id and the build renumbers them; a pass that re-derived it sent each of
+     them the first one's posting. FOUR of the thirteen form postings the
+     site is showing today carry such a suffix, from two same-day groups six
+     days apart — so this is the ordinary case, not a corner. */
+  const sibDocs = ['Information Systems', 'Management Science'].map((unit, i) => ({
+    id: 's' + i,
+    data: { ...doc.data, unit, ref: 'OA-JOB-S' + i, email: `s${i}@x.edu` },
+  }));
+  const sibRows = assignIds(sibDocs.map((d) => ({ row: job.row(d.data) }))).map((e) => e.row || e);
+  eq(new Set(sibRows.map((r) => r.id)).size, 2,
+    'the build gives same-day siblings distinct ids');
+  eq(job.row(sibDocs[0].data).id === job.row(sibDocs[1].data).id, true,
+    '…which the submissions themselves cannot derive: both derive ONE id');
+  const sibMail = partitionLive(job, sibDocs, { published: servedIndex(sibRows) }).mail;
+  eq(sibMail.length, 2, 'both siblings are due');
+  eq(sibMail.every((m) => m.published.ref === m.data.ref), true,
+    'and each is matched to its OWN row, by the reference the form issued');
+
+  /* NOT SURE MEANS DO NOTHING. A reference the file does not carry is a
+     posting that has not published yet (or that collapseSameDay folded into
+     a sibling) — never an invitation to fall back to a key that can pick the
+     wrong row, and never a stamp, so a later run can still get it right. */
+  const miss = partitionLive(job, [{ id: 'm1', data: { ...doc.data, ref: 'OA-JOB-NOPE' } }],
+    { published: servedIndex(sibRows) });
+  eq(miss.mail.length + miss.grandfather.length, 0,
+    'a submission whose reference is not in the served file is passed over entirely');
+
+  eq(matchServed({ ref: 'OA-JOB-S1' }, null, servedIndex(sibRows)).ref, 'OA-JOB-S1',
+    'matchServed resolves by reference with no row at all');
+  eq(matchServed({ ref: '', publishedId: sibRows[1].id }, null, servedIndex(sibRows)).id,
+    sibRows[1].id, 'and by the publishedId the build stamped, for a document with no reference');
+  eq(matchServed({ ref: '' }, sibRows[0], servedIndex(sibRows)), null,
+    'but never onto a row carrying a reference of its own — that row is somebody else\'s');
+
+  /* A CRAWLED POSTING THANKS NOBODY. Once the maintainer edits a
+     tracking-sheet mirror it is an ordinary submission carrying THEIR
+     address, and "thank you for using OperationsAcademia.org" would be sent
+     to the person who runs the site about a row read out of a spreadsheet. */
+  eq(partitionLive(job, [{ id: 'mir', data: { ...doc.data, source: 'jobmarket-sheet' } }],
+    { published: servedIndex([row]) }).mail.length, 0,
+    'a claimed tracking-sheet mirror is never thanked for posting anything');
 
   /* THE ROW IT PRINTS IS THE ROW THE SITE PRINTS. `partitionLive` hands the
      SERVED row on, so a name the build canonicalised or a deadline it healed
      reads in the e-mail exactly as a visitor reads it. */
   const served = { ...row, institution: 'Tulane University (healed)' };
-  eq(partitionLive(job, [doc], { published: rowsById([served]) }).mail[0].published.institution,
+  eq(partitionLive(job, [doc], { published: servedIndex([served]) }).mail[0].published.institution,
     'Tulane University (healed)',
     'and what it carries is the SERVED row, not the poster’s own document');
 
   /* ---- exactly once, which is what makes an EDIT safe -------------------- */
   eq(partitionLive(job, [{ ...doc, data: { ...doc.data, [SUB_LIVE_MAILED_AT]: 'x' } }],
-    { published: rowsById([row]) }).mail.length, 0,
+    { published: servedIndex([row]) }).mail.length, 0,
     'a poster already thanked is never thanked again — correcting a posting sets its ' +
     'status back to queued and re-publishes it, and that must not send a second e-mail');
 
@@ -9259,7 +9305,7 @@ async function testPostedByAndLiveEmail() {
 
   /* ---- an address that is not there yet is not written off --------------- */
   const noAddr = partitionLive(job, [{ id: 'p2', data: { ...doc.data, email: '', authEmail: '' } }],
-    { published: rowsById([row]) });
+    { published: servedIndex([row]) });
   ok(!noAddr.mail.length && !noAddr.grandfather.length,
     'a submission with no reachable address is skipped ENTIRELY — a stamp would make ' +
     'an address added by a later correction unthankable for ever');
@@ -9299,8 +9345,20 @@ async function testPostedByAndLiveEmail() {
   ok(subMailer.includes(SUB_LIVE_MAILED_AT), 'and stamps what the model named');
   ok(/oa-jobnav\.js/.test(subMailer),
     'the link is built by the site’s own page rule — a rolled season is on the archive');
+  ok(/name-fixes\.json/.test(subMailer) && /fixes\s*\}\)/.test(subMailer),
+    'and the mailer derives a row under the SAME approved name corrections the build applies, ' +
+    'so the fallback join cannot silently diverge from what was published');
   ok(/replyTo: CONTACT/.test(subMailer),
     'and a reply from the poster reaches a person, not the sending mailbox');
+
+  /* A DISPATCHED --dry-run PRINTS INTO A PUBLIC ACTIONS LOG, so it may not
+     name the recipient — the same "nothing public carries an address" rule
+     the served files are held to, applied to the one line here that held a
+     real person's e-mail. */
+  const dryLine = (subMailer.match(/log\(`\\n--- would send to the poster[^`]*`\)/) || [])[0] || '';
+  ok(dryLine, 'the dry run still says what it would send');
+  ok(!/entry\.to|\bto\b\s*\}/.test(dryLine),
+    'but names the DOCUMENT, never the address — a dispatched dry run is a public log');
 
   /* The panels must not learn the poster's mark: it is the mailer's, and a
      browser writing it would silence an e-mail that had never been sent. */

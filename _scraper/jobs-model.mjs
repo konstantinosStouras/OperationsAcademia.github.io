@@ -358,7 +358,12 @@ export function postedBy(doc, row = null) {
              text: `auto-crawler from ${label}` };
   }
 
-  const name = [text(d.firstName, 100), text(d.lastName, 100)].filter(Boolean).join(' ');
+  /* `firstName`/`lastName` on a job posting, `first`/`last` on a candidate
+     profile — two forms, two field names, one question. Reading only the
+     first pair made every candidate announcement say "Posted by:" and then
+     a bare address, with the name the profile carries sitting unused. */
+  const name = [text(d.firstName || d.first, 100),
+                text(d.lastName || d.last, 100)].filter(Boolean).join(' ');
   const email = contactEmail(d);
   if (name || email) {
     return { kind: 'user', name, email, source, label: sourceLabel(source),
