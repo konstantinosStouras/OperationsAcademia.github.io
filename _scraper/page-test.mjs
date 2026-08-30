@@ -6684,6 +6684,89 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* --- WITH EVERY SOURCE ANSWERING AT ONCE ------------------------------
+
+     The state nothing else here drives: GA4's dimensions AND the site's own
+     resolver both populated. Two defects lived exactly there and in no other
+     combination, which is why both survived a green suite — one measured, one
+     self-contradictory, neither reachable from a fixture that had only half
+     the data. */
+
+  {
+    for (const width of [1400, 1180, 1024]) {
+      const ctx = await browser.newContext({ viewport: { width, height: 1400 } });
+      const q = await ctx.newPage();
+      q.on('pageerror', (e) => jsErrors.push('analytics full: ' + e.message));
+      await q.route('**/firebasejs/**', (r) => r.abort());
+      await serveDemo(q, demo);          // carries breakdowns, engagement AND universities
+      await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+      await q.waitForSelector('.oa-tile', { timeout: 15000 });
+
+      /* A SIXTH TILE ORPHANS, which is why the length and the depth of a visit
+         share one. Measured as the geometry rather than asserted as a count:
+         what matters is that the strip never ends with a tile alone on a row
+         of its own, whatever the tiles happen to be. */
+      const strip = await q.evaluate(() => {
+        const t = [...document.querySelectorAll('.oa-tile')];
+        const tops = [...new Set(t.map((e) => Math.round(e.getBoundingClientRect().top)))];
+        const last = tops[tops.length - 1];
+        return {
+          n: t.length,
+          rows: tops.length,
+          lastRow: t.filter((e) => Math.round(e.getBoundingClientRect().top) === last).length,
+          labels: t.map((e) => e.querySelector('.oa-tile-label').textContent),
+        };
+      });
+      ok(strip.n >= 5, `analytics (${width}px): the full dataset draws the whole tile strip`);
+      ok(strip.rows === 1 || strip.lastRow > 1,
+        `analytics (${width}px): no tile is left alone on a row of its own ` +
+        `(${strip.n} tiles over ${strip.rows} row(s), last row holds ${strip.lastRow})`);
+      ok(!strip.labels.includes('Universities seen'),
+        `analytics (${width}px): the universities count is not a sixth tile — its ` +
+        'own figure carries it');
+      await ctx.close();
+    }
+  }
+
+  /* --- ONE FIGURE PRESENT, THE OTHER NOT --------------------------------
+
+     GA4 is configured and the visit resolver is not deployed, which is this
+     installation's REAL state today. The countries caption used to point at
+     "Which universities visited" below while the page listed that same figure
+     under "Not on this page yet" — a page contradicting itself in the one
+     combination no fixture covered. */
+
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1180, height: 1400 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics half: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, { ...demo,
+      universities: { frozen: false, from: '', to: '', all: [], recent: [] },
+      totals: { ...demo.totals, universities: 0 } });
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    const half = await q.evaluate(() => {
+      const subOf = (name) => [...document.querySelectorAll('.oa-figure')]
+        .filter((s) => new RegExp(name).test((s.querySelector('h2') || {}).textContent || ''))
+        .map((s) => (s.querySelector('.oa-figure-sub') || {}).textContent || '')[0] || '';
+      return {
+        countries: subOf('Where readers are'),
+        missing: [...document.querySelectorAll('.oa-an-missing li')].map((e) => e.textContent),
+        heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
+      };
+    });
+    ok(half.countries.length > 20, 'analytics: the countries figure is drawn (or the next check is vacuous)');
+    ok(!half.heads.includes('Which universities visited'),
+      'analytics: …and the universities figure is NOT, which is the combination under test');
+    ok(!/Which universities visited/.test(half.countries),
+      'analytics: a drawn figure never points at one the same page lists as missing — ' +
+      'two optional figures cannot promise each other');
+    ok(half.missing.includes('Which universities visited'),
+      'analytics: …the absent figure is named as missing, as every absent figure is');
+    await ctx.close();
+  }
+
   /* --- a dataset with no dimensions at all, which is what ships today ---
 
      The five figures above must be ABSENT rather than empty. A heading over a

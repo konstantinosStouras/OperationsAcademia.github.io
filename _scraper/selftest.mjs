@@ -10976,6 +10976,53 @@ async function testUniversityVisits() {
       'and saying otherwise is what nearly kept them from being rebuilt');
   }
 
+  /* --- NO FIGURE'S CAPTION NAMES ANOTHER FIGURE -------------------------
+     Two optional figures cannot promise each other. "Where readers are" comes
+     from a GA4 breakdown and "Which universities visited" from the site's own
+     resolver, and they are drawn on INDEPENDENT conditions — so a caption that
+     cross-referenced the other one produced, on the live shape of the data
+     (GA4 configured, the Cloud Functions not yet deployed), a page saying "see
+     the figure below" directly above its own note listing that figure under
+     "Not on this page yet". Measured in a browser, then removed. */
+  const pagejsRaw = await readFile(path.join(root, 'assets', 'oa-analytics.js'), 'utf8');
+  /* READ WITH THE COMMENTS STRIPPED. Both blocks below now EXPLAIN the defect
+     they no longer have, and a guard that cannot tell the explanation from the
+     thing can only be satisfied by deleting the explanation — the trap this
+     repository already records for the analytics page's "no iframes" check,
+     walked into twice on the very checks that removed these two. */
+  const pagejs = pagejsRaw.replace(/\/\*[\s\S]*?\*\//g, '');
+  const dimBlock = pagejs.slice(pagejs.indexOf('var DIMENSIONS = ['),
+    pagejs.indexOf('var state = {'));
+  ok(dimBlock.length > 500, 'the DIMENSIONS table was found (or the check below is vacuous)');
+  ok(!/Which universities visited/.test(dimBlock),
+    'no DIMENSION caption names the universities figure — the two are drawn on ' +
+    'independent conditions, so a cross-reference is a promise the page cannot keep');
+  const uniFn = pagejs.slice(pagejs.indexOf('function renderUniversities'));
+  ok(uniFn.length > 500, 'renderUniversities was found');
+  const uniBody = uniFn.slice(0, uniFn.indexOf('function renderProvenance'));
+  for (const other of ['Where readers are', 'How readers arrive', 'What they read it on']) {
+    ok(!uniBody.includes(other),
+      `…and the universities caption names no other figure either (${other})`);
+  }
+
+  /* --- AND THE TILE STRIP STAYS AT FIVE ----------------------------------
+     A sixth tile lands alone on a second row at 1400px, 1180px and 1024px —
+     which is why the length and the depth of a visit were folded into one.
+     "Universities seen" was the sixth the moment that tile arrived, so the
+     count moved into the universities figure's own caption. */
+  const tiles = pagejs.slice(pagejs.indexOf('function renderTiles'),
+    pagejs.indexOf('/* ---------------------------------------------------------------- figures'));
+  ok(tiles.length > 500, 'renderTiles was found (or the count below is vacuous)');
+  const tileCalls = (tiles.match(/html \+= tile\(/g) || []).length;
+  ok(tileCalls <= 5,
+    `the headline strip draws at most five tiles (found ${tileCalls}) — a sixth ` +
+    'orphans onto a row of its own at every width the page is read at');
+  ok(!/Universities seen/.test(tiles),
+    '…and the universities count is not one of them: it is a fact about ONE ' +
+    'figure rather than a headline about the corpus, and its caption carries it');
+  ok(/universit/i.test(uniBody) && /u\.all\.length/.test(uniBody),
+    '…which the caption really does — the count is not simply lost');
+
   /* --- the Privacy Policy discloses what is derived from an address ------- */
 
   const pp = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');

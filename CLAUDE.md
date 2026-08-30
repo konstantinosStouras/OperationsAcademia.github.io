@@ -2881,6 +2881,39 @@ RECOUNTING the mistake in order to correct it), plus the universities block in
 `_scraper/page-test.mjs` (a live section carrying no archive chip and printing
 its own coverage, and an archived one still labelled with its range).
 
+### Two figures that are each OPTIONAL cannot promise each other
+
+Both of these shipped in the merge that brought the universities figure back
+beside PR #109's five GA4 ones, both survived a green suite, and both live in
+exactly one combination of the data — which is the whole lesson: a page
+assembled from independently-gated figures has a state space, and a fixture
+carrying half the data cannot reach most of it.
+
+**A caption that names another figure is a promise the page may break.**
+"Where readers are" is drawn when GA4 answers; "Which universities visited" is
+drawn when the site's own resolver has data. On THIS installation today the
+first is configured and the second is not deployed — so the countries caption
+said "the coarser companion to *Which universities visited* below" directly
+above the page's own note listing that figure under **Not on this page yet**.
+Neither caption names the other now. Each describes itself, which is the only
+formulation true under all four combinations.
+
+**And the tile strip caps at FIVE.** #109 measured that a sixth orphans onto a
+row of its own and folded the length and the depth of a visit into one tile to
+stay at five; the merge then left "Universities seen" in, which is the sixth
+the moment both are present — measured 6 tiles over 2 rows with **one alone on
+the second** at 1400px, 1180px and 1024px. The count moved into the
+universities figure's own caption, where a fact about ONE figure belongs.
+
+**The guards for both had to be re-read with comments stripped**, because each
+block now EXPLAINS the defect it no longer has — the trap this file already
+records for the analytics page's "no iframes" check, walked into twice on the
+very checks that removed these. And the browser half drives the two states no
+other fixture reaches: **every source answering at once** (three widths, the
+strip asserted never to end with a lone tile — geometry, not a count, so it
+holds whatever the tiles become) and **one figure present with the other
+absent** (a drawn figure never points at one the same page lists as missing).
+
 ### The two rules the charts themselves had to learn
 
 * **A month the record has not covered is not a month with no visitors.** Under
