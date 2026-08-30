@@ -196,7 +196,7 @@ nothing*, and the committed file stands (see `build-analytics.mjs`).
 `data/analytics-history.json` will therefore never exist, and the reader for
 it stays in place as a documented recovery path rather than being deleted —
 the same reasoning CLAUDE.md records for keeping `repository_dispatch:
-[oa-jobs-changed]` wired while the functions are undeployed. If a copy ever
+[oa-jobs-changed]` wired through the months when nothing dispatched it. If a copy ever
 surfaces (an old export, a colleague's download, a backup), drop it in as:
 
 ```json
@@ -255,8 +255,12 @@ firebase deploy --only functions --project operations-academia
 That is the whole of it — no secret, no variable. **Nothing is collected until
 that runs**, and the collection stays empty, so the builder logs
 `visits: universityVisits is empty` and the page simply does not draw the
-figure. (The same command also deploys the three instant-publish doorbells,
-which have never been deployed either — see `_SETUP-INSTANT-PUBLISH.md`.)
+figure. **Run it from an up-to-date checkout and read the deployed list back
+against `_functions/index.js`**: the run on 2026-08-30 deployed from a clone
+that predated this function, printed `Deploy complete!` over the other three,
+and never mentioned it — which is exactly how a function comes to be missing
+with nothing anywhere saying so. (Those three instant-publish doorbells have
+been live since 2026-08-27 — see `_SETUP-INSTANT-PUBLISH.md`.)
 
 **Check the URL the deploy prints** against `ENDPOINT` at the top of
 `assets/oa-visit.js`, which expects the classic form:

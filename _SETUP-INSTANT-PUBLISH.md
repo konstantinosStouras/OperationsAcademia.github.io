@@ -23,11 +23,31 @@ The workflows themselves are unchanged and their schedules stay as the safety
 net, so nothing is lost if the functions are down — changes just take up to 20
 minutes again, and an approval up to half an hour.
 
+**THESE THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
+on every decision since. To check rather than trust: filter this repository's
+Actions by `event:repository_dispatch` and read the ACTOR — the function
+carries the PAT from step 1 and shows as a person, where the two verify
+workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
+`oa-jobreview-decided` has no other sender at all, so it is the cleanest of the
+two to read.
+
 **PATHS MOVED WITH THE PROMOTION.** The functions used to live in `v2/`; they
 are at the repository root now, which is also where `firebase.json` is. A
 `cd v2 && firebase deploy` — what the earlier version of this page told you to
 do — deploys nothing, and the doorbell that was never deployed looks exactly
 like a site that is simply slow.
+
+**PULL BEFORE YOU DEPLOY, AND COUNT THE LINES.** `firebase deploy --only
+functions` deploys what is in the working copy, so a clone a few commits behind
+deploys the older set and reports success over it. That is not hypothetical:
+the run on 2026-08-30 printed `Deploy complete!` over three functions when
+`_functions/index.js` on master held four, which is how `recordVisit` (the
+university-visits counter) came to be the one function nobody has switched on.
+Read the deployed list back against `_functions/index.js` every time.
+
+**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30.** The deploy warns about it on
+every run. After that date nothing here deploys until `_functions/package.json`
+names a supported runtime — including an emergency fix.
 
 The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
 build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was

@@ -1231,17 +1231,24 @@
             /* WHAT THIS SAYS HAS TO BE TRUE OF THIS INSTALLATION. It used to
                say "publishing starts now", on the strength of the Cloud
                Function that dispatches the build the moment an approval lands
-               — and that function has never fired here (the
-               `oa-jobreview-decided` dispatch has zero runs, ever), because
+               — and at the time that function had never fired here (the
+               `oa-jobreview-decided` dispatch had zero runs, ever), because
                deploying Functions is a hand step nothing in CI performs. So
                the posting waited for the build's own schedule while the card
                claimed it was already on its way, which is the failure this
                repository names everywhere: a doorbell that was never deployed
                looks exactly like a site that is simply slow.
 
-               It now says what is true either way — the echo puts it in front
-               of the maintainer at once, and the build puts it in front of
-               everyone else — without promising a minute nobody has wired. */
+               `publishOnReview` HAS been deployed since 2026-08-27 and now
+               dispatches on every decision, so "the next build" is a minute
+               away rather than twenty — and the wording below deliberately
+               does NOT say so. A deployment is a hand step outside this
+               repository: it can lapse (one already has, `recordVisit`), and
+               nothing on this page would know. Promising the minute would put
+               the card back in the business of guaranteeing something it
+               cannot see. It says what is true either way — the echo puts it
+               in front of the maintainer at once, and the build puts it in
+               front of everyone else. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
               (act === 'approve'
                 ? 'Approved &mdash; and on your own jobs page straight away. ' +
