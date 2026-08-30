@@ -46,48 +46,45 @@ university-visits counter) was simply absent from that clone, and it exists
 only because the 2026-08-30 deploy that followed ran from a pulled checkout.
 Read the deployed list back against `_functions/index.js` every time.
 
-**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THIS INSTALLATION IS OFF
-IT.** `_functions/package.json` names Node 22 and current SDKs since
-2026-08-30 (`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major
-that removes the namespaced `admin.*` API, which is why `recordVisit` now
-uses the modular one), and the owner's deploy the same day moved the live
-runtime: `firebase functions:list --project operations-academia` reads
-**nodejs22** on all four, which is also the right way to verify any future
-deploy — the list is what is DEPLOYED, where the deploy output is only what
-one run did. Read the deployed list back against `_functions/index.js` as
-always. (Google decommissioned Node 20 deploys on 2026-10-30; had this
-lapsed past that date, nothing here — an emergency fix included — could have
-deployed until it was done.)
+**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER LANDED ON
+2026-08-30.** `_functions/package.json` names Node 22 and current SDKs
+(`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major that removes
+the namespaced `admin.*` API, which is why `recordVisit` now uses the modular
+one), and the deploy carrying them has run: `firebase functions:list` reports
+**all four functions on `nodejs22`**. Nothing is owed before the deadline —
+but read the next paragraph before believing any FUTURE runtime change has
+landed, because the deploy will not tell you.
 
-**TWO DEPLOY FAILURES THAT ARE NOT WHAT THEY SAY, both hit live on the
-upgrade deploy (2026-08-30):**
+**"Skipped (No changes detected)" CANNOT SEE A RUNTIME CHANGE.** The CLI
+decides what to redeploy from one hash, and that hash is
 
-* *"User code failed to load. Cannot determine backend specification.
-  Timeout after 10000"* — with `node_modules` fresh and the module loading in
-  under a second. The CLI gives its discovery round trip 10 seconds flat, and
-  on some machines (this repo lives in a Dropbox folder on Windows) the
-  spawn-serve-poll cycle needs longer than the code does. The knob is an
-  environment variable, in seconds, set in the same window as the deploy:
+    sha1( source-zip-hash + env-vars-hash + secrets-hash )
 
-  ```
-  set FUNCTIONS_DISCOVERY_TIMEOUT=60
-  ```
+(`lib/deploy/functions/cache/hash.js` in firebase-tools). **The runtime is not
+one of its inputs.** So a change that moves ONLY `engines.node` deploys
+nothing and prints `Deploy complete!` over functions still on the old runtime
+— the stale-checkout trap above wearing different clothes, where the deploy
+reports success and the thing you changed did not ship. The Node 22 upgrade
+escaped it only by accident: it edited `index.js` and `package.json` together,
+so the zip changed too and the hash moved with it.
 
-  It does not persist — a new terminal needs it set again. Only if the plain
-  `node -e "require('./_functions/index.js')"` probe FAILS is the code itself
-  the problem.
+So whenever a runtime moves, **verify it instead of reading the deploy log**:
 
-* *"Skipped (No changes detected)"* on a function whose runtime or SDKs just
-  changed — the skip check compared wrongly and `functions:list` still read
-  nodejs20. The override that worked is naming the functions explicitly,
-  which bypasses the skip:
+```
+firebase functions:list --project operations-academia
+```
 
-  ```
-  firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:recordVisit --project operations-academia
-  ```
+The **Runtime** column must say what `_functions/package.json` says. Where it
+does not, name each function explicitly — the supported bypass, not a trick:
 
-  Then read `functions:list` again — the runtime column is the ground truth,
-  never the word "complete".
+```
+firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:recordVisit --project operations-academia
+```
+
+`--only functions` parses to an EMPTY filter list, which leaves every endpoint
+un-targeted and so eligible for the skip; naming one sets its `targetedByOnly`
+flag, and the skip predicate reads `!targetedByOnly && …`, so a named function
+is always redeployed.
 
 The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
 build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was
@@ -140,6 +137,55 @@ once (see CLAUDE.md).
 
 First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
 Artifact Registry, Eventarc) — say yes. It takes a few minutes.
+
+**IF THE DEPLOY DIES AT "Loading and analyzing source code".** On Windows this
+has failed with
+
+    User code failed to load. Cannot determine backend specification.
+    Timeout after 10000.
+
+**That message names the wrong culprit.** The CLI discovers your functions by
+spawning the SDK's own loader, which serves the manifest over HTTP on a random
+port just above 8000, and the timeout is reached by ONE path: a retry loop
+that spins on `ECONNREFUSED` / `ECONNRESET` / `ETIMEDOUT`. Code that merely
+loaded slowly would still connect, and code that threw would answer and give
+you "Functions codebase could not be analyzed successfully" instead. So the
+timeout means **the CLI could not open a socket to `127.0.0.1` on that port**,
+and says nothing whatever about this repository's code — measured on
+2026-08-30, `index.js` loads in 0.69 s against a ten-second budget on the very
+machine that could not deploy.
+
+Route around the port rather than hunting the firewall: the CLI has a
+file-based discovery mode that opens no socket at all.
+
+```
+setx FIREBASE_FUNCTIONS_DISCOVERY_OUTPUT_PATH true
+```
+
+`setx` is permanent and takes effect in NEW windows; plain `set` lasts only
+for the window you type it in, which is easy to mistake for a fix that stopped
+working. The file route is also the better diagnostic — unlike the port route
+it reports the loader's own stderr, so a genuine load failure finally says
+what it is.
+
+`FUNCTIONS_DISCOVERY_TIMEOUT` is a red herring here, and is in SECONDS rather
+than the milliseconds the error prints: no timeout helps when nothing ever
+connects.
+
+**AND `setx` IS MACHINE-WIDE, WHICH IS A CAVEAT WITH TEETH.** The variable
+reaches every Firebase project deployed from that machine — the six in the
+sibling `konstantinosStouras.github.io` included — and only
+`firebase-functions` **>= 6.4.0** honours it (measured: 6.3.2 has no
+`FUNCTIONS_MANIFEST_OUTPUT_PATH` handling, 6.4.0 does). A project on an older
+SDK spawns a loader that ignores the variable and serves a port nothing will
+read, so its deploy dies with `Timeout after 10000ms` — note **`ms`, and no
+doc link**: that is the FILE route's timeout, where the port route's above
+prints `10000.` with the link, and the two spellings are how you tell which
+one bit you. The sibling's five functions packages were audited and brought to
+^6.6.0 the day this shipped (its CLAUDE.md records the rule); if some OTHER
+old checkout ever hits the `ms` form, clear the variable for that window only —
+`set FIREBASE_FUNCTIONS_DISCOVERY_OUTPUT_PATH=` (an empty value is falsy) —
+or raise that project's `firebase-functions` above the floor.
 
 ## 4. Verify
 

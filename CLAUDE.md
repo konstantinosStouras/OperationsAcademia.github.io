@@ -2044,10 +2044,10 @@ release notes), and `firebase functions:list --project operations-academia`
 reads **nodejs22** on all four — the runtime column there is the ground
 truth for any future deploy, never the deploy's own "complete". Getting it
 live surfaced two misleading CLI failures — a discovery timeout on code that
-loads in under a second (`FUNCTIONS_DISCOVERY_TIMEOUT`, seconds, per
-window), and a wrong "Skipped (No changes detected)" on a changed runtime
-(bypassed by naming the functions in `--only`) — both recorded with their
-fixes in `_SETUP-INSTANT-PUBLISH.md`. `npm install --prefix _functions`
+loads in under a second (a blocked localhost socket, not slow code), and a
+wrong "Skipped (No changes detected)" on a changed runtime (the skip hash
+does not include the runtime; bypassed by naming the functions in `--only`)
+— both recorded with their fixes in `_SETUP-INSTANT-PUBLISH.md`. `npm install --prefix _functions`
 before deploying, as always: the CLI loads the local `index.js`, and stale
 modules are how a load dies.
 

@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "candidate-own-research-areas",
+      "date": "2026-08-30",
+      "title": "Candidates can add their own research areas",
+      "summary": "The candidacy form's research areas used to be a fixed list of twelve tick boxes, so a candidate whose field was not on it — queueing theory, say, or energy markets — had nowhere to say so. The form now takes your own areas as well: type them under the list, separated by commas, and they appear on your profile and in the candidates page's Research area filter exactly like the ticked ones. The limit of ten areas covers ticked and typed together, a typed respelling of a listed area is folded onto the list's spelling rather than shown twice, and editing your profile brings your own areas back into the box so a later correction never loses them.",
+      "url": "/post-a-candidate.html"
+    },
+    {
       "id": "analytics-mobile-fit",
       "date": "2026-08-30",
       "title": "The analytics charts fit your screen, and their numbers were audited",
