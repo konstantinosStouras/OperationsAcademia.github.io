@@ -2957,19 +2957,19 @@ ARCHIVE of a closed period, measured under another rule — which is what the
 the two: adding a decade of UA counts to a month of resolver counts gives a
 ranking that means nothing and cannot be explained on the page.
 
-**IT IS INERT UNTIL `recordVisit` IS DEPLOYED — and it still is, though the
-three instant-publish doorbells no longer are.** Those went live on 2026-08-27
-(see "An approved posting is on the maintainer's jobs page at once"). This
-function did not ride along: the 2026-08-29 `firebase deploy` was made from a
-checkout that predated the commit adding it, so it printed "Deploy complete!"
-while the three existing functions skipped as unchanged and this one was not
-in the upload at all — a deploy from a stale checkout looks exactly like a
-successful one. The remedy is a pull, then the same
-`firebase deploy --only functions --project operations-academia`; the three
-will skip and only this one deploys. Until then the ping fails silently, the
-collection stays empty, the builder logs `visits: universityVisits is empty`,
-and the page draws no figure rather than an empty one — the undeployed-doorbell
-trap wearing the chart's clothes.
+**`recordVisit` IS LIVE SINCE 2026-08-30, and its road there is the lesson.**
+The three instant-publish doorbells went live on 2026-08-27 (see "An approved
+posting is on the maintainer's jobs page at once"); this function did not ride
+along, because the 2026-08-29 `firebase deploy` was made from a checkout that
+predated the commit adding it — it printed "Deploy complete!" while the three
+existing functions skipped as unchanged and this one was not in the upload at
+all. **A deploy from a stale checkout looks exactly like a successful one.**
+The 2026-08-30 deploy, from a pulled checkout, shipped all four and printed
+`recordVisit`'s URL. While it was undeployed the failure was exactly the
+undeployed-doorbell trap wearing the chart's clothes: the ping failed
+silently, the collection stayed empty, the builder logged
+`visits: universityVisits is empty`, and the page drew no figure rather than
+an empty one — which is where to look first if the figures ever stop.
 
 **`build-netmap.mjs` is in `BUILDERS`, after `build-directory.mjs`**, because
 it is derived from the directory that builder writes — so a university that
