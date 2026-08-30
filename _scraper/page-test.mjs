@@ -4098,6 +4098,20 @@ for (const [from, hash] of [
     const { ctx: outCtx, page: out, errors: outErrs } = await signedOutPage(pageName);
     await out.waitForSelector(`${host} .oa-card`, { timeout: 15000 });
     await out.waitForTimeout(300);
+    /* The rows as the SITE serves them, handed to the page so the leak check
+       below compares a card against its own posting rather than against a
+       fixture that could drift from the data. Both files, because the two
+       pages partition the corpus between them. */
+    await out.evaluate(async () => {
+      const by = {};
+      for (const url of ['/data/jobs.json', '/data/past-postings.json']) {
+        try {
+          const rows = await (await fetch(url, { cache: 'no-cache' })).json();
+          for (const r of rows) if (r && r.id) by[r.id] = r;
+        } catch { /* the page under test does not need both */ }
+      }
+      window.__GATE_ROWS = by;
+    });
 
     const shut = await out.evaluate((h) => {
       const cards = [...document.querySelectorAll(`${h} .oa-card`)];
@@ -4132,6 +4146,47 @@ for (const [from, hash] of [
       `${pageName}: a head that discloses nothing no longer claims to`);
     eq([...new Set(shut.notes)], [note],
       `${pageName}: each card says what would open it, in the page's own words`);
+
+    /* THE STRONGEST FORM OF THE PROMISE, measured against the site's own
+       data rather than a fixture: take what each locked card's posting
+       actually SAYS and prove none of it is anywhere in that card's markup.
+       The checks above assert the absence of the containers; this asserts the
+       absence of the CONTENT, which is what "never able to view details"
+       means and what a future refactor could quietly undo while every
+       structural check stayed green (a hidden body, an aria-label, a data-
+       attribute, a title carrying the comments would all pass those).
+
+       Values are matched at 12+ characters: shorter ones ("Sunday", a bare
+       year, "link") legitimately occur in the page's own furniture, and a
+       check that fired on those would be noise rather than a finding.
+
+       WHAT IS ALLOWED IS MEASURED FROM THE HEAD ITSELF, not from a list of
+       field names. Who is hiring stays readable, so anything the head already
+       displays is not a leak — and a name list would rot: `school` and `unit`
+       are the two halves the subtitle is joined from, and `type` ("Business
+       School") is a substring of that subtitle by coincidence at CUHK and
+       would not be at the next university. Stating the rule as "nothing in
+       this card that its own head does not already show" needs no
+       maintenance and says exactly what the promise is. `id` is excluded
+       separately because it is the element's id attribute rather than text. */
+    const leaked = await out.evaluate((h) => {
+      const out2 = [];
+      for (const card of document.querySelectorAll(`${h} .oa-card`)) {
+        const html = card.outerHTML;
+        const shown = card.querySelector('.oa-card-head').textContent;
+        const row = (window.__GATE_ROWS || {})[card.id.replace(/^job-/, '')];
+        if (!row) continue;
+        for (const [k, v] of Object.entries(row)) {
+          if (k === 'id') continue;
+          if (typeof v !== 'string' || v.length < 12) continue;
+          if (shown.includes(v)) continue;          // the head is meant to show it
+          if (html.includes(v)) out2.push(card.id + ' → ' + k + ': ' + v.slice(0, 40));
+        }
+      }
+      return out2;
+    }, host);
+    eq(leaked.slice(0, 4), [],
+      `${pageName}: and no value any of those postings holds is anywhere in its card`);
 
     /* THE CARD DOES NOT EXPAND — the owner's own sentence. Press it and what
        arrives is the sign-in box, not a body. */
@@ -4293,6 +4348,63 @@ for (const [from, hash] of [
       'gate: signed in, the profile opens');
     ok(await q.$$eval('#oa-candidates .oa-kv a[href^="mailto:"]', (n) => n.length) >= 1,
       'gate: …and carries the way to contact them, which is what it is for');
+    await ctx.close();
+  }
+
+  /* -- the card you PRESSED is the card that opens ------------------------ */
+  {
+    /* The one-pager mounts TWO gated lists, and `pending` — the id of the
+       card whose lock was pressed — is one variable in one module. Consumed
+       unconditionally it went to whichever list was notified FIRST: press a
+       candidate card signed out, sign in, and the profile you pressed stayed
+       shut while the teaser above quietly marked a row it does not have.
+
+       Reproduced end to end rather than reasoned about, because the whole
+       failure is an ORDERING between two listeners: the reader is seeded as a
+       real user so the shim can sign them back in, signed OUT before anything
+       is touched, and both lists are mounted in the order a reader scrolling
+       the page mounts them. selftest.mjs pins the rule; this is the reader. */
+    const SEED = [{ id: 'gate-cand-1', name: 'A Candidate',
+      affiliation: 'Somewhere University', position: 'PhD Candidate',
+      year: String(marketYear()), posted: new Date().toISOString().slice(0, 10),
+      researchAreas: ['Operations'], informsDays: ['Sunday'],
+      email: 'someone@example.edu', cvUrl: 'https://example.edu/cv.pdf' }];
+
+    const { ctx, page: q, errors } = await signedInPage('index.html', { wait: false });
+    await q.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.evaluate(() => window.OAAccounts.signOut());
+    await q.waitForFunction(() => window.OAAccounts.resolved() && !window.OAAccounts.user(),
+      null, { timeout: 15000 });
+
+    // both lists mounted, teaser first — the order a reader scrolling creates
+    await q.evaluate(() => document.querySelector('#oa-jobs-recent').scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-candidates .oa-card-locked', { timeout: 15000 });
+    await q.waitForTimeout(300);
+
+    await q.click('#oa-candidates .oa-card .oa-card-head');
+    await q.waitForTimeout(300);
+    ok(await q.$('.oa-modal'),
+      'gate: pressing a locked candidate card offers the sign-in box');
+    await q.evaluate(() => window.OAFB.ready().then((fb) => fb.auth().signInWithPopup({})));
+    await q.waitForTimeout(1200);
+
+    const landed = await q.evaluate(() => ({
+      signedIn: !!(window.OAAccounts && window.OAAccounts.user()),
+      locked: document.querySelectorAll('#oa-candidates .oa-card-locked').length,
+      open: (() => { const b = document.querySelector('#oa-candidates .oa-card-body');
+        return b ? !b.hidden : null; })(),
+    }));
+    eq(landed.signedIn, true, 'gate: …and signing in from it really signs the reader in');
+    eq(landed.locked, 0, 'gate: …which unlocks the profile');
+    eq(landed.open, true,
+      'gate: …and opens THE ONE THEY PRESSED, not whichever list was notified first');
+    eq(errors, [], 'gate: no uncaught script error on the way through');
     await ctx.close();
   }
 }

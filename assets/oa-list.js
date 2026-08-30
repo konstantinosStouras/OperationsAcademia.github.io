@@ -1237,12 +1237,27 @@
       /* Open ONE card, from the page rather than from a click. What lets a
          reader who pressed a locked card and then signed in land on the
          posting they pressed, rather than on the list they would have to find
-         it in again (assets/oa-gate.js `watch`). */
+         it in again (assets/oa-gate.js `watch`).
+
+         IT ANSWERS WHETHER IT DID, and that is what makes it usable on a page
+         carrying SEVERAL lists. The one-pager mounts two gated ones — the
+         jobs teaser and the candidates — and both watch the same auth state,
+         so a caller holding one id has to be able to ask which list owns it
+         rather than handing it to whichever happens to be notified first.
+         Ownership is membership in this list's own rows; a row filtered out
+         of the current view is still this list's, and opening it means it is
+         open when the filter is cleared. */
       open: function (id) {
         var key = String(id == null ? '' : id);
-        if (!key) return;
+        if (!key) return false;
+        var found = false;
+        for (var i = 0; i < rows.length; i++) {
+          if (String(rows[i] && rows[i].id) === key) { found = true; break; }
+        }
+        if (!found) return false;
         expanded[key] = true;
         render();
+        return true;
       },
       rows: function () { return rows.slice(); },
       /* What the list is SHOWING, in the order it is showing it — the whole

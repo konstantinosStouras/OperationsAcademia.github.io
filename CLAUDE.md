@@ -2717,6 +2717,58 @@ strip says *"Sign-in is unavailable at the moment"* and the head is disabled,
 rather than offering a control that would do nothing when pressed. That is the
 wording `oa-jobexport.js` already gives its disabled button.
 
+### The pending card is CLAIMED, not handed out
+
+`pending` — the id of the card whose lock was pressed, so signing in lands the
+reader on the posting they pressed — is one variable in one module, and the
+one-pager mounts TWO gated lists that both watch the same auth state. Consumed
+unconditionally it went to whichever list `OAAccounts.onChange` notified
+FIRST: press a candidate card signed out, sign in, and **the profile you
+pressed stayed shut** while the jobs teaser above quietly marked a row it does
+not have. On `jobs.html`, which has one gated list, the same code worked
+perfectly — which is why it shipped.
+
+So `list.open(id)` **answers whether it opened**, and only for a row this list
+carries; `watch` spends the id only when a list claims it. Ownership is
+membership in that list's own `rows`, not its current view — a row filtered
+out is still this list's, and opening it means it is open when the filter is
+cleared. A sign-OUT drops the id: one pressed in one session must not open a
+card for whoever signs in next on the same machine.
+
+Pinned twice, because the failure is an ORDERING between two listeners and a
+single-list page cannot show it: a unit check in `selftest.mjs` drives two
+mock lists through a fresh module instance (with a `window` in place, since
+the module captures its global at load and Node has none), and
+`page-test.mjs` reproduces the reader — signed out on the one-pager, press a
+candidate card, sign in, the card opens.
+
+### Nothing merely HIDDEN counts as withheld
+
+The gate's own rule — *the values are absent, not blurred* — turned up a
+second place that broke it, older than the gate: **`alerts.html` built its
+example e-mail for a signed-out reader.** The whole app is `hidden` when
+nobody is signed in, but `applyNewsDecisions` re-renders the preview whenever
+the change-log decisions land, which is every page load — so a university, its
+department, the entry level, the country and both apply-by dates sat in the
+document of a reader who could not see them. Hidden is not absent, and it is
+the same picture-of-a-lock the cards refuse to draw.
+
+`renderPreview` now returns empty while `OAGate.locked()`, asked of the one
+definition so the page and the cards cannot disagree about who is reading.
+Nothing is lost by waiting: signing in runs `resetForm()` → `syncFormState()`
+→ `renderPreview()`, and the preview is byte-for-byte what it was.
+
+**The check that states the whole promise** is in `page-test.mjs`: for every
+locked card it takes what that posting actually SAYS, from the served file,
+and asserts none of it is anywhere in the card's markup. What is ALLOWED is
+measured from the head itself — anything the head already displays is not a
+leak — rather than from a list of field names, which would rot: `school` and
+`unit` are the halves the subtitle is joined from, and `type` ("Business
+School") is a substring of that subtitle by coincidence at CUHK and would not
+be at the next university. It is the check a refactor could not slip past: a
+hidden body, an `aria-label`, a `data-` attribute or a `title` carrying the
+comments all pass every structural check and fail this one.
+
 ### When a browser check needs a detail on screen, SIGN THE READER IN
 
 The gate turned several existing checks into contradictions — a signed-out
