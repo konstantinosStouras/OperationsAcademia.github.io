@@ -40,9 +40,10 @@ like a site that is simply slow.
 **PULL BEFORE YOU DEPLOY, AND COUNT THE LINES.** `firebase deploy --only
 functions` deploys what is in the working copy, so a clone a few commits behind
 deploys the older set and reports success over it. That is not hypothetical:
-the run on 2026-08-30 printed `Deploy complete!` over three functions when
-`_functions/index.js` on master held four, which is how `recordVisit` (the
-university-visits counter) came to be the one function nobody has switched on.
+the first run on 2026-08-30 printed `Deploy complete!` over three functions
+when `_functions/index.js` on master held four — `recordVisit` (the
+university-visits counter) was simply absent from that clone, and it exists
+only because a second deploy the same day ran from a pulled checkout.
 Read the deployed list back against `_functions/index.js` every time.
 
 **NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30.** The deploy warns about it on

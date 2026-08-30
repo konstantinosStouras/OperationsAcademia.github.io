@@ -204,16 +204,17 @@ exports.publishOnReview = onDocumentWritten(
    read as "no universities visit", which is precisely the misreading the rest
    of this page was rebuilt to prevent.
 
-   NOTHING HERE IS LIVE UNTIL THIS FUNCTION IS DEPLOYED, and it is the one in
-   this file that is not. The three doorbells above went live on 2026-08-27;
-   the deploy of 2026-08-30 listed those three and never mentioned a fourth,
-   because it ran from a clone that predated this function — a stale checkout
-   deploys the stale set and still prints "Deploy complete!". One
+   LIVE SINCE 2026-08-30, and last of the four by half a day. The three
+   doorbells above went live on 2026-08-27; the first deploy of 2026-08-30
+   listed those three and never mentioned this one, because it ran from a
+   clone that predated it — a stale checkout deploys the stale set and still
+   prints "Deploy complete!". A second deploy the same day, from a pulled
+   checkout, created it, printing the URL that matches ENDPOINT in
+   assets/oa-visit.js. After any future
        firebase deploy --only functions --project operations-academia
-   FROM AN UP-TO-DATE CHECKOUT switches it on; read the deployed list back
-   against this file afterwards. Until then the browser's ping simply fails,
-   the collection stays empty, and the page says the figures are not being
-   collected yet rather than drawing an empty chart.
+   read the deployed list back against this file. While the collection is
+   still young the page says the figures are not being collected yet rather
+   than drawing an empty chart — a young tally, not a fault.
    =========================================================================== */
 
 const { onRequest } = require('firebase-functions/v2/https');

@@ -1015,9 +1015,10 @@ the last word), and it echoes only what the build would publish.
 redundant one.** It now spans the minute or two the build takes instead of
 twenty, and it remains the only half of this that is true unconditionally: a
 deployment is a hand step outside this repository, and one has already lapsed
-here — `recordVisit`, shipped after these three and still not live, because the
-deploy that reported success ran from a clone that predated it (see "IT IS
-INERT UNTIL THE FUNCTION IS DEPLOYED").
+here — `recordVisit` was missed entirely by the first 2026-08-30 deploy, which
+ran from a clone that predated it and reported success anyway, and exists only
+because a second deploy the same day ran from a pulled checkout (see "ALL FOUR
+FUNCTIONS ARE LIVE").
 
 **And the copy now says what is true of this installation** — "Approved — and on
 your own jobs page straight away. Everyone else sees it at the next build." —
@@ -2039,7 +2040,8 @@ repository has FOUR: `recordVisit` was not skipped, not created, not mentioned
 — it was not in the working copy the command ran from. So "I deployed the
 functions" and "every function on master is live" are different sentences, and
 nothing in that output distinguishes them unless you count the lines against
-`_functions/index.js`. **Pull first, deploy, then read the list back.** The
+`_functions/index.js`. **Pull first, deploy, then read the list back** — the
+second run that day did exactly that and created it. The
 same run warns that the Node.js 20 runtime is **decommissioned on 2026-10-30**,
 after which none of this deploys at all until `_functions/package.json` names a
 later one — a deadline with no other alarm attached to it.
@@ -2925,19 +2927,20 @@ ARCHIVE of a closed period, measured under another rule — which is what the
 the two: adding a decade of UA counts to a month of resolver counts gives a
 ranking that means nothing and cannot be explained on the page.
 
-**IT IS INERT UNTIL THE FUNCTION IS DEPLOYED, AND `recordVisit` IS THE ONE
-THAT IS NOT.** The three instant-publish doorbells above went live on
-2026-08-27 and fire on every decision; this fourth function has never reached
-production — and the reason is worth knowing, because nothing reported it. The
-2026-08-30 `firebase deploy --only functions` ran from a clone that predated
-it, so the CLI deployed the three it could see, printed `Deploy complete!`, and
-never mentioned a fourth. One `firebase deploy --only functions --project
-operations-academia` **from an up-to-date checkout** switches it on. Until then
-the ping fails silently, the collection stays empty, the builder logs
-`visits: universityVisits is empty`, and the page draws no figure rather than
-an empty one. **A doorbell nobody deployed looks exactly like a site that is
-simply slow** — this is the same trap wearing the chart's clothes, with the
-extra turn that here it is a deploy which SUCCEEDED that left it undeployed.
+**ALL FOUR FUNCTIONS ARE LIVE — `recordVisit` LAST, on 2026-08-30, and the
+half-day it lagged is the lesson.** The three instant-publish doorbells went
+live on 2026-08-27 and fire on every decision; this fourth function shipped
+after them and was MISSED by the first 2026-08-30 deploy, which ran from a
+clone that predated it — the CLI deployed the three it could see, printed
+`Deploy complete!`, and never mentioned a fourth, so nothing anywhere said a
+function was missing. A second deploy the same day, from a pulled checkout,
+created it (`Successful create operation`, printing the URL that matches
+`ENDPOINT` in `assets/oa-visit.js`). While the collection is still young the
+builder logs `visits: universityVisits is empty` and the page draws no figure
+rather than an empty one, which is the correct reading of a chart that has
+just been switched on — not a fault. **A doorbell nobody deployed looks
+exactly like a site that is simply slow**, and the extra turn here is that a
+deploy which SUCCEEDED is what left it undeployed for half a day.
 
 **`build-netmap.mjs` is in `BUILDERS`, after `build-directory.mjs`**, because
 it is derived from the directory that builder writes — so a university that

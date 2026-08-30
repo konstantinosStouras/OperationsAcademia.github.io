@@ -252,15 +252,17 @@ university's is.
 firebase deploy --only functions --project operations-academia
 ```
 
-That is the whole of it — no secret, no variable. **Nothing is collected until
-that runs**, and the collection stays empty, so the builder logs
+That is the whole of it — no secret, no variable. **`recordVisit` is live
+since 2026-08-30**, created by the SECOND deploy of that day: the first ran
+from a clone that predated this function, printed `Deploy complete!` over the
+other three, and never mentioned it — which is exactly how a function comes to
+be missing with nothing anywhere saying so. **Run any future deploy from an
+up-to-date checkout and read the deployed list back against
+`_functions/index.js`.** While the collection is still young the builder logs
 `visits: universityVisits is empty` and the page simply does not draw the
-figure. **Run it from an up-to-date checkout and read the deployed list back
-against `_functions/index.js`**: the run on 2026-08-30 deployed from a clone
-that predated this function, printed `Deploy complete!` over the other three,
-and never mentioned it — which is exactly how a function comes to be missing
-with nothing anywhere saying so. (Those three instant-publish doorbells have
-been live since 2026-08-27 — see `_SETUP-INSTANT-PUBLISH.md`.)
+figure, which is a chart that has just been switched on, not a fault. (The
+three instant-publish doorbells have been live since 2026-08-27 — see
+`_SETUP-INSTANT-PUBLISH.md`.)
 
 **Check the URL the deploy prints** against `ENDPOINT` at the top of
 `assets/oa-visit.js`, which expects the classic form:

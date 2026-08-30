@@ -8684,10 +8684,10 @@ async function testReviewWiring() {
      could only be satisfied by deleting the explanation. So what is forbidden
      is a file still ASSERTING it.
 
-     Deliberately NOT forbidden: the same words about `recordVisit`, which is
-     genuinely not deployed — the fourth function in `_functions/index.js`,
-     left behind by a deploy that ran from a stale clone and reported success.
-     That is why this names the doorbells rather than "the functions". */
+     And the recordVisit claim aged the same way WITHIN A DAY: the morning of
+     2026-08-30 this comment excused it as the one honest "not deployed", and
+     that afternoon a deploy from a pulled checkout created the function. So
+     the sweep covers it too — the failure is identical, only faster. */
   /* Two fragments are CONCATENATED rather than written out, because this file
      is one of the six swept and a pattern that spells its own claim in full
      matches itself. The alternatives carrying a group cannot. */
@@ -8699,6 +8699,9 @@ async function testReviewWiring() {
     'dispatch has (\\*\\*)?zero runs, ever',
     'neither\\s+is deployed',
     'that function has never ' + 'fired here',
+    'recordVisit[,`]* (is|remains|which is)( genuinely| still)? not ' + '(deployed|live)',
+    'the one function nobody has ' + 'switched on',
+    'this fourth function has never ' + 'reached production',
   ].join('|'), 'i');
   for (const f of ['CLAUDE.md', '_SETUP-INSTANT-PUBLISH.md', '_SETUP-ANALYTICS.md',
     'assets/oa-jobreview.js', '_functions/index.js', '_scraper/selftest.mjs']) {
@@ -8712,8 +8715,9 @@ async function testReviewWiring() {
 
   /* …and the ONE operational lesson that outlives the date: a deploy runs on
      the working copy, so a clone a few commits behind deploys the older set
-     and prints "Deploy complete!" over it. That is how `recordVisit` came to
-     be the one function nobody has switched on. */
+     and prints "Deploy complete!" over it. That is how the first 2026-08-30
+     deploy missed `recordVisit` — a second, from a pulled checkout, created
+     it the same day. */
   const instantSetup =
     await readFile(path.join(HERE, '..', '_SETUP-INSTANT-PUBLISH.md'), 'utf8');
   ok(/read the deployed list back/i.test(instantSetup)

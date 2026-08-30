@@ -1243,8 +1243,9 @@
                dispatches on every decision, so "the next build" is a minute
                away rather than twenty — and the wording below deliberately
                does NOT say so. A deployment is a hand step outside this
-               repository: it can lapse (one already has, `recordVisit`), and
-               nothing on this page would know. Promising the minute would put
+               repository: it can lapse (recordVisit was missed by one deploy
+               and created only by a second, half a day later), and nothing on
+               this page would know. Promising the minute would put
                the card back in the business of guaranteeing something it
                cannot see. It says what is true either way — the echo puts it
                in front of the maintainer at once, and the build puts it in
