@@ -3231,21 +3231,22 @@ fetch — seven days, on every run after the first — while the tiles beside it
 described the whole record, and nothing on screen said the two meant different
 spans. It carries `pagesWindow` now and the figure prints it.
 
-**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN**, and appears on its own
-once the figures exist. A heading over an empty axis is precisely the shape of
-the defect this whole page is a rebuild of, and the five GA4 figures are empty
-today because the tag was switched on the same morning.
+**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN, and its absence is
+SILENT.** It appears on its own once the figures exist. A heading over an
+empty axis is precisely the shape of the defect this whole page is a rebuild
+of. The missing figures used to be NAMED at the foot, in a "Where these
+figures come from" note that also described the sources, the cookieless
+trade-off and the admin-area exclusion — the owner had that whole section
+removed (2026-08-30: "we shouldn't tell that private information to the
+users"), and the page's own comment records the removal so the guard against
+it cannot be satisfied by deleting the explanation. What the note carried for
+READERS is not lost: the per-figure "Measured by … · span" lines stay, being
+about the numbers rather than the plumbing, and `_SETUP-ANALYTICS.md` holds
+the plumbing.
 
-It was also NAMED, at the foot of the page, in a "Where these figures come
-from" note that listed the absences under *Not on this page yet* beside a
-paragraph on provenance and the cookieless trade-off. **The owner removed that
-note entirely (2026-08-30)** — it is gone from the page, from `oa-analytics.css`
-and from the guards, not hidden. Three things follow and all three are pinned:
-not drawing an unanswered figure is now the WHOLE of the promise (it was always
-the half doing the work); the provenance the note carried lives in the Privacy
-Policy, which is its proper home and already said all of it; and the checks that
-asserted on the note assert on its ABSENCE instead, so it cannot creep back
-half-way.
+(The reader-facing half — the cookieless posture and what it costs — was
+already in the Privacy Policy, which is its proper home and where the selftest
+pins it.)
 
 **The interactivity, and what each piece is for.** Every chart already had a
 tooltip except the one nobody could interrogate at all — the bar lists — so a
@@ -3302,6 +3303,64 @@ distinct colours, "32m 32s" on screen with the raw seconds nowhere, the metric
 switch re-plotting the chart, the legend putting a line away and bringing it
 back, and — with no dimensions at all — the five figures ABSENT and named as
 missing instead.
+
+### The charts fit the screen they are read on, and the numbers were audited
+
+Owner, 2026-08-30: *"check the numbers of any figures and make sure they are
+optimized for mobiles and small screens. they appear somewhat stretched right
+now."* Both halves were real.
+
+**The stretch was one attribute.** Every SVG chart drew into a fixed
+`viewBox="0 0 900 H"` with `preserveAspectRatio: 'none'`, so the drawing was
+scaled NON-UNIFORMLY into whatever box it landed in — measured scaleX 0.28 at
+a 320px viewport, 0.36 at 390px, 1.13 at 1180px, against scaleY always 1.
+Every glyph, marker circle, corner radius and vertical stroke was distorted by
+that ratio at every width; no width was ever right. The fix is to **draw at
+the size the chart is shown at** (`plotWidth`/`plotHeight` in oa-charts.js:
+one user unit = one CSS pixel, height following the width down on a phone),
+with ONE debounced resize listener in oa-analytics.js redrawing through the
+same `draw()` everything else uses — no observer per chart to leak, and a
+resize that changed only the height (a phone's URL bar, on every scroll)
+redraws nothing. What a narrow plot gives up it gives up honestly: axis
+labels THIN to every Nth (the 24-hour clock reads 00 03 06 … at 390px) while
+every bucket keeps its bar, tooltip, focus stop and table row; and a tap is
+the phone's hover — pointerdown shows the same tooltip everywhere, without
+preventDefault so a swipe still scrolls.
+
+**The numbers audit found twelve defects; every one reproduced and every one
+is fixed.** The worth-remembering ones: `compact()` printed "1000.0K" for
+999,999 and "10.0K" for 9,990; both axes drew gridlines at exact fractions of
+the top and rounded only the LABEL, so a top of 2.5 read 0 1 2 3 over lines
+at 0.83 and 1.67 (`tickVal` now settles each tick's VALUE first and draws the
+line AT it); the weekday/season bars carry one-decimal means but printed
+integers, so two visibly different bars could carry the same number; `bars()`
+invented a share denominator by summing the rows it displayed, so the
+most-visited-pages leader was a "share of the whole" measured against 25 rows
+(a share now needs a stated whole — `pagesWindow.views`, the window's entire
+pageview count, from the builder); a share bar's unlisted tail was an
+unexplained blank (now a muted, named "Everything else" part); a 1.5%
+bar-length floor drew small rows up to 15x their true length (a 2px CSS
+min-width now); the ranges sliced the last N ROWS rather than N calendar
+days, and the daily line ran index-spaced straight through any gap (nulls now
+break the line, and `rollingMean` refuses a window with a hole in it).
+
+**Three were about what a label CLAIMED.** The daily chart offered a "Visits"
+metric that, for every day the first-party record owns, is the Pageviews
+series under a wrong name — the record files one document per page opened, so
+its session count IS its pageview count; the metric is gone (the file keeps
+all three day fields — the format is not the interface). The "Typical visit"
+tile claimed pages-per-visit from the same record, where it is identically 1
+by construction — it reads "Time on a page" for the usage source, and only a
+source that can measure a visit (GA4) gets the visit framing. And the
+headline Visitors tile now says "counted per day": the file has no cross-day
+identity, so the total is per-day uniques summed, and a reader returning on
+ten days counts ten times.
+
+Tests: the axis/scale/format pins in `testAnalytics`, and in `page-test.mjs`
+the scales measured at 1180 AND 390 (|scale−1| < 0.02 on both axes), zero
+overlapping axis labels on a phone, the legend switches at 42px, a viewport
+change redrawn at the new width, the "Everything else" part drawn, named and
+filling its bar, and the retitled tile.
 
 ### The archive is CONFIRMED GONE, and the spreadsheet says how
 

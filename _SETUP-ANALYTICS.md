@@ -147,11 +147,13 @@ collection to find each browser's first day, which is the unbounded read the
 incremental query is shaped to avoid. A figure that would be wrong from one
 source and expensive from the other is better not drawn.
 
-**A dimension with no source is not drawn.** A heading over an empty axis is
-precisely the shape of the defect this page is a rebuild of, so the five GA4
-figures simply appear on their own once the credential exists and the property
-has days in it. (They were also NAMED, in a provenance note at the foot; the
-owner removed that note on 2026-08-30, so not drawing them is the whole of it.)
+**A dimension with no source is not drawn — and its absence is silent.** A
+heading over an empty axis is precisely the shape of the defect this page is a
+rebuild of, so the five GA4 figures simply appear on their own once the
+credential exists and the property has days in it. (They used to be listed in
+a "Where these figures come from" note at the foot of the page; the owner had
+that section removed, 2026-08-30 — how the site is measured is not the
+readers' business. This file is where that information lives now.)
 
 **And every figure describes public pages only.** The non-public filter is
 applied to the GA4 dimension reports as well as to the daily one, so the

@@ -261,7 +261,11 @@ async function fromUsage(db, { since, windowFrom }) {
     days,
     pages: Array.from(winPages.values())
       .map((p) => ({ path: p.path, title: '', views: p.views, avgSec: p.views ? p.sec / p.views : 0 })),
-    pagesWindow: { from: winFrom, to: winTo },
+    /* `views` is the window's WHOLE pageview count — the denominator a page's
+       share is honest against. The served pages list is only the top of the
+       table, so a share computed over the listed rows would be a share of the
+       rows that fitted. */
+    pagesWindow: { from: winFrom, to: winTo, views: winViews },
     universities: [],
     breakdowns: {
       /* THE HOURS ARE THE FIRST-PARTY RECORD'S ALONE. It stamps the instant a
@@ -483,6 +487,7 @@ async function fromGa4({ since, windowFrom, windowTo }) {
      divides again, which keeps ONE definition of the average rather than two
      that could drift. */
   let engagement = null;
+  let winViews = 0;
   try {
     const eng = await runReport({
       dateRanges: [{ startDate: winStart, endDate }],
@@ -493,18 +498,21 @@ async function fromGa4({ since, windowFrom, windowTo }) {
     });
     const m = eng.rows?.[0]?.metricValues || [];
     const sessions = Number(m[0]?.value || 0);
+    winViews = Math.max(0, Math.round(Number(m[2]?.value || 0)));
     engagement = A.engagement({
       source: 'ga4', ...win,
       sessions,
       seconds: Number(m[1]?.value || 0) * sessions,
-      views: Number(m[2]?.value || 0),
+      views: winViews,
     });
   } catch (e) {
     warn(`the GA4 engagement report failed (${e.message}) — that figure is skipped`);
   }
 
   return {
-    source: 'ga4', days, pages, pagesWindow: win,
+    source: 'ga4', days, pages,
+    /* the same whole-window pageview count the usage leg states — see there */
+    pagesWindow: { ...win, views: winViews },
     universities: [], breakdowns, engagement,
   };
 }
@@ -620,7 +628,8 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
     if (!engagement && r.engagement) engagement = r.engagement;
     /* the window belongs to whichever source's pages actually got in */
     if (!pagesWindow && r.pagesWindow && pages.size > before) {
-      pagesWindow = { source: r.source, from: r.pagesWindow.from || '', to: r.pagesWindow.to || '' };
+      pagesWindow = { source: r.source, from: r.pagesWindow.from || '', to: r.pagesWindow.to || '',
+        views: Math.max(0, Math.round(Number(r.pagesWindow.views) || 0)) };
     }
     for (const u of r.universities || []) {
       const name = String((u && u.name) || '').trim();
@@ -668,7 +677,7 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
   }
 
   data.pages = A.topPages(pages, TOP_PAGES);
-  data.pagesWindow = pagesWindow || { source: '', from: '', to: '' };
+  data.pagesWindow = pagesWindow || { source: '', from: '', to: '', views: 0 };
   data.breakdowns = breakdowns;
   data.engagement = engagement;
 
@@ -919,7 +928,7 @@ function selftest() {
   const a = assemble([
     { source: 'usage', days: { '2026-08-02': [99, 99, 99], '2026-08-03': [7, 8, 20] },
       pages: [{ path: '/jobs.html', views: 5, avgSec: 10 }],
-      pagesWindow: { from: '2026-08-02', to: '2026-08-03' },
+      pagesWindow: { from: '2026-08-02', to: '2026-08-03', views: 812 },
       breakdowns: {
         hours: A.breakdown('hours', { source: 'usage', items: hours, limit: 24 }),
         /* the first-party record has no idea where a reader is; if it ever
@@ -995,6 +1004,10 @@ function selftest() {
     'and the window reported for the pages is the window of whichever source ' +
     'actually supplied them — the figure and its span cannot come from ' +
     'different places');
+  ok(a.pagesWindow.views === 812,
+    '…and it carries the window\'s WHOLE pageview count, which is the only ' +
+    'denominator a page\'s share is honest against — the served rows are the ' +
+    'top of the table, not the table');
 
   /* an id the model does not know is not a shape anybody has checked, and this
      file is world-readable */
