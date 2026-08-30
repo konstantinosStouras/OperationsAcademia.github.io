@@ -2977,22 +2977,36 @@ ARCHIVE of a closed period, measured under another rule — which is what the
 the two: adding a decade of UA counts to a month of resolver counts gives a
 ranking that means nothing and cannot be explained on the page.
 
-**ALL FOUR FUNCTIONS ARE LIVE — `recordVisit` LAST, on 2026-08-30, and the
-day it lagged is the lesson.** The three instant-publish doorbells went live
-on 2026-08-27 and fire on every decision; this fourth function shipped after
-them and was MISSED by the 2026-08-29 deploy, which ran from a checkout that
-predated it — the CLI deployed the three it could see, printed
-`Deploy complete!`, and never mentioned a fourth, so nothing anywhere said a
-function was missing. The 2026-08-30 deploy that followed a pull created it
-(`Successful create operation`, printing the URL that matches `ENDPOINT` in
-`assets/oa-visit.js`; a later deploy may print the service's own
-`run.app` address instead — same function, and the classic
-`cloudfunctions.net` form the page pings stays valid). While the collection
-is still young the builder logs `visits: universityVisits is empty` and the
-page draws no figure rather than an empty one, which is the correct reading
-of a chart that has just been switched on — not a fault. **A doorbell nobody
-deployed looks exactly like a site that is simply slow**, and the extra turn
-here is that a deploy which SUCCEEDED is what left it undeployed.
+**IT WAS INERT UNTIL `recordVisit` WAS DEPLOYED — done on 2026-08-30, so the
+measurement is LIVE.** The three instant-publish doorbells went live on
+2026-08-27 (see "An approved posting is on the maintainer's jobs page at
+once"); this function did not ride along, and until its own deploy the ping
+failed silently, the collection stayed empty, the builder logged
+`visits: universityVisits is empty`, and the page drew no figure rather than
+an empty one — the undeployed-doorbell trap wearing the chart's clothes. What
+ended it was the owner's `firebase deploy --only functions --project
+operations-academia` from a PULLED checkout:
+`functions[recordVisit(us-central1)] Successful create operation.`, FOUR
+functions in the list, at the exact URL `assets/oa-visit.js` pings (a
+later deploy may print the service's own `run.app` address instead —
+same function, and the classic `cloudfunctions.net` form stays valid). The
+collection fills from real traffic from that moment, and the daily build
+publishes the figure once it holds a day.
+
+**AND A DEPLOY FROM A STALE CHECKOUT LOOKS EXACTLY LIKE A SUCCESSFUL ONE**
+(owner, 2026-08-30). The first attempt ran `firebase deploy --only functions`
+from a working copy that predated the merge, and printed **`Deploy complete!`**
+over a list of THREE functions — the three doorbells, each "Skipped (No changes
+detected)". `recordVisit` was not deployed, not skipped, and not mentioned: the
+CLI discovers functions by LOADING the local `index.js`, so a checkout without
+the code has nothing to find and nothing to say about it. **The count is the
+only signal there is — four functions, or something is wrong.**
+
+`npm install --prefix _functions` is part of the ritual for the same reason and
+is not optional: `firebase-admin` arrived WITH `recordVisit`, and the CLI's own
+load of `index.js` throws on a `require` it cannot resolve. So the sequence is
+`git pull` → `npm install --prefix _functions` → deploy, and the deploy is read
+rather than glanced at.
 
 **`build-netmap.mjs` is in `BUILDERS`, after `build-directory.mjs`**, because
 it is derived from the directory that builder writes — so a university that
@@ -3013,6 +3027,41 @@ figures cannot come back, matched present-tense so the files may go on
 RECOUNTING the mistake in order to correct it), plus the universities block in
 `_scraper/page-test.mjs` (a live section carrying no archive chip and printing
 its own coverage, and an archived one still labelled with its range).
+
+### Two figures that are each OPTIONAL cannot promise each other
+
+Both of these shipped in the merge that brought the universities figure back
+beside PR #109's five GA4 ones, both survived a green suite, and both live in
+exactly one combination of the data — which is the whole lesson: a page
+assembled from independently-gated figures has a state space, and a fixture
+carrying half the data cannot reach most of it.
+
+**A caption that names another figure is a promise the page may break.**
+"Where readers are" is drawn when GA4 answers; "Which universities visited" is
+drawn when the site's own resolver has data. On THIS installation today the
+first is configured and the second is not deployed — so the countries caption
+said "the coarser companion to *Which universities visited* below" directly
+above the page's own note listing that figure under **Not on this page yet**
+(that note has since been removed — see below — but the rule it exposed stands:
+a caption may not name a figure the page might not draw).
+Neither caption names the other now. Each describes itself, which is the only
+formulation true under all four combinations.
+
+**And the tile strip caps at FIVE.** #109 measured that a sixth orphans onto a
+row of its own and folded the length and the depth of a visit into one tile to
+stay at five; the merge then left "Universities seen" in, which is the sixth
+the moment both are present — measured 6 tiles over 2 rows with **one alone on
+the second** at 1400px, 1180px and 1024px. The count moved into the
+universities figure's own caption, where a fact about ONE figure belongs.
+
+**The guards for both had to be re-read with comments stripped**, because each
+block now EXPLAINS the defect it no longer has — the trap this file already
+records for the analytics page's "no iframes" check, walked into twice on the
+very checks that removed these. And the browser half drives the two states no
+other fixture reaches: **every source answering at once** (three widths, the
+strip asserted never to end with a lone tile — geometry, not a count, so it
+holds whatever the tiles become) and **one figure present with the other
+absent** (a drawn figure never points at one the same page lists as missing).
 
 ### The two rules the charts themselves had to learn
 
@@ -3244,6 +3293,10 @@ it cannot be satisfied by deleting the explanation. What the note carried for
 READERS is not lost: the per-figure "Measured by … · span" lines stay, being
 about the numbers rather than the plumbing, and `_SETUP-ANALYTICS.md` holds
 the plumbing.
+
+(The reader-facing half — the cookieless posture and what it costs — was
+already in the Privacy Policy, which is its proper home and where the selftest
+pins it.)
 
 **The interactivity, and what each piece is for.** Every chart already had a
 tooltip except the one nobody could interrogate at all — the bar lists — so a

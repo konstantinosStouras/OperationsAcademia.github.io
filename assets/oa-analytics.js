@@ -81,9 +81,10 @@
   ];
 
   /* Each dimension the file may carry: its heading, the sentence under it, and
-     the shape it is drawn as. Kept in ONE table because the provenance note at
-     the foot has to name the same figures the page draws, and two lists would
-     drift apart the first time one was added to. */
+     the shape it is drawn as. Kept in ONE table so the page and the model
+     cannot disagree about which figures exist — the selftest pins this list
+     against BREAKDOWN_IDS both ways, and two lists would drift apart the first
+     time one was added to. */
   var DIMENSIONS = [
     {
       id: 'hours', kind: 'columns',
@@ -97,11 +98,17 @@
     {
       id: 'countries', kind: 'bars',
       title: 'Where readers are',
-      sub: 'Visits by country, as Google Analytics reports them. It is the ' +
-        'coarser companion to “Which universities visited” below, which resolves ' +
-        'the visitor’s own network to a named university where it can — this one ' +
-        'places every visit, including the ones on a commercial or home ' +
-        'connection that the university figure deliberately does not record.',
+      /* IT DESCRIBES ITSELF AND NAMES NO OTHER FIGURE. This caption used to
+         call itself the coarser companion to “Which universities visited”
+         below — and the two are drawn on INDEPENDENT conditions (this one on
+         a GA4 breakdown, that one on the site's own resolver having data), so
+         with GA4 configured and the resolver not yet deployed the page said
+         “see the figure below” about a figure it was not drawing at all.
+         Measured, not theorised. A cross-reference between two optional
+         figures is a promise the page cannot keep, so neither makes one. */
+      sub: 'Visits by country, as Google Analytics reports them — every visit ' +
+        'it can place, whether the reader was on a campus, an office or a ' +
+        'phone.',
       unit: 'visits', limit: 12,
     },
     {
@@ -216,14 +223,13 @@
           ? eng.viewsPerSession + ' pages a visit · ' : '') +
         (span(eng) || 'on average'));
     }
-    if (data.totals && data.totals.universities) {
-      var u = data.universities || {};
-      html += tile('Universities seen', C.full(data.totals.universities),
-        u.frozen
-          ? (u.from ? 'in the ' + u.from.slice(0, 4) + '–' + u.to.slice(0, 4) + ' archive'
-            : 'archived')
-          : 'recognised from their networks');
-    }
+    /* THERE IS DELIBERATELY NO SIXTH TILE. "Universities seen" was one until
+       the engagement tile arrived beside it, and six tiles measure as two rows
+       with ONE tile alone on the second at 1400px, 1180px and 1024px — the
+       orphan the comment above says the length and the depth were folded
+       together to avoid. The count is not lost: it is the first thing the
+       universities figure's own caption says, which is where a fact about one
+       figure belongs. */
     html += '</div>';
     host.innerHTML = html;
   }
@@ -474,8 +480,7 @@
 
     /* 5-8 — who the readers are, where they came from and what they read on.
        Each is drawn only where a source has actually answered for it; the ones
-       that have not are named in the provenance note at the foot instead of
-       being drawn as an empty axis. */
+       that have not are simply absent, rather than drawn as an empty axis. */
     ['countries', 'channels', 'referrers', 'devices'].forEach(drawDimension);
 
     /* 9 — the pages.
@@ -536,7 +541,9 @@
       DRAWN ONLY WHERE A SOURCE HAS ANSWERED. A heading over an empty axis is
       exactly the shape of the defect this page was rebuilt to remove — four
       boxes reporting nothing to anybody — so a dimension with no record is
-      named in the provenance note at the foot and drawn nowhere. */
+      drawn nowhere. THIS EARLY RETURN IS THE WHOLE PROMISE: the note at the
+      foot that also named the absences was removed by the owner (2026-08-30),
+      and the selftest pins this line for that reason. */
   function drawDimension(id) {
     var def = DIMENSIONS.filter(function (d) { return d.id === id; })[0];
     var rec = ((state.data.breakdowns || {})[id]) || null;
@@ -624,7 +631,13 @@
       var share = seen ? Math.round((placed / seen) * 100) : 0;
       sub = 'Visits by university, worked out from the visitor\'s own network — ' +
         'nobody is identified and no address is kept. ' +
-        (range ? 'Covers ' + range + '. ' : '');
+        /* THE COUNT LIVES HERE, not in a tile. It is a fact about this one
+           figure rather than a headline about the corpus, and the tiles cap at
+           five: a sixth orphans onto a row of its own at every width the page
+           is read at (measured 1400/1180/1024px), which is why the length and
+           the depth of a visit share one tile. */
+        C.full(u.all.length) + (u.all.length === 1 ? ' university' : ' universities') +
+        (range ? ', ' + range : '') + '. ';
       if (seen) {
         sub += 'It is a sample rather than a count: of ' + C.full(seen) + ' visits, ' +
           C.full(placed) + ' (' + share + '%) were placed at a university listed here' +

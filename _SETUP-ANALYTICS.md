@@ -254,17 +254,26 @@ university's is.
 firebase deploy --only functions --project operations-academia
 ```
 
-That is the whole of it — no secret, no variable. **`recordVisit` is live
-since 2026-08-30**, created by the deploy that followed a pull; the
-2026-08-29 one ran from a clone that predated this function, printed
-`Deploy complete!` over the other three, and never mentioned it — which is
-exactly how a function comes to be missing with nothing anywhere saying so. **Run any future deploy from an
-up-to-date checkout and read the deployed list back against
-`_functions/index.js`.** While the collection is still young the builder logs
-`visits: universityVisits is empty` and the page simply does not draw the
-figure, which is a chart that has just been switched on, not a fault. (The
-three instant-publish doorbells have been live since 2026-08-27 — see
-`_SETUP-INSTANT-PUBLISH.md`.)
+No secret and no variable — but **two commands come first, and the second is
+not optional**:
+
+```bash
+git pull
+npm install --prefix _functions
+firebase deploy --only functions --project operations-academia
+```
+
+`firebase-admin` arrived with `recordVisit`, and the CLI discovers what to
+deploy by LOADING your local `_functions/index.js` — so a missing module throws
+before it can see anything, and a checkout that predates the merge has nothing
+to see. **Nothing is collected until that runs**, and the collection stays
+empty, so the builder logs `visits: universityVisits is empty` and the page
+simply does not draw the figure.
+
+**COUNT THE FUNCTIONS IN THE OUTPUT.** A deploy from a stale checkout prints
+`Deploy complete!` over the three instant-publish doorbells and never mentions
+`recordVisit` at all — not deployed, not skipped, not named (owner, 2026-08-30).
+There should be **four**.
 
 **Check the URL the deploy prints** against `ENDPOINT` at the top of
 `assets/oa-visit.js`, which expects the classic form:
