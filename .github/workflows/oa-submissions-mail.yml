@@ -20,7 +20,29 @@ name: OA — tell the maintainer somebody has posted something
 # it exists, because `announcedAt` is only stamped after a send succeeds.
 
 on:
+  # THE INSTANT PATH. The poster's half of this mailer says their posting is
+  # "live on operationsacademia.org", and post-a-job.html now promises an
+  # e-mail "as soon as it is publicly shown" — so it has to fire when the
+  # posting is actually shown, which is the moment the build commits it.
+  #
+  # The schedule below cannot keep that promise on its own. It asks for 96
+  # runs a day and GitHub, which throttles scheduled workflows on a busy
+  # repository, delivers about five: measured over the last twelve fires the
+  # mean gap was SIX HOURS and the worst was twelve. A promise the pipeline
+  # misses by six hours is the copy-versus-cadence gap this repository already
+  # records ("if the cadence ever changes, they change with it").
+  #
+  # Same shape and same reasoning as oa-alerts-mail.yml, which chains here for
+  # exactly this reason. Cheap by construction: both passes key on their own
+  # high-water mark (`announcedAt`, `liveMailedAt`), so a fire with nothing new
+  # sends nothing, and the concurrency group below makes overlapping fires
+  # queue rather than race.
+  workflow_run:
+    workflows: ["OA data — publish queued postings, candidates and placements"]
+    types: [completed]
   schedule:
+    # the safety net for anything the chain missed — and the only thing that
+    # runs when the build has not
     - cron: '3,18,33,48 * * * *'
   workflow_dispatch:
     inputs:
@@ -44,8 +66,23 @@ jobs:
   mail:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # A build that FAILED committed nothing, so it published no posting and
+    # there is nobody new to tell. Scheduled and hand-dispatched fires are
+    # unaffected.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v5
+        with:
+          # THE TIP OF THE BRANCH, named explicitly — not the default, which is
+          # `github.sha`. On a `workflow_run` event that is the head of the run
+          # that TRIGGERED us, and the build commits data/jobs.json BEFORE it
+          # finishes, so the default would read the commit before the postings
+          # we were fired about. That is precisely the bug oa-alerts-mail.yml
+          # shipped with, and it matters more here: "publicly shown" is decided
+          # by whether the row is in this checkout's data/jobs.json, so a stale
+          # read does not delay the poster's e-mail — it silently concludes
+          # there is nobody to write to.
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-node@v5
         with:
           node-version: '22'

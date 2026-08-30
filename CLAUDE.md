@@ -1378,6 +1378,35 @@ so the poster pass names the DOCUMENT it would write to and never the address �
 the served files' "nothing public carries an e-mail" rule applied to the one line
 here that held a real person's.
 
+**AND IT FIRES ON THE BUILD, because the schedule cannot keep its promise.**
+`post-a-job.html` tells a poster they will hear "as soon as it is publicly
+shown", and *publicly shown* is decided by whether their row is in the
+checkout's `data/jobs.json` — which is exactly what the build has just
+committed. The cron asks for 96 fires a day and GitHub, which throttles
+scheduled workflows on a busy repository, delivers about five: measured over
+the last twelve fires on 2026-08-30 the **mean gap was six hours and the worst
+twelve**. So the mailer is chained to the build's completion, same shape and
+same reasoning as `oa-alerts-mail.yml`, and the cron is the safety net it had
+already become. A promise the pipeline misses by most of a day is the
+copy-versus-cadence gap this file already warns about.
+
+Two things that chain needs, both pinned in `testReviewWiring`: the checkout
+must name **`ref: ${{ github.ref_name }}`** — on a `workflow_run` event the
+default `github.sha` is the TRIGGERING run's head, and the build commits before
+it finishes, so the default reads the commit *before* the postings it was fired
+about (the bug `oa-alerts-mail.yml` shipped with, and worse here, because a
+stale read does not delay the poster's e-mail, it silently concludes there is
+nobody to write to) — and the job is gated on a **successful** build, which
+committed something. `oa-submissions-mail.yml` joins `DATA_CHAINED` for the
+first and is pinned to the build's own NAME for the second.
+
+**The other half of that sentence is not this feature's to keep.** "It will
+appear on the job postings page within a few minutes" depends on
+`publishOnChange` ringing the build the moment a posting is stored, and those
+Cloud Functions have never been deployed (see "What 'immediate' costs"), so a
+posting waits for the build's own cadence. Deploying them is one command and
+would make both halves true.
+
 Tests: `testPostedByAndLiveEmail` in `_scraper/selftest.mjs` (the shared rule
 both ways, the source-wins case, that the poster's e-mail carries nothing
 private, that "publicly shown" is measured against the served file, the join
