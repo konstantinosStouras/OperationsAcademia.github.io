@@ -230,9 +230,10 @@
    *
    * SPONSORED ABOVE FEATURED because a sponsorship is a commitment the site
    * has made to somebody and Featured is a note the maintainer left
-   * themselves. Nothing is featured today, so the two have never had to be
-   * ranked before; this writes down the order rather than leaving it to
-   * whichever line was typed first.
+   * themselves. That ordering is NOT hypothetical: the served file carries
+   * exactly one featured row — CUHK Business School's own 2025 posting, as
+   * it happens — so the two really can meet, and this writes the answer
+   * down rather than leaving it to whichever line was typed first.
    *
    * It is a TOTAL order over the whole list, not a "when no filter is set"
    * special case: a bar that re-sorts itself as the reader types would be a
