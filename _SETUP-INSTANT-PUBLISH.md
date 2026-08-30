@@ -46,16 +46,48 @@ university-visits counter) was simply absent from that clone, and it exists
 only because the 2026-08-30 deploy that followed ran from a pulled checkout.
 Read the deployed list back against `_functions/index.js` every time.
 
-**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER NEEDS ONE MORE
-DEPLOY.** `_functions/package.json` names Node 22 and current SDKs since
+**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THIS INSTALLATION IS OFF
+IT.** `_functions/package.json` names Node 22 and current SDKs since
 2026-08-30 (`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major
 that removes the namespaced `admin.*` API, which is why `recordVisit` now
-uses the modular one), but a runtime changes only when a deploy carries it:
-run `npm install --prefix _functions` and then
-`firebase deploy --only functions --project operations-academia` from a
-checkout with this change BEFORE 2026-10-30, or after that date nothing here
-deploys at all — an emergency fix included — until one succeeds. Read the
-four functions back against `_functions/index.js` as always.
+uses the modular one), and the owner's deploy the same day moved the live
+runtime: `firebase functions:list --project operations-academia` reads
+**nodejs22** on all four, which is also the right way to verify any future
+deploy — the list is what is DEPLOYED, where the deploy output is only what
+one run did. Read the deployed list back against `_functions/index.js` as
+always. (Google decommissioned Node 20 deploys on 2026-10-30; had this
+lapsed past that date, nothing here — an emergency fix included — could have
+deployed until it was done.)
+
+**TWO DEPLOY FAILURES THAT ARE NOT WHAT THEY SAY, both hit live on the
+upgrade deploy (2026-08-30):**
+
+* *"User code failed to load. Cannot determine backend specification.
+  Timeout after 10000"* — with `node_modules` fresh and the module loading in
+  under a second. The CLI gives its discovery round trip 10 seconds flat, and
+  on some machines (this repo lives in a Dropbox folder on Windows) the
+  spawn-serve-poll cycle needs longer than the code does. The knob is an
+  environment variable, in seconds, set in the same window as the deploy:
+
+  ```
+  set FUNCTIONS_DISCOVERY_TIMEOUT=60
+  ```
+
+  It does not persist — a new terminal needs it set again. Only if the plain
+  `node -e "require('./_functions/index.js')"` probe FAILS is the code itself
+  the problem.
+
+* *"Skipped (No changes detected)"* on a function whose runtime or SDKs just
+  changed — the skip check compared wrongly and `functions:list` still read
+  nodejs20. The override that worked is naming the functions explicitly,
+  which bypasses the skip:
+
+  ```
+  firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:recordVisit --project operations-academia
+  ```
+
+  Then read `functions:list` again — the runtime column is the ground truth,
+  never the word "complete".
 
 The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
 build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was

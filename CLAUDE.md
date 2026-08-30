@@ -2032,20 +2032,24 @@ existing ones skipped as unchanged and `recordVisit` was not in the upload at
 all; the 2026-08-30 deploy that followed a pull created it. Pull before
 deploying, and read the per-function lines, not the last one.
 
-**The Node.js 20 deadline is answered in the repository and closed by a
-deploy.** Google decommissions the Node 20 runtime on **2026-10-30**, after
-which nothing here deploys at all — an emergency fix included — from a
-package still naming it. `_functions/package.json` names **Node 22** and
-current SDKs since 2026-08-30 (`firebase-functions` ^7.3.2, the package the
-deploy warning itself named; `firebase-admin` ^14.3.0 — a major that REMOVES
-the namespaced `admin.*` surface whole, which is why `recordVisit` was
-rewritten to the modular `firebase-admin/app` / `firebase-admin/firestore`
-API in the same change; the breaking change was caught by LOADING the module,
-not by reading release notes). The RUNTIME moves only when the next
-`firebase deploy --only functions` runs from a checkout carrying this — run
-one before the date, `npm install --prefix _functions` first (the CLI loads
-the local `index.js`, and stale modules are how a load times out), and read
-the four functions back as always.
+**The Node.js 20 deadline is CLOSED — answered in the repository and carried
+live by the owner's 2026-08-30 deploy.** Google decommissioned Node 20
+deploys on **2026-10-30**; `_functions/package.json` names **Node 22** and
+current SDKs (`firebase-functions` ^7.3.2, the package the deploy warning
+itself named; `firebase-admin` ^14.3.0 — a major that REMOVES the namespaced
+`admin.*` surface whole, which is why `recordVisit` was rewritten to the
+modular `firebase-admin/app` / `firebase-admin/firestore` API in the same
+change; the breaking change was caught by LOADING the module, not by reading
+release notes), and `firebase functions:list --project operations-academia`
+reads **nodejs22** on all four — the runtime column there is the ground
+truth for any future deploy, never the deploy's own "complete". Getting it
+live surfaced two misleading CLI failures — a discovery timeout on code that
+loads in under a second (`FUNCTIONS_DISCOVERY_TIMEOUT`, seconds, per
+window), and a wrong "Skipped (No changes detected)" on a changed runtime
+(bypassed by naming the functions in `--only`) — both recorded with their
+fixes in `_SETUP-INSTANT-PUBLISH.md`. `npm install --prefix _functions`
+before deploying, as always: the CLI loads the local `index.js`, and stale
+modules are how a load dies.
 
 **The last stretch of the delay is the reader's own browser.** Pages serves
 `data/*.json` with ten minutes of freshness, so a visitor who had the page open
