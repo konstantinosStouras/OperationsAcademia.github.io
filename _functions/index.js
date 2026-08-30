@@ -204,20 +204,24 @@ exports.publishOnReview = onDocumentWritten(
    read as "no universities visit", which is precisely the misreading the rest
    of this page was rebuilt to prevent.
 
-   NOTHING HERE IS LIVE UNTIL THIS FUNCTION IS DEPLOYED — and it is the one
-   that still is not. The three doorbells above went live on 2026-08-27; the
-   2026-08-29 deploy was made from a checkout that PREDATED this file, so it
-   printed "Deploy complete!" while the three skipped as unchanged and this
-   function was not in the upload at all. Pull first, then
-       firebase deploy --only functions --project operations-academia
-   — the three will skip again and only this one deploys. Until then the
-   browser's ping simply fails, the collection stays empty, and the page says
-   the figures are not being collected yet rather than drawing an empty
-   chart.
+   LIVE SINCE 2026-08-30, and its road here is worth the paragraph: the three
+   doorbells above went live on 2026-08-27, but the 2026-08-29 deploy was made
+   from a checkout that PREDATED this file, so it printed "Deploy complete!"
+   while the three skipped as unchanged and this function was not in the
+   upload at all — a deploy from a stale checkout looks exactly like a
+   successful one. The 2026-08-30 deploy, from a pulled checkout, shipped all
+   four. If the collection ever reads empty again, check the deploy's
+   per-function lines before the code.
    =========================================================================== */
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+/* MODULAR, because firebase-admin 14 removed the namespaced surface whole:
+   `admin.apps`, `admin.firestore()` and `admin.firestore.FieldValue` are all
+   undefined there — the breaking change the CLI's upgrade warning promised,
+   and the one the load-time smoke test caught (FieldValue.increment would
+   have thrown on the first ping, after a deploy that looked clean). */
+const { initializeApp, getApps } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const dns = require('node:dns');
 
 /* Both VENDORED by _scraper/build-netmap.mjs, because `firebase deploy` ships
@@ -252,8 +256,8 @@ async function reverseDns(ip) {
 }
 
 function visitsDb() {
-  if (!admin.apps.length) admin.initializeApp();
-  return admin.firestore();
+  if (!getApps().length) initializeApp();
+  return getFirestore();
 }
 
 exports.recordVisit = onRequest(
@@ -301,7 +305,7 @@ exports.recordVisit = onRequest(
 
     const hit = netorg.classify(host, UNI_DOMAINS);
     const day = new Date().toISOString().slice(0, 10);
-    const inc = admin.firestore.FieldValue.increment(1);
+    const inc = FieldValue.increment(1);
 
     /* The counters, and only counters.
 
