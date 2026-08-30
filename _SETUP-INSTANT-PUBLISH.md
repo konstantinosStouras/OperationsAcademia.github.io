@@ -48,9 +48,10 @@ Read the deployed list back against `_functions/index.js` every time.
 
 **NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER NEEDS ONE MORE
 DEPLOY.** `_functions/package.json` names Node 22 and current SDKs since
-2026-08-30 (`firebase-functions` ^7.3.2; `firebase-admin` ^13.10.0 —
-deliberately not 14, which removes the namespaced `admin.*` API `recordVisit`
-uses), but a runtime changes only when a deploy carries it: run
+2026-08-30 (`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major
+that removes the namespaced `admin.*` API, which is why `recordVisit` now
+uses the modular one), but a runtime changes only when a deploy carries it:
+run `npm install --prefix _functions` and then
 `firebase deploy --only functions --project operations-academia` from a
 checkout with this change BEFORE 2026-10-30, or after that date nothing here
 deploys at all — an emergency fix included — until one succeeds. Read the

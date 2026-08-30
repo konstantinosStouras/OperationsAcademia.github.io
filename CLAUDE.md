@@ -2037,12 +2037,15 @@ deploy.** Google decommissions the Node 20 runtime on **2026-10-30**, after
 which nothing here deploys at all — an emergency fix included — from a
 package still naming it. `_functions/package.json` names **Node 22** and
 current SDKs since 2026-08-30 (`firebase-functions` ^7.3.2, the package the
-deploy warning itself named; `firebase-admin` ^13.10.0 — deliberately NOT 14,
-which removes the namespaced `admin.initializeApp` / `admin.firestore` /
-`FieldValue` API `recordVisit` is written against, so 14 is a code change,
-not a version bump). The RUNTIME moves only when the next
+deploy warning itself named; `firebase-admin` ^14.3.0 — a major that REMOVES
+the namespaced `admin.*` surface whole, which is why `recordVisit` was
+rewritten to the modular `firebase-admin/app` / `firebase-admin/firestore`
+API in the same change; the breaking change was caught by LOADING the module,
+not by reading release notes). The RUNTIME moves only when the next
 `firebase deploy --only functions` runs from a checkout carrying this — run
-one before the date, and read the four functions back as always.
+one before the date, `npm install --prefix _functions` first (the CLI loads
+the local `index.js`, and stale modules are how a load times out), and read
+the four functions back as always.
 
 **The last stretch of the delay is the reader's own browser.** Pages serves
 `data/*.json` with ten minutes of freshness, so a visitor who had the page open
