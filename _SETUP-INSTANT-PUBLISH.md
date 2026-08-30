@@ -172,6 +172,21 @@ what it is.
 than the milliseconds the error prints: no timeout helps when nothing ever
 connects.
 
+**AND `setx` IS MACHINE-WIDE, WHICH IS A CAVEAT WITH TEETH.** The variable
+reaches every Firebase project deployed from that machine — the six in the
+sibling `konstantinosStouras.github.io` included — and only
+`firebase-functions` **>= 6.4.0** honours it (measured: 6.3.2 has no
+`FUNCTIONS_MANIFEST_OUTPUT_PATH` handling, 6.4.0 does). A project on an older
+SDK spawns a loader that ignores the variable and serves a port nothing will
+read, so its deploy dies with `Timeout after 10000ms` — note **`ms`, and no
+doc link**: that is the FILE route's timeout, where the port route's above
+prints `10000.` with the link, and the two spellings are how you tell which
+one bit you. The sibling's five functions packages were audited and brought to
+^6.6.0 the day this shipped (its CLAUDE.md records the rule); if some OTHER
+old checkout ever hits the `ms` form, clear the variable for that window only —
+`set FIREBASE_FUNCTIONS_DISCOVERY_OUTPUT_PATH=` (an empty value is falsy) —
+or raise that project's `firebase-functions` above the floor.
+
 ## 4. Verify
 
 Post or edit a job on the site, then look at
