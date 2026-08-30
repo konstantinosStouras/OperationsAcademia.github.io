@@ -1489,6 +1489,10 @@ for (const [name, expect] of [
     await q.fill('#f-email', 'grace@example.edu');
     await q.fill('#f-personalEmail', 'grace.hopper@gmail.example');
     await q.check('input[name="researchAreas"][value="Supply Chain Management"]');
+    // the candidate's OWN areas (owner, 2026-08-30): commas AND semicolons
+    // split, and a typed respelling of a ticked area must fold onto the
+    // tick's spelling rather than publish the same area twice
+    await q.fill('#f-areasOther', 'Queueing Theory; supply chain management, Energy Markets');
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     const ref = await q.textContent('#oa-ref');
@@ -1522,6 +1526,10 @@ for (const [name, expect] of [
     'the form no longer offers the research-summary slot (retired 2026-08-24)');
   eq(cand.doc.year, marketYear(),
     'and its market year is derived from the date, like the job form\u2019s');
+  eq(cand.doc.researchAreas,
+    ['Supply Chain Management', 'Queueing Theory', 'Energy Markets'],
+    'own research areas join the ticked ones \u2014 split on commas and semicolons, ' +
+    'a respelling of a listed area folded onto its one spelling, never doubled');
 
   /* -- one profile per account per market year (owner, 2026-08-24) --------- */
 
@@ -1529,6 +1537,7 @@ for (const [name, expect] of [
     uid: KEPT, status: 'queued', ref: 'OA-CAND-260820-ZZZZ',
     first: 'Grace', last: 'Hopper', affiliation: 'Test University',
     position: 'PhD Candidate', year: marketYear(),
+    researchAreas: ['Supply Chain Management', 'Queueing Theory'],
     createdAt: '2026-08-20T00:00:00.000Z',
   } }] };
   const one = await onSite('post-a-candidate.html', oneSeed, async (q) => {
@@ -1540,6 +1549,9 @@ for (const [name, expect] of [
         document.querySelector('.title-heading h2') || {}).textContent || '',
       first: document.getElementById('f-first').value,
       inst: document.getElementById('f-institution').value,
+      areaTicked: document.querySelector(
+        'input[name="researchAreas"][value="Supply Chain Management"]').checked,
+      areaOther: document.getElementById('f-areasOther').value,
     }));
   });
   eq(one.heading.trim(), 'Edit your profile',
@@ -1547,6 +1559,9 @@ for (const [name, expect] of [
   eq(one.first, 'Grace', 'and the form holds their own profile, not a blank one');
   eq(one.inst, 'Test University',
     'a pre-split profile\u2019s free-text affiliation lands in the university box to redistribute');
+  eq([one.areaTicked, one.areaOther], [true, 'Queueing Theory'],
+    'editing round-trips a candidate\u2019s OWN research area into its box \u2014 ' +
+    'a save must never silently drop an area the checkbox list does not offer');
 
   /* -- report a placement on /v3/ ------------------------------------------ */
 
