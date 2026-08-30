@@ -8688,7 +8688,7 @@ async function testReviewWiring() {
      the CHECKS, which commit nothing, and publishing the ruleset that was
      actually tested is the point of it. Its head_sha IS the commit under
      test. */
-  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml'];
+  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml', 'oa-submissions-mail.yml'];
   for (const name of DATA_CHAINED) {
     const src = await readFile(path.join(wfDir, name), 'utf8');
     if (!/^\s*workflow_run:/m.test(src)) continue;
@@ -8707,6 +8707,21 @@ async function testReviewWiring() {
   ok(buildName && alertsWf.includes(`workflows: ["${buildName.trim()}"]`),
     'the alerts mailer is chained to the build BY ITS CURRENT NAME — renaming a ' +
     'workflow silently unchains every workflow_run listening for it');
+
+  /* …AND SO IS THE SUBMISSIONS MAILER, for a promise the schedule cannot keep
+     on its own. post-a-job.html tells a poster they will hear "as soon as it
+     is publicly shown", and "publicly shown" is decided by whether the row is
+     in the checkout's data/jobs.json — which is exactly what the build has
+     just committed. The cron asks for 96 fires a day and GitHub delivers about
+     five (mean gap six hours, worst twelve, measured 2026-08-30), so without
+     this chain the promise is missed by most of a day. */
+  const subsWf = await readFile(path.join(wfDir, 'oa-submissions-mail.yml'), 'utf8');
+  ok(buildName && subsWf.includes(`workflows: ["${buildName.trim()}"]`),
+    'the submissions mailer is chained to the build by its current name too — it is ' +
+    'what makes the poster\'s "as soon as it is publicly shown" true');
+  ok(/conclusion == 'success'/.test(subsWf),
+    '…and only to a SUCCESSFUL build: a failed one committed nothing, so it published ' +
+    'no posting and there is nobody new to tell');
 
   /* ------------- A REJECTED PUSH IS REBUILT, NEVER REBASED (2026-08-26)
 
