@@ -8004,12 +8004,18 @@ function testReviewDuplicates() {
 
   /* ---- AND AN APPROVAL SHOWS AT ONCE (owner, 2026-08-26) --------------
 
-     The card used to say "publishing starts now", on the strength of a Cloud
-     Function that dispatches the build the moment an approval lands — and
-     deploying Functions is a hand step nothing in CI performs, so the posting
-     waited for the build's own schedule while the card said otherwise. The
-     echo makes the first half true for the maintainer; the copy must not
-     claim the second half. */
+     The card has been wrong in BOTH directions, so the pin names the cadence
+     rather than a side of it. It first said "publishing starts now" while the
+     doorbell function was undeployed and the posting waited for the schedule;
+     the correction said "at the next build" — and the functions went live on
+     2026-08-27 (the `oa-jobreview-decided` dispatch, which only
+     `publishOnReview` sends, has fired on every decision since), after which
+     "the next build" UNDER-promised a two-minute chain and read as the
+     doorbell still being dead. Copy that promises a time changes with the
+     cadence — this repository's own rule — so what is pinned is today's:
+     the echo for the maintainer at once, the chain for everyone else in a
+     couple of minutes, and neither stale wording anywhere the maintainer
+     reads. */
   ok(/echoApproval\(doc, edits, patch\.reviewedAt\)/.test(rvSrc),
     'approving one posting echoes the row the build will publish');
   ok(/echoApproval\(doc, edits, reviewedAt\)/.test(rvSrc),
@@ -8021,13 +8027,22 @@ function testReviewDuplicates() {
     .test(rvSrc),
     'and an echo that throws never costs the approval itself');
   /* The COPY, not the commentary: the comment above the card's message quotes
-     the old wording to say why it went, and a naive search finds that. */
+     BOTH retired wordings to say why each went, and a naive search finds
+     them. */
   const rvCopy = rvSrc.replace(/\/\*[\s\S]*?\*\//g, '');
   ok(!/publishing starts now|publishing starts the moment you approve/.test(rvCopy),
-    'nothing the maintainer READS claims a doorbell this installation has not deployed');
-  for (const claim of ['on your own jobs page straight away', 'at the next build']) {
-    ok(rvSrc.indexOf(claim) >= 0, `the card says what is true instead: "${claim}"`);
+    'the card never claims an instant nothing measures — the promise is a time');
+  ok(!/at the next build/.test(rvCopy),
+    'and never the retired under-promise, which read as the doorbell being dead');
+  for (const claim of ['on your own jobs page straight away',
+    'within a couple of minutes']) {
+    ok(rvCopy.indexOf(claim) >= 0, `the card says what is true instead: "${claim}"`);
   }
+  /* BOTH decision paths carry it — approve-one and Approve-all each end on
+     their own message, and a cadence corrected on one alone would have the
+     panel disagreeing with itself. */
+  eq((rvCopy.match(/within a couple of minutes/g) || []).length, 2,
+    'both the single approval and Approve-all promise the same cadence');
 
   const adminPage = readFileSync(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(/<script defer src="assets\/oa-fresh\.js">/.test(adminPage),

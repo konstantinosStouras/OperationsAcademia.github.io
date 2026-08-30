@@ -961,20 +961,26 @@ Approving writes Firestore; the BUILD turns that into a row in
 queue and not on the site — which reads exactly like an approval that did not
 save.
 
-**The doorbell that was supposed to close that gap did not ring for months.**
-`publishOnReview` and `publishOnChange` are in `_functions/index.js` and neither
-was deployed: the `oa-jobreview-decided` dispatch had **zero runs, ever**, and
-all 251 `oa-jobs-changed` dispatches were sent by `github-actions[bot]` — the
-sheet workflow's own final curl — never by the function. So an approval waited
-for the build's 20-minute schedule while the card said "publishing starts now".
-That is this file's own recorded trap: *a doorbell that was never deployed looks
-exactly like a site that is simply slow*. **They are deployed now** (owner,
-2026-08-30 — a `firebase deploy --only functions` reported all three
-"Skipped (No changes detected)", which is a comparison against something that
-exists), so the echo below is a belt the site no longer strictly needs and is
-kept as one. One `firebase deploy --only functions
---project operations-academia` fixes it for everybody; nothing in CI performs
-it.
+**The doorbell that was supposed to close that gap had never rung** when this
+shipped (2026-08-26): `publishOnReview` and `publishOnChange` were in
+`_functions/index.js` and neither was deployed — the `oa-jobreview-decided`
+dispatch had zero runs, ever, and every `oa-jobs-changed` dispatch to that date
+was `github-actions[bot]`, the sheet workflow's own final curl, never the
+function. So an approval waited for the build's 20-minute schedule while the
+card said "publishing starts now" — this file's own recorded trap: *a doorbell
+that was never deployed looks exactly like a site that is simply slow*.
+
+**IT RINGS NOW.** The owner ran the `firebase deploy --only functions` this
+paragraph asked for on 2026-08-27, and the claim above was checked against the
+Actions history rather than left to stand (2026-08-30): `oa-jobreview-decided`
+— which nothing but `publishOnReview` can send; no workflow curls it — first
+fired at 09:19 that morning and has fired on every decision since, 29 runs in
+its first two days, with the build chained on each. A redeploy on 2026-08-29
+answered "Skipped (No changes detected)" for all three, which is what an
+already-deployed, unchanged function answers. So an approval publishes in
+about two minutes, and the ECHO below is not made redundant by it: it still
+beats the two-minute chain for the person who pressed the button, and it is
+the fallback the day the functions are ever down.
 
 So the approval is **echoed**, the way a saved EDIT already is
 (`assets/oa-fresh.js`): the published row is left in that browser's
@@ -999,10 +1005,15 @@ browser: PER BROWSER (a second context with the same served file shows nothing),
 it stands down against the build (a build that STARTED after the approval has
 the last word), and it echoes only what the build would publish.
 
-**And the copy now says what is true of this installation** — "Approved — and on
-your own jobs page straight away. Everyone else sees it at the next build." —
-with `selftest.mjs` pinning that nothing the maintainer READS claims a doorbell
-nobody has deployed.
+**And the copy says what is true of this installation, which has now meant
+correcting it twice** — it read "publishing starts now" over an undeployed
+doorbell, then "at the next build" once the echo shipped, which the 2026-08-27
+deploy turned into an UNDER-promise that read as the doorbell still being dead.
+It is "Approved — and on your own jobs page straight away. Everyone else sees
+it within a couple of minutes." now, on both decision paths, with `selftest.mjs`
+pinning the current cadence and banning both retired wordings — the "copy that
+promises a time changes with the cadence" rule, enforced where it was twice
+broken.
 
 **A crawled posting that mentions "business" is flagged under Business School,
 and its card NAMES the school** (owner, 2026-08-23). `typeFromNames` used to
@@ -1850,9 +1861,11 @@ Two causes, both removed:
   always the more robust half (it fires whatever the conclusion, and needs no
   token). `repository_dispatch: [oa-jobs-changed]` STAYS on the build — that
   is the Cloud Function's own doorbell for a posting made or edited on the
-  site, a different producer. It reads as dead code while the functions are
-  undeployed, and tidying it away would silently break the instant path the
-  moment they are, so the selftest pins it.
+  site, a different producer. It READ as dead code while the functions were
+  undeployed — they are live since 2026-08-27, so it is the live instant path
+  now — and the selftest pin stays for the same reason it was written: nothing
+  in this repository can see whether the functions are up, so the trigger is
+  kept whether or not they are.
 * **the stale checkout.** `actions/checkout` defaults to `github.sha`, and on
   a `workflow_run` event that is the head of the run that TRIGGERED it — which
   the producer has already moved past by committing before it finished. So the
@@ -1996,13 +2009,20 @@ the commonest outcome of a real race: the writer that beat us had already
 published everything we held.
 
 **The functions are deployed BY HAND** (`firebase deploy --only functions
---project operations-academia`, from the repository root), and a doorbell that
-was never deployed looks exactly like a site that is simply slow — there is no
-error anywhere, everything still publishes, just on the schedule. That is worth
-checking first whenever "it takes ages to appear" comes up:
-`firebase functions:log` should show `build dispatched` / `sheet read
-dispatched`. The setup page's paths were stale after the promotion (it said
-`cd v2`, where there are no functions any more); they are fixed.
+--project operations-academia`, from the repository root — done, since
+2026-08-27), and a doorbell that is not deployed looks exactly like a site
+that is simply slow — there is no error anywhere, everything still publishes,
+just on the schedule. That is worth checking first whenever "it takes ages to
+appear" comes up: `firebase functions:log` should show `build dispatched` /
+`sheet read dispatched`, and the `oa-jobreview-decided` runs in the Actions
+history are the proof only the function can produce. The setup page's paths
+were stale after the promotion (it said `cd v2`, where there are no functions
+any more); they are fixed. **And a deploy from a STALE CHECKOUT is the same
+trap one layer up**: the 2026-08-29 deploy printed "Deploy complete!" while
+shipping nothing — the checkout predated the newest function, so the three
+existing ones skipped as unchanged and the new one was not in the upload at
+all. Pull before deploying, and read the per-function lines, not the last
+one.
 
 **The last stretch of the delay is the reader's own browser.** Pages serves
 `data/*.json` with ten minutes of freshness, so a visitor who had the page open
@@ -2937,11 +2957,19 @@ ARCHIVE of a closed period, measured under another rule — which is what the
 the two: adding a decade of UA counts to a month of resolver counts gives a
 ranking that means nothing and cannot be explained on the page.
 
-**IT IS INERT UNTIL THE FUNCTION IS DEPLOYED.** Until then the ping fails
-silently, the collection stays empty, the builder logs
-`visits: universityVisits is empty`, and the page draws no figure rather than
-an empty one. **A doorbell nobody deployed looks exactly like a site that is
-simply slow**, and this is the same trap wearing the chart's clothes.
+**IT WAS INERT UNTIL `recordVisit` WAS DEPLOYED — done on 2026-08-30, so the
+measurement is LIVE.** The three instant-publish doorbells went live on
+2026-08-27 (see "An approved posting is on the maintainer's jobs page at
+once"); this function did not ride along, and until its own deploy the ping
+failed silently, the collection stayed empty, the builder logged
+`visits: universityVisits is empty`, and the page drew no figure rather than
+an empty one — the undeployed-doorbell trap wearing the chart's clothes. What
+ended it was the owner's `firebase deploy --only functions --project
+operations-academia` from a PULLED checkout:
+`functions[recordVisit(us-central1)] Successful create operation.`, FOUR
+functions in the list, at the exact URL `assets/oa-visit.js` pings. The
+collection fills from real traffic from that moment, and the daily build
+publishes the figure once it holds a day.
 
 **AND A DEPLOY FROM A STALE CHECKOUT LOOKS EXACTLY LIKE A SUCCESSFUL ONE**
 (owner, 2026-08-30). The first attempt ran `firebase deploy --only functions`
@@ -3383,8 +3411,9 @@ That is precisely why `build-analytics.mjs` carries the opposite rule —
 *an unreachable source changes nothing*, the committed file stands, and the
 days already served are carried forward as a floor. The history source's
 reader stays wired as a documented recovery path rather than being deleted,
-the same reasoning that keeps `repository_dispatch: [oa-jobs-changed]` in
-place while the functions are undeployed.
+the same reasoning that kept `repository_dispatch: [oa-jobs-changed]` in
+place through the months the functions were undeployed — and that trigger is
+the live instant path now that they are.
 
 ## Mobile standards for tables and lists — MUST consult
 
