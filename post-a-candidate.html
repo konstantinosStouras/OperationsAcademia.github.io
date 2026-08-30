@@ -286,7 +286,8 @@
                       <div class="oa-field">
                         <span class="oa-label-text" id="lbl-areas">Research area(s)</span>
                         <p class="oa-hint">Shown publicly as small tags, and used by the
-                        <em>Research area</em> filter. Tick up to ten.</p>
+                        <em>Research area</em> filter. Tick up to ten &mdash; areas you
+                        add yourself count toward the ten.</p>
                         <div class="oa-checks" role="group" aria-labelledby="lbl-areas" id="f-areas">
                           <label class="oa-check"><input type="checkbox" name="researchAreas" value="Supply Chain Management"> Supply Chain Management</label>
                           <label class="oa-check"><input type="checkbox" name="researchAreas" value="Operations Research / Optimization"> Operations Research / Optimization</label>
@@ -301,6 +302,13 @@
                           <label class="oa-check"><input type="checkbox" name="researchAreas" value="Empirical Operations"> Empirical Operations</label>
                           <label class="oa-check"><input type="checkbox" name="researchAreas" value="Transportation and Logistics"> Transportation and Logistics</label>
                         </div>
+                        <p class="oa-hint oa-advert-or">Not covered above? Add your own
+                        &mdash; separate several with commas. They appear on your
+                        profile and in the filter exactly like the ticked ones.</p>
+                        <label class="oa-visually-hidden" for="f-areasOther">Your own
+                        research area(s), comma-separated</label>
+                        <input type="text" id="f-areasOther" maxlength="400"
+                               placeholder="e.g. Queueing Theory, Energy Markets">
                       </div>
 
                       <div class="oa-field">

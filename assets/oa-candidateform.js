@@ -47,9 +47,52 @@
     cvUrl: 500, webUrl: 500, email: 160, personalEmail: 160, note: 1200
   };
 
-  // list('researchAreas', 10) in the rules: an eleventh tick would be refused
+  // list('researchAreas', 10) in the rules: an eleventh area would be refused
   // by the database AFTER a full submit, so it is refused here with a sentence.
+  // The cap covers the ticked areas and the typed ones TOGETHER — they publish
+  // as one list. AREA_LEN mirrors candidates-model.mjs, where the per-item
+  // bound lives (the rules language has no per-item predicate).
   var AREAS_MAX = 10;
+  var AREA_LEN = 80;
+
+  /* ------------------------------------------------- the candidate's OWN areas
+
+     The checkbox list is a HINT, not a vocabulary (owner, 2026-08-30: areas it
+     does not cover can be added by the candidate). The pipeline was built for
+     this all along — freeList in candidates-model.mjs is deliberately NOT
+     pickList, and the candidates page builds its Research-area facet from
+     whatever values exist, so a new area simply appears — the form was the one
+     place that closed the set. The box splits on commas/semicolons, bounds
+     each area to the model's own AREA_LEN, and folds a typed respelling of a
+     LISTED area onto the list's spelling ("supply chain management" becomes
+     the tick's "Supply Chain Management", once), so one area can never publish
+     twice under two cases and the filter facet never splits. */
+
+  function areaFold(v) {
+    return String(v || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function ownAreas(ticked) {
+    var el = $('f-areasOther');
+    if (!el) return [];
+    var canon = {};                    // folded -> the checkbox list's spelling
+    Array.prototype.forEach.call(
+      document.querySelectorAll('input[name="researchAreas"]'),
+      function (cb) { canon[areaFold(cb.value)] = cb.value; });
+    var seen = {};
+    (ticked || []).forEach(function (v) { seen[areaFold(v)] = true; });
+    var out = [];
+    String(el.value || '').split(/[,;\n]+/).forEach(function (part) {
+      var v = part.replace(/\s+/g, ' ').trim().slice(0, AREA_LEN).trim();
+      if (!v) return;
+      var k = areaFold(v);
+      if (canon[k]) v = canon[k];      // a respelling of a listed area
+      if (seen[k]) return;             // already ticked, or typed twice
+      seen[k] = true;
+      out.push(v);
+    });
+    return out;
+  }
 
   function $(id) { return document.getElementById(id); }
 
@@ -222,9 +265,11 @@
     if (!pemailOk && !firstBad) firstBad = pemail;
     out.personalEmail = pev.slice(0, MAX.personalEmail);
 
-    out.researchAreas = checked('researchAreas');
+    var tickedAreas = checked('researchAreas');
+    out.researchAreas = tickedAreas.concat(ownAreas(tickedAreas));
     if (out.researchAreas.length > AREAS_MAX) {
-      setError($('f-areas'), 'Please tick at most ' + AREAS_MAX + ' research areas.');
+      setError($('f-areas'), 'Please keep to at most ' + AREAS_MAX +
+        ' research areas — ticked and your own together.');
       if (!firstBad) firstBad = $('f-areas');
     } else {
       setError($('f-areas'), '');
@@ -516,6 +561,22 @@
     set('f-note', v.note);
 
     ticks('researchAreas', v.researchAreas);
+    /* Areas the checkbox list does not offer go back into the own-areas box.
+       Without this an edit would silently DROP them: collect() reads only
+       what is on the form, so a custom area with nowhere to land would leave
+       the document at the very next save. Matched EXACTLY, not folded — a
+       stored value differing from a tick only in case lands here too and is
+       healed onto the tick's spelling by ownAreas() when the edit is saved. */
+    (function () {
+      var el = $('f-areasOther');
+      if (!el) return;
+      var listed = {};
+      Array.prototype.forEach.call(
+        $('oa-cand-form').querySelectorAll('input[name="researchAreas"]'),
+        function (cb) { listed[cb.value] = true; });
+      el.value = (v.researchAreas || [])
+        .filter(function (x) { return x && !listed[x]; }).join(', ');
+    })();
     ticks('informsDays', v.informsDays);
 
     var ep = $('f-emailPublic');
@@ -710,6 +771,9 @@
        in oa-jobform.js. */
     form.addEventListener('input', function (e) {
       if (e.target.getAttribute('aria-invalid') === 'true') setError(e.target, '');
+      // the areas-count error hangs on the GROUP (#f-areas), so typing in the
+      // own-areas box would never clear it through the aria-invalid path above
+      if (e.target.id === 'f-areasOther') setError($('f-areas'), '');
     }, true);
     form.addEventListener('change', function (e) {
       if (e.target.getAttribute('aria-invalid') === 'true') setError(e.target, '');
