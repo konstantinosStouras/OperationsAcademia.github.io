@@ -961,14 +961,18 @@ Approving writes Firestore; the BUILD turns that into a row in
 queue and not on the site — which reads exactly like an approval that did not
 save.
 
-**The doorbell that was supposed to close that gap has never rung.**
+**The doorbell that was supposed to close that gap did not ring for months.**
 `publishOnReview` and `publishOnChange` are in `_functions/index.js` and neither
-is deployed: the `oa-jobreview-decided` dispatch has **zero runs, ever**, and
+was deployed: the `oa-jobreview-decided` dispatch had **zero runs, ever**, and
 all 251 `oa-jobs-changed` dispatches were sent by `github-actions[bot]` — the
-sheet workflow's own final curl — never by the function. So an approval waits
+sheet workflow's own final curl — never by the function. So an approval waited
 for the build's 20-minute schedule while the card said "publishing starts now".
 That is this file's own recorded trap: *a doorbell that was never deployed looks
-exactly like a site that is simply slow*. One `firebase deploy --only functions
+exactly like a site that is simply slow*. **They are deployed now** (owner,
+2026-08-30 — a `firebase deploy --only functions` reported all three
+"Skipped (No changes detected)", which is a comparison against something that
+exists), so the echo below is a belt the site no longer strictly needs and is
+kept as one. One `firebase deploy --only functions
 --project operations-academia` fixes it for everybody; nothing in CI performs
 it.
 
@@ -2852,14 +2856,26 @@ ARCHIVE of a closed period, measured under another rule — which is what the
 the two: adding a decade of UA counts to a month of resolver counts gives a
 ranking that means nothing and cannot be explained on the page.
 
-**IT IS INERT UNTIL THE FUNCTIONS ARE DEPLOYED**, and in this repository they
-never have been — the three instant-publish doorbells above are undeployed,
-which is why an approval still waits for the schedule. One `firebase deploy
---only functions --project operations-academia` switches on all four. Until
-then the ping fails silently, the collection stays empty, the builder logs
+**IT IS INERT UNTIL THE FUNCTION IS DEPLOYED.** Until then the ping fails
+silently, the collection stays empty, the builder logs
 `visits: universityVisits is empty`, and the page draws no figure rather than
 an empty one. **A doorbell nobody deployed looks exactly like a site that is
 simply slow**, and this is the same trap wearing the chart's clothes.
+
+**AND A DEPLOY FROM A STALE CHECKOUT LOOKS EXACTLY LIKE A SUCCESSFUL ONE**
+(owner, 2026-08-30). The first attempt ran `firebase deploy --only functions`
+from a working copy that predated the merge, and printed **`Deploy complete!`**
+over a list of THREE functions — the three doorbells, each "Skipped (No changes
+detected)". `recordVisit` was not deployed, not skipped, and not mentioned: the
+CLI discovers functions by LOADING the local `index.js`, so a checkout without
+the code has nothing to find and nothing to say about it. **The count is the
+only signal there is — four functions, or something is wrong.**
+
+`npm install --prefix _functions` is part of the ritual for the same reason and
+is not optional: `firebase-admin` arrived WITH `recordVisit`, and the CLI's own
+load of `index.js` throws on a `require` it cannot resolve. So the sequence is
+`git pull` → `npm install --prefix _functions` → deploy, and the deploy is read
+rather than glanced at.
 
 **`build-netmap.mjs` is in `BUILDERS`, after `build-directory.mjs`**, because
 it is derived from the directory that builder writes — so a university that
@@ -2894,7 +2910,9 @@ carrying half the data cannot reach most of it.
 drawn when the site's own resolver has data. On THIS installation today the
 first is configured and the second is not deployed — so the countries caption
 said "the coarser companion to *Which universities visited* below" directly
-above the page's own note listing that figure under **Not on this page yet**.
+above the page's own note listing that figure under **Not on this page yet**
+(that note has since been removed — see below — but the rule it exposed stands:
+a caption may not name a figure the page might not draw).
 Neither caption names the other now. Each describes itself, which is the only
 formulation true under all four combinations.
 
@@ -3132,11 +3150,21 @@ fetch — seven days, on every run after the first — while the tiles beside it
 described the whole record, and nothing on screen said the two meant different
 spans. It carries `pagesWindow` now and the figure prints it.
 
-**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN.** It is named at the foot
-of the page under "Not on this page yet", and appears on its own once the
-figures exist. A heading over an empty axis is precisely the shape of the
-defect this whole page is a rebuild of, and the five GA4 figures are empty
+**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN**, and appears on its own
+once the figures exist. A heading over an empty axis is precisely the shape of
+the defect this whole page is a rebuild of, and the five GA4 figures are empty
 today because the tag was switched on the same morning.
+
+It was also NAMED, at the foot of the page, in a "Where these figures come
+from" note that listed the absences under *Not on this page yet* beside a
+paragraph on provenance and the cookieless trade-off. **The owner removed that
+note entirely (2026-08-30)** — it is gone from the page, from `oa-analytics.css`
+and from the guards, not hidden. Three things follow and all three are pinned:
+not drawing an unanswered figure is now the WHOLE of the promise (it was always
+the half doing the work); the provenance the note carried lives in the Privacy
+Policy, which is its proper home and already said all of it; and the checks that
+asserted on the note assert on its ABSENCE instead, so it cannot creep back
+half-way.
 
 **The interactivity, and what each piece is for.** Every chart already had a
 tooltip except the one nobody could interrogate at all — the bar lists — so a

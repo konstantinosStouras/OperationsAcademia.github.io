@@ -20,9 +20,12 @@
                               pipeline that quietly stopped is the failure this
                               page is now built to make impossible to miss.
      - a figure with no
-       source yet          -> NOT DRAWN, and named in the provenance note at
-                              the foot instead. An empty axis is the shape of
-                              the defect this page was rebuilt to remove.
+       source yet          -> NOT DRAWN. An empty axis is the shape of the
+                              defect this page was rebuilt to remove, and not
+                              drawing one is the whole of the promise: a
+                              "Where these figures come from" note used to name
+                              the absences at the foot as well, and the owner
+                              removed it (2026-08-30).
      - the universities    -> drawn with the SHARE OF VISITS it could place,
                               never as a bare ranking. It is measured from the
                               visitor's own network (see oa-netorg.js) and
@@ -72,9 +75,10 @@
   ];
 
   /* Each dimension the file may carry: its heading, the sentence under it, and
-     the shape it is drawn as. Kept in ONE table because the provenance note at
-     the foot has to name the same figures the page draws, and two lists would
-     drift apart the first time one was added to. */
+     the shape it is drawn as. Kept in ONE table so the page and the model
+     cannot disagree about which figures exist — the selftest pins this list
+     against BREAKDOWN_IDS both ways, and two lists would drift apart the first
+     time one was added to. */
   var DIMENSIONS = [
     {
       id: 'hours', kind: 'columns',
@@ -93,10 +97,9 @@
          below — and the two are drawn on INDEPENDENT conditions (this one on
          a GA4 breakdown, that one on the site's own resolver having data), so
          with GA4 configured and the resolver not yet deployed the page said
-         “see the figure below” directly above its own note listing that
-         figure under “Not on this page yet”. Measured, not theorised.
-         A cross-reference between two optional figures is a promise the page
-         cannot keep, so neither of them makes one. */
+         “see the figure below” about a figure it was not drawing at all.
+         Measured, not theorised. A cross-reference between two optional
+         figures is a promise the page cannot keep, so neither makes one. */
       sub: 'Visits by country, as Google Analytics reports them — every visit ' +
         'it can place, whether the reader was on a campus, an office or a ' +
         'phone.',
@@ -425,8 +428,7 @@
 
     /* 5-8 — who the readers are, where they came from and what they read on.
        Each is drawn only where a source has actually answered for it; the ones
-       that have not are named in the provenance note at the foot instead of
-       being drawn as an empty axis. */
+       that have not are simply absent, rather than drawn as an empty axis. */
     ['countries', 'channels', 'referrers', 'devices'].forEach(drawDimension);
 
     /* 9 — the pages.
@@ -472,7 +474,6 @@
     }
 
     renderUniversities();
-    renderProvenance();
   }
 
   /** One dimension figure, or nothing at all.
@@ -480,7 +481,9 @@
       DRAWN ONLY WHERE A SOURCE HAS ANSWERED. A heading over an empty axis is
       exactly the shape of the defect this page was rebuilt to remove — four
       boxes reporting nothing to anybody — so a dimension with no record is
-      named in the provenance note at the foot and drawn nowhere. */
+      drawn nowhere. THIS EARLY RETURN IS THE WHOLE PROMISE: the note at the
+      foot that also named the absences was removed by the owner (2026-08-30),
+      and the selftest pins this line for that reason. */
   function drawDimension(id) {
     var def = DIMENSIONS.filter(function (d) { return d.id === id; })[0];
     var rec = ((state.data.breakdowns || {})[id]) || null;
@@ -591,69 +594,6 @@
       items: u.all.map(function (x) {
         return { label: x.name, value: x.visits };
       }) });
-  }
-
-  /** WHERE EVERY FIGURE ON THIS PAGE COMES FROM, and which ones are not here
-      yet. A dashboard that shows only what it happens to have, with nothing
-      saying what it does not, is the failure this whole page is a rebuild of:
-      four dead embeds looked exactly like four figures nobody had got round
-      to. So the absences are printed as plainly as the presences. */
-  function renderProvenance() {
-    var data = state.data;
-    var have = [];
-    var missing = [];
-    DIMENSIONS.forEach(function (d) {
-      var rec = (data.breakdowns || {})[d.id];
-      if (rec && rec.items && rec.items.length) {
-        have.push('<li><b>' + esc(d.title) + '</b> — ' + esc(sourceName(rec.source)) +
-          (span(rec) ? ', ' + esc(span(rec)) : '') + '</li>');
-      } else {
-        missing.push('<li>' + esc(d.title) + '</li>');
-      }
-    });
-
-    var html = '<h2>Where these figures come from</h2>' +
-      '<p>The day-by-day counts, the weekly rhythm and the hiring season are drawn ' +
-      'from the site’s own record of its own pages — no cookies, no third ' +
-      'party, nothing that leaves this project. The audience figures come from ' +
-      'Google Analytics, which runs here <b>cookieless</b>: it stores nothing at all ' +
-      'on your device, which is why you were not asked to accept anything on the way ' +
-      'in. That has a cost we would rather state than hide — with no identifier ' +
-      'it cannot tell a returning reader from a new one, so everything it reports is ' +
-      'counted in <b>visits</b> rather than in people.</p>';
-
-    /* THE UNIVERSITIES ARE NOT A `DIMENSION`, and they belong in this note
-       anyway: it promises to say where EVERY figure comes from, and this is
-       the one whose source is neither of the two analytics systems named
-       above — the site resolves it itself, which is exactly the thing a
-       reader would otherwise have no way to learn. It is listed as HAVE or
-       as MISSING on the same rule as the rest: drawn, or named. */
-    var uni = data.universities || {};
-    var uniHas = (uni.all || []).length;
-    if (uniHas) {
-      have.push('<li><b>Which universities visited</b> — ' +
-        (uni.frozen ? 'an archive of an earlier measurement'
-          : 'this site’s own resolver, from the visitor’s network') +
-        (span(uni) ? ', ' + esc(span(uni)) : '') + '</li>');
-    } else {
-      missing.push('<li>Which universities visited</li>');
-    }
-
-    if (have.length) html += '<ul class="oa-an-list">' + have.join('') + '</ul>';
-    if (missing.length) {
-      html += '<p>Not on this page yet, because no source has answered for ' +
-        (missing.length === 1 ? 'it' : 'them') + ' — they will appear on their own ' +
-        'once the figures exist:</p><ul class="oa-an-list oa-an-missing">' +
-        missing.join('') + '</ul>';
-    }
-    html += '<p>The counts describe <b>public pages only</b>: a visit to the ' +
-      'maintainer’s own area of the site is left out of every figure here, and ' +
-      'never written into the file this page reads. ' +
-      (data.generated ? 'Rebuilt ' + esc(pretty(data.generated.slice(0, 10))) + '. ' : '') +
-      'The file itself is <code>data/analytics.json</code>, which you are welcome to ' +
-      'read directly.</p>';
-
-    root.appendChild(note(html));
   }
 
   /* ------------------------------------------------------------------- load */

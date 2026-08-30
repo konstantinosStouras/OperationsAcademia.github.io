@@ -147,11 +147,11 @@ collection to find each browser's first day, which is the unbounded read the
 incremental query is shaped to avoid. A figure that would be wrong from one
 source and expensive from the other is better not drawn.
 
-**A dimension with no source is not drawn.** It is named in the note at the
-foot of the page instead, under "Not on this page yet". A heading over an empty
-axis is precisely the shape of the defect this page is a rebuild of, so the
-five GA4 figures simply appear on their own once the credential exists and the
-property has days in it.
+**A dimension with no source is not drawn.** A heading over an empty axis is
+precisely the shape of the defect this page is a rebuild of, so the five GA4
+figures simply appear on their own once the credential exists and the property
+has days in it. (They were also NAMED, in a provenance note at the foot; the
+owner removed that note on 2026-08-30, so not drawing them is the whole of it.)
 
 **And every figure describes public pages only.** The non-public filter is
 applied to the GA4 dimension reports as well as to the daily one, so the
@@ -252,11 +252,26 @@ university's is.
 firebase deploy --only functions --project operations-academia
 ```
 
-That is the whole of it — no secret, no variable. **Nothing is collected until
-that runs**, and the collection stays empty, so the builder logs
-`visits: universityVisits is empty` and the page simply does not draw the
-figure. (The same command also deploys the three instant-publish doorbells,
-which have never been deployed either — see `_SETUP-INSTANT-PUBLISH.md`.)
+No secret and no variable — but **two commands come first, and the second is
+not optional**:
+
+```bash
+git pull
+npm install --prefix _functions
+firebase deploy --only functions --project operations-academia
+```
+
+`firebase-admin` arrived with `recordVisit`, and the CLI discovers what to
+deploy by LOADING your local `_functions/index.js` — so a missing module throws
+before it can see anything, and a checkout that predates the merge has nothing
+to see. **Nothing is collected until that runs**, and the collection stays
+empty, so the builder logs `visits: universityVisits is empty` and the page
+simply does not draw the figure.
+
+**COUNT THE FUNCTIONS IN THE OUTPUT.** A deploy from a stale checkout prints
+`Deploy complete!` over the three instant-publish doorbells and never mentions
+`recordVisit` at all — not deployed, not skipped, not named (owner, 2026-08-30).
+There should be **four**.
 
 **Check the URL the deploy prints** against `ENDPOINT` at the top of
 `assets/oa-visit.js`, which expects the classic form:

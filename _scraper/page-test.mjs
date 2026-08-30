@@ -6665,21 +6665,25 @@ for (const w of [320, 360, 390, 430]) {
       'analytics: the daily chart takes focus and the arrow keys read it — a ' +
       'crosshair only a pointer can drive leaves the table as the only way in');
 
-    /* every figure says where it came from, and the note at the foot says it
-       once more for the page as a whole */
+    /* EVERY FIGURE STILL SAYS WHERE IT CAME FROM, per figure. What is gone is
+       the "Where these figures come from" note at the foot, which said it once
+       more for the page as a whole and carried the cookieless trade-off with
+       it — the owner removed that card entirely (2026-08-30).
+
+       The reader-facing half of what it said is not lost: the cookieless
+       posture and what it costs ("our own visitor numbers are approximate")
+       are in the Privacy Policy, which is its proper home and where
+       selftest.mjs pins it. So what is measured here is the per-figure line,
+       which still has to be there, and the note's ABSENCE — gone rather than
+       emptied, so it cannot creep back half-way. */
     const prov = await q.evaluate(() => ({
       perFigure: [...document.querySelectorAll('.oa-figure-src')].map((x) => x.textContent),
-      foot: [...document.querySelectorAll('.oa-an-note')].map((x) => x.textContent).join(' '),
+      foot: document.body.textContent,
     }));
     ok(prov.perFigure.some((t) => /Google Analytics/.test(t)),
       'analytics: a figure Google measured says so under it');
-    ok(/Where these figures come from/.test(prov.foot),
-      'analytics: and the page as a whole accounts for its own sources');
-    ok(/cookieless/i.test(prov.foot) && /visits/.test(prov.foot),
-      'analytics: …including that Google Analytics runs cookieless here and ' +
-      'therefore counts visits rather than people');
-    ok(/public pages only/i.test(prov.foot),
-      'analytics: …and that the maintainer’s own area is in none of it');
+    ok(!/Where these figures come from/.test(prov.foot),
+      'analytics: and the provenance note is gone from the page, not merely hidden');
 
     await ctx.close();
   }
@@ -6752,7 +6756,6 @@ for (const w of [320, 360, 390, 430]) {
         .map((s) => (s.querySelector('.oa-figure-sub') || {}).textContent || '')[0] || '';
       return {
         countries: subOf('Where readers are'),
-        missing: [...document.querySelectorAll('.oa-an-missing li')].map((e) => e.textContent),
         heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
       };
     });
@@ -6762,8 +6765,10 @@ for (const w of [320, 360, 390, 430]) {
     ok(!/Which universities visited/.test(half.countries),
       'analytics: a drawn figure never points at one the same page lists as missing — ' +
       'two optional figures cannot promise each other');
-    ok(half.missing.includes('Which universities visited'),
-      'analytics: …the absent figure is named as missing, as every absent figure is');
+    ok(!half.heads.some((h) => /Which universities/.test(h)),
+      'analytics: …and the absent one is simply NOT DRAWN — the note that used to ' +
+      'name it was removed by the owner (2026-08-30), so not drawing it is the ' +
+      'whole of the promise now');
     await ctx.close();
   }
 
@@ -6785,27 +6790,19 @@ for (const w of [320, 360, 390, 430]) {
     const bare = await q.evaluate(() => ({
       heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
       missing: [...document.querySelectorAll('.oa-an-missing li')].map((x) => x.textContent),
-      have: [...document.querySelectorAll('.oa-an-list:not(.oa-an-missing) li')]
-        .map((x) => x.textContent),
       tiles: [...document.querySelectorAll('.oa-tile')].map((t) => t.textContent).join(' '),
     }));
     ok(!bare.heads.includes('Where readers are'),
       'analytics: a figure no source has answered for is not drawn at all');
-    ok(bare.missing.includes('Where readers are') && bare.missing.length === 5,
-      'analytics: …it is NAMED as missing instead, because a dashboard that shows ' +
-      'only what it happens to have, with nothing saying what it does not, is the ' +
-      'failure this page is a rebuild of');
+    /* It used to be NAMED as missing in a provenance note at the foot; the owner
+       removed that note entirely (2026-08-30). Not drawing it is what the note
+       existed to guarantee, and that half is unchanged — so what is pinned is
+       the absence of the heading AND the absence of the note. */
+    eq(bare.missing.length, 0,
+      'analytics: …and there is no provenance note listing it — that card is gone, ' +
+      'not merely emptied');
     ok(!/Typical visit/.test(bare.tiles),
       'analytics: and a tile with no measurement behind it is absent, never a zero');
-    /* THE UNIVERSITIES ARE IN THAT NOTE TOO. They are not a `DIMENSION`, so
-       nothing in the loop above would have named them — and this is the one
-       figure whose source is NEITHER analytics system, which is exactly the
-       thing a reader could not otherwise learn. */
-    ok(bare.have.some((x) => /Which universities visited/.test(x) &&
-      /own resolver/.test(x)),
-      'analytics: the provenance note says the universities figure is the site\'s ' +
-      'own resolver — a note that promises where every figure comes from must ' +
-      'not silently skip the one measured by neither analytics system');
     await ctx.close();
   }
 

@@ -8698,6 +8698,36 @@ async function testReviewWiring() {
       '(github.ref_name) — the default github.sha is the TRIGGERING run\'s head');
   }
 
+  /* ---- ONE NODE VERSION, AND THE FUNCTIONS RUN ON IT TOO ----------------
+
+     Google decommissions a Cloud Functions runtime on a DATE — Node 20's is
+     2026-10-30, after which nothing deploys at all — and the deploy log is
+     the only place that says so. That is this repository's own recurring
+     failure shape wearing a calendar: a warning nobody reads until the thing
+     stops.
+
+     A guard pinning "22" would go stale the same way, so what is pinned is a
+     RELATIONSHIP that does not rot: the runtime the Functions declare is the
+     one CI actually runs the code on. Deploying code tested on one Node to a
+     runtime on another is the real defect, and it is checkable offline for
+     ever. It was true only by luck until 2026-08-30 — `_functions` said 20
+     while fifteen of the sixteen workflows said 22, and the sixteenth
+     (oa-analytics.yml, the newest) said 20 as well. */
+  const wfFiles = (await readdir(wfDir)).filter((f) => /\.ya?ml$/.test(f));
+  const nodeVersions = new Set();
+  for (const name of wfFiles) {
+    const src = await readFile(path.join(wfDir, name), 'utf8');
+    for (const m of src.matchAll(/node-version:\s*'?([0-9.]+)'?/g)) nodeVersions.add(m[1]);
+  }
+  eq([...nodeVersions].sort(), ['22'],
+    'every workflow runs ONE Node version — an odd one out is drift nobody sees ' +
+    'until a version-specific failure appears in exactly one job');
+  const fnPkg = JSON.parse(
+    await readFile(path.join(HERE, '..', '_functions', 'package.json'), 'utf8'));
+  eq(fnPkg.engines && fnPkg.engines.node, [...nodeVersions][0],
+    'and the Cloud Functions declare that same runtime — code tested on one ' +
+    'Node and deployed to another is the defect a decommission date turns fatal');
+
   /* AND THE CHAIN ITSELF: the alerts mailer must go on answering the build's
      completion. Losing that trigger costs an hour rather than a posting (the
      hourly cron is the safety net), but "as soon as something appears" is what
@@ -10575,10 +10605,16 @@ async function testAnalytics() {
   eq(drawn.slice().sort(), A.BREAKDOWN_IDS.slice().sort(),
     'every dimension the model may carry is drawn by the page, and every ' +
     'dimension the page draws is one the model may carry');
-  ok(/renderProvenance/.test(page) && /oa-an-missing/.test(page),
-    'and the ones no source has answered for are NAMED at the foot rather than ' +
-    'drawn as an empty axis — a dashboard that shows only what it happens to ' +
-    'have is the failure this page is a rebuild of');
+  /* A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN. It used to be NAMED as
+     well, in a provenance note at the foot; the owner removed that note
+     entirely (2026-08-30). What the note was there to prevent — a heading over
+     an empty axis — is prevented by the drawing rule itself, which is the half
+     that was always doing the work. */
+  ok(/!rec \|\| !rec\.items \|\| !rec\.items\.length\) return/.test(page),
+    'a dimension with no items is not drawn at all — a heading over an empty ' +
+    'axis is the failure this page is a rebuild of');
+  ok(!/renderProvenance|oa-an-missing/.test(page),
+    'and the provenance note is gone, not merely hidden');
 
   /* --- each dimension is asked of the source that can answer it ---------- */
 
@@ -10999,7 +11035,14 @@ async function testUniversityVisits() {
     'independent conditions, so a cross-reference is a promise the page cannot keep');
   const uniFn = pagejs.slice(pagejs.indexOf('function renderUniversities'));
   ok(uniFn.length > 500, 'renderUniversities was found');
-  const uniBody = uniFn.slice(0, uniFn.indexOf('function renderProvenance'));
+  /* Bounded on CODE, never on a comment: `pagejs` above is read with comments
+     STRIPPED, so a comment marker cannot be found in it at all and the slice
+     would silently run to the end of the file and pass by accident.
+     renderUniversities became the last function on the page when the
+     provenance note was removed, so the fetch that boots it is the boundary. */
+  const uniEnd = uniFn.indexOf("fetch('data/analytics.json'");
+  ok(uniEnd > 400, 'the universities renderer was bounded (or the checks below are vacuous)');
+  const uniBody = uniFn.slice(0, uniEnd);
   for (const other of ['Where readers are', 'How readers arrive', 'What they read it on']) {
     ok(!uniBody.includes(other),
       `…and the universities caption names no other figure either (${other})`);
