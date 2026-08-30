@@ -20,9 +20,14 @@
                               pipeline that quietly stopped is the failure this
                               page is now built to make impossible to miss.
      - a figure with no
-       source yet          -> NOT DRAWN, and named in the provenance note at
-                              the foot instead. An empty axis is the shape of
-                              the defect this page was rebuilt to remove.
+       source yet          -> NOT DRAWN AT ALL. An empty axis is the shape of
+                              the defect this page was rebuilt to remove, and
+                              each figure appears on its own once its source
+                              has data. (The page used to list the missing
+                              ones in a "Where these figures come from" note
+                              at the foot; the owner had it removed,
+                              2026-08-30 — how the site is measured is not
+                              the readers' business.)
      - the universities    -> drawn with the SHARE OF VISITS it could place,
                               never as a bare ranking. It is measured from the
                               visitor's own network (see oa-netorg.js) and
@@ -58,15 +63,19 @@
   ];
 
   /* WHICH NUMBER THE DAILY CHART PLOTS, and the reason it is a control rather
-     than three charts stacked. The three answer different questions — how many
-     PEOPLE, how many VISITS, how many PAGES — and a reader almost always wants
-     one of them; drawing all three at once needs two more colours and makes
-     the one they came for harder to see. */
+     than charts stacked: the two answer different questions — how many PEOPLE
+     and how many PAGES — and a reader almost always wants one of them.
+
+     "VISITS" IS DELIBERATELY NOT OFFERED. The site's own record files one
+     document per PAGE OPENED, so for every day it owns the session count IS
+     the pageview count — a "Visits" button would plot a line identical to
+     Pageviews and describe a pageview as "one browsing session", which is a
+     wrong number wearing a right label. The day rows keep carrying all three
+     fields (the file format is not the interface), so the button returns the
+     day a source that can really count sessions owns the record. */
   var METRICS = [
     { id: 'visitors', label: 'Visitors', unit: 'visitors',
       note: 'distinct browsers, as the site’s own record counts them' },
-    { id: 'sessions', label: 'Visits', unit: 'visits',
-      note: 'a visit is one browsing session' },
     { id: 'pageviews', label: 'Pageviews', unit: 'pageviews',
       note: 'every page opened' },
   ];
@@ -174,26 +183,37 @@
   function renderTiles(host, rows, data) {
     var s = A.summarise(rows);
     var html = '<div class="oa-tiles">';
-    html += tile('Visitors', C.full(s.visitors), s.days ? 'over ' + C.full(s.days) + ' days' : '');
+    /* "counted per day" is load-bearing: the served file has no cross-day
+       identity, so the headline is per-day distinct visitors SUMMED — a
+       reader who comes back on ten days counts ten times, and a tile that
+       said a bare "Visitors over 90 days" would claim a distinct count
+       nothing here can compute. */
+    html += tile('Visitors', C.full(s.visitors),
+      s.days ? 'counted per day, over ' + C.full(s.days) + ' days' : '');
     html += tile('Pageviews', C.full(s.pageviews), s.days ? C.full(Math.round(s.pageviews / s.days)) + ' a day' : '');
     html += tile('Busiest day', s.busiest ? C.full(s.busiest.visitors) : '—',
       s.busiest ? pretty(s.busiest.day) : '');
     html += tile('Typical day', s.days ? C.full(Math.round(s.mean)) : '—', 'visitors, on average');
 
-    /* HOW LONG A VISIT LASTS, said in minutes rather than in seconds (owner,
-       2026-08-29). It comes from the dimension window, not from the range
-       control above, so it says which — a tile that silently means a different
-       span from the tile beside it is worse than no tile.
+    /* HOW LONG, said in minutes rather than in seconds (owner, 2026-08-29).
+       It comes from the dimension window, not from the range control above,
+       so it says which — a tile that silently means a different span from the
+       tile beside it is worse than no tile.
 
-       The length and the depth share ONE tile rather than taking two. They are
-       two halves of the same fact, measured by the same source over the same
-       window; and a sixth tile orphans onto a row of its own at every width the
-       page is read at, because the reading column caps at 1064px and five is
-       what fits. */
+       WHAT the length is a length OF depends on the source, and the tile says
+       which. The site's own record files one document per page, so its
+       average is time on a PAGE — its "session" count equals its pageview
+       count by construction, its pages-per-visit is identically 1, and a
+       "Typical visit · 1 pages" tile was two wrong claims in nine
+       characters. Only a source that can really measure a visit (GA4) gets
+       the visit framing and the depth. */
     var eng = data.engagement;
     if (eng && eng.avgSessionSec) {
-      html += tile('Typical visit', C.duration(eng.avgSessionSec),
-        (eng.viewsPerSession ? eng.viewsPerSession + ' pages · ' : '') +
+      var perPage = eng.source === 'usage';
+      html += tile(perPage ? 'Time on a page' : 'Typical visit',
+        C.duration(eng.avgSessionSec),
+        (!perPage && eng.viewsPerSession > 1
+          ? eng.viewsPerSession + ' pages a visit · ' : '') +
         (span(eng) || 'on average'));
     }
     if (data.totals && data.totals.universities) {
@@ -243,11 +263,44 @@
     sec.appendChild(p);
   }
 
+  /** A calendar day, moved. Pure arithmetic in UTC, like every date on this
+      page — a local read shifts the day for readers west of Greenwich. */
+  function dayShift(day, n) {
+    var q = day.split('-');
+    return new Date(Date.UTC(+q[0], +q[1] - 1, +q[2] + n)).toISOString().slice(0, 10);
+  }
+
   function rowsInRange() {
     var all = A.series(state.data.days);
     var r = RANGES.filter(function (x) { return x.id === state.range; })[0] || RANGES[1];
-    if (!r.days || all.length <= r.days) return all;
-    return all.slice(-r.days);
+    if (!r.days || !all.length) return all;
+    /* clipped by DATE, not by row count: a day with no measurement is not in
+       the file at all, so "the last 90 rows" could quietly reach back further
+       than 90 days across a gap and call it "Last 90 days" */
+    var cutoff = dayShift(all[all.length - 1].day, -(r.days - 1));
+    return all.filter(function (x) { return x.day >= cutoff; });
+  }
+
+  /** The rows made CALENDAR-CONTINUOUS for the daily chart: a day the record
+      does not cover becomes a null row, which line() draws as a BREAK and the
+      rolling mean refuses to average across. An index-spaced line used to run
+      straight through a collection outage as if it were one ordinary day —
+      and a chart that cannot show a gap is a chart that hides one. Bounded,
+      because it is driven by the range control and "Everything" grows a row a
+      day for ever. */
+  function withGaps(rows) {
+    if (rows.length < 2) return rows;
+    var have = {};
+    rows.forEach(function (r) { have[r.day] = r; });
+    var out = [];
+    var day = rows[0].day;
+    var last = rows[rows.length - 1].day;
+    while (day <= last && out.length < 4200) {
+      out.push(have[day] ||
+        { day: day, visitors: null, sessions: null, pageviews: null });
+      day = dayShift(day, 1);
+    }
+    return out;
   }
 
   /** A row of mutually-exclusive buttons. Used for the range and for the
@@ -276,6 +329,7 @@
     var data = state.data;
     var rows = rowsInRange();
 
+    drawnAt = root.clientWidth || 0;
     root.textContent = '';
 
     var stale = A.staleness(data, Date.now());
@@ -337,10 +391,11 @@
     });
     var plot1 = document.createElement('div');
     f1.body.appendChild(plot1);
-    var values = rows.map(function (r) { return r[metric.id]; });
+    var chartRows = withGaps(rows);
+    var values = chartRows.map(function (r) { return r[metric.id]; });
     C.line(plot1, {
       title: metric.label + ' per day',
-      points: rows.map(function (r) {
+      points: chartRows.map(function (r) {
         return { label: pretty(r.day).replace(/ \d{4}$/, ''), label2: pretty(r.day) };
       }),
       series: [
@@ -440,14 +495,22 @@
     });
     if (publicPages.length) {
       var win = data.pagesWindow || {};
+      /* THE SHARE NEEDS A WHOLE. `views` is the window's entire pageview
+         count, stated by the builder; the rows here are only the top of the
+         list, so a share computed over them would be a share of the rows that
+         fitted — the claim this figure briefly made. Without the stated
+         whole, no share is offered and the subtitle does not promise one. */
+      var pagesTotal = Math.max(0, Math.round(Number(win.views) || 0));
       var f4 = figure('The most visited pages',
         'Pageviews, and how long a reader spends on each' +
-        (span(win) ? ', over ' + span(win) : '') + '. Hover or tab through a row for ' +
-        'its share of the whole.');
+        (span(win) ? ', over ' + span(win) : '') + '.' +
+        (pagesTotal ? ' Hover or tab through a row for its share of all ' +
+          C.full(pagesTotal) + ' pageviews in that window.' : ''));
       root.appendChild(f4.section);
       C.bars(f4.body, {
         unit: 'views',
         limit: 12,
+        total: pagesTotal,
         xTitle: 'Page',
         subTitle: 'Average time on the page',
         items: publicPages.map(function (p) {
@@ -466,7 +529,6 @@
     }
 
     renderUniversities();
-    renderProvenance();
   }
 
   /** One dimension figure, or nothing at all.
@@ -576,73 +638,25 @@
     var f = figure('Which universities visited', sub, opts);
     root.appendChild(f.section);
     C.bars(f.body, { unit: 'visits', limit: 25, xTitle: 'University',
+      /* the live figure's shares are of PLACED visits — the builder's true
+         total, the same number the sentence above quotes — never of the 25
+         rows that fitted (bars() offers no share without a stated whole).
+         The frozen archive states no whole, so its rows carry no share
+         rather than a made-up one. */
+      total: (!u.frozen && Number(u.placed)) || 0,
       items: u.all.map(function (x) {
         return { label: x.name, value: x.visits };
       }) });
   }
 
-  /** WHERE EVERY FIGURE ON THIS PAGE COMES FROM, and which ones are not here
-      yet. A dashboard that shows only what it happens to have, with nothing
-      saying what it does not, is the failure this whole page is a rebuild of:
-      four dead embeds looked exactly like four figures nobody had got round
-      to. So the absences are printed as plainly as the presences. */
-  function renderProvenance() {
-    var data = state.data;
-    var have = [];
-    var missing = [];
-    DIMENSIONS.forEach(function (d) {
-      var rec = (data.breakdowns || {})[d.id];
-      if (rec && rec.items && rec.items.length) {
-        have.push('<li><b>' + esc(d.title) + '</b> — ' + esc(sourceName(rec.source)) +
-          (span(rec) ? ', ' + esc(span(rec)) : '') + '</li>');
-      } else {
-        missing.push('<li>' + esc(d.title) + '</li>');
-      }
-    });
-
-    var html = '<h2>Where these figures come from</h2>' +
-      '<p>The day-by-day counts, the weekly rhythm and the hiring season are drawn ' +
-      'from the site’s own record of its own pages — no cookies, no third ' +
-      'party, nothing that leaves this project. The audience figures come from ' +
-      'Google Analytics, which runs here <b>cookieless</b>: it stores nothing at all ' +
-      'on your device, which is why you were not asked to accept anything on the way ' +
-      'in. That has a cost we would rather state than hide — with no identifier ' +
-      'it cannot tell a returning reader from a new one, so everything it reports is ' +
-      'counted in <b>visits</b> rather than in people.</p>';
-
-    /* THE UNIVERSITIES ARE NOT A `DIMENSION`, and they belong in this note
-       anyway: it promises to say where EVERY figure comes from, and this is
-       the one whose source is neither of the two analytics systems named
-       above — the site resolves it itself, which is exactly the thing a
-       reader would otherwise have no way to learn. It is listed as HAVE or
-       as MISSING on the same rule as the rest: drawn, or named. */
-    var uni = data.universities || {};
-    var uniHas = (uni.all || []).length;
-    if (uniHas) {
-      have.push('<li><b>Which universities visited</b> — ' +
-        (uni.frozen ? 'an archive of an earlier measurement'
-          : 'this site’s own resolver, from the visitor’s network') +
-        (span(uni) ? ', ' + esc(span(uni)) : '') + '</li>');
-    } else {
-      missing.push('<li>Which universities visited</li>');
-    }
-
-    if (have.length) html += '<ul class="oa-an-list">' + have.join('') + '</ul>';
-    if (missing.length) {
-      html += '<p>Not on this page yet, because no source has answered for ' +
-        (missing.length === 1 ? 'it' : 'them') + ' — they will appear on their own ' +
-        'once the figures exist:</p><ul class="oa-an-list oa-an-missing">' +
-        missing.join('') + '</ul>';
-    }
-    html += '<p>The counts describe <b>public pages only</b>: a visit to the ' +
-      'maintainer’s own area of the site is left out of every figure here, and ' +
-      'never written into the file this page reads. ' +
-      (data.generated ? 'Rebuilt ' + esc(pretty(data.generated.slice(0, 10))) + '. ' : '') +
-      'The file itself is <code>data/analytics.json</code>, which you are welcome to ' +
-      'read directly.</p>';
-
-    root.appendChild(note(html));
-  }
+  /* There is DELIBERATELY no "Where these figures come from" section. The
+     page carried one — sources, spans, the cookieless trade-off, the figures
+     not yet drawn — and the owner had it removed (2026-08-30): how the site
+     is measured is not the readers' business. What that section also did is
+     NOT lost: a figure with no source is still simply not drawn (see
+     drawDimension), and the per-figure provenance lines still name each
+     chart's own span, which is a property of the numbers rather than of the
+     plumbing. */
 
   /* ------------------------------------------------------------------- load */
 
@@ -650,6 +664,25 @@
      ten minutes of freshness, so without it a reader who was here recently is
      shown what they already had. The rule every fetch of data/ on this site
      follows. */
+  /* THE CHARTS ARE DRAWN AT THE WIDTH THEY ARE SHOWN AT (see plotWidth in
+     oa-charts.js), so a width that changes needs a redraw — a rotated phone,
+     a resized window, a developer dock. One debounced listener for the whole
+     page: draw() rebuilds every figure in a few milliseconds, each chart owns
+     no observer of its own (an observer per chart would leak one per redraw),
+     and a resize that did not change the width — a phone's URL bar collapsing
+     changes only the HEIGHT, on every scroll — redraws nothing. */
+  var drawnAt = 0;
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      resizeTimer = null;
+      if (!state.data) return;
+      var w = root.clientWidth || 0;
+      if (Math.abs(w - drawnAt) > 1) draw();
+    }, 150);
+  });
+
   fetch('data/analytics.json', { cache: 'no-cache' })
     .then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
