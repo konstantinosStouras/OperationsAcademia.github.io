@@ -1415,12 +1415,16 @@ nobody to write to) — and the job is gated on a **successful** build, which
 committed something. `oa-submissions-mail.yml` joins `DATA_CHAINED` for the
 first and is pinned to the build's own NAME for the second.
 
-**The other half of that sentence is not this feature's to keep.** "It will
-appear on the job postings page within a few minutes" depends on
-`publishOnChange` ringing the build the moment a posting is stored, and those
-Cloud Functions have never been deployed (see "What 'immediate' costs"), so a
-posting waits for the build's own cadence. Deploying them is one command and
-would make both halves true.
+**The other half of that sentence is kept by the doorbell, and that is
+measured rather than assumed.** "It will appear on the job postings page within
+a few minutes" depends on `publishOnChange` ringing the build the moment a
+posting is stored, and it does: the build carries 15 `oa-jobs-changed`
+dispatches whose actor is the function's PAT rather than `github-actions[bot]`
+(see "What 'immediate' costs", where the actor is the whole discriminator).
+Both halves of what the form promises are therefore true — but they are true
+for different reasons, and only one of them is inside this repository: the
+mailer's half is a workflow chain the selftest pins, the publish half is a hand
+deployment that can lapse without a word.
 
 Tests: `testPostedByAndLiveEmail` in `_scraper/selftest.mjs` (the shared rule
 both ways, the source-wins case, that the poster's e-mail carries nothing
@@ -2010,19 +2014,38 @@ published everything we held.
 
 **The functions are deployed BY HAND** (`firebase deploy --only functions
 --project operations-academia`, from the repository root — done, since
-2026-08-27), and a doorbell that is not deployed looks exactly like a site
-that is simply slow — there is no error anywhere, everything still publishes,
-just on the schedule. That is worth checking first whenever "it takes ages to
-appear" comes up: `firebase functions:log` should show `build dispatched` /
-`sheet read dispatched`, and the `oa-jobreview-decided` runs in the Actions
-history are the proof only the function can produce. The setup page's paths
-were stale after the promotion (it said `cd v2`, where there are no functions
-any more); they are fixed. **And a deploy from a STALE CHECKOUT is the same
-trap one layer up**: the 2026-08-29 deploy printed "Deploy complete!" while
+2026-08-27; `recordVisit` since 2026-08-30), and a doorbell that is not
+deployed looks exactly like a site that is simply slow — there is no error
+anywhere, everything still publishes, just on the schedule. That is worth
+checking first whenever "it takes ages to appear" comes up:
+`firebase functions:log` should show `build dispatched` / `sheet read
+dispatched`, and the `oa-jobreview-decided` runs in the Actions history are
+the proof only the function can produce — filter by
+`event:repository_dispatch` and read the ACTOR: the function carries a PAT
+and shows as a person, where the verify workflows' own curls carry
+`GITHUB_TOKEN` and show as `github-actions[bot]`. The setup page's paths were
+stale after the promotion (it said `cd v2`, where there are no functions any
+more); they are fixed. **And a deploy from a STALE CHECKOUT is the same trap
+one layer up**: the 2026-08-29 deploy printed "Deploy complete!" while
 shipping nothing — the checkout predated the newest function, so the three
-existing ones skipped as unchanged and the new one was not in the upload at
-all. Pull before deploying, and read the per-function lines, not the last
-one.
+existing ones skipped as unchanged and `recordVisit` was not in the upload at
+all; the 2026-08-30 deploy that followed a pull created it. Pull before
+deploying, and read the per-function lines, not the last one.
+
+**The Node.js 20 deadline is answered in the repository and closed by a
+deploy.** Google decommissions the Node 20 runtime on **2026-10-30**, after
+which nothing here deploys at all — an emergency fix included — from a
+package still naming it. `_functions/package.json` names **Node 22** and
+current SDKs since 2026-08-30 (`firebase-functions` ^7.3.2, the package the
+deploy warning itself named; `firebase-admin` ^14.3.0 — a major that REMOVES
+the namespaced `admin.*` surface whole, which is why `recordVisit` was
+rewritten to the modular `firebase-admin/app` / `firebase-admin/firestore`
+API in the same change; the breaking change was caught by LOADING the module,
+not by reading release notes). The RUNTIME moves only when the next
+`firebase deploy --only functions` runs from a checkout carrying this — run
+one before the date, `npm install --prefix _functions` first (the CLI loads
+the local `index.js`, and stale modules are how a load times out), and read
+the four functions back as always.
 
 **The last stretch of the delay is the reader's own browser.** Pages serves
 `data/*.json` with ten minutes of freshness, so a visitor who had the page open
@@ -2967,7 +2990,9 @@ an empty one — the undeployed-doorbell trap wearing the chart's clothes. What
 ended it was the owner's `firebase deploy --only functions --project
 operations-academia` from a PULLED checkout:
 `functions[recordVisit(us-central1)] Successful create operation.`, FOUR
-functions in the list, at the exact URL `assets/oa-visit.js` pings. The
+functions in the list, at the exact URL `assets/oa-visit.js` pings (a
+later deploy may print the service's own `run.app` address instead —
+same function, and the classic `cloudfunctions.net` form stays valid). The
 collection fills from real traffic from that moment, and the daily build
 publishes the figure once it holds a day.
 

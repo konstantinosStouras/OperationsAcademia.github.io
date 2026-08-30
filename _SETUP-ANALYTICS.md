@@ -198,7 +198,7 @@ nothing*, and the committed file stands (see `build-analytics.mjs`).
 `data/analytics-history.json` will therefore never exist, and the reader for
 it stays in place as a documented recovery path rather than being deleted —
 the same reasoning CLAUDE.md records for keeping `repository_dispatch:
-[oa-jobs-changed]` wired while the functions are undeployed. If a copy ever
+[oa-jobs-changed]` wired through the months when nothing dispatched it. If a copy ever
 surfaces (an old export, a colleague's download, a backup), drop it in as:
 
 ```json

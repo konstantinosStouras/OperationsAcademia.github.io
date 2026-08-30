@@ -23,11 +23,39 @@ The workflows themselves are unchanged and their schedules stay as the safety
 net, so nothing is lost if the functions are down — changes just take up to 20
 minutes again, and an approval up to half an hour.
 
+**THESE THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
+on every decision since. To check rather than trust: filter this repository's
+Actions by `event:repository_dispatch` and read the ACTOR — the function
+carries the PAT from step 1 and shows as a person, where the two verify
+workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
+`oa-jobreview-decided` has no other sender at all, so it is the cleanest of the
+two to read.
+
 **PATHS MOVED WITH THE PROMOTION.** The functions used to live in `v2/`; they
 are at the repository root now, which is also where `firebase.json` is. A
 `cd v2 && firebase deploy` — what the earlier version of this page told you to
 do — deploys nothing, and the doorbell that was never deployed looks exactly
 like a site that is simply slow.
+
+**PULL BEFORE YOU DEPLOY, AND COUNT THE LINES.** `firebase deploy --only
+functions` deploys what is in the working copy, so a clone a few commits behind
+deploys the older set and reports success over it. That is not hypothetical:
+the 2026-08-29 run printed `Deploy complete!` over three functions when
+`_functions/index.js` on master held four — `recordVisit` (the
+university-visits counter) was simply absent from that clone, and it exists
+only because the 2026-08-30 deploy that followed ran from a pulled checkout.
+Read the deployed list back against `_functions/index.js` every time.
+
+**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER NEEDS ONE MORE
+DEPLOY.** `_functions/package.json` names Node 22 and current SDKs since
+2026-08-30 (`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major
+that removes the namespaced `admin.*` API, which is why `recordVisit` now
+uses the modular one), but a runtime changes only when a deploy carries it:
+run `npm install --prefix _functions` and then
+`firebase deploy --only functions --project operations-academia` from a
+checkout with this change BEFORE 2026-10-30, or after that date nothing here
+deploys at all — an emergency fix included — until one succeeds. Read the
+four functions back against `_functions/index.js` as always.
 
 The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
 build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was

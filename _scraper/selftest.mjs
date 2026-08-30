@@ -8676,11 +8676,69 @@ async function testReviewWiring() {
 
   /* …and the build KEEPS that dispatch trigger, which is a different producer:
      the Cloud Function's doorbell for a posting made or edited on the site. It
-     reads as dead code now that nothing in CI sends it (the functions are not
-     deployed), and tidying it away would silently break the instant path the
-     moment they are. */
+     READ as dead code through the months when nothing sent it; the functions
+     were deployed on 2026-08-27 and it has carried real traffic since, so
+     tidying it away would now break the instant path outright. */
   ok(/repository_dispatch:\s*\n\s*types:\s*\[oa-jobs-changed\]/.test(buildSrc),
     'oa-jobs-build still answers oa-jobs-changed — the Cloud Function\'s own doorbell');
+
+  /* ---------------------- NOTHING STILL CALLS THE DOORBELLS UNDEPLOYED
+
+     A claim about the world OUTSIDE this repository cannot be tested here, so
+     it goes stale in silence — and this one went stale in the direction that
+     costs an afternoon: six files asserted that the three instant-publish
+     functions had never been deployed, for three days after they were. The
+     evidence is one filter away (this repository's Actions, event
+     `repository_dispatch`, read the ACTOR: `oa-jobreview-decided` has no
+     sender but `_functions/index.js`), and nobody looks at a fact already
+     written down.
+
+     PRESENT-TENSE ONLY, exactly as with the university figures further down:
+     every one of these files RECOUNTS the old state in order to explain what
+     changed, and a guard that could not tell the explanation from the claim
+     could only be satisfied by deleting the explanation. So what is forbidden
+     is a file still ASSERTING it.
+
+     And the recordVisit claim aged the same way WITHIN A DAY: the morning of
+     2026-08-30 this comment excused it as the one honest "not deployed", and
+     that afternoon a deploy from a pulled checkout created the function. So
+     the sweep covers it too — the failure is identical, only faster. */
+  /* Two fragments are CONCATENATED rather than written out, because this file
+     is one of the six swept and a pattern that spells its own claim in full
+     matches itself. The alternatives carrying a group cannot. */
+  const DOORBELL_STALE = new RegExp([
+    '(the |those )?(cloud )?functions (are|is) undeployed',
+    '(cloud )?functions have never ' + 'been deployed',
+    'doorbells?( above)? (is|are) undeployed',
+    'has never ' + 'rung',
+    'dispatch has (\\*\\*)?zero runs, ever',
+    'neither\\s+is deployed',
+    'that function has never ' + 'fired here',
+    'recordVisit[,`]* (is|remains|which is)( genuinely| still)? not ' + '(deployed|live)',
+    'the one function nobody has ' + 'switched on',
+    'this fourth function has never ' + 'reached production',
+  ].join('|'), 'i');
+  for (const f of ['CLAUDE.md', '_SETUP-INSTANT-PUBLISH.md', '_SETUP-ANALYTICS.md',
+    'assets/oa-jobreview.js', '_functions/index.js', '_scraper/selftest.mjs']) {
+    const t = await readFile(path.join(HERE, '..', f), 'utf8');
+    ok(!DOORBELL_STALE.test(t),
+      `${f} no longer asserts the instant-publish doorbells are ` + `undeployed — ` +
+      'they have fired on every decision since 2026-08-27, and a warning left ' +
+      'standing after its fact expired sends the next reader chasing a delay ' +
+      'nobody has');
+  }
+
+  /* …and the ONE operational lesson that outlives the date: a deploy runs on
+     the working copy, so a clone a few commits behind deploys the older set
+     and prints "Deploy complete!" over it. That is how the first 2026-08-30
+     deploy missed `recordVisit` — a second, from a pulled checkout, created
+     it the same day. */
+  const instantSetup =
+    await readFile(path.join(HERE, '..', '_SETUP-INSTANT-PUBLISH.md'), 'utf8');
+  ok(/read the deployed list back/i.test(instantSetup)
+     && /_functions\/index\.js/.test(instantSetup),
+    'the setup guide says to count the deployed functions back against ' +
+    '_functions/index.js — the check that would have caught the missing one');
 
   /* ---------------------- A CHAINED BUILD STARTS FROM THE BRANCH TIP
 
