@@ -63,12 +63,51 @@
   }
 
   /** Compact, and never a bare `toLocaleString` on an axis tick: 12.9K reads
-      at a glance where 12,914 has to be counted. */
+      at a glance where 12,914 has to be counted.
+
+      ROUNDED AT THE SCALE IT IS SHOWN AT, which the first version was not:
+      999,999 fell through the >=1,000,000 gate and printed "1000.0K", and
+      9,990 printed "10.0K" — a decimal carrying no information. The value is
+      rounded to one decimal of its unit FIRST, and a decimal that rounds away
+      is dropped rather than printed as ".0". */
   function compact(n) {
     const v = Math.round(Number(n) || 0);
-    if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(v % 1000000 ? 1 : 0) + 'M';
-    if (Math.abs(v) >= 1000) return (v / 1000).toFixed(v % 1000 >= 100 ? 1 : 0) + 'K';
+    const a = Math.abs(v);
+    const one = (x) => {
+      const r = Math.round(x * 10) / 10;
+      return Number.isInteger(r) ? String(r) : r.toFixed(1);
+    };
+    if (a >= 999500) return one(v / 1e6) + 'M';
+    if (a >= 1000) return one(v / 1e3) + 'K';
     return String(v);
+  }
+
+  /** A gridline VALUE, chosen so the label and the line cannot disagree.
+
+      The old axis drew lines at exact fractions of the top (top/3, top/4) and
+      then rounded the LABEL — so with a top of 2.5 the columns axis read
+      0, 1, 2, 3 against lines really at 0, 0.83, 1.67, 2.5, and with a top of
+      1 it read 0, 0, 1, 1. A mislabelled axis is worse than an ugly one. So
+      the tick value is settled FIRST — snapped to what its label will say —
+      and the line is drawn AT that value. The snap tiers keep compact() exact
+      at every scale (1,250 -> 1,300 -> "1.3K", never "1.3K" over a line at
+      1,250). */
+  function tickVal(raw) {
+    if (raw >= 999500) return Math.round(raw / 1e5) * 1e5;
+    if (raw >= 100000) return Math.round(raw / 1000) * 1000;
+    if (raw >= 1000) return Math.round(raw / 100) * 100;
+    if (raw >= 10) return Math.round(raw);
+    return Math.round(raw * 10) / 10;
+  }
+  const tickText = (v) => (v >= 1000 ? compact(v) : String(v));
+
+  /** The unit word, agreeing with its number — "1 visit", never "1 visits".
+      Only a plain trailing s is trimmed, so "Average visitors" bends and a
+      hypothetical "class" would not. */
+  function unitFor(n, unit) {
+    if (!unit) return '';
+    if (Number(n) === 1 && /[^s]s$/i.test(unit)) return unit.slice(0, -1);
+    return unit;
   }
 
   const full = (n) => Math.round(Number(n) || 0).toLocaleString('en-GB');
@@ -147,15 +186,42 @@
     tip.setAttribute('role', 'status');
     tip.hidden = true;
     wrap.appendChild(tip);
+    /* NO preserveAspectRatio:'none' ANY MORE — that one attribute was the
+       stretch. With it, a fixed 900-unit drawing was scaled NON-UNIFORMLY to
+       whatever box it landed in: measured scaleX 0.28 at a 320px viewport
+       against scaleY 1.0, so every glyph, circle and corner radius was drawn
+       at a third of its width — and 1.13x too wide on a desktop. The chart is
+       now DRAWN at the width it will be shown at (see plotWidth below), so
+       one user unit is one CSS pixel and nothing is ever scaled at all. */
     const svg = el('svg', {
       class: 'oa-chart-svg',
       role: 'img',
       'aria-label': title || '',
-      preserveAspectRatio: 'none',
     });
     if (desc) el('desc', {}, svg).textContent = desc;
     wrap.insertBefore(svg, tip);
     return { wrap, svg, tip };
+  }
+
+  /** The width the chart will actually be shown at, measured from the host —
+      the figure is in the document before the chart is drawn, so the layout
+      is real. Guarded for a host that is not laid out yet (display:none, a
+      detached node): 600 is a drawing nobody sees rather than a crash, and
+      the page redraws on resize anyway. Floored so a pathological flex
+      collapse cannot produce a 0-width axis. */
+  function plotWidth(wrap) {
+    const w = wrap.clientWidth ||
+      (wrap.parentNode && wrap.parentNode.clientWidth) || 0;
+    return Math.max(240, Math.min(1600, w || 600));
+  }
+
+  /** A chart drawn 280px tall was right for a 1,000px-wide plot and reads as
+      a tower on a 320px phone, where the same height meets a third of the
+      width. The height follows the width down — never below 160px, which is
+      the least a y axis with five labelled gridlines can carry. */
+  function plotHeight(base, width) {
+    if (width >= 520) return base;
+    return Math.max(160, Math.round(base * 0.78));
   }
 
   function showTip(tip, wrap, x, y, html) {
@@ -223,7 +289,11 @@
     const series = (opts.series || []).filter((s) => s && s.values);
     const { wrap, svg, tip } = shell(host, { title: opts.title, desc: opts.desc });
 
-    const W = 900, H = opts.height || 260;
+    /* DRAWN AT THE SIZE IT IS SHOWN AT — one user unit is one CSS pixel, so
+       nothing (text, strokes, radii) is ever scaled. The page redraws on
+       resize; between the resize and the redraw the browser letterboxes
+       rather than stretches, which is the honest interim. */
+    const W = plotWidth(wrap), H = plotHeight(opts.height || 260, W);
     const pad = { t: 12, r: 14, b: 26, l: 44 };
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.style.height = H + 'px';
@@ -242,15 +312,21 @@
        directly labelled and nothing more */
     const g = el('g', { class: 'oa-grid' }, svg);
     for (let i = 0; i <= 4; i++) {
-      const v = (top / 4) * i;
+      /* the tick VALUE is settled first and the line drawn AT it, so the
+         label and the line cannot disagree — see tickVal */
+      const v = tickVal((top / 4) * i);
       const y = Y(v);
       el('line', { x1: pad.l, x2: W - pad.r, y1: y, y2: y }, g);
-      el('text', { x: pad.l - 8, y: y + 4, class: 'oa-tick oa-tick-y' }, g).textContent = compact(v);
+      el('text', { x: pad.l - 8, y: y + 4, class: 'oa-tick oa-tick-y' }, g).textContent = tickText(v);
     }
 
     /* x ticks: a handful of dates, never one per day — 4,500 labels is a grey
-       smear, and the tooltip carries the rest */
-    const every = Math.max(1, Math.ceil(pts.length / 6));
+       smear, and the tooltip carries the rest. HOW MANY fit is a fact about
+       the real width, not a constant: six date labels that sit comfortably in
+       a 1,000px plot collide in a 200px one, so the count follows the width
+       down (never below two — a time axis with one label is not an axis). */
+    const fit = Math.max(2, Math.min(6, Math.floor(iw / 64)));
+    const every = Math.max(1, Math.ceil(pts.length / fit));
     const gx = el('g', { class: 'oa-grid' }, svg);
     for (let i = 0; i < pts.length; i += every) {
       el('text', { x: X(i), y: H - 8, class: 'oa-tick oa-tick-x' }, gx).textContent = pts[i].label;
@@ -329,6 +405,11 @@
     }
 
     wrap.addEventListener('pointermove', move);
+    /* a TAP reads the chart too: on a phone there is no hover and a tap does
+       not reliably produce a pointermove, so pointerdown places the crosshair
+       and its tooltip. Deliberately no preventDefault — a vertical swipe that
+       starts on the chart must keep scrolling the page. */
+    wrap.addEventListener('pointerdown', move);
     wrap.addEventListener('pointerleave', leave);
 
     /* THE KEYBOARD READS IT TOO. A crosshair driven only by a pointer is a
@@ -408,11 +489,13 @@
   function columns(host, opts) {
     const items = opts.items || [];
     const { wrap, svg, tip } = shell(host, { title: opts.title, desc: opts.desc });
-    const W = 900, H = opts.height || 220;
+    /* real pixels, like line() — see plotWidth */
+    const W = plotWidth(wrap), H = plotHeight(opts.height || 220, W);
     const pad = { t: 22, r: 8, b: 28, l: 44 };
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.style.height = H + 'px';
     if (!items.length) return;
+    const fmt = (v) => (opts.format ? opts.format(v) : full(v));
 
     /* An EMPTY bucket is not a zero. A month the record has never covered
        drawn as a zero-height bar reads as "nobody came in September", which on
@@ -427,11 +510,22 @@
 
     const g = el('g', { class: 'oa-grid' }, svg);
     for (let i = 0; i <= 3; i++) {
-      const v = (top / 3) * i;
+      /* value first, line AT it — a top of 2.5 used to draw lines at 0.83 and
+         1.67 labelled 1 and 2; see tickVal */
+      const v = tickVal((top / 3) * i);
       const y = base - (v / top) * ih;
       el('line', { x1: pad.l, x2: W - pad.r, y1: y, y2: y }, g);
-      el('text', { x: pad.l - 8, y: y + 4, class: 'oa-tick oa-tick-y' }, g).textContent = compact(v);
+      el('text', { x: pad.l - 8, y: y + 4, class: 'oa-tick oa-tick-y' }, g).textContent = tickText(v);
     }
+
+    /* HOW MANY x labels fit is measured, not hoped: 24 hour labels in a 200px
+       plot overprint each other into a smear. Every Nth label is drawn — the
+       clock reads 00 03 06 … on a phone — and every bucket keeps its bar, its
+       tooltip, its focus stop and its table row, so nothing is lost but ink.
+       On a desktop the slot is wide and every label draws exactly as before. */
+    const labelChars = items.reduce(
+      (m, it) => Math.max(m, String(it.short || it.label).length), 1);
+    const labelEvery = Math.max(1, Math.ceil((labelChars * 6.6 + 6) / slot));
 
     const real = items.filter((i) => !i.empty);
     const peak = real.length ? real.reduce((a, b) => (b.value > a.value ? b : a), real[0]) : null;
@@ -453,37 +547,43 @@
           `Q${x + bw} ${y} ${x + bw} ${y + r} L${x + bw} ${base} Z`,
       }, svg);
 
-      el('text', {
-        x: cx, y: H - 9,
-        class: 'oa-tick oa-tick-x' + (it.empty ? ' oa-tick-empty' : ''),
-      }, svg).textContent = it.short || it.label;
+      if (i % labelEvery === 0) {
+        el('text', {
+          x: cx, y: H - 9,
+          class: 'oa-tick oa-tick-x' + (it.empty ? ' oa-tick-empty' : ''),
+        }, svg).textContent = it.short || it.label;
+      }
 
       /* label the extreme only — a number on every column is chaos and goes
-         unread */
+         unread. Through fmt, so this label agrees with the tooltip and the
+         table: a 17.4 bar used to print "17" here while the mark plainly
+         stood taller than a 16.6 printing the same "17". */
       if (it === peak) {
-        el('text', { x: cx, y: y - 8, class: 'oa-value' }, svg).textContent = full(it.value);
+        el('text', { x: cx, y: y - 8, class: 'oa-value' }, svg).textContent = fmt(it.value);
       }
 
       /* The hit area takes FOCUS as well as a pointer, so the same tooltip is
          reachable by tabbing. A column chart whose numbers can only be had by
          hovering is a chart half the readers cannot read. */
-      const shown = opts.format ? opts.format(it.value) : full(it.value);
+      const shown = fmt(it.value);
       const hit = el('rect', {
         class: 'oa-hit', x: pad.l + slot * i, y: pad.t, width: slot, height: ih,
         tabindex: 0, role: 'img',
         'aria-label': it.label + ': ' + (it.empty ? 'no data' : shown +
-          (opts.unit ? ' ' + opts.unit : '')),
+          (opts.unit ? ' ' + unitFor(it.value, opts.unit) : '')),
       }, svg);
       const say = () => {
         const box = svg.getBoundingClientRect();
         showTip(tip, wrap, (cx / W) * box.width, ((it.empty ? base - 6 : y - 6) / H) * box.height,
           '<b>' + esc(it.label) + '</b>' +
           (it.empty ? '' :
-            '<span>' + esc(opts.unit || '') + ' <b>' + esc(shown) + '</b></span>') +
+            '<span>' + esc(unitFor(it.value, opts.unit) || '') + ' <b>' + esc(shown) + '</b></span>') +
           (it.note ? '<span class="oa-tip-note">' + esc(it.note) + '</span>' : ''));
       };
       const hide = () => { tip.hidden = true; };
       hit.addEventListener('pointerenter', say);
+      /* a tap is the phone's hover, here as everywhere on this page */
+      hit.addEventListener('pointerdown', say);
       hit.addEventListener('focus', say);
       hit.addEventListener('pointerleave', hide);
       hit.addEventListener('blur', hide);
@@ -492,7 +592,7 @@
     table(host, [opts.xTitle || '', opts.unit || 'Value'],
       /* an em dash, never a 0: the table must not say the thing the bar was
          redrawn to stop saying */
-      items.map((i) => [i.label, i.empty ? '—' : (opts.format ? opts.format(i.value) : full(i.value))]));
+      items.map((i) => [i.label, i.empty ? '—' : fmt(i.value)]));
   }
 
   /* ------------------------------------------------------------------ bars */
@@ -525,8 +625,13 @@
     wrap.appendChild(tip);
 
     const top = Math.max.apply(null, items.map((i) => i.value)) || 1;
-    const total = Number(opts.total) ||
-      all.reduce((n, i) => n + (Number(i.value) || 0), 0);
+    /* A SHARE NEEDS A REAL WHOLE. The old fallback summed the rows it was
+       handed, so a list cut to its top rows reported each one's share OF THE
+       ROWS THAT FITTED — the most-visited-pages figure claimed its leader was
+       a share "of the whole" measured against 25 pages. With no stated total
+       there is no share, which is honest; the caller that has the pre-cut
+       total (see `breakdown` in the model) passes it. */
+    const total = Number(opts.total) || 0;
     const show = (v) => (opts.format ? opts.format(v) : full(v));
 
     const list = document.createElement('ol');
@@ -537,7 +642,7 @@
       li.tabIndex = 0;
       const share = total ? it.value / total : 0;
       li.setAttribute('aria-label', it.label + ': ' + show(it.value) +
-        (opts.unit ? ' ' + opts.unit : '') + (total ? ', ' + pct(share) : ''));
+        (opts.unit ? ' ' + unitFor(it.value, opts.unit) : '') + (total ? ', ' + pct(share) : ''));
 
       const head = document.createElement('div');
       head.className = 'oa-bar-head';
@@ -553,7 +658,7 @@
       }
       const val = document.createElement('span');
       val.className = 'oa-bar-val';
-      val.textContent = show(it.value) + (opts.unit ? ' ' + opts.unit : '');
+      val.textContent = show(it.value) + (opts.unit ? ' ' + unitFor(it.value, opts.unit) : '');
       head.appendChild(name);
       head.appendChild(val);
 
@@ -561,7 +666,11 @@
       track.className = 'oa-bar-track';
       const fill = document.createElement('div');
       fill.className = 'oa-bar-fill';
-      fill.style.width = Math.max(1.5, (it.value / top) * 100) + '%';
+      /* the TRUE proportion, never a percentage floor: the old 1.5% minimum
+         drew a small row up to fifteen times its real length, so the number
+         beside the bar was honest and the bar was not. Visibility comes from
+         a 2px CSS min-width instead, which is a hairline, not a claim. */
+      fill.style.width = ((it.value / top) * 100) + '%';
       track.appendChild(fill);
       li.appendChild(head);
       li.appendChild(track);
@@ -587,6 +696,8 @@
       };
       const hide = () => { tip.hidden = true; };
       li.addEventListener('pointerenter', say);
+      /* a tap is the phone's hover */
+      li.addEventListener('pointerdown', say);
       li.addEventListener('focus', say);
       li.addEventListener('pointerleave', hide);
       li.addEventListener('blur', hide);
@@ -628,6 +739,21 @@
       all.reduce((n, i) => n + (Number(i.value) || 0), 0);
     if (!total) return;
 
+    /* THE TAIL IS A PART, NOT A BLANK. The parts are drawn against the
+       PRE-CUT total, so whatever the listed items do not cover — categories
+       past the display cut, and rows the record holds that were never listed
+       — used to be an unexplained empty stretch of track. It is now one
+       muted "Everything else" part with its own legend entry, tooltip, focus
+       stop and table row, because a share chart whose parts visibly fail to
+       fill the bar reads as broken, and one whose parts are silently
+       renormalised reads as a lie. */
+    const shownSum = items.reduce((n, i) => n + (Number(i.value) || 0), 0);
+    const rest = Math.max(0, total - shownSum);
+    const parts = items.map((it, i) => ({
+      label: it.label, value: it.value, cls: 'oa-cat-' + ((i % 6) + 1),
+    }));
+    if (rest > 0) parts.push({ label: 'Everything else', value: rest, cls: 'oa-cat-rest' });
+
     const wrap = document.createElement('div');
     wrap.className = 'oa-chart-plot';
     host.appendChild(wrap);
@@ -641,21 +767,21 @@
     bar.className = 'oa-share-bar';
     bar.setAttribute('role', 'img');
     bar.setAttribute('aria-label', (opts.title || 'Share') + ': ' +
-      items.map((i) => i.label + ' ' + pct(i.value / total)).join(', '));
+      parts.map((i) => i.label + ' ' + pct(i.value / total)).join(', '));
     wrap.appendChild(bar);
 
     const legendBox = document.createElement('div');
     legendBox.className = 'oa-chart-legend oa-share-legend';
 
-    items.forEach((it, i) => {
-      const cls = 'oa-cat-' + ((i % 6) + 1);
+    parts.forEach((it) => {
+      const cls = it.cls;
       const frac = it.value / total;
       const seg = document.createElement('span');
       seg.className = 'oa-share-seg ' + cls;
       seg.style.width = (frac * 100).toFixed(3) + '%';
       seg.tabIndex = 0;
       seg.setAttribute('aria-label', it.label + ': ' + pct(frac) +
-        ', ' + full(it.value) + (opts.unit ? ' ' + opts.unit : ''));
+        ', ' + full(it.value) + (opts.unit ? ' ' + unitFor(it.value, opts.unit) : ''));
 
       const say = () => {
         const box = wrap.getBoundingClientRect();
@@ -667,6 +793,8 @@
       };
       const hide = () => { tip.hidden = true; };
       seg.addEventListener('pointerenter', say);
+      /* a tap is the phone's hover */
+      seg.addEventListener('pointerdown', say);
       seg.addEventListener('focus', say);
       seg.addEventListener('pointerleave', hide);
       seg.addEventListener('blur', hide);
@@ -680,7 +808,7 @@
 
     host.appendChild(legendBox);
     table(host, [opts.xTitle || '', opts.unit || 'Value', 'Share'],
-      items.map((i) => [i.label, full(i.value), pct(i.value / total)]));
+      parts.map((i) => [i.label, full(i.value), pct(i.value / total)]));
   }
 
   return { line, columns, bars, share, compact, full, duration, durationLong, pct,

@@ -10555,6 +10555,79 @@ async function testAnalytics() {
   ok(/C\.duration\(/.test(page),
     'the page says its times through that one formatter rather than printing ' +
     'raw seconds — the defect the owner reported');
+
+  /* --- the axis cannot lie, and the marks are never stretched ------------ */
+
+  const charts = await readFile(path.join(HERE, '..', 'assets', 'oa-charts.js'), 'utf8');
+  const cssText = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8');
+  ok(!/preserveAspectRatio: 'none'/.test(charts.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'no chart declares preserveAspectRatio none any more — that one attribute ' +
+    'scaled a fixed 900-unit drawing NON-UNIFORMLY into whatever box it landed ' +
+    'in (measured: scaleX 0.28 at a 320px viewport against scaleY 1.0), which ' +
+    'is the stretch the owner reported');
+  ok(/function plotWidth\(/.test(charts) && /plotWidth\(wrap\)/.test(charts),
+    'the charts are DRAWN at the width they are shown at instead — one user ' +
+    'unit is one CSS pixel');
+  ok(/addEventListener\('resize'/.test(page) && /drawnAt/.test(page),
+    'and the page redraws when the width changes, debounced, through the one ' +
+    'draw() everything already goes through — no observer per chart to leak');
+
+  eq(CH.compact(999999), '1M',
+    'compact() rounds at the scale it displays — 999,999 used to fall through ' +
+    'the megabyte gate and print "1000.0K"');
+  eq(CH.compact(9990), '10K', '…and a decimal that rounds away is dropped, not printed as ".0"');
+  eq(CH.compact(12914), '12.9K', '…while a decimal that means something is kept');
+  ok(/function tickVal\(/.test(charts) && /tickVal\(\(top \/ 4\)/.test(charts) &&
+     /tickVal\(\(top \/ 3\)/.test(charts),
+    'both axes settle each tick VALUE first and draw the gridline AT it — a ' +
+    'top of 2.5 used to draw lines at 0.83 and 1.67 labelled "1" and "2", and ' +
+    'a top of 1 read 0, 0, 1, 1');
+  ok(!/all\.reduce\(\(n, i\) => n \+ \(Number\(i\.value\) \|\| 0\), 0\)/.test(
+    charts.slice(charts.indexOf('function bars('), charts.indexOf('function share('))),
+    'bars() no longer invents a total by summing the rows it was handed — a ' +
+    'share is offered only against a stated whole, so the most-visited-pages ' +
+    'leader is never reported as a share of the 25 rows that fitted');
+  ok(/Math\.max\(1\.5,/.test(charts) === false,
+    'and the 1.5% bar-length floor is gone — a small row was drawn up to ' +
+    'fifteen times its true length; visibility is a 2px CSS min-width now');
+  ok(/min-width: 2px/.test(cssText), '…which the stylesheet carries');
+  ok(/function unitFor\(/.test(charts),
+    'a unit agrees with its number — "1 visit", never "1 visits"');
+  eq(A.rollingMean([1, null, 3, 4], 2), [null, null, null, 3.5],
+    'a rolling window with a hole in it has no mean — the page hands the ' +
+    'daily chart calendar-continuous values with null where the record has a ' +
+    'gap, and an average over five known days and two unknowns is not a ' +
+    '7-day average');
+
+  /* --- the numbers mean what their labels say ---------------------------- */
+
+  ok(!/id: 'sessions'/.test(page),
+    'the daily chart does not offer a "Visits" metric: the site\'s own record ' +
+    'files one document per page opened, so for every day it owns the session ' +
+    'count IS the pageview count, and a Visits line would be the Pageviews ' +
+    'line wearing a wrong label');
+  ok(/Time on a page/.test(page) && /eng\.source === 'usage'/.test(page),
+    'the engagement tile says what its number is a length OF: the first-party ' +
+    'record measures time on a PAGE (its pages-per-visit is identically 1 by ' +
+    'construction), so only a source that can really measure a visit gets the ' +
+    '"Typical visit" framing and the depth');
+  ok(/counted per day/.test(page),
+    'and the headline Visitors tile says it is counted per day — the served ' +
+    'file has no cross-day identity, so a reader returning on ten days counts ' +
+    'ten times and a bare "Visitors" would claim a distinct count nothing ' +
+    'here can compute');
+  ok(/withGaps/.test(page) && /dayShift/.test(page),
+    'the ranges clip by DATE and the daily line breaks over a calendar gap ' +
+    'instead of running straight through a collection outage as if it were ' +
+    'one ordinary day');
+  ok(/total: pagesTotal/.test(page) && /win\.views/.test(page),
+    'the pages figure passes the window\'s WHOLE pageview count as the share ' +
+    'denominator, from the file, and offers no share without it');
+  ok(/Everything else/.test(charts),
+    'a share bar\'s unlisted tail is a NAMED muted part, never an unexplained ' +
+    'blank stretch of track — and never silently renormalised away');
+  ok(/--oa-cat-rest/.test(cssText),
+    '…painted from its own token, defined in both themes like the six real ones');
   /* READ WITH THE COMMENTS STRIPPED. The page still records WHAT it used to
      print and why that was wrong, and a guard that could not tell the
      explanation from the thing would have to be satisfied by deleting the
@@ -10575,10 +10648,24 @@ async function testAnalytics() {
   eq(drawn.slice().sort(), A.BREAKDOWN_IDS.slice().sort(),
     'every dimension the model may carry is drawn by the page, and every ' +
     'dimension the page draws is one the model may carry');
-  ok(/renderProvenance/.test(page) && /oa-an-missing/.test(page),
-    'and the ones no source has answered for are NAMED at the foot rather than ' +
-    'drawn as an empty axis — a dashboard that shows only what it happens to ' +
-    'have is the failure this page is a rebuild of');
+  /* THE "WHERE THESE FIGURES COME FROM" SECTION IS GONE, BY OWNER DECISION
+     (2026-08-30): how the site is measured is not the readers' business. Read
+     with the comments stripped, because the page deliberately still RECORDS
+     what was removed and why — the guard must never be satisfiable by
+     deleting the explanation. What that section also did is not lost: a
+     figure with no source is still simply not drawn, which the second pin
+     holds. */
+  const pageLive = page.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(!/Where these figures come from/.test(pageLive) && !/renderProvenance/.test(pageLive),
+    'the provenance section is removed — owner, 2026-08-30 — and only the ' +
+    'comment recording the removal still names it');
+  ok(/Where these figures come from/.test(page),
+    '…while the page still records WHAT was removed and why, so the check ' +
+    'above cannot be satisfied by deleting the explanation');
+  ok(/if (!def || !rec || !rec.items || !rec.items.length) return;/.test(page) ||
+     /!rec\.items\.length\) return;/.test(page),
+    'and a dimension with no record still draws NOTHING — an empty axis is ' +
+    'the shape of the defect this page is a rebuild of');
 
   /* --- each dimension is asked of the source that can answer it ---------- */
 

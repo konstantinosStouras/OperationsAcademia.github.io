@@ -203,7 +203,10 @@
       /* which window `pages` describes — see BREAKDOWN_DAYS. Empty until a
          source has supplied one, and the figure says so rather than letting
          the tiles above it imply a span it does not have. */
-      pagesWindow: { source: '', from: '', to: '' },
+      /* `views` is the window's WHOLE pageview count — what a page's share is
+         a share OF. Zero until a source states it, and a share is simply not
+         claimed without it. */
+      pagesWindow: { source: '', from: '', to: '', views: 0 },
       breakdowns: {},
       engagement: null,
       universities: { frozen: true, from: '', to: '', all: [], recent: [] },
@@ -345,11 +348,21 @@
   function rollingMean(values, window) {
     const w = Math.max(1, Math.round(window || 1));
     const out = [];
-    let sum = 0;
     for (let i = 0; i < values.length; i++) {
-      sum += values[i];
-      if (i >= w) sum -= values[i - w];
-      out.push(i >= w - 1 ? sum / w : null);
+      if (i < w - 1) { out.push(null); continue; }
+      /* A WINDOW WITH A HOLE IN IT HAS NO MEAN. The page now hands this
+         series calendar-continuous, with null on a day the record does not
+         cover — and a "7-day average" computed over five known days and two
+         unknowns is not an average of a week, it is a guess wearing one's
+         label. Null, so the line breaks over the gap exactly as the daily
+         line does. */
+      let sum = 0, known = true;
+      for (let j = i - w + 1; j <= i; j++) {
+        const v = values[j];
+        if (v == null) { known = false; break; }
+        sum += v;
+      }
+      out.push(known ? sum / w : null);
     }
     return out;
   }
