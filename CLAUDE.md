@@ -2041,10 +2041,19 @@ repository has FOUR: `recordVisit` was not skipped, not created, not mentioned
 functions" and "every function on master is live" are different sentences, and
 nothing in that output distinguishes them unless you count the lines against
 `_functions/index.js`. **Pull first, deploy, then read the list back** — the
-second run that day did exactly that and created it. The
-same run warns that the Node.js 20 runtime is **decommissioned on 2026-10-30**,
-after which none of this deploys at all until `_functions/package.json` names a
-later one — a deadline with no other alarm attached to it.
+second run that day did exactly that and created it.
+
+**The Node.js 20 deadline is answered in the repository and closed by a
+deploy.** Google decommissions the Node 20 runtime on **2026-10-30**, after
+which nothing here deploys at all — an emergency fix included — from a
+package still naming it. `_functions/package.json` names **Node 22** and
+current SDKs since 2026-08-30 (`firebase-functions` ^7.3.2, the package the
+deploy warning itself named; `firebase-admin` ^13.10.0 — deliberately NOT 14,
+which removes the namespaced `admin.initializeApp` / `admin.firestore` /
+`FieldValue` API `recordVisit` is written against, so 14 is a code change,
+not a version bump). The RUNTIME moves only when the next
+`firebase deploy --only functions` runs from a checkout carrying this — run
+one before the date, and read the four functions back as always.
 
 **The last stretch of the delay is the reader's own browser.** Pages serves
 `data/*.json` with ten minutes of freshness, so a visitor who had the page open

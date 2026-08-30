@@ -46,9 +46,15 @@ university-visits counter) was simply absent from that clone, and it exists
 only because a second deploy the same day ran from a pulled checkout.
 Read the deployed list back against `_functions/index.js` every time.
 
-**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30.** The deploy warns about it on
-every run. After that date nothing here deploys until `_functions/package.json`
-names a supported runtime — including an emergency fix.
+**NODE.JS 20 IS DECOMMISSIONED ON 2026-10-30, AND THE ANSWER NEEDS ONE MORE
+DEPLOY.** `_functions/package.json` names Node 22 and current SDKs since
+2026-08-30 (`firebase-functions` ^7.3.2; `firebase-admin` ^13.10.0 —
+deliberately not 14, which removes the namespaced `admin.*` API `recordVisit`
+uses), but a runtime changes only when a deploy carries it: run
+`firebase deploy --only functions --project operations-academia` from a
+checkout with this change BEFORE 2026-10-30, or after that date nothing here
+deploys at all — an emergency fix included — until one succeeds. Read the
+four functions back against `_functions/index.js` as always.
 
 The **before/after e-mail** needs no setup beyond SMTP: it is sent by the
 build itself, to `kstouras@gmail.com`, whenever an edit or a takedown was
