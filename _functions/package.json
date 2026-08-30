@@ -1,9 +1,7 @@
 {
   "name": "oa-functions",
   "description": "Operations Academia Cloud Functions — instant publish, and the university-visit resolver",
-  "engines": {
-    "node": "22"
-  },
+  "engines": { "node": "22" },
   "main": "index.js",
   "dependencies": {
     "firebase-admin": "^14.3.0",

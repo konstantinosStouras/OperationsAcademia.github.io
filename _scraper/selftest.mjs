@@ -8713,6 +8713,36 @@ async function testReviewWiring() {
       '(github.ref_name) — the default github.sha is the TRIGGERING run\'s head');
   }
 
+  /* ---- ONE NODE VERSION, AND THE FUNCTIONS RUN ON IT TOO ----------------
+
+     Google decommissions a Cloud Functions runtime on a DATE — Node 20's is
+     2026-10-30, after which nothing deploys at all — and the deploy log is
+     the only place that says so. That is this repository's own recurring
+     failure shape wearing a calendar: a warning nobody reads until the thing
+     stops.
+
+     A guard pinning "22" would go stale the same way, so what is pinned is a
+     RELATIONSHIP that does not rot: the runtime the Functions declare is the
+     one CI actually runs the code on. Deploying code tested on one Node to a
+     runtime on another is the real defect, and it is checkable offline for
+     ever. It was true only by luck until 2026-08-30 — `_functions` said 20
+     while fifteen of the sixteen workflows said 22, and the sixteenth
+     (oa-analytics.yml, the newest) said 20 as well. */
+  const wfFiles = (await readdir(wfDir)).filter((f) => /\.ya?ml$/.test(f));
+  const nodeVersions = new Set();
+  for (const name of wfFiles) {
+    const src = await readFile(path.join(wfDir, name), 'utf8');
+    for (const m of src.matchAll(/node-version:\s*'?([0-9.]+)'?/g)) nodeVersions.add(m[1]);
+  }
+  eq([...nodeVersions].sort(), ['22'],
+    'every workflow runs ONE Node version — an odd one out is drift nobody sees ' +
+    'until a version-specific failure appears in exactly one job');
+  const fnPkg = JSON.parse(
+    await readFile(path.join(HERE, '..', '_functions', 'package.json'), 'utf8'));
+  eq(fnPkg.engines && fnPkg.engines.node, [...nodeVersions][0],
+    'and the Cloud Functions declare that same runtime — code tested on one ' +
+    'Node and deployed to another is the defect a decommission date turns fatal');
+
   /* AND THE CHAIN ITSELF: the alerts mailer must go on answering the build's
      completion. Losing that trigger costs an hour rather than a posting (the
      hourly cron is the safety net), but "as soon as something appears" is what
@@ -11204,6 +11234,60 @@ async function testUniversityVisits() {
       `${f} no longer says the university figures can never come back — they can, ` +
       'and saying otherwise is what nearly kept them from being rebuilt');
   }
+
+  /* --- NO FIGURE'S CAPTION NAMES ANOTHER FIGURE -------------------------
+     Two optional figures cannot promise each other. "Where readers are" comes
+     from a GA4 breakdown and "Which universities visited" from the site's own
+     resolver, and they are drawn on INDEPENDENT conditions — so a caption that
+     cross-referenced the other one produced, on the live shape of the data
+     (GA4 configured, the Cloud Functions not yet deployed), a page saying "see
+     the figure below" directly above its own note listing that figure under
+     "Not on this page yet". Measured in a browser, then removed. */
+  const pagejsRaw = await readFile(path.join(root, 'assets', 'oa-analytics.js'), 'utf8');
+  /* READ WITH THE COMMENTS STRIPPED. Both blocks below now EXPLAIN the defect
+     they no longer have, and a guard that cannot tell the explanation from the
+     thing can only be satisfied by deleting the explanation — the trap this
+     repository already records for the analytics page's "no iframes" check,
+     walked into twice on the very checks that removed these two. */
+  const pagejs = pagejsRaw.replace(/\/\*[\s\S]*?\*\//g, '');
+  const dimBlock = pagejs.slice(pagejs.indexOf('var DIMENSIONS = ['),
+    pagejs.indexOf('var state = {'));
+  ok(dimBlock.length > 500, 'the DIMENSIONS table was found (or the check below is vacuous)');
+  ok(!/Which universities visited/.test(dimBlock),
+    'no DIMENSION caption names the universities figure — the two are drawn on ' +
+    'independent conditions, so a cross-reference is a promise the page cannot keep');
+  const uniFn = pagejs.slice(pagejs.indexOf('function renderUniversities'));
+  ok(uniFn.length > 500, 'renderUniversities was found');
+  /* Bounded on CODE, never on a comment: `pagejs` above is read with comments
+     STRIPPED, so a comment marker cannot be found in it at all and the slice
+     would silently run to the end of the file and pass by accident.
+     renderUniversities became the last function on the page when the
+     provenance note was removed, so the fetch that boots it is the boundary. */
+  const uniEnd = uniFn.indexOf("fetch('data/analytics.json'");
+  ok(uniEnd > 400, 'the universities renderer was bounded (or the checks below are vacuous)');
+  const uniBody = uniFn.slice(0, uniEnd);
+  for (const other of ['Where readers are', 'How readers arrive', 'What they read it on']) {
+    ok(!uniBody.includes(other),
+      `…and the universities caption names no other figure either (${other})`);
+  }
+
+  /* --- AND THE TILE STRIP STAYS AT FIVE ----------------------------------
+     A sixth tile lands alone on a second row at 1400px, 1180px and 1024px —
+     which is why the length and the depth of a visit were folded into one.
+     "Universities seen" was the sixth the moment that tile arrived, so the
+     count moved into the universities figure's own caption. */
+  const tiles = pagejs.slice(pagejs.indexOf('function renderTiles'),
+    pagejs.indexOf('/* ---------------------------------------------------------------- figures'));
+  ok(tiles.length > 500, 'renderTiles was found (or the count below is vacuous)');
+  const tileCalls = (tiles.match(/html \+= tile\(/g) || []).length;
+  ok(tileCalls <= 5,
+    `the headline strip draws at most five tiles (found ${tileCalls}) — a sixth ` +
+    'orphans onto a row of its own at every width the page is read at');
+  ok(!/Universities seen/.test(tiles),
+    '…and the universities count is not one of them: it is a fact about ONE ' +
+    'figure rather than a headline about the corpus, and its caption carries it');
+  ok(/universit/i.test(uniBody) && /u\.all\.length/.test(uniBody),
+    '…which the caption really does — the count is not simply lost');
 
   /* --- the Privacy Policy discloses what is derived from an address ------- */
 
