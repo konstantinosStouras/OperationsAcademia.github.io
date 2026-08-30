@@ -462,7 +462,7 @@
       msg.textContent = failed
         ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
         : 'All ' + done + ' approved, and on your own jobs page straight away. ' +
-          'Everyone else sees them at the next build.';
+          'Everyone else sees them within a couple of minutes.';
       btn.disabled = !!failed;
     });
   }
@@ -1228,24 +1228,28 @@
               });
               return;
             }
-            /* WHAT THIS SAYS HAS TO BE TRUE OF THIS INSTALLATION. It used to
-               say "publishing starts now", on the strength of the Cloud
-               Function that dispatches the build the moment an approval lands
-               — and that function has never fired here (the
-               `oa-jobreview-decided` dispatch has zero runs, ever), because
-               deploying Functions is a hand step nothing in CI performs. So
-               the posting waited for the build's own schedule while the card
-               claimed it was already on its way, which is the failure this
-               repository names everywhere: a doorbell that was never deployed
-               looks exactly like a site that is simply slow.
+            /* WHAT THIS SAYS HAS TO BE TRUE OF THIS INSTALLATION, and it has
+               already been wrong in BOTH directions. It first said "publishing
+               starts now" while the Cloud Function that rings the build was
+               undeployed (the `oa-jobreview-decided` dispatch had zero runs),
+               so the posting waited for the schedule while the card claimed it
+               was on its way. The correction then said "at the next build" —
+               and the owner deployed the functions on 2026-08-27, the dispatch
+               has fired on every decision since, and the build is chained on
+               it, so an approval publishes in about two minutes and the card
+               was UNDER-promising: "the next build" read as the doorbell still
+               being dead.
 
-               It now says what is true either way — the echo puts it in front
-               of the maintainer at once, and the build puts it in front of
-               everyone else — without promising a minute nobody has wired. */
+               So it names the cadence the installation actually has — the
+               echo puts the posting in front of the maintainer at once, the
+               doorbell chain in front of everyone else in a couple of minutes
+               — and per CLAUDE.md's own rule, copy that promises a time
+               changes with the cadence: if the functions ever come down, this
+               string comes back here with them. */
             card.innerHTML = '<p class="oa-form-msg is-ok">' +
               (act === 'approve'
                 ? 'Approved &mdash; and on your own jobs page straight away. ' +
-                  'Everyone else sees it at the next build.'
+                  'Everyone else sees it within a couple of minutes.'
                 : 'Rejected. It stays off the site and will not be queued again.') +
               '</p>';
             retire(db, 'crawled', doc);

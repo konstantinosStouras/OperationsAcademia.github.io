@@ -204,13 +204,16 @@ exports.publishOnReview = onDocumentWritten(
    read as "no universities visit", which is precisely the misreading the rest
    of this page was rebuilt to prevent.
 
-   NOTHING HERE IS LIVE UNTIL THE FUNCTIONS ARE DEPLOYED, and in this
-   repository they never have been (CLAUDE.md records that all three doorbells
-   above are undeployed, which is why an approval waits for the schedule). One
+   NOTHING HERE IS LIVE UNTIL THIS FUNCTION IS DEPLOYED — and it is the one
+   that still is not. The three doorbells above went live on 2026-08-27; the
+   2026-08-29 deploy was made from a checkout that PREDATED this file, so it
+   printed "Deploy complete!" while the three skipped as unchanged and this
+   function was not in the upload at all. Pull first, then
        firebase deploy --only functions --project operations-academia
-   switches on this function AND those three. Until then the browser's ping
-   simply fails, the collection stays empty, and the page says the figures are
-   not being collected yet rather than drawing an empty chart.
+   — the three will skip again and only this one deploys. Until then the
+   browser's ping simply fails, the collection stays empty, and the page says
+   the figures are not being collected yet rather than drawing an empty
+   chart.
    =========================================================================== */
 
 const { onRequest } = require('firebase-functions/v2/https');
