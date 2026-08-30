@@ -963,17 +963,39 @@ body.v3 .oa-action:hover:not([disabled]) {
   body.v3 .oa-filters { grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 14px 18px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
+  /* Stacked, the pair breathes. The desktop cell's 0 row-gap exists only to
+     land Clear on its row's BASELINE beside the labelled controls, and the
+     spacer only to reserve that label's height — on a phone this cell has a
+     row of its own, so the first left the two buttons touching and the second
+     was a blank strip over them (owner's phone screenshot, 2026-08-30). */
+  body.v3 .oa-filter-actions { gap: 10px; }
+  body.v3 .oa-filter-actions .oa-label-spacer { display: none; }
   /* and the action with them: a thumb gets the whole row and a real target,
      so on a phone the two go back to being stacked — side by side, each would
      be half a screen wide. The border keeps its green: a phone reader needs
-     the affordance more than a mouse one, not less. */
+     the affordance more than a mouse one, not less.
+
+     NO border-radius here, deliberately. Both buttons are pills (999px), and
+     the 10px this rule used to write reached only ONE of them — .oa-clear's
+     pill rule sits later in this file at the same specificity, so Clear
+     stayed a pill while the download squared off beside it: the "specificity
+     AND load order" trap, on the very pair the cell exists to present as a
+     pair. A phone rule takes a control's size up and never restyles it
+     (rule 11 in _MOBILE-STANDARDS.md). */
   body.v3 .oa-clear,
   body.v3 .oa-action {
     flex: 0 0 100%;
     width: 100%;
-    border-radius: 10px;
+    height: 46px;
+    font-size: 15px;
   }
-  body.v3 .oa-action { height: 44px; }
+  /* a tap has no hover: the press itself answers, in each button's own hover
+     colours — gated exactly as the hovers are, because a disabled control
+     must not light up under a thumb either */
+  body.v3 .oa-clear:active:not([disabled]) { background: var(--err-soft); }
+  body.v3 .oa-action:active:not([disabled]) {
+    background: var(--ok); color: var(--on-brand); border-color: var(--ok);
+  }
 }
 /* a profile picture fills the avatar disc; the initials show only without one */
 .oa-avatar { overflow: hidden; }

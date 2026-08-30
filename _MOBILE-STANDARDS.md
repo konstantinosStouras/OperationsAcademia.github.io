@@ -98,6 +98,21 @@ marked global.
     sight. It now **measures after opening** and takes whichever side has more
     room, growing no further than that side allows.
 
+11. **Controls that stack keep a gap and keep their shape.** The filter bar's
+    action pair (Clear + a page's `.oa-action`) stacks full width on a phone,
+    and two things about the desktop cell stop being true there: its 0 row-gap
+    (which exists only to land Clear on its row's baseline beside the labelled
+    controls) left the stacked buttons touching, and the label-height spacer
+    (which reserves space to align with labels BESIDE the cell) was a blank
+    strip over them — so on a phone the cell gets a real gap and no spacer.
+    And a breakpoint rule must never change what a control IS: a
+    `border-radius` override written at the phone breakpoint reached only ONE
+    of the two buttons — Clear's pill rule sat later in `v3.css` at the same
+    specificity — so the pair shipped visibly mismatched (owner's screenshot,
+    2026-08-30). A phone rule takes a control's size up (rule 0); its shape,
+    colour and ground stay the ones it has everywhere else. `page-test.mjs`
+    measures the gap and the matching shape at 390px.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and

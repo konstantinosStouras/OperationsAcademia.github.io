@@ -6285,6 +6285,29 @@ for (const w of [320, 360, 390, 430]) {
       return getComputedStyle(b).borderTopColor === resolved;
     }), 'jobs export at 390px: …and keeps its green border — a thumb needs the ' +
       'affordance more than a mouse does, not less');
+    /* THE PAIR, measured (owner's phone screenshot, 2026-08-30): stacked, the
+       two buttons kept 0px between them — the desktop cell's zero row-gap
+       exists only to hold Clear on a baseline a phone row does not have — and
+       only ONE of them took the breakpoint's old 10px corner override, because
+       Clear's pill rule sits later in v3.css at the same specificity. Rule 11
+       in _MOBILE-STANDARDS.md: stacked controls keep a gap and keep one
+       shape, measured rather than trusted to the cascade. */
+    const pair = await q.evaluate(() => {
+      const c = document.querySelector('.oa-clear');
+      const b = document.querySelector('.oa-export');
+      const cr = c.getBoundingClientRect(), br = b.getBoundingClientRect();
+      return { gap: Math.round(br.top - cr.bottom),
+        clearShape: getComputedStyle(c).borderRadius,
+        exportShape: getComputedStyle(b).borderRadius,
+        clearW: Math.round(cr.width), exportW: Math.round(br.width) };
+    });
+    ok(pair.gap >= 6,
+      `jobs export at 390px: the stacked pair breathes (${pair.gap}px between the buttons)`);
+    eq(pair.clearShape, pair.exportShape,
+      'jobs export at 390px: the two buttons share ONE shape — a breakpoint ' +
+      'override that reaches only one of them is the load-order trap');
+    eq(pair.clearW, pair.exportW,
+      'jobs export at 390px: …and one width, each taking the whole cell');
     await ctx.close();
   }
 

@@ -3,6 +3,12 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "mobile-filter-buttons",
+      "date": "2026-08-30",
+      "title": "The jobs page's buttons sit properly on a phone",
+      "summary": "On a phone, the filter panel's two buttons — Clear filters and Download Excel — used to sit touching each other under a strip of blank space, and disagreed about their own shape: one drew as a rounded pill, the other with squared-off corners. They are now a matched pair: both full-width pills with real space between them and slightly larger, easier-to-press targets, in both the light and the dark theme."
+    },
+    {
       "id": "candidate-own-research-areas",
       "date": "2026-08-30",
       "title": "Candidates can add their own research areas",
