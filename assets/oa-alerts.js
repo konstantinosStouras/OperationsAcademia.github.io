@@ -193,6 +193,21 @@
     var c = a.criteria;
     var box = $('oa-preview');
 
+    /* THE PREVIEW CARRIES REAL POSTINGS, so it belongs to a registered reader
+       like every other detail on the site (assets/oa-gate.js). The whole app
+       is `hidden` when nobody is signed in — but hidden is not absent, and
+       this file's example e-mail was being built anyway (applyNewsDecisions
+       re-renders it when the change-log decisions land, which happens on
+       every page load), leaving a university, its department, the entry
+       level, the country and both apply-by dates sitting in the document of
+       a signed-out reader. That is precisely the shape the gate exists to
+       refuse: a blur, or a `hidden`, over real text is a picture of a lock.
+
+       Nothing is lost by waiting — signing in runs resetForm(), which calls
+       syncFormState() and repaints this. Asked of the ONE definition, so the
+       page and the cards cannot disagree about who is reading. */
+    if (window.OAGate && OAGate.locked()) { box.innerHTML = ''; return; }
+
     if (!M.hasIntent(c)) {
       box.innerHTML = '<p class="oa-hint">Tick at least one thing to be e-mailed about.</p>';
       return;

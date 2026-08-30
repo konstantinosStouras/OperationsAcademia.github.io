@@ -8688,7 +8688,7 @@ async function testReviewWiring() {
      the CHECKS, which commit nothing, and publishing the ruleset that was
      actually tested is the point of it. Its head_sha IS the commit under
      test. */
-  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml'];
+  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml', 'oa-submissions-mail.yml'];
   for (const name of DATA_CHAINED) {
     const src = await readFile(path.join(wfDir, name), 'utf8');
     if (!/^\s*workflow_run:/m.test(src)) continue;
@@ -8737,6 +8737,21 @@ async function testReviewWiring() {
   ok(buildName && alertsWf.includes(`workflows: ["${buildName.trim()}"]`),
     'the alerts mailer is chained to the build BY ITS CURRENT NAME — renaming a ' +
     'workflow silently unchains every workflow_run listening for it');
+
+  /* …AND SO IS THE SUBMISSIONS MAILER, for a promise the schedule cannot keep
+     on its own. post-a-job.html tells a poster they will hear "as soon as it
+     is publicly shown", and "publicly shown" is decided by whether the row is
+     in the checkout's data/jobs.json — which is exactly what the build has
+     just committed. The cron asks for 96 fires a day and GitHub delivers about
+     five (mean gap six hours, worst twelve, measured 2026-08-30), so without
+     this chain the promise is missed by most of a day. */
+  const subsWf = await readFile(path.join(wfDir, 'oa-submissions-mail.yml'), 'utf8');
+  ok(buildName && subsWf.includes(`workflows: ["${buildName.trim()}"]`),
+    'the submissions mailer is chained to the build by its current name too — it is ' +
+    'what makes the poster\'s "as soon as it is publicly shown" true');
+  ok(/conclusion == 'success'/.test(subsWf),
+    '…and only to a SUCCESSFUL build: a failed one committed nothing, so it published ' +
+    'no posting and there is nobody new to tell');
 
   /* ------------- A REJECTED PUSH IS REBUILT, NEVER REBASED (2026-08-26)
 
@@ -9827,6 +9842,78 @@ async function testReaderGate() {
     'gate: …and with no href to offer it simply opens the card here');
   GATE.__setForTest(null);
 
+  /* ---- ONE PENDING ID, SEVERAL LISTS ------------------------------------
+
+     `pending` is one variable in one module, and the one-pager mounts TWO
+     gated lists that both watch the same auth state. Consuming it
+     unconditionally meant whichever list was notified FIRST swallowed an id
+     belonging to the other — press a candidate card signed out, sign in, and
+     the profile you pressed stayed shut. Measured in a real browser by
+     page-test.mjs; this pins the rule itself.
+
+     Driven against a fresh instance with a `window` in place, since the
+     module captures its global once at load and Node has none. The cache
+     entry is dropped on both sides so no other check inherits either the
+     instance or the global. */
+  {
+    const gatePath = require.resolve(path.join(HERE, '..', 'assets', 'oa-gate.js'));
+    delete require.cache[gatePath];
+    const hadWindow = 'window' in globalThis;
+    const listeners = [];
+    globalThis.window = {
+      OAAccounts: {
+        resolved: () => true,
+        user: () => null,
+        hint: () => 'out',
+        failed: () => false,
+        whenSignedIn: () => {},
+        onChange: (fn) => listeners.push(fn),
+      },
+    };
+    try {
+      const G2 = require(gatePath);
+      // a list that owns nothing, and one that owns the pressed row
+      const opened = [];
+      const mkList = (owns) => ({
+        rerendered: 0,
+        rerender() { this.rerendered += 1; },
+        open(id) {
+          if (!owns.includes(id)) return false;
+          opened.push(id); return true;
+        },
+      });
+      const teaser = mkList(['job-1']);          // notified FIRST, owns other rows
+      const cands = mkList(['cand-1']);          // owns the row that was pressed
+      G2.watch(teaser);
+      G2.watch(cands);
+      eq(listeners.length, 2, 'gate: both lists on a page watch the auth state');
+
+      // the reader presses the CANDIDATE card, then signs in
+      G2.cardOpen({})({ id: 'cand-1' }).run({ id: 'cand-1' });
+      listeners.forEach((fn) => fn({ uid: 'u1' }));
+      eq(opened, ['cand-1'],
+        'gate: the pending card is opened by the list that OWNS it, not the one notified first');
+      eq([teaser.rerendered, cands.rerendered], [1, 1],
+        'gate: …while both lists still re-render, which is what the watch is for');
+
+      // …and it is spent: a second sign-in event opens nothing again
+      opened.length = 0;
+      listeners.forEach((fn) => fn({ uid: 'u1' }));
+      eq(opened, [], 'gate: …and the id is spent once it has been claimed');
+
+      /* Signing OUT drops it: an id pressed in one session must never open a
+         card for whoever signs in next on the same machine. */
+      G2.cardOpen({})({ id: 'cand-1' }).run({ id: 'cand-1' });
+      listeners.forEach((fn) => fn(null));
+      opened.length = 0;
+      listeners.forEach((fn) => fn({ uid: 'u2' }));
+      eq(opened, [], 'gate: a sign-out drops the pending card rather than holding it for the next reader');
+    } finally {
+      if (!hadWindow) delete globalThis.window;
+      delete require.cache[gatePath];
+    }
+  }
+
   /* ---- the ENGINE ------------------------------------------------------- */
 
   const engine = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
@@ -9847,6 +9934,19 @@ async function testReaderGate() {
     'gate: …and it returns before the details table is built at all');
   ok(/'aria-expanded': gate \? null/.test(engine) && /'aria-controls': gate \? null/.test(engine),
     'gate: a head that no longer discloses anything stops claiming to');
+
+  /* `open(id)` ANSWERS whether it opened, and only for a row this list has —
+     the other half of the claim rule above. Without the membership test a
+     list would report success for an id it does not carry, which is exactly
+     how the teaser swallowed the candidates' pending card. */
+  const openFn = engine.slice(engine.indexOf('      open: function (id) {'),
+    engine.indexOf('      rows: function ()'));
+  ok(openFn.length > 200 && openFn.length < 1200,
+    'gate: the engine\'s open() is where this expects it');
+  ok(/return false/.test(openFn) && /return true/.test(openFn),
+    'gate: open() says whether it opened the card');
+  ok(/rows\[i\]/.test(openFn),
+    'gate: …and only ever for a row this list actually carries');
 
   /* ---- BOTH stylesheets ------------------------------------------------- */
 
@@ -9908,6 +10008,33 @@ async function testReaderGate() {
     'gate: the teaser opens a posting on the page OAJobNav says carries it');
   ok(!/cardOpen[\s\S]{0,400}?full:/.test(jobs) && !/cardOpen[\s\S]{0,400}?full:/.test(past),
     'gate: the full lists open a posting where it stands — they ARE the full list');
+
+  /* ---- NOTHING MERELY HIDDEN COUNTS AS WITHHELD -------------------------
+
+     alerts.html's example e-mail carries REAL postings — a university, its
+     department, the entry level, the country and both apply-by dates. The
+     whole app is `hidden` when nobody is signed in, but the preview was built
+     anyway (applyNewsDecisions re-renders it whenever the change-log
+     decisions land, which is every page load), so all of it sat in the
+     document of a signed-out reader. Hidden is not absent: it is the same
+     picture-of-a-lock the cards refuse to draw. */
+  const alertsJs = await readFile(path.join(HERE, '..', 'assets', 'oa-alerts.js'), 'utf8');
+  const alertsHtml = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  const preview = alertsJs.slice(alertsJs.indexOf('function renderPreview()'),
+    alertsJs.indexOf('M.hasIntent(c)'));
+  ok(preview.length > 200 && preview.length < 2500,
+    'gate: the alerts preview is where this expects it');
+  ok(/OAGate\.locked\(\)/.test(preview) && /return;/.test(preview),
+    'gate: …and it draws nothing at all while the reader is not signed in');
+  ok(alertsHtml.includes('<script defer src="assets/oa-gate.js"></script>'),
+    'gate: alerts.html loads the module it asks');
+  ok(alertsHtml.indexOf('assets/oa-accounts.js') < alertsHtml.indexOf('assets/oa-gate.js'),
+    'gate: …after the accounts module the gate itself asks');
+  /* The gate is the ONE definition; a second reading of the auth state here
+     would be the drift every shared module in this repository exists to
+     prevent. */
+  ok(!/hint\(\)\s*===\s*'in'/.test(alertsJs),
+    'gate: the alerts page keeps no private copy of "is this reader signed in"');
 
   /* ---- ONE definition of "is this reader signed in" --------------------- */
 
