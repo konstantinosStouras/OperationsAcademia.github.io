@@ -147,11 +147,13 @@ collection to find each browser's first day, which is the unbounded read the
 incremental query is shaped to avoid. A figure that would be wrong from one
 source and expensive from the other is better not drawn.
 
-**A dimension with no source is not drawn.** It is named in the note at the
-foot of the page instead, under "Not on this page yet". A heading over an empty
-axis is precisely the shape of the defect this page is a rebuild of, so the
-five GA4 figures simply appear on their own once the credential exists and the
-property has days in it.
+**A dimension with no source is not drawn — and its absence is silent.** A
+heading over an empty axis is precisely the shape of the defect this page is a
+rebuild of, so the five GA4 figures simply appear on their own once the
+credential exists and the property has days in it. (They used to be listed in
+a "Where these figures come from" note at the foot of the page; the owner had
+that section removed, 2026-08-30 — how the site is measured is not the
+readers' business. This file is where that information lives now.)
 
 **And every figure describes public pages only.** The non-public filter is
 applied to the GA4 dimension reports as well as to the daily one, so the
@@ -253,10 +255,10 @@ firebase deploy --only functions --project operations-academia
 ```
 
 That is the whole of it — no secret, no variable. **`recordVisit` is live
-since 2026-08-30**, created by the SECOND deploy of that day: the first ran
-from a clone that predated this function, printed `Deploy complete!` over the
-other three, and never mentioned it — which is exactly how a function comes to
-be missing with nothing anywhere saying so. **Run any future deploy from an
+since 2026-08-30**, created by the deploy that followed a pull; the
+2026-08-29 one ran from a clone that predated this function, printed
+`Deploy complete!` over the other three, and never mentioned it — which is
+exactly how a function comes to be missing with nothing anywhere saying so. **Run any future deploy from an
 up-to-date checkout and read the deployed list back against
 `_functions/index.js`.** While the collection is still young the builder logs
 `visits: universityVisits is empty` and the page simply does not draw the

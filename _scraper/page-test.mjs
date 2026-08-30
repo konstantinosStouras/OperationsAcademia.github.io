@@ -4098,6 +4098,20 @@ for (const [from, hash] of [
     const { ctx: outCtx, page: out, errors: outErrs } = await signedOutPage(pageName);
     await out.waitForSelector(`${host} .oa-card`, { timeout: 15000 });
     await out.waitForTimeout(300);
+    /* The rows as the SITE serves them, handed to the page so the leak check
+       below compares a card against its own posting rather than against a
+       fixture that could drift from the data. Both files, because the two
+       pages partition the corpus between them. */
+    await out.evaluate(async () => {
+      const by = {};
+      for (const url of ['/data/jobs.json', '/data/past-postings.json']) {
+        try {
+          const rows = await (await fetch(url, { cache: 'no-cache' })).json();
+          for (const r of rows) if (r && r.id) by[r.id] = r;
+        } catch { /* the page under test does not need both */ }
+      }
+      window.__GATE_ROWS = by;
+    });
 
     const shut = await out.evaluate((h) => {
       const cards = [...document.querySelectorAll(`${h} .oa-card`)];
@@ -4132,6 +4146,47 @@ for (const [from, hash] of [
       `${pageName}: a head that discloses nothing no longer claims to`);
     eq([...new Set(shut.notes)], [note],
       `${pageName}: each card says what would open it, in the page's own words`);
+
+    /* THE STRONGEST FORM OF THE PROMISE, measured against the site's own
+       data rather than a fixture: take what each locked card's posting
+       actually SAYS and prove none of it is anywhere in that card's markup.
+       The checks above assert the absence of the containers; this asserts the
+       absence of the CONTENT, which is what "never able to view details"
+       means and what a future refactor could quietly undo while every
+       structural check stayed green (a hidden body, an aria-label, a data-
+       attribute, a title carrying the comments would all pass those).
+
+       Values are matched at 12+ characters: shorter ones ("Sunday", a bare
+       year, "link") legitimately occur in the page's own furniture, and a
+       check that fired on those would be noise rather than a finding.
+
+       WHAT IS ALLOWED IS MEASURED FROM THE HEAD ITSELF, not from a list of
+       field names. Who is hiring stays readable, so anything the head already
+       displays is not a leak — and a name list would rot: `school` and `unit`
+       are the two halves the subtitle is joined from, and `type` ("Business
+       School") is a substring of that subtitle by coincidence at CUHK and
+       would not be at the next university. Stating the rule as "nothing in
+       this card that its own head does not already show" needs no
+       maintenance and says exactly what the promise is. `id` is excluded
+       separately because it is the element's id attribute rather than text. */
+    const leaked = await out.evaluate((h) => {
+      const out2 = [];
+      for (const card of document.querySelectorAll(`${h} .oa-card`)) {
+        const html = card.outerHTML;
+        const shown = card.querySelector('.oa-card-head').textContent;
+        const row = (window.__GATE_ROWS || {})[card.id.replace(/^job-/, '')];
+        if (!row) continue;
+        for (const [k, v] of Object.entries(row)) {
+          if (k === 'id') continue;
+          if (typeof v !== 'string' || v.length < 12) continue;
+          if (shown.includes(v)) continue;          // the head is meant to show it
+          if (html.includes(v)) out2.push(card.id + ' → ' + k + ': ' + v.slice(0, 40));
+        }
+      }
+      return out2;
+    }, host);
+    eq(leaked.slice(0, 4), [],
+      `${pageName}: and no value any of those postings holds is anywhere in its card`);
 
     /* THE CARD DOES NOT EXPAND — the owner's own sentence. Press it and what
        arrives is the sign-in box, not a body. */
@@ -4293,6 +4348,63 @@ for (const [from, hash] of [
       'gate: signed in, the profile opens');
     ok(await q.$$eval('#oa-candidates .oa-kv a[href^="mailto:"]', (n) => n.length) >= 1,
       'gate: …and carries the way to contact them, which is what it is for');
+    await ctx.close();
+  }
+
+  /* -- the card you PRESSED is the card that opens ------------------------ */
+  {
+    /* The one-pager mounts TWO gated lists, and `pending` — the id of the
+       card whose lock was pressed — is one variable in one module. Consumed
+       unconditionally it went to whichever list was notified FIRST: press a
+       candidate card signed out, sign in, and the profile you pressed stayed
+       shut while the teaser above quietly marked a row it does not have.
+
+       Reproduced end to end rather than reasoned about, because the whole
+       failure is an ORDERING between two listeners: the reader is seeded as a
+       real user so the shim can sign them back in, signed OUT before anything
+       is touched, and both lists are mounted in the order a reader scrolling
+       the page mounts them. selftest.mjs pins the rule; this is the reader. */
+    const SEED = [{ id: 'gate-cand-1', name: 'A Candidate',
+      affiliation: 'Somewhere University', position: 'PhD Candidate',
+      year: String(marketYear()), posted: new Date().toISOString().slice(0, 10),
+      researchAreas: ['Operations'], informsDays: ['Sunday'],
+      email: 'someone@example.edu', cvUrl: 'https://example.edu/cv.pdf' }];
+
+    const { ctx, page: q, errors } = await signedInPage('index.html', { wait: false });
+    await q.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.evaluate(() => window.OAAccounts.signOut());
+    await q.waitForFunction(() => window.OAAccounts.resolved() && !window.OAAccounts.user(),
+      null, { timeout: 15000 });
+
+    // both lists mounted, teaser first — the order a reader scrolling creates
+    await q.evaluate(() => document.querySelector('#oa-jobs-recent').scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-jobs-recent .oa-card', { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-candidates .oa-card-locked', { timeout: 15000 });
+    await q.waitForTimeout(300);
+
+    await q.click('#oa-candidates .oa-card .oa-card-head');
+    await q.waitForTimeout(300);
+    ok(await q.$('.oa-modal'),
+      'gate: pressing a locked candidate card offers the sign-in box');
+    await q.evaluate(() => window.OAFB.ready().then((fb) => fb.auth().signInWithPopup({})));
+    await q.waitForTimeout(1200);
+
+    const landed = await q.evaluate(() => ({
+      signedIn: !!(window.OAAccounts && window.OAAccounts.user()),
+      locked: document.querySelectorAll('#oa-candidates .oa-card-locked').length,
+      open: (() => { const b = document.querySelector('#oa-candidates .oa-card-body');
+        return b ? !b.hidden : null; })(),
+    }));
+    eq(landed.signedIn, true, 'gate: …and signing in from it really signs the reader in');
+    eq(landed.locked, 0, 'gate: …which unlocks the profile');
+    eq(landed.open, true,
+      'gate: …and opens THE ONE THEY PRESSED, not whichever list was notified first');
+    eq(errors, [], 'gate: no uncaught script error on the way through');
     await ctx.close();
   }
 }
@@ -6293,8 +6405,10 @@ for (const w of [320, 360, 390, 430]) {
         metric: 'visits', zone: '', total: 1000,
         items: [{ name: 'United States', value: 400 }, { name: 'Ireland', value: 120 },
           { name: 'Germany', value: 90 }, { name: 'Singapore', value: 60 }] },
+      /* total DELIBERATELY exceeds the listed rows by 150: the uncovered tail
+         must be drawn as a named muted part, never as a blank stretch */
       channels: { source: 'ga4', from: '2026-06-01', to: '2026-08-28',
-        metric: 'visits', zone: '', total: 1000,
+        metric: 'visits', zone: '', total: 1150,
         items: [{ name: 'Organic Search', value: 520 }, { name: 'Typed or bookmarked', value: 300 },
           { name: 'Referral', value: 180 }] },
       referrers: { source: 'ga4', from: '2026-06-01', to: '2026-08-28',
@@ -6447,6 +6561,23 @@ for (const w of [320, 360, 390, 430]) {
     ok(season && /whole record/i.test(season.sub),
       `analytics (${theme}): …and says so, rather than letting the range above imply otherwise`);
 
+    /* THE MARKS ARE NEVER STRETCHED. Every chart used to be a fixed 900-unit
+       drawing scaled NON-UNIFORMLY into its box (preserveAspectRatio:'none'),
+       so nothing was ever at true proportion — 1.13x too wide at this
+       viewport, a third of its width at 320px. A chart is now DRAWN at the
+       width it is shown at, so both scales must be exactly 1. */
+    const scales = await q.evaluate(() =>
+      [...document.querySelectorAll('.oa-chart-svg')].map((svg) => {
+        const vb = svg.getAttribute('viewBox').split(' ').map(Number);
+        const r = svg.getBoundingClientRect();
+        return { sx: r.width / vb[2], sy: r.height / vb[3] };
+      }));
+    ok(scales.length > 0 && scales.every((c) =>
+      Math.abs(c.sx - 1) < 0.02 && Math.abs(c.sy - 1) < 0.02),
+      `analytics (${theme}): every chart is drawn at the size it is shown at — ` +
+      'one user unit is one CSS pixel, nothing stretched in either axis ' +
+      `(scales ${scales.map((c) => c.sx.toFixed(2) + 'x' + c.sy.toFixed(2)).join(' ')})`);
+
     /* the range control drives every figure at once */
     const before = await q.evaluate(() =>
       document.querySelector('.oa-tile-value').textContent);
@@ -6594,6 +6725,28 @@ for (const w of [320, 360, 390, 430]) {
       };
     });
     eq(shares.n, 3, 'analytics: the share bar is cut into one part per category');
+
+    /* THE TAIL IS A PART, NOT A BLANK: the channels fixture's total exceeds
+       its listed rows by 150 on purpose, and that remainder must be drawn as
+       a named muted part with a legend entry — never an unexplained empty
+       stretch of track, and never silently renormalised away. */
+    const tail = await q.evaluate(() => {
+      const f = [...document.querySelectorAll('.oa-figure')]
+        .find((x) => /How readers arrive/.test(x.querySelector('h2').textContent));
+      const segs = [...f.querySelectorAll('.oa-share-seg')];
+      const bar = f.querySelector('.oa-share-bar').getBoundingClientRect();
+      return {
+        n: segs.length,
+        rest: segs.filter((x) => /oa-cat-rest/.test(x.className)).length,
+        filled: Math.abs(segs.reduce((n, x) => n + x.getBoundingClientRect().width, 0) - bar.width) < 2,
+        legend: [...f.querySelectorAll('.oa-share-legend span')].map((x) => x.textContent),
+      };
+    });
+    eq(tail.n, 4, 'analytics: a share total beyond the listed rows grows a fourth part');
+    eq(tail.rest, 1, '…exactly one, painted as the muted rest');
+    ok(tail.filled, '…and the parts then really fill the bar');
+    ok(tail.legend.some((t) => /Everything else/.test(t) && /13%/.test(t)),
+      '…named in the legend with its share of the whole (150 of 1,150 is 13%)');
     ok(Math.abs(shares.widths - shares.bar) < 2,
       'analytics: …and the parts really do fill it');
     ok(shares.legend.length === 3 && shares.legend.every((t) => /%/.test(t)),
@@ -6613,8 +6766,13 @@ for (const w of [320, 360, 390, 430]) {
       'analytics: an average time on a page reads "32m 32s", not "1952 seconds"');
     ok(!/1,?952 seconds/.test(times.body),
       'analytics: …and the raw seconds are nowhere on the page');
-    ok(times.tiles.some((t) => /Typical visit/.test(t) && /5m 22s/.test(t)),
-      'analytics: the visit-length tile is said the same way');
+    ok(times.tiles.some((t) => /Time on a page/.test(t) && /5m 22s/.test(t)),
+      'analytics: the time tile is said the same way — and titled "Time on a ' +
+      'page", because the first-party record measures a PAGE, not a visit: its ' +
+      'pages-per-visit is identically 1 by construction, so "Typical visit · ' +
+      '1 pages" was two wrong claims in nine characters');
+    ok(!times.tiles.some((t) => /Typical visit/.test(t)),
+      'analytics: …and no tile claims the visit framing for it');
 
     /* the metric switch: one control, three questions */
     const heading0 = await q.evaluate(() =>
@@ -6635,8 +6793,11 @@ for (const w of [320, 360, 390, 430]) {
       'analytics: the daily chart opens on visitors');
     ok(/^Pageviews, day by day/.test(switched.heading),
       'analytics: …and the switch really re-plots it, heading and all');
-    eq(switched.pressed, ['false', 'false', 'true'],
-      'analytics: …with exactly one of the three reading as chosen');
+    /* TWO metrics, deliberately: the site's own record files one document per
+       page opened, so a "Visits" series would be the Pageviews series wearing
+       a wrong label — see METRICS in oa-analytics.js */
+    eq(switched.pressed, ['false', 'true'],
+      'analytics: …with exactly one of the two reading as chosen');
 
     /* the legend is a control: either line can be put away and brought back */
     const toggled = await q.evaluate(() => {
@@ -6665,31 +6826,32 @@ for (const w of [320, 360, 390, 430]) {
       'analytics: the daily chart takes focus and the arrow keys read it — a ' +
       'crosshair only a pointer can drive leaves the table as the only way in');
 
-    /* every figure says where it came from, and the note at the foot says it
-       once more for the page as a whole */
+    /* every figure still names its own span; the page-level "Where these
+       figures come from" note is GONE by owner decision (2026-08-30) — how
+       the site is measured is not the readers' business */
     const prov = await q.evaluate(() => ({
       perFigure: [...document.querySelectorAll('.oa-figure-src')].map((x) => x.textContent),
-      foot: [...document.querySelectorAll('.oa-an-note')].map((x) => x.textContent).join(' '),
+      body: document.querySelector('#oa-analytics').textContent,
     }));
     ok(prov.perFigure.some((t) => /Google Analytics/.test(t)),
       'analytics: a figure Google measured says so under it');
-    ok(/Where these figures come from/.test(prov.foot),
-      'analytics: and the page as a whole accounts for its own sources');
-    ok(/cookieless/i.test(prov.foot) && /visits/.test(prov.foot),
-      'analytics: …including that Google Analytics runs cookieless here and ' +
-      'therefore counts visits rather than people');
-    ok(/public pages only/i.test(prov.foot),
-      'analytics: …and that the maintainer’s own area is in none of it');
+    ok(!/Where these figures come from/.test(prov.body),
+      'analytics: the provenance note is off the page — owner, 2026-08-30');
+    ok(!/cookieless/i.test(prov.body) && !/admin/i.test(prov.body),
+      'analytics: …and neither the cookieless trade-off nor the admin-area ' +
+      'exclusion is described to visitors anywhere else on it');
 
     await ctx.close();
   }
 
-  /* --- a dataset with no dimensions at all, which is what ships today ---
+  /* --- a dataset with no dimensions at all ------------------------------
 
-     The five figures above must be ABSENT rather than empty. A heading over a
-     bare axis is the exact shape of the defect this page is a rebuild of, so
-     the ones nothing has answered for are named in the note at the foot and
-     drawn nowhere. */
+     The five audience figures must be ABSENT rather than empty — a heading
+     over a bare axis is the exact shape of the defect this page is a rebuild
+     of. Absence is SILENT now: the foot note that used to name the missing
+     ones (and the universities figure's own resolver beside them) was removed
+     by the owner, 2026-08-30 — how the site is measured is not the readers'
+     business. */
 
   {
     const ctx = await browser.newContext({ viewport: { width: 1180, height: 1000 } });
@@ -6701,28 +6863,21 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForSelector('.oa-figure', { timeout: 15000 });
     const bare = await q.evaluate(() => ({
       heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
-      missing: [...document.querySelectorAll('.oa-an-missing li')].map((x) => x.textContent),
-      have: [...document.querySelectorAll('.oa-an-list:not(.oa-an-missing) li')]
-        .map((x) => x.textContent),
+      body: document.querySelector('#oa-analytics').textContent,
+      emptyAxes: [...document.querySelectorAll('.oa-chart-svg')]
+        .filter((svg) => !svg.querySelector('.oa-bar[d]:not([d=""]), .oa-line')).length,
       tiles: [...document.querySelectorAll('.oa-tile')].map((t) => t.textContent).join(' '),
     }));
     ok(!bare.heads.includes('Where readers are'),
       'analytics: a figure no source has answered for is not drawn at all');
-    ok(bare.missing.includes('Where readers are') && bare.missing.length === 5,
-      'analytics: …it is NAMED as missing instead, because a dashboard that shows ' +
-      'only what it happens to have, with nothing saying what it does not, is the ' +
-      'failure this page is a rebuild of');
-    ok(!/Typical visit/.test(bare.tiles),
+    ok(!/Where these figures come from|Not on this page yet|own resolver/.test(bare.body),
+      'analytics: …and no foot note describes the plumbing in its place — ' +
+      'owner, 2026-08-30');
+    eq(bare.emptyAxes, 0,
+      'analytics: …and no chart on the page is an empty axis, which is the ' +
+      'shape of the defect the page was rebuilt to remove');
+    ok(!/Typical visit|Time on a page/.test(bare.tiles),
       'analytics: and a tile with no measurement behind it is absent, never a zero');
-    /* THE UNIVERSITIES ARE IN THAT NOTE TOO. They are not a `DIMENSION`, so
-       nothing in the loop above would have named them — and this is the one
-       figure whose source is NEITHER analytics system, which is exactly the
-       thing a reader could not otherwise learn. */
-    ok(bare.have.some((x) => /Which universities visited/.test(x) &&
-      /own resolver/.test(x)),
-      'analytics: the provenance note says the universities figure is the site\'s ' +
-      'own resolver — a note that promises where every figure comes from must ' +
-      'not silently skip the one measured by neither analytics system');
     await ctx.close();
   }
 
@@ -6841,6 +6996,53 @@ for (const w of [320, 360, 390, 430]) {
       'analytics mobile: every range control is a 42px target, the standard every ' +
       'control on this site is held to on a phone');
     ok(mob.widest <= mob.vw, 'analytics mobile: no figure runs past the viewport');
+
+    /* THE PHONE IS WHERE THE STRETCH WAS WORST — measured 0.36x at this very
+       width — so true proportion is asserted here as well as on the desktop,
+       along with the two things a narrow plot must give up honestly: axis
+       labels THIN to what fits (every Nth, never overprinting into a smear),
+       and the legend's series switches grow to thumb size. */
+    const mgeo = await q.evaluate(() => {
+      const out = { scales: [], overlaps: 0, legend: [] };
+      document.querySelectorAll('.oa-chart-svg').forEach((svg) => {
+        const vb = svg.getAttribute('viewBox').split(' ').map(Number);
+        const r = svg.getBoundingClientRect();
+        out.scales.push({ sx: r.width / vb[2], sy: r.height / vb[3] });
+        const ticks = [...svg.querySelectorAll('.oa-tick-x')]
+          .map((t) => t.getBoundingClientRect())
+          .sort((a, b) => a.left - b.left);
+        for (let i = 1; i < ticks.length; i++) {
+          if (ticks[i].left < ticks[i - 1].right - 0.5) out.overlaps++;
+        }
+      });
+      out.legend = [...document.querySelectorAll('.oa-chart-legend-on button')]
+        .map((b) => Math.round(b.getBoundingClientRect().height));
+      return out;
+    });
+    ok(mgeo.scales.length > 0 && mgeo.scales.every((c) =>
+      Math.abs(c.sx - 1) < 0.02 && Math.abs(c.sy - 1) < 0.02),
+      'analytics mobile: the charts are at true proportion on a phone too — ' +
+      'this width used to render every glyph at a third of its designed width');
+    eq(mgeo.overlaps, 0,
+      'analytics mobile: no two axis labels overprint — the 24 hour labels ' +
+      'thin to every third rather than piling into a smear');
+    ok(mgeo.legend.length > 0 && mgeo.legend.every((h) => h >= 42),
+      'analytics mobile: the legend series switches are 42px thumb targets');
+
+    /* AND A ROTATION IS A REDRAW: widen the viewport and the charts must be
+       re-drawn at the new width within the debounce, not letterboxed into it
+       for ever. */
+    await q.setViewportSize({ width: 700, height: 844 });
+    await q.waitForTimeout(450);
+    const rotated = await q.evaluate(() =>
+      [...document.querySelectorAll('.oa-chart-svg')].map((svg) => {
+        const vb = svg.getAttribute('viewBox').split(' ').map(Number);
+        const r = svg.getBoundingClientRect();
+        return Math.abs(r.width / vb[2] - 1) < 0.02 && vb[2] > 400;
+      }));
+    ok(rotated.length > 0 && rotated.every(Boolean),
+      'analytics mobile: turning the phone redraws every chart at the new ' +
+      'width — still one user unit to one pixel, at the wider size');
     await ctx.close();
   }
 }

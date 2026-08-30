@@ -204,13 +204,14 @@ exports.publishOnReview = onDocumentWritten(
    read as "no universities visit", which is precisely the misreading the rest
    of this page was rebuilt to prevent.
 
-   LIVE SINCE 2026-08-30, and last of the four by half a day. The three
-   doorbells above went live on 2026-08-27; the first deploy of 2026-08-30
-   listed those three and never mentioned this one, because it ran from a
-   clone that predated it — a stale checkout deploys the stale set and still
-   prints "Deploy complete!". A second deploy the same day, from a pulled
-   checkout, created it, printing the URL that matches ENDPOINT in
-   assets/oa-visit.js. After any future
+   LIVE SINCE 2026-08-30, and last of the four. The three doorbells above
+   went live on 2026-08-27; the 2026-08-29 deploy listed those three and
+   never mentioned this one, because it ran from a clone that predated it —
+   a stale checkout deploys the stale set and still prints "Deploy
+   complete!". The 2026-08-30 deploy that followed a pull created it,
+   printing the URL that matches ENDPOINT in assets/oa-visit.js (a later
+   deploy may print the run.app form — same function, both addresses
+   answer). After any future
        firebase deploy --only functions --project operations-academia
    read the deployed list back against this file. While the collection is
    still young the page says the figures are not being collected yet rather

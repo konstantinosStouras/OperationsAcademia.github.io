@@ -8004,12 +8004,18 @@ function testReviewDuplicates() {
 
   /* ---- AND AN APPROVAL SHOWS AT ONCE (owner, 2026-08-26) --------------
 
-     The card used to say "publishing starts now", on the strength of a Cloud
-     Function that dispatches the build the moment an approval lands — and
-     deploying Functions is a hand step nothing in CI performs, so the posting
-     waited for the build's own schedule while the card said otherwise. The
-     echo makes the first half true for the maintainer; the copy must not
-     claim the second half. */
+     The card has been wrong in BOTH directions, so the pin names the cadence
+     rather than a side of it. It first said "publishing starts now" while the
+     doorbell function was undeployed and the posting waited for the schedule;
+     the correction said "at the next build" — and the functions went live on
+     2026-08-27 (the `oa-jobreview-decided` dispatch, which only
+     `publishOnReview` sends, has fired on every decision since), after which
+     "the next build" UNDER-promised a two-minute chain and read as the
+     doorbell still being dead. Copy that promises a time changes with the
+     cadence — this repository's own rule — so what is pinned is today's:
+     the echo for the maintainer at once, the chain for everyone else in a
+     couple of minutes, and neither stale wording anywhere the maintainer
+     reads. */
   ok(/echoApproval\(doc, edits, patch\.reviewedAt\)/.test(rvSrc),
     'approving one posting echoes the row the build will publish');
   ok(/echoApproval\(doc, edits, reviewedAt\)/.test(rvSrc),
@@ -8021,13 +8027,22 @@ function testReviewDuplicates() {
     .test(rvSrc),
     'and an echo that throws never costs the approval itself');
   /* The COPY, not the commentary: the comment above the card's message quotes
-     the old wording to say why it went, and a naive search finds that. */
+     BOTH retired wordings to say why each went, and a naive search finds
+     them. */
   const rvCopy = rvSrc.replace(/\/\*[\s\S]*?\*\//g, '');
   ok(!/publishing starts now|publishing starts the moment you approve/.test(rvCopy),
-    'nothing the maintainer READS claims a doorbell this installation has not deployed');
-  for (const claim of ['on your own jobs page straight away', 'at the next build']) {
-    ok(rvSrc.indexOf(claim) >= 0, `the card says what is true instead: "${claim}"`);
+    'the card never claims an instant nothing measures — the promise is a time');
+  ok(!/at the next build/.test(rvCopy),
+    'and never the retired under-promise, which read as the doorbell being dead');
+  for (const claim of ['on your own jobs page straight away',
+    'within a couple of minutes']) {
+    ok(rvCopy.indexOf(claim) >= 0, `the card says what is true instead: "${claim}"`);
   }
+  /* BOTH decision paths carry it — approve-one and Approve-all each end on
+     their own message, and a cadence corrected on one alone would have the
+     panel disagreeing with itself. */
+  eq((rvCopy.match(/within a couple of minutes/g) || []).length, 2,
+    'both the single approval and Approve-all promise the same cadence');
 
   const adminPage = readFileSync(path.join(HERE, '..', 'admin-area.html'), 'utf8');
   ok(/<script defer src="assets\/oa-fresh\.js">/.test(adminPage),
@@ -9870,6 +9885,78 @@ async function testReaderGate() {
     'gate: …and with no href to offer it simply opens the card here');
   GATE.__setForTest(null);
 
+  /* ---- ONE PENDING ID, SEVERAL LISTS ------------------------------------
+
+     `pending` is one variable in one module, and the one-pager mounts TWO
+     gated lists that both watch the same auth state. Consuming it
+     unconditionally meant whichever list was notified FIRST swallowed an id
+     belonging to the other — press a candidate card signed out, sign in, and
+     the profile you pressed stayed shut. Measured in a real browser by
+     page-test.mjs; this pins the rule itself.
+
+     Driven against a fresh instance with a `window` in place, since the
+     module captures its global once at load and Node has none. The cache
+     entry is dropped on both sides so no other check inherits either the
+     instance or the global. */
+  {
+    const gatePath = require.resolve(path.join(HERE, '..', 'assets', 'oa-gate.js'));
+    delete require.cache[gatePath];
+    const hadWindow = 'window' in globalThis;
+    const listeners = [];
+    globalThis.window = {
+      OAAccounts: {
+        resolved: () => true,
+        user: () => null,
+        hint: () => 'out',
+        failed: () => false,
+        whenSignedIn: () => {},
+        onChange: (fn) => listeners.push(fn),
+      },
+    };
+    try {
+      const G2 = require(gatePath);
+      // a list that owns nothing, and one that owns the pressed row
+      const opened = [];
+      const mkList = (owns) => ({
+        rerendered: 0,
+        rerender() { this.rerendered += 1; },
+        open(id) {
+          if (!owns.includes(id)) return false;
+          opened.push(id); return true;
+        },
+      });
+      const teaser = mkList(['job-1']);          // notified FIRST, owns other rows
+      const cands = mkList(['cand-1']);          // owns the row that was pressed
+      G2.watch(teaser);
+      G2.watch(cands);
+      eq(listeners.length, 2, 'gate: both lists on a page watch the auth state');
+
+      // the reader presses the CANDIDATE card, then signs in
+      G2.cardOpen({})({ id: 'cand-1' }).run({ id: 'cand-1' });
+      listeners.forEach((fn) => fn({ uid: 'u1' }));
+      eq(opened, ['cand-1'],
+        'gate: the pending card is opened by the list that OWNS it, not the one notified first');
+      eq([teaser.rerendered, cands.rerendered], [1, 1],
+        'gate: …while both lists still re-render, which is what the watch is for');
+
+      // …and it is spent: a second sign-in event opens nothing again
+      opened.length = 0;
+      listeners.forEach((fn) => fn({ uid: 'u1' }));
+      eq(opened, [], 'gate: …and the id is spent once it has been claimed');
+
+      /* Signing OUT drops it: an id pressed in one session must never open a
+         card for whoever signs in next on the same machine. */
+      G2.cardOpen({})({ id: 'cand-1' }).run({ id: 'cand-1' });
+      listeners.forEach((fn) => fn(null));
+      opened.length = 0;
+      listeners.forEach((fn) => fn({ uid: 'u2' }));
+      eq(opened, [], 'gate: a sign-out drops the pending card rather than holding it for the next reader');
+    } finally {
+      if (!hadWindow) delete globalThis.window;
+      delete require.cache[gatePath];
+    }
+  }
+
   /* ---- the ENGINE ------------------------------------------------------- */
 
   const engine = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');
@@ -9890,6 +9977,19 @@ async function testReaderGate() {
     'gate: …and it returns before the details table is built at all');
   ok(/'aria-expanded': gate \? null/.test(engine) && /'aria-controls': gate \? null/.test(engine),
     'gate: a head that no longer discloses anything stops claiming to');
+
+  /* `open(id)` ANSWERS whether it opened, and only for a row this list has —
+     the other half of the claim rule above. Without the membership test a
+     list would report success for an id it does not carry, which is exactly
+     how the teaser swallowed the candidates' pending card. */
+  const openFn = engine.slice(engine.indexOf('      open: function (id) {'),
+    engine.indexOf('      rows: function ()'));
+  ok(openFn.length > 200 && openFn.length < 1200,
+    'gate: the engine\'s open() is where this expects it');
+  ok(/return false/.test(openFn) && /return true/.test(openFn),
+    'gate: open() says whether it opened the card');
+  ok(/rows\[i\]/.test(openFn),
+    'gate: …and only ever for a row this list actually carries');
 
   /* ---- BOTH stylesheets ------------------------------------------------- */
 
@@ -9951,6 +10051,33 @@ async function testReaderGate() {
     'gate: the teaser opens a posting on the page OAJobNav says carries it');
   ok(!/cardOpen[\s\S]{0,400}?full:/.test(jobs) && !/cardOpen[\s\S]{0,400}?full:/.test(past),
     'gate: the full lists open a posting where it stands — they ARE the full list');
+
+  /* ---- NOTHING MERELY HIDDEN COUNTS AS WITHHELD -------------------------
+
+     alerts.html's example e-mail carries REAL postings — a university, its
+     department, the entry level, the country and both apply-by dates. The
+     whole app is `hidden` when nobody is signed in, but the preview was built
+     anyway (applyNewsDecisions re-renders it whenever the change-log
+     decisions land, which is every page load), so all of it sat in the
+     document of a signed-out reader. Hidden is not absent: it is the same
+     picture-of-a-lock the cards refuse to draw. */
+  const alertsJs = await readFile(path.join(HERE, '..', 'assets', 'oa-alerts.js'), 'utf8');
+  const alertsHtml = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  const preview = alertsJs.slice(alertsJs.indexOf('function renderPreview()'),
+    alertsJs.indexOf('M.hasIntent(c)'));
+  ok(preview.length > 200 && preview.length < 2500,
+    'gate: the alerts preview is where this expects it');
+  ok(/OAGate\.locked\(\)/.test(preview) && /return;/.test(preview),
+    'gate: …and it draws nothing at all while the reader is not signed in');
+  ok(alertsHtml.includes('<script defer src="assets/oa-gate.js"></script>'),
+    'gate: alerts.html loads the module it asks');
+  ok(alertsHtml.indexOf('assets/oa-accounts.js') < alertsHtml.indexOf('assets/oa-gate.js'),
+    'gate: …after the accounts module the gate itself asks');
+  /* The gate is the ONE definition; a second reading of the auth state here
+     would be the drift every shared module in this repository exists to
+     prevent. */
+  ok(!/hint\(\)\s*===\s*'in'/.test(alertsJs),
+    'gate: the alerts page keeps no private copy of "is this reader signed in"');
 
   /* ---- ONE definition of "is this reader signed in" --------------------- */
 
@@ -10628,6 +10755,79 @@ async function testAnalytics() {
   ok(/C\.duration\(/.test(page),
     'the page says its times through that one formatter rather than printing ' +
     'raw seconds — the defect the owner reported');
+
+  /* --- the axis cannot lie, and the marks are never stretched ------------ */
+
+  const charts = await readFile(path.join(HERE, '..', 'assets', 'oa-charts.js'), 'utf8');
+  const cssText = await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8');
+  ok(!/preserveAspectRatio: 'none'/.test(charts.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'no chart declares preserveAspectRatio none any more — that one attribute ' +
+    'scaled a fixed 900-unit drawing NON-UNIFORMLY into whatever box it landed ' +
+    'in (measured: scaleX 0.28 at a 320px viewport against scaleY 1.0), which ' +
+    'is the stretch the owner reported');
+  ok(/function plotWidth\(/.test(charts) && /plotWidth\(wrap\)/.test(charts),
+    'the charts are DRAWN at the width they are shown at instead — one user ' +
+    'unit is one CSS pixel');
+  ok(/addEventListener\('resize'/.test(page) && /drawnAt/.test(page),
+    'and the page redraws when the width changes, debounced, through the one ' +
+    'draw() everything already goes through — no observer per chart to leak');
+
+  eq(CH.compact(999999), '1M',
+    'compact() rounds at the scale it displays — 999,999 used to fall through ' +
+    'the megabyte gate and print "1000.0K"');
+  eq(CH.compact(9990), '10K', '…and a decimal that rounds away is dropped, not printed as ".0"');
+  eq(CH.compact(12914), '12.9K', '…while a decimal that means something is kept');
+  ok(/function tickVal\(/.test(charts) && /tickVal\(\(top \/ 4\)/.test(charts) &&
+     /tickVal\(\(top \/ 3\)/.test(charts),
+    'both axes settle each tick VALUE first and draw the gridline AT it — a ' +
+    'top of 2.5 used to draw lines at 0.83 and 1.67 labelled "1" and "2", and ' +
+    'a top of 1 read 0, 0, 1, 1');
+  ok(!/all\.reduce\(\(n, i\) => n \+ \(Number\(i\.value\) \|\| 0\), 0\)/.test(
+    charts.slice(charts.indexOf('function bars('), charts.indexOf('function share('))),
+    'bars() no longer invents a total by summing the rows it was handed — a ' +
+    'share is offered only against a stated whole, so the most-visited-pages ' +
+    'leader is never reported as a share of the 25 rows that fitted');
+  ok(/Math\.max\(1\.5,/.test(charts) === false,
+    'and the 1.5% bar-length floor is gone — a small row was drawn up to ' +
+    'fifteen times its true length; visibility is a 2px CSS min-width now');
+  ok(/min-width: 2px/.test(cssText), '…which the stylesheet carries');
+  ok(/function unitFor\(/.test(charts),
+    'a unit agrees with its number — "1 visit", never "1 visits"');
+  eq(A.rollingMean([1, null, 3, 4], 2), [null, null, null, 3.5],
+    'a rolling window with a hole in it has no mean — the page hands the ' +
+    'daily chart calendar-continuous values with null where the record has a ' +
+    'gap, and an average over five known days and two unknowns is not a ' +
+    '7-day average');
+
+  /* --- the numbers mean what their labels say ---------------------------- */
+
+  ok(!/id: 'sessions'/.test(page),
+    'the daily chart does not offer a "Visits" metric: the site\'s own record ' +
+    'files one document per page opened, so for every day it owns the session ' +
+    'count IS the pageview count, and a Visits line would be the Pageviews ' +
+    'line wearing a wrong label');
+  ok(/Time on a page/.test(page) && /eng\.source === 'usage'/.test(page),
+    'the engagement tile says what its number is a length OF: the first-party ' +
+    'record measures time on a PAGE (its pages-per-visit is identically 1 by ' +
+    'construction), so only a source that can really measure a visit gets the ' +
+    '"Typical visit" framing and the depth');
+  ok(/counted per day/.test(page),
+    'and the headline Visitors tile says it is counted per day — the served ' +
+    'file has no cross-day identity, so a reader returning on ten days counts ' +
+    'ten times and a bare "Visitors" would claim a distinct count nothing ' +
+    'here can compute');
+  ok(/withGaps/.test(page) && /dayShift/.test(page),
+    'the ranges clip by DATE and the daily line breaks over a calendar gap ' +
+    'instead of running straight through a collection outage as if it were ' +
+    'one ordinary day');
+  ok(/total: pagesTotal/.test(page) && /win\.views/.test(page),
+    'the pages figure passes the window\'s WHOLE pageview count as the share ' +
+    'denominator, from the file, and offers no share without it');
+  ok(/Everything else/.test(charts),
+    'a share bar\'s unlisted tail is a NAMED muted part, never an unexplained ' +
+    'blank stretch of track — and never silently renormalised away');
+  ok(/--oa-cat-rest/.test(cssText),
+    '…painted from its own token, defined in both themes like the six real ones');
   /* READ WITH THE COMMENTS STRIPPED. The page still records WHAT it used to
      print and why that was wrong, and a guard that could not tell the
      explanation from the thing would have to be satisfied by deleting the
@@ -10648,10 +10848,24 @@ async function testAnalytics() {
   eq(drawn.slice().sort(), A.BREAKDOWN_IDS.slice().sort(),
     'every dimension the model may carry is drawn by the page, and every ' +
     'dimension the page draws is one the model may carry');
-  ok(/renderProvenance/.test(page) && /oa-an-missing/.test(page),
-    'and the ones no source has answered for are NAMED at the foot rather than ' +
-    'drawn as an empty axis — a dashboard that shows only what it happens to ' +
-    'have is the failure this page is a rebuild of');
+  /* THE "WHERE THESE FIGURES COME FROM" SECTION IS GONE, BY OWNER DECISION
+     (2026-08-30): how the site is measured is not the readers' business. Read
+     with the comments stripped, because the page deliberately still RECORDS
+     what was removed and why — the guard must never be satisfiable by
+     deleting the explanation. What that section also did is not lost: a
+     figure with no source is still simply not drawn, which the second pin
+     holds. */
+  const pageLive = page.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(!/Where these figures come from/.test(pageLive) && !/renderProvenance/.test(pageLive),
+    'the provenance section is removed — owner, 2026-08-30 — and only the ' +
+    'comment recording the removal still names it');
+  ok(/Where these figures come from/.test(page),
+    '…while the page still records WHAT was removed and why, so the check ' +
+    'above cannot be satisfied by deleting the explanation');
+  ok(/if (!def || !rec || !rec.items || !rec.items.length) return;/.test(page) ||
+     /!rec\.items\.length\) return;/.test(page),
+    'and a dimension with no record still draws NOTHING — an empty axis is ' +
+    'the shape of the defect this page is a rebuild of');
 
   /* --- each dimension is asked of the source that can answer it ---------- */
 

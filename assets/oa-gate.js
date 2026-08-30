@@ -149,6 +149,16 @@
    * The gate is painted from the hint before the session restores, so the
    * list HAS to be able to change shape late — which is exactly what
    * `rerender()` was added to the engine for.
+   *
+   * THE PENDING ID IS CLAIMED, NOT HANDED OUT. `pending` is one variable in
+   * one module and a page may carry SEVERAL gated lists — the one-pager
+   * mounts two, the jobs teaser and the candidates, and both watch the same
+   * auth state. Consuming it unconditionally meant whichever list was
+   * notified FIRST swallowed an id belonging to the other: press a candidate
+   * card signed out, sign in, and the profile you pressed stayed shut while
+   * the teaser quietly marked a row it does not have. So the list has to say
+   * it really opened the card before the id is spent, and only the list that
+   * owns the row can.
    */
   function watch(list) {
     if (!list || !list.rerender) return;
@@ -156,11 +166,10 @@
     if (!A || !A.onChange) return;
     A.onChange(function (user) {
       list.rerender();
-      if (user && pending && list.open) {
-        var id = pending;
-        pending = '';
-        list.open(id);
-      }
+      /* Signing OUT drops it: an id pressed in one session must not open a
+         card for whoever signs in next on the same machine. */
+      if (!user) { pending = ''; return; }
+      if (pending && list.open && list.open(pending)) pending = '';
     });
   }
 

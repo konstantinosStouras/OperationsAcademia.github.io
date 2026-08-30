@@ -961,32 +961,26 @@ Approving writes Firestore; the BUILD turns that into a row in
 queue and not on the site — which reads exactly like an approval that did not
 save.
 
-**The doorbell that was supposed to close that gap had never rung — and it
-rings now.** When this was written (2026-08-26) `publishOnReview` and
-`publishOnChange` were in `_functions/index.js` and neither was deployed: the
-`oa-jobreview-decided` dispatch had **zero runs, ever**, and all 251
-`oa-jobs-changed` dispatches were sent by `github-actions[bot]` — the sheet
-workflow's own final curl — never by the function. So an approval waited for
-the build's 20-minute schedule while the card said "publishing starts now".
-That is this file's own recorded trap: *a doorbell that was never deployed looks
-exactly like a site that is simply slow*. **They were deployed on 2026-08-27**
-and have fired on every decision since; a re-deploy on 2026-08-30 reported all
-three `Skipped (No changes detected)`, which is what "already live" looks like
-from the CLI.
+**The doorbell that was supposed to close that gap had never rung** when this
+shipped (2026-08-26): `publishOnReview` and `publishOnChange` were in
+`_functions/index.js` and neither was deployed — the `oa-jobreview-decided`
+dispatch had zero runs, ever, and every `oa-jobs-changed` dispatch to that date
+was `github-actions[bot]`, the sheet workflow's own final curl, never the
+function. So an approval waited for the build's 20-minute schedule while the
+card said "publishing starts now" — this file's own recorded trap: *a doorbell
+that was never deployed looks exactly like a site that is simply slow*.
 
-**READ THE ACTOR, NOT THE COUNT** — that is the check, and its absence is why
-the paragraph above could stand here wrong for three days.
-`oa-jobreview-decided` is sent by `_functions/index.js` and by NOTHING else in
-this repository (no workflow, no curl), so its **29 runs** settle
-`publishOnReview` on their own. `oa-jobs-changed` has three senders, so its
-total settles nothing: the two verify workflows curl it with `GITHUB_TOKEN` and
-appear as `github-actions[bot]`, while the function carries a PAT and appears as
-`konstantinosStouras` — **15** of those, the first at 09:21 on the 27th. One
-`firebase deploy --only functions --project operations-academia` is still what
-puts a function live and nothing in CI performs it, **which is why a claim about
-this can go stale in either direction** — the sentence that reads as a warning
-today reads as a wild goose chase tomorrow, and both cost the same reader the
-same afternoon.
+**IT RINGS NOW.** The owner ran the `firebase deploy --only functions` this
+paragraph asked for on 2026-08-27, and the claim above was checked against the
+Actions history rather than left to stand (2026-08-30): `oa-jobreview-decided`
+— which nothing but `publishOnReview` can send; no workflow curls it — first
+fired at 09:19 that morning and has fired on every decision since, 29 runs in
+its first two days, with the build chained on each. A redeploy on 2026-08-29
+answered "Skipped (No changes detected)" for all three, which is what an
+already-deployed, unchanged function answers. So an approval publishes in
+about two minutes, and the ECHO below is not made redundant by it: it still
+beats the two-minute chain for the person who pressed the button, and it is
+the fallback the day the functions are ever down.
 
 So the approval is **echoed**, the way a saved EDIT already is
 (`assets/oa-fresh.js`): the published row is left in that browser's
@@ -1011,19 +1005,15 @@ browser: PER BROWSER (a second context with the same served file shows nothing),
 it stands down against the build (a build that STARTED after the approval has
 the last word), and it echoes only what the build would publish.
 
-**The echo stays, and the doorbell makes it a shorter bridge rather than a
-redundant one.** It now spans the minute or two the build takes instead of
-twenty, and it remains the only half of this that is true unconditionally: a
-deployment is a hand step outside this repository, and one has already lapsed
-here — `recordVisit` was missed entirely by the first 2026-08-30 deploy, which
-ran from a clone that predated it and reported success anyway, and exists only
-because a second deploy the same day ran from a pulled checkout (see "ALL FOUR
-FUNCTIONS ARE LIVE").
-
-**And the copy now says what is true of this installation** — "Approved — and on
-your own jobs page straight away. Everyone else sees it at the next build." —
-with `selftest.mjs` pinning that nothing the maintainer READS claims a doorbell
-nobody has deployed.
+**And the copy says what is true of this installation, which has now meant
+correcting it twice** — it read "publishing starts now" over an undeployed
+doorbell, then "at the next build" once the echo shipped, which the 2026-08-27
+deploy turned into an UNDER-promise that read as the doorbell still being dead.
+It is "Approved — and on your own jobs page straight away. Everyone else sees
+it within a couple of minutes." now, on both decision paths, with `selftest.mjs`
+pinning the current cadence and banning both retired wordings — the "copy that
+promises a time changes with the cadence" rule, enforced where it was twice
+broken.
 
 **A crawled posting that mentions "business" is flagged under Business School,
 and its card NAMES the school** (owner, 2026-08-23). `typeFromNames` used to
@@ -1876,9 +1866,10 @@ Two causes, both removed:
   token). `repository_dispatch: [oa-jobs-changed]` STAYS on the build — that
   is the Cloud Function's own doorbell for a posting made or edited on the
   site, a different producer. It READ as dead code while the functions were
-  undeployed and would have broken the instant path silently if it had been
-  tidied away; they have fired since 2026-08-27, so it is load-bearing rather
-  than merely prudent now. The selftest pins it either way.
+  undeployed — they are live since 2026-08-27, so it is the live instant path
+  now — and the selftest pin stays for the same reason it was written: nothing
+  in this repository can see whether the functions are up, so the trigger is
+  kept whether or not they are.
 * **the stale checkout.** `actions/checkout` defaults to `github.sha`, and on
   a `workflow_run` event that is the head of the run that TRIGGERED it — which
   the producer has already moved past by committing before it finished. So the
@@ -2022,26 +2013,24 @@ the commonest outcome of a real race: the writer that beat us had already
 published everything we held.
 
 **The functions are deployed BY HAND** (`firebase deploy --only functions
---project operations-academia`, from the repository root), and a doorbell that
-was never deployed looks exactly like a site that is simply slow — there is no
-error anywhere, everything still publishes, just on the schedule. That is worth
+--project operations-academia`, from the repository root — done, since
+2026-08-27; `recordVisit` since 2026-08-30), and a doorbell that is not
+deployed looks exactly like a site that is simply slow — there is no error
+anywhere, everything still publishes, just on the schedule. That is worth
 checking first whenever "it takes ages to appear" comes up:
 `firebase functions:log` should show `build dispatched` / `sheet read
-dispatched`, or filter this repository's Actions by `event:repository_dispatch`
-and read the ACTOR — the function carries a PAT and shows as a person, the
-workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
-The three doorbells have been live since 2026-08-27. The setup page's paths
-were stale after the promotion (it said `cd v2`, where there are no functions
-any more); they are fixed.
-
-**A DEPLOY FROM A STALE CLONE DEPLOYS THE STALE SET AND REPORTS SUCCESS.** The
-2026-08-30 run printed `Deploy complete!` over three functions, and this
-repository has FOUR: `recordVisit` was not skipped, not created, not mentioned
-— it was not in the working copy the command ran from. So "I deployed the
-functions" and "every function on master is live" are different sentences, and
-nothing in that output distinguishes them unless you count the lines against
-`_functions/index.js`. **Pull first, deploy, then read the list back** — the
-second run that day did exactly that and created it.
+dispatched`, and the `oa-jobreview-decided` runs in the Actions history are
+the proof only the function can produce — filter by
+`event:repository_dispatch` and read the ACTOR: the function carries a PAT
+and shows as a person, where the verify workflows' own curls carry
+`GITHUB_TOKEN` and show as `github-actions[bot]`. The setup page's paths were
+stale after the promotion (it said `cd v2`, where there are no functions any
+more); they are fixed. **And a deploy from a STALE CHECKOUT is the same trap
+one layer up**: the 2026-08-29 deploy printed "Deploy complete!" while
+shipping nothing — the checkout predated the newest function, so the three
+existing ones skipped as unchanged and `recordVisit` was not in the upload at
+all; the 2026-08-30 deploy that followed a pull created it. Pull before
+deploying, and read the per-function lines, not the last one.
 
 **The Node.js 20 deadline is answered in the repository and closed by a
 deploy.** Google decommissions the Node 20 runtime on **2026-10-30**, after
@@ -2772,6 +2761,58 @@ strip says *"Sign-in is unavailable at the moment"* and the head is disabled,
 rather than offering a control that would do nothing when pressed. That is the
 wording `oa-jobexport.js` already gives its disabled button.
 
+### The pending card is CLAIMED, not handed out
+
+`pending` — the id of the card whose lock was pressed, so signing in lands the
+reader on the posting they pressed — is one variable in one module, and the
+one-pager mounts TWO gated lists that both watch the same auth state. Consumed
+unconditionally it went to whichever list `OAAccounts.onChange` notified
+FIRST: press a candidate card signed out, sign in, and **the profile you
+pressed stayed shut** while the jobs teaser above quietly marked a row it does
+not have. On `jobs.html`, which has one gated list, the same code worked
+perfectly — which is why it shipped.
+
+So `list.open(id)` **answers whether it opened**, and only for a row this list
+carries; `watch` spends the id only when a list claims it. Ownership is
+membership in that list's own `rows`, not its current view — a row filtered
+out is still this list's, and opening it means it is open when the filter is
+cleared. A sign-OUT drops the id: one pressed in one session must not open a
+card for whoever signs in next on the same machine.
+
+Pinned twice, because the failure is an ORDERING between two listeners and a
+single-list page cannot show it: a unit check in `selftest.mjs` drives two
+mock lists through a fresh module instance (with a `window` in place, since
+the module captures its global at load and Node has none), and
+`page-test.mjs` reproduces the reader — signed out on the one-pager, press a
+candidate card, sign in, the card opens.
+
+### Nothing merely HIDDEN counts as withheld
+
+The gate's own rule — *the values are absent, not blurred* — turned up a
+second place that broke it, older than the gate: **`alerts.html` built its
+example e-mail for a signed-out reader.** The whole app is `hidden` when
+nobody is signed in, but `applyNewsDecisions` re-renders the preview whenever
+the change-log decisions land, which is every page load — so a university, its
+department, the entry level, the country and both apply-by dates sat in the
+document of a reader who could not see them. Hidden is not absent, and it is
+the same picture-of-a-lock the cards refuse to draw.
+
+`renderPreview` now returns empty while `OAGate.locked()`, asked of the one
+definition so the page and the cards cannot disagree about who is reading.
+Nothing is lost by waiting: signing in runs `resetForm()` → `syncFormState()`
+→ `renderPreview()`, and the preview is byte-for-byte what it was.
+
+**The check that states the whole promise** is in `page-test.mjs`: for every
+locked card it takes what that posting actually SAYS, from the served file,
+and asserts none of it is anywhere in the card's markup. What is ALLOWED is
+measured from the head itself — anything the head already displays is not a
+leak — rather than from a list of field names, which would rot: `school` and
+`unit` are the halves the subtitle is joined from, and `type` ("Business
+School") is a substring of that subtitle by coincidence at CUHK and would not
+be at the next university. It is the check a refactor could not slip past: a
+hidden body, an `aria-label`, a `data-` attribute or a `title` carrying the
+comments all pass every structural check and fail this one.
+
 ### When a browser check needs a detail on screen, SIGN THE READER IN
 
 The gate turned several existing checks into contradictions — a signed-out
@@ -2937,19 +2978,21 @@ the two: adding a decade of UA counts to a month of resolver counts gives a
 ranking that means nothing and cannot be explained on the page.
 
 **ALL FOUR FUNCTIONS ARE LIVE — `recordVisit` LAST, on 2026-08-30, and the
-half-day it lagged is the lesson.** The three instant-publish doorbells went
-live on 2026-08-27 and fire on every decision; this fourth function shipped
-after them and was MISSED by the first 2026-08-30 deploy, which ran from a
-clone that predated it — the CLI deployed the three it could see, printed
+day it lagged is the lesson.** The three instant-publish doorbells went live
+on 2026-08-27 and fire on every decision; this fourth function shipped after
+them and was MISSED by the 2026-08-29 deploy, which ran from a checkout that
+predated it — the CLI deployed the three it could see, printed
 `Deploy complete!`, and never mentioned a fourth, so nothing anywhere said a
-function was missing. A second deploy the same day, from a pulled checkout,
-created it (`Successful create operation`, printing the URL that matches
-`ENDPOINT` in `assets/oa-visit.js`). While the collection is still young the
-builder logs `visits: universityVisits is empty` and the page draws no figure
-rather than an empty one, which is the correct reading of a chart that has
-just been switched on — not a fault. **A doorbell nobody deployed looks
-exactly like a site that is simply slow**, and the extra turn here is that a
-deploy which SUCCEEDED is what left it undeployed for half a day.
+function was missing. The 2026-08-30 deploy that followed a pull created it
+(`Successful create operation`, printing the URL that matches `ENDPOINT` in
+`assets/oa-visit.js`; a later deploy may print the service's own
+`run.app` address instead — same function, and the classic
+`cloudfunctions.net` form the page pings stays valid). While the collection
+is still young the builder logs `visits: universityVisits is empty` and the
+page draws no figure rather than an empty one, which is the correct reading
+of a chart that has just been switched on — not a fault. **A doorbell nobody
+deployed looks exactly like a site that is simply slow**, and the extra turn
+here is that a deploy which SUCCEEDED is what left it undeployed.
 
 **`build-netmap.mjs` is in `BUILDERS`, after `build-directory.mjs`**, because
 it is derived from the directory that builder writes — so a university that
@@ -3189,11 +3232,18 @@ fetch — seven days, on every run after the first — while the tiles beside it
 described the whole record, and nothing on screen said the two meant different
 spans. It carries `pagesWindow` now and the figure prints it.
 
-**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN.** It is named at the foot
-of the page under "Not on this page yet", and appears on its own once the
-figures exist. A heading over an empty axis is precisely the shape of the
-defect this whole page is a rebuild of, and the five GA4 figures are empty
-today because the tag was switched on the same morning.
+**A FIGURE NO SOURCE HAS ANSWERED FOR IS NOT DRAWN, and its absence is
+SILENT.** It appears on its own once the figures exist. A heading over an
+empty axis is precisely the shape of the defect this whole page is a rebuild
+of. The missing figures used to be NAMED at the foot, in a "Where these
+figures come from" note that also described the sources, the cookieless
+trade-off and the admin-area exclusion — the owner had that whole section
+removed (2026-08-30: "we shouldn't tell that private information to the
+users"), and the page's own comment records the removal so the guard against
+it cannot be satisfied by deleting the explanation. What the note carried for
+READERS is not lost: the per-figure "Measured by … · span" lines stay, being
+about the numbers rather than the plumbing, and `_SETUP-ANALYTICS.md` holds
+the plumbing.
 
 **The interactivity, and what each piece is for.** Every chart already had a
 tooltip except the one nobody could interrogate at all — the bar lists — so a
@@ -3251,6 +3301,64 @@ switch re-plotting the chart, the legend putting a line away and bringing it
 back, and — with no dimensions at all — the five figures ABSENT and named as
 missing instead.
 
+### The charts fit the screen they are read on, and the numbers were audited
+
+Owner, 2026-08-30: *"check the numbers of any figures and make sure they are
+optimized for mobiles and small screens. they appear somewhat stretched right
+now."* Both halves were real.
+
+**The stretch was one attribute.** Every SVG chart drew into a fixed
+`viewBox="0 0 900 H"` with `preserveAspectRatio: 'none'`, so the drawing was
+scaled NON-UNIFORMLY into whatever box it landed in — measured scaleX 0.28 at
+a 320px viewport, 0.36 at 390px, 1.13 at 1180px, against scaleY always 1.
+Every glyph, marker circle, corner radius and vertical stroke was distorted by
+that ratio at every width; no width was ever right. The fix is to **draw at
+the size the chart is shown at** (`plotWidth`/`plotHeight` in oa-charts.js:
+one user unit = one CSS pixel, height following the width down on a phone),
+with ONE debounced resize listener in oa-analytics.js redrawing through the
+same `draw()` everything else uses — no observer per chart to leak, and a
+resize that changed only the height (a phone's URL bar, on every scroll)
+redraws nothing. What a narrow plot gives up it gives up honestly: axis
+labels THIN to every Nth (the 24-hour clock reads 00 03 06 … at 390px) while
+every bucket keeps its bar, tooltip, focus stop and table row; and a tap is
+the phone's hover — pointerdown shows the same tooltip everywhere, without
+preventDefault so a swipe still scrolls.
+
+**The numbers audit found twelve defects; every one reproduced and every one
+is fixed.** The worth-remembering ones: `compact()` printed "1000.0K" for
+999,999 and "10.0K" for 9,990; both axes drew gridlines at exact fractions of
+the top and rounded only the LABEL, so a top of 2.5 read 0 1 2 3 over lines
+at 0.83 and 1.67 (`tickVal` now settles each tick's VALUE first and draws the
+line AT it); the weekday/season bars carry one-decimal means but printed
+integers, so two visibly different bars could carry the same number; `bars()`
+invented a share denominator by summing the rows it displayed, so the
+most-visited-pages leader was a "share of the whole" measured against 25 rows
+(a share now needs a stated whole — `pagesWindow.views`, the window's entire
+pageview count, from the builder); a share bar's unlisted tail was an
+unexplained blank (now a muted, named "Everything else" part); a 1.5%
+bar-length floor drew small rows up to 15x their true length (a 2px CSS
+min-width now); the ranges sliced the last N ROWS rather than N calendar
+days, and the daily line ran index-spaced straight through any gap (nulls now
+break the line, and `rollingMean` refuses a window with a hole in it).
+
+**Three were about what a label CLAIMED.** The daily chart offered a "Visits"
+metric that, for every day the first-party record owns, is the Pageviews
+series under a wrong name — the record files one document per page opened, so
+its session count IS its pageview count; the metric is gone (the file keeps
+all three day fields — the format is not the interface). The "Typical visit"
+tile claimed pages-per-visit from the same record, where it is identically 1
+by construction — it reads "Time on a page" for the usage source, and only a
+source that can measure a visit (GA4) gets the visit framing. And the
+headline Visitors tile now says "counted per day": the file has no cross-day
+identity, so the total is per-day uniques summed, and a reader returning on
+ten days counts ten times.
+
+Tests: the axis/scale/format pins in `testAnalytics`, and in `page-test.mjs`
+the scales measured at 1180 AND 390 (|scale−1| < 0.02 on both axes), zero
+overlapping axis labels on a phone, the legend switches at 42px, a viewport
+change redrawn at the new width, the "Everything else" part drawn, named and
+filling its bar, and the retitled tile.
+
 ### The archive is CONFIRMED GONE, and the spreadsheet says how
 
 Checked 2026-08-29, and the answer is final — **do not send anyone looking
@@ -3272,8 +3380,9 @@ That is precisely why `build-analytics.mjs` carries the opposite rule —
 *an unreachable source changes nothing*, the committed file stands, and the
 days already served are carried forward as a floor. The history source's
 reader stays wired as a documented recovery path rather than being deleted,
-the same reasoning that kept `repository_dispatch: [oa-jobs-changed]` on the
-build through the months when nothing was dispatching it.
+the same reasoning that kept `repository_dispatch: [oa-jobs-changed]` in
+place through the months the functions were undeployed — and that trigger is
+the live instant path now that they are.
 
 ## Mobile standards for tables and lists — MUST consult
 
