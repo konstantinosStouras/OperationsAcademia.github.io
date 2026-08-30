@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generated": "2026-08-29T17:44:02.735Z",
+ "generated": "2026-08-30T07:52:50.388Z",
  "dayFields": [
   "visitors",
   "sessions",
@@ -9,16 +9,407 @@
  "sources": [
   {
    "source": "usage",
-   "days": 13,
+   "days": 14,
+   "from": "",
+   "to": ""
+  },
+  {
+   "source": "ga4",
+   "days": 77,
    "from": "",
    "to": ""
   }
  ],
  "days": {
-  "2026-08-17": [
-   5,
-   27,
+  "2026-06-01": [
+   23,
+   25,
+   61
+  ],
+  "2026-06-02": [
+   26,
+   28,
+   73
+  ],
+  "2026-06-03": [
+   13,
+   15,
+   31
+  ],
+  "2026-06-04": [
+   9,
+   11,
+   21
+  ],
+  "2026-06-05": [
+   13,
+   14,
+   32
+  ],
+  "2026-06-06": [
+   10,
+   10,
+   14
+  ],
+  "2026-06-07": [
+   8,
+   9,
+   25
+  ],
+  "2026-06-08": [
+   22,
+   24,
+   62
+  ],
+  "2026-06-09": [
+   17,
+   21,
+   43
+  ],
+  "2026-06-10": [
+   23,
+   24,
+   58
+  ],
+  "2026-06-11": [
+   22,
+   24,
+   68
+  ],
+  "2026-06-12": [
+   12,
+   13,
+   24
+  ],
+  "2026-06-13": [
+   8,
+   8,
+   19
+  ],
+  "2026-06-14": [
+   22,
+   23,
+   34
+  ],
+  "2026-06-15": [
+   22,
+   22,
+   38
+  ],
+  "2026-06-16": [
+   16,
+   16,
+   52
+  ],
+  "2026-06-17": [
+   19,
+   21,
+   36
+  ],
+  "2026-06-18": [
+   11,
+   13,
+   35
+  ],
+  "2026-06-19": [
+   18,
+   18,
+   52
+  ],
+  "2026-06-20": [
+   11,
+   13,
    27
+  ],
+  "2026-06-21": [
+   9,
+   10,
+   23
+  ],
+  "2026-06-22": [
+   16,
+   18,
+   44
+  ],
+  "2026-06-23": [
+   20,
+   26,
+   56
+  ],
+  "2026-06-24": [
+   20,
+   25,
+   48
+  ],
+  "2026-06-25": [
+   20,
+   23,
+   47
+  ],
+  "2026-06-26": [
+   9,
+   9,
+   29
+  ],
+  "2026-06-27": [
+   15,
+   16,
+   36
+  ],
+  "2026-06-28": [
+   12,
+   13,
+   37
+  ],
+  "2026-06-29": [
+   12,
+   15,
+   27
+  ],
+  "2026-06-30": [
+   12,
+   13,
+   26
+  ],
+  "2026-07-01": [
+   16,
+   17,
+   27
+  ],
+  "2026-07-02": [
+   21,
+   28,
+   71
+  ],
+  "2026-07-03": [
+   15,
+   18,
+   32
+  ],
+  "2026-07-04": [
+   13,
+   14,
+   25
+  ],
+  "2026-07-05": [
+   11,
+   13,
+   26
+  ],
+  "2026-07-06": [
+   27,
+   33,
+   55
+  ],
+  "2026-07-07": [
+   22,
+   30,
+   52
+  ],
+  "2026-07-08": [
+   19,
+   23,
+   55
+  ],
+  "2026-07-09": [
+   21,
+   25,
+   42
+  ],
+  "2026-07-10": [
+   11,
+   19,
+   46
+  ],
+  "2026-07-11": [
+   20,
+   24,
+   37
+  ],
+  "2026-07-12": [
+   16,
+   18,
+   35
+  ],
+  "2026-07-13": [
+   23,
+   27,
+   67
+  ],
+  "2026-07-14": [
+   26,
+   31,
+   96
+  ],
+  "2026-07-15": [
+   15,
+   19,
+   47
+  ],
+  "2026-07-16": [
+   23,
+   32,
+   70
+  ],
+  "2026-07-17": [
+   24,
+   29,
+   68
+  ],
+  "2026-07-18": [
+   19,
+   20,
+   78
+  ],
+  "2026-07-19": [
+   16,
+   18,
+   45
+  ],
+  "2026-07-20": [
+   21,
+   21,
+   51
+  ],
+  "2026-07-21": [
+   17,
+   20,
+   47
+  ],
+  "2026-07-22": [
+   17,
+   20,
+   45
+  ],
+  "2026-07-23": [
+   20,
+   25,
+   44
+  ],
+  "2026-07-24": [
+   44,
+   47,
+   67
+  ],
+  "2026-07-25": [
+   23,
+   28,
+   42
+  ],
+  "2026-07-26": [
+   18,
+   18,
+   42
+  ],
+  "2026-07-27": [
+   21,
+   25,
+   47
+  ],
+  "2026-07-28": [
+   28,
+   30,
+   88
+  ],
+  "2026-07-29": [
+   23,
+   25,
+   61
+  ],
+  "2026-07-30": [
+   18,
+   21,
+   46
+  ],
+  "2026-07-31": [
+   23,
+   26,
+   44
+  ],
+  "2026-08-01": [
+   16,
+   19,
+   37
+  ],
+  "2026-08-02": [
+   22,
+   24,
+   65
+  ],
+  "2026-08-03": [
+   28,
+   34,
+   69
+  ],
+  "2026-08-04": [
+   34,
+   38,
+   66
+  ],
+  "2026-08-05": [
+   30,
+   35,
+   84
+  ],
+  "2026-08-06": [
+   18,
+   20,
+   45
+  ],
+  "2026-08-07": [
+   25,
+   28,
+   74
+  ],
+  "2026-08-08": [
+   14,
+   19,
+   44
+  ],
+  "2026-08-09": [
+   22,
+   22,
+   54
+  ],
+  "2026-08-10": [
+   33,
+   39,
+   120
+  ],
+  "2026-08-11": [
+   34,
+   35,
+   93
+  ],
+  "2026-08-12": [
+   30,
+   34,
+   85
+  ],
+  "2026-08-13": [
+   19,
+   19,
+   40
+  ],
+  "2026-08-14": [
+   29,
+   30,
+   47
+  ],
+  "2026-08-15": [
+   23,
+   25,
+   64
+  ],
+  "2026-08-16": [
+   25,
+   37,
+   166
+  ],
+  "2026-08-17": [
+   2,
+   2,
+   2
   ],
   "2026-08-18": [
    40,
@@ -46,65 +437,94 @@
    82
   ],
   "2026-08-23": [
-   28,
-   130,
-   130
+   27,
+   108,
+   108
   ],
   "2026-08-24": [
    59,
-   194,
-   194
+   183,
+   183
   ],
   "2026-08-25": [
    57,
-   214,
-   214
+   185,
+   185
   ],
   "2026-08-26": [
    58,
-   151,
-   151
+   141,
+   141
   ],
   "2026-08-27": [
    55,
-   179,
-   179
+   166,
+   166
   ],
   "2026-08-28": [
    61,
-   162,
-   162
+   159,
+   159
   ],
   "2026-08-29": [
-   32,
-   80,
-   80
+   57,
+   153,
+   153
+  ],
+  "2026-08-30": [
+   17,
+   36,
+   36
   ]
  },
  "pages": [
   {
    "path": "/",
    "title": "",
-   "views": 680,
-   "avgSec": 372
+   "views": 723,
+   "avgSec": 373
   },
   {
    "path": "/jobs.html",
    "title": "",
-   "views": 678,
-   "avgSec": 522
+   "views": 712,
+   "avgSec": 541
+  },
+  {
+   "path": "/candidates.html",
+   "title": "Candidates - OperationsAcademia.org",
+   "views": 546,
+   "avgSec": 0
+  },
+  {
+   "path": "/placements.html",
+   "title": "Confirmed Placements - OperationsAcademia.org",
+   "views": 205,
+   "avgSec": 0
+  },
+  {
+   "path": "/resources-for-candidates.html",
+   "title": "Resources - OperationsAcademia.org",
+   "views": 130,
+   "avgSec": 0
   },
   {
    "path": "/post-a-job.html",
    "title": "",
-   "views": 113,
-   "avgSec": 310
+   "views": 115,
+   "avgSec": 336
   },
   {
    "path": "/universities.html",
    "title": "",
-   "views": 90,
-   "avgSec": 313
+   "views": 94,
+   "avgSec": 324
+  },
+  {
+   "path": "/logoHeader.html",
+   "title": "Jobs - OperationsAcademia.org",
+   "views": 73,
+   "avgSec": 10
   },
   {
    "path": "/my-postings.html",
@@ -115,82 +535,386 @@
   {
    "path": "/account.html",
    "title": "",
-   "views": 48,
-   "avgSec": 125
+   "views": 50,
+   "avgSec": 122
+  },
+  {
+   "path": "/jobsFooterWasClicked.html",
+   "title": "Operations Academia",
+   "views": 42,
+   "avgSec": 7
+  },
+  {
+   "path": "/faqs.html",
+   "title": "FAQs - OperationsAcademia.org",
+   "views": 38,
+   "avgSec": 0
   },
   {
    "path": "/recent-faculty.html",
    "title": "",
-   "views": 34,
-   "avgSec": 516
-  },
-  {
-   "path": "/previous-markets.html",
-   "title": "",
-   "views": 23,
-   "avgSec": 82
-  },
-  {
-   "path": "/post-a-candidate.html",
-   "title": "",
-   "views": 20,
-   "avgSec": 346
-  },
-  {
-   "path": "/terms-and-conditions.html",
-   "title": "",
-   "views": 12,
-   "avgSec": 77
-  },
-  {
-   "path": "/alerts.html",
-   "title": "",
-   "views": 11,
-   "avgSec": 366
-  },
-  {
-   "path": "/whats-new.html",
-   "title": "",
-   "views": 11,
-   "avgSec": 1050
+   "views": 36,
+   "avgSec": 487
   },
   {
    "path": "/analytics.html",
    "title": "",
-   "views": 9,
-   "avgSec": 440
+   "views": 27,
+   "avgSec": 640
   },
   {
-   "path": "/feedback.html",
+   "path": "/previous-markets.html",
    "title": "",
-   "views": 8,
-   "avgSec": 1952
+   "views": 26,
+   "avgSec": 74
   },
   {
-   "path": "/privacy-policy.html",
+   "path": "/post-a-candidate.html",
    "title": "",
-   "views": 5,
-   "avgSec": 730
+   "views": 24,
+   "avgSec": 442
   },
   {
-   "path": "/survey.html",
-   "title": "",
-   "views": 4,
-   "avgSec": 8
+   "path": "/contact.html",
+   "title": "Contact us - OperationsAcademia.org",
+   "views": 19,
+   "avgSec": 0
   },
   {
-   "path": "/survey-faqs.html",
-   "title": "",
-   "views": 3,
-   "avgSec": 1
+   "path": "/Research Summaries of the 2017-2018 Candidates.html",
+   "title": "Resources - OperationsAcademia.org",
+   "views": 16,
+   "avgSec": 7
   },
   {
-   "path": "/messages.html",
+   "path": "/terms-and-conditions.html",
    "title": "",
-   "views": 3,
-   "avgSec": 1213
+   "views": 13,
+   "avgSec": 71
+  },
+  {
+   "path": "/whats-new.html",
+   "title": "",
+   "views": 13,
+   "avgSec": 1186
+  },
+  {
+   "path": "/alerts.html",
+   "title": "",
+   "views": 12,
+   "avgSec": 339
+  },
+  {
+   "path": "/Survey Slides by Kostas and Serguei.html",
+   "title": "Resources - OperationsAcademia.org",
+   "views": 12,
+   "avgSec": 10
+  },
+  {
+   "path": "/candidatesFooterWasClicked.html",
+   "title": "Operations Academia",
+   "views": 12,
+   "avgSec": 6
+  },
+  {
+   "path": "/placementsFooterWasClicked.html",
+   "title": "Operations Academia",
+   "views": 12,
+   "avgSec": 10
+  },
+  {
+   "path": "/JMbook.html",
+   "title": "Resources - OperationsAcademia.org",
+   "views": 10,
+   "avgSec": 13
   }
  ],
+ "pagesWindow": {
+  "source": "usage",
+  "from": "2026-08-17",
+  "to": "2026-08-30",
+  "views": 1930
+ },
+ "breakdowns": {
+  "hours": {
+   "source": "usage",
+   "from": "2026-08-17",
+   "to": "2026-08-30",
+   "metric": "visits",
+   "zone": "UTC",
+   "total": 1930,
+   "items": [
+    {
+     "name": "00",
+     "value": 74
+    },
+    {
+     "name": "01",
+     "value": 86
+    },
+    {
+     "name": "02",
+     "value": 75
+    },
+    {
+     "name": "03",
+     "value": 112
+    },
+    {
+     "name": "04",
+     "value": 75
+    },
+    {
+     "name": "05",
+     "value": 111
+    },
+    {
+     "name": "06",
+     "value": 56
+    },
+    {
+     "name": "07",
+     "value": 88
+    },
+    {
+     "name": "08",
+     "value": 59
+    },
+    {
+     "name": "09",
+     "value": 83
+    },
+    {
+     "name": "10",
+     "value": 94
+    },
+    {
+     "name": "11",
+     "value": 58
+    },
+    {
+     "name": "12",
+     "value": 75
+    },
+    {
+     "name": "13",
+     "value": 66
+    },
+    {
+     "name": "14",
+     "value": 90
+    },
+    {
+     "name": "15",
+     "value": 110
+    },
+    {
+     "name": "16",
+     "value": 94
+    },
+    {
+     "name": "17",
+     "value": 116
+    },
+    {
+     "name": "18",
+     "value": 73
+    },
+    {
+     "name": "19",
+     "value": 110
+    },
+    {
+     "name": "20",
+     "value": 88
+    },
+    {
+     "name": "21",
+     "value": 58
+    },
+    {
+     "name": "22",
+     "value": 31
+    },
+    {
+     "name": "23",
+     "value": 48
+    }
+   ]
+  },
+  "countries": {
+   "source": "ga4",
+   "from": "2026-06-01",
+   "to": "2026-08-30",
+   "metric": "visits",
+   "zone": "",
+   "total": 1795,
+   "items": [
+    {
+     "name": "United States",
+     "value": 989
+    },
+    {
+     "name": "Hong Kong",
+     "value": 116
+    },
+    {
+     "name": "Canada",
+     "value": 106
+    },
+    {
+     "name": "Singapore",
+     "value": 95
+    },
+    {
+     "name": "China",
+     "value": 78
+    },
+    {
+     "name": "India",
+     "value": 77
+    },
+    {
+     "name": "France",
+     "value": 54
+    },
+    {
+     "name": "United Kingdom",
+     "value": 34
+    },
+    {
+     "name": "South Korea",
+     "value": 27
+    },
+    {
+     "name": "Germany",
+     "value": 25
+    },
+    {
+     "name": "Spain",
+     "value": 25
+    },
+    {
+     "name": "Türkiye",
+     "value": 22
+    }
+   ]
+  },
+  "devices": {
+   "source": "ga4",
+   "from": "2026-06-01",
+   "to": "2026-08-30",
+   "metric": "visits",
+   "zone": "",
+   "total": 1797,
+   "items": [
+    {
+     "name": "desktop",
+     "value": 1504
+    },
+    {
+     "name": "mobile",
+     "value": 292
+    },
+    {
+     "name": "tablet",
+     "value": 1
+    }
+   ]
+  },
+  "channels": {
+   "source": "ga4",
+   "from": "2026-06-01",
+   "to": "2026-08-30",
+   "metric": "visits",
+   "zone": "",
+   "total": 1793,
+   "items": [
+    {
+     "name": "Direct",
+     "value": 1132
+    },
+    {
+     "name": "Organic Search",
+     "value": 474
+    },
+    {
+     "name": "Referral",
+     "value": 117
+    },
+    {
+     "name": "AI Assistant",
+     "value": 55
+    },
+    {
+     "name": "Organic Social",
+     "value": 13
+    },
+    {
+     "name": "Unassigned",
+     "value": 2
+    }
+   ]
+  },
+  "referrers": {
+   "source": "ga4",
+   "from": "2026-06-01",
+   "to": "2026-08-30",
+   "metric": "visits",
+   "zone": "",
+   "total": 1793,
+   "items": [
+    {
+     "name": "Typed or bookmarked",
+     "value": 1132
+    },
+    {
+     "name": "google",
+     "value": 443
+    },
+    {
+     "name": "view-awesome-table.com",
+     "value": 50
+    },
+    {
+     "name": "gemini.google.com",
+     "value": 41
+    },
+    {
+     "name": "bing",
+     "value": 28
+    },
+    {
+     "name": "chatgpt.com",
+     "value": 15
+    },
+    {
+     "name": "en.wikipedia.org",
+     "value": 14
+    },
+    {
+     "name": "github.com",
+     "value": 14
+    },
+    {
+     "name": "francesxwang.substack.com",
+     "value": 10
+    },
+    {
+     "name": "weixin110.qq.com",
+     "value": 9
+    }
+   ]
+  }
+ },
+ "engagement": {
+  "source": "usage",
+  "from": "2026-08-17",
+  "to": "2026-08-30",
+  "sessions": 1930,
+  "avgSessionSec": 432,
+  "viewsPerSession": 1
+ },
  "universities": {
   "frozen": true,
   "from": "",
@@ -199,15 +923,15 @@
   "recent": []
  },
  "totals": {
-  "visitors": 594,
-  "sessions": 1934,
-  "pageviews": 1934,
-  "days": 13,
+  "visitors": 2135,
+  "sessions": 3652,
+  "pageviews": 5859,
+  "days": 91,
   "universities": 0
  },
  "range": {
-  "from": "2026-08-17",
-  "to": "2026-08-29"
+  "from": "2026-06-01",
+  "to": "2026-08-30"
  },
  "recentDays": 7
 }
