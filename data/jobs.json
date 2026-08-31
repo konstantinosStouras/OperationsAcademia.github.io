@@ -38,6 +38,45 @@
   "owner": ""
  },
  {
+  "id": "2027-ie-business-school-20260831",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-08-31",
+  "institution": "IE Business School",
+  "department": "Operations and Business Analytics",
+  "school": "",
+  "unit": "Operations and Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Assistant Professor",
+   "Other Ranks"
+  ],
+  "applyBy": "November 30, 2026",
+  "applyByDate": "2026-11-30",
+  "comments": "",
+  "country": "Spain",
+  "adUrl": "",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://apply.interfolio.com/188451",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=IE%20Business%20School",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-08-31T10:37:18Z",
+  "ref": "OA-JOB-260831-UTPG",
+  "owner": "d2de4df06e1e539e"
+ },
+ {
   "id": "2027-university-of-chicago-20260828",
   "year": 2027,
   "years": [

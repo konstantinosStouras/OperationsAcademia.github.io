@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-28T17:40:14.134Z",
+ "generated": "2026-08-31T10:37:45.289Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -103,6 +103,10 @@
   },
   {
    "v": "Hofstra University",
+   "n": 3
+  },
+  {
+   "v": "IE Business School",
    "n": 3
   },
   {
@@ -259,10 +263,6 @@
   },
   {
    "v": "Howard University",
-   "n": 2
-  },
-  {
-   "v": "IE Business School",
    "n": 2
   },
   {
@@ -3114,6 +3114,10 @@
    "n": 3
   },
   {
+   "v": "Operations and Business Analytics",
+   "n": 3
+  },
+  {
    "v": "Operations and Information Management",
    "n": 3
   },
@@ -3207,10 +3211,6 @@
   },
   {
    "v": "OM/OR",
-   "n": 2
-  },
-  {
-   "v": "Operations and Business Analytics",
    "n": 2
   },
   {
@@ -6495,12 +6495,14 @@
    "units": [
     "DS",
     "OM",
+    "Operations and Business Analytics",
     "Operations and Technology"
    ],
    "bySchool": {
     "": [
      "DS",
      "OM",
+     "Operations and Business Analytics",
      "Operations and Technology"
     ]
    }
