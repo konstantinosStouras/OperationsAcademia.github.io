@@ -963,6 +963,18 @@ body.v3 .oa-action:hover:not([disabled]) {
   body.v3 .oa-filters { grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 14px 18px; }
   body.v3 .oa-filter:not(.oa-pick),
   body.v3 .oa-filter-actions { grid-column: 1 / -1; }
+  /* TWO PICKERS ON A ROW SHARE ONE LINE, whatever their labels wrap to
+     (owner's phone screenshot, 2026-08-31: "Suggested deadline" runs to two
+     lines at this column width and pushed its picker below "Final deadline"'s
+     — the circled pair). The bar's items are START-aligned for the chips'
+     sake (see the grid above), which lets a taller LABEL push only its own
+     control down. On a phone the two-per-row cells are all PICKERS — label +
+     button and nothing below (chips live on text filters, which take a full
+     row here) — so aligning these cells to the row's END is safe and exact:
+     every button sits on the row's shared line and each label stays directly
+     above its own button, wrapped or not. The desktop bar keeps its
+     top-alignment untouched; its wider tracks fit every label on one line. */
+  body.v3 .oa-filter.oa-pick { align-self: end; }
   /* Stacked, the pair breathes. The desktop cell's 0 row-gap exists only to
      land Clear on its row's BASELINE beside the labelled controls, and the
      spacer only to reserve that label's height — on a phone this cell has a

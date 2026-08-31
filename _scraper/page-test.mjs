@@ -6308,6 +6308,33 @@ for (const w of [320, 360, 390, 430]) {
       'override that reaches only one of them is the load-order trap');
     eq(pair.clearW, pair.exportW,
       'jobs export at 390px: …and one width, each taking the whole cell');
+    /* TWO PICKERS ON A ROW SHARE ONE LINE (owner's phone screenshot,
+       2026-08-31): "Suggested deadline" wraps to two lines at this width and
+       used to push its picker below "Final deadline"'s — the bar's cells are
+       start-aligned for the chips' sake, so a taller label moved only its
+       own control. Asserted as the general property rather than those two
+       labels (a guard about a corpus must not move with the corpus): any two
+       picker cells that overlap vertically are a row, and their buttons'
+       tops stay together. */
+    const picks = await q.evaluate(() => {
+      const cells = [...document.querySelectorAll('.oa-filters .oa-pick')];
+      const offs = [];
+      for (let i = 0; i < cells.length; i++) {
+        for (let j = i + 1; j < cells.length; j++) {
+          const a = cells[i].getBoundingClientRect();
+          const b = cells[j].getBoundingClientRect();
+          if (a.top < b.bottom && b.top < a.bottom) {
+            const ba = cells[i].querySelector('.oa-pick-btn').getBoundingClientRect();
+            const bb = cells[j].querySelector('.oa-pick-btn').getBoundingClientRect();
+            offs.push(Math.abs(Math.round(ba.top - bb.top)));
+          }
+        }
+      }
+      return offs;
+    });
+    ok(picks.length > 0 && picks.every((d) => d <= 1.5),
+      `jobs at 390px: pickers sharing a row keep their controls on one line ` +
+      `(offsets ${picks.join(', ')}px)`);
     await ctx.close();
   }
 

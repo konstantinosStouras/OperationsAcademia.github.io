@@ -113,6 +113,18 @@ marked global.
     colour and ground stay the ones it has everywhere else. `page-test.mjs`
     measures the gap and the matching shape at 390px.
 
+12. **Controls that share a row share a line.** The two-per-row pickers'
+    cells align to the row's END on phones (`align-self: end` in `v3.css`,
+    `flex-end` in the engine's flex bar), so a label that wraps to two lines
+    grows upward instead of pushing its own control below its neighbour's —
+    "Suggested deadline" beside "Final deadline" did exactly that at
+    360–390px (owner's screenshot, 2026-08-31). Safe HERE and not on the
+    desktop bar: a phone picker cell holds nothing below its control (chips
+    belong to text filters, which take a full row on phones), while the
+    desktop bar stays top-aligned for the chips' sake — see the note on
+    `body.v3 .oa-filters`. `page-test.mjs` measures the shared line at 390px
+    over every pair of pickers that share a row.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and
