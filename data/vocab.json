@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-31T10:37:45.289Z",
+ "generated": "2026-08-31T21:12:31.192Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -3574,7 +3574,7 @@
    "n": 1
   },
   {
-   "v": "information technology, business analytics, AI",
+   "v": "Information technology, business analytics, AI",
    "n": 1
   },
   {
@@ -4707,11 +4707,11 @@
   "American University Kogod School of Business": {
    "schools": [],
    "units": [
-    "information technology, business analytics, AI"
+    "Information technology, business analytics, AI"
    ],
    "bySchool": {
     "": [
-     "information technology, business analytics, AI"
+     "Information technology, business analytics, AI"
     ]
    }
   },
