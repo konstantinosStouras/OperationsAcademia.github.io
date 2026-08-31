@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "candidate-resources-lit-and-jobs-lists",
+      "date": "2026-08-31",
+      "title": "Two new resources for candidates",
+      "summary": "The \"Advice and guides for candidates\" list gained two entries. Better Search Is All You Need: The Lit, a focused database and browser for research papers across journals in Operations, Supply Chain, Economics, Computer Science, Project Management and Innovation — all in one place. And a list of other job posting websites and discussions compiled by Frances Wang (Cornell PhD Alum), linked beside her other related posts.",
+      "url": "/resources-for-candidates.html"
+    },
+    {
       "id": "mobile-filter-row-alignment",
       "date": "2026-08-31",
       "title": "Side-by-side filters sit level on a phone",
