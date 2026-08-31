@@ -378,7 +378,10 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
 [data-theme='dark'] .v3-theme .i-sun { display: block; }
 [data-theme='dark'] .v3-theme .i-moon { display: none; }
 
-/* burger — phones/tablets only */
+/* burger — phones/tablets only. It is the FIRST child of .v3-header-inner
+   (owner, 2026-08-31: the menu button and the sheet it opens sit on the LEFT
+   of a small screen), so on phones the row reads burger · lockup · actions;
+   on desktop it is display:none and its place in the DOM costs nothing. */
 .v3-burger {
   display: none;
   width: 42px; height: 42px;
@@ -400,7 +403,9 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
 .v3-burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
 .v3-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* --------------------------------------------------------- mobile sheet */
+/* --------------------------------------------------------- mobile sheet
+   Anchored LEFT and sliding in from the left (owner, 2026-08-31), matching
+   the burger that opens it — the two moved sides together. */
 
 .v3-sheet-backdrop {
   position: fixed; inset: 0; z-index: 130;
@@ -409,12 +414,12 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   transition: opacity 0.25s ease;
 }
 .v3-sheet {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 140;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 140;
   width: min(330px, 88vw);
   background: var(--bg-2);
-  border-left: 1px solid var(--line-soft);
+  border-right: 1px solid var(--line-soft);
   box-shadow: var(--shadow-lg);
-  transform: translateX(102%);
+  transform: translateX(-102%);
   transition: transform 0.3s cubic-bezier(0.22, 0.9, 0.3, 1);
   display: flex; flex-direction: column;
   padding: 18px 20px 24px;
@@ -1977,7 +1982,7 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
   .v3-nav { display: none; }
   .v3-burger { display: inline-flex; }
   .v3-header-inner { gap: 12px; }
-  /* the header keeps: logo · theme · sign-in/chip · burger */
+  /* the header keeps: burger · logo · theme · sign-in/chip */
   body.v3 .oa-acct-name { display: none; }           /* chip shrinks to avatar */
   body.v3 .oa-acct-chip { padding: 4px; }
   .v3-grid, .v3-grid.two { grid-template-columns: 1fr 1fr; }
