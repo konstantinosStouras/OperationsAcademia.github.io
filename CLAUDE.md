@@ -4099,11 +4099,16 @@ FIRST child of `.v3-header-inner` on every live page — on a phone the row
 reads burger · lockup · actions, and on desktop it is `display: none`, so its
 place in the DOM costs nothing there — and `.v3-sheet` is anchored `left: 0`,
 sliding in from the left (`translateX(-102%)`, with `border-right` taking the
-border that faced the page). The `/v1/`–`/v2/` archives keep their frozen
-right-side copies, by the rule the three trees are held to. The phone-header
-block in `page-test.mjs` pins the new geometry: the burger LEFT of the lockup
-at the screen's left edge, the opened sheet measured at left = 0 with the
-right of the screen left to the page — and the clash check rewritten as an
+border that faced the page). The `/v1/` and `/v2/` archives are untouched —
+each keeps its own frozen navigation, by the rule the three trees are held
+to. **Becoming a direct flex child cost the burger its size**, the one thing
+the position pins cannot see: with default `flex-shrink` the row's tightness
+shaved the 42px touch target to 32px at a 320px viewport, so `.v3-burger` is
+`flex: none` — the logo's `min-width: 0` stays the thing that gives — and the
+phone-header block pins the WIDTH beside the position. It pins the rest of
+the new geometry too: the burger LEFT of the lockup at the screen's left
+edge, the opened sheet measured at left = 0 with the right of the screen
+left to the page — and the clash check rewritten as an
 order-independent horizontal OVERLAP, because the old "the words end before
 the burger begins" encoded which SIDE the button sat on and would have to be
 rewritten again the next time the row moved; the geometry it protects

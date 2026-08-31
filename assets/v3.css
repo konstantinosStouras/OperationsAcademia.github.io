@@ -385,6 +385,9 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
 .v3-burger {
   display: none;
   width: 42px; height: 42px;
+  flex: none; /* a direct flex child now — without this the row's tightness
+                 shaves the 42px touch target (measured 32px at a 320px
+                 viewport); the logo's min-width: 0 is what gives instead */
   border: 1px solid var(--line);
   border-radius: 12px;
   background: transparent;
@@ -1995,14 +1998,15 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
   .v3-container { padding: 0 18px; }
   /* PHONE HEADER: THE WHOLE LOCKUP, MARK AND WORDS (owner, 2026-08-18).
      This used to be `.v3-header .v3-logo span + span { display: none }` — the
-     mark alone — because at full size the words really do push the burger off
-     a 390px screen. Hiding the site's name on the devices most people arrive
-     on is the wrong half of that trade, so the lockup is SCALED to fit
-     instead: a smaller mark, smaller words, tighter gaps, and `min-width: 0`
-     so the logo is the thing that gives when the row is short rather than the
-     burger being pushed out of reach. Measured at 320/360/390/430 by
-     page-test.mjs, which fails if the row overflows or the burger stops being
-     the topmost thing at its own centre. */
+     mark alone — because at full size the words crowded the burger (then the
+     row's LAST control; since 2026-08-31 it leads the row instead). Hiding
+     the site's name on the devices most people arrive on is the wrong half
+     of that trade, so the lockup is SCALED to fit instead: a smaller mark,
+     smaller words, tighter gaps, and `min-width: 0` so the logo is the thing
+     that gives when the row is short — never the burger, which is flex: none
+     for exactly that reason. Measured at 320/360/390/430 by page-test.mjs,
+     which fails if the row overflows, the burger stops being the topmost
+     thing at its own centre, or its 42px box is shaved. */
   .v3-header .v3-logo { gap: 7px; min-width: 0; }
   .v3-header .v3-w1, .v3-header .v3-w2 { font-size: 13px; letter-spacing: -0.016em; }
   .v3-header .v3-logo .v3-mark { width: 26px; height: 36px; }

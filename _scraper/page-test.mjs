@@ -4765,6 +4765,7 @@ for (const w of [320, 360, 390, 430]) {
       clash: !!(wb && bb && Math.round(wb.right) > Math.round(bb.left) && Math.round(bb.right) > Math.round(wb.left)),
       burgerLeads: !!(bb && mb && Math.round(bb.right) <= Math.round(mb.left)),
       burgerLeft: bb ? Math.round(bb.left) : -1,
+      burgerW: bb ? Math.round(bb.width) : 0,
       burgerHit: !!(top && burger && (top === burger || burger.contains(top))),
       overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     };
@@ -4777,6 +4778,10 @@ for (const w of [320, 360, 390, 430]) {
   ok(r.burgerLeads, `${w}px: the menu button sits LEFT of the lockup`);
   ok(r.burgerLeft >= 0 && r.burgerLeft <= 60,
     `${w}px: at the left edge of the screen (left=${r.burgerLeft})`);
+  /* as a direct flex child the burger now needs flex: none, or the row's
+     tightness shaves it (measured 32px at 320px without it) — the position
+     pins above all pass over a shrunken button, so its SIZE is pinned too */
+  ok(r.burgerW >= 42, `${w}px: keeping its whole 42px touch target (width=${r.burgerW})`);
   ok(r.burgerHit, `${w}px: the menu button is still the thing under its own centre`);
   ok(!r.overflowX, `${w}px: the page does not scroll sideways`);
 
