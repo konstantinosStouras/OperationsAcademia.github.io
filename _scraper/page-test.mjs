@@ -4732,7 +4732,17 @@ const THEME_PAGES = ['index.html', 'jobs.html', 'post-a-job.html',
    deliberate rule — the wordmark at full size pushes the burger off a 390px
    screen — so the lockup is scaled down instead of cut in half, and this is
    what holds that: the words are there, and the row still fits, at every phone
-   width the site is likely to meet. */
+   width the site is likely to meet.
+
+   Owner, 2026-08-31: "this button and list of links it opens should appear on
+   the left of the screen (whereas currently is shown on the right)". So the
+   burger now LEADS the row — the leftmost control, the lockup beside it — and
+   the sheet it opens is anchored to the LEFT edge and slides in from there.
+   The clash check is an order-independent horizontal OVERLAP: the old
+   "the words end before the burger begins" was only ever true of the old
+   order, and a check that encodes which side a thing sits on has to be
+   rewritten every time the row moves — the geometry it protects (nothing runs
+   into anything) does not. */
 for (const w of [320, 360, 390, 430]) {
   const m = await browser.newPage({ viewport: { width: w, height: 800 }, isMobile: true, hasTouch: true });
   await m.goto(BASE, { waitUntil: 'domcontentloaded' });
@@ -4743,14 +4753,19 @@ for (const w of [320, 360, 390, 430]) {
       const b = el.getBoundingClientRect(), cs = getComputedStyle(el);
       return b.width > 0 && b.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden';
     };
-    const words = q('.v3-header .v3-words'), burger = q('.v3-burger');
+    const words = q('.v3-header .v3-words'), mark = q('.v3-header .v3-mark'), burger = q('.v3-burger');
     const bb = burger ? burger.getBoundingClientRect() : null;
+    const wb = words ? words.getBoundingClientRect() : null;
+    const mb = mark ? mark.getBoundingClientRect() : null;
     const top = bb ? document.elementFromPoint(bb.left + bb.width / 2, bb.top + bb.height / 2) : null;
     return {
-      mark: seen(q('.v3-header .v3-mark')),
+      mark: seen(mark),
       words: seen(words),
       text: words ? words.innerText.replace(/\s+/g, ' ').trim() : '',
-      clash: !!(words && bb && Math.round(words.getBoundingClientRect().right) > Math.round(bb.left)),
+      clash: !!(wb && bb && Math.round(wb.right) > Math.round(bb.left) && Math.round(bb.right) > Math.round(wb.left)),
+      burgerLeads: !!(bb && mb && Math.round(bb.right) <= Math.round(mb.left)),
+      burgerLeft: bb ? Math.round(bb.left) : -1,
+      burgerW: bb ? Math.round(bb.width) : 0,
       burgerHit: !!(top && burger && (top === burger || burger.contains(top))),
       overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     };
@@ -4760,8 +4775,31 @@ for (const w of [320, 360, 390, 430]) {
   ok(/Operations/.test(r.text) && /Academia/.test(r.text),
     `${w}px: the wordmark reads "Operations Academia" (got ${JSON.stringify(r.text)})`);
   ok(!r.clash, `${w}px: and does not run into the menu button`);
+  ok(r.burgerLeads, `${w}px: the menu button sits LEFT of the lockup`);
+  ok(r.burgerLeft >= 0 && r.burgerLeft <= 60,
+    `${w}px: at the left edge of the screen (left=${r.burgerLeft})`);
+  /* as a direct flex child the burger now needs flex: none, or the row's
+     tightness shaves it (measured 32px at 320px without it) — the position
+     pins above all pass over a shrunken button, so its SIZE is pinned too */
+  ok(r.burgerW >= 42, `${w}px: keeping its whole 42px touch target (width=${r.burgerW})`);
   ok(r.burgerHit, `${w}px: the menu button is still the thing under its own centre`);
   ok(!r.overflowX, `${w}px: the page does not scroll sideways`);
+
+  /* …and the menu it opens comes in from the left too. The closed sheet
+     rests at translateX(-102%), so "left <= 0" is true mid-slide as well —
+     the wait demands the settled position, |left| < 0.5. */
+  await m.click('.v3-burger');
+  await m.waitForFunction(() => {
+    const s = document.querySelector('.v3-sheet');
+    return s && document.body.classList.contains('v3-sheet-open') &&
+      Math.abs(s.getBoundingClientRect().left) < 0.5;
+  }, null, { timeout: 5000 });
+  const sh = await m.evaluate(() => {
+    const b = document.querySelector('.v3-sheet').getBoundingClientRect();
+    return { left: Math.round(b.left), right: Math.round(b.right), vw: window.innerWidth };
+  });
+  ok(sh.left === 0, `${w}px: the opened menu is anchored to the LEFT edge (left=${sh.left})`);
+  ok(sh.right < sh.vw, `${w}px: and leaves the right of the screen to the page (right=${sh.right} of ${sh.vw})`);
   await m.close();
 }
 

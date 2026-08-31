@@ -4092,6 +4092,28 @@ the row is short. `page-test.mjs` measures 320/360/390/430 and fails if the
 words are missing, if they run into the menu button, if the burger stops being
 the topmost element at its own centre, or if the page scrolls sideways.
 
+**…and the menu button, with the sheet it opens, sits on the LEFT** (owner,
+2026-08-31: "this button and list of links it opens should appear on the left
+of the screen (whereas currently is shown on the right)"). The burger is the
+FIRST child of `.v3-header-inner` on every live page — on a phone the row
+reads burger · lockup · actions, and on desktop it is `display: none`, so its
+place in the DOM costs nothing there — and `.v3-sheet` is anchored `left: 0`,
+sliding in from the left (`translateX(-102%)`, with `border-right` taking the
+border that faced the page). The `/v1/` and `/v2/` archives are untouched —
+each keeps its own frozen navigation, by the rule the three trees are held
+to. **Becoming a direct flex child cost the burger its size**, the one thing
+the position pins cannot see: with default `flex-shrink` the row's tightness
+shaved the 42px touch target to 32px at a 320px viewport, so `.v3-burger` is
+`flex: none` — the logo's `min-width: 0` stays the thing that gives — and the
+phone-header block pins the WIDTH beside the position. It pins the rest of
+the new geometry too: the burger LEFT of the lockup at the screen's left
+edge, the opened sheet measured at left = 0 with the right of the screen
+left to the page — and the clash check rewritten as an
+order-independent horizontal OVERLAP, because the old "the words end before
+the burger begins" encoded which SIDE the button sat on and would have to be
+rewritten again the next time the row moved; the geometry it protects
+(nothing runs into anything) does not.
+
 ## Anything that paints its own ground must name its own ink
 
 Three reports in one morning (2026-08-18) were all the same fault: the
