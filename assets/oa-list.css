@@ -764,6 +764,14 @@
     font-size: 13px;
   }
 
+  /* Stacked full-width in their cell, the pair needs a gap of its own — the
+     base cell is a plain flex row that never needed one while Clear stood
+     alone — and Clear takes the full width the action above already has, so
+     the two read as one pair of controls rather than a button and a stray
+     (rule 11 in _MOBILE-STANDARDS.md). */
+  .oa-filter-actions { flex-wrap: wrap; gap: 10px; }
+  .oa-clear { width: 100%; }
+
   /* pager chevrons at finger size */
   .oa-pager button { width: 42px; height: 40px; font-size: 24px; }
 
