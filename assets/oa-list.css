@@ -734,6 +734,15 @@
   .oa-filter { width: calc(50% - 6px); }
   .oa-filter:not(.oa-pick) { width: 100%; }
 
+  /* …and the two pickers of a row keep their CONTROLS on one line whatever
+     their labels wrap to: a picker cell is label + button and nothing below
+     (chips live on text filters, full-width here), so aligning the cell to
+     its flex line's end is safe — the wrapped label grows upward instead of
+     pushing its own button below its neighbour's (rule 12 in
+     _MOBILE-STANDARDS.md; the bar itself stays start-aligned for the chips'
+     sake). */
+  .oa-pick { align-self: flex-end; }
+
   /* 16px is not cosmetic: iOS Safari zooms the whole page into any focused
      input whose font is smaller, and leaves it zoomed. 42px tall is a real
      touch target (the desktop 35px is a mouse target). */
