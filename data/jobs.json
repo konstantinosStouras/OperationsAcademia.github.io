@@ -1488,16 +1488,23 @@
   "levels": [
    "Assistant Professor"
   ],
-  "applyBy": "Until filled.",
-  "applyByDate": "",
+  "applyBy": "October 31, 2026",
+  "applyByDate": "2026-10-31",
   "comments": "",
   "country": "United States",
-  "adUrl": "https://careercenter.informs.org/job/assistant-professor-massachusetts-institute-of-technology-sloan-school-of-management-operations-management-cambridge-massachusetts-5461",
+  "adUrl": "https://apply.interfolio.com/191132",
   "adLabel": "link to Job ad",
   "postedAtUrl": "",
   "postedAtLabel": "link",
   "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=Massachusetts%20Institute%20of%20Technology%20(MIT)",
-  "characteristics": [],
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "featured": false,
   "source": "jobmarket-sheet",
   "addedAt": "2026-08-19T06:04:41Z",

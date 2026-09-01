@@ -4480,6 +4480,14 @@
   "mapUrl": "https://goo.gl/maps/Y773Y",
   "facultyUrl": "http://mitsloan.mit.edu/groups/om/faculty.php",
   "deptUrl": "https://mitsloan.mit.edu/faculty/academic-groups/operations-management/faculty-research-centers",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad",
+   "Exec Ed"
+  ],
   "sources": [
    "directory",
    "omlist",
