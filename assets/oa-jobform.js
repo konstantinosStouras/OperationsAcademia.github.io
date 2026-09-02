@@ -314,9 +314,35 @@
     out.school = String(place.school || '').slice(0, MAX.school);
     out.unit = String(place.unit || '').slice(0, MAX.unit);
     out.department = [out.school, out.unit].filter(Boolean).join(', ').slice(0, MAX.department);
-    var unitEl = $('f-unit');
-    setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');
-    if (!out.department && !firstBad) firstBad = $('f-school');
+    /* BOTH are mandatory on a NEW posting (owner, 2026-09-02), judged on what
+       the poster TYPED: a school that repeats the institution's name is the
+       answer a place with no separate school gives, and canonColumns() has
+       just folded it away (oa-schools.js schoolRepeatsInstitution, so the
+       name publishes once) — the stored `school` may be empty while the box
+       is not. An EDIT keeps the older rule, one line or the other, like
+       every other new-posting-only requirement on this form. */
+    var schoolEl = $('f-school'), unitEl = $('f-unit');
+    var typedSchool = String(schoolEl.value || '').trim();
+    var typedUnit = String(unitEl.value || '').trim();
+    if (!EDIT_ID) {
+      setError(schoolEl, typedSchool ? '' :
+        'Please give the school. If your institution has none, repeat its name here; it is shown once.');
+      if (!typedSchool && !firstBad) firstBad = schoolEl;
+      if (!typedUnit) {
+        setError(unitEl, 'Please give the department, area or group.');
+        if (!firstBad) firstBad = unitEl;
+      } else if (!out.department) {
+        /* typed, and the canon left nothing of it ("Department" alone) — a
+           line the build would refuse to publish */
+        setError(unitEl, 'Please give the department, area or group a name of its own.');
+        if (!firstBad) firstBad = unitEl;
+      } else {
+        setError(unitEl, '');
+      }
+    } else {
+      setError(unitEl, out.department ? '' : 'Please give a school, department, area or group.');
+      if (!out.department && !firstBad) firstBad = schoolEl;
+    }
     need('f-country', 'country', 'the country of the campus');
     need('f-firstName', 'firstName', 'your first name');
     need('f-lastName', 'lastName', 'your last name');
@@ -791,7 +817,7 @@
        not true. */
     Array.prototype.forEach.call(document.querySelectorAll('.oa-req-new'),
       function (n) { n.parentNode.removeChild(n); });
-    ['f-deptUrl', 'f-chairName', 'f-chairEmail'].forEach(function (id) {
+    ['f-school', 'f-unit', 'f-deptUrl', 'f-chairName', 'f-chairEmail'].forEach(function (id) {
       var el = $(id);
       if (el) el.removeAttribute('required');
     });
@@ -1100,15 +1126,25 @@
     /* Keep the hidden joined field and the preview in step on every keystroke,
        so what will be published is visible before it is sent. */
     function sync() {
-      var joined = [String(school.value || '').trim(), String(unit.value || '').trim()]
-        .filter(Boolean).join(', ');
+      var s = String(school.value || '').trim(), u = String(unit.value || '').trim();
+      /* A school that repeats the institution's name is shown ONCE — the same
+         rule canonColumns() applies when the posting is sent (oa-schools.js
+         schoolRepeatsInstitution), read here so the preview says what will
+         publish, and says so in words: the poster was told to type it. */
+      var S = window.OASchools;
+      var repeats = !!(S && S.schoolRepeatsInstitution &&
+        S.schoolRepeatsInstitution(s, String(inst.value || '').trim()));
+      var joined = [repeats ? '' : s, u].filter(Boolean).join(', ');
       if (dept) dept.value = joined;
       if (preview) {
         preview.textContent = joined
-          ? 'Shown under the institution name as: ' + joined
-          : '';
+          ? 'Shown under the institution name as: ' + joined +
+            (repeats ? ' (the institution\u2019s name is not repeated as the school)' : '')
+          : (repeats ? 'The institution\u2019s name is shown once; it is not repeated as the school.' : '');
       }
     }
+    inst.addEventListener('input', sync);
+    inst.addEventListener('change', sync);
     school.addEventListener('input', sync);
     unit.addEventListener('input', sync);
     /* 'change' as well: the records pre-fill (oa-uniinfo.js) deliberately

@@ -5733,15 +5733,23 @@ async function testUniInfo() {
     'off must not gain one because the form was opened');
 }
 
-/* The department's own page, at least one characteristic, and the area
-   coordinator / chair pair are MANDATORY FOR A NEW POSTING (owner,
-   2026-09-02) — and only there. An EDIT is exempt by design: every posting
-   that predates the rule, the crawled mirrors among them, must stay
-   correctable without inventing a chair nobody named — which is also what
-   keeps the maintainer's sheet-mirror hand-over saveable. Pinned here from
-   the sources; the browser halves — the refusal with an error on each of
-   the four, and an old posting still saving with the marks lifted — are
-   measured in page-test.mjs. */
+/* The school, the department, the department's own page, at least one
+   characteristic, and the area coordinator / chair pair are MANDATORY FOR A
+   NEW POSTING (owner, 2026-09-02) — and only there. An EDIT is exempt by
+   design: every posting that predates the rule, the crawled mirrors among
+   them, must stay correctable without inventing a chair nobody named — which
+   is also what keeps the maintainer's sheet-mirror hand-over saveable.
+   Pinned here from the sources; the browser halves — the refusal with an
+   error on each of the six, and an old posting still saving with the marks
+   lifted — are measured in page-test.mjs.
+
+   AND A SCHOOL THAT REPEATS THE UNIVERSITY IS NO SCHOOL. Asking for a school
+   on every posting meets the places that have none — INSEAD, IE Business
+   School — and the owner's answer is that they repeat the institution's name
+   in the School box, which must not publish twice. `schoolRepeatsInstitution`
+   in oa-schools.js is the ONE rule, and assemble() applies it as the last word
+   of every canon path, so the form's preview, the review card, the build and
+   the directory cannot disagree about it. */
 async function testMandatoryPostingFields() {
   const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
   const tagOf = (id) => {
@@ -5749,26 +5757,30 @@ async function testMandatoryPostingFields() {
     ok(at > -1, `post-a-job.html carries #${id}`);
     return page.slice(page.lastIndexOf('<', at), page.indexOf('>', at) + 1);
   };
-  for (const id of ['f-deptUrl', 'f-chairName', 'f-chairEmail']) {
+  for (const id of ['f-school', 'f-unit', 'f-deptUrl', 'f-chairName', 'f-chairEmail']) {
     ok(/\brequired\b/.test(tagOf(id)),
       `post-a-job.html: #${id} is marked required for a new posting`);
   }
   /* the CLASS ATTRIBUTE is counted, not the bare string — the page's own
      comment explains the marks by name, and a guard that cannot tell the
      explanation from the thing is this file's recorded trap */
-  eq((page.match(/class="oa-req oa-req-new"/g) || []).length, 4,
-    'exactly the four new-posting-only fields carry the oa-req-new mark ' +
+  eq((page.match(/class="oa-req oa-req-new"/g) || []).length, 6,
+    'exactly the six new-posting-only fields carry the oa-req-new mark ' +
     '— the class enterEditMode() lifts, so a field marked with the plain ' +
     'oa-req would stay starred on an edit it does not bind');
   ok(/oa-req-new/.test(page.slice(page.indexOf('id="lbl-chars"'),
     page.indexOf('</span>', page.indexOf('id="lbl-chars"')))),
-    'the characteristics GROUP is one of the four — no required attribute ' +
+    'the characteristics GROUP is one of the six — no required attribute ' +
     'can sit on a checkbox group, so the mark is the whole of its declaration');
+  ok(/repeat the institution&rsquo;s name here/.test(page),
+    'the School hint tells a place with no separate school what to type');
 
   const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
   const collect = form.slice(form.indexOf('function collect('),
     form.indexOf('function makeRef('));
   for (const msg of [
+    'Please give the school.',
+    'Please give the department, area or group.',
     "Please give your department's own web page.",
     'Please tick at least one characteristic.',
     'Please name the area coordinator or department chair.',
@@ -5776,18 +5788,86 @@ async function testMandatoryPostingFields() {
   ]) {
     const at = collect.indexOf(msg);
     ok(at > -1, `collect() refuses a new posting without: "${msg}"`);
-    ok(/EDIT_ID/.test(collect.slice(Math.max(0, at - 300), at)),
+    ok(/EDIT_ID/.test(collect.slice(Math.max(0, at - 400), at)),
       `…and that requirement is scoped to a NEW posting (EDIT_ID exempts ` +
       `an edit): "${msg}"`);
   }
+  ok(collect.includes("'Please give a school, department, area or group.'"),
+    'an EDIT keeps the older either-or rule on the two name fields');
 
   const editMode = form.slice(form.indexOf('function enterEditMode('),
     form.indexOf('function boot('));
   ok(editMode.includes('.oa-req-new'),
     'enterEditMode() lifts the new-posting-only * marks');
-  ok(editMode.includes("removeAttribute('required')"),
-    '…and the required attributes with them, so the document never claims ' +
-    'a requirement collect() does not enforce there');
+  ok(editMode.includes("removeAttribute('required')") &&
+     editMode.includes("'f-school', 'f-unit'"),
+    '…and the required attributes with them, the two name fields included, ' +
+    'so the document never claims a requirement collect() does not enforce there');
+
+  /* the repeated school, judged by the shared rule */
+  const S = require(path.join(HERE, '..', 'assets', 'oa-schools.js'));
+  ok(S.schoolRepeatsInstitution('INSEAD', 'INSEAD'), 'INSEAD said twice is a repeat');
+  ok(S.schoolRepeatsInstitution('ie business school', 'IE Business School'),
+    'case does not hide one');
+  ok(S.schoolRepeatsInstitution('Indian School of Business', 'Indian School of Business (ISB)'),
+    'nor a trailing acronym');
+  ok(S.schoolRepeatsInstitution('University of Hong Kong', 'The University of Hong Kong'),
+    'nor a leading The');
+  ok(!S.schoolRepeatsInstitution('ESSEC Business School', 'ESSEC'),
+    'ESSEC Business School at ESSEC is a real school, not a repeat — the alias-aware ' +
+    'institutionKey reads it as ESSEC itself, which is why the rule is a LITERAL fold');
+  ok(!S.schoolRepeatsInstitution('', 'INSEAD') && !S.schoolRepeatsInstitution('INSEAD', ''),
+    'an empty name repeats nothing');
+
+  const folded = S.canonColumns({ institution: 'IE Business School', school: 'IE Business School', unit: 'Operations' });
+  eq([folded.institution, folded.school, folded.unit], ['IE Business School', '', 'Operations'],
+    'canonColumns() drops the repeated school and keeps the rest');
+  eq(S.canonPlace(folded), folded, 'and a second pass changes nothing');
+  eq(S.canonPlace({ institution: 'ETH Zurich', school: 'ETH Zurich', unit: 'Management, Technology and Economics' }).school, '',
+    'canonPlace() folds it too, AFTER the curated school fill that would put ' +
+    'ETH Zurich\u2019s own name back — the fold is the last word');
+  eq(S.canonColumns({ institution: 'ESSEC', school: 'ESSEC Business School', unit: 'Operations' }).school,
+    'ESSEC Business School', 'while a school of the same family name is kept');
+
+  /* THE BUILD IS THE TWIN: a document whose school repeats its institution
+     publishes the line ONCE, so the card never reads "INSEAD — INSEAD, …" */
+  const twin = rowFromSubmission({ ...GOOD, institution: 'INSEAD', school: 'INSEAD', unit: 'Decision Sciences', department: '' });
+  ok(!!twin, 'the build still publishes a posting whose school repeated its institution');
+  eq([twin.school || '', twin.department], ['', 'Decision Sciences'],
+    'rowFromSubmission() publishes the department line without the repeated name');
+
+  ok(/S\.schoolRepeatsInstitution\(s,/.test(form),
+    'the form\u2019s own preview reads the SAME rule, so what the poster is shown ' +
+    'is what will publish');
+  ok(/not repeated as the school/.test(form),
+    '…and says so in words, because the poster was told to type it');
+
+  /* THE PICKER MUST NOT UNDO IT ON BLUR. snapPlace() writes the canon's
+     answer back into the boxes as a field is left, and the canon's answer
+     for a repeated school is '' — which would blank the box the hint had
+     just asked the poster to fill, and the mandatory check would refuse it
+     a moment later. The box keeps the typed repeat; the fold happens on
+     send, and the browser half measures exactly that. */
+  const picker = await readFile(path.join(HERE, '..', 'assets', 'oa-place-picker.js'), 'utf8');
+  const snap = picker.slice(picker.indexOf('function snapPlace('), picker.indexOf('function inferSchool('));
+  ok(/schoolRepeatsInstitution/.test(snap),
+    'the place picker’s settle-on-blur keeps a school that repeats the institution in the box');
+
+  /* …and the REVIEW CARD's own twin of the join folds it too, or the
+     maintainer's heading, edit preview and approval echo would all read the
+     name twice while settlePlace publishes it once. */
+  const panel = await readFile(path.join(HERE, '..', 'assets', 'oa-jobreview.js'), 'utf8');
+  const cardJoin = panel.slice(panel.indexOf('function joinDepartment('), panel.indexOf('function $('));
+  ok(/schoolRepeatsInstitution/.test(cardJoin),
+    'the review card’s preview of the line folds a repeated school as settlePlace will on save');
+  const calls = [];
+  for (let at = panel.indexOf('joinDepartment(', panel.indexOf('function $(')); at > -1;
+    at = panel.indexOf('joinDepartment(', at + 1)) calls.push(panel.slice(at, at + 160));
+  ok(calls.length >= 4, `the card joins the line in ${calls.length} places`);
+  for (const c of calls) {
+    ok(/institution|inst\.value/.test(c),
+      `…and each passes the institution, so no surface joins the raw boxes: ${c.split('\n')[0]}`);
+  }
 }
 
 async function testRowOverrides() {

@@ -3994,6 +3994,35 @@ dropped). THE SAME RULES IN BOTH FILES, pinned by the selftest: an alert that
 matched what the site shows must go on matching it, and "what I see on the site"
 and "what I am e-mailed" cannot mean different things.
 
+**Both name fields are MANDATORY on a new posting, and a school that repeats
+the university is no school** (owner, 2026-09-02). The form used to accept a
+posting with either a school or a department; it asks for both now, on a NEW
+posting only. An edit keeps the older either-or rule, the same exemption every
+other new-posting-only field on the form carries (`EDIT_ID` in `collect()`, the
+`oa-req-new` marks lifted by `enterEditMode()`), because a posting that
+predates the rule must stay correctable. A place with no separate school,
+INSEAD or IE Business School, answers by repeating the institution's name in
+the School box, and that name must not publish twice ("INSEAD, INSEAD,
+Decision Sciences"). `schoolRepeatsInstitution` in `assets/oa-schools.js` is
+the ONE rule: a LITERAL repeat with case, accents, punctuation, a leading "The"
+and a trailing acronym folded, never the alias-aware `institutionKey`, which
+reads "ESSEC Business School" as ESSEC itself and would fold away a real
+school. `assemble()` applies it as the LAST word of every canon path
+(`canonColumns` and `canonPlace` alike), after the curated `UNIT_HOME` fill
+that can put a university's own name back as its school (ETH Zurich's seed
+row), so a second pass changes nothing. That is what makes it one rule: the
+form's own preview, the review card's `settlePlace`, `rowFromSubmission`,
+`healPlace`, the sheet ingest and the directory build all fold it the same way,
+and the picker's settle-on-blur keeps the typed repeat in the box, or the
+mandatory check would refuse a moment later what the hint had just asked for.
+Measured over the served data it reached three seed rows and one archived
+posting (Indian School of Business, healed with `--heal-names`;
+`directory.json` and `vocab.json` rebuilt) and moved no posting's id, which is
+built from the institution alone. Pinned in `testMandatoryPostingFields`; the
+browser half, the refusal with an error on each of the six, the preview naming
+the fold, the box keeping the repeat on blur, and the stored `school` empty
+with the line said once, is in `page-test.mjs`.
+
 ## The posting form pre-fills from the site's records — and keeps them honest
 
 Beside the cascade, `post-a-job.html` mounts **`assets/oa-uniinfo.js`** (owner,

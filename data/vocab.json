@@ -2540,10 +2540,6 @@
    "n": 0
   },
   {
-   "v": "ETH Zurich",
-   "n": 0
-  },
-  {
    "v": "Faculty of Business Administration",
    "n": 0
   },
@@ -2629,10 +2625,6 @@
   },
   {
    "v": "IESE Business School",
-   "n": 0
-  },
-  {
-   "v": "Indian School of Business",
    "n": 0
   },
   {
@@ -2757,10 +2749,6 @@
   },
   {
    "v": "Neeley School of Business",
-   "n": 0
-  },
-  {
-   "v": "Nova School of Business and Economics",
    "n": 0
   },
   {
@@ -6009,18 +5997,14 @@
    }
   },
   "ETH Zurich": {
-   "schools": [
-    "ETH Zurich"
-   ],
+   "schools": [],
    "units": [
     "Empirical business problems",
     "Management, Technology and Economics"
    ],
    "bySchool": {
     "": [
-     "Empirical business problems"
-    ],
-    "ETH Zurich": [
+     "Empirical business problems",
      "Management, Technology and Economics"
     ]
    }
@@ -6590,9 +6574,7 @@
    }
   },
   "Indian School of Business": {
-   "schools": [
-    "Indian School of Business"
-   ],
+   "schools": [],
    "units": [
     "OM",
     "Operations Management"
@@ -6600,9 +6582,6 @@
    "bySchool": {
     "": [
      "OM",
-     "Operations Management"
-    ],
-    "Indian School of Business": [
      "Operations Management"
     ]
    }
@@ -7673,14 +7652,12 @@
    }
   },
   "NOVA School of Business and Economics": {
-   "schools": [
-    "Nova School of Business and Economics"
-   ],
+   "schools": [],
    "units": [
     "Operations, Technology and Innovation Management"
    ],
    "bySchool": {
-    "Nova School of Business and Economics": [
+    "": [
      "Operations, Technology and Innovation Management"
     ]
    }
@@ -11716,9 +11693,6 @@
   "ESSEC Business School": [
    "Information Systems, Data Analytics and Operations"
   ],
-  "ETH Zurich": [
-   "Management, Technology and Economics"
-  ],
   "Faculty of Business": [
    "Computing and Decision Sciences",
    "Fashion and Textiles",
@@ -11815,9 +11789,6 @@
   ],
   "Imperial College Business School": [
    "Analytics and Operations"
-  ],
-  "Indian School of Business": [
-   "Operations Management"
   ],
   "Institut Mines-Télécom Business School": [
    "Management, Marketing and Strategy"
@@ -11994,9 +11965,6 @@
   ],
   "Neeley School of Business": [
    "Information Systems and Supply Chain Management"
-  ],
-  "Nova School of Business and Economics": [
-   "Operations, Technology and Innovation Management"
   ],
   "NUS Business School": [
    "Analytics and Operations"

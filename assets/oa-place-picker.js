@@ -385,7 +385,15 @@
           inst.value = place.institution;
         }
         if (place.school !== val(school) || place.unit !== val(unit)) {
-          school.value = place.school;
+          /* A school that REPEATS the institution's name folds to '' in the
+             canon (oa-schools.js schoolRepeatsInstitution), so the name
+             publishes once — but the BOX keeps the repeat: the hint asked
+             for it, the mandatory check on a new posting reads the box, and
+             a blur that blanked it would refuse a moment later what the
+             form had just told the poster to type. The fold happens on send. */
+          var repeat = !place.school && S.schoolRepeatsInstitution &&
+            S.schoolRepeatsInstitution(val(school), place.institution || val(inst));
+          school.value = repeat ? val(school) : place.school;
           unit.value = place.unit;
         }
         maybeFillType();

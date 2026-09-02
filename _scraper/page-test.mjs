@@ -1232,8 +1232,6 @@ for (const [name, expect] of [
   const posted = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
     await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
     await q.fill('#f-institution', 'Test University');
-    await q.fill('#f-school', 'Business School');
-    await q.fill('#f-unit', 'Operations Area');
     await q.selectOption('#f-type', 'University');
     await q.fill('#f-country', 'Ireland');
     // an open name-picker dropdown sits over the checkboxes below it; the
@@ -1250,15 +1248,18 @@ for (const [name, expect] of [
       const n = document.getElementById('oa-year-note');
       return n ? n.textContent : '';
     });
-    // the department page, a characteristic and the chair pair are mandatory
-    // for a NEW posting (owner, 2026-09-02) — submitting without them is
-    // refused, with an error drawn on each of the four
+    // the school, the department, the department page, a characteristic and
+    // the chair pair are mandatory for a NEW posting (owner, 2026-09-02) —
+    // submitting without them is refused, with an error drawn on each of the six
     await q.click('#oa-submit');
     const refused = await q.evaluate(() => ({
       done: document.getElementById('oa-done').hidden,
       errs: document.querySelectorAll('.oa-err').length,
       msg: document.getElementById('oa-msg').textContent,
     }));
+    await q.fill('#f-school', 'Business School');
+    await q.fill('#f-unit', 'Operations Area');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
     await q.fill('#f-deptUrl', 'https://ops.example.edu/department');
     await q.check('input[name="characteristics"][value="PhD"]');
     await q.fill('#f-chairName', 'Chair Person');
@@ -1274,10 +1275,10 @@ for (const [name, expect] of [
     return { ref, doc, noYearField, yearNote, refused };
   });
   eq(posted.refused.done, true,
-    'v3 post-a-job: a NEW posting without the mandatory department page, ' +
-    'characteristic and chair pair is refused');
-  eq(posted.refused.errs, 4,
-    'v3 post-a-job: …with an error drawn on each of the four fields');
+    'v3 post-a-job: a NEW posting without the mandatory school, department, ' +
+    'department page, characteristic and chair pair is refused');
+  eq(posted.refused.errs, 6,
+    'v3 post-a-job: …with an error drawn on each of the six fields');
   ok(/highlighted fields/.test(posted.refused.msg),
     'v3 post-a-job: …and the form says to check them');
   ok(/^OA-JOB-\d{6}-[A-Z2-9]{4}$/.test(posted.ref.trim()),
@@ -1297,6 +1298,58 @@ for (const [name, expect] of [
     'and the form does not ask for it — it states what it worked out instead');
   ok(posted.yearNote.includes(`${marketYear() - 1}\u2013${marketYear()}`),
     `the form SAYS which season the posting lands in (${marketYear() - 1}-${marketYear()}), so nothing is hidden`);
+
+  /* -- a school that repeats the university is shown ONCE (owner, 2026-09-02)
+
+     The School box is mandatory now, and a place with no separate school
+     (INSEAD, IE Business School) is told to repeat the institution's name in
+     it. That name must not publish twice: the preview says so as the poster
+     types, and the stored document carries no school and the department line
+     said once. A made-up university, so no curated record can fill a school
+     in behind the poster's back. */
+
+  const repeated = await onSite('post-a-job.html', { user: keptUser, docs: [] }, async (q) => {
+    await q.waitForSelector('#oa-job-form:not([hidden])', { timeout: 10000 });
+    await q.fill('#f-institution', 'Repeat Institute of Technology');
+    await q.fill('#f-school', 'Repeat Institute of Technology');
+    await q.fill('#f-unit', 'Operations Management');
+    const preview = await q.$eval('#f-department-preview', (n) => n.textContent);
+    await q.selectOption('#f-type', 'University');
+    await q.fill('#f-country', 'Ireland');
+    await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
+    // the box keeps what the poster typed — a blur must not blank the repeat
+    // the hint asked for, or the mandatory check refuses it a moment later
+    const keptTyped = await q.$eval('#f-school', (n) => n.value);
+    await q.check('input[name="levels"][value="Assistant Professor"]');
+    await q.check('input[name="characteristics"][value="PhD"]');
+    await q.check('#f-untilFilled');
+    await q.fill('#f-deptUrl', 'https://ops.example.edu/rit');
+    await q.fill('#f-firstName', 'Kon');
+    await q.fill('#f-lastName', 'Stouras');
+    await q.fill('#f-email', 'kon@example.edu');
+    await q.fill('#f-chairName', 'Chair Person');
+    await q.fill('#f-chairEmail', 'chair@example.edu');
+    await q.click('#oa-submit');
+    await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
+    const doc = await q.evaluate(() => {
+      const d = window.__fb.dump();
+      const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
+      return d[k];
+    });
+    return { preview, keptTyped, doc };
+  });
+  ok(/Operations Management/.test(repeated.preview) && /not repeated/.test(repeated.preview),
+    'v3 post-a-job: the preview shows the department alone and says the institution\u2019s name is not repeated');
+  ok(!/Technology, Operations/.test(repeated.preview),
+    'v3 post-a-job: …and never the two names joined');
+  eq(repeated.keptTyped, 'Repeat Institute of Technology',
+    'v3 post-a-job: leaving the School box keeps the repeat the hint asked for');
+  eq(repeated.doc.school || '', '',
+    'v3 post-a-job: the stored posting carries no school — the name is said once');
+  eq(repeated.doc.department, 'Operations Management',
+    'v3 post-a-job: …and its department line is the department alone');
+  eq(repeated.doc.institution, 'Repeat Institute of Technology',
+    'v3 post-a-job: …under the institution, which is untouched');
 
   /* -- the site's records pre-fill the form (owner, 2026-08-24) ------------
 
