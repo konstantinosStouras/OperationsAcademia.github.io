@@ -2369,9 +2369,8 @@
   "lastPosted": "2025-06-06"
  },
  {
-  "id": "eth-zurich__eth-zurich__management-technology-and-economics",
+  "id": "eth-zurich____management-technology-and-economics",
   "institution": "ETH Zurich",
-  "school": "ETH Zurich",
   "department": "Management, Technology and Economics",
   "deptUrl": "https://mtec.ethz.ch/people/scientists/professors.html",
   "sources": [
@@ -3567,12 +3566,25 @@
   "lng": 72.9172156
  },
  {
-  "id": "indian-school-of-business__indian-school-of-business__operations-management",
-  "institution": "Indian School of Business",
-  "school": "Indian School of Business",
+  "id": "indian-school-of-business____operations",
+  "institution": "Indian School of Business (ISB)",
+  "department": "Operations",
+  "type": "Business School",
+  "country": "India",
+  "sources": [
+   "postings"
+  ],
+  "n": 1,
+  "lastPosted": "2014-08-29"
+ },
+ {
+  "id": "indian-school-of-business____operations-management",
+  "institution": "Indian School of Business (ISB)",
   "department": "Operations Management",
   "type": "Business School",
   "country": "India",
+  "address": "Gachibowli, Hyderabad, Telangana 500032, India",
+  "mapUrl": "https://goo.gl/maps/PdhGJ",
   "facultyUrl": "http://www.isb.edu/faculty-research/faculty/directory",
   "deptUrl": "https://www.isb.edu/faculty-and-research/faculty-directory?area=operations-management",
   "characteristics": [
@@ -3588,19 +3600,9 @@
    "seed"
   ],
   "n": 3,
-  "lastPosted": "2025-08-07"
- },
- {
-  "id": "indian-school-of-business____operations",
-  "institution": "Indian School of Business (ISB)",
-  "department": "Operations",
-  "type": "Business School",
-  "country": "India",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2014-08-29"
+  "lastPosted": "2025-08-07",
+  "lat": 17.4358411,
+  "lng": 78.3467857
  },
  {
   "id": "indiana-state-university____ba",
@@ -5549,9 +5551,8 @@
   "lastPosted": "2024-08-26"
  },
  {
-  "id": "nova-school-of-business-and-economics__nova-school-of-business-and-economics__operations-technology-and-innovation-management",
+  "id": "nova-school-of-business-and-economics____operations-technology-and-innovation-management",
   "institution": "NOVA School of Business and Economics",
-  "school": "Nova School of Business and Economics",
   "department": "Operations, Technology and Innovation Management",
   "type": "Business School",
   "deptUrl": "https://www.novasbe.unl.pt/en/faculty-research/faculty",

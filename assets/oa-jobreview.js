@@ -108,10 +108,18 @@
 
   /** The line the card publishes: the school and the department joined. ONE
       definition of that join lives in _scraper/vocab.mjs and this is its
-      browser twin — it only ever previews what applyEdits will derive. */
-  function joinDepartment(school, unit) {
-    return [String(school || '').trim(), String(unit || '').trim()]
-      .filter(Boolean).join(', ');
+      browser twin — it only ever previews what applyEdits will derive.
+      A school that repeats the institution's name is dropped from it, as
+      settlePlace's canonColumns() drops it on save (oa-schools.js
+      schoolRepeatsInstitution): the maintainer's preview must not read
+      "INSEAD, Decision Sciences" under INSEAD when the site will publish
+      "Decision Sciences". Without the institution it joins as it always did. */
+  function joinDepartment(school, unit, institution) {
+    var S = window.OASchools;
+    var s = String(school || '').trim();
+    if (s && institution && S && S.schoolRepeatsInstitution &&
+        S.schoolRepeatsInstitution(s, institution)) s = '';
+    return [s, String(unit || '').trim()].filter(Boolean).join(', ');
   }
 
   function $(id) { return document.getElementById(id); }
@@ -350,8 +358,8 @@
        `row.department` directly, so a card whose school had just been
        corrected still carried the old line above the boxes that had corrected
        it. */
-    var line = joinDepartment(fieldValue(doc, 'school'), fieldValue(doc, 'unit'))
-      || fieldValue(doc, 'department') || '';
+    var line = joinDepartment(fieldValue(doc, 'school'), fieldValue(doc, 'unit'),
+      fieldValue(doc, 'institution')) || fieldValue(doc, 'department') || '';
 
     return '<header>' +
         '<strong>' + esc(fieldValue(doc, 'institution') || row.id || 'Untitled posting') + '</strong>' +
@@ -535,7 +543,7 @@
       institution: fieldValue(doc, 'institution'),
       school: school,
       unit: unit,
-      department: joinDepartment(school, unit) || row.department || '',
+      department: joinDepartment(school, unit, fieldValue(doc, 'institution')) || row.department || '',
       levels: fieldValue(doc, 'levels'),
       adUrl: fieldValue(doc, 'adUrl')
     };
@@ -868,9 +876,10 @@
 
     function preview() {
       if (!derived) return;
-      var line = joinDepartment(school.value, unit.value);
+      var line = joinDepartment(school.value, unit.value, inst.value);
       derived.textContent = line ? 'Published as: ' + line : '';
     }
+    inst.addEventListener('input', preview);
     school.addEventListener('input', preview);
     unit.addEventListener('input', preview);
     preview();
@@ -926,7 +935,7 @@
    */
   function userCardHtml(it) {
     var d = it.data || {};
-    var line = joinDepartment(d.school, d.unit) || d.department || '';
+    var line = joinDepartment(d.school, d.unit, d.institution) || d.department || '';
     var ad = safeHref(d.adUrl);
     return '<header>' +
         '<strong>' + esc(d.institution || 'Untitled posting') + '</strong>' +

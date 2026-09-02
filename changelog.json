@@ -3,11 +3,18 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
-     "id": "posting-id-on-card",
-     "date": "2026-09-02",
-     "title": "Every job posting shows its own ID",
-     "summary": "The last line of every job posting now gives its OA posting ID, the one name the site uses for that posting everywhere, so you can quote it when you write to us about it. The ID is a link to the posting's own page, and a posting made through the site's form shows the reference number you were given beside it.",
-     "url": "/jobs.html"
+      "id": "mandatory-school-and-department",
+      "date": "2026-09-02",
+      "title": "A new posting names its school and its department",
+      "summary": "The posting form now asks for the school and the department on every new posting, beside the fields made mandatory earlier today. A place with no separate school, such as INSEAD or IE Business School, repeats the institution's name in the School box; the site shows that name once on the posting, never twice, and the form says so as you type. Correcting an older posting works exactly as before.",
+      "url": "/post-a-job.html"
+    },
+    {
+      "id": "posting-id-on-card",
+      "date": "2026-09-02",
+      "title": "Every job posting shows its own ID",
+      "summary": "The last line of every job posting now gives its OA posting ID, the one name the site uses for that posting everywhere, so you can quote it when you write to us about it. The ID is a link to the posting's own page, and a posting made through the site's form shows the reference number you were given beside it.",
+      "url": "/jobs.html"
     },
     {
       "id": "mandatory-job-posting-fields",

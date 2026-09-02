@@ -221,16 +221,26 @@
                       </div>
 
                       <div class="oa-row">
+                        <!-- Both mandatory for a NEW posting (owner, 2026-09-02);
+                             see the note on the department's-own-page field
+                             below for the edit-mode exemption. A school that
+                             repeats the institution's name is how a place with
+                             no separate school answers, and the canon
+                             (assets/oa-schools.js, schoolRepeatsInstitution,
+                             the last word of every canon path) drops it so the
+                             name publishes once. -->
                         <div class="oa-field">
-                          <label for="f-school">School, faculty or college</label>
-                          <p class="oa-hint">For example &ldquo;Fuqua School of Business&rdquo;. Leave
-                          empty if the department sits directly under the university.</p>
-                          <input type="text" id="f-school" name="school" maxlength="160">
+                          <label for="f-school">School, faculty or college <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
+                          <p class="oa-hint">For example &ldquo;Fuqua School of Business&rdquo;. If your
+                          institution has no separate school (INSEAD or IE Business School, say),
+                          repeat the institution&rsquo;s name here. It is shown once on the posting,
+                          never twice.</p>
+                          <input type="text" id="f-school" name="school" maxlength="160" required>
                         </div>
                         <div class="oa-field">
-                          <label for="f-unit">Department, area or group</label>
+                          <label for="f-unit">Department, area or group <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
                           <p class="oa-hint">For example &ldquo;Operations Management group&rdquo;.</p>
-                          <input type="text" id="f-unit" name="unit" maxlength="160">
+                          <input type="text" id="f-unit" name="unit" maxlength="160" required>
                         </div>
                       </div>
 
@@ -360,8 +370,9 @@
                            meets it in one flow; collect() never reads it into
                            the submission document.
 
-                           This field, the characteristics below and the chair
-                           pair further down are mandatory for a NEW posting
+                           This field, the school and department above, the
+                           characteristics below and the chair pair further down
+                           are mandatory for a NEW posting
                            (owner, 2026-09-02) and only there: the .oa-req-new
                            marks and the required attributes are lifted by
                            enterEditMode(), and collect() skips the rule under

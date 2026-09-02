@@ -1073,7 +1073,30 @@
       if (homes && homes[fold(unit)]) school = canonSchool(homes[fold(unit)], institution);
     }
 
+    /* THE SCHOOL THAT REPEATS THE UNIVERSITY IS NO SCHOOL (owner, 2026-09-02).
+       The posting form asks for a school on every new posting, and a place
+       with no separate school — INSEAD, IE Business School — is told to
+       repeat the institution's name there. That name must not publish twice
+       ("INSEAD — INSEAD, Decision Sciences"), so it is dropped HERE, the
+       last word of every canon path: the form's own preview, the review
+       card, the build, the sheet ingest and the directory all read one rule.
+       LAST on purpose — the curated fill above can put back a school that is
+       the university's own name (ETH Zurich's seed row), and a fold that ran
+       before it would be undone; run after, a second pass changes nothing. */
+    if (schoolRepeatsInstitution(school, institution)) school = '';
+
     return { institution: institution, school: school, unit: unit };
+  }
+
+  /** True when the school is the institution's own name said again — a
+      LITERAL repeat (case, accents and punctuation folded, a leading "The"
+      and a trailing acronym set aside), never the alias-aware
+      institutionKey: that reads "ESSEC Business School" as ESSEC itself,
+      and a university's school of the same family name is a real school. */
+  function schoolRepeatsInstitution(school, institution) {
+    var s = fold(dropAcronym(clean(school))).replace(/^the /, '');
+    var u = fold(dropAcronym(clean(institution))).replace(/^the /, '');
+    return !!s && !!u && s === u;
   }
 
   /** True when the value is already the name we publish. */
@@ -1376,6 +1399,7 @@
     fold: fold,
     canonInstitution: canonInstitution,
     institutionKey: institutionKey,
+    schoolRepeatsInstitution: schoolRepeatsInstitution,
     slugPart: slugPart,
     directoryRowKey: directoryRowKey,
     canonSchool: canonSchool,
