@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T04:06:41.682Z",
+ "generated": "2026-09-02T08:06:34.018Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -1214,6 +1214,10 @@
    "n": 1
   },
   {
+   "v": "Universidade Católica Portuguesa",
+   "n": 1
+  },
+  {
    "v": "Universitat Pompeu Fabra",
    "n": 1
   },
@@ -2181,6 +2185,10 @@
   },
   {
    "v": "Carlos Alvarez College of Business",
+   "n": 1
+  },
+  {
+   "v": "Católica-Lisbon School of Business and Economics",
    "n": 1
   },
   {
@@ -3799,6 +3807,10 @@
   },
   {
    "v": "Operations and Analytics Department",
+   "n": 1
+  },
+  {
+   "v": "Operations and Data Science",
    "n": 1
   },
   {
@@ -9170,6 +9182,19 @@
    "units": [],
    "bySchool": {}
   },
+  "Universidade Católica Portuguesa": {
+   "schools": [
+    "Católica-Lisbon School of Business and Economics"
+   ],
+   "units": [
+    "Operations and Data Science"
+   ],
+   "bySchool": {
+    "Católica-Lisbon School of Business and Economics": [
+     "Operations and Data Science"
+    ]
+   }
+  },
   "Universitat Pompeu Fabra": {
    "schools": [],
    "units": [
@@ -11558,6 +11583,9 @@
   ],
   "Carroll School of Management": [
    "Business Analytics"
+  ],
+  "Católica-Lisbon School of Business and Economics": [
+   "Operations and Data Science"
   ],
   "Charles H. Lundquist College of Business": [
    "Operations and Business Analytics"
