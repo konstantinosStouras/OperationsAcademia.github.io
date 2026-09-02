@@ -469,6 +469,39 @@ which is stronger than recomputing the window in Node because it cannot
 disagree with what the page is showing. The market-year fixture's own "rolled"
 row is dated for the same reason: to stay in the past whatever day this runs.
 
+### …and every card ends with the posting's own ID
+
+Owner, 2026-09-02: *"add the OA job posting ID to each job posting at the
+bottom of it to be publicly shown for easy reference."* The id is the one name
+a posting has everywhere — the permalink (`?job=<id>`), the join key for edits
+and takedowns, the row the Admin area and the run logs name — and until now
+nothing on the card showed it, so a reader writing in about a posting could
+only describe it, and the maintainer could only guess which one they meant.
+
+**`OAJobNav.refRow(row)` is the one definition**, drawn as the LAST row of the
+details on every list that draws a posting (`jobs.html`, the one-pager's
+teaser and `previous-markets.html`): the id as a link to its own permalink
+(`hrefFor`, so "copy link address" is the shareable form of the same
+reference), with the form's reference number beside it where the posting has
+one — that is the number the poster was told to keep, and the two together
+answer both people. It lives in `oa-jobnav.js` because that module already
+owns `hrefFor`, and a row that names a page belongs beside the rule that
+decides which page. The html carries its own escaping: an id is derived from
+a name somebody typed.
+
+**"Publicly shown" means every signed-in reader, not the maintainer alone**
+— it is a card row like the others, so the gate treats it as one: a reader
+who has not registered sees its LABEL in the blurred strip and nothing else,
+which is the same answer the gate gives every other detail. The leak check
+skips `id` already (it is the element's own id attribute), and the reference
+never reaches a locked card because no row does.
+
+Tests: `testJobNavModule` (the row's label and link, the reference beside it,
+a crawled posting showing the id alone, markup rendered inert, and the wiring
+on all three pages — last row, through the module, module loaded first) and
+the gated-list block in `page-test.mjs`, which opens a card signed in on both
+pages and reads the last row against the card's own element id.
+
 ## The HigherEdJobs postings are checked against their own ads
 
 The tracking sheet has no deadline column for most rows, so they reach the site

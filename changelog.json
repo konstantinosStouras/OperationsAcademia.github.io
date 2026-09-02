@@ -10,6 +10,13 @@
       "url": "/post-a-job.html"
     },
     {
+      "id": "posting-id-on-card",
+      "date": "2026-09-02",
+      "title": "Every job posting shows its own ID",
+      "summary": "The last line of every job posting now gives its OA posting ID, the one name the site uses for that posting everywhere, so you can quote it when you write to us about it. The ID is a link to the posting's own page, and a posting made through the site's form shows the reference number you were given beside it.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "mandatory-job-posting-fields",
       "date": "2026-09-02",
       "title": "A new job posting names its department and its chair",
