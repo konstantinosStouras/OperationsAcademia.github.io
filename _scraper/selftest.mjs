@@ -44,7 +44,7 @@ import {
   sheetDay, daysBetween, deadlineDay, classifyTab, isIntroTab, conventionalTabs,
   normHeader, mapColumns,
   inferColumns, resolveColumns, looksLikeData, repairColumns, institutionColumn,
-  levelsFromRank, typeFromNames, rowsFromTab, collectRows,
+  levelsFromRank, typeFromNames, rowsFromTab, collectRows, carryUnreadColumns,
   stampAddedAt, serialiseSheetRows, buildSheetMeta, stalenessOf, shouldWarn,
   tabsFromHtml, sheetIdsFromHtml, sheetId, sheetCsvUrl, sheetHtmlUrl,
   emptyRegistry, adoptSheets, activeSheets, rollRegistry,
@@ -3811,6 +3811,54 @@ function testChanges() {
   ok(!renderChangesHtml({ edits: [], takedowns: [], added: 0 }),
     'nothing changed renders as nothing');
 
+  /* ---- WHO edited it (owner, 2026-09-02) ------------------------------
+
+     "for each edit (1) the name and email of user who edited". The message
+     listed eight "Edited" sections and named nobody, so a run in which the
+     tracking-sheet crawler republished a degraded read read exactly like
+     eight people editing postings. The line is the shared `postedBy` rule,
+     as in the review and submission mailers, so the three cannot disagree
+     about what a crawled posting is. */
+  const changed = collectChanges([a], [edited], []);
+  const byUser = renderChangesHtml(changed, {
+    whoFor: () => postedBy({ firstName: 'Ada', lastName: 'Lovelace', email: 'ada@x.edu' }),
+  });
+  ok(/Posted by:/.test(byUser), 'each section says who put the posting on the site');
+  ok(/Ada Lovelace/.test(byUser) && /ada@x\.edu/.test(byUser),
+    'a person is named, with the address they gave');
+  ok(/mailto:ada@x\.edu/.test(byUser), 'as a mailto, so replying is one click');
+
+  const byCrawler = renderChangesHtml(changed, {
+    whoFor: (row) => postedBy({ source: 'jobmarket-sheet' }, row),
+  });
+  ok(/auto-crawler from the OM Job Market tracking sheet/.test(byCrawler),
+    'and a crawled posting reads as the crawler — the eight the owner was sent');
+  ok(!/Posted by:[\s\S]{0,80}@/.test(byCrawler),
+    'never as a nameless person: a workbook row has no submitter to name');
+
+  ok(!/Posted by:/.test(renderChangesHtml(changed)),
+    'a caller that cannot answer says nothing rather than guessing');
+
+  const tookDown = renderChangesHtml(collectChanges([a], [], ['OA-JOB-1']), {
+    whoFor: () => postedBy({ firstName: 'Ada', email: 'ada@x.edu' }),
+  });
+  ok(/Posted by:/.test(tookDown), 'a takedown answers the same question');
+
+  const nasty = renderChangesHtml(changed, {
+    whoFor: () => ({ kind: 'user', name: '<script>x</script>', email: 'a"b@x.edu',
+                     text: 'x' }),
+  });
+  ok(!/<script>/.test(nasty), 'a name carrying markup is rendered inert');
+
+  /* The wiring, because the join needs Firestore to run for real: `ref` is
+     issued by the FORM and by nothing else, so it is the only key that can
+     find the POSTER's own document rather than a place and a day. */
+  const whoSrc = readFileSync(path.join(HERE, 'build-jobs.mjs'), 'utf8');
+  ok(/renderChangesHtml\(changes, \{ whoFor \}\)/.test(whoSrc),
+    'the build passes the attribution into the message it sends');
+  ok(/docByRef\.set\(v\.ref, v\)/.test(whoSrc),
+    'joined on the reference the form issues, never on a derived id');
+
   /* ---- "22 edited" every day, and nobody had edited anything ----------
 
      The owner was getting a daily "[OA] Job postings changed: 22 edited"
@@ -4387,6 +4435,68 @@ function testJobMarketSheetRows() {
   const meta = buildSheetMeta(withHead.rows, { generated: 'x' });
   eq(meta.count, 4, 'the meta file counts the postings');
   eq(meta.newestPosted, '2026-08-12', 'and knows the newest');
+}
+
+/* ------------------- a read without its header cannot un-say what it said
+
+   The 2026-09-01 02:01 read caught the crowdsourced "2026 Jobs" tab mid-edit:
+   the header row was momentarily unrecognisable, the read fell to whole-tab
+   inference — which structurally cannot find the deadline cell or the notes
+   column — and eight served postings had their deadlines published back to
+   "Until filled." for one run. The admin was e-mailed an "edit" for each,
+   which is how it was noticed at all (owner, 2026-09-02: "you are not editing
+   these jobs all the time, right?" territory again, one layer down). The
+   23:23 read before and the 17:26 read after both saw the header.
+
+   The rule under test: A COLUMN THE READ COULD NOT FIND CHANGES NOTHING. */
+function testJobMarketSheetCarry() {
+  const HEAD = ['University', 'Country', 'Date', 'Field', 'Position', 'Deadline', 'Comment'];
+  const BODY = [
+    ['Alpha University', 'USA', '25-Aug-26', 'OM', 'AP', '20-Oct-26', ''],
+    ['Beta University', 'USA', '26-Aug-26', 'SCM', 'AP', '', 'Teaching post, two years'],
+    ['Gamma University', 'USA', '27-Aug-26', 'BA', 'AP', '', ''],
+  ];
+  const at = { tab: '2026 Jobs', kind: 'jobs', sheetId: 'S', minYear: 2026 };
+
+  const good = rowsFromTab(csvOf([HEAD, ...BODY]), at);
+  ok(!good.inferred, 'the fixture header is recognised');
+  ok(good.columns.includes('deadline') && good.columns.includes('notes'),
+    'and names the deadline and the notes — a recognised header is the tab\'s own word');
+
+  const bad = rowsFromTab(csvOf(BODY), at);
+  ok(bad.inferred, 'the same tab without its header falls to whole-tab inference');
+  ok(!bad.columns.includes('deadline') && !bad.columns.includes('notes'),
+    'which structurally cannot find the deadline cell or the notes column');
+  eq(bad.rows.map((r) => r.id), good.rows.map((r) => r.id),
+    'while the rows keep their identity, which is what the carry joins on');
+  eq(bad.rows.find((r) => r.institution === 'Alpha University').applyBy, 'Until filled.',
+    'so the degraded read, published as it stands, un-says every deadline — the defect');
+
+  const reads = [{ sheet: 'S', tab: '2026 Jobs', inferred: bad.inferred, columns: bad.columns }];
+  const { rows: kept, carried } = carryUnreadColumns(bad.rows, good.rows, reads);
+
+  const alpha = kept.find((r) => r.institution === 'Alpha University');
+  eq(alpha.applyByDate, '2026-10-20', 'the deadline the header-read published is kept');
+  eq(alpha.applyBy, 'October 20, 2026', 'with its display line');
+  eq(alpha.years, good.rows.find((r) => r.institution === 'Alpha University').years,
+    'and the market-year span is re-read off the dates as they finally stand');
+  eq(kept.find((r) => r.institution === 'Beta University').comments,
+    'Teaching post, two years', 'the notes column is kept the same way');
+  const gAt = bad.rows.findIndex((r) => r.institution === 'Gamma University');
+  ok(kept[gAt] === bad.rows[gAt],
+    'a row with nothing to carry is the same object — by value, the healCountry shape');
+  eq(carried.length, 2, 'and the carry reports exactly what it kept, for the log');
+
+  eq(carryUnreadColumns(kept, good.rows, reads).carried.length, 0,
+    'idempotent: a second pass carries nothing more');
+  eq(carryUnreadColumns(bad.rows, good.rows,
+    [{ sheet: 'S', tab: '2026 Jobs', inferred: false, columns: good.columns }]).carried.length, 0,
+    'a tab whose header WAS read carries nothing — a deadline genuinely cleared ' +
+    'in the workbook still clears');
+  eq(carryUnreadColumns(bad.rows, [], reads).carried.length, 0,
+    'and a posting the site does not know yet has nothing to carry from');
+  ok(carryUnreadColumns(bad.rows, good.rows, []).rows === bad.rows,
+    'no inferred tab, no work at all');
 }
 
 function testJobMarketSheetAddedAt() {
@@ -6739,6 +6849,21 @@ async function testJobMarketSheetWiring() {
   ok(sync.includes('the dataset was left exactly as it is'),
     'a workbook that cannot be read writes nothing at all');
   ok(sync.includes('SHRINK_FLOOR'), 'and a read that comes back suspiciously small is refused');
+
+  /* …and the same rule ONE COLUMN AT A TIME: a tab read without its header
+     cannot see the deadline cell or the notes column, so those are carried
+     rather than published as empty (testJobMarketSheetCarry has the defect
+     itself). Wiring, because the sync needs the workbook to run for real. */
+  ok(/carryUnreadColumns\(collected\.rows, known, tabReads\)/.test(sync),
+    'the sync carries the columns a degraded read could not see');
+  ok(/carriedBack\.rows/.test(sync) && !/fillSchoolFromDirectory\(r, vocab\)[\s\S]{0,120}collected\.rows\n/.test(sync),
+    'and everything downstream reads the CARRIED rows — a carry nothing consumes ' +
+    'is a fix that is not applied');
+  ok(/tabReads: perTab\.map/.test(sync),
+    'the read reports how each tab was read, which is what says a carry is needed');
+  ok(/read without its header/.test(sync),
+    'and a degraded read is named in the log — the last one went out as eight ' +
+    'phantom edits with nothing anywhere saying why');
 
   const wf = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-jobmarket-sheet.yml'), 'utf8');
@@ -11460,6 +11585,7 @@ if (isMain(import.meta.url)) {
   testJobMarketSheetParsing();
   testJobMarketSheetColumns();
   testJobMarketSheetRows();
+  testJobMarketSheetCarry();
   testJobMarketSheetAddedAt();
   testJobMarketSheetMislabelledHeader();
   testJobMarketSheetTabCycle();

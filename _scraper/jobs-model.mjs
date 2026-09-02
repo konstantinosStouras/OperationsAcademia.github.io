@@ -1671,15 +1671,35 @@ export function collectChanges(existingRows, freshRows, removeRefs = [], removeI
 
 /** The admin e-mail body: one section per changed posting, before/after per
     field. Self-contained HTML (its own escaping) so the model stays free of
-    the mail plumbing. */
-export function renderChangesHtml({ edits, takedowns, added }) {
+    the mail plumbing.
+
+    `whoFor(row)` answers WHO put the posting on the site, as a `postedBy`
+    object \u2014 the shared rule, so this message cannot disagree with the review
+    and submission mailers about what a crawled posting is. The owner's report
+    (2026-09-02) was exactly this line missing: eight "edited" sections with
+    nothing anywhere saying the editor was the tracking-sheet crawler and not
+    a person, so the message read as eight users editing postings. A user is
+    named with the address they gave, as a mailto like the submissions
+    mailer's line; a crawled row names its source and never a person. */
+export function renderChangesHtml({ edits, takedowns, added }, { whoFor = null } = {}) {
   const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const byLine = (row) => {
+    const who = whoFor && row ? whoFor(row) : null;
+    if (!who || !who.text) return '';
+    const shown = who.kind === 'user' && who.email
+      ? (who.name ? esc(who.name) + ' ' : '') +
+        '<a href="mailto:' + esc(who.email) + '">' + esc(who.email) + '</a>'
+      : esc(who.text);
+    return `<p style="margin:0 0 8px;color:#5a5f6b;font-size:13px;">
+        <strong style="color:#222">Posted by:</strong> ${shown}</p>`;
+  };
 
   const section = (title, row, rowsHtml) =>
     `<h3 style="margin:18px 0 4px;font-size:16px;">${esc(title)}</h3>
      <p style="margin:0 0 8px;color:#555;">${esc(row.institution)}${row.department ? ' \u2014 ' + esc(row.department) : ''}
-        ${row.ref ? ' \u00b7 ' + esc(row.ref) : ''}</p>${rowsHtml}`;
+        ${row.ref ? ' \u00b7 ' + esc(row.ref) : ''}</p>${byLine(row)}${rowsHtml}`;
 
   const table = (fields) =>
     `<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;">

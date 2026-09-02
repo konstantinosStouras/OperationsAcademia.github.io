@@ -911,7 +911,7 @@ export function rowsFromTab(csv, {
   if (head.missing.length) {
     return { rows: [], skipped: 0, unmapped: head.unmapped || [], missing: head.missing,
              unlinked: 0, headerAt: head.at, inferred: !!head.inferred,
-             repaired: head.repaired || [] };
+             columns: Object.keys(head.index || {}), repaired: head.repaired || [] };
   }
 
   const { index } = head;
@@ -1067,7 +1067,96 @@ export function rowsFromTab(csv, {
   }
 
   return { rows, skipped, unmapped: head.unmapped || [], missing: [], unlinked,
-           headerAt: head.at, inferred: !!head.inferred, repaired: head.repaired || [] };
+           headerAt: head.at, inferred: !!head.inferred,
+           columns: Object.keys(index), repaired: head.repaired || [] };
+}
+
+/* -------------------------------------- a read without its header, mid-edit
+
+   THE FAILURE THIS ANSWERS (owner, 2026-09-02: eight "edited" postings in the
+   admin e-mail that nobody had edited). The workbook is crowdsourced and
+   edited live; on 2026-09-01 the 02:01 read caught "2026 Jobs" mid-edit —
+   its header row momentarily unrecognisable, so the read fell to whole-tab
+   inference — while the 23:23 read before it and the 17:26 read after it
+   both saw the header. Inference finds the institution, the date, the link,
+   the country, the area and the rank from the DATA, and can never find the
+   DEADLINE CELL or the NOTES column — a column is not named after either of
+   the things it detects. So the degraded read published every deadline on
+   that tab as "Until filled." and every notes carry as empty; eight served
+   postings were "edited" back to dateless, the maintainer was e-mailed a
+   before/after for each, and the next healthy read reverted the lot.
+
+   THE RULE: A COLUMN THE READ COULD NOT FIND CHANGES NOTHING — the same rule
+   the sync already applies to a workbook it cannot read, one column at a
+   time. For a row from an INFERRED tab only (a recognised or repaired header
+   is the tab's own word: a column such a header does not name genuinely is
+   not on the tab), a field whose column the inference did not claim keeps
+   what the site already knows for that posting — the committed file's row,
+   or the review queue's own copy for a posting still pending. Fill-empty,
+   by value, idempotent; a run in which the header reads normally carries
+   nothing, so a deadline genuinely cleared in the workbook still clears.
+
+   `year` and `id` are deliberately left as derived: the tab-cycle floor is
+   what keeps them stable through a dateless read (it did, for all eight),
+   and an id rewritten here would desync from everything joined on it.       */
+export function carryUnreadColumns(rows, known = [], tabs = []) {
+  const inferredTabs = new Map();
+  for (const t of tabs || []) {
+    if (!t || !t.inferred) continue;
+    inferredTabs.set(`${t.sheet || ''}!${t.tab || ''}`, new Set(t.columns || []));
+  }
+  if (!inferredTabs.size || !known.length) return { rows, carried: [] };
+
+  const prevById = new Map();
+  for (const p of known) {
+    if (p && p.id && !prevById.has(p.id)) prevById.set(p.id, p);
+  }
+
+  const carried = [];
+  const out = rows.map((r) => {
+    const cols = inferredTabs.get(`${r._sheet || ''}!${r._tab || ''}`);
+    if (!cols) return r;
+    const prev = prevById.get(r.id);
+    if (!prev) return r;
+
+    const take = {};
+    /* The deadline cell: never claimed by inference, and it settles all three
+       date fields at once, so they move together (the two-deadlines rule).
+       Only onto a row the degraded read left open-ended — which is every row
+       such a read produces — so this can never overwrite a date. */
+    if (!cols.has('deadline') && !r.applyByDate && !r.reviewDate &&
+        (!r.applyBy || r.applyBy === 'Until filled.')) {
+      for (const k of ['applyBy', 'applyByDate', 'reviewDate']) {
+        if ((prev[k] || '') !== (r[k] || '')) take[k] = prev[k] || '';
+      }
+    }
+    /* The comments are built from the notes column and the deadline cell's
+       unbelieved words — both invisible to inference. */
+    if (!cols.has('notes') && !cols.has('deadline') && !r.comments && (prev.comments || '')) {
+      take.comments = prev.comments;
+    }
+    /* The columns inference DOES look for may still have gone unclaimed on a
+       thin sample; each is carried only when its column was not found and
+       the fresh row came back without it. */
+    if (!cols.has('rank') && Array.isArray(prev.levels) && prev.levels.length &&
+        JSON.stringify(prev.levels) !== JSON.stringify(r.levels || [])) {
+      take.levels = prev.levels.slice();
+    }
+    if (!cols.has('area') && !r.school && !r.unit && (prev.department || '')) {
+      take.department = prev.department;
+      take.school = prev.school || '';
+      take.unit = prev.unit || '';
+    }
+    if (!cols.has('country') && !r.country && (prev.country || '')) take.country = prev.country;
+    if (!cols.has('link') && !r.adUrl && (prev.adUrl || '')) take.adUrl = prev.adUrl;
+
+    if (!Object.keys(take).length) return r;
+    carried.push({ id: r.id, tab: r._tab || '', fields: Object.keys(take).sort() });
+    // the span is read off the dates as they finally stand, like every writer
+    return withMarketYears({ ...r, ...take });
+  });
+
+  return { rows: out, carried };
 }
 
 /**

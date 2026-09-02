@@ -59,7 +59,7 @@ import {
   SEED_SHEET_ID, STALE_DAYS, STALE_REPEAT_DAYS,
   sheetCsvUrl, sheetHtmlUrl, sheetEditUrl, sheetId,
   tabsFromHtml, sheetIdsFromHtml, classifyTab, isIntroTab, conventionalTabs,
-  rowsFromTab, collectRows, stampAddedAt, serialiseSheetRows, buildSheetMeta,
+  rowsFromTab, collectRows, stampAddedAt, carryUnreadColumns, serialiseSheetRows, buildSheetMeta,
   stalenessOf, shouldWarn, emptyRegistry, adoptSheets, activeSheets, rollRegistry,
 } from './jobmarket-sheet.mjs';
 import { applyVerified, emptyCache } from './higheredjobs.mjs';
@@ -439,6 +439,11 @@ async function readWorkbook(id, { minYear, now }) {
   return {
     ok: true, id, rows, links, notes, dead,
     tabs: (wanted.length ? wanted : tabs).map((t) => t.name),
+    /* how each tab was read — carryUnreadColumns needs to know which tabs
+       fell to whole-tab inference and which columns that inference claimed */
+    tabReads: perTab.map((p) => ({
+      sheet: id, tab: p.tab, inferred: !!p.inferred, columns: p.columns || [],
+    })),
     newestPosted: rows.reduce((m, r) => (r.posted > m ? r.posted : m), ''),
   };
 }
@@ -598,6 +603,28 @@ async function main() {
       const known = existing.concat(
         (queue.docs || []).map((d) => d.row).filter((r) => r && r.id));
 
+      /* A TAB READ WITHOUT ITS HEADER MUST NOT UN-SAY WHAT THE HEADER SAID.
+         The workbook is edited live, and a read that catches a tab mid-edit
+         can fail to recognise its header row and fall to whole-tab inference
+         — which structurally cannot see the deadline cell or the notes
+         column. On 2026-09-01 exactly that published eight postings'
+         deadlines back to "Until filled." for one run and e-mailed the
+         maintainer an "edit" for each. A column the read could not find
+         changes nothing: those fields are carried from what the site already
+         knows — the committed file, or the queue's own copy of a pending row
+         (carryUnreadColumns in jobmarket-sheet.mjs, where the read rules
+         live). LOUD, because a degraded read the log never names is how the
+         last one went out as eight phantom edits. */
+      const tabReads = [].concat(...results.map((x) => x.tabReads || []));
+      const carriedBack = carryUnreadColumns(collected.rows, known, tabReads);
+      if (carriedBack.carried.length) {
+        const tabsHit = [...new Set(carriedBack.carried.map((c) => c.tab))].join('", "');
+        warn(`tab "${tabsHit}": read without its header (columns inferred) — ` +
+             `${carriedBack.carried.length} posting(s) kept their deadline/notes ` +
+             'from the previous read instead of losing them to a read that ' +
+             'cannot see those columns');
+      }
+
       /* THE SCHOOL THE WORKBOOK NEVER NAMED. Its hiring-unit column holds the
          department — the more specific of the two, and the one the advert
          names — so fifteen of its sixteen postings arrived with a department
@@ -616,12 +643,12 @@ async function main() {
       const vocab = await loadVocab();
       let filled = 0;
       const placed = vocab
-        ? collected.rows.map((r) => {
+        ? carriedBack.rows.map((r) => {
           const out = fillSchoolFromDirectory(r, vocab);
           if (out !== r) filled++;
           return out;
         })
-        : collected.rows;
+        : carriedBack.rows;
       if (filled) {
         log(`${filled} posting(s) gained the school their department sits in, ` +
             'from the site\'s own Universities directory');

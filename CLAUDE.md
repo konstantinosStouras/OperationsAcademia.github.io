@@ -2138,6 +2138,86 @@ rebuild reporting nothing, a collapsed row never counted as new, and the
 build's own source read back to check it diffs `rows` and never `freshVisible`
 again (reproducing it for real needs Firestore and the workbook).
 
+### …and it says WHO edited, or the crawler reads as eight people
+
+Owner, 2026-09-02, of an "[OA] Job postings changed: 8 edited": *"for each edit
+(1) the name and email of user who edited"*. Every one of those eight was the
+tracking-sheet crawler, and the message gave the maintainer no way to know it —
+eight "Edited" headings, a before/after each, and nobody named. A message whose
+whole subject is that something changed has to answer who changed it, or every
+pipeline hiccup reads as users editing postings.
+
+**It is `postedBy`, the shared rule** (`jobs-model.mjs`) — the same one the
+review and submission mailers print, so the three cannot disagree about what a
+crawled posting is. `renderChangesHtml` takes a `whoFor(row)` and draws
+*"Posted by:"* under each section: a person by name with their address as a
+`mailto`, a crawled row as *"auto-crawler from the OM Job Market tracking sheet
+(Google Sheets)"*. **A caller that cannot answer says nothing** rather than
+guessing, which is what keeps the renderer usable from a test with no database.
+
+**The join is `ref` and only `ref`.** It is issued by the FORM and by nothing
+else, so it is the one key that finds the POSTER's own document rather than a
+place and a day — the `matchServed` lesson, which cost a poster somebody else's
+posting in their inbox. A row without one is the workbook's or the legacy
+import's, and `postedBy` names the source.
+
+**Only the admin receives this message, and always did**: one `to:`,
+`ADMIN_NOTIFY` or `kstouras@gmail.com`, no list and no other recipient — the
+same address the review and staleness mail goes to. No user has ever been sent
+one, so nothing had to be stopped. What was missing was the line saying so.
+
+### A tab read without its header must not UN-SAY what the header said
+
+Those eight edits were not merely unattributed — they were **wrong**, and they
+reverted themselves. The workbook is crowdsourced and edited live; the
+2026-09-01 02:01 read caught "2026 Jobs" mid-edit with its header row
+momentarily unrecognisable, so `resolveColumns` fell through to whole-tab
+inference. **Inference reads the institution, the date, the link, the country,
+the area and the rank out of the DATA, and can never find the DEADLINE CELL or
+the NOTES column** — a column is not named after either of the things it
+detects. So the tab published every deadline as "Until filled." and every
+comment as empty: eight served postings lost their closing dates for one run,
+the maintainer was mailed a before/after for each, and the 17:26 read — which
+saw the header again — put all eight back.
+
+**The rule is the sync's own, one column at a time: a column the read could not
+find changes nothing.** `carryUnreadColumns` (`jobmarket-sheet.mjs`, pure) is
+the same shape as *"a workbook that cannot be read writes nothing"* and *"an
+unreachable queue changes nothing"*, narrowed from the file to the field. For a
+row from an **inferred** tab only, a field whose column the inference did not
+claim keeps what the site already knows — the committed `data/jobmarket.json`,
+or the review queue's own copy for a posting still pending, which is the same
+"already known" set `stampAddedAt` reads.
+
+Four things make it safe, and each is pinned:
+
+* **An inferred tab only.** A recognised or repaired header is the tab's own
+  word: a column such a header does not name genuinely is not on the tab, so a
+  deadline the maintainer really did clear in the workbook still clears.
+* **Fill-empty and by value**, the `healCountry`/`healPlace` shape — a row with
+  nothing to carry is the same object, and a second pass carries nothing more.
+* **The dates move together** (`applyBy`, `applyByDate`, `reviewDate`), because
+  one cell settles all three, and only onto a row the degraded read left
+  open-ended — so it can never overwrite a date.
+* **`year` and `id` stay derived.** The tab-cycle floor is what holds them
+  steady through a dateless read (it did, for all eight), and an id rewritten
+  here would desync from everything joined on it.
+
+**And a degraded read is now LOUD.** The run warns which tab was read without
+its header and how many postings kept their deadline because of it. The last
+one said only `"2026 Jobs": 129 posting(s) (columns inferred — no header row
+was recognised)` — true, buried, and indistinguishable in the log from the
+tabs that legitimately have no header.
+
+Tests: `testJobMarketSheetCarry` in `selftest.mjs` drives the defect itself —
+one fixture read with its header and without, the degraded read asserted to
+un-say the deadline, the carry putting it back with its span re-read, the
+idempotence, the by-value identity, and the three cases that must carry
+nothing (a header that was read, a posting the site does not know, no inferred
+tab at all) — plus the wiring in `testJobMarketSheetWiring`, including that
+everything downstream consumes the CARRIED rows, since a carry nothing reads
+is a fix that is not applied.
+
 ## A text search holds SEVERAL terms
 
 Every `type: 'text'` filter in `assets/oa-list.js` takes more than one term:
