@@ -5623,6 +5623,63 @@ async function testUniInfo() {
     'off must not gain one because the form was opened');
 }
 
+/* The department's own page, at least one characteristic, and the area
+   coordinator / chair pair are MANDATORY FOR A NEW POSTING (owner,
+   2026-09-02) — and only there. An EDIT is exempt by design: every posting
+   that predates the rule, the crawled mirrors among them, must stay
+   correctable without inventing a chair nobody named — which is also what
+   keeps the maintainer's sheet-mirror hand-over saveable. Pinned here from
+   the sources; the browser halves — the refusal with an error on each of
+   the four, and an old posting still saving with the marks lifted — are
+   measured in page-test.mjs. */
+async function testMandatoryPostingFields() {
+  const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  const tagOf = (id) => {
+    const at = page.indexOf(`id="${id}"`);
+    ok(at > -1, `post-a-job.html carries #${id}`);
+    return page.slice(page.lastIndexOf('<', at), page.indexOf('>', at) + 1);
+  };
+  for (const id of ['f-deptUrl', 'f-chairName', 'f-chairEmail']) {
+    ok(/\brequired\b/.test(tagOf(id)),
+      `post-a-job.html: #${id} is marked required for a new posting`);
+  }
+  /* the CLASS ATTRIBUTE is counted, not the bare string — the page's own
+     comment explains the marks by name, and a guard that cannot tell the
+     explanation from the thing is this file's recorded trap */
+  eq((page.match(/class="oa-req oa-req-new"/g) || []).length, 4,
+    'exactly the four new-posting-only fields carry the oa-req-new mark ' +
+    '— the class enterEditMode() lifts, so a field marked with the plain ' +
+    'oa-req would stay starred on an edit it does not bind');
+  ok(/oa-req-new/.test(page.slice(page.indexOf('id="lbl-chars"'),
+    page.indexOf('</span>', page.indexOf('id="lbl-chars"')))),
+    'the characteristics GROUP is one of the four — no required attribute ' +
+    'can sit on a checkbox group, so the mark is the whole of its declaration');
+
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  const collect = form.slice(form.indexOf('function collect('),
+    form.indexOf('function makeRef('));
+  for (const msg of [
+    "Please give your department's own web page.",
+    'Please tick at least one characteristic.',
+    'Please name the area coordinator or department chair.',
+    'Please give their e-mail address.',
+  ]) {
+    const at = collect.indexOf(msg);
+    ok(at > -1, `collect() refuses a new posting without: "${msg}"`);
+    ok(/EDIT_ID/.test(collect.slice(Math.max(0, at - 300), at)),
+      `…and that requirement is scoped to a NEW posting (EDIT_ID exempts ` +
+      `an edit): "${msg}"`);
+  }
+
+  const editMode = form.slice(form.indexOf('function enterEditMode('),
+    form.indexOf('function boot('));
+  ok(editMode.includes('.oa-req-new'),
+    'enterEditMode() lifts the new-posting-only * marks');
+  ok(editMode.includes("removeAttribute('required')"),
+    '…and the required attributes with them, so the document never claims ' +
+    'a requirement collect() does not enforce there');
+}
+
 async function testRowOverrides() {
   const js = await readFile(path.join(HERE, '..', 'assets', 'oa-rowedit.js'), 'utf8');
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
@@ -11414,6 +11471,7 @@ if (isMain(import.meta.url)) {
   await testDirectoryModel();
   await testDirectoryWiring();
   await testUniInfo();
+  await testMandatoryPostingFields();
   await testRowOverrides();
   await testNewsReview();
   await testNameFixes();

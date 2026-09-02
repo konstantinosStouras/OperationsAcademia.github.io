@@ -1250,6 +1250,19 @@ for (const [name, expect] of [
       const n = document.getElementById('oa-year-note');
       return n ? n.textContent : '';
     });
+    // the department page, a characteristic and the chair pair are mandatory
+    // for a NEW posting (owner, 2026-09-02) — submitting without them is
+    // refused, with an error drawn on each of the four
+    await q.click('#oa-submit');
+    const refused = await q.evaluate(() => ({
+      done: document.getElementById('oa-done').hidden,
+      errs: document.querySelectorAll('.oa-err').length,
+      msg: document.getElementById('oa-msg').textContent,
+    }));
+    await q.fill('#f-deptUrl', 'https://ops.example.edu/department');
+    await q.check('input[name="characteristics"][value="PhD"]');
+    await q.fill('#f-chairName', 'Chair Person');
+    await q.fill('#f-chairEmail', 'chair@example.edu');
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     const ref = await q.textContent('#oa-ref');
@@ -1258,12 +1271,22 @@ for (const [name, expect] of [
       const k = Object.keys(d).find((p) => p.startsWith('jobSubmissions/'));
       return d[k];
     });
-    return { ref, doc, noYearField, yearNote };
+    return { ref, doc, noYearField, yearNote, refused };
   });
+  eq(posted.refused.done, true,
+    'v3 post-a-job: a NEW posting without the mandatory department page, ' +
+    'characteristic and chair pair is refused');
+  eq(posted.refused.errs, 4,
+    'v3 post-a-job: …with an error drawn on each of the four fields');
+  ok(/highlighted fields/.test(posted.refused.msg),
+    'v3 post-a-job: …and the form says to check them');
   ok(/^OA-JOB-\d{6}-[A-Z2-9]{4}$/.test(posted.ref.trim()),
     'v3 post-a-job: the poster is given a quotable reference');
   eq(posted.doc.status, 'queued', 'the submission is queued for the build');
   eq(posted.doc.uid, KEPT, 'and owned by the signed-in poster');
+  eq(posted.doc.chairName, 'Chair Person',
+    'the chair travels with the posting (never published — not in PUBLIC_FIELDS)');
+  eq(posted.doc.characteristics, ['PhD'], 'and so does the ticked characteristic');
   eq(posted.doc.department, 'Business School, Operations',
     'school and unit are joined into the published department line — under the ' +
     'canonical names (assets/oa-schools.js), so "Operations Area" is posted as ' +
@@ -1314,14 +1337,18 @@ for (const [name, expect] of [
     }));
 
     // the poster corrects the link, finishes the posting, and sends it
+    // (a characteristic and the chair pair are mandatory on a new posting)
     await q.fill('#f-deptUrl', 'https://corrected.example/ds');
     await q.fill('#f-country', 'France');
     await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
     await q.check('input[name="levels"][value="Assistant Professor"]');
+    await q.check('input[name="characteristics"][value="PhD"]');
     await q.check('#f-untilFilled');
     await q.fill('#f-firstName', 'Kon');
     await q.fill('#f-lastName', 'Stouras');
     await q.fill('#f-email', 'kon@example.edu');
+    await q.fill('#f-chairName', 'Chair Person');
+    await q.fill('#f-chairEmail', 'chair@example.edu');
     await q.click('#oa-submit');
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     await q.waitForFunction((row) => {
@@ -1449,6 +1476,10 @@ for (const [name, expect] of [
       school: document.getElementById('f-school').value,
       date: document.getElementById('f-applyByDate').value,
       btn: document.getElementById('oa-submit').textContent,
+      // the new-posting-only mandatory fields (chair, department page,
+      // characteristics) must not block an EDIT: j9 predates them and
+      // carries none, and the * marks are lifted with the rule
+      reqMarks: document.querySelectorAll('.oa-req-new').length,
     }));
     await q.fill('#f-institution', 'Edit University (fixed)');
     await q.evaluate(() => document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })));
@@ -1456,8 +1487,10 @@ for (const [name, expect] of [
     await q.waitForSelector('#oa-done:not([hidden])', { timeout: 10000 });
     return { prefill, doc: await q.evaluate(() => window.__fb.dump()['jobSubmissions/j9']) };
   });
-  eq(edited.prefill, { school: 'School X', date: '2026-12-01', btn: 'Save changes' },
-    'v3 edit: the stored posting is loaded back into the form');
+  eq(edited.prefill, { school: 'School X', date: '2026-12-01', btn: 'Save changes', reqMarks: 0 },
+    'v3 edit: the stored posting is loaded back into the form, with the ' +
+    'new-posting-only required marks lifted — an old posting saves without ' +
+    'inventing a chair');
   eq(edited.doc.institution, 'Edit University (fixed)', 'the correction is saved');
   eq(edited.doc.uid, KEPT, 'the owner is unchanged by an edit');
   eq(edited.doc.status, 'queued', 'and the build re-publishes it');

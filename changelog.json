@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "mandatory-job-posting-fields",
+      "date": "2026-09-02",
+      "title": "A new job posting names its department and its chair",
+      "summary": "Posting a job now asks four things it used to leave optional: the department's own web page (which keeps the Universities directory current), at least one characteristic of the school or department (research seminars, a PhD programme, and so on, feeding the Characteristics filter), and the area coordinator or department chair with their e-mail, which are never published and are stored only so the maintainer can reach the right person about the posting. Correcting a posting that predates the change still works exactly as before: an edit is not asked to invent them.",
+      "url": "/post-a-job.html"
+    },
+    {
       "id": "candidate-resources-lit-and-jobs-lists",
       "date": "2026-08-31",
       "title": "Two new resources for candidates",
