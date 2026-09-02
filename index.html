@@ -1036,7 +1036,9 @@
                   html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad', true)
                     : (r.adPending ? '<em>soon to be available</em>' : null) },
                 { label: 'Posted online at', html: link(r.postedAtUrl, r.postedAtLabel || 'link', true) },
-                { label: 'Further info', html: link(r.furtherInfoUrl, 'link', true) }
+                { label: 'Further info', html: link(r.furtherInfoUrl, 'link', true) },
+                // the posting's own id, last — assets/oa-jobnav.js, one definition
+                OAJobNav.refRow(r)
               ];
             }
           }

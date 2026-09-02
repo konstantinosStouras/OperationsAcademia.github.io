@@ -482,7 +482,9 @@
                     html: link(r.adUrl, r.adLabel || 'link to Job ad') },
                   { label: 'Posted online at',
                     html: link(r.postedAtUrl, r.postedAtLabel || 'link') },
-                  { label: 'Further info', html: link(r.furtherInfoUrl, 'link') }
+                  { label: 'Further info', html: link(r.furtherInfoUrl, 'link') },
+                  // the posting's own id, last — assets/oa-jobnav.js, one definition
+                  OAJobNav.refRow(r)
                 ];
               }
             },

@@ -1451,6 +1451,39 @@ async function testJobNavModule() {
     .endsWith('?job=a%20b%26c'), 'the id is encoded into the link, never interpolated');
   eq(NAV.FOCUS_PARAM, 'job', 'and the parameter has one name, shared with the engine');
 
+  /* 3b. THE POSTING'S OWN ID ON THE CARD (owner, 2026-09-02: "add the OA job
+     posting ID to each job posting at the bottom of it to be publicly shown
+     for easy reference"). One definition, drawn as the last row of every job
+     card, linking to the posting's own permalink. */
+  const refRow = NAV.refRow({ ...NANYANG, ref: 'OA-JOB-260924-AB12' }, NOW);
+  eq(refRow.label, NAV.REF_LABEL, 'the row is labelled by the module\'s own constant');
+  eq(NAV.REF_LABEL, 'OA posting ID', 'and the label is the owner\'s words');
+  ok(refRow.html.includes('>2026-nanyang-technological-university-20250924</a>'),
+    'the id itself is the visible text');
+  ok(refRow.html.includes('href="' + NAV.hrefFor(NANYANG, NOW) + '"'),
+    'linking to the posting\'s own permalink, on the page that carries it');
+  ok(refRow.html.includes('reference OA-JOB-260924-AB12'),
+    'and the form\'s reference is printed beside it where the posting has one');
+  ok(!NAV.refRow(MCGILL, NOW).html.includes('reference'),
+    'while a crawled posting, which has none, shows the id alone');
+  eq(NAV.refRow({ posted: '2026-08-01' }, NOW), null,
+    'no id, no row — the engine skips a null');
+  const hostile = NAV.refRow({ id: '<img src=x onerror=alert(1)>', ref: '"><b>x',
+    posted: '2026-08-01', year: 2027 }, NOW).html;
+  ok(!/<img/.test(hostile) && !/<b>/.test(hostile) && /&lt;img/.test(hostile),
+    'an id or reference carrying markup is rendered inert — the row is html, ' +
+    'and an id is derived from a name somebody typed');
+
+  /* …and every list that draws a posting draws it LAST, through the module —
+     the jobs page, the one-pager's teaser and Previous markets. */
+  for (const pg of ['jobs.html', 'index.html', 'previous-markets.html']) {
+    const src = await readFile(path.join(HERE, '..', pg), 'utf8');
+    ok(/OAJobNav\.refRow\(r\)\s*\n\s*\];/.test(src),
+      `${pg}: the posting's id is the last row of the card, through the one definition`);
+    ok(src.indexOf('assets/oa-jobnav.js') < src.indexOf('OAJobNav.refRow('),
+      `${pg}: and the module is loaded before the page reads it`);
+  }
+
   /* 4. THE WIRING. The engine owns the parameter, the pages declare it, and
      the report links through the module. */
   const list = await readFile(path.join(HERE, '..', 'assets', 'oa-list.js'), 'utf8');

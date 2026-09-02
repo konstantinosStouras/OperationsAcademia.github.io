@@ -4259,6 +4259,22 @@ for (const [from, hash] of [
     ok((await q.$$eval(`${host} .oa-card:first-child .oa-kv th`,
       (ns) => ns.map((n) => n.textContent))).length >= 2,
       `${pageName}: …with its details on it`);
+    /* THE POSTING'S OWN ID IS THE LAST LINE (owner, 2026-09-02): the id the
+       site uses for it everywhere, as a link to its own permalink, so a
+       reader can quote it or copy the address. Measured against the card's
+       own element id rather than a fixture. */
+    const idRow = await q.$eval(`${host} .oa-card:first-child`, (li) => {
+      const ths = [...li.querySelectorAll('.oa-kv th')];
+      const last = ths[ths.length - 1];
+      const a = li.querySelector('.oa-kv a.oa-ref');
+      return { label: last ? last.textContent.trim() : '',
+        text: a ? a.textContent.trim() : '', href: a ? a.getAttribute('href') : '',
+        id: li.id.replace(/^job-/, '') };
+    });
+    eq(idRow.label, 'OA posting ID', `${pageName}: the last row is the posting's ID`);
+    eq(idRow.text, idRow.id, `${pageName}: …showing the id the card itself carries`);
+    eq(idRow.href, `${pageName}?job=${encodeURIComponent(idRow.id)}`,
+      `${pageName}: …as a link to this one posting on this page`);
     eq(errors, [], `${pageName}: signed-in run — no uncaught script error`);
     await ctx.close();
   }

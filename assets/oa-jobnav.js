@@ -150,6 +150,44 @@
     return String(pathname || '').indexOf(PAST_PAGE) !== -1 ? JOBS_PAGE : PAST_PAGE;
   }
 
+  /* ------------------------------------- the posting's own ID, on the card
+
+     Owner, 2026-09-02: "add the OA job posting ID to each job posting at the
+     bottom of it to be publicly shown for easy reference". The id is the one
+     name a posting has everywhere — the permalink (?job=<id>), the join key
+     for edits and takedowns, the row the Admin area and the run logs name —
+     so a reader quoting it to the maintainer, or the maintainer quoting it
+     back, is talking about exactly one posting. It is the LAST row of the
+     card's details on every list that draws a posting, through this one
+     function so the three pages cannot word it three ways.
+
+     It is drawn as a link to the posting's own permalink (hrefFor: the one
+     card, on whichever page carries it today), so "copy link address" is the
+     shareable form of the same reference. The form's own reference number is
+     printed beside it where the posting has one — that is the number the
+     poster was told to keep, and the two together answer both people. The
+     html is built here with its own escaping because an id is derived from
+     a name somebody typed. */
+  var REF_LABEL = 'OA posting ID';
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function refRow(row, now) {
+    var id = String((row && row.id) || '');
+    if (!id) return null;
+    var ref = String((row && row.ref) || '');
+    return {
+      label: REF_LABEL,
+      html: '<a class="oa-ref" href="' + escapeHtml(hrefFor(row, now)) + '">' +
+        escapeHtml(id) + '</a>' +
+        (ref ? ' <span class="oa-ref-sub">&middot; reference ' + escapeHtml(ref) + '</span>' : '')
+    };
+  }
+
   return {
     MARKET_ROLL_MONTH: MARKET_ROLL_MONTH,
     FOCUS_PARAM: FOCUS_PARAM,
@@ -163,6 +201,8 @@
     pageFor: pageFor,
     pageLabelFor: pageLabelFor,
     hrefFor: hrefFor,
-    otherPage: otherPage
+    otherPage: otherPage,
+    REF_LABEL: REF_LABEL,
+    refRow: refRow
   };
 }));
