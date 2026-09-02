@@ -8354,19 +8354,6 @@
   "lng": -58.4469439
  },
  {
-  "id": "universidade-catolica-portuguesa__catolica-lisbon-school-of-business-and-economics__operations-and-data-science",
-  "institution": "Universidade Católica Portuguesa",
-  "school": "Católica-Lisbon School of Business and Economics",
-  "department": "Operations and Data Science",
-  "type": "Business School",
-  "country": "Portugal",
-  "sources": [
-   "postings"
-  ],
-  "n": 1,
-  "lastPosted": "2026-09-01"
- },
- {
   "id": "universitat-pompeu-fabra____om-or",
   "institution": "Universitat Pompeu Fabra",
   "department": "OM/OR",
