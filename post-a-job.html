@@ -358,21 +358,29 @@
                            directoryEdits correction after the posting is
                            sent). It is inside the form only so the poster
                            meets it in one flow; collect() never reads it into
-                           the submission document. -->
+                           the submission document.
+
+                           This field, the characteristics below and the chair
+                           pair further down are mandatory for a NEW posting
+                           (owner, 2026-09-02) and only there: the .oa-req-new
+                           marks and the required attributes are lifted by
+                           enterEditMode(), and collect() skips the rule under
+                           EDIT_ID, so a posting that predates the requirement
+                           can still be corrected without inventing them. -->
                       <div class="oa-field">
-                        <label for="f-deptUrl">The department&rsquo;s own page</label>
+                        <label for="f-deptUrl">The department&rsquo;s own page <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
                         <p class="oa-hint">Not published with the posting &mdash; this is the
                         link the <a href="universities.html">Universities directory</a> shows
                         for your department. Where the site already has one it appears here:
                         please verify it, and correct it if it has moved. A correction updates
                         the directory for everyone.</p>
                         <input type="url" id="f-deptUrl" name="deptUrl" maxlength="600"
-                               placeholder="https://">
+                               placeholder="https://" required>
                         <p class="oa-hint oa-derived" id="f-deptUrl-note" aria-live="polite"></p>
                       </div>
 
                       <div class="oa-field">
-                        <span class="oa-label-text" id="lbl-chars">Does your school or department have any of the following?</span>
+                        <span class="oa-label-text" id="lbl-chars">Does your school or department have any of the following? <span class="oa-req oa-req-new" aria-hidden="true">*</span></span>
                         <p class="oa-hint">Shown publicly as small tags, and used by the
                         <em>Characteristics</em> filter. Tick all that apply.</p>
                         <div class="oa-checks" role="group" aria-labelledby="lbl-chars" id="f-chars">
@@ -413,16 +421,18 @@
                                autocomplete="email" required>
                       </div>
 
+                      <!-- Mandatory for a NEW posting only — see the note on
+                           the department's-own-page field above. -->
                       <div class="oa-row">
                         <div class="oa-field">
-                          <label for="f-chairName">Area coordinator or department chair</label>
+                          <label for="f-chairName">Area coordinator or department chair <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
                           <p class="oa-hint">Full name, no titles needed.</p>
-                          <input type="text" id="f-chairName" name="chairName" maxlength="120">
+                          <input type="text" id="f-chairName" name="chairName" maxlength="120" required>
                         </div>
                         <div class="oa-field">
-                          <label for="f-chairEmail">Their e-mail</label>
+                          <label for="f-chairEmail">Their e-mail <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
                           <p class="oa-hint">&nbsp;</p>
-                          <input type="email" id="f-chairEmail" name="chairEmail" maxlength="160">
+                          <input type="email" id="f-chairEmail" name="chairEmail" maxlength="160" required>
                         </div>
                       </div>
 

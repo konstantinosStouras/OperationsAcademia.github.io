@@ -399,21 +399,48 @@
        department (assets/oa-uniinfo.js; the write happens after the posting
        is accepted). It is validated HERE, where the poster can still fix it,
        rather than silently dropped after they pressed Post — but it is never
-       read into the submission document, whose rules pin its field set. */
+       read into the submission document, whose rules pin its field set.
+
+       For a NEW posting it is mandatory (owner, 2026-09-02), like the
+       characteristics and the chair pair below. Never under EDIT_ID: a
+       posting that predates the requirement — every crawled mirror among
+       them — must stay correctable without inventing a chair or a link its
+       poster never gave. enterEditMode() lifts the * marks to match. */
     var deptUrlEl = $('f-deptUrl');
     if (deptUrlEl) {
       var du = httpUrl(deptUrlEl.value);
       if (du === null) {
         setError(deptUrlEl, 'That does not look like a web address. It should start with https://');
         if (!firstBad) firstBad = deptUrlEl;
+      } else if (!du && !EDIT_ID) {
+        setError(deptUrlEl, "Please give your department's own web page.");
+        if (!firstBad) firstBad = deptUrlEl;
       } else {
         setError(deptUrlEl, '');
       }
     }
 
+    out.characteristics = checked('characteristics');
+    if (!EDIT_ID) {
+      setError($('f-chars'), out.characteristics.length
+        ? '' : 'Please tick at least one characteristic.');
+      if (!out.characteristics.length && !firstBad) firstBad = $('f-chars');
+    }
+
+    var chairNameEl = $('f-chairName');
+    var chairName = String(chairNameEl.value || '').trim();
+    if (!EDIT_ID) {
+      setError(chairNameEl, chairName
+        ? '' : 'Please name the area coordinator or department chair.');
+      if (!chairName && !firstBad) firstBad = chairNameEl;
+    }
+
     var chairEmail = String($('f-chairEmail').value || '').trim();
     if (chairEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(chairEmail)) {
       setError($('f-chairEmail'), 'That does not look like an e-mail address.');
+      if (!firstBad) firstBad = $('f-chairEmail');
+    } else if (!chairEmail && !EDIT_ID) {
+      setError($('f-chairEmail'), "Please give their e-mail address. It is never published.");
       if (!firstBad) firstBad = $('f-chairEmail');
     } else {
       setError($('f-chairEmail'), '');
@@ -422,8 +449,7 @@
     out.year = postingYear();
     out.applyByNote = String($('f-applyByNote').value || '').trim().slice(0, MAX.applyByNote);
     out.comments = String($('f-comments').value || '').trim().slice(0, MAX.comments);
-    out.characteristics = checked('characteristics');
-    out.chairName = String($('f-chairName').value || '').trim().slice(0, MAX.chairName);
+    out.chairName = chairName.slice(0, MAX.chairName);
     out.chairEmail = chairEmail.slice(0, MAX.chairEmail);
     out.note = String($('f-note').value || '').trim().slice(0, MAX.note);
 
@@ -757,6 +783,18 @@
 
     var submit = $('oa-submit');
     if (submit) submit.textContent = 'Save changes';
+
+    /* The chair pair, the department page and the characteristics are
+       mandatory for a NEW posting only — collect() already skips the rule
+       under EDIT_ID, and the marks must say the same thing: a * beside a
+       field an edit may leave empty is a statement in the document that is
+       not true. */
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-req-new'),
+      function (n) { n.parentNode.removeChild(n); });
+    ['f-deptUrl', 'f-chairName', 'f-chairEmail'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.removeAttribute('required');
+    });
 
     var intro = $('oa-intro');
     if (intro) {
