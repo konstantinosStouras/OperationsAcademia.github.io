@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T08:06:34.018Z",
+ "generated": "2026-09-02T10:36:14.992Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -107,6 +107,10 @@
   },
   {
    "v": "IE Business School",
+   "n": 3
+  },
+  {
+   "v": "IESE Business School",
    "n": 3
   },
   {
@@ -263,10 +267,6 @@
   },
   {
    "v": "Howard University",
-   "n": 2
-  },
-  {
-   "v": "IESE Business School",
    "n": 2
   },
   {
@@ -3222,6 +3222,10 @@
    "n": 2
   },
   {
+   "v": "Operations, Information and Technology",
+   "n": 2
+  },
+  {
    "v": "OR",
    "n": 2
   },
@@ -3855,10 +3859,6 @@
   },
   {
    "v": "Operations, Information and Decisions",
-   "n": 1
-  },
-  {
-   "v": "Operations, Information and Technology",
    "n": 1
   },
   {
