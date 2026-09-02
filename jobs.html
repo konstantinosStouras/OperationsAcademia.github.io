@@ -487,7 +487,10 @@
                 html: r.adUrl ? link(r.adUrl, r.adLabel || 'link to Job ad')
                   : (r.adPending ? '<em>soon to be available</em>' : null) },
               { label: 'Posted online at', html: link(r.postedAtUrl, r.postedAtLabel || 'link') },
-              { label: 'Further info', html: link(r.furtherInfoUrl, 'link') }
+              { label: 'Further info', html: link(r.furtherInfoUrl, 'link') },
+              /* the posting's own id, last — one definition for every list
+                 (owner, 2026-09-02: "publicly shown for easy reference") */
+              OAJobNav.refRow(r)
             ];
           }
         }
