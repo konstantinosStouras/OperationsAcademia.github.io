@@ -33,7 +33,7 @@ import {
   rowFromSubmission, mergeRows, buildMeta, serialise, publicRow, displayOrder, assignIds, healPlace,
   stripRowEmails, withMarketYears,
   healReviewDate,
-  marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml,
+  marketYear, marketYearReview, inCurrentMarket, collectChanges, renderChangesHtml, postedBy,
   MIRROR_STATUS, sheetMirrorDoc, mirrorDiffers, sheetHandover, removalSpecs, buildOwned,
   specMatches,
 } from './jobs-model.mjs';
@@ -1071,12 +1071,28 @@ async function main() {
           changes.edits.length && `${changes.edits.length} edited`,
           changes.takedowns.length && `${changes.takedowns.length} taken down`,
         ].filter(Boolean).join(', ');
+        /* WHO made each change (owner, 2026-09-02: "for each edit … the name
+           and email of user who edited"). The honest answer this pipeline can
+           give: the shared postedBy rule, over the posting's own document
+           where one exists. A `ref` is issued by the form and by nothing
+           else, so it is the join that can only ever find the poster's own
+           document; a row without one is the crawler's or the legacy
+           import's, and postedBy names the source. The day this shipped,
+           all eight "edits" in the reported message were the tracking-sheet
+           crawler republishing a degraded read — a fact the message gave the
+           maintainer no way to see. */
+        const docByRef = new Map();
+        for (const d of live.concat(pulled)) {
+          const v = d.data() || {};
+          if (v.ref) docByRef.set(v.ref, v);
+        }
+        const whoFor = (row) => postedBy((row && row.ref && docByRef.get(row.ref)) || null, row);
         await mail.send(tx, {
           to: process.env.ADMIN_NOTIFY || 'kstouras@gmail.com',
           subject: `[OA] Job postings changed: ${what}`,
           html: mail.shell({
             title: 'Job postings changed',
-            bodyHtml: renderChangesHtml(changes),
+            bodyHtml: renderChangesHtml(changes, { whoFor }),
             manageUrl: null,
           }),
         });
