@@ -6670,9 +6670,25 @@ for (const w of [320, 360, 390, 430]) {
         .map((s) => (s.querySelector('.oa-figure-sub') || {}).textContent || '')[0] || '',
       iframes: document.querySelectorAll('iframe').length,
       overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      /* THE CAPTION RUNS THE FULL READING LINE (owner, 2026-09-03, with a
+         screenshot of it stopping two thirds of the way across). Measured as
+         geometry: every caption is as wide as its card's content box, which
+         is the width the chart under it is drawn at. */
+      subs: [...document.querySelectorAll('.oa-figure > .oa-figure-sub')].map((p) => {
+        const card = p.parentElement;
+        const cs = getComputedStyle(card);
+        const inner = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        return { title: card.querySelector('h2').textContent,
+          width: p.getBoundingClientRect().width, inner, dash: /—/.test(p.textContent) };
+      }),
     }));
 
     eq(seen.iframes, 0, `analytics (${theme}): the page embeds nothing`);
+    ok(seen.subs.length >= 5, `analytics (${theme}): the figures carry captions (or the next check is vacuous)`);
+    eq(seen.subs.filter((s) => Math.abs(s.width - s.inner) > 1).map((s) => s.title), [],
+      `analytics (${theme}): every caption runs the full width of its card, as wide as the chart under it`);
+    eq(seen.subs.filter((s) => s.dash).map((s) => s.title), [],
+      `analytics (${theme}): …and none of them carries an em dash`);
     ok(seen.svgs >= 3, `analytics (${theme}): the charts are drawn as inline SVG`);
     ok(seen.tiles >= 4, `analytics (${theme}): the headline figures are shown`);
     /* THE RULE IS PER CHART, NOT PER SVG, and it had been the weaker one: the
@@ -6831,7 +6847,7 @@ for (const w of [320, 360, 390, 430]) {
         .filter((s) => /Which universities/.test((s.querySelector('h2') || {}).textContent || ''))
         .map((s) => (s.querySelector('.oa-figure-sub') || {}).textContent || '')[0] || '',
     }));
-    eq(arch.frozen, ['Archive — 2014 to 2023'],
+    eq(arch.frozen, ['Archive: 2014 to 2023'],
       'analytics: an archived universities section is still labelled as one, with its range');
     ok(/is not being added to/.test(arch.sub),
       'analytics: …and says it is closed, rather than claiming nothing could ever replace it');

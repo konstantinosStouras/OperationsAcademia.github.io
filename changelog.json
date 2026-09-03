@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "analytics-captions-full-width",
+      "date": "2026-09-03",
+      "title": "The analytics captions read across the whole card",
+      "summary": "On the Analytics page, the sentence under each chart's heading used to stop about two thirds of the way across, beside a chart that ran to the edge. It now runs the full width of its card on every figure, and the captions and notes on that page were reworded to read more plainly.",
+      "url": "/analytics.html"
+    },
+    {
       "id": "mandatory-school-and-department",
       "date": "2026-09-02",
       "title": "A new posting names its school and its department",

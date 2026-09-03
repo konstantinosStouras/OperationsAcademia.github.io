@@ -426,7 +426,7 @@
     wrap.tabIndex = 0;
     wrap.setAttribute('role', 'application');
     wrap.setAttribute('aria-label',
-      (opts.title || 'Chart') + ' — use the arrow keys to read each day');
+      (opts.title || 'Chart') + '. Use the arrow keys to read each day');
     wrap.addEventListener('keydown', (e) => {
       const step = { ArrowRight: 1, ArrowLeft: -1, ArrowUp: 1, ArrowDown: -1 }[e.key];
       if (step) { place(at_ < 0 ? 0 : at_ + step); e.preventDefault(); return; }

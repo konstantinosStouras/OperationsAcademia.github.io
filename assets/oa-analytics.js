@@ -89,7 +89,7 @@
     {
       id: 'hours', kind: 'columns',
       title: 'When in the day people read it',
-      sub: 'Visits by hour of the day, in UTC — the site’s own record stamps the ' +
+      sub: 'Visits by hour of the day, in UTC. The site’s own record stamps the ' +
         'instant each session begins, so this is exact rather than bucketed by a ' +
         'reporting time zone. Readers here are spread across the Americas, Europe ' +
         'and Asia, so the flat hours are the ones nobody anywhere is awake for.',
@@ -106,16 +106,16 @@
          “see the figure below” about a figure it was not drawing at all.
          Measured, not theorised. A cross-reference between two optional
          figures is a promise the page cannot keep, so neither makes one. */
-      sub: 'Visits by country, as Google Analytics reports them — every visit ' +
-        'it can place, whether the reader was on a campus, an office or a ' +
-        'phone.',
+      sub: 'Visits by country, as Google Analytics reports them. Every visit ' +
+        'it can place is counted, whether the reader was on a campus, in an ' +
+        'office or on a phone.',
       unit: 'visits', limit: 12,
     },
     {
       id: 'channels', kind: 'share',
       title: 'How readers arrive',
-      sub: 'Which channel brought each visit — a search engine, a link on another ' +
-        'site, an e-mail, or the address typed or opened from a bookmark.',
+      sub: 'Which channel brought each visit: a search engine, a link on another ' +
+        'site, an e-mail, or the address typed in or opened from a bookmark.',
       unit: 'visits', limit: 6,
     },
     {
@@ -344,7 +344,7 @@
         '<h2>These figures have stopped moving</h2>' +
         '<p>The most recent day on record is <b>' + esc(pretty(stale.last)) + '</b>, ' +
         esc(String(stale.age)) + ' days ago. That is long enough to mean the ' +
-        'collection has stopped rather than that the site is quiet — the page ' +
+        'collection has stopped rather than that the site is quiet, so the page ' +
         'says so here rather than leaving the charts to look merely flat.</p>', true));
     }
 
@@ -357,7 +357,7 @@
         'on yet.</p>' +
         '<p>The charts that used to be here were Google Sheets embeds fed by the ' +
         'Google&nbsp;Analytics Spreadsheet Add-on, which spoke only the Universal ' +
-        'Analytics API — retired in July&nbsp;2023, with the properties themselves ' +
+        'Analytics API, retired in July&nbsp;2023, with the properties themselves ' +
         'deleted a year later. They have shown nothing since. See ' +
         '<code>_SETUP-ANALYTICS.md</code> for what each source needs.</p>'));
       /* the frozen archive may still have something worth showing even with no
@@ -383,10 +383,10 @@
        asked for, with its trailing 7-day mean over it */
     var metric = METRICS.filter(function (m) { return m.id === state.metric; })[0] || METRICS[0];
     var f1 = figure(metric.label + ', day by day',
-      'One point per day — ' + metric.note + '. The gold line is the trailing ' +
+      'One point per day: ' + metric.note + '. The dashed gold line is the trailing ' +
       'seven-day average, which is what the shape of the traffic looks like once the ' +
-      'weekend is taken out of it. Press a key in the legend to put either line away; ' +
-      'the chart takes the keyboard, so the arrow keys walk it day by day.');
+      'weekend is taken out of it. Press a name in the legend to put either line away. ' +
+      'The chart also takes the keyboard, so the arrow keys walk it day by day.');
     root.appendChild(f1.section);
     chooser(f1.body, {
       label: 'Which number to plot',
@@ -454,9 +454,9 @@
       : '';
     var f3 = figure('The hiring season',
       'Average visitors in each calendar month, over the whole record' +
-      (monthSpan ? ' (' + monthSpan + ')' : '') + ' — not the range above, because a ' +
-      'window shorter than a year cannot answer a question about the year. The ' +
-      'Operations job market runs on an annual cycle; this is the chart that ' +
+      (monthSpan ? ' (' + monthSpan + ')' : '') + '. It ignores the range above, ' +
+      'because a window shorter than a year cannot answer a question about the year. ' +
+      'The Operations job market runs on an annual cycle, and this is the chart that ' +
       'shows whether the site does too.');
     root.appendChild(f3.section);
     C.columns(f3.body, {
@@ -614,7 +614,7 @@
         (range ? 'Covers ' + range + '. ' : '') +
         'An archive: it was measured differently from the figures above and ' +
         'is not being added to.';
-      opts = { frozen: 'Archive' + (u.from ? ' — ' + u.from.slice(0, 4) + ' to ' + u.to.slice(0, 4) : '') };
+      opts = { frozen: 'Archive' + (u.from ? ': ' + u.from.slice(0, 4) + ' to ' + u.to.slice(0, 4) : '') };
     } else {
       /* THE DENOMINATOR IS WHAT THE SENTENCE CLAIMS. `resolved` counts every
          address reverse DNS answered for, an internet provider included, so
@@ -629,8 +629,8 @@
         u.all.reduce(function (n, x) { return n + (Number(x.visits) || 0); }, 0);
       var acad = Number(u.academic) || 0;
       var share = seen ? Math.round((placed / seen) * 100) : 0;
-      sub = 'Visits by university, worked out from the visitor\'s own network — ' +
-        'nobody is identified and no address is kept. ' +
+      sub = 'Visits by university, worked out from the visitor\'s own network. ' +
+        'Nobody is identified and no address is kept. ' +
         /* THE COUNT LIVES HERE, not in a tile. It is a fact about this one
            figure rather than a headline about the corpus, and the tiles cap at
            five: a sixth orphans onto a row of its own at every width the page
@@ -711,6 +711,6 @@
         '<h2>The figures could not be loaded</h2>' +
         '<p>The page asks for <code>data/analytics.json</code> and that request ' +
         'did not come back. It is a plain served file, so this is usually a ' +
-        'network problem rather than a broken page — reloading is worth a try.</p>'));
+        'network problem rather than a broken page. Reloading is worth a try.</p>'));
     });
 }());
