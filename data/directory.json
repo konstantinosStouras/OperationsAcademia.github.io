@@ -9744,13 +9744,20 @@
   "type": "Business School",
   "country": "United States",
   "deptUrl": "https://tippie.uiowa.edu/people/?cohort=537896&amp%3Bcategory=FACULTY&amp%3Bpage=1&amp%3Bsize=10&category=FACULTY",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
   "sources": [
    "omlist",
    "postings",
    "seed"
   ],
-  "n": 4,
-  "lastPosted": "2026-08-14"
+  "n": 5,
+  "lastPosted": "2026-09-03"
  },
  {
   "id": "university-of-kansas__school-of-business__analytics-information-and-operations-management",

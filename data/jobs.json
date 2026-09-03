@@ -38,6 +38,44 @@
   "owner": ""
  },
  {
+  "id": "2027-university-of-iowa-20260903",
+  "year": 2027,
+  "years": [
+   2027
+  ],
+  "posted": "2026-09-03",
+  "institution": "University of Iowa",
+  "department": "Tippie College of Business, Business Analytics",
+  "school": "Tippie College of Business",
+  "unit": "Business Analytics",
+  "type": "Business School",
+  "levels": [
+   "Non-tenure track (teaching) position"
+  ],
+  "applyBy": "Until filled.",
+  "applyByDate": "",
+  "reviewDate": "2026-11-06",
+  "comments": "Please apply before attending INFORMS.",
+  "country": "United States",
+  "adUrl": "https://jobs.uiowa.edu/faculty/view/76016",
+  "adLabel": "link to Job ad",
+  "postedAtUrl": "https://jobs.uiowa.edu/faculty/view/76016",
+  "postedAtLabel": "link",
+  "furtherInfoUrl": "https://www.operationsacademia.org/universities?filterA=University%20of%20Iowa",
+  "characteristics": [
+   "Research seminars",
+   "PhD",
+   "Masters",
+   "MBA",
+   "Undergrad"
+  ],
+  "featured": false,
+  "source": "oa-form",
+  "addedAt": "2026-09-03T14:00:36Z",
+  "ref": "OA-JOB-260903-94R8",
+  "owner": "c0f7618380865dfd"
+ },
+ {
   "id": "2027-iese-business-school-20260902",
   "year": 2027,
   "years": [
