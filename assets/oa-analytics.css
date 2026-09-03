@@ -90,8 +90,15 @@
 .oa-figure > p.oa-figure-sub {
   margin: 0 0 18px;
   color: var(--mut);
-  font-size: 14px;
-  max-width: 68ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  /* THE CAPTION RUNS THE FULL WIDTH OF ITS CARD. It used to stop at 68ch,
+     which on a desktop screen is about two thirds of the card, so every
+     figure's explanation wrapped early beside a chart that ran to the edge
+     and the two looked misaligned (owner, 2026-09-03, with a screenshot).
+     A caption is a short paragraph under a heading, and the card it sits in
+     is already the measure. */
+  max-width: none;
 }
 .oa-figure-frozen {
   display: inline-block;

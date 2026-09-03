@@ -11260,6 +11260,38 @@ async function testAnalytics() {
     'answers a pointer must answer a keyboard, and a focus nobody can see is ' +
     'not an answer');
 
+  /* --- the caption runs the full reading line, and reads like a person ---
+
+     Owner, 2026-09-03, with a screenshot: the sentence under each figure's
+     heading stopped about two thirds of the way across its card, beside a
+     chart that ran to the edge. It was a `max-width: 68ch` on the caption
+     rule; the card is already the measure. The same report asked for the
+     captions to read naturally, without em dashes, so that is pinned on the
+     COPY too — every string a reader sees on this page, the hero lede and
+     the notes included. A lone '—' is exempt: the tiles and the tables print
+     one as an EMPTY marker where a number would go ("the table says —,
+     never 0"), which is a symbol rather than a sentence. */
+  const subRule = (css.match(/\.oa-figure > p\.oa-figure-sub\s*\{[\s\S]*?\}/) || [''])[0];
+  ok(subRule && !/max-width:\s*\d/.test(subRule.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'the figure caption carries no width cap of its own — it runs the full ' +
+    'width of its card, which is what the owner asked for');
+  const dashedStrings = (src) => (src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '')
+    .match(/'(?:[^'\\\n]|\\.)*'/g) || [])
+    .filter((lit) => /—/.test(lit) && lit.length > 3);
+  eq(dashedStrings(page), [],
+    'no sentence the analytics page prints carries an em dash — the captions, ' +
+    'the tiles, the notes and the error copy read as a person writes');
+  eq(dashedStrings(charts), [],
+    '…and neither does anything the chart module says to a reader (its ' +
+    'keyboard hint is read out by a screen reader)');
+  const mainCopy = (html.match(/<main[\s\S]*?<\/main>/) || [''])[0]
+    .replace(/<!--[\s\S]*?-->/g, '');
+  ok(mainCopy.length > 200 && !/—|&mdash;/.test(mainCopy),
+    'and the page\'s own lede and notes carry none either (the <head> keeps ' +
+    'the site-wide title and card wording, which share-check pins)');
+
   /* --- the setup guide names what is actually needed --------------------- */
 
   const setup = await readFile(path.join(HERE, '..', '_SETUP-ANALYTICS.md'), 'utf8');
