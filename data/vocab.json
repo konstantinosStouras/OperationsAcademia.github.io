@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-03T14:01:02.070Z",
+ "generated": "2026-09-04T21:04:08.649Z",
  "universities": [
   {
    "v": "University of Houston",
@@ -10,11 +10,11 @@
    "n": 8
   },
   {
-   "v": "University College London",
-   "n": 8
+   "v": "National University of Singapore",
+   "n": 7
   },
   {
-   "v": "National University of Singapore",
+   "v": "University College London",
    "n": 7
   },
   {
@@ -691,10 +691,6 @@
   },
   {
    "v": "Endicott College",
-   "n": 1
-  },
-  {
-   "v": "ESSEC",
    "n": 1
   },
   {
@@ -1638,6 +1634,10 @@
    "n": 0
   },
   {
+   "v": "ESSEC",
+   "n": 0
+  },
+  {
    "v": "European School of Management and Technology",
    "n": 0
   },
@@ -2152,10 +2152,6 @@
    "n": 2
   },
   {
-   "v": "UCL School of Management",
-   "n": 2
-  },
-  {
    "v": "W. P. Carey School of Business",
    "n": 2
   },
@@ -2401,6 +2397,10 @@
   },
   {
    "v": "Tilburg School of Economics and Management",
+   "n": 1
+  },
+  {
+   "v": "UCL School of Management",
    "n": 1
   },
   {
@@ -3054,10 +3054,6 @@
    "n": 6
   },
   {
-   "v": "Operations Management",
-   "n": 6
-  },
-  {
    "v": "AI",
    "n": 5
   },
@@ -3075,6 +3071,10 @@
   },
   {
    "v": "Operations and Supply Chain Management",
+   "n": 5
+  },
+  {
+   "v": "Operations Management",
    "n": 5
   },
   {
@@ -3215,10 +3215,6 @@
   },
   {
    "v": "Operations and Information Systems",
-   "n": 2
-  },
-  {
-   "v": "Operations and Technology",
    "n": 2
   },
   {
@@ -3835,6 +3831,10 @@
   },
   {
    "v": "Operations and Project Management (AI focus)",
+   "n": 1
+  },
+  {
+   "v": "Operations and Technology",
    "n": 1
   },
   {
