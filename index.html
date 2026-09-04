@@ -735,6 +735,9 @@
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-reveal.js: WHEN candidate profiles go public (14:00 UTC on the
+         reveal day), the one definition the reveal note below asks. -->
+    <script defer src="assets/oa-reveal.js"></script>
     <!-- oa-schools.js FIRST: oa-sponsors.js asks it whether two spellings
          are one university, and a factory handed no OASchools cannot
          answer. Deferred like every other script here, and the same file
@@ -942,10 +945,14 @@
           var stat = document.querySelector('[data-stat="candidates"]');
           if (stat && listed > 700) V3.statTo(stat, listed.toLocaleString('en-US'));
 
+          /* the reveal is an INSTANT, 14:00 UTC on the day (assets/oa-reveal.js,
+             the same definition the build's own gate calls): no real day means
+             nothing to announce, and from the instant on the list speaks */
           var at = String(meta.revealAt || '');
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
-          var today = new Date().toISOString().slice(0, 10);
-          if (today >= at) return;                    // revealed — the list speaks
+          if (!OAReveal.revealInstant(at)) return;
+          if (OAReveal.isRevealed(at)) return;        // revealed, the list speaks
+          /* the note's times (the four cities, the reader's own clock) come
+             from OAReveal.describeReveal(at) too; the day is printed below */
           var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
             'August', 'September', 'October', 'November', 'December'];
           document.getElementById('oa-reveal-date').textContent =

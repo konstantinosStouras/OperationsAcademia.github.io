@@ -1472,6 +1472,82 @@ against a served set that WOULD match (an empty one made it pass for the wrong
 reason: with nothing published, no kind could produce mail, so flipping
 `tellsPoster` onto candidates left the suite green).
 
+## The reveal is an instant, not a day, and a candidate can see their own card first
+
+Three owner requests, 2026-09-04: a candidate who has posted a profile can see
+how THEIR OWN profile will appear before the reveal (only their own, never
+anyone else's); the reveal happens at a time of day that suits readers from
+California to Shanghai; and a candidate can edit anything at any time, with the
+card then saying when. What was decided, so nobody re-opens it:
+
+**14:00 UTC on the reveal day.** The gate was a UTC calendar day, so the first
+scheduled build after midnight UTC revealed, which is 17:00 the previous day in
+California. 14:00 UTC is 07:00 Los Angeles, 10:00 New York, 15:00 London, 16:00
+Paris, 22:00 Shanghai, all still that calendar day. **`assets/oa-reveal.js` is
+the ONE definition** (dual-mode, the `oa-jobnav.js` shape): `revealInstant`
+(null for anything but a real yyyy-mm-dd, so a typo can never reveal early),
+`isRevealed`, `describeReveal` (the day with its weekday, `14:00 UTC`, the four
+cities and the reader's own clock, computed with Intl from NAMED zones rather
+than typed, so daylight saving follows on its own, and null where Intl cannot
+answer) and `formatDay`, the site's one day-month-year formatter ("2 October
+2026"; `longDate` in jobs-model is the other order and stays what it is).
+`revealGate` in `candidates-model.mjs` is a thin caller of it, and the meta
+carries `revealAtInstant` beside `revealAt`. Seven files compared a calendar day
+against `revealAt`, none through a module; every one asks `isRevealed` now, and
+`testCandidateReveal` pins the old comparison OUT of each file, because two
+copies of "is it out yet" disagreeing is a profile one page calls held while
+another calls it live.
+
+**The trigger is a Cloud Function, not a cron.** Nothing in Firestore changes at
+14:00, so no document trigger can ring the build; `revealCandidates` in
+`_functions/index.js` is a scheduled function (`0 14 * * *`, UTC) that reads the
+served `candidates-reveal.json` (cache-busted; Pages holds it ten minutes) and,
+on the reveal day, rings the same `ring()` the other doorbells ring with the
+same `oa-jobs-changed`. The build's :07/:27/:47 schedule is the safety net, so a
+lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:00
+as well**: two producers for one event is the duplicate-doorbell outage under
+"One event, one build", and the selftest refuses a workflow cron on that hour.
+Like every function here it is inert until deployed; the deploy also creates
+the Cloud Scheduler job, and `firebase functions:list` must read back FIVE.
+
+**The alerts' reveal note is keyed on the instant, and its mark is lifted to
+it.** `candidateNews` announced when the alert's mark preceded the reveal DAY;
+it precedes the INSTANT now, so a mark stamped at 09:00 on the reveal day still
+gets the note. And the note's stored mark is the newer of the instant and the
+newest profile: every profile's `addedAt` is its posting time, weeks before the
+reveal, so a mark that was only "the newest profile" sat before the boundary and
+the next due run sent the note again (the old fixture hid it with a row dated
+the day after the reveal; the new one has every profile posted before it). With
+the module absent the old fallback stands: an empty mark announces, a set mark
+lists.
+
+**`updatedAt` is a public field, day-cut**, right after `addedAt` and skipped
+when empty like `ref`; the card prints "Profile updated on 2 October 2026" only
+when it is a later day than `addedAt` (the renderer is `oa-candcard.js`, the one
+card builder the public list and the two previews share). It is NOT an alerts
+cursor: the candidates topic lists by `addedAt` alone, so an edit never
+re-announces a profile, and `mergeCandidateRows` keeps the previous `addedAt`
+while taking the fresh `updatedAt`. The rules bound it (`str('updatedAt', 40)`
+in `candShapeOk`, never in the merge hand-over's `hasOnly`); the create ceiling
+of 34 stands, since the form writes it only on the edit path. Nothing gates Edit
+on the reveal, before or after it, and the selftest pins that nothing does.
+
+**Only the candidate sees their own card early.** The account page reads
+`candidateSubmissions` by `where('uid', '==', user.uid)`, which the rules already
+allow the owner (`allow read: if isOwner(resource.data.uid) || isAdmin()`), and
+draws it through the same renderer as the public list with a browser twin of the
+build's projection pinned against the real one, so the preview is what the build
+would publish and never anyone else's document.
+
+Tests: `testCandidateReveal` in `_scraper/selftest.mjs` (the module to the
+second, with and without Intl; the gate's parity; the meta's instant; every
+consumer through the module and the old comparison out of each; the doorbell's
+shape, hour and helper; no workflow cron at 14:00; the setup guide; the public
+field, the rules and the three writers; Edit ungated), the reveal block of
+`build-candidates.mjs --selftest`, `alerts-mailer.mjs --selftest` for the note's
+instant and its lifted mark, and `submissions-mailer.mjs --selftest` for an
+e-mail that stops saying "held" from the instant on.
+
 ## Nothing on "What's new" publishes itself either
 
 `changelog.json` says WHAT was announced. Firestore `newsOverrides/{changelog

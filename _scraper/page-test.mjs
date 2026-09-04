@@ -4992,10 +4992,13 @@ for (const w of [320, 360, 390, 430]) {
   const changelog = JSON.parse(await readFile(path.join(ROOT, 'changelog.json'), 'utf8'));
   const newsPending = OANewsNode.partition(changelog.updates, {}).pending.length;
   const cmeta = JSON.parse(await readFile(path.join(ROOT, 'data', 'candidates-meta.json'), 'utf8'));
-  const today = new Date().toISOString().slice(0, 10);
-  const validReveal = /^\d{4}-\d{2}-\d{2}$/.test(String(cmeta.revealAt || ''));
-  // the build's gate: no announced date holds everything
-  const preReveal = !validReveal || today < cmeta.revealAt;
+  /* the build's gate, asked of the ONE definition (assets/oa-reveal.js): no
+     announced date holds everything, and the reveal is an INSTANT, 14:00 UTC
+     on the day, so between midnight and 14:00 on the reveal day the panel
+     says held and so must this expectation. A calendar-day compare here would
+     go red for exactly those fourteen hours. */
+  const OARevealNode = createRequire(import.meta.url)(path.join(ROOT, 'assets', 'oa-reveal.js'));
+  const preReveal = !OARevealNode.isRevealed(cmeta.revealAt, new Date());
   const metaHeld = preReveal ? (Number(cmeta.heldCount) || 0) : 0;
 
   /* WHICH SEASON A POSTING IS FOR is read off its apply-by dates (owner,

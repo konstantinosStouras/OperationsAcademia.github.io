@@ -65,6 +65,10 @@ import {
 } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
+/* WHEN the candidate profiles go public: 14:00 UTC on the reveal day, decided
+   in assets/oa-reveal.js (the build's own gate calls it), so this e-mail says
+   "held" exactly while the build is holding and not a moment longer. */
+const OAReveal = createRequire(import.meta.url)('../assets/oa-reveal.js');
 const DATA = path.join(HERE, '..', 'data');
 
 const argv = process.argv.slice(2);
@@ -130,14 +134,19 @@ function postedByHtml(doc) {
  * profile is "live" when the whole point of the reveal gate is that it is not
  * would be worse than saying nothing.
  */
-export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' } = {}) {
+export function renderSubmissionEmail(kind, entry,
+  { site = SITE, revealAt = '', now = new Date() } = {}) {
   const doc = entry.data || {};
   const row = entry.row || null;
   const title = kind.headline(doc, row);
   const reviewUrl = site + '/admin-area';
   const editUrl = site + '/' + kind.editPath + encodeURIComponent(entry.id);
 
-  const held = kind.key === 'candidate' && revealAt;
+  /* held only while the reveal instant is still ahead, asked of the module:
+     a profile is live from 14:00 UTC on the reveal day like any posting, and
+     an e-mail sent after that must not go on calling it held */
+  const when = kind.key === 'candidate' ? OAReveal.describeReveal(revealAt, { now }) : null;
+  const held = !!when && !when.revealed;
 
   const bodyHtml =
     '<p>A <strong>' + esc(kind.one) + '</strong> has been posted through the site.</p>' +
@@ -149,8 +158,9 @@ export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' 
     '</table>' +
     (held
       ? '<p style="color:#5a5f6b;font-size:13px">Candidate profiles are held until <strong>' +
-        esc(revealAt) + '</strong> and appear all at once on the day, so this one is not ' +
-        'on the site and cannot be seen there yet — which is why it is worth reading here.</p>'
+        esc(when.utc + ' on ' + when.dayLong) + '</strong> and appear all at once at that ' +
+        'moment, so this one is not on the site and cannot be seen there yet, which is why ' +
+        'it is worth reading here.</p>'
       : '<p style="color:#5a5f6b;font-size:13px">It is already live, or will be within a ' +
         'minute of the next build. Nothing is waiting on you — this is so you know it ' +
         'arrived.</p>') +
@@ -609,12 +619,19 @@ function selftest() {
 
   /* --- a held candidate profile ----------------------------------------- */
   const held = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },
-    { site: 'https://x.test', revealAt: '2026-10-11' });
+    { site: 'https://x.test', revealAt: '2026-10-11', now: new Date('2026-10-11T13:59:59Z') });
   ok(/Ada Lovelace/.test(held.subject), 'a profile is named in its subject');
-  ok(/2026-10-11/.test(held.html) && /held until/.test(held.html),
-    'and a held profile SAYS it is held — the reveal gate is why it cannot be seen on the site');
+  ok(/11 October 2026/.test(held.html) && /14:00 UTC/.test(held.html) && /held until/i.test(held.html),
+    'and a held profile SAYS it is held, naming the instant (14:00 UTC on the day): the ' +
+    'reveal gate is why it cannot be seen on the site');
   ok(!/already live/.test(held.html), 'so it never claims to be live');
   ok(/post-a-candidate\.html\?edit=c1/.test(held.html), 'and links to its own form');
+  /* the clock is injected, so the boundary is pinned to the second rather
+     than read off the calendar the day this runs */
+  const out = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },
+    { site: 'https://x.test', revealAt: '2026-10-11', now: new Date('2026-10-11T14:00:00Z') });
+  ok(!/held until/i.test(out.html) && /already live/.test(out.html),
+    'from the instant on a profile is live like any posting, and the e-mail stops saying held');
 
   /* --- the digest -------------------------------------------------------- */
   const many = Array.from({ length: BURST + 1 }, (_, i) => ({

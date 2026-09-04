@@ -40,6 +40,11 @@ import {
   revealGate,
 } from './candidates-model.mjs';
 import { marketYear, inCurrentMarket, ownerTag, removalSpecs, specMatches } from './jobs-model.mjs';
+import { createRequire } from 'node:module';
+
+// the reveal INSTANT (14:00 UTC on the reveal day), the one definition the
+// gate itself calls; read here only to name it in the log
+const OAReveal = createRequire(import.meta.url)('../assets/oa-reveal.js');
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -413,7 +418,9 @@ async function main() {
   const projected = reveal.held ? [] : rows;
   if (reveal.held) {
     log(`reveal gate: ${waiting.length} profile(s) held until ` +
-        (reveal.revealAt || '(no date announced yet)'));
+        (reveal.revealAt
+          ? `${reveal.revealAt} 14:00 UTC (${OAReveal.revealStamp(reveal.revealAt)})`
+          : '(no date announced yet)'));
   }
 
   const before = serialiseCandidates(existing);
@@ -705,12 +712,21 @@ function selftest() {
 
   /* ------------------------------------------------------ the reveal gate */
 
+  /* THE REVEAL IS AN INSTANT, NOT A DAY (owner, 2026-09-04): 14:00 UTC on
+     the reveal day, so it is still that calendar day from California to
+     Shanghai. The gate is a thin caller of assets/oa-reveal.js; the boundary
+     is pinned to the second here, and selftest.mjs pins the module itself. */
   const AUG = new Date('2026-08-16T12:00:00Z');
   eq(revealGate('2026-10-11', AUG).held, true, 'before the reveal date, profiles are held');
   eq(revealGate('2026-10-11', new Date('2026-10-10T23:59:59Z')).held, true,
     'held through the last second of the day before');
-  eq(revealGate('2026-10-11', new Date('2026-10-11T00:00:00Z')).held, false,
-    'ON the reveal day, everyone appears');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T00:00:00Z')).held, true,
+    'and STILL held at midnight UTC on the day: that is five in the afternoon ' +
+    'of the day before in California, which is what the instant exists to fix');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T13:59:59Z')).held, true,
+    'held through the last second before the instant');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T14:00:00Z')).held, false,
+    'AT 14:00 UTC on the reveal day, everyone appears');
   eq(revealGate('2026-10-11', new Date('2027-01-01T00:00:00Z')).held, false,
     'and stays visible after');
   eq(revealGate('', AUG).held, true, 'no date announced = hold everything');
@@ -719,6 +735,10 @@ function selftest() {
   const heldMeta = buildCandidatesMeta([], { generated: 'g', revealAt: '2026-10-11', heldCount: 7 });
   eq(heldMeta.heldCount, 7, 'the meta carries the waiting count for the page to announce');
   eq(heldMeta.revealAt, '2026-10-11', 'and the date');
+  eq(heldMeta.revealAtInstant, '2026-10-11T14:00:00.000Z',
+    'and the INSTANT, as an ISO stamp, the same one the pages compute from the date');
+  eq(buildCandidatesMeta([], { generated: 'g' }).revealAtInstant, '',
+    'no date, no instant: an empty string, never a guess');
   eq(heldMeta.count, 0, 'while the served row count is zero');
 
   eq(freeList('one value'), ['one value'], 'freeList accepts a scalar');

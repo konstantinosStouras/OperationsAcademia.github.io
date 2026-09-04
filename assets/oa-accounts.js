@@ -816,6 +816,10 @@
   function adminPending() {
     return Promise.all([
       loadScript('assets/oa-news.js', 'OANews'),
+      // the reveal instant (assets/oa-reveal.js): oa-adminarea's held-profiles
+      // count asks it whether the profiles are out yet, and a page that never
+      // loaded it would throw there and read the badge as null
+      loadScript('assets/oa-reveal.js', 'OAReveal'),
       loadScript('assets/oa-adminarea.js', 'OAAdminArea')
     ]).then(function () {
       return window.OAAdminArea.pendingCounts();

@@ -35,6 +35,10 @@ import {
   postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE,
 } from './jobs-model.mjs';
 import {
+  CANDIDATE_PUBLIC_FIELDS, rowFromCandidateSubmission, publicCandidateRow,
+  mergeCandidateRows, revealGate, buildCandidatesMeta,
+} from './candidates-model.mjs';
+import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
   campusCountries, healCountry, SCHOOLS,
 } from './vocab.mjs';
@@ -9421,25 +9425,31 @@ async function testAdminArea() {
   ok(/match \/feedback\/\{id\}[\s\S]*?allow read, update, delete: if isAdmin\(\);/.test(rules),
     'and the feedback inbox stays admin-read');
 
-  /* the reveal grouping is the build's own semantics: before the date every
-     queued profile is held, from the day itself queued means published */
+  /* the reveal grouping is the build's own semantics: before the reveal
+     INSTANT (14:00 UTC on the day, assets/oa-reveal.js) every queued profile
+     is held, from the instant itself queued means published. The function is
+     handed the module the page hands it, and a real clock. */
   const fn = /function candGroupOf[\s\S]*?\n  }/.exec(js);
   ok(fn, 'candGroupOf is present');
   if (fn) {
+    const OAReveal = require(path.join(HERE, '..', 'assets', 'oa-reveal.js'));
     /* eslint-disable-next-line no-new-func */
-    const candGroupOf = new Function('return (' + fn[0] + ')')();
-    eq(candGroupOf({ status: 'queued' }, '2026-10-11', '2026-08-23'), 'held',
+    const candGroupOf = new Function('OAReveal', 'return (' + fn[0] + ')')(OAReveal);
+    const AUG = new Date('2026-08-23T12:00:00Z');
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', AUG), 'held',
       'a queued profile before the reveal is HELD');
-    eq(candGroupOf({ status: 'queued' }, '2026-10-11', '2026-10-11'), 'live',
-      'and on the reveal day itself it is live — the same >= the page uses');
-    eq(candGroupOf({ status: 'withdrawn' }, '2026-10-11', '2026-08-23'), 'withdrawn',
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', new Date('2026-10-11T13:59:59Z')), 'held',
+      'and still held on the reveal day up to the last second before 14:00 UTC');
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', new Date('2026-10-11T14:00:00Z')), 'live',
+      'and at 14:00 UTC on the reveal day it is live, the same instant the build reveals on');
+    eq(candGroupOf({ status: 'withdrawn' }, '2026-10-11', AUG), 'withdrawn',
       'a withdrawal stays the candidate\u2019s own whatever the date');
-    eq(candGroupOf({ status: 'hidden' }, '', '2026-08-23'), 'hidden',
+    eq(candGroupOf({ status: 'hidden' }, '', AUG), 'hidden',
       'and a takedown stays the maintainer\u2019s');
-    eq(candGroupOf({}, '', '2026-08-23'), 'held',
+    eq(candGroupOf({}, '', AUG), 'held',
       'no reveal date announced means EVERYTHING is held \u2014 the build\u2019s own ' +
       'revealGate (candidates-model.mjs) publishes nothing until a date is set');
-    eq(candGroupOf({}, 'soon', '2026-08-23'), 'held',
+    eq(candGroupOf({}, 'soon', AUG), 'held',
       'and a malformed date holds too \u2014 the typo revealGate exists to survive ' +
       'must not read as \u201ceverything is public\u201d here');
   }
@@ -9849,6 +9859,307 @@ async function testCandidateProfilePolicy() {
     'the profile points at its replacement');
   ok(/supersededId !== uploaded\.id/.test(build),
     'and never the file just filed');
+}
+
+/* ------------------- the reveal is an INSTANT, and a candidate can edit
+
+   Owner, 2026-09-04: candidate profiles go public at 14:00 UTC on the reveal
+   day (07:00 Los Angeles, 10:00 New York, 15:00 London, 22:00 Shanghai, all
+   still that calendar day), not at the first build after midnight UTC, which
+   is five in the afternoon of the PREVIOUS day in California. And a candidate
+   may edit at any time; the card then says when (`updatedAt`, a public field
+   since the same day).
+
+   assets/oa-reveal.js is the ONE definition. The build's revealGate calls it,
+   and every page and mailer that used to compare a calendar day against
+   `revealAt` reads it instead, which this test pins file by file: two copies
+   of "is it out yet" disagreeing is a profile one page calls held while
+   another calls it live. */
+
+async function testCandidateReveal() {
+  const R = require(path.join(HERE, '..', 'assets', 'oa-reveal.js'));
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+
+  /* ---- the module, to the second ------------------------------------ */
+  eq(R.REVEAL_HOUR_UTC, 14, 'reveal: the hour is 14:00 UTC');
+  eq(R.revealInstant('2026-10-11').toISOString(), '2026-10-11T14:00:00.000Z',
+    'reveal: the instant is 14:00 UTC on the stored day');
+  eq(R.revealInstant(' 2026-10-11 ').toISOString(), '2026-10-11T14:00:00.000Z',
+    'reveal: the stored day is trimmed');
+  for (const junk of ['', 'soon', '11/10/2026', '2026-13-45', '2026-02-31',
+    '2026-10-11T00:00:00Z', null, undefined, 20261011]) {
+    eq(R.revealInstant(junk), null, `reveal: ${JSON.stringify(junk)} is no instant`);
+    eq(R.isRevealed(junk, new Date('2030-01-01T00:00:00Z')), false,
+      `reveal: ...and can never reveal (${JSON.stringify(junk)}), however late the clock`);
+  }
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-10T14:00:00Z')), false, 'reveal: the day before, held');
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-11T00:00:00Z')), false,
+    'reveal: midnight UTC on the day is NOT the reveal (that was the old gate)');
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-11T13:59:59Z')), false, 'reveal: 13:59:59Z, held');
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-11T14:00:00Z')), true, 'reveal: 14:00:00Z, revealed');
+  eq(R.isRevealed('2026-10-11', '2026-10-11T14:00:00Z'), true, 'reveal: a clock given as a string works too');
+  eq(R.isRevealed('2026-10-11', 'not a clock'), false, 'reveal: an unreadable clock holds');
+  eq(R.revealStamp('2026-10-11'), '2026-10-11T14:00:00.000Z', 'reveal: the stamp the meta carries');
+  eq(R.revealStamp('soon'), '', 'reveal: no day, no stamp');
+  eq(R.formatDay('2026-10-02'), '2 October 2026', 'reveal: the site’s day-month-year, no suffix');
+  eq(R.formatDay('2026-10-11T14:00:00Z'), '', 'reveal: a stamp is not a day (cut it first)');
+
+  /* describeReveal: computed with Intl from named zones, never typed. The
+     weekday expectation is computed here too, so a wrong literal in the
+     spec ("Saturday") cannot be pinned into the test. */
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long',
+    day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(new Date('2026-10-11T14:00:00Z'));
+  const part = (t) => parts.find((x) => x.type === t).value;
+  const d = R.describeReveal('2026-10-11', { now: new Date('2026-09-04T00:00:00Z'),
+    timeZone: 'Pacific/Auckland' });
+  eq(d.dayLong, `${part('weekday')} ${part('day')} ${part('month')} ${part('year')}`,
+    'reveal: dayLong is the weekday and the day, without en-GB’s comma');
+  eq(d.day, '2026-10-11', 'reveal: the day'); eq(d.instant, '2026-10-11T14:00:00.000Z', 'reveal: the instant');
+  eq(d.utc, '14:00 UTC', 'reveal: the UTC clock'); eq(d.revealed, false, 'reveal: not yet, at that `now`');
+  eq(d.cities.map((c) => c.name), ['Los Angeles', 'New York', 'London', 'Shanghai'],
+    'reveal: the four cities, west to east');
+  eq(d.cities.map((c) => c.time), ['07:00', '10:00', '15:00', '22:00'],
+    'reveal: their clocks at 14:00 UTC on 2026-10-11');
+  eq(d.cities.map((c) => c.sameDay), [true, true, true, true],
+    'reveal: all four still on the reveal day, which is what the hour was chosen for');
+  eq(d.local, { timeZone: 'Pacific/Auckland', time: '03:00', sameDay: false },
+    'reveal: a reader in Auckland sees three in the morning of the NEXT day, and is told so');
+  eq(R.describeReveal('2026-10-11', { timeZone: 'Not/AZone' }).local,
+    { timeZone: 'Not/AZone', time: null, sameDay: null },
+    'reveal: a zone Intl does not know answers null, never a guess');
+  eq(R.describeReveal('soon'), null, 'reveal: nothing to describe without a day');
+  eq(R.describeReveal('2026-10-11', { now: new Date('2026-10-11T14:00:00Z') }).revealed, true,
+    'reveal: describeReveal says when it is already out');
+  const revealSrc = await read('assets', 'oa-reveal.js');
+  for (const z of ['America/Los_Angeles', 'America/New_York', 'Europe/London', 'Asia/Shanghai']) {
+    ok(revealSrc.includes(`'${z}'`), `reveal: ${z} is a NAMED zone, so daylight saving follows on its own`);
+  }
+  /* read with the comments STRIPPED: the module EXPLAINS its shape with an
+     example, and a guard that could not tell the example from a literal
+     would have to be satisfied by deleting the explanation */
+  ok(!/'[0-2][0-9]:[0-5][0-9]'/.test(revealSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')),
+    'reveal: no clock time is typed into the module; every one is computed');
+  /* driven WITHOUT Intl: the fields are null and the day still prints, so the
+     copy can fall back to its UTC sentence */
+  const noIntl = {};
+  // eslint-disable-next-line no-new-func
+  new Function('self', 'Intl', revealSrc)(noIntl, undefined);
+  const bare = noIntl.OAReveal.describeReveal('2026-10-11');
+  ok(bare && bare.dayLong === d.dayLong && bare.utc === '14:00 UTC',
+    'reveal: without Intl the day and the UTC clock still print');
+  eq(bare.cities.map((c) => c.time), [null, null, null, null],
+    'reveal: ...and the city clocks are null rather than guessed');
+  eq(bare.local.time, null, 'reveal: ...as is the reader’s own');
+  eq(noIntl.OAReveal.isRevealed('2026-10-11', new Date('2026-10-11T14:00:00Z')), true,
+    'reveal: the gate itself never needed Intl');
+
+  /* ---- the build's gate is a thin caller ----------------------------- */
+  eq(revealGate('2026-10-11', new Date('2026-10-11T13:59:59Z')).held, true, 'gate: 13:59:59Z held');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T14:00:00Z')).held, false, 'gate: 14:00:00Z revealed');
+  eq(revealGate('2026-10-11', new Date('2026-10-10T14:00:00Z')).held, true, 'gate: the day before, held');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T00:00:00Z')).held, true,
+    'gate: midnight UTC on the day, held (the old gate revealed here)');
+  eq(revealGate('soon', new Date('2030-01-01')).held, true, 'gate: junk holds everything');
+  eq(revealGate(' 2026-10-11 ', new Date('2026-09-04')).revealAt, '2026-10-11', 'gate: echoes the day it parsed');
+  eq(revealGate('soon', new Date('2026-09-04')).revealAt, '', 'gate: and nothing for junk');
+  eq(buildCandidatesMeta([], { generated: 'g', revealAt: '2026-10-11', heldCount: 3 }).revealAtInstant,
+    '2026-10-11T14:00:00.000Z', 'meta: carries the instant beside the day');
+  eq(buildCandidatesMeta([], { generated: 'g' }).revealAtInstant, '', 'meta: no day, an empty instant');
+  const model = await read('_scraper', 'candidates-model.mjs');
+  ok(/require\('\.\.\/assets\/oa-reveal\.js'\)/.test(model), 'gate: candidates-model reads the module');
+  ok(/held: !OAReveal\.isRevealed\(at, now\)/.test(model), 'gate: revealGate is a thin caller of it');
+  const revealFile = JSON.parse(await read('data', 'candidates-reveal.json'));
+  ok(/14:00 UTC/.test(revealFile['//']) && /oa-reveal\.js/.test(revealFile['//']),
+    'candidates-reveal.json says 14:00 UTC in its own comment, and names the module');
+  ok(!revealFile.revealAt || R.revealInstant(revealFile.revealAt),
+    'the committed reveal date is a real day, or empty (a typo holds everything, but is still a typo)');
+
+  /* ---- every comparison goes through the module ---------------------- */
+  const DAY_COMPARE =
+    /\b(today|todayIso\(\)|toISOString\(\)\.slice\(0, 10\)|isoDay\(now\))\s*[<>]=?\s*(at|revealAt|cmeta\.revealAt)\b/;
+  for (const f of ['index.html', 'assets/oa-alerts.js', 'assets/oa-alert-match.js',
+    'assets/oa-adminarea.js', 'assets/oa-submissions.js', '_scraper/submissions-mailer.mjs',
+    '_scraper/candidates-model.mjs', '_scraper/page-test.mjs']) {
+    const src = await read(...f.split('/'));
+    ok(!DAY_COMPARE.test(src), `${f}: no private calendar-day comparison against revealAt`);
+    ok(/OAReveal\w*\.(isRevealed|revealInstant|describeReveal|revealDay|revealStamp)\(/.test(src),
+      `${f}: asks the module instead`);
+  }
+  const matchSrc = await read('assets', 'oa-alert-match.js');
+  ok(!/\bmark < day\b/.test(matchSrc), 'oa-alert-match: the note is no longer keyed on a bare day');
+  ok(/require\('\.\/oa-reveal\.js'\)/.test(matchSrc) && /root\.OAReveal/.test(matchSrc),
+    'oa-alert-match: the factory is handed the module on both sides');
+  const mailerSrc = await read('_scraper', 'submissions-mailer.mjs');
+  ok(!/=== 'candidate' && revealAt;/.test(mailerSrc),
+    'submissions-mailer: "held" is no longer the mere presence of a date');
+  ok(/OAReveal\.describeReveal\(revealAt, \{ now \}\)/.test(mailerSrc),
+    'submissions-mailer: ...it asks the module, with the clock injected');
+  const admin = await read('assets', 'oa-adminarea.js');
+  ok(/OAReveal\.isRevealed\(meta\.revealAt\)/.test(admin), 'oa-adminarea: heldCandidates asks the module');
+  ok(/var held = !OAReveal\.isRevealed\(revealAt, now\);/.test(admin),
+    'oa-adminarea: candGroupOf asks it, with the clock injected');
+  ok(/candGroupOf\(v, revealAt, now\)/.test(admin), 'oa-adminarea: ...and is handed a real clock');
+  ok(/OAReveal\.describeReveal\(revealAt\)/.test(admin), 'oa-adminarea: the panel hint names the computed instant');
+  const subs = await read('assets', 'oa-submissions.js');
+  ok(/OAReveal\.describeReveal\(revealAt\)/.test(subs) && /Held until/.test(subs),
+    'oa-submissions: the card names the instant and still says "Held until"');
+  const acct = await read('assets', 'oa-accounts.js');
+  ok(/loadScript\('assets\/oa-reveal\.js', 'OAReveal'\)/.test(acct),
+    'oa-accounts: adminPending loads the module before oa-adminarea.js needs it, on every page');
+  ok(acct.indexOf("loadScript('assets/oa-reveal.js', 'OAReveal')")
+     < acct.indexOf("loadScript('assets/oa-adminarea.js', 'OAAdminArea')"),
+    'oa-accounts: ...listed before it');
+
+  /* ---- the alerts: the note is keyed on the instant ------------------ */
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const CT = { topics: ['candidates'] };
+  const ROWS = [
+    { id: 'a', name: 'A', addedAt: '2026-08-20T09:00:00Z' },
+    { id: 'b', name: 'B', addedAt: '2026-10-11T09:00:00Z' },
+  ];
+  eq(M.candidateNews(ROWS, CT, '2026-10-11T13:59:59Z', '2026-10-11').kind, 'reveal',
+    'alerts: a mark on the reveal day before 14:00 UTC gets the note');
+  const note = M.candidateNews(ROWS, CT, '', '2026-10-11');
+  eq(note.mark, '2026-10-11T14:00:00Z',
+    'alerts: the note’s mark is the instant when every profile predates it');
+  eq(M.candidateNews(ROWS, CT, note.mark, '2026-10-11'), null,
+    'alerts: ...so the note goes once (the repeat a posting-time mark had)');
+  eq(M.candidateNews(ROWS, CT, '2026-10-11T14:00:00Z', '2026-10-11'), null,
+    'alerts: at the instant, nothing new to list');
+  /* driven WITHOUT the module: the old fallback, an empty mark announces and
+     a set mark lists, never a private guess at the instant */
+  const bareRoot = {
+    OACountries: require(path.join(HERE, '..', 'assets', 'oa-countries.js')),
+    OASchools: require(path.join(HERE, '..', 'assets', 'oa-schools.js')),
+    OAJobNav: require(path.join(HERE, '..', 'assets', 'oa-jobnav.js')),
+  };
+  // eslint-disable-next-line no-new-func
+  new Function('self', matchSrc)(bareRoot);
+  eq(bareRoot.OAAlertMatch.candidateNews(ROWS, CT, '', '2026-10-11').kind, 'reveal',
+    'alerts (no module): an empty mark announces');
+  eq(bareRoot.OAAlertMatch.candidateNews(ROWS, CT, '2026-10-11T09:00:00Z', '2026-10-11'), null,
+    'alerts (no module): a set mark lists, and here has nothing newer to list');
+  ok(!/function (revealInstant|isRevealed)\(/.test(matchSrc),
+    'alerts: the matcher carries no private copy of the reveal rule');
+
+  /* ---- the pages load the module before its users -------------------- */
+  const tagAt = (html, f) => html.indexOf('<script defer src="assets/' + f + '"></script>');
+  const index = await read('index.html');
+  ok(tagAt(index, 'oa-reveal.js') > 0, 'index.html loads oa-reveal.js, deferred');
+  ok(tagAt(index, 'oa-reveal.js') < index.indexOf('OAReveal.isRevealed('),
+    'index.html: ...before the reveal note that asks it');
+  const alertsHtml = await read('alerts.html');
+  ok(tagAt(alertsHtml, 'oa-reveal.js') > 0 && tagAt(alertsHtml, 'oa-reveal.js') < tagAt(alertsHtml, 'oa-alert-match.js'),
+    'alerts.html loads oa-reveal.js BEFORE the matcher whose factory is handed it');
+  const adminHtml = await read('admin-area.html');
+  ok(tagAt(adminHtml, 'oa-reveal.js') > 0
+     && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-submissions.js')
+     && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-adminarea.js'),
+    'admin-area.html loads oa-reveal.js before both panels that ask it');
+  /* account.html and post-a-candidate.html load it with the candidate card
+     (oa-candcard.js) and the previews; their load-order pins live with that
+     work, beside the twin's parity table. */
+
+  /* ---- updatedAt: a public field, day-cut, never an alerts cursor ---- */
+  ok(CANDIDATE_PUBLIC_FIELDS.includes('updatedAt'), 'updatedAt: is a published field');
+  eq(CANDIDATE_PUBLIC_FIELDS.indexOf('updatedAt'), CANDIDATE_PUBLIC_FIELDS.indexOf('addedAt') + 1,
+    'updatedAt: right after addedAt in the served order');
+  const NOW = new Date('2026-09-04T12:00:00Z');
+  const base = { uid: 'u-1', first: 'Ada', last: 'Reader', institution: 'Somewhere University',
+    position: 'PhD Candidate', year: 2027, createdAt: '2026-08-20T09:00:00Z' };
+  const r0 = publicCandidateRow(rowFromCandidateSubmission(base, { now: NOW }));
+  ok(!('updatedAt' in r0), 'updatedAt: a profile never edited carries no key at all');
+  const r1 = publicCandidateRow(rowFromCandidateSubmission(
+    { ...base, updatedAt: '2026-10-02T17:45:10.123Z' }, { now: NOW }));
+  eq(r1.updatedAt, '2026-10-02', 'updatedAt: the stamp is cut to its day');
+  eq(Object.keys(r1).indexOf('updatedAt'), Object.keys(r1).indexOf('addedAt') + 1,
+    'updatedAt: ...and written in the served order');
+  eq(r1.addedAt, '2026-08-20T09:00:00Z', 'updatedAt: addedAt is untouched by an edit');
+  eq(publicCandidateRow(rowFromCandidateSubmission(
+    { ...base, updatedAt: { toDate: () => new Date('2026-10-03T01:00:00Z') } }, { now: NOW })).updatedAt,
+    '2026-10-03', 'updatedAt: a Firestore Timestamp shape is read too');
+  ok(!('updatedAt' in publicCandidateRow(rowFromCandidateSubmission(
+    { ...base, updatedAt: 'junk' }, { now: NOW }))), 'updatedAt: junk is dropped, never published');
+  const prevRow = rowFromCandidateSubmission(base, { now: NOW });
+  const nextRow = rowFromCandidateSubmission({ ...base, updatedAt: '2026-10-02T00:00:00Z' },
+    { now: new Date('2026-10-02T12:00:00Z') });
+  const merged = mergeCandidateRows([prevRow], [nextRow]);
+  eq([merged.added, merged.updated], [0, 1], 'updatedAt: an edit is an update of the served row, never a new profile');
+  eq(merged.rows[0].updatedAt, '2026-10-02', 'updatedAt: the fresh day wins');
+  eq(merged.rows[0].addedAt, prevRow.addedAt, 'updatedAt: the alerts cursor stays where it was');
+  eq(M.newCandidatesFor([{ ...r1, updatedAt: '2026-12-01' }], CT, '2026-08-20T09:00:00Z'), [],
+    'updatedAt: the candidates topic lists by addedAt alone, so an edit re-announces nothing');
+  const rules = await read('_firestore.rules');
+  const candBlock = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'),
+    rules.indexOf('// ---------------------------------------------------------- placements'));
+  ok(candBlock.length > 1500 && candBlock.length < 6000, 'updatedAt: the rules slice is the candidates block');
+  ok(/&& str\('updatedAt', 40\)/.test(candBlock), 'updatedAt: candShapeOk bounds it as a string');
+  ok(!/hasOnly\(\[[^\]]*updatedAt/.test(candBlock), 'updatedAt: never in the merge hand-over’s hasOnly');
+  ok(/allow update: if isOwner\(resource\.data\.uid\)\n\s+&& request\.resource\.data\.uid == resource\.data\.uid[\s\S]*?&& candShapeOk\(\);/.test(candBlock),
+    'updatedAt: the owner’s update runs candShapeOk, so an edit carrying it is accepted');
+  ok(new Date().toISOString().length <= 40, 'updatedAt: an ISO stamp fits the bound');
+  for (const [f, re] of [
+    ['assets/oa-candidateform.js', /updatedAt(:| =) new Date\(\)\.toISOString\(\)/],
+    ['assets/oa-candidateedit.js', /updatedAt: new Date\(\)\.toISOString\(\)/],
+    ['assets/oa-adminarea.js', /updatedAt: new Date\(\)\.toISOString\(\)/],
+  ]) {
+    ok(re.test(await read(...f.split('/'))), `${f}: writes updatedAt as an ISO stamp`);
+  }
+  /* edit at ANY time: nothing gates Edit on the reveal, before or after */
+  const editJs = await read('assets', 'oa-candidateedit.js');
+  const editSlice = editJs.slice(editJs.indexOf('function decorate'), editJs.indexOf('function takeDown'));
+  ok(editSlice.length > 500 && editSlice.length < 5000, 'edit: the decorate slice is bounded both ends');
+  ok(!/revealAt|isRevealed|OAReveal/.test(editSlice), 'edit: the card’s Edit button is not gated on the reveal');
+  const formJs = await read('assets', 'oa-candidateform.js');
+  const editMode = formJs.slice(formJs.indexOf('function enterEditMode'), formJs.indexOf('function wireTakeDown'));
+  ok(editMode.length > 500 && editMode.length < 8000, 'edit: the enterEditMode slice is bounded both ends');
+  ok(!/revealAt|isRevealed/.test(editMode), 'edit: the form opens a profile for editing whatever the date');
+
+  /* ---- the doorbell: revealCandidates ------------------------------- */
+  const fnSrc = await read('_functions', 'index.js');
+  ok(/require\('firebase-functions\/v2\/scheduler'\)/.test(fnSrc), 'doorbell: the scheduler is imported');
+  ok(/exports\.revealCandidates = onSchedule\(/.test(fnSrc), 'doorbell: revealCandidates is a scheduled function');
+  const bell = fnSrc.slice(fnSrc.indexOf('exports.revealCandidates'),
+    fnSrc.indexOf('/* --------------------------------------------------------------- approvals */'));
+  ok(bell.length > 800 && bell.length < 4000, 'doorbell: the slice is the function, bounded both ends');
+  ok(/schedule: '0 14 \* \* \*'/.test(bell) && /timeZone: 'UTC'/.test(bell), 'doorbell: 14:00 UTC daily');
+  eq(Number(/schedule: '0 (\d+) \* \* \*'/.exec(bell)[1]), R.REVEAL_HOUR_UTC,
+    'doorbell: its hour IS the module’s hour');
+  eq(Number(/const REVEAL_HOUR_UTC = (\d+);/.exec(fnSrc)[1]), R.REVEAL_HOUR_UTC,
+    'doorbell: ...and so is the constant it logs');
+  ok(/secrets: \[GH_DISPATCH_TOKEN\]/.test(bell), 'doorbell: carries the dispatch token like the others');
+  ok(/candidates-reveal\.json/.test(bell) && /Date\.now\(\)/.test(bell) && /cache: 'no-store'/.test(bell),
+    'doorbell: reads the served reveal file, cache-busted');
+  ok(/await ring\(EVENT_TYPE, \{ reason: 'reveal'/.test(bell),
+    'doorbell: rings the SAME helper with the SAME event type the other doorbells use');
+  ok(/revealAt !== today/.test(bell) && /'reveal: not today'/.test(bell),
+    'doorbell: on every other day it logs why it did not ring');
+  ok(/FOUR doorbells/.test(fnSrc) && !/THREE doorbells/.test(fnSrc), 'doorbell: the header counts four');
+  ok(/the fifth function, and the only\s+one here that is not a doorbell/.test(fnSrc),
+    'doorbell: recordVisit is the fifth function');
+  /* ONE producer for the event: no GitHub cron may fire at 14:00, the
+     duplicate-doorbell outage (One event, one build) in another costume */
+  const wfDir = path.join(HERE, '..', '.github', 'workflows');
+  for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
+    const src = await readFile(path.join(wfDir, file), 'utf8');
+    for (const m of src.matchAll(/cron:\s*['"]([^'"]+)['"]/g)) {
+      const hours = (m[1].trim().split(/\s+/)[1] || '').split(',');
+      ok(!hours.includes(String(R.REVEAL_HOUR_UTC)),
+        `${file}: no workflow cron fires at ${R.REVEAL_HOUR_UTC}:00 UTC; the Cloud Function is the one producer`);
+    }
+  }
+  const setup = await read('_SETUP-INSTANT-PUBLISH.md');
+  ok(/`revealCandidates`/.test(setup) && /which is five/.test(setup) && /read back\s+five/.test(setup),
+    'setup guide: names revealCandidates and counts five functions');
+  ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
+  ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
+  ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
+
+  /* ---- CLAUDE.md records the decisions ------------------------------- */
+  const claude = await read('CLAUDE.md');
+  ok(/^## The reveal is an instant, not a day, and a candidate can see their own card first$/m.test(claude),
+    'CLAUDE.md: the section is there');
+  ok(/14:00 UTC/.test(claude), 'CLAUDE.md: ...and names the hour');
 }
 
 /* ------------------------------------------------- the Excel download
@@ -12103,6 +12414,7 @@ if (isMain(import.meta.url)) {
   await testSubmissionNotices();
   await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();
+  await testCandidateReveal();
   await testJobExport();
   await testJobExportWiring();
   await testMultiSelectFilters();
