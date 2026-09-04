@@ -78,7 +78,7 @@ The **Runtime** column must say what `_functions/package.json` says. Where it
 does not, name each function explicitly — the supported bypass, not a trick:
 
 ```
-firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:recordVisit --project operations-academia
+firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:recordVisit,functions:sendVerificationEmail --project operations-academia
 ```
 
 `--only functions` parses to an EMPTY filter list, which leaves every endpoint
@@ -126,10 +126,14 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is four: the three
-doorbells above, and **`recordVisit`** — the university-visit resolver behind
+This deploys EVERY function in `_functions/`, which is five: the three
+doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
-and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4).
+and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
+and **`sendVerificationEmail`**, the mailer behind e-mail verification on
+registration, which needs the four `SMTP_*` secrets set in Secret Manager
+first (`_SETUP-EMAIL-VERIFICATION.md`). Read the deployed list back and count
+five.
 
 Always pass `--project`: the CLI remembers an "active project" per directory,
 and a deploy from this folder has already gone into another project's database

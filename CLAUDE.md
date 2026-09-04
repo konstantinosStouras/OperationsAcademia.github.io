@@ -1844,6 +1844,77 @@ on all four pages) and the roster/messaging block in `_scraper/page-test.mjs`
 round trip asserted to leave the body, `from` and the timestamp untouched, a
 thread whose messages are all removed still answerable, plus the 390px gate).
 
+## Registration is verified by e-mail
+
+Owner, 2026-09-04: a person who registers with an e-mail address and a
+password must press a link in a message before the account can be used.
+Google sign-ins are already verified by Google; ORCID sign-ins carry no
+e-mail claim and are not gated. The decisions, so nobody re-opens them:
+
+    _functions/verify-email.js        the message (renderer, zero dependencies)
+    _functions/index.js               sendVerificationEmail, the callable that sends it
+    _firestore.rules                  verified(), on every write a signed-in user makes
+    assets/oa-accounts.js             the pending session and the "Check your inbox" card
+    verify-email.html + oa-verify.js  where the link lands
+    _SETUP-EMAIL-VERIFICATION.md      the four secrets, the deploy, how to test
+
+**The rules read the TOKEN, and `verified()` is the one place they read it.**
+`verified()` is a sign-in whose `email_verified` claim is true OR whose
+provider is anything but `password`, and `isOwner(uid)` goes through it, so
+every owner write is gated with no text change at its call sites. The
+top-level user writes (`jobSubmissions`, `candidateSubmissions`,
+`placementSubmissions`, `accountKeys`, `directoryEdits`, `nameFixes`, the
+signed-in branch of `usageSessions`) name `verified()` where they named
+`signedIn()`. **The ONE exception is `profiles/{uid}`**: its owner may create
+and update it on a bare sign-in, because the registration form writes the
+profile in the same breath as it creates the account, before any link can
+have been pressed. Read and delete there stay owner-gated. The selftest pins
+that exactly one write clause in the file is granted on a bare sign-in and
+that it is that one.
+
+**A pending session is signed out for everything but the panel.** The browser
+keeps the user for the "Check your inbox" card and nothing else: `user()`
+answers null, `hint()` answers `'out'`, `onChange` fires null, nothing writes
+the hint, the roster row, the tally, the identity keys or the counts, and the
+chip reads "Verify your e-mail". Anything less leaves a flash of unlocked
+cards on the next page, painted from a remembered hint the SDK then
+contradicts.
+
+**Verification does not refresh the token by itself.** `user.reload()` updates
+`emailVerified` on the object; the rules read the ID token, which is cached
+for up to an hour. So every lift calls `getIdToken(true)` before the first
+write, or the roster row, the tally and the profile read all bounce with
+permission-denied that looks exactly like undeployed rules.
+
+**The site's own message, with Firebase's as the fallback.** The callable
+generates the link with the Admin SDK, cuts the code out of it, and puts it on
+the site's own page (`verify-email.html?mode=verifyEmail&oobCode=...`), so the
+reader lands on operationsacademia.org rather than a firebaseapp.com handler.
+It mails the address on the token only, refuses an already-verified one, and
+keeps its own rate limit in `verifyMail/{uid}` (one send in 90 seconds, six in
+a UTC day), because Firebase's resend limits do not apply to links the Admin
+SDK mints. Neither the link nor the code is ever logged. When the callable
+cannot be reached (not deployed, down, or the SDK failed to load) the browser
+falls back to `sendEmailVerification`, so nobody is stranded; that message
+comes from Firebase's own address and lands on the same page with no code.
+
+**The renderer is deploy-local.** `firebase deploy` ships only `_functions/`,
+so `verify-email.js` copies the shape of `_scraper/_mail.mjs` (a 600px table,
+an escaper, a plain-text alternative) and imports nothing. The palette is the
+live site's from `assets/v3.css`, the button is a coloured table cell with a
+VML fallback for Outlook, and the link is written out in full as text as well
+as behind the button.
+
+**The deploy count is FIVE now.** Three doorbells, `recordVisit`, and
+`sendVerificationEmail`. Read the list back after every deploy; four means a
+stale checkout. `npm install --prefix _functions` first, since the CLI loads
+`index.js` and this function requires `nodemailer`.
+
+Tests: `testEmailVerification` in `_scraper/selftest.mjs` (the message, the
+rules with the exception, the function's secrets and what it never logs, the
+package and lockfile, the setup page and this section), plus the browser
+half in `_scraper/page-test.mjs`.
+
 ## What "immediate" costs, and where the waiting used to be
 
 A posting is decided in Firestore and served from `data/` by GitHub Pages, so

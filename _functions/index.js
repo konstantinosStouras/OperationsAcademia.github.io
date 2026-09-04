@@ -1,5 +1,12 @@
 /* ---------------------------------------------------------------------------
-   Operations Academia — instant publish.
+   Operations Academia: instant publish, the visit resolver, and the
+   verification mailer.
+
+   FIVE functions live in this file: three doorbells (publishOnChange,
+   publishOnCandidateChange, publishOnReview), the university-visit resolver
+   (recordVisit), and the e-mail verification mailer (sendVerificationEmail,
+   set up in _SETUP-EMAIL-VERIFICATION.md). A deploy lists all five, and
+   reading that count back is how a deploy from a stale checkout is caught.
 
    THREE doorbells, one job each. When a job posting changes in Firestore,
    start the GitHub build that publishes it, so a new posting or an edit
@@ -42,10 +49,37 @@
 'use strict';
 
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
+/* MODULAR, because firebase-admin 14 removed the namespaced surface whole:
+   `admin.apps`, `admin.firestore()` and `admin.firestore.FieldValue` are all
+   undefined there: the breaking change the CLI's upgrade warning promised,
+   and the one the load-time smoke test caught (FieldValue.increment would
+   have thrown on the first ping, after a deploy that looked clean). */
+const { initializeApp, getApps } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getAuth } = require('firebase-admin/auth');
+const nodemailer = require('nodemailer');
+const { renderVerifyEmail } = require('./verify-email.js');
 
 const GH_DISPATCH_TOKEN = defineSecret('GH_DISPATCH_TOKEN');
+
+/* The mailbox the verification e-mail is sent from: the same four names the
+   scheduled mailers read from the repository's secrets, held here in Secret
+   Manager (_SETUP-EMAIL-VERIFICATION.md). */
+const SMTP_HOST = defineSecret('SMTP_HOST');
+const SMTP_PORT = defineSecret('SMTP_PORT');
+const SMTP_USER = defineSecret('SMTP_USER');
+const SMTP_PASS = defineSecret('SMTP_PASS');
+
+const SITE = 'https://www.operationsacademia.org';
+const CONTACT = 'operationsacademia@gmail.com';
+
+/** The Admin app, initialised once whichever function touches it first. */
+function adminApp() {
+  if (!getApps().length) initializeApp();
+}
 
 const REPO = 'konstantinosStouras/OperationsAcademia.github.io';
 const EVENT_TYPE = 'oa-jobs-changed';
@@ -177,8 +211,149 @@ exports.publishOnReview = onDocumentWritten(
   });
 
 /* ===========================================================================
-   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and the only
-   one here that is not a doorbell.
+   E-MAIL VERIFICATION. The fifth function, and a mailer rather than a
+   doorbell.
+
+   A person who registers with an e-mail address and a password must press a
+   link in a message before the account can be used (the rules read
+   `email_verified` off the token, see verified() in _firestore.rules).
+   Firebase sends a verification message of its own, but from a
+   firebaseapp.com address, in its own template, landing on a Firebase-hosted
+   page. This function sends the site's own message instead, rendered by
+   ./verify-email.js in the live site's palette, from the site's own mailbox,
+   and pointing at verify-email.html on the site.
+
+   HOW IT IS CALLED. The browser's accounts module calls it as a callable
+   (`sendVerificationEmail`) right after registration and from the "send the
+   e-mail again" button. If the callable is unreachable, the browser falls
+   back to Firebase's own `sendEmailVerification`, so nobody is stranded while
+   this function is not yet deployed or is down.
+
+   WHAT IT MUST NEVER DO. The link carries a one-time code that verifies the
+   address for whoever presses it, so neither the link nor the code is ever
+   logged; a log line names the account and a redacted address and nothing
+   more. A message goes to the address on the TOKEN, never to an address the
+   client sends, so nobody can have a verification link mailed to somebody
+   else. The address must be unverified, or there is nothing to do.
+
+   THE RATE LIMIT IS OURS. Firebase's own resend limits apply to messages it
+   sends, not to links the Admin SDK generates, so this function keeps a small
+   document per account, `verifyMail/{uid}` { sentAt, count, day }, and
+   refuses a second message inside 90 seconds or a seventh in a UTC day. The
+   collection is written by this function alone, with the Admin SDK; no
+   client rule names it and the catch-all rule denies it.
+   =========================================================================== */
+
+const VERIFY_MIN_GAP_MS = 90 * 1000;
+const VERIFY_DAY_MAX = 6;
+
+/** `a***@example.org`: enough to recognise in a log, never enough to write to. */
+function redact(email) {
+  const m = String(email || '').trim().match(/^([^@]{1,2})[^@]*(@.*)$/);
+  return m ? `${m[1]}***${m[2]}` : '***';
+}
+
+exports.sendVerificationEmail = onCall(
+  {
+    region: 'us-central1',
+    secrets: [SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS],
+    /* A bounded fan-out: this is pressed once or twice per registration, and
+       a flood should shed load rather than run up a bill. */
+    maxInstances: 5,
+    timeoutSeconds: 30,
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Sign in first.');
+    }
+    const uid = request.auth.uid;
+    const token = request.auth.token || {};
+    const email = String(token.email || '').trim();
+    if (!email) {
+      logger.warn('verification refused', { uid, reason: 'no-address' });
+      throw new HttpsError('failed-precondition',
+        'This account has no e-mail address to verify.');
+    }
+    if (token.email_verified === true) {
+      logger.warn('verification refused', { uid, reason: 'already-verified' });
+      throw new HttpsError('failed-precondition', 'This address is already verified.');
+    }
+
+    adminApp();
+    const db = getFirestore();
+    const today = new Date().toISOString().slice(0, 10);
+    const now = Date.now();
+    const limitRef = db.collection('verifyMail').doc(uid);
+    const prior = (await limitRef.get()).data() || {};
+    const sameDay = prior.day === today;
+    const count = sameDay ? Number(prior.count || 0) : 0;
+    if (typeof prior.sentAt === 'number' && now - prior.sentAt < VERIFY_MIN_GAP_MS) {
+      logger.warn('verification refused', { uid, reason: 'too-soon' });
+      throw new HttpsError('resource-exhausted',
+        'A message went out a moment ago. Give it a minute and look again.');
+    }
+    if (count >= VERIFY_DAY_MAX) {
+      logger.warn('verification refused', { uid, reason: 'daily-limit' });
+      throw new HttpsError('resource-exhausted',
+        'That is enough messages for today. Try again tomorrow, and look in spam.');
+    }
+
+    /* Firebase mints the one-time code; the site's own page is what the
+       reader lands on. The continueUrl is where that page sends them next. */
+    const generated = await getAuth().generateEmailVerificationLink(email, {
+      url: SITE + '/account.html',
+    });
+    const code = new URL(generated).searchParams.get('oobCode');
+    if (!code) {
+      logger.error('the minted address carried no verification token', { uid });
+      throw new HttpsError('internal', 'The verification message could not be made.');
+    }
+    const link = `${SITE}/verify-email.html?mode=verifyEmail` +
+      `&oobCode=${encodeURIComponent(code)}` +
+      `&continueUrl=${encodeURIComponent(SITE + '/account.html')}`;
+
+    /* The greeting. The profile is written by the registration form in the
+       same breath as the account, so it is usually there; a missing one only
+       costs the first name. */
+    let firstName = '';
+    try {
+      const prof = (await db.collection('profiles').doc(uid).get()).data() || {};
+      firstName = String(prof.firstName || '').trim();
+    } catch (e) {
+      logger.warn('profile not read for the greeting', { uid, error: e.message });
+    }
+
+    const msg = renderVerifyEmail({ firstName, email, link, site: SITE, contact: CONTACT });
+    const port = Number(SMTP_PORT.value() || 587);
+    const transport = nodemailer.createTransport({
+      host: SMTP_HOST.value().trim(),
+      port,
+      secure: port === 465,
+      auth: { user: SMTP_USER.value().trim(), pass: SMTP_PASS.value() },
+    });
+    try {
+      await transport.sendMail({
+        from: `Operations Academia <${SMTP_USER.value().trim()}>`,
+        to: email,
+        subject: msg.subject,
+        html: msg.html,
+        text: msg.text,
+      });
+    } catch (e) {
+      logger.error('verification e-mail not sent', { uid, to: redact(email), error: e.message });
+      throw new HttpsError('internal', 'The message could not be sent.');
+    }
+
+    /* Stamped AFTER the send, so a failed attempt does not count against the
+       person who then presses the button again. */
+    await limitRef.set({ sentAt: now, day: today, count: count + 1 });
+    logger.info('verification e-mail sent', { uid, to: redact(email) });
+    return { sent: true, to: redact(email) };
+  });
+
+/* ===========================================================================
+   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and one of the
+   two here that are not doorbells.
 
    THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to
    show "which universities visited", measured from Universal Analytics'
@@ -224,14 +399,9 @@ exports.publishOnReview = onDocumentWritten(
    per-function lines before the code.
    =========================================================================== */
 
-const { onRequest } = require('firebase-functions/v2/https');
-/* MODULAR, because firebase-admin 14 removed the namespaced surface whole:
-   `admin.apps`, `admin.firestore()` and `admin.firestore.FieldValue` are all
-   undefined there — the breaking change the CLI's upgrade warning promised,
-   and the one the load-time smoke test caught (FieldValue.increment would
-   have thrown on the first ping, after a deploy that looked clean). */
-const { initializeApp, getApps } = require('firebase-admin/app');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+/* `onRequest`, `getFirestore` and `FieldValue` are required at the top of the
+   file with the rest of the Admin SDK, since the verification mailer above
+   shares them. */
 const dns = require('node:dns');
 
 /* Both VENDORED by _scraper/build-netmap.mjs, because `firebase deploy` ships
@@ -266,7 +436,7 @@ async function reverseDns(ip) {
 }
 
 function visitsDb() {
-  if (!getApps().length) initializeApp();
+  adminApp();
   return getFirestore();
 }
 

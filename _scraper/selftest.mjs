@@ -5469,8 +5469,9 @@ async function testDirectoryWiring() {
   ok(block.length > 100, 'the rules carry a directoryEdits block');
   ok(/allow read: if true;/.test(block.slice(0, 400)),
     'an edit reaches EVERY visitor — a correction is not an editor-only view');
-  ok(/allow create, update: if signedIn\(\)/.test(block.slice(0, 900)),
-    'and ANY registered user may write one (owner, 2026-08-24)');
+  ok(/allow create, update: if verified\(\)/.test(block.slice(0, 900)),
+    'and ANY registered user with a verified address may write one (owner, ' +
+    '2026-08-24; the verification gate joined every user write on 2026-09-04)');
   ok(/request\.resource\.data\.by == request\.auth\.uid/.test(block.slice(0, 1200)),
     'attribution cannot be forged: `by` is pinned to the writing account');
   ok(/'hidden' in request\.resource\.data[\s\S]{0,220}isAdmin\(\)/.test(block),
@@ -12014,6 +12015,241 @@ async function testUniversityVisits() {
     'from an IP and says so nowhere is wrong whatever its rules allow');
 }
 
+/* ------------------------------------------ registration is verified by e-mail
+
+   An account registered with an e-mail address and a password must press the
+   link in a message before it can be used (CLAUDE.md, "Registration is
+   verified by e-mail"). Three pieces carry it and each is pinned here: the
+   message itself (_functions/verify-email.js), the function that sends it
+   (sendVerificationEmail in _functions/index.js), and the rules, which read
+   `email_verified` off the token through verified() on every user write with
+   the one exception the registration form needs. The browser half is pinned
+   further down, at the anchor marked FRONTEND PINS. */
+async function testEmailVerification() {
+  const root = path.join(HERE, '..');
+  const site = 'https://www.operationsacademia.org';
+  const noDash = (s) => !/—/.test(String(s));
+
+  /* --- the message ------------------------------------------------------- */
+
+  const V = require(path.join(root, '_functions', 'verify-email.js'));
+  const link = `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC123xyz` +
+    `&continueUrl=${encodeURIComponent(site + '/account.html')}`;
+  const r = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link });
+  const count = (hay, needle) => String(hay).split(needle).length - 1;
+  const escLink = V.esc(link);
+  const visible = r.html.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&');
+
+  eq(r.subject, 'Verify your e-mail address for Operations Academia',
+    'verify: the subject line is the one the owner approved');
+  ok(/One more step/.test(r.html) && /Hello Ada,/.test(r.html),
+    'verify: the heading and a greeting by first name');
+  ok(/>Hello,</.test(V.renderVerifyEmail({ link }).html),
+    'verify: with no name on the profile the greeting is a bare "Hello,"');
+  ok(count(r.html, 'Verify my e-mail address') >= 1 && count(r.text, 'Verify my e-mail address') === 1,
+    'verify: the button says "Verify my e-mail address", once in the plain text');
+  ok(count(r.html, `href="${escLink}"`) >= 1,
+    'verify: the button carries the link');
+  ok(count(visible, link) === 1,
+    'verify: and the link is written out in full ONCE as text a reader can copy');
+  ok(count(r.html, escLink) >= 2,
+    'verify: so the link is in the HTML at least twice, behind the button and as text');
+  ok(count(r.text, link) === 1,
+    'verify: the plain-text alternative carries the link exactly once');
+  ok(/copy this link into your browser:/.test(r.html)
+     && /You will not be able to sign in until your address is verified\./.test(r.html)
+     && /you can ignore this message and no account will be used\./.test(r.html),
+    'verify: the fallback sentence and the two closing sentences are as written');
+  ok(r.text.length > 300 && !/<[a-z]/i.test(r.text),
+    'verify: there IS a plain-text alternative, and it holds no markup');
+  ok(noDash(r.html) && noDash(r.text) && noDash(r.subject),
+    'verify: no em dash anywhere in the message');
+  ok(!/<script/i.test(r.html), 'verify: no script in an e-mail');
+  ok(/<meta name="color-scheme" content="light dark">/.test(r.html)
+     && /<meta name="supported-color-schemes" content="light dark">/.test(r.html),
+    'verify: the head declares both colour schemes');
+  ok(new RegExp(`<img src="${site}/images/OA-logo-solo\\.png"[^>]*alt="[^"]+"`).test(r.html),
+    'verify: the logo is an absolute https image with alt text');
+  ok(/Operations Academia<span[^>]*>\.org<\/span>/.test(r.html),
+    'verify: the wordmark is TEXT beside the logo, so the header reads with images blocked');
+  ok(/mso-hide:all/.test(r.html) && /display:none;max-height:0/.test(r.html),
+    'verify: a hidden preheader');
+  ok(/<v:roundrect[^>]*href="/.test(r.html) && /bgcolor="#3a424d"/.test(r.html),
+    'verify: the button is a coloured table cell with a VML fallback for Outlook');
+  for (const hex of ['#f8f7f4', '#ffffff', '#ccd1d7', '#22272e', '#454c56', '#646c78', '#3a424d']) {
+    ok(r.html.includes(hex), `verify: the live site's palette, ${hex}`);
+  }
+  ok(/border-radius:14px/.test(r.html) && /border-radius:999px/.test(r.html)
+     && /padding:14px 26px/.test(r.html) && /width="600"/.test(r.html),
+    'verify: the card radius, the pill button and the 600px table');
+  ok(/Georgia/.test(r.html) && /Inter, Helvetica, Arial/.test(r.html),
+    'verify: Georgia for the heading, Inter with Helvetica and Arial behind it for the body');
+  ok(/questions to <a href="mailto:operationsacademia@gmail\.com"/.test(r.html)
+     && /<a href="https:\/\/www\.operationsacademia\.org"[^>]*>operationsacademia\.org<\/a>/.test(r.html)
+     && /questions to operationsacademia@gmail\.com/.test(r.text),
+    'verify: the footer names the site and the contact address, with links');
+  const hostile = V.renderVerifyEmail({ firstName: '<b>x</b>', link }).html;
+  ok(hostile.includes('Hello &lt;b&gt;x&lt;/b&gt;,') && !hostile.includes('<b>x</b>'),
+    'verify: a first name somebody typed is escaped');
+  const shell = V.brandShell({ title: 'T', preheader: 'P', bodyHtml: '<p>BODY</p>' });
+  ok(/^<!DOCTYPE html>/.test(shell) && shell.includes('<p>BODY</p>') && /<title>T<\/title>/.test(shell),
+    'verify: brandShell is exported and wraps whatever it is given');
+  eq(V.toPlain('<!--[if mso]><center>twice</center><![endif]--><p>once</p>'), 'once',
+    'verify: toPlain drops the Outlook copy of the button, so its label is not printed twice');
+
+  const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
+  ok(!/\brequire\(/.test(rendererSrc) && !/^\s*import /m.test(rendererSrc),
+    'verify: the renderer depends on NOTHING, since firebase deploy ships only _functions');
+  ok(noDash(rendererSrc), 'verify: no em dash in the renderer');
+
+  /* --- the rules --------------------------------------------------------- */
+
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  ok(/function verified\(\)\s*\{\s*return signedIn\(\)\s*&&\s*\(request\.auth\.token\.email_verified == true\s*\|\|\s*request\.auth\.token\.firebase\.sign_in_provider != "password"\);?\s*\}/.test(rules),
+    'rules: verified() is a sign-in whose address is verified OR whose provider is not the password one');
+  ok(/function isOwner\(uid\)\s*\{\s*return verified\(\) && request\.auth\.uid == uid;/.test(rules),
+    'rules: isOwner goes through verified(), so every owner write is gated');
+
+  /* EVERY user write goes through verified(), with ONE exception. Read as
+     allow statements rather than lines, since a clause spans several. */
+  const allows = rules.match(/allow [\s\S]*?;/g) || [];
+  ok(allows.length > 40, 'rules: the allow statements were really found');
+  const bareWrites = allows.filter((a) => /^allow [^:]*\b(create|update|write)\b/.test(a)
+    && /signedIn\(\)/.test(a));
+  eq(bareWrites.length, 1,
+    'rules: exactly ONE write clause is granted on a bare sign-in');
+  const profBlock = rules.slice(rules.indexOf('match /profiles/{uid}'));
+  const profRule = profBlock.slice(0, profBlock.indexOf('match /', 10));
+  ok(bareWrites.length === 1 && profRule.includes(bareWrites[0]),
+    'rules: and it is the owner\'s own profile, which the registration form writes ' +
+    'in the same breath as the account, before any link can have been pressed');
+  ok(/allow create, update: if signedIn\(\) && request\.auth\.uid == uid;/.test(profRule)
+     && /allow read, delete: if isOwner\(uid\);/.test(profRule),
+    'rules: the profile exception is create and update only; read and delete stay owner-gated');
+  ok(/allow get: if signedIn\(\);/.test(rules),
+    'rules: an identity key can still be looked up on a bare sign-in (a READ, not a write)');
+  ok(/\(verified\(\) && request\.resource\.data\.uid == request\.auth\.uid\)/.test(rules),
+    'rules: a signed-in usage session is pinned to a verified account');
+  ok((rules.match(/verified\(\)/g) || []).length >= 9,
+    'rules: verified() really is used across the user-write clauses');
+  ok(/match \/verifyMail\/\{uid\} \{\s*allow read, write: if false;/.test(rules),
+    'rules: the rate-limit documents are closed to every client');
+  ok(!/signedIn\(\)\s*&&\s*request\.auth\.uid == uid/.test(rules.replace(profRule, '')),
+    'rules: nothing outside the profile block re-implements the un-gated owner test');
+
+  /* --- the function ------------------------------------------------------ */
+
+  const fn = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+  ok(/require\('firebase-functions\/v2\/https'\)/.test(fn) && /\bonCall\b/.test(fn)
+     && /\bHttpsError\b/.test(fn),
+    'function: an onCall v2 callable with HttpsError');
+  ok(/exports\.sendVerificationEmail = onCall\(/.test(fn),
+    'function: it is exported as sendVerificationEmail, the name the browser calls');
+  const at = fn.indexOf('exports.sendVerificationEmail');
+  const end = fn.indexOf('exports.recordVisit');
+  ok(at > 0 && end > at, 'function: the handler sits before recordVisit (whose own slice scans everything after it)');
+  const handler = fn.slice(at, end);
+  ok(handler.length > 500, 'function: the handler was really found (or the checks below are vacuous)');
+  ok(/secrets: \[SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS\]/.test(handler),
+    'function: the four SMTP secrets are listed on the callable');
+  for (const n of ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`const ${n} = defineSecret\\('${n}'\\);`).test(fn), `function: ${n} is a defineSecret`);
+  }
+  ok(/region: 'us-central1'/.test(handler),
+    'function: us-central1, where the compat client looks by default');
+  ok(/require\('firebase-admin\/auth'\)/.test(fn) && /require\('nodemailer'\)/.test(fn)
+     && /require\('\.\/verify-email\.js'\)/.test(fn),
+    'function: the Admin Auth API, nodemailer and the renderer are required');
+  ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(handler),
+    'function: the link is generated by the Admin SDK with the account page as its continue URL');
+  ok(/searchParams\.get\('oobCode'\)/.test(handler)
+     && /verify-email\.html\?mode=verifyEmail/.test(handler)
+     && /encodeURIComponent\(SITE \+ '\/account\.html'\)/.test(handler),
+    'function: the code is cut out of the generated link and put on the SITE\'s own page');
+  ok(/if \(!request\.auth\)[\s\S]{0,80}'unauthenticated'/.test(handler),
+    'function: it refuses a caller who is not signed in');
+  ok(/token\.email/.test(handler) && /to: email,/.test(handler) && !/request\.data/.test(handler),
+    'function: the message goes to the address on the TOKEN, never one the client sends');
+  ok(/email_verified === true[\s\S]{0,200}'failed-precondition'/.test(handler),
+    'function: an already-verified address is refused');
+  ok(/collection\('verifyMail'\)\.doc\(uid\)/.test(handler)
+     && /VERIFY_MIN_GAP_MS = 90 \* 1000/.test(fn) && /VERIFY_DAY_MAX = 6/.test(fn)
+     && (handler.match(/'resource-exhausted'/g) || []).length === 2,
+    'function: the rate limit lives in verifyMail/{uid}: one send in 90 seconds, six a day');
+  ok(handler.indexOf('limitRef.set(') > handler.indexOf('sendMail('),
+    'function: the rate-limit document is written AFTER a successful send');
+  ok(/secure: port === 465/.test(handler) && /from: `Operations Academia <\$\{SMTP_USER\.value\(\)\.trim\(\)\}>`/.test(handler),
+    'function: TLS on 465, and From is the site\'s own mailbox');
+  ok(/collection\('profiles'\)\.doc\(uid\)/.test(handler) && /prof\.firstName/.test(handler),
+    'function: the greeting takes the first name from the profile');
+  ok(/return \{ sent: true, to: redact\(email\) \}/.test(handler),
+    'function: it answers with a redacted address, never the full one');
+  const logCalls = handler.match(/logger\.\w+\([\s\S]*?\);/g) || [];
+  ok(logCalls.length >= 4, 'function: the log lines were really found');
+  ok(logCalls.every((c) => !/\b(link|generated|code|oobCode)\b/.test(c)
+      && !/\bemail\b/.test(c.replace(/redact\(email\)/g, ''))),
+    'function: NO log line names the link, the code or the address (redact() only)');
+  ok(!/console\.log/.test(handler), 'function: nothing goes through console.log');
+  const blockAt = fn.indexOf('E-MAIL VERIFICATION');
+  const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
+  ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
+    'function: no em dash in the verification block');
+  ok(/FIVE functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts five and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 5,
+    'function: the file exports exactly five functions, the count a deploy must read back');
+
+  const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
+  ok(pkg.dependencies && pkg.dependencies.nodemailer,
+    'function: nodemailer is a declared dependency, or the deploy dies at load');
+  const lock = JSON.parse(await readFile(path.join(root, '_functions', 'package-lock.json'), 'utf8'));
+  ok(lock.packages && lock.packages['node_modules/nodemailer'],
+    'function: and the lockfile resolves it, so a deploy is deterministic');
+
+  /* --- the setup page and CLAUDE.md -------------------------------------- */
+
+  const setup = await readFile(path.join(root, '_SETUP-EMAIL-VERIFICATION.md'), 'utf8');
+  for (const n of ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`firebase functions:secrets:set ${n} --project operations-academia`).test(setup),
+      `setup: the command that sets ${n}`);
+  }
+  ok(/npm install --prefix _functions/.test(setup)
+     && /firebase deploy --only functions --project operations-academia/.test(setup),
+    'setup: install, then deploy, naming the project');
+  ok(/\bfive\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count FIVE');
+  ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
+     && /firebaseapp\.com/.test(setup),
+    'setup: says what the browser does while the function is absent');
+  ok(/verify-email\.html/.test(setup) && /verifyMail/.test(setup) && /functions:log/.test(setup),
+    'setup: how to test');
+  ok(noDash(setup), 'setup: no em dash');
+
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('## Registration is verified by e-mail');
+  ok(secAt > 0, 'CLAUDE.md records the decision');
+  const section = claude.slice(secAt, claude.indexOf('\n## ', secAt + 10));
+  ok(section.length > 800 && /verified\(\)/.test(section) && /profiles/.test(section)
+     && /sendVerificationEmail/.test(section) && /\bfive\b/i.test(section),
+    'CLAUDE.md: the section names the rule, the exception, the function and the deploy count');
+  ok(noDash(section), 'CLAUDE.md: no em dash in the section');
+
+  const instant = await readFile(path.join(root, '_SETUP-INSTANT-PUBLISH.md'), 'utf8');
+  ok(/sendVerificationEmail/.test(instant) && /\bfive\b/i.test(instant),
+    'the instant-publish page counts five now, so the deploy check there is not stale');
+
+  /* --- FRONTEND PINS ------------------------------------------------------
+     The browser half (assets/oa-accounts.js, assets/oa-firebase.js,
+     verify-email.html, assets/oa-verify.js, the copy on index.html and
+     privacy-policy.html, the changelog entry) is built after this and pinned
+     HERE: needsVerification and sendVerification exported, the callable
+     tried first and sendEmailVerification as the fallback, user() null while
+     pending, the verify page noindex with both tags and no og:*, listed in
+     NOINDEX_OK and share-check PAGES, the register note, the FAQ and policy
+     sentences, and the changelog entry at index 0. */
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -12112,5 +12348,6 @@ if (isMain(import.meta.url)) {
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();
+  await testEmailVerification();
   process.exit(finish() ? 0 : 1);
 }
