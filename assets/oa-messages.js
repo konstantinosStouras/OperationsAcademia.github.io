@@ -225,12 +225,17 @@
 
     var now = Date.now();
     var thread = db.collection(THREADS).doc(uid);
-    thread.collection(ITEMS).add({ from: 'user', body: body, t: now })
-      .then(function () {
-        /* Only the three keys the rules allow an owner to touch when
-           replying, and needsAdmin only ever RAISED. */
-        return thread.update({ lastAt: now, lastFrom: 'user', needsAdmin: true });
-      })
+    /* ONE atomic write for the reply and its bookkeeping — the shape the
+       maintainer's side already uses. As two writes the reply could land and
+       the flag-raise be refused (offline, thread deleted mid-flight): the
+       message exists, the Admin area never lists it as awaiting a reply, and
+       the box says "Could not send", so the reader posts it again. Only the
+       three keys the rules allow an owner to touch, and needsAdmin only ever
+       RAISED. */
+    var batch = db.batch();
+    batch.set(thread.collection(ITEMS).doc(), { from: 'user', body: body, t: now });
+    batch.update(thread, { lastAt: now, lastFrom: 'user', needsAdmin: true });
+    batch.commit()
       .then(function () {
         if (ta) ta.value = '';
         /* Re-read so the reply appears. The uid latch must NOT be cleared to

@@ -542,13 +542,18 @@
       set('f-school', v.school);
       set('f-unit', v.unit);
     } else if (v.affiliation) {
-      var S = window.OASchools;
-      var p = S && S.canonPlace
-        ? S.canonPlace({ institution: v.affiliation, school: '', unit: '' })
-        : { institution: v.affiliation, school: '', unit: '' };
-      set('f-institution', p.institution);
-      set('f-school', p.school);
-      set('f-unit', p.unit);
+      /* A legacy one-line affiliation is joined SMALLEST FIRST
+         ("Operations, Kellogg School of Management, Northwestern University"
+         — joinAffiliation), the opposite of the archive shape canonPlace
+         takes apart, which read the department as the university. Right to
+         left: the last part is the university, the first the unit. */
+      var parts = String(v.affiliation).split(/\s*,\s*/).filter(Boolean);
+      var inst = parts.length ? parts[parts.length - 1] : '';
+      var unit = parts.length > 1 ? parts[0] : '';
+      var school = parts.length > 2 ? parts.slice(1, -1).join(', ') : '';
+      set('f-institution', inst);
+      set('f-school', school);
+      set('f-unit', unit);
     }
     paintAffiliationPreview();
     set('f-position', v.position);
@@ -607,10 +612,11 @@
 
     var intro = $('oa-intro');
     if (intro) {
-      intro.innerHTML = '<p><strong>You are editing a profile that is already on the ' +
-        'site.</strong> Your changes appear on the ' +
+      intro.innerHTML = '<p><strong>You are editing your profile.</strong> Once this ' +
+        'season\'s profiles have been revealed, your changes appear on the ' +
         '<a href="candidates.html">candidates page</a> at the next update, normally ' +
-        'within an hour. The posting date does not change.</p>';
+        'within an hour; until the reveal date your profile stays private and is ' +
+        'published with everyone else\'s on the day. The posting date does not change.</p>';
     }
 
     /* The three file verbs, said where the reader is looking: the same widget
@@ -669,8 +675,8 @@
       if (!window.confirm(
         'Take your profile down?\n\n' +
         'It stops appearing on the candidates page at the next update, normally ' +
-        'within an hour. Nothing is deleted — you can put it back at any time by ' +
-        'editing it again.')) return;
+        'within an hour (or is left out of the reveal, if that is still to come). ' +
+        'Nothing is deleted — you can put it back at any time by editing it again.')) return;
 
       btn.disabled = true;
       say('Taking your profile down…');
@@ -694,8 +700,9 @@
           done.innerHTML =
             '<h3>Your profile has been taken down.</h3>' +
             '<p>It disappears from the <a href="candidates.html">candidates page</a> ' +
-            'at the next update, normally within an hour. Nothing is deleted: to put ' +
-            'it back, sign in and edit it again — saving re-publishes it.</p>' +
+            'at the next update, normally within an hour, or is left out of the reveal ' +
+            'if that is still to come. Nothing is deleted: to put it back, sign in and ' +
+            'edit it again — saving re-publishes it.</p>' +
             '<p class="oa-done-actions">' +
             '<a class="button blue" href="candidates.html">Back to the candidates</a></p>';
           show($('oa-cand-form'), false);
@@ -909,7 +916,8 @@
               '<h3>Your changes have been saved.</h3>' +
               '<p>Your profile is updated on the ' +
               '<a href="candidates.html">candidates page</a> at the next update, ' +
-              'normally within an hour.</p>' +
+              'normally within an hour — or, before the reveal date, goes live with ' +
+              'everyone else\'s on the day, changes included.</p>' +
               '<p class="oa-done-actions">' +
               '<a class="button blue" href="candidates.html">Back to the candidates</a></p>';
           } else {

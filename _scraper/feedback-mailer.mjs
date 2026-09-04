@@ -10,7 +10,7 @@
       and `ackSent` independently, so a failed receipt never causes the
       maintainer's copy to be sent twice.
 
-   2. RESOLVE. Every file in v2/_feedback-resolutions/ is matched to its ticket,
+   2. RESOLVE. Every file in _feedback-resolutions/ is matched to its ticket,
       the ticket is CLOSED IN FIRESTORE FIRST, and then the submitter is
       e-mailed what was done. Write-before-send: a send failure retries only
       the e-mail, and can never lose the record that the ticket was resolved.
@@ -137,7 +137,7 @@ export function renderMaintainerEmail(v) {
         ${(v.shots || []).length} screenshot(s) attached
       </p>
       <p style="font-size:13px;color:#666;">To close this, add
-        <code>v2/_feedback-resolutions/${esc(v.ticket)}.md</code> to the repository.</p>`,
+        <code>_feedback-resolutions/${esc(v.ticket)}.md</code> to the repository.</p>`,
   });
 }
 
@@ -339,9 +339,17 @@ async function main() {
   console.log(`\n${resolutions.length} resolution file(s) on disk`);
 
   for (const r of resolutions) {
-    const snap = await db.collection('feedback').where('ticket', '==', r.ticket).limit(1).get();
+    const snap = await db.collection('feedback').where('ticket', '==', r.ticket).limit(2).get();
     if (snap.empty) {
       console.log(`::warning::${r.file}: no ticket ${r.ticket} in the database — skipped`);
+      continue;
+    }
+    /* A ticket is CLIENT-CHOSEN (the page generates it, the rules do not pin
+       it), so two documents can carry one. A resolution applied to "the
+       first" would close and e-mail whichever the index returned — possibly
+       a stranger's — so it is applied only when the ticket is unambiguous. */
+    if (snap.size > 1) {
+      console.log(`::warning::${r.file}: ticket ${r.ticket} names more than one submission — skipped`);
       continue;
     }
     const doc = snap.docs[0];

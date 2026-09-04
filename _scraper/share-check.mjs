@@ -194,7 +194,7 @@ export const PAGES = [
     file: 'alerts.html', url: '/alerts.html',
     title: 'E-mail alerts — Operations Academia',
     ogTitle: 'E-mail alerts',
-    description: 'Be told when a new job posting matches your filters, or when the site changes. You choose what and how often; every message carries a one-click unsubscribe.',
+    description: 'Be told when a new job posting matches your filters, or when the site changes. You choose what and how often; every message carries an unsubscribe link.',
   },
   {
     file: 'account.html', url: '/account.html',
@@ -206,7 +206,7 @@ export const PAGES = [
     file: 'my-postings.html', url: '/my-postings.html',
     title: 'My postings — Operations Academia',
     ogTitle: 'My postings',
-    description: 'The job postings, candidate profiles and placements you have submitted to Operations Academia — edit any of them, or take one down.',
+    description: 'The job postings you have made through Operations Academia — edit any of them, or take one down.',
   },
   {
     file: 'messages.html', url: '/messages.html',

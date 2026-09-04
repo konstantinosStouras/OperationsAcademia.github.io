@@ -93,7 +93,7 @@
         'instant each session begins, so this is exact rather than bucketed by a ' +
         'reporting time zone. Readers here are spread across the Americas, Europe ' +
         'and Asia, so the flat hours are the ones nobody anywhere is awake for.',
-      xTitle: 'Hour of the day (UTC)', unit: 'Visits',
+      xTitle: 'Hour of the day (UTC)', unit: 'Visits', unitBySource: { usage: 'Page opens' },
     },
     {
       id: 'countries', kind: 'bars',
@@ -555,7 +555,10 @@
     if (def.kind === 'columns') {
       C.columns(f.body, {
         title: def.title,
-        unit: def.unit,
+        /* the site's own record files one session per PAGE, so its "visits"
+           are page opens — the same honesty the daily chart's retired Visits
+           metric and the engagement tile already keep */
+        unit: (def.unitBySource && def.unitBySource[rec.source]) || def.unit,
         xTitle: def.xTitle || '',
         items: rec.items.map(function (it) {
           return { label: it.name + ':00', short: it.name, value: it.value };
@@ -696,7 +699,7 @@
     }, 150);
   });
 
-  fetch('data/analytics.json', { cache: 'no-cache' })
+  fetch('/data/analytics.json', { cache: 'no-cache' })   // the shared substrate is absolute
     .then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();

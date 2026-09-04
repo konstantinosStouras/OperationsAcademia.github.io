@@ -8,7 +8,7 @@
    this whole site be committed and served before the project exists.
 
    TO ACTIVATE: create the Firebase project, then paste its web config below
-   and republish v2/_firestore.rules. Steps: v2/_SETUP-FIREBASE.md
+   and let the checks publish _firestore.rules. Steps: _SETUP-FIREBASE.md
    --------------------------------------------------------------------------- */
 (function () {
   'use strict';
@@ -41,7 +41,7 @@
   // done the button is present but Firebase answers
   // `auth/operation-not-allowed`, which the modal reports as "that sign-in
   // method is not switched on for this site yet" rather than a raw error.
-  // Steps: v2/_SETUP-FIREBASE.md, "ORCID".
+  // Steps: _SETUP-FIREBASE.md, "ORCID".
   var AUTH_PROVIDERS = ['google', 'orcid', 'password'];
 
   // The maintainer. Governs who sees the admin inboxes. This is a UI hint

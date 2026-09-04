@@ -175,12 +175,18 @@ async function storageBucket() {
 
 /* -------------------------------------------------------------- uploads */
 
+/* Returns what it WROTE, per document id, so the build can lay it over the
+   snapshot it holds: `live` was read before this ran, and a QuerySnapshot
+   does not see its own later updates — without the overlay the link filed
+   here reached the served file one build later, and a CV replacement (whose
+   old link the form blanks) published the profile with no CV for ~20 min. */
 async function transferUploads(db, live, { now }) {
+  const patched = new Map();
   const pending = live.filter((d) => {
     const v = d.data() || {};
     return v.adUploadPath && !v.adUrl;
   });
-  if (!pending.length) return;
+  if (!pending.length) return patched;
 
   let drive, folders;
   try {
@@ -188,13 +194,13 @@ async function transferUploads(db, live, { now }) {
     folders = await import('./drive-folders.mjs');
   } catch (e) {
     warn(`advert uploads: could not load the Drive client (${e.message}) — left for the next run`);
-    return;
+    return patched;
   }
 
   if (drive.missingCredentials().length) {
     warn(`advert uploads: ${pending.length} waiting, but ` +
       `${drive.missingCredentials().join(', ')} not set — left for the next run`);
-    return;
+    return patched;
   }
 
   const bucket = await storageBucket();
@@ -211,7 +217,7 @@ async function transferUploads(db, live, { now }) {
     token = await drive.accessToken();
   } catch (e) {
     warn(`advert uploads: ${e.message} — left for the next run`);
-    return;
+    return patched;
   }
 
   for (const d of pending) {
@@ -258,11 +264,13 @@ async function transferUploads(db, live, { now }) {
       /* Write the link BEFORE deleting the landing-strip object: a crash in
          between leaves a stray object in Storage (harmless, cleaned by hand)
          rather than a filed-and-forgotten upload with no link anywhere. */
-      await d.ref.update({
+      const patch = {
         adUrl: uploaded.webViewLink,
         adDriveId: uploaded.id,
         adUploadPath: null, adUploadName: null, adUploadType: null, adUploadSize: null,
-      });
+      };
+      await d.ref.update(patch);
+      patched.set(d.id, patch);
       await file.delete().catch(() => {});
 
       log(`  filed advert for ${v.ref || d.id}: ${uploaded.name}`);
@@ -270,6 +278,7 @@ async function transferUploads(db, live, { now }) {
       warn(`advert uploads: ${v.ref || d.id}: ${e.message} — left for the next run`);
     }
   }
+  return patched;
 }
 
 /* ---------------------------------------------------------------------- main */
@@ -473,8 +482,30 @@ async function main() {
      other orphan rather than deleted. Only a file that EXISTS and no longer
      lists a posting removes it, and for the same reason a missing file claims
      nothing and hands nothing over. */
-  const sheetPresent = existsSync(SHEET);
-  let sheetRows = sheetPresent ? await readJson(SHEET, []) : [];
+  let sheetPresent = existsSync(SHEET);
+  let sheetRows = [];
+  let sheetGeneratedAt = 0;
+  if (sheetPresent) {
+    /* STRICTLY, like readJobsStrict. A file that is PRESENT but cannot be
+       parsed (a conflict marker left by a rebase, a truncated write) used
+       to read as an EMPTY sheet: every workbook posting left jobs.json in
+       one build with a warning, because `sheetPresent` stayed true while
+       the rows were gone. Unreadable is treated as ABSENT — nothing is
+       claimed, nothing is handed over, nothing is removed. */
+    try {
+      sheetRows = JSON.parse(await readFile(SHEET, 'utf8'));
+      if (!Array.isArray(sheetRows)) throw new Error('not a list');
+    } catch (e) {
+      warn(`${path.basename(SHEET)} could not be read (${e.message}) — treated as absent: ` +
+        'the workbook\'s postings are carried, none is removed');
+      sheetPresent = false;
+      sheetRows = [];
+    }
+    try {
+      const meta = JSON.parse(await readFile(path.join(DATA, 'jobmarket-meta.json'), 'utf8'));
+      sheetGeneratedAt = Date.parse(meta && meta.generated) || 0;
+    } catch { /* no meta — the approved-queue window below stays open */ }
+  }
   const fromSheet = (r) => r.source === SHEET_SOURCE;
 
   /* APPROVALS REACH THE SITE HERE, not at the next sheet read.
@@ -509,6 +540,17 @@ async function main() {
            the window between an approval and the sheet read that follows it
            — a row jobmarket.json already lists has been through that read. */
         if (byId.has(v.row.id)) continue;
+        /* …AND ONLY WHILE THAT WINDOW IS STILL OPEN. A row the WORKBOOK has
+           since deleted (or re-keyed) is never in jobmarket.json again, so
+           its frozen snapshot was re-added on every build for ever — the
+           one producer of a sheet-sourced row not bound by "what the
+           workbook keeps is existence" (UCL and ESSEC, served for a week
+           after their rows had gone). An approval that predates the last
+           successful sheet read by more than a run's length has been
+           through that read; if the file still lacks it, the sheet dropped
+           it. The margin covers a read that began before the approval. */
+        if (sheetGeneratedAt && v.reviewedAt &&
+            Date.parse(v.reviewedAt) < sheetGeneratedAt - 15 * 60 * 1000) continue;
         /* approvedRow, not bare applyEdits: it also dates the posting from its
            approval (the moment it could first be read on the site), which is
            what the e-mail alerts window on — and it is the SAME function the
@@ -592,7 +634,7 @@ async function main() {
      season — each is warned about and the posting publishes WITHOUT its File
      link; the upload stays in Storage and the next run retries. A failure here
      must never stop the postings pipeline. */
-  if (db) await transferUploads(db, live, { now });
+  const filed = db ? (await transferUploads(db, live, { now })) || new Map() : new Map();
 
   const fresh = [];
   const rejected = [];
@@ -600,7 +642,7 @@ async function main() {
   for (const d of live) {
     let row = null;
     try {
-      row = rowFromSubmission(d.data(), { now, fixes });
+      row = rowFromSubmission(Object.assign({}, d.data(), filed.get(d.id) || {}), { now, fixes });
     } catch (e) {
       // One unreadable document must not kill the run: it stays as it is, so
       // without this the next scheduled run dies on it too and no posting is
@@ -1062,7 +1104,7 @@ async function main() {
      message into this log instead — the record still exists, just not in an
      inbox — and a send failure never stops the publish; the change is already
      live, which is the point. */
-  if (before !== after && !DRY) {
+  if (before !== after && !DRY && !process.env.OA_REBUILD) {   // the retry loop mails nothing twice
     try {
       if (changes.edits.length || changes.takedowns.length) {
         const mail = await import('./_mail.mjs');
@@ -1115,10 +1157,18 @@ async function main() {
      forever. */
   const writes = [];
   for (const f of fresh.filter((x) => x.queued)) {
+    /* The id the row was PUBLISHED under. `uniqueIds` renames a same-day
+       collision by returning a NEW object (`-2`, `-3`), so `f.row.id` is the
+       id the row was born with, not the one in the file — and a takedown
+       keyed on that stamp named the OTHER row and was refused for ever. */
+    const published = rows.find((r) => f.row.ref
+      ? (r.ref === f.row.ref && (r.owner || '') === (f.row.owner || ''))
+      : ((r.id === f.row.id || r.id.indexOf(f.row.id + '-') === 0) &&
+         r.posted === f.row.posted && r.department === f.row.department));
     writes.push([f.id, {
       status: 'published',
       publishedAt: new Date(),
-      publishedId: f.row.id,
+      publishedId: (published && published.id) || f.row.id,
     }]);
   }
 

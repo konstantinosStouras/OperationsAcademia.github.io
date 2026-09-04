@@ -404,6 +404,21 @@
   }
 
   /**
+   * The ONE write a decision makes. `edits` is REPLACED, never merged into:
+   * `set(…, {merge:true})` deep-merges a map, so a key the maintainer had
+   * changed and then typed BACK to the sheet's value — which readEdits
+   * therefore leaves out — survived in Firestore, and approvedRow re-applied
+   * the stale edit at publish while the card said "Saved." and the echo
+   * showed the reverted value: a private fiction, and the same trap
+   * search-v2's contentJson records. `mergeFields` names the fields set
+   * whole; everything else on the document (row, dup, biz, ad, queuedAt,
+   * note) is left as it is, exactly as before.
+   */
+  function writeDecision(db, doc, patch) {
+    return db.collection(COL).doc(doc.rowId).set(patch, { mergeFields: Object.keys(patch) });
+  }
+
+  /**
    * Approve the whole queue.
    *
    * WHY THIS EXISTS. The gate is right — nothing from the sheet reaches the
@@ -423,7 +438,22 @@
   function approveAll(db, docs, cards) {
     var msg = $('oa-review-bulk-msg');
     var btn = $('oa-review-all');
-    var n = docs.length;
+    /* ONLY WHAT IS STILL QUEUED. `docs`/`cards` are the page as it was
+       RENDERED; a card decided on since then (Approve, Reject, the duplicate
+       sweep) is retired from state.crawled but the list is not redrawn, so
+       the arrays still carry it. Walking them as they stand re-approved
+       every decided card — including one the maintainer had just REJECTED,
+       which the merge write then flipped to approved. */
+    var pairs = [];
+    docs.forEach(function (doc, i) {
+      if (state.crawled.indexOf(doc) >= 0) pairs.push({ doc: doc, card: cards[i] });
+    });
+    var n = pairs.length;
+    if (!n) {
+      msg.className = 'oa-form-msg';
+      msg.textContent = 'Nothing left to publish on this page.';
+      return;
+    }
 
     if (!window.confirm('Publish all ' + n + ' postings on this page?\n\n' +
         'They are on your own jobs page at once and reach everyone else at the ' +
@@ -436,16 +466,16 @@
 
     var done = 0, failed = 0;
     var chain = Promise.resolve();
-    docs.forEach(function (doc, i) {
+    pairs.forEach(function (pair) {
       chain = chain.then(function () {
-        var card = cards[i];
+        var doc = pair.doc, card = pair.card;
         var edits = card ? readEdits(card, doc) : (doc.edits || {});
         var reviewedAt = new Date().toISOString();
-        return db.collection(COL).doc(doc.rowId).set({
+        return writeDecision(db, doc, {
           edits: edits,
           status: 'approved',
           reviewedAt: reviewedAt,
-        }, { merge: true })
+        })
           .then(function () {
             done++;
             echoApproval(doc, edits, reviewedAt);
@@ -466,6 +496,10 @@
     });
 
     chain.then(function () {
+      /* Redraw what is left BEFORE the outcome is written (render() clears
+         this line), so the cards just published leave the screen and the
+         button's count says what is really still here. */
+      if (!failed) paint(db, 'crawled', state.year);
       msg.className = 'oa-form-msg ' + (failed ? 'is-err' : 'is-ok');
       msg.textContent = failed
         ? done + ' approved, ' + failed + ' could not be saved — reload and try those again.'
@@ -980,7 +1014,16 @@
   function markAllReviewed(db, items) {
     var msg = $('oa-review-bulk-msg');
     var btn = $('oa-review-all');
+    /* Only the rows still on the list — the same stale-array trap approveAll
+       has: a row ticked off singly since the render is gone from state.user
+       but still in `items`. */
+    items = items.filter(function (it) { return state.user.indexOf(it) >= 0; });
     var n = items.length;
+    if (!n) {
+      msg.className = 'oa-form-msg';
+      msg.textContent = 'Nothing left to mark on this page.';
+      return;
+    }
 
     if (!window.confirm('Mark all ' + n + ' postings on this page reviewed?\n\n' +
         'They stay live — this only takes them off your list. Nothing is ' +
@@ -1225,7 +1268,7 @@
         msg.className = 'oa-form-msg';
         msg.textContent = act === 'save' ? 'Saving…' : 'Sending…';
 
-        db.collection(COL).doc(doc.rowId).set(patch, { merge: true })
+        writeDecision(db, doc, patch)
           .then(function () {
             if (act === 'approve') echoApproval(doc, edits, patch.reviewedAt);
             if (act === 'save') {

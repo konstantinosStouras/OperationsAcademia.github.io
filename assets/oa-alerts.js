@@ -227,13 +227,19 @@
     var matching = hits.length;
 
     var parts = [];
+    /* The subject the MAILER gives an unnamed alert (alerts-mailer.mjs):
+       "N new job posting(s)" when postings went, else what is new. */
+    var fallbackSubject = M.wantsJobs(c) && matching
+      ? matching + ' new job posting' + (matching > 1 ? 's' : '')
+      : 'What is new on Operations Academia';
     parts.push('<div class="oa-preview-head"><strong>Subject:</strong> ' +
-      esc(a.name || 'Operations Academia — new job postings') + '</div>');
+      esc(a.name || fallbackSubject) + '</div>');
     parts.push('<div class="oa-preview-body">');
 
     if (M.wantsJobs(c)) {
       if (sample.length) {
-        parts.push('<p>Since we last wrote, these job postings were added:</p><ul>');
+        parts.push('<p>' + esc(matching === 1 ? 'A new job posting matches your alert:'
+          : matching + ' new job postings match your alert:') + '</p><ul>');
         sample.forEach(function (r) {
           parts.push('<li><strong>' + esc(r.institution) + '</strong> &mdash; ' +
             esc(r.department) + '<br><span class="oa-hint" style="display:inline">' +
@@ -309,7 +315,8 @@
 
     parts.push('<p class="oa-preview-foot">You are receiving this because you asked ' +
       'Operations Academia to tell you about new postings. ' +
-      '<u>Change what you get</u> &middot; <u>Unsubscribe</u></p>');
+      '<u>Change what you receive</u> &middot; <u>Unsubscribe from these e-mails</u> ' +
+      '&middot; <u>Send feedback</u></p>');
     parts.push('</div>');
     box.innerHTML = parts.join('');
   }

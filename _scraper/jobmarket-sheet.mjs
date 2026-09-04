@@ -274,8 +274,8 @@ export function sheetDay(v) {
 
   let m;
 
-  // 2026-07-20
-  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\b/))) return iso(+m[1], +m[2], +m[3]);
+  // 2026-07-20, 2026/07/20, 2026.07.20
+  if ((m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})\b/))) return iso(+m[1], +m[2], +m[3]);
 
   // 20-Jul-26, 20 Jul 2026, 20/Jul/2026
   if ((m = s.match(/^(\d{1,2})[\s\-/.]+([A-Za-z]{3,})[\s\-/.]+(\d{2,4})\b/))) {
@@ -936,7 +936,9 @@ export function rowsFromTab(csv, {
     const rank = text(redactEmails(cell(raw, index, 'rank')), 160);
     const notes = text(redactEmails(cell(raw, index, 'notes')), 600);
 
-    const linkCell = text(cell(raw, index, 'link'), 500);
+    /* Decoded first: an exported cell can carry `&amp;` for `&`, and a
+       query string served with it points at nothing. */
+    const linkCell = text(decodeEntities(cell(raw, index, 'link')), 500);
     const link = HAS_EMAIL.test(linkCell) ? '' : url(linkCell);
     if (!link && linkCell) unlinked++;
 
@@ -1006,7 +1008,10 @@ export function rowsFromTab(csv, {
       notes,
       // the remainder, not the whole cell: what extractReviewDate captured is
       // already on the card as the suggested apply-by
-      remainder && !openEnded && !deadline ? `Deadline as listed: ${remainder}` : '',
+      /* …only when the cell SAYS something — a lone `≈` or `?` carried
+         verbatim reads as a typo on the card, not as a claim to settle. */
+      remainder && !openEnded && !deadline && /[A-Za-z0-9]/.test(remainder)
+        ? `Deadline as listed: ${remainder}` : '',
     ].filter(Boolean).join(' · ').slice(0, 1200);
 
     const row = {

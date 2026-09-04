@@ -54,8 +54,11 @@ jobs:
       - name: Re-check the files we are about to commit
         run: node _scraper/selftest.mjs --publishing
 
+      # The push trigger fires on ANY branch that touches the importer, and a
+      # commit into a feature branch is a data write nobody asked for. A
+      # dispatch commits to whatever ref it was asked for, as it always did.
       - name: Commit
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && (github.event_name == 'workflow_dispatch' || github.ref_name == 'master') }}
         run: |
           if [ -z "$(git status --porcelain data)" ]; then
             echo "no change — nothing to commit"

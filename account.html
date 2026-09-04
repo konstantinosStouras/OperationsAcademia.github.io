@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>My personal area — Operations Academia</title>
     <meta name="description" content="Your Operations Academia account — the postings you have made, the alerts you subscribe to, and the details kept against your name.">
     <link rel="canonical" href="https://www.operationsacademia.org/account.html">
@@ -90,6 +92,7 @@
   </head>
 
   <body class="v3">
+    <a class="v3-skip" href="#main">Skip to content</a>
     <header class="v3-header">
       <div class="v3-header-inner">
         <button type="button" class="v3-burger" aria-label="Open the menu" aria-expanded="false" aria-controls="v3-sheet">
@@ -100,7 +103,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="./#jobs">Jobs</a>
+          <a href="jobs.html">Jobs</a>
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey">Survey</a>
@@ -128,7 +131,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="./#jobs">Jobs</a>
+        <a href="jobs.html">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -146,7 +149,7 @@
       </div>
     </aside>
 
-    <main>
+    <main id="main">
       <section class="v3-pa-hero">
         <div class="v3-container">
           <span class="v3-kicker">My personal area</span>
@@ -201,8 +204,8 @@
           <a class="v3-pa-card" href="alerts.html">
             <h3><span class="v3-ico" aria-hidden="true">&#9993;</span> E-mail alerts</h3>
             <span class="v3-pa-n" id="pa-n-alerts">&mdash;</span>
-            <p>What we e-mail you about, and how often. Every message has a one-click
-            unsubscribe.</p>
+            <p>What we e-mail you about, and how often. Every message carries an
+            unsubscribe link.</p>
           </a>
           <a class="v3-pa-card" href="messages.html">
             <h3><span class="v3-ico" aria-hidden="true">&#128172;</span> Messages</h3>
@@ -212,8 +215,8 @@
           </a>
           <a class="v3-pa-card" href="post-a-job.html">
             <h3><span class="v3-ico" aria-hidden="true">&#128221;</span> Post a job</h3>
-            <p>Advertise an academic opening. It publishes automatically, normally within an
-            hour, and is free.</p>
+            <p>Advertise an academic opening. It publishes automatically, normally within a
+            few minutes, and is free.</p>
           </a>
           <a class="v3-pa-card" href="post-a-candidate.html">
             <h3><span class="v3-ico" aria-hidden="true">&#127891;</span> Candidate profile</h3>
@@ -221,7 +224,7 @@
             summary attached.</p>
           </a>
           <a class="v3-pa-card" href="#" id="pa-profile">
-            <h3><span class="v3-ico" aria-hidden="true">&#128100;</span> Edit profile</h3>
+            <h3><span class="v3-ico" aria-hidden="true">&#128100;</span> Edit account</h3>
             <p>Your name, affiliation, website and ORCID iD &mdash; and merging duplicate
             accounts, if you ever end up with two.</p>
           </a>
@@ -376,6 +379,11 @@
           var db = fb.firestore();
           var jobsQ = db.collection(OAFB.col.jobSubmissions).where('uid', '==', user.uid).get()
             .then(function (s) { return s.size; }).catch(function () { return null; });
+          /* …and a candidate profile, which the "nothing here yet" nudge used
+             to ignore: a candidate with only a profile was told the account
+             held nothing. Owner-readable by the deployed rules. */
+          var candQ = db.collection(OAFB.col.candidateSubmissions).where('uid', '==', user.uid).get()
+            .then(function (s) { return s.size; }).catch(function () { return null; });
           var alertsQ = db.collection(OAFB.col.users).doc(user.uid)
             .collection(OAFB.col.alerts).get()
             .then(function (s) { return s.size; }).catch(function () { return null; });
@@ -388,14 +396,20 @@
               var n = (d.data() || {}).userUnread;
               return typeof n === 'number' ? n : 0;
             }).catch(function () { return null; });
-          return Promise.all([jobsQ, alertsQ, msgQ]);
+          return Promise.all([jobsQ, alertsQ, msgQ, candQ]);
         }).then(function (r) {
-          var jobs = r[0], alerts = r[1], msgs = r[2];
+          var jobs = r[0], alerts = r[1], msgs = r[2], cands = r[3];
+          var candCard = document.querySelector('.v3-pa-card[href="post-a-candidate.html"] h3');
+          if (cands > 0 && candCard) {
+            candCard.innerHTML = '<span class="v3-ico" aria-hidden="true">&#127891;</span> Your candidate profile';
+            var candP = candCard.parentNode.querySelector('p');
+            if (candP) candP.textContent = 'Open, edit or take down the profile you have filed for this season.';
+          }
           if (jobs !== null) document.getElementById('pa-n-jobs').textContent = String(jobs);
           if (alerts !== null) document.getElementById('pa-n-alerts').textContent = String(alerts);
           if (msgs !== null) document.getElementById('pa-n-messages').textContent = String(msgs);
           // holding nothing at all → the friendly nudge card above the grid
-          if (jobs === 0 && alerts === 0) empty.hidden = false;
+          if (jobs === 0 && alerts === 0 && cands === 0) empty.hidden = false;
         }).catch(function () { /* counts are decoration — the links still work */ });
       }
 

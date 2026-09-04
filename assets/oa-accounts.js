@@ -1,8 +1,8 @@
 /* ---------------------------------------------------------------------------
    Operations Academia — accounts (sign in / register / account menu).
 
-   V3 VENDORED COPY — keep the LOGIC in sync with /assets/oa-accounts.js.
-   Only the presentation differs from the root copy (owner, 2026-08-16):
+   THE LIVE COPY (promoted from /v3/ on 2026-08-17; /v2/ keeps its own
+   frozen one). Its presentation was decided on 2026-08-16:
 
      - the signed-out control is a proper "Sign in" pill;
      - the signed-in chip greets the person by NAME (owner, 2026-08-17); its
@@ -428,7 +428,8 @@
     /* paint() REPLACES the menu's markup, so the badges have to be written
        back after every one of its branches — hence the deferral rather than a
        call beside the markup itself. Cheap: it reads localStorage, no network. */
-    if (state.user) setTimeout(function () { paintCounts(readCounts(state.user.uid)); }, 0);
+    var countsFor = state.user || readHint();   // the hint window paints its final form too
+    if (countsFor && countsFor.uid) setTimeout(function () { paintCounts(readCounts(countsFor.uid)); }, 0);
 
     var host = $('#oa-account');
     if (!host) return;
@@ -921,7 +922,15 @@
       .then(function (fb) { return profileDoc(fb, uid).get(); })
       .then(function (snap) {
         if (!stillOurs()) return;
-        state.profile = (snap && snap.exists ? snap.data() : null) || null;
+        /* An EMPTY snapshot keeps whatever this session already holds for the
+           same account: registration sets state.profile the moment the
+           document is written, and this read — started by the auth event a
+           beat earlier — usually lands first and used to null it, so on the
+           pages that do not navigate after registering (the forms, alerts)
+           the profile, and the ORCID typed into it, were gone for the page's
+           life. A previous ACCOUNT's profile cannot survive here: this
+           function nulls it on entry, before the read. */
+        state.profile = (snap && snap.exists ? snap.data() : null) || state.profile || null;
         paint();
         // Write the name we actually SHOW back into the hint. Firebase leaves
         // displayName null for a password account, so without this the chip
@@ -1361,8 +1370,10 @@
       differently from the sign-in modal. */
   function friendly(err) {
     var c = (err && err.code) || '';
-    if (c === 'auth/invalid-credential' || c === 'auth/wrong-password' ||
-        c === 'auth/user-not-found') return 'That e-mail and password do not match an account.';
+    if (c === 'auth/invalid-credential' || c === 'auth/wrong-password') return 'That e-mail and password do not match an account.';
+    if (c === 'auth/user-not-found') return 'We could not find an account with that e-mail address.';
+    if (c === 'auth/invalid-email') return 'That does not look like an e-mail address.';
+    if (c === 'auth/too-many-requests') return 'Too many attempts — please wait a few minutes and try again.';
     if (c === 'auth/email-already-in-use') return 'There is already an account with that e-mail — try signing in.';
     if (c === 'auth/weak-password') return 'Please choose a password of at least 6 characters.';
     if (c === 'auth/popup-blocked') return 'Your browser blocked the sign-in window. Allow pop-ups and try again.';

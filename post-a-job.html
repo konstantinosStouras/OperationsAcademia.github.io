@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Post a job — Operations Academia</title>
     <meta name="description" content="Posting an academic job in Operations is free. It appears on the job postings page within a few minutes and stays there for the rest of the market year.">
     <link rel="canonical" href="https://www.operationsacademia.org/post-a-job.html">
@@ -90,6 +92,7 @@
   </head>
 
   <body class="v3">
+    <a class="v3-skip" href="#main">Skip to content</a>
 
     <header class="v3-header">
       <div class="v3-header-inner">
@@ -101,7 +104,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="./#jobs">Jobs</a>
+          <a href="jobs.html">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -129,7 +132,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="./#jobs">Jobs</a>
+        <a href="jobs.html">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -147,7 +150,7 @@
       </div>
     </aside>
 
-    <main>
+    <main id="main">
       <section class="v3-pa-hero">
         <div class="v3-container">
           <span class="v3-kicker">Participate</span>
@@ -438,12 +441,12 @@
                         <div class="oa-field">
                           <label for="f-chairName">Area coordinator or department chair <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
                           <p class="oa-hint">Full name, no titles needed.</p>
-                          <input type="text" id="f-chairName" name="chairName" maxlength="120" required>
+                          <input type="text" id="f-chairName" name="chairName" maxlength="120" autocomplete="off" required>
                         </div>
                         <div class="oa-field">
                           <label for="f-chairEmail">Their e-mail <span class="oa-req oa-req-new" aria-hidden="true">*</span></label>
                           <p class="oa-hint">&nbsp;</p>
-                          <input type="email" id="f-chairEmail" name="chairEmail" maxlength="160" required>
+                          <input type="email" id="f-chairEmail" name="chairEmail" maxlength="160" autocomplete="off" required>
                         </div>
                       </div>
 

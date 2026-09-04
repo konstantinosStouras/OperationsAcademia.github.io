@@ -429,9 +429,18 @@ body.v3 .button:not(.blue):hover { border-color: var(--brand); color: var(--bran
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-body.v3-sheet-open .v3-sheet { transform: translateX(0); }
+/* OUT OF THE TAB ORDER WHILE CLOSED. A transform alone hides the sheet from
+   sight and from nothing else: on every page, at every width — the desktop
+   included, where the burger that opens it is not even drawn — Tab walked
+   eleven off-screen links before reaching the visible header. The visibility
+   transition is delayed on the way out so the slide still plays. */
+.v3-sheet { visibility: hidden; transition: transform 0.3s cubic-bezier(0.22, 0.9, 0.3, 1), visibility 0s 0.3s; }
+body.v3-sheet-open .v3-sheet { transform: translateX(0); visibility: visible; transition-delay: 0s; }
 body.v3-sheet-open .v3-sheet-backdrop { opacity: 1; pointer-events: auto; }
 body.v3-sheet-open { overflow: hidden; }
+@media (min-width: 921px) {
+  .v3-sheet, .v3-sheet-backdrop { display: none; }
+}
 
 .v3-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .v3-sheet-close {
@@ -627,13 +636,15 @@ a.v3-card { color: inherit !important; text-decoration: none !important; }
 }
 .v3-faq-item.is-open .v3-faq-chev { transform: rotate(45deg); }
 
-/* the 0fr -> 1fr grid trick: height animation with no JS measuring */
+/* the 0fr -> 1fr grid trick: height animation with no JS measuring — plus
+   visibility, or the links inside a closed answer stay focusable unseen */
 .v3-faq-a {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
+  visibility: hidden;
+  transition: grid-template-rows 0.35s cubic-bezier(0.22, 0.9, 0.3, 1), visibility 0s 0.35s;
 }
-.v3-faq-item.is-open .v3-faq-a { grid-template-rows: 1fr; }
+.v3-faq-item.is-open .v3-faq-a { grid-template-rows: 1fr; visibility: visible; transition-delay: 0s; }
 .v3-faq-a > div { overflow: hidden; }
 .v3-faq-a .v3-faq-body {
   padding: 0 24px 22px;
@@ -1981,6 +1992,14 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
   .v3-nav a { padding: 9px 9px; font-size: 14.5px; }
 }
 
+/* Between the burger's breakpoint and ~1180px the row — logo, eight nav
+   links, theme toggle and a chip carrying a full name — is wider than the
+   viewport, and a fixed header hides the overflow: the chip, its menu and
+   "Sign in" sat off-screen. The name is the one part that can go. */
+@media (max-width: 1180px) {
+  body.v3 .oa-acct-name { display: none; }
+  body.v3 .oa-acct-chip { padding: 4px; }
+}
 @media (max-width: 920px) {
   .v3-nav { display: none; }
   .v3-burger { display: inline-flex; }
@@ -2028,6 +2047,9 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
   body.v3 .oa-form input, body.v3 .oa-form select {
     font-size: 16px; min-height: 44px;
   }
+  /* …but not the custom-drawn tick boxes, whose 17px `height` this minimum
+     otherwise beats into a 17x44 bar; the label row is the finger target */
+  body.v3 .oa-form input[type='checkbox'], body.v3 .oa-form input[type='radio'] { min-height: 0; }
   body.v3 .oa-form textarea { font-size: 16px; }
   body.v3 .oa-check { font-size: 15.5px; }
 }

@@ -182,7 +182,7 @@
     function prepared(list) {
       if (typeof cfg.prepare !== 'function') return list.slice();
       var out = cfg.prepare(list.slice());
-      return (out || []).filter(function (r) { return r && isFinite(r.lat) && isFinite(r.lng); });
+      return (out || []).filter(function (r) { return r && numeric(r.lat) && numeric(r.lng); });
     }
 
     function bounds(list) {
@@ -227,6 +227,8 @@
     /* Filter state lives in the query string, like every list page — and the
        vendor's own ?filterA=/?filterB= deep links (every posting's "Further
        info" link names this page that way) are honoured as the search. */
+    /* `isFinite(null)` is true, and a null coordinate would pin 0°,0° */
+    function numeric(v) { return typeof v === 'number' && isFinite(v); }
     function readUrl() {
       var p = new URLSearchParams(location.search);
       return p.get('q') || p.get('filterA') || p.get('filterB') || '';
@@ -234,7 +236,7 @@
     function syncUrl() {
       var p = new URLSearchParams(location.search);
       p['delete']('q'); p['delete']('filterA'); p['delete']('filterB');
-      if (input.value) p.set('q', input.value);
+      if (input.value) { p.set('q', input.value); p.set('view', 'map'); }   // a search is a map search
       var qs = p.toString();
       history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
     }
@@ -251,7 +253,7 @@
       })
       .then(function (data) {
         base = (Array.isArray(data) ? data : []).filter(function (r) {
-          return r && isFinite(r.lat) && isFinite(r.lng);
+          return r && numeric(r.lat) && numeric(r.lng);
         });
         rows = prepared(base);
         input.value = readUrl();

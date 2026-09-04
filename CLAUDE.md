@@ -3557,6 +3557,95 @@ the same reasoning that kept `repository_dispatch: [oa-jobs-changed]` in
 place through the months the functions were undeployed — and that trigger is
 the live instant path now that they are.
 
+## The 2026-09-04 review sweep — what ten reviewers found, and what changed
+
+Ten independent reviews of the live site (home/nav, jobs page, forms, accounts,
+archives, admin area, pipeline, mailers/workflows, candidates, security) were
+run against this tree on 2026-09-04 and the confirmed defects fixed in one
+change. The load-bearing decisions, so the next reader does not undo them:
+
+* **`str()` in `_firestore.rules` accepts NULL.** The builds clear a filed
+  upload's landing-strip fields (`adUploadPath`, `cvUploadPath`, …) by writing
+  `null`, and on an update `request.resource.data` is the MERGED document, so
+  `null is string` refused every later OWNER write: a poster who had uploaded
+  an advert could never edit or take down that posting again (verified in the
+  emulator). Null now reads as "cleared". Beside it, `directoryEdits` lets any
+  signed-in account carry an UNCHANGED `hidden` — a row the maintainer had
+  restored kept `hidden: false` on the document, and every later merge from an
+  ordinary account then failed the admin-only test.
+* **A review decision REPLACES `edits`** (`writeDecision` in
+  `oa-jobreview.js`, `mergeFields`): `set(…, {merge:true})` deep-merges a map,
+  so a field changed and then typed BACK to the sheet's value — which
+  `readEdits` therefore omits — survived in Firestore and was re-applied at
+  publish while the card said "Saved." `_fake-firebase.js` now deep-merges the
+  way the SDK does, or the browser check could not see it. **Approve-all acts
+  on `state.crawled`, never on the arrays captured at render**: a card decided
+  singly since the render was still in them, and a REJECTED posting was
+  flipped to approved.
+* **The approved-queue read in `build-jobs.mjs` is bounded by the last sheet
+  read.** An approved document whose row `data/jobmarket.json` does not carry
+  is published from its snapshot only while the approval is NEWER than that
+  file's `generated` (15-minute margin for a read that began first); older, the
+  workbook has dropped the row and "what the workbook keeps is existence"
+  applies (UCL and ESSEC were served for a week after their rows had gone).
+  And **an unreadable `jobmarket.json` is ABSENT, not empty** — present but
+  unparsable used to take every workbook posting off the site in one build.
+  `publishedId` is stamped from the FINAL rows, since `uniqueIds` renames a
+  same-day collision by returning a new object. `transferUploads` (both
+  builds) RETURNS what it wrote so the same build publishes the link.
+* **The alerts mailer freezes `lastJobAt` at `since`** on every patch that can
+  advance `lastSentAt` without carrying a posting: `since` fell back to
+  `lastSentAt`, which an update-only digest advanced past a posting approved
+  minutes earlier — the same loss `lastJobAt` was written to end.
+  **`_mail.mjs` prints a REDACTED `To:`** and the submissions/feedback dry
+  runs print ids and subjects, never bodies: with SMTP unset the alerts mailer
+  IS a dry run, hourly, into a public Actions log.
+* **The analytics pages list belongs to ONE source** — the one whose window it
+  prints. Every source used to add rows: GA4's ninety days landed a dozen old-
+  site click events (`/logoHeader.html`, a 404) and redirect stubs under the
+  usage fortnight's heading, shares summing past 100%. `normPath` also drops a
+  backslash whole (`/\evil.com` resolves off-site, and the list links its
+  rows). The hours chart says "Page opens" for the usage source, whose sessions
+  are pages.
+* **The header, keyboard and nav.** `.v3-sheet` is `visibility: hidden` while
+  closed and `display: none` above the burger's breakpoint — a transform alone
+  left eleven off-screen links in every page's tab order; the burger moves
+  focus in and back and the sheet is a `dialog`; in-page links (the skip link
+  included) FOCUS their target; every page carries a skip link and
+  `aria-current`; the account chip's NAME hides up to 1180px, where the fixed
+  header was wider than the viewport and hid the chip. `Jobs` in the nav points
+  at `jobs.html` on every page (nine form/account pages sent it to the home
+  teaser). `oa-list.js`'s `rerender()` is a no-op until the data has landed —
+  the gate and the edit layer re-render on the auth event, which fires
+  synchronously on a warm session, and painted "No job postings are listed"
+  over the loading state; and `todayISO()` is UTC, the pipeline's clock.
+* **Copy that promised what the site does not do**: "one-click unsubscribe"
+  (there is no endpoint; every message carries an unsubscribe LINK), "My
+  postings" listing profiles and placements (it lists job postings), a
+  candidate profile "on the candidates page within an hour" while the reveal
+  gate holds it, "within an hour" for a job posting (minutes), a FAQ example
+  season hard-coded to 2026. The three sign-in-only shells left the sitemap.
+* `MEX` joined the country aliases (ISO-3 codes, with the served rows healed
+  once by hand — the usual alias discipline). The placement form no longer
+  offers a season that has not started.
+
+**Reported, deliberately NOT changed here — the owner's calls:** e-mail alerts
+can be pointed at any address and the `feedback` receipt goes to an unverified
+one (a working relay from the site's SMTP identity; pinning the recipient to
+the account's own address, or App Check, is a product decision); the
+`deadlineDay` day/month swap manufactures a future date for a closed search
+entered after the fact; the account-merge hand-over lets a poster assign a
+submission to any uid; `usageSessions` is unauthenticated and unbounded; the
+merge re-authentication asks for the password in a `window.prompt`;
+"University of Leeds, UK" is served as an institution with an empty country
+(an alias moves its id, which is the join key to the queue); the archive lists
+the same San Diego advertisement under two seasons; JobPosting structured data
+is only viable if the gated fields are shown to crawlers.
+
+**Running the browser suite locally**: `node_modules` may be a SYMLINK to a
+global install that holds `playwright` (`ln -s /opt/node22/lib/node_modules
+node_modules`) — `.gitignore` names the bare form for exactly this reason.
+
 ## Mobile standards for tables and lists — MUST consult
 
 **Before building or changing ANY table / card-list page (job postings,

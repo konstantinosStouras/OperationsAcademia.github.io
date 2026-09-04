@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Operations Academia</title>
     <meta name="description" content="Matching supply with demand in the Operations job market — academic job postings, candidates, placements and the annual survey, in one place.">
     <link rel="canonical" href="https://www.operationsacademia.org/">
@@ -93,6 +95,7 @@
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
+      <noscript><style>.v3-reveal{opacity:1!important;transform:none!important}</style></noscript>
   </head>
 
   <body class="v3">
@@ -134,7 +137,7 @@
     <div class="v3-sheet-backdrop" aria-hidden="true"></div>
     <aside class="v3-sheet" id="v3-sheet" aria-label="Menu">
       <div class="v3-sheet-head">
-        <a class="v3-logo" href="#top">
+        <a class="v3-logo" href="#top" aria-label="Operations Academia — back to the top">
           <span class="v3-mark" aria-hidden="true">OA</span>
         </a>
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
@@ -193,10 +196,10 @@
           <div class="v3-sponsors">
             <span>Proudly sponsored and supported by</span>
             <a href="https://www.bschool.cuhk.edu.hk/departments/decisions-operations-and-technology/" target="_blank" rel="noopener" aria-label="CUHK Business School — Department of Decisions, Operations and Technology">
-              <img src="/images/logos/cuhk_dot_logo.png" alt="CUHK Business School — Department of Decisions, Operations and Technology" loading="lazy">
+              <img src="/images/logos/cuhk_dot_logo.png" alt="CUHK Business School — Department of Decisions, Operations and Technology">
             </a>
             <a href="https://connect.informs.org/msom/home" target="_blank" rel="noopener" aria-label="INFORMS MSOM Society">
-              <img src="/images/logos/informs-msom.png" alt="INFORMS Manufacturing and Service Operations Management (MSOM) Society" data-small loading="lazy">
+              <img src="/images/logos/informs-msom.png" alt="INFORMS Manufacturing and Service Operations Management (MSOM) Society" data-small>
             </a>
           </div>
         </div>
@@ -427,8 +430,8 @@
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>Sign in (with Google, ORCID, or an e-mail address and password), open
                 <a href="post-a-job.html">Post a job</a> and fill in the form. Your posting
-                appears on the site automatically, normally within an hour, and stays up for the
-                rest of the job-market year. Posting is free.</p>
+                appears on the site automatically, normally within a few minutes, and stays up for
+                the rest of the job-market year. Posting is free.</p>
                 <p>Because the posting is tied to your account, you can come back at any time to
                 correct it, extend the deadline, or withdraw it &mdash; from
                 <a href="my-postings.html">My postings</a> in your personal area. Only the
@@ -474,11 +477,14 @@
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>Continuously. Postings, profiles and placements are submitted by the
-                community and publish automatically, normally within the hour &mdash; there is
-                no third-party service between a poster and the page any more.</p>
+                community and publish automatically &mdash; job postings normally within a few
+                minutes, placements within the hour, and candidate profiles all together on the
+                season&rsquo;s reveal date &mdash; there is no third-party service between a poster
+                and the page any more.</p>
                 <p>The lists always show the job-market year under way. A market year runs from
                 1 July to 30 June and is numbered by the year it ends &mdash; so the
-                2026&ndash;2027 market began on 1 July 2026. Previous seasons stay in the
+                <span id="oa-faq-season">current</span> market began on
+                <span id="oa-faq-season-start">1 July</span>. Previous seasons stay in the
                 <a href="previous-markets.html">archive</a>.</p>
               </div></div></div>
             </div>
@@ -490,8 +496,9 @@
                 <p>Yes. Sign in and open <a href="alerts.html">E-mail alerts</a>: you can be
                 told about every new job posting, or only those matching filters you choose
                 (institution, type, entry level, location&hellip;), and about changes to the
-                site itself. You pick the frequency, and every message carries a one-click
-                unsubscribe.</p>
+                site itself &mdash; and, if you like, about this season&rsquo;s candidate
+                profiles once they are revealed. You pick the frequency, and every message
+                carries an unsubscribe link.</p>
               </div></div></div>
             </div>
 
@@ -534,7 +541,7 @@
                 <a href="https://operationsacademia.uservoice.com/" target="_blank" rel="noopener">vote
                 on suggested features</a>.</p>
                 <p>Everything here is free. If you want to say thanks, you can
-                <a href="http://a.co/ev61V45" target="_blank" rel="noopener">donate in books</a> or
+                <a href="https://a.co/ev61V45" target="_blank" rel="noopener">donate in books</a> or
                 <a href="https://www.buymeacoffee.com/kstouras" target="_blank" rel="noopener">buy
                 me a book or a coffee</a>.</p>
               </div></div></div>
@@ -567,10 +574,10 @@
                 <!-- the same card as stouras.com's portrait (owner, 2026-08-17),
                      but in this site's own type and colours -->
                 <a class="v3-portrait-name" href="https://www.stouras.com/" target="_blank" rel="noopener">Konstantinos I. Stouras</a>
-                <span>Assistant Professor of Management</span>
-                <a href="http://www.smurfitschool.ie/" target="_blank" rel="noopener">UCD, Michael Smurfit GSB</a>
+                <span>Assistant Professor of Operations Management</span>
+                <a href="https://www.smurfitschool.ie/" target="_blank" rel="noopener">UCD, Michael Smurfit GSB</a>
                 <ul class="v3-portrait-links" aria-label="Profiles">
-                  <li><a href="mailto:kostas.stouras@ucd.ie" title="E-mail me" aria-label="E-mail">
+                  <li><a href="mailto:konstantinos.stouras@ucd.ie" title="E-mail me" aria-label="E-mail">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M16.5 12a4.5 4.5.0 11-9 0 4.5 4.5.0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"/></svg>
                   </a></li>
                   <li><a href="https://x.com/stourask" target="_blank" rel="noopener" title="X" aria-label="X (Twitter)">
@@ -702,7 +709,7 @@
               <li><a href="post-a-placement.html">Report a placement</a></li>
               <li><a href="alerts.html">E-mail alerts</a></li>
               <li><a href="feedback.html">Feedback</a></li>
-              <li><a href="http://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
+              <li><a href="https://a.co/ev61V45" target="_blank" rel="noopener">Donate (in books)</a></li>
             </ul>
           </div>
         </div>
@@ -770,6 +777,12 @@
 
       document.getElementById('oa-jobs-heading').textContent =
         'Job postings (' + marketLabel() + ')';
+      /* the FAQ's worked example follows the season too, or it goes stale
+         every 1 July */
+      var faqS = document.getElementById('oa-faq-season');
+      if (faqS) faqS.textContent = marketLabel();
+      var faqStart = document.getElementById('oa-faq-season-start');
+      if (faqStart) faqStart.textContent = '1 July ' + (marketYear() - 1);
       document.getElementById('oa-cands-heading').textContent =
         'Job market candidates (' + marketLabel() + ')';
 
@@ -810,6 +823,14 @@
          inter-linked"). */
       function uniLink(name) {
         name = String(name || '').replace(/^\s+|\s+$/g, '');
+        /* A candidate's affiliation is the whole joined line, smallest part
+           first ("Operations, Kellogg …, Northwestern University"); the
+           directory's search is contains-the-needle over the university, so
+           the full line found nothing. The LAST part is the university. */
+        if (name.indexOf(',') !== -1) {
+          var parts = name.split(',');
+          name = parts[parts.length - 1].replace(/^\s+|\s+$/g, '') || name;
+        }
         if (!name) return null;
         var a = document.createElement('a');
         a.href = 'universities.html?filterA=' + encodeURIComponent(name);
@@ -1014,11 +1035,6 @@
             subtitle: function (r) { return r.department; },
             badges:   function (r) {
               var out = [];
-              /* A sponsor is MARKED here but does not LEAD here: this teaser
-                 is "the ten most recent postings" and reordering it would
-                 make that heading false, where the jobs page's list has no
-                 such promise. Exactly the split Featured already has — it is
-                 badged on this page and leads only on jobs.html. */
               var sp = OASponsors.badge(r);
               if (sp) out.push(sp);
               if (r.featured) out.push({ text: 'Featured', cls: 'oa-label-primary' });
@@ -1061,8 +1077,8 @@
           urlPrefix: 'c_',
           strings: {
             loading: 'Loading candidate profiles…',
-            emptyData: 'No candidate profiles yet.',
-            emptyDataHint: 'The new market’s profiles appear here as candidates post them.',
+            emptyData: 'No candidate profiles are public yet.',
+            emptyDataHint: 'Before the reveal date, profiles are held privately and appear here together on the day; after it, new ones appear as candidates post them.',
             emptyFiltered: 'No candidate profiles match these filters.',
             emptyFilteredHint: 'Try removing a filter, or clear them all to see every profile.',
             loadError: 'The candidate profiles could not be loaded.',

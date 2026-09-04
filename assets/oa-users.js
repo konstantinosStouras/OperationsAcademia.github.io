@@ -40,10 +40,9 @@
    this panel for the wrong visitor still cannot load or write a document.
    Drawing a control grants nothing.
 
-   INERT UNTIL THE RULES ARE REDEPLOYED — nothing in CI does it:
-       firebase deploy --only firestore:rules --project operations-academia
-   Until then the panel says so rather than showing a bare permission-denied
-   (see _SETUP-FIREBASE.md §4).
+   The rules publish themselves after a green check on master
+   (oa-deploy-rules.yml); until a change lands the panel says so rather than
+   showing a bare permission-denied (see _SETUP-FIREBASE.md §4).
 
    THIS IS ITS OWN FILE ON PURPOSE. oa-accounts.js fetches oa-adminarea.js in
    the maintainer's browser on EVERY page to compute the "Admin area" badge;
@@ -260,8 +259,9 @@
     var picked = pickedUids().length;
 
     if (!state.rows.length) {
-      host.innerHTML = '<p class="oa-hint">No accounts have signed in since the ' +
-        'roster shipped. A row is written the first time someone signs in.</p>';
+      host.innerHTML = '<p class="oa-hint">No registered accounts yet. A row is ' +
+        'written when someone signs in, and the daily directory sync adds every ' +
+        'account Firebase Auth knows.</p>';
       return;
     }
 
@@ -467,7 +467,8 @@
     if (btn) btn.disabled = true;
     if (msg) { msg.className = 'oa-form-msg'; msg.textContent = 'Sending…'; }
 
-    db().then(function (d) {
+    root.OAFB.ready().then(function (fb) {
+      var d = fb.firestore();
       var now = Date.now();
       var sent = 0, failed = 0;
       /* One at a time, failures counted rather than thrown — the shape
@@ -484,18 +485,26 @@
              as undelivered when it had in fact arrived. */
           var batch = d.batch();
           batch.set(head.collection(ITEMS).doc(), { from: 'admin', body: body, t: now });
-          batch.set(head, {
-            uid: uid,
-            lastAt: now,
-            lastFrom: 'admin',
-            /* NOT `false`. Clearing it here would drop somebody who has
-               replied out of the "awaiting you" queue without their reply
-               having been read — and a broadcast is not an answer. Only
-               opening the thread and pressing "Mark answered", or replying to
-               it, clears the flag. */
-            needsAdmin: !!(prev && prev.needsAdmin),
-            userUnread: (prev && typeof prev.userUnread === 'number' ? prev.userUnread : 0) + 1
-          }, { merge: true });
+          if (prev) {
+            /* AN EXISTING THREAD IS UPDATED, NOT RE-STATED. `prev` is the
+               roster as it was READ when the page opened, and the maintainer
+               may have spent a while composing: the recipient can have replied
+               (needsAdmin → true) or read the thread (userUnread → 0) in
+               between, and a set() copying the stale values back would drop
+               that reply out of the "awaiting you" queue unread and miscount
+               the badge. So `needsAdmin` is NOT written at all — a broadcast
+               is not an answer; only "Mark answered" or a reply clears it —
+               and the unread count is a server-side increment. */
+            batch.update(head, {
+              lastAt: now,
+              lastFrom: 'admin',
+              userUnread: fb.firestore.FieldValue.increment(1)
+            });
+          } else {
+            batch.set(head, {
+              uid: uid, lastAt: now, lastFrom: 'admin', needsAdmin: false, userUnread: 1
+            }, { merge: true });
+          }
           return batch.commit()
             .then(function () { sent++; })
             ['catch'](function () { failed++; });

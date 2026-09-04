@@ -116,7 +116,8 @@
     if (!window.confirm(
       'Take this profile down?\n\n' + what + '\n\n' +
       'It stops appearing on the site at the next update, normally within an ' +
-      'hour. Nothing is deleted — editing it again puts it back.')) return;
+      'hour (or is left out of the reveal, if that is still to come). Nothing is ' +
+      'deleted — editing it again puts it back.')) return;
 
     btn.disabled = true;
     btn.textContent = 'Taking down…';

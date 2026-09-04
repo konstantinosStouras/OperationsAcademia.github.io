@@ -123,12 +123,15 @@
     return '';
   }
 
+  /* UTC, not local: the pipeline and oa-jobnav.js decide "expired" and
+     "which page" on the UTC day, so a local reading bucketed a card as
+     Expired around midnight on a page the UTC rule still placed it on. */
   function todayISO() {
     var d = new Date();
     return (
-      d.getFullYear() +
-      '-' + String(d.getMonth() + 1).padStart(2, '0') +
-      '-' + String(d.getDate()).padStart(2, '0')
+      d.getUTCFullYear() +
+      '-' + String(d.getUTCMonth() + 1).padStart(2, '0') +
+      '-' + String(d.getUTCDate()).padStart(2, '0')
     );
   }
 
@@ -270,6 +273,8 @@
       }
     }
     var rows = [];
+    var loaded = false;       // the dataset has landed (or failed) — see rerender
+    var loadFailed = false;
     var view = [];
     var page = 0;
     var expanded = {};
@@ -290,6 +295,7 @@
        taken from `rows`, ahead of every filter and every page. */
     var focusParam = cfg.focusParam || '';
     var focusId = '';
+    var focusTitleWas = '';
     var focusOpened = false;   // the card is opened once, not on every render
     var focusScrolled = false; // …and scrolled to once, on the render that finds it
     /* A focus that arrived as `#job-<id>` — see readUrl(). The fragment is
@@ -404,7 +410,18 @@
       if (focusId) {
         /* ahead of every filter and every page — see the block by focusId */
         view = one ? [one] : [];
-        if (one && !focusOpened) { expanded[one.id] = true; focusOpened = true; }
+        if (one && !focusOpened) {
+          expanded[one.id] = true; focusOpened = true;
+          /* The permalink the Admin area and the poster's e-mail hand out
+             opened under the list page's generic title; the tab, the
+             history and a bookmark now say WHICH posting. */
+          var t = [one.institution || one.name, one.department].filter(Boolean).join(' — ');
+          if (t) {
+            if (!focusTitleWas) focusTitleWas = document.title;
+            document.title = t + ' · ' + focusTitleWas;
+          }
+        }
+        if (!one && focusTitleWas) { document.title = focusTitleWas; focusTitleWas = ''; }
       } else {
         view = passing(null);
         if (cfg.sort) view.sort(cfg.sort);
@@ -439,7 +456,10 @@
           class: 'oa-filter' + (f.type === 'text' ? '' : ' oa-pick') +
                  (f.className ? ' ' + f.className : ''),
         });
-        var id = 'oaf-' + f.key;
+        /* Prefixed by the mount, or two lists on one page (the home page's
+           candidates and placements both filter on `name`) mint one id and
+           the second label points at the first input. */
+        var id = 'oaf-' + (cfg.urlPrefix || '') + f.key;
         wrap.appendChild(el('label', { for: id, text: f.label }));
 
         if (f.type === 'text') {
@@ -1157,7 +1177,8 @@
            as a chip, which is strictly better than the bare text it used to
            set: the reader can see what is filtering the list and remove it. */
         if (f.type === 'text') {
-          all.forEach(function (v) { if (v) sel[f.key].add(String(v).trim()); });
+          // trimmed BEFORE the test, or `?institution=%20` lands as an empty chip
+          all.forEach(function (v) { var t = String(v || '').trim(); if (t) sel[f.key].add(t); });
           return;
         }
         var add = function (v) {
@@ -1168,7 +1189,8 @@
           sel[f.key].add(v);
         };
         if (all.length > 1) {
-          all.forEach(add);
+          // a single-select filter takes ONE value from a link, the last named
+          if (f.type === 'one') add(all[all.length - 1]); else all.forEach(add);
         } else if (all[0].indexOf('|') === -1 || facetHas(f, all[0])) {
           add(all[0]);
         } else {
@@ -1210,6 +1232,7 @@
 
     load(cfg.data)
       .then(function (data) {
+        loaded = true;
         rows = (Array.isArray(data) ? data : data.rows || []).filter(Boolean);
         rows.forEach(function (r, i) { if (!r.id) r.id = 'r' + i; });
         if (cfg.prepare) rows = cfg.prepare(rows);
@@ -1218,22 +1241,37 @@
         apply();
       })
       .catch(function (err) {
-        listEl.innerHTML = '';
-        listEl.appendChild(
-          el('li', { class: 'oa-empty' }, [
-            el('strong', { text: STR.loadError }),
-            el('span', { text: STR.loadErrorHint }),
-          ])
-        );
+        loadFailed = true;
+        paintLoadError();
         if (window.console) console.error('OAList: failed to load ' + cfg.data, err);
       });
+
+    function paintLoadError() {
+      listEl.innerHTML = '';
+      listEl.appendChild(
+        el('li', { class: 'oa-empty' }, [
+          el('strong', { text: STR.loadError }),
+          el('span', { text: STR.loadErrorHint }),
+        ])
+      );
+    }
 
     return {
       reload: function () { apply(); },
       /* Re-run the render with the rows already loaded. Sign-in resolves AFTER
          the first paint, so the controls a signed-in user may see have to be
          able to arrive late without refetching the dataset. */
-      rerender: function () { render(); },
+      rerender: function () {
+        /* NOT BEFORE THE DATA. The gate and the edit layer both re-render on
+           the auth event, which fires synchronously when the session is
+           already resolved — usually before the fetch lands — and render()
+           read zero rows as an EMPTY dataset: "No job postings are listed at
+           the moment" painted over the loading state, and over the fetch
+           error too. Until the rows are here there is nothing to redraw. */
+        if (loadFailed) { paintLoadError(); return; }
+        if (!loaded) return;
+        render();
+      },
       /* Open ONE card, from the page rather than from a click. What lets a
          reader who pressed a locked card and then signed in land on the
          posting they pressed, rather than on the list they would have to find

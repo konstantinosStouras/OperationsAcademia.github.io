@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Admin area — Operations Academia</title>
     <meta name="description" content="The maintainer's review desk — job postings, candidate profiles, feedback and site updates waiting to be looked at.">
     <!-- The maintainer's own desk: noindex, and DELIBERATELY no og:* block.
@@ -44,6 +46,7 @@
   </head>
 
   <body class="v3">
+    <a class="v3-skip" href="#main">Skip to content</a>
 
     <header class="v3-header">
       <div class="v3-header-inner">
@@ -55,7 +58,7 @@
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
         <nav class="v3-nav" aria-label="Site sections">
-          <a href="./#jobs">Jobs</a>
+          <a href="jobs.html">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -83,7 +86,7 @@
         <button type="button" class="v3-sheet-close" aria-label="Close the menu">&times;</button>
       </div>
       <nav aria-label="Site sections">
-        <a href="./#jobs">Jobs</a>
+        <a href="jobs.html">Jobs</a>
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
@@ -101,7 +104,7 @@
       </div>
     </aside>
 
-    <main>
+    <main id="main">
       <section class="v3-pa-hero">
         <div class="v3-container">
           <span class="v3-kicker">Maintainer</span>
@@ -339,8 +342,8 @@
                  for the wrong visitor. -->
             <section class="oa-panel" id="oa-aa-users" hidden>
               <h3 class="oa-panel-h">&#128101; Registered users</h3>
-              <p class="oa-hint">Everyone who has signed in since the roster
-                shipped &mdash; the name they show themselves under, the address
+              <p class="oa-hint">Every registered account &mdash; seeded daily from
+                Firebase Auth and kept current by each sign-in: the name they show themselves under, the address
                 they sign in with, and where their conversation with you stands.
                 Tick the people you want to reach and write once: the message
                 appears in their own area on this site under &ldquo;Messages&rdquo;,

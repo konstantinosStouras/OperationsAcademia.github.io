@@ -140,7 +140,12 @@ function clearedSlot(slot) {
   return { [slot.path]: null, [slot.name]: null, [slot.type]: null, [slot.size]: null };
 }
 
+/* Returns what it WROTE, per document id — see build-jobs.mjs: `live` is a
+   snapshot taken before this ran, and without the overlay a CV filed here
+   reached the served file one build later (a REPLACEMENT, whose old link the
+   form blanks, published the profile with no CV until then). */
 async function transferUploads(db, live, { now }) {
+  const patched = new Map();
   // a document is pending when ANY slot has an upload waiting and no link —
   // the same "prefer the typed link" rule the old display tab's formula had:
   // a slot that already carries a URL is never overwritten by the upload.
@@ -148,7 +153,7 @@ async function transferUploads(db, live, { now }) {
     const v = d.data() || {};
     return SLOTS.some((s) => v[s.path] && !v[s.url]);
   });
-  if (!pending.length) return;
+  if (!pending.length) return patched;
 
   let drive, folders;
   try {
@@ -156,13 +161,13 @@ async function transferUploads(db, live, { now }) {
     folders = await import('./drive-folders.mjs');
   } catch (e) {
     warn(`candidate uploads: could not load the Drive client (${e.message}) — left for the next run`);
-    return;
+    return patched;
   }
 
   if (drive.missingCredentials().length) {
     warn(`candidate uploads: ${pending.length} waiting, but ` +
       `${drive.missingCredentials().join(', ')} not set — left for the next run`);
-    return;
+    return patched;
   }
 
   const bucket = await storageBucket();
@@ -179,7 +184,7 @@ async function transferUploads(db, live, { now }) {
     token = await drive.accessToken();
   } catch (e) {
     warn(`candidate uploads: ${e.message} — left for the next run`);
-    return;
+    return patched;
   }
 
   for (const d of pending) {
@@ -246,11 +251,13 @@ async function transferUploads(db, live, { now }) {
         /* Write the link BEFORE deleting the landing-strip object: a crash in
            between leaves a stray object in Storage (harmless, cleaned by
            hand) rather than a filed-and-forgotten upload with no link. */
-        await d.ref.update({
+        const patch = {
           [slot.url]: uploaded.webViewLink,
           [slot.driveId]: uploaded.id,
           ...clearedSlot(slot),
-        });
+        };
+        await d.ref.update(patch);
+        patched.set(d.id, Object.assign(patched.get(d.id) || {}, patch));
         await file.delete().catch(() => {});
 
         if (supersededId && supersededId !== uploaded.id) {
@@ -270,6 +277,7 @@ async function transferUploads(db, live, { now }) {
       }
     }
   }
+  return patched;
 }
 
 /* ---------------------------------------------------------------------- main */
@@ -322,14 +330,14 @@ async function main() {
      with its links. WHOLLY NON-FATAL — Drive down, a missing credential, an
      unconfigured season each warn and the profile publishes without that
      link; the upload stays in Storage and the next run retries. */
-  await transferUploads(db, live, { now });
+  const filed = (await transferUploads(db, live, { now })) || new Map();
 
   const fresh = [];
   const rejected = [];
   for (const d of live) {
     let row = null;
     try {
-      row = rowFromCandidateSubmission(d.data(), { now });
+      row = rowFromCandidateSubmission(Object.assign({}, d.data(), filed.get(d.id) || {}), { now });
     } catch (e) {
       // One unreadable document must not kill the run — see build-jobs.mjs.
       warn(`submission ${d.data().ref || d.id} could not be read (${e.message}) — skipped`);

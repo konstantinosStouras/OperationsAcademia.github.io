@@ -491,24 +491,6 @@
    "avgSec": 541
   },
   {
-   "path": "/candidates.html",
-   "title": "Candidates - OperationsAcademia.org",
-   "views": 546,
-   "avgSec": 0
-  },
-  {
-   "path": "/placements.html",
-   "title": "Confirmed Placements - OperationsAcademia.org",
-   "views": 205,
-   "avgSec": 0
-  },
-  {
-   "path": "/resources-for-candidates.html",
-   "title": "Resources - OperationsAcademia.org",
-   "views": 130,
-   "avgSec": 0
-  },
-  {
    "path": "/post-a-job.html",
    "title": "",
    "views": 115,
@@ -521,12 +503,6 @@
    "avgSec": 324
   },
   {
-   "path": "/logoHeader.html",
-   "title": "Jobs - OperationsAcademia.org",
-   "views": 73,
-   "avgSec": 10
-  },
-  {
    "path": "/my-postings.html",
    "title": "",
    "views": 56,
@@ -537,18 +513,6 @@
    "title": "",
    "views": 50,
    "avgSec": 122
-  },
-  {
-   "path": "/jobsFooterWasClicked.html",
-   "title": "Operations Academia",
-   "views": 42,
-   "avgSec": 7
-  },
-  {
-   "path": "/faqs.html",
-   "title": "FAQs - OperationsAcademia.org",
-   "views": 38,
-   "avgSec": 0
   },
   {
    "path": "/recent-faculty.html",
@@ -575,18 +539,6 @@
    "avgSec": 442
   },
   {
-   "path": "/contact.html",
-   "title": "Contact us - OperationsAcademia.org",
-   "views": 19,
-   "avgSec": 0
-  },
-  {
-   "path": "/Research Summaries of the 2017-2018 Candidates.html",
-   "title": "Resources - OperationsAcademia.org",
-   "views": 16,
-   "avgSec": 7
-  },
-  {
    "path": "/terms-and-conditions.html",
    "title": "",
    "views": 13,
@@ -603,30 +555,6 @@
    "title": "",
    "views": 12,
    "avgSec": 339
-  },
-  {
-   "path": "/Survey Slides by Kostas and Serguei.html",
-   "title": "Resources - OperationsAcademia.org",
-   "views": 12,
-   "avgSec": 10
-  },
-  {
-   "path": "/candidatesFooterWasClicked.html",
-   "title": "Operations Academia",
-   "views": 12,
-   "avgSec": 6
-  },
-  {
-   "path": "/placementsFooterWasClicked.html",
-   "title": "Operations Academia",
-   "views": 12,
-   "avgSec": 10
-  },
-  {
-   "path": "/JMbook.html",
-   "title": "Resources - OperationsAcademia.org",
-   "views": 10,
-   "avgSec": 13
   }
  ],
  "pagesWindow": {

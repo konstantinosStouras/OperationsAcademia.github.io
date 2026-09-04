@@ -193,7 +193,9 @@ jobs:
             git fetch origin "$REF" || exit 1
             git reset --hard FETCH_HEAD || exit 1
 
-            if ! node _scraper/build-all.mjs; then
+            # OA_REBUILD: the first pass already mailed the "what changed"
+            # diff; a second, slightly narrower copy from the retry is noise
+            if ! OA_REBUILD=1 node _scraper/build-all.mjs; then
               echo "::error title=Publishing has STOPPED::the rebuild on the new \
               tip failed, so nothing was committed. The build's own errors are above."
               exit 1
