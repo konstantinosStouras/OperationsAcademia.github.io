@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "save-search-as-email-alert",
+      "date": "2026-09-04",
+      "title": "Save a search on the jobs page as an e-mail alert",
+      "summary": "Once you have narrowed the list on the job postings page, a Save as e-mail alert button beside the Excel download opens the E-mail alerts page with a new alert already filled in from your search: the university you typed, the type, the entry levels and the locations you chose, with New job postings ticked and a name suggested. A filter an alert cannot use, such as the characteristics or a deadline bucket, is left out and the page says so. Like the download, it is for signed-in readers.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "levels-and-characteristics-multi-select",
       "date": "2026-09-04",
       "title": "Entry level and Characteristics take several values",

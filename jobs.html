@@ -188,9 +188,10 @@
           <div class="v3-lock-card-inner">
             <h3>&#128274; Sign in to read the postings</h3>
             <p>The universities hiring this season are listed below either way. Opening a
-            posting &mdash; its entry level, its deadlines and how to apply &mdash; along with
-            searching, filtering and downloading the full list as an Excel file, is
-            free with an account, which takes a moment to create.</p>
+            posting (its entry level, its deadlines and how to apply), along with
+            searching, filtering, downloading the full list as an Excel file and saving a
+            search as an e-mail alert, is free with an account, which takes a moment to
+            create.</p>
             <div class="v3-cta-row">
               <button type="button" class="v3-btn primary" id="v3-lock-signin">Sign in</button>
               <button type="button" class="v3-btn ghost" id="v3-lock-register">Create account</button>
@@ -274,6 +275,9 @@
     <script defer src="assets/oa-jobedit.js"></script>
     <script defer src="assets/oa-xlsx.js"></script>
     <script defer src="assets/oa-jobexport.js"></script>
+    <!-- the current search, saved as an e-mail alert: reads OACountries and
+         the gate above, and hands the filters to alerts.html -->
+    <script defer src="assets/oa-alertsave.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
@@ -400,13 +404,27 @@
            poster's Contact details: see the header of assets/oa-jobexport.js
            for why that holds three times over. Registered readers only, which
            is the module's own gate as well as this page's sign-in lock. */
-        actions: window.OAJobExport
-          ? [OAJobExport.action({
-              market: function () {
-                return (marketYear() - 1) + '-' + marketYear();
-              },
-            })]
-          : [],
+        actions: [
+          window.OAJobExport
+            ? OAJobExport.action({
+                market: function () {
+                  return (marketYear() - 1) + '-' + marketYear();
+                },
+              })
+            : null,
+          /* SAVE THE SEARCH AS AN E-MAIL ALERT (2026-09-04), beside the
+             download and gated exactly like it. It hands the live filters to
+             alerts.html (assets/oa-alertsave.js: what is carried, what is
+             reported as left out, and why the first university term alone
+             goes). The ?job= focus is not in the engine's snapshot, so the
+             page passes a getter; `jobs` is assigned by the time a click can
+             happen, and guarded in case a refresh runs before it is. */
+          window.OAAlertSave
+            ? OAAlertSave.action({
+                focused: function () { return jobs ? jobs.focused() : ''; },
+              })
+            : null,
+        ],
 
         /* Newest posting first — but a SPONSOR's posting leads the list,
            then a Featured one. The whole order lives in one place

@@ -10054,8 +10054,10 @@ async function testJobExportWiring() {
     ok(jobs.includes(`<script defer src="${src}"></script>`),
       `export: jobs.html loads ${src}, deferred like every other script on it`);
   }
-  ok(/actions:\s*window\.OAJobExport/.test(jobs),
-    'export: the jobs mount declares the action');
+  /* the download leads the list; "Save as e-mail alert" follows it since
+     2026-09-04 (testSaveSearchAsAlert pins the second) */
+  ok(/actions:\s*\[\s*window\.OAJobExport\s*\?\s*OAJobExport\.action\(/.test(jobs),
+    'export: the jobs mount declares the action, first in the list');
 
   /* The ENGINE renders it, and that is not a style choice: buildBar() empties
      the bar whenever the filters are cleared, so a button the page appended
@@ -10885,6 +10887,216 @@ async function testSponsors() {
    each closing date is named once. The mailer's own selftest pins the mark
    from its source and the rendered section; this pins the decision, the
    module driven without its dependency, and the wiring. */
+
+/* ------------------------------------- save the search as an e-mail alert
+
+   Owner, 2026-09-04: a signed-in reader who has narrowed the jobs list can
+   press "Save as e-mail alert" beside the Excel download and land on
+   alerts.html with a new alert filled in from the filters they had set.
+   assets/oa-alertsave.js is ONE module on both ends — the jobs page writes
+   the hand-over and the alerts page reads it through the same file — so this
+   drives the pure half offline and pins the wiring on both pages; the reader
+   is measured in page-test.mjs. */
+async function testSaveSearchAsAlert() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const S = require(path.join(HERE, '..', 'assets', 'oa-alertsave.js'));
+
+  /* --- the mapping: four filters carry, everything else is REPORTED ------ */
+  const filters = [
+    { key: 'institution', label: 'University search', values: ['Utah', 'Princeton'], match: 'any' },
+    { key: 'review', label: 'Suggested deadline', values: ['Review ahead'], match: 'any' },
+    { key: 'deadline', label: 'Final deadline', values: ['Closing soon'], match: 'any' },
+    { key: 'type', label: 'Type', values: ['Business School'], match: 'any' },
+    { key: 'level', label: 'Entry level', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
+    { key: 'country', label: 'Location', values: ['USA', 'Ireland'], match: 'any' },
+    { key: 'chars', label: 'Characteristics', values: ['PhD'], match: 'all' },
+    { key: 'posted', label: 'Date posted', values: ['Last 7 days'], match: 'any' },
+  ];
+  const c = S.carry(filters, '2027-somewhere-20260901');
+  eq(c.criteria, { text: 'Utah', type: ['Business School'],
+    level: ['Assistant Professor', 'Post-Doc'], country: ['United States', 'Ireland'] },
+  'save-search: the four filters an alert can hold are carried, the country through the ONE table');
+  eq(c.dropped, ['terms', 'review', 'deadline', 'chars', 'posted', 'job'],
+    'save-search: …and everything else is reported — the extra search terms and the ?job= focus included');
+  eq(S.carry([], ''), null, 'save-search: nothing filtered is nothing to save');
+  eq(S.carry([{ key: 'level', values: [] }], 'some-id'), null,
+    'save-search: …a focus alone included — a filter with no values is no filter');
+  eq(S.carry([{ key: 'institution', values: ['Dublin'] }]).dropped, [],
+    'save-search: one search term drops nothing');
+  eq(S.carry([{ key: 'country', values: ['United States', 'USA'] }]).criteria.country, ['United States'],
+    'save-search: two spellings of one country are one tick box');
+
+  /* THE FIRST TERM ONLY is deliberate, and the matcher is why: it searches
+     ONE substring across institution and department, where the jobs page ORs
+     its terms. Joined, the needle finds neither. */
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const row = { institution: 'University of Utah', department: 'Operations', type: 'University',
+    levels: ['Assistant Professor'], country: 'United States', characteristics: [] };
+  ok(M.matchesJob(row, { text: 'Utah' }) && !M.matchesJob(row, { text: 'Utah Princeton' }),
+    'save-search: …because two terms joined are a needle that matches neither posting');
+
+  /* --- the round trip ---------------------------------------------------- */
+  const u = S.url(c);
+  ok(u.startsWith('alerts.html?prefill=1&'),
+    'save-search: the hand-over is a URL on alerts.html carrying the flag');
+  eq((u.match(/(^|&)level=/g) || []).length, 2,
+    'save-search: one key per value, like the jobs page\'s own links');
+  eq(S.read(u.slice(u.indexOf('?'))), c,
+    'save-search: what the alerts page reads is exactly what the jobs page sent');
+  eq(S.read('?topic=updates'), null, 'save-search: no flag, no prefill');
+  eq(S.read('?prefill=1'), null, 'save-search: a bare flag fills nothing and says nothing');
+  eq(S.read('?prefill=1&country=USA').criteria.country, ['United States'],
+    'save-search: a hand-edited link is canonicalised on arrival too');
+  eq(S.strip('?prefill=1&text=a&level=b&level=c&country=d&type=e&dropped=chars&unsubscribe=abc&topic=updates'),
+    '?unsubscribe=abc&topic=updates',
+    'save-search: stripping the address keeps every key that is somebody else\'s');
+  eq(S.strip('?prefill=1&text=a'), '',
+    'save-search: …and leaves a clean address when nothing else was there');
+
+  /* --- the name and the note --------------------------------------------- */
+  eq(S.suggestName({ level: ['Assistant Professor'], country: ['United States'] }),
+    'Assistant Professor in United States', 'save-search: the suggested name, in the owner\'s example');
+  eq(S.suggestName(c.criteria),
+    'Assistant Professor or Post-Doc matching “Utah” in United States or Ireland',
+    'save-search: …levels, the search term and the countries, in that order');
+  eq(S.suggestName({ type: ['Business School'], country: ['France'] }), 'Business School posts in France',
+    'save-search: …the type leads when no level was chosen');
+  eq(S.suggestName({}), 'Job postings', 'save-search: …and something rather than nothing');
+  ok(S.suggestName({ text: 'x'.repeat(200) }).length <= 120,
+    'save-search: the name fits the form\'s own maxlength');
+  const note = S.note(c);
+  ok(/^Filled in from your search on the jobs page\./.test(note),
+    'save-search: the note says where the values came from');
+  ok(/cannot filter on them: every university search term after the first, the suggested-deadline bucket, the final-deadline bucket, the characteristics you ticked, the date-posted window and the one posting you had open on its own\./.test(note),
+    'save-search: …and names each thing it left out, in words');
+  ok(/Postings closing within 7 days/.test(note),
+    'save-search: …pointing a dropped deadline bucket at the topic that stands in for it');
+  ok(!/Not carried/.test(S.note({ dropped: [] })) && !/closing within/.test(S.note({ dropped: ['chars'] })),
+    'save-search: nothing dropped, nothing said; no deadline dropped, no pointer');
+  eq(S.words(['mystery']), 'the mystery filter',
+    'save-search: a filter with no wording is still reported, never dropped silently');
+
+  /* every jobs-page filter an alert cannot hold HAS a wording, and every
+     wording names a real filter — read from the mount, so a filter added to
+     jobs.html tomorrow fails here rather than reaching the note unnamed */
+  const jobs = await read('jobs.html');
+  const keys = [...jobs.matchAll(/\{\s*key:\s*'([a-z]+)'/g)].map((m) => m[1]);
+  ok(keys.length >= 8, `save-search: the jobs mount's filter keys were found (${keys.length})`);
+  for (const k of keys) {
+    ok(['institution', 'type', 'level', 'country'].includes(k) || k in S.DROPPED,
+      `save-search: the "${k}" filter is carried, or has a wording in DROPPED`);
+  }
+  for (const k of Object.keys(S.DROPPED)) {
+    ok(keys.includes(k) || k === 'terms' || k === 'job',
+      `save-search: DROPPED.${k} names a real jobs-page filter`);
+  }
+
+  /* NO EM DASH in anything a reader sees, and the two tooltips say what
+     they must: the disabled one names the topic that already covers
+     "everything", the signed-out one that an account is what unlocks it. */
+  for (const [k, v] of Object.entries(S.COPY)) ok(!/—/.test(v), `save-search: COPY.${k} carries no em dash`);
+  for (const [k, v] of Object.entries(S.DROPPED)) ok(!/—/.test(v), `save-search: DROPPED.${k} carries no em dash`);
+  ok(!/—/.test(note) && !/—/.test(S.suggestName(c.criteria)),
+    'save-search: nor do the note and the suggested name');
+  ok(/New job postings/.test(S.COPY.noFilter) && /leave the filters blank/i.test(S.COPY.noFilter),
+    'save-search: the disabled tooltip says an alert for everything is the topic with no filters');
+  ok(/with an account/.test(S.COPY.saveSignedOut) && !/with an account/.test(S.COPY.save),
+    'save-search: the signed-out tooltip sells the account; the signed-in one does not');
+  ok(/Save as e-mail alert/.test(S.COPY.label), 'save-search: the label says what it does');
+
+  /* --- the country table ABSENT: passes through, because the receiving
+         page canonicalises again (a fallback that is right, not a guess) --- */
+  const src = await read('assets', 'oa-alertsave.js');
+  const bare = { exports: {} };
+  new Function('module', 'require', src)(bare, () => null);
+  eq(bare.exports.carry([{ key: 'country', values: ['USA'] }]).criteria.country, ['USA'],
+    'save-search: without the country table the value passes through as typed…');
+  const matchSrc = await read('assets', 'oa-alert-match.js');
+  ok(/country:\s*arr\(c\.country\)\.map\(canonCountry\)/.test(matchSrc),
+    'save-search: …because the alerts page normalises every country through the same table on arrival');
+
+  /* --- the gate, the download's --------------------------------------- */
+  ok(/whenSignedIn/.test(src), 'save-search: the hop goes through the site\'s own signed-in gate');
+  ok(!/hint\(\)\s*===\s*'in'/.test(src), 'save-search: …never the localStorage hint alone');
+  ok(/function signedIn\(\)\s*\{[\s\S]{0,200}?OAGate/.test(src),
+    'save-search: it asks the gate who is signed in, not its own copy');
+  ok(!/firestore\(\)|\.collection\(/.test(src),
+    'save-search: the module writes nothing to Firestore — the alert is saved by the form, in the shape the rules already allow');
+
+  /* --- wiring: the jobs page ---------------------------------------------- */
+  ok(jobs.includes('<script defer src="assets/oa-alertsave.js"></script>'),
+    'save-search: jobs.html loads the module, deferred like every other script on it');
+  for (const dep of ['assets/oa-countries.js', 'assets/oa-gate.js', 'assets/oa-jobexport.js']) {
+    ok(jobs.indexOf(dep) < jobs.indexOf('assets/oa-alertsave.js'),
+      `save-search: jobs.html loads ${dep} before the module that reads it`);
+  }
+  const mount = jobs.slice(jobs.indexOf('actions: ['), jobs.indexOf('sort: function'));
+  ok(mount.length > 100 && mount.length < 2500, 'save-search: the mount\'s actions block is where this expects it');
+  ok(/OAJobExport\.action\(/.test(mount) && /OAAlertSave\.action\(/.test(mount) &&
+     mount.indexOf('OAJobExport.action(') < mount.indexOf('OAAlertSave.action('),
+    'save-search: the jobs mount declares the button BESIDE the download, after it');
+  ok(/focused:\s*function\s*\(\)\s*\{\s*return jobs \? jobs\.focused\(\) : ''/.test(mount),
+    'save-search: …handing it the ?job= focus, guarded for a refresh before the mount returns');
+
+  /* the lock card names it — the one place a signed-out reader is told what
+     an account gives. Comments stripped and bounded at both ends, the
+     testReaderGate discipline. */
+  const jobsCopy = jobs.replace(/<!--[\s\S]*?-->/g, '');
+  const card = jobsCopy.slice(jobsCopy.indexOf('class="v3-lock-card"'), jobsCopy.indexOf('<div id="oa-jobs">'));
+  ok(card.length > 200 && card.length < 2000, 'save-search: the sign-in card is where this expects it');
+  ok(/e-mail alert/i.test(card) && /Excel/.test(card),
+    'save-search: the sign-in card names the alert beside the download');
+  const sentence = card.slice(card.indexOf('<p>'), card.indexOf('</p>'));
+  ok(sentence.length > 100 && !/—|&mdash;/.test(sentence),
+    'save-search: …in a sentence with no em dash');
+
+  /* --- wiring: the alerts page -------------------------------------------- */
+  const alertsHtml = await read('alerts.html');
+  const alertsJs = await read('assets', 'oa-alerts.js');
+  ok(alertsHtml.includes('<script defer src="assets/oa-alertsave.js"></script>'),
+    'save-search: alerts.html loads the same module');
+  /* the TAGS, not the first mention — a comment over the note names the
+     module hundreds of lines above the scripts */
+  const tag = (f) => alertsHtml.indexOf(`<script defer src="${f}"></script>`);
+  ok(tag('assets/oa-countries.js') !== -1 && tag('assets/oa-countries.js') < tag('assets/oa-alertsave.js') &&
+     tag('assets/oa-alertsave.js') < tag('assets/oa-alerts.js'),
+    'save-search: …after the country table and before the page script that reads it');
+  ok(/id="oa-prefill-note"\s+hidden/.test(alertsHtml),
+    'save-search: the note over the form exists and starts hidden');
+  const bootSrc = alertsJs.slice(alertsJs.indexOf('function boot()'), alertsJs.indexOf("$('oa-needauth-btn')"));
+  ok(bootSrc.length > 100 && bootSrc.length < 1500, 'save-search: boot() is where this expects it');
+  ok(bootSrc.indexOf('Save.stash()') !== -1 && bootSrc.indexOf('Save.stash()') < bootSrc.indexOf('OAFB.enabled'),
+    'save-search: boot() stashes and strips the address FIRST, before the offline gate can return');
+  ok(/\.then\(handleUnsubscribeLink\)[\s\S]{0,300}?\.then\(applyPrefill\)/.test(alertsJs),
+    'save-search: the prefill is applied after the list and the vocabulary, on the signed-in path');
+  const apply = alertsJs.slice(alertsJs.indexOf('function applyPrefill()'), alertsJs.indexOf('function load()'));
+  ok(apply.length > 300 && apply.length < 2500, 'save-search: applyPrefill is where this expects it');
+  ok(/Save\.take\(\)/.test(apply), 'save-search: …taken from the stash, once');
+  ok(/topics:\s*\['jobs'\]/.test(apply) && /editingId = null/.test(apply),
+    'save-search: …as a NEW alert on the jobs topic');
+  ok(/Save\.suggestName\(/.test(apply) && /Save\.note\(/.test(apply),
+    'save-search: …named and annotated by the module, not by a second copy of its words');
+  const wf = alertsJs.slice(alertsJs.indexOf('function writeForm('), alertsJs.indexOf('function syncFormState('));
+  ok(wf.length > 200 && /show\(\$\('oa-prefill-note'\), false\)/.test(wf),
+    'save-search: every other path through writeForm hides the note');
+
+  /* --- keep-in-sync: the change log, the FAQ, the record ------------------ */
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = (log.updates || []).find((x) => x.id === 'save-search-as-email-alert');
+  ok(!!entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+    'save-search: changelog.json announces it, dated, linking the jobs page');
+  ok(!!entry && !/—/.test(entry.title + entry.summary) && /Save as e-mail alert/.test(entry.summary),
+    'save-search: …naming the button, with no em dash');
+  const home = await read('index.html');
+  const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
+  ok(faq.length > 200 && faq.length < 2500 && /Save as e-mail\s+alert/.test(faq) && /jobs\.html/.test(faq),
+    'save-search: the FAQ answer on e-mail alerts names the button and links the jobs page');
+  ok(!/—|&mdash;/.test(faq.slice(faq.indexOf('Quicker still'))),
+    'save-search: …in a sentence with no em dash');
+  const claude = await read('CLAUDE.md');
+  ok(/oa-alertsave\.js/.test(claude) && /FIRST term only/.test(claude),
+    'save-search: CLAUDE.md records the module and the first-term rule');
+}
 
 async function testClosingSoonDigest() {
   const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
@@ -12109,6 +12321,7 @@ if (isMain(import.meta.url)) {
   await testSponsors();
   await testReaderGate();
   await testClosingSoonDigest();
+  await testSaveSearchAsAlert();
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();

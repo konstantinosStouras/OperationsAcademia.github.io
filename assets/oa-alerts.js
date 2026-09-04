@@ -14,6 +14,7 @@
   'use strict';
 
   var M = window.OAAlertMatch;
+  var Save = window.OAAlertSave;   // the jobs page's "Save as e-mail alert" hand-over
   var jobs = [];          // the current postings, for the preview and the vocab
   var jobsState = 'loading';   // 'loading' | 'ok' | 'failed' — see renderPreview
   var cands = [];         // data/candidates.json — EMPTY until the reveal date,
@@ -166,6 +167,9 @@
         wanted === 'deadlines' ? [wanted] : ['jobs'] } };
     }
     var c = M.normalise(a.criteria);
+    /* the "filled in from the jobs page" note belongs to ONE filling; every
+       other path through here (an edit, a reset after a save) hides it */
+    show($('oa-prefill-note'), false);
     $('a-name').value = a.name || '';
     $('a-email').value = a.email || (OAAccounts.user() || {}).email || '';
     $('a-freq').value = a.frequency || 'daily';
@@ -467,6 +471,44 @@
     writeForm(null);
   }
 
+  /* ------------------------------------ the hand-over from the jobs page
+
+     A reader who narrowed the jobs list and pressed "Save as e-mail alert"
+     lands here with their filters on the address (assets/oa-alertsave.js).
+     boot() STASHES that the moment the page loads and strips the address, so
+     a reload does not fill the form twice; this applies it ONCE the form can
+     be drawn — after sign-in, after the vocabulary is built — as a NEW alert
+     on the jobs topic, with a suggested name, and a note over the form saying
+     which of the search's filters an alert cannot hold. The stash is taken as
+     it is applied, so a second auth event, or the next save's resetForm(),
+     finds nothing to apply. */
+  function applyPrefill() {
+    if (!Save) return;
+    var got = Save.take();
+    if (!got) return;
+    editingId = null;
+    editing = null;
+    writeForm({
+      name: Save.suggestName(got.criteria),
+      criteria: {
+        topics: ['jobs'],
+        text: got.criteria.text,
+        type: got.criteria.type,
+        level: got.criteria.level,
+        country: got.criteria.country
+      }
+    });
+    var note = $('oa-prefill-note');
+    if (note) {
+      note.textContent = Save.note(got);
+      note.setAttribute('data-dropped', (got.dropped || []).join(','));
+      show(note, true);
+    }
+    say('Filled in from your search on the jobs page. Check it, then press Create alert.');
+    var form = $('oa-alert-form');
+    if (form && form.scrollIntoView) form.scrollIntoView({ block: 'start' });
+  }
+
   function load() {
     listFailed = false;
     return coll().then(function (c) { return c.get(); }).then(function (snap) {
@@ -559,6 +601,13 @@
   /* -------------------------------------------------------------- wiring */
 
   function boot() {
+    /* FIRST, before anything can navigate or repaint: the jobs page's
+       hand-over is read off the address and the address stripped, whoever is
+       reading and whether or not alerts are switched on — a reload must
+       never fill the form twice, and a signed-out reader keeps what they
+       brought across the sign-in (the stash outlives the URL). */
+    if (Save) Save.stash();
+
     if (!window.OAFB || !OAFB.enabled) {
       show($('oa-offline'), true);
       return;
@@ -664,7 +713,10 @@
       ready.then(function () {
         resetForm();
         return load();
-      }).then(handleUnsubscribeLink);
+      }).then(handleUnsubscribeLink)
+        /* after the list and the vocabulary, so the tick boxes it needs
+           exist; a no-op unless the jobs page sent something */
+        .then(applyPrefill);
     });
   }
 

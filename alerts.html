@@ -192,6 +192,11 @@
                     <hr style="margin:30px 0;border:0;border-top:1px solid var(--line-soft)">
 
                     <form id="oa-alert-form" novalidate>
+                      <!-- shown only when the form was filled in from the jobs
+                           page's "Save as e-mail alert" button: says so, and
+                           names any filter of that search an alert cannot hold
+                           (assets/oa-alertsave.js writes the words) -->
+                      <div class="oa-note" id="oa-prefill-note" hidden></div>
                       <fieldset>
                         <legend id="oa-form-legend">Create an alert</legend>
 
@@ -379,6 +384,9 @@
          the reader the e-mail they will get, so it must show only the entries
          the maintainer has actually published -->
     <script defer src="assets/oa-news.js"></script>
+    <!-- the hand-over from the jobs page's "Save as e-mail alert" button:
+         read off the address on load, held until the form can be drawn -->
+    <script defer src="assets/oa-alertsave.js"></script>
     <script defer src="assets/oa-alerts.js"></script>
   </body>
 </html>

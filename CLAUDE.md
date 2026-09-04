@@ -2739,6 +2739,63 @@ would be half a screen — where the mobile rules give both the full width and a
 the two buttons' shared baseline at desktop width, and the full-width targets
 at 390px.
 
+### …and a search can be saved as an e-mail alert
+
+Owner, 2026-09-04: a signed-in reader who has narrowed the jobs list can
+press **Save as e-mail alert**, beside the Excel download, and land on
+`alerts.html` with a new alert filled in from the filters they had set.
+
+    assets/oa-alertsave.js   what is carried, what is reported as left out,
+                             the URL, the note, the button (dual-mode)
+
+**One module on both ends**, like `oa-alert-match.js`: the jobs page WRITES
+the hand-over and the alerts page READS it through the same file, so the two
+cannot disagree about its shape, and `selftest.mjs` drives the pure half.
+
+**The university search carries its FIRST term only.** The matcher searches
+ONE substring across the institution and the department, where the jobs page
+ORs several terms; "utah princeton" as one needle matches nothing, so joining
+them would hand the reader an alert that never sends. The others are reported
+as `terms`. Type, entry levels and locations carry whole (through
+`OACountries.canon`, so a legacy `?country=USA` lands as the name the form
+offers). **Characteristics, the two deadline buckets, the date-posted window
+and the `?job=` focus are not carried** and cannot be: nothing in an alert
+holds them. Their keys travel as `dropped` and the alerts page says, in one
+line over the form, what it left out, pointing a dropped deadline bucket at
+the "Postings closing within 7 days" topic. A jobs-page filter added without
+a wording in `DROPPED` is still reported, as "the <key> filter", never dropped
+silently, and the selftest pins that every filter key has one.
+
+**The transport is the URL and the stash is sessionStorage.**
+`alerts.html?prefill=1&text=…&level=…&level=…&country=…&dropped=chars`, one
+key per value as the jobs page's own links are. The alerts page stashes it
+the moment it loads and strips the keys from the address with
+`history.replaceState` (keeping `?unsubscribe=` and `?topic=`, which are
+somebody else's), so a reload after the form was filled does not fill it
+again; the stash is consumed ONCE, when the form can be drawn, which for a
+reader who arrived signed out is after they sign in. It opens as a NEW alert
+on the jobs topic with a suggested name ("Assistant Professor in United
+States"), because the name is the e-mail's subject and a blank one is the
+first thing the form refuses.
+
+**Gated exactly like the download**: `whenSignedIn`, never the hint, and it
+says no without the gate module. **Disabled with nothing filtered**, and the
+tooltip says why: an alert for every new posting already exists as the "New
+job postings" topic with the filters left blank, so an empty form would be
+the wrong answer. The `.oa-action` rules in both stylesheets cover it with no
+addition; measured at 1280px the three buttons share one line and the bar
+stays two rows deep, and at 390px they stack full-width.
+
+Tests: `testSaveSearchAsAlert` in `_scraper/selftest.mjs` (the mapping,
+the round trip, what is kept off the address, the name, the note, the
+no-em-dash rule over every word the module shows, the gate, and the wiring
+on both pages, the lock card, the FAQ and the change log) and the
+save-search block in `_scraper/page-test.mjs` (signed out it opens the
+sign-in box and goes nowhere; signed in it lands on the alerts page with the
+boxes ticked and the note naming the characteristics; a reload does not
+re-fill; a signed-out arrival on the alerts page keeps the prefill across the
+sign-in; the row at 1280px and the stack at 390px).
+
 ## A department that SPONSORED the site, and what that may change
 
 CUHK Business School's Department of Decisions, Operations and Technology

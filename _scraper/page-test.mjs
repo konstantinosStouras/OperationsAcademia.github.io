@@ -6300,10 +6300,16 @@ for (const w of [320, 360, 390, 430]) {
       const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
       const c = document.querySelector('.oa-clear');
       const clear = c.getBoundingClientRect();
+      /* the LAST action in the cell is what holds the bar's right edge —
+         since 2026-09-04 that is "Save as e-mail alert", and the download
+         sits between Clear and it */
+      const last = b.closest('.oa-filter-actions').lastElementChild.getBoundingClientRect();
+      const next = document.querySelector('.oa-alert-save');
       return { title: b.title, text: b.textContent.trim(), disabled: b.disabled,
         h: Math.round(r.height), w: Math.round(r.width),
-        x: Math.round(r.x), top: Math.round(r.top),
-        rightGap: Math.round(cell.right - r.right),
+        x: Math.round(r.x), right: Math.round(r.right), top: Math.round(r.top),
+        rightGap: Math.round(cell.right - last.right),
+        nextX: next ? Math.round(next.getBoundingClientRect().x) : null,
         clearW: Math.round(clear.width), clearH: Math.round(clear.height),
         clearX: Math.round(clear.x), clearTop: Math.round(clear.top),
         locked: !!document.querySelector('.v3-lock.is-locked') };
@@ -6330,8 +6336,10 @@ for (const w of [320, 360, 390, 430]) {
     ok(Math.abs(btn.top - btn.clearTop) <= 2 && btn.h === btn.clearH,
       `jobs export: on ONE line with Clear filters, same height ` +
       `(${btn.h} vs ${btn.clearH}, tops ${btn.top}/${btn.clearTop})`);
-    ok(btn.x > btn.clearX && Math.abs(btn.rightGap) <= 1.5,
-      'jobs export: …to its right, holding the bar\'s right edge');
+    ok(btn.x > btn.clearX && btn.nextX !== null && btn.right < btn.nextX,
+      'jobs export: …to its right, and left of "Save as e-mail alert"');
+    ok(Math.abs(btn.rightGap) <= 1.5,
+      'jobs export: …with the last button in the cell holding the bar\'s right edge');
 
     /* TWO ROWS, WITH ENTRY LEVEL ON THE FIRST (owner, 2026-08-27: "pushing
        'entry level' search field on the top line, so that 'clear filters' and
@@ -7675,6 +7683,208 @@ for (const w of [320, 360, 390, 430]) {
     'closing: the card\'s summary line names the reminder and its filter');
   eq(errors, [], 'closing: no script errors on the alerts page');
   await ctx.close();
+}
+
+/* ------------------------------------- save the search as an e-mail alert
+
+   A signed-in reader who has narrowed the jobs list can press "Save as
+   e-mail alert", beside the Excel download, and land on alerts.html with a
+   new alert filled in from the filters they had set (owner, 2026-09-04;
+   assets/oa-alertsave.js). selftest.mjs pins the mapping and the wiring;
+   this drives the reader: signed out it opens the sign-in box and goes
+   nowhere, signed in it lands on the alerts page with the boxes ticked and a
+   note naming what was left out, a reload does not fill the form twice, a
+   signed-out arrival on the alerts page keeps the prefill across the
+   sign-in, and the button shares the download's line at 1280px and its
+   stack at 390px.
+
+   The fixture is read off the served file under the page's own market rule
+   rather than named: a guard about a corpus must not move with the corpus. */
+{
+  /* wrapped: filter() hands the index as the predicate's second argument,
+     which inCurrentMarket reads as `now` */
+  const served = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'))
+    .filter((r) => inCurrentMarket(r));
+  const pick = served.find((r) => (r.characteristics || []).length &&
+    (r.levels || []).length && r.country && r.institution);
+  ok(!!pick, 'save-search: a served posting in the current market carries a level, a country and a characteristic');
+  const LEVEL = pick.levels[0], CHAR = pick.characteristics[0], COUNTRY = pick.country;
+  const TERM = pick.institution.slice(0, 6);
+  const enc = encodeURIComponent;
+  const SEARCH = `jobs.html?institution=${enc(TERM)}&level=${enc(LEVEL)}` +
+    `&country=${enc(COUNTRY)}&chars=${enc(CHAR)}`;
+
+  /* -- signed OUT: the sign-in box, and no navigation --------------------- */
+  {
+    const { ctx, page: q, errors } = await signedOutPage(SEARCH);
+    const before = await q.evaluate(() => {
+      const b = document.querySelector('.oa-alert-save');
+      return { there: !!b, disabled: b ? b.disabled : null, title: b ? b.title : '',
+        locked: !!document.querySelector('.v3-lock.is-locked') };
+    });
+    ok(before.there && before.locked, 'save-search: the button is in the locked filter bar');
+    ok(before.disabled === false && /with an account/.test(before.title),
+      'save-search: filtered, it is live and says the alert is free with an account');
+    /* through the lock's pointer-events:none deliberately — the lock is a
+       nudge, and what is under test is the module's own gate */
+    await q.evaluate(() => document.querySelector('.oa-alert-save').click());
+    await q.waitForTimeout(1000);
+    ok(/jobs\.html$/.test(new URL(q.url()).pathname),
+      'save-search: pressing it signed out goes NOWHERE');
+    ok(await q.evaluate(() => !!document.querySelector('.oa-modal')),
+      'save-search: …it offers the sign-in box instead');
+    ok(await q.$eval('#v3-lock-card', (n) => /e-mail alert/i.test(n.textContent)),
+      'save-search: and the sign-in card names it as a reason to register');
+    eq(errors, [], 'save-search: signed-out run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- signed IN: disabled with nothing filtered, then the hop ------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html');
+    const idle = await q.evaluate(() => {
+      const b = document.querySelector('.oa-alert-save');
+      return { disabled: b.disabled, title: b.title, aria: b.getAttribute('aria-label') };
+    });
+    ok(idle.disabled, 'save-search: with nothing filtered the button is disabled');
+    ok(/New job postings/.test(idle.title) && /leave the filters blank/i.test(idle.title),
+      'save-search: …and its tooltip says an alert for everything is the topic with no filters');
+    eq(idle.aria, idle.title, 'save-search: …readable by a screen reader too');
+
+    await q.goto(BASE + SEARCH, { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card', { timeout: 15000 });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForTimeout(300);
+    const row = await q.evaluate(() => {
+      const g = (s) => document.querySelector(s).getBoundingClientRect();
+      const b = document.querySelector('.oa-alert-save');
+      const r = g('.oa-alert-save'), c = g('.oa-clear'), x = g('.oa-export');
+      const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
+      const tops = new Set([...document.querySelector('.oa-filters').children]
+        .map((n) => Math.round(n.getBoundingClientRect().top)));
+      return { disabled: b.disabled, title: b.title, text: b.textContent.trim(),
+        top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), x: Math.round(r.x),
+        clearTop: Math.round(c.top), clearH: Math.round(c.height), clearW: Math.round(c.width),
+        expRight: Math.round(x.right), expTop: Math.round(x.top),
+        rightGap: Math.round(cell.right - r.right), rows: tops.size };
+    });
+    ok(!row.disabled && !/with an account/.test(row.title),
+      'save-search: filtered and signed in, the button is live and no longer sells the account');
+    ok(/save as e-mail alert/i.test(row.text),
+      `save-search: the label says what it does (${JSON.stringify(row.text)})`);
+    ok(Math.abs(row.top - row.clearTop) <= 2 && row.h === row.clearH && Math.abs(row.top - row.expTop) <= 2,
+      `save-search: on ONE line with Clear and the download, same height ` +
+      `(${row.h}, tops ${row.top}/${row.clearTop}/${row.expTop})`);
+    ok(row.w < row.clearW, `save-search: narrower than Clear (${row.w} vs ${row.clearW})`);
+    ok(row.x > row.expRight && Math.abs(row.rightGap) <= 1.5,
+      'save-search: to the right of the download, holding the bar\'s right edge');
+    eq(row.rows, 2, `save-search: the bar is still two rows deep (${row.rows})`);
+
+    await q.click('.oa-alert-save');
+    await q.waitForURL(/alerts\.html/, { timeout: 15000 });
+    await q.waitForSelector('#oa-prefill-note:not([hidden])', { timeout: 15000 });
+    await q.waitForTimeout(250);
+    const landed = await q.evaluate(([level, country]) => {
+      const checked = (host, v) => {
+        const i = [...document.querySelectorAll('#' + host + ' input')].find((n) => n.value === v);
+        return i ? i.checked : null;
+      };
+      const note = document.querySelector('#oa-prefill-note');
+      return { search: location.search, text: document.querySelector('#a-text').value,
+        name: document.querySelector('#a-name').value,
+        level: checked('a-level', level), country: checked('a-country', country),
+        jobs: document.querySelector('#t-jobs').checked,
+        deadlines: document.querySelector('#t-deadlines').checked,
+        legend: document.querySelector('#oa-form-legend').textContent,
+        note: note.textContent.replace(/\s+/g, ' '), dropped: note.getAttribute('data-dropped') || '',
+        stash: sessionStorage.getItem('oaAlertPrefill'),
+        msg: document.querySelector('#a-msg').textContent,
+        filters: !document.querySelector('#a-filters').hidden };
+    }, [LEVEL, COUNTRY]);
+    eq(landed.text, TERM, 'save-search: the university search term is in the text box');
+    eq(landed.level, true, `save-search: the entry level is ticked (${LEVEL})`);
+    eq(landed.country, true, `save-search: the location is ticked (${COUNTRY})`);
+    ok(landed.jobs && !landed.deadlines && landed.filters,
+      'save-search: New job postings is the topic, and the filters are on screen');
+    ok(landed.name.includes(LEVEL) && landed.name.includes(COUNTRY),
+      `save-search: a name is suggested from the filters (${JSON.stringify(landed.name)})`);
+    ok(/Create an alert/.test(landed.legend), 'save-search: it is a NEW alert, not an edit');
+    ok(/^Filled in from your search/.test(landed.note) && /characteristics you ticked/.test(landed.note),
+      'save-search: the note says the form was filled in, and names the characteristics as not carried');
+    ok(landed.dropped.split(',').includes('chars'), 'save-search: …keyed on the filter that was dropped');
+    ok(!/prefill|level=|chars=/.test(landed.search),
+      `save-search: the parameters are gone from the address (${JSON.stringify(landed.search)})`);
+    eq(landed.stash, null, 'save-search: and the stash is spent');
+    ok(/jobs page/.test(landed.msg), 'save-search: the form\'s own message line says where the values came from');
+
+    /* a reload does NOT fill the form again */
+    await q.reload({ waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForSelector('#a-country input', { timeout: 15000 });
+    await q.waitForTimeout(400);
+    const again = await q.evaluate(() => ({
+      note: document.querySelector('#oa-prefill-note').hidden,
+      text: document.querySelector('#a-text').value,
+      name: document.querySelector('#a-name').value }));
+    ok(again.note && again.text === '' && again.name === '',
+      'save-search: a reload after the form was filled starts clean');
+    eq(errors, [], 'save-search: signed-in run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- arriving signed OUT on the alerts page keeps the prefill ------------ */
+  {
+    const { ctx, page: q, errors } = await signedOutPage(
+      `alerts.html?prefill=1&level=${enc(LEVEL)}&dropped=chars`, { wait: false });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForSelector('#oa-needauth:not([hidden])', { timeout: 15000 });
+    const held = await q.evaluate(() => ({ search: location.search,
+      stash: sessionStorage.getItem('oaAlertPrefill'),
+      note: document.querySelector('#oa-prefill-note').hidden }));
+    ok(!/prefill/.test(held.search), 'save-search: signed out, the address is stripped on arrival');
+    ok(!!held.stash && held.note,
+      'save-search: …the prefill is held, and nothing is drawn for a reader who cannot see the form');
+    /* the reader signs in: the shim signs whoever the seed names, so the seed
+       is given the reader first (the gate block's own trick) */
+    await q.evaluate((u) => {
+      window.__FAKE_FB.user = u;
+      return window.OAFB.ready().then((fb) => fb.auth().signInWithPopup({}));
+    }, A_READER);
+    await q.waitForSelector('#oa-prefill-note:not([hidden])', { timeout: 15000 });
+    const after = await q.evaluate((level) => ({
+      level: ([...document.querySelectorAll('#a-level input')].find((n) => n.value === level) || {}).checked,
+      stash: sessionStorage.getItem('oaAlertPrefill'),
+      note: document.querySelector('#oa-prefill-note').textContent }), LEVEL);
+    eq(after.level, true, 'save-search: …and signing in fills the form from it');
+    ok(/characteristics/.test(after.note) && after.stash === null,
+      'save-search: …note and all, spent once');
+    eq(errors, [], 'save-search: alerts-page run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a phone: full width, stacked under the download, one shape --------- */
+  {
+    const { ctx, page: q } = await signedInPage(SEARCH, { viewport: { width: 390, height: 850 } });
+    const m = await q.evaluate(() => {
+      const b = document.querySelector('.oa-alert-save'), x = document.querySelector('.oa-export');
+      const r = b.getBoundingClientRect(), xr = x.getBoundingClientRect();
+      const bar = document.querySelector('.oa-filters').getBoundingClientRect();
+      return { h: Math.round(r.height), w: Math.round(r.width), barW: Math.round(bar.width),
+        gap: Math.round(r.top - xr.bottom), shape: getComputedStyle(b).borderRadius,
+        expShape: getComputedStyle(x).borderRadius, expW: Math.round(xr.width),
+        over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(m.h >= 40, `save-search at 390px: a 40px+ target (${m.h}px)`);
+    ok(m.w > m.barW * 0.7 && m.w === m.expW,
+      'save-search at 390px: full width, the same width as the download');
+    ok(m.gap >= 6, `save-search at 390px: stacked under the download with room (${m.gap}px)`);
+    eq(m.shape, m.expShape, 'save-search at 390px: …and the same shape as it');
+    ok(m.over <= 1, 'save-search at 390px: the page still does not scroll sideways');
+    await ctx.close();
+  }
 }
 
 /* ------------------------------------------------------------------ done */
