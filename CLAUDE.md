@@ -1910,10 +1910,38 @@ as behind the button.
 stale checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
 
+**Where the browser keeps it, so nobody looks in the wrong place.**
+`needsVerification(u)` is the one test (unconfirmed address AND the password
+provider); the auth handler sets `state.pending` from it and takes the
+pending branch before anything a session does; `enterSession(u, fb)` is what
+a usable session does on arrival, factored out because the lift
+(`liftVerification`) has to do the same list later and two copies would
+drift. The registration form no longer writes the signed-in hint for a
+password account; it opens the card and calls `sendVerification` with the
+user it just created, because the auth event may not have fired yet. The
+Functions SDK is loaded lazily by `OAFB.readyFunctions()`, the way Storage
+is, so the ~30 KB bundle costs only the page that presses the button. The
+verify page marks its `<main>` with `data-oa-verify-page`, which is how the
+accounts module knows not to draw the card over it. The header chip while
+pending is `.oa-acct-pending`, styled in BOTH `oa-ui.css` and `v3.css` (the
+live design overrides the engine's rule at a higher specificity, the Excel
+button's lesson). And `_scraper/_fake-firebase.js` makes every seeded user
+VERIFIED by default, so every browser check written before the gate keeps a
+verified reader; an unverified password account is a seed that says so.
+
 Tests: `testEmailVerification` in `_scraper/selftest.mjs` (the message, the
 rules with the exception, the function's secrets and what it never logs, the
-package and lockfile, the setup page and this section), plus the browser
-half in `_scraper/page-test.mjs`.
+package and lockfile, the setup page and this section, then the browser
+half's source: the exports, the callable-first send with Firebase's message
+as the fallback, `user()` null while pending, the reload-then-token lift,
+the verify page noindex with both tags and no preview block, the two
+registries, the copy on the FAQ and the Privacy Policy, the changelog entry
+at index 0, and the shim's defaults), plus the block in
+`_scraper/page-test.mjs`, which drives it in a real browser: the pending
+session on the jobs page (locked cards, the chip, the card, no hint and no
+writes), Send again reaching the callable and falling back when it is
+absent, "I have verified it" lifting the gate with a fresh token, and the
+verify page's four cards for both readers, at 390px too.
 
 ## What "immediate" costs, and where the waiting used to be
 

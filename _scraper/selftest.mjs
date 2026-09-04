@@ -12239,15 +12239,195 @@ async function testEmailVerification() {
   ok(/sendVerificationEmail/.test(instant) && /\bfive\b/i.test(instant),
     'the instant-publish page counts five now, so the deploy check there is not stale');
 
-  /* --- FRONTEND PINS ------------------------------------------------------
-     The browser half (assets/oa-accounts.js, assets/oa-firebase.js,
-     verify-email.html, assets/oa-verify.js, the copy on index.html and
-     privacy-policy.html, the changelog entry) is built after this and pinned
-     HERE: needsVerification and sendVerification exported, the callable
-     tried first and sendEmailVerification as the fallback, user() null while
-     pending, the verify page noindex with both tags and no og:*, listed in
-     NOINDEX_OK and share-check PAGES, the register note, the FAQ and policy
-     sentences, and the changelog entry at index 0. */
+  /* --- the browser half: the accounts module --------------------------- */
+
+  const acct = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  ok(/function needsVerification\(u\) \{\s*return !!\(u && u\.emailVerified === false && hasProvider\('password', u\)\);/.test(acct),
+    'accounts: needsVerification is an unconfirmed address on the PASSWORD provider and nothing else ' +
+    '(an ORCID sign-in carries no e-mail claim and would be locked out for ever)');
+  for (const name of ['needsVerification', 'sendVerification', 'confirmVerified', 'pendingUser', 'openVerifyPanel', 'friendly']) {
+    ok(new RegExp(`^\\s+${name}: `, 'm').test(acct), `accounts: ${name} is exported, for the verify page and the browser checks`);
+  }
+  ok(/user: function \(\) \{ return state\.pending \? null : state\.user; \}/.test(acct),
+    'accounts: user() answers null while the address is unconfirmed, so every page treats the account as signed out');
+  ok(/pendingUser: function \(\) \{ return state\.pending \? state\.user : null; \}/.test(acct),
+    'accounts: pendingUser() is the one export that can see the unconfirmed account');
+  ok(/return state\.user && !state\.pending \? 'in' : 'out';/.test(acct),
+    'accounts: hint() answers out while pending, so the gate locks from the first paint');
+  ok(/if \(state\.resolved\) fn\(state\.pending \? null : state\.user\);/.test(acct),
+    'accounts: a listener registered while pending hears null');
+  /* the pending branch of the auth handler: no hint, no session, listeners told null */
+  const pendAt = acct.indexOf('state.pending = needsVerification(u);');
+  const pendEnd = acct.indexOf('return;', acct.indexOf('notify(null);', pendAt));
+  ok(pendAt > 0 && pendEnd > pendAt, 'accounts: the auth handler has a pending branch');
+  const pendBranch = acct.slice(pendAt, pendEnd + 'return;'.length);
+  ok(pendBranch.length > 100 && pendBranch.length < 1400, 'accounts: the pending branch was really sliced');
+  ok(/writeHint\(null\)/.test(pendBranch) && /return;/.test(pendBranch)
+     && !/enterSession\(/.test(pendBranch) && !/loadProfile\(/.test(pendBranch),
+    'accounts: while pending the hint is CLEARED and the session is never entered (no profile read, no roster row, no tally)');
+  ok(/openVerifyPanel\(\)/.test(pendBranch),
+    'accounts: …and the "Check your inbox" card opens instead');
+  ok(/function enterSession\(u, fb\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
+     && (acct.match(/enterSession\(u, fb\)/g) || []).length >= 3,
+    'accounts: everything a usable session does on arrival is ONE function, shared by the auth handler and the lift');
+  /* the registration path no longer seeds the hint */
+  const regAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value');
+  const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
+  ok(regAt > 0 && regEnd > regAt, 'accounts: the registration path was found');
+  const reg = acct.slice(regAt, regEnd);
+  ok(reg.length > 500 && reg.length < 3000, 'accounts: the registration slice is the right size');
+  ok(!/writeHint\(u, first/.test(reg), 'accounts: registering with a password no longer writes the signed-in hint');
+  ok(/openVerifyPanel\('sent', created\)/.test(reg) && /sendVerification\(created\)/.test(reg),
+    'accounts: …it opens the card and sends the message instead of finishing the sign-in');
+  ok(/needsVerification\(created\)/.test(reg) && /finish\(true\)/.test(reg),
+    'accounts: …and only for an account that needs it (a provider that arrives verified still lands on the personal area)');
+  /* the send: the callable FIRST, Firebase's own message as the fallback */
+  ok(/OAFB\.readyFunctions\(\)/.test(acct) && /fb\.functions\(\)\.httpsCallable\('sendVerificationEmail'\)\(\{\}\)/.test(acct),
+    'accounts: sendVerification calls the site\'s own function first, by the name the function exports');
+  for (const c of ['functions/not-found', 'functions/unavailable', 'functions/internal']) {
+    ok(acct.includes(`'${c}'`), `accounts: ${c} is a reason to fall back`);
+  }
+  ok(/'functions\/resource-exhausted'/.test(acct) && /throttled: true/.test(acct)
+     && /sent a moment ago/.test(acct),
+    'accounts: a throttled send is reported as such, never re-sent through Firebase');
+  ok(/u\.sendEmailVerification\(\{ url: SITE \+ '\/verify-email\.html' \}\)/.test(acct)
+     && /var SITE = 'https:\/\/www\.operationsacademia\.org';/.test(acct),
+    'accounts: the fallback is Firebase\'s own message, landing on the site\'s verify page (an authorised domain, never location.origin)');
+  ok(acct.indexOf("httpsCallable('sendVerificationEmail')") < acct.indexOf('return fallback();'),
+    'accounts: …and it is the fallback, tried after the function');
+  ok(/sdk-load-failed/.test(acct.slice(acct.indexOf('function sendVerification'), acct.indexOf('function confirmVerified'))),
+    'accounts: a Functions SDK that failed to load falls back too');
+  /* the lift refreshes the TOKEN */
+  const liftSrc = acct.slice(acct.indexOf('function confirmVerified'), acct.indexOf('function liftVerification'));
+  ok(liftSrc.length > 200 && liftSrc.length < 1500, 'accounts: confirmVerified was really sliced');
+  ok(/u\.reload\(\)/.test(liftSrc) && /u\.getIdToken\(true\)/.test(liftSrc)
+     && liftSrc.indexOf('u.reload()') < liftSrc.indexOf('u.getIdToken(true)'),
+    'accounts: confirming reloads the user and THEN forces a fresh ID token, or the rules go on reading it unverified');
+  ok(/if \(needsVerification\(u\)\) return false;/.test(liftSrc) && /liftVerification\(u\);/.test(liftSrc),
+    'accounts: …and lifts the gate only when the reload says the address is confirmed');
+  /* the card */
+  ok(/<h3 id="oa-verify-h">Check your inbox<\/h3>/.test(acct)
+     && /id="oa-verify-send">Send the e-mail again</.test(acct)
+     && /id="oa-verify-check">I have verified it</.test(acct)
+     && /id="oa-verify-out">Use a different account</.test(acct)
+     && /Look in spam too\. The message comes from ' \+\s*VERIFY_SENDER/.test(acct)
+     && /VERIFY_SENDER = 'operationsacademia@gmail\.com'/.test(acct),
+    'accounts: the card carries its heading, its three controls and the spam line naming the sender');
+  ok(/document\.querySelector\('\[data-oa-verify-page\]'\)\) return;/.test(acct),
+    'accounts: the card is never drawn over the verify page, which confirms the address itself');
+  ok(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/.test(acct)
+     && (acct.match(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/g) || []).length >= 3,
+    'accounts: openAuth, whenSignedIn and openProfile all open the card for a pending account');
+  ok(/class="oa-acct-btn oa-acct-pending" id="oa-verify-chip"[^>]*>Verify your e-mail</.test(acct)
+     && /id="oa-np-verify" href="#">Verify your e-mail</.test(acct),
+    'accounts: the header chip and the phone sheet both read "Verify your e-mail" while pending');
+  ok(/state\.pending = false;\s*closeVerifyPanel\(\);/.test(acct.slice(acct.indexOf('function signOut'))),
+    'accounts: signing out (Use a different account) clears the pending state and the card');
+  ok(/'auth\/expired-action-code'/.test(acct) && /'auth\/invalid-action-code'/.test(acct)
+     && /That link has expired/.test(acct) && /not valid any more/.test(acct),
+    'accounts: friendly() explains both answers a link can come back with');
+  ok(/We will e-mail you a link to ' \+\s*'confirm your address\. Nothing works until you click it\./.test(acct),
+    'accounts: the register form says, under its button, that a link is coming and nothing works until it is clicked');
+  const verifyBlock = acct.slice(acct.indexOf('E-MAIL VERIFICATION (owner, 2026-09-04)'), acct.indexOf('DUPLICATE ACCOUNTS'));
+  ok(acct.indexOf('DUPLICATE ACCOUNTS') < acct.indexOf('var MERGE_APP'), 'accounts: the merge comment still heads the merge region');
+  ok(verifyBlock.length > 3000, 'accounts: the verification block sits before the merge region, which is byte-pinned against /v2/');
+  ok(noDash(verifyBlock), 'accounts: no em dash in the verification block');
+
+  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
+  ok(/readyFunctions: function \(\)/.test(fbjs) && /SDK \+ 'firebase-functions-compat\.js'/.test(fbjs),
+    'oa-firebase.js loads the Functions SDK lazily, the way it loads Storage');
+  ok(/if \(fb\.functions\) resolve\(fb\);\s*else reject\(new Error\('firebase-sdk-load-failed'\)\);/.test(fbjs),
+    '…and a bundle that loaded and defined nothing is a load failure, which is the fallback branch');
+
+  /* the pending control is styled in BOTH stylesheets, ink named with the ground */
+  for (const [file, rx] of [
+    ['assets/oa-ui.css', /\.oa-acct-btn\.oa-acct-pending \{[^}]*border-color: var\(--err[^}]*color: var\(--err[^}]*background: var\(--err-soft/],
+    ['assets/v3.css', /body\.v3 \.oa-acct-btn\.oa-acct-pending \{[^}]*border-color: var\(--err\);[^}]*color: var\(--err\);[^}]*background: var\(--err-soft\);/],
+  ]) {
+    const css = await readFile(path.join(root, file), 'utf8');
+    ok(rx.test(css), `${file} styles the pending chip in the error hue, ink and ground together`);
+  }
+
+  /* --- the verify page ---------------------------------------------------- */
+
+  const vpage = await readFile(path.join(root, 'verify-email.html'), 'utf8');
+  ok(/<meta name="robots" content="noindex,nofollow">/.test(vpage), 'verify page: noindex');
+  ok(!/property="og:/.test(vpage) && !/name="twitter:/.test(vpage) && !/rel="image_src"/.test(vpage),
+    'verify page: no preview block at all (an og:url on it would claim an identity nobody should share)');
+  const firstTag = /<head[^>]*>\s*(<[^>]+>)/i.exec(vpage);
+  ok(firstTag && /^<meta\s+charset=/i.test(firstTag[1]), 'verify page: <meta charset> is the first element in <head>');
+  ok(vpage.includes('assets/oa-ga4.js') && vpage.includes('assets/oa-visit.js'),
+    'verify page: carries the GA4 tag and the visit ping like every served page');
+  ok(/<a class="v3-skip" href="#main">/.test(vpage) && /<main id="main" data-oa-verify-page>/.test(vpage),
+    'verify page: a skip link to a main that carries the attribute the accounts module reads');
+  const scripts = [...vpage.matchAll(/<script (defer )?src="([^"]+)"/g)];
+  ok(scripts.length >= 6 && scripts.every((m) => m[1] === 'defer '),
+    'verify page: every script tag is deferred');
+  const order = scripts.map((m) => m[2]);
+  ok(order.indexOf('assets/oa-verify.js') > order.indexOf('assets/oa-accounts.js')
+     && order.indexOf('assets/oa-accounts.js') > order.indexOf('assets/oa-firebase.js'),
+    'verify page: oa-verify.js loads after the accounts module, which loads after the Firebase config');
+  for (const id of ['ve-wait', 've-done', 've-error', 've-nocode', 've-continue', 've-signin', 've-resend', 've-error-hint', 've-nocode-signin']) {
+    ok(vpage.includes(`id="${id}"`), `verify page: carries #${id}`);
+  }
+  ok(/Your e-mail address is verified/.test(vpage) && /Continue to your account/.test(vpage)
+     && /Send me a new link/.test(vpage) && /That link did not work/.test(vpage),
+    'verify page: the four states carry the owner\'s wording');
+  ok(/id="ve-continue" href="account\.html"/.test(vpage), 'verify page: Continue goes to the account page');
+  ok(noDash(vpage), 'verify page: no em dash');
+  ok(!/&mdash;/.test(vpage), 'verify page: …not as an entity either');
+
+  const vjs = await readFile(path.join(root, 'assets', 'oa-verify.js'), 'utf8');
+  ok(/fb\.auth\(\)\.applyActionCode\(code\)/.test(vjs) && /mode === 'verifyEmail' && code/.test(vjs),
+    'oa-verify.js applies the code the address carries, on mode=verifyEmail');
+  ok(/A\.confirmVerified\(\)/.test(vjs) && /A\.sendVerification\(\)/.test(vjs) && /A\.friendly\(err\)/.test(vjs)
+     && /A\.needsVerification\(p\)/.test(vjs) && /A\.pendingUser\(\)/.test(vjs),
+    'oa-verify.js goes through the accounts module for the lift, the resend, the wording and the pending account');
+  ok(!/\bfirebase\.functions\b|sendEmailVerification/.test(vjs),
+    'oa-verify.js sends nothing itself, so the page and the card cannot drift on how a message goes');
+  ok(/params\.get\('oobCode'\)/.test(vjs), 'oa-verify.js reads the code off the query string');
+  ok(noDash(vjs), 'oa-verify.js: no em dash');
+
+  const lc = await readFile(path.join(HERE, 'link-check.mjs'), 'utf8');
+  ok(/NOINDEX_OK = new Set\(\[[\s\S]*?'verify-email\.html',[\s\S]*?\]\)/.test(lc),
+    'link-check names verify-email.html as a live page that chooses noindex, with its reason');
+  const sc = await readFile(path.join(HERE, 'share-check.mjs'), 'utf8');
+  ok(/file: 'verify-email\.html', card: false,\s*why: '[^']{40,}'/.test(sc),
+    'share-check lists verify-email.html card: false, with a reason');
+  const sitemap = await readFile(path.join(root, 'sitemap.xml'), 'utf8');
+  ok(!/verify-email\.html/.test(sitemap),
+    'the sitemap does not list it, like the other sign-in-only shells');
+
+  /* --- the copy, the changelog, the shim ----------------------------------- */
+
+  const home = await readFile(path.join(root, 'index.html'), 'utf8');
+  ok(/we first e-mail you a\s+link to confirm that the address is yours, and nothing on the site works for the\s+new account until you click it/.test(home),
+    'the FAQ says a password registration is confirmed by a link first, and that nothing works until it is clicked');
+  ok(/Signing in with Google needs no extra step/.test(home), '…and that Google needs no extra step');
+  const policy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/If you register with an e-mail address and a password, we send that address\s+<strong>one<\/strong> message, from operationsacademia@gmail\.com/.test(policy)
+     && /The account cannot be used until the link is clicked/.test(policy),
+    'the Privacy Policy records the verification message: one, from the site\'s address, and what it gates');
+
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  eq([log[0].id, log[0].date], ['email-verification-2026-09', '2026-09-04'],
+    'the changelog entry sits at index 0 with the agreed id and date');
+  ok(/e-mail address and a password/.test(log[0].summary) && /Google/.test(log[0].summary) && noDash(log[0].title + log[0].summary),
+    '…and says what changed, for both kinds of sign-in, with no em dash');
+
+  const shim = await readFile(path.join(HERE, '_fake-firebase.js'), 'utf8');
+  ok(/Object\.assign\(\{ emailVerified: true, providerData: \[\{ providerId: 'google\.com' \}\] \}, spec\)/.test(shim),
+    'the fake Firebase user is VERIFIED by default, so every existing browser check keeps a verified reader');
+  for (const fn of ['reload', 'getIdToken', 'sendEmailVerification', 'applyActionCode', 'httpsCallable']) {
+    ok(new RegExp(`\\b${fn}\\b`).test(shim), `…and the shim records ${fn}`);
+  }
+  ok(/seed\.reloadVerifies/.test(shim) && /seed\.callableFails/.test(shim) && /seed\.applyActionCodeFails/.test(shim),
+    '…with the switches the browser checks drive the failure branches through');
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  ok(/e-mail verification on registration/.test(pt) && /callableFails: 'functions\/not-found'/.test(pt)
+     && /applyActionCodeFails: 'auth\/expired-action-code'/.test(pt) && /reloadVerifies: true/.test(pt)
+     && /'Verify your e-mail'/.test(pt) && /verify-email\.html\?mode=verifyEmail&oobCode=/.test(pt),
+    'page-test.mjs drives the pending session, the fallback, the lift and the verify page in a real browser');
 }
 
 if (isMain(import.meta.url)) {

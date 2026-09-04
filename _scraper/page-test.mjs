@@ -174,8 +174,10 @@ async function signedInPage(url, opts = {}) {
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
   const who = ('user' in opts) ? opts.user : A_READER;   // null = signed out
+  /* `seed` carries the shim's own switches (reloadVerifies, callableFails,
+     applyActionCodeFails …) for the checks that drive a failure branch */
   await p.addInitScript(
-    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [] })};`);
+    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [], ...(opts.seed || {}) })};`);
   await p.route('**/firebasejs/**', (r) =>
     r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_FB }));
   await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
@@ -7675,6 +7677,319 @@ for (const w of [320, 360, 390, 430]) {
     'closing: the card\'s summary line names the reminder and its filter');
   eq(errors, [], 'closing: no script errors on the alerts page');
   await ctx.close();
+}
+
+/* ------------------------------ e-mail verification on registration
+
+   Owner, 2026-09-04: an account registered with an e-mail address and a
+   password must press a link in a message before it can be used. The rules
+   enforce it (verified() in _firestore.rules, pinned in selftest.mjs); what
+   is measured HERE is what the BROWSER does with an unverified password
+   account: it is signed out for everything but the "Check your inbox" card,
+   the card's buttons reach the callable first and Firebase's own message
+   when the callable is absent, "I have verified it" lifts the gate, and the
+   page the link opens (verify-email.html) shows the right one of its four
+   cards. The shim stands in for the SDK (_fake-firebase.js: reload,
+   getIdToken, sendEmailVerification, applyActionCode and httpsCallable are
+   all recorded), so every path is driven rather than read off the source. */
+{
+  const UNVERIFIED = { uid: 'unverified-uid-00001', email: 'newcomer@example.edu',
+    displayName: '', emailVerified: false, providerData: [{ providerId: 'password' }] };
+
+  /* -- jobs.html: the pending session is signed out for everything but the card -- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html', { user: UNVERIFIED });
+    await q.waitForSelector('#oa-verify-chip', { timeout: 15000 });
+    await q.waitForTimeout(400);
+    const st = await q.evaluate(() => {
+      const panel = document.querySelector('#oa-verify');
+      const cards = [...document.querySelectorAll('#oa-jobs .oa-card')];
+      return {
+        chip: (document.querySelector('#oa-verify-chip') || {}).textContent,
+        chipPending: !!document.querySelector('#oa-verify-chip.oa-acct-pending'),
+        nameChip: !!document.querySelector('#oa-chip'),
+        panel: !!panel,
+        heading: panel ? panel.querySelector('h3').textContent : '',
+        lede: panel ? panel.querySelector('.oa-modal-lede').textContent : '',
+        text: panel ? panel.textContent : '',
+        send: !!(panel && panel.querySelector('#oa-verify-send')),
+        check: !!(panel && panel.querySelector('#oa-verify-check')),
+        out: !!(panel && panel.querySelector('#oa-verify-out')),
+        cards: cards.length,
+        locked: cards.filter((c) => c.classList.contains('oa-card-locked')).length,
+        auth: document.documentElement.getAttribute('data-oa-auth'),
+        hint: localStorage.getItem('oaAuthHint'),
+        user: window.OAAccounts.user(),
+        hintFn: window.OAAccounts.hint(),
+        pending: (window.OAAccounts.pendingUser() || {}).uid,
+        needs: window.OAAccounts.needsVerification(),
+        writes: window.__fb.ops('set').filter((p) => /^(registeredUsers|userDirectory|accountKeys)\//.test(p)),
+        profileRead: window.__fb.ops('get').filter((p) => /^profiles\//.test(p)),
+      };
+    });
+    eq(st.chip, 'Verify your e-mail', 'verify: the header chip says what the account has to do');
+    ok(st.chipPending && !st.nameChip,
+      'verify: …in its own pending state, and no name chip is painted for an unusable account');
+    ok(st.panel && st.heading === 'Check your inbox',
+      'verify: the "Check your inbox" card opens on its own');
+    ok(st.lede.includes(UNVERIFIED.email) && /Operations Academia/.test(st.lede),
+      'verify: …naming the address, and that a message from Operations Academia is on its way');
+    ok(st.send && st.check && st.out,
+      'verify: …with Send the e-mail again, I have verified it, and a way out');
+    ok(/spam/i.test(st.text) && /operationsacademia@gmail\.com/.test(st.text),
+      'verify: …and says to look in spam, naming the sender');
+    ok(st.cards > 1 && st.locked === st.cards,
+      `verify: every card on the jobs page is LOCKED for the pending account (${st.locked} of ${st.cards})`);
+    eq([st.user, st.hintFn, st.auth], [null, 'out', 'out'],
+      'verify: user() is null, hint() is out, and the head reserve reads out');
+    eq(st.hint, null, 'verify: no localStorage hint is written, so the next page cannot paint it signed in');
+    eq(st.pending, UNVERIFIED.uid, 'verify: pendingUser() is the one export that can see the account');
+    ok(st.needs === true, 'verify: needsVerification() says so');
+    eq(st.writes, [], 'verify: no roster row, no tally and no identity key is written while pending');
+    eq(st.profileRead, [], 'verify: …and the profile is not read either');
+
+    /* Send again: the callable FIRST, and only that */
+    await q.click('#oa-verify-send');
+    await q.waitForFunction(() => window.__fb.at('callable', 'sendVerificationEmail') >= 0,
+      null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const sent = await q.evaluate((uid) => ({
+      callable: window.__fb.at('callable', 'sendVerificationEmail'),
+      fallback: window.__fb.at('sendEmailVerification', uid),
+      msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+    }), UNVERIFIED.uid);
+    ok(sent.callable >= 0 && sent.fallback < 0,
+      'verify: Send again calls the site\'s own function and NOT Firebase\'s message');
+    ok(/Sent to newcomer@example\.edu/.test(sent.msg), 'verify: …and the card says it went');
+
+    /* I have verified it, while it has not been: the gate holds */
+    await q.click('#oa-verify-check');
+    await q.waitForTimeout(400);
+    const held = await q.evaluate(() => ({
+      reload: window.__fb.at('reload', 'unverified-uid-00001'),
+      panel: !!document.querySelector('#oa-verify'),
+      msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+      user: window.OAAccounts.user(),
+    }));
+    ok(held.reload >= 0 && held.panel && held.user === null && /Not confirmed yet/.test(held.msg),
+      'verify: "I have verified it" reloads the user, and holds the gate while the address is still unconfirmed');
+    eq(errors, [], 'verify: no uncaught script error on the pending jobs page');
+    await ctx.close();
+  }
+
+  /* -- the callable is absent: Firebase's own message is the fallback ------ */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/not-found' } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction((uid) => window.__fb.at('sendEmailVerification', uid) >= 0,
+      UNVERIFIED.uid, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const fb = await q.evaluate((uid) => {
+      const rec = window.__fb.log.find((e) => e.op === 'sendEmailVerification' && e.path === uid);
+      return {
+        callable: window.__fb.at('callable', 'sendVerificationEmail'),
+        fallback: window.__fb.at('sendEmailVerification', uid),
+        url: rec && rec.data && rec.data.url,
+        from: (document.querySelector('#oa-verify-from') || {}).textContent,
+        msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+      };
+    }, UNVERIFIED.uid);
+    ok(fb.callable >= 0 && fb.fallback > fb.callable,
+      'verify: with the function not deployed, the card tries it and then FALLS BACK to sendEmailVerification');
+    eq(fb.url, 'https://www.operationsacademia.org/verify-email.html',
+      'verify: …landing Firebase\'s own link on the site\'s verify page');
+    ok(/firebaseapp\.com/.test(fb.from) && /Sent to/.test(fb.msg),
+      'verify: …and the sender line then names Firebase\'s address, so the reader knows what to look for');
+    eq(errors, [], 'verify: no uncaught script error on the fallback path');
+    await ctx.close();
+  }
+
+  /* -- "I have verified it", once the link HAS been pressed: the lift ------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { reloadVerifies: true } });
+    await q.waitForSelector('#oa-verify-check', { timeout: 15000 });
+    await q.click('#oa-verify-check');
+    await q.waitForSelector('#oa-chip', { timeout: 15000 });
+    await q.waitForTimeout(500);
+    const lifted = await q.evaluate((uid) => ({
+      panel: !!document.querySelector('#oa-verify'),
+      pendingChip: !!document.querySelector('#oa-verify-chip'),
+      locked: document.querySelectorAll('#oa-jobs .oa-card-locked').length,
+      auth: document.documentElement.getAttribute('data-oa-auth'),
+      hint: (JSON.parse(localStorage.getItem('oaAuthHint') || 'null') || {}).uid,
+      user: (window.OAAccounts.user() || {}).uid,
+      token: window.__fb.at('getIdToken', uid + ':force'),
+      reload: window.__fb.at('reload', uid),
+      tally: window.__fb.ops('set').some((p) => p === 'registeredUsers/' + uid),
+    }), UNVERIFIED.uid);
+    ok(!lifted.panel && !lifted.pendingChip,
+      'verify: once confirmed, the card closes and the pending chip goes');
+    eq(lifted.locked, 0, 'verify: …every card unlocks');
+    eq([lifted.auth, lifted.hint, lifted.user], ['in', UNVERIFIED.uid, UNVERIFIED.uid],
+      'verify: …the session is an ordinary signed-in one: hint written, reserve in, user() answers');
+    ok(lifted.token > lifted.reload,
+      'verify: the lift refreshes the ID TOKEN after the reload, or the rules still read it unverified');
+    ok(lifted.tally, 'verify: …and the session then does what a sign-in does (the tally is written)');
+    eq(errors, [], 'verify: no uncaught script error on the lift');
+    await ctx.close();
+  }
+
+  /* -- verify-email.html: where the link lands ------------------------------ */
+  const LINK = 'verify-email.html?mode=verifyEmail&oobCode=AbC123xyz&continueUrl=' +
+    encodeURIComponent('https://www.operationsacademia.org/account.html');
+
+  {
+    // the signed-in pending reader, whose link works
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.waitForTimeout(300);
+    const done = await q.evaluate((uid) => ({
+      h2: document.querySelector('#ve-done h2').textContent,
+      cont: document.querySelector('#ve-continue'),
+      contShown: !document.querySelector('#ve-continue').hidden,
+      contHref: document.querySelector('#ve-continue').getAttribute('href'),
+      signinShown: !document.querySelector('#ve-signin').hidden,
+      applied: window.__fb.log.find((e) => e.op === 'applyActionCode'),
+      reload: window.__fb.at('reload', uid),
+      panel: !!document.querySelector('#oa-verify'),
+      chip: !!document.querySelector('#oa-chip'),
+      user: (window.OAAccounts.user() || {}).uid,
+      others: ['ve-wait', 've-error', 've-nocode'].filter((id) => !document.getElementById(id).hidden),
+    }), UNVERIFIED.uid);
+    eq(done.h2, 'Your e-mail address is verified', 'verify page: a working link shows the verified state');
+    ok(done.contShown && done.contHref === 'account.html' && !done.signinShown,
+      'verify page: …with Continue to your account for the signed-in reader');
+    ok(done.applied && done.applied.path === 'AbC123xyz',
+      'verify page: the code on the address is the one applied');
+    ok(done.reload >= 0 && done.user === UNVERIFIED.uid && done.chip,
+      'verify page: the pending account is reloaded and lifted, so the chip shows the name');
+    ok(!done.panel, 'verify page: the "Check your inbox" card is never drawn over this page');
+    eq(done.others, [], 'verify page: the other three cards stay hidden');
+    eq(errors, [], 'verify page: no uncaught script error');
+    await ctx.close();
+  }
+  {
+    // a reader with no session at all (the commonest case: the link opened in
+    // another browser) still gets the confirmation, and a way to sign in
+    const { ctx, page: q, errors } = await signedOutPage(LINK, { selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    const out = await q.evaluate(() => ({
+      contShown: !document.querySelector('#ve-continue').hidden,
+      signinShown: !document.querySelector('#ve-signin').hidden,
+    }));
+    ok(!out.contShown && out.signinShown, 'verify page: signed out, the verified state offers Sign in instead');
+    await q.click('#ve-signin');
+    await q.waitForSelector('#oa-auth', { timeout: 8000 });
+    ok(true, 'verify page: …which opens the sign-in box');
+    eq(errors, [], 'verify page: no uncaught script error signed out');
+    await ctx.close();
+  }
+  {
+    // an expired link, with the unconfirmed account signed in: say what
+    // happened, and offer a new one that goes through the same send path
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { applyActionCodeFails: 'auth/expired-action-code' }, selector: '#main' });
+    await q.waitForSelector('#ve-error', { state: 'visible', timeout: 15000 });
+    const err = await q.evaluate(() => ({
+      why: document.querySelector('#ve-error-why').textContent,
+      resendShown: !document.querySelector('#ve-resend').hidden,
+      hintShown: !document.querySelector('#ve-error-hint').hidden,
+      done: !document.getElementById('ve-done').hidden,
+      panel: !!document.querySelector('#oa-verify'),
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent,
+    }));
+    ok(/expired/i.test(err.why) && !err.done, 'verify page: an expired link says so, in the accounts module\'s words');
+    ok(err.resendShown && !err.hintShown, 'verify page: …and offers "Send me a new link" to the unconfirmed account');
+    ok(!err.panel && err.chip === 'Verify your e-mail',
+      'verify page: the account stays pending (chip), and still no card over the page');
+    await q.click('#ve-resend');
+    await q.waitForFunction(() => window.__fb.at('callable', 'sendVerificationEmail') >= 0,
+      null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    ok(/Sent to newcomer@example\.edu/.test(await q.$eval('#ve-msg', (n) => n.textContent)),
+      'verify page: pressing it sends through the same function the card uses, and says so');
+    eq(errors, [], 'verify page: no uncaught script error on the expired path');
+    await ctx.close();
+  }
+  {
+    // an invalid link, signed out: no account to resend for, so say what to do
+    const { ctx, page: q, errors } = await signedOutPage(LINK,
+      { seed: { applyActionCodeFails: 'auth/invalid-action-code' }, selector: '#main' });
+    await q.waitForSelector('#ve-error', { state: 'visible', timeout: 15000 });
+    const err = await q.evaluate(() => ({
+      why: document.querySelector('#ve-error-why').textContent,
+      resendShown: !document.querySelector('#ve-resend').hidden,
+      hint: document.querySelector('#ve-error-hint'),
+      hintShown: !document.querySelector('#ve-error-hint').hidden,
+      hintText: document.querySelector('#ve-error-hint').textContent,
+    }));
+    ok(/not valid any more/.test(err.why), 'verify page: an invalid link says so');
+    ok(!err.resendShown && err.hintShown && /sign in with your e-mail/i.test(err.hintText),
+      'verify page: …and, signed out, says to sign in with the e-mail and password to get a new one');
+    eq(errors, [], 'verify page: no uncaught script error on the invalid path');
+    await ctx.close();
+  }
+  {
+    // no code at all: Firebase's own fallback handler applies the code and
+    // then lands here, so a pending account is reloaded and shown verified
+    const { ctx, page: q, errors } = await signedInPage('verify-email.html',
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    const nc = await q.evaluate((uid) => ({
+      applied: window.__fb.log.some((e) => e.op === 'applyActionCode'),
+      reload: window.__fb.at('reload', uid),
+      user: (window.OAAccounts.user() || {}).uid,
+    }), UNVERIFIED.uid);
+    ok(!nc.applied && nc.reload >= 0 && nc.user === UNVERIFIED.uid,
+      'verify page: with no code, a signed-in account is reloaded rather than refused, and lifted');
+    eq(errors, [], 'verify page: no uncaught script error with no code, signed in');
+    await ctx.close();
+  }
+  {
+    // no code, signed out: a short explanation and a Sign in button
+    const { ctx, page: q, errors } = await signedOutPage('verify-email.html', { selector: '#main' });
+    await q.waitForSelector('#ve-nocode', { state: 'visible', timeout: 15000 });
+    const nc = await q.evaluate(() => ({
+      why: document.querySelector('#ve-nocode-why').textContent,
+      signin: !document.querySelector('#ve-nocode-signin').hidden,
+      resend: !document.querySelector('#ve-nocode-resend').hidden,
+    }));
+    ok(/link in the message/.test(nc.why) && nc.signin && !nc.resend,
+      'verify page: with no code and no session, it explains itself and offers Sign in');
+    eq(errors, [], 'verify page: no uncaught script error with no code, signed out');
+    await ctx.close();
+  }
+
+  /* -- the 390px gate for the new page, both readers ------------------------ */
+  for (const [label, opts] of [
+    ['signed out', { user: null }],
+    ['pending', { user: UNVERIFIED, seed: { applyActionCodeFails: 'auth/expired-action-code' } }],
+  ]) {
+    const { ctx, page: m, errors } = await signedInPage(LINK,
+      { ...opts, selector: '#main', viewport: { width: 390, height: 844 } });
+    await m.waitForFunction(() => document.getElementById('ve-wait').hidden, null, { timeout: 15000 });
+    await m.waitForTimeout(300);
+    const r = await m.evaluate(() => {
+      const btns = [...document.querySelectorAll('#main .v3-btn')]
+        .filter((b) => !b.hidden && b.getBoundingClientRect().height > 0);
+      return {
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        buttons: btns.length,
+        short: btns.filter((b) => b.getBoundingClientRect().height < 42).map((b) => b.id),
+        wide: btns.filter((b) => b.getBoundingClientRect().right > window.innerWidth).map((b) => b.id),
+      };
+    });
+    eq(r.overflowX, 0, `verify page (${label}): no sideways scroll at 390px`);
+    ok(r.buttons > 0, `verify page (${label}): a button is on screen to measure`);
+    eq(r.short, [], `verify page (${label}): every button is a 42px target`);
+    eq(r.wide, [], `verify page (${label}): …and none runs off the screen`);
+    eq(errors, [], `verify page (${label}): no uncaught script error at 390px`);
+    await ctx.close();
+  }
 }
 
 /* ------------------------------------------------------------------ done */

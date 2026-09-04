@@ -61,7 +61,10 @@
         own (frozen) shape. A field it does not know about is a field it
         silently deletes; a separate key is one it never touches. */
   var PHOTO_KEY = 'oaAcctPhoto';
-  var state = { user: null, resolved: false, profile: null, failed: false };
+  /* `pending`: the session is a password account whose address has not been
+     confirmed yet. It is SIGNED OUT for everything but the "Check your inbox"
+     card, which is what the branches below on state.pending are for. */
+  var state = { user: null, resolved: false, profile: null, failed: false, pending: false };
   var queue = [];
   var listeners = [];
 
@@ -325,6 +328,15 @@
 
   function hasProvider(id, u) { return providerIds(u).indexOf(id) !== -1; }
 
+  /** A password account whose address has not been confirmed. Only the
+      password provider is gated: Google arrives verified by Google, and an
+      ORCID sign-in carries no e-mail claim at all, so `emailVerified` there
+      is false for ever and would lock the account out for nothing. The rules
+      make the same distinction (verified() in _firestore.rules). */
+  function needsVerification(u) {
+    return !!(u && u.emailVerified === false && hasProvider('password', u));
+  }
+
   /** How the account is described to its owner: "Google", "ORCID", "Google
       and e-mail and password". Never a raw provider id. */
   function providerSummary(u) {
@@ -428,7 +440,8 @@
     /* paint() REPLACES the menu's markup, so the badges have to be written
        back after every one of its branches — hence the deferral rather than a
        call beside the markup itself. Cheap: it reads localStorage, no network. */
-    var countsFor = state.user || readHint();   // the hint window paints its final form too
+    // (a pending account has no menu and no counts to paint)
+    var countsFor = state.pending ? null : (state.user || readHint());   // the hint window paints its final form too
     if (countsFor && countsFor.uid) setTimeout(function () { paintCounts(readCounts(countsFor.uid)); }, 0);
 
     var host = $('#oa-account');
@@ -445,6 +458,19 @@
       host.innerHTML =
         '<span class="oa-acct-off" title="We could not reach the sign-in ' +
         'service. Check your connection and reload.">Sign-in unavailable</span>';
+      return;
+    }
+
+    /* An unverified password account gets neither the "Sign in" pill (it has
+       an account) nor the name chip (it cannot use it yet): a distinct
+       pending control that opens the "Check your inbox" card. The reserve is
+       stamped OUT, since the control is a pill and not the chip. */
+    if (state.pending && state.user) {
+      stampAuthState(false);
+      host.innerHTML =
+        '<button type="button" class="oa-acct-btn oa-acct-pending" id="oa-verify-chip" ' +
+          'title="Your e-mail address has not been confirmed yet">Verify your e-mail</button>';
+      $('#oa-verify-chip').addEventListener('click', function () { openVerifyPanel(); });
       return;
     }
 
@@ -595,6 +621,16 @@
     // Not configured, or unreachable: no entry at all. A dead "Sign in" link
     // in the panel would be the same silent no-op the header just fixed.
     if (!window.OAFB || !OAFB.enabled || state.failed) { box.innerHTML = ''; return; }
+
+    // the pending control, mirrored into the sheet (same rule as the header)
+    if (state.pending && state.user) {
+      box.innerHTML = '<a class="link depth-0" id="oa-np-verify" href="#">Verify your e-mail</a>';
+      $('#oa-np-verify').addEventListener('click', function (e) {
+        e.preventDefault();
+        openVerifyPanel();
+      });
+      return;
+    }
 
     var u = state.user || (!state.resolved ? readHint() : null);
     if (!u) {
@@ -1025,6 +1061,9 @@
 
   function openProfile(firstRun) {
     var u = state.user;
+    // an unconfirmed address has nothing to edit yet: the card that opens is
+    // the one that gets it confirmed
+    if (state.pending) { openVerifyPanel(); return; }
     if (!u) {
       // Belt and braces for invariant 1: mid-restore we do not yet know who
       // this is, so queue rather than bounce a signed-in reader to a sign-in
@@ -1391,6 +1430,11 @@
         'different sign-in method. Use that one, and you can link the two afterwards.';
     }
     if (c === 'auth/network-request-failed') return 'We could not reach the sign-in service. Check your connection.';
+    // the two answers a verification link can come back with (verify-email.html)
+    if (c === 'auth/expired-action-code') return 'That link has expired. Ask for a new one below.';
+    if (c === 'auth/invalid-action-code') {
+      return 'That link is not valid any more. It may have been used already, or copied incompletely.';
+    }
     if (/sdk-load-failed|not-configured/.test(err && err.message || '')) {
       return 'We could not load the sign-in service. If you use an ad blocker, ' +
         'allow gstatic.com and reload.';
@@ -1419,6 +1463,9 @@
       register and turns out to have an account must not have to close the box
       and find another button. */
   function openAuth(mode) {
+    // an unconfirmed account IS signed in as far as this box is concerned;
+    // what it needs is the card that gets the address confirmed
+    if (state.pending) { openVerifyPanel(); return; }
     if (state.user) return;                      // invariant 1
     if (!window.OAFB || !OAFB.enabled) {
       openNotice('Sign-in is not switched on for this site yet. ' +
@@ -1511,6 +1558,12 @@
             '<button type="submit" class="button blue">' +
               (registering ? 'Create account' : 'Sign in') + '</button>' +
           '</div>' +
+          // said BEFORE the account exists: the address must be confirmed
+          // from a link we e-mail, and until it is the account does nothing
+          (registering
+            ? '<p class="oa-auth-fine oa-auth-verify-note">We will e-mail you a link to ' +
+              'confirm your address. Nothing works until you click it.</p>'
+            : '') +
         '</form>' +
 
         '<div class="oa-auth-links">' +
@@ -1631,25 +1684,43 @@
           website: website.slice(0, 300)
         };
         if (orcid) prof.orcid = orcid;
+        var created = null;
         OAFB.ready()
           .then(function (fb) {
             return fb.auth().createUserWithEmailAndPassword(f.email.value, f.password.value)
               .then(function (cred) {
                 var u = cred && cred.user;
                 if (!u) return;
+                created = u;
                 // The profile arrives WITH the account: silence the first-run
                 // "add your name" prompt before the Firestore write races the
-                // auth-state profile read, seed the chip's name immediately,
-                // and store the profile. A failed store never blocks the
-                // registration — Edit profile can re-enter it.
+                // auth-state profile read, and store the profile. A failed
+                // store never blocks the registration, Edit profile can
+                // re-enter it. The profile write is the ONE write the rules
+                // allow before the address is confirmed.
+                //
+                // No hint is written here any more. A password account is
+                // unusable until its address is confirmed, and a hint would
+                // paint the next page signed in, cards unlocked, until the
+                // SDK contradicted it.
                 try { localStorage.setItem('oaProfileAsked:' + u.uid, '1'); } catch (e2) { /* private mode */ }
                 state.profile = prof;
-                writeHint(u, first + ' ' + last);
                 return profileDoc(fb, u.uid).set(prof, { merge: true })
                   .catch(function () { /* rules not deployed / offline — see above */ });
               });
           })
-          .then(function () { finish(true); })
+          .then(function () {
+            if (!created || !needsVerification(created)) { finish(true); return; }
+            /* The account exists and is not usable yet. Close this box, open
+               the "Check your inbox" card, and send the message. The auth
+               event may or may not have fired by now, which is why the user
+               is handed over rather than read off state. */
+            close();
+            openVerifyPanel('sent', created);
+            return sendVerification(created)
+              .then(function (r) { verifySent(r, created); })
+              .catch(function (err) { verifySay(friendly(err)); });
+          })
           .catch(function (err) { say(friendly(err)); });
         return;
       }
@@ -1671,6 +1742,211 @@
         .then(function () { say('Check your inbox for a password reset link.', true); })
         .catch(function (err) { say(friendly(err)); });
     });
+  }
+
+  /* =========================================================================
+     E-MAIL VERIFICATION (owner, 2026-09-04)
+
+     A person who registers with an e-mail address and a password must press
+     a link in a message before the account can be used. The rules enforce it
+     (verified() in _firestore.rules reads the token); what is here is the
+     browser's half of the same decision:
+
+       PENDING     needsVerification(u) above. While it holds, the session is
+                   signed out for everything but the card below: user()
+                   answers null, hint() answers 'out', onChange fires null,
+                   nothing writes the hint, the roster row, the tally, the
+                   identity keys or the counts, and the chip reads "Verify
+                   your e-mail". Anything less leaves a flash of unlocked
+                   cards on the next page, painted from a remembered hint the
+                   SDK then contradicts.
+       THE CARD    openVerifyPanel(): "Check your inbox", naming the address,
+                   with Send again, I have verified it, and a way out.
+       THE MESSAGE sendVerification(): the site's own message, from the Cloud
+                   Function sendVerificationEmail, which mints the link with
+                   the Admin SDK and lands it on verify-email.html. When the
+                   function cannot be reached (not deployed, down, or the SDK
+                   failed to load) it FALLS BACK to Firebase's own
+                   sendEmailVerification, so nobody is ever stranded; that
+                   message comes from Firebase's address and lands on the same
+                   page with no code.
+       THE LIFT    confirmVerified(): reload the user, then getIdToken(true).
+                   The second call is not optional. reload() updates
+                   emailVerified on the object, but the rules read the ID
+                   TOKEN, which is cached for up to an hour, and without a
+                   fresh one the roster row, the tally and the profile read
+                   all bounce with permission-denied that looks exactly like
+                   undeployed rules.
+     ========================================================================= */
+
+  var SITE = 'https://www.operationsacademia.org';
+  var VERIFY_SENDER = 'operationsacademia@gmail.com';
+  var VERIFY_FALLBACK_SENDER = 'noreply@operations-academia.firebaseapp.com';
+  /* The callable's answers that mean "not available", each one a reason to
+     use Firebase's own message instead: never deployed, temporarily down, or
+     failed inside (an SMTP refusal, say). A throttle is NOT one of them: the
+     message went a moment ago and sending a second from another address
+     would only confuse. */
+  var VERIFY_FALLBACK_CODES = ['functions/not-found', 'functions/unavailable', 'functions/internal'];
+
+  function closeVerifyPanel() {
+    var old = $('#oa-verify');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+  }
+
+  function verifySay(msg, ok) {
+    var m = $('#oa-verify-msg');
+    if (!m) return;
+    m.textContent = msg || '';
+    m.className = 'oa-auth-msg' + (ok ? ' is-ok' : msg ? ' is-err' : '');
+  }
+
+  /** What the card says once a send has come back. */
+  function verifySent(r, who) {
+    var u = state.user || who;
+    if (!r) return;
+    if (r.throttled) {
+      verifySay('The last message was sent a moment ago. Give it a minute and look again.');
+      return;
+    }
+    if (r.alreadyVerified) {
+      // the function refused because the address IS confirmed: lift the gate
+      confirmVerified(u).then(function (done) {
+        if (!done) verifySay('Not confirmed yet. Press the link in the message first, then try again.');
+      });
+      return;
+    }
+    if (r.via === 'fallback') {
+      var from = $('#oa-verify-from');
+      if (from) {
+        from.textContent = 'Look in spam too. This message comes from ' + VERIFY_FALLBACK_SENDER +
+          ', on behalf of Operations Academia.';
+      }
+    }
+    verifySay('Sent to ' + ((u && u.email) || 'your address') + '. Look in your inbox.', true);
+  }
+
+  /** The "Check your inbox" card. Rebuilt on every open, like the sign-in
+      box, so a stale message never survives a reopen. `who` covers the
+      registration path, where the auth event may not have fired yet. On
+      verify-email.html the card is never drawn: that page confirms the
+      address itself, and a modal over it would cover the confirmation. */
+  function openVerifyPanel(status, who) {
+    var u = state.user || who;
+    if (!u) return;
+    if (document.querySelector('[data-oa-verify-page]')) return;
+    closeVerifyPanel();
+
+    var wrap = document.createElement('div');
+    wrap.className = 'oa-modal';
+    wrap.id = 'oa-verify';
+    wrap.innerHTML =
+      '<div class="oa-modal-card" role="dialog" aria-modal="true" aria-labelledby="oa-verify-h">' +
+        '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
+        '<h3 id="oa-verify-h">Check your inbox</h3>' +
+        '<p class="oa-modal-lede">' +
+          (status === 'sent'
+            ? 'Your account is created. '
+            : 'Your e-mail address has not been confirmed yet. ') +
+          'A message from Operations Academia is on its way to <strong>' + esc(u.email || '') +
+          '</strong>. Press the link in it to confirm the address. Until then nothing on the ' +
+          'site works for this account.</p>' +
+        '<div class="oa-auth-actions">' +
+          '<button type="button" class="button blue" id="oa-verify-send">Send the e-mail again</button>' +
+          '<button type="button" class="button oa-btn-ghost" id="oa-verify-check">I have verified it</button>' +
+        '</div>' +
+        '<p class="oa-auth-msg" id="oa-verify-msg" role="alert"></p>' +
+        '<p class="oa-auth-fine" id="oa-verify-from">Look in spam too. The message comes from ' +
+          VERIFY_SENDER + '.</p>' +
+        '<div class="oa-auth-back">' +
+          '<button type="button" class="oa-linkbtn" id="oa-verify-out">Use a different account</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+
+    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    $('.oa-modal-x', wrap).addEventListener('click', close);
+    wireModalKeys(wrap, close);
+
+    $('#oa-verify-send', wrap).addEventListener('click', function () {
+      var b = this;
+      b.disabled = true;
+      verifySay('Sending.');
+      sendVerification(u)
+        .then(function (r) { b.disabled = false; verifySent(r, u); })
+        .catch(function (err) { b.disabled = false; verifySay(friendly(err)); });
+    });
+    $('#oa-verify-check', wrap).addEventListener('click', function () {
+      verifySay('Checking.');
+      confirmVerified(u)
+        .then(function (done) {
+          if (done) return;                // the card is gone and the page is open
+          verifySay('Not confirmed yet. Press the link in the message first, then try again.');
+        })
+        .catch(function (err) { verifySay(friendly(err)); });
+    });
+    $('#oa-verify-out', wrap).addEventListener('click', function () { signOut(); });
+    $('#oa-verify-send', wrap).focus();
+  }
+
+  /** Send the verification message. Resolves with where it went:
+        { via: 'function' }                 the site's own message
+        { via: 'function', throttled: true } the function refused: too soon
+        { via: 'function', alreadyVerified: true }
+        { via: 'fallback' }                 Firebase's own message
+      Rejects only when neither road could be taken. */
+  function sendVerification(who) {
+    var u = state.user || who;
+    if (!u || !window.OAFB || !OAFB.enabled) return Promise.reject(new Error('not-signed-in'));
+
+    function fallback() {
+      return u.sendEmailVerification({ url: SITE + '/verify-email.html' })
+        .then(function () { return { via: 'fallback' }; });
+    }
+
+    return OAFB.readyFunctions()
+      .then(function (fb) { return fb.functions().httpsCallable('sendVerificationEmail')({}); })
+      .then(function (res) { return { via: 'function', to: res && res.data && res.data.to }; })
+      .catch(function (err) {
+        var c = (err && err.code) || '';
+        if (c === 'functions/resource-exhausted') return { via: 'function', throttled: true };
+        if (c === 'functions/failed-precondition') return { via: 'function', alreadyVerified: true };
+        if (VERIFY_FALLBACK_CODES.indexOf(c) !== -1 || /sdk-load-failed/.test((err && err.message) || '')) {
+          return fallback();
+        }
+        throw err;
+      });
+  }
+
+  /** Ask Firebase whether the address is confirmed now, and lift the gate if
+      it is. Resolves true when the session is usable. */
+  function confirmVerified(who) {
+    var u = state.user || who;
+    if (!u) return Promise.resolve(false);
+    if (!state.pending && state.user) return Promise.resolve(true);
+    return Promise.resolve(typeof u.reload === 'function' ? u.reload() : null)
+      .then(function () { return typeof u.getIdToken === 'function' ? u.getIdToken(true) : null; })
+      .then(function () {
+        if (state.user && state.user.uid !== u.uid) return false;   // someone else meanwhile
+        if (needsVerification(u)) return false;
+        liftVerification(u);
+        return true;
+      });
+  }
+
+  /** The address is confirmed: the session becomes an ordinary signed-in one,
+      with everything the auth event would have done for it. */
+  function liftVerification(u) {
+    state.user = u;
+    state.pending = false;
+    closeVerifyPanel();
+    writeHint(u);
+    paint();
+    if (window.OAFB && OAFB.enabled) {
+      OAFB.ready().then(function (fb) { enterSession(u, fb); }).catch(function () { /* said elsewhere */ });
+    }
+    notify(u);
   }
 
   /* =========================================================================
@@ -2348,6 +2624,8 @@
     // than staying open for an account that is on its way out.
     state.user = null;
     state.profile = null;
+    state.pending = false;
+    closeVerifyPanel();       // "Use a different account" lands here
     queue.length = 0;
     /* the counts belong to the account that is leaving; a shared machine must
        not show the next person how many postings the last one had */
@@ -2372,6 +2650,9 @@
   /** Run fn once a user is known. Queues while auth is still resolving; opens
       the sign-in modal only if we end up genuinely signed out. */
   function whenSignedIn(fn) {
+    // an unconfirmed account cannot run anything yet; what it can do is
+    // confirm the address, so that is the card a click reaches
+    if (state.pending) { openVerifyPanel(); return; }
     if (state.user) { fn(state.user); return; }
     if (!state.resolved) { queue.push(fn); return; }
     openAuth();
@@ -2379,11 +2660,42 @@
 
   function onChange(fn) {
     listeners.push(fn);
-    if (state.resolved) fn(state.user);
+    if (state.resolved) fn(state.pending ? null : state.user);
   }
 
   function notify(u) {
     listeners.forEach(function (fn) { try { fn(u); } catch (e) {} });
+  }
+
+  /** Everything a USABLE signed-in session does on arrival. Factored out of
+      the auth handler because the e-mail verification lift has to do the
+      same things later, once the address is confirmed, and two copies of
+      this list would drift. */
+  function enterSession(u, fb) {
+    loadProfile(u);
+    loadCounts(u);
+    // Contentless tally so the Admin area can count registered users
+    // without anyone being able to read the user list. Same shape as
+    // /lit/'s registeredUsers/{uid}, a coarse timestamp and nothing else,
+    // but admin-read, not public: the figure is the maintainer's alone
+    // (owner, 2026-08-23). The write stays the owner's own, and the
+    // merge deletes the duplicate's mark so the count is of people.
+    //
+    // ONCE PER SESSION, as /lit/ does it, not once per page view. This
+    // is a flat multi-page site: a signed-in reader opening ten pages
+    // would otherwise cost ten writes, all of them overwriting the same
+    // coarse timestamp, against a 20k/day free-tier ceiling.
+    var tally = 'oaTally:' + u.uid, done = false;
+    try { done = !!sessionStorage.getItem(tally); } catch (e) { /* private mode */ }
+    if (!done) {
+      try { sessionStorage.setItem(tally, '1'); } catch (e) { /* private mode */ }
+      fb.firestore().collection(OAFB.col.registered).doc(u.uid)
+        .set({ t: Date.now() }, { merge: true })
+        .catch(function () { /* rule not deployed yet, never block sign-in */ });
+    }
+
+    var q = queue.splice(0, queue.length);
+    q.forEach(function (fn) { try { fn(u); } catch (e) { if (window.console) console.error(e); } });
   }
 
   function boot() {
@@ -2416,34 +2728,30 @@
         // one's "already checked" latch and never be looked at.
         accountKeysChecked = false;
         duplicateNoted = false;
+
+        /* AN UNCONFIRMED PASSWORD ACCOUNT IS SIGNED OUT FOR EVERYTHING BUT THE
+           CARD. No hint (the next page would paint it signed in), no profile
+           read, no roster row, no tally, no identity keys, no counts, and the
+           listeners hear null so every page locks. The card opens unless it
+           is already open, which is the registration path, where the form
+           has just drawn it with its own wording; anything queued while the
+           session restored is dropped, since the only thing this account can
+           do is confirm its address. */
+        state.pending = needsVerification(u);
+        if (state.pending) {
+          writeHint(null);
+          paint();
+          queue.length = 0;
+          if (!$('#oa-verify')) openVerifyPanel();
+          notify(null);
+          return;
+        }
+
         writeHint(u);
         paint();
 
         if (u) {
-          loadProfile(u);
-          loadCounts(u);
-          // Contentless tally so the Admin area can count registered users
-          // without anyone being able to read the user list. Same shape as
-          // /lit/'s registeredUsers/{uid} — a coarse timestamp, nothing else —
-          // but admin-read, not public: the figure is the maintainer's alone
-          // (owner, 2026-08-23). The write stays the owner's own, and the
-          // merge deletes the duplicate's mark so the count is of people.
-          //
-          // ONCE PER SESSION, as /lit/ does it — not once per page view. This
-          // is a flat multi-page site: a signed-in reader opening ten pages
-          // would otherwise cost ten writes, all of them overwriting the same
-          // coarse timestamp, against a 20k/day free-tier ceiling.
-          var tally = 'oaTally:' + u.uid, done = false;
-          try { done = !!sessionStorage.getItem(tally); } catch (e) { /* private mode */ }
-          if (!done) {
-            try { sessionStorage.setItem(tally, '1'); } catch (e) { /* private mode */ }
-            fb.firestore().collection(OAFB.col.registered).doc(u.uid)
-              .set({ t: Date.now() }, { merge: true })
-              .catch(function () { /* rule not deployed yet — never block sign-in */ });
-          }
-
-          var q = queue.splice(0, queue.length);
-          q.forEach(function (fn) { try { fn(u); } catch (e) { if (window.console) console.error(e); } });
+          enterSession(u, fb);
         } else {
           // Anything queued during the restore window belongs to someone who
           // turns out NOT to be signed in. Dropping it silently loses the
@@ -2482,15 +2790,28 @@
     signOut: signOut,
     whenSignedIn: whenSignedIn,
     onChange: onChange,
-    user: function () { return state.user; },
+    /* null while the address is unconfirmed: to every page, an unverified
+       password account is a reader who has not signed in */
+    user: function () { return state.pending ? null : state.user; },
     resolved: function () { return state.resolved; },
+    /* --- e-mail verification (see the block above the merge) ------------- */
+    /** The unconfirmed account itself, for the verify page and the card;
+        null when there is none. The one export that can see it. */
+    pendingUser: function () { return state.pending ? state.user : null; },
+    needsVerification: function (u) { return needsVerification(u || state.user); },
+    sendVerification: function () { return sendVerification(); },
+    confirmVerified: function () { return confirmVerified(); },
+    openVerifyPanel: function () { openVerifyPanel(); },
+    /** A sign-in or link error in the reader's own words, for the verify
+        page, so its wording and the box's cannot drift. */
+    friendly: friendly,
     /** The localStorage memory of the LAST resolved auth state — 'in', 'out',
         or null on a first visit. What lets a page paint its signed-in or
         signed-out shape immediately instead of holding everything blank while
         the SDK downloads and the session restores (~1-3 s on a cold cache);
         the real state reconciles it when it arrives. */
     hint: function () {
-      if (state.resolved) return state.user ? 'in' : 'out';
+      if (state.resolved) return state.user && !state.pending ? 'in' : 'out';
       // The stored hint exists only for a signed-in session (sign-out removes
       // it), so a first-time visitor and a signed-out one read the same —
       // 'out' — which is the right shape to paint first for both.

@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "email-verification-2026-09",
+      "date": "2026-09-04",
+      "title": "A new account confirms its e-mail address first",
+      "summary": "Registering with an e-mail address and a password now sends you a message with one button, and the account does nothing until you press it. The page it opens says whether the address is confirmed, and the site offers to send the message again if it did not arrive. Google sign-ins need no extra step, since Google has already confirmed the address.",
+      "url": "/account.html"
+    },
+    {
       "id": "levels-and-characteristics-multi-select",
       "date": "2026-09-04",
       "title": "Entry level and Characteristics take several values",

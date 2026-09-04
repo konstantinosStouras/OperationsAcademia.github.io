@@ -245,8 +245,29 @@
 
   /* ------------------------------------------------------------------ auth */
 
+  /* A user is VERIFIED unless the seed says otherwise: every existing check
+     models a reader whose address is confirmed (a Google sign-in, say), and
+     since the e-mail verification gate (2026-09-04) an unverified password
+     account is signed out for everything but the "Check your inbox" card. To
+     drive that gate, seed { emailVerified: false, providerData: [{ providerId:
+     'password' }] }; `reloadVerifies` makes user.reload() confirm the address,
+     which is what a real reload does once the link has been pressed. */
   function makeUser(spec, appName) {
-    var u = Object.assign({ providerData: [] }, spec);
+    var u = Object.assign({ emailVerified: true, providerData: [{ providerId: 'google.com' }] }, spec);
+    u.reload = function () {
+      record('reload', u.uid);
+      if (seed.reloadVerifies) u.emailVerified = true;
+      return Promise.resolve();
+    };
+    u.getIdToken = function (force) {
+      record('getIdToken', u.uid + (force ? ':force' : ''));
+      return Promise.resolve('fake-id-token');
+    };
+    u.sendEmailVerification = function (opts) {
+      record('sendEmailVerification', u.uid, opts || null);
+      if (seed.sendVerificationFails) return Promise.reject({ code: seed.sendVerificationFails });
+      return Promise.resolve();
+    };
     u.delete = function () {
       record('deleteUser', u.uid);
       if (seed.deleteFails) return Promise.reject({ code: seed.deleteFails });
@@ -288,6 +309,17 @@
   Auth.prototype.signInWithEmailAndPassword = function () { return this.__signIn('password'); };
   Auth.prototype.createUserWithEmailAndPassword = function () { return this.__signIn('password'); };
   Auth.prototype.sendPasswordResetEmail = function () { return Promise.resolve(); };
+  /* The verification link's code, applied by verify-email.html. Records the
+     code so a check can see it was the one on the address, and refuses with
+     whatever the seed names (auth/expired-action-code, auth/invalid-action-code). */
+  Auth.prototype.applyActionCode = function (code) {
+    record('applyActionCode', String(code));
+    if (seed.applyActionCodeFails) return Promise.reject({ code: seed.applyActionCodeFails });
+    return Promise.resolve();
+  };
+  Object.defineProperty(Auth.prototype, 'currentUser', {
+    get: function () { var app = APPS[this.__appName]; return (app && app.__user) || null; }
+  });
   Auth.prototype.__signIn = function (how) {
     var appName = this.__appName;
     record('signIn', appName + ':' + how);
@@ -325,6 +357,27 @@
     this.__auth.__cbs.forEach(function (cb) { try { cb(u); } catch (e) {} });
   };
 
+  /* --------------------------------------------------------- functions
+
+     The one callable the site makes (sendVerificationEmail, from the "Check
+     your inbox" card). Records the name so a check can see it was tried
+     FIRST, and refuses with whatever the seed names: functions/not-found is
+     the shape of a function that is not deployed, which is the branch the
+     card must fall back on (user.sendEmailVerification above). With
+     `noFunctions` the namespace has no functions() at all, which is the
+     load-failure branch. */
+  function functionsFor() {
+    return {
+      httpsCallable: function (name) {
+        return function (data) {
+          record('callable', String(name), data || null);
+          if (seed.callableFails) return Promise.reject({ code: seed.callableFails, message: seed.callableFails });
+          return Promise.resolve({ data: { sent: true, to: 'r***@example.edu' } });
+        };
+      }
+    };
+  }
+
   var firebase = {
     apps: [],
     initializeApp: function (config, name) {
@@ -343,6 +396,11 @@
     },
     firestore: function () { return firestoreFor(); }
   };
+
+  if (!seed.noFunctions) {
+    firebase.functions = functionsFor;
+    App.prototype.functions = functionsFor;
+  }
 
   firebase.auth.GoogleAuthProvider = function () { this.providerId = 'google.com'; };
   firebase.auth.OAuthProvider = function (id) { this.providerId = id; };

@@ -56,6 +56,18 @@
 .oa-acct-btn:hover,
 .oa-acct-chip:hover { background: var(--brand); color: var(--on-brand, #fff); }
 
+/* the PENDING control: a password account whose address is not confirmed
+   yet reads "Verify your e-mail" in the header, in the site's error hue so it
+   is not taken for the signed-out pill or for a name chip. Ink named with the
+   ground, as every painted surface here must be. The live design overrides
+   this in v3.css at a higher specificity; keep the two in step. */
+.oa-acct-btn.oa-acct-pending {
+  border-color: var(--err, #b3413d);
+  color: var(--err, #b3413d);
+  background: var(--err-soft, #fdf1f0);
+}
+.oa-acct-btn.oa-acct-pending:hover { background: var(--err, #b3413d); color: var(--on-brand, #fff); }
+
 .oa-acct-off {
   /* the state shown when sign-in is not configured or unreachable: same box as
      the real control, so the header row never changes height under it */

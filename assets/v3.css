@@ -1633,6 +1633,18 @@ body.v3 .oa-acct-btn {
 }
 body.v3 .oa-acct-btn:hover { background: var(--ink); color: var(--bg); }
 
+/* the PENDING control, "Verify your e-mail": an account exists but its address
+   is not confirmed, so neither the signed-out pill nor the name chip is the
+   honest shape. The error hue, ink and ground together, in both themes (the
+   tokens are defined in each). The same rule lives in oa-ui.css for the pages
+   that do not carry this stylesheet; keep the two in step. */
+body.v3 .oa-acct-btn.oa-acct-pending {
+  border-color: var(--err);
+  color: var(--err);
+  background: var(--err-soft);
+}
+body.v3 .oa-acct-btn.oa-acct-pending:hover { background: var(--err); color: var(--on-brand); }
+
 body.v3 .oa-acct-chip {
   display: inline-flex; align-items: center; gap: 9px;
   background: var(--bg-2);

@@ -246,6 +246,8 @@ export const PAGES = [
      exists to prevent. They stay bare, deliberately. */
   { file: 'admin-area.html', card: false,
     why: "maintainer-only review desk (noindex) — a page nobody shares, and an og:url on it would claim an Open Graph identity for a page that answers only the admin" },
+  { file: 'verify-email.html', card: false,
+    why: 'e-mail verification landing page (noindex), reached from the link in a message; an og:url on it would claim an identity nobody should share' },
   { file: 'candidates.html', card: false, why: 'redirect stub → /#candidates' },
   { file: 'placements.html', card: false, why: 'redirect stub → /#placements' },
   { file: 'faqs.html', card: false, why: 'redirect stub → /#faq' },
