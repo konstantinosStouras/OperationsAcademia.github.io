@@ -10143,6 +10143,121 @@ async function testJobExportWiring() {
        engine's and v3.css is the live design's override, and a rule in only
        one of them is either invisible on the site or lost on the next page —
        CLAUDE.md records that trap under the Excel button. */
+/* ---------------- two pickers take SEVERAL values, one of them ALL-OF
+
+   Owner, 2026-09-04: Entry level and Characteristics on jobs.html were
+   single-select radios. Both take several values now, and they combine them
+   differently because the questions differ — Entry level ANY-OF ("Assistant
+   Professor or Post-Doc" is two things one candidate could take),
+   Characteristics ALL-OF ("PhD and Research seminars" is a department that
+   has both). `match: 'all'` is a generic engine option; this pins the option,
+   the honest counts under AND, the note in the menu, the word the Excel
+   download writes between the values, and that the 'one' type the other
+   pages still use kept working. What a reader sees is measured in
+   page-test.mjs against expectations computed from the served file.        */
+
+async function testMultiSelectFilters() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const jobs = await read('jobs.html');
+  const list = await read('assets', 'oa-list.js');
+  const listCss = await read('assets', 'oa-list.css');
+  const v3css = await read('assets', 'v3.css');
+  const mod = await read('assets', 'oa-jobexport.js');
+  const pm = await read('previous-markets.html');
+  const dir = await read('assets', 'oa-directory.js');
+
+  /* the two filters, as the jobs page declares them */
+  const level = /\{ key: 'level',[^}]*\}/.exec(jobs);
+  ok(level && !/type: 'one'/.test(level[0]) && !/match:/.test(level[0]),
+    'multi: Entry level takes several values, any-of (the engine default)');
+  const chars = /\{ key: 'chars',[\s\S]*?placeholder: 'All characteristics' \}/.exec(jobs);
+  ok(chars && !/type: 'one'/.test(chars[0]) && /match: 'all'/.test(chars[0]),
+    'multi: Characteristics takes several values, ALL-OF');
+  const hint = chars && /hint: '([^']+)'/.exec(chars[0]);
+  ok(hint && /every characteristic you tick/.test(hint[1]),
+    'multi: …and words the rule for its own dataset');
+  ok(hint && !/—/.test(hint[1]), 'multi: in plain words, with no em dash');
+
+  /* the 'one' type stays in use, and the engine keeps it */
+  ok(/key: 'level',[^}]*type: 'one'/.test(pm),
+    "multi: the archive's Entry level (previous-markets) keeps its single choice");
+  ok(/key: 'show',[^}]*type: 'one'/.test(dir) && /key: 'edited',[^}]*type: 'one'/.test(dir),
+    'multi: …as do the directory\'s Show and Last edited');
+  ok(/var multi = f\.type !== 'one';/.test(list) &&
+     /type: multi \? 'checkbox' : 'radio'/.test(list),
+    'engine: a single-choice filter is still drawn as radios');
+  ok(/if \(f\.type === 'one'\) add\(all\[all\.length - 1\]\); else all\.forEach\(add\);/.test(list),
+    'engine: a link names ONE value for it (the last) and every value for a multi');
+
+  /* the rule, where a row is tested */
+  const m = list.slice(list.indexOf('function matches(row, f, chosen, draft)'),
+    list.indexOf('/* ------------------------------------------------------------------ mount */'));
+  ok(m.length > 500 && m.length < 3000, 'engine: matches() is where this expects it');
+  ok(/if \(f\.match === 'all'\)/.test(m) && /vals\.indexOf\(v\) === -1\) missing = true/.test(m),
+    'engine: under match all, EVERY chosen value must be on the row');
+  ok(/chosen\.has\(vals\[i\]\)\) return true;/.test(m), 'engine: …and any-of stays the default');
+
+  /* the counts, which change meaning under AND */
+  const o = list.slice(list.indexOf('function optionsFor(f)'), list.indexOf('function focusRow()'));
+  ok(o.length > 800 && o.length < 4000, 'engine: optionsFor() is where this expects it');
+  ok(/f\.match === 'all' && sel\[f\.key\]\.size/.test(o) &&
+     /carriesAll = matches\(r, f, sel\[f\.key\]\)/.test(o),
+    'engine: an all-of count is what ticking that value AS WELL would leave');
+  ok(/counts\[v\] = \(counts\[v\] \|\| 0\) \+ \(carriesAll \? 1 : 0\)/.test(o),
+    'engine: …listing every value the other filters allow, at 0 where nothing has it ' +
+    'beside what is ticked, so no value seems to vanish');
+
+  /* the picker: counts refreshed in place, the note in the menu and as the title */
+  const pk = list.slice(list.indexOf('function buildPicker(f, id, onPick)'),
+    list.indexOf('/* ------------------------------------------------------------ render */'));
+  ok(pk.length > 3000 && pk.length < 14000, 'engine: buildPicker() is where this expects it');
+  ok(/var allOf = multi && f\.match === 'all';/.test(pk), 'picker: knows an all-of filter');
+  ok(/if \(allOf\) recount\(\);/.test(pk) && /function recount\(\)/.test(pk) &&
+     /countEls\[v\]\.textContent/.test(pk),
+    'picker: an all-of tick refreshes the counts IN PLACE');
+  ok(!/if \(allOf\) fill\(/.test(pk),
+    'picker: …never by redrawing the rows, which would take the keyboard focus with them');
+  ok(/class: 'oa-pick-hint'/.test(pk) && /title: hint \|\| null/.test(pk),
+    'picker: the rule is said inside the menu and as the button\'s title');
+  const fallback = /f\.hint \|\| \(allOf \? '([^']+)' : ''\)/.exec(pk);
+  ok(fallback, 'picker: worded by the page, with an engine fallback for an all-of filter');
+  ok(fallback && !/—/.test(fallback[1]), 'picker: the fallback is plain words too');
+  ok(/\.oa-pick-hint\s*\{/.test(listCss), 'picker: the note is styled in the engine stylesheet');
+  ok(/body\.v3 \.oa-pick-hint\s*\{/.test(v3css), 'picker: …and themed in the live design');
+
+  /* what the search is DESCRIBED as: the engine says how a filter combines,
+     the About sheet writes the word the list meant */
+  ok(/match: f\.match === 'all' \? 'all' : 'any'/.test(list),
+    'engine: activeFilters says how each filter combines its values');
+  ok(/f\.match === 'all' \? '  and  ' : '  or  '/.test(mod),
+    'export: the About sheet joins an all-of filter\'s values with "and"');
+  const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+  const sheets = E.sheets([], { market: '2026-2027', total: 5, filters: [
+    { label: 'Entry level', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
+    { label: 'Characteristics', values: ['PhD', 'Research seminars'], match: 'all' },
+  ] });
+  const about = JSON.stringify(sheets[2].rows);
+  ok(about.includes('Assistant Professor  or  Post-Doc'), 'export: an any-of filter reads "or"');
+  ok(about.includes('PhD  and  Research seminars') && !about.includes('PhD  or  Research seminars'),
+    'export: an all-of filter reads "and", never "or"');
+  const legacy = JSON.stringify(E.sheets([], { market: '2026-2027', total: 5,
+    filters: [{ label: 'Location', values: ['Ireland', 'France'] }] })[2].rows);
+  ok(legacy.includes('Ireland  or  France'),
+    'export: a filter that says nothing about how it combines still reads "or"');
+
+  /* announced, and recorded */
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = (log.updates || []).find((u) => u.id === 'levels-and-characteristics-multi-select');
+  ok(entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+    'multi: changelog.json announces it, dated, linking the jobs page');
+  ok(entry && /only the departments that have both/.test(entry.summary) &&
+     !/—/.test(entry.title + entry.summary),
+    'multi: …saying the AND rule in plain words');
+  const claude = await read('CLAUDE.md');
+  ok(/`match: 'all'`/.test(claude) && /Characteristics is\s+ALL-OF/.test(claude),
+    'multi: CLAUDE.md records the all-of option and why Characteristics uses it');
+}
+
 /* --------------------------------- what a reader who has not registered SEES
 
    Owner, 2026-08-29, from two screenshots of the site signed out: an
@@ -11990,6 +12105,7 @@ if (isMain(import.meta.url)) {
   await testCandidateProfilePolicy();
   await testJobExport();
   await testJobExportWiring();
+  await testMultiSelectFilters();
   await testSponsors();
   await testReaderGate();
   await testClosingSoonDigest();

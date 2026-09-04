@@ -439,14 +439,26 @@
             legacyValues: { Open: 'Closing soon' } },
           { key: 'type',        label: 'Type',            field: 'type',
             placeholder: 'All types' },
-          { key: 'level',       label: 'Entry level',     field: 'levels', type: 'one',
+          /* SEVERAL VALUES, and the two pickers combine them differently
+             (owner, 2026-09-04). Entry level is ANY-OF, the engine's default:
+             a candidate who could take an assistant professorship or a
+             post-doc wants to see both. Characteristics is ALL-OF
+             (`match: 'all'`): a candidate who ticks "PhD" and "Research
+             seminars" wants a department that has both, and a widening
+             search there would show them departments with neither of the
+             things they were looking for together. Both used to be
+             single-select (`type: 'one'`), which forced one value on a
+             question that has several answers. */
+          { key: 'level',       label: 'Entry level',     field: 'levels',
             placeholder: 'All levels' },
           // a link shared or bookmarked when the site said "USA" still selects
           // the country it now publishes as "United States"
           { key: 'country',     label: 'Location',        field: 'country', sort: 'count',
             legacyValues: (window.OACountries || {}).ALIASES,
             placeholder: 'All locations' },
-          { key: 'chars',       label: 'Characteristics', field: 'characteristics', type: 'one',
+          { key: 'chars',       label: 'Characteristics', field: 'characteristics',
+            match: 'all',
+            hint: 'A posting must have every characteristic you tick.',
             placeholder: 'All characteristics' },
           { key: 'posted',      label: 'Date posted',     derive: 'datePosted',
             placeholder: 'Any date' }

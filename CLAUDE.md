@@ -2350,6 +2350,54 @@ styled by the same rule as a real label, rather than from a pixel value that
 would silently drift when the type changes. `page-test.mjs` measures the
 baseline per row and fails if any control leaves it.
 
+### …and two pickers take several values, one of them ALL-OF
+
+Owner, 2026-09-04: Entry level and Characteristics on `jobs.html` were
+single-select (`type: 'one'`, drawn as radios), one answer forced on two
+questions that have several. Both are multi now, and they combine their values
+DIFFERENTLY, because the questions differ. **Entry level is ANY-OF**, the
+engine's default and the text search's own reading: a candidate who could take
+an assistant professorship or a post-doc wants to see both, and AND would be
+empty for everybody not advertised at two ranks at once. **Characteristics is
+ALL-OF** (`match: 'all'` on the filter): a candidate ticking "PhD" and
+"Research seminars" wants a department that has BOTH, and a widening search
+would show them departments with neither of the things they asked for
+together.
+
+`match: 'all'` is a GENERIC engine option (`matches()` in `oa-list.js`), so the
+decision stays on the page that knows its dataset. Three things follow, each
+pinned in `testMultiSelectFilters` and driven in `page-test.mjs`:
+
+* **The counts change meaning under AND.** A cross-filtered count is "rows
+  carrying this value, given every OTHER filter", and the moment one value is
+  ticked that overstates every other option: "MBA 82" beside a ticked "PhD",
+  where a tick would show the postings that have both. An all-of count is
+  therefore WHAT TICKING THIS AS WELL WOULD LEAVE, counted over the rows
+  already carrying every ticked value — a ticked value's own count is the
+  current result, and every value the other filters allow stays listed, at an
+  honest 0 where nothing has it beside what is ticked. Because those numbers
+  move with the menu's own ticks, an all-of tick refreshes them IN PLACE
+  (`recount`) rather than redrawing the rows, which would throw away the
+  checkbox just pressed and the keyboard focus with it.
+* **The rule is said where the reader is choosing** — a line inside the menu
+  (`.oa-pick-hint`, styled in BOTH stylesheets) and the button's title — never
+  under the control, where it would move the bar about on a phone. The page
+  words it for its dataset (`hint:`); the engine has a fallback.
+* **The Excel download's About sheet writes "and" between an all-of filter's
+  values** (`activeFilters()` now says how each filter combines, `match:
+  'all' | 'any'`), because "or" would describe a search the reader was not
+  shown.
+
+The URL needed nothing: a multi filter already carries one parameter per value
+(`?chars=PhD&chars=Research+seminars`), and a single-value link from the radio
+days still selects. `type: 'one'` stays in use — the archive's Entry level on
+`previous-markets.html` and the directory's Show and Last edited — and the
+engine keeps drawing it as radios that take the last value a link names. On a
+phone the chips under a picker hang below its control, so a row whose partner
+has none is not on one line while values are chosen; that was already true of
+Location and is not what rule 12 in `_MOBILE-STANDARDS.md` measures (nothing
+chosen).
+
 ## A guard that fires on a legitimate posting stops the whole site publishing
 
 `oa-jobs-build.yml` rebuilds `data/`, runs `selftest.mjs` over what it is about

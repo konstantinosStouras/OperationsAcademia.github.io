@@ -6549,6 +6549,228 @@ for (const w of [320, 360, 390, 430]) {
     }
     await ctx.close();
   }
+
+  /* -- TWO PICKERS TAKE SEVERAL VALUES, and combine them differently -------
+
+     Owner, 2026-09-04: Entry level and Characteristics were single-select
+     radios. Entry level is ANY-OF now ("Assistant Professor or Post-Doc" is
+     two things one candidate could take), Characteristics ALL-OF ("PhD and
+     Research seminars" is a department that has both). Every expectation
+     below is computed from the served file under the page's own market rule,
+     never from a number that would move with the corpus, and the values
+     ticked are whichever the open menu offers, for the same reason. */
+  {
+    const { ctx, q, errors } = await jobsPage(READER);
+    const shown = () => q.$eval('.oa-count', (n) =>
+      Number(n.textContent.split('/')[1].trim().split(' ')[0]));
+    const menu = () => q.$$eval('.oa-pick-menu:not([hidden]) .oa-opt:not(.is-empty)', (ns) =>
+      ns.map((n) => ({ v: n.querySelector('.oa-opt-name').textContent,
+        n: Number(n.querySelector('.oa-opt-n').textContent),
+        type: n.querySelector('input').type, on: n.querySelector('input').checked })));
+    const chips = () => q.$$eval('.oa-filter.oa-pick .oa-chip .oa-chip-label',
+      (ns) => ns.map((n) => n.textContent));
+    const tick = async (opts, v) => {
+      const i = opts.findIndex((o) => o.v === v) + 1;
+      await q.click(`.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(${i}) input`);
+      await q.waitForTimeout(300);
+    };
+    /* the rows the page holds, with the two fields these filters read */
+    const rows = await q.evaluate(async () => {
+      const d = await (await fetch('/data/jobs.json')).json();
+      return (Array.isArray(d) ? d : d.rows)
+        .filter((r) => window.OAJobNav.inCurrentMarket(r))
+        .map((r) => ({ levels: r.levels || [], chars: r.characteristics || [] }));
+    });
+    const total = await shown();
+    eq(rows.length, total,
+      'multi: the expectations are computed over exactly the rows the page holds');
+    const anyOf = (rs, vals) => rs.filter((r) => vals.some((v) => r.levels.includes(v)));
+    const allOf = (rs, vals) => rs.filter((r) => vals.every((v) => r.chars.includes(v)));
+
+    /* ENTRY LEVEL: tick boxes, and a second tick WIDENS */
+    await q.click('#oaf-level');
+    await q.waitForTimeout(200);
+    let opts = await menu();
+    ok(opts.length >= 2 && opts.every((o) => o.type === 'checkbox'),
+      'multi: Entry level offers tick boxes, not radios');
+    eq(await q.$$eval('.oa-pick-menu:not([hidden]) .oa-pick-hint', (n) => n.length), 0,
+      'multi: …and carries no note, because any-of is what every other picker means');
+    const L = opts.slice().sort((a, b) => b.n - a.n).slice(0, 2).map((o) => o.v);
+    await tick(opts, L[0]);
+    const one = await shown();
+    eq(one, anyOf(rows, [L[0]]).length, `multi: one level shows its own postings ("${L[0]}")`);
+    eq(await q.$$eval('.oa-pick-menu:not([hidden])', (n) => n.length), 1,
+      'multi: the menu stays open for the next tick');
+    await tick(opts, L[1]);
+    const two = await shown();
+    eq(two, anyOf(rows, L).length,
+      `multi: two levels show EITHER (${one} -> ${two}), the union the data holds`);
+    ok(two >= Math.max(...L.map((v) => anyOf(rows, [v]).length)),
+      'multi: …at least as many as the larger alone, which an AND could never be');
+    await q.keyboard.press('Escape');
+    eq(await chips(), L, 'multi: both levels are chips under the control');
+
+    /* CHARACTERISTICS: tick boxes, a note, and a second tick NARROWS */
+    await q.click('#oaf-chars');
+    await q.waitForTimeout(200);
+    opts = await menu();
+    ok(opts.length >= 2 && opts.every((o) => o.type === 'checkbox'),
+      'multi: Characteristics offers tick boxes too');
+    const hint = await q.$eval('.oa-pick-menu:not([hidden]) .oa-pick-hint', (n) => n.textContent);
+    ok(/every characteristic you tick/.test(hint),
+      'multi: …and its menu says what ticking several means');
+    eq(await q.$eval('#oaf-chars', (n) => n.title), hint,
+      'multi: the button says it as its title, for a pointer that hovers first');
+    const inLevels = anyOf(rows, L);   // its counts are cross-filtered on the ticked levels
+    for (const o of opts) {
+      eq(o.n, allOf(inLevels, [o.v]).length,
+        `multi: "${o.v}" counts the postings that have it, within the ticked levels`);
+    }
+    const c0 = opts.slice().sort((a, b) => b.n - a.n)[0].v;
+    await tick(opts, c0);
+    const x = await shown();
+    eq(x, allOf(inLevels, [c0]).length, `multi: one characteristic shows its postings ("${c0}")`);
+    /* THE COUNTS MOVE, IN PLACE: each is now what ticking it AS WELL would leave */
+    const after = await menu();
+    for (const o of after) {
+      eq(o.n, allOf(inLevels, [c0, o.v]).length,
+        `multi: with "${c0}" ticked, "${o.v}" says what ticking it as well would leave`);
+    }
+    eq(after.map((o) => o.v), opts.map((o) => o.v),
+      'multi: every characteristic is still listed, so none seems to have vanished');
+    eq(await q.evaluate(() => document.activeElement && document.activeElement.type), 'checkbox',
+      'multi: the keyboard focus stayed on the box just ticked — the counts were refreshed, not redrawn');
+    const c1 = after.filter((o) => o.v !== c0).sort((a, b) => b.n - a.n)[0].v;
+    await tick(opts, c1);
+    const xy = await shown();
+    eq(xy, allOf(inLevels, [c0, c1]).length,
+      `multi: two characteristics show only postings with BOTH (${x} -> ${xy})`);
+    ok(xy <= x, 'multi: …a second tick narrows, it never widens');
+    const own = (await menu()).find((o) => o.v === c0);
+    eq(own && own.n, xy, "multi: a ticked value's own count is the current result");
+    await q.keyboard.press('Escape');
+    const C = [c0, c1];
+    eq(await chips(), [...L, ...C], 'multi: every value is a chip under its own control');
+
+    /* the address carries all four, one parameter per value */
+    const u = new URL(q.url());
+    eq(u.searchParams.getAll('level'), L, 'multi: the address carries both levels');
+    eq(u.searchParams.getAll('chars'), C, 'multi: …and both characteristics');
+
+    /* the workbook says "and" where the list meant it, "or" where it meant that */
+    if (xy > 0) {
+      const dl = q.waitForEvent('download', { timeout: 30000 });
+      await q.click('.oa-export');
+      const file = await (await dl).path();
+      const parts = unzipStore(new Uint8Array(await readFile(file)));
+      const about = sheetCells(parts['xl/worksheets/sheet3.xml']);
+      const text = Object.keys(about).map((k) => about[k].v).join(' | ');
+      ok(text.includes(`${L[0]}  or  ${L[1]}`),
+        'multi: the About sheet joins the levels with "or"');
+      ok(text.includes(`${c0}  and  ${c1}`),
+        'multi: …and the characteristics with "and" — the word the list used');
+    }
+
+    /* CHIPS MOVE NOTHING — the desktop baseline rule, with chips under two
+       PICKERS this time (the existing check hangs them under the text
+       search) — and a phone still fits everything on screen. */
+    for (const width of [1280, 390, 320]) {
+      await q.setViewportSize({ width, height: 1000 });
+      await q.waitForTimeout(250);
+      const geo = await q.evaluate(() => {
+        const doc = document.documentElement;
+        const bar = document.querySelector('.oa-filters');
+        const ctrls = [...document.querySelectorAll(
+          '.oa-filters input[type=search], .oa-filters .oa-pick-btn, .oa-filters .oa-clear')];
+        const lines = [];
+        ctrls.forEach((n) => {
+          const t = n.getBoundingClientRect().top;
+          const row = lines.find((r) => Math.abs(r.top - t) < 1.5);
+          if (row) row.n++; else lines.push({ top: t, n: 1 });
+        });
+        const cells = new Set([...bar.children]
+          .map((c) => Math.round(c.getBoundingClientRect().top))).size;
+        const menus = [...document.querySelectorAll('.oa-pick .oa-pick-btn')].map((btn) => {
+          btn.click();
+          const r = btn.parentElement.querySelector('.oa-pick-menu').getBoundingClientRect();
+          btn.click();
+          return { left: Math.round(r.left), right: Math.round(r.right) };
+        });
+        return { over: doc.scrollWidth - doc.clientWidth, lines: lines.length, cells,
+          chips: document.querySelectorAll('.oa-pick .oa-chip').length, menus, vw: doc.clientWidth };
+      });
+      eq(geo.chips, 4, `multi @${width}: the four chips are showing, so the measurement means something`);
+      ok(geo.over <= 1, `multi @${width}: the page does not scroll sideways (${geo.over}px)`);
+      ok(geo.menus.every((r) => r.left >= 0 && r.right <= geo.vw),
+        `multi @${width}: every picker menu stays on screen (${JSON.stringify(geo.menus)})`);
+      if (width >= 1000) {
+        eq(geo.lines, geo.cells,
+          `multi @${width}: every control sits on its row's baseline with chips under two pickers`);
+      }
+    }
+    await q.setViewportSize({ width: 1280, height: 1000 });
+
+    /* a link is a search: reloading it restores every value */
+    await q.goto(u.href, { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card, .oa-empty');
+    await q.waitForTimeout(400);
+    eq(await shown(), xy, 'multi: reloading the link restores the same result');
+    eq(await chips(), [...L, ...C], 'multi: …with every value back as a chip');
+
+    /* a link from the single-choice days names ONE value, and still selects it;
+       the older "a|b" join, which links in the wild still carry, selects both */
+    await q.goto(BASE + 'jobs.html?level=' + encodeURIComponent(L[0]) +
+      '&chars=' + encodeURIComponent(c0), { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card, .oa-empty');
+    await q.waitForTimeout(400);
+    eq(await shown(), allOf(anyOf(rows, [L[0]]), [c0]).length,
+      'multi: a one-value link from the radio days still selects what it names');
+    eq(await chips(), [L[0], c0], 'multi: …as one chip each');
+    await q.goto(BASE + 'jobs.html?chars=' + encodeURIComponent(C.join('|')), { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card, .oa-empty');
+    await q.waitForTimeout(400);
+    eq(await shown(), allOf(rows, C).length,
+      'multi: the legacy "a|b" join lands as both values, and under AND means both');
+    eq(errors, [], 'multi: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- and the SINGLE-CHOICE type the other pages use kept working ---------
+
+     previous-markets keeps `type: 'one'` on its Entry level (the directory
+     on two of its filters): radios, one value at a time, and a link naming
+     several takes the last. A page-level decision, so it is measured on the
+     page that made it. */
+  {
+    const { ctx, page: p, errors } = await signedInPage('previous-markets.html');
+    await p.click('#oaf-level');
+    await p.waitForTimeout(200);
+    const opts = await p.$$eval('.oa-pick-menu:not([hidden]) .oa-opt:not(.is-empty)', (ns) =>
+      ns.map((n) => ({ v: n.querySelector('.oa-opt-name').textContent,
+        type: n.querySelector('input').type })));
+    ok(opts.length >= 2 && opts.every((o) => o.type === 'radio'),
+      "one: the archive's Entry level is still drawn as radios");
+    await p.click('.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(1) input');
+    await p.waitForTimeout(300);
+    eq(await p.$$eval('.oa-pick-menu:not([hidden])', (n) => n.length), 0,
+      'one: choosing a value closes the menu, as it always did');
+    await p.click('#oaf-level');
+    await p.waitForTimeout(200);
+    await p.click('.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(2) input');
+    await p.waitForTimeout(300);
+    eq(await p.$$eval('.oa-filter.oa-pick .oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
+      [opts[1].v], 'one: a second choice REPLACES the first');
+    eq(new URL(p.url()).searchParams.getAll('level'), [opts[1].v],
+      'one: …and the address names one value');
+    await p.goto(BASE + 'previous-markets.html?level=' + encodeURIComponent(opts[0].v) +
+      '&level=' + encodeURIComponent(opts[1].v), { waitUntil: 'load' });
+    await p.waitForSelector('.oa-card, .oa-empty');
+    await p.waitForTimeout(400);
+    eq(await p.$$eval('.oa-filter.oa-pick .oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
+      [opts[1].v], 'one: a link naming two values selects the LAST, as before');
+    eq(errors, [], 'one: no uncaught script error');
+    await ctx.close();
+  }
 }
 
 /* ----------------------------------------------------- the analytics page

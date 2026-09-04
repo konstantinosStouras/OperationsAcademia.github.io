@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "levels-and-characteristics-multi-select",
+      "date": "2026-09-04",
+      "title": "Entry level and Characteristics take several values",
+      "summary": "On the job postings page, the Entry level and Characteristics filters now let you tick more than one value. Entry level widens the list: tick Assistant Professor and Post-Doc and you see postings at either. Characteristics narrows it: tick PhD and Research seminars and you see only the departments that have both, and the number beside each characteristic says how many postings ticking it as well would leave. A link you copy carries every value you ticked.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "closing-this-week-alerts",
       "date": "2026-09-04",
       "title": "E-mail alerts can remind you of postings about to close",

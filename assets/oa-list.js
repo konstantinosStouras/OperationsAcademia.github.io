@@ -30,12 +30,17 @@
    FILTER SEMANTICS (matching what Awesome Table did, so results do not shift
    under returning visitors):
      - every filter ANDs with every other filter;
-     - within one filter, selected values OR together;
+     - within one filter, selected values OR together — unless the filter
+       declares `match: 'all'`, when a row passes only if it carries EVERY
+       selected value (the jobs page's Characteristics: a reader ticking
+       "PhD" and "Research seminars" wants a department that has both);
      - a 'text' filter is a case/diacritic-insensitive substring match;
      - a filter with nothing selected is inert.
 
    Option counts are CROSS-FILTERED: each value shows how many rows it would
-   yield given every OTHER active filter, so a count is never a dead end.
+   yield given every OTHER active filter, so a count is never a dead end. For
+   an all-of filter the count is what ticking that value ON TOP OF the ones
+   already ticked would leave, which is the only honest number under AND.
    --------------------------------------------------------------------------- */
 (function () {
   'use strict';
@@ -236,6 +241,16 @@
     }
     if (!chosen || !chosen.size) return true;
     var vals = valuesOf(row, f);
+    if (f.match === 'all') {
+      /* ALL OF THEM (owner, 2026-09-04): a reader who ticks "PhD" and
+         "Research seminars" under Characteristics wants a department that
+         has BOTH, so every ticked value must be on the row. Any-of stays the
+         default and is what Entry level means — "Assistant Professor or
+         Post-Doc" is two things the same person could take. */
+      var missing = false;
+      chosen.forEach(function (v) { if (vals.indexOf(v) === -1) missing = true; });
+      return !missing;
+    }
     for (var i = 0; i < vals.length; i++) if (chosen.has(vals[i])) return true;
     return false;
   }
@@ -357,11 +372,33 @@
     function optionsFor(f) {
       var pool = passing(f.key);
       var counts = Object.create(null);
-      pool.forEach(function (r) {
-        valuesOf(r, f).forEach(function (v) {
-          counts[v] = (counts[v] || 0) + 1;
+      if (f.match === 'all' && sel[f.key].size) {
+        /* UNDER AND, A COUNT IS "WHAT TICKING THIS AS WELL WOULD LEAVE". The
+           any-of count below (rows carrying the value, given every OTHER
+           filter) would overstate every option the moment one is ticked:
+           with "PhD" chosen, "MBA 82" reads as 82 postings a tick would
+           show, where a tick shows the postings that have BOTH. So the rows
+           counted are the ones already carrying every ticked value, and a
+           ticked value's own count is therefore the current result.
+
+           Every value the other filters allow is still LISTED, at 0 where
+           nothing has it beside what is ticked — a value that vanished from
+           the menu would read as the site having lost it, and "MBA 0" says
+           the true thing: no posting here offers both. */
+        pool.forEach(function (r) {
+          var vals = valuesOf(r, f);
+          var carriesAll = matches(r, f, sel[f.key]);
+          vals.forEach(function (v) {
+            counts[v] = (counts[v] || 0) + (carriesAll ? 1 : 0);
+          });
         });
-      });
+      } else {
+        pool.forEach(function (r) {
+          valuesOf(r, f).forEach(function (v) {
+            counts[v] = (counts[v] || 0) + 1;
+          });
+        });
+      }
       // include an already-selected value even when it now counts zero, so a
       // chip can always be seen and removed
       sel[f.key].forEach(function (v) { if (!(v in counts)) counts[v] = 0; });
@@ -620,14 +657,21 @@
 
     /** Every filter with something selected, in bar order: what a reader would
         have to describe to say what they were looking at. The half-typed word
-        counts, because it is narrowing the list they can see. */
+        counts, because it is narrowing the list they can see. `match` says
+        how the values combine — 'all' for a filter whose values must ALL be
+        on a row, 'any' otherwise — so a consumer describing the search (the
+        Excel download's About sheet) can write "and" where "or" would be a
+        lie about what the reader was shown. */
     function activeFilters() {
       var out = [];
       filters.forEach(function (f) {
         var values = [];
         sel[f.key].forEach(function (v) { values.push(v); });
         if (f.type === 'text' && drafts[f.key]) values.push(drafts[f.key]);
-        if (values.length) out.push({ key: f.key, label: f.label, values: values });
+        if (values.length) {
+          out.push({ key: f.key, label: f.label, values: values,
+            match: f.match === 'all' ? 'all' : 'any' });
+        }
       });
       return out;
     }
@@ -677,6 +721,17 @@
     function buildPicker(f, id, onPick) {
       var chosen = sel[f.key];
       var multi = f.type !== 'one';
+      var allOf = multi && f.match === 'all';
+      /* WHAT TICKING SEVERAL MEANS, said where the reader is choosing. An
+         all-of picker reads exactly like its any-of neighbours — the same
+         "2 selected", the same chips — and nothing else on the bar says that
+         here the values narrow rather than widen. A page may word it for its
+         own dataset (`hint`); the engine's own wording is the fallback. It is
+         drawn INSIDE the menu rather than under the control: the bar is
+         already eight controls wide and two chips deep on a 320px phone, and
+         a menu has its own room. The button carries it as a title too, for
+         a pointer that hovers before it presses. */
+      var hint = f.hint || (allOf ? 'Tick several and a posting must have every one of them.' : '');
       var btnLabel = el('span', {
         class: 'oa-pick-label',
         text: chosen.size
@@ -689,6 +744,7 @@
         class: 'oa-pick-btn' + (chosen.size ? ' is-set' : ''),
         'aria-haspopup': 'listbox',
         'aria-expanded': 'false',
+        title: hint || null,
       }, [
         btnLabel,
         el('span', { class: 'oa-pick-caret', 'aria-hidden': 'true', text: multi ? '+' : '⌄' }),
@@ -704,6 +760,7 @@
       }
 
       var menu = el('div', { class: 'oa-pick-menu', role: 'listbox', hidden: true });
+      if (hint) menu.appendChild(el('p', { class: 'oa-pick-hint', text: hint }));
 
       /* The search box is created ONCE and never re-rendered. It used to be
          rebuilt inside fill() on every keystroke and then re-focused, which put
@@ -745,8 +802,22 @@
         if (e.key === 'Escape') { close(); btn.focus(); }
       }
 
+      /* The count spans of the rows on screen, by value — so an all-of tick
+         can refresh the numbers IN PLACE (recount below) without redrawing
+         the rows, which would throw away the checkbox that was just pressed
+         and the keyboard focus with it. */
+      var countEls = Object.create(null);
+
+      function recount() {
+        var fresh = optionsFor(f);
+        var by = Object.create(null);
+        fresh.forEach(function (o) { by[o.value] = o.count; });
+        for (var v in countEls) countEls[v].textContent = String(v in by ? by[v] : 0);
+      }
+
       function fill(q) {
         optsEl.innerHTML = '';
+        countEls = Object.create(null);
         var opts = optionsFor(f);
         var needle = fold(q || '');
         if (needle) {
@@ -758,10 +829,12 @@
         opts.forEach(function (o) {
           var cb = el('input', { type: multi ? 'checkbox' : 'radio', name: id });
           cb.checked = chosen.has(o.value);
+          var nEl = el('span', { class: 'oa-opt-n', text: String(o.count) });
+          countEls[o.value] = nEl;
           var row = el('label', { class: 'oa-opt' }, [
             cb,
             el('span', { class: 'oa-opt-name', text: o.value }),
-            el('span', { class: 'oa-opt-n', text: String(o.count) }),
+            nEl,
           ]);
           cb.addEventListener('change', function () {
             if (!multi) chosen.clear();
@@ -769,10 +842,14 @@
             page = 0;
             syncBtn();
             if (!multi) close();
-            // NOT a rebuild: the option counts in THIS menu are cross-filtered
-            // on every OTHER filter (optionsFor skips f.key), so ticking a
-            // value here cannot change them — and leaving the rows in place is
-            // what keeps a multi-select menu open under the pointer.
+            // NOT a rebuild: the option counts in an any-of menu are
+            // cross-filtered on every OTHER filter (optionsFor skips f.key),
+            // so ticking a value here cannot change them — and leaving the
+            // rows in place is what keeps a multi-select menu open under the
+            // pointer. An ALL-OF menu's counts do move with its own ticks
+            // (each is "what ticking this as well would leave"), so those are
+            // refreshed in place, rows and focus untouched.
+            if (allOf) recount();
             onPick();
           });
           optsEl.appendChild(row);

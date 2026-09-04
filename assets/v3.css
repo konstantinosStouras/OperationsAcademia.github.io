@@ -1262,6 +1262,9 @@ body.v3 .oa-opt { color: var(--ink-2); }
 body.v3 .oa-opt:hover { background: var(--brand-soft); }
 body.v3 .oa-opt-n { color: var(--mut); background: var(--bg-3); border-radius: 999px; }
 body.v3 .oa-filter-hint { color: var(--mut); }
+/* the all-of picker's note inside its menu (oa-list.css .oa-pick-hint) — a
+   rule in one stylesheet alone is invisible on the site or lost on the next page */
+body.v3 .oa-pick-hint { color: var(--mut); }
 body.v3 .oa-chip { background: var(--brand); color: var(--on-brand); border-radius: 999px; }
 body.v3 .oa-chip:hover { background: var(--brand-2); }
 /* RED — see the note on .oa-clear in assets/oa-list.css. On this design the

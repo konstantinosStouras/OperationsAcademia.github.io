@@ -161,6 +161,18 @@
   font-size: 13px;
 }
 
+/* What ticking several values means, for a picker that says so (an all-of
+   filter — its values NARROW rather than widen, and nothing else about the
+   control tells the reader that). Drawn inside the menu, where the reader is
+   choosing and where there is room; never under the control, where it would
+   push the bar about on a phone. Themed in v3.css as well. */
+.oa-pick-hint {
+  margin: 4px 10px 6px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--mut, #666);
+}
+
 .oa-opt {
   display: flex;
   align-items: center;
