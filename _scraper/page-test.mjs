@@ -7353,6 +7353,108 @@ for (const w of [320, 360, 390, 430]) {
 }
 
 
+/* ------------------------------------- "Closing this week" on the alerts page
+
+   The deadlines topic (owner, 2026-09-04): a fourth tick box, a preview
+   section built by the SAME function the mailer runs, and a deadlines-only
+   alert that saves with exactly that topic. The served file is routed to a
+   fixture, because whether any real posting closes in the next seven days is
+   a fact about the calendar and a guard about a corpus must not move with
+   it; the reader is signed in through the shim, since the preview carries
+   real postings and is drawn for a registered reader only.               */
+{
+  const today = new Date().toISOString().slice(0, 10);
+  const plus = (n) => new Date(Date.parse(today + 'T00:00:00Z') + n * 86400000)
+    .toISOString().slice(0, 10);
+  const yr = marketYear();
+  const row = (id, extra) => ({ id, year: yr, years: [yr], posted: today,
+    institution: id + ' University', department: 'Operations', school: '', unit: 'Operations',
+    type: 'University', levels: ['Assistant Professor'], applyBy: 'Until filled.',
+    applyByDate: '', country: 'Ireland', characteristics: [], featured: false,
+    source: 'oa-form', addedAt: today + 'T00:00:00Z', ...extra });
+  const SEED = [
+    row('closing-final', { applyByDate: plus(3), applyBy: 'soon' }),
+    row('closing-review', { reviewDate: plus(5) }),
+    row('closing-later', { applyByDate: plus(30), applyBy: 'later' }),
+  ];
+
+  const { ctx, page: q, errors } = await signedInPage('alerts.html', { wait: false });
+  await q.route('**/data/jobs.json', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+  await q.goto(BASE + 'alerts.html', { waitUntil: 'load' });
+  await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+    null, { timeout: 15000 });
+  await q.waitForSelector('#oa-alerts-app', { timeout: 15000 });
+  // the filter vocabulary is built from the routed file, so this is "loaded"
+  await q.waitForSelector('#a-country input', { timeout: 15000 });
+  await q.waitForTimeout(250);
+
+  const box = await q.evaluate(() => {
+    const t = document.querySelector('#t-deadlines');
+    return t && { checked: t.checked,
+      label: t.closest('label').textContent.replace(/\s+/g, ' ').trim() };
+  });
+  ok(box && !box.checked, 'closing: the fourth tick box is offered, unticked on a new alert');
+  ok(box && /^Postings closing within 7 days\./.test(box.label),
+    'closing: …and says what it does');
+
+  // a deadlines-ONLY alert: the filters stay, the preview shows the section
+  await q.uncheck('#t-jobs');
+  await q.check('#t-deadlines');
+  await q.waitForTimeout(150);
+  const pv = await q.evaluate(() => ({
+    filters: !document.querySelector('#a-filters').hidden,
+    subject: document.querySelector('#oa-preview .oa-preview-head').textContent.replace(/\s+/g, ' '),
+    text: document.querySelector('#oa-preview').textContent.replace(/\s+/g, ' '),
+  }));
+  ok(pv.filters, 'closing: the filters stay on screen for a deadlines-only alert — they choose its postings');
+  ok(/Closing this week/.test(pv.text), 'closing: the preview carries the "Closing this week" section');
+  ok(/2 postings matching your alert close in the next seven days/.test(pv.text),
+    'closing: …counting the two that close within the week');
+  ok(/closing-final University/.test(pv.text) && /Final apply by/.test(pv.text),
+    'closing: …the final apply-by named as final');
+  ok(/closing-review University/.test(pv.text) && /Suggested apply by/.test(pv.text),
+    'closing: …the suggested one as suggested');
+  ok(!/closing-later University/.test(pv.text),
+    'closing: …and not the posting closing in a month');
+  ok(/Subject: 2 postings close this week/.test(pv.subject),
+    'closing: an unnamed deadlines-only alert previews the subject the mailer gives it');
+
+  // the alert's own filters narrow the reminder, live
+  await q.fill('#a-text', 'closing-final');
+  await q.waitForTimeout(150);
+  const narrowed = await q.$eval('#oa-preview', (n) => n.textContent.replace(/\s+/g, ' '));
+  ok(/One posting matching your alert closes in the next seven days/.test(narrowed) &&
+     !/closing-review University/.test(narrowed),
+    'closing: a filter narrows the reminder the way it narrows new postings');
+
+  // …and it saves, with exactly that topic, through the shim
+  await q.fill('#a-name', 'Closing soon');
+  await q.click('#a-save');
+  await q.waitForFunction(() => /Alert created/.test(
+    document.querySelector('#a-msg').textContent), null, { timeout: 15000 });
+  await q.waitForTimeout(250);
+  const saved = await q.evaluate((uid) => {
+    const key = Object.keys(window.__fb.docs).find((k) => k.startsWith('users/' + uid + '/alerts/'));
+    const d = key && window.__fb.docs[key];
+    return d && { topics: d.criteria.topics, text: d.criteria.text, enabled: d.enabled,
+      email: d.email, hasMark: 'lastDeadlineUntil' in d,
+      card: (document.querySelector('#oa-alert-list .oa-alert-card') || {}).textContent
+        .replace(/\s+/g, ' ') };
+  }, A_READER.uid);
+  eq(saved && saved.topics, ['deadlines'],
+    'closing: a deadlines-only alert is saved with that one topic — it has intent on its own');
+  ok(saved && saved.text === 'closing-final' && saved.enabled === true &&
+     saved.email === A_READER.email,
+    'closing: …with its filter, enabled, to the account\'s own address');
+  ok(saved && !saved.hasMark,
+    'closing: the page writes no mark — lastDeadlineUntil is the mailer\'s, behind a delivery');
+  ok(saved && /postings closing within 7 days matching “closing-final”/.test(saved.card),
+    'closing: the card\'s summary line names the reminder and its filter');
+  eq(errors, [], 'closing: no script errors on the alerts page');
+  await ctx.close();
+}
+
 /* ------------------------------------------------------------------ done */
 
 

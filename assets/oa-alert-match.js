@@ -16,14 +16,22 @@
    --------------------------------------------------------------------------- */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./oa-countries.js'), require('./oa-schools.js'));
+    module.exports = factory(require('./oa-countries.js'), require('./oa-schools.js'),
+      require('./oa-jobnav.js'));
   } else {
-    root.OAAlertMatch = factory(root.OACountries, root.OASchools);
+    root.OAAlertMatch = factory(root.OACountries, root.OASchools, root.OAJobNav);
   }
-}(typeof self !== 'undefined' ? self : this, function (OACountries, OASchools) {
+}(typeof self !== 'undefined' ? self : this, function (OACountries, OASchools, OAJobNav) {
   'use strict';
 
-  var TOPICS = ['jobs', 'updates', 'candidates', 'news'];
+  var TOPICS = ['jobs', 'updates', 'candidates', 'deadlines', 'news'];
+
+  /* THE "CLOSING THIS WEEK" WINDOW: a posting whose final or suggested apply-by
+     date falls within this many days of today. One constant, read by the
+     mailer and by the alerts page's preview alike, so the page cannot promise
+     a week the mailer does not send. */
+  var DEADLINE_WINDOW_DAYS = 7;
+  var ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
   /* ONE SPELLING PER COUNTRY, on both sides of every comparison.
 
@@ -152,6 +160,11 @@
   /** True when the alert asks for new candidate profiles. */
   function wantsCandidates(c) {
     return normalise(c).topics.indexOf('candidates') !== -1;
+  }
+
+  /** True when the alert asks to be reminded of postings about to close. */
+  function wantsDeadlines(c) {
+    return normalise(c).topics.indexOf('deadlines') !== -1;
   }
 
   /** True when the alert has no job filters, i.e. "tell me about everything". */
@@ -352,6 +365,85 @@
     return d.toISOString().slice(0, 10);
   }
 
+  /** yyyy-mm-dd, `n` days after (or, negative, before) the day given — the
+      window arithmetic the deadlines topic does on BOTH sides. Strings in,
+      strings out, UTC throughout; '' for anything that is not a day. */
+  function shiftDay(day, n) {
+    var t = Date.parse(String(day == null ? '' : day).slice(0, 10) + 'T00:00:00Z');
+    if (isNaN(t)) return '';
+    return new Date(t + n * 86400000).toISOString().slice(0, 10);
+  }
+
+  function dayOf(v) {
+    return String(v == null ? '' : v).slice(0, 10);
+  }
+
+  /* ------------------------------------------------------------- deadlines
+
+     "Closing this week": the postings matching the alert's own filters whose
+     FINAL apply-by date (applyByDate) or SUGGESTED apply-by date (reviewDate)
+     falls within the next DEADLINE_WINDOW_DAYS. The same paper filters the
+     jobs topic applies (matchesJob — no filter means every posting), so the
+     reminder is about the postings the subscriber asked to hear about, and
+     nothing else.
+
+     DATES ARE DAYS, COMPARED AS STRINGS. Every apply-by date on a served row
+     is yyyy-mm-dd, and so are `from`, `until` and `coveredUntil`, so `<=` is
+     the whole comparison and no time zone can shift a deadline by a day.
+     Today is the UTC day, like the rest of the pipeline.
+
+     `coveredUntil` is the END of the last window this alert was checked
+     against (the mailer's `lastDeadlineUntil`): a date on or before it has
+     already been announced, or already been looked at and found empty, so
+     only dates AFTER it go out. That is what makes a posting never appear
+     twice — a daily alert sees each closing date exactly once, on the day it
+     enters the window. It has a cost, stated rather than hidden: a posting
+     that ENTERS the window late (added, or given a date, after the window was
+     covered) is not announced by this topic; the jobs topic is what announces
+     a new posting.
+
+     WHICH DATE, where both fall due in one window: the FINAL one. It is the
+     date that closes the search; the suggested one precedes it and is implied.
+     Where only the suggested date is in the window, that is what is named,
+     and the final date is named when its own turn comes. */
+
+  /**
+   * Every posting matching `c` that is in the current market and whose final
+   * or suggested apply-by date is a day in [from, until] and after
+   * coveredUntil — each as { row, kind: 'final'|'suggested', date }, sorted
+   * by date. Empty when the alert did not ask for deadlines, when the window
+   * is not a pair of days, or when the market rule (assets/oa-jobnav.js) is
+   * not loaded: it says no when it cannot tell, never guesses.
+   */
+  function closingSoonFor(rows, c, opts) {
+    if (!wantsDeadlines(c)) return [];
+    if (!OAJobNav || !OAJobNav.inCurrentMarket) return [];
+    opts = opts || {};
+    var from = dayOf(opts.from), until = dayOf(opts.until);
+    var covered = dayOf(opts.coveredUntil);
+    if (!ISO_DAY.test(from) || !ISO_DAY.test(until)) return [];
+    var at = new Date(from + 'T00:00:00Z');
+    var out = [];
+    arr(rows).forEach(function (r) {
+      if (!r || !matchesJob(r, c)) return;
+      if (!OAJobNav.inCurrentMarket(r, at)) return;
+      var tries = [['final', dayOf(r.applyByDate)], ['suggested', dayOf(r.reviewDate)]];
+      for (var i = 0; i < tries.length; i++) {
+        var d = tries[i][1];
+        if (!ISO_DAY.test(d)) continue;
+        if (d < from || d > until) continue;
+        if (covered && d <= covered) continue;
+        out.push({ row: r, kind: tries[i][0], date: d });
+        return;
+      }
+    });
+    out.sort(function (x, y) {
+      if (x.date !== y.date) return x.date < y.date ? -1 : 1;
+      return String(x.row.institution || '').localeCompare(String(y.row.institution || ''));
+    });
+    return out;
+  }
+
   /**
    * Is this alert due, given when it last ran?
    * `immediate` is bounded by the mailer's own cadence, not by a window.
@@ -379,11 +471,13 @@
 
   return {
     TOPICS: TOPICS,
+    DEADLINE_WINDOW_DAYS: DEADLINE_WINDOW_DAYS,
     fold: fold,
     normalise: normalise,
     wantsJobs: wantsJobs,
     wantsUpdates: wantsUpdates,
     wantsCandidates: wantsCandidates,
+    wantsDeadlines: wantsDeadlines,
     isBroad: isBroad,
     matchesJob: matchesJob,
     newJobsFor: newJobsFor,
@@ -393,6 +487,8 @@
     newUpdatesFor: newUpdatesFor,
     latestUpdateDate: latestUpdateDate,
     daysBefore: daysBefore,
+    shiftDay: shiftDay,
+    closingSoonFor: closingSoonFor,
     isDue: isDue,
     hasIntent: hasIntent
   };

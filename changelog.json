@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "closing-this-week-alerts",
+      "date": "2026-09-04",
+      "title": "E-mail alerts can remind you of postings about to close",
+      "summary": "E-mail alerts have a fourth thing to tell you about: the postings matching your filters whose final or suggested apply-by date falls within the next seven days. Tick \"Postings closing within 7 days\" on an alert and each digest ends with a short \"Closing this week\" list, naming each posting once with the date that matters and a link to it. It uses the same filters as new postings, so an alert can carry either or both.",
+      "url": "/alerts.html"
+    },
+    {
       "id": "review-sweep-2026-09",
       "date": "2026-09-04",
       "title": "Keyboard, phone and reliability fixes across the site",

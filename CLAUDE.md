@@ -1983,6 +1983,79 @@ The alerts workflow is also pinned to the build **by its current name**:
 `workflow_run` matches on the literal string, so renaming a workflow silently
 unchains every listener.
 
+### …and a "Closing this week" digest, whose mark is a WINDOW END
+
+Owner, 2026-09-04: an alert may also remind its subscriber of the postings
+matching their filters whose **final apply-by date** (`applyByDate`) or
+**suggested apply-by date** (`reviewDate`) falls within the next seven days.
+It is a fourth topic, `deadlines`, on the existing alert system rather than a
+mailer of its own: the tick box sits beside the other three on `alerts.html`,
+the same `criteria` filters choose the postings (no filter means every
+posting), the same `isDue` honours the alert's frequency, and a digest may
+carry jobs, candidates, updates and deadlines together — the section is
+headed **Closing this week** and lists institution, department, which date it
+is and the date, each posting linked through `livePostingUrl`, the same
+`OAJobNav.hrefFor` rule the poster's own e-mail already uses (so a posting
+whose season has rolled opens on Previous markets). A digest that carried
+only deadlines is subjected "N postings close this week".
+
+**One pure function decides it, on both sides.** `closingSoonFor(rows,
+criteria, {from, until, coveredUntil})` in `assets/oa-alert-match.js` — the
+alerts page's preview and the mailer both call it, over the same served
+file, so the sample a subscriber sees is the e-mail they get. Dates are
+`yyyy-mm-dd` strings compared as strings (a stamp is cut to its day, prose is
+never a date), today is the UTC day like the rest of the pipeline, and both
+window edges are inclusive: a search closes at the end of the day named, and
+"within seven days" includes the seventh. Where both dates fall due in one
+window the FINAL one is named, since it is the date that closes the search;
+where only the suggested one is in the window it is named as suggested, and
+the final date gets its own turn. The window's length is ONE constant,
+`DEADLINE_WINDOW_DAYS`, read by both consumers, so the page cannot promise a
+week the mailer does not send.
+
+**The mark is `lastDeadlineUntil`: the END of the window the alert was last
+checked against**, written when a digest was delivered and on the idle
+branch, and never a wall clock — the shape `lastJobAt`, `lastUpdateDate` and
+`lastCandidateAt` have, for the reason the section above records. The next
+window announces only dates AFTER it, which is what makes a closing date
+named exactly once: a daily alert sees each posting on the day its date
+enters the window, a weekly one sees the week's worth, and a run that could
+not send (no mark written) re-checks the same days rather than losing them.
+A checked-and-EMPTY window is covered too — a delivered digest with no
+closing rows, or an idle run, still writes the window end — because what the
+mark records is what was looked at, not what was found.
+
+**The cost, stated rather than hidden**: a posting that ENTERS the window late
+— added, or given a date, after the window was covered — is not announced by
+this topic. The jobs topic is what announces a new posting, and a subscriber
+who wants both ticks both; a per-posting ledger would keep "never twice"
+without that gap and was not worth a document that grows for ever.
+
+**The matcher is handed the market rule, and says no without it.** A posting
+from a closed season is not on the jobs page and is not reminded of, however
+its dates read, so `closingSoonFor` asks `OAJobNav.inCurrentMarket` — the ONE
+definition — through a third factory argument. `alerts.html` therefore loads
+`oa-jobnav.js` BEFORE `oa-alert-match.js`, and with the module absent the
+function returns nothing rather than a private guess at the season (the
+`oa-sponsors.js` lesson, pinned by evaluating the file with a bare root).
+The dependency changes nothing for the jobs, updates and candidates topics.
+
+**No rules change**: alerts live under the blanket `users/{uid}/**` owner
+rule with no key ceiling, so the Admin-SDK stamp freezes nothing (pinned).
+`ALERT_FIELDS` carries the mark in both copies of `oa-accounts.js`, or a
+merged alert would re-announce the week it was already told about.
+
+Tests: `testClosingSoonDigest` in `_scraper/selftest.mjs` (the window edges,
+the covered-until exclusion, suggested versus final, the market filter,
+string dates, the module without its dependency, and the wiring on the page,
+the mailer, both accounts copies, the rules, the changelog and the FAQ),
+`alerts-mailer.mjs --selftest` (the section rendered with the permalink, the
+subject, and — from the file's own source — that the mark is the window end
+on the idle branch and behind a delivery, and never `now`), and the alerts
+block in `_scraper/page-test.mjs` (the tick box, the preview section over a
+routed file, and a deadlines-only alert saved through the fake Firebase shim
+with exactly that topic).
+
 ### A rejected push is REBUILT, never rebased
 
 Everything under `data/` is a build OUTPUT, so a rejected push has nothing to

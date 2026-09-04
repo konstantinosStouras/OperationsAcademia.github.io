@@ -14,6 +14,15 @@
    alert next run rather than skipping the window, and a run that dies halfway
    does not silently swallow a day of postings for everybody after it.
 
+   CLOSING THIS WEEK (owner, 2026-09-04). The deadlines topic reminds a
+   subscriber of the postings matching their filters whose final or suggested
+   apply-by date falls within the next seven days (closingSoonFor in
+   assets/oa-alert-match.js). Its mark is `lastDeadlineUntil` — the END of the
+   window the alert was last checked against, written when a digest was
+   delivered and on the idle branch, and never a wall clock: the next window
+   only announces dates after it, so a closing date is named once and a run
+   that could not send re-checks the same window rather than losing it.
+
    CANDIDATES (owner, 2026-08-23). The candidates topic reads ONE source:
    data/candidates.json — the file build-candidates.mjs leaves EMPTY until the
    admin's reveal date, so a profile the site is not showing cannot reach an
@@ -40,6 +49,12 @@ import {
   shell, esc, safeUrl, headerSafe, send, transport, firestore, unsubHeaders, SITE, toPlain,
 } from './_mail.mjs';
 import { longDate } from './jobs-model.mjs';
+/* WHICH PAGE a posting is on, and the link that opens THAT one — the same
+   `livePostingUrl` the poster's own "your posting is live" e-mail uses, which
+   asks assets/oa-jobnav.js. A posting whose season has rolled lives on
+   Previous markets, and a link to the jobs page would open a list that cannot
+   contain it. */
+import { livePostingUrl } from './submissions-mailer.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -158,6 +173,23 @@ function candidateHtml(r) {
   </li>`;
 }
 
+/** One posting about to close, as a list item: the institution, the
+    department, WHICH date it is and the date, and the posting's own
+    permalink. Every field is submitted through a form, so each part is
+    escaped before it is joined in. */
+function closingHtml(e, now) {
+  const r = e.row || {};
+  const when = (e.kind === 'suggested' ? 'Suggested apply by ' : 'Final apply by ') +
+    longDate(e.date);
+  const href = livePostingUrl(r, { now });
+  return `<li style="margin-bottom:14px;">
+    <strong style="font-size:16px;">${esc(r.institution)}</strong><br>
+    <span style="color:rgba(0,0,0,.6);">${esc(r.department)}</span><br>
+    <span style="color:#666;font-size:13px;">${esc(when)} &middot;
+      <a href="${esc(href)}">Open the posting</a></span>
+  </li>`;
+}
+
 /**
  * The one-off "the candidate profiles are now live" note — the FIRST candidate
  * e-mail every subscriber gets, sent instead of a listing (see the header).
@@ -193,7 +225,8 @@ export function renderCandidatesLiveEmail({ alert, count }) {
   });
 }
 
-export function renderAlertEmail({ alert, jobs, updates, candidates = [] }) {
+export function renderAlertEmail({ alert, jobs, updates, candidates = [], closing = [],
+  now = new Date() }) {
   const parts = [];
   const n = jobs.length;
 
@@ -224,8 +257,28 @@ export function renderAlertEmail({ alert, jobs, updates, candidates = [] }) {
     }
   }
 
+  /* CLOSING THIS WEEK. Headed as its own section, because it is a reminder
+     about postings the reader may already have been told about, not news of
+     new ones; keep the wording in step with the alerts page's preview
+     (oa-alerts.js). */
+  const nd = closing.length;
+  if (nd) {
+    parts.push(`<p style="margin:${(n || nc) ? '22px' : '0'} 0 10px;">` +
+      '<strong>Closing this week</strong></p>');
+    parts.push(`<p style="margin:0 0 14px;">${nd === 1
+      ? 'One posting matching your alert closes in the next seven days:'
+      : `${nd} postings matching your alert close in the next seven days:`}</p>`);
+    parts.push('<ul style="padding-left:20px;margin:0 0 18px;">');
+    parts.push(closing.slice(0, MAX_ROWS).map((e) => closingHtml(e, now)).join(''));
+    parts.push('</ul>');
+    if (nd > MAX_ROWS) {
+      parts.push(`<p style="color:#666;font-size:13px;">…and ${nd - MAX_ROWS} more.
+        <a href="${esc(SITE)}/jobs">See them all on the site</a>.</p>`);
+    }
+  }
+
   if (updates.length) {
-    parts.push(`<p style="margin:${(n || nc) ? '22px' : '0'} 0 10px;"><strong>What is new on the
+    parts.push(`<p style="margin:${(n || nc || nd) ? '22px' : '0'} 0 10px;"><strong>What is new on the
       site</strong></p><ul style="padding-left:20px;margin:0 0 18px;">`);
     for (const u of updates) {
       const uUrl = safeUrl(u.url);
@@ -240,7 +293,7 @@ export function renderAlertEmail({ alert, jobs, updates, candidates = [] }) {
 
   // The button aims where the e-mail's news is: a candidates-only message
   // must not end on "Browse all job postings" about postings it never named.
-  const cta = (nc && !n)
+  const cta = (nc && !n && !nd)
     ? { href: `${SITE}/#candidates`, label: 'Meet the candidates' }
     : { href: `${SITE}/jobs`, label: 'Browse all job postings' };
   parts.push(`<p style="margin-top:20px;">
@@ -439,6 +492,106 @@ async function selftest() {
   ok(!evilCand.includes('<b>aff</b>'), 'a profile affiliation cannot inject markup');
   ok(!/href="javascript:/i.test(evilCand), 'a javascript: CV link is not linked');
   ok(!/href="data:/i.test(evilCand), 'a data: website link is not linked');
+
+  /* ------------------------------------------------------ closing this week
+
+     The deadlines topic (owner, 2026-09-04): the postings matching the alert's
+     filters whose final or suggested apply-by date is within the next seven
+     days, each named ONCE. The window arithmetic and the mark are pinned
+     here, the renderer below; the matcher's own edges are pinned in
+     _scraper/selftest.mjs. */
+  const TODAY = '2026-09-04';
+  const DL_UNTIL = M.shiftDay(TODAY, M.DEADLINE_WINDOW_DAYS);
+  ok(M.DEADLINE_WINDOW_DAYS === 7 && DL_UNTIL === '2026-09-11',
+    'the window runs today through today plus seven days, as the page promises');
+  const CLOSING = [
+    { id: '2027-a-university-20260901', institution: 'A University', department: 'Ops',
+      type: 'University', country: 'Ireland', levels: ['Assistant Professor'],
+      characteristics: [], posted: '2026-09-01', year: 2027,
+      applyByDate: '2026-09-08', reviewDate: '', addedAt: '2026-09-01T00:00:00Z' },
+    { id: '2027-b-university-20260901', institution: 'B University', department: 'SCM',
+      type: 'Business School', country: 'Germany', levels: ['Post-Doc'],
+      characteristics: [], posted: '2026-09-01', year: 2027,
+      applyByDate: '', reviewDate: '2026-09-05', addedAt: '2026-09-01T00:00:00Z' },
+    { id: '2027-c-university-20260901', institution: 'C University', department: 'Ops',
+      type: 'University', country: 'Ireland', levels: [], characteristics: [],
+      posted: '2026-09-01', year: 2027, applyByDate: '2026-10-01', reviewDate: '',
+      addedAt: '2026-09-01T00:00:00Z' },
+  ];
+  const DL = { topics: ['deadlines'] };
+  const win = (covered) => M.closingSoonFor(CLOSING, DL,
+    { from: TODAY, until: DL_UNTIL, coveredUntil: covered });
+  ok(win('').map((e) => e.row.id + ':' + e.kind + ':' + e.date).join(',') ===
+     '2027-b-university-20260901:suggested:2026-09-05,2027-a-university-20260901:final:2026-09-08',
+    'a never-checked alert is told every posting closing in the window, earliest first, ' +
+    'a suggested date named as suggested and a final one as final');
+  ok(win(DL_UNTIL).length === 0,
+    'and once the window end is the mark, nothing in it is sent twice');
+  ok(win('2026-09-06').map((e) => e.row.id).join(',') === '2027-a-university-20260901',
+    'a mark inside the window lets through only the dates after it');
+  ok(M.closingSoonFor(CLOSING, { topics: ['jobs'] },
+    { from: TODAY, until: DL_UNTIL, coveredUntil: '' }).length === 0,
+    'a jobs-only alert is sent no closing reminder');
+  ok(M.closingSoonFor(CLOSING, { topics: ['deadlines'], country: ['Germany'] },
+    { from: TODAY, until: DL_UNTIL, coveredUntil: '' }).map((e) => e.row.id).join(',') ===
+     '2027-b-university-20260901',
+    'the reminder honours the same filters the jobs topic does');
+
+  /* THE MARK IS THE WINDOW END, written on the idle branch and behind a real
+     delivery, and never the clock. Read out of this file's own source, like
+     the job mark above, because the branch that writes it needs Firestore and
+     a mailbox. */
+  ok(/const deadlineUntil = M\.shiftDay\(today, M\.DEADLINE_WINDOW_DAYS\);/.test(mailerSrc),
+    'the window end is today plus the shared constant');
+  ok(/coveredUntil: a\.lastDeadlineUntil \|\| ''/.test(mailerSrc),
+    'and the alert is checked against the days after its own lastDeadlineUntil');
+  ok(/if \(wantsDeadlines\) idle\.lastDeadlineUntil = deadlineUntil;/.test(mailerSrc),
+    'an idle run covers the window it checked and found empty');
+  ok(/if \(wantsDeadlines\) patch\.lastDeadlineUntil = deadlineUntil;/.test(mailerSrc),
+    'a delivered digest covers the window it carried');
+  // the needle is assembled, not written, so this check cannot match itself
+  ok(!new RegExp('lastDeadlineUntil = ' + '(now|today)\\b').test(mailerSrc),
+    'a wall clock never becomes the deadlines mark — the mark is the window END');
+  ok(/lastSentCount: jobs\.length \+ news\.length \+ candRows\.length \+ closing\.length/
+    .test(mailerSrc), 'the closing rows count towards lastSentCount');
+  ok(/`\$\{closing\.length\} posting\$\{closing\.length > 1 \? 's' : ''\} ` \+\s*`close\$\{closing\.length === 1 \? 's' : ''\} this week`/
+    .test(mailerSrc), 'a digest that carried only deadlines is subjected "N postings close this week"');
+  ok(/!jobs\.length && !news\.length && !cand && !closing\.length/.test(mailerSrc),
+    'a closing reminder alone is enough to send');
+
+  // the section, rendered
+  const dlDigest = renderAlertEmail({
+    alert: { id: 'x', name: 'n' }, jobs: [], updates: [], closing: win(''),
+    now: new Date(TODAY + 'T09:00:00Z'),
+  });
+  ok(dlDigest.includes('Closing this week'), 'the digest carries the "Closing this week" section');
+  ok(dlDigest.includes('2 postings matching your alert close in the next seven days'),
+    'and says how many');
+  ok(dlDigest.includes('Final apply by September 8, 2026') &&
+     dlDigest.includes('Suggested apply by September 5, 2026'),
+    'each row names which date it is, and the date, in the site\'s own words');
+  ok(dlDigest.includes('A University') && dlDigest.includes('B University') &&
+     dlDigest.includes('SCM'),
+    'each row names the institution and the department');
+  ok(dlDigest.includes('jobs.html?job=2027-a-university-20260901'),
+    'and links the posting\'s own permalink, through the shared page rule');
+  ok(dlDigest.includes('Browse all job postings'),
+    'a deadlines-only e-mail still ends on the job board');
+  const oneDl = renderAlertEmail({
+    alert: { id: 'x', name: 'n' }, jobs: [], updates: [], closing: win('').slice(0, 1),
+  });
+  ok(oneDl.includes('One posting matching your alert closes in the next seven days'),
+    'a single posting reads as a sentence');
+  const evilDl = renderAlertEmail({
+    alert: { id: 'x', name: 'n' }, jobs: [], updates: [],
+    closing: [{ kind: 'final', date: '2026-09-08',
+      row: { ...CLOSING[0], id: '"><script>bad()</script>',
+        institution: '<img src=x onerror=alert(1)>', department: '<b>d</b>' } }],
+  });
+  ok(!evilDl.includes('<img src=x') && !evilDl.includes('<b>d</b>') &&
+     !evilDl.includes('<script>bad()'),
+    'a posting cannot inject markup into the closing section, id included');
+  ok(!dlDigest.includes('\u2014'), 'and the section carries no em-dash');
 
   /* ------------------------------- what may be announced at all (oa-news.js)
 
@@ -689,6 +842,10 @@ async function main() {
   const oldestPending = split.pending.reduce(
     (m, e) => (!m || e.date < m ? e.date : m), '');
   const until = updateWindowEnd(today, oldestPending);
+  /* THE DEADLINES WINDOW is the same for every alert this run: today through
+     today plus the constant the alerts page promises. Per alert, only the
+     dates AFTER its `lastDeadlineUntil` go out — see closingSoonFor. */
+  const deadlineUntil = M.shiftDay(today, M.DEADLINE_WINDOW_DAYS);
   if (until !== today) {
     console.log(`update digests stop at ${until} — ` +
       `"${split.pending[split.pending.length - 1].title}" (${oldestPending}) ` +
@@ -778,7 +935,18 @@ async function main() {
     const cand = M.candidateNews(cands, a.criteria, a.lastCandidateAt || '', candRevealAt);
     const candRows = cand && cand.kind === 'profiles' ? cand.rows : [];
 
-    if (!jobs.length && !news.length && !cand) {
+    /* CLOSING THIS WEEK. `lastDeadlineUntil` is the end of the window this
+       alert was last checked against; empty for an alert that has never had
+       the topic, so its first digest carries the whole week. It is a mark on
+       the WINDOW, never on the clock: written as `deadlineUntil` when a digest
+       is delivered and on the idle branch, so a run that could not send
+       re-checks the same days instead of losing them. */
+    const wantsDeadlines = M.wantsDeadlines(a.criteria);
+    const closing = M.closingSoonFor(rows, a.criteria, {
+      from: today, until: deadlineUntil, coveredUntil: a.lastDeadlineUntil || '',
+    });
+
+    if (!jobs.length && !news.length && !cand && !closing.length) {
       // NOTHING NEW IS NOT A SEND. Advance the mark anyway, so tomorrow's
       // window starts here rather than re-scanning from the last real send.
       skipped++;
@@ -793,6 +961,9 @@ async function main() {
            the mark for ever. Frozen once, at the value it had, it can only
            ever move on a digest that actually carried postings. */
         if (!a.lastJobAt) idle.lastJobAt = since;
+        // the deadlines window was checked and found empty: cover it, so the
+        // next run announces only what enters the window after today's end
+        if (wantsDeadlines) idle.lastDeadlineUntil = deadlineUntil;
         await doc.ref.update(idle);
       }
       continue;
@@ -803,7 +974,8 @@ async function main() {
         : cand.kind === 'reveal'
           ? `, the candidates-are-live note (${cand.count} profile(s))`
           : `, ${candRows.length} candidate profile(s)`;
-      console.log(`  DUE      ${label}  ${jobs.length} posting(s), ${news.length} update(s)${candNote}`);
+      console.log(`  DUE      ${label}  ${jobs.length} posting(s), ${news.length} update(s)` +
+        `${candNote}, ${closing.length} closing this week`);
       continue;
     }
 
@@ -845,15 +1017,20 @@ async function main() {
     }
 
     // the announcement may have been the whole of this run for this alert
-    if (!jobs.length && !news.length && !candRows.length) continue;
+    if (!jobs.length && !news.length && !candRows.length && !closing.length) continue;
 
-    const html = renderAlertEmail({ alert: a, jobs, updates: news, candidates: candRows });
+    const html = renderAlertEmail({
+      alert: a, jobs, updates: news, candidates: candRows, closing, now,
+    });
     const subject = a.name ||
       (jobs.length ? `${jobs.length} new job posting${jobs.length > 1 ? 's' : ''}`
-        : candRows.length
-          ? (candRows.length === 1 ? 'A new job market candidate'
-            : `${candRows.length} new job market candidates`)
-          : 'What is new on Operations Academia');
+        : closing.length
+          ? `${closing.length} posting${closing.length > 1 ? 's' : ''} ` +
+            `close${closing.length === 1 ? 's' : ''} this week`
+          : candRows.length
+            ? (candRows.length === 1 ? 'A new job market candidate'
+              : `${candRows.length} new job market candidates`)
+            : 'What is new on Operations Academia');
 
     try {
       const delivered = await send(tx, {
@@ -869,7 +1046,8 @@ async function main() {
       if (!delivered) {
         skipped++;
         console.log(`would send ${label}: ${jobs.length} posting(s), ` +
-          `${candRows.length} candidate(s), ${news.length} update(s)`);
+          `${candRows.length} candidate(s), ${news.length} update(s), ` +
+          `${closing.length} closing this week`);
         continue;
       }
 
@@ -877,7 +1055,7 @@ async function main() {
       const patch = {
         lastSentAt: now.toISOString(),
         lastCheckedAt: now.toISOString(),
-        lastSentCount: jobs.length + news.length + candRows.length,
+        lastSentCount: jobs.length + news.length + candRows.length + closing.length,
       };
       /* …and the newest posting actually sent, which is what the next job
          window starts after. Written ONLY when postings went out: a digest
@@ -900,11 +1078,17 @@ async function main() {
       // candidate window starts after it, never at a wall clock a profile
       // published mid-run could slip behind
       if (candRows.length && cand.mark) patch.lastCandidateAt = cand.mark;
+      /* …and the deadlines window this digest covered — its END, whether or
+         not a posting fell inside it (a checked-and-empty window is covered
+         too). Never `now`: the mark is a day the window reached, and the next
+         window starts after it. */
+      if (wantsDeadlines) patch.lastDeadlineUntil = deadlineUntil;
       await doc.ref.update(patch);
 
       sent++;
       console.log(`sent ${label}: ${jobs.length} posting(s), ` +
-        `${candRows.length} candidate(s), ${news.length} update(s)`);
+        `${candRows.length} candidate(s), ${news.length} update(s), ` +
+        `${closing.length} closing this week`);
     } catch (err) {
       failed++;
       console.log(`::warning::could not send to ${redact(a.email)}: ${err.message}`);

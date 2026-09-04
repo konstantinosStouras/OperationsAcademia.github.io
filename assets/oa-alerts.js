@@ -137,6 +137,7 @@
     if ($('t-jobs').checked) topics.push('jobs');
     if ($('t-updates').checked) topics.push('updates');
     if ($('t-candidates').checked) topics.push('candidates');
+    if ($('t-deadlines').checked) topics.push('deadlines');
     return {
       name: $('a-name').value.trim().slice(0, 120),
       email: $('a-email').value.trim().slice(0, 200),
@@ -161,8 +162,8 @@
     // asked for the OTHER stream, so the new form starts there instead.
     if (!a) {
       var wanted = new URLSearchParams(location.search).get('topic');
-      a = { criteria: { topics: wanted === 'updates' || wanted === 'candidates'
-        ? [wanted] : ['jobs'] } };
+      a = { criteria: { topics: wanted === 'updates' || wanted === 'candidates' ||
+        wanted === 'deadlines' ? [wanted] : ['jobs'] } };
     }
     var c = M.normalise(a.criteria);
     $('a-name').value = a.name || '';
@@ -171,6 +172,7 @@
     $('t-jobs').checked = c.topics.indexOf('jobs') !== -1;
     $('t-updates').checked = c.topics.indexOf('updates') !== -1;
     $('t-candidates').checked = c.topics.indexOf('candidates') !== -1;
+    $('t-deadlines').checked = c.topics.indexOf('deadlines') !== -1;
     $('a-text').value = c.text || '';
     writeGroup('type', c.type);
     writeGroup('level', c.level);
@@ -179,7 +181,9 @@
   }
 
   function syncFormState() {
-    show($('a-filters'), $('t-jobs').checked);
+    // the filters choose the postings for BOTH paper topics: the new ones
+    // announced, and the ones reminded of before they close
+    show($('a-filters'), $('t-jobs').checked || $('t-deadlines').checked);
     $('oa-form-legend').textContent = editingId ? 'Edit this alert' : 'Create an alert';
     $('a-save').textContent = editingId ? 'Save changes' : 'Create alert';
     show($('a-cancel'), !!editingId);
@@ -226,12 +230,26 @@
     var sample = hits.slice(0, 3);
     var matching = hits.length;
 
+    /* CLOSING THIS WEEK: the postings matching these filters whose final or
+       suggested apply-by date is within the mailer's window from today — the
+       same closingSoonFor the mailer runs, over the same served file, with no
+       window yet covered (a new alert's first digest carries the whole week).
+       Today is the UTC day, like the mailer's. */
+    var today = new Date().toISOString().slice(0, 10);
+    var closing = M.wantsDeadlines(c) ? M.closingSoonFor(jobs, c, {
+      from: today, until: M.shiftDay(today, M.DEADLINE_WINDOW_DAYS), coveredUntil: ''
+    }) : [];
+
     var parts = [];
     /* The subject the MAILER gives an unnamed alert (alerts-mailer.mjs):
-       "N new job posting(s)" when postings went, else what is new. */
+       "N new job posting(s)" when postings went, "N postings close this week"
+       when only the reminder did, else what is new. */
     var fallbackSubject = M.wantsJobs(c) && matching
       ? matching + ' new job posting' + (matching > 1 ? 's' : '')
-      : 'What is new on Operations Academia';
+      : closing.length
+        ? closing.length + ' posting' + (closing.length > 1 ? 's' : '') +
+          ' close' + (closing.length === 1 ? 's' : '') + ' this week'
+        : 'What is new on Operations Academia';
     parts.push('<div class="oa-preview-head"><strong>Subject:</strong> ' +
       esc(a.name || fallbackSubject) + '</div>');
     parts.push('<div class="oa-preview-body">');
@@ -269,6 +287,37 @@
         parts.push('<p class="oa-hint"><strong>No posting currently on the site matches ' +
           'these filters.</strong> That is allowed — you will simply hear from us when one ' +
           'appears. But if you did not mean to be this specific, loosen a filter.</p>');
+      }
+    }
+
+    if (M.wantsDeadlines(c)) {
+      /* mirrors the mailer's section (alerts-mailer.mjs renderAlertEmail):
+         the heading, the count line, then institution, department, which
+         date it is and the date — keep the wording in step */
+      parts.push('<p><strong>Closing this week</strong></p>');
+      if (closing.length) {
+        parts.push('<p>' + esc(closing.length === 1
+          ? 'One posting matching your alert closes in the next seven days:'
+          : closing.length + ' postings matching your alert close in the next seven days:') +
+          '</p><ul>');
+        closing.slice(0, 3).forEach(function (e) {
+          parts.push('<li><strong>' + esc(e.row.institution) + '</strong><br>' +
+            esc(e.row.department) + '<br><span class="oa-hint" style="display:inline">' +
+            esc((e.kind === 'suggested' ? 'Suggested apply by ' : 'Final apply by ') +
+              longDate(e.date)) + ' &middot; <u>Open the posting</u></span></li>');
+        });
+        parts.push('</ul>');
+        if (closing.length > 3) {
+          parts.push('<p class="oa-hint">…and ' + (closing.length - 3) + ' more.</p>');
+        }
+      } else if (jobsState === 'loading') {
+        parts.push('<p class="oa-hint">Loading the current postings…</p>');
+      } else if (jobsState === 'failed') {
+        parts.push('<p class="oa-hint"><strong>We could not load the current postings, ' +
+          'so there is nothing to sample here.</strong> The reminder itself is unaffected.</p>');
+      } else {
+        parts.push('<p class="oa-hint">No posting matching these filters closes in the ' +
+          'next seven days. You will be reminded when one does, each posting once.</p>');
       }
     }
 
@@ -333,6 +382,18 @@
         c.level.length ? c.level.join(' or ') : '',
         c.country.length ? c.country.join(' or ') : ''
       ].filter(Boolean).join(', '));
+    }
+    if (c.topics.indexOf('deadlines') !== -1) {
+      // the same filters as the jobs topic; named here only when the jobs
+      // line above has not already said what they are
+      var jobsToo = c.topics.indexOf('jobs') !== -1;
+      bits.push('postings closing within 7 days' +
+        (jobsToo || M.isBroad(c) ? '' : ' matching ' + [
+          c.text ? '“' + c.text + '”' : '',
+          c.type.length ? c.type.join(' or ') : '',
+          c.level.length ? c.level.join(' or ') : '',
+          c.country.length ? c.country.join(' or ') : ''
+        ].filter(Boolean).join(', ')));
     }
     if (c.topics.indexOf('candidates') !== -1) bits.push('new job market candidates');
     if (c.topics.indexOf('updates') !== -1) bits.push('changes to the website');
@@ -550,7 +611,8 @@
     var form = $('oa-alert-form');
     form.addEventListener('input', renderPreview);
     form.addEventListener('change', function (e) {
-      if (e.target === $('t-jobs') || e.target === $('t-updates')) syncFormState();
+      if (e.target === $('t-jobs') || e.target === $('t-updates') ||
+          e.target === $('t-deadlines')) syncFormState();
       else renderPreview();
     });
 

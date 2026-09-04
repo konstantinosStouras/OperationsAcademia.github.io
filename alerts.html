@@ -164,9 +164,10 @@
                 <div class="oa-form">
 
                   <div class="oa-note">
-                    <p><strong>Be told when something you care about appears</strong> &mdash; a new
-                    job posting matching your filters, or a change to the site. You choose what and
-                    how often; every message carries an unsubscribe link.</p>
+                    <p><strong>Be told when something you care about appears:</strong> a new
+                    job posting matching your filters, a posting you follow whose apply-by date is
+                    within the week, or a change to the site. You choose what and how often; every
+                    message carries an unsubscribe link.</p>
                   </div>
 
                   <!-- shown only when the visitor arrived from an
@@ -211,6 +212,10 @@
                             <label class="oa-check"><input type="checkbox" id="t-updates">
                               <span><strong>Changes to the website.</strong> New features and
                               improvements, taken from the site's own change log.</span></label>
+                            <label class="oa-check"><input type="checkbox" id="t-deadlines">
+                              <span><strong>Postings closing within 7 days.</strong> A reminder of
+                              the postings matching the filters below whose final or suggested
+                              apply-by date falls in the next seven days, each named once.</span></label>
                             <label class="oa-check"><input type="checkbox" id="t-candidates">
                               <span><strong>New job market candidates.</strong> One short note when
                               the year's profiles go live, then a note whenever a new candidate
@@ -226,8 +231,10 @@
                       <fieldset id="a-filters">
                         <legend>Which job postings?</legend>
                         <p class="oa-hint" style="margin-bottom:16px">Leave everything blank to be
-                        told about <strong>every</strong> new posting. Otherwise a posting must match
-                        <em>every</em> box you fill in, and any of the values you tick inside one.</p>
+                        told about <strong>every</strong> posting. Otherwise a posting must match
+                        <em>every</em> box you fill in, and any of the values you tick inside one.
+                        The same filters choose the new postings you hear about and the ones you
+                        are reminded of before they close.</p>
 
                         <!-- the Type / Entry level / Location lists are built from the postings
                              currently on the site; if that file could not be read they are empty,
@@ -360,6 +367,10 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-schools.js"></script>
+    <!-- which season a posting is in: the "closing this week" reminder asks
+         the ONE market rule (assets/oa-jobnav.js), so the matcher loads after
+         it — without it the matcher says no, never guesses -->
+    <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-alert-match.js"></script>
     <!-- who is reading: the preview carries real postings, so it is drawn for
          a registered reader only, asked of the same module the cards ask -->

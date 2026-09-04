@@ -942,7 +942,7 @@ async function testAccountMerge() {
   // whole catalogue — one enormous e-mail as the reward for merging.
   const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
   for (const f of ['lastSentAt', 'lastJobAt', 'lastCheckedAt', 'lastUpdateDate',
-    'lastCandidateAt', 'criteria', 'enabled']) {
+    'lastCandidateAt', 'lastDeadlineUntil', 'criteria', 'enabled']) {
     ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
   }
 }
@@ -10759,6 +10759,215 @@ async function testSponsors() {
    here is mostly the honesty the replacement is built for: that a day is never
    counted twice, that an unreachable source cannot shorten the history, and
    that nothing on the page claims the frozen archive is current. */
+/* ------------------------------------- "Closing this week", the fourth topic
+
+   Owner, 2026-09-04: an alert may also remind its subscriber of the postings
+   matching their filters whose FINAL apply-by date (applyByDate) or SUGGESTED
+   apply-by date (reviewDate) falls within the next seven days. One pure
+   function decides it — closingSoonFor in assets/oa-alert-match.js, read by
+   the mailer and by the alerts page's preview alike — and its mark is the END
+   of the window last checked (`lastDeadlineUntil`), never a wall clock, so
+   each closing date is named once. The mailer's own selftest pins the mark
+   from its source and the rendered section; this pins the decision, the
+   module driven without its dependency, and the wiring. */
+
+async function testClosingSoonDigest() {
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const DL = { topics: ['deadlines'] };
+  const FROM = '2026-09-04', UNTIL = M.shiftDay(FROM, M.DEADLINE_WINDOW_DAYS);
+  const row = (id, extra) => ({ id, institution: id + ' University', department: 'Operations',
+    type: 'University', country: 'Ireland', levels: ['Assistant Professor'],
+    characteristics: [], posted: '2026-09-01', year: 2027, applyByDate: '', reviewDate: '',
+    ...extra });
+  const closing = (rows, c, covered) =>
+    M.closingSoonFor(rows, c || DL, { from: FROM, until: UNTIL, coveredUntil: covered || '' })
+      .map((e) => `${e.row.id}:${e.kind}:${e.date}`);
+
+  ok(M.TOPICS.includes('deadlines'), 'closing: "deadlines" is a topic the matcher knows');
+  ok(M.wantsDeadlines(DL) && !M.wantsDeadlines({ topics: ['jobs'] }),
+    'closing: wantsDeadlines reads the stored topics like the other three');
+  ok(M.hasIntent(DL), 'closing: a deadlines-only alert has intent, so it can be saved');
+  eq(UNTIL, '2026-09-11', 'closing: the window is seven days, from the shared constant');
+  eq(M.shiftDay('2026-12-30', 3), '2027-01-02', 'closing: the day arithmetic crosses a year');
+  eq(M.shiftDay('Until filled.', 7), '', 'closing: …and a non-day shifts to nothing');
+
+  /* THE WINDOW EDGES, both inclusive: a search closes at the end of the day
+     named, and "within seven days" includes the seventh. */
+  eq(closing([row('on-from', { applyByDate: FROM })]), ['on-from:final:2026-09-04'],
+    'closing: a deadline TODAY is in the window');
+  eq(closing([row('on-until', { applyByDate: UNTIL })]), ['on-until:final:2026-09-11'],
+    'closing: …and so is one on the seventh day');
+  eq(closing([row('before', { applyByDate: M.shiftDay(FROM, -1) })]), [],
+    'closing: one that closed yesterday is not');
+  eq(closing([row('after', { applyByDate: M.shiftDay(UNTIL, 1) })]), [],
+    'closing: nor one closing on the eighth day');
+
+  /* COVERED UNTIL: the end of the window last checked. A date on or before it
+     has been announced (or looked at and found empty), so it is never named
+     twice; the day after it is the first the next digest may carry. */
+  const pair = [row('a', { applyByDate: '2026-09-06' }), row('b', { applyByDate: '2026-09-07' })];
+  eq(closing(pair, DL, '2026-09-06'), ['b:final:2026-09-07'],
+    'closing: a date ON the covered end is excluded, the day after it is not');
+  eq(closing(pair, DL, UNTIL), [],
+    'closing: with the window end as the mark, nothing in the window goes twice');
+  eq(closing(pair, DL, ''), ['a:final:2026-09-06', 'b:final:2026-09-07'],
+    'closing: an alert never checked is told the whole window, earliest first');
+
+  /* SUGGESTED VERSUS FINAL: each named as what it is; where both fall due in
+     one window the final one is named, since it is the date that closes the
+     search; and the final date gets its own turn when only the suggested one
+     was in the window before. */
+  eq(closing([row('s', { reviewDate: '2026-09-05' })]), ['s:suggested:2026-09-05'],
+    'closing: a suggested apply-by date is named as suggested');
+  eq(closing([row('both', { reviewDate: '2026-09-05', applyByDate: '2026-09-10' })]),
+    ['both:final:2026-09-10'],
+    'closing: where both fall in one window, the FINAL date is the one named');
+  eq(closing([row('later', { reviewDate: '2026-09-05', applyByDate: '2026-09-20' })]),
+    ['later:suggested:2026-09-05'],
+    'closing: a final date outside the window leaves the suggested one to be named');
+  eq(M.closingSoonFor([row('later', { reviewDate: '2026-09-05', applyByDate: '2026-09-20' })],
+    DL, { from: '2026-09-15', until: '2026-09-22', coveredUntil: '2026-09-14' })
+    .map((e) => e.kind), ['final'],
+    'closing: …and the final date is named when its own window comes round');
+
+  /* THE MARKET FILTER: a row whose season has rolled is not on the jobs page
+     and is not reminded of, however its dates read. A deadline in the window
+     is by itself an open deadline, which keeps a posting in the market. */
+  eq(closing([row('old', { reviewDate: '2026-09-05', posted: '2024-09-01', year: 2025 })]), [],
+    'closing: a posting from a closed season is not reminded of');
+  eq(closing([row('old-open', { applyByDate: '2026-09-05', posted: '2024-09-01', year: 2025 })]),
+    ['old-open:final:2026-09-05'],
+    'closing: …unless its final deadline is still open, which keeps it on the jobs page');
+
+  /* THE FILTERS are the jobs topic's own, and no filter means every posting. */
+  eq(closing(pair, { topics: ['deadlines'], country: ['Germany'] }), [],
+    'closing: the alert\'s country filter applies to the reminder');
+  eq(closing(pair, { topics: ['deadlines'], text: 'b univ' }), ['b:final:2026-09-07'],
+    'closing: …and so does its text filter');
+  eq(closing(pair, { topics: ['jobs'] }), [],
+    'closing: an alert without the topic is reminded of nothing');
+
+  /* STRING DATES. Every date is yyyy-mm-dd compared as text: a stamp is cut to
+     its day, prose is never a date, and the window itself is cut the same way. */
+  eq(closing([row('stamp', { applyByDate: '2026-09-06T00:00:00Z' })]), ['stamp:final:2026-09-06'],
+    'closing: an apply-by carrying a time is read as its day');
+  eq(closing([row('prose', { applyByDate: 'Until filled.' })]), [],
+    'closing: prose in the date field never matches');
+  eq(M.closingSoonFor(pair, DL, { from: FROM + 'T12:00:00Z', until: UNTIL + 'T12:00:00Z' })
+    .length, 2, 'closing: a window given as stamps is read as days');
+  eq(M.closingSoonFor(pair, DL, { from: '', until: UNTIL }), [],
+    'closing: a window with no start decides nothing');
+  eq(M.closingSoonFor(pair, DL, {}), [], 'closing: …nor one with no window at all');
+
+  /* DRIVEN WITHOUT ITS DEPENDENCY. The market rule is assets/oa-jobnav.js,
+     handed to the factory; a page that forgot the tag must get NO, not a
+     private guess at the season (the oa-sponsors.js lesson). */
+  const matchSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-alert-match.js'), 'utf8');
+  const bare = {
+    OACountries: require(path.join(HERE, '..', 'assets', 'oa-countries.js')),
+    OASchools: require(path.join(HERE, '..', 'assets', 'oa-schools.js')),
+  };
+  // eslint-disable-next-line no-new-func
+  new Function('self', matchSrc)(bare);
+  ok(!!bare.OAAlertMatch, 'closing: the matcher still LOADS without oa-jobnav.js');
+  eq(bare.OAAlertMatch.closingSoonFor(pair, DL, { from: FROM, until: UNTIL }), [],
+    'closing: …but reminds of nothing rather than guessing which season a posting is in');
+  ok(bare.OAAlertMatch.matchesJob(pair[0], { topics: ['jobs'] }),
+    'closing: …while the jobs topic, which never asked for it, is unaffected');
+  ok(!/function (marketYear|inCurrentMarket|deadlineOpen)\(/.test(matchSrc),
+    'closing: the matcher carries no private copy of the market rule');
+
+  /* ---- THE WIRING ------------------------------------------------------- */
+
+  const alertsHtml = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  const alertsJs = await readFile(path.join(HERE, '..', 'assets', 'oa-alerts.js'), 'utf8');
+  const mailer = await readFile(path.join(HERE, 'alerts-mailer.mjs'), 'utf8');
+
+  ok(/<input type="checkbox" id="t-deadlines">/.test(alertsHtml),
+    'closing: alerts.html offers the fourth tick box');
+  ok(/Postings closing within 7 days\./.test(alertsHtml),
+    'closing: …labelled in the words the summary line and the FAQ use');
+  ok(alertsHtml.includes('<script defer src="assets/oa-jobnav.js"></script>'),
+    'closing: alerts.html loads the market rule, deferred like every other script');
+  // on the TAGS, not the file names — the comment above the tag names it too
+  const tagAt = (f) => alertsHtml.indexOf('<script defer src="assets/' + f + '"></script>');
+  ok(tagAt('oa-jobnav.js') > 0 && tagAt('oa-jobnav.js') < tagAt('oa-alert-match.js'),
+    'closing: …BEFORE the matcher, whose factory is handed it');
+  ok(tagAt('oa-alert-match.js') > 0 && tagAt('oa-alert-match.js') < tagAt('oa-alerts.js'),
+    'closing: …and the matcher before the page that reads it');
+  ok(/within the week/.test(alertsHtml), 'closing: the alerts page lede names the reminder');
+
+  ok(/if \(\$\('t-deadlines'\)\.checked\) topics\.push\('deadlines'\);/.test(alertsJs),
+    'closing: the form saves the topic');
+  ok(/\$\('t-deadlines'\)\.checked = c\.topics\.indexOf\('deadlines'\) !== -1;/.test(alertsJs),
+    'closing: …and an edit opens with it ticked');
+  ok(/show\(\$\('a-filters'\), \$\('t-jobs'\)\.checked \|\| \$\('t-deadlines'\)\.checked\);/
+    .test(alertsJs), 'closing: the filters stay on screen for a deadlines-only alert');
+  ok(/M\.closingSoonFor\(jobs, c, \{[\s\S]{0,200}?coveredUntil: ''/.test(alertsJs),
+    'closing: the preview samples through the SAME function the mailer runs, with no window covered');
+  ok(/M\.shiftDay\(today, M\.DEADLINE_WINDOW_DAYS\)/.test(alertsJs) &&
+     /M\.shiftDay\(today, M\.DEADLINE_WINDOW_DAYS\)/.test(mailer),
+    'closing: both sides take the window from the shared constant');
+  ok(/postings closing within 7 days/.test(alertsJs),
+    'closing: the summary line on an alert\'s card names the reminder');
+  /* THE PREVIEW MIRRORS THE MAILER'S TEMPLATE, word for word where the words
+     are the same thing: the heading, the count line, and the two date labels. */
+  for (const words of ['Closing this week', 'matching your alert close in the next seven days',
+    'Final apply by ', 'Suggested apply by ', 'Open the posting']) {
+    ok(alertsJs.includes(words) && mailer.includes(words),
+      `closing: the preview and the mailer both say "${words.trim()}"`);
+  }
+
+  ok(/import \{ livePostingUrl \} from '\.\/submissions-mailer\.mjs';/.test(mailer),
+    'closing: the reminder links a posting through the rule the poster\'s e-mail already uses');
+  ok(/livePostingUrl\(r, \{ now \}\)/.test(mailer),
+    'closing: …asked at send time, so a posting whose season has rolled opens on Previous markets');
+  ok(/M\.closingSoonFor\(rows, a\.criteria, \{/.test(mailer),
+    'closing: the mailer decides through the shared function');
+
+  /* THE MARK NEEDS NO RULES CHANGE: alerts live under the blanket owner rule
+     with no key ceiling, so an Admin-SDK stamp cannot freeze a subscription
+     against its own owner. Pinned rather than remembered. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  // cut at the NEXT match, not at the first `}` — `{document=**}` carries one
+  const usersBlock = rules.slice(rules.indexOf('match /users/{uid}/{document=**}'));
+  const usersRule = usersBlock.slice(0, usersBlock.indexOf('match /', 10));
+  ok(usersRule.length > 60 && usersRule.length < 400 &&
+     /allow read, write: if isOwner\(uid\);/.test(usersRule) && !/hasOnly/.test(usersRule),
+    'closing: the alerts subtree carries no key ceiling, so the new mark freezes nothing');
+
+  /* A MERGE CARRIES THE MARK, in both copies of the accounts module, or a
+     merged alert re-announces the week it was already told about. */
+  for (const dir of [[], ['v2']]) {
+    const acc = await readFile(path.join(HERE, '..', ...dir, 'assets', 'oa-accounts.js'), 'utf8');
+    const fields = (acc.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
+    ok(fields.includes("'lastDeadlineUntil'"),
+      `closing: ${[...dir, 'oa-accounts.js'].join('/')} copies lastDeadlineUntil with a merged alert`);
+  }
+
+  /* KEEP-IN-SYNC: the change log, the FAQ, the record of the decision. */
+  const log = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
+  const entry = (log.updates || []).find((u) => u.id === 'closing-this-week-alerts');
+  ok(!!entry && entry.date === '2026-09-04' && /alerts\.html/.test(entry.url || ''),
+    'closing: changelog.json announces the topic, dated, linking the alerts page');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
+  ok(faq.length > 200 && faq.length < 2000 && /closing|close/i.test(faq) && /seven days|7 days/.test(faq),
+    'closing: the FAQ answer on e-mail alerts names the reminder');
+  const claude = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(/lastDeadlineUntil/.test(claude), 'closing: CLAUDE.md records the mark and why');
+
+  /* NO EM-DASH in the copy this shipped (the site's rule for user-facing
+     words): the tick box, the lede, the hint, the FAQ sentence. */
+  const tick = alertsHtml.slice(alertsHtml.indexOf('id="t-deadlines"'), alertsHtml.indexOf('id="t-candidates"'));
+  ok(tick.length > 50 && tick.length < 600 && !tick.includes('—') && !tick.includes('&mdash;'),
+    'closing: the tick box copy carries no em-dash');
+  const lede = alertsHtml.slice(alertsHtml.indexOf('Be told when something you care about'),
+    alertsHtml.indexOf('oa-unsub-notice'));
+  ok(lede.length > 100 && lede.length < 800 && !lede.includes('—') && !lede.includes('&mdash;'),
+    'closing: nor does the lede');
+}
+
 async function testAnalytics() {
   const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
 
@@ -11783,6 +11992,7 @@ if (isMain(import.meta.url)) {
   await testJobExportWiring();
   await testSponsors();
   await testReaderGate();
+  await testClosingSoonDigest();
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();
