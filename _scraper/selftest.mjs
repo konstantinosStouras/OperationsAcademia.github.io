@@ -3004,6 +3004,51 @@ async function testAccountCounts() {
     ok(new RegExp(`setCount\\('${what}', ${n.replace('.', '\\.')}\\)`).test(js),
       `${file} corrects the ${what} count from the list it already loaded`);
   }
+
+  /* -- rule 4: a row is drawn only for what the account holds (owner,
+     2026-09-04). "My postings" for an account that has posted, "My candidate
+     profile" for one that has filed a profile, and NEITHER while the count
+     is not known — the rows are born hidden and the badge painter is the one
+     thing that reveals them, under the badge's own known-and-positive rule,
+     so a row and its badge cannot disagree. The browser half — the rows as
+     they render for three seeded accounts, the phone sheet, and the account
+     page's card — is in page-test.mjs. */
+  for (const what of ['postings', 'cands']) {
+    ok((acct.match(new RegExp(`data-held="${what}" hidden`, 'g')) || []).length >= 2,
+      `both menus (header and phone sheet) carry the ${what} row, born hidden`);
+  }
+  ok(/href="post-a-candidate\.html" data-held="cands"/.test(acct) &&
+     /My candidate profile/.test(acct),
+    'the candidate row is "My candidate profile" and opens post-a-candidate.html, ' +
+    'which sends an owner straight to their own profile');
+  ok(/data-count="cands"/.test(acct),
+    'and carries a badge like the other rows');
+  const painter = acct.slice(acct.indexOf('function paintCounts'), acct.indexOf('function setCount'));
+  ok(painter.length > 200 && painter.length < 3000, 'paintCounts is where it was');
+  ok(/querySelectorAll\('\[data-held\]'\)/.test(painter) &&
+     /el\.hidden = !held\(el\.getAttribute\('data-held'\)\)/.test(painter) &&
+     /typeof n === 'number' && n > 0/.test(painter),
+    'the badge painter reveals a held row under the SAME rule as the badge — ' +
+    'known, and more than zero — so an unknown count draws neither row');
+  ok(/candidateSubmissions\)\.where\('uid', '==', uid\)/.test(acct) &&
+     /counts\.cands = r\[4\]/.test(acct),
+    'the once-per-session refresh counts the account\'s candidate profiles by ' +
+    'uid, with no status filter — a withdrawn profile still exists');
+  const cand = await readFile(path.join(HERE, '..', 'assets', 'oa-candidateform.js'), 'utf8');
+  ok(/setCount\('cands', snap\.size\)/.test(cand),
+    'the candidate form corrects the count from its own one-profile query');
+  ok(/if \(!EDIT_ID && window\.OAAccounts && OAAccounts\.setCount\)/.test(cand) &&
+     /setCount\('cands', \(ownProfiles === null \? 0 : ownProfiles\) \+ 1\)/.test(cand),
+    'and adds one on a CREATE only — an edit or a take-down changes nothing, ' +
+    'because the profile still exists');
+  const paHtml = await readFile(path.join(HERE, '..', 'account.html'), 'utf8');
+  ok(/id="pa-cand-card"/.test(paHtml) &&
+     /candCard\.href = 'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(r\[3\]\.id\)/.test(paHtml),
+    'the personal area\'s candidate card links straight to the profile it found');
+  for (const what of ['postings', 'alerts', 'cands']) {
+    ok(new RegExp(`OAAccounts\\.setCount\\('${what}', `).test(paHtml),
+      `and corrects the ${what} count from the list it already holds`);
+  }
 }
 
 /* --------------------------- the same names on the map and the faculty list

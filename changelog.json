@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "menu-lists-what-you-hold",
+      "date": "2026-09-04",
+      "title": "The account menu lists My postings and My candidate profile only when you have them",
+      "summary": "The menu under your name (and its copy in the phone menu) now shows My postings only if this account has made a job posting, and gains a My candidate profile row only if it has filed a candidate profile, including one you have taken down, which you can put back. Each row still carries its number. An account holding neither sees neither row, and the rest of the menu is unchanged. On your personal area page, the candidate card opens your profile directly.",
+      "url": "/account.html"
+    },
+    {
       "id": "save-search-as-email-alert",
       "date": "2026-09-04",
       "title": "Save a search on the jobs page as an e-mail alert",

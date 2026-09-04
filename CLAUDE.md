@@ -4375,7 +4375,8 @@ filed correction — is measured in page-test.mjs.
 dozen, so each carries its number now — the shape `/lit/`'s account menu uses.
 
 A menu is on EVERY page of a static site, so a read per page per visitor is a
-real cost. Three rules keep it cheap, and `testAccountCounts` pins all three:
+real cost. Three rules keep it cheap, and `testAccountCounts` pins all four
+(the fourth is below):
 
 * **Paint from the cache first.** The count is remembered per account in
   `localStorage` beside the name hint, so the badge lands with the menu.
@@ -4391,6 +4392,59 @@ and zero shows nothing either, since an empty pill beside "My postings" reads
 as a fault rather than as "none yet". The cache is keyed to its own uid, a read
 that lands after a sign-out is dropped, and signing out forgets it: a shared
 machine must not show the next person the last one's numbers.
+
+### …and a row is drawn only for what the account holds
+
+Owner, 2026-09-04: *"my job postings should appear in the account menu of a
+user who has posted, otherwise it shouldn't show it there"*, and a **My
+candidate profile** row *"only for those users who posted a candidate
+profile"*. So the fourth rule: **"My postings" is listed only for an account
+that has made a job posting, "My candidate profile" only for one that has
+filed a profile, and an account holding neither sees neither row.** E-mail
+alerts, Messages, My personal area and the maintainer's Admin area are
+untouched; the phone sheet follows the same rule.
+
+* **The count decides the row, under the badge's own rule.** A third cached
+  count, `cands`, joins `postings` and `alerts` in the same once-per-session
+  `count()` refresh — `candidateSubmissions where uid == me`, the query the
+  candidate form's one-profile check and `account.html` already issue and the
+  rules already allow the owner. **Nothing is excluded by status**: a
+  withdrawn profile still exists and is its owner's to restore, so it earns
+  the row. The rows carry `data-held` and are BORN HIDDEN in the markup;
+  `paintCounts` — the one function that knows the numbers — reveals a row
+  exactly when it would show its badge (known, and more than zero). One
+  function on purpose: a row and its badge cannot disagree about whether
+  there is anything there, and every path that already repainted badges
+  (the deferred repaint after `paint()`, `setCount`, the refresh) now reveals
+  the rows too, so a row appears the moment its count becomes known.
+* **A count NOT KNOWN draws neither row.** Never a row that may be wrong: the
+  refresh lands within a second on the first page of a session, and every
+  later page paints the final form from the cache before that. The browser
+  check reproduces the state (no cache, session latch set) and asserts the
+  poster's own "My postings" is withheld.
+* **The candidate form is the third exact-where-loaded source.** Its
+  one-profile query returns every profile the account holds, so it calls
+  `OAAccounts.setCount('cands', snap.size)`; a successful CREATE adds one, so
+  the row appears from that moment rather than the next session; an edit or
+  a take-down changes nothing, because the profile still exists.
+  `account.html` holds all three lists and corrects all three counts.
+* **The row links `post-a-candidate.html`**, which sends an owner straight to
+  their own profile (`redirectToOwnProfile`) — a `count()` aggregate could not
+  hand the menu a document id anyway. The personal area's card, which DOES
+  read the documents, links straight to `?edit=<newest profile>` and reads
+  "Your candidate profile"; newest overall is the current season's where one
+  exists, because `createdAt` is set once and a new profile takes the season
+  under way.
+
+Tests: the rule-4 block of `testAccountCounts` in `_scraper/selftest.mjs`
+(both menus carry both rows born hidden, the painter reveals them under the
+badge's own rule, the refresh counts by uid with no status filter, the form
+and the personal area correct the cache) and the "held rows" block in
+`_scraper/page-test.mjs` (three seeded accounts through the shim: neither row,
+My postings with its count, My candidate profile for a WITHDRAWN profile with
+its count, the phone sheet mirroring each, the not-known state withholding the
+poster's own row, and the personal area's card linking straight to the
+profile).
 
 ## A same-day collapse is keyed on the ADVERTISEMENT, not just the day
 

@@ -4016,6 +4016,174 @@ for (const [from, hash] of [
   await a.close();
 }
 
+/* ------------------------ the menu lists only what the account HOLDS
+
+   Owner, 2026-09-04: "My postings" for an account that has posted, "My
+   candidate profile" for one that has filed a profile, and NEITHER for an
+   account holding nothing. Three seeded accounts through the site's own
+   sign-in path (the shim), each on index.html, which carries the header menu
+   AND the phone sheet's copy. A row is measured as the reader meets it — the
+   menu opened by the chip, the row visible or not — never by its presence in
+   the markup, because being in the markup and hidden until the count says
+   otherwise is exactly the mechanism. The fourth reading is the one no
+   scenario reaches on its own: a count NOT KNOWN (no cache, no refresh this
+   session) draws neither row, the poster's included. */
+{
+  const HELD = A_READER.uid;
+  const seeds = {
+    nothing: [],
+    poster: [{ path: 'jobSubmissions/held-j1', data: {
+      uid: HELD, status: 'published', ref: 'OA-JOB-260901-HELD',
+      institution: 'Held University', department: 'Operations',
+      createdAt: '2026-09-01T00:00:00.000Z' } }],
+    /* WITHDRAWN on purpose: a taken-down profile still exists and is its
+       owner's to restore, so it must still earn the row */
+    candidate: [{ path: 'candidateSubmissions/held-c1', data: {
+      uid: HELD, status: 'withdrawn', ref: 'OA-CAND-260901-HELD',
+      first: 'Grace', last: 'Hopper', affiliation: 'Held University',
+      position: 'PhD Candidate', year: marketYear(), researchAreas: [],
+      createdAt: '2026-09-01T00:00:00.000Z' } }],
+  };
+  const readRows = (q) => q.evaluate(() => {
+    const row = (root, href) => {
+      const el = document.querySelector(root + ' a[href="' + href + '"]');
+      if (!el) return null;
+      const badge = el.querySelector('.oa-acct-n');
+      // the LABEL: the row's own text nodes, without the icon glyph or the badge
+      const text = [...el.childNodes].filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent).join('').trim();
+      return { hidden: el.hidden, text,
+        badge: badge ? (badge.hidden ? '' : badge.textContent) : null };
+    };
+    return {
+      menuPostings: row('#oa-menu', 'my-postings.html'),
+      menuCand: row('#oa-menu', 'post-a-candidate.html'),
+      sheetPostings: row('#oa-np', 'my-postings.html'),
+      sheetCand: row('#oa-np', 'post-a-candidate.html'),
+      alerts: row('#oa-menu', 'alerts.html'),
+      messages: row('#oa-menu', 'messages.html'),
+      area: row('#oa-menu', 'account.html'),
+    };
+  });
+  async function heldRows(name, docs) {
+    const { ctx, page: q, errors } = await signedInPage('index.html', { docs, selector: '#oa-chip' });
+    // the refresh has landed once the once-per-session latch is written
+    await q.waitForFunction((uid) => {
+      try { return sessionStorage.getItem('oa-acct-counts-fresh') === uid; } catch (e) { return false; }
+    }, HELD, { timeout: 15000 });
+    await q.waitForTimeout(100);
+    await q.click('#oa-chip');
+    const rows = await readRows(q);
+    const shown = {
+      postings: await q.locator('#oa-menu a[href="my-postings.html"]').isVisible(),
+      cand: await q.locator('#oa-menu a[href="post-a-candidate.html"]').isVisible(),
+    };
+    eq(errors, [], `held rows (${name}): no uncaught script error`);
+    return { ctx, q, rows, shown };
+  }
+
+  /* -- an account holding nothing: neither row, the rest of the menu intact */
+  {
+    const { ctx, rows, shown } = await heldRows('nothing', seeds.nothing);
+    eq(shown, { postings: false, cand: false },
+      'held rows: an account with no posting and no profile is shown neither row');
+    ok(rows.menuPostings && rows.menuPostings.hidden && rows.menuCand && rows.menuCand.hidden,
+      'held rows: …the rows are in the markup, hidden — not drawn and then removed');
+    ok(rows.sheetPostings && rows.sheetPostings.hidden && rows.sheetCand && rows.sheetCand.hidden,
+      'held rows: and the phone sheet mirrors it');
+    ok(rows.alerts && !rows.alerts.hidden && rows.messages && !rows.messages.hidden &&
+       rows.area && !rows.area.hidden,
+      'held rows: E-mail alerts, Messages and My personal area stay as they were');
+    await ctx.close();
+  }
+
+  /* -- an account that has posted a job: My postings, with its count ------- */
+  {
+    const { ctx, q, rows, shown } = await heldRows('poster', seeds.poster);
+    eq(shown, { postings: true, cand: false },
+      'held rows: an account with a job posting is shown My postings and not the profile row');
+    eq(rows.menuPostings.badge, '1', 'held rows: …and the badge still counts');
+    eq(rows.menuPostings.text, 'My postings', 'held rows: labelled My postings');
+    ok(!rows.sheetPostings.hidden && rows.sheetCand.hidden,
+      'held rows: the phone sheet draws My postings and not the profile row');
+
+    /* the count NOT KNOWN: no cache and no refresh this session — the same
+       account, and the row it has earned is withheld rather than guessed */
+    await q.evaluate((uid) => {
+      localStorage.removeItem('oa-acct-counts');
+      sessionStorage.setItem('oa-acct-counts-fresh', uid);
+    }, HELD);
+    await q.reload({ waitUntil: 'load' });
+    await q.waitForSelector('#oa-chip', { timeout: 15000 });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForTimeout(400);
+    await q.click('#oa-chip');
+    const unknown = await readRows(q);
+    ok(unknown.menuPostings.hidden && unknown.menuCand.hidden &&
+       unknown.sheetPostings.hidden && unknown.sheetCand.hidden &&
+       unknown.menuPostings.badge === '',
+      'held rows: with the count not known, NEITHER row is drawn — the poster\'s ' +
+      'own My postings included — rather than a row that may be wrong');
+    await ctx.close();
+  }
+
+  /* -- an account that has filed a candidate profile (withdrawn) ------------ */
+  {
+    const { ctx, q, rows, shown } = await heldRows('candidate', seeds.candidate);
+    eq(shown, { postings: false, cand: true },
+      'held rows: an account with a candidate profile is shown My candidate profile and not My postings');
+    eq(rows.menuCand.text, 'My candidate profile', 'held rows: labelled My candidate profile');
+    eq(rows.menuCand.badge, '1',
+      'held rows: a WITHDRAWN profile still counts — it exists and is its owner\'s to restore');
+    ok(!rows.sheetCand.hidden && rows.sheetPostings.hidden,
+      'held rows: the phone sheet draws My candidate profile and not My postings');
+    eq(await q.locator('#oa-menu a[href="post-a-candidate.html"]').getAttribute('href'),
+      'post-a-candidate.html',
+      'held rows: the row opens post-a-candidate.html, which sends an owner to their own profile');
+    await ctx.close();
+  }
+
+  /* -- the personal area's card goes straight to the profile ---------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('account.html',
+      { docs: seeds.candidate, selector: '#oa-chip' });
+    await q.waitForFunction(() =>
+      /\?edit=/.test((document.getElementById('pa-cand-card') || {}).href || ''),
+      null, { timeout: 15000 });
+    const card = await q.evaluate(() => {
+      const el = document.getElementById('pa-cand-card');
+      return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
+    });
+    eq(card.href, 'post-a-candidate.html?edit=held-c1',
+      'personal area: the candidate card links straight to the profile the account holds');
+    ok(/Your candidate profile/.test(card.h3), 'personal area: …and reads "Your candidate profile"');
+    /* and, holding the real lists, it corrected the menu's cache for free */
+    const cached = await q.evaluate(() =>
+      (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}));
+    eq([cached.postings, cached.cands], [0, 1],
+      'personal area: the page corrects the postings and profile counts it just read');
+    eq(errors, [], 'personal area: no uncaught script error');
+    await ctx.close();
+  }
+  {
+    const { ctx, page: q } = await signedInPage('account.html',
+      { docs: seeds.nothing, selector: '#oa-chip' });
+    await q.waitForFunction(() =>
+      (document.getElementById('pa-n-jobs') || {}).textContent === '0', null, { timeout: 15000 });
+    const card = await q.evaluate(() => {
+      const el = document.getElementById('pa-cand-card');
+      return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
+    });
+    eq(card.href, 'post-a-candidate.html',
+      'personal area: with no profile the card still offers the form');
+    ok(/^Candidate profile$/.test(card.h3.replace(/^\S+\s*/, '')) || /Candidate profile/.test(card.h3),
+      'personal area: …and reads "Candidate profile", not "Your"');
+    ok(!/Your candidate profile/.test(card.h3), 'personal area: never "Your candidate profile" for nobody');
+    await ctx.close();
+  }
+}
+
 /* --------------------------------------- the SPONSOR mark, as it renders
 
    selftest.mjs pins the rule, the wiring and the stylesheets. This is the

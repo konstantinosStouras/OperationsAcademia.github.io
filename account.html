@@ -218,7 +218,7 @@
             <p>Advertise an academic opening. It publishes automatically, normally within a
             few minutes, and is free.</p>
           </a>
-          <a class="v3-pa-card" href="post-a-candidate.html">
+          <a class="v3-pa-card" href="post-a-candidate.html" id="pa-cand-card">
             <h3><span class="v3-ico" aria-hidden="true">&#127891;</span> Candidate profile</h3>
             <p>On the market this season? Create your profile, with your CV and research
             summary attached.</p>
@@ -381,9 +381,24 @@
             .then(function (s) { return s.size; }).catch(function () { return null; });
           /* …and a candidate profile, which the "nothing here yet" nudge used
              to ignore: a candidate with only a profile was told the account
-             held nothing. Owner-readable by the deployed rules. */
+             held nothing. Owner-readable by the deployed rules. The NEWEST
+             document is kept beside the count: the card links straight to
+             it (below), the same profile post-a-candidate.html would redirect
+             its owner to, without the hop. A profile filed this season is
+             newer than last season's by construction (createdAt is set once,
+             and a new profile takes the season under way), so newest overall
+             is the one this season where there is one. */
           var candQ = db.collection(OAFB.col.candidateSubmissions).where('uid', '==', user.uid).get()
-            .then(function (s) { return s.size; }).catch(function () { return null; });
+            .then(function (s) {
+              var newest = '', newestAt = '';
+              s.forEach(function (d) {
+                var v = d.data() || {};
+                var at = v.createdAt && v.createdAt.toDate
+                  ? v.createdAt.toDate().toISOString() : String(v.createdAt || '');
+                if (!newest || at >= newestAt) { newest = d.id; newestAt = at; }
+              });
+              return { n: s.size, id: newest };
+            }).catch(function () { return null; });
           var alertsQ = db.collection(OAFB.col.users).doc(user.uid)
             .collection(OAFB.col.alerts).get()
             .then(function (s) { return s.size; }).catch(function () { return null; });
@@ -398,16 +413,29 @@
             }).catch(function () { return null; });
           return Promise.all([jobsQ, alertsQ, msgQ, candQ]);
         }).then(function (r) {
-          var jobs = r[0], alerts = r[1], msgs = r[2], cands = r[3];
-          var candCard = document.querySelector('.v3-pa-card[href="post-a-candidate.html"] h3');
+          var jobs = r[0], alerts = r[1], msgs = r[2];
+          var cands = r[3] ? r[3].n : null;
+          var candCard = document.getElementById('pa-cand-card');
           if (cands > 0 && candCard) {
-            candCard.innerHTML = '<span class="v3-ico" aria-hidden="true">&#127891;</span> Your candidate profile';
-            var candP = candCard.parentNode.querySelector('p');
-            if (candP) candP.textContent = 'Open, edit or take down the profile you have filed for this season.';
+            candCard.querySelector('h3').innerHTML =
+              '<span class="v3-ico" aria-hidden="true">&#127891;</span> Your candidate profile';
+            var candP = candCard.querySelector('p');
+            if (candP) candP.textContent = 'Open, edit or take down the profile you have filed.';
+            /* straight to the profile — the editor the candidates page's own
+               Edit button opens, keyed on the document the read just found */
+            if (r[3].id) candCard.href = 'post-a-candidate.html?edit=' + encodeURIComponent(r[3].id);
           }
           if (jobs !== null) document.getElementById('pa-n-jobs').textContent = String(jobs);
           if (alerts !== null) document.getElementById('pa-n-alerts').textContent = String(alerts);
           if (msgs !== null) document.getElementById('pa-n-messages').textContent = String(msgs);
+          /* This page holds the real lists, so the account menu's cache is
+             corrected for free (oa-accounts.js, rule 3) — the "My postings"
+             and "My candidate profile" rows follow the same numbers. */
+          if (window.OAAccounts && OAAccounts.setCount) {
+            if (jobs !== null) OAAccounts.setCount('postings', jobs);
+            if (alerts !== null) OAAccounts.setCount('alerts', alerts);
+            if (cands !== null) OAAccounts.setCount('cands', cands);
+          }
           // holding nothing at all → the friendly nudge card above the grid
           if (jobs === 0 && alerts === 0 && cands === 0) empty.hidden = false;
         }).catch(function () { /* counts are decoration — the links still work */ });

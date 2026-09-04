@@ -403,7 +403,10 @@
     alerts: '&#9993;',
     messages: '&#128172;',
     profile: '&#128100;',
-    feedback: '&#128172;'
+    feedback: '&#128172;',
+    // the graduation cap account.html's candidate card already wears, so the
+    // menu row and the card read as one thing
+    cand: '&#127891;'
   };
 
   /* Whether to DRAW the maintainer's menu entry. From the resolved session
@@ -497,9 +500,27 @@
           '<div class="oa-acct-group">' +
             '<a role="menuitem" href="post-a-job.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.post + '</span>Post a job</a>' +
-            '<a role="menuitem" href="my-postings.html">' +
+            /* The two rows an account may not HOLD anything for (owner,
+               2026-09-04: "my job postings should appear in the account menu
+               of a user who has posted, otherwise it shouldn't show it
+               there", and the same for a candidate profile). Both are born
+               `hidden` and carry data-held; paintCounts — the one place that
+               knows how many of each the account has — reveals a row under
+               the SAME rule as its badge: the count is KNOWN and more than
+               zero. A count not known yet draws neither row, rather than a
+               row that may be wrong; the once-per-session refresh lands
+               within a second, and the cache paints the final form before
+               that on every later page. */
+            '<a role="menuitem" href="my-postings.html" data-held="postings" hidden>' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.mine + '</span>My postings' +
               '<span class="oa-acct-n" data-count="postings" hidden></span></a>' +
+            /* post-a-candidate.html sends an owner straight to their own
+               profile (redirectToOwnProfile in oa-candidateform.js), so the
+               row needs no document id — which the count() aggregate could
+               not give it anyway. */
+            '<a role="menuitem" href="post-a-candidate.html" data-held="cands" hidden>' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.cand + '</span>My candidate profile' +
+              '<span class="oa-acct-n" data-count="cands" hidden></span></a>' +
             '<a role="menuitem" href="alerts.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.alerts + '</span>E-mail alerts' +
               '<span class="oa-acct-n" data-count="alerts" hidden></span></a>' +
@@ -613,7 +634,10 @@
       // (owner, 2026-08-24) — the same order the header menu draws
       (adminish(u) ? '<a class="link depth-0" href="admin-area.html">Admin area</a>' : '') +
       '<a class="link depth-0" href="account.html">My personal area</a>' +
-      '<a class="link depth-0" href="my-postings.html">My postings</a>' +
+      // the same two held rows as the header menu, under the same rule —
+      // hidden until paintCounts knows the account holds one (see paint())
+      '<a class="link depth-0" href="my-postings.html" data-held="postings" hidden>My postings</a>' +
+      '<a class="link depth-0" href="post-a-candidate.html" data-held="cands" hidden>My candidate profile</a>' +
       '<a class="link depth-0" href="messages.html">Messages</a>' +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
@@ -704,7 +728,18 @@
 
      A count we do not KNOW shows nothing: no badge is honest, a 0 is not.
      Zero is also nothing to show — an empty badge beside "My postings" reads
-     as a fault rather than as "none yet". */
+     as a fault rather than as "none yet".
+
+       4. A ROW IS DRAWN ONLY FOR WHAT THE ACCOUNT HOLDS (owner, 2026-09-04).
+          "My postings" is listed only for an account that has made a job
+          posting, and "My candidate profile" only for one that has filed a
+          profile — a withdrawn profile still exists and is its owner's to
+          restore, so nothing is excluded by status. The rows carry
+          `data-held` and are hidden in the markup; paintCounts reveals one
+          under the badge's own rule (known, and more than zero), so a count
+          that is not known yet draws NEITHER row — never a row that may be
+          wrong. The two decisions are one function on purpose: a row and its
+          badge cannot disagree about whether there is anything there. */
 
   var COUNT_KEY = 'oa-acct-counts';
   var COUNT_SESSION = 'oa-acct-counts-fresh';
@@ -725,12 +760,25 @@
   }
 
   function paintCounts(counts) {
+    /* ONE rule for a badge and for the row it sits on: the count is KNOWN
+       and more than zero. */
+    function held(what) {
+      var n = counts[what];
+      return typeof n === 'number' && n > 0 ? n : 0;
+    }
     var nodes = document.querySelectorAll('.oa-acct-n[data-count]');
     Array.prototype.forEach.call(nodes, function (el) {
-      var n = counts[el.getAttribute('data-count')];
-      var show = typeof n === 'number' && n > 0;
+      var n = held(el.getAttribute('data-count'));
+      var show = n > 0;
       el.textContent = show ? String(n) : '';
       el.hidden = !show;
+    });
+    /* …and the rows drawn only for what the account holds (rule 4): the
+       header menu's and the phone sheet's alike, since both are in the
+       document. Not a list of ids — whatever carries data-held follows. */
+    var rows = document.querySelectorAll('[data-held]');
+    Array.prototype.forEach.call(rows, function (el) {
+      el.hidden = !held(el.getAttribute('data-held'));
     });
   }
 
@@ -788,6 +836,14 @@
             return typeof n === 'number' ? n : 0;
           })
           .catch(function () { return null; }),
+        /* Candidate profiles — the row of the menu that exists only when
+           there is something behind it (rule 4). The SAME query the
+           candidate form's own one-profile check and account.html issue,
+           which the rules already allow the owner
+           (read: isOwner(resource.data.uid)); no status filter, because a
+           withdrawn profile still exists and is its owner's to restore. */
+        countOf(db.collection(OAFB.col.candidateSubmissions).where('uid', '==', uid))
+          .catch(function () { return null; }),
       ]);
     }).then(function (r) {
       if (!state.user || state.user.uid !== uid) return;   // signed out mid-flight
@@ -796,6 +852,7 @@
       if (typeof r[1] === 'number') counts.alerts = r[1];
       if (typeof r[2] === 'number') counts.admin = r[2];
       if (typeof r[3] === 'number') counts.messages = r[3];
+      if (typeof r[4] === 'number') counts.cands = r[4];
       writeCounts(uid, counts);
       paintCounts(counts);
       try { sessionStorage.setItem(COUNT_SESSION, uid); } catch (e) { /* ignore */ }

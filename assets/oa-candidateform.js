@@ -813,6 +813,12 @@
        Checked once per page load; a failure to check is not fatal — the
        build's collapse is the backstop. */
     var oneProfileChecked = false;
+    /* How many profiles this account holds, ALL seasons, from the check's
+       own query — null until it has answered. It is what the account menu's
+       "My candidate profile" row is drawn from (OAAccounts.setCount('cands'),
+       the exact-where-the-data-is-loaded rule oa-myjobs.js follows for
+       postings), and what a successful CREATE adds one to. */
+    var ownProfiles = null;
     function redirectToOwnProfile(user) {
       if (EDIT_ID || sent || oneProfileChecked || !user) return;
       oneProfileChecked = true;
@@ -821,6 +827,8 @@
         return fb.firestore().collection(col()).where('uid', '==', user.uid).get();
       }).then(function (snap) {
         if (sent) return;
+        ownProfiles = snap.size;
+        if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('cands', snap.size);
         var season = jobMarketYears().current;
         var found = '', foundAt = '';
         snap.forEach(function (d) {
@@ -907,6 +915,14 @@
           return c.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
           sent = true;
+          /* A NEW profile is one more than the account held: the menu's
+             "My candidate profile" row appears from this moment, not from
+             the next session's refresh. An edit changes nothing here (the
+             profile already counted), and neither does a take-down — a
+             withdrawn profile still exists and is its owner's to restore. */
+          if (!EDIT_ID && window.OAAccounts && OAAccounts.setCount) {
+            OAAccounts.setCount('cands', (ownProfiles === null ? 0 : ownProfiles) + 1);
+          }
           /* The confirmation is written for a NEW profile — a reference to
              keep, "post another". Neither is true of an edit, so say what
              actually happened instead. */
