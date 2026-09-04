@@ -54,7 +54,9 @@
   function marketYears() {
     var now = new Date();
     var base = now.getUTCFullYear() + (now.getUTCMonth() >= 6 ? 1 : 0);
-    return { list: [base - 1, base, base + 1], current: base };
+    /* The season under way and the one before it — never one that has not
+       started (a placement is reported once accepted, in its own season). */
+    return { list: [base - 1, base], current: base };
   }
 
   function fillStaticOptions() {

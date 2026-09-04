@@ -95,7 +95,7 @@
        upload landed but the build has not filed it into Drive yet — the
        posting itself never waits for it (the public card says "soon to be
        available" meanwhile). */
-    if (v.adUrl) {
+    if (v.adUrl && /^https?:\/\//i.test(String(v.adUrl))) {
       meta.appendChild(document.createTextNode((bits.length ? ' · ' : '') + 'Advert: '));
       var a = el('a', null, 'file');
       a.href = v.adUrl;

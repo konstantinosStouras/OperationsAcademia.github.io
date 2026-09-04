@@ -325,6 +325,14 @@ async function selftest() {
   ok(/const idle = \{ lastCheckedAt: now\.toISOString\(\) \};/.test(mailerSrc) &&
      !/const idle = \{[^}]*lastJobAt/.test(mailerSrc),
     'a run with nothing to send moves no window at all');
+  /* …but it FREEZES the job floor where it stood: `since` fell back to
+     lastSentAt, which every digest advances, so an update-only digest moved
+     the job window past a posting approved minutes earlier. The three
+     patches that can advance lastSentAt without carrying a posting each pin
+     lastJobAt to `since` when the alert has none — never to `now`. */
+  ok((mailerSrc.match(/if \(!a\.lastJobAt\) \w+\.lastJobAt = since;/g) || []).length === 3,
+    'the job floor is frozen at `since` on the idle, reveal-note and no-posting digest paths');
+
 
   const log = [
     { id: 'a', date: '2026-08-15', title: 'T', summary: 'S' },
@@ -778,6 +786,13 @@ async function main() {
       else if (LIVE) {
         const idle = { lastCheckedAt: now.toISOString() };
         if (floor) idle.lastUpdateDate = floor;   // freeze the floor, see above
+        /* …and the JOB floor, for the same reason. `since` fell back to
+           lastSentAt, which EVERY digest advances — an update-only or
+           candidates-only digest moved the job window to now, and a posting
+           approved minutes before it (dated from its approval) was behind
+           the mark for ever. Frozen once, at the value it had, it can only
+           ever move on a digest that actually carried postings. */
+        if (!a.lastJobAt) idle.lastJobAt = since;
         await doc.ref.update(idle);
       }
       continue;
@@ -812,6 +827,7 @@ async function main() {
             lastCandidateAt: cand.mark || now.toISOString(),
             lastCheckedAt: now.toISOString(),
           };
+          if (!a.lastJobAt) notePatch.lastJobAt = since;   // freeze the job floor too
           // freeze the update-window floor here too — a run whose whole
           // output is this note must not leave it sliding (see the idle
           // branch); the digest below rewrites it when it also sends
@@ -872,6 +888,7 @@ async function main() {
          announced. */
       const newestJob = M.latestAddedAt(jobs);
       if (newestJob) patch.lastJobAt = newestJob;
+      else if (!a.lastJobAt) patch.lastJobAt = since;   // frozen where it stood, never `now`
       // record the newest change-log entry actually sent, so the next window
       // starts after it rather than at a timestamp. The frozen floor is written
       // first and only stands when nothing was sent — a real send always knows

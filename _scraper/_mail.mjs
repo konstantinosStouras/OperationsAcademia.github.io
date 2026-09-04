@@ -92,6 +92,14 @@ export function fromAddress() {
  * change what they receive; pass null for a message nobody subscribed to (a
  * feedback receipt), which then carries no unsubscribe language.
  */
+/** `a***@example.org` — enough to recognise, never enough to write to. */
+export function redact(email) {
+  return String(email || '').split(',').map((one) => {
+    const m = one.trim().match(/^([^@]{1,2})[^@]*(@.*)$/);
+    return m ? `${m[1]}***${m[2]}` : (one.trim() ? '***' : 'no address');
+  }).join(', ');
+}
+
 export function shell({ title, bodyHtml, manageUrl, unsubUrl }) {
   const foot = manageUrl
     ? `You are receiving this because you asked Operations Academia to tell you about
@@ -184,8 +192,13 @@ export async function send(tx, msg, { dryRun = false } = {}) {
   }
 
   if (!tx || dryRun) {
+    /* REDACTED. This prints into the Actions log of a PUBLIC repository, and
+       the alerts mailer runs as a dry run whenever SMTP is unset — so a
+       subscriber's, a poster's or a feedback submitter's address printed
+       here in full was world-readable. The same rule the served files are
+       held to: nothing public carries an address. */
     console.log(`\n--- ${dryRun ? 'DRY RUN' : 'NO SMTP'}: would send ---`);
-    console.log(`To:      ${full.to}`);
+    console.log(`To:      ${redact(full.to)}`);
     console.log(`Subject: ${full.subject}`);
     if (full.replyTo) console.log(`Reply-To: ${full.replyTo}`);
     console.log(full.text.slice(0, 800));

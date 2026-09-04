@@ -8,7 +8,7 @@
    maintainer and sends the submitter a copy.
 
    The loop is closed from the repository: adding
-   v2/_feedback-resolutions/<TICKET>.md and pushing it closes the ticket and
+   _feedback-resolutions/<TICKET>.md and pushing it closes the ticket and
    e-mails the submitter what was done. That file is the public record of the
    fix — which is why it must never contain the submitter's name or address
    (this repository is public; the mailer looks those up in Firestore).
@@ -269,7 +269,7 @@
             (v.resolution ? '<p class="oa-fb-res"><strong>Resolution:</strong> ' +
               esc(v.resolution) + '</p>' : '') +
             '<p class="oa-hint">Close this ticket by adding ' +
-              '<code>v2/_feedback-resolutions/' + esc(v.ticket || d.id) + '.md</code> ' +
+              '<code>_feedback-resolutions/' + esc(v.ticket || d.id) + '.md</code> ' +
               'to the repository &mdash; the submitter is e-mailed automatically.</p>';
           list.appendChild(card);
         });

@@ -98,7 +98,11 @@
 
   function cardHtml(kind, id, d, revealAt) {
     var href = safeHref(kind.link(d));
-    var held = kind.key === 'candidate' && revealAt;
+    /* Held only while the reveal date is still AHEAD — the same test
+       oa-adminarea's candGroupOf makes, so the two panels on one page cannot
+       disagree about a profile from the reveal day on. */
+    var held = kind.key === 'candidate' && !!revealAt &&
+      new Date().toISOString().slice(0, 10) < revealAt;
 
     return '<header>' +
         '<strong>' + esc(kind.title(d)) + '</strong>' +

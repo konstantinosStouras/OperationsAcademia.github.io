@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "review-sweep-2026-09",
+      "date": "2026-09-04",
+      "title": "Keyboard, phone and reliability fixes across the site",
+      "summary": "A review of every page fixed a run of small things: the menu no longer sits in the keyboard's tab order while closed, every page has a skip link, the Jobs link goes to the full list from every page, tick boxes on phones are the right size, a posting you open from a shared link names itself in the browser tab, a candidate's University link now finds the university, and the wording about when things publish says what the site really does.",
+      "url": "/jobs.html"
+    },
+    {
       "id": "analytics-captions-full-width",
       "date": "2026-09-03",
       "title": "The analytics captions read across the whole card",

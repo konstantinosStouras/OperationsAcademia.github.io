@@ -298,6 +298,11 @@
     let p = String(raw || '').trim();
     if (!p) return '';
     p = p.split('?')[0].split('#')[0];
+    /* A backslash is never in a path this site serves, and it is how a
+       page value written by an unauthenticated client turns into a link
+       off the site: `new URL('/\\evil.com', origin)` is `https://evil.com/`,
+       and the most-visited list links its rows. Dropped whole. */
+    if (p.indexOf('\\') !== -1) return '';
     if (p.charAt(0) !== '/') p = '/' + p;
     p = p.replace(/\/{2,}/g, '/');
     if (/\/index\.html?$/i.test(p)) p = p.replace(/index\.html?$/i, '');

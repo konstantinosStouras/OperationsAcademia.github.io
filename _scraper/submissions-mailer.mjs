@@ -375,9 +375,14 @@ async function main() {
   }
 
   if (SCAN) {
+    /* THE DOCUMENT, NEVER THE PERSON. --scan prints into the Actions log of
+       a public repository, and a candidate's headline is their NAME — for a
+       profile held behind the reveal date, a name that is by design in no
+       served file. A job posting's headline names a university and a
+       department, which the site publishes anyway. */
     for (const { kind, entry } of all) {
       log(`  to the maintainer: ${kind.one}  ${entry.id}  ` +
-          `${kind.headline(entry.data || {}, entry.row)}`);
+          `${kind.tellsPoster ? kind.headline(entry.data || {}, entry.row) : '(held)'}`);
     }
     for (const { kind, entry } of live) {
       log(`  to the poster: ${kind.one}  ${entry.id}  ` +
@@ -448,9 +453,12 @@ async function announceToMaintainer(db, tx, all, revealAt) {
   if (all.length > BURST) {
     const { subject, html } = renderSubmissionDigest(all);
     if (DRY) {
+      /* The subject and the ids only: the body carries every poster's
+         address ("Posted by: …") and every held candidate's name, and a
+         dispatched dry run prints into a public Actions log. */
       log(`--dry-run: ${all.length} submissions would go as ONE digest`);
       log('subject: ' + subject);
-      log(toPlain(html));
+      log('for: ' + all.map((x) => `${x.kind.one} ${x.entry.id}`).join(', '));
       return;
     }
     try {
@@ -477,9 +485,8 @@ async function announceToMaintainer(db, tx, all, revealAt) {
     const { subject, html } = renderSubmissionEmail(kind, entry, { revealAt });
 
     if (DRY) {
-      log('\n--- would send ---');
-      log('subject: ' + subject);
-      log(toPlain(html));
+      log(`\n--- would send to the maintainer about ${kind.one} ${entry.id} ---`);
+      log('subject: ' + subject);   // the body names the poster — see the digest branch
       continue;
     }
 
@@ -531,8 +538,7 @@ async function thankPosters(db, tx, live) {
          that holds a real person's e-mail — the same "nothing public may carry
          an address" rule the served files are held to. */
       log(`\n--- would send to the poster of ${entry.id} ---`);
-      log('subject: ' + subject);
-      log(toPlain(html));
+      log('subject: ' + subject);   // the body is the served row, which is public
       continue;
     }
 

@@ -66,17 +66,39 @@
     record('get', this.path);
     return Promise.resolve(snapOf(this.path));
   };
+  /* Like the SDK: `merge` DEEP-merges (a nested map's keys are added to,
+     not replaced — which is exactly why oa-jobreview writes `edits` with
+     `mergeFields`, and the shim has to reproduce it or the browser check
+     cannot see the difference); `mergeFields` replaces the named fields whole
+     and leaves the rest of the document alone. */
+  function deepMerge(into, from) {
+    var out = Object.assign({}, into);
+    Object.keys(from).forEach(function (k) {
+      var v = from[k], had = out[k];
+      out[k] = (v && typeof v === 'object' && !Array.isArray(v) &&
+                had && typeof had === 'object' && !Array.isArray(had))
+        ? deepMerge(had, v) : v;
+    });
+    return out;
+  }
   DocRef.prototype.set = function (data, opts) {
     record('set', this.path, data);
-    docs[this.path] = (opts && opts.merge && docs[this.path])
-      ? Object.assign({}, docs[this.path], data)
-      : Object.assign({}, data);
+    var had = docs[this.path];
+    if (opts && opts.mergeFields && had) {
+      var next = Object.assign({}, had);
+      opts.mergeFields.forEach(function (k) { if (k in data) next[k] = data[k]; });
+      docs[this.path] = next;
+    } else if (opts && (opts.merge || opts.mergeFields) && had) {
+      docs[this.path] = deepMerge(had, data);
+    } else {
+      docs[this.path] = Object.assign({}, data);
+    }
     return Promise.resolve();
   };
   DocRef.prototype.update = function (patch) {
     record('update', this.path, patch);
     if (!docs[this.path]) return Promise.reject(new Error('not-found: ' + this.path));
-    docs[this.path] = Object.assign({}, docs[this.path], patch);
+    docs[this.path] = Object.assign({}, docs[this.path], resolveIncrements(docs[this.path], patch));
     return Promise.resolve();
   };
   DocRef.prototype.delete = function () {
@@ -205,7 +227,21 @@
       batch: function () { return new Batch(); }
     };
   }
-  firestoreFor.FieldValue = { serverTimestamp: function () { return '<serverTimestamp>'; } };
+  /* `increment` is resolved at write time, as the server does: the roster's
+     broadcast bumps an existing thread's unread count with it rather than
+     re-stating a value read minutes earlier. */
+  function Increment(n) { this.__inc = n; }
+  function resolveIncrements(had, patch) {
+    var out = Object.assign({}, patch);
+    Object.keys(out).forEach(function (k) {
+      if (out[k] instanceof Increment) out[k] = (typeof had[k] === 'number' ? had[k] : 0) + out[k].__inc;
+    });
+    return out;
+  }
+  firestoreFor.FieldValue = {
+    serverTimestamp: function () { return '<serverTimestamp>'; },
+    increment: function (n) { return new Increment(n); }
+  };
 
   /* ------------------------------------------------------------------ auth */
 

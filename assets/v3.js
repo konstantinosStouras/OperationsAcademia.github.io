@@ -176,6 +176,11 @@
       // record the section in the address bar without the native jump
       try { history.pushState(null, '', '#' + id); } catch (err) {}
       scrollToEl(el);
+      /* …and move FOCUS there, which the native jump did and this did not:
+         the skip link and every nav link scrolled the page while the
+         keyboard stayed on the link, so the next Tab went back to the header. */
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+      try { el.focus({ preventScroll: true }); } catch (err) { el.focus(); }
     });
 
     // arriving with a #hash: let the page paint, then travel to it
@@ -222,9 +227,9 @@
       if (window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 4) {
         active = sections[sections.length - 1].id;
       }
-      links.forEach(function (a) { a.classList.remove('is-active'); });
+      links.forEach(function (a) { a.classList.remove('is-active'); a.removeAttribute('aria-current'); });
       if (active && byId[active]) {
-        byId[active].forEach(function (a) { a.classList.add('is-active'); });
+        byId[active].forEach(function (a) { a.classList.add('is-active'); a.setAttribute('aria-current', 'true'); });
       }
     }
     window.addEventListener('scroll', function () {
@@ -245,15 +250,33 @@
     var burger = $('.v3-burger');
     var backdrop = $('.v3-sheet-backdrop');
     var close = $('.v3-sheet-close');
+    var sheet = $('.v3-sheet');
     if (!burger) return;
+    if (sheet) { sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-modal', 'true'); }
     burger.addEventListener('click', function () {
       var open = document.body.classList.toggle('v3-sheet-open');
       burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      /* A dialog takes focus when it opens and gives it back when it closes;
+         without this Tab walked the page BEHIND the sheet. */
+      if (open && close) setTimeout(function () { close.focus(); }, 0);
     });
-    if (backdrop) backdrop.addEventListener('click', closeSheet);
-    if (close) close.addEventListener('click', closeSheet);
+    function closeAndReturn() {
+      var was = document.body.classList.contains('v3-sheet-open');
+      closeSheet();
+      if (was) burger.focus();
+    }
+    if (backdrop) backdrop.addEventListener('click', closeAndReturn);
+    if (close) close.addEventListener('click', closeAndReturn);
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeSheet();
+      if (e.key === 'Escape') { closeAndReturn(); return; }
+      /* keep Tab inside the open sheet */
+      if (e.key !== 'Tab' || !sheet || !document.body.classList.contains('v3-sheet-open')) return;
+      var stops = sheet.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (!stops.length) return;
+      var first = stops[0], last = stops[stops.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      else if (!sheet.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
     });
   }
 

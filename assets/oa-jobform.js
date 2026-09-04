@@ -554,20 +554,27 @@
       });
       (data.__checks || []).forEach(function (pair) {
         var i = pair.indexOf('=');
+        var name = pair.slice(0, i), value = pair.slice(i + 1);
         var box = document.querySelector(
-          'input[type="checkbox"][name="' + pair.slice(0, i) + '"][value="' +
-          CSS.escape(pair.slice(i + 1)) + '"]');
+          'input[type="checkbox"][name="' + name + '"][value="' + CSS.escape(value) + '"]');
+        /* A box with no `value` attribute saves as "on" and matches no
+           [value=…] selector — the until-filled tick was silently lost. */
+        if (!box && value === 'on') {
+          box = document.querySelector('input[type="checkbox"][name="' + name + '"]:not([value])');
+        }
         if (box) box.checked = true;
       });
-      // keep the derived department line and the until-filled state in step
+      // keep the derived department line and the until-filled state in step —
+      // `change`, not `input`: the picker reads `input` as typing and opens
       var school = $('f-school');
-      if (school) school.dispatchEvent(new Event('input', { bubbles: true }));
+      if (school) school.dispatchEvent(new Event('change', { bubbles: true }));
       var uf = $('f-untilFilled');
       if (uf && uf.checked) uf.dispatchEvent(new Event('change', { bubbles: true }));
     } catch (e) { /* a corrupt draft is discarded by the next save */ }
   }
 
   function draftClear() {
+    clearTimeout(draftTimer);   // a save still pending would put it straight back
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
   }
 
@@ -782,9 +789,11 @@
        is what fills an EMPTY school from an unambiguous department, and doing
        it here would put a school on a posting whose owner deliberately left
        it off, just because they opened the edit form. */
+    /* `change`, not `input`: the combo picker reads an `input` event as
+       typing and opened all three dropdowns on top of the edit form. */
     ['f-institution', 'f-school', 'f-unit'].forEach(function (id) {
       var el = $(id);
-      if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+      if (el) el.dispatchEvent(new Event('change', { bubbles: true }));
     });
     /* …and on the SCHOOL only. Not the institution: a posting's id and its
        permalink are built from it (jobs-model.jobId), so settling it here

@@ -58,8 +58,15 @@ service cloud.firestore {
               || request.resource.data.mergedFrom == resource.data.mergedFrom);
     }
 
+    // A field may be ABSENT, a bounded string — or NULL. The builds clear
+    // the landing-strip fields (adUploadPath, cvUploadPath, …) by writing
+    // null once a file is filed into Drive, and on an update
+    // request.resource.data is the MERGED document, so `null is string`
+    // refused every later owner write: a poster who had uploaded an advert
+    // could never edit or take down their posting again. Null is "cleared".
     function str(field, maxLen) {
       return !(field in request.resource.data)
+        || request.resource.data[field] == null
         || (request.resource.data[field] is string
             && request.resource.data[field].size() <= maxLen);
     }
@@ -766,8 +773,16 @@ service cloud.firestore {
                        || request.resource.data.add is bool)
                    && (!('t' in request.resource.data)
                        || request.resource.data.t is number)
+                   // …and a row the maintainer has RESTORED keeps `hidden:
+                   // false` on the document, which every later merge from an
+                   // ordinary account then carries — so an unchanged value
+                   // is anyone's, and only CHANGING it is the maintainer's.
                    && (!('hidden' in request.resource.data)
-                       || (request.resource.data.hidden is bool && isAdmin()));
+                       || (request.resource.data.hidden is bool
+                           && (isAdmin()
+                               || (resource != null
+                                   && 'hidden' in resource.data
+                                   && request.resource.data.hidden == resource.data.hidden))));
       allow delete: if isAdmin();
     }
 

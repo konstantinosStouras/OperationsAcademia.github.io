@@ -210,6 +210,11 @@
       return true;
     }
     if (v.indexOf(':') !== -1 && /^[0-9a-f:.]+$/.test(v)) {
+      /* An IPv4-mapped address (`::ffff:10.0.0.1`) is the IPv4 address it
+         wraps, and is judged as one — otherwise a private hop written that
+         way passed as public and clientIp() picked it over the real visitor. */
+      var mapped = v.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
+      if (mapped) return isPublicIp(mapped[1]);
       if (v === '::' || v === '::1') return false;
       if (/^f[cd]/.test(v)) return false;            // fc00::/7 unique-local
       if (/^fe[89ab]/.test(v)) return false;          // fe80::/10 link-local

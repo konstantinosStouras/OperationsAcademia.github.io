@@ -5351,9 +5351,15 @@ async function testUsersAndMessages() {
     'would silently omit exactly those accounts');
   ok(dir.indexOf('function rowOk()') < dir.indexOf('allow create'),
     'rowOk() is declared before the allow statements that call it');
-  ok(/needsAdmin: !!\(prev && prev\.needsAdmin\)/.test(users),
+  /* An EXISTING thread is updated without touching needsAdmin at all — not
+     re-stated from the roster as it was read at page load, which could copy a
+     stale `false` over a reply that landed while the maintainer was typing. */
+  const sendUpdate = (users.match(/batch\.update\(head, \{[\s\S]*?\}\);/) || [''])[0];
+  ok(sendUpdate.length > 40 && !/needsAdmin/.test(sendUpdate) &&
+     /FieldValue\.increment\(1\)/.test(sendUpdate),
     'A BROADCAST IS NOT AN ANSWER: sending to somebody who has replied leaves ' +
-    'them in the queue — only reading the thread clears it');
+    'them in the queue — only reading the thread clears it — and the unread ' +
+    'count is a server-side increment, never a value read minutes earlier');
   ok(/d\.batch\(\)/.test(users),
     'the message and its bookkeeping are ONE write — half of them landing ' +
     'would leave a message the roster does not know about');
@@ -11648,7 +11654,7 @@ async function testUniversityVisits() {
      would silently run to the end of the file and pass by accident.
      renderUniversities became the last function on the page when the
      provenance note was removed, so the fetch that boots it is the boundary. */
-  const uniEnd = uniFn.indexOf("fetch('data/analytics.json'");
+  const uniEnd = uniFn.indexOf("fetch('/data/analytics.json'");   // absolute — the shared substrate rule
   ok(uniEnd > 400, 'the universities renderer was bounded (or the checks below are vacuous)');
   const uniBody = uniFn.slice(0, uniEnd);
   for (const other of ['Where readers are', 'How readers arrive', 'What they read it on']) {

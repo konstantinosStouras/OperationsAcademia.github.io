@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
     <title>Universities — Operations Academia</title>
     <meta name="description" content="The searchable directory of 500+ universities and schools with Operations departments — grouped by university, with each school, department and link. Search it, or explore the map.">
     <link rel="canonical" href="https://www.operationsacademia.org/universities.html">
@@ -92,6 +94,7 @@
   </head>
 
   <body class="v3">
+    <a class="v3-skip" href="#main">Skip to content</a>
     <header class="v3-header">
       <div class="v3-header-inner">
         <button type="button" class="v3-burger" aria-label="Open the menu" aria-expanded="false" aria-controls="v3-sheet">
@@ -106,7 +109,7 @@
           <a href="./#candidates">Candidates</a>
           <a href="./#placements">Placements</a>
           <a href="./#survey">Survey</a>
-          <a href="./#resources" class="is-active">Resources</a>
+          <a href="./#resources" class="is-active" aria-current="page">Resources</a>
           <a href="./#faq">FAQ</a>
           <a href="./#about">About</a>
           <a href="./#contact">Contact</a>
@@ -134,7 +137,7 @@
         <a href="./#candidates">Candidates</a>
         <a href="./#placements">Placements</a>
         <a href="./#survey">Survey</a>
-        <a href="./#resources" class="is-active">Resources</a>
+        <a href="./#resources" class="is-active" aria-current="page">Resources</a>
         <a href="./#faq">FAQ</a>
         <a href="./#about">About</a>
         <a href="./#contact">Contact</a>
@@ -148,7 +151,7 @@
       </div>
     </aside>
 
-    <main>
+    <main id="main">
       <section class="v3-pa-hero">
         <div class="v3-container">
           <span class="v3-kicker">Universities</span>
@@ -376,6 +379,16 @@
       function setView(map) {
         dirEl.hidden = map;
         mapEl.hidden = !map;
+        /* The address says which view is showing. The map writes its search
+           as ?q=, and a link copied after switching back to Cards carried a
+           `q` the cards ignore and no `view=map` to restore it — a shareable
+           state that was neither. Cards drops the map's search; Map keeps it. */
+        try {
+          var sp = new URLSearchParams(location.search);
+          if (map) sp.set('view', 'map'); else { sp['delete']('view'); sp['delete']('q'); }
+          var qs = sp.toString();
+          history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+        } catch (e) { /* an old browser keeps the address it has */ }
         btnCards.classList.toggle('is-on', !map);
         btnMap.classList.toggle('is-on', map);
         btnCards.setAttribute('aria-pressed', map ? 'false' : 'true');

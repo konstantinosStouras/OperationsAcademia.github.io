@@ -161,6 +161,16 @@ exports.publishOnReview = onDocumentWritten(
       logger.debug('skip: not a decision', { status: after.status });
       return;
     }
+    /* Only a TRANSITION into a decision rings. The sheet sync itself creates
+       documents already approved (grandfathered rows) or rejected (an advert
+       already on the site), and every one of those used to dispatch a sheet
+       read plus a chained build — for a row that was never waiting. */
+    const before = event.data && event.data.before && event.data.before.exists
+      ? event.data.before.data() : null;
+    if (before && before.status === after.status) {
+      logger.debug('skip: already decided', { status: after.status });
+      return;
+    }
 
     await ring(REVIEW_EVENT_TYPE, { id: event.params.id, status: after.status },
       'sheet read dispatched');

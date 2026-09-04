@@ -160,7 +160,10 @@ async function firestore() {
     return null;
   }
   const app = admin.default || admin;
-  if (!app.apps.length) app.initializeApp({ credential: app.credential.cert(c) });
+  /* `apps` is the namespaced surface firebase-admin 14 removed; read it
+     defensively so an unpinned install fails with a message, not a throw. */
+  const apps = Array.isArray(app.apps) ? app.apps : [];
+  if (!apps.length) app.initializeApp({ credential: app.credential.cert(c) });
   return app.firestore();
 }
 
@@ -617,7 +620,16 @@ export function assemble(results, { now = Date.now(), carry = null, visits = nul
   for (const r of ordered) {
     const record = A.mergeDays(data.days, r.days, r.source);
     const before = pages.size;
-    A.mergePages(pages, r.pages);
+    /* THE PAGES LIST BELONGS TO ONE SOURCE — the one whose window it prints.
+       Every source's rows used to funnel in ("across sources the first claim
+       stands"), which is right for one PAGE and wrong for the LIST: the
+       usage leg claimed the twenty pages it had seen in its fortnight and
+       GA4 then added a dozen more from its ninety days — old-site click
+       events (`/logoHeader.html`) that 404, redirect stubs at 0 seconds —
+       under the usage window's heading, with shares summing past 100%. So
+       a source contributes pages only while none has, and the window and
+       the rows are then the same source by construction. */
+    if (!pagesWindow) A.mergePages(pages, r.pages);
     /* ONE SOURCE OWNS EACH DIMENSION, WHOLE — the first claim stands, and a
        later source is ignored rather than merged into it. See the model: two
        systems counting "visits from Germany" disagree about what a visit and

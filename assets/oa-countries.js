@@ -82,6 +82,18 @@
      and for every past row at the same time. */
   var ALIASES = {
     'USA': 'United States',
+    'MEX': 'Mexico',
+    'CAN': 'Canada',
+    'GBR': 'United Kingdom',
+    'DEU': 'Germany',
+    'FRA': 'France',
+    'ESP': 'Spain',
+    'ITA': 'Italy',
+    'NLD': 'Netherlands',
+    'CHN': 'China',
+    'HKG': 'Hong Kong',
+    'SGP': 'Singapore',
+    'AUS': 'Australia',
     'U.S.A.': 'United States',
     'U.S.': 'United States',
     'US': 'United States',
