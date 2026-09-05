@@ -292,8 +292,16 @@ async function main() {
 
   /* ----------------------------------------------------------- delete */
   console.log('\nforumDelete');
-  const notMine = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  /* SOMEBODY ELSE cannot delete it, and somebody else can no longer be the
+     MAINTAINER, who may remove any post in either room. So the author check
+     is made where two ordinary members meet, which is the open room: the
+     candidates room holds only this candidate and the maintainer. */
+  const oTh = await call('forumPost', tokens.open, { room: 'open', title: 'A question in the open room', tags: ['waiting'], body: 'Asked in the open room by somebody who is not the candidate.', kind: '', acceptGuide: true });
+  ok(!oTh.error && oTh.result.tid, 'a thread in the open room, by another member', JSON.stringify(oTh));
+  const notMine = await call('forumDelete', tokens.cand, { room: 'open', tid: oTh.result.tid, pid: oTh.result.pid });
   ok(status(notMine) === 'PERMISSION_DENIED' && reason(notMine) === 'author', 'somebody else cannot delete it');
+  const stillThere = await admin.doc(`forumSeasons/${Y}/rooms/open/threads/${oTh.result.tid}`).get();
+  ok(stillThere.data().hidden === false, 'and the refusal leaves their thread standing');
   /* the author's own reply, long past the edit window: there is no window */
   const rep = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${quoteSource.pid}`).get();
   const repN = rep.data().n;
