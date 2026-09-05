@@ -738,6 +738,86 @@ service cloud.firestore {
       allow list, delete: if false;
     }
 
+    // -------------------------------------------------- deleting an account
+    //
+    // A WORK ORDER, one per account, keyed on the uid itself so that a person
+    // cannot open two and the sweep can find the one it is looking for with a
+    // get() (the shape messages/{uid} and verifyMail/{uid} already use).
+    //
+    // WHY THERE IS A DOCUMENT HERE AT ALL. A person deleting their own account
+    // can do nearly all of it in their own browser: this file already lets an
+    // owner withdraw their postings and delete their alerts, their profile,
+    // their registeredUsers mark and their roster row, and Firebase lets a
+    // session delete its own sign-in. THE MAINTAINER CAN DO ALMOST NONE OF IT
+    // — users/{uid}/** is owner-only with no admin clause, so the admin cannot
+    // delete somebody else's e-mail alerts, and an alert left behind mails a
+    // person who no longer exists for ever (the lesson the account merge is
+    // built around). No browser can delete another account's Auth record at
+    // all. So the browser records the DECISION and _scraper/purge-accounts.mjs
+    // carries it out with the Admin SDK, which bypasses these rules.
+    //
+    // It is also what makes the person's own deletion safe to interrupt: the
+    // order is written BEFORE anything is taken away, so a browser closed half
+    // way through, a refused write or a cancelled password check leaves
+    // something that finishes the job. Without it there would be no way to
+    // know the account was meant to go, and no way for the person to ask
+    // again, because their alerts and their sign-in are already gone.
+    //
+    // THREE THINGS THE RULES PIN, each closing a hole:
+    //
+    //   1. `by` is pinned to WHO IS WRITING. A person may only file their own
+    //      deletion, as 'self'; the maintainer files anyone's, as 'admin'.
+    //      Without the pin an ordinary account could file an order that reads
+    //      as the maintainer's decision.
+    //   2. `uid` must equal the document id, so the id cannot say one account
+    //      and the body another — the id-composition guard messages/{uid}
+    //      already relies on.
+    //   3. NOBODY UPDATES ONE FROM A BROWSER. The sweep stamps `clearedAt`,
+    //      `doneAt`, `removed` and `note` with the Admin SDK, and those keys
+    //      are deliberately outside the create list above. That is safe here
+    //      and only here: the sync-user-directory trap is an Admin-SDK key
+    //      that makes a document its own owner can no longer write, and there
+    //      is no later owner write to freeze — a browser creates one of these
+    //      or deletes one, and never edits one.
+    //
+    // An unverified password account cannot file one, because isOwner() goes
+    // through verified() like every other user write on this site. It holds a
+    // profile document and a sign-in and nothing else, and the maintainer's
+    // roster lists every Auth account (it is seeded from Auth itself), so that
+    // account is deleted from there.
+    //
+    // CANCELLING IS ALLOWED ONLY WHILE IT IS STILL QUEUED. Once the sweep has
+    // started, "cancelled" would be a lie: the alerts and the sign-in have
+    // already gone. `resource` is the STORED document on a delete (it is
+    // `request.resource` that is null), so the condition can read the status.
+    //
+    // The keys are pinned against REQUEST_KEYS in assets/oa-account-delete.js
+    // both ways by selftest.mjs. Disclosed in the Privacy Policy.
+    match /accountDeletions/{uid} {
+
+      function orderOk() {
+        return request.resource.data.keys().hasOnly(
+                 ['uid', 'by', 'email', 'name', 'askedAt', 'status'])
+          && request.resource.data.uid == uid
+          && request.resource.data.status == 'requested'
+          && request.resource.data.askedAt is number
+          && str('email', 200) && str('name', 200);
+      }
+
+      // The person themselves, and the maintainer. Nobody else can even see
+      // that an account is on its way out.
+      allow read: if isAdmin() || isOwner(uid);
+
+      allow create: if orderOk()
+                    && ((isOwner(uid) && request.resource.data.by == 'self')
+                        || (isAdmin() && request.resource.data.by == 'admin'));
+
+      // See (3) above: the sweep writes with the Admin SDK.
+      allow update: if false;
+
+      allow delete: if isAdmin() && resource.data.status == 'requested';
+    }
+
     // ------------------------------------------------ what's-new decisions
     // The admin curates the public "What's new" list in place (owner,
     // 2026-08-17, extended 2026-08-18): one doc per changelog entry id,

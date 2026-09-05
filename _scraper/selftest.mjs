@@ -5373,6 +5373,316 @@ async function testDirectoryModel() {
    pins: the rules against what the modules write BOTH WAYS, the address that
    cannot be forged, the queue/statistic split the badge depends on, and the
    wiring on all four pages. */
+/* ---------------------------------------------------------------------------
+   DELETING AN ACCOUNT, from both ends (owner, 2026-09-05: "There is no option
+   for a user to completely delete their profile. You should have it within
+   their personal area … Also, the admin should be able to delete a user.")
+
+   The two halves are not symmetric and the tests say so. A person does nearly
+   all of their own deletion in their browser, because the rules already let an
+   owner withdraw their postings and delete their alerts, their details, their
+   tally mark and their roster row. THE MAINTAINER CAN DO ALMOST NONE OF IT, so
+   both write a WORK ORDER and _scraper/purge-accounts.mjs carries it out with
+   the Admin SDK.
+
+   What is pinned here is everything a refactor could quietly break: the order
+   of the steps (the sign-in LAST, or nothing that follows can write), that a
+   posting is WITHDRAWN and never deleted (deleting the document orphans the
+   published row for ever), that the document keys and the rules agree BOTH
+   WAYS, that the sweep's stamps cannot freeze a document against its own
+   owner, and that nothing anywhere claims more than is true.
+   --------------------------------------------------------------------------- */
+async function testAccountDeletion() {
+  const root = path.join(HERE, '..');
+  const AD = require(path.join(root, 'assets', 'oa-account-delete.js'));
+
+  /* the sweep's own suite first, the way the roster sync's is spawned: it
+     carries the served-file test and the source-order checks nothing here
+     repeats, and a suite run only by the workflow would catch a PR after
+     merge, where a red step stops a deletion rather than the PR */
+  let purgeOut = '';
+  try {
+    purgeOut = execFileSync(process.execPath,
+      [path.join(HERE, 'purge-accounts.mjs'), '--selftest'], { encoding: 'utf8' });
+  } catch (e) {
+    purgeOut = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/purge-accounts selftest: \d+ checks passed/.test(purgeOut),
+    'the account purge\'s own selftest is green:\n' + purgeOut.slice(0, 1500));
+
+  /* READ WITH THE COMMENTS STRIPPED. Both of these files explain the defects
+     they avoid in the same words the negative checks below look for, so over
+     the raw text a guard could be satisfied by deleting the explanation — the
+     trap this file already records for the Commit step's rebase and for the
+     analytics page's iframes. */
+  const stripJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const stripHtml = (t) => t.replace(/<!--[\s\S]*?-->/g, '');
+
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  const mod = stripJs(await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8'));
+  const accounts = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  const users = stripJs(await readFile(path.join(root, 'assets', 'oa-users.js'), 'utf8'));
+  const acctPage = await readFile(path.join(root, 'account.html'), 'utf8');
+  const adminPage = await readFile(path.join(root, 'admin-area.html'), 'utf8');
+
+  /* ------------------------------------------------------------- the rules */
+
+  const at = rules.indexOf('match /accountDeletions/{uid}');
+  ok(at > 0, 'the rules carry an accountDeletions block');
+  const block = rules.slice(at, rules.indexOf('match /newsOverrides/', at));
+  ok(block.length > 400, 'and it was really sliced');
+
+  const ruleKeys = (block.slice(block.indexOf('hasOnly('),
+    block.indexOf(')', block.indexOf('hasOnly(') + 40)).match(/'[^']+'/g) || [])
+    .map((q) => q.slice(1, -1));
+  eq([...ruleKeys].sort(), [...AD.REQUEST_KEYS].sort(),
+    'the rules allow EXACTLY the keys a browser writes on a work order — a key ' +
+    'with no rule is a permission-denied nobody can debug, a rule with no ' +
+    'writer is dead');
+
+  /* …and what the two WRITERS really send, read out of their own source. A key
+     list can agree with the rules perfectly while requestDoc had stopped
+     sending one of them (the lesson testRowOverrides and testUsersAndMessages
+     both record). */
+  const minted = AD.requestDoc({ uid: 'u1', by: 'self', email: 'a@b.c', name: 'A', now: 7 });
+  eq(Object.keys(minted).sort(), [...AD.REQUEST_KEYS].sort(),
+    'requestDoc really mints every key the rules allow');
+  ok(minted.status === 'requested', 'a fresh order is `requested`');
+  ok(!('email' in AD.requestDoc({ uid: 'u1', by: 'admin', now: 1 })),
+    'an account with no address carries no `email` key at all — an ORCID sign-in ' +
+    'has no e-mail claim, and an empty string would make "we do not know" read ' +
+    'as "there is none"');
+  ok(AD.requestDoc({ uid: '', by: 'self', now: 1 }) === null &&
+     AD.requestDoc({ uid: 'u', by: 'someone', now: 1 }) === null,
+    'and nothing is minted for a nameless account or an unknown asker');
+
+  ok(/request\.resource\.data\.uid == uid/.test(block),
+    'the body cannot name one account while the id names another');
+  ok(/isOwner\(uid\) && request\.resource\.data\.by == 'self'/.test(block),
+    '`by` is pinned to WHO IS WRITING: a person files their own, as self');
+  ok(/isAdmin\(\) && request\.resource\.data\.by == 'admin'/.test(block),
+    '…and only the maintainer may file one that reads as the maintainer\'s decision');
+  ok(/allow read: if isAdmin\(\) \|\| isOwner\(uid\);/.test(block),
+    'nobody but the two of them can even see that an account is on its way out');
+
+  /* THE ADMIN-SDK FREEZE, answered rather than avoided. The sweep stamps keys
+     the create rule does not allow; that is safe here and only here because no
+     browser ever UPDATES one of these documents. */
+  ok(/allow update: if false;/.test(block),
+    'no browser updates a work order — which is what makes the sweep\'s own ' +
+    'stamps safe (the sync-user-directory trap is a stamp that freezes a ' +
+    'document against its own owner, and there is no later owner write here)');
+  ok(AD.SWEEP_KEYS.every((k) => !AD.REQUEST_KEYS.includes(k)),
+    'and the two key sets are disjoint, so the claim above is checkable');
+  ok(!/COLLECTION\)[\s\S]{0,120}\.update\(/.test(mod),
+    'and the module never updates a work order either — only creates one, or ' +
+    'deletes one it has not carried out yet');
+
+  ok(/allow delete: if isAdmin\(\) && resource\.data\.status == 'requested';/.test(block),
+    'a queued deletion can be called off, and one already being carried out ' +
+    'cannot: "cancelled" would then be a lie, since the alerts and the sign-in ' +
+    'have already gone');
+
+  /* -------------------------------------------------------- the pure parts */
+
+  ok(AD.matchesConfirmation(' DELETE ') && !AD.matchesConfirmation('delete') &&
+     !AD.matchesConfirmation(''),
+    'the confirmation is the exact word, spaces trimmed and case significant');
+
+  const many = AD.summarise({ jobs: [1, 2], cands: [1], places: [], alerts: [1, 2, 3] });
+  eq([many.jobs, many.cands, many.places, many.alerts], [2, 1, 0, 3],
+    'the survey is counted the way the panel names it');
+  ok(AD.summarise({ postingsOk: false }).postingsOk === false &&
+     AD.summarise({}).postingsOk === true,
+    'and a survey that could not read the postings says so — what cannot be ' +
+    'listed cannot be taken down, and the last step removes the only sign-in ' +
+    'that could ever reach it again');
+
+  const sentence = AD.describe(many);
+  ok(/2 job postings/.test(sentence) && /off the site/.test(sentence),
+    'the sentence says what comes off the site');
+  ok(/3 e-mail alerts/.test(sentence) && !/3 e-mail alerts[^.]*off the site/.test(sentence),
+    '…and names the alerts separately: an alert is a subscription that stops ' +
+    'arriving, not something published anywhere');
+  ok(!/—/.test(sentence) && !/—/.test(AD.describe({})),
+    'no em dash in copy a reader sees, the house rule since 2026-08');
+
+  const items = AD.itemsOf({
+    jobs: [{ id: 'j1', data: { institution: 'Tulane University', department: 'OM', ref: 'R1' } }],
+    cands: [{ id: 'c1', data: { first: 'Ada', last: 'Lovelace' } }],
+    places: [],
+  });
+  ok(items.length === 2 && /Tulane University, OM/.test(items[0].label),
+    'the panel can name WHICH posting is about to come off the site');
+
+  const done = AD.redacted({ uid: 'u1', by: 'self', email: 'a@b.c', name: 'Ada',
+    askedAt: 1, clearedAt: 2, removed: { jobs: 1 } }, 9);
+  ok(done.status === 'done' && done.doneAt === 9 && done.removed.jobs === 1,
+    'a finished order records the day and the counts');
+  ok(!('email' in done) && !('name' in done),
+    'AND NOTHING ELSE: a record of a deleted person that still carries their ' +
+    'name and their address is the thing the deletion was for');
+
+  eq(AD.stateOf(null), { queued: false, label: '', cancellable: false },
+    'a row with no order is offered the Delete control');
+  ok(AD.stateOf({ status: 'requested' }).cancellable === true,
+    'a queued one can be called off');
+  ok(AD.stateOf({ status: 'clearing' }).queued === true &&
+     AD.stateOf({ status: 'clearing' }).cancellable === false,
+    'and one being carried out cannot');
+
+  /* ------------------------------------------------- the person's own flow */
+
+  const selfSrc = mod.slice(mod.indexOf('function runSelfDelete'),
+    mod.indexOf('function requestFor'));
+  ok(selfSrc.length > 1000 && selfSrc.length < 8000,
+    'the self-deletion flow was really sliced, at both ends: a slice taken on a ' +
+    'wrong marker comes back empty and every check below it passes on nothing');
+
+  const iOrder = selfSrc.indexOf('collection(COLLECTION)');
+  const iWithdraw = selfSrc.indexOf("status: 'withdrawn'");
+  const iAlerts = selfSrc.indexOf('col.alerts');
+  const iSignIn = selfSrc.indexOf('deleteSignIn');
+  ok(iOrder > 0 && iWithdraw > iOrder,
+    'THE WORK ORDER IS WRITTEN FIRST, before anything is taken away: a browser ' +
+    'closed half way through, a refused write or a cancelled password check ' +
+    'must leave something the sweep can finish from');
+  ok(iAlerts > iWithdraw && iSignIn > iAlerts,
+    '…and the sign-in goes LAST, the merge\'s own order: a session that has ' +
+    'gone cannot write, so anything still owed then is owed for ever');
+  ok(!/collection\(root\.OAFB\.col\.jobSubmissions\)[\s\S]{0,60}\['delete'\]/.test(selfSrc),
+    'a posting is WITHDRAWN and never deleted: deleting the document leaves the ' +
+    'published row an orphan build-jobs.mjs carries for ever');
+  ok(/OAAccounts\.signOut\(\)/.test(selfSrc) && /forgetThisDevice\(uid\)/.test(selfSrc),
+    'and the browser\'s own memory of the account goes with it — the hint the ' +
+    'header is painted from before any script runs, the menu counts, and the ' +
+    'things signing out deliberately leaves alone');
+  ok(/'oa:jobdraft:v1'/.test(mod) && /'oaAuthPending'/.test(mod) && /'oaFreshJobs'/.test(mod),
+    '…the unsent job-form draft above all, which holds the poster\'s own name ' +
+    'and address, the chair\'s, and the private note, and is otherwise cleared ' +
+    'only by a successful send');
+
+  ok(/notDeployed\(err\)/.test(selfSrc) && /NOT_DEPLOYED/.test(mod),
+    'a permission-denied says what to press and to reload first, rather than ' +
+    'showing a bare error — the rule every rule-gated panel here follows');
+
+  /* --------------------------------------------------------- both surfaces */
+
+  ok(/id="pa-delete"/.test(acctPage) && /id="pa-delete-open"/.test(acctPage),
+    'the personal area carries the delete section the owner asked for');
+  ok(/<section class="v3-pa-danger" id="pa-delete" hidden/.test(acctPage),
+    '…born hidden: a control that deletes an account is drawn on the auth ' +
+    'event and never from the remembered hint');
+  ok(/assets\/oa-account-delete\.js/.test(acctPage),
+    'and the page loads the module that draws it');
+  ok(!/oa-account-delete\.js/.test(stripHtml(await readFile(path.join(root, 'jobs.html'), 'utf8'))),
+    'while a page that has no account panel does not pay for it');
+
+  /* the SCRIPT TAGS, not the first mention: a panel's comment names the file
+     that draws it a hundred lines above the tag that loads it */
+  const iMod = adminPage.indexOf('src="assets/oa-account-delete.js"');
+  const iUsers = adminPage.indexOf('src="assets/oa-users.js"');
+  ok(iMod > 0 && iUsers > iMod,
+    'the Admin area loads the shared module BEFORE the roster that reads it');
+  ok(/oa-u-kill/.test(users) && /oa-u-unkill/.test(users),
+    'the roster offers Delete, and Cancel while it is still queued');
+  ok(/OAAccountDelete/.test(users) && !/'accountDeletions'/.test(users),
+    'through the shared module and never a second copy of what a deletion is');
+  ok(/state\.deletions === null/.test(users),
+    'a queue that could not be read withholds the control rather than drawing ' +
+    'one that may already be out of date');
+  ok(/me\.uid === r\.uid/.test(users),
+    '…and so does the maintainer\'s own row: the rules would allow an admin to ' +
+    'file an order for any account including their own, and the result is a ' +
+    'site whose only maintainer account has deleted itself');
+  ok(/matchesConfirmation\(typed\)/.test(users),
+    'and the maintainer types the word: a confirm() is what this panel uses to ' +
+    'delete an orphaned conversation, and an account is not that');
+
+  ok(/survey: function/.test(accounts) && /deleteSignIn: function/.test(accounts),
+    'oa-accounts.js exports the merge\'s own two answers rather than letting a ' +
+    'second copy of either drift');
+
+  /* --------------------------------------------------------- the sweep\'s wiring */
+
+  /* every uid-keyed collection the rules carry is either swept, anonymised or
+     named as deliberately left — the inventory, kept honest rather than
+     remembered */
+  const purge = await readFile(path.join(HERE, 'purge-accounts.mjs'), 'utf8');
+  for (const col of ['profiles', 'registeredUsers', 'userDirectory', 'messages',
+    'accountKeys', 'usageSessions', 'verifyMail', 'directoryEdits', 'nameFixes',
+    'jobSubmissions', 'candidateSubmissions', 'placementSubmissions']) {
+    ok(purge.includes(col), `the sweep accounts for ${col}`);
+  }
+  ok(/feedback/.test(purge) && !/collection\('feedback'\)/.test(stripJs(purge)),
+    '…and feedback is named as deliberately LEFT rather than quietly missed: it ' +
+    'carries no uid, a signed-out visitor can send one, and joining it by the ' +
+    'address typed into a public form would be a guess');
+
+  const wf = await readFile(
+    path.join(root, '.github', 'workflows', 'oa-purge-accounts.yml'), 'utf8');
+  ok(/workflow_run:/.test(wf) &&
+     /workflows: \["OA data — publish queued postings, candidates and placements"\]/.test(wf),
+    'the purge runs on the BUILD\'s completion: the build is what takes a row ' +
+    'off the served file, and that is the first moment a document may go');
+  ok(/node _scraper\/purge-accounts\.mjs --selftest/.test(wf),
+    'and it runs the sweep\'s own checks before deleting anything');
+  ok(/dry_run/.test(wf), 'with a dry run for measuring before writing');
+  ok(!/git (commit|push)/.test(wf),
+    'it writes nothing to data/, so there is no commit and no push race');
+
+  /* ------------------------------------------------------------- the copy */
+
+  const privacy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  const pAt = privacy.indexOf('<h2>Deleting your account</h2>');
+  ok(pAt > 0, 'the Privacy Policy has a section on deleting an account');
+  const pSec = privacy.slice(pAt, privacy.indexOf('<h2>', pAt + 10));
+  ok(pSec.length > 800 && pSec.length < 4000, '…and it was really sliced');
+  ok(/account\.html/.test(pSec) && /Delete my account/.test(pSec),
+    '…saying where the control is');
+  ok(/feedback/i.test(pSec) && /Universities directory/.test(pSec),
+    '…and what is NOT deleted with it, because a policy that claims more than ' +
+    'is true is worse than one that says nothing');
+  ok(/maintainer can also delete an account/.test(pSec),
+    '…and that the maintainer can delete one too, which is the other half the ' +
+    'owner asked for');
+
+  const index = await readFile(path.join(root, 'index.html'), 'utf8');
+  ok(/How do I delete my account\?/.test(index),
+    'the FAQ answers it where people look');
+
+  const changelog = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8'));
+  ok(/delet/i.test(changelog.updates[0].title + changelog.updates[0].summary),
+    'and it is announced, newest first');
+
+  /* ------------------------------------------------------------ the styling */
+
+  const v3 = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
+  ok(/\.v3-btn\.danger\s*\{/.test(v3) && /\.v3-pa-danger\s*\{/.test(v3),
+    'the live design carries the delete panel\'s own rules — v3.css is the one ' +
+    'that reaches the site');
+  const danger = v3.slice(v3.indexOf('.v3-btn.danger {'), v3.indexOf('.v3-btn.danger {') + 400);
+  ok(/color: var\(--err\)/.test(danger) && /background-color:/.test(danger),
+    'and it names its own INK as well as its ground: a rule that paints a ' +
+    'background and inherits --ink is the dark-theme failure this file records');
+  const ui = await readFile(path.join(root, 'assets', 'oa-ui.css'), 'utf8');
+  ok(/\.oa-u-going\s*\{/.test(ui), 'the roster\'s "queued" chip is styled too');
+
+  /* ------------------------------------------------- CLAUDE.md's own record */
+
+  const claudeMd = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claudeMd.indexOf('## Deleting an account, and why the two halves are not symmetric');
+  ok(secAt > 0, 'CLAUDE.md records the decision');
+  const sec = claudeMd.slice(secAt, claudeMd.indexOf('\n## ', secAt + 10));
+  ok(/work order/i.test(sec) && /purge-accounts\.mjs/.test(sec) &&
+     /callable/i.test(sec) && /orphan/i.test(sec),
+    '…including the work order, the sweep, why a callable was rejected, and the ' +
+    'orphan that is the reason a posting is withdrawn rather than deleted');
+  ok(/feedback/i.test(sec) && /anonymis/i.test(sec),
+    '…and what is anonymised and what stays, so the next reader does not ' +
+    '"fix" either of them');
+}
+
 async function testUsersAndMessages() {
   const U = require(path.join(HERE, '..', 'assets', 'oa-users.js'));
   const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
@@ -9252,7 +9562,12 @@ async function testReviewWiring() {
      the CHECKS, which commit nothing, and publishing the ruleset that was
      actually tested is the point of it. Its head_sha IS the commit under
      test. */
-  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml', 'oa-submissions-mail.yml'];
+  const DATA_CHAINED = [...WRITERS, 'oa-alerts-mail.yml', 'oa-submissions-mail.yml',
+    /* …and the account purge, which is a READER of data/ in the most literal
+       sense: it may only delete a submission's document once the served file
+       has stopped carrying its row, so a stale read holds every deletion open
+       for another cycle. */
+    'oa-purge-accounts.yml'];
   for (const name of DATA_CHAINED) {
     const src = await readFile(path.join(wfDir, name), 'utf8');
     if (!/^\s*workflow_run:/m.test(src)) continue;
@@ -9395,9 +9710,19 @@ async function testReviewWiring() {
   const builderFiles = (await readdir(HERE))
     .filter((f) => /^build-.*\.mjs$/.test(f) && f !== 'build-all.mjs').sort();
   const inBuilders = BUILDERS.map((b) => b.script);
+  /* READ WITH THE COMMENTS STRIPPED. A workflow's header EXPLAINS why it runs
+     when it does, and an explanation routinely has to name the builder it is
+     chained to — oa-purge-accounts.yml says why it may not delete a document
+     while build-jobs.mjs is still carrying its row. A guard that cannot tell
+     the explanation from the call can only be satisfied by deleting the
+     explanation, which is the trap this file already records for the Commit
+     step's rebase and for the analytics page's iframes. What CALLS a builder
+     is a `node _scraper/build-*.mjs` line, never a comment. */
   const wfText = (await Promise.all((await readdir(wfDir))
     .filter((f) => /\.ya?ml$/.test(f))
-    .map((f) => readFile(path.join(wfDir, f), 'utf8')))).join('\n');
+    .map((f) => readFile(path.join(wfDir, f), 'utf8'))))
+    .join('\n')
+    .split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
   const orphans = builderFiles.filter(
     (f) => !inBuilders.includes(f) && !wfText.includes(f));
   eq(orphans, [], 'every builder in _scraper has a caller — BUILDERS, or a workflow naming it');
@@ -14983,6 +15308,7 @@ if (isMain(import.meta.url)) {
   await testNameFixes();
   await testAdminArea();
   await testUsersAndMessages();
+  await testAccountDeletion();
   await testRemovalSafety();
   await testMirrorLifecycle();
   await testRefLessTakedown();

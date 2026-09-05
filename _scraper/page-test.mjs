@@ -6531,6 +6531,206 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* --------------------------------------------- deleting an account, for real
+
+   Owner, 2026-09-05: "There is no option for a user to completely delete their
+   profile. You should have it within their personal area … Also, the admin
+   should be able to delete a user."
+
+   What no static pin can prove is the money path, and here the money path IS
+   an ORDER: the work order has to be written BEFORE anything is taken away
+   (or a browser closed half way through leaves nothing that can finish), the
+   postings have to be WITHDRAWN rather than deleted (or the published row is
+   an orphan the build carries for ever), the alerts have to go before the
+   sign-in (or they mail a person who no longer exists), and the sign-in has to
+   go LAST (or nothing after it can write at all). The shim records every
+   operation in the order it was issued, which is exactly what that needs.  */
+{
+  const SHIM = await readFile(path.join(ROOT, '_scraper', '_fake-firebase.js'), 'utf8');
+  const ADMIN = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+    emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+  const LEAVER = { uid: 'leaver-uid-000000', email: 'leaver@example.edu',
+    emailVerified: true, displayName: 'Lee Leaver', providerData: [] };
+
+  const seed = [
+    { path: 'jobSubmissions/job-leaver', data: { uid: LEAVER.uid, status: 'published',
+      institution: 'Tulane University', department: 'Management Science',
+      year: marketYear(), posted: '2026-08-01', ref: 'OA-LEAVER-1' } },
+    { path: 'candidateSubmissions/cand-leaver', data: { uid: LEAVER.uid, status: 'queued',
+      first: 'Lee', last: 'Leaver', year: marketYear() } },
+    { path: 'users/' + LEAVER.uid + '/alerts/a1', data: { name: 'Everything', topics: ['jobs'] } },
+    { path: 'profiles/' + LEAVER.uid, data: { firstName: 'Lee', lastName: 'Leaver' } },
+    { path: 'registeredUsers/' + LEAVER.uid, data: { t: 1000 } },
+    { path: 'userDirectory/' + LEAVER.uid, data: { name: 'Lee Leaver',
+      email: 'leaver@example.edu', first: 1000, seen: 2000 } },
+    /* the maintainer's own row, which must NOT be offered a Delete control:
+       the rules would allow it, and the result is a site whose only admin
+       account has deleted itself */
+    { path: 'userDirectory/admin-uid-0000000000', data: { name: 'Kostas Stouras',
+      email: 'kstouras@gmail.com', first: 500, seen: 500 } },
+  ];
+
+  async function open(user, url, docs, viewport) {
+    const ctx = await browser.newContext({ viewport: viewport || { width: 1280, height: 1000 } });
+    const q = await ctx.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user, docs: docs || seed })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + url, { waitUntil: 'load' });
+    return { ctx, q, errors };
+  }
+
+  /* -- a person deleting their own account ---------------------------------- */
+  {
+    const { ctx, q, errors } = await open(LEAVER, 'account.html');
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    ok(true, 'delete: the personal area offers it to a signed-in reader');
+
+    await q.click('#pa-delete-open');
+    await q.waitForSelector('#pa-delete-word', { timeout: 10000 });
+
+    const listed = await q.textContent('#pa-delete-panel');
+    ok(listed.indexOf('Tulane University') !== -1 && listed.indexOf('Lee Leaver') !== -1,
+      'delete: it names WHICH posting and WHICH profile are about to come off ' +
+      'the site, rather than asking for a decision about "everything"');
+    ok(/off the site/.test(listed) && !/—/.test(listed),
+      'delete: …and says so in the house style, with no em dash');
+
+    eq(await q.$eval('#pa-delete-go', (n) => n.disabled), true,
+      'delete: the button is refused until the word is typed');
+    await q.fill('#pa-delete-word', 'delete');
+    await q.waitForTimeout(80);
+    eq(await q.$eval('#pa-delete-go', (n) => n.disabled), true,
+      'delete: …and the word is the WORD, not a lowercase near miss');
+    await q.fill('#pa-delete-word', 'DELETE');
+    await q.waitForTimeout(80);
+    eq(await q.$eval('#pa-delete-go', (n) => n.disabled), false,
+      'delete: typed in full, it is offered');
+
+    await q.click('#pa-delete-go');
+    await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
+      'delete: and it says so plainly when it is done');
+
+    const seq = await q.evaluate(() => window.__fb.log.map((e) => e.op + ' ' + e.path));
+    const at = (needle) => seq.findIndex((l) => l.indexOf(needle) !== -1);
+    const iOrder = at('accountDeletions/');
+    const iWithdraw = seq.findIndex((l) => l.indexOf('update jobSubmissions/job-leaver') === 0);
+    const iAlert = at('delete users/');
+    const iRoster = at('delete userDirectory/');
+    const iSignIn = at('deleteUser');
+
+    ok(iOrder >= 0 && iOrder < iWithdraw,
+      'delete: THE WORK ORDER IS WRITTEN FIRST, so a browser closed half way ' +
+      'through leaves something the sweep can finish from');
+    ok(iWithdraw > 0 && !seq.some((l) => l === 'delete jobSubmissions/job-leaver'),
+      'delete: a posting is WITHDRAWN, never deleted — deleting the document ' +
+      'leaves the published row an orphan the build carries for ever');
+    ok(iAlert > iWithdraw && iAlert < iSignIn,
+      'delete: the alerts go before the sign-in, or they mail somebody who no ' +
+      'longer exists and nobody can ever stop them');
+    ok(iRoster > 0 && iRoster < iSignIn,
+      'delete: the roster row and the tally go too, so the count is of people');
+    ok(iSignIn > 0 && iSignIn === Math.max(iOrder, iWithdraw, iAlert, iRoster, iSignIn),
+      'delete: and the sign-in goes LAST — a session that has gone cannot write');
+
+    const order = await q.evaluate(() =>
+      window.__fb.dump()['accountDeletions/leaver-uid-000000']);
+    ok(order && order.by === 'self' && order.status === 'requested' &&
+       order.uid === 'leaver-uid-000000',
+      'delete: the order says who asked and is filed under the account itself');
+
+    eq(await q.evaluate(() => localStorage.getItem('oaAuthHint')), null,
+      'delete: and the browser forgets the account — the hint the header is ' +
+      'painted from before any script runs');
+    eq(errors, [], 'delete: no page errors');
+    await ctx.close();
+  }
+
+  /* -- a reader who is not signed in is not offered it ---------------------- */
+  {
+    const { ctx, q } = await open(null, 'account.html');
+    await q.waitForTimeout(600);
+    eq(await q.$eval('#pa-delete', (n) => n.hidden), true,
+      'delete: a signed-out reader is not offered a control that deletes an account');
+    await ctx.close();
+  }
+
+  /* -- on a phone ----------------------------------------------------------- */
+  {
+    const { ctx, q } = await open(LEAVER, 'account.html', seed, { width: 390, height: 844 });
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    await q.click('#pa-delete-open');
+    await q.waitForSelector('#pa-delete-go', { timeout: 10000 });
+    const box = await q.$eval('#pa-delete-go', (n) => {
+      const r = n.getBoundingClientRect();
+      return { w: r.width, h: r.height };
+    });
+    ok(box.h >= 42, 'delete: the button is a real target on a phone');
+    ok(box.w > 250, '…and full width, so it is not half a screen beside another');
+    eq(await q.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true,
+      '…and nothing pushes the page sideways');
+    await ctx.close();
+  }
+
+  /* -- the maintainer deleting somebody ------------------------------------- */
+  {
+    const { ctx, q, errors } = await open(ADMIN, 'admin-area.html');
+    await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
+    eq(await q.$$eval('.oa-u-kill', (n) => n.length), 1,
+      'admin delete: a roster row offers it — the other half the owner asked for — ' +
+      'and the maintainer\'s OWN row does not, or the site loses the only account ' +
+      'that can run it');
+    eq(await q.$eval('.oa-u-kill', (n) => n.closest('tr').getAttribute('data-uid')),
+      'leaver-uid-000000', 'admin delete: …and it is on the other person\'s row');
+
+    /* the word, typed into the prompt the roster asks with */
+    q.on('dialog', (d) => d.accept('DELETE'));
+    await q.click('.oa-u-kill');
+    await q.waitForSelector('.oa-u-going', { timeout: 10000 });
+    ok((await q.textContent('#oa-aa-users')).indexOf('Deletion queued') !== -1,
+      'admin delete: the row says what is happening, which is the state the ' +
+      'page can actually observe');
+    ok(await q.$('.oa-u-unkill'),
+      'admin delete: …and it can be called off while it is still queued');
+
+    const orders = await q.evaluate(() => {
+      const all = window.__fb.dump();
+      return Object.keys(all).filter((k) => k.indexOf('accountDeletions/') === 0)
+        .map((k) => all[k]);
+    });
+    ok(orders.length === 1 && orders[0].by === 'admin' && orders[0].status === 'requested',
+      'admin delete: it files a work order and nothing else — the browser cannot ' +
+      'delete another account\'s alerts, details or sign-in, so it must not pretend to');
+    const ops = await q.evaluate(() => window.__fb.log.map((e) => e.op + ' ' + e.path));
+    ok(!ops.some((l) => l.indexOf('deleteUser') === 0) &&
+       !ops.some((l) => l.indexOf('delete userDirectory/') === 0) &&
+       !ops.some((l) => l.indexOf('delete profiles/') === 0),
+      'admin delete: and nothing of the account itself is touched from here — the ' +
+      'browser cannot reach the alerts, the details or the sign-in, so it must ' +
+      'not half-delete and report success');
+    eq(errors, [], 'admin delete: no page errors');
+    await ctx.close();
+  }
+
+  /* -- a deletion already being carried out cannot be called off ------------ */
+  {
+    const clearing = seed.concat([{ path: 'accountDeletions/' + LEAVER.uid,
+      data: { uid: LEAVER.uid, by: 'admin', status: 'clearing', askedAt: 1, clearedAt: 2 } }]);
+    const { ctx, q } = await open(ADMIN, 'admin-area.html', clearing);
+    await q.waitForSelector('#oa-aa-users .oa-u-table tbody tr', { timeout: 10000 });
+    const row = await q.textContent('#oa-aa-users');
+    ok(row.indexOf('Deleting now') !== -1,
+      'admin delete: one already under way says so');
+    eq(await q.$$eval('.oa-u-unkill', (n) => n.length), 0,
+      '…and offers no Cancel, because the rules refuse it and "cancelled" would ' +
+      'be a lie: the alerts and the sign-in have already gone');
+    await ctx.close();
+  }
+}
+
 /* ------------------------------ the candidate's own card, before the reveal
 
    Owner, 2026-09-04: a candidate who has posted a profile can see how THEIR

@@ -2046,6 +2046,245 @@ on all four pages) and the roster/messaging block in `_scraper/page-test.mjs`
 round trip asserted to leave the body, `from` and the timestamp untouched, a
 thread whose messages are all removed still answerable, plus the 390px gate).
 
+## Deleting an account, and why the two halves are not symmetric
+
+Owner, 2026-09-05: *"There is no option for a user to completely delete their
+profile. You should have it within their personal area … Also, the admin should
+be able to delete a user."* Neither existed. The account page could edit a
+profile and merge two accounts; the only way out was to write to the
+maintainer, and the maintainer's own only route was the Firebase console.
+
+    assets/oa-account-delete.js   what a deletion IS (pure), the panel, the roster's control
+    accountDeletions/{uid}        the work order, one per account
+    _scraper/purge-accounts.mjs   the sweep that carries it out, with the Admin SDK
+    .github/workflows/oa-purge-accounts.yml   on the BUILD's completion, plus daily
+
+**A PERSON CAN DO NEARLY ALL OF THEIR OWN DELETION IN THEIR OWN BROWSER**, and
+that half is live the moment it merges. `_firestore.rules` already lets an
+owner withdraw their postings and delete their alerts, their profile, their
+`registeredUsers` mark and their roster row, and Firebase lets a session delete
+its own sign-in — which is exactly the set of writes `runMerge` already makes
+for the account it removes.
+
+**THE MAINTAINER CAN DO ALMOST NONE OF IT.** `users/{uid}/**` is owner-only
+with no admin clause, so no browser can delete somebody else's e-mail alerts —
+and an alert left behind mails a person who no longer exists FOR EVER: the
+mailer enumerates every subscription by collection group and never asks whether
+the uid still exists, and unsubscribing needs a sign-in the account no longer
+has. `profiles`, `registeredUsers` and `userDirectory` are owner-delete too, and
+no browser can delete another account's **Auth** record at all. A browser-only
+admin deletion would be a row of caught-and-ignored permission-denieds: green on
+screen, and the sign-in still alive.
+
+So a deletion is a **WORK ORDER** both sides write and one sweep carries out.
+
+**A CALLABLE CLOUD FUNCTION WOULD HAVE BEEN FASTER AND WAS REJECTED.** It would
+be inert until somebody ran `firebase deploy --only functions` by hand, and this
+file has twice written down what that costs — *a feature that needs a manual
+step to become real looks installed and is not*, and *a doorbell that was never
+deployed looks exactly like a site that is simply slow*. It would also make the
+deploy count SEVEN and sit between two source slices the selftest pins.
+`FIREBASE_SERVICE_ACCOUNT` has been a secret here for months, so the workflow
+road is live on merge with nothing to remember.
+
+**EVERYTHING THE PERSON POSTED COMES OFF THE SITE**, said plainly, by name,
+before the button is pressed. The alternative was considered and rejected:
+leaving a job posting up means either keeping the document that carries the
+poster's own name, address and private note — the opposite of deleting an
+account — or deleting the document and leaving the published row ORPHANED,
+carried by `build-jobs.mjs` for ever and beyond anyone's reach, the maintainer's
+included. A posting nobody can correct or take down is worse for the school than
+one that is gone.
+
+### The order is the whole of it, and the two ends run it BACKWARDS
+
+**In the browser: the work order FIRST, the sign-in LAST.** The order is written
+before anything is taken away, so a browser closed half way through, a refused
+write or a cancelled password check leaves something the sweep finishes from —
+without it there is no way to know the account was meant to go, and the person
+cannot ask again, because their alerts and possibly their sign-in have already
+gone. The sign-in goes last for `runMerge`'s own reason: a session that has gone
+cannot write, so anything still owed then is owed for ever. In between: withdraw
+the postings, delete the alerts, delete the details, the tally mark and the
+roster row. Then `OAAccounts.signOut()`, because the hint the header is painted
+from before any script runs, and the menu's cached counts, belong to an account
+that no longer exists.
+
+**In the sweep: the sign-in FIRST**, which is the mirror image rather than a
+contradiction. The Admin SDK needs no session — and while the sign-in exists a
+tab the person left open goes on minting work, because `enterSession` re-creates
+the `registeredUsers` mark and `syncDirectoryRow` re-creates the roster row,
+each latched per TAB. Deleting it first stops any NEW token being issued.
+
+**A POSTING IS WITHDRAWN, NEVER DELETED.** `build-jobs.mjs` says it in as many
+words: *"taking a posting down is a STATUS CHANGE (withdrawn/hidden), never
+deleting its document. Deleting the document would leave the row orphaned and
+therefore preserved."* Both ends withdraw; only the sweep deletes the documents,
+and only once four things are true.
+
+### The four gates on deleting a submission's document
+
+1. **The build has run SINCE the withdrawal.** `data/jobs-meta.json`'s
+   `generated` must be at least `BUILD_GRACE_MS` (15 minutes) past the moment
+   the postings were withdrawn. The idea is `oa-fresh.js`'s own 90-second
+   grace; the number is ten times larger, deliberately — there the cost of
+   being early is a stale value on one screen for a minute, here it is a
+   published row whose document has gone, and waiting costs one more
+   twenty-minute cycle.
+2. **No served file still names the account.** Measured, never assumed:
+   `owner` is a digest of the uid and is published on every row of all three
+   datasets (`PUBLIC_FIELDS`, `CANDIDATE_PUBLIC_FIELDS`,
+   `PLACEMENT_PUBLIC_FIELDS`), so the files answer the question directly, with
+   every `ref` and id the documents carry as the belt to that braces (the
+   `removalSpecs` shape). **An unreadable file is ABSENT, never empty** — the
+   unreachable-source rule, and here an empty read would delete a document
+   under a row that is still on the site.
+3. **The Google Drive copies are gone.** A job advertisement and a candidate's
+   CV are filed into Drive by the build, which writes the Drive id onto the
+   document and nowhere else; the credential's `drive.file` scope cannot see
+   anything it did not create, so it cannot list the folder to find an orphan.
+   Delete the document first and that file — whose name carries the person's
+   own name — sits in the shared Drive for ever with no route to it. So they go
+   first, and a failure HOLDS the deletion rather than being swallowed.
+4. **An hour has passed since the sign-in went.** Deleting an Auth account
+   revokes its refresh tokens and does NOT invalidate an ID token already
+   minted, and the rules read the token. The three owned documents are swept
+   once more before the order is closed, in case one of those tokens put the
+   tally mark or the roster row back.
+
+Until all four hold the order stays open and **the run's log says which one it
+is waiting on**, rather than leaving it to be guessed at.
+
+### What goes, what is anonymised, and what stays
+
+**Goes**: the postings (withdrawn, then their documents), the e-mail alerts and
+everything else under `users/{uid}`, the profile, the `registeredUsers` mark,
+the roster row, the message thread and its items, the identity keys in
+`accountKeys` (only while they still name THIS account — a claim another
+account has taken over is somebody else's), the `usageSessions` records,
+`verifyMail/{uid}` (the verification mailer's own rate limit: keyed on the
+account and `allow read, write: if false`, so this sweep is the only thing that
+could ever reach it), the Storage landing strip, the Drive copies, and the Auth
+record.
+
+**…and the DEVICE's own memory, which signing out deliberately does not
+reach.** `signOut()` clears the header hint, the picture beside it and the two
+count caches, and leaves the rest, because the rest is this browser's working
+state and belongs to whoever is sitting there. A deletion is the case where it
+does not: `forgetThisDevice` also removes the job form's unsent DRAFT
+(`oa:jobdraft:v1`, which holds the poster's own name and address, the chair's,
+and the private note, and is otherwise cleared only by a successful send), the
+edit echo, the pending-verification marker and the two per-uid latches. Named
+keys, never a prefix sweep: a machine may be shared, and a key belonging to
+another account there is somebody else's.
+
+**The MESSAGE THREAD is deleted, and that is a departure worth naming.** The
+rules keep a thread out of both parties' hands because *a thread whose history
+either party can rewrite is not a record of anything*, and the MERGE
+deliberately leaves one behind — because a merged account's person is still
+here and the conversation is still theirs. A deletion is the case that is not:
+the person it was with has asked to be gone, and it is a two-party conversation
+with nobody else's stake in it. Disclosed in the Privacy Policy.
+
+**Anonymised, not deleted**: a `directoryEdits` correction to the Universities
+directory (public-read, and its `name` is printed on the card as "Last edited by
+… on …", so the name goes and `oa-directory.js` falls back to "a registered
+user") and a `nameFixes` suggestion (its `authEmail` goes). Deleting either
+would revert a correction the community relies on — `build-jobs.mjs` rewrites
+`data/name-fixes.json` from a fresh queue read and applies it to every published
+and carried row, so removing a suggester's document un-renames the site. The
+field is **blanked, never deleted as a key**: the rules bound these with
+`str()`, and a key that has gone is a different shape from a blank one.
+
+**The public figures follow on their own, and one of them moves BACKWARDS.**
+`data/users-meta.json` counts the Auth accounts that carry a `registeredUsers`
+mark, so a deletion takes one off exactly as a merge does. `data/users-growth.json`
+is RECOMPUTED from the surviving accounts on every roster sync rather than
+appended to, so a deletion also lowers every point at or after that person's
+joining day. That is inherent in a series built from who is here now, it is the
+same behaviour a merge already had, and it is worth knowing before somebody
+reads the whole chart shifting as a bug.
+
+**Stays, and the Privacy Policy says so rather than claiming otherwise**:
+anything sent through the feedback form. `feedback` carries no uid at all — its
+own key list has none, and a signed-out visitor can send one — so joining it to
+an account by the address typed into a public form would be a guess. It is
+removed on request, like everything else that has to be asked for.
+
+### The rules, and the one place an Admin-SDK stamp is safe
+
+`accountDeletions/{uid}` is keyed on the uid itself (the `messages/{uid}` and
+`verifyMail/{uid}` shape), so a person cannot open two and the sweep finds one
+with a `get()`. Three things the rules pin, each closing a hole: **`by` is
+pinned to who is writing** (a person files their own as `self`, the maintainer
+files anyone's as `admin`, so an ordinary account cannot file an order that
+reads as the maintainer's decision); **`uid` must equal the document id**; and
+**nobody updates one from a browser**. The sweep's own keys (`clearedAt`,
+`doneAt`, `removed`, `note`) are deliberately outside the create list, which is
+safe here and only here — the `sync-user-directory` trap is an Admin-SDK key
+that makes a document its own owner can no longer write, and there is no later
+owner write to freeze. `REQUEST_KEYS` and `SWEEP_KEYS` are pinned against the
+rules, and against each other as disjoint sets.
+
+**Cancelling is allowed only while it is still queued** (`allow delete: if
+isAdmin() && resource.data.status == 'requested'` — `resource` is the STORED
+document on a delete, which is what lets the condition read the status). Once
+the sweep has started, "cancelled" would be a lie: the alerts and the sign-in
+have gone.
+
+**An unverified password account cannot file one**, because `isOwner()` goes
+through `verified()` like every other user write here. It holds a profile
+document and a sign-in and nothing else, and the roster is seeded from Auth
+itself, so that account is deleted from the Admin area.
+
+**A finished order is REDACTED, not kept**: a record that an account was deleted
+on a day is worth keeping; a record of a deleted person that still carries their
+name and their address is the thing the deletion was for. What is left is a uid,
+the dates and the counts.
+
+### Where the controls are, and what they say
+
+`account.html` carries the section, last on the page (`#pa-delete`), drawn by
+`oa-account-delete.js` and **born hidden**: it follows the auth event and never
+the remembered hint, because a control that deletes an account must not be
+painted for a reader the SDK then says is not there. It names each posting and
+profile that is about to come off the site, asks for the word DELETE to be
+typed, and refuses outright when the postings could not be LISTED — the merge's
+own *refuse rather than strand*, for the same reason.
+
+`admin-area.html`'s roster gains **Delete** on every row, and **Cancel** while
+one is queued. **The control is withheld where the queue could not be read** —
+unknown draws nothing, the rule the account menu's badges follow — and the
+maintainer types the word into a prompt rather than pressing a `confirm()`,
+which is what that panel uses to delete an orphaned conversation. **The
+maintainer's OWN row is never offered one**: the rules would allow it, an admin
+may file an order for any account including their own, and the result is a site
+whose only maintainer account has deleted itself, with the Admin area and the
+review queues gone with it. Their own route is the same one everybody else has,
+in their personal area. A queued deletion is **not** in `pendingCounts()`: it clears itself, so it is not
+something waiting on the maintainer, and a figure nobody can clear inflates the
+badge for ever (the Registered-users rule).
+
+**The module is loaded on those two pages and nowhere else.** Its markup and
+its copy have no business in `oa-accounts.js`, which every page downloads; what
+it takes from there is two exports, `survey()` and `deleteSignIn()`, which are
+the merge's own machinery rather than a second copy of it.
+
+Tests: `testAccountDeletion` in `_scraper/selftest.mjs` (the rules against
+`REQUEST_KEYS` both ways, the `by` pin, the no-update argument and the disjoint
+key sets, the cancel window, the pure halves including that a finished order
+carries no name or address, the browser flow's ORDER read out of its own source,
+the two surfaces, the load order, the workflow's chain and its checkout, the
+copy on the Privacy Policy and the FAQ, and both stylesheets), the sweep's own
+`node _scraper/purge-accounts.mjs --selftest` (the served-file test, the four
+gates, the sign-in first with its reason, the blanked-not-deleted anonymisation,
+and that no log line carries an address or a name), and the deletion block in
+`_scraper/page-test.mjs`, which drives it in a real browser against the shim's
+recorded operation log: the order written first, the posting withdrawn and never
+deleted, the alerts before the sign-in, the sign-in last, the local memory
+cleared, the signed-out reader offered nothing, the phone target, and the
+maintainer's row queuing an order and nothing else.
+
 ## Registration is verified by e-mail
 
 Owner, 2026-09-04: a person who registers with an e-mail address and a

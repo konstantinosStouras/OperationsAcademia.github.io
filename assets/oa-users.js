@@ -227,6 +227,11 @@
   var state = {
     rows: [],            // the roster, joined with its threads
     ghosts: [],          // threads whose roster row has gone (a merged account)
+    /* The account deletions that are queued, uid -> the work order, or NULL
+       when the collection could not be read. Null is UNKNOWN and never an
+       empty map: an empty map would draw every row as though nothing were
+       queued, and the control it draws deletes somebody. */
+    deletions: null,
     sortKey: 'seen',
     sortDir: 'desc',
     filter: '',
@@ -251,6 +256,95 @@
   }
 
   /* ------------------------------------------------------------- rendering */
+
+  /**
+   * The controls at the end of a row: open the conversation, and delete the
+   * account (owner, 2026-09-05: "the admin should be able to delete a user").
+   *
+   * …and every row opens its conversation. Without that the "Message replies
+   * waiting" tile counts something the maintainer cannot reach: the only Open
+   * control was on the orphaned threads below.
+   *
+   * THE DELETE CONTROL IS WITHHELD WHERE THE QUEUE COULD NOT BE READ. A null
+   * `state.deletions` means the accountDeletions collection did not answer —
+   * the rules carrying it have not been published yet, most likely — and a
+   * Delete button drawn then would either be refused or, worse, file a second
+   * order over one already being carried out. Unknown draws nothing, the same
+   * rule the account menu's badges follow.
+   */
+  function actionsFor(r) {
+    var open = '<button type="button" class="button oa-btn-ghost oa-u-open" data-uid="' +
+      esc(r.uid) + '">' + (r.thread ? 'Open' : 'Message') + '</button>';
+    var D = root.OAAccountDelete;
+    if (!D || state.deletions === null) return open;
+    /* …and never on the maintainer's OWN row. The rules would allow it — an
+       admin may file an order for any account, their own included — and the
+       result would be a site whose only maintainer account had deleted
+       itself, with the Admin area, the review queues and this roster gone
+       with it. There is a delete control for their own account in the same
+       place as everybody else's: their personal area. */
+    var me = root.OAAccounts && root.OAAccounts.user();
+    if (me && me.uid === r.uid) return open;
+    var st = D.stateOf(state.deletions[r.uid]);
+    if (!st.queued) {
+      return open + ' <button type="button" class="button oa-btn-ghost oa-u-kill" ' +
+        'data-uid="' + esc(r.uid) + '">Delete</button>';
+    }
+    return open + ' <span class="oa-u-going">' + esc(st.label) + '</span>' +
+      (st.cancellable
+        ? ' <button type="button" class="button oa-btn-ghost oa-u-unkill" data-uid="' +
+          esc(r.uid) + '">Cancel</button>'
+        : '');
+  }
+
+  function rowFor(uid) {
+    return state.rows.filter(function (r) { return r.uid === uid; })[0] || { uid: uid };
+  }
+
+  /** File a deletion, once the maintainer has typed the word. It is a WORK
+      ORDER and not the deletion itself: the browser cannot delete another
+      account's alerts, its details, its tally mark or its Auth record, so
+      _scraper/purge-accounts.mjs does all of it with the Admin SDK, on the
+      jobs build's own completion. A confirm() is what this panel uses to
+      delete an orphaned conversation; this asks for a word, because an
+      account is not something an accidental press should be able to take. */
+  function askDelete(uid) {
+    var D = root.OAAccountDelete;
+    if (!D) return;
+    var r = rowFor(uid);
+    var typed = root.prompt(
+      'Delete this account and everything they posted?\n\n' +
+      (r.name || '(no name)') + '\n' + (r.email || '(no address)') + '\n\n' +
+      'Their job postings, candidate profile and placement reports come off the ' +
+      'site, their e-mail alerts stop, their messages and details are removed, ' +
+      'and their sign-in is deleted. You can call it off while it is still ' +
+      'queued, and not afterwards.\n\n' +
+      'Type ' + D.CONFIRM_WORD + ' to confirm:');
+    if (!D.matchesConfirmation(typed)) return;
+    D.requestFor(r).then(load)['catch'](function (err) { sayRosterError(err); });
+  }
+
+  /** Call one off while the sweep has not started. The rules refuse it
+      afterwards, because "cancelled" would then be a lie. */
+  function cancelDelete(uid) {
+    var D = root.OAAccountDelete;
+    if (!D) return;
+    if (!root.confirm('Call off the deletion of this account?')) return;
+    D.cancelFor(uid).then(load)['catch'](function (err) { sayRosterError(err); });
+  }
+
+  function sayRosterError(err) {
+    var host = $('oa-aa-users-list');
+    if (!host) return;
+    host.insertAdjacentHTML('beforeend',
+      '<p class="oa-form-msg is-err">' + (err && err.code === 'permission-denied'
+        ? 'Not switched on yet. If the rules were published in the last few ' +
+          'minutes, reload the page first; otherwise run the ' +
+          '<strong>&ldquo;OA &mdash; publish the Firestore rules&rdquo;</strong> ' +
+          'workflow from the Actions tab.'
+        : 'Could not do that (' + esc(err && (err.code || err.message)) + ').') +
+      '</p>');
+  }
 
   function renderTable() {
     var host = $('oa-aa-users-list');
@@ -287,11 +381,7 @@
           'data-uid="' + esc(r.uid) + '"' + (state.picked[r.uid] ? ' checked' : '') +
           ' aria-label="Select ' + esc(r.name || r.email || r.uid) + '"></td>' +
         tds +
-        /* …and every row opens its conversation. Without this the "Message
-           replies waiting" tile counts something the maintainer cannot reach:
-           the only Open control was on the orphaned threads below. */
-        '<td><button type="button" class="button oa-btn-ghost oa-u-open" data-uid="' +
-          esc(r.uid) + '">' + (r.thread ? 'Open' : 'Message') + '</button></td>' +
+        '<td class="oa-u-actions">' + actionsFor(r) + '</td>' +
         '</tr>';
     }).join('');
 
@@ -379,6 +469,12 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll('.oa-u-del'), function (b) {
       b.addEventListener('click', function () { deleteThread(b.getAttribute('data-uid')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-u-kill'), function (b) {
+      b.addEventListener('click', function () { askDelete(b.getAttribute('data-uid')); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.oa-u-unkill'), function (b) {
+      b.addEventListener('click', function () { cancelDelete(b.getAttribute('data-uid')); });
     });
   }
 
@@ -610,8 +706,13 @@
     return db().then(function (d) {
       return Promise.all([
         d.collection(DIRECTORY).get(),
-        d.collection(THREADS).get()
+        d.collection(THREADS).get(),
+        /* …and which accounts are on their way out. Its own read, resolving
+           null rather than throwing: the roster is what this panel is for,
+           and one refused collection must not empty it. */
+        root.OAAccountDelete ? root.OAAccountDelete.loadRequests() : Promise.resolve(null)
       ]).then(function (both) {
+        state.deletions = both[2];
         var threads = {};
         both[1].forEach(function (doc) {
           var t = doc.data() || {};

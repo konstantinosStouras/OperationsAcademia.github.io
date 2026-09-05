@@ -350,6 +350,12 @@
                 where they can reply to you. <strong>No e-mail is sent</strong>
                 &mdash; the address links open your own mail client when e-mail
                 is what you want.</p>
+              <p class="oa-hint">Delete removes an account and everything the
+                person posted: their job postings, candidate profile and
+                placement reports come off the site, their e-mail alerts stop,
+                and their sign-in is deleted. It starts at the site&rsquo;s next
+                update, normally within a few minutes, and you can call it off
+                until then.</p>
               <div id="oa-aa-users-list"><p class="oa-hint">Loading&hellip;</p></div>
               <div id="oa-aa-users-thread" hidden></div>
               <div id="oa-aa-users-compose"></div>
@@ -443,6 +449,11 @@
     <script defer src="assets/oa-reveal.js"></script>
     <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
+    <!-- the one definition of what deleting an account is: the roster's
+         Delete control writes the same work order the account page's own
+         panel writes, so the two cannot disagree. Loaded BEFORE the
+         roster that reads it. -->
+    <script defer src="assets/oa-account-delete.js"></script>
     <script defer src="assets/oa-users.js"></script>
     <!-- The market-year report links each flagged posting to the page that
          actually carries it, so it reads the same window rule jobs.html and

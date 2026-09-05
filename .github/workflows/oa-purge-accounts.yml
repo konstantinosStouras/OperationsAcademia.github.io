@@ -1,0 +1,109 @@
+name: OA accounts — carry out the deletions that were asked for
+
+# A person deleting their own account does nearly all of it in their own
+# browser; the maintainer deleting somebody else's can do almost none of it,
+# because users/{uid}/** is owner-only with no admin clause and no browser can
+# delete another account's Auth record. So both write a WORK ORDER,
+# accountDeletions/{uid} (assets/oa-account-delete.js is its one definition),
+# and this job carries it out with the Admin SDK.
+#
+# IT RUNS ON THE BUILD'S OWN COMPLETION, and that is not tidiness. The second
+# half of a deletion is deleting the postings' documents, and that may only
+# happen once the site has stopped showing their rows: delete a document while
+# its row is still served and build-jobs.mjs carries that row as an ORPHAN for
+# ever, beyond anyone's reach. The build is what takes the rows off, so the
+# moment after it finishes is the first moment there is anything to finish.
+# A withdrawal made in the browser rings the build through publishOnChange, so
+# a person's own deletion is usually complete about two minutes after they
+# press the button.
+#
+# The daily cron is the safety net for an order filed when nothing else was
+# happening (the maintainer's, most often, which withdraws nothing itself).
+#
+# Nothing here writes data/, so there is no commit and no push race. It DOES
+# READ data/, which is why the checkout names the branch tip: on a
+# workflow_run event the default github.sha is the TRIGGERING run's head, and
+# the build commits before it finishes — so the default would read the file
+# from BEFORE the takedown it is waiting for and hold every deletion open for
+# another cycle.
+#
+# A no-op, saying so, until FIREBASE_SERVICE_ACCOUNT is set.
+
+on:
+  workflow_run:
+    workflows: ["OA data — publish queued postings, candidates and placements"]
+    types: [completed]
+  schedule:
+    # once a day, off the hour so it does not queue behind every other :00 job
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Say what would be deleted, change nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-purge-accounts
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # A build that FAILED committed nothing, so no row has left the served
+    # files and there is nothing new to finish. Scheduled and hand-dispatched
+    # fires are unaffected.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # the branch tip, never github.sha — see the header
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Is Firebase configured?
+        id: gate
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Firebase is not configured yet — nothing to do. See _SETUP-FIREBASE.md"
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+        if: steps.gate.outputs.ready == 'true'
+
+      # The offline checks over what a deletion means, before anything is
+      # deleted: the served-file test, the order of the steps, and that stage
+      # one withdraws a posting rather than deleting its document.
+      - run: node _scraper/purge-accounts.mjs --selftest
+
+      - name: Carry out the deletions
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # A job advertisement and a candidate's CV are filed into Drive by the
+          # build, which writes the Drive id onto the document and nowhere else.
+          # The credential's drive.file scope cannot list the folder to find an
+          # orphan, so the copy must go BEFORE the document that names it — and
+          # without these the sweep holds the deletion open and says so rather
+          # than deleting the only route to the file.
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node _scraper/purge-accounts.mjs --dry-run
+          else
+            node _scraper/purge-accounts.mjs
+          fi
