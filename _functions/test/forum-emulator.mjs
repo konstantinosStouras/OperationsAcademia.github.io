@@ -29,6 +29,11 @@
                     every guard fixture refused with its reason, a wrong quote
                     refused, an archived season refused, and two secret
                     versions giving two handles for one uid.
+     the deletion   the accountDeletions rules, which are not the forum's but
+                    are the one destructive feature here whose boundary can
+                    be exercised against the real engine: who may file an order,
+                    that nobody updates one from a browser, and that cancelling
+                    stops the moment the sweep starts.
      the privacy    R7: every stored stamp is a whole minute. R10: after the
                     scenario every document under forumSeasons, forumTags,
                     forumHandles and forumNames is walked and fails on any test
@@ -362,6 +367,64 @@ async function main() {
   let delOk = false;
   try { await ctx(people.cand).doc(`candidateMarkers/${people.cand.uid}`).delete(); delOk = true; } catch {}
   ok(delOk, 'rules: an owner may delete their own marker');
+
+  /* ------------------------------------------------- deleting an account
+
+     Not the forum, and here on purpose: this is the one place in the
+     repository where _firestore.rules is exercised against the real engine
+     rather than by reading the file, and `accountDeletions` is the security
+     boundary of a DESTRUCTIVE feature. A regex over the rules file cannot
+     tell whether the clause it matched actually refuses anything.
+
+     What is pinned is exactly what the block promises: a person files their
+     own order and nobody else's, only as 'self'; the maintainer files
+     anyone's, only as 'admin'; NOBODY updates one from a browser, which is
+     what makes the sweep's own Admin-SDK stamps safe; and cancelling works
+     while the order is queued and not once it is being carried out, because
+     by then the alerts and the sign-in have already gone. */
+  console.log('\naccount deletion rules');
+  const AD = requireFn(path.join(ROOT, 'assets', 'oa-account-delete.js'));
+  const order = (p, by) => AD.requestDoc({ uid: p.uid, by, email: p.email, name: 'Someone', now: 1 });
+  const tryWrite = async (fs, pth, data, how) => {
+    try {
+      if (how === 'update') await fs.doc(pth).update(data);
+      else if (how === 'delete') await fs.doc(pth).delete();
+      else await fs.doc(pth).set(data);
+      return true;
+    } catch { return false; }
+  };
+  const adPath = (p) => `${AD.COLLECTION}/${p.uid}`;
+
+  ok(!(await tryWrite(ctx(people.cand), adPath(people.open), order(people.open, 'self'))),
+    'rules: a person cannot file somebody ELSE\'s deletion');
+  ok(!(await tryWrite(ctx(people.cand), adPath(people.cand), order(people.cand, 'admin'))),
+    'rules: …nor file one that reads as the maintainer\'s decision');
+  ok(!(await tryWrite(ctx(people.pend), adPath(people.pend), order(people.pend, 'self'))),
+    'rules: an unverified password account cannot file one at all');
+  ok(await tryWrite(ctx(people.cand), adPath(people.cand), order(people.cand, 'self')),
+    'rules: and a person files their OWN, as self');
+  ok(await canRead(ctx(people.cand), adPath(people.cand)) &&
+     await canRead(ctx(people.adm), adPath(people.cand)) &&
+     !(await canRead(ctx(people.open), adPath(people.cand))),
+    'rules: the person and the maintainer see it, and nobody else does');
+
+  ok(!(await tryWrite(ctx(people.cand), adPath(people.cand), { status: 'done' }, 'update')) &&
+     !(await tryWrite(ctx(people.adm), adPath(people.cand), { status: 'done' }, 'update')),
+    'rules: NOBODY updates one from a browser, the maintainer included, which ' +
+    'is what makes the sweep\'s own stamps safe to write with the Admin SDK');
+  ok(!(await tryWrite(ctx(people.cand), adPath(people.cand), null, 'delete')),
+    'rules: a person cannot call their own deletion off');
+  ok(await tryWrite(ctx(people.adm), adPath(people.cand), null, 'delete'),
+    'rules: the maintainer can, while it is still queued');
+
+  ok(await tryWrite(ctx(people.adm), adPath(people.open), order(people.open, 'admin')),
+    'rules: the maintainer files anyone\'s deletion');
+  await admin.doc(adPath(people.open)).set({ status: 'clearing' }, { merge: true });
+  ok(!(await tryWrite(ctx(people.adm), adPath(people.open), null, 'delete')),
+    'rules: …and once the sweep has started it can no longer be called off, ' +
+    'because "cancelled" would then be a lie');
+  await admin.doc(adPath(people.open)).delete();
+
   await env.cleanup();
 
   /* --------------------------------------------- R7 and R10: the document walk */
