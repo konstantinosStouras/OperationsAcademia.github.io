@@ -9818,8 +9818,10 @@ for (const w of [320, 360, 390, 430]) {
        geometry rather than as a class list, so it survives a change of
        markup: a tally column to the LEFT of the title, the tags BELOW the
        excerpt where they cannot crowd the heading (the collision the owner
-       reported the same day), no two chips overlapping, and the reply count
-       said once. */
+       reported the same day), no two chips overlapping, and the ANSWER count
+       said once. There are no comments anywhere in this forum and there is no
+       plan for any (owner, 2026-09-05), so a card says questions and answers
+       and nothing else. */
     const geom = await q.evaluate(() => {
       const card = document.querySelector('#oa-forum-list .oa-card');
       const box = (n) => { const r = n.getBoundingClientRect(); return { t: r.top, b: r.bottom, l: r.left, r: r.right, w: r.width }; };
@@ -9842,7 +9844,9 @@ for (const w of [320, 360, 390, 430]) {
         chips: chips.length, clash,
         tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,
         footRow: Math.abs(sub.b - chips[chips.length - 1].b) < 40 && sub.l > chips[0].l,
+        answers: (card.textContent.match(/answers?/g) || []).length,
         replies: (card.textContent.match(/repl(y|ies)/g) || []).length,
+        comments: (card.textContent.match(/comment/gi) || []).length,
         chipFont: parseFloat(chipStyle.fontSize),
         chipHeight: Math.max(...chips.map((c) => c.b - c.t)),
       };
@@ -9851,7 +9855,9 @@ for (const w of [320, 360, 390, 430]) {
     eq(geom.clash, 0, 'forum (candidate): no two chips overlap, none reaches up into the excerpt, and none runs into the tally column');
     ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
     ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
-    eq(geom.replies, 1, 'forum (candidate): and the reply count is printed once, in the tally');
+    eq(geom.answers, 1, 'forum (candidate): and the answer count is printed once, in the tally');
+    eq(geom.replies, 0, 'forum (candidate): the card says answers, never replies');
+    eq(geom.comments, 0, 'forum (candidate): and offers no comment on anything, which is the whole model');
     /* smaller and lighter than the site's default label, which is 700-weight
        at 12.5px and reads as crowded when four sit in a row under a question
        (owner, 2026-09-05: "the tags still look cramped, make them smaller") */
@@ -9942,7 +9948,11 @@ for (const w of [320, 360, 390, 430]) {
         mine: !!p2.querySelector('.oa-forum-handle.is-me'),
         own: p2.querySelectorAll('.oa-forum-v[disabled]').length,
         edit: (p2.querySelector('.oa-forum-act[data-act="edit"]') || {}).textContent,
-        heading: document.querySelector('.oa-forum-replies-h h2').textContent,
+        heading: document.querySelector('.oa-forum-answers-h h2').textContent,
+        sortOptions: [...document.querySelectorAll('#oa-forum-sort option')].map((o) => o.value),
+        accept: document.querySelectorAll('[data-act="accept"]').length,
+        save: document.querySelectorAll('[data-act="save"]').length,
+        comments: (document.getElementById('oa-forum-thread').textContent.match(/comment/gi) || []).length,
         sent: { keys: Object.keys(sent).sort(), quote: sent.quote, accept: sent.acceptGuide },
         hash: location.hash,
         acceptGone: !document.getElementById('oa-forum-accept'),
@@ -9953,8 +9963,12 @@ for (const w of [320, 360, 390, 430]) {
     ok(/teaching load question worked/.test(rep.body), 'forum (candidate): the reply\'s own words follow');
     ok(rep.mine && rep.own === 2, 'forum (candidate): the reply is marked as the reader\'s own, with both vote buttons disabled');
     ok(/^Edit · \d+ min left$/.test(rep.edit || ''), 'forum (candidate): the author is offered Edit with the minutes left');
-    eq(rep.heading, '1 reply', 'forum (candidate): the replies heading counts');
-    eq(rep.sent.keys, ['acceptGuide', 'body', 'quote', 'room', 'tid'], 'forum (candidate): the reply sent room, tid, body, the quote and the acceptance, and no kind');
+    eq(rep.heading, '1 Answer', 'forum (candidate): the answers band counts, and says answers');
+    eq(rep.sortOptions, ['score', 'oldest'], 'forum (candidate): and offers the two orders, highest score first');
+    eq(rep.accept, 0, 'forum (candidate): NO tick is offered on somebody else\'s question, whatever this reader thinks of the answer');
+    eq(rep.save, 2, 'forum (candidate): the question and the answer can each be saved');
+    eq(rep.comments, 0, 'forum (candidate): and there is nowhere to comment on either, which is the whole model');
+    eq(rep.sent.keys, ['acceptGuide', 'body', 'quote', 'room', 'tid'], 'forum (candidate): the answer sent room, tid, body, the quote and the acceptance, and no kind');
     eq(Object.keys(rep.sent.quote).sort(), ['n', 'text'], 'forum (candidate): the quote sent is n and text only');
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
 
@@ -10083,8 +10097,8 @@ for (const w of [320, 360, 390, 430]) {
     ok(asked.sentTags.join() === 'offers,teaching-release' && asked.sentRoom === 'candidates' && !asked.sentTid,
       'forum (candidate): forumPost was sent room, title, tags and body, and no tid for a new thread');
     eq(asked.docBy, 'quiet heron 42', 'forum (candidate): the thread carries the handle, never the account');
-    eq(asked.docKeys, ['by', 'excerpt', 'hidden', 'lastAt', 'lastBy', 'locked', 'n', 'pinned', 'room', 'score', 'season', 't', 'tags', 'title'],
-      'forum (candidate): the simulator writes the thread shape the model names');
+    eq(asked.docKeys, ['accepted', 'by', 'excerpt', 'hidden', 'lastAt', 'lastBy', 'locked', 'n', 'pinned', 'room', 'score', 'season', 't', 'tags', 'title'],
+      'forum (candidate): the simulator writes the thread shape the model names, the tick among it');
     eq(asked.tally, { flyouts: 1, europe: 1, offers: 1, 'teaching-release': 1 }, 'forum (candidate): the tag tally was bumped');
     eq(asked.own, 2, 'forum (candidate): one cannot vote on one\'s own question');
     const leak2 = await leakCheck(q);
@@ -10095,6 +10109,104 @@ for (const w of [320, 360, 390, 430]) {
       .filter((p) => needles.some((k) => (p + ' ' + JSON.stringify(window.__fb.docs[p])).includes(k))), [CAND.email, 'Zyxwvut', CAND.uid]);
     eq(forumDocs, ['candidateMarkers/' + CAND.uid],
       'forum (candidate): of every forum document, only the membership marker carries the uid (in its id, by design), and none the address or the name');
+    /* ---- THE TICK, on a question this reader asked ------------------------
+
+       The one who asked, and only they (forumAccept refuses everyone else
+       with `asker` whatever the page draws). Ticked, the answer carries the
+       mark, moves to the top of the band, and the thread's own row says so,
+       which is what lets the card in the list mark an answered question
+       without reading a post. Pressing it again takes it off. */
+    await q.fill('#oa-forum-body', 'Answering my own question: yes, and the letter is the place to ask.');
+    await q.click('#oa-forum-send');
+    await q.waitForSelector('#oa-forum-answers .oa-forum-post[data-n="2"]', { timeout: 15000 });
+    const mine = await q.evaluate(() => ({
+      accept: document.querySelectorAll('#oa-forum-answers [data-act="accept"]').length,
+      onQuestion: document.querySelectorAll('.oa-forum-post.is-first [data-act="accept"]').length,
+      pressed: document.querySelector('#oa-forum-answers [data-act="accept"]').getAttribute('aria-pressed'),
+    }));
+    eq(mine.accept, 1, 'forum (accept): the asker is offered the tick on the answer');
+    eq(mine.onQuestion, 0, 'forum (accept): and never on the question itself, which is not an answer');
+    eq(mine.pressed, 'false', 'forum (accept): nothing is ticked to begin with');
+    await q.click('#oa-forum-answers [data-act="accept"]');
+    await q.waitForSelector('#oa-forum-answers .oa-forum-post.is-accepted', { timeout: 15000 });
+    const ticked = await q.evaluate((t) => {
+      const tid = new URLSearchParams(location.search).get('t');
+      const li = document.querySelector('#oa-forum-answers .oa-forum-post.is-accepted');
+      const sent = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumAccept').pop().data;
+      return {
+        pid: li.getAttribute('data-pid'),
+        first: document.querySelector('#oa-forum-answers .oa-forum-post').getAttribute('data-pid'),
+        pressed: li.querySelector('[data-act="accept"]').getAttribute('aria-pressed'),
+        doc: window.__fb.docs[t + '/' + tid].accepted,
+        sentKeys: Object.keys(sent).sort(),
+      };
+    }, T);
+    eq(ticked.doc, ticked.pid, 'forum (accept): the tick is stored on the THREAD, naming the post');
+    eq(ticked.first, ticked.pid, 'forum (accept): and the ticked answer is drawn first in the band');
+    eq(ticked.pressed, 'true', 'forum (accept): the control says it is on');
+    eq(ticked.sentKeys, ['pid', 'room', 'tid'], 'forum (accept): forumAccept was sent the room, the thread and the post, and nothing else');
+    await q.click('#oa-forum-answers [data-act="accept"]');
+    await q.waitForFunction(() => !document.querySelector('#oa-forum-answers .oa-forum-post.is-accepted'), null, { timeout: 15000 });
+    eq(await q.evaluate((t) => window.__fb.docs[t + '/' + new URLSearchParams(location.search).get('t')].accepted, T), '',
+      'forum (accept): pressing it again unticks it, and the thread says so');
+
+    /* TICKED, THEN THE ANSWER DELETED: the tick goes with it, in the same
+       transaction the function writes (forum/delete.js), or the thread would
+       go on telling every reader that a question with no answer left in it
+       has been answered. It also puts this thread back where the step below
+       needs it, with no live answer holding the question down. */
+    await q.click('#oa-forum-answers [data-act="accept"]');
+    await q.waitForSelector('#oa-forum-answers .oa-forum-post.is-accepted', { timeout: 15000 });
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-forum-answers .oa-forum-act[data-act="delete"]');
+    await q.waitForFunction(() => !!document.querySelector('#oa-forum-answers .oa-forum-removed'), null, { timeout: 15000 });
+    const untick = await q.evaluate((t) => ({
+      stored: window.__fb.docs[t + '/' + new URLSearchParams(location.search).get('t')].accepted,
+      marked: document.querySelectorAll('#oa-forum-answers .oa-forum-post.is-accepted').length,
+      note: (document.querySelector('#oa-forum-answers .oa-forum-removed') || {}).textContent,
+    }), T);
+    eq(untick.stored, '', 'forum (accept): deleting the ticked answer clears the tick on the thread');
+    eq(untick.marked, 0, 'forum (accept): and nothing on the page still says it was answered');
+    ok(/answer was deleted by its author/i.test(untick.note || ''),
+      'forum (accept): the tombstone reads as an answer, never as a reply');
+
+    /* ---- SAVED, and WATCHED: this browser's, and nowhere else -------------
+
+       Neither writes a document. A uid beside a thread id is a record of what
+       a member reads, in a room built so that nothing records that, so both
+       live in localStorage beside the seen-marks and the page says so. */
+    await q.click('.oa-forum-post.is-first [data-act="save"]');
+    await q.waitForSelector('#oa-forum-savedcard:not([hidden])', { timeout: 8000 });
+    const saved = await q.evaluate((who) => ({
+      store: JSON.parse(localStorage.getItem('oa-forum-saved') || 'null'),
+      rows: document.querySelectorAll('#oa-forum-saved .oa-forum-savedrow').length,
+      pressed: document.querySelector('.oa-forum-post.is-first [data-act="save"]').getAttribute('aria-pressed'),
+      mine: (JSON.parse(localStorage.getItem('oa-forum-saved') || '{}') || {}).uid === who.uid,
+      leaks: JSON.stringify(JSON.parse(localStorage.getItem('oa-forum-saved') || 'null')).includes(who.email),
+    }), { uid: CAND.uid, email: CAND.email });
+    eq(saved.pressed, 'true', 'forum (saved): the bookmark says it is on');
+    eq(saved.rows, 1, 'forum (saved): and the side card lists what was saved');
+    ok(saved.mine && Object.keys(saved.store.items).length === 1,
+      'forum (saved): the mark is in this browser, keyed to the account');
+    ok(!saved.leaks, 'forum (saved): and carries no address');
+    /* the tag cards are beside every view, so this needs no navigation, and
+       the thread stays on screen for the step below */
+    const before = await q.evaluate(() => window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length);
+    await q.click('#oa-forum-tags [data-watch]');
+    await q.waitForFunction(() => (JSON.parse(localStorage.getItem('oa-forum-saved') || '{}').tags || []).length === 1,
+      null, { timeout: 8000 });
+    const watched = await q.evaluate(() => ({
+      tags: JSON.parse(localStorage.getItem('oa-forum-saved') || '{}').tags,
+      card: !document.getElementById('oa-forum-watchcard').hidden,
+      chips: document.querySelectorAll('#oa-forum-watch .oa-forum-tagrow').length,
+      pressed: document.querySelector('#oa-forum-tags [data-watch]').getAttribute('aria-pressed'),
+      wrote: window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length,
+    }));
+    eq(watched.tags.length, 1, 'forum (watched): the bell adds the tag to this browser\'s own list');
+    ok(watched.card && watched.chips === 1, 'forum (watched): and the side card lists it');
+    eq(watched.pressed, 'true', 'forum (watched): the bell says it is on');
+    eq(watched.wrote, before, 'forum (watched): watching a tag writes NOTHING to the database, which is the whole point of it');
+
     eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
       'forum (candidate): the join is remembered for the session under the handle');
     /* THEIR OWN QUESTION, WHICH NOBODY HAS ANSWERED: it goes, and the whole
@@ -10258,13 +10370,17 @@ for (const w of [320, 360, 390, 430]) {
       updown: document.querySelector('.oa-forum-updown').textContent,
       reply: !!document.getElementById('oa-forum-body'),
       acts: document.querySelectorAll('button.oa-forum-act').length,
+      accept: document.querySelectorAll('[data-act="accept"]').length,
+      save: document.querySelectorAll('[data-act="save"]').length,
       note: document.getElementById('oa-forum-compose').textContent,
       threadVotes: window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length,
       url: location.search,
     }));
     eq(at.votes, 0, 'forum (archive): a thread draws no vote button');
     ok(at.score === '+4' && at.updown === '5 / 1', 'forum (archive): the counts are still shown');
-    ok(!at.reply && at.acts === 0 && /archived/.test(at.note), 'forum (archive): no reply box, no Reply, Quote or Edit, and the note says why');
+    ok(!at.reply && at.acts === 0 && /archived/.test(at.note), 'forum (archive): no answer box, no Quote or Edit, and the note says why');
+    eq(at.accept, 0, 'forum (archive): and no tick, which the function would refuse: a closed season cannot answer who asked');
+    ok(at.save > 0, 'forum (archive): the bookmark IS offered, since saving is this browser\'s own and writes nothing');
     eq(at.threadVotes, 0, 'forum (archive): forumThreadVotes is never asked for an archived thread');
     ok(new RegExp(`season=${PY}`).test(at.url), 'forum (archive): the season stays on the address through the navigation');
     eq(errors, [], 'forum (archive): no uncaught script error');
@@ -10301,6 +10417,7 @@ for (const w of [320, 360, 390, 430]) {
         overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         votes: [...document.querySelectorAll('.oa-forum-v')].map(h),
         acts: [...document.querySelectorAll('.oa-forum-pacts .oa-forum-act')].map(h),
+        marks: [...document.querySelectorAll('.oa-forum-save, button.oa-forum-acc')].map(h),
         voteAbove: vote.bottom <= body.top + 1,
         taFont: parseFloat(getComputedStyle(document.getElementById('oa-forum-body')).fontSize),
         send: h(document.getElementById('oa-forum-send')),
@@ -10309,10 +10426,11 @@ for (const w of [320, 360, 390, 430]) {
     });
     eq(thM.overflowX, 0, 'forum mobile (thread): no sideways scroll');
     ok(thM.votes.length === 2 && thM.votes.every((h) => h >= 42), `forum mobile (thread): like and dislike are 42px targets (got ${thM.votes})`);
-    ok(thM.acts.length >= 3 && thM.acts.every((h) => h >= 42), `forum mobile (thread): Reply, Quote and the post link are 42px targets (got ${thM.acts})`);
+    ok(thM.acts.length >= 3 && thM.acts.every((h) => h >= 42), `forum mobile (thread): Answer, Quote and the post link are 42px targets (got ${thM.acts})`);
+    ok(thM.marks.length >= 1 && thM.marks.every((h) => h >= 42), `forum mobile (thread): the bookmark and the tick are 42px targets too (got ${thM.marks})`);
     ok(thM.voteAbove, 'forum mobile (thread): the vote column lies ABOVE the post on a phone, never in a gutter beside it');
     ok(thM.taFont >= 16, `forum mobile (thread): the reply textarea is 16px so iOS does not zoom (got ${thM.taFont}px)`);
-    ok(thM.send >= 42 && thM.sendRight, `forum mobile (thread): Post reply is a 42px target on screen (got ${thM.send})`);
+    ok(thM.send >= 42 && thM.sendRight, `forum mobile (thread): Post your answer is a 42px target on screen (got ${thM.send})`);
 
     /* the ask form */
     await m.click('.oa-forum-crumbs a');

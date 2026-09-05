@@ -97,6 +97,7 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
         n: 1,
         excerpt: P.excerptOf(body),
         score: 0,
+        accepted: '',
         pinned: false,
         locked: false,
         hidden: false,

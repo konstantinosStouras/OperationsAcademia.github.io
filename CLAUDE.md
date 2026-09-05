@@ -1516,8 +1516,8 @@ lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:0
 as well**: two producers for one event is the duplicate-doorbell outage under
 "One event, one build", and the selftest refuses a workflow cron on that hour.
 Like every function here it is inert until deployed; the deploy also creates
-the Cloud Scheduler job, and `firebase functions:list` must read back THIRTEEN
-(the four doorbells, `recordVisit`, `sendVerificationEmail` and the seven forum
+the Cloud Scheduler job, and `firebase functions:list` must read back FOURTEEN
+(the four doorbells, `recordVisit`, `sendVerificationEmail` and the eight forum
 callables).
 
 **The alerts' reveal note is keyed on the instant, and its mark is lifted to
@@ -2538,8 +2538,8 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is THIRTEEN now.** Four doorbells (`revealCandidates` among
-them), `recordVisit`, `sendVerificationEmail`, and the seven forum callables
+**The deploy count is FOURTEEN now.** Four doorbells (`revealCandidates` among
+them), `recordVisit`, `sendVerificationEmail`, and the eight forum callables
 (see "The forum"). Read the list back after every deploy; fewer means a stale
 checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
@@ -2974,16 +2974,16 @@ answered ones in a green outline) beside the **title, the first lines, and a
 footer** carrying the tags on one side and who asked on the other. `subtitle`
 returns the handle alone; `onCard` MOVES the engine's own `.oa-badges` and
 `.oa-card-sub` into that footer rather than drawing either twice, which is
-what keeps every fact said once and the reply count in the tally alone. The
+what keeps every fact said once and the answer count in the tally alone. The
 chips are `inline-block`, **scoped to this card** rather than fixed globally,
 because every other list's badges are measured where they are. On a phone the
 tally lies ABOVE the question as a row, the same move the vote column makes in
 a thread (rule 13).
 
 The thread already had the shape: crumbs, a heading, a meta bar, a vote column
-per post, a replies band. What changed is the reading: square arrows rather
+per post, an answers band. What changed is the reading: square arrows rather
 than pills, the score the largest thing in its column, the who-block on the
-brand wash with the handle in the link colour, and a rule under the replies
+brand wash with the handle in the link colour, and a rule under the answers
 heading.
 
 **What is NOT copied is the brand.** No orange, no logo, no wordmark, no
@@ -3103,17 +3103,18 @@ deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
 
-**The deploy count is THIRTEEN.** `_functions/index.js` re-exports the seven
+**The deploy count is FOURTEEN.** `_functions/index.js` re-exports the eight
 callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
 per-function lines and the selftest's count of them agree; the header, both
-setup pages and the count sentences in this file moved from six together, and
-again from twelve when `forumDelete` arrived.
+setup pages and the count sentences in this file moved from six together,
+again from twelve when `forumDelete` arrived, and again from thirteen when
+`forumAccept` did.
 `npm install --prefix _functions` first, as always: `@google-cloud/secret-
 manager` arrived with the forum and the CLI's own load of `index.js` dies on
 a `require` it cannot resolve. Owner, by hand, once: `firebase
 functions:secrets:set FORUM_SECRET --project operations-academia`, then
 `git pull && npm install --prefix _functions && firebase deploy --only
-functions --project operations-academia`, read thirteen back, and press the
+functions --project operations-academia`, read fourteen back, and press the
 seed for each room. The rules publish themselves behind the green check.
 
 **The emulator test is the ground truth, and it skips honestly.**
@@ -3179,7 +3180,7 @@ with `pushState` (`go()`, `popstate`, and every link the page draws to its
 own address followed in place), so a post lands on its thread without a
 round trip and the Back button works; `?room=` and `?season=` travel with
 every address, `?tags=` is the engine's own key. **A past season is the
-archive**: `.oa-archive-banner`, no Ask button, no reply box, no vote button
+archive**: `.oa-archive-banner`, no Ask button, no answer box, no vote button
 in the DOM at all (the functions refuse a write there anyway). Votes are
 drawn from `forumThreadVotes` once per thread open and a press calls
 `forumVote` with the toggled value (`aria-pressed` on `.oa-forum-v`, own
@@ -3212,7 +3213,7 @@ a post on a desktop and lies above it on a phone.
 
 **The browser suite drives the page through a SIMULATOR, never the
 functions.** `_scraper/_fake-firebase.js` gained `forumSim`, a stand-in for
-the six callables over its own fake Firestore: join writes the marker and
+the eight callables over its own fake Firestore: join writes the marker and
 answers the handle and the rooms (the maintainer's address, verified, opens
 both; a seeded current profile opens the candidates room; `emailVerified` or
 a non-password provider opens the open room, the `verifiedToken` reading), a
@@ -3336,7 +3337,7 @@ and it ends for a season when that season's version is destroyed.
 Tests: `testForum` in `_scraper/selftest.mjs` (the model, the writers against
 the model both ways through the `@doc` blocks, R1 to R8 as source scans, the
 rules block clause by clause with the rooms pinned against the model both
-ways, the guard's literal and fixtures, the guide, the thirteen exports, the
+ways, the guard's literal and fixtures, the guide, the fourteen exports, the
 package and lockfile, the emulator test's shape and the workflow job, no
 forum cron, the runbook, the policy paragraph (R9), the change log entry and
 this section; then the page half: noindex and no preview block, charset
@@ -3537,6 +3538,149 @@ would be satisfied by deleting the explanation) and `testForumThreadRemoval` in
 spawned and pins the one document it writes against `KEYS.tags`, the
 collections it may never reach, the dispatch-only workflow with its
 plan-by-default input and its list-to-find-the-id line, and this section.
+
+### A question, its answers, and the tick that says which one worked
+
+Owner, 2026-09-05, over four screenshots of a Stack Exchange question: *"a
+user who posts may tick an answer that they think answers their question.
+Other users can post answers but comments as shown in red should not be
+posted"*, and then *"improve the looks of the posts, e.g. add more space to
+look nicer. See how stackoverflow does it"*. Three decisions come out of it
+and none of them should be re-opened lightly.
+
+**THERE ARE NO COMMENTS, AND THERE IS NO PLAN FOR ANY.** The thing circled in
+red is the comment thread under a Stack Exchange answer, and the forum has
+never had one: a thread is a QUESTION and the ANSWERS to it, post 1 and the
+rest. What changed is that the page now says so — the band under the question
+is "N Answers", the box below it is "Your answer", a post is "answered" rather
+than "replied", and the per-post Reply button (which only ever moved the
+keyboard to the box below) is drawn on the question alone as *Answer this
+question*; Quote is how an answer is answered. The selftest reads
+`assets/oa-forum.js` with its own comments stripped and refuses the word
+`comment` in anything the page draws, and `KEYS` names no such document, so a
+comment layer cannot arrive by accident. (The scan has to strip the file's
+comments, because the paragraph explaining this decision is itself full of the
+word — the trap this file records for the analytics page's "no iframes"
+check.)
+
+**`forumAccept` IS THE EIGHTH CALLABLE, and the tick is ONE FIELD ON THE
+THREAD.** `accepted` names the post; the post carries no flag of its own.
+That is what lets the card in the list mark an answered question from the row
+it already reads — no post read per card — and it is why the two can never
+disagree: there is nothing to keep in step. `forumAccept({room, tid, pid})`
+takes an empty `pid` to untick, moves the tick when another answer is named,
+and writes nothing when asked for the one already ticked (the shape
+`forumVote` already had).
+
+* **The member who ASKED, and nobody else.** The handle on the thread head is
+  the one that may tick, and the refusal is its own word, `asker`. Not the
+  maintainer: they are an ordinary member in both rooms, and reading somebody
+  else's question is not moderation.
+* **Only an answer, and only while its words are there.** Post 1 is the
+  question and a deleted post is a tombstone; both answer `answer`.
+* **Refused on an ARCHIVE, allowed on a LOCKED thread.** An archived season
+  cannot answer "did this member ask it" once its secret version is destroyed;
+  locking stops new posts, and saying which of the answers already written
+  worked is not a new post. That is `forumDelete`'s own reading, applied here.
+* **Deleting the ticked answer takes the tick with it**, in the same
+  transaction (`delete.js`), or the thread goes on telling every reader that a
+  question with no answer left in it has been answered. That is the same
+  transaction the rule above it lives in: a question with a live answer cannot
+  be deleted at all, so the tick and the question can never go together.
+* **No rate limit, deliberately.** It writes one field on the caller's own
+  thread and creates nothing; the day counters exist to bound what a handle
+  can ADD to a room.
+
+**The band is ordered, and the numbering is not.** Answers read accepted
+first, then best liked, then oldest, with "Sorted by" beside the heading
+offering the strictly chronological reading instead. What never moves is `n`:
+it is a post's name, a quote points at it, and the permalink under each answer
+is that number. The band is repainted on its own when the tick moves, so the
+box below it keeps whatever was half written in it.
+
+**The looks, and the one rule behind all of them.** A post is given 28px of
+air and a 64px vote column; the question card's tally column is 104px with the
+number over its word (which is what stops "0" and "votes" being squeezed into
+one cramped line — the column the owner circled); the answered count is boxed
+in the room's green and FILLED with a tick once an answer is accepted; the
+accepted answer carries that green as a rail and a wash where the words are;
+"Open the thread" stays (it is the only text on the card that says what a
+press does, and the engine's comment explains why it must reach a screen
+reader) but is small, muted and tucked to the right. And the heading a thread
+focuses on arrival is no longer RINGED: `tabindex="-1"` means nothing can tab
+to it, so every focus it takes is the script's, and Chrome matches
+`:focus-visible` on a programmatic focus, so both have to say `outline: none`.
+
+**A tag chip's hover is a STEP, not a flip** (owner, 2026-09-05, of the
+near-black chip: *"see what happens when a user hovers over a tag on
+stackoverflow. Improve the colour and behavior"*). Filling a chip with
+`--brand` inverts it to near-black in light theme and near-white in dark,
+which reads as a pressed state on something that is only being pointed at and
+throws the tag's own colour away at the moment a reader is looking at it. The
+ground goes one step firmer (`--line-soft`), the ink stays the tag's, a
+hairline appears, and the chip carries a TITLE naming what pressing it does
+and how many questions carry it this season — the useful half of the popover
+there. Both places a chip is drawn move the same way, and the selftest pins
+that neither goes back to the flip.
+
+### Saved questions and watched tags live in THIS BROWSER
+
+Owner, 2026-09-05: *"allow users to bookmark a question or answer within the
+forum. Also, similar to stackoverflow allow them to watch tags and get
+notified if new posts get posted with the same tags."*
+
+**Neither writes a document, and that is the decision rather than the
+shortcut.** A `users/{uid}/...` bookmark would be perfectly easy to write —
+the blanket owner rule already allows it — and it would put in the database
+exactly what this page refuses to let the site keep: a uid beside the threads
+a member reads and the tags they follow. `forum.html` loads no GA4, no
+`oa-usage.js` and no visit ping for that same reason, and the argument does
+not change because the record would be the reader's own. So both marks sit in
+`localStorage` under **`oa-forum-saved`**, keyed to the account like the
+seen-marks beside them, cleared by `signOut()` with the rest (a shared machine
+must not hand the next person the last one's list), and the cards SAY so
+rather than letting a reader take them for a subscription the site is keeping.
+The cost is stated where it is offered: they follow the reader on this device
+and no other.
+
+* **The bookmark is on every post**, question and answer alike, under the vote
+  arrows where the site the owner named puts it; saving an answer and saving
+  its question are two marks, so the key carries the post id. The side card
+  lists the newest eight for the room on screen, each with a way to remove it,
+  and it is hidden while there are none.
+* **A tag is watched from its own chip**, in Popular tags and in the card of
+  the tags you watch; the bell says which state it is in and the card explains
+  itself while the list is empty, since that is where the feature is
+  discovered.
+* **"Notified" is IN-APP, and the e-mail half is deferred rather than
+  forgotten.** Over the list, when questions carrying a watched tag have
+  arrived since this reader last read the room, a line says how many and
+  offers to show them — computed from the rows the list has already read and
+  the seen-marks it already keeps, so watching a tag costs no read, no
+  document and nothing anyone could later be asked to hand over. A digest
+  cannot ship yet for a reason that has nothing to do with the plumbing: the
+  forum is deliberately NOT ANNOUNCED (`FORUM_ANNOUNCED`), and an e-mail
+  naming a thread in the Candidates' room would announce it to whoever opens
+  the message. When the switch is flipped, the honest shape is a fifth topic
+  on the existing alerts (`assets/oa-alert-match.js` + `alerts-mailer.mjs`)
+  with the room checked per subscriber at send time.
+
+Tests: the accept and marks blocks of `testForum` (a callable of its own with
+the asker check, the question and the tombstone refused, the archive refused
+and the locked thread not, the idempotent write, the tick pinned as a thread
+key and never a post one, the deletion that clears it, the band's order, the
+"Answers" wording with `oa-forum-replies-h` gone from both files, no `comment`
+in anything the page draws, the local store with no collection behind it, the
+five new ids born hidden, the tag hover pinned both ways, the post's own
+padding and the un-ringed heading), the `forumAccept` block of
+`_functions/test/forum-emulator.mjs` against the real function (somebody else
+refused, the tick moved and cleared, the archive refused, and the deletion
+clearing it), and the forum block of `_scraper/page-test.mjs`, which drives
+the whole of it in a browser: no tick offered on somebody else's question, the
+asker ticking their own thread with the answer moving to the top and the
+thread's row following, the untick, the bookmark with its side card, the bell
+writing to localStorage and NOTHING to the database, the archive offering the
+bookmark but no tick, and rule 13's 42px targets for both new controls.
 
 ## What "immediate" costs, and where the waiting used to be
 

@@ -97,6 +97,7 @@ exports.forumModerate = onCall(P.OPTS, async (req) => {
         n: 1,
         excerpt: P.excerptOf(body),
         score: 0,
+        accepted: '',
         pinned: true,
         locked: true,
         hidden: false,

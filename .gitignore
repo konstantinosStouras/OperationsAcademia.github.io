@@ -14,7 +14,9 @@ _t[0-9]*.mjs
 # run ends — never content.
 .claude/worktrees/
 
-# Firebase emulator artefacts, written by a local emulators:exec run
+# Firebase emulator artefacts, written by a local emulators:exec run of
+# _functions/test/forum-emulator.mjs. Tooling scratch, and the run that
+# produced them is the ground truth rather than the files.
 firestore-debug.log
 ui-debug.log
 firebase-debug.log

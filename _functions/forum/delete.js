@@ -47,6 +47,12 @@
    does not blank the passage a reply was written about. The guide says the
    words are gone; it does not promise to reach into what other people wrote.
 
+   AN ACCEPTED ANSWER TAKES THE TICK WITH IT. `accepted` on the thread names
+   the post the asker ticked, so deleting that answer must clear it in the
+   same transaction: a tick left pointing at a tombstone tells every reader,
+   and every card in the list, that a question with no answer left in it has
+   been answered. forumAccept is the other half.
+
    Refused on a HIDDEN thread (moderation has already removed it, so there is
    nothing here to act on) and on any season but the one under way: an
    archived season's handles cannot be re-derived once its secret version is
@@ -121,6 +127,14 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     };
     /* @end */
     tx.update(postRef, postPatch);
+    if (String(tv.accepted || '') === postRef.id) {
+      /* @doc thread */
+      const untick = {
+        accepted: '',
+      };
+      /* @end */
+      tx.update(threadRef, untick);
+    }
     if (!isQuestion) return;
     /* @doc thread */
     const gonePatch = {

@@ -409,8 +409,8 @@
      and that no uid, address or profile id reaches the markup. `seed.refuse`
      ({ forumPost: { code: 'resource-exhausted', reason: 'posts' } }) makes
      one callable refuse, for the refusal-wording checks. */
-  var FORUM_NAMES = ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumVote',
-    'forumThreadVotes', 'forumModerate'];
+  var FORUM_NAMES = ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept',
+    'forumVote', 'forumThreadVotes', 'forumModerate'];
   var SIM_HASH = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
   var simN = 0;
 
@@ -520,7 +520,7 @@
         simWrite(threads + '/' + gtid, {
           season: Y, room: room, title: 'About this forum', tags: ['about'], by: 'Moderator', t: now, lastAt: now,
           lastBy: 'Moderator', n: 1, excerpt: 'How this room works, in thirteen rules.', score: 0,
-          pinned: true, locked: true, hidden: false
+          accepted: '', pinned: true, locked: true, hidden: false
         });
         simWrite(threads + '/' + gtid + '/posts/' + gtid + '-p1', {
           season: Y, room: room, tid: gtid, n: 1, by: 'Moderator', body: simGuideText(), t: now,
@@ -562,7 +562,7 @@
         var pid1 = 'sim-p' + (++simN);
         simWrite(threads + '/' + tid, {
           season: Y, room: room, title: title, tags: tags, by: handle, t: now, lastAt: now, lastBy: handle,
-          n: 1, excerpt: excerpt, score: 0, pinned: false, locked: false, hidden: false
+          n: 1, excerpt: excerpt, score: 0, accepted: '', pinned: false, locked: false, hidden: false
         });
         simWrite(threads + '/' + tid + '/posts/' + pid1, {
           season: Y, room: room, tid: tid, n: 1, by: handle, body: body, t: now,
@@ -607,6 +607,21 @@
     var tpath2 = threads + '/' + String(data.tid || '');
     var th = docs[tpath2];
     if (!th) return simRefuse('not-found', 'thread');
+
+    /* the tick that says "this answered my question": the ASKER alone, one
+       field on the thread, and an empty pid clears it (forum/accept.js) */
+    if (name === 'forumAccept') {
+      if (th.hidden) return simRefuse('failed-precondition', 'locked');
+      if (th.by !== handle) return simRefuse('permission-denied', 'asker');
+      var want = String(data.pid || '');
+      if (want) {
+        var ap = docs[tpath2 + '/posts/' + want];
+        if (!ap) return simRefuse('not-found', 'thread');
+        if (Number(ap.n) === 1 || ap.hidden) return simRefuse('failed-precondition', 'answer');
+      }
+      simWrite(tpath2, Object.assign({}, th, { accepted: want }));
+      return Promise.resolve({ data: { accepted: want } });
+    }
 
     if (name === 'forumThreadVotes') {
       var votes = {};
@@ -662,6 +677,11 @@
           body: '', hidden: true,
           hiddenBy: isAdmin && post.by !== handle ? 'admin' : 'author', editedAt: now
         }));
+        /* the tick goes with the answer it named, as the function does */
+        if (String(th.accepted || '') === String(data.pid || '')) {
+          th = Object.assign({}, th, { accepted: '' });
+          simWrite(tpath2, th);
+        }
         if (question) {
           whole = true;
           simWrite(tpath2, Object.assign({}, th, { hidden: true }));
