@@ -27,10 +27,15 @@
              "2026-09-04" are dates people write all the time; a comma or a
              currency sign breaks the run, so "$120,000-150,000" is a salary
              range; a DOI's digits are broken by its slash.
-     url     any web address: https://, www., or a bare host on a common
-             ending (mit.edu/~jane names a person as surely as a card would).
-             A posting on this site is cited by the OA posting ID printed on
-             its card, which is a word and a date and never a link.
+
+   A WEB ADDRESS IS ALLOWED (owner, 2026-09-05: "I want users to be able to
+   post links in their posts or replies"). It was refused at first, on the
+   reading that mit.edu/~jane names a person as surely as a card would; the
+   owner's call is that a forum where you cannot link the call for papers you
+   are asking about is the poorer trade. So a link posts, the page draws it as
+   a link, and the guide says in as many words that a link to your own page
+   identifies you. What is still refused is a way to be CONTACTED off the
+   forum, or an identifier that names exactly one researcher.
 
    Order matters only for the reason returned: an ORCID iD is also sixteen
    digits, and it is more useful to be told what it is.
@@ -58,8 +63,6 @@
   var PHONE_MIN_DIGITS = 9;
   var CURRENCY = '$€£';
 
-  var URL_RX = /(https?:\/\/|\bwww\.|\b[\w-]+(?:\.[\w-]+)*\.(?:com|org|net|edu|io|me|info|ac\.[a-z]{2}|edu\.[a-z]{2}|co\.[a-z]{2})\b)/i;
-
   function hasEmail(s) {
     EMAIL_RX.lastIndex = 0;
     return EMAIL_RX.test(s);
@@ -83,7 +86,7 @@
 
   /**
    * '' when the text may be posted; otherwise the reason it may not, one of
-   * 'email' | 'orcid' | 'phone' | 'url'. The same word the function puts in
+   * 'email' | 'orcid' | 'phone'. The same word the function puts in
    * its invalid-argument details, so the page can show one message for both.
    */
   function check(text) {
@@ -92,7 +95,6 @@
     if (hasEmail(s)) return 'email';
     if (ORCID_RX.test(s)) return 'orcid';
     if (hasPhone(s)) return 'phone';
-    if (URL_RX.test(s)) return 'url';
     return '';
   }
 
@@ -101,8 +103,7 @@
   var WHY = {
     email: 'That looks like an e-mail address. The forum does not carry contact details.',
     orcid: 'That looks like an ORCID iD, which names one person exactly.',
-    phone: 'That looks like a telephone number. The forum does not carry contact details.',
-    url: 'That looks like a web address. Cite a posting by the OA posting ID on its card instead.'
+    phone: 'That looks like a telephone number. The forum does not carry contact details.'
   };
 
   return {
@@ -110,7 +111,6 @@
     ORCID_RX: ORCID_RX,
     PHONE_RX: PHONE_RX,
     PHONE_MIN_DIGITS: PHONE_MIN_DIGITS,
-    URL_RX: URL_RX,
     WHY: WHY,
     check: check
   };

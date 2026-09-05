@@ -196,49 +196,65 @@
 }
 
 /* the question card: a stats column beside the engine's own head */
-body.v3 .oa-forum-q {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  align-items: start;
-}
+/* THE QUESTION CARD IS ONE COLUMN. It was a 88px stat column beside the
+   title, and the two crowded each other: the chips sat level with the badge
+   row and the title, and the reply count appeared in both (owner's
+   screenshot, 2026-09-05). Everything is stacked now: badges, title,
+   excerpt, then one row of facts, so nothing can collide at any width. */
 
-body.v3 .oa-forum-q .oa-card-lock { grid-column: 1 / -1; }
-
-.oa-forum-stats {
+/* .oa-label is `display: inline` site-wide, which is a Bootstrap
+   inheritance: vertical padding on an inline box does not grow its line, so
+   several chips on one line bleed into the rows above and below. Scoped to
+   this card rather than fixed globally, because every other list's badges
+   are measured where they are. */
+body.v3 .oa-forum-q .oa-badges {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
-  padding: 18px 0 0 18px;
+  margin-bottom: 8px;
+}
+
+body.v3 .oa-forum-q .oa-badges .oa-label {
+  display: inline-block;
+  margin: 0;
+}
+
+/* the facts row: the handle the engine wrote, then the chips onCard adds */
+body.v3 .oa-forum-q .oa-card-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 8px;
   color: var(--mut);
-  font-size: 12.5px;
-  text-align: right;
+  font-size: 13px;
 }
 
-.oa-forum-stats b {
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.oa-forum-replies {
-  padding: 1px 7px;
+.oa-forum-stat {
+  padding: 1px 8px 2px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--bg-2);
   color: var(--ink-2);
+  font-size: 12.5px;
   white-space: nowrap;
 }
 
-.oa-forum-replies.has {
+.oa-forum-stat b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.oa-forum-stat.has {
   border-color: var(--ok);
   background: var(--ok);
   color: var(--on-brand);
 }
 
-.oa-forum-replies.has b { color: var(--on-brand); }
+.oa-forum-stat.has b { color: var(--on-brand); }
 
-body.v3 .oa-forum-q .oa-card-head { padding-left: 0; }
+.oa-forum-when { color: var(--mut); }
 
 .oa-forum-ex {
   margin: 4px 0 0;
@@ -833,18 +849,6 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 }
 
 @media (max-width: 640px) {
-  body.v3 .oa-forum-q { grid-template-columns: minmax(0, 1fr); }
-  .oa-forum-stats {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    order: 2;
-    padding: 0 16px 14px;
-    text-align: left;
-  }
-  body.v3 .oa-forum-q .oa-card-head { padding-left: 16px; }
-  body.v3 .oa-forum-q .oa-card-lock { order: 3; }
   .oa-forum-tabs { width: 100%; }
   .oa-forum-tab { flex: 1 1 0; justify-content: center; }
   .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 10px; }

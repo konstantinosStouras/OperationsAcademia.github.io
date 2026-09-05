@@ -2,13 +2,13 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   TWELVE functions live in this file: four doorbells (publishOnChange,
+   THIRTEEN functions live in this file: four doorbells (publishOnChange,
    publishOnCandidateChange, publishOnReview, and the clock, revealCandidates),
    the university-visit resolver (recordVisit), the e-mail verification
    mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md), and
-   the six forum callables re-exported from ./forum (forumJoin, forumPost,
-   forumEdit, forumVote, forumThreadVotes, forumModerate; the FORUM_SECRET
-   runbook is in _SETUP-INSTANT-PUBLISH.md). A deploy lists all twelve, and
+   the seven forum callables re-exported from ./forum (forumJoin, forumPost,
+   forumEdit, forumDelete, forumVote, forumThreadVotes, forumModerate; the FORUM_SECRET
+   runbook is in _SETUP-INSTANT-PUBLISH.md). A deploy lists all thirteen, and
    reading that count back is how a deploy from a stale checkout is caught.
 
    FOUR doorbells, one job each. When a job posting changes in Firestore,
@@ -662,15 +662,16 @@ exports.recordVisit = onRequest(
 
 /* ------------------------------------------------------------------- forum
 
-   THE FORUM. Six callables, one per file under ./forum, sharing the preamble
+   THE FORUM. Seven callables, one per file under ./forum, sharing the preamble
    in ./forum/member.js and the identity in ./forum/identity.js: the one
    HMAC over `season + ':' + uid` under the season's own Secret Manager
    version, a handle drawn at random, and every write inside a transaction.
    Re-exported one per line so a deploy's per-function lines, and the
-   selftest's count of them, read TWELVE. */
+   selftest's count of them, read THIRTEEN. */
 exports.forumJoin = forum.forumJoin;
 exports.forumPost = forum.forumPost;
 exports.forumEdit = forum.forumEdit;
+exports.forumDelete = forum.forumDelete;
 exports.forumVote = forum.forumVote;
 exports.forumThreadVotes = forum.forumThreadVotes;
 exports.forumModerate = forum.forumModerate;

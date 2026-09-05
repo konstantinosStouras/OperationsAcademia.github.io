@@ -215,14 +215,17 @@ async function main() {
   const tally = await admin.doc(`forumTags/${Y}_candidates`).get();
   ok(tally.data().counts.offers === 1 && tally.data().counts.negotiation === 1 && tally.data().counts.about === 1, 'the tag tally counts the thread and the guide');
   const bad = [
-    ['jane@mit.edu', 'email'], ['+1 617 253 1000', 'phone'], ['mit.edu/~jane', 'url'],
-    ['www.example.org', 'url'], ['0000-0002-1825-0097', 'orcid'], ['(617) 253-1000', 'phone'],
+    ['jane@mit.edu', 'email'], ['+1 617 253 1000', 'phone'],
+    ['0000-0002-1825-0097', 'orcid'], ['(617) 253-1000', 'phone'],
   ];
   for (const [text, why] of bad) {
     const r = await call('forumPost', tokens.cand, { room: 'candidates', tid: t1.result.tid, body: 'see ' + text, kind: '' });
     ok(status(r) === 'INVALID_ARGUMENT' && reason(r) === why, `the guard refuses "${text}" as ${why}`);
   }
-  const fine = ['2026-2027', '$120,000-150,000', '10.1287/mnsc.2020.3745'];
+  /* a link posts (owner, 2026-09-05); the three the guard used to refuse are
+     kept here as the positive control that the change reached the function */
+  const fine = ['2026-2027', '$120,000-150,000', '10.1287/mnsc.2020.3745',
+    'mit.edu/~jane', 'www.example.org', 'https://example.org/x'];
   let quoteSource = null;
   for (const text of fine) {
     /* the gap between posts is 20 s, so these are spaced by back-dating the handle */
@@ -287,6 +290,41 @@ async function main() {
   const votes = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${t1.result.pid}/votes`).get();
   ok(votes.empty, 'a withdrawn vote leaves no document');
 
+  /* ----------------------------------------------------------- delete */
+  console.log('\nforumDelete');
+  const notMine = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  ok(status(notMine) === 'PERMISSION_DENIED' && reason(notMine) === 'author', 'somebody else cannot delete it');
+  /* the author's own reply, long past the edit window: there is no window */
+  const rep = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${quoteSource.pid}`).get();
+  const repN = rep.data().n;
+  await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${quoteSource.pid}`).update({ t: M.minute() - 99 * 60000 });
+  const d1 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: quoteSource.pid });
+  ok(!d1.error && d1.result.ok === true && d1.result.thread === false, 'the author deletes their own reply, window or no window', JSON.stringify(d1));
+  const dp = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${quoteSource.pid}`).get();
+  ok(dp.exists && dp.data().body === '' && dp.data().kind === '' && dp.data().hidden === true && dp.data().hiddenBy === 'author',
+    'the words are erased in the database, not merely flagged');
+  ok(dp.data().n === repN, 'and the slot keeps its number, so the replies still read');
+  ok(dp.data().editedAt % 60000 === 0, 'the stamp is on the minute (R7)');
+  const again = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: quoteSource.pid });
+  ok(!again.error, 'a second press is a success, not an error');
+  /* a quote of a deleted post survives: forumPost stored a COPY */
+  const qAfter = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${q1.result.pid}`).get();
+  ok(qAfter.data().quote && qAfter.data().quote.text === 'second-year release', 'a quote of somebody else\'s post is a copy and survives their deletion');
+  /* the OPENING post of a thread that HAS replies: the thread stands */
+  const d2 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  ok(!d2.error && d2.result.thread === false, 'deleting the opening post of a thread with replies leaves the thread');
+  const th1e = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(th1e.data().hidden === false && th1e.data().title === M.DELETED_TITLE && th1e.data().excerpt === '',
+    'the title and the excerpt were the author\'s words too, and go with them');
+  /* the OPENING post of a thread nobody has replied to: the thread goes */
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const solo = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question I will withdraw', tags: ['waiting'], body: 'Something I would rather not have asked after all.', kind: '' });
+  ok(!solo.error, 'a fresh thread with no replies', JSON.stringify(solo));
+  const d3 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: solo.result.tid, pid: solo.result.pid });
+  ok(!d3.error && d3.result.thread === true, 'deleting it takes the whole thread');
+  const soloTh = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${solo.result.tid}`).get();
+  ok(soloTh.data().hidden === true, 'and the thread is hidden, off every list');
+
   /* ---------------------------------------------------------- archive */
   console.log('\narchive');
   await admin.doc(`forumSeasons/${Y - 1}`).set({ season: Y - 1, createdAt: M.minute(), secretVersion: 'env', guides: {} });
@@ -301,6 +339,10 @@ async function main() {
   });
   const ar = await call('forumPost', tokens.cand, { room: 'candidates', tid: oldThread.id, body: 'hello', kind: '' });
   ok(status(ar) === 'FAILED_PRECONDITION' && reason(ar) === 'archive', 'a thread of another season refuses a reply');
+  /* and a deletion: once a season's secret version is destroyed its handles
+     cannot be re-derived, so "the author" is not a question with an answer */
+  const arDel = await call('forumDelete', tokens.cand, { room: 'candidates', tid: oldThread.id, pid: 'whatever' });
+  ok(reason(arDel) === 'thread' || reason(arDel) === 'archive', 'and refuses a deletion');
   await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${oldThread.id}`).delete();
 
   /* ------------------------------------------- two secret versions, one uid */

@@ -62,8 +62,8 @@ const ERRORS = {
   locked: 'This thread is locked.',
   thread: 'No such thread or post.',
   archive: 'This season is an archive and is read-only.',
-  author: 'Only the author may edit a post.',
-  window: 'The fifteen-minute edit window has closed.',
+  author: 'Only the author may change their own post.',
+  window: 'The fifteen-minute edit window has closed. You can still delete the post.',
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',
   bounds: 'That is too long, or empty.',
@@ -76,7 +76,6 @@ const ERRORS = {
   gap: 'Wait a little between posts.',
   email: guard.WHY.email,
   phone: guard.WHY.phone,
-  url: guard.WHY.url,
   orcid: guard.WHY.orcid,
 };
 
