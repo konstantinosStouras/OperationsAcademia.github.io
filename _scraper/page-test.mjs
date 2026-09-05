@@ -6649,6 +6649,25 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- the maintainer is offered the reason instead of the button ----------- */
+  {
+    const { ctx, q } = await open(ADMIN, 'account.html');
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    eq(await q.$eval('#pa-delete-open', (n) => n.hidden), true,
+      'delete: the account that RUNS the site is not offered the button — deleting ' +
+      'it here would take the Admin area, the review queues and the roster with it');
+    eq(await q.$eval('#pa-delete-admin', (n) => n.hidden), false,
+      'delete: …and is told why, rather than finding the section silently short of ' +
+      'the control everybody else has');
+    /* not merely hidden: pressing it through the DOM must do nothing either,
+       or the guard is a picture of one (the gate's own "absent, not blurred") */
+    await q.evaluate(() => document.getElementById('pa-delete-open').click());
+    await q.waitForTimeout(300);
+    eq(await q.$eval('#pa-delete-panel', (n) => n.hidden), true,
+      'delete: and the panel stays shut when the hidden button is pressed anyway');
+    await ctx.close();
+  }
+
   /* -- a reader who is not signed in is not offered it ---------------------- */
   {
     const { ctx, q } = await open(null, 'account.html');

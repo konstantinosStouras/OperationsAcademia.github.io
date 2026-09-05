@@ -2257,6 +2257,19 @@ one is queued. **The control is withheld where the queue could not be read** —
 unknown draws nothing, the rule the account menu's badges follow — and the
 maintainer types the word into a prompt rather than pressing a `confirm()`,
 which is what that panel uses to delete an orphaned conversation. **The
+maintainer's own account is offered no delete control anywhere**, in the roster
+or in their own personal area (owner, 2026-09-05: *"yes add that guard"*). The
+personal area was the way round the roster's guard, and it is offered the
+REASON in place of the button rather than being left silently short of a
+control everybody else has; `openSelfPanel` refuses as well as hiding, or a
+hidden button is still a button on a keyboard. **It is a guard against an
+accident and not an authorisation, and the file says so**: the rules still let
+any owner file their own order, because `isAdmin()` is keyed on an ADDRESS
+rather than on an account, so a maintainer who genuinely means it registers
+again with the same address and is the maintainer again. What it removes is a
+button that deletes the site's own account in two presses and a typed word.
+
+**The
 maintainer's OWN row is never offered one**: the rules would allow it, an admin
 may file an order for any account including their own, and the result is a site
 whose only maintainer account has deleted itself, with the Admin area and the

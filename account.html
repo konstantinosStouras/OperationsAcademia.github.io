@@ -272,6 +272,16 @@
             goes and what stays.</p>
           <p><button type="button" class="v3-btn danger" id="pa-delete-open">Delete my
             account</button></p>
+          <!-- …and the ONE account this is withheld from, drawn in its place
+               (owner, 2026-09-05). It is the maintainer's own: deleting it here
+               would take the Admin area, the review queues and the roster with
+               it, and the roster already withholds the same control on their
+               own row. Hidden by default and revealed by the auth event, like
+               the button it replaces. -->
+          <p id="pa-delete-admin" class="v3-pa-danger-warn" hidden>You are signed in as
+            the account that runs this site. Deleting it here would take the Admin
+            area, the review queues and the registered-users roster with it, so the
+            button is withheld on this account and on no other.</p>
           <div id="pa-delete-panel" hidden></div>
           <p class="oa-form-msg" id="pa-delete-msg" role="status"></p>
         </section>

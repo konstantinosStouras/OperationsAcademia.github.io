@@ -399,6 +399,21 @@
     if (opener) opener.focus();
   }
 
+  /** THE ONE ACCOUNT THIS IS WITHHELD FROM: the maintainer's own (owner,
+      2026-09-05). Deleting it would take the Admin area, the review queues and
+      the roster with it, and the roster already withholds the same control on
+      their own row — the personal area was the way round that.
+
+      IT IS A GUARD AGAINST AN ACCIDENT AND NOT AN AUTHORISATION, and saying so
+      is the honest half: the rules still let any owner file their own order,
+      because isAdmin() is keyed on an ADDRESS rather than on an account, and a
+      maintainer who genuinely means it registers again with the same address
+      and is the maintainer again. What this removes is a button that deletes
+      the site's own account in two presses and a typed word. */
+  function isMaintainer() {
+    return !!(root.OAAccounts && root.OAAccounts.isAdmin && root.OAAccounts.isAdmin());
+  }
+
   function openSelfPanel() {
     var msg = $('pa-delete-msg');
     if (selfState.busy) return;
@@ -406,6 +421,7 @@
       say(msg, 'Sign in first.', 'err');
       return;
     }
+    if (isMaintainer()) return;
     if (!root.OAFB || !root.OAFB.enabled || root.OAAccounts.failed()) {
       say(msg, 'Sign-in is unavailable at the moment, so nothing can be deleted. ' +
         'Please try again later.', 'err');
@@ -666,6 +682,14 @@
     root.OAAccounts.onChange(function (user) {
       show($('pa-delete'), !!user || selfState.busy || selfState.finished);
       if (!user && selfState.open && !selfState.busy && !selfState.finished) closeSelfPanel();
+      /* The maintainer is offered the reason instead of the button. Painted
+         here rather than once at boot because isAdmin() answers from the
+         resolved session, which is exactly what this event delivers; and only
+         while nothing is under way, so it cannot fight the panel. */
+      if (selfState.open || selfState.busy || selfState.finished) return;
+      var admin = !!user && isMaintainer();
+      show($('pa-delete-open'), !!user && !admin);
+      show($('pa-delete-admin'), admin);
     });
   }
 
