@@ -8237,6 +8237,12 @@ for (const w of [320, 360, 390, 430]) {
       totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
       range: { from: '', to: '' }, recentDays: 7,
     });
+    /* the growth file as it SHIPS, the empty seed: the committed one holds
+       real days since the roster sync first ran (2026-09-05), and left
+       unrouted it drew the growth chart under "nothing is being measured",
+       so the "no empty chart" pin went red on a data commit. A browser check
+       must not move with the corpus. */
+    await serveGrowth(q, { generated: '', first: '', days: [] });
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-an-note', { timeout: 15000 });
     const note = await q.evaluate(() => document.querySelector('#oa-analytics').textContent);
