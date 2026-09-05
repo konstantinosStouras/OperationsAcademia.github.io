@@ -6287,7 +6287,9 @@ for (const w of [320, 360, 390, 430]) {
       'own card: the affiliation line the build would publish, joined smallest first');
     ok(!/Nobody Elsewhere|Other University/.test(a.html),
       'own card: somebody else’s profile is nowhere in the document');
-    ok(/Only you can see this until the reveal/.test(a.note), 'own card: the only-you line');
+    ok(/Only you and the site's maintainer can see this until the reveal/.test(a.note),
+      'own card: the only-you line, naming the maintainer');
+    ok(!/\(\w+\/\w+\)/.test(a.note), 'own card: ...with no zone id after the reader’s clock');
     ok(a.note.includes(R.describeReveal(future).dayLong) && /14:00 UTC/.test(a.note),
       'own card: ...naming the reveal day and 14:00 UTC');
     ok(/\d{2}:\d{2}[^.]*where you are/.test(a.note), 'own card: ...and the reader’s own clock');
@@ -6297,6 +6299,36 @@ for (const w of [320, 360, 390, 430]) {
       'own card: the updated-on line, from the document’s later updatedAt');
     ok(/\?edit=cand-me$/.test(a.edit), 'own card: Edit opens the reader’s own document');
     eq(errors, [], 'own card: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a taken-down profile, and one from a past season: neither is "will
+        go public", and the card above says the same thing ----------------- */
+  for (const [label, doc, heading, notePat, cardPat] of [
+    ['taken down (the build has rewritten withdrawn to removed)',
+      { path: 'candidateSubmissions/cand-gone', data: { ...mine.data, status: 'removed' } },
+      'Your profile (taken down)', /not shown to anyone/, /filed for this season/],
+    ['from a past season',
+      { path: 'candidateSubmissions/cand-old', data: { ...mine.data, year: marketYear() - 1, ref: 'OA-CAND-250820-OLD' } },
+      'Your profile from a previous season', /no longer on the candidates page/, /previous season is shown below/],
+  ]) {
+    const { ctx, page: q, errors } = await signedInPage('account.html', { docs: [doc], wait: false });
+    await routeMeta(q);
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+    await q.waitForSelector('#pa-cand-preview:not([hidden]) .oa-card', { timeout: 15000 });
+    await q.waitForTimeout(700);   // time for a meta fetch to land, which must NOT rewrite the note
+    const a = await q.evaluate(() => ({
+      heading: document.getElementById('pa-cand-preview-h').textContent.trim(),
+      note: document.getElementById('pa-cand-preview-note').textContent,
+      title: document.querySelector('#pa-cand-preview .oa-card-title').textContent.trim(),
+      card: document.querySelector('.v3-pa-card[href="post-a-candidate.html"] p').textContent,
+    }));
+    eq(a.heading, heading, `own card ${label}: headed as what it is`);
+    ok(notePat.test(a.note), `own card ${label}: the note says so`);
+    ok(!/goes public|as everyone sees it/.test(a.note), `own card ${label}: ...and never that it will go public`);
+    eq(a.title, 'Ada Reader', `own card ${label}: the card itself is still drawn`);
+    ok(cardPat.test(a.card), `own card ${label}: the card above agrees with the section below`);
+    eq(errors, [], `own card ${label}: no uncaught script error`);
     await ctx.close();
   }
 
@@ -6421,7 +6453,8 @@ for (const w of [320, 360, 390, 430]) {
       text: document.getElementById('oa-reveal-note').textContent.replace(/\s+/g, ' '),
     }));
     eq(n.day, R.describeReveal(future).dayLong, 'reveal note: the day, with its weekday, from the module');
-    eq(n.cities.split(', ').length, 4, 'reveal note: the four cities');
+    ok(/^ \(\d{2}:\d{2} Los Angeles, \d{2}:\d{2} New York, \d{2}:\d{2} London, 22:00 Shanghai\)$/.test(n.cities),
+      'reveal note: the four cities, filled by the script (the markup carries no clock)');
     ok(/^, which is \d{2}:\d{2}.* where you are$/.test(n.local), 'reveal note: the reader’s own clock');
     ok(/at 14:00 UTC on/.test(n.text), 'reveal note: ...beside the UTC time the static sentence names');
     ok(/2 profiles have already been filed/.test(n.count), 'reveal note: the held count');

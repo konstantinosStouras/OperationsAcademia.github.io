@@ -609,6 +609,14 @@
 .oa-card-gated .oa-card-head[disabled] { cursor: default; }
 .oa-card-gated .oa-card-head[disabled]:hover .oa-card-title { text-decoration: none; }
 
+/* A PREVIEW card (the candidate's own, on the account page and under the
+   form) is drawn standing open by oa-candcard.js and its head does nothing
+   when pressed, so it takes neither the pointer nor the hover underline the
+   list's open/close button carries. Here, once, beside the disabled rule it
+   mirrors, rather than in each page's own stylesheet. */
+.oa-card-preview .oa-card-head { cursor: default; }
+.oa-card-preview .oa-card-head:hover .oa-card-title { text-decoration: none; }
+
 @media (prefers-reduced-motion: reduce) {
   /* a blur is not motion, and readers who ask for less of it still get the
      strip — this is only here so the note is never the thing that moves */

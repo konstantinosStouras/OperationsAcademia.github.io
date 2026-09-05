@@ -102,10 +102,13 @@
        still ahead, asked of assets/oa-reveal.js, the same module
        oa-adminarea's candGroupOf asks, so the two panels on one page cannot
        disagree about a profile from the reveal day on. No date announced, or
-       a malformed one, reads as held, exactly as the build's gate reads it. */
-    var when = kind.key === 'candidate' && !!revealAt
-      ? OAReveal.describeReveal(revealAt) : null;
-    var held = kind.key === 'candidate' && !!revealAt && !(when && when.revealed);
+       a malformed one, reads as held, exactly as the build's gate reads it:
+       describeReveal answers null then, and null is not "revealed". (It used
+       to test the mere presence of a date first, which called every profile
+       live while none was announced, the one state in which the build holds
+       them all.) */
+    var when = kind.key === 'candidate' ? OAReveal.describeReveal(revealAt) : null;
+    var held = kind.key === 'candidate' && !(when && when.revealed);
 
     return '<header>' +
         '<strong>' + esc(kind.title(d)) + '</strong>' +

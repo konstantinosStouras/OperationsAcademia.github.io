@@ -292,13 +292,18 @@
                14:00 UTC on the date the admin set (assets/oa-reveal.js is the
                one definition of that instant); until then this note explains
                the empty list (filled from /data/candidates-meta.json). The
-               sentence is TRUE AS WRITTEN: the day, the four city clocks and
-               the reader's own clock are filled in by the script below, and
-               without it the typed clocks stand. -->
+               sentence is TRUE AS WRITTEN and carries NO CLOCK BUT THE UTC ONE:
+               the day, the four city clocks and the reader's own clock are
+               filled in by the script below, computed from named zones. A
+               typed city clock here would be the daylight-saving reading and
+               wrong by an hour for a November reveal, and it would stand
+               whenever one zone failed to answer. The note stays hidden until
+               the script has a day to name: the list it explains is drawn by
+               script too, so without script there is no empty list to explain
+               and, after the reveal, no stale note beside a full one. -->
           <div class="oa-note" id="oa-reveal-note" hidden>
             <p><strong>Candidate profiles are revealed all at once, at 14:00 UTC on
-            <span id="oa-reveal-day">the reveal date</span></strong>
-            (<span id="oa-reveal-cities">07:00 Los Angeles, 10:00 New York, 15:00 London, 22:00 Shanghai</span>)<span id="oa-reveal-local"></span>.
+            <span id="oa-reveal-day">the reveal date</span></strong><span id="oa-reveal-cities"></span><span id="oa-reveal-local"></span>.
             <span id="oa-reveal-count"></span>
             Post yours now: it stays private until then, you can see how it will look on
             your <a href="account.html">account page</a>, and it appears with everyone
@@ -455,9 +460,10 @@
                 your CV attached, your research areas, and the day(s) you
                 present at INFORMS, so hiring committees can find your talk and attend it.</p>
                 <p>Profiles are collected continuously but revealed <strong>all at once</strong>,
-                at 14:00 UTC on a set date each season (07:00 in Los Angeles, 10:00 in New
-                York, 15:00 in London, 22:00 in Shanghai), so no one gains from posting
-                earlier or later. Each
+                at 14:00 UTC on a set date each season, which is morning in the Americas,
+                afternoon in Europe and evening in East Asia, so no one gains from posting
+                earlier or later. The note above the candidates list works out what that
+                is on your own clock. Each
                 candidate has <strong>one profile per market year</strong> &mdash; if you have
                 already filed one this season, the form reopens it for editing. You
                 can edit your profile, replace or remove its files (a replaced CV keeps only
@@ -470,9 +476,10 @@
               <button type="button" class="v3-faq-q">Can I see my profile before the reveal?
                 <span class="v3-faq-chev" aria-hidden="true">+</span></button>
               <div class="v3-faq-a"><div><div class="v3-faq-body">
-                <p>Yes, on your <a href="account.html">account page</a>, and only you can see
-                it. It is drawn exactly as it will appear on the candidates page once every
-                profile is revealed, and the form shows the same preview while you type.</p>
+                <p>Yes, on your <a href="account.html">account page</a>, and only you and the
+                site&rsquo;s maintainer can see it. It is drawn exactly as it will appear on
+                the candidates page once every profile is revealed, and the form shows the
+                same preview while you type.</p>
               </div></div></div>
             </div>
 
@@ -509,7 +516,7 @@
                 <p>Continuously. Postings, profiles and placements are submitted by the
                 community and publish automatically &mdash; job postings normally within a few
                 minutes, placements within the hour, and candidate profiles all together at
-                14:00 UTC on the season&rsquo;s reveal date &mdash; there is no third-party service
+                14:00 UTC on the season&rsquo;s reveal date. There is no third-party service
                 between a poster and the page any more.</p>
                 <p>The lists always show the job-market year under way. A market year runs from
                 1 July to 30 June and is numbered by the year it ends &mdash; so the
@@ -990,11 +997,14 @@
              typed clock would be wrong the year daylight saving moves */
           var when = OAReveal.describeReveal(at);
           document.getElementById('oa-reveal-day').textContent = when.dayLong;
+          /* the four cities only when every one answered: a partial list
+             would name three cities and drop one, and the markup carries no
+             clock to fall back on, deliberately (see the note above) */
           var known = when.cities.filter(function (c) { return c.time; });
-          if (known.length === when.cities.length) {
-            document.getElementById('oa-reveal-cities').textContent = known
-              .map(function (c) { return c.time + ' ' + c.name; }).join(', ');
-          }
+          document.getElementById('oa-reveal-cities').textContent =
+            known.length === when.cities.length
+              ? ' (' + known.map(function (c) { return c.time + ' ' + c.name; }).join(', ') + ')'
+              : '';
           /* the reader's own clock, and honestly the NEXT day where it is one
              (Auckland reads three in the morning of the day after) */
           document.getElementById('oa-reveal-local').textContent = when.local.time

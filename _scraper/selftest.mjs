@@ -9922,6 +9922,13 @@ async function testCandidateReveal() {
     'reveal: their clocks at 14:00 UTC on 2026-10-11');
   eq(d.cities.map((c) => c.sameDay), [true, true, true, true],
     'reveal: all four still on the reveal day, which is what the hour was chosen for');
+  /* the SAME hour on a November day is an hour earlier in the three cities
+     that observe daylight saving, which is why no page TYPES the four clocks
+     (the 2026-09-04 review found them typed in three places): they are
+     computed per date, and a typed 07:00 would be wrong for this reveal */
+  eq(R.describeReveal('2026-11-08', { now: new Date('2026-09-04T00:00:00Z') }).cities.map((c) => c.time),
+    ['06:00', '09:00', '14:00', '22:00'],
+    'reveal: after the clocks go back the same 14:00 UTC reads 06:00, 09:00, 14:00 and 22:00');
   eq(d.local, { timeZone: 'Pacific/Auckland', time: '03:00', sameDay: false },
     'reveal: a reader in Auckland sees three in the morning of the NEXT day, and is told so');
   eq(R.describeReveal('2026-10-11', { timeZone: 'Not/AZone' }).local,
@@ -10003,6 +10010,14 @@ async function testCandidateReveal() {
   const subs = await read('assets', 'oa-submissions.js');
   ok(/OAReveal\.describeReveal\(revealAt\)/.test(subs) && /Held until/.test(subs),
     'oa-submissions: the card names the instant and still says "Held until"');
+  /* NO DATE ANNOUNCED is the one state in which the build holds every
+     profile, and both readers once called it live (`!!revealAt && ...`):
+     held is now "the module does not say revealed", exactly the build's test */
+  ok(!/!!revealAt &&/.test(subs) && /var held = kind\.key === 'candidate' && !\(when && when\.revealed\);/.test(subs),
+    'oa-submissions: with no reveal date announced a profile reads HELD, as the build holds it');
+  ok(/const held = kind\.key === 'candidate' && !\(when && when\.revealed\);/.test(mailerSrc)
+     && /the reveal date is announced/.test(mailerSrc),
+    'submissions-mailer: the same reading, and the held paragraph has words for an unannounced date');
   const acct = await read('assets', 'oa-accounts.js');
   ok(/loadScript\('assets\/oa-reveal\.js', 'OAReveal'\)/.test(acct),
     'oa-accounts: adminPending loads the module before oa-adminarea.js needs it, on every page');
@@ -10134,14 +10149,50 @@ async function testCandidateReveal() {
   ok(/the fifth function, and the only\s+one here that is not a doorbell/.test(fnSrc),
     'doorbell: recordVisit is the fifth function');
   /* ONE producer for the event: no GitHub cron may fire at 14:00, the
-     duplicate-doorbell outage (One event, one build) in another costume */
+     duplicate-doorbell outage (One event, one build) in another costume.
+     The hour field is EXPANDED before it is tested: a bare star, a step
+     (every second hour) and a range (12-16) all fire at 14:00 and none of
+     them contains the literal "14", so the first version of this guard,
+     which split the field on commas, passed every one of them. The minute
+     field is expanded the same way, because the build's own :07/:27/:47
+     fires in the 14:00 HOUR by design (it is the safety net) and must pass;
+     what is refused is a fire AT 14:00. */
+  const cronField = (field, max) => {
+    const out = new Set();
+    for (const part of String(field).trim().split(',')) {
+      const m = /^(\*|\d+(?:-\d+)?)(?:\/(\d+))?$/.exec(part);
+      if (!m) continue;
+      const step = m[2] ? Number(m[2]) : 1;
+      let lo, hi;
+      if (m[1] === '*') { lo = 0; hi = max; }
+      else if (m[1].includes('-')) { [lo, hi] = m[1].split('-').map(Number); }
+      else { lo = Number(m[1]); hi = m[2] ? max : lo; }
+      for (let v = lo; v <= hi; v += step) out.add(v);
+    }
+    return out;
+  };
+  eq(cronField('*', 23).size, 24, 'cronField: a star is every hour');
+  ok(cronField('*/2', 23).has(14) && !cronField('*/2', 23).has(13), 'cronField: a step is every Nth hour');
+  ok(cronField('12-16', 23).has(14) && !cronField('12-16', 23).has(17), 'cronField: a range');
+  ok(cronField('7,22', 23).has(22) && !cronField('7,22', 23).has(14), 'cronField: a list');
+  ok(cronField('10-20/5', 23).has(15) && !cronField('10-20/5', 23).has(14), 'cronField: a stepped range');
+  ok(cronField('0', 59).has(0) && cronField('7,27,47', 59).has(27) && !cronField('7,27,47', 59).has(0),
+    'cronField: minutes');
+  const firesAtReveal = (cron) => {
+    const [min, hour] = cron.trim().split(/\s+/);
+    return cronField(hour, 23).has(R.REVEAL_HOUR_UTC) && cronField(min, 59).has(0);
+  };
+  ok(firesAtReveal('0 * * * *') && firesAtReveal('0 */2 * * *') && firesAtReveal('0 12-16 * * *')
+     && firesAtReveal('0,30 14 * * *'),
+    'firesAtReveal: an hourly, a stepped, a ranged and a listed cron that reach 14:00 are all caught');
+  ok(!firesAtReveal('7,27,47 * * * *') && !firesAtReveal('0 13 * * *') && !firesAtReveal('23 * * * *'),
+    'firesAtReveal: ...and the build’s own safety net, a 13:00 daily and an hourly at :23 are not');
   const wfDir = path.join(HERE, '..', '.github', 'workflows');
   for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
     const src = await readFile(path.join(wfDir, file), 'utf8');
     for (const m of src.matchAll(/cron:\s*['"]([^'"]+)['"]/g)) {
-      const hours = (m[1].trim().split(/\s+/)[1] || '').split(',');
-      ok(!hours.includes(String(R.REVEAL_HOUR_UTC)),
-        `${file}: no workflow cron fires at ${R.REVEAL_HOUR_UTC}:00 UTC; the Cloud Function is the one producer`);
+      ok(!firesAtReveal(m[1]),
+        `${file}: no workflow cron fires at ${R.REVEAL_HOUR_UTC}:00 UTC (${m[1]}); the Cloud Function is the one producer`);
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
@@ -10211,6 +10262,8 @@ async function testCandidateReveal() {
     ['too many research areas, duplicates and blanks', { ...ok3,
       researchAreas: ['A', 'B', 'A', '', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'] }],
     ['research areas as one string', { ...ok3, researchAreas: 'Operations' }],
+    ['research areas named like prototype members (the seen-set is prototype-free)',
+      { ...ok3, researchAreas: ['constructor', 'toString', 'Operations', 'constructor'] }],
     ['an INFORMS day off the list, and a repeat', { ...ok3, informsDays: ['Saturday', 'Monday', 'Monday'] }],
     ['no source (defaults to the form)', { ...ok3, source: undefined }],
     ['an import source', { ...ok3, source: 'legacy-sheet' }],
@@ -10314,8 +10367,10 @@ async function testCandidateReveal() {
   /* the reveal note: a static sentence true without JS, filled in by JS */
   const noteHtml = index.slice(index.indexOf('id="oa-reveal-note"'), index.indexOf('id="oa-candidates"'));
   ok(noteHtml.length > 300 && noteHtml.length < 2000, 'index.html: the reveal note slice is bounded both ends');
-  ok(/at 14:00 UTC on/.test(noteHtml) && /07:00 Los Angeles, 10:00 New York, 15:00 London, 22:00 Shanghai/.test(noteHtml),
-    'index.html: the note’s static sentence names the time and the four cities');
+  ok(/at 14:00 UTC on/.test(noteHtml) && /id="oa-reveal-cities"><\/span>/.test(noteHtml),
+    'index.html: the note’s static sentence names the UTC time and leaves the city clocks to the script (an empty span)');
+  ok(/known\.length === when\.cities\.length\s*\?/.test(index) && /: '';/.test(index.slice(index.indexOf('oa-reveal-cities\').textContent'))),
+    'index.html: the script fills all four city clocks or none, never a partial list over a typed one');
   for (const id of ['oa-reveal-day', 'oa-reveal-cities', 'oa-reveal-local', 'oa-reveal-count']) {
     ok(noteHtml.includes(`id="${id}"`), `index.html: the note carries #${id} for the script to fill`);
   }
@@ -10326,8 +10381,9 @@ async function testCandidateReveal() {
   ok(/emptyDataHint: '[^']*14:00 UTC/.test(index), 'index.html: the empty list’s hint names the time');
   ok(/Can I see my profile before the reveal\?/.test(index) && /Can I change my profile\?/.test(index),
     'index.html: the FAQ gains the two questions');
-  ok(/only you can\s+see\s+it/.test(index.replace(/<[^>]+>/g, '')) && /the card then shows when it was last updated/.test(index),
-    'index.html: ...with the spec’s answers');
+  ok(/only you and the\s+site&rsquo;s maintainer can\s+see\s+it/.test(index.replace(/<[^>]+>/g, ''))
+     && /the card then shows when it was last updated/.test(index),
+    'index.html: ...with the spec’s answers, naming the maintainer, who can read every profile');
   /* account.html: the own-card section, reading ONLY this account's documents */
   const acctHtml = await read('account.html');
   for (const f of ['oa-schools.js', 'oa-jobnav.js', 'oa-reveal.js', 'oa-candcard.js']) {
@@ -10367,6 +10423,14 @@ async function testCandidateReveal() {
     ok(!/pa-cand-edit/.test(noteFn), 'account.html: Edit is offered whatever the reveal says (it is set before the note is)');
   }
   ok(/OACandCard\.mount\(host, row\)/.test(acctHtml), 'account.html: the card is the module’s own render');
+  /* the two states the first version headed as "will go public" */
+  ok(/'Your profile \(taken down\)'/.test(acctHtml) && /'Your profile from a previous season'/.test(acctHtml),
+    'account.html: headed as taken down, and as a past season’s, where it is either');
+  ok(/takenDown: v\.status !== 'queued' && v\.status !== 'published'/.test(acctHtml)
+     && !/v\.status === 'withdrawn' \|\| v\.status === 'hidden'/.test(acctHtml),
+    'account.html: taken down is anything the build does not publish (it rewrites withdrawn to removed), not two named words');
+  ok(/if \(!mine\) mine = newest\(false\);/.test(acctHtml) && /previous season is shown below/.test(acctHtml),
+    'account.html: a past season’s profile is drawn when none matches this season, and the card above says so');
   /* post-a-candidate.html: the live preview under the form */
   const formHtml = await read('post-a-candidate.html');
   for (const f of ['oa-jobnav.js', 'oa-reveal.js', 'oa-candcard.js']) {
@@ -10383,7 +10447,7 @@ async function testCandidateReveal() {
     'post-a-candidate.html: the preview sits under the form and before the thank-you panel');
   ok(/at 14:00 UTC on that day/.test(formHtml) && /revealed all together at 14:00 UTC/.test(formHtml),
     'post-a-candidate.html: the intro and the thank-you name the time');
-  for (const f of ['post-a-candidate.html', 'account.html', 'assets/oa-candidateform.js']) {
+  for (const f of ['post-a-candidate.html', 'account.html', 'assets/oa-candidateform.js', 'assets/oa-candidateedit.js']) {
     ok(!/within an hour/.test(await read(...f.split('/'))),
       `${f}: no longer promises "within an hour" (the doorbell publishes in minutes; the reveal at 14:00 UTC)`);
   }
@@ -10409,7 +10473,44 @@ async function testCandidateReveal() {
     ok(/show\(\$\('oa-cand-preview'\), !!user\);/.test(formJs), 'oa-candidateform: the panel shows with the form and hides with it');
     ok(/EDIT_DOC = v;\s+dirty = false;\s+paintCardPreview\(\);/.test(formJs), 'oa-candidateform: fill() ends by drawing the loaded profile');
     ok(/OAReveal\.describeReveal\(revealAt\)/.test(formJs), 'oa-candidateform: the note names the instant from the module');
+    ok(/var posted = !!EDIT_ID;/.test(formJs) && /once you post it/.test(formJs),
+      'oa-candidateform: in create mode the note says "once you post it", never "as everyone sees it" over a blank form');
+    for (const [f, src] of [['account.html', acctHtml], ['assets/oa-candidateform.js', formJs]]) {
+      ok(!/when\.local\.timeZone/.test(src) && /' where you are'/.test(src),
+        `${f}: the reader’s clock carries no zone id (the front page says "where you are" and stops)`);
+      ok(/Only you and the site\\'s maintainer/.test(src),
+        `${f}: the only-you line names the maintainer, who can read every profile`);
+    }
+    {
+      /* the edit-save path: updatedAt only when something changed */
+      const at = formJs.search(/if \(EDIT_ID\) \{\s*doc\.status = 'queued';/);
+      const save = formJs.slice(at, formJs.indexOf('doc.ref = makeRef();', at));
+      ok(at > 0 && save.length > 200 && save.length < 1500, 'oa-candidateform: the edit-save slice is bounded both ends');
+      ok(/if \(dirty\) doc\.updatedAt = new Date\(\)\.toISOString\(\);/.test(save) && /else delete doc\.updatedAt;/.test(save)
+         && !/^\s*doc\.updatedAt = new Date\(\)\.toISOString\(\);/m.test(save),
+        'oa-candidateform: updatedAt is stamped only when something changed, the test the preview draws the line by');
+      ok(/cvSlot\.onChange = function \(\) \{ dirty = true; paintCardPreview\(\); \};/.test(formJs)
+         && (formJs.match(/if \(slot\.onChange\) slot\.onChange\(\);/g) || []).length === 2,
+        'oa-candidateform: the CV slot reports a chosen, un-chosen or removed file as a change (Remove is a button, not a field)');
+    }
     ok(/14:00 UTC/.test(editMode) && /account\.html/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
+  }
+  {
+    const listCss = await read('assets', 'oa-list.css');
+    ok(/\.oa-card-preview \.oa-card-head:hover \.oa-card-title \{ text-decoration: none; \}/.test(listCss)
+       && /\.oa-card-preview \.oa-card-head \{ cursor: default; \}/.test(listCss),
+      'oa-list.css: a preview card’s head, which does nothing when pressed, takes neither the pointer nor the hover underline');
+  }
+  /* NO TYPED CITY CLOCK on any served page or in the log: 07:00 Los Angeles
+     is the summer-time reading, wrong by an hour for a November reveal, and
+     it stood wherever a script did not overwrite it (the 2026-09-04 review
+     found it in the FAQ, the form's intro and the note's fallback) */
+  {
+    const TYPED_CLOCK = /\b\d{2}:\d{2}\b[^.<\n]{0,40}\b(Los Angeles|New York|London|Shanghai|Paris)\b/;
+    for (const [f, src] of [['index.html', index], ['post-a-candidate.html', formHtml], ['account.html', acctHtml],
+      ['assets/oa-candidateform.js', formJs], ['changelog.json', await read('changelog.json')]]) {
+      ok(!TYPED_CLOCK.test(src), `${f}: no city clock is typed (describeReveal computes them per date)`);
+    }
   }
   /* both stylesheets carry the line's rule, small and muted */
   for (const f of ['assets/oa-list.css', 'assets/v3.css']) {
@@ -10436,7 +10537,7 @@ async function testCandidateReveal() {
   }
   ok(/14:00 UTC/.test(log.updates.find((u) => u.id === 'reveal-time-2026-09').summary),
     'changelog: the reveal entry names the time');
-  ok(/only you can see it/.test(log.updates.find((u) => u.id === 'candidate-preview-2026-09').summary),
+  ok(/only you and the site's maintainer can see it/.test(log.updates.find((u) => u.id === 'candidate-preview-2026-09').summary),
     'changelog: the preview entry says who can see it');
   ok(/Profile updated on/.test(log.updates.find((u) => u.id === 'profile-updated-line-2026-09').summary),
     'changelog: the updated-line entry quotes the line');

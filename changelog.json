@@ -6,14 +6,14 @@
       "id": "candidate-preview-2026-09",
       "date": "2026-09-04",
       "title": "See your own candidate profile before the reveal",
-      "summary": "If you have posted a candidate profile, your account page now shows your card exactly as the candidates page will draw it once every profile is revealed, and only you can see it until then. The profile form shows the same card under the form and redraws it as you type, so you can see what a change looks like before you save it. After the reveal the same section shows your card as everyone sees it.",
+      "summary": "If you have posted a candidate profile, your account page now shows your card exactly as the candidates page will draw it once every profile is revealed, and only you and the site's maintainer can see it until then. The profile form shows the same card under the form and redraws it as you type, so you can see what a change looks like before you save it. After the reveal the same section shows your card as everyone sees it.",
       "url": "/account.html"
     },
     {
       "id": "reveal-time-2026-09",
       "date": "2026-09-04",
       "title": "Profiles are revealed at 14:00 UTC on the reveal date",
-      "summary": "Candidate profiles go public all at once at 14:00 UTC on the reveal date announced on the candidates page, which is 07:00 in Los Angeles, 10:00 in New York, 15:00 in London and 22:00 in Shanghai, all still that calendar day. The note above the candidates list names the day and the time, and works out what that is on your own clock. Until now the reveal happened at the first update after midnight UTC, which is the previous evening in California.",
+      "summary": "Candidate profiles go public all at once at 14:00 UTC on the reveal date announced on the candidates page, which is morning in the Americas, afternoon in Europe and evening in East Asia, all still that calendar day. The note above the candidates list names the day and the time, works out the clock in Los Angeles, New York, London and Shanghai for that date, and says what that is on your own clock. Until now the reveal happened at the first update after midnight UTC, which is the previous evening in California.",
       "url": "/#candidates"
     },
     {

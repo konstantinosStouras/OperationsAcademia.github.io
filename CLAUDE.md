@@ -1482,8 +1482,16 @@ card then saying when. What was decided, so nobody re-opens it:
 
 **14:00 UTC on the reveal day.** The gate was a UTC calendar day, so the first
 scheduled build after midnight UTC revealed, which is 17:00 the previous day in
-California. 14:00 UTC is 07:00 Los Angeles, 10:00 New York, 15:00 London, 16:00
-Paris, 22:00 Shanghai, all still that calendar day. **`assets/oa-reveal.js` is
+California. 14:00 UTC is morning in the Americas, afternoon in Europe and
+evening in East Asia, all still that calendar day (07:00 Los Angeles, 10:00
+New York, 15:00 London, 22:00 Shanghai for the October 2026 reveal). **No page
+TYPES those four clocks**: they are the daylight-saving readings, and a reveal
+set after the clocks go back (late October, November) is an hour earlier in
+the first three. The review sweep found them typed in the FAQ, the form's
+intro and the reveal note's fallback; every one now says the UTC hour and the
+part of the day, and the clocks a page shows are filled by script from
+`describeReveal`, all four or none, with the selftest refusing a typed
+`HH:MM` before a city name on the served pages. **`assets/oa-reveal.js` is
 the ONE definition** (dual-mode, the `oa-jobnav.js` shape): `revealInstant`
 (null for anything but a real yyyy-mm-dd, so a typo can never reveal early),
 `isRevealed`, `describeReveal` (the day with its weekday, `14:00 UTC`, the four
@@ -1532,12 +1540,26 @@ in `candShapeOk`, never in the merge hand-over's `hasOnly`); the create ceiling
 of 34 stands, since the form writes it only on the edit path. Nothing gates Edit
 on the reveal, before or after it, and the selftest pins that nothing does.
 
-**Only the candidate sees their own card early.** The account page reads
-`candidateSubmissions` by `where('uid', '==', user.uid)`, which the rules already
-allow the owner (`allow read: if isOwner(resource.data.uid) || isAdmin()`), and
-draws it through the same renderer as the public list with a browser twin of the
-build's projection pinned against the real one, so the preview is what the build
-would publish and never anyone else's document.
+**Only the candidate sees their own card early, and the copy names the
+maintainer too.** The account page reads `candidateSubmissions` by
+`where('uid', '==', user.uid)`, which the rules already allow the owner
+(`allow read: if isOwner(resource.data.uid) || isAdmin()`), and draws it
+through the same renderer as the public list with a browser twin of the
+build's projection pinned against the real one, so the preview is what the
+build would publish and never anyone else's document. The `|| isAdmin()` is
+why the line reads "only you and the site's maintainer": the Admin area lists
+every held profile, and a site that reads something and says so nowhere is
+wrong whatever its rules allow. The section also answers the two states the
+first version headed as "will go public": a TAKEN-DOWN profile is anything
+the build does not publish (it reads `queued` and `published` only, and
+rewrites a candidate's `withdrawn` to `removed` within minutes, so testing for
+the two words the page knew missed the one it lands in), headed "Your profile
+(taken down)"; and a profile from a PAST season, headed as such, drawn when no
+profile matches the market under way, with the card above offering this
+season's rather than claiming one exists. And "Profile updated on" is stamped
+only when something CHANGED (`dirty`, the test the preview already drew the
+line by; the CV slot's Remove is a button and reports itself), so a Save over
+an untouched form writes the stored stamp back rather than today.
 
 **ONE renderer, ONE projection: `assets/oa-candcard.js`.** The card the
 candidates list draws was inline in `index.html`; it is `cardConfig` now (the

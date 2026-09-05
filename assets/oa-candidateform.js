@@ -442,6 +442,7 @@
         slot.file = f || null;
         sayFile('');
         paint();
+        if (slot.onChange) slot.onChange();
       });
 
       clear.addEventListener('click', function () {
@@ -459,6 +460,10 @@
         }
         sayFile('');
         paint();
+        /* Remove is a button, not a field: it fires no input or change
+           event on the form, so the slot says so itself, or removing a CV
+           would leave the profile "unchanged" for the stamp and the preview */
+        if (slot.onChange) slot.onChange();
       });
     }
 
@@ -692,24 +697,38 @@
     var note = $('oa-cand-preview-note');
     if (!note || !window.OAReveal) return;
     var when = OAReveal.describeReveal(revealAt);
+    /* CREATE mode (no ?edit=) is a profile nobody has yet, so the note says
+       "once you post it": after the reveal, "as everyone sees it" over a
+       blank form would describe a card that is on no page. EDIT_ID is read
+       off the address at load, so the branch is right from the first paint. */
+    var posted = !!EDIT_ID;
     if (when && when.revealed) {
-      note.textContent = 'This is your card as everyone sees it on the candidates page. ' +
-        'A change you save reaches the page within a few minutes.';
+      note.textContent = posted
+        ? 'This is your card as everyone sees it on the candidates page. ' +
+          'A change you save reaches the page within a few minutes.'
+        : 'This is how your card will appear on the candidates page once you post it. ' +
+          'The reveal has passed, so a new profile goes up within a few minutes of saving.';
       return;
     }
+    /* "only you": the maintainer can read every profile (the rules say so,
+       and the Admin area lists the held ones), so the sentence names them */
+    var who = posted
+      ? 'Only you and the site\'s maintainer can see this until the reveal: '
+      : 'Only you and the site\'s maintainer will be able to see this until the reveal. ' +
+        'Once you post it, ';
     if (!when) {
-      note.textContent = 'Only you can see this until the reveal: every profile goes ' +
-        'public at once at 14:00 UTC on the reveal date announced on the candidates page. ' +
-        'You can edit it at any time.';
+      note.textContent = who + 'every profile goes public at once at 14:00 UTC on the ' +
+        'reveal date announced on the candidates page. You can edit it at any time.';
       return;
     }
+    /* the reader's own clock, with no zone id beside it: "where you are" is
+       what the front page says, and "America/Los_Angeles" is not a place */
     var local = when.local && when.local.time
       ? ', which is ' + when.local.time + (when.local.sameDay ? '' : ' the next day') +
-        ' where you are (' + when.local.timeZone + ')'
+        ' where you are'
       : '';
-    note.textContent = 'Only you can see this until the reveal: every profile goes ' +
-      'public at once on ' + when.dayLong + ' at ' + when.utc + local +
-      '. You can edit it at any time, before or after.';
+    note.textContent = who + 'every profile goes public at once on ' + when.dayLong +
+      ' at ' + when.utc + local + '. You can edit it at any time, before or after.';
   }
 
   function wirePreview() {
@@ -885,6 +904,8 @@
 
   function boot() {
     cvSlot = makeSlot('cv', 'CV');
+    // a file chosen, un-chosen or removed is a change, like a typed field
+    cvSlot.onChange = function () { dirty = true; paintCardPreview(); };
     enterEditMode();
     wireTakeDown();
     paintYearNote();
@@ -1032,7 +1053,16 @@
              later edit un-withdraws one. */
           if (EDIT_ID) {
             doc.status = 'queued';
-            doc.updatedAt = new Date().toISOString();
+            /* `updatedAt` is stamped only when something CHANGED (`dirty`,
+               the same test the preview draws its "Profile updated on" line
+               by): the card prints that line from it, and a Save pressed
+               over an untouched form is not an update to report. Unchanged,
+               the stored stamp is written back, or nothing at all where
+               there was none, so the two never disagree in the no-change
+               case and the rules' bounded-string test still passes. */
+            if (dirty) doc.updatedAt = new Date().toISOString();
+            else if (EDIT_DOC && typeof EDIT_DOC.updatedAt === 'string' && EDIT_DOC.updatedAt) doc.updatedAt = EDIT_DOC.updatedAt;
+            else delete doc.updatedAt;
             delete doc.uid;
             return c.doc(EDIT_ID).update(doc).then(function () { return EDIT_REF; });
           }

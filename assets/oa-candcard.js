@@ -117,8 +117,11 @@
 
   function listOf(v) { return Object.prototype.toString.call(v) === '[object Array]' ? v : [v]; }
 
+  /* the seen-sets are prototype-free: with a plain {} an area named
+     "constructor" is seen before it is ever added and is dropped, where the
+     build's Set keeps it, and the twin would then disagree with the build */
   function pickList(v, allowed) {
-    var seen = {}, out = [];
+    var seen = Object.create(null), out = [];
     listOf(v).forEach(function (x) {
       var t = text(x, 80);
       if (allowed.indexOf(t) === -1 || seen[t]) return;
@@ -129,7 +132,7 @@
   }
 
   function freeList(v) {
-    var seen = {}, out = [];
+    var seen = Object.create(null), out = [];
     listOf(v).forEach(function (x) {
       var t = text(x, AREA_LEN);
       if (!t || seen[t]) return;

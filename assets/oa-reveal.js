@@ -12,8 +12,11 @@
    The gate used to be a UTC calendar day: the first scheduled build after
    midnight UTC revealed, which is five in the afternoon of the PREVIOUS day in
    California. The instant is now 14:00 UTC on the reveal day, which is still
-   that calendar day everywhere the readers are: 07:00 Los Angeles, 10:00 New
-   York, 15:00 London, 16:00 Paris, 22:00 Shanghai.
+   that calendar day everywhere the readers are: morning in the Americas,
+   afternoon in Europe, evening in East Asia (07:00 Los Angeles, 10:00 New
+   York, 15:00 London, 22:00 Shanghai for a reveal in summer time; an hour
+   earlier in the first three once the clocks have gone back, which is why
+   no page types those numbers and every one asks describeReveal instead).
 
    Seven files compared a day against `revealAt` and none of them through a
    module. That is the shape this site has learned to distrust (oa-jobnav.js
