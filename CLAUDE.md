@@ -2798,6 +2798,18 @@ it nor `gossip`), and `page-test.mjs` measures both halves in a browser: the
 picker suggests nothing for "rumou", and a reader who types the word gets
 the chip.
 
+**WHAT IS STILL A NUDGE, SAID RATHER THAN HIDDEN.** The compose picker's
+suggestion pool is the curated list PLUS THE ROOM'S OWN TALLY
+(`drawSugg` in `oa-forum.js`), and the "Popular tags" card is the tally
+alone (`drawTags`). So the first thread anybody tags `rumour` puts the word
+into both, high up, ordered by use like every other tag. That is deliberate
+for now and the reading is: the curated list is the SITE recommending
+something, and the tally is the ROOM describing itself, which is also what
+makes the card a truthful filter. It is the owner's call, and the one-line
+change if they want it is a suppression list read by `drawSugg`/`drawTags`
+only, never by `tagOk`, so nothing would be refused. The browser check says
+which half it measures, rather than a message that reads as covering both.
+
 **The pinned guide thread had to be refreshable for any of this to reach a
 reader**, which is the paragraph above ("A SECOND PRESS REFRESHES THE
 THREAD"): the panel renders the module, the thread is a copy, and rules edited

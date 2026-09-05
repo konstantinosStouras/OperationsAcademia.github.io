@@ -9965,7 +9965,12 @@ for (const w of [320, 360, 390, 430]) {
        asked to keep. Measured on the suggestion list AND on the chip. */
     await q.fill('#oa-forum-tag-in', 'rumou');
     const suggested = await q.$$eval('#oa-forum-tagsugg [data-tag]', (ns) => ns.map((b) => b.getAttribute('data-tag')));
-    ok(!suggested.includes('rumour'), 'forum (candidate): the picker suggests no rumour tag, since the curated list carries none');
+    /* SCOPE, said exactly: the seeded tally here holds flyouts and europe, so
+       what this measures is the CURATED half of the pool. The other half is
+       the room's own tally, and a tag a member has really used is offered
+       like any other: the room describing itself rather than the site
+       recommending it. */
+    ok(!suggested.includes('rumour'), 'forum (candidate): the curated half of the picker offers no rumour tag');
     await q.fill('#oa-forum-tag-in', 'Rumour');
     await q.press('#oa-forum-tag-in', 'Enter');
     const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
