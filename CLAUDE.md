@@ -2467,10 +2467,76 @@ schedule.
 **`forum.html` loads none of GA4, `oa-usage.js` or `oa-visit.js`** (decision
 12): GA4 would send `forum.html?t=<tid>` as `page_location`, usage writes a
 uid-keyed document with click timings, and the visit ping sends the address
-to a function. The page's own pins (`QUIET_PAGES` in the two page walks, the
-load order, `card: false` in share-check, `NOINDEX_OK`, the FAQ, rule 13 in
-`_MOBILE-STANDARDS.md`) arrive with the page. Cost, stated: forum use is
-unmeasured.
+to a function. The two page walks in the selftest name it in `QUIET_PAGES`
+rather than letting a missing tag on a members-only page read as the gap
+those walks exist to catch. Cost, stated: forum use is unmeasured.
+
+**The page: one page under three addresses, painted from the hint first.**
+`forum.html` is the `messages.html` skeleton (charset first, `noindex`, NO
+`og:*` block since nobody can share into it, `card: false` in share-check's
+`PAGES` with its reason, in `NOINDEX_OK`, out of the sitemap, the exact head
+snippet, the skip link) plus `assets/oa-forum.js` and `assets/oa-forum.css`,
+loading `oa-firebase`, `oa-accounts`, `oa-jobnav`, the three forum modules,
+`oa-list` and then itself, every script deferred. The gate is painted from
+`OAAccounts.hint()` before the SDK lands (a remembered signed-in reader sees
+"Joining the forum", never a flash of the sign-in card); when the session
+resolves, `pendingUser()` gets the verify prompt (`#oa-forum-verify`), a
+usable account calls `forumJoin` ONCE per session and caches
+`{uid, season, handle, guideAt, banned, rooms}` in `sessionStorage
+'oa-forum-me'`, trusted only for the same uid and season. **The tabs are
+drawn from `rooms` in that answer**, never from anything the page decides: a
+non-candidate sees the Open forum alone and one line saying what opens the
+other room (`#oa-forum-roomnote`), a current candidate and the maintainer see
+both (`#oa-forum-rooms`, `role="tablist"`, `.oa-forum-tab[data-room]`). The
+list (`#oa-forum-list`) is an **`OAList` mount fed by `cfg.source`**, the one
+generic addition the engine gained: a function answering the rows (a
+Firestore read of `forumSeasons/{Y}/rooms/{room}/threads`, `orderBy lastAt
+desc, limit 200`, hidden rows dropped, pinned first) stands in for
+`load(cfg.data)`, and deliberately skips the `OAFresh` echo that path
+applies, since nothing a source answers is a posting saved in this browser.
+Everything else is the engine's: the `tags` pick filter over the array
+field with `TAGS` as its order, the text search over title and excerpt, the
+chips, the URL keys, the pager and the phone rules, so the forum INHERITS
+`_MOBILE-STANDARDS.md`. A card is a way IN (`cardOpen`, the one-pager
+teaser's own shape): pressing it opens the thread. The Ask button lives in
+the list HEAD (`#oa-forum-askbtn`), not in the engine's action bar, because
+v3 hides that bar with an empty dataset and an empty room is exactly where
+the first question has to come from. The thread (`?t=`), the ask form
+(`?ask=1`) and the list are one page under three addresses moved between
+with `pushState` (`go()`, `popstate`, and every link the page draws to its
+own address followed in place), so a post lands on its thread without a
+round trip and the Back button works; `?room=` and `?season=` travel with
+every address, `?tags=` is the engine's own key. **A past season is the
+archive**: `.oa-archive-banner`, no Ask button, no reply box, no vote button
+in the DOM at all (the functions refuse a write there anyway). Votes are
+drawn from `forumThreadVotes` once per thread open and a press calls
+`forumVote` with the toggled value (`aria-pressed` on `.oa-forum-v`, own
+posts disabled with a title saying why); Quote takes the selection inside
+that post's body or the whole body cut to `BOUNDS.quote` at a word boundary
+and sends `{n, text}` only; Edit appears on the author's own post for the
+window (a countdown from `t`, the function the authority). Every refusal is
+worded through `REASONS`, which the selftest pins against `ERRORS` in
+`member.js` both ways (plus `auth`), so a code never reaches the screen; the
+guard runs on every keystroke so the refusal the function would give is
+shown first. The New badge is a per-account `localStorage 'oa-forum-seen'`
+mark (`{uid, since, seen:{tid:n}}`); sign-out clears both stores. **The uid,
+the address and the profile id never reach the forum's markup**: the banner
+prints the handle, a post its author's handle, a quote the quoted author's.
+The maintainer's seed button (`#oa-forum-admin`, `[data-seed-room]`, drawn
+for `OAAccounts.isAdmin()` when a room's guide is not yet posted) calls
+`forumModerate {op:'seedGuide', room}`; the guide panel
+(`#oa-forum-guide`) is `OAForumGuide.html()` and opens until `guideAt` is
+set; the first post carries `acceptGuide` from the tick. The account menu
+carries **Forum** on both menus as an ordinary row like Messages (the Open
+room admits every verified account, so no profile read and no `data-held`;
+the badge `data-count="forum"` is born hidden until step 3 fills it), the
+home page's candidates section links it and the FAQ names both rooms, and
+`oa-candidateform.js` drops the owner's own `candidateMarkers/{uid}` on a
+withdrawal, best-effort and never the maintainer's. `oa-forum.css` paints
+with tokens alone (no raw colour, pinned), so both themes are covered, and
+rule 13 in `_MOBILE-STANDARDS.md` is what its phone block holds to: a 16px
+textarea, 42px tabs, votes, actions and Post; the vote column stands beside
+a post on a desktop and lies above it on a phone.
 
 **What is not solved, and is said rather than hidden.** A constant per-season
 handle lets a reader connect one person's posts across threads, and a detail
@@ -2486,8 +2552,24 @@ rules block clause by clause with the rooms pinned against the model both
 ways, the guard's literal and fixtures, the guide, the twelve exports, the
 package and lockfile, the emulator test's shape and the workflow job, no
 forum cron, the runbook, the policy paragraph (R9), the change log entry and
-this section) and `_functions/test/forum-emulator.mjs` (R7 and R10 against
-the real thing).
+this section; then the page half: noindex and no preview block, charset
+first, the head snippet, the nine scripts in order and deferred, the three
+quiet scripts absent, the ids the browser suite hooks on, the app and the
+gate cards born hidden with no thread markup shipped, `card: false`,
+`NOINDEX_OK`, the sitemap, both `QUIET_PAGES`, the engine's `cfg.source`,
+the collections in `col`, the menu row on both menus and the sign-out
+clearing, `REASONS` against `ERRORS` both ways, the quote's bound and
+shape, the archive drawing no write control, the withdraw marker, the CTA,
+the FAQ, rule 13 and a token-only stylesheet), `_functions/test/
+forum-emulator.mjs` (R7 and R10 against the real thing), and the forum
+block of `_scraper/page-test.mjs` (the gate for a signed-out, an
+unverified, a verified non-candidate, a seeded candidate and the
+maintainer; a question with two tags posted, read back, replied to with a
+quote and voted on through the shim's forum simulator; the leak check over
+`#main`, which is where the forum's markup is, since the header's account
+chip prints the account's own name and address on every page by design; the
+archive view; and the 390px block for the list, one thread and the open
+compose).
 
 ## What "immediate" costs, and where the waiting used to be
 

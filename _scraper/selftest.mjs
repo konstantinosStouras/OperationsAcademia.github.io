@@ -12885,19 +12885,26 @@ async function testGa4Tag() {
   const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
   const missing = [];
   const onStub = [];
+  /* THE FORUM IS QUIET BY DESIGN (decision 12 in CLAUDE.md, "The forum"):
+     GA4 would report forum.html?t=<tid> as a page location, which is a record
+     of who read which thread when. It carries no tag, and the walk names it
+     rather than letting a missing tag on a members-only page read as the gap
+     this check exists to catch. */
+  const QUIET_PAGES = new Set(['forum.html']);
   for (const f of pages) {
     const html = await readFile(path.join(root, f), 'utf8');
     const isStub = /http-equiv=["']?refresh/i.test(html);
     const tagged = html.includes('assets/oa-ga4.js');
-    if (isStub && tagged) onStub.push(f);
-    if (!isStub && !tagged) missing.push(f);
+    if ((isStub || QUIET_PAGES.has(f)) && tagged) onStub.push(f);
+    if (!isStub && !QUIET_PAGES.has(f) && !tagged) missing.push(f);
   }
   eq(missing, [],
     'every served page carries the tag — a page added without it measures ' +
     'nothing, and the only symptom is a gap in the figures nobody can see');
   eq(onStub, [],
-    'and no redirect stub does: those meta-refresh to a fragment of the home ' +
-    'page within a moment, so a hit there would double-count the page they go to');
+    'and no redirect stub does, nor the forum: those meta-refresh to a fragment of the home ' +
+    'page within a moment, so a hit there would double-count the page they go to, and the ' +
+    'forum is quiet by design');
   ok(pages.filter((f) => f !== 'index.html').length > 10 && missing.length === 0,
     'the sweep really walked the site rather than passing on an empty list');
 
@@ -13094,6 +13101,10 @@ async function testUniversityVisits() {
   const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
   const missing = [];
   const shouldNot = [];
+  /* the forum is quiet by design (decision 12 in CLAUDE.md, "The forum"): the
+     visit ping sends the connecting address to a function, and the forum reads
+     no address, so it carries no ping and is named here beside the desk */
+  const QUIET_PAGES = new Set(['forum.html']);
   for (const f of pages) {
     const html = await readFile(path.join(root, f), 'utf8');
     const stub = /http-equiv=["']?refresh/i.test(html);
@@ -13103,12 +13114,13 @@ async function testUniversityVisits() {
        be filtered wrongly by a rule that drifts — which is a stronger
        guarantee than the path predicate the pages list is filtered by, and
        needs no second copy of that predicate in the browser. */
-    if ((stub || f === 'admin-area.html') && has) shouldNot.push(f);
-    if (!stub && f !== 'admin-area.html' && !has) missing.push(f);
+    const quiet = f === 'admin-area.html' || QUIET_PAGES.has(f);
+    if ((stub || quiet) && has) shouldNot.push(f);
+    if (!stub && !quiet && !has) missing.push(f);
   }
   eq(missing, [], 'every public page carries the visit ping');
   eq(shouldNot, [],
-    'and neither the admin desk nor any redirect stub does — the exclusion is ' +
+    'and neither the admin desk, the forum nor any redirect stub does; the exclusion is ' +
     'the absence of a script tag, not a runtime check that could drift');
   ok(pages.length > 20 && !missing.length,
     'the sweep really walked the site rather than passing on an empty list');
@@ -14548,6 +14560,121 @@ async function testForum() {
     ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
     ok(noDash(src), `forum: no em dash in ${f}`);
   }
+
+  /* --- the page half: forum.html, oa-forum.js, oa-forum.css and the wiring ---
+
+     What the browser half promises, read from the files: the page is quiet,
+     noindexed and unpreviewed; it loads its modules in the order they depend
+     on each other, every one deferred; the app is hidden until an account is
+     admitted and no thread markup ships in the page; the list engine gained
+     cfg.source and nothing else; the account menu carries the row on both
+     menus and sign-out clears the forum's two stores; the refusal words the
+     page can show are exactly the reasons the functions can answer with; and
+     the stylesheet paints with tokens alone, so both themes are covered. */
+
+  const page = await read('forum.html');
+  const pageJs = await read('assets', 'oa-forum.js');
+  const pageCss = await read('assets', 'oa-forum.css');
+  ok(/<meta name="robots" content="noindex,nofollow">/.test(page), 'forum page: noindex, nofollow');
+  ok(!/property="og:|name="twitter:|rel="image_src"|itemprop="image"/.test(page), 'forum page: no preview block, since nobody can share into it');
+  const firstTag = /<head[^>]*>\s*(<[^>]+>)/i.exec(page);
+  ok(firstTag && /^<meta\s+charset=/i.test(firstTag[1]), 'forum page: charset first in head');
+  ok(/<a class="v3-skip" href="#main">/.test(page) && /<main id="main">/.test(page), 'forum page: the skip link and its target');
+  ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
+    'forum page: the head snippet, the exact line every live page carries');
+  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-list.js', 'oa-forum.js'];
+  const tagAt = (f) => page.indexOf('<script defer src="assets/' + f + '"></script>');
+  ok(LOAD.every((f, i) => tagAt(f) > 0 && (i === 0 || tagAt(f) > tagAt(LOAD[i - 1]))),
+    'forum page: the nine scripts load in dependency order, each deferred');
+  eq((page.match(/<script[^>]*\ssrc=/g) || []).length, LOAD.length, 'forum page: and no other external script');
+  for (const f of ['oa-ga4.js', 'oa-usage.js', 'oa-visit.js']) ok(!page.includes('assets/' + f), `forum page: quiet by design, no ${f}`);
+  for (const f of ['oa-list.css', 'oa-ui.css', 'v3.css', 'oa-forum.css']) ok(page.includes('assets/' + f), `forum page: loads ${f}`);
+  for (const id of ['oa-offline', 'oa-needauth', 'oa-needauth-btn', 'oa-forum-verify', 'oa-forum-verify-btn', 'oa-forum-loading',
+    'oa-forum-error', 'oa-forum', 'oa-forum-rooms', 'oa-forum-roomnote', 'oa-forum-archive', 'oa-forum-me', 'oa-forum-listview',
+    'oa-forum-listtitle', 'oa-forum-listcount', 'oa-forum-list', 'oa-forum-thread', 'oa-forum-compose', 'oa-forum-roomcard',
+    'oa-forum-tagcard', 'oa-forum-tags', 'oa-forum-seasoncard', 'oa-forum-seasons', 'oa-forum-admin', 'oa-forum-guide', 'oa-forum-guidebody']) {
+    ok(page.includes(`id="${id}"`), `forum page: carries #${id}`);
+  }
+  ok(/<div id="oa-forum" hidden>/.test(page) && /id="oa-needauth" hidden/.test(page) && /id="oa-forum-verify" hidden/.test(page),
+    'forum page: the app and both gate cards are born hidden; the script decides which one shows');
+  ok(!/oa-forum-post\b|oa-forum-v\b|oa-forum-handle/.test(page), 'forum page: no thread, post or handle markup ships in the page');
+  ok(/role="tablist"/.test(page) && /class="oa-forum-tabs" id="oa-forum-rooms"/.test(page), 'forum page: the room switch is a tablist');
+  ok(/<title>Forum &middot; Operations Academia<\/title>/.test(page), 'forum page: the title');
+
+  /* the two checks and the sitemap */
+  const sc = await read('_scraper', 'share-check.mjs');
+  const scEntry = /\{ file: 'forum\.html', card: false,\s*why: '([^']+)' \}/.exec(sc);
+  ok(scEntry && scEntry[1].length >= 40, 'forum page: card: false in share-check, with a reason');
+  const lc = await read('_scraper', 'link-check.mjs');
+  const noindexList = lc.slice(lc.indexOf('const NOINDEX_OK'), lc.indexOf(']);', lc.indexOf('const NOINDEX_OK')));
+  ok(/'forum\.html',/.test(noindexList), 'forum page: in NOINDEX_OK');
+  const sitemap = await read('sitemap.xml');
+  ok(!/<loc>[^<]*forum\.html/.test(sitemap) && /forum\.html/.test(sitemap), 'forum page: absent from the sitemap, and its comment says why');
+  const selfSrc = await read('_scraper', 'selftest.mjs');
+  eq((selfSrc.match(/const QUIET_PAGES = new Set\(\['forum\.html'\]\);/g) || []).length, 2,
+    'forum page: QUIET_PAGES names it in the GA4 walk and the visit walk');
+
+  /* the engine's one addition */
+  const listJs = await read('assets', 'oa-list.js');
+  ok(/\(typeof cfg\.source === 'function' \? Promise\.resolve\(\)\.then\(cfg\.source\) : load\(cfg\.data\)\)/.test(listJs),
+    'oa-list.js: cfg.source stands in for load(cfg.data)');
+  ok(/console\.error\('OAList: failed to load ' \+ \(cfg\.data \|\| STR\.unit\), err\)/.test(listJs), 'oa-list.js: a source failure is named by its unit');
+  ok(/source: readThreads,/.test(pageJs) && /OAList\.mount\(\{/.test(pageJs), 'oa-forum.js: the list is an OAList mount fed by source');
+  ok(!/OAFresh/.test(pageJs), 'oa-forum.js: no echo overlay, the source path skips it deliberately');
+
+  /* the collections, the menu, the sign-out */
+  const fbJs = await read('assets', 'oa-firebase.js');
+  for (const k of ['candidateMarkers', 'forumSeasons', 'forumRooms', 'forumThreads', 'forumPosts', 'forumVotes', 'forumTags', 'forumHandles', 'forumNames', 'forumHidden', 'forumReports', 'forumMail']) {
+    ok(new RegExp(`\\n\\s+${k}: '[a-zA-Z]+'`).test(fbJs), `oa-firebase.js: col.${k}`);
+  }
+  const acct = await read('assets', 'oa-accounts.js');
+  ok(/<a role="menuitem" href="forum\.html">/.test(acct) && /data-count="forum" hidden/.test(acct), 'oa-accounts.js: the Forum row with its badge born hidden');
+  ok(/<a class="link depth-0" href="forum\.html">Forum<\/a>/.test(acct), 'oa-accounts.js: the phone sheet has the row too');
+  ok(!/data-held="forum"/.test(acct), 'oa-accounts.js: the row is drawn for every signed-in account, not held on a count');
+  const signOutSrc = acct.slice(acct.indexOf('  function signOut() {'), acct.indexOf('OAFB.ready()', acct.indexOf('  function signOut() {')));
+  ok(signOutSrc.length > 300 && signOutSrc.length < 3000, 'oa-accounts.js: signOut was sliced');
+  ok(/sessionStorage\.removeItem\('oa-forum-me'\)/.test(signOutSrc) && /localStorage\.removeItem\('oa-forum-seen'\)/.test(signOutSrc),
+    'oa-accounts.js: signing out forgets the forum handle and the seen-marks');
+  ok(/ME_KEY = 'oa-forum-me'/.test(pageJs) && /SEEN_KEY = 'oa-forum-seen'/.test(pageJs), 'oa-forum.js: the same two keys');
+  ok(/v\.uid === uid && Number\(v\.season\) === Y && v\.handle/.test(pageJs), 'oa-forum.js: the cached join is trusted only for the same account and season');
+
+  /* the callables and their words */
+  for (const n of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) ok(pageJs.includes(`'${n}'`), `oa-forum.js: calls ${n}`);
+  ok(/REGION = 'us-central1'/.test(pageJs) && /fb\.app\(\)\.functions\(REGION\)\.httpsCallable\(name\)/.test(pageJs), 'oa-forum.js: the callables by region through OAFB.readyFunctions');
+  ok(/OAFB\.readyFunctions\(\)/.test(pageJs), 'oa-forum.js: the Functions SDK is loaded on demand');
+  const reasonKeys = [...pageJs.slice(pageJs.indexOf('var REASONS = {'), pageJs.indexOf('};', pageJs.indexOf('var REASONS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
+  for (const r of errKeys) ok(reasonKeys.includes(r), `oa-forum.js: REASONS words the function reason ${r}`);
+  for (const r of reasonKeys) ok(errKeys.includes(r) || r === 'auth', `oa-forum.js: REASONS.${r} is a reason the functions can answer with`);
+  ok(/function friendly\(err\)/.test(pageJs) && /err\.details && err\.details\.reason/.test(pageJs), 'oa-forum.js: a refusal is worded by its reason, never shown as a code');
+  ok(!/\b(u|user|me|S\.me)\.(email|displayName|uid)\b[^;]*innerHTML|innerHTML[^;]*\b(email|displayName)\b/.test(pageJs), 'oa-forum.js: no address or name is ever drawn');
+  ok(/G\.check\(/.test(pageJs) && /OAForumGuard/.test(pageJs), 'oa-forum.js: the guard runs in the browser too');
+  ok(/GUIDE\.html\(\)/.test(pageJs), 'oa-forum.js: the guide panel is the module\'s html()');
+  ok(/M\.BOUNDS\.quote/.test(pageJs) && /S\.quote = \{ n: Number\(p\.n\) \|\| 0, by: p\.by, text: text \}/.test(pageJs), 'oa-forum.js: a quote is cut to the bound and carries n, by, text');
+  ok(/data\.quote = \{ n: S\.quote\.n, text: S\.quote\.text \}/.test(pageJs), 'oa-forum.js: and only n and text are sent');
+  ok(/history\.pushState\(null, '', to\)/.test(pageJs) && /addEventListener\('popstate'/.test(pageJs), 'oa-forum.js: the three views are one page under three addresses');
+  ok(/if \(!readOnly\)/.test(pageJs) && /S\.archive \|\| !!thread\.locked/.test(pageJs), 'oa-forum.js: an archived or locked thread draws no vote button and no reply box');
+
+  /* the withdraw path */
+  const candForm = await read('assets', 'oa-candidateform.js');
+  ok(/OAFB\.col\.candidateMarkers\)\.doc\(user\.uid\)\['delete'\]\(\)\.catch/.test(candForm) && /!OAAccounts\.isAdmin\(\) && user && user\.uid/.test(candForm),
+    'oa-candidateform.js: a withdrawal drops the owner\'s own forum marker, best-effort, never the maintainer\'s');
+
+  /* the home page, the standard, the stylesheet */
+  const home = await read('index.html');
+  ok(/<a class="v3-btn ghost" href="forum\.html">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
+  const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
+  ok(faq.length > 300 && faq.length < 2500 && /forum\.html/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
+    'index.html: the FAQ names both rooms and where the forum is reached');
+  ok(noDash(faq.replace(/&mdash;/g, '\u2014')), 'index.html: the FAQ answer carries no em dash');
+  const std = await read('_MOBILE-STANDARDS.md');
+  const rule13 = std.slice(std.indexOf('13. **A compose box is a control.**'), std.indexOf('## The test gate'));
+  ok(rule13.length > 300 && /16px/.test(rule13) && /42px/.test(rule13) && /forum\.html/.test(rule13), '_MOBILE-STANDARDS.md: rule 13, the compose box');
+  const cssBare = pageCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(!/#[0-9a-fA-F]{3,8}\b/.test(cssBare), 'oa-forum.css: no raw colour, every colour is a token defined in both themes');
+  ok(/font-size: 16px/.test(cssBare) && /min-height: 42px/.test(cssBare) && /@media \(max-width: 640px\)/.test(cssBare), 'oa-forum.css: the phone rules rule 13 measures');
+  ok(/\.oa-forum-tab\[aria-selected='true'\]/.test(cssBare) && /\.oa-forum-quote/.test(cssBare) && /\.oa-forum-v\b/.test(cssBare), 'oa-forum.css: the tabs, the quote block and the vote buttons are styled');
+  for (const [f, src] of [['forum.html', page], ['oa-forum.js', pageJs], ['oa-forum.css', pageCss]]) ok(noDash(src), `forum page: no em dash in ${f}`);
+  ok(/cfg\.source/.test(cf) && /QUIET_PAGES/.test(cf) && /oa-forum-me/.test(cf) && /pushState/.test(cf), 'forum: CLAUDE.md records the page half');
 }
 
 async function testRegisteredUsersFigure() {

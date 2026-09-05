@@ -443,7 +443,9 @@
     feedback: '&#128172;',
     // the graduation cap account.html's candidate card already wears, so the
     // menu row and the card read as one thing
-    cand: '&#127891;'
+    cand: '&#127891;',
+    // the forum (forum.html): two rooms under one handle scheme
+    forum: '&#128488;'
   };
 
   /* Whether to DRAW the maintainer's menu entry. From the resolved session
@@ -581,6 +583,16 @@
             '<a role="menuitem" href="messages.html">' +
               '<span class="oa-mi" aria-hidden="true">' + ICON.messages + '</span>Messages' +
               '<span class="oa-acct-n" data-count="messages" hidden></span></a>' +
+            /* The forum. An ordinary row like Messages, drawn for every
+               signed-in account, because the Open forum admits every
+               verified account: the page itself decides which rooms the
+               reader may enter (forumJoin answers that), so the menu needs
+               no profile read and no data-held rule. The badge is born hidden
+               and stays so in step 1; step 3 (private messages) fills it
+               under the same rule as every other badge here. */
+            '<a role="menuitem" href="forum.html">' +
+              '<span class="oa-mi" aria-hidden="true">' + ICON.forum + '</span>Forum' +
+              '<span class="oa-acct-n" data-count="forum" hidden></span></a>' +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
               '<span class="oa-mi" aria-hidden="true">&#9998;</span>Edit profile</button>' +
             '<a role="menuitem" href="feedback.html">' +
@@ -700,6 +712,7 @@
       '<a class="link depth-0" href="my-postings.html" data-held="postings" hidden>My postings</a>' +
       '<a class="link depth-0" href="post-a-candidate.html" data-held="cands" hidden>My candidate profile</a>' +
       '<a class="link depth-0" href="messages.html">Messages</a>' +
+      '<a class="link depth-0" href="forum.html">Forum</a>' +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {
@@ -2784,6 +2797,11 @@
     /* the counts belong to the account that is leaving; a shared machine must
        not show the next person how many postings the last one had */
     try { localStorage.removeItem(COUNT_KEY); sessionStorage.removeItem(COUNT_SESSION); } catch (e) { /* ignore */ }
+    /* the forum's handle for the season (sessionStorage) and its seen-marks
+       (localStorage) belong to the account that is leaving too: a handle is
+       the one identity the forum has, and the next person on this machine
+       must not inherit it or the marks of what the last one had read */
+    try { sessionStorage.removeItem('oa-forum-me'); localStorage.removeItem('oa-forum-seen'); } catch (e) { /* ignore */ }
     paint();
     notify(null);
     if (!window.OAFB || !OAFB.enabled) return;
