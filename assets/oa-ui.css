@@ -1021,6 +1021,23 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   color: var(--mut, #888);
 }
 
+/* the candidate form's LIVE CARD PREVIEW (owner, 2026-09-04), under the form
+   in the same panel chrome as the alerts page's example e-mail; the card
+   inside it is the candidates list's own (oa-list.css), drawn standing open */
+.oa-cand-preview { margin: 26px 0 0; }
+.oa-cand-preview .oa-preview-head h3 { margin: 0 0 4px; font-size: 17px; }
+.oa-cand-preview .oa-preview-head p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--mut, #646c78); }
+.oa-cand-preview .oa-cards { margin: 0; }
+.oa-cand-preview .oa-card-preview .oa-card-head { cursor: default; }
+.oa-cand-preview .oa-hint { margin: 0; }
+.oa-cand-preview #oa-cand-preview-cv { margin-top: 10px; }
+@media screen and (max-width: 640px) {
+  /* on a phone the preview STACKS under the form, full width, never beside
+     it; the form itself is a single column at this width already */
+  .oa-cand-preview { margin-top: 20px; width: 100%; max-width: 100%; }
+  .oa-cand-preview .oa-preview-body { padding: 12px; }
+}
+
 /* ------------------------------------------------------ the preview index */
 
 .oa-preview-list { margin: 0 0 26px; padding: 0; list-style: none; }

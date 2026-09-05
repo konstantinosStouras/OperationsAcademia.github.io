@@ -245,6 +245,12 @@ service cloud.firestore {
             && str('personalEmail', 200)
             && str('note', 1500)       && str('source', 40)
             && str('authEmail', 200)   && str('ref', 60)
+            // the day the candidate last edited the profile (owner,
+            // 2026-09-04): the edit form writes an ISO stamp, the build
+            // publishes the day, and the card says "Profile updated on …".
+            // Bounded like every other string; never in the merge clause
+            // below, which names only the hand-over keys
+            && str('updatedAt', 40)
             && str('cvUploadPath', 400) && str('cvUploadName', 200)
             && str('cvUploadType', 100)
             && str('rsUploadPath', 400) && str('rsUploadName', 200)

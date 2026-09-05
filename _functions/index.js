@@ -2,26 +2,35 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   FIVE functions live in this file: three doorbells (publishOnChange,
-   publishOnCandidateChange, publishOnReview), the university-visit resolver
-   (recordVisit), and the e-mail verification mailer (sendVerificationEmail,
-   set up in _SETUP-EMAIL-VERIFICATION.md). A deploy lists all five, and
+   SIX functions live in this file: four doorbells (publishOnChange,
+   publishOnCandidateChange, publishOnReview, and the clock, revealCandidates),
+   the university-visit resolver (recordVisit), and the e-mail verification
+   mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md). A
+   deploy lists all six, and
    reading that count back is how a deploy from a stale checkout is caught.
 
-   THREE doorbells, one job each. When a job posting changes in Firestore,
+   FOUR doorbells, one job each. When a job posting changes in Firestore,
    start the GitHub build that publishes it, so a new posting or an edit
    reaches the site in about a minute instead of waiting for the 20-minute
    schedule; when a CANDIDATE PROFILE changes, start the same build — it runs
-   build-candidates.mjs too, and once the reveal date has passed a new profile
-   is public information the moment it is posted (before the date, the
+   build-candidates.mjs too, and once the reveal instant has passed a new
+   profile is public information the moment it is posted (before it, the
    build's own reveal gate still writes nothing, so ringing early costs
-   nothing and leaks nothing); and
+   nothing and leaks nothing);
    when the maintainer APPROVES a posting from the review queue, start the
    sheet read that publishes it, which is a different workflow because
    data/jobmarket.json holds the approved rows and only that job writes it.
    Approving is an act with an expectation attached — it used to sit invisible
    for up to half an hour, and then up to twenty minutes more while it waited
-   for the build that merges the file it had just written.
+   for the build that merges the file it had just written; and
+   at 14:00 UTC EVERY DAY (`revealCandidates`, a scheduled function rather
+   than a Firestore trigger), read the site's own candidates-reveal.json and,
+   when today is the reveal day, ring the same build, so the profiles go
+   public at the instant the site names rather than at the build's next
+   scheduled tick. The build's :07/:27/:47 schedule stays the safety net: if
+   this ring is lost the reveal lands at 14:07 at worst. It is deliberately
+   NOT a GitHub cron at 14:00 as well: two producers for one event is the
+   duplicate-doorbell outage CLAUDE.md records (One event, one build).
 
    It deliberately does NOT build, e-mail, or touch Drive — the scheduled
    build owns all of that and is already idempotent. This is a doorbell, not a
@@ -43,13 +52,14 @@
         permission "Contents: read and write" — nothing else.
      2. firebase functions:secrets:set GH_DISPATCH_TOKEN   (paste the PAT)
      3. firebase deploy --only functions
-   Steps with screenshots: v2/_SETUP-INSTANT-PUBLISH.md
+   Steps with screenshots: _SETUP-INSTANT-PUBLISH.md (repository root)
    --------------------------------------------------------------------------- */
 
 'use strict';
 
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
 /* MODULAR, because firebase-admin 14 removed the namespaced surface whole:
@@ -91,7 +101,7 @@ const REVIEW_EVENT_TYPE = 'oa-jobreview-decided';
 const CLIENT_STATES = ['queued', 'withdrawn', 'hidden'];
 
 /** One repository_dispatch POST — the whole of what every doorbell does once
-    it has decided to ring. Shared so the three cannot drift. */
+    it has decided to ring. Shared so the four cannot drift. */
 async function ring(eventType, payload, okLine) {
   const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
     method: 'POST',
@@ -169,6 +179,67 @@ exports.publishOnCandidateChange = onDocumentWritten(
       'candidate build dispatched');
   });
 
+/* ------------------------------------------------------------- the reveal
+
+   THE REVEAL IS AN INSTANT, NOT A DAY (owner, 2026-09-04). Profiles are held
+   until 14:00 UTC on the day named in data/candidates-reveal.json (07:00 in
+   Los Angeles, 22:00 in Shanghai, still that calendar day for every reader),
+   and the build's reveal gate (revealGate in _scraper/candidates-model.mjs,
+   a caller of assets/oa-reveal.js) writes the rows only from that instant.
+   Nothing in Firestore changes at 14:00, so no document trigger can ring
+   the build for it; this scheduled function does. It reads the SAME served
+   file the build reads, and when today (UTC) is the reveal day it rings the
+   SAME doorbell the document triggers ring, with the same helper.
+
+   The served file is Pages-cached for ten minutes, so the URL is cache-busted
+   and the fetch asks for no store; a date edited on the reveal morning may
+   still read stale at 14:00, in which case the build's own :07/:27/:47
+   schedule publishes at 14:07, the safety net this doorbell is not a
+   replacement for. It logs why it rang or did not, so the day's function log
+   answers "did the reveal fire" without guessing. */
+
+const REVEAL_HOUR_UTC = 14;   // keep equal to REVEAL_HOUR_UTC in assets/oa-reveal.js
+const REVEAL_FILE = 'https://www.operationsacademia.org/data/candidates-reveal.json';
+
+exports.revealCandidates = onSchedule(
+  {
+    schedule: '0 14 * * *',
+    timeZone: 'UTC',
+    secrets: [GH_DISPATCH_TOKEN],
+    region: 'us-central1',
+    // a failed run is caught by the build's own schedule seven minutes later;
+    // retrying could only ring twice for one reveal
+    retryCount: 0,
+  },
+  async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    let revealAt = '';
+    try {
+      const res = await fetch(`${REVEAL_FILE}?v=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'user-agent': 'operations-academia-functions' },
+      });
+      if (!res.ok) {
+        logger.warn('reveal: could not read candidates-reveal.json', { http: res.status });
+        return;
+      }
+      revealAt = String((await res.json()).revealAt || '').trim();
+    } catch (err) {
+      logger.warn('reveal: could not read candidates-reveal.json', { error: String(err) });
+      return;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(revealAt)) {
+      logger.info('reveal: no date announced', { revealAt, today });
+      return;
+    }
+    if (revealAt !== today) {
+      logger.info('reveal: not today', { revealAt, today, hourUtc: REVEAL_HOUR_UTC });
+      return;
+    }
+    await ring(EVENT_TYPE, { reason: 'reveal', revealAt }, 'reveal build dispatched');
+  });
+
 /* --------------------------------------------------------------- approvals */
 
 /** The states a decision leaves a queued posting in. `pending` is what the
@@ -211,7 +282,7 @@ exports.publishOnReview = onDocumentWritten(
   });
 
 /* ===========================================================================
-   E-MAIL VERIFICATION. The fifth function, and a mailer rather than a
+   E-MAIL VERIFICATION. The sixth function, and a mailer rather than a
    doorbell.
 
    A person who registers with an e-mail address and a password must press a
@@ -390,8 +461,10 @@ exports.sendVerificationEmail = onCall(
     return { sent: true, to: redact(email) };
   });
 
-/* ===========================================================================
-   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and one of the
+/* ====================================================================   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and one of the
+   two here that are not doorbells.
+=======
+   WHICH UNIVERSITY A VISITOR CAME FROM: the fifth function, and one of the
    two here that are not doorbells.
 
    THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to

@@ -371,6 +371,10 @@
          the ONE market rule (assets/oa-jobnav.js), so the matcher loads after
          it — without it the matcher says no, never guesses -->
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-reveal.js BEFORE the matcher, whose factory is handed it: the
+         candidates topic announces against the reveal INSTANT (14:00 UTC on
+         the reveal day), and the example e-mail names that instant. -->
+    <script defer src="assets/oa-reveal.js"></script>
     <script defer src="assets/oa-alert-match.js"></script>
     <!-- who is reading: the preview carries real postings, so it is drawn for
          a registered reader only, asked of the same module the cards ask -->

@@ -1310,6 +1310,10 @@ body.v3 .oa-card-body { border-top: 1px solid var(--line-soft); }
    for the same reason. */
 body.v3 .oa-card-lock-blur { color: var(--mut); }
 body.v3 .oa-card-lock-note { color: var(--brand); }
+/* the candidate card's "Profile updated on" line (assets/oa-candcard.js):
+   the same small muted rule oa-list.css carries, restated here so the live
+   design paints it, and pinned in both files by selftest.mjs */
+body.v3 .oa-card-updated { font-size: 12.5px; color: var(--mut); }
 body.v3 .oa-kv th { color: var(--mut); }
 body.v3 .oa-kv td { color: var(--ink-2); }
 body.v3 .oa-kv tr { border-color: var(--line-soft); }
@@ -1745,6 +1749,16 @@ body.v3 .oa-merge-from, body.v3 .oa-merge-into { background: var(--bg-3); border
 }
 .v3-pa-card h3 { margin: 0; font-size: 17px; color: var(--ink); display: flex; gap: 10px; align-items: center; }
 .v3-pa-card p { margin: 0; font-size: 14.5px; color: var(--mut); }
+/* the candidate's OWN card on the account page (assets/oa-candcard.js draws
+   it standing open in the candidates list's own chrome); the grid above it
+   carries the bottom margin, so this only tightens the gap and spaces the
+   Edit button */
+.v3-pa-cand { margin: -24px 0 60px; }
+.v3-pa-cand .v3-h3 { margin: 0 0 8px; }
+.v3-pa-cand .v3-mut { margin: 0 0 10px; font-size: 14.5px; }
+.v3-pa-cand .oa-cards { margin: 0; }
+.v3-pa-cand .oa-card-preview .oa-card-head { cursor: default; }
+.v3-pa-cand .v3-cta-row { margin-top: 18px; }
 .v3-pa-card .v3-pa-n {
   font-family: var(--font-sans); font-size: 28px; font-weight: 700; color: var(--ink);
   font-variant-numeric: tabular-nums;

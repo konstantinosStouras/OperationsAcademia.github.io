@@ -65,6 +65,10 @@ import {
 } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
+/* WHEN the candidate profiles go public: 14:00 UTC on the reveal day, decided
+   in assets/oa-reveal.js (the build's own gate calls it), so this e-mail says
+   "held" exactly while the build is holding and not a moment longer. */
+const OAReveal = createRequire(import.meta.url)('../assets/oa-reveal.js');
 const DATA = path.join(HERE, '..', 'data');
 
 const argv = process.argv.slice(2);
@@ -130,14 +134,22 @@ function postedByHtml(doc) {
  * profile is "live" when the whole point of the reveal gate is that it is not
  * would be worse than saying nothing.
  */
-export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' } = {}) {
+export function renderSubmissionEmail(kind, entry,
+  { site = SITE, revealAt = '', now = new Date() } = {}) {
   const doc = entry.data || {};
   const row = entry.row || null;
   const title = kind.headline(doc, row);
   const reviewUrl = site + '/admin-area';
   const editUrl = site + '/' + kind.editPath + encodeURIComponent(entry.id);
 
-  const held = kind.key === 'candidate' && revealAt;
+  /* held only while the reveal instant is still ahead, asked of the module:
+     a profile is live from 14:00 UTC on the reveal day like any posting, and
+     an e-mail sent after that must not go on calling it held. With NO date
+     announced (describeReveal answers null) every profile is held, exactly as
+     the build's gate holds them; reading that as live would tell the
+     maintainer a profile is on the site in the one state where none is. */
+  const when = kind.key === 'candidate' ? OAReveal.describeReveal(revealAt, { now }) : null;
+  const held = kind.key === 'candidate' && !(when && when.revealed);
 
   const bodyHtml =
     '<p>A <strong>' + esc(kind.one) + '</strong> has been posted through the site.</p>' +
@@ -149,10 +161,11 @@ export function renderSubmissionEmail(kind, entry, { site = SITE, revealAt = '' 
     '</table>' +
     (held
       ? '<p style="color:#5a5f6b;font-size:13px">Candidate profiles are held until <strong>' +
-        esc(revealAt) + '</strong> and appear all at once on the day, so this one is not ' +
-        'on the site and cannot be seen there yet — which is why it is worth reading here.</p>'
+        esc(when ? when.utc + ' on ' + when.dayLong : 'the reveal date is announced') +
+        '</strong> and appear all at once at that moment, so this one is not on the site ' +
+        'and cannot be seen there yet, which is why it is worth reading here.</p>'
       : '<p style="color:#5a5f6b;font-size:13px">It is already live, or will be within a ' +
-        'minute of the next build. Nothing is waiting on you — this is so you know it ' +
+        'minute of the next build. Nothing is waiting on you; this is so you know it ' +
         'arrived.</p>') +
     '<p><a href="' + esc(editUrl) + '" style="display:inline-block;background:#426394;' +
       'color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:600">' +
@@ -609,12 +622,30 @@ function selftest() {
 
   /* --- a held candidate profile ----------------------------------------- */
   const held = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },
-    { site: 'https://x.test', revealAt: '2026-10-11' });
+    { site: 'https://x.test', revealAt: '2026-10-11', now: new Date('2026-10-11T13:59:59Z') });
   ok(/Ada Lovelace/.test(held.subject), 'a profile is named in its subject');
-  ok(/2026-10-11/.test(held.html) && /held until/.test(held.html),
-    'and a held profile SAYS it is held — the reveal gate is why it cannot be seen on the site');
+  ok(/11 October 2026/.test(held.html) && /14:00 UTC/.test(held.html) && /held until/i.test(held.html),
+    'and a held profile SAYS it is held, naming the instant (14:00 UTC on the day): the ' +
+    'reveal gate is why it cannot be seen on the site');
   ok(!/already live/.test(held.html), 'so it never claims to be live');
   ok(/post-a-candidate\.html\?edit=c1/.test(held.html), 'and links to its own form');
+  /* the clock is injected, so the boundary is pinned to the second rather
+     than read off the calendar the day this runs */
+  const out = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },
+    { site: 'https://x.test', revealAt: '2026-10-11', now: new Date('2026-10-11T14:00:00Z') });
+  ok(!/held until/i.test(out.html) && /already live/.test(out.html),
+    'from the instant on a profile is live like any posting, and the e-mail stops saying held');
+  /* no date announced at all: the build holds every profile, so the e-mail
+     must say held, never live (it said live, once) */
+  const undated = renderSubmissionEmail(cand, { ...candDoc, row: cand.row(candDoc.data) },
+    { site: 'https://x.test', revealAt: '', now: new Date('2026-10-11T14:00:00Z') });
+  ok(/held until/i.test(undated.html) && /the reveal date is announced/.test(undated.html),
+    'with no reveal date announced a profile is held until one is, as the build holds it');
+  ok(!/already live/.test(undated.html), 'and is never called live');
+  const undatedJob = renderSubmissionEmail(job, { ...jobDoc, row: job.row(jobDoc.data) },
+    { site: 'https://x.test', revealAt: '' });
+  ok(/already live/.test(undatedJob.html) && !/held until/i.test(undatedJob.html),
+    'a job posting with no reveal date is live: the gate is for candidates only');
 
   /* --- the digest -------------------------------------------------------- */
   const many = Array.from({ length: BURST + 1 }, (_, i) => ({

@@ -23,10 +23,20 @@
    --selftest can cover the whole model offline.
    --------------------------------------------------------------------------- */
 
+import { createRequire } from 'node:module';
+
 import {
   text, url, day, slug, pickList, ownerTag, keyOf, uniqueIds,
   marketYear, isoDay, isoStamp, canonColumns,
 } from './jobs-model.mjs';
+
+/* WHEN the profiles go public is decided in ONE place, assets/oa-reveal.js,
+   a dual-mode file the pages load too (the oa-jobnav.js shape). The gate
+   below is a thin caller of it, so the build, the front page's note, the
+   Admin area's held/live split and the mailers cannot disagree about whether
+   a profile is out yet. */
+const require = createRequire(import.meta.url);
+const OAReveal = require('../assets/oa-reveal.js');
 
 /** The published fields, in the order they are written. Anything not listed
     here never reaches data/candidates.json — which is how `uid`, `authEmail`,
@@ -43,11 +53,18 @@ import {
 
     `addedAt` means the same ONE thing as in jobs-model: the moment the row
     entered this dataset — the e-mail alerts' cursor — never the day the
-    candidate says they posted (that is `posted`). */
+    candidate says they posted (that is `posted`).
+
+    `updatedAt` (owner, 2026-09-04) is the DAY the candidate last edited the
+    profile, cut from the stamp the edit form writes: a day, because the
+    card says "Profile updated on 2 October 2026" and nothing reads the hour.
+    It is skipped when empty, like `ref`, so a profile never edited carries
+    no line. It is NOT an alerts cursor: the candidates topic lists by
+    `addedAt` alone, so an edit never re-announces a profile. */
 export const CANDIDATE_PUBLIC_FIELDS = [
   'id', 'year', 'posted', 'first', 'last', 'name', 'affiliation', 'position',
   'researchAreas', 'informsDays', 'cvUrl', 'rsUrl', 'webUrl', 'email',
-  'source', 'addedAt', 'ref', 'owner',
+  'source', 'addedAt', 'updatedAt', 'ref', 'owner',
 ];
 
 /* The days an INFORMS Annual Meeting runs, PINNED. The old sheet's display
@@ -206,6 +223,11 @@ export function rowFromCandidateSubmission(doc, { now = new Date() } = {}) {
     email,
     source: text(doc.source, 40) || 'oa-form',
     addedAt: isoStamp(tsToDate(doc.createdAt) || now),
+    /* the day of the last edit: the form, the card's Take-down and the
+       Admin area all write `updatedAt` as an ISO stamp; a document never
+       edited has none and publishes none. Day-cut here, once, so the served
+       file and the browser twin agree on the value to the byte. */
+    updatedAt: (() => { const d = tsToDate(doc.updatedAt); return d ? isoDay(d) : ''; })(),
     ref: text(doc.ref, 40),
     owner: ownerTag(doc.uid),
   };
@@ -242,7 +264,9 @@ export function publicCandidateRow(row) {
   const out = {};
   for (const k of CANDIDATE_PUBLIC_FIELDS) {
     if (row[k] === undefined) continue;
-    if ((k === 'ref' || k === 'email') && !row[k]) continue;
+    // `updatedAt` too: a profile never edited has no "updated on" line, and
+    // an empty stamp on every row would be diff noise for nothing
+    if ((k === 'ref' || k === 'email' || k === 'updatedAt') && !row[k]) continue;
     out[k] = row[k];
   }
   return out;
@@ -279,7 +303,11 @@ export function sameCandidateKey(row) {
 }
 
 /** How much a row carries, so the fullest of a set of repeats is kept. The
-    CV counts double: it is the document a hiring committee came for. */
+    CV counts double: it is the document a hiring committee came for.
+    `updatedAt` counts like any other field since 2026-09-04: an edited
+    profile is fuller than one never touched, which only ever moves a
+    tie-break between two OWNERLESS repeats (owned rows are settled by
+    account and stamp first, in `better`). */
 function fullness(row) {
   let n = 0;
   for (const k of CANDIDATE_PUBLIC_FIELDS) {
@@ -445,19 +473,21 @@ export function candidateDisplayOrder(a, b) {
 /**
  * The reveal gate (owner, 2026-08-16): profiles are COLLECTED continuously but
  * SHOWN all at once, on a date the admin sets in data/candidates-reveal.json.
- * Until that day (UTC), the build projects ZERO rows into the world-readable
- * candidates.json — held-back means not-written, never written-and-hidden.
- * An empty or malformed date means "not announced yet": hold everything, so a
- * typo in the config can never reveal early.
+ * Until the reveal INSTANT (14:00 UTC on that day, since 2026-09-04; see
+ * assets/oa-reveal.js for why an instant rather than a day) the build
+ * projects ZERO rows into the world-readable candidates.json: held-back means
+ * not-written, never written-and-hidden. An empty or malformed date means
+ * "not announced yet": hold everything, so a typo in the config can never
+ * reveal early.
  *
  * Pure, clock-injected, so the boundary is unit-testable: `held` is true
- * strictly BEFORE revealAt — on the day itself, everyone appears.
+ * strictly BEFORE the instant: 13:59:59Z holds, 14:00:00Z reveals. A thin
+ * caller of OAReveal, keeping its name and return shape; `revealAt` is the
+ * day it parsed, echoed so the log and the meta can name it.
  */
 export function revealGate(revealAt, now = new Date()) {
-  const at = /^\d{4}-\d{2}-\d{2}$/.test(String(revealAt || '').trim())
-    ? String(revealAt).trim()
-    : '';
-  return { revealAt: at, held: !at || isoDay(now) < at };
+  const at = OAReveal.revealDay(revealAt);
+  return { revealAt: at, held: !OAReveal.isRevealed(at, now) };
 }
 
 export function buildCandidatesMeta(rows, { generated, revealAt = '', heldCount = 0 } = {}) {
@@ -475,9 +505,13 @@ export function buildCandidatesMeta(rows, { generated, revealAt = '', heldCount 
     informsDays: tally((r) => r.informsDays),
     withCv: rows.filter((r) => r.cvUrl).length,
     newestPosted: rows.reduce((m, r) => (r.posted > m ? r.posted : m), ''),
-    /* the reveal, for the page to announce: the date, and how many profiles
+    /* the reveal, for the page to announce: the date, the instant it happens
+       (14:00 UTC on that date, as an ISO stamp, the SAME instant the pages
+       compute from the date through assets/oa-reveal.js, written here so a
+       reader of the file needs no module to know it), and how many profiles
        are waiting behind it (a COUNT only — no name, no field, no PII) */
     revealAt,
+    revealAtInstant: OAReveal.revealStamp(revealAt),
     heldCount,
   };
 }

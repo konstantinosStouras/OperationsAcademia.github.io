@@ -343,9 +343,13 @@
            itself announces, so it is all the preview may say either. */
         var revealAt = (candMeta || {}).revealAt || '';
         var held = (candMeta || {}).heldCount || 0;
+        /* the instant, named the way the site names it (assets/oa-reveal.js:
+           the day with its weekday, and 14:00 UTC), never the bare stored day */
+        var when = window.OAReveal ? OAReveal.describeReveal(revealAt) : null;
         parts.push('<p class="oa-hint">Profiles are being collected now and go up all at ' +
-          'once' + (revealAt ? ' on <strong>' + esc(revealAt) + '</strong>'
-            : ', on a date the site will announce') +
+          'once' + (when ? ' on <strong>' + esc(when.dayLong) + ' at ' + esc(when.utc) + '</strong>'
+            : (revealAt ? ' on <strong>' + esc(revealAt) + '</strong>'
+              : ', on a date the site will announce')) +
           (held ? ' (' + held + ' already waiting)' : '') +
           '. Nothing is e-mailed about any profile before then. On the day you will get ' +
           'one short, friendly note that the candidates are live, and from then on a note ' +

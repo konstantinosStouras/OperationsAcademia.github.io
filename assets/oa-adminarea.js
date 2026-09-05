@@ -73,8 +73,6 @@
     return /^https?:\/\//i.test(s) ? s : '';
   }
 
-  function todayIso() { return new Date().toISOString().slice(0, 10); }
-
   /* One request per file per page — the site's own rule (OAList.load does the
      same): the counts AND the panels read candidates-meta.json and
      changelog.json, and without this each was fetched twice per open. A
@@ -113,8 +111,10 @@
       window between the reveal day and the next build. */
   function heldCandidates() {
     return fetchJson('/data/candidates-meta.json').then(function (meta) {
-      var at = String(meta.revealAt || '');
-      if (/^\d{4}-\d{2}-\d{2}$/.test(at) && todayIso() >= at) return 0;
+      /* from the reveal INSTANT (14:00 UTC on the day, assets/oa-reveal.js,
+         the build's own definition) nothing is held, whatever the meta still
+         says until the next build rewrites heldCount 0 */
+      if (OAReveal.isRevealed(meta.revealAt)) return 0;
       return Number(meta.heldCount) || 0;
     });
   }
@@ -278,19 +278,19 @@
     hidden: 'Taken down by you'
   };
 
-  /** Which pile a stored profile belongs to. Pure, so the selftest can hold
-      it to the build's own reveal semantics: until the reveal date EVERY
-      queued profile is held (build-candidates.mjs publishes a constant []),
-      and from the day itself queued means live. */
-  function candGroupOf(doc, revealAt, today) {
+  /** Which pile a stored profile belongs to. Pure, clock-injected, so the
+      selftest can hold it to the build's own reveal semantics: until the
+      reveal INSTANT EVERY queued profile is held (build-candidates.mjs
+      publishes a constant []), and from that instant queued means live. */
+  function candGroupOf(doc, revealAt, now) {
     var s = String((doc && doc.status) || 'queued');
     if (s === 'withdrawn') return 'withdrawn';
     if (s === 'hidden') return 'hidden';
-    /* the build's own gate (revealGate in candidates-model.mjs): NO announced
-       date means everything is HELD — the build publishes nothing until the
-       admin sets one — and from the day itself queued means live */
-    var at = /^\d{4}-\d{2}-\d{2}$/.test(String(revealAt || '')) ? revealAt : '';
-    var held = !at || today < at;
+    /* the build's own gate (revealGate in candidates-model.mjs, a caller of
+       assets/oa-reveal.js): NO announced date means everything is HELD, the
+       build publishes nothing until the admin sets one, and from 14:00 UTC on
+       the day itself queued means live */
+    var held = !OAReveal.isRevealed(revealAt, now);
     return held ? 'held' : 'live';
   }
 
@@ -380,10 +380,10 @@
 
     return db.collection(OAFB.col.candidateSubmissions).get().then(function (snap) {
       var groups = { held: [], live: [], withdrawn: [], hidden: [] };
-      var today = todayIso();
+      var now = new Date();
       snap.forEach(function (d) {
         var v = d.data() || {};
-        groups[candGroupOf(v, revealAt, today)].push({ id: d.id, v: v });
+        groups[candGroupOf(v, revealAt, now)].push({ id: d.id, v: v });
       });
       /* newest filed first within each pile — the queue is read as a to-do
          list, like the job review queue's newest-advertisement-first */
@@ -897,12 +897,15 @@
         .then(function (meta) {
           var revealAt = String((meta && meta.revealAt) || '');
           var hint = $('oa-aa-cands-hint');
-          if (hint && /^\d{4}-\d{2}-\d{2}$/.test(revealAt) && todayIso() < revealAt) {
+          // the instant, computed (assets/oa-reveal.js): null when no real
+          // day is announced, and `revealed` once 14:00 UTC on it has passed
+          var when = OAReveal.describeReveal(revealAt);
+          if (hint && when && !when.revealed) {
             hint.innerHTML = 'Every profile filed through the site, including the ' +
-              'ones held back until the reveal on <strong>' + esc(revealAt) +
-              '</strong>. Edit opens the same form the candidate used; a held ' +
-              'profile is visible to nobody but you and its candidate until the ' +
-              'reveal publishes it.';
+              'ones held back until the reveal at <strong>' + esc(when.utc) + ' on ' +
+              esc(when.dayLong) + '</strong>. Edit opens the same form the candidate ' +
+              'used; a held profile is visible to nobody but you and its candidate ' +
+              'until the reveal publishes it.';
           }
           show($('oa-aa-cands'), true);
           wireCandidateActions(db, revealAt);

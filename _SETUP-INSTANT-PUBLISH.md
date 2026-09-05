@@ -3,9 +3,12 @@
 **What it does.** A posting created, edited, withdrawn or taken down appears on
 the site in about a minute instead of at the next 20-minute build, and a
 posting APPROVED in the review queue appears in about two. Candidate profiles
-ring the same bell: once the reveal date has passed, a new profile is on the
+ring the same bell: once the reveal instant has passed, a new profile is on the
 site in about a minute too (before it, the build's reveal gate still writes
-nothing, so the early ring costs nothing and leaks nothing). Three small Cloud
+nothing, so the early ring costs nothing and leaks nothing). And the reveal
+itself has a bell: at 14:00 UTC on the day named in `data/candidates-reveal.json`
+the profiles go public, so a scheduled function rings the build at that hour
+every day and does nothing on every day but that one. Four small Cloud
 Functions in `_functions/index.js` ring a GitHub workflow's doorbell
 (`repository_dispatch`):
 
@@ -14,6 +17,13 @@ Functions in `_functions/index.js` ring a GitHub workflow's doorbell
 | `publishOnChange` | `jobSubmissions` | **OA data — publish queued postings** (`oa-jobs-changed`) |
 | `publishOnCandidateChange` | `candidateSubmissions` | the same build (`oa-jobs-changed`) — it runs `build-candidates.mjs` too |
 | `publishOnReview` | `jobReviews` | **OA jobs — read the job market tracking sheet** (`oa-jobreview-decided`), which the build then follows automatically |
+| `revealCandidates` | the clock: 14:00 UTC daily (Cloud Scheduler), reading `data/candidates-reveal.json` | the same build (`oa-jobs-changed`), on the reveal day only |
+
+The reveal function is deliberately the ONLY thing that rings at 14:00. There
+is no GitHub cron at that hour, and one must not be added: the build's own
+:07/:27/:47 schedule already catches a lost ring (the reveal then lands at
+14:07 at worst), and two producers for one event is the duplicate-doorbell
+outage CLAUDE.md records under "One event, one build".
 
 An approval takes two workflows because `data/jobmarket.json` holds the
 approved rows and only the sheet read writes it; `oa-jobs-build.yml` runs on
@@ -23,8 +33,10 @@ The workflows themselves are unchanged and their schedules stay as the safety
 net, so nothing is lost if the functions are down — changes just take up to 20
 minutes again, and an approval up to half an hour.
 
-**THESE THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
-on every decision since. To check rather than trust: filter this repository's
+**THE FIRST THREE ARE LIVE.** They were deployed on 2026-08-27 and have dispatched
+on every decision since. `revealCandidates` (2026-09-04) rides along with the
+next `firebase deploy --only functions` and is inert until that deploy has
+run; read the count back (five) rather than trusting the deploy log. To check rather than trust: filter this repository's
 Actions by `event:repository_dispatch` and read the ACTOR — the function
 carries the PAT from step 1 and shows as a person, where the two verify
 workflows' own curls carry `GITHUB_TOKEN` and show as `github-actions[bot]`.
@@ -51,7 +63,8 @@ Read the deployed list back against `_functions/index.js` every time.
 (`firebase-functions` ^7.3.2; `firebase-admin` ^14.3.0 — a major that removes
 the namespaced `admin.*` API, which is why `recordVisit` now uses the modular
 one), and the deploy carrying them has run: `firebase functions:list` reports
-**all four functions on `nodejs22`**. Nothing is owed before the deadline —
+**every function on `nodejs22`** (four at that deploy; five once
+`revealCandidates` is deployed). Nothing is owed before the deadline,
 but read the next paragraph before believing any FUTURE runtime change has
 landed, because the deploy will not tell you.
 
@@ -78,7 +91,7 @@ The **Runtime** column must say what `_functions/package.json` says. Where it
 does not, name each function explicitly — the supported bypass, not a trick:
 
 ```
-firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:recordVisit,functions:sendVerificationEmail --project operations-academia
+firebase deploy --only functions:publishOnChange,functions:publishOnCandidateChange,functions:publishOnReview,functions:revealCandidates,functions:recordVisit,functions:sendVerificationEmail --project operations-academia
 ```
 
 `--only functions` parses to an EMPTY filter list, which leaves every endpoint
@@ -126,14 +139,21 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is five: the three
+This deploys EVERY function in `_functions/`, which is six: the four
 doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
 and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
 and **`sendVerificationEmail`**, the mailer behind e-mail verification on
 registration, which needs the four `SMTP_*` secrets set in Secret Manager
-first (`_SETUP-EMAIL-VERIFICATION.md`). Read the deployed list back and count
-five.
+first (`_SETUP-EMAIL-VERIFICATION.md`). `firebase functions:list` must read back
+six; fewer means the checkout predates one of them.
+
+`revealCandidates` is a SCHEDULED function, so its first deploy also creates a
+Cloud Scheduler job (`0 14 * * *`, UTC) and asks to enable the Cloud Scheduler
+API, say yes. The job is visible in the Google Cloud console under Cloud
+Scheduler; it fires the function every day, and the function itself decides
+whether today is the reveal day. The function's log line `reveal: not today`
+on an ordinary day is the proof it is running.
 
 Always pass `--project`: the CLI remembers an "active project" per directory,
 and a deploy from this folder has already gone into another project's database
@@ -209,7 +229,8 @@ Function logs, if needed:
 firebase functions:log --project operations-academia
 ```
 
-`build dispatched` / `sheet read dispatched` = working. `dispatch refused (401)` = the PAT expired or is
+`build dispatched` / `sheet read dispatched` / `reveal build dispatched` (on the
+reveal day; `reveal: not today` on every other) = working. `dispatch refused (401)` = the PAT expired or is
 wrong — mint a new one and re-run step 2, then redeploy (step 3) so the
 function picks the new secret version up.
 
