@@ -2678,30 +2678,54 @@ long past the edit window, a second press a success, a quote of it surviving,
 both opening-post branches), and the browser block in `page-test.mjs`, which
 posts a reply, deletes it and reads the stored document back.
 
-### The question card is ONE column, and each fact is said once
+### The question list is laid out the way Stack Overflow lays one out
 
-From the owner's screenshot, 2026-09-05: *"I think these tags are too close to
-each other, update them to look nicer and merge"*. The card was a two-column
-grid, an 88px stat column beside everything else, and three things met badly
-in it: the like and reply chips sat level with the badge row and the title,
-the badges ran into each other because `.oa-label` is `display: inline`
-site-wide (vertical padding on an inline box does not grow its line, so chips
-bleed into the rows above and below), and the reply count was printed twice,
-once as a chip and once in the line under the excerpt.
+Two owner messages on 2026-09-05, and they are one change rather than two.
+First, from a screenshot: *"I think these tags are too close to each other,
+update them to look nicer and merge"*. Then, plainly: *"I want the forum to
+look like stackoverflow"*.
 
-It is stacked now: badges, title, excerpt, then ONE row of facts (the handle,
-the like count, the reply count, when it was last active). `subtitle` returns
-the handle alone and `onCard` appends the rest into that same `.oa-card-sub`,
-so a fact has one place to be. The badge row is a flex row with a gap and its
+The card was a two-column grid with an 88px stat column, and three things met
+badly in it: the like and reply chips sat level with the badge row and the
+title, the badges ran into each other because `.oa-label` is `display:
+inline` site-wide (vertical padding on an inline box does not grow its line,
+so chips bleed into the rows above and below), and the reply count was
+printed twice, once as a chip and once in the line under the excerpt.
+
+**The first fix stacked everything into one column, and that was the wrong
+lesson.** It removed the collision by removing the layout, and the owner's
+next message asked for exactly the arrangement that had just been taken out.
+The column was never the fault: **the tags being ABOVE the title was**, which
+is why Stack Overflow puts them under the excerpt and always has.
+
+So the card is a **tally column on the left** (votes, then replies, the
+answered ones in a green outline) beside the **title, the first lines, and a
+footer** carrying the tags on one side and who asked on the other. `subtitle`
+returns the handle alone; `onCard` MOVES the engine's own `.oa-badges` and
+`.oa-card-sub` into that footer rather than drawing either twice, which is
+what keeps every fact said once and the reply count in the tally alone. The
 chips are `inline-block`, **scoped to this card** rather than fixed globally,
-because every other list's badges are measured where they are. The phone block
-lost its overrides with the grid, since one column is already what a phone
-wants.
+because every other list's badges are measured where they are. On a phone the
+tally lies ABOVE the question as a row, the same move the vote column makes in
+a thread (rule 13).
 
-`page-test.mjs` measures it as GEOMETRY rather than as a class list: no two
-chips overlap, none reaches into the title below, the facts row sits under the
-title rather than beside it, and the word "reply" appears once. That survives a
-change of markup, which a check on class names would not.
+The thread already had the shape: crumbs, a heading, a meta bar, a vote column
+per post, a replies band. What changed is the reading: square arrows rather
+than pills, the score the largest thing in its column, the who-block on the
+brand wash with the handle in the link colour, and a rule under the replies
+heading.
+
+**What is NOT copied is the brand.** No orange, no logo, no wordmark, no
+borrowed stylesheet. `oa-forum.css` carries no raw colour at all, which the
+selftest pins, so every one of these rules resolves through the site's own
+tokens and works in both themes. It is the LAYOUT people recognise, and the
+layout is the part that is a good idea rather than somebody's property.
+
+`page-test.mjs` measures it as GEOMETRY rather than as a class list: the tally
+sits left of the title, no two chips overlap, none reaches up into the excerpt
+or across into the tally, the tags and the asker share a footer row, and the
+word "reply" appears once on the card. That survives a change of markup, which
+a check on class names would not.
 
 **Timestamps are whole minutes (R7).** Every `t`, `lastAt`, `joinedAt`,
 `editedAt`, `createdAt` comes from `minute()`; `serverTimestamp()` and

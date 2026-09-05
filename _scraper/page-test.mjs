@@ -9670,17 +9670,21 @@ for (const w of [320, 360, 390, 430]) {
     eq(list.n, 1, 'forum (candidate): the seeded question is listed');
     ok(list.title === HOSTILE_TITLE && list.bold === 0, 'forum (candidate): a title carrying markup is printed as text');
     eq(list.tags, ['flyouts', 'europe'], 'forum (candidate): the card carries its tag chips');
-    ok(/patient owl 7/.test(list.sub) && /0 replies/.test(list.sub), 'forum (candidate): the subtitle names the asking handle and the reply count');
-    eq(list.likes, '0', 'forum (candidate): and the first post\'s net score');
-    /* the card is ONE column and each fact is said once (owner's screenshot,
-       2026-09-05: a stat column beside the title crowded the badge row and
-       printed the reply count twice). Measured as geometry rather than as a
-       class list: nothing may overlap anything. */
+    ok(/patient owl 7/.test(list.sub), 'forum (candidate): the footer names the asking handle');
+    eq(list.likes, '0', 'forum (candidate): and the tally column carries the first post\'s net score');
+    /* THE STACK OVERFLOW ARRANGEMENT (owner, 2026-09-05), measured as
+       geometry rather than as a class list, so it survives a change of
+       markup: a tally column to the LEFT of the title, the tags BELOW the
+       excerpt where they cannot crowd the heading (the collision the owner
+       reported the same day), no two chips overlapping, and the reply count
+       said once. */
     const geom = await q.evaluate(() => {
       const card = document.querySelector('#oa-forum-list .oa-card');
       const box = (n) => { const r = n.getBoundingClientRect(); return { t: r.top, b: r.bottom, l: r.left, r: r.right, w: r.width }; };
       const chips = [...card.querySelectorAll('.oa-badges .oa-label')].map(box);
       const title = box(card.querySelector('.oa-card-title'));
+      const stats = box(card.querySelector('.oa-forum-stats'));
+      const ex = box(card.querySelector('.oa-forum-ex'));
       const sub = box(card.querySelector('.oa-card-sub'));
       let clash = 0;
       for (let i = 0; i < chips.length; i++) {
@@ -9688,15 +9692,21 @@ for (const w of [320, 360, 390, 430]) {
           const a = chips[i], b = chips[j];
           if (a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5) clash++;
         }
-        if (chips[i].b > title.t + 0.5) clash++;
+        if (chips[i].t < ex.b - 0.5) clash++;
+        if (stats.l < chips[i].r && chips[i].l < stats.r && stats.t < chips[i].b && chips[i].t < stats.b) clash++;
       }
-      return { chips: chips.length, clash, subBelowTitle: sub.t >= title.b - 0.5,
-        replies: (card.querySelector('.oa-card-sub').textContent.match(/repl(y|ies)/g) || []).length };
+      return {
+        chips: chips.length, clash,
+        tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,
+        footRow: Math.abs(sub.b - chips[chips.length - 1].b) < 40 && sub.l > chips[0].l,
+        replies: (card.textContent.match(/repl(y|ies)/g) || []).length,
+      };
     });
-    ok(geom.chips >= 2, `forum (candidate): the card carries a badge row of more than one chip, which is what could collide (${geom.chips})`);
-    eq(geom.clash, 0, 'forum (candidate): no two chips overlap, and none reaches into the title below');
-    ok(geom.subBelowTitle, 'forum (candidate): the facts row sits under the title, not beside it');
-    eq(geom.replies, 1, 'forum (candidate): and the reply count is printed once, not twice');
+    ok(geom.chips >= 2, `forum (candidate): the card carries a tag row of more than one chip, which is what could collide (${geom.chips})`);
+    eq(geom.clash, 0, 'forum (candidate): no two chips overlap, none reaches up into the excerpt, and none runs into the tally column');
+    ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
+    ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
+    eq(geom.replies, 1, 'forum (candidate): and the reply count is printed once, in the tally');
     eq(list.filterLabels, ['Tags', 'Search questions'], 'forum (candidate): the list engine draws the tag filter and the text search');
     eq(list.count, '1 question this season', 'forum (candidate): the count line');
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');

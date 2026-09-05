@@ -640,25 +640,48 @@
           run: function (row) { go({ room: S.room, season: S.season, t: row.id }); }
         };
       },
+      /* THE QUESTION CARD IS THE STACK OVERFLOW ONE (owner, 2026-09-05: "I
+         want the forum to look like stackoverflow"): a tally column on the
+         left, then the title, the first lines, and a footer carrying the
+         tags on one side and who asked on the other.
+
+         That LAYOUT is also what settles the collision the owner reported
+         the same day. The first attempt stacked everything in one column,
+         which read as a list of paragraphs; the real fault was never the
+         column, it was that the tag chips sat ABOVE the title (and that
+         .oa-label is `display: inline` site-wide, so their padding bled into
+         the rows around them). Tags belong under the excerpt, which is where
+         Stack Overflow has always put them and where nothing can crowd the
+         heading. */
       onCard: function (li, r) {
         li.classList.add('oa-forum-q');
         var replies = Math.max(0, r.n - 1);
-        /* ONE row of facts under the excerpt: who asked, its two counts, when
-           it was last active. It used to be a 88px column of chips beside the
-           title, which crowded the badge row above it and repeated the reply
-           count in the line below (owner's screenshot, 2026-09-05). */
-        var sub = li.querySelector('.oa-card-sub');
-        if (sub) {
-          sub.appendChild(el('span', { class: 'oa-forum-stat' }, [
-            el('b', { text: String(r.score) }), ' ' + (Math.abs(r.score) === 1 ? 'like' : 'likes')
-          ]));
-          sub.appendChild(el('span', { class: 'oa-forum-stat' + (replies ? ' has' : '') }, [
-            el('b', { text: String(replies) }), ' ' + (replies === 1 ? 'reply' : 'replies')
-          ]));
-          if (r.lastAt) sub.appendChild(el('span', { class: 'oa-forum-when', text: 'active ' + ago(r.lastAt) }));
-        }
+        var head = li.querySelector('.oa-card-head');
         var t = li.querySelector('.oa-card-title');
         if (t && r.excerpt) t.insertAdjacentElement('afterend', el('p', { class: 'oa-forum-ex', text: r.excerpt }));
+
+        li.insertBefore(el('div', { class: 'oa-forum-stats' }, [
+          el('span', { class: 'oa-forum-stat' }, [
+            el('b', { text: String(r.score) }), el('i', { text: Math.abs(r.score) === 1 ? 'vote' : 'votes' })
+          ]),
+          el('span', { class: 'oa-forum-stat is-answers' + (replies ? ' has' : '') }, [
+            el('b', { text: String(replies) }), el('i', { text: replies === 1 ? 'reply' : 'replies' })
+          ])
+        ]), li.firstChild);
+
+        /* the footer: the engine wrote the badges above the title and the
+           handle below it, so both are MOVED here rather than drawn twice */
+        var foot = el('div', { class: 'oa-forum-qfoot' });
+        var badges = li.querySelector('.oa-badges');
+        var sub = li.querySelector('.oa-card-sub');
+        foot.appendChild(badges || el('div', { class: 'oa-badges' }));
+        if (sub) {
+          sub.textContent = '';
+          sub.appendChild(el('span', { class: 'oa-forum-asker', text: r.by }));
+          if (r.lastAt) sub.appendChild(el('span', { class: 'oa-forum-when', text: 'active ' + ago(r.lastAt) }));
+          foot.appendChild(sub);
+        }
+        if (head) head.appendChild(foot);
         Array.prototype.forEach.call(li.querySelectorAll('.oa-label-tag'), function (b) {
           var tag = b.textContent;
           b.setAttribute('data-tag', tag);

@@ -15101,17 +15101,24 @@ async function testForum() {
   ok(/A link is fine/.test(GUIDE.RULES[6]) && /identifies you/.test(GUIDE.RULES[6]),
     'forum links: rule 7 allows one and says what it costs, which is the honest half');
 
-  /* --- the question card: one column, each fact said once ---------------- */
+  /* --- the question card, in the Stack Overflow arrangement -------------- */
 
-  ok(!/oa-forum-stats/.test(pageJs) && !/oa-forum-stats/.test(pageCss),
-    'forum card: the 88px stat column is gone, which is what crowded the badge row and the title');
+  ok(/grid-template-columns: 92px minmax\(0, 1fr\)/.test(pageCss),
+    'forum card: a tally column on the left and the question beside it, the shape the owner asked for');
+  ok(/oa-forum-stats'/.test(pageJs) && /is-answers/.test(pageJs) && /is-answers/.test(pageCss),
+    'forum card: the tally column carries the votes and the replies, the answered ones marked');
   ok(/subtitle: function \(r\) \{ return r\.by; \}/.test(pageJs),
-    'forum card: the subtitle is the handle alone, so the reply count is not printed twice');
-  ok(/oa-forum-stat'/.test(pageJs) && /oa-forum-when'/.test(pageJs) && /querySelector\('\.oa-card-sub'\)/.test(pageJs),
-    'forum card: the counts and the last activity are appended to that one row');
+    'forum card: the subtitle is the handle alone, so the reply count is said once, in the tally');
+  ok(/class: 'oa-forum-qfoot'/.test(pageJs) && /foot\.appendChild\(badges/.test(pageJs)
+     && /foot\.appendChild\(sub\)/.test(pageJs),
+    'forum card: the tags and the asker are MOVED into a footer under the excerpt rather than drawn twice');
+  ok(/\.oa-forum-qfoot \{[^}]*justify-content: space-between/.test(pageCss),
+    'forum card: the tags on one side of that footer, who asked on the other');
   ok(/body\.v3 \.oa-forum-q \.oa-badges \{[^}]*display: flex/.test(pageCss)
      && /body\.v3 \.oa-forum-q \.oa-badges \.oa-label \{[^}]*display: inline-block/.test(pageCss),
-    'forum card: the badge row is a flex row with a gap, and its chips are inline-BLOCK so their padding grows the line rather than bleeding into it');
+    'forum card: and its chips are inline-BLOCK, so their padding grows the line rather than bleeding into the rows around them');
+  ok(/@media \(max-width: 640px\)[\s\S]*?body\.v3 \.oa-forum-q \{ grid-template-columns: minmax\(0, 1fr\); \}/.test(pageCss),
+    'forum card: on a phone the tally lies above the question rather than in a 92px gutter (rule 13)');
   ok(/function friendly\(err\)/.test(pageJs) && /err\.details && err\.details\.reason/.test(pageJs), 'oa-forum.js: a refusal is worded by its reason, never shown as a code');
   ok(!/\b(u|user|me|S\.me)\.(email|displayName|uid)\b[^;]*innerHTML|innerHTML[^;]*\b(email|displayName)\b/.test(pageJs), 'oa-forum.js: no address or name is ever drawn');
   ok(/G\.check\(/.test(pageJs) && /OAForumGuard/.test(pageJs), 'oa-forum.js: the guard runs in the browser too');
