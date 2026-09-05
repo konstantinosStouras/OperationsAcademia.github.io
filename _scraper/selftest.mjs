@@ -12075,8 +12075,23 @@ async function testEmailVerification() {
     'verify: the wordmark is TEXT beside the logo, so the header reads with images blocked');
   ok(/mso-hide:all/.test(r.html) && /display:none;max-height:0/.test(r.html),
     'verify: a hidden preheader');
-  ok(/<v:roundrect[^>]*href="/.test(r.html) && /bgcolor="#3a424d"/.test(r.html),
-    'verify: the button is a coloured table cell with a VML fallback for Outlook');
+  ok(/<v:roundrect[^>]*href="[^>]*fillcolor="#3a424d"/.test(r.html)
+     && /<a href="[^"]+" class="oa-btn" style="[^"]*background-color:#3a424d;/.test(r.html),
+    'verify: the button is a padded link that draws its own pill, with a VML roundrect for Outlook');
+  ok(!/<td[^>]*bgcolor=/.test(r.html) && !/<td[^>]*background-color:#3a424d/.test(r.html),
+    'verify: and the cell around them carries NO colour, or Outlook paints a square block behind the rounded one');
+  ok(/(\?|&amp;|%)<wbr>/.test(r.html) && !/<wbr>/.test(r.text)
+     && (r.html.match(/<wbr>/g) || []).length >= 3,
+    'verify: the written-out link carries a break opportunity after every ? & and %, for Outlook, and the text copy none');
+  eq(V.breakable('a?b&amp;c%2Fd'), 'a?<wbr>b&amp;<wbr>c%<wbr>2Fd',
+    'verify: breakable() breaks after the WHOLE &amp; entity, so the escaping survives');
+  ok(/@media \(prefers-color-scheme: dark\)/.test(r.html)
+     && /\.oa-card \{ background-color: #15181d !important; border-color: #363d47 !important; color: #eef0f2 !important; \}/.test(r.html)
+     && /\.oa-card \.oa-btn \{ background-color: #c6ccd4 !important; color: #0d0f12 !important; \}/.test(r.html)
+     && /\.oa-ground \{ background-color: #0d0f12 !important; \}/.test(r.html),
+    'verify: the head declares dark support AND carries the dark half, in the live site\'s own dark tokens');
+  ok(/<td class="oa-card" /.test(r.html) && /<body class="oa-ground" /.test(r.html) && /<h1 class="oa-ink" /.test(r.html),
+    'verify: …on classed elements, since inline styles are what the light half is written in');
   for (const hex of ['#f8f7f4', '#ffffff', '#ccd1d7', '#22272e', '#454c56', '#646c78', '#3a424d']) {
     ok(r.html.includes(hex), `verify: the live site's palette, ${hex}`);
   }
@@ -12089,9 +12104,27 @@ async function testEmailVerification() {
      && /<a href="https:\/\/www\.operationsacademia\.org"[^>]*>operationsacademia\.org<\/a>/.test(r.html)
      && /questions to operationsacademia@gmail\.com/.test(r.text),
     'verify: the footer names the site and the contact address, with links');
-  const hostile = V.renderVerifyEmail({ firstName: '<b>x</b>', link }).html;
-  ok(hostile.includes('Hello &lt;b&gt;x&lt;/b&gt;,') && !hostile.includes('<b>x</b>'),
+  const hostile = V.renderVerifyEmail({ firstName: 'Ada <x>', link }).html;
+  ok(hostile.includes('Hello Ada &lt;x&gt;,') && !hostile.includes('<x>'),
     'verify: a first name somebody typed is escaped');
+  /* The profile is the one document an UNVERIFIED account may write, and its
+     holder may have registered with a stranger's address: the first name is
+     then a line the stranger reads in a message from the site's mailbox. */
+  const phish = 'Your account is suspended, restore it at http://evil.example';
+  eq(V.greetingName(phish), '', 'verify: a "first name" carrying a link is not used');
+  eq(V.greetingName('a'.repeat(V.NAME_MAX + 1)), '', 'verify: nor one longer than NAME_MAX');
+  eq(V.greetingName('write to me@evil.example'), '', 'verify: nor one carrying an address');
+  eq(V.greetingName('see www.evil.example'), '', 'verify: nor a www. host');
+  eq(V.greetingName('a/b'), '', 'verify: nor a slash, which every path has');
+  eq(V.greetingName('Ada\nLovelace'), 'Ada Lovelace', 'verify: a line break is folded to a space');
+  eq(V.greetingName("  Mary-Jo O'Brien "), "Mary-Jo O'Brien", 'verify: a real name, trimmed, is used as typed');
+  eq(V.greetingName(''), '', 'verify: and no name is no name');
+  ok(/<p style="margin:0 0 14px;">Hello,<\/p>/.test(V.renderVerifyEmail({ firstName: phish, link }).html)
+     && /^Hello,$/m.test(V.renderVerifyEmail({ firstName: phish, link }).text),
+    'verify: so the rendered message falls back to a bare "Hello," in both halves');
+  ok(new RegExp(`^Verify my e-mail address: ${link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm').test(r.text)
+     && /by opening the link below\./.test(r.text) && !/button/.test(r.text) && /^Hello Ada,$/m.test(r.text),
+    'verify: the plain text is written FOR text: the label and the address on one line, and no "button below" pointing at nothing');
   const shell = V.brandShell({ title: 'T', preheader: 'P', bodyHtml: '<p>BODY</p>' });
   ok(/^<!DOCTYPE html>/.test(shell) && shell.includes('<p>BODY</p>') && /<title>T<\/title>/.test(shell),
     'verify: brandShell is exported and wraps whatever it is given');
@@ -12117,16 +12150,42 @@ async function testEmailVerification() {
   ok(allows.length > 40, 'rules: the allow statements were really found');
   const bareWrites = allows.filter((a) => /^allow [^:]*\b(create|update|write)\b/.test(a)
     && /signedIn\(\)/.test(a));
-  eq(bareWrites.length, 1,
-    'rules: exactly ONE write clause is granted on a bare sign-in');
+  eq(bareWrites.length, 2,
+    'rules: exactly TWO write clauses are granted on a bare sign-in (a create and an update)');
   const profBlock = rules.slice(rules.indexOf('match /profiles/{uid}'));
   const profRule = profBlock.slice(0, profBlock.indexOf('match /', 10));
-  ok(bareWrites.length === 1 && profRule.includes(bareWrites[0]),
-    'rules: and it is the owner\'s own profile, which the registration form writes ' +
+  ok(bareWrites.length === 2 && bareWrites.every((w) => profRule.includes(w)),
+    'rules: and both are the owner\'s own profile, which the registration form writes ' +
     'in the same breath as the account, before any link can have been pressed');
-  ok(/allow create, update: if signedIn\(\) && request\.auth\.uid == uid;/.test(profRule)
+  ok(/allow create: if signedIn\(\) && request\.auth\.uid == uid\s*&& request\.resource\.data\.keys\(\)\.hasOnly\(profileKeys\(\)\)\s*&& profileShape\(\);/.test(profRule)
+     && /allow update: if signedIn\(\) && request\.auth\.uid == uid\s*&& request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\.hasOnly\(profileKeys\(\)\)\s*&& profileShape\(\);/.test(profRule)
      && /allow read, delete: if isOwner\(uid\);/.test(profRule),
-    'rules: the profile exception is create and update only; read and delete stay owner-gated');
+    'rules: the profile exception is create and update only, each SHAPED (keys and bounds), and an update judged on the keys it changes; read and delete stay owner-gated');
+  /* The one write an unverified account may make carries a shape, and the
+     shape is the module's own key list, both ways. */
+  const acctForKeys = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  const profKeysRules = (/function profileKeys\(\) \{\s*return \[([\s\S]*?)\];/.exec(rules) || [])[1];
+  const profKeysModule = (/var PROFILE_DOC_KEYS = \[([\s\S]*?)\];/.exec(acctForKeys) || [])[1];
+  const keyList = (src) => [...String(src || '').matchAll(/'([A-Za-z]+)'/g)].map((m) => m[1]).sort();
+  ok(profKeysRules && profKeysModule, 'rules: profileKeys() and PROFILE_DOC_KEYS were both found');
+  eq(keyList(profKeysRules), keyList(profKeysModule),
+    'rules: profileKeys() in the rules IS PROFILE_DOC_KEYS in oa-accounts.js, both ways');
+  for (const k of keyList(profKeysModule)) {
+    ok(new RegExp(`(\\b${k}:|\\.${k}\\s*=|'${k}')`).test(acctForKeys.replace(/var PROFILE_DOC_KEYS = \[[\s\S]*?\];/, '')),
+      `rules: …and ${k} really is a key the module writes or reads on the profile`);
+  }
+  for (const k of ['firstName', 'lastName', 'affiliation', 'website', 'orcid', 'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded']) {
+    ok(keyList(profKeysModule).includes(k), `rules: the profile key list carries ${k}, which the module writes`);
+  }
+  ok(/function profileShape\(\) \{[\s\S]*?str\('firstName', 300\)[\s\S]*?str\('lastName', 300\)[\s\S]*?str\('affiliation', 300\)[\s\S]*?str\('website', 300\)[\s\S]*?str\('orcid', 40\)[\s\S]*?str\('photo', 120000\)/.test(rules),
+    'rules: every text field on the profile is bounded, the photo (a data URL) at its own size');
+  /* Storage: an upload is a write like the others. */
+  const storageRules = await readFile(path.join(root, '_storage.rules'), 'utf8');
+  ok(/function verified\(\) \{\s*return signedIn\(\)\s*&&\s*\(request\.auth\.token\.email_verified == true\s*\|\|\s*request\.auth\.token\.firebase\.sign_in_provider != 'password'\);?\s*\}/.test(storageRules),
+    'storage rules: carry the same verified() test');
+  ok(/allow create: if verified\(\)\s*&& request\.auth\.uid == uid/.test(storageRules)
+     && !/allow create: if signedIn\(\)/.test(storageRules),
+    'storage rules: an upload needs a verified account, never a bare sign-in');
   ok(/allow get: if signedIn\(\);/.test(rules),
     'rules: an identity key can still be looked up on a bare sign-in (a READ, not a write)');
   ok(/\(verified\(\) && request\.resource\.data\.uid == request\.auth\.uid\)/.test(rules),
@@ -12177,8 +12236,20 @@ async function testEmailVerification() {
      && /VERIFY_MIN_GAP_MS = 90 \* 1000/.test(fn) && /VERIFY_DAY_MAX = 6/.test(fn)
      && (handler.match(/'resource-exhausted'/g) || []).length === 2,
     'function: the rate limit lives in verifyMail/{uid}: one send in 90 seconds, six a day');
-  ok(handler.indexOf('limitRef.set(') > handler.indexOf('sendMail('),
-    'function: the rate-limit document is written AFTER a successful send');
+  ok(/db\.runTransaction\(async \(tx\) => \{[\s\S]*?tx\.get\(limitRef\)[\s\S]*?tx\.set\(limitRef, \{ sentAt: now, day: today, count: count \+ 1 \}\);/.test(handler)
+     && handler.indexOf('runTransaction(') < handler.indexOf('sendMail(')
+     && handler.indexOf('tx.set(limitRef') < handler.indexOf('sendMail('),
+    'function: the rate-limit slot is RESERVED in a transaction before the send, so parallel calls cannot all pass the check');
+  ok(!/await limitRef\.set\(\{ sentAt/.test(handler),
+    'function: …and there is no read-check-send-write stamp left');
+  const sendCatch = handler.slice(handler.indexOf('await transport.sendMail('), handler.indexOf("'The message could not be sent.'"));
+  ok(sendCatch.length > 100 && sendCatch.length < 1200, 'function: the send\'s catch was really sliced');
+  ok(/await releaseSlot\(\);/.test(sendCatch) && (handler.match(/await releaseSlot\(\);/g) || []).length >= 3,
+    'function: a send that fails gives the slot back, as does a link that could not be minted');
+  ok(/const releaseSlot = async \(\) => \{[\s\S]*?limitRef\.set\(slot\.before\)[\s\S]*?limitRef\.delete\(\)/.test(handler),
+    'function: …restoring the stamp that was there before, or deleting one that was not');
+  ok(!/e\.message/.test(handler) && /error: e\.code, response: e\.responseCode/.test(handler),
+    'function: no log line prints an error\'s message text, which for an SMTP refusal quotes the address in full');
   ok(/secure: port === 465/.test(handler) && /from: `Operations Academia <\$\{SMTP_USER\.value\(\)\.trim\(\)\}>`/.test(handler),
     'function: TLS on 465, and From is the site\'s own mailbox');
   ok(/collection\('profiles'\)\.doc\(uid\)/.test(handler) && /prof\.firstName/.test(handler),
@@ -12187,9 +12258,14 @@ async function testEmailVerification() {
     'function: it answers with a redacted address, never the full one');
   const logCalls = handler.match(/logger\.\w+\([\s\S]*?\);/g) || [];
   ok(logCalls.length >= 4, 'function: the log lines were really found');
-  ok(logCalls.every((c) => !/\b(link|generated|code|oobCode)\b/.test(c)
+  /* `e.code` and `e.responseCode` are an error's own classification (an SMTP
+     code, a Firestore code), never the verification token; they are the only
+     "code" a log line may carry. */
+  ok(logCalls.every((c) => !/\b(link|generated|code|oobCode)\b/.test(c.replace(/\be\.(code|responseCode)\b/g, ''))
       && !/\bemail\b/.test(c.replace(/redact\(email\)/g, ''))),
     'function: NO log line names the link, the code or the address (redact() only)');
+  ok(logCalls.some((c) => /error: e\.code/.test(c)),
+    'function: …and the exemption above is exercised, so it is not vacuous');
   ok(!/console\.log/.test(handler), 'function: nothing goes through console.log');
   const blockAt = fn.indexOf('E-MAIL VERIFICATION');
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
@@ -12224,6 +12300,13 @@ async function testEmailVerification() {
     'setup: says what the browser does while the function is absent');
   ok(/verify-email\.html/.test(setup) && /verifyMail/.test(setup) && /functions:log/.test(setup),
     'setup: how to test');
+  ok(/Every password account that already exists is gated too/.test(setup) && /Send the e-mail/.test(setup)
+     && /BEFORE the gate/.test(setup),
+    'setup: says that every existing password account is pending on its next sign-in and how it gets out');
+  ok(/firebase deploy --only storage --project operations-academia/.test(setup) && /_storage\.rules/.test(setup),
+    'setup: says the Storage rules still deploy by hand, and how');
+  ok(/transaction/i.test(setup) && /enough messages for today/.test(setup),
+    'setup: describes the reserved slot and the two refusals the card prints');
   ok(noDash(setup), 'setup: no em dash');
 
   const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
@@ -12265,7 +12348,7 @@ async function testEmailVerification() {
   ok(/writeHint\(null\)/.test(pendBranch) && /return;/.test(pendBranch)
      && !/enterSession\(/.test(pendBranch) && !/loadProfile\(/.test(pendBranch),
     'accounts: while pending the hint is CLEARED and the session is never entered (no profile read, no roster row, no tally)');
-  ok(/openVerifyPanel\(\)/.test(pendBranch),
+  ok(/openVerifyPanel\(null, null, true\)/.test(pendBranch),
     'accounts: …and the "Check your inbox" card opens instead');
   ok(/function enterSession\(u, fb\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
      && (acct.match(/enterSession\(u, fb\)/g) || []).length >= 3,
@@ -12307,14 +12390,19 @@ async function testEmailVerification() {
     'accounts: …and lifts the gate only when the reload says the address is confirmed');
   /* the card */
   ok(/<h3 id="oa-verify-h">Check your inbox<\/h3>/.test(acct)
-     && /id="oa-verify-send">Send the e-mail again</.test(acct)
+     && /id="oa-verify-send">' \+\s*\(status === 'sent' \? 'Send the e-mail again' : 'Send the e-mail'\)/.test(acct)
      && /id="oa-verify-check">I have verified it</.test(acct)
      && /id="oa-verify-out">Use a different account</.test(acct)
      && /Look in spam too\. The message comes from ' \+\s*VERIFY_SENDER/.test(acct)
      && /VERIFY_SENDER = 'operationsacademia@gmail\.com'/.test(acct),
     'accounts: the card carries its heading, its three controls and the spam line naming the sender');
-  ok(/document\.querySelector\('\[data-oa-verify-page\]'\)\) return;/.test(acct),
-    'accounts: the card is never drawn over the verify page, which confirms the address itself');
+  ok(/if \(auto && document\.querySelector\('\[data-oa-verify-page\]'\)\) return;/.test(acct)
+     && /function openVerifyPanel\(status, who, auto\)/.test(acct),
+    'accounts: the card is not drawn over the verify page ON ITS OWN (the page confirms the address itself), but a press still opens it there');
+  ok(/openVerifyPanel\(null, null, true\);/.test(pendBranch),
+    'accounts: …and the auth handler is the one caller that says auto');
+  ok((acct.match(/openVerifyPanel\(\);/g) || []).length >= 4,
+    'accounts: the chip, the sheet link, openAuth, whenSignedIn and openProfile all press it explicitly');
   ok(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/.test(acct)
      && (acct.match(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/g) || []).length >= 3,
     'accounts: openAuth, whenSignedIn and openProfile all open the card for a pending account');
@@ -12332,6 +12420,54 @@ async function testEmailVerification() {
   ok(acct.indexOf('DUPLICATE ACCOUNTS') < acct.indexOf('var MERGE_APP'), 'accounts: the merge comment still heads the merge region');
   ok(verifyBlock.length > 3000, 'accounts: the verification block sits before the merge region, which is byte-pinned against /v2/');
   ok(noDash(verifyBlock), 'accounts: no em dash in the verification block');
+  /* the two ledes: a promise only where something was sent */
+  ok(/status === 'sent'\s*\?\s*'Your account is created\. A message from Operations Academia is on its way to '/.test(acct)
+     && /'Your e-mail address has not been confirmed yet\. If a message from Operations ' \+\s*'Academia reached <strong>'/.test(acct)
+     && /Otherwise press the button below and we will send one\./.test(acct)
+     && !/A message from Operations Academia is on its way to <strong>' \+ esc\(u\.email \|\| ''\) \+\s*'<\/strong>\. Press the link in it to confirm the address\. Until then/.test(acct),
+    'accounts: the card promises a message "on its way" ONLY on the registration path; a sign-in or a page load, which sent nothing, says what to do instead');
+  /* the throttle: the function\'s own reason */
+  ok(/return \{ via: 'function', throttled: true, reason: \(err && err\.message\) \|\| '' \};/.test(acct)
+     && /verifySay\(r\.reason \|\| 'The last message was sent a moment ago/.test(acct),
+    'accounts: a throttle carries the function\'s own words (too soon, or enough for the day), printed when present');
+  /* a Functions error is not a sign-in failure */
+  ok(/if \(\/\^functions\\\/\/\.test\(c\)\) \{\s*return 'We could not send the message just now\./.test(acct),
+    'accounts: friendly() words a functions/* error as a send that failed, never as "Sign-in failed" with a raw code');
+  ok(/'functions\/deadline-exceeded'/.test(acct)
+     && /VERIFY_FALLBACK_CODES = \['functions\/not-found', 'functions\/unavailable',\s*'functions\/internal', 'functions\/deadline-exceeded'\]/.test(acct),
+    'accounts: a send that timed out (a slow mailbox) falls back to Firebase\'s own message too');
+  /* the pending marker, against the archive\'s hint */
+  ok(/var PENDING_KEY = 'oaAuthPending';/.test(acct)
+     && /if \(h && h\.uid && localStorage\.getItem\(PENDING_KEY\) === h\.uid\) return null;/.test(acct.slice(acct.indexOf('function readHint'), acct.indexOf('function markPending'))),
+    'accounts: readHint() reads a hint naming a pending uid as no hint (the frozen /v2/ writes one for any signed-in user)');
+  ok(/markPending\(u\.uid, true\);/.test(pendBranch),
+    'accounts: …the pending branch writes the marker');
+  ok(/markPending\(u\.uid, false\);/.test(acct.slice(acct.indexOf('function writeHint'), acct.indexOf('function writePhotoHint')))
+     && /else if \(localStorage\.getItem\(PENDING_KEY\) === uid\) localStorage\.removeItem\(PENDING_KEY\);/.test(acct),
+    'accounts: …and writing a hint for a usable session clears it, for that uid only');
+  /* the modal keys: Tab stays inside, focus goes back */
+  const keysSrc = acct.slice(acct.indexOf('function wireModalKeys'), acct.indexOf('function openNotice'));
+  ok(keysSrc.length > 500 && keysSrc.length < 3000, 'accounts: wireModalKeys was really sliced');
+  ok(/e\.key === 'Escape'/.test(keysSrc) && /e\.key !== 'Tab'\) return;/.test(keysSrc)
+     && /last\.focus\(\)/.test(keysSrc) && /first\.focus\(\)/.test(keysSrc) && /e\.preventDefault\(\)/.test(keysSrc),
+    'accounts: every card that claims aria-modal keeps Tab inside it, wrapping at both ends');
+  ok(/function removeModal\(wrap, backTo\)/.test(keysSrc) && /wrap\.contains\(document\.activeElement\)/.test(keysSrc),
+    'accounts: removing a card puts focus back on the control that opened it, when focus was inside');
+  ok(/var VERIFY_BACK = '#oa-verify-chip, #oa-np-verify';/.test(acct)
+     && (acct.match(/removeModal\(\w+, VERIFY_BACK\)/g) || []).length === 2,
+    'accounts: …which for the verify card is the header chip or the phone-sheet link, on both close paths');
+
+  /* the usage tracker files a pending account as an anonymous visitor */
+  const usage = await readFile(path.join(root, 'assets', 'oa-usage.js'), 'utf8');
+  ok(/function usable\(u\) \{[\s\S]*?providerId === 'password'[\s\S]*?return u\.emailVerified === false && pw \? null : u;/.test(usage)
+     && /user = usable\(u\);/.test(usage) && !/user = u \|\| null;/.test(usage),
+    'oa-usage.js files an unconfirmed password account as an anonymous visitor, since the rule refuses its uid and the refusal is silent');
+  ok(/function pageOf\(\) \{[\s\S]*?\[\?&\]oobCode=[\s\S]*?return location\.pathname/.test(usage) && /page: pageOf\(\),/.test(usage),
+    'oa-usage.js never records a query carrying a one-time code');
+  const ga4 = await readFile(path.join(root, 'assets', 'oa-ga4.js'), 'utf8');
+  ok(/function pageLocation\(\) \{[\s\S]*?\[\?&\]oobCode=[\s\S]*?return location\.origin \+ location\.pathname;/.test(ga4)
+     && /gtag\('config', MEASUREMENT_ID, \{\s*page_location: pageLocation\(\),/.test(ga4),
+    'oa-ga4.js reports a page_location without the code, since it runs before the page can scrub it');
 
   const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
   ok(/readyFunctions: function \(\)/.test(fbjs) && /SDK \+ 'firebase-functions-compat\.js'/.test(fbjs),
@@ -12386,6 +12522,34 @@ async function testEmailVerification() {
   ok(!/\bfirebase\.functions\b|sendEmailVerification/.test(vjs),
     'oa-verify.js sends nothing itself, so the page and the card cannot drift on how a message goes');
   ok(/params\.get\('oobCode'\)/.test(vjs), 'oa-verify.js reads the code off the query string');
+  ok(/history\.replaceState\(null, '', location\.pathname \+ location\.hash\)/.test(vjs)
+     && vjs.indexOf('history.replaceState(') < vjs.indexOf('function start(')
+     && vjs.indexOf('history.replaceState(') < vjs.indexOf('OAFB.ready()'),
+    'oa-verify.js takes the code OFF the address bar as soon as it is read, before any async work');
+  ok(/querySelector\('h2'\);\s*if \(h && typeof h\.focus === 'function'\) h\.focus\(\);/.test(vjs)
+     && (vpage.match(/<h2 class="v3-h3" style="font-size:26px" tabindex="-1">/g) || []).length === 3,
+    'oa-verify.js moves focus to the shown card\'s heading, and the three result headings can take it');
+  ok(/A\.onChange\(function \(\) \{\s*if \(!\$\('ve-done'\)\.hidden\) showDone\(\);\s*else if \(!\$\('ve-nocode'\)\.hidden\) showNoCode\(\);/.test(vjs),
+    'oa-verify.js re-decides the shown card\'s buttons when the session changes (a sign-in on the verified card)');
+  ok(/showDone\(ok === false\);/.test(vjs) && /function showDone\(mismatch\)/.test(vjs)
+     && /MISMATCH_NOTE = 'The link confirmed an address, but not the one this account uses/.test(vjs)
+     && /'Use a different account' : 'Sign in'/.test(vjs),
+    'oa-verify.js treats a code that applied while THIS account stays unconfirmed as another address\'s link, and does not offer Continue into a locked account');
+  ok(/function signInFromDone\(\) \{\s*if \(pendingUser\(\)\) A\.signOut\(\);\s*A\.openAuth\(\);/.test(vjs),
+    'oa-verify.js signs a pending account out before opening the box for the other one');
+  ok(/say\(msgId, r\.reason \|\| 'The last message was sent a moment ago/.test(vjs),
+    'oa-verify.js prints the function\'s own throttle reason too');
+  /* every live page's head snippet reads the marker the pending branch writes */
+  const snippetPages = (await readdir(root)).filter((f) => f.endsWith('.html'));
+  let snippetSeen = 0;
+  for (const f of snippetPages) {
+    const html = await readFile(path.join(root, f), 'utf8');
+    if (!html.includes("localStorage.getItem('oaAuthHint')")) continue;
+    snippetSeen++;
+    ok(html.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
+      `${f}: the head snippet reads a hint for a pending account as signed out`);
+  }
+  ok(snippetSeen >= 20, `the head snippet was found on ${snippetSeen} pages, so the loop above measured something`);
   ok(noDash(vjs), 'oa-verify.js: no em dash');
 
   const lc = await readFile(path.join(HERE, 'link-check.mjs'), 'utf8');
@@ -12414,6 +12578,8 @@ async function testEmailVerification() {
     'the changelog entry sits at index 0 with the agreed id and date');
   ok(/e-mail address and a password/.test(log[0].summary) && /Google/.test(log[0].summary) && noDash(log[0].title + log[0].summary),
     '…and says what changed, for both kinds of sign-in, with no em dash');
+  ok(/before this change/.test(log[0].summary) && /Send the e-mail/.test(log[0].summary),
+    '…and tells an account registered before the gate what it has to do once');
 
   const shim = await readFile(path.join(HERE, '_fake-firebase.js'), 'utf8');
   ok(/Object\.assign\(\{ emailVerified: true, providerData: \[\{ providerId: 'google\.com' \}\] \}, spec\)/.test(shim),
@@ -12428,6 +12594,12 @@ async function testEmailVerification() {
      && /applyActionCodeFails: 'auth\/expired-action-code'/.test(pt) && /reloadVerifies: true/.test(pt)
      && /'Verify your e-mail'/.test(pt) && /verify-email\.html\?mode=verifyEmail&oobCode=/.test(pt),
     'page-test.mjs drives the pending session, the fallback, the lift and the verify page in a real browser');
+  ok(/callableFails: 'functions\/resource-exhausted'/.test(pt) && /callableMessage:/.test(pt)
+     && /callableFails: 'functions\/deadline-exceeded'/.test(pt) && /callableFails: 'functions\/permission-denied'/.test(pt)
+     && /noFunctions: true/.test(pt) && /signInUser:/.test(pt) && /oaAuthPending/.test(pt),
+    'page-test.mjs also drives the throttle reason, the slow send, a refused send, the Functions bundle that loads nothing, a sign-in on the verified card, and the archive\'s hint');
+  ok(/seed\.callableMessage/.test(shim) && /seed\.signInUser/.test(shim) && /seed\.noFunctions/.test(shim),
+    'the shim carries the switches those checks drive');
 }
 
 if (isMain(import.meta.url)) {

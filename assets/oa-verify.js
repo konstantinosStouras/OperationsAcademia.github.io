@@ -27,11 +27,17 @@
 
   function $(id) { return document.getElementById(id); }
 
+  /** Show one card, and put the keyboard on its heading. A person who
+      arrives from a link in a message and cannot see the page would
+      otherwise hear "Checking your link" and then nothing: the cards only
+      toggle `hidden`. The headings carry tabindex="-1" for this. */
   function show(id) {
     CARDS.forEach(function (k) {
       var el = $(k);
       if (el) el.hidden = k !== id;
     });
+    var h = id !== 've-wait' && $(id) && $(id).querySelector('h2');
+    if (h && typeof h.focus === 'function') h.focus();
   }
 
   function say(id, msg, ok) {
@@ -45,6 +51,16 @@
   try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
   var mode = params ? String(params.get('mode') || '') : '';
   var code = params ? String(params.get('oobCode') || '') : '';
+
+  /* The code is a one-time credential, and it came in on the address bar.
+     Now that it is read, it comes OFF the address at once, before any of the
+     work below: nothing else on the page may copy it (the usage record and
+     the analytics tag both read the page's address, and both are told to
+     drop a code they find anyway), a reload cannot re-apply it, and the
+     browser's history does not keep it. */
+  if (params && (mode || code)) {
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* nothing sane to do */ }
+  }
 
   var A = window.OAAccounts;
 
@@ -62,11 +78,22 @@
 
   /* ---------------------------------------------------------- the cards */
 
-  function showDone() {
+  var DONE_NOTE = '';        // the card's own wording, read once at boot
+  var MISMATCH_NOTE = 'The link confirmed an address, but not the one this account uses: ' +
+    'this account is still unconfirmed. Sign in with the account that received the message, ' +
+    'or ask for a new link from this one.';
+
+  /** The verified card. `mismatch` is the case where the code applied but
+      the account signed in here is STILL unconfirmed after its reload: the
+      link belonged to another address (a second registration after a typo,
+      say), so Continue would only lead to a locked account page. */
+  function showDone(mismatch) {
     show('ve-done');
-    var inside = signedIn() || !!pendingUser();
+    var inside = !mismatch && (signedIn() || !!pendingUser());
+    $('ve-done-note').textContent = mismatch ? MISMATCH_NOTE : DONE_NOTE;
     $('ve-continue').hidden = !inside;
     $('ve-signin').hidden = inside;
+    $('ve-signin').textContent = mismatch ? 'Use a different account' : 'Sign in';
     $('ve-title').textContent = 'Address confirmed';
   }
 
@@ -115,7 +142,7 @@
       A.sendVerification()
         .then(function (r) {
           if (r && r.throttled) {
-            say(msgId, 'The last message was sent a moment ago. Give it a minute and look again.');
+            say(msgId, r.reason || 'The last message was sent a moment ago. Give it a minute and look again.');
             return;
           }
           if (r && r.alreadyVerified) {
@@ -131,8 +158,18 @@
     };
   }
 
+  /** Sign in, from the verified card. When the account signed in here is a
+      pending one whose address the link did NOT confirm (the mismatch case),
+      openAuth would only reopen the "Check your inbox" card for it, so that
+      account is signed out first and the sign-in box opened for the other. */
+  function signInFromDone() {
+    if (pendingUser()) A.signOut();
+    A.openAuth();
+  }
+
   function wire() {
-    $('ve-signin').addEventListener('click', function () { A.openAuth(); });
+    DONE_NOTE = $('ve-done-note').textContent;
+    $('ve-signin').addEventListener('click', signInFromDone);
     $('ve-nocode-signin').addEventListener('click', function () { A.openAuth(); });
     $('ve-resend').addEventListener('click', resend('ve-msg'));
     $('ve-nocode-resend').addEventListener('click', resend('ve-nocode-msg'));
@@ -160,7 +197,11 @@
           // usable, which is the lift confirmVerified performs
           return pendingUser() ? A.confirmVerified() : null;
         })
-        .then(showDone)
+        .then(function (ok) {
+          // false means the reload found THIS account still unconfirmed:
+          // the code confirmed some other address
+          showDone(ok === false);
+        })
         .catch(showError);
       return;
     }
@@ -182,6 +223,14 @@
     }
     wire();
     whenResolved(start);
+    /* The session can change under the page: a signed-out reader presses
+       Sign in on the verified card and signs in, or a pending account signs
+       out. The card that is showing re-decides its buttons from the new
+       state; start() itself runs once. */
+    A.onChange(function () {
+      if (!$('ve-done').hidden) showDone();
+      else if (!$('ve-nocode').hidden) showNoCode();
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

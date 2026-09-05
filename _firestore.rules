@@ -85,6 +85,20 @@ service cloud.firestore {
             && request.resource.data[field].size() <= maxLen);
     }
 
+    /* The profile document's keys and bounds, for profiles/{uid} below. The
+       photo is a 192x192 JPEG data URL (assets/oa-accounts.js caps the hint
+       copy at 96 KB), so its bound is the one field here that is not 300. */
+    function profileKeys() {
+      return ['firstName', 'lastName', 'affiliation', 'website', 'orcid',
+              'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded'];
+    }
+
+    function profileShape() {
+      return str('firstName', 300) && str('lastName', 300)
+        && str('affiliation', 300) && str('website', 300)
+        && str('orcid', 40) && str('photo', 120000);
+    }
+
     function list(field, maxItems) {
       return !(field in request.resource.data)
         || (request.resource.data[field] is list
@@ -378,8 +392,23 @@ service cloud.firestore {
       // Reading and deleting it go through isOwner(uid) like everything
       // else: the form writes and moves on, and nothing reads the profile
       // back until the address is verified and the session is let in.
+      //
+      // AND IT IS THE ONE WRITE THAT HAS TO CARRY A SHAPE, for the same
+      // reason: whoever holds the account has not proved the address is
+      // theirs, and the first name they type is printed at the top of the
+      // verification message that goes TO that address, from the site's own
+      // mailbox. So the keys are the ones assets/oa-accounts.js writes
+      // (PROFILE_DOC_KEYS there, pinned both ways by the selftest) and every
+      // text field is bounded. An update may touch only those keys, judged
+      // on what it CHANGES, so a document carrying an older field is not
+      // frozen against its own owner (the sync-user-directory lesson).
       allow read, delete: if isOwner(uid);
-      allow create, update: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(profileKeys())
+                    && profileShape();
+      allow update: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(profileKeys())
+                    && profileShape();
     }
 
     // A contentless tally of registered accounts: one document per account

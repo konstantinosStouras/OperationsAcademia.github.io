@@ -18,6 +18,21 @@ its link lands on `verify-email.html` with no code once Firebase has applied
 it. So a fresh deploy of the site is never stranded; what the function adds is
 the branded message from the site's own address, and the rate limit.
 
+**Every password account that already exists is gated too.** `verified()`
+reads the token's `email_verified` claim and there is no date before which an
+account is excused, and the Firestore rules publish themselves after a green
+check on master. So from the moment the rules land, every account registered
+with an e-mail address and a password BEFORE the gate is pending on its next
+sign-in: it sees the "Check your inbox" card, nothing on the site works for
+it, and no message was ever sent to it, because none of those accounts
+registered through the path that sends one. The card says so honestly (it
+promises a message only on the registration path) and its button reads "Send
+the e-mail", which is the one press those accounts need: it sends the
+message, they press the link, and the account is ordinary again. Google and
+ORCID accounts are untouched. If the roster is large, a line to the
+registered users saying "sign in once and press Send the e-mail" saves the
+questions.
+
 ## 1. The mailbox to send from
 
 The function reads the same four names the scheduled mailers use
@@ -95,12 +110,28 @@ database once (see CLAUDE.md).
 5. In Firestore, `verifyMail/{uid}` now holds `sentAt`, `day` and `count`.
    Pressing "Send the e-mail again" inside 90 seconds is refused with
    `resource-exhausted` and the card says the last message went a moment ago;
-   the seventh press in a UTC day is refused the same way.
+   the seventh press in a UTC day is refused the same way, and the card
+   prints the function's own reason ("That is enough messages for today"),
+   not the 90-second one. The slot is reserved in a transaction BEFORE the
+   send, so ten presses fired in the same second send one message, not ten;
+   a send that fails gives the slot back.
 
 To test the fallback, deploy nothing and register: the message then comes
 from Firebase's own address in its own template, and pressing its link lands
 on `verify-email.html` with no code, which shows the verified state once the
 account has been reloaded.
+
+## 5. The Storage rules still deploy by hand
+
+`_storage.rules` gates an upload (an advertisement or a CV) on the same
+`verified()` test as every Firestore write, so an unverified password
+account cannot upload a file through the SDK either. Unlike the Firestore
+rules, the Storage rules do NOT publish themselves; after any change to that
+file run, from the repository root:
+
+```
+firebase deploy --only storage --project operations-academia
+```
 
 ## What is deliberately not done
 

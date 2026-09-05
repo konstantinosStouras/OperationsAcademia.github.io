@@ -1870,7 +1870,27 @@ and update it on a bare sign-in, because the registration form writes the
 profile in the same breath as it creates the account, before any link can
 have been pressed. Read and delete there stay owner-gated. The selftest pins
 that exactly one write clause in the file is granted on a bare sign-in and
-that it is that one.
+that it is that one. **Because it is the one write an unverified account may
+make, it is also the one that has to carry a shape**: whoever holds the
+account has not proved the address is theirs, and the first name they type
+is printed at the top of the message that goes TO that address from the
+site's mailbox. So `profileKeys()` in the rules is exactly
+`PROFILE_DOC_KEYS` in `oa-accounts.js` (pinned both ways), every text field
+is bounded, and an update is judged on the keys it CHANGES
+(`diff().affectedKeys()`), so a document carrying an older field is not
+frozen against its own owner. The renderer guards the same line from its
+end: `greetingName` uses a first name only when it is short, on one line and
+carries no address or link, else the greeting is a bare "Hello,". The
+Storage rules gate an upload on the same `verified()`; they still deploy by
+hand (`firebase deploy --only storage --project operations-academia`).
+
+**Every password account that already existed is gated too**, and nothing was
+ever sent to it, because none of them registered through the path that
+sends. So the card promises a message only on the registration path (status
+`'sent'`); on a sign-in or a page load it says "if a message reached you when
+you registered, press its link, otherwise press the button" and the button
+reads "Send the e-mail", which is the one press those accounts need. The
+setup page and the changelog say so.
 
 **A pending session is signed out for everything but the panel.** The browser
 keeps the user for the "Check your inbox" card and nothing else: `user()`
@@ -1878,7 +1898,34 @@ answers null, `hint()` answers `'out'`, `onChange` fires null, nothing writes
 the hint, the roster row, the tally, the identity keys or the counts, and the
 chip reads "Verify your e-mail". Anything less leaves a flash of unlocked
 cards on the next page, painted from a remembered hint the SDK then
-contradicts.
+contradicts. **The archive can still write that hint**: `/v2/` is frozen,
+shares the origin, and its accounts module writes `oaAuthHint` for any
+signed-in user, pending ones included. So the pending branch writes a marker
+beside it, `oaAuthPending` = the uid, and a hint naming that uid is read as
+no hint at all, in `readHint()` and in every live page's `<head>` snippet;
+the marker is cleared the moment that account becomes usable
+(`markPending`). The usage tracker (`oa-usage.js`) makes the same
+`needsVerification` test itself and files a pending account's session as an
+anonymous visitor, because the `usageSessions` rule refuses one filed under
+an unverified uid and the refusal is silent.
+
+**The card opens on its own everywhere but the verify page, and opens on a
+press anywhere.** `openVerifyPanel(status, who, auto)`: the auth handler
+passes `auto`, and only an auto open stands down on `verify-email.html`
+(which confirms the address itself); a press on the chip or the phone-sheet
+link opens it there too, or the one account control in the header would do
+nothing. Closing it puts focus back on that chip, and `wireModalKeys` keeps
+Tab inside every card that claims `aria-modal`.
+
+**The one-time code comes off the address bar at once.** `oa-verify.js`
+reads `mode` and `oobCode` and calls `history.replaceState` before any
+async work; `oa-ga4.js` reports a `page_location` without the code (it runs
+first in the deferred order) and `oa-usage.js` records the path alone when
+the query carries one. The page also moves focus to the heading of the card
+it shows, re-decides its buttons when the session changes (`A.onChange`), and
+treats `confirmVerified()` answering false after a successful
+`applyActionCode` as the link having confirmed a DIFFERENT address, offering
+"Use a different account" rather than a Continue into a locked account page.
 
 **Verification does not refresh the token by itself.** `user.reload()` updates
 `emailVerified` on the object; the rules read the ID token, which is cached
@@ -1893,7 +1940,13 @@ reader lands on operationsacademia.org rather than a firebaseapp.com handler.
 It mails the address on the token only, refuses an already-verified one, and
 keeps its own rate limit in `verifyMail/{uid}` (one send in 90 seconds, six in
 a UTC day), because Firebase's resend limits do not apply to links the Admin
-SDK mints. Neither the link nor the code is ever logged. When the callable
+SDK mints. The slot is RESERVED in a transaction before the send, so parallel
+calls cannot all pass the check and each send a message, and a failed send
+gives the slot back. Neither the link nor the code is ever logged, and neither
+is an SMTP error's message text, which quotes the rejected address in full.
+The browser prints the function's own refusal (too soon, or enough for the
+day) rather than one sentence for both, and a `functions/*` error is worded
+as a send that failed, never as a sign-in failure. When the callable
 cannot be reached (not deployed, down, or the SDK failed to load) the browser
 falls back to `sendEmailVerification`, so nobody is stranded; that message
 comes from Firebase's own address and lands on the same page with no code.

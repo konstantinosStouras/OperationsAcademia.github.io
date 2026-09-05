@@ -37,13 +37,54 @@ const C = {
   onButton: '#ffffff',
 };
 
+/* The dark inbox: the live site's own dark theme, from assets/v3.css. The
+   head declares both colour schemes, so a client that honours the
+   declaration expects the message to carry the dark half itself; without
+   this block it would show the light card unchanged on a dark inbox. */
+const D = {
+  ground: '#0d0f12',
+  card: '#15181d',
+  line: '#363d47',
+  ink: '#eef0f2',
+  ink2: '#c5cad1',
+  muted: '#8d949e',
+  button: '#c6ccd4',
+  onButton: '#0d0f12',
+};
+
 const BODY_FONT = "Inter, Helvetica, Arial, sans-serif";
 const HEAD_FONT = "Georgia, 'Times New Roman', serif";
+
+/** How long a first name may be before it is not a name. */
+const NAME_MAX = 60;
+
+/** The first name the greeting may use, or nothing. The profile is the one
+    document an unverified account may write, and its owner may be somebody
+    who registered with a stranger's address: a "first name" that is a
+    sentence, a link or an address would then reach that stranger in a
+    message from the site's own mailbox. So a name is used only when it looks
+    like one: short, on one line, and carrying no address or link. Anything
+    else falls back to a bare "Hello,". */
+function greetingName(firstName) {
+  const n = String(firstName || '').replace(/\s+/g, ' ').trim();
+  if (!n || n.length > NAME_MAX) return '';
+  if (/https?:|www\.|@|\//i.test(n)) return '';
+  return n;
+}
 
 function esc(s) {
   return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, (c) => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
+}
+
+/** A break opportunity after every ? & and % of an ESCAPED address, for the
+    copy of the link that is printed as text: Outlook on Windows ignores
+    word-break, and a 190-character link with nowhere to break widens the
+    card. <wbr> is not copied by any client, so what the reader copies is the
+    address unchanged. The `&amp;` is matched whole, so the entity survives. */
+function breakable(escaped) {
+  return String(escaped || '').replace(/(\?|&amp;|%)/g, '$1<wbr>');
 }
 
 /** The host a site address is shown as: "operationsacademia.org", never the
@@ -101,11 +142,19 @@ function brandShell({ title, preheader, bodyHtml, site, contact }) {
 <style>
   :root { color-scheme: light dark; supported-color-schemes: light dark; }
   a { color: ${C.ink}; }
+  @media (prefers-color-scheme: dark) {
+    .oa-ground { background-color: ${D.ground} !important; }
+    .oa-card { background-color: ${D.card} !important; border-color: ${D.line} !important; color: ${D.ink} !important; }
+    .oa-ink, .oa-card a { color: ${D.ink} !important; }
+    .oa-ink2 { color: ${D.ink2} !important; }
+    .oa-muted, .oa-muted a { color: ${D.muted} !important; }
+    .oa-card .oa-btn { background-color: ${D.button} !important; color: ${D.onButton} !important; }
+  }
 </style>
 </head>
-<body style="margin:0;padding:0;background-color:${C.ground};">
+<body class="oa-ground" style="margin:0;padding:0;background-color:${C.ground};">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:${C.ground};">${esc(preheader || '')}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${C.ground};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="oa-ground" style="background-color:${C.ground};">
  <tr><td align="center" style="padding:28px 12px 32px;">
   <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
@@ -118,18 +167,18 @@ function brandShell({ title, preheader, bodyHtml, site, contact }) {
        </a>
       </td>
       <td style="vertical-align:middle;font-family:${HEAD_FONT};font-size:20px;line-height:1.2;color:${C.ink};">
-       <a href="${esc(S)}" style="color:${C.ink};text-decoration:none;">Operations Academia<span style="color:${C.muted};">.org</span></a>
+       <a href="${esc(S)}" class="oa-ink" style="color:${C.ink};text-decoration:none;">Operations Academia<span class="oa-muted" style="color:${C.muted};">.org</span></a>
       </td>
      </tr>
     </table>
    </td></tr>
 
-   <tr><td style="background-color:${C.card};border:1px solid ${C.line};border-radius:14px;padding:32px 36px;font-family:${BODY_FONT};font-size:16px;line-height:1.6;color:${C.ink};">
+   <tr><td class="oa-card" style="background-color:${C.card};border:1px solid ${C.line};border-radius:14px;padding:32px 36px;font-family:${BODY_FONT};font-size:16px;line-height:1.6;color:${C.ink};">
 ${bodyHtml}
    </td></tr>
 
-   <tr><td style="padding:18px 8px 0;font-family:${BODY_FONT};font-size:13px;line-height:1.6;color:${C.muted};">
-    Operations Academia, <a href="${esc(S)}" style="color:${C.muted};">${esc(host)}</a>, questions to <a href="mailto:${esc(K)}" style="color:${C.muted};">${esc(K)}</a>
+   <tr><td class="oa-muted" style="padding:18px 8px 0;font-family:${BODY_FONT};font-size:13px;line-height:1.6;color:${C.muted};">
+    Operations Academia, <a href="${esc(S)}" class="oa-muted" style="color:${C.muted};">${esc(host)}</a>, questions to <a href="mailto:${esc(K)}" class="oa-muted" style="color:${C.muted};">${esc(K)}</a>
    </td></tr>
 
   </table>
@@ -153,20 +202,23 @@ function renderVerifyEmail({ firstName, email, link, site, contact }) {
   const S = String(site || SITE_DEFAULT).replace(/\/+$/, '');
   const K = String(contact || CONTACT_DEFAULT);
   const host = hostOf(S);
-  const name = String(firstName || '').trim();
+  const name = greetingName(firstName);
   const L = String(link || '');
 
   const subject = 'Verify your e-mail address for Operations Academia';
   const greeting = name ? `Hello ${esc(name)},` : 'Hello,';
+  const greetingText = name ? `Hello ${name},` : 'Hello,';
   const label = 'Verify my e-mail address';
 
-  /* The button: a coloured table cell with a padded link inside it, which is
-     the shape every mail client draws, plus a VML roundrect for Outlook on
-     Windows, which ignores the padding and would otherwise draw a bare link. */
+  /* The button: a VML roundrect for Outlook on Windows, and for every other
+     client a padded link that draws the pill itself. The cell around them
+     carries NO colour of its own: Outlook honours bgcolor on a cell and
+     ignores border-radius, so a coloured cell the size of the roundrect
+     painted a square block behind the rounded one. */
   const button = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
  <tr>
-  <td align="center" bgcolor="${C.button}" style="border-radius:999px;background-color:${C.button};">
+  <td align="center">
    <!--[if mso]>
    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${esc(L)}" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="50%" stroke="f" fillcolor="${C.button}">
     <w:anchorlock/>
@@ -174,20 +226,20 @@ function renderVerifyEmail({ firstName, email, link, site, contact }) {
    </v:roundrect>
    <![endif]-->
    <!--[if !mso]><!-->
-   <a href="${esc(L)}" style="display:inline-block;padding:14px 26px;border-radius:999px;background-color:${C.button};color:${C.onButton};font-family:${BODY_FONT};font-size:16px;font-weight:600;line-height:1.25;text-decoration:none;">${label}</a>
+   <a href="${esc(L)}" class="oa-btn" style="display:inline-block;padding:14px 26px;border-radius:999px;background-color:${C.button};color:${C.onButton};font-family:${BODY_FONT};font-size:16px;font-weight:600;line-height:1.25;text-decoration:none;">${label}</a>
    <!--<![endif]-->
   </td>
  </tr>
 </table>`;
 
   const bodyHtml = `
-<h1 style="margin:0 0 18px;font-family:${HEAD_FONT};font-size:28px;line-height:1.2;font-weight:600;color:${C.ink};">One more step</h1>
+<h1 class="oa-ink" style="margin:0 0 18px;font-family:${HEAD_FONT};font-size:28px;line-height:1.2;font-weight:600;color:${C.ink};">One more step</h1>
 <p style="margin:0 0 14px;">${greeting}</p>
 <p style="margin:0 0 22px;">Thank you for registering with Operations Academia. Please confirm that this is your e-mail address by pressing the button below.</p>
 ${button}
-<p style="margin:26px 0 8px;color:${C.ink2};font-size:15px;">The button opens ${esc(host)}. If it does not work, copy this link into your browser:</p>
-<p style="margin:0 0 22px;font-size:13px;line-height:1.5;color:${C.muted};word-break:break-all;">${esc(L)}</p>
-<p style="margin:0;color:${C.ink2};font-size:15px;">You will not be able to sign in until your address is verified. If you did not register, you can ignore this message and no account will be used.</p>`;
+<p class="oa-ink2" style="margin:26px 0 8px;color:${C.ink2};font-size:15px;">The button opens ${esc(host)}. If it does not work, copy this link into your browser:</p>
+<p class="oa-muted" style="margin:0 0 22px;font-size:13px;line-height:1.5;color:${C.muted};word-break:break-all;">${breakable(esc(L))}</p>
+<p class="oa-ink2" style="margin:0;color:${C.ink2};font-size:15px;">You will not be able to sign in until your address is verified. If you did not register, you can ignore this message and no account will be used.</p>`;
 
   const html = brandShell({
     title: subject,
@@ -197,10 +249,22 @@ ${button}
     contact: K,
   });
 
+  /* Written for text rather than stripped from the HTML: a text client has
+     no button, so "pressing the button below" would point at nothing and
+     the link would sit two paragraphs away from the words that ask for it.
+     Here the label and the address are one line. */
   const text = [
     'Operations Academia',
     '',
-    toPlain(bodyHtml),
+    'One more step',
+    '',
+    greetingText,
+    '',
+    'Thank you for registering with Operations Academia. Please confirm that this is your e-mail address by opening the link below.',
+    '',
+    `${label}: ${L}`,
+    '',
+    'You will not be able to sign in until your address is verified. If you did not register, you can ignore this message and no account will be used.',
     '',
     `Operations Academia, ${host}, questions to ${K}`,
   ].join('\n');
@@ -208,4 +272,4 @@ ${button}
   return { subject, html, text };
 }
 
-module.exports = { renderVerifyEmail, brandShell, esc, toPlain };
+module.exports = { renderVerifyEmail, brandShell, esc, toPlain, greetingName, breakable, NAME_MAX };

@@ -31,6 +31,28 @@
   var timer = null;
   var pending = false;
 
+  /** A password account whose address is not confirmed yet is signed out
+      for everything on the site, this record included: the rules refuse a
+      session filed under its uid (verified() in _firestore.rules), and a
+      refused write is silently dropped below, so the session would simply
+      vanish from the record. It is filed as an anonymous visitor instead.
+      The test is the one assets/oa-accounts.js makes in needsVerification. */
+  function usable(u) {
+    if (!u) return null;
+    var pw = (u.providerData || []).some(function (p) { return !!p && p.providerId === 'password'; });
+    return u.emailVerified === false && pw ? null : u;
+  }
+
+  /** The page a session is filed under. verify-email.html is opened with a
+      one-time verification code on its query string, and a code is a
+      credential: it is never copied into a record, so a query carrying one
+      is dropped whole and the path alone is kept. */
+  function pageOf() {
+    var q = String(location.search || '');
+    if (/[?&]oobCode=/.test(q)) return location.pathname.slice(0, 300);
+    return (location.pathname + q).slice(0, 300);
+  }
+
   /** The identity a session is filed under: the uid, else a stable random
       per-browser id so an anonymous visitor's return visits correlate. */
   function who() {
@@ -55,7 +77,7 @@
       uid: id,
       email: (user && user.email) || '',
       sid: sid,
-      page: (location.pathname + location.search).slice(0, 300),
+      page: pageOf(),
       start: start,
       last: Date.now(),
       dur: Math.round((Date.now() - start) / 1000),
@@ -102,7 +124,7 @@
 
   OAFB.ready().then(function (fb) {
     fb.auth().onAuthStateChanged(function (u) {
-      user = u || null;
+      user = usable(u);
       if (!timer) {
         flush();                                  // session opens
         timer = setInterval(flush, 60000);        // rolling duration

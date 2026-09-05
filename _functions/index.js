@@ -284,28 +284,60 @@ exports.sendVerificationEmail = onCall(
     const today = new Date().toISOString().slice(0, 10);
     const now = Date.now();
     const limitRef = db.collection('verifyMail').doc(uid);
-    const prior = (await limitRef.get()).data() || {};
-    const sameDay = prior.day === today;
-    const count = sameDay ? Number(prior.count || 0) : 0;
-    if (typeof prior.sentAt === 'number' && now - prior.sentAt < VERIFY_MIN_GAP_MS) {
+
+    /* The slot is RESERVED in a transaction before anything is sent. Read,
+       check, send and then write would let ten calls fired in the same
+       second all read the same stamp, all pass, and each send a message from
+       the site's mailbox; a transaction makes the check and the stamp one
+       step, so the second caller reads the first one's reservation. A send
+       that then fails puts the previous stamp back (below), so a failed
+       attempt is not counted against the person who presses again. */
+    const slot = await db.runTransaction(async (tx) => {
+      const before = (await tx.get(limitRef)).data() || {};
+      const count = before.day === today ? Number(before.count || 0) : 0;
+      if (typeof before.sentAt === 'number' && now - before.sentAt < VERIFY_MIN_GAP_MS) {
+        return { refused: 'too-soon' };
+      }
+      if (count >= VERIFY_DAY_MAX) return { refused: 'daily-limit' };
+      tx.set(limitRef, { sentAt: now, day: today, count: count + 1 });
+      return { before };
+    });
+    if (slot.refused === 'too-soon') {
       logger.warn('verification refused', { uid, reason: 'too-soon' });
       throw new HttpsError('resource-exhausted',
         'A message went out a moment ago. Give it a minute and look again.');
     }
-    if (count >= VERIFY_DAY_MAX) {
+    if (slot.refused === 'daily-limit') {
       logger.warn('verification refused', { uid, reason: 'daily-limit' });
       throw new HttpsError('resource-exhausted',
         'That is enough messages for today. Try again tomorrow, and look in spam.');
     }
+    /** Put the stamp back as it was before this call reserved its slot. */
+    const releaseSlot = async () => {
+      try {
+        if (Object.keys(slot.before).length) await limitRef.set(slot.before);
+        else await limitRef.delete();
+      } catch (e) {
+        logger.warn('rate-limit stamp not restored', { uid, error: e.code });
+      }
+    };
 
     /* Firebase mints the one-time code; the site's own page is what the
        reader lands on. The continueUrl is where that page sends them next. */
-    const generated = await getAuth().generateEmailVerificationLink(email, {
-      url: SITE + '/account.html',
-    });
+    let generated = '';
+    try {
+      generated = await getAuth().generateEmailVerificationLink(email, {
+        url: SITE + '/account.html',
+      });
+    } catch (e) {
+      logger.error('verification token not minted', { uid, error: e.code });
+      await releaseSlot();
+      throw new HttpsError('internal', 'The verification message could not be made.');
+    }
     const code = new URL(generated).searchParams.get('oobCode');
     if (!code) {
       logger.error('the minted address carried no verification token', { uid });
+      await releaseSlot();
       throw new HttpsError('internal', 'The verification message could not be made.');
     }
     const link = `${SITE}/verify-email.html?mode=verifyEmail` +
@@ -320,7 +352,7 @@ exports.sendVerificationEmail = onCall(
       const prof = (await db.collection('profiles').doc(uid).get()).data() || {};
       firstName = String(prof.firstName || '').trim();
     } catch (e) {
-      logger.warn('profile not read for the greeting', { uid, error: e.message });
+      logger.warn('profile not read for the greeting', { uid, error: e.code });
     }
 
     const msg = renderVerifyEmail({ firstName, email, link, site: SITE, contact: CONTACT });
@@ -340,13 +372,20 @@ exports.sendVerificationEmail = onCall(
         text: msg.text,
       });
     } catch (e) {
-      logger.error('verification e-mail not sent', { uid, to: redact(email), error: e.message });
+      /* The SMTP error's own message can quote the rejected recipient in full
+         ("550 5.1.1 <name@example.org>: Recipient address rejected"), which
+         would undo the redaction beside it. So the code and the response
+         number are logged and the message text never is. */
+      logger.error('verification e-mail not sent', {
+        uid, to: redact(email), error: e.code, response: e.responseCode,
+      });
+      await releaseSlot();
       throw new HttpsError('internal', 'The message could not be sent.');
     }
 
-    /* Stamped AFTER the send, so a failed attempt does not count against the
-       person who then presses the button again. */
-    await limitRef.set({ sentAt: now, day: today, count: count + 1 });
+    /* The slot was reserved before the send (the transaction above); a send
+       that failed has just given it back, so only a message that really
+       went out counts against the person. */
     logger.info('verification e-mail sent', { uid, to: redact(email) });
     return { sent: true, to: redact(email) };
   });

@@ -325,7 +325,9 @@
     record('signIn', appName + ':' + how);
     // The default app is the account already signed in; any OTHER app is the
     // second session a merge opens, i.e. the account being kept.
-    var spec = appName === '[DEFAULT]' ? seed.user : (seed.keptUser || seed.user);
+    // `signInUser` is who a sign-in THROUGH THE BOX produces on a page that
+    // opened with nobody signed in (a signed-out reader pressing Sign in)
+    var spec = appName === '[DEFAULT]' ? (seed.user || seed.signInUser) : (seed.keptUser || seed.user);
     if (seed.secondSignInFails && appName !== '[DEFAULT]') {
       return Promise.reject({ code: seed.secondSignInFails });
     }
@@ -371,7 +373,11 @@
       httpsCallable: function (name) {
         return function (data) {
           record('callable', String(name), data || null);
-          if (seed.callableFails) return Promise.reject({ code: seed.callableFails, message: seed.callableFails });
+          if (seed.callableFails) {
+            // `callableMessage` is what the function said, the way the SDK
+            // hands it over on err.message (the throttle names its reason there)
+            return Promise.reject({ code: seed.callableFails, message: seed.callableMessage || seed.callableFails });
+          }
           return Promise.resolve({ data: { sent: true, to: 'r***@example.edu' } });
         };
       }

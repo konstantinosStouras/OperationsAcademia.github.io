@@ -61,6 +61,15 @@
         own (frozen) shape. A field it does not know about is a field it
         silently deletes; a separate key is one it never touches. */
   var PHOTO_KEY = 'oaAcctPhoto';
+  /* The uid of a password account whose address is not confirmed yet. It
+     exists because the archived /v2/ tree shares this origin and writes the
+     hint for ANY signed-in user, pending ones included (its accounts module
+     is frozen and knows nothing of the gate), so a pending account that
+     opened one archived page would paint the next live page signed in, cards
+     unlocked, until the SDK contradicted it. A hint naming this uid is read
+     as no hint at all (readHint), here and in every page's <head> snippet.
+     The marker is cleared the moment that account becomes usable. */
+  var PENDING_KEY = 'oaAuthPending';
   /* `pending`: the session is a password account whose address has not been
      confirmed yet. It is SIGNED OUT for everything but the "Check your inbox"
      card, which is what the branches below on state.pending are for. */
@@ -79,7 +88,22 @@
   }
 
   function readHint() {
-    try { return JSON.parse(localStorage.getItem(HINT_KEY) || 'null'); } catch (e) { return null; }
+    try {
+      var h = JSON.parse(localStorage.getItem(HINT_KEY) || 'null');
+      // a hint the archive wrote for an account that is still pending
+      if (h && h.uid && localStorage.getItem(PENDING_KEY) === h.uid) return null;
+      return h;
+    } catch (e) { return null; }
+  }
+
+  /** Remember that this account is pending (see PENDING_KEY), or that it no
+      longer is. Only the account named is ever cleared: a marker for some
+      other uid is somebody else's business on a shared machine. */
+  function markPending(uid, pending) {
+    try {
+      if (pending) localStorage.setItem(PENDING_KEY, uid);
+      else if (localStorage.getItem(PENDING_KEY) === uid) localStorage.removeItem(PENDING_KEY);
+    } catch (e) { /* private mode */ }
   }
 
   /* A profile photo is a 192x192 JPEG data URL (see the canvas in openProfile),
@@ -133,6 +157,7 @@
           uid: u.uid, email: u.email || '', name: name || u.displayName || '',
           w: (mine && mine.w) || 0
         }));
+        markPending(u.uid, false);       // a hint is only written for a usable session
         writePhotoHint(u);
       } else {
         localStorage.removeItem(HINT_KEY);
@@ -670,12 +695,44 @@
       — it is a trap. The only Escape handler in the file used to be the
       account menu's, registered only when the signed-in chip is painted, so a
       signed-out visitor's sign-in box had no key handler at all. */
+  var FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]';
+
+  /** The controls inside a card a keyboard can reach, in document order. */
+  function focusables(card) {
+    return Array.prototype.filter.call(card.querySelectorAll(FOCUSABLE), function (el) {
+      return !el.disabled && !el.hidden && el.getAttribute('tabindex') !== '-1'
+        && el.offsetParent !== null;
+    });
+  }
+
   function wireModalKeys(wrap, close) {
     document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
       if (!wrap.parentNode || wrap.hidden) return;      // already closed
-      close();
+      if (e.key === 'Escape') { close(); return; }
+      /* aria-modal="true" promises a dialog the keyboard cannot leave by
+         Tab, and the browser does nothing to keep that promise: Tab walked
+         out of the card into the locked page behind it. So the last control
+         wraps to the first and the first back to the last. */
+      if (e.key !== 'Tab') return;
+      var card = $('.oa-modal-card', wrap) || wrap;
+      var items = focusables(card);
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1], active = document.activeElement;
+      var outside = !card.contains(active);
+      if (e.shiftKey && (outside || active === first)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (outside || active === last)) { e.preventDefault(); first.focus(); }
     });
+  }
+
+  /** Take a card out of the page and put the keyboard back where it was:
+      on the control that opened it when there is one, so closing a dialog
+      never leaves focus on <body> behind a locked page. */
+  function removeModal(wrap, backTo) {
+    var inside = wrap.contains(document.activeElement);
+    if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    if (!inside) return;
+    var back = backTo && $(backTo);
+    if (back && typeof back.focus === 'function') back.focus();
   }
 
   /** A plain, honest box for when there is nothing to sign in WITH: the SDK
@@ -886,6 +943,13 @@
   }
 
   var PROFILE_FIELDS = ['firstName', 'lastName', 'affiliation', 'website'];
+  /* Every key this file ever writes to profiles/{uid}: the four the form
+     edits, the ORCID trio, and the picture with its seeded flag. The rules
+     (profileKeys() in _firestore.rules) allow exactly these and no more,
+     pinned both ways by the selftest, because the profile is the one write
+     an account may make before its address is verified. */
+  var PROFILE_DOC_KEYS = ['firstName', 'lastName', 'affiliation', 'website',
+    'orcid', 'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded'];
 
   function profileDoc(fb, uid) {
     return fb.firestore().collection(OAFB.col.profiles).doc(uid);
@@ -1439,6 +1503,12 @@
       return 'We could not load the sign-in service. If you use an ad blocker, ' +
         'allow gstatic.com and reload.';
     }
+    // the verification mailer (a Cloud Function) is the one thing here that
+    // is not a sign-in, so its errors must not be reported as one
+    if (/^functions\//.test(c)) {
+      return 'We could not send the message just now. Try again in a minute, ' +
+        'or press the button below to have it sent again.';
+    }
     return 'Sign-in failed. Please try again.' + (c ? ' (' + c + ')' : '');
   }
 
@@ -1784,14 +1854,19 @@
   var VERIFY_FALLBACK_SENDER = 'noreply@operations-academia.firebaseapp.com';
   /* The callable's answers that mean "not available", each one a reason to
      use Firebase's own message instead: never deployed, temporarily down, or
-     failed inside (an SMTP refusal, say). A throttle is NOT one of them: the
-     message went a moment ago and sending a second from another address
-     would only confuse. */
-  var VERIFY_FALLBACK_CODES = ['functions/not-found', 'functions/unavailable', 'functions/internal'];
+     failed inside (an SMTP refusal, say), or took longer than its 30 seconds
+     (a slow mailbox), which reaches the browser as deadline-exceeded. A
+     throttle is NOT one of them: the message went a moment ago and sending a
+     second from another address would only confuse. */
+  var VERIFY_FALLBACK_CODES = ['functions/not-found', 'functions/unavailable',
+    'functions/internal', 'functions/deadline-exceeded'];
+
+  /* The control that opened the card, for the keyboard to go back to. */
+  var VERIFY_BACK = '#oa-verify-chip, #oa-np-verify';
 
   function closeVerifyPanel() {
     var old = $('#oa-verify');
-    if (old && old.parentNode) old.parentNode.removeChild(old);
+    if (old) removeModal(old, VERIFY_BACK);
   }
 
   function verifySay(msg, ok) {
@@ -1806,7 +1881,9 @@
     var u = state.user || who;
     if (!r) return;
     if (r.throttled) {
-      verifySay('The last message was sent a moment ago. Give it a minute and look again.');
+      // the function refuses for two reasons (too soon, and enough for the
+      // day) and says which; only when it said nothing is the short one assumed
+      verifySay(r.reason || 'The last message was sent a moment ago. Give it a minute and look again.');
       return;
     }
     if (r.alreadyVerified) {
@@ -1828,13 +1905,17 @@
 
   /** The "Check your inbox" card. Rebuilt on every open, like the sign-in
       box, so a stale message never survives a reopen. `who` covers the
-      registration path, where the auth event may not have fired yet. On
-      verify-email.html the card is never drawn: that page confirms the
-      address itself, and a modal over it would cover the confirmation. */
-  function openVerifyPanel(status, who) {
+      registration path, where the auth event may not have fired yet. `auto`
+      says the SITE opened it (the auth handler, on every page a pending
+      session lands on) rather than a press: on verify-email.html the card is
+      not drawn on its own, since that page confirms the address itself and a
+      modal over it would cover the confirmation, but a press on the chip
+      there must still open it, or the one account control in the header
+      does nothing when pressed. */
+  function openVerifyPanel(status, who, auto) {
     var u = state.user || who;
     if (!u) return;
-    if (document.querySelector('[data-oa-verify-page]')) return;
+    if (auto && document.querySelector('[data-oa-verify-page]')) return;
     closeVerifyPanel();
 
     var wrap = document.createElement('div');
@@ -1844,15 +1925,23 @@
       '<div class="oa-modal-card" role="dialog" aria-modal="true" aria-labelledby="oa-verify-h">' +
         '<button type="button" class="oa-modal-x" aria-label="Close">&times;</button>' +
         '<h3 id="oa-verify-h">Check your inbox</h3>' +
+        /* Two ledes, because only one path has just sent anything. The
+           registration path (status 'sent') has: the message is on its way.
+           Every other path, a sign-in with an unconfirmed account or a page
+           load in a pending session, has sent nothing, and an account made
+           before the gate existed was never sent one at all, so that lede
+           promises nothing and the button offers to send it. */
         '<p class="oa-modal-lede">' +
           (status === 'sent'
-            ? 'Your account is created. '
-            : 'Your e-mail address has not been confirmed yet. ') +
-          'A message from Operations Academia is on its way to <strong>' + esc(u.email || '') +
-          '</strong>. Press the link in it to confirm the address. Until then nothing on the ' +
-          'site works for this account.</p>' +
+            ? 'Your account is created. A message from Operations Academia is on its way to ' +
+              '<strong>' + esc(u.email || '') + '</strong>. Press the link in it to confirm the address.'
+            : 'Your e-mail address has not been confirmed yet. If a message from Operations ' +
+              'Academia reached <strong>' + esc(u.email || '') + '</strong> when you registered, ' +
+              'press the link in it. Otherwise press the button below and we will send one.') +
+          ' Until then nothing on the site works for this account.</p>' +
         '<div class="oa-auth-actions">' +
-          '<button type="button" class="button blue" id="oa-verify-send">Send the e-mail again</button>' +
+          '<button type="button" class="button blue" id="oa-verify-send">' +
+            (status === 'sent' ? 'Send the e-mail again' : 'Send the e-mail') + '</button>' +
           '<button type="button" class="button oa-btn-ghost" id="oa-verify-check">I have verified it</button>' +
         '</div>' +
         '<p class="oa-auth-msg" id="oa-verify-msg" role="alert"></p>' +
@@ -1864,7 +1953,7 @@
       '</div>';
     document.body.appendChild(wrap);
 
-    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+    function close() { removeModal(wrap, VERIFY_BACK); }
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     $('.oa-modal-x', wrap).addEventListener('click', close);
     wireModalKeys(wrap, close);
@@ -1892,7 +1981,9 @@
 
   /** Send the verification message. Resolves with where it went:
         { via: 'function' }                 the site's own message
-        { via: 'function', throttled: true } the function refused: too soon
+        { via: 'function', throttled: true, reason }
+                                            the function refused: too soon, or enough
+                                            for the day, in its own words
         { via: 'function', alreadyVerified: true }
         { via: 'fallback' }                 Firebase's own message
       Rejects only when neither road could be taken. */
@@ -1910,7 +2001,9 @@
       .then(function (res) { return { via: 'function', to: res && res.data && res.data.to }; })
       .catch(function (err) {
         var c = (err && err.code) || '';
-        if (c === 'functions/resource-exhausted') return { via: 'function', throttled: true };
+        if (c === 'functions/resource-exhausted') {
+          return { via: 'function', throttled: true, reason: (err && err.message) || '' };
+        }
         if (c === 'functions/failed-precondition') return { via: 'function', alreadyVerified: true };
         if (VERIFY_FALLBACK_CODES.indexOf(c) !== -1 || /sdk-load-failed/.test((err && err.message) || '')) {
           return fallback();
@@ -2740,9 +2833,10 @@
         state.pending = needsVerification(u);
         if (state.pending) {
           writeHint(null);
+          markPending(u.uid, true);      // and a hint /v2/ writes for it is ignored
           paint();
           queue.length = 0;
-          if (!$('#oa-verify')) openVerifyPanel();
+          if (!$('#oa-verify')) openVerifyPanel(null, null, true);
           notify(null);
           return;
         }

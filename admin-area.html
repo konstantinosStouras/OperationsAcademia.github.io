@@ -28,7 +28,7 @@
          snippet as every other page; see feedback.html for the reasoning. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
           el.style.setProperty('--oa-chip-w', h.w + 'px');
         }

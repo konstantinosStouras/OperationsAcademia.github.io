@@ -6,7 +6,7 @@
       "id": "email-verification-2026-09",
       "date": "2026-09-04",
       "title": "A new account confirms its e-mail address first",
-      "summary": "Registering with an e-mail address and a password now sends you a message with one button, and the account does nothing until you press it. The page it opens says whether the address is confirmed, and the site offers to send the message again if it did not arrive. Google sign-ins need no extra step, since Google has already confirmed the address.",
+      "summary": "Registering with an e-mail address and a password now sends you a message with one button, and the account does nothing until you press it. The page it opens says whether the address is confirmed, and the site offers to send the message again if it did not arrive. If you registered with an e-mail address and a password before this change, the site asks you to confirm your address once: sign in, press Send the e-mail on the card that opens, and press the link in the message. Google sign-ins need no extra step, since Google has already confirmed the address.",
       "url": "/account.html"
     },
     {

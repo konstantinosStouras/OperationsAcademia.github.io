@@ -178,6 +178,9 @@ async function signedInPage(url, opts = {}) {
      applyActionCodeFails …) for the checks that drive a failure branch */
   await p.addInitScript(
     `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [], ...(opts.seed || {}) })};`);
+  /* `init` is extra script run before the page's own (a localStorage seed, an
+     observer on the first paint), for the checks that measure the head */
+  if (opts.init) await p.addInitScript(opts.init);
   await p.route('**/firebasejs/**', (r) =>
     r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_FB }));
   await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
@@ -7713,6 +7716,7 @@ for (const w of [320, 360, 390, 430]) {
         lede: panel ? panel.querySelector('.oa-modal-lede').textContent : '',
         text: panel ? panel.textContent : '',
         send: !!(panel && panel.querySelector('#oa-verify-send')),
+        sendLabel: panel ? panel.querySelector('#oa-verify-send').textContent : '',
         check: !!(panel && panel.querySelector('#oa-verify-check')),
         out: !!(panel && panel.querySelector('#oa-verify-out')),
         cards: cards.length,
@@ -7736,6 +7740,9 @@ for (const w of [320, 360, 390, 430]) {
       'verify: …naming the address, and that a message from Operations Academia is on its way');
     ok(st.send && st.check && st.out,
       'verify: …with Send the e-mail again, I have verified it, and a way out');
+    ok(/If a message from Operations Academia reached/.test(st.lede) && !/on its way/.test(st.lede)
+       && st.sendLabel === 'Send the e-mail',
+      'verify: on a sign-in, where nothing was sent, the card promises nothing "on its way" and the button offers to send it');
     ok(/spam/i.test(st.text) && /operationsacademia@gmail\.com/.test(st.text),
       'verify: …and says to look in spam, naming the sender');
     ok(st.cards > 1 && st.locked === st.cards,
@@ -7806,6 +7813,136 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- the function refuses, and says why: its words reach the card --------- */
+  {
+    const DAY = 'That is enough messages for today. Try again tomorrow, and look in spam.';
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/resource-exhausted', callableMessage: DAY } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction(() => /today|moment ago/.test((document.querySelector('#oa-verify-msg') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    const th = await q.evaluate((uid) => ({
+      msg: document.querySelector('#oa-verify-msg').textContent,
+      fallback: window.__fb.at('sendEmailVerification', uid),
+    }), UNVERIFIED.uid);
+    eq(th.msg, DAY, 'verify: a daily-limit refusal reaches the card in the function\'s own words, not the 90-second sentence');
+    eq(th.fallback, -1, 'verify: …and a throttle is never re-sent through Firebase');
+    eq(errors, [], 'verify: no uncaught script error on the throttle path');
+    await ctx.close();
+  }
+  {
+    // a slow mailbox: the callable times out, and Firebase's message goes instead
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/deadline-exceeded' } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction((uid) => window.__fb.at('sendEmailVerification', uid) >= 0,
+      UNVERIFIED.uid, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const slow = await q.evaluate(() => ({ msg: document.querySelector('#oa-verify-msg').textContent }));
+    ok(/Sent to newcomer@example\.edu/.test(slow.msg),
+      'verify: a send that timed out falls back to Firebase\'s own message rather than reporting a failure');
+    eq(errors, [], 'verify: no uncaught script error on the slow-send path');
+    await ctx.close();
+  }
+  {
+    // a refusal that is neither a throttle nor a reason to fall back: worded
+    // as a send that failed, never as a sign-in failure with a raw code
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/permission-denied' } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction(() => /could not|failed/i.test((document.querySelector('#oa-verify-msg') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    const ref = await q.evaluate((uid) => ({
+      msg: document.querySelector('#oa-verify-msg').textContent,
+      fallback: window.__fb.at('sendEmailVerification', uid),
+    }), UNVERIFIED.uid);
+    ok(/We could not send the message just now/.test(ref.msg) && !/Sign-in failed/.test(ref.msg) && !/functions\//.test(ref.msg),
+      'verify: a refused send is worded as one, with no "Sign-in failed" and no raw code');
+    eq(ref.fallback, -1, 'verify: …and is not the fallback\'s business');
+    eq(errors, [], 'verify: no uncaught script error on the refused path');
+    await ctx.close();
+  }
+  {
+    // the Functions bundle loads and defines nothing: the load-failure branch,
+    // driven for real rather than read off the source
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { noFunctions: true } });
+    await q.route('**/firebase-functions-compat.js', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: '/* nothing */' }));
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction((uid) => window.__fb.at('sendEmailVerification', uid) >= 0,
+      UNVERIFIED.uid, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const nf = await q.evaluate((uid) => ({
+      callable: window.__fb.at('callable', 'sendVerificationEmail'),
+      fallback: window.__fb.at('sendEmailVerification', uid),
+      from: (document.querySelector('#oa-verify-from') || {}).textContent,
+      msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+    }), UNVERIFIED.uid);
+    ok(nf.callable === -1 && nf.fallback >= 0,
+      'verify: with a Functions bundle that defined nothing, no callable is tried and Firebase\'s message goes');
+    ok(/firebaseapp\.com/.test(nf.from) && /Sent to/.test(nf.msg),
+      'verify: …and the sender line names Firebase\'s address');
+    eq(errors, [], 'verify: no uncaught script error on the load-failure path');
+    await ctx.close();
+  }
+
+  /* -- the archive's hint: a pending account is painted signed OUT --------- */
+  {
+    /* /v2/ is frozen and writes oaAuthHint for any signed-in user. The live
+       pending branch writes a marker beside it, and the head snippet on every
+       live page reads a hint naming that uid as no hint: measured on the
+       FIRST value the snippet stamps, before any script of the page runs. */
+    /* an init script runs before the document has an element to observe, so
+       the stamp is caught where it is made: every setAttribute of that name */
+    const observe = `
+      window.__auth = [];
+      (function () {
+        var orig = Element.prototype.setAttribute;
+        Element.prototype.setAttribute = function (n, v) {
+          if (n === 'data-oa-auth') window.__auth.push(String(v));
+          return orig.apply(this, arguments);
+        };
+      })();`;
+    const hintFor = (u) => `localStorage.setItem('oaAuthHint', ${JSON.stringify(JSON.stringify({ uid: u.uid, email: u.email, name: 'X', w: 120 }))});`;
+    {
+      const { ctx, page: q, errors } = await signedInPage('jobs.html', {
+        user: UNVERIFIED,
+        init: hintFor(UNVERIFIED) + `localStorage.setItem('oaAuthPending', ${JSON.stringify(UNVERIFIED.uid)});` + observe,
+      });
+      await q.waitForSelector('#oa-verify-chip', { timeout: 15000 });
+      await q.waitForTimeout(300);
+      const h = await q.evaluate(() => ({
+        first: window.__auth[0],
+        now: document.documentElement.getAttribute('data-oa-auth'),
+        hintFn: window.OAAccounts.hint(),
+        hint: localStorage.getItem('oaAuthHint'),
+        marker: localStorage.getItem('oaAuthPending'),
+        locked: document.querySelectorAll('#oa-jobs .oa-card-locked').length,
+        cards: document.querySelectorAll('#oa-jobs .oa-card').length,
+      }));
+      eq(h.first, 'out', 'archive hint: the head snippet paints a hint for a PENDING uid as signed out, on the first frame');
+      ok(h.now === 'out' && h.hintFn === 'out' && h.hint === null && h.marker === UNVERIFIED.uid,
+        'archive hint: …the pending branch then clears the hint and keeps the marker');
+      ok(h.cards > 1 && h.locked === h.cards, 'archive hint: …and every card is locked');
+      eq(errors, [], 'archive hint: no uncaught script error');
+      await ctx.close();
+    }
+    {
+      // the control: the same hint for a verified reader, no marker, paints in
+      const { ctx, page: q, errors } = await signedInPage('jobs.html', { user: A_READER, init: hintFor(A_READER) + observe });
+      const h = await q.evaluate(() => ({ first: window.__auth[0], marker: localStorage.getItem('oaAuthPending') }));
+      eq(h.first, 'in', 'archive hint: a hint with no marker still paints signed in on the first frame');
+      eq(h.marker, null, 'archive hint: …and a usable session writes no marker');
+      eq(errors, [], 'archive hint: no uncaught script error on the control');
+      await ctx.close();
+    }
+  }
+
   /* -- "I have verified it", once the link HAS been pressed: the lift ------- */
   {
     const { ctx, page: q, errors } = await signedInPage('jobs.html',
@@ -7842,9 +7979,13 @@ for (const w of [320, 360, 390, 430]) {
     encodeURIComponent('https://www.operationsacademia.org/account.html');
 
   {
-    // the signed-in pending reader, whose link works
+    // the signed-in pending reader, whose link works. The registration form
+    // stamps oaProfileAsked before any link can be pressed, so the fixture
+    // does too; without it the first-run profile card opens the moment the
+    // account is lifted and takes the focus this block measures.
     const { ctx, page: q, errors } = await signedInPage(LINK,
-      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main',
+        init: `localStorage.setItem('oaProfileAsked:${UNVERIFIED.uid}', '1');` });
     await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
     await q.waitForTimeout(300);
     const done = await q.evaluate((uid) => ({
@@ -7859,8 +8000,16 @@ for (const w of [320, 360, 390, 430]) {
       chip: !!document.querySelector('#oa-chip'),
       user: (window.OAAccounts.user() || {}).uid,
       others: ['ve-wait', 've-error', 've-nocode'].filter((id) => !document.getElementById(id).hidden),
+      focusIn: document.getElementById('ve-done').contains(document.activeElement),
+      focusTag: document.activeElement && document.activeElement.tagName,
+      url: location.search,
+      note: document.getElementById('ve-done-note').textContent,
     }), UNVERIFIED.uid);
     eq(done.h2, 'Your e-mail address is verified', 'verify page: a working link shows the verified state');
+    ok(done.focusIn && done.focusTag === 'H2',
+      'verify page: …and the keyboard lands on its heading, so a screen reader hears the outcome');
+    eq(done.url, '', 'verify page: the one-time code is off the address bar');
+    ok(/ready to use/.test(done.note), 'verify page: the card\'s own note stands for a confirmed account');
     ok(done.contShown && done.contHref === 'account.html' && !done.signinShown,
       'verify page: …with Continue to your account for the signed-in reader');
     ok(done.applied && done.applied.path === 'AbC123xyz',
@@ -7889,6 +8038,63 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
   {
+    // …and signing in THROUGH that box changes the card: Continue appears,
+    // Sign in goes, with no reload (the page listens for the session)
+    const { ctx, page: q, errors } = await signedOutPage(LINK,
+      { seed: { signInUser: A_READER }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.click('#ve-signin');
+    await q.waitForSelector('#oa-auth-form', { timeout: 8000 });
+    await q.fill('#oa-auth-form [name="email"]', A_READER.email);
+    await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+    await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+    await q.waitForFunction(() => !document.querySelector('#ve-continue').hidden, null, { timeout: 8000 });
+    const si = await q.evaluate(() => ({
+      signinShown: !document.querySelector('#ve-signin').hidden,
+      box: !!document.querySelector('#oa-auth'),
+      user: (window.OAAccounts.user() || {}).uid,
+    }));
+    ok(!si.signinShown && si.user === A_READER.uid && !si.box,
+      'verify page: after signing in on the verified card, Continue is offered and Sign in is gone');
+    eq(errors, [], 'verify page: no uncaught script error signing in on the card');
+    await ctx.close();
+  }
+  {
+    // the code applied, but THIS account is still unconfirmed after its reload:
+    // the link belonged to another address, and Continue would lead to a
+    // locked account page
+    const { ctx, page: q, errors } = await signedInPage(LINK, { user: UNVERIFIED, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.waitForTimeout(200);
+    const mm = await q.evaluate(() => ({
+      note: document.getElementById('ve-done-note').textContent,
+      contShown: !document.querySelector('#ve-continue').hidden,
+      signinShown: !document.querySelector('#ve-signin').hidden,
+      signinText: document.querySelector('#ve-signin').textContent,
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent,
+      pending: (window.OAAccounts.pendingUser() || {}).uid,
+      applied: window.__fb.log.some((e) => e.op === 'applyActionCode'),
+    }));
+    ok(mm.applied && /not the one this account uses/.test(mm.note),
+      'verify page: a code that applied while this account stays unconfirmed says the link was another address\'s');
+    ok(!mm.contShown && mm.signinShown && mm.signinText === 'Use a different account',
+      'verify page: …offers a different account, never Continue into a locked account page');
+    ok(mm.chip === 'Verify your e-mail' && mm.pending === UNVERIFIED.uid,
+      'verify page: …and the account here stays pending');
+    await q.click('#ve-signin');
+    await q.waitForSelector('#oa-auth', { timeout: 8000 });
+    const out2 = await q.evaluate((uid) => ({
+      pending: window.OAAccounts.pendingUser(),
+      signedOut: window.__fb.at('signOut', '[DEFAULT]') >= 0,
+      note: document.getElementById('ve-done-note').textContent,
+      panel: !!document.querySelector('#oa-verify'),
+    }), UNVERIFIED.uid);
+    ok(out2.pending === null && out2.signedOut && !out2.panel && /ready to use/.test(out2.note),
+      'verify page: pressing it signs the pending account out and opens the sign-in box, and the card re-decides its note');
+    eq(errors, [], 'verify page: no uncaught script error on the mismatch path');
+    await ctx.close();
+  }
+  {
     // an expired link, with the unconfirmed account signed in: say what
     // happened, and offer a new one that goes through the same send path
     const { ctx, page: q, errors } = await signedInPage(LINK,
@@ -7912,6 +8118,29 @@ for (const w of [320, 360, 390, 430]) {
     await q.waitForTimeout(200);
     ok(/Sent to newcomer@example\.edu/.test(await q.$eval('#ve-msg', (n) => n.textContent)),
       'verify page: pressing it sends through the same function the card uses, and says so');
+    /* the chip is the one account control in the header, and on this page a
+       press on it must still do something: it opens the card, which the page
+       otherwise never draws on its own */
+    await q.click('#oa-verify-chip');
+    await q.waitForSelector('#oa-verify', { timeout: 8000 });
+    const pressed = await q.evaluate(() => ({
+      heading: document.querySelector('#oa-verify h3').textContent,
+      focusIn: document.querySelector('#oa-verify').contains(document.activeElement),
+    }));
+    ok(pressed.heading === 'Check your inbox' && pressed.focusIn,
+      'verify page: a PRESS on the header chip opens the card here too, with focus inside it');
+    await q.keyboard.press('Escape');
+    await q.waitForFunction(() => !document.querySelector('#oa-verify'), null, { timeout: 8000 });
+    eq(await q.evaluate(() => document.activeElement && document.activeElement.id), 'oa-verify-chip',
+      'verify page: …and Escape closes it with the keyboard back on the chip');
+    /* Tab stays inside the card while it is open */
+    await q.click('#oa-verify-chip');
+    await q.waitForSelector('#oa-verify', { timeout: 8000 });
+    await q.focus('#oa-verify-out');
+    await q.keyboard.press('Tab');
+    const tabbed = await q.evaluate(() => document.querySelector('#oa-verify').contains(document.activeElement));
+    ok(tabbed, 'verify page: Tab from the card\'s last control wraps to its first rather than leaving the dialog');
+    await q.keyboard.press('Escape');
     eq(errors, [], 'verify page: no uncaught script error on the expired path');
     await ctx.close();
   }
