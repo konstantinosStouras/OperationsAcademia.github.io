@@ -1,0 +1,79 @@
+name: "OA: carry the Q&A archive into the forum"
+
+# A SEED IS PRESSED, NEVER SCHEDULED. The forum ships built and not announced
+# (CLAUDE.md, "It is BUILT and NOT ANNOUNCED"), and the owner asked on
+# 2026-09-05 to pre-populate it with certain topics. This button carries the
+# tracking workbook's "2026 Q&A" tab into the Candidates' room as threads and
+# replies under drawn handles, one handle per post.
+#
+# THE INPUT DEFAULTS TO A PLAN. `write: false` prints every thread and post it
+# would post and touches nothing; tick it to post them. The seed itself is
+# committed (_scraper/forum-seed-2026-qa.json), so what will be written is
+# reviewable in the diff before the button is pressed.
+#
+# IT IS IDEMPOTENT. Each thread is keyed on its source row, so a second press
+# reports what is already there and writes nothing — which is also what keeps
+# the room's tag tally from being counted twice.
+#
+# Nothing here is scheduled: no cron may touch the forum (the selftest pins
+# that). Without FIREBASE_SERVICE_ACCOUNT nothing is written; the run warns
+# and exits 0.
+
+on:
+  workflow_dispatch:
+    inputs:
+      write:
+        description: 'Post the threads (unticked = print the plan only)'
+        type: boolean
+        default: false
+      room:
+        description: 'Room (blank = the one the seed names, candidates)'
+        type: choice
+        options: ['', 'candidates', 'open']
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-forum-seed
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be written."
+          fi
+
+      # firebase-admin 12, like every other workflow here that runs a _scraper/
+      # script: _mail.mjs's firebaseAdmin() uses the NAMESPACED admin.* surface
+      # (admin.apps, admin.credential.cert, admin.firestore()), and 14 removed
+      # it whole. The ^14 in _functions/package.json is the deployed Cloud
+      # Functions runtime, which uses the modular API and is a different thing.
+      - name: Install firebase-admin
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: The seeder's own checks
+        run: node _scraper/seed-forum.mjs --selftest
+
+      - name: Seed
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.room }}" ]; then ARGS="$ARGS --room=${{ inputs.room }}"; fi
+          if [ "${{ inputs.write }}" = "true" ]; then ARGS="$ARGS --write"; fi
+          node _scraper/seed-forum.mjs $ARGS

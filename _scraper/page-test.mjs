@@ -6649,6 +6649,76 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
 
+  /* -- THE OWNER'S OWN BUG, 2026-09-05 -------------------------------------
+
+     Reported after a real deletion: the password prompt stopped them part way
+     on a password they did not remember, and every later attempt was refused,
+     because a `set` over the work order the first attempt had already filed is
+     an UPDATE and every browser update of one is refused. The panel read that
+     permission-denied as rules that were never published.
+
+     Both halves are driven here: a session Firebase will not let delete itself
+     (`deleteFails`) must finish anyway and ask for nothing, and an account that
+     already has an order filed must be able to try again. */
+  {
+    const filed = seed.concat([{ path: 'accountDeletions/' + LEAVER.uid,
+      data: { uid: LEAVER.uid, by: 'self', status: 'requested', askedAt: 1 } }]);
+    const ctx0 = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx0.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user: LEAVER, docs: filed,
+      deleteFails: 'auth/requires-recent-login' })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    await q.click('#pa-delete-open');
+    await q.waitForSelector('#pa-delete-word', { timeout: 10000 });
+    await q.fill('#pa-delete-word', 'DELETE');
+    await q.click('#pa-delete-go');
+    await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
+
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
+      'delete: a second attempt finishes — the order already filed is carried on ' +
+      'from, not written over and refused');
+    const seq = await q.evaluate(() => window.__fb.log.map((e) => e.op + ' ' + e.path));
+    ok(seq.some((l) => l.indexOf('get accountDeletions/') === 0),
+      'delete: …because it READS the order first');
+    ok(!seq.some((l) => l.indexOf('set accountDeletions/') === 0),
+      '…and writes nothing over one that is already there');
+    ok(!seq.some((l) => l.indexOf('reauth') === 0),
+      'delete: and NOTHING asks for the password back — Firebase refused the ' +
+      'sign-in deletion here, and the sweep removes it instead');
+    ok(seq.some((l) => l.indexOf('delete userDirectory/') === 0),
+      'delete: everything the browser CAN reach still went');
+    ok((await q.textContent('#pa-delete-panel')).indexOf('twenty minutes') !== -1,
+      'delete: …and the card says when the sign-in itself goes, rather than ' +
+      'claiming it has');
+    eq(errors, [], 'delete: no page errors');
+    await ctx0.close();
+  }
+
+  /* -- the maintainer is offered the reason instead of the button ----------- */
+  {
+    const { ctx, q } = await open(ADMIN, 'account.html');
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    eq(await q.$eval('#pa-delete-open', (n) => n.hidden), true,
+      'delete: the account that RUNS the site is not offered the button — deleting ' +
+      'it here would take the Admin area, the review queues and the roster with it');
+    eq(await q.$eval('#pa-delete-admin', (n) => n.hidden), false,
+      'delete: …and is told why, rather than finding the section silently short of ' +
+      'the control everybody else has');
+    /* not merely hidden: pressing it through the DOM must do nothing either,
+       or the guard is a picture of one (the gate's own "absent, not blurred") */
+    await q.evaluate(() => document.getElementById('pa-delete-open').click());
+    await q.waitForTimeout(300);
+    eq(await q.$eval('#pa-delete-panel', (n) => n.hidden), true,
+      'delete: and the panel stays shut when the hidden button is pressed anyway');
+    await ctx.close();
+  }
+
   /* -- a reader who is not signed in is not offered it ---------------------- */
   {
     const { ctx, q } = await open(null, 'account.html');

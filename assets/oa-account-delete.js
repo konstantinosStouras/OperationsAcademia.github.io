@@ -325,10 +325,15 @@
     return err && err.code === 'permission-denied';
   }
 
+  /* It used to say "This is not switched on yet" outright, which sent the owner
+     looking for a rules deploy that had happened hours earlier: the real cause
+     was a second attempt being refused as an update (see the work order step).
+     That is fixed, so the remaining causes really are the rules, but the copy
+     no longer states one as fact before the reader has tried the cheap thing. */
   var NOT_DEPLOYED =
-    'This is not switched on yet. If the rules were published in the last few ' +
-    'minutes, reload the page first. Otherwise the site’s maintainer needs ' +
-    'to publish them.';
+    'The site would not accept that. Reload the page and try once more. If it ' +
+    'still says this, the database rules need publishing and the site’s ' +
+    'maintainer can do it.';
 
   /* ------------------------------------------------- a person’s own account */
 
@@ -399,6 +404,21 @@
     if (opener) opener.focus();
   }
 
+  /** THE ONE ACCOUNT THIS IS WITHHELD FROM: the maintainer's own (owner,
+      2026-09-05). Deleting it would take the Admin area, the review queues and
+      the roster with it, and the roster already withholds the same control on
+      their own row — the personal area was the way round that.
+
+      IT IS A GUARD AGAINST AN ACCIDENT AND NOT AN AUTHORISATION, and saying so
+      is the honest half: the rules still let any owner file their own order,
+      because isAdmin() is keyed on an ADDRESS rather than on an account, and a
+      maintainer who genuinely means it registers again with the same address
+      and is the maintainer again. What this removes is a button that deletes
+      the site's own account in two presses and a typed word. */
+  function isMaintainer() {
+    return !!(root.OAAccounts && root.OAAccounts.isAdmin && root.OAAccounts.isAdmin());
+  }
+
   function openSelfPanel() {
     var msg = $('pa-delete-msg');
     if (selfState.busy) return;
@@ -406,6 +426,7 @@
       say(msg, 'Sign in first.', 'err');
       return;
     }
+    if (isMaintainer()) return;
     if (!root.OAFB || !root.OAFB.enabled || root.OAAccounts.failed()) {
       say(msg, 'Sign-in is unavailable at the moment, so nothing can be deleted. ' +
         'Please try again later.', 'err');
@@ -469,10 +490,29 @@
       /* 1. THE WORK ORDER, before anything is taken away. A permission-denied
             here means the rules carrying this collection are not published
             yet, and the honest answer is to change nothing at all rather than
-            to start a deletion nothing could finish. */
-      return d.collection(COLLECTION).doc(uid).set(order).then(function () {
-        stepLine(log, 'Recorded the request.');
-        return d;
+            to start a deletion nothing could finish.
+
+            READ FIRST, AND ONLY WRITE WHAT IS NOT THERE. The rules refuse
+            every browser UPDATE of a work order, which is what makes the
+            sweep's own stamps safe — and to Firestore a `set` over a document
+            that already exists IS an update. So a second attempt (the first
+            having stopped part way, which is exactly what the password prompt
+            used to cause) was refused with a permission-denied, and the panel
+            read it as rules that were never published. Reported by the owner,
+            2026-09-05, on an account they could then never delete.
+
+            A read that itself fails changes nothing: fall through to the
+            write, so a genuine rules problem still surfaces as one. */
+      var ref = d.collection(COLLECTION).doc(uid);
+      return ref.get()['catch'](function () { return null; }).then(function (snap) {
+        if (snap && snap.exists) {
+          stepLine(log, 'Your request was already recorded.');
+          return d;
+        }
+        return ref.set(order).then(function () {
+          stepLine(log, 'Recorded the request.');
+          return d;
+        });
       });
     }).then(function (d) {
       /* 2. TAKE THE POSTINGS DOWN. A status change, never a delete: deleting
@@ -532,13 +572,23 @@
     }).then(function () {
       /* 5. …and only now the sign-in. Anything still owed after this point is
             owed for ever, which is why the sweep, not this browser, is what
-            makes the promise true. */
-      return root.OAAccounts.deleteSignIn().then(function () {
+            makes the promise true.
+
+            AND IT NEVER ASKS FOR THE PASSWORD BACK. Firebase refuses to delete
+            a session older than a few minutes until it is re-proved, and the
+            merge asks, because nothing else can finish a merge. This can:
+            the work order is already filed and the sweep removes the sign-in
+            with the Admin SDK. Owner, 2026-09-05, stopped at that prompt on a
+            password they did not remember, then unable to try again: "There is
+            no reason we ask them to add their password." So it tries, and a
+            refusal is not a failure here, it is the ordinary path for anyone
+            who did not sign in a minute ago. */
+      return root.OAAccounts.deleteSignIn({ reauth: false }).then(function () {
         signInGone = true;
         stepLine(log, 'Removed your sign-in.');
       })['catch'](function () {
-        stepLine(log, 'Could not remove the sign-in from this browser. It is removed ' +
-          'for you within a few minutes.');
+        stepLine(log, 'Your sign-in is removed for you shortly, within about ' +
+          'twenty minutes.');
       });
     }).then(function () {
       /* `finished` before `busy` goes: the sign-in has already gone, so the
@@ -555,8 +605,8 @@
           'who you were is kept.</p>' +
         (signInGone
           ? ''
-          : '<p>We could not remove the sign-in itself from this browser, so it is ' +
-            'removed for you within a few minutes. You are signed out either way.</p>') +
+          : '<p>You are signed out now, and the sign-in itself is removed for you ' +
+            'within about twenty minutes. There is nothing more for you to do.</p>') +
         '<p class="v3-cta-row"><a class="v3-btn primary" href="./">Back to the site</a></p>';
       /* Sign out whatever happened above: the local memory of this account —
          the header hint with its picture, the menu counts — belongs to an
@@ -616,7 +666,13 @@
     });
     if (!order) return Promise.reject(new Error('no account named'));
     return db().then(function (d) {
-      return d.collection(COLLECTION).doc(order.uid).set(order);
+      /* the same read-first as the account page's own, and for the same
+         reason: a `set` over an order that is already filed is an UPDATE, and
+         every browser update of one is refused */
+      var ref = d.collection(COLLECTION).doc(order.uid);
+      return ref.get()['catch'](function () { return null; }).then(function (snap) {
+        return (snap && snap.exists) ? null : ref.set(order);
+      });
     }).then(function () { return order; });
   }
 
@@ -666,6 +722,14 @@
     root.OAAccounts.onChange(function (user) {
       show($('pa-delete'), !!user || selfState.busy || selfState.finished);
       if (!user && selfState.open && !selfState.busy && !selfState.finished) closeSelfPanel();
+      /* The maintainer is offered the reason instead of the button. Painted
+         here rather than once at boot because isAdmin() answers from the
+         resolved session, which is exactly what this event delivers; and only
+         while nothing is under way, so it cannot fight the panel. */
+      if (selfState.open || selfState.busy || selfState.finished) return;
+      var admin = !!user && isMaintainer();
+      show($('pa-delete-open'), !!user && !admin);
+      show($('pa-delete-admin'), admin);
     });
   }
 

@@ -5562,6 +5562,27 @@ async function testAccountDeletion() {
     'and address, the chair\'s, and the private note, and is otherwise cleared ' +
     'only by a successful send');
 
+  /* NEITHER STEP MAY BE ATTEMPTED TWICE, AND NEITHER MAY ASK FOR A PASSWORD
+     (owner, 2026-09-05, reporting an account they could no longer delete: the
+     password prompt stopped them part way, and the second attempt was refused
+     because a `set` over the work order it had already filed is an UPDATE,
+     which every browser update of one is refused as). */
+  ok(/ref\.get\(\)/.test(selfSrc) && /snap && snap\.exists/.test(selfSrc),
+    'the work order is READ before it is written, so a second attempt carries ' +
+    'on from the one already filed instead of being refused as an update');
+  ok(/deleteSignIn\(\{ reauth: false \}\)/.test(selfSrc),
+    'and the sign-in is deleted WITHOUT asking for the password back: the sweep ' +
+    'removes it with the Admin SDK, so a password box between somebody and the ' +
+    'door buys nothing');
+  ok(!/reauth(enticate)?[A-Za-z]*\(/.test(selfSrc.replace(/reauth: false/g, '')),
+    '…and nothing on this path re-proves the session at all');
+  ok(/ref\.get\(\)/.test(mod.slice(mod.indexOf('function requestFor'),
+       mod.indexOf('function cancelFor'))),
+    'the maintainer\'s own write reads first for the same reason');
+  ok(/reauth: false/.test(accounts) && /quiet \? u\['delete'\]\(\)/.test(accounts),
+    'oa-accounts.js offers the quiet delete, and keeps the merge asking — the ' +
+    'merge has no sweep behind it to finish what a refusal leaves');
+
   ok(/notDeployed\(err\)/.test(selfSrc) && /NOT_DEPLOYED/.test(mod),
     'a permission-denied says what to press and to reload first, rather than ' +
     'showing a bare error — the rule every rule-gated panel here follows');
@@ -5575,6 +5596,25 @@ async function testAccountDeletion() {
     'event and never from the remembered hint');
   ok(/assets\/oa-account-delete\.js/.test(acctPage),
     'and the page loads the module that draws it');
+
+  /* THE ONE ACCOUNT IT IS WITHHELD FROM (owner, 2026-09-05). The roster
+     already refuses the maintainer their own row; the personal area was the
+     way round that, and deleting the account that runs the site takes the
+     Admin area, the review queues and the roster with it. */
+  ok(/id="pa-delete-admin"[^>]*hidden/.test(acctPage),
+    'the personal area carries the maintainer\'s note, born hidden like the ' +
+    'button it replaces');
+  ok(/isMaintainer\(\)/.test(mod) && /if \(isMaintainer\(\)\) return;/.test(mod),
+    'and the module refuses to open the panel for them, not merely to draw the ' +
+    'button — a hidden control that still works on a keyboard is not a guard');
+  ok(/show\(\$\('pa-delete-open'\), !!user && !admin\)/.test(mod) &&
+     /show\(\$\('pa-delete-admin'\), admin\)/.test(mod),
+    '…and they are offered the reason in its place');
+  ok(/guard against an accident and not an authorisation/i.test(
+       await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8')),
+    '…said plainly in the file, because it is one: the rules still let an owner ' +
+    'file their own order, and isAdmin() is keyed on an address rather than on ' +
+    'an account');
   ok(!/oa-account-delete\.js/.test(stripHtml(await readFile(path.join(root, 'jobs.html'), 'utf8'))),
     'while a page that has no account panel does not pay for it');
 
@@ -14411,6 +14451,107 @@ async function testEmailVerification() {
     'the shim carries the switches those checks drive');
 }
 
+/* ------------- the Q&A archive carried into the forum (owner, 2026-09-05)
+
+   "prepopulate the OA forum with anonymous users having posted the questions
+   ... and then anonymous users having posted the answers", from the tracking
+   workbook's 2026 Q&A tab, tagged 2026 Q&A. _scraper/seed-forum.mjs is the
+   ONE writer of a forum document that lives outside _functions/forum/, so
+   the writer-against-model discipline the @doc scan applies to the callables
+   is applied to it by its own suite, which is spawned here the way the
+   roster sync's and the campaign mailer's are. Pinned here besides: the seed
+   is not under data/ (which Pages serves to anyone who asks, and these
+   threads are a room's), the room and season it is cut for, the
+   dispatch-only workflow with its plan-by-default input, and this file's
+   own section. */
+async function testForumSeed() {
+  const root = path.join(HERE, '..');
+
+  /* the seeder's own suite: the digest, the ids, the minute-aligned clock,
+     the model's KEYS over every document it would write, and the guard
+     re-run over the committed seed */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'seed-forum.mjs'), '--selftest'], { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/seed-forum selftest: \d+ checks passed/.test(out),
+    'the forum seeder\'s own selftest is green:\n' + out.slice(0, 1500));
+
+  const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
+  const FG = require(path.join(root, 'assets', 'oa-forum-guard.js'));
+  const S = await import('./seed-forum.mjs');
+  const seed = JSON.parse(await readFile(path.join(HERE, S.SEED_FILE), 'utf8'));
+
+  /* NOT under data/: everything there is served to anyone who asks, and the
+     Candidates' room is what decides who reads these */
+  ok(!S.SEED_FILE.includes('/') && !/^data\//.test(S.SEED_FILE),
+    'the seed lives beside the seeder under _scraper/, never under data/');
+  const served = await readdir(path.join(root, 'data'));
+  ok(!served.some((f) => /forum/i.test(f)), 'and no forum file reached data/');
+
+  /* what it is cut for */
+  eq(seed.room, 'candidates', 'the seed is cut for the Candidates\' room');
+  ok(FM.ROOMS.includes(seed.room), 'which is a room the model names');
+  ok(Number.isInteger(seed.season), 'it names its season');
+  ok(seed.threads.length > 0 && seed.threads.every((t) => Array.isArray(t.posts) && t.posts.length > 0),
+    'every thread in it carries at least one post');
+  ok(seed.threads.every((t) => t.tags.includes('2026-q-a')),
+    'every thread carries the tag the owner asked for');
+  ok(seed.threads.every((t) => FM.tagsOk(t.tags)), 'and one to five well-formed slugs');
+  /* one handle per post, and never the guide thread's */
+  const handles = seed.threads.flatMap((t) => t.posts.map((p) => FM.slug(p.by)));
+  eq(handles.length, new Set(handles).size, 'no handle speaks for two posters');
+  ok(!handles.includes(FM.slug(FM.MODERATOR)), 'and none of them is Moderator, which is the guide thread\'s');
+  /* nothing that could name a person travels in the file */
+  const raw = JSON.stringify(seed.threads);
+  ok(!FG.check(raw.replace(/\\[nrt]/g, ' ')), 'the whole seed passes the forum guard');
+  ok(!/"uid"|"email"|"authEmail"/.test(raw), 'and it carries no uid and no address');
+  /* what the sheet held and the forum does not: said in the file, not dropped */
+  ok(Array.isArray(seed.skipped) && seed.skipped.every((x) => x.why),
+    'anything not carried over is listed with the reason it was not');
+
+  /* the workflow: pressed, never scheduled, and a plan until it is ticked */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-forum-seed.yml'), 'utf8');
+  const wfCode = wf.replace(/^\s*#.*$/gm, '');
+  ok(/workflow_dispatch:/.test(wfCode) && !/\bschedule:/.test(wfCode),
+    'the seeding workflow is dispatch-only: no cron touches the forum');
+  ok(/write:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wfCode),
+    'and its write input defaults to a plan');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'it checks out the branch tip');
+  ok(/seed-forum\.mjs --selftest/.test(wfCode), 'and runs the seeder\'s own checks before it writes');
+
+  /* EVERY workflow that installs firebase-admin installs 12, and the reason is
+     one API surface. _mail.mjs's firebaseAdmin() reaches for the NAMESPACED
+     admin.* (admin.apps, admin.credential.cert, admin.firestore()), which
+     version 14 removed whole; _functions/package.json's ^14 is the DEPLOYED
+     Cloud Functions runtime on the modular API, a different thing that reads
+     like the number to copy. Copying it is what failed the first seeding run
+     (TypeError: Cannot read properties of undefined, reading 'length'), so the
+     rule is pinned over every workflow rather than remembered per file. */
+  const wfDir = path.join(root, '.github', 'workflows');
+  let installers = 0;
+  for (const f of (await readdir(wfDir)).filter((n) => n.endsWith('.yml'))) {
+    const src = (await readFile(path.join(wfDir, f), 'utf8')).replace(/^\s*#.*$/gm, '');
+    for (const m of src.matchAll(/firebase-admin@\^?(\d+)/g)) {
+      installers++;
+      eq(m[1], '12', `${f} installs firebase-admin 12, the namespaced surface _mail.mjs uses`);
+    }
+  }
+  ok(installers >= 10, `the firebase-admin scan really read the workflows (${installers} installs)`);
+
+  /* the seeder never writes a season head, and changes no rule */
+  const src = await readFile(path.join(HERE, 'seed-forum.mjs'), 'utf8');
+  ok(/firestore\(\)/.test(src) && !/initializeApp/.test(src.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'it takes its Admin SDK handle from _mail.mjs, the one definition');
+
+  /* and this file says so */
+  const doc = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/seed-forum\.mjs/.test(doc) && /forum-seed-2026-qa\.json/.test(doc),
+    'CLAUDE.md names the seeder and its seed');
+}
+
 /* ------------- the campaign over EXISTING accounts (owner, 2026-09-05)
 
    Every password account that registered before the e-mail gate is pending
@@ -15492,5 +15633,6 @@ if (isMain(import.meta.url)) {
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
   await testForum();
+  await testForumSeed();
   process.exit(finish() ? 0 : 1);
 }

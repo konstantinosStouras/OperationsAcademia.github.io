@@ -504,6 +504,19 @@ async function main() {
   ok(await tryWrite(ctx(people.adm), adPath(people.cand), null, 'delete'),
     'rules: the maintainer can, while it is still queued');
 
+  /* THE OWNER'S OWN BUG, 2026-09-05: a first attempt filed the order, the
+     password prompt stopped it part way, and every later attempt was refused,
+     because a `set` over a document that already exists is an UPDATE and every
+     browser update of one is refused. Pinned against the real engine, because
+     it is the ENGINE's reading of `set` that caused it: the browser now reads
+     the order first and carries on from it. */
+  ok(await tryWrite(ctx(people.cand), adPath(people.cand), order(people.cand, 'self')),
+    'rules: a person files their own order again after it was deleted');
+  ok(!(await tryWrite(ctx(people.cand), adPath(people.cand), order(people.cand, 'self'))),
+    'rules: …and filing the SAME order twice is refused, because a set over one ' +
+    'that exists is an update, which is why the panel reads before it writes');
+  await admin.doc(adPath(people.cand)).delete();
+
   ok(await tryWrite(ctx(people.adm), adPath(people.open), order(people.open, 'admin')),
     'rules: the maintainer files anyone\'s deletion');
   await admin.doc(adPath(people.open)).set({ status: 'clearing' }, { merge: true });

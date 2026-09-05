@@ -13,3 +13,9 @@ _t[0-9]*.mjs
 # this repository, inside this repository). Tooling scratch, removed when the
 # run ends — never content.
 .claude/worktrees/
+
+# Firebase emulator artefacts, written by a local emulators:exec run
+firestore-debug.log
+ui-debug.log
+firebase-debug.log
+pubsub-debug.log

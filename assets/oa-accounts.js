@@ -2996,9 +2996,23 @@
       }
       return OAFB.ready().then(surveyAccount);
     },
-    deleteSignIn: function () {
+    /* `{ reauth: false }` deletes the sign-in WITHOUT asking for the password
+       back. Firebase refuses to delete a session older than a few minutes
+       until it is re-proved, and the merge has to ask, because nothing else
+       can finish a merge. DELETING AN ACCOUNT DOES NOT: the work order is
+       already filed and _scraper/purge-accounts.mjs removes the sign-in with
+       the Admin SDK. Owner, 2026-09-05, having been stopped by that prompt on
+       a password they did not remember: "There is no reason we ask them to add
+       their password. It's too complicated, not needed." So the deletion path
+       tries, and lets the sweep finish it rather than putting a password box
+       between somebody and the door. */
+    deleteSignIn: function (opts) {
       if (!state.user) return Promise.reject(new Error('not signed in'));
-      return OAFB.ready().then(deleteCurrentSignIn);
+      var quiet = !!(opts && opts.reauth === false);
+      var u = state.user;
+      return OAFB.ready().then(function (fb) {
+        return quiet ? u['delete']() : deleteCurrentSignIn(fb);
+      });
     },
     profile: function () { return state.profile; },
     displayName: function () { return displayName(state.user); },
