@@ -125,6 +125,19 @@ marked global.
     `body.v3 .oa-filters`. `page-test.mjs` measures the shared line at 390px
     over every pair of pickers that share a row.
 
+13. **A compose box is a control.** A page where the reader WRITES (the
+    forum's reply box and its Ask-a-question form, `forum.html`) holds to the
+    same numbers as a page where they filter: the textarea is 16px, so iOS
+    does not zoom the page on focus, and every button beside it (Post, Cancel,
+    the like and dislike buttons in a thread's vote column, the room tabs, the
+    Quote and Reply actions) is a 42px target on a phone, measured. A vote
+    column that stands beside the post on a desktop lies ABOVE it on a phone,
+    a row of two round buttons and the net between them, so nothing is
+    squeezed into a 56px gutter. `page-test.mjs` measures the forum's list,
+    one thread and the open compose at 390px in its own forum block: the page
+    cannot join `MOBILE_PAGES`, because signed out it shows a sign-in card and
+    mounts no list, and the loop waits for a rendered list and a visible bar.
+
 ## The test gate
 
 `_scraper/page-test.mjs` runs every list page at a 390px viewport and
@@ -133,6 +146,13 @@ and every picker menu on screen. **A new list page must be added to the
 `MOBILE_PAGES` list there in the same change that creates the page** — the
 suite is what caught this very feature's first draft dropping the menu's
 Escape-close wiring, so the gate is not a formality.
+
+The measure itself is ONE function, `MOBILE_LIST_MEASURE` in `page-test.mjs`,
+with its assertions in `assertMobileList`: the loop runs it over every page in
+`MOBILE_PAGES`, and a page that cannot join the loop but still mounts a list
+(the forum, signed in) runs the same function in its own block, so the
+standard is never applied two ways. `selftest.mjs` pins that exactly those two
+call it.
 
 `MOBILE_PAGES` covers **both designs the site serves**: the live one at the
 root (where the candidates and placements lists are sections of `index.html`

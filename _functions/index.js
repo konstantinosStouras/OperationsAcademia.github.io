@@ -2,11 +2,13 @@
    Operations Academia: instant publish, the visit resolver, and the
    verification mailer.
 
-   SIX functions live in this file: four doorbells (publishOnChange,
+   TWELVE functions live in this file: four doorbells (publishOnChange,
    publishOnCandidateChange, publishOnReview, and the clock, revealCandidates),
-   the university-visit resolver (recordVisit), and the e-mail verification
-   mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md). A
-   deploy lists all six, and
+   the university-visit resolver (recordVisit), the e-mail verification
+   mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md), and
+   the six forum callables re-exported from ./forum (forumJoin, forumPost,
+   forumEdit, forumVote, forumThreadVotes, forumModerate; the FORUM_SECRET
+   runbook is in _SETUP-INSTANT-PUBLISH.md). A deploy lists all twelve, and
    reading that count back is how a deploy from a stale checkout is caught.
 
    FOUR doorbells, one job each. When a job posting changes in Firestore,
@@ -72,6 +74,7 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getAuth } = require('firebase-admin/auth');
 const nodemailer = require('nodemailer');
 const { renderVerifyEmail, siteVerifyLink } = require('./verify-email.js');
+const forum = require('./forum');
 
 const GH_DISPATCH_TOKEN = defineSecret('GH_DISPATCH_TOKEN');
 
@@ -656,3 +659,18 @@ exports.recordVisit = onRequest(
     }
     return done();
   });
+
+/* ------------------------------------------------------------------- forum
+
+   THE FORUM. Six callables, one per file under ./forum, sharing the preamble
+   in ./forum/member.js and the identity in ./forum/identity.js: the one
+   HMAC over `season + ':' + uid` under the season's own Secret Manager
+   version, a handle drawn at random, and every write inside a transaction.
+   Re-exported one per line so a deploy's per-function lines, and the
+   selftest's count of them, read TWELVE. */
+exports.forumJoin = forum.forumJoin;
+exports.forumPost = forum.forumPost;
+exports.forumEdit = forum.forumEdit;
+exports.forumVote = forum.forumVote;
+exports.forumThreadVotes = forum.forumThreadVotes;
+exports.forumModerate = forum.forumModerate;
