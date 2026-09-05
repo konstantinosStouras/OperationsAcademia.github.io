@@ -3285,6 +3285,75 @@ the way the roster sync's is spawned and pins the seed out of `data/`, its
 room and season, the owner's tag on every thread, one handle per post, the
 dispatch-only workflow with its plan-by-default input, and this section.
 
+### …and one thread can be taken off entirely
+
+Owner, 2026-09-05, of a thread on the Candidates' room list: *remove this
+thread in red entirely*. It was one whose author had deleted the opening post
+with a reply already under it — `forumDelete`'s documented middle case, where
+the words go, the title becomes `DELETED_TITLE` and the thread STANDS, because
+one person changing their mind must not take other people's replies down with
+them. That is right for an author and it is not the maintainer's answer: what
+was left was a card reading "Deleted by its author" over a reply, with no way
+to be rid of it. Nothing in the forum could remove it — every content path in
+`_firestore.rules` is `allow write: if false`, the maintainer's browser
+included, and `forumModerate` carries `seedGuide`, `pin` and `lock` and no
+removal, since moderation of reports is step 3.
+
+    _scraper/remove-forum-thread.mjs           the plan, the guards, the deletes
+    .github/workflows/oa-forum-remove-thread.yml   pressed, never scheduled
+
+**THE SEEDER'S ROAD AGAIN, and for its reason.** An `op` on `forumModerate`
+would be inert until somebody ran `firebase deploy --only functions` by hand,
+which this file has recorded twice the cost of; `FIREBASE_SERVICE_ACCOUNT` has
+been a secret here for months, so a script is live on merge. It joins
+`seed-forum.mjs` as the second writer of a forum document outside
+`_functions/forum/`, and like it, the one document it WRITES is held to the
+model: the room's tag tally, whose only key `KEYS.tags` names. Everything else
+it touches, it deletes.
+
+**IT PRINTS NO WORDS, because the log is public.** A dispatched run prints into
+the Actions log of a public repository and the Candidates' room decides who
+reads what is in it, so a thread is named by its ID, its tags, its counts and
+its days — never a title, never a body, never a handle. That is also what makes
+the LIST mode usable at all: with no id the run lists the room and marks the
+threads whose author has deleted the opening post `opener-deleted`, which is
+how the one the owner circled is told apart without publishing anybody's words
+to the world. The id itself comes off the address bar (`?t=`) or off that list.
+
+**THE TALLY IS GIVEN BACK, BY VALUE.** `forumTags/{Y}_{room}` is an `increment`
+tally and the one thing here that cannot be recomputed from what is stored, so
+a removal that ignored it would leave **Popular tags** counting a thread nobody
+can open. It is read and written back floored at zero rather than incremented
+by −1: a tag past `TAG_COUNT_CAP` was never counted, has nothing to give back,
+and `increment(-1)` would print a negative in that panel.
+
+**WHAT IT NEVER REACHES.** `forumHandles/{H}` and `forumNames/{slug}` are the
+ACCOUNT's handle for the season, shared by every thread it has posted in, so a
+thread removal must not take one with it; nor `candidateMarkers`, which is the
+membership marker. And the room's own **guide thread is refused outright** —
+`forumSeasons/{Y}.guides.{room}` names it and the seed button is drawn only
+while that field is empty, so a removed guide is a room that can never have one
+again.
+
+**The order is recoverable, and it is permanent.** The posts and their votes go
+first and the thread document LAST, so a run interrupted half way leaves the
+thread standing and a second press finishes it; the other order would strand
+posts under a thread nothing can reach. There is no Restore, and the plan is
+what stands in for one: elsewhere on this site hiding is never a one-way door
+because those are controls a READER presses, this is the maintainer's own tool,
+and nothing happens until `--write`.
+
+Tests: `node _scraper/remove-forum-thread.mjs --selftest` (the tally floored at
+zero and never incremented, the guide refused, a printed line carrying no
+title, handle or body while still saying `opener-deleted`, the arguments, and
+the source scans over a slice bounded at BOTH ends and its length asserted —
+the file explains the things it must not do, so a scan over the whole of it
+would be satisfied by deleting the explanation) and `testForumThreadRemoval` in
+`_scraper/selftest.mjs`, which spawns that suite the way the seeder's is
+spawned and pins the one document it writes against `KEYS.tags`, the
+collections it may never reach, the dispatch-only workflow with its
+plan-by-default input and its list-to-find-the-id line, and this section.
+
 ## What "immediate" costs, and where the waiting used to be
 
 A posting is decided in Firestore and served from `data/` by GitHub Pages, so

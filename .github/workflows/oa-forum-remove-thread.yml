@@ -1,0 +1,100 @@
+name: "OA: remove a forum thread"
+
+# THE MAINTAINER'S OWN REMOVAL, PRESSED AND NEVER SCHEDULED. Moderation of
+# reports is step 3 of the forum; this is the one thing the owner needed before
+# it (2026-09-05: remove this thread entirely). It takes a thread off the site
+# whole -- its votes, its posts, the thread document, and its share of the
+# room's tag tally, or Popular tags goes on counting a thread nobody can open.
+#
+# LEAVE THE THREAD BLANK TO FIND ITS ID. With no id the run LISTS the room:
+# one line per thread with its id, its tags, its counts and its days, and
+# `opener-deleted` on the ones whose author has deleted the opening post. No
+# title, no body and no handle is ever printed -- this log is world-readable
+# and the Candidates' room decides who reads what is in it.
+#
+# THE INPUT DEFAULTS TO A PLAN. `write: false` says what would go and touches
+# nothing; tick it to remove. THERE IS NO RESTORE: the plan is the safety.
+#
+# The room's own GUIDE thread is refused outright -- forumSeasons names it, and
+# a room whose guide has gone can never be seeded again.
+#
+# Nothing here is scheduled: no cron may touch the forum (the selftest pins
+# that). Without FIREBASE_SERVICE_ACCOUNT nothing is read or written; the run
+# warns and exits 0.
+
+on:
+  workflow_dispatch:
+    inputs:
+      thread:
+        description: 'Thread id (blank = list the room, so you can find it)'
+        type: string
+        default: ''
+      room:
+        description: 'Room'
+        type: choice
+        options: ['candidates', 'open']
+        default: 'candidates'
+      season:
+        description: 'Season (blank = the one under way)'
+        type: string
+        default: ''
+      write:
+        description: 'Remove it (unticked = print the plan only). This cannot be undone.'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-forum-remove-thread
+  cancel-in-progress: false
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credential is present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read or written."
+          fi
+
+      # firebase-admin 12, like every other workflow here that runs a _scraper/
+      # script: _mail.mjs's firebaseAdmin() uses the NAMESPACED admin.* surface
+      # (admin.apps, admin.credential.cert, admin.firestore()), and 14 removed
+      # it whole. The ^14 in _functions/package.json is the deployed Cloud
+      # Functions runtime, which uses the modular API and is a different thing.
+      - name: Install firebase-admin
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+
+      - name: The remover's own checks
+        run: node _scraper/remove-forum-thread.mjs --selftest
+
+      # The inputs go through the ENVIRONMENT, never interpolated into the
+      # script: `thread` and `season` are free text, and ${{ }} pastes them in
+      # before the shell ever sees them. Only a writer can press this button,
+      # so it is hygiene rather than a hole -- but it is the shape that is not
+      # a hole whoever presses it.
+      - name: Remove
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_ROOM: ${{ inputs.room }}
+          IN_SEASON: ${{ inputs.season }}
+          IN_THREAD: ${{ inputs.thread }}
+          IN_WRITE: ${{ inputs.write }}
+        run: |
+          set -- "--room=$IN_ROOM"
+          if [ -n "$IN_SEASON" ]; then set -- "$@" "--season=$IN_SEASON"; fi
+          if [ -n "$IN_THREAD" ]; then set -- "$@" "--thread=$IN_THREAD"; fi
+          if [ "$IN_WRITE" = "true" ]; then set -- "$@" --write; fi
+          node _scraper/remove-forum-thread.mjs "$@"
