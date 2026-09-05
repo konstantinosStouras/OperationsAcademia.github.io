@@ -2162,6 +2162,53 @@ filed, a session Firebase will not let delete itself — and asserts it finishes
 reads rather than writes the order, asks for no password, and says when the
 sign-in goes.
 
+### …and then a NEW account could not be deleted either
+
+Owner, 2026-09-05, minutes after registering one: *"I registered a new user.
+Then immediately after tried to delete that user profile entirely. The website
+doesn't let me."* The panel said *"We could not read what this account has
+posted, so we cannot take it down"* and **disabled the button**, so there was
+nothing left on the page to press.
+
+**THE CAUSE IS THE TOKEN, AND THIS FILE ALREADY KNEW THE FACT.** `isOwner()`
+goes through `verified()`, which reads `email_verified` off the ID TOKEN, and
+the SDK caches that token for up to an hour — the same fact gate 4 below turns
+the other way round, that deleting an Auth account does not invalidate a token
+already minted. So an account that confirmed its address minutes ago goes on
+presenting the claims it had BEFORE it did, and every read of its own data is
+refused: its postings, its alerts, its profile. `confirmVerified` states the
+rule on the LIFT (*reload() updates the user object; the rules read the token*,
+with `getIdToken(true)` beside it and a comment saying the second call is not
+optional) and a session RESTORED on a later page load lifts nothing, so nothing
+refreshed it. **`OAAccounts.survey()` re-mints it first now** (`freshClaims`),
+best effort and deliberately: a refresh that fails changes nothing, and the read
+behind it reports for itself.
+
+**AND THE PANEL NO LONGER DEAD-ENDS ON A READ IT WAS REFUSED.** The survey is
+how the panel NAMES what will go; it is not what does the removal. The removal
+is the sweep's, with the Admin SDK, over an account it enumerates server-side
+and cannot be refused. So a survey the browser could not read is a list it
+cannot print, never a deletion it must refuse: **the typed word is the only gate
+on the button**, the note in the list's place says the list is missing and that
+everything goes regardless, and `describe()` stops saying *"your account holds
+nothing you have posted"*, which this page has no way of knowing. The work order
+is filed exactly as before, which is the whole of what the sweep needs.
+
+**THE MERGE KEEPS THE OPPOSITE RULE, and what separates them is what finishes
+them.** `runMerge` still refuses when the postings could not be listed, because
+nothing but that browser finishes a merge: what it cannot enumerate it cannot
+move, and its last step removes the only sign-in that could ever reach it again.
+A deletion has a sweep behind it. One survey, two flows, opposite answers, for
+that one reason.
+
+Tests: the pins in `testAccountDeletion` (the token re-minted before the survey,
+the typed word as the only gate, and `describe()` claiming no empty account it
+cannot see) and the block in `page-test.mjs` that drives the owner's own case in
+a real browser — every read of the account refused, through the shim's
+`refuseReads`, which is its stand-in for a stale token: the note drawn, the
+button offered, the deletion finished, the work order filed, and the forced
+token ahead of the survey's first query.
+
 ### The four gates on deleting a submission's document
 
 1. **The build has run SINCE the withdrawal.** `data/jobs-meta.json`'s
@@ -2289,8 +2336,8 @@ the dates and the counts.
 the remembered hint, because a control that deletes an account must not be
 painted for a reader the SDK then says is not there. It names each posting and
 profile that is about to come off the site, asks for the word DELETE to be
-typed, and refuses outright when the postings could not be LISTED — the merge's
-own *refuse rather than strand*, for the same reason.
+typed. A survey it could not READ leaves the list empty and a note in its
+place; it never withholds the button (see the section above).
 
 `admin-area.html`'s roster gains **Delete** on every row, and **Cancel** while
 one is queued. **The control is withheld where the queue could not be read** —
@@ -3348,6 +3395,75 @@ invented vote document) and `testForumSeed` in `_scraper/selftest.mjs`, which sp
 the way the roster sync's is spawned and pins the seed out of `data/`, its
 room and season, the owner's tag on every thread, one handle per post, the
 dispatch-only workflow with its plan-by-default input, and this section.
+
+### …and one thread can be taken off entirely
+
+Owner, 2026-09-05, of a thread on the Candidates' room list: *remove this
+thread in red entirely*. It was one whose author had deleted the opening post
+with a reply already under it — `forumDelete`'s documented middle case, where
+the words go, the title becomes `DELETED_TITLE` and the thread STANDS, because
+one person changing their mind must not take other people's replies down with
+them. That is right for an author and it is not the maintainer's answer: what
+was left was a card reading "Deleted by its author" over a reply, with no way
+to be rid of it. Nothing in the forum could remove it — every content path in
+`_firestore.rules` is `allow write: if false`, the maintainer's browser
+included, and `forumModerate` carries `seedGuide`, `pin` and `lock` and no
+removal, since moderation of reports is step 3.
+
+    _scraper/remove-forum-thread.mjs           the plan, the guards, the deletes
+    .github/workflows/oa-forum-remove-thread.yml   pressed, never scheduled
+
+**THE SEEDER'S ROAD AGAIN, and for its reason.** An `op` on `forumModerate`
+would be inert until somebody ran `firebase deploy --only functions` by hand,
+which this file has recorded twice the cost of; `FIREBASE_SERVICE_ACCOUNT` has
+been a secret here for months, so a script is live on merge. It joins
+`seed-forum.mjs` as the second writer of a forum document outside
+`_functions/forum/`, and like it, the one document it WRITES is held to the
+model: the room's tag tally, whose only key `KEYS.tags` names. Everything else
+it touches, it deletes.
+
+**IT PRINTS NO WORDS, because the log is public.** A dispatched run prints into
+the Actions log of a public repository and the Candidates' room decides who
+reads what is in it, so a thread is named by its ID, its tags, its counts and
+its days — never a title, never a body, never a handle. That is also what makes
+the LIST mode usable at all: with no id the run lists the room and marks the
+threads whose author has deleted the opening post `opener-deleted`, which is
+how the one the owner circled is told apart without publishing anybody's words
+to the world. The id itself comes off the address bar (`?t=`) or off that list.
+
+**THE TALLY IS GIVEN BACK, BY VALUE.** `forumTags/{Y}_{room}` is an `increment`
+tally and the one thing here that cannot be recomputed from what is stored, so
+a removal that ignored it would leave **Popular tags** counting a thread nobody
+can open. It is read and written back floored at zero rather than incremented
+by −1: a tag past `TAG_COUNT_CAP` was never counted, has nothing to give back,
+and `increment(-1)` would print a negative in that panel.
+
+**WHAT IT NEVER REACHES.** `forumHandles/{H}` and `forumNames/{slug}` are the
+ACCOUNT's handle for the season, shared by every thread it has posted in, so a
+thread removal must not take one with it; nor `candidateMarkers`, which is the
+membership marker. And the room's own **guide thread is refused outright** —
+`forumSeasons/{Y}.guides.{room}` names it and the seed button is drawn only
+while that field is empty, so a removed guide is a room that can never have one
+again.
+
+**The order is recoverable, and it is permanent.** The posts and their votes go
+first and the thread document LAST, so a run interrupted half way leaves the
+thread standing and a second press finishes it; the other order would strand
+posts under a thread nothing can reach. There is no Restore, and the plan is
+what stands in for one: elsewhere on this site hiding is never a one-way door
+because those are controls a READER presses, this is the maintainer's own tool,
+and nothing happens until `--write`.
+
+Tests: `node _scraper/remove-forum-thread.mjs --selftest` (the tally floored at
+zero and never incremented, the guide refused, a printed line carrying no
+title, handle or body while still saying `opener-deleted`, the arguments, and
+the source scans over a slice bounded at BOTH ends and its length asserted —
+the file explains the things it must not do, so a scan over the whole of it
+would be satisfied by deleting the explanation) and `testForumThreadRemoval` in
+`_scraper/selftest.mjs`, which spawns that suite the way the seeder's is
+spawned and pins the one document it writes against `KEYS.tags`, the
+collections it may never reach, the dispatch-only workflow with its
+plan-by-default input and its list-to-find-the-id line, and this section.
 
 ## What "immediate" costs, and where the waiting used to be
 

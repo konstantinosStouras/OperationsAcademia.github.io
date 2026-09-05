@@ -6700,6 +6700,78 @@ for (const w of [320, 360, 390, 430]) {
     await ctx0.close();
   }
 
+  /* -- A BRAND-NEW ACCOUNT, WHOSE READS ARE STILL BEING REFUSED ------------
+
+     Owner, 2026-09-05: "I registered a new user. Then immediately after tried
+     to delete that user profile entirely. The website doesn't let me." The
+     panel said it could not read what the account had posted and DISABLED the
+     button, so there was no way past it at all.
+
+     The cause is one this file already records at the other end of the same
+     feature: the rules read `email_verified` off the ID TOKEN, the SDK caches
+     that token for up to an hour, and an account that confirmed its address
+     minutes ago goes on presenting the claims it had before it did. So every
+     read of its own data is refused, which reads as a broken page.
+
+     Both halves are driven: the token is re-minted BEFORE the survey (the
+     cause), and a survey that comes back refused anyway is a list the panel
+     cannot print rather than a deletion it must refuse (the consequence).
+     `refuseReads` is the shim's stand-in for the stale token, which no shim
+     can mint. */
+  {
+    const ctx0 = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx0.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user: LEAVER, docs: seed,
+      refuseReads: ['users/', 'jobSubmissions', 'candidateSubmissions',
+        'placementSubmissions'] })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    /* Everything the PAGE reads for itself is already in the log by now, the
+       postings list included, so the survey's own reads are measured from
+       here on. */
+    const beforeOpen = await q.evaluate(() => window.__fb.log.length);
+    await q.click('#pa-delete-open');
+    await q.waitForSelector('#pa-delete-word', { timeout: 10000 });
+
+    const said = await q.textContent('#pa-delete-panel');
+    ok(said.indexOf('could not list') !== -1 && said.indexOf('still removes') !== -1,
+      'delete: a survey it could not read says so, and says the deletion goes ' +
+      'ahead regardless — the sweep enumerates the account server-side');
+    ok(said.indexOf('nothing you have posted') === -1,
+      'delete: …and never claims an empty account, which this page cannot know');
+
+    await q.fill('#pa-delete-word', 'DELETE');
+    await q.waitForTimeout(80);
+    eq(await q.$eval('#pa-delete-go', (n) => n.disabled), false,
+      'delete: THE TYPED WORD IS THE ONLY GATE. This is the owner\'s bug: the ' +
+      'button was disabled by a read the browser was refused, and nothing on ' +
+      'the page could get past it');
+
+    await q.click('#pa-delete-go');
+    await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
+      'delete: and it finishes');
+
+    const seq = await q.evaluate((n) =>
+      window.__fb.log.slice(n).map((e) => e.op + ' ' + e.path), beforeOpen);
+    const iToken = seq.findIndex((l) => l.indexOf('getIdToken') === 0 &&
+      l.indexOf(':force') !== -1);
+    const iSurvey = seq.findIndex((l) => l.indexOf('query jobSubmissions?uid==') === 0);
+    ok(iToken >= 0 && iSurvey > iToken,
+      'delete: the token the rules read is re-minted BEFORE the account is ' +
+      'surveyed, which is the cause rather than the symptom');
+    ok(seq.some((l) => l.indexOf('set accountDeletions/') === 0),
+      'delete: the work order is filed even though nothing could be listed — ' +
+      'without it there is no record the account was meant to go');
+    eq(errors, [], 'delete: no page errors');
+    await ctx0.close();
+  }
+
   /* -- the maintainer is offered the reason instead of the button ----------- */
   {
     const { ctx, q } = await open(ADMIN, 'account.html');

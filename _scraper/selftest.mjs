@@ -5494,9 +5494,22 @@ async function testAccountDeletion() {
     'the survey is counted the way the panel names it');
   ok(AD.summarise({ postingsOk: false }).postingsOk === false &&
      AD.summarise({}).postingsOk === true,
-    'and a survey that could not read the postings says so — what cannot be ' +
-    'listed cannot be taken down, and the last step removes the only sign-in ' +
-    'that could ever reach it again');
+    'and a survey that could not be read says so: it decides what the panel ' +
+    'can NAME, and never whether the account may go — the sweep enumerates ' +
+    'the account with the Admin SDK and cannot be refused');
+
+  /* A SURVEY IT COULD NOT READ IS A LIST IT CANNOT PRINT, NOT A DELETION IT
+     MUST REFUSE (owner, 2026-09-05, on an account registered minutes earlier:
+     "I registered a new user. Then immediately after tried to delete that user
+     profile entirely. The website doesn't let me"). The panel reported that it
+     could not read what the account had posted and DISABLED the button, which
+     left no way past it at all. */
+  const blind = AD.describe({ postingsOk: false });
+  ok(!/nothing you have posted/.test(blind) && /everything on it/.test(blind),
+    'the sentence above the button does not claim an empty account when ' +
+    'nothing could be read: this page does not know that, and says what is ' +
+    'true of every deletion instead');
+  ok(!/—/.test(blind), '…in the house style, with no em dash');
 
   const sentence = AD.describe(many);
   ok(/2 job postings/.test(sentence) && /off the site/.test(sentence),
@@ -5582,6 +5595,27 @@ async function testAccountDeletion() {
   ok(/reauth: false/.test(accounts) && /quiet \? u\['delete'\]\(\)/.test(accounts),
     'oa-accounts.js offers the quiet delete, and keeps the merge asking — the ' +
     'merge has no sweep behind it to finish what a refusal leaves');
+
+  ok(/go\.disabled = !matchesConfirmation\(word\.value\);/.test(mod),
+    'THE TYPED WORD IS THE ONLY GATE ON THE BUTTON. It also required a readable ' +
+    'survey, and that was a dead end rather than a safeguard: what the browser ' +
+    'could not list, the sweep enumerates server-side');
+
+  /* …AND THE READ THAT FAILED IS FIXED AT ITS CAUSE, not only survived. The
+     rules read `email_verified` off the ID TOKEN, which the SDK caches for up
+     to an hour, so an account that confirmed its address minutes ago presents
+     the claims it had before it did and is refused every read of its own data
+     — a permission-denied wearing the clothes of a broken page. This is the
+     rule confirmVerified() already states on the lift; a session restored on a
+     later page load lifts nothing, so nothing refreshed it. Read with the
+     comments stripped: this file explains the trap in the same words. */
+  const acctSrc = stripJs(accounts);
+  ok(/function freshClaims/.test(acctSrc) &&
+     /getIdToken\(true\)/.test(acctSrc.slice(acctSrc.indexOf('function freshClaims'),
+       acctSrc.indexOf('window.OAAccounts'))),
+    'the survey has a way to re-mint the token the rules read');
+  ok(/freshClaims\(u\)\.then\(function \(\) \{ return surveyAccount\(fb\); \}\)/.test(acctSrc),
+    '…and it uses it, before the account is surveyed at all');
 
   ok(/notDeployed\(err\)/.test(selfSrc) && /NOT_DEPLOYED/.test(mod),
     'a permission-denied says what to press and to reload first, rather than ' +
@@ -14522,6 +14556,25 @@ async function testForumSeed() {
   ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'it checks out the branch tip');
   ok(/seed-forum\.mjs --selftest/.test(wfCode), 'and runs the seeder\'s own checks before it writes');
 
+  /* EVERY workflow that installs firebase-admin installs 12, and the reason is
+     one API surface. _mail.mjs's firebaseAdmin() reaches for the NAMESPACED
+     admin.* (admin.apps, admin.credential.cert, admin.firestore()), which
+     version 14 removed whole; _functions/package.json's ^14 is the DEPLOYED
+     Cloud Functions runtime on the modular API, a different thing that reads
+     like the number to copy. Copying it is what failed the first seeding run
+     (TypeError: Cannot read properties of undefined, reading 'length'), so the
+     rule is pinned over every workflow rather than remembered per file. */
+  const wfDir = path.join(root, '.github', 'workflows');
+  let installers = 0;
+  for (const f of (await readdir(wfDir)).filter((n) => n.endsWith('.yml'))) {
+    const src = (await readFile(path.join(wfDir, f), 'utf8')).replace(/^\s*#.*$/gm, '');
+    for (const m of src.matchAll(/firebase-admin@\^?(\d+)/g)) {
+      installers++;
+      eq(m[1], '12', `${f} installs firebase-admin 12, the namespaced surface _mail.mjs uses`);
+    }
+  }
+  ok(installers >= 10, `the firebase-admin scan really read the workflows (${installers} installs)`);
+
   /* the seeder never writes a season head, and changes no rule */
   const src = await readFile(path.join(HERE, 'seed-forum.mjs'), 'utf8');
   ok(/firestore\(\)/.test(src) && !/initializeApp/.test(src.replace(/\/\*[\s\S]*?\*\//g, '')),
@@ -14531,6 +14584,113 @@ async function testForumSeed() {
   const doc = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
   ok(/seed-forum\.mjs/.test(doc) && /forum-seed-2026-qa\.json/.test(doc),
     'CLAUDE.md names the seeder and its seed');
+}
+
+/* ------------- removing one thread whole (owner, 2026-09-05)
+
+   Moderation of reports is step 3 of the forum, and the owner needed one
+   thing before it: a thread off the site entirely. remove-forum-thread.mjs is
+   the seeder's road again -- a dispatch-only script with the Admin SDK, live
+   on merge, rather than an op on forumModerate that would be inert until
+   somebody deployed the functions by hand.
+
+   Pinned here: the remover's own offline suite, the workflow pressed and never
+   scheduled with its plan-by-default input, the one document it may WRITE (the
+   tag tally, whose keys the model names), the ones it may never reach, and
+   that a public log never carries a title, a body or a handle. */
+async function testForumThreadRemoval() {
+  const root = path.join(HERE, '..');
+
+  /* its own suite: the tally floored at zero, the guide refused, the
+     words-free line, the arguments and the source scans */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'remove-forum-thread.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/remove-forum-thread selftest: \d+ checks passed/.test(out),
+    "the thread remover's own selftest is green:\n" + out.slice(0, 1500));
+
+  const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
+  const R = await import('./remove-forum-thread.mjs');
+
+  /* the writer half, bounded the way the file's own scan bounds it */
+  const src = await readFile(path.join(HERE, 'remove-forum-thread.mjs'), 'utf8');
+  const code = src.slice(0, src.indexOf('async function selftest'))
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok(code.length > 3000, 'the slice under scan is the remover, not an empty string');
+
+  /* IMPORTING IT DOES NOTHING. This test imports the file for its pure
+     halves, and selftest.mjs runs with FIREBASE_SERVICE_ACCOUNT set in every
+     data writer -- a module that reached for Firestore on import would list
+     the room on every publishing run. */
+  const entry = src.slice(src.lastIndexOf('if (process.argv[1]'));
+  ok(/import\.meta\.url === pathToFileURL\(process\.argv\[1\]\)\.href/.test(entry)
+     && /await main\(argv\)/.test(entry),
+    'remove-forum-thread runs only when it is the file being run, never on import');
+
+  /* IT DELETES, AND WRITES EXACTLY ONE DOCUMENT: the room's tag tally, whose
+     only key the model names. Every other forum document it touches, it takes
+     away -- so there is no shape here for the writer scan to disagree with. */
+  eq((code.match(/batch\.set\(|\.set\(/g) || []).length, 1,
+    'the remover writes exactly one document');
+  ok(/R\.tags\(\)\.set\(\{ counts:/.test(code),
+    'and it is the tag tally, set as a value');
+  eq(FM.KEYS.tags, ['counts'], "whose one key is what the model names for a tally");
+  ok(/batch\.delete\(/.test(code), 'everything else it touches, it deletes');
+
+  /* the handle is the ACCOUNT'S for the season and is shared by every thread
+     it has posted in, so a thread removal must never reach one */
+  for (const never of ['forumHandles', 'forumNames', 'candidateMarkers', 'jobSubmissions']) {
+    ok(!new RegExp(never).test(code), `remove-forum-thread never reaches ${never}`);
+  }
+
+  /* the tally is given back by VALUE. `increment(-1)` on a tally that is
+     already short (a tag past TAG_COUNT_CAP was never counted) prints a
+     negative in the Popular tags panel. */
+  ok(!/FieldValue/.test(code), 'the tally is never incremented by -1');
+  eq(R.tallyAfter({ deadlines: 1 }, ['deadlines']), { deadlines: 0 }, 'a tag is given back one at a time');
+  eq(R.tallyAfter({ deadlines: 0 }, ['deadlines']), {}, 'and a tally at zero is never driven below it');
+
+  /* the room's own guide is refused: forumSeasons names it, and the seed
+     button is drawn only while that field is empty */
+  ok(R.refusalFor('g1', { guides: { candidates: 'g1' } }, 'candidates') !== '',
+    "the candidates room's guide thread cannot be removed by this road");
+  ok(R.refusalFor('t1', { guides: { candidates: 'g1' } }, 'candidates') === '',
+    'an ordinary thread can');
+
+  /* A PUBLIC LOG CARRIES NO WORDS. The run prints into the Actions log of a
+     public repository and the room decides who reads what is in it. */
+  const line = R.describe('t1', { title: 'Kellogg flyout', tags: ['deadlines'], by: 'jolly fern 38', t: 0, lastAt: 0 },
+    [{ n: 1, hidden: true, body: 'a body' }]);
+  ok(!/Kellogg|jolly|fern|a body/.test(line), 'a printed line carries no title, no handle and no body');
+  ok(/t1/.test(line) && /opener-deleted/.test(line),
+    'and still tells the thread apart, opening post deleted by its author included');
+
+  /* the workflow: pressed, never scheduled, and a plan until it is ticked */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-forum-remove-thread.yml'), 'utf8');
+  const wfCode = wf.replace(/^\s*#.*$/gm, '');
+  ok(/workflow_dispatch:/.test(wfCode) && !/\bschedule:/.test(wfCode),
+    'the removal workflow is dispatch-only: no cron touches the forum');
+  ok(/write:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wfCode),
+    'and its write input defaults to a plan');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'it checks out the branch tip');
+  ok(/remove-forum-thread\.mjs --selftest/.test(wfCode), "and runs the remover's own checks before it writes");
+  ok(/thread:\s*\n\s*description:[^\n]*blank = list/i.test(wfCode),
+    'a blank thread id lists the room, which is how the id is found');
+  /* `thread` and `season` are free text, and ${{ }} pastes an input in before
+     the shell sees it. They go through the environment instead. */
+  ok(!/run:[\s\S]*?\$\{\{\s*inputs\./.test(wfCode.slice(wfCode.indexOf('- name: Remove'))),
+    'and no input is interpolated into the script it runs; they go through the environment');
+
+  /* nothing forum-shaped may reach data/, which is served to anyone who asks */
+  ok(!/data\//.test(code), 'the remover writes nothing under data/');
+
+  /* and this file says so */
+  const doc = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/remove-forum-thread\.mjs/.test(doc), 'CLAUDE.md names the remover');
 }
 
 /* ------------- the campaign over EXISTING accounts (owner, 2026-09-05)
@@ -15624,5 +15784,6 @@ if (isMain(import.meta.url)) {
   await testRegisteredUsersFigure();
   await testForum();
   await testForumSeed();
+  await testForumThreadRemoval();
   process.exit(finish() ? 0 : 1);
 }
