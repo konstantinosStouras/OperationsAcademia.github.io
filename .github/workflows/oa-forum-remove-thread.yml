@@ -80,12 +80,21 @@ jobs:
       - name: The remover's own checks
         run: node _scraper/remove-forum-thread.mjs --selftest
 
+      # The inputs go through the ENVIRONMENT, never interpolated into the
+      # script: `thread` and `season` are free text, and ${{ }} pastes them in
+      # before the shell ever sees them. Only a writer can press this button,
+      # so it is hygiene rather than a hole -- but it is the shape that is not
+      # a hole whoever presses it.
       - name: Remove
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          IN_ROOM: ${{ inputs.room }}
+          IN_SEASON: ${{ inputs.season }}
+          IN_THREAD: ${{ inputs.thread }}
+          IN_WRITE: ${{ inputs.write }}
         run: |
-          ARGS="--room=${{ inputs.room }}"
-          if [ -n "${{ inputs.season }}" ]; then ARGS="$ARGS --season=${{ inputs.season }}"; fi
-          if [ -n "${{ inputs.thread }}" ]; then ARGS="$ARGS --thread=${{ inputs.thread }}"; fi
-          if [ "${{ inputs.write }}" = "true" ]; then ARGS="$ARGS --write"; fi
-          node _scraper/remove-forum-thread.mjs $ARGS
+          set -- "--room=$IN_ROOM"
+          if [ -n "$IN_SEASON" ]; then set -- "$@" "--season=$IN_SEASON"; fi
+          if [ -n "$IN_THREAD" ]; then set -- "$@" "--thread=$IN_THREAD"; fi
+          if [ "$IN_WRITE" = "true" ]; then set -- "$@" --write; fi
+          node _scraper/remove-forum-thread.mjs "$@"

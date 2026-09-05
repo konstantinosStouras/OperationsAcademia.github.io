@@ -14646,6 +14646,10 @@ async function testForumThreadRemoval() {
   ok(/remove-forum-thread\.mjs --selftest/.test(wfCode), "and runs the remover's own checks before it writes");
   ok(/thread:\s*\n\s*description:[^\n]*blank = list/i.test(wfCode),
     'a blank thread id lists the room, which is how the id is found');
+  /* `thread` and `season` are free text, and ${{ }} pastes an input in before
+     the shell sees it. They go through the environment instead. */
+  ok(!/run:[\s\S]*?\$\{\{\s*inputs\./.test(wfCode.slice(wfCode.indexOf('- name: Remove'))),
+    'and no input is interpolated into the script it runs; they go through the environment');
 
   /* nothing forum-shaped may reach data/, which is served to anyone who asks */
   ok(!/data\//.test(code), 'the remover writes nothing under data/');
