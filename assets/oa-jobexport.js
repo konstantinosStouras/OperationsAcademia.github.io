@@ -322,7 +322,13 @@
         ? '' : 'None — this is every posting the page was showing.']
     ];
     filters.forEach(function (f) {
-      aboutRows.push(['  ' + txt(f.label), f.values.map(txt).join('  or  ')]);
+      /* The word between the values is the one the list used: an all-of
+         filter (the jobs page's Characteristics, where every ticked value
+         must be on the posting) joins with "and", everything else with "or".
+         Writing "or" for both would describe a search the reader was not
+         shown. */
+      var join = f.match === 'all' ? '  and  ' : '  or  ';
+      aboutRows.push(['  ' + txt(f.label), f.values.map(txt).join(join)]);
     });
     aboutRows.push(['Downloaded', isoMinute(at)]);
     aboutRows.push(['Source', { link: JOBS_PAGE }]);

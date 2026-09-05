@@ -23,6 +23,19 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    /* A signed-in account whose address is known to be real: the same test
+       verified() makes in _firestore.rules. An account registered with an
+       e-mail address and a password must press the link in the verification
+       message first; a Google sign-in arrives verified by Google, and an
+       ORCID sign-in carries no e-mail claim, so anything but the password
+       provider passes. The site's Firestore writes all go through it, and an
+       upload is a write like the others. */
+    function verified() {
+      return signedIn()
+        && (request.auth.token.email_verified == true
+            || request.auth.token.firebase.sign_in_provider != 'password');
+    }
+
     function isAdmin() {
       return signedIn()
         && request.auth.token.email_verified == true
@@ -55,8 +68,9 @@ service firebase.storage {
        from the path rather than trusting a parameter. */
     match /uploads/{uid}/{kind}/{name} {
 
-      // Only the uploader may write, and only into their own folder.
-      allow create: if signedIn()
+      // Only the uploader may write, and only into their own folder, and only
+      // once their address is verified (the gate every Firestore write has).
+      allow create: if verified()
                     && request.auth.uid == uid
                     && kind in ['jobs', 'candidates']
                     && allowedType()

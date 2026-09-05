@@ -5,40 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
-    <title>Analytics — Operations Academia</title>
-    <meta name="description" content="How the Operations job market site is used: visitors day by day, the weekly rhythm, the hiring season across the year, where readers are, how they arrive and the pages they actually read.">
-    <link rel="canonical" href="https://www.operationsacademia.org/analytics.html">
-
-    <!-- LINK PREVIEWS — what a card looks like when somebody shares this page.
-         og:* is read by Facebook, Messenger, WhatsApp, LinkedIn, Telegram,
-         Slack, Discord, Signal, Viber and iMessage; twitter:* by X, whose
-         twitter:card is the one preview tag with no Open Graph equivalent.
-         The image_src / itemprop trio offers the SQUARE thumbnail to the
-         Chinese clients, which centre-crop a card to 1:1 and would keep only
-         the middle of the wide one. There is EXACTLY ONE og:image on purpose:
-         several are legal Open Graph and WhatsApp handles them badly.
-         Kept honest by _scraper/share-check.mjs — read its header first. -->
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Operations Academia">
-    <meta property="og:locale" content="en_GB">
-    <meta property="og:title" content="How Operations Academia is used">
-    <meta property="og:description" content="How the Operations job market site is used: visitors day by day, the weekly rhythm, the hiring season across the year, where readers are, how they arrive and the pages they actually read.">
-    <meta property="og:url" content="https://www.operationsacademia.org/analytics.html">
-    <meta property="og:image" content="https://www.operationsacademia.org/images/og-card.jpg">
-    <meta property="og:image:secure_url" content="https://www.operationsacademia.org/images/og-card.jpg">
-    <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="How Operations Academia is used">
-    <meta name="twitter:description" content="How the Operations job market site is used: visitors day by day, the weekly rhythm, the hiring season across the year, where readers are, how they arrive and the pages they actually read.">
-    <meta name="twitter:image" content="https://www.operationsacademia.org/images/og-card.jpg">
-    <meta name="twitter:image:alt" content="Operations Academia — matching supply with demand in the Operations job market.">
-    <link rel="image_src" href="https://www.operationsacademia.org/images/share-square.jpg">
-    <meta itemprop="name" content="How Operations Academia is used">
-    <meta itemprop="description" content="How the Operations job market site is used: visitors day by day, the weekly rhythm, the hiring season across the year, where readers are, how they arrive and the pages they actually read.">
-    <meta itemprop="image" content="https://www.operationsacademia.org/images/share-square.jpg">
+    <title>Verify your e-mail address, Operations Academia</title>
+    <meta name="description" content="The page a verification link from Operations Academia opens: it confirms the e-mail address of a new account and says whether it worked.">
+    <!-- A landing page reached only from the link in a message, so there is
+         nothing here for a search engine and nothing anybody would share: no
+         preview block, and noindex (named in _scraper/link-check.mjs and
+         listed card: false in _scraper/share-check.mjs). -->
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="canonical" href="https://www.operationsacademia.org/verify-email.html">
     <link href="/images/OAfavicon.ico?v=1" rel="shortcut icon">
     <script>
     (function () {
@@ -50,26 +24,16 @@
       } catch (e) {
         el.setAttribute('data-theme', 'light');
       }
-      /* The account chip, for the same reason and in the same breath. It is
-         painted by assets/oa-accounts.js, which cannot run until the page has
-         parsed — so #oa-account is empty and 0px wide for ~130ms and the whole
-         header row jumps sideways when the chip lands (measured: the nav by
-         62px, the theme toggle by 185px). Reserve the space it will take, from
-         the same localStorage hint the chip is painted from, before the browser
-         draws anything. */
+      /* The account chip, for the same reason and in the same breath: reserve
+         the space the chip will take, from the same localStorage hint it is
+         painted from, before the browser draws anything (see account.html). */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
         el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
-        /* the width the chip MEASURED last visit, so the reserve is the real
-           one and not a guess at how long a name is; absent on a first visit,
-           where the stylesheet's own minimum takes over. Bounded because this
-           value is written into a style before anything else runs, and the
-           only honest thing to do with a number that is not a plausible chip
-           width is to ignore it. */
         if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
           el.style.setProperty('--oa-chip-w', h.w + 'px');
         }
-      } catch (e) { /* private mode — the reserve is an optimisation */ }
+      } catch (e) { /* private mode, the reserve is an optimisation */ }
     })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,18 +41,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
-    <!-- The Firebase SDK is ~700 KB of third-party JavaScript that NOTHING on
-         screen waits for any more: the account chip is painted from the
-         localStorage hint before the SDK has even been asked for, and the
-         session it restores only confirms what the chip already shows. It was
-         being PRELOADED here, which is a high-priority fetch competing with
-         this page's own stylesheet and data at the very moment the first paint
-         is being assembled. The preconnect stays — it warms the connection, at
-         no bandwidth cost, so the SDK still arrives promptly when
-         oa-firebase.js asks for it. -->
+    <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
-    <link href="assets/oa-analytics.css" rel="stylesheet">
   </head>
 
   <body class="v3">
@@ -98,7 +53,7 @@
         <button type="button" class="v3-burger" aria-label="Open the menu" aria-expanded="false" aria-controls="v3-sheet">
           <span></span><span></span><span></span>
         </button>
-        <a class="v3-logo" href="./" aria-label="Operations Academia — home">
+        <a class="v3-logo" href="./" aria-label="Operations Academia, home">
           <span class="v3-mark" aria-hidden="true">OA</span>
           <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
         </a>
@@ -149,54 +104,76 @@
       </div>
     </aside>
 
-    <main id="main">
+    <!-- data-oa-verify-page: assets/oa-accounts.js reads it and does NOT draw
+         its "Check your inbox" card here. This page confirms the address
+         itself, and a modal over it would cover the confirmation. -->
+    <main id="main" data-oa-verify-page>
       <section class="v3-pa-hero">
         <div class="v3-container">
-          <span class="v3-kicker">Analytics</span>
-          <h1 class="v3-h1">How the site is used</h1>
-          <p class="v3-lede" style="margin-top:14px">How busy the site is, day by day, and the rhythms worth knowing about it: the week, the hours of the day and the hiring season across the year, plus who is reading and how they got here, and how the community of registered users has grown since the first account. Rebuilt daily.</p>
-          <div class="v3-cta-row" style="margin-top:24px">
-            <a class="v3-btn ghost" href="./#about">&larr; Back to the overview</a>
-          </div>
-          <p class="v3-mut" style="font-size:14px;margin-top:18px">The charts follow whichever theme you are reading in and size themselves to your screen. Every one answers a tap, a pointer or the keyboard, every one will also give you its numbers as a table, and each says underneath it what span of time it covers.</p>
+          <span class="v3-kicker">E-mail verification</span>
+          <h1 class="v3-h1" id="ve-title">Confirming your address</h1>
         </div>
       </section>
 
-      <div class="v3-container" style="padding-bottom:90px">
-        <!-- Everything below is drawn by assets/oa-analytics.js from
-             data/analytics.json.
+      <div class="v3-container">
 
-             THIS USED TO BE FOUR <iframe>s pointing at Google Sheets
-             `pubchart` charts, and they had been dead since 2023: the
-             spreadsheets behind them were filled by the Google Analytics
-             Spreadsheet Add-on, which spoke only the Universal Analytics
-             Reporting API — switched off on 1 July 2023, with the properties
-             deleted a year later. A dead embed renders as an empty box and
-             reports nothing to anybody, which is how three years went by.
-
-             Drawing the marks here also takes the reader's theme (an embed
-             cannot — the old lede had to apologise for it), gives every chart
-             a table of its own numbers, makes no third-party connection, and
-             sizes to a phone instead of being fixed at 900px. -->
-        <div id="oa-analytics">
-          <noscript>
-            <div class="oa-an-note">
-              <h2>These charts need JavaScript</h2>
-              <p>The figures are drawn in the browser from
-              <code>data/analytics.json</code>, which is a plain served file you
-              are welcome to read directly.</p>
-            </div>
-          </noscript>
+        <!-- while the link is being checked -->
+        <div class="v3-pa-signin" id="ve-wait">
+          <p class="v3-mut" style="margin:0">Checking your link&hellip;</p>
         </div>
+
+        <!-- the address is confirmed -->
+        <div class="v3-pa-signin" id="ve-done" hidden>
+          <span class="v3-kicker">Done</span>
+          <h2 class="v3-h3" style="font-size:26px" tabindex="-1">Your e-mail address is verified</h2>
+          <p class="v3-mut" id="ve-done-note" style="margin:12px 0 26px">Thank you. Your account is
+          ready to use: post a job, set up e-mail alerts, or create a candidate profile.</p>
+          <div class="v3-cta-row" style="justify-content:center">
+            <a class="v3-btn primary" id="ve-continue" href="account.html">Continue to your account</a>
+            <button type="button" class="v3-btn primary" id="ve-signin" hidden>Sign in</button>
+          </div>
+        </div>
+
+        <!-- the link was refused: expired, used already, or copied short -->
+        <div class="v3-pa-signin" id="ve-error" hidden>
+          <span class="v3-kicker">Something went wrong</span>
+          <h2 class="v3-h3" style="font-size:26px" tabindex="-1">That link did not work</h2>
+          <p class="v3-mut" id="ve-error-why" style="margin:12px 0 26px"></p>
+          <div class="v3-cta-row" style="justify-content:center">
+            <button type="button" class="v3-btn primary" id="ve-resend">Send me a new link</button>
+          </div>
+          <p class="v3-mut" id="ve-error-hint" hidden style="margin:12px 0 0">Sign in with your e-mail
+          address and password and the site will offer to send you a new one.</p>
+          <p class="oa-auth-msg" id="ve-msg" role="alert"></p>
+        </div>
+
+        <!-- no code on the address: opened directly, or from Firebase's own
+             fallback message, which applies the code itself and then lands here -->
+        <div class="v3-pa-signin" id="ve-nocode" hidden>
+          <span class="v3-kicker">E-mail verification</span>
+          <h2 class="v3-h3" style="font-size:26px" tabindex="-1">Nothing to confirm here yet</h2>
+          <p class="v3-mut" id="ve-nocode-why" style="margin:12px 0 26px">This page confirms an e-mail
+          address when it is opened from the link in the message we send on registration. Sign in
+          with your e-mail address and password and the site will offer to send you one.</p>
+          <div class="v3-cta-row" style="justify-content:center">
+            <button type="button" class="v3-btn primary" id="ve-nocode-signin">Sign in</button>
+            <button type="button" class="v3-btn primary" id="ve-nocode-resend" hidden>Send me a new link</button>
+          </div>
+          <p class="oa-auth-msg" id="ve-nocode-msg" role="alert"></p>
+        </div>
+
+        <p class="v3-mut" style="text-align:center;margin:0 0 70px">
+          Questions? <a href="mailto:operationsacademia@gmail.com">Email us</a>.</p>
       </div>
     </main>
+
     <footer class="v3-footer">
       <div class="v3-container">
         <div class="v3-footer-grid">
           <div class="v3-footer-brand">
             <!-- the SAME footer as the front page (owner, 2026-08-17): every
                  page and sub-page ends the same way -->
-            <a class="v3-logo v3-logo-foot" href="./" aria-label="Operations Academia — home">
+            <a class="v3-logo v3-logo-foot" href="./" aria-label="Operations Academia, home">
               <span class="v3-mark" aria-hidden="true">OA</span>
               <span class="v3-words"><span class="v3-w1">Operations</span> <span class="v3-w2">Academia<span class="v3-org">.org</span></span></span>
             </a>
@@ -241,19 +218,14 @@
       </div>
     </footer>
 
-
-
-    <button type="button" class="v3-top" aria-label="Back to the top">&uarr;</button>
-
+    <!-- every script deferred, in the order they depend on each other:
+         oa-verify.js reads OAAccounts and OAFB, so it comes after both -->
     <script defer src="assets/oa-ga4.js"></script>
     <script defer src="assets/oa-visit.js"></script>
     <script defer src="assets/v3.js"></script>
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
+    <script defer src="assets/oa-verify.js"></script>
     <script defer src="assets/oa-usage.js"></script>
-    <script defer src="assets/oa-analytics-model.js"></script>
-    <script defer src="assets/oa-charts.js"></script>
-    <script defer src="assets/oa-analytics.js"></script>
-
   </body>
 </html>

@@ -59,7 +59,7 @@
          draws anything. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         /* the width the chip MEASURED last visit, so the reserve is the real
            one and not a guess at how long a name is; absent on a first visit,
            where the stylesheet's own minimum takes over. Bounded because this
@@ -164,9 +164,10 @@
                 <div class="oa-form">
 
                   <div class="oa-note">
-                    <p><strong>Be told when something you care about appears</strong> &mdash; a new
-                    job posting matching your filters, or a change to the site. You choose what and
-                    how often; every message carries an unsubscribe link.</p>
+                    <p><strong>Be told when something you care about appears:</strong> a new
+                    job posting matching your filters, a posting you follow whose apply-by date is
+                    within the week, or a change to the site. You choose what and how often; every
+                    message carries an unsubscribe link.</p>
                   </div>
 
                   <!-- shown only when the visitor arrived from an
@@ -191,6 +192,11 @@
                     <hr style="margin:30px 0;border:0;border-top:1px solid var(--line-soft)">
 
                     <form id="oa-alert-form" novalidate>
+                      <!-- shown only when the form was filled in from the jobs
+                           page's "Save as e-mail alert" button: says so, and
+                           names any filter of that search an alert cannot hold
+                           (assets/oa-alertsave.js writes the words) -->
+                      <div class="oa-note" id="oa-prefill-note" hidden></div>
                       <fieldset>
                         <legend id="oa-form-legend">Create an alert</legend>
 
@@ -211,6 +217,11 @@
                             <label class="oa-check"><input type="checkbox" id="t-updates">
                               <span><strong>Changes to the website.</strong> New features and
                               improvements, taken from the site's own change log.</span></label>
+                            <label class="oa-check"><input type="checkbox" id="t-deadlines">
+                              <span><strong>Postings closing within 7 days.</strong> A reminder of
+                              the postings matching the filters below whose final or suggested
+                              apply-by date falls in the seven days after each digest, each named
+                              once (choose daily or weekly to see every closing date).</span></label>
                             <label class="oa-check"><input type="checkbox" id="t-candidates">
                               <span><strong>New job market candidates.</strong> One short note when
                               the year's profiles go live, then a note whenever a new candidate
@@ -226,8 +237,10 @@
                       <fieldset id="a-filters">
                         <legend>Which job postings?</legend>
                         <p class="oa-hint" style="margin-bottom:16px">Leave everything blank to be
-                        told about <strong>every</strong> new posting. Otherwise a posting must match
-                        <em>every</em> box you fill in, and any of the values you tick inside one.</p>
+                        told about <strong>every</strong> posting. Otherwise a posting must match
+                        <em>every</em> box you fill in, and any of the values you tick inside one.
+                        The same filters choose the new postings you hear about and the ones you
+                        are reminded of before they close.</p>
 
                         <!-- the Type / Entry level / Location lists are built from the postings
                              currently on the site; if that file could not be read they are empty,
@@ -273,6 +286,13 @@
                               <option value="weekly">A weekly digest</option>
                               <option value="monthly">A monthly digest</option>
                             </select>
+                            <!-- drawn by syncFormState() only while deadlines is ticked AND the
+                                 frequency is monthly: the reminder covers the seven days after
+                                 each digest, and a digest every four weeks sees one week in four -->
+                            <p class="oa-hint" id="a-freq-note" hidden>A monthly digest names only
+                              the postings closing in the seven days after it goes out, so a
+                              closing date in the other three weeks is not announced. Choose daily
+                              or weekly to see every closing date.</p>
                           </div>
                           <div class="oa-field">
                             <label for="a-email">Send to</label>
@@ -360,6 +380,14 @@
     <script defer src="assets/oa-usage.js"></script>
     <script defer src="assets/oa-countries.js"></script>
     <script defer src="assets/oa-schools.js"></script>
+    <!-- which season a posting is in: the "closing this week" reminder asks
+         the ONE market rule (assets/oa-jobnav.js), so the matcher loads after
+         it — without it the matcher says no, never guesses -->
+    <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-reveal.js BEFORE the matcher, whose factory is handed it: the
+         candidates topic announces against the reveal INSTANT (14:00 UTC on
+         the reveal day), and the example e-mail names that instant. -->
+    <script defer src="assets/oa-reveal.js"></script>
     <script defer src="assets/oa-alert-match.js"></script>
     <!-- who is reading: the preview carries real postings, so it is drawn for
          a registered reader only, asked of the same module the cards ask -->
@@ -368,6 +396,9 @@
          the reader the e-mail they will get, so it must show only the entries
          the maintainer has actually published -->
     <script defer src="assets/oa-news.js"></script>
+    <!-- the hand-over from the jobs page's "Save as e-mail alert" button:
+         read off the address on load, held until the form can be drawn -->
+    <script defer src="assets/oa-alertsave.js"></script>
     <script defer src="assets/oa-alerts.js"></script>
   </body>
 </html>

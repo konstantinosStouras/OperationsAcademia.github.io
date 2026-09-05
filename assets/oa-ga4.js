@@ -87,8 +87,20 @@
   function gtag() { window.dataLayer.push(arguments); }
   window.gtag = gtag;
 
+  /* The address reported for the page, without a one-time code. The
+     verification link opens verify-email.html with its code on the query
+     string, and gtag would otherwise send the whole address to Google before
+     the page's own script has had a chance to scrub it. */
+  function pageLocation() {
+    try {
+      if (/[?&]oobCode=/.test(location.search || '')) return location.origin + location.pathname;
+    } catch (e) { /* nothing sane to do */ }
+    return location.href;
+  }
+
   gtag('js', new Date());
   gtag('config', MEASUREMENT_ID, {
+    page_location: pageLocation(),
     /* no identifier on the device — the whole point, see the header */
     client_storage: COOKIELESS ? 'none' : 'browser',
     /* and no advertising audiences or cross-device profiles built from it */

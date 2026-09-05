@@ -12,11 +12,13 @@
 import { isMain } from './_main.mjs';
 import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
+import * as CSTATS from './build-candidate-stats.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
@@ -34,6 +36,10 @@ import {
   stripEmails, stripRowEmails, patchDeadlines, canonColumns,
   postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE,
 } from './jobs-model.mjs';
+import {
+  CANDIDATE_PUBLIC_FIELDS, rowFromCandidateSubmission, assignCandidateIds, publicCandidateRow,
+  mergeCandidateRows, revealGate, buildCandidatesMeta,
+} from './candidates-model.mjs';
 import {
   splitDepartment, joinDepartment, buildVocab, serialiseVocab, vocabKey, businessSchoolOf,
   campusCountries, healCountry, SCHOOLS,
@@ -942,7 +948,7 @@ async function testAccountMerge() {
   // whole catalogue — one enormous e-mail as the reward for merging.
   const fields = (accounts.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
   for (const f of ['lastSentAt', 'lastJobAt', 'lastCheckedAt', 'lastUpdateDate',
-    'lastCandidateAt', 'criteria', 'enabled']) {
+    'lastCandidateAt', 'lastDeadlineUntil', 'criteria', 'enabled']) {
     ok(fields.includes(`'${f}'`), `a copied alert carries ${f}`);
   }
 }
@@ -3004,6 +3010,51 @@ async function testAccountCounts() {
     ok(new RegExp(`setCount\\('${what}', ${n.replace('.', '\\.')}\\)`).test(js),
       `${file} corrects the ${what} count from the list it already loaded`);
   }
+
+  /* -- rule 4: a row is drawn only for what the account holds (owner,
+     2026-09-04). "My postings" for an account that has posted, "My candidate
+     profile" for one that has filed a profile, and NEITHER while the count
+     is not known — the rows are born hidden and the badge painter is the one
+     thing that reveals them, under the badge's own known-and-positive rule,
+     so a row and its badge cannot disagree. The browser half — the rows as
+     they render for three seeded accounts, the phone sheet, and the account
+     page's card — is in page-test.mjs. */
+  for (const what of ['postings', 'cands']) {
+    ok((acct.match(new RegExp(`data-held="${what}" hidden`, 'g')) || []).length >= 2,
+      `both menus (header and phone sheet) carry the ${what} row, born hidden`);
+  }
+  ok(/href="post-a-candidate\.html" data-held="cands"/.test(acct) &&
+     /My candidate profile/.test(acct),
+    'the candidate row is "My candidate profile" and opens post-a-candidate.html, ' +
+    'which sends an owner straight to their own profile');
+  ok(/data-count="cands"/.test(acct),
+    'and carries a badge like the other rows');
+  const painter = acct.slice(acct.indexOf('function paintCounts'), acct.indexOf('function setCount'));
+  ok(painter.length > 200 && painter.length < 3000, 'paintCounts is where it was');
+  ok(/querySelectorAll\('\[data-held\]'\)/.test(painter) &&
+     /el\.hidden = !held\(el\.getAttribute\('data-held'\)\)/.test(painter) &&
+     /typeof n === 'number' && n > 0/.test(painter),
+    'the badge painter reveals a held row under the SAME rule as the badge — ' +
+    'known, and more than zero — so an unknown count draws neither row');
+  ok(/candidateSubmissions\)\.where\('uid', '==', uid\)/.test(acct) &&
+     /counts\.cands = r\[4\]/.test(acct),
+    'the once-per-session refresh counts the account\'s candidate profiles by ' +
+    'uid, with no status filter — a withdrawn profile still exists');
+  const cand = await readFile(path.join(HERE, '..', 'assets', 'oa-candidateform.js'), 'utf8');
+  ok(/setCount\('cands', snap\.size\)/.test(cand),
+    'the candidate form corrects the count from its own one-profile query');
+  ok(/if \(!EDIT_ID && window\.OAAccounts && OAAccounts\.setCount\)/.test(cand) &&
+     /setCount\('cands', \(ownProfiles === null \? 0 : ownProfiles\) \+ 1\)/.test(cand),
+    'and adds one on a CREATE only — an edit or a take-down changes nothing, ' +
+    'because the profile still exists');
+  const paHtml = await readFile(path.join(HERE, '..', 'account.html'), 'utf8');
+  ok(/id="pa-cand-card"/.test(paHtml) &&
+     /candCard\.href = 'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(shown\.id\)/.test(paHtml),
+    'the personal area\'s candidate card links straight to the profile it found');
+  for (const what of ['postings', 'alerts', 'cands']) {
+    ok(new RegExp(`OAAccounts\\.setCount\\('${what}', `).test(paHtml),
+      `and corrects the ${what} count from the list it already holds`);
+  }
 }
 
 /* --------------------------- the same names on the map and the faculty list
@@ -4997,6 +5048,20 @@ async function testRulesDeploy() {
 
 async function testUserDirectorySync() {
   const root = path.join(HERE, '..');
+  /* the sync's own suite first, the way the campaign mailer's is spawned: it
+     carries checks nothing here repeats (the undated account, the no-name and
+     no-address rows, the sweep of its own log lines), and a suite run only by
+     the daily writer catches a PR after merge, where a red step stops the
+     figures rather than the PR */
+  let syncOut = '';
+  try {
+    syncOut = execFileSync(process.execPath, [path.join(HERE, 'sync-user-directory.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    syncOut = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/sync-user-directory selftest: \d+ checks passed/.test(syncOut),
+    'the roster sync\'s own selftest is green:\n' + syncOut.slice(0, 1500));
   const mod = await import('./sync-user-directory.mjs');
   const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
 
@@ -5043,6 +5108,89 @@ async function testUserDirectorySync() {
   const src = await readFile(path.join(root, '_scraper', 'sync-user-directory.mjs'), 'utf8');
   ok(/isMain\(import\.meta\.url\)/.test(src),
     'and importing it syncs nothing');
+
+  /* ---- THE TWO SERVED FILES (owner, 2026-09-05) ------------------------
+     data/users-meta.json is the front page's registered-users figure and
+     data/users-growth.json the analytics page's growth chart. Both are
+     public, so they carry counts and dates and nothing else, and the shape
+     is pinned EXACTLY: a key added for convenience is a key served to
+     anyone who asks. */
+  const ADDRESS = /[\w.+-]+@[\w-]+\.[\w.]+/;
+  const DAY = /^\d{4}-\d{2}-\d{2}$/;
+  const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+  const metaRaw = await readFile(path.join(root, 'data', mod.USERS_META), 'utf8');
+  const meta = JSON.parse(metaRaw);
+  eq(Object.keys(meta), ['generated', 'count'],
+    'data/users-meta.json carries generated and count and nothing else');
+  ok(Number.isInteger(meta.count) && meta.count >= 0, 'the count is a whole number');
+  ok(meta.count === 0 ? meta.generated === '' || ISO.test(meta.generated) : ISO.test(meta.generated),
+    'generated is an ISO instant, or empty only on the committed seed with a count of 0');
+  ok(!ADDRESS.test(metaRaw), 'and it carries no address');
+  const growthRaw = await readFile(path.join(root, 'data', mod.USERS_GROWTH), 'utf8');
+  const growth = JSON.parse(growthRaw);
+  eq(Object.keys(growth), ['generated', 'first', 'days'],
+    'data/users-growth.json carries generated, first and days and nothing else');
+  ok(Array.isArray(growth.days), 'days is a list');
+  if (growth.days.length) {
+    ok(ISO.test(growth.generated) && DAY.test(growth.first), 'a real growth file carries an ISO generated and a first day');
+    eq(growth.days[0][0], growth.first, 'and its first point is the first day');
+    ok(growth.days.every((p) => Array.isArray(p) && p.length === 2 && DAY.test(p[0]) && Number.isInteger(p[1])),
+      'every point is [yyyy-mm-dd, whole number]');
+    ok(growth.days.every((p, i, a) => i === 0 || (a[i - 1][0] < p[0] && a[i - 1][1] <= p[1])),
+      'the days are sorted and the counts never decrease');
+    eq(growth.days[growth.days.length - 1][1], meta.count, 'the last point is the count the meta file carries');
+  } else {
+    eq([growth.generated, growth.first], ['', ''], 'the empty seed carries no dates either');
+  }
+  ok(!ADDRESS.test(growthRaw), 'and it carries no address');
+  /* the pure halves behind them, on a fixture */
+  const NOW = new Date('2026-09-05T12:00:00Z');
+  const acc = (creation, disabled) => ({ disabled: !!disabled, metadata: { creationTime: creation } });
+  const fixture = [acc('Wed, 02 Sep 2026 08:00:00 GMT'), acc('Fri, 04 Sep 2026 03:00:00 GMT'),
+    acc('Thu, 03 Sep 2026 03:00:00 GMT', true)];
+  eq(mod.usersMeta(fixture, NOW), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
+    'usersMeta counts every account that is not disabled');
+  eq(mod.usersGrowth(fixture, NOW).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
+    'usersGrowth is one cumulative point per UTC day to the generated day');
+  ok(/writeFile\(path\.join\(DATA, USERS_META\)/.test(src) && /writeFile\(path\.join\(DATA, USERS_GROWTH\)/.test(src),
+    'the sync writes both files');
+  ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)')
+     && /import \{ firebaseAdmin, redact \} from '\.\/_mail\.mjs'/.test(src) && !/async function firestoreAndAuth/.test(src),
+    'never on a scan or a dry run, and the Admin SDK comes from _mail.mjs, the one definition');
+  /* the scan and dry-run lines print into a PUBLIC Actions log (the workflow's
+     scan button runs them): the id and a redacted address, never the name */
+  const syncMain = src.slice(src.indexOf('async function main()'), src.indexOf('/* ---------------------------------------------------------------- selftest */'));
+  ok(syncMain.length > 1500, 'the sync\'s main() was really sliced');
+  const syncLogs = syncMain.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
+  ok(syncLogs.length >= 5 && syncLogs.some((l) => /redact\(row\.email\)/.test(l)),
+    'the sync\'s log lines were found and the redact exemption is exercised');
+  ok(syncLogs.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
+      && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, ''))),
+    'no log line in the sync names a person: an address through redact() only, and never the name (the _mail.mjs redact rule)');
+  ok(!/changes only when the count/.test(src) && !/changes only when the count/.test(wf),
+    'neither the sync nor its workflow claims the meta file changes only with the count: `generated` is the run instant, so both files change every run');
+  ok(/const accounts = \[\];/.test(src)
+     && /accounts\.push\(\{ disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
+    'and what the files are built from holds the flags and the creation time only, never a name or an address');
+
+  /* the workflow is a DATA WRITER now: the branch tip, the publishing role,
+     a commit step naming both files, and a rejected push re-run rather than
+     rebased (read with the comments stripped, since the step explains the
+     rebase it does not do) */
+  const wfCode = wf.replace(/#.*$/gm, '');
+  ok(/permissions:\s*\n\s*contents: write/.test(wf), 'the sync workflow may commit');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wf), 'it checks out the branch TIP, never github.sha');
+  ok(!/pull --rebase/.test(wfCode) && /git reset --hard FETCH_HEAD/.test(wfCode)
+     && /node _scraper\/sync-user-directory\.mjs\s*\n/.test(wfCode.slice(wfCode.indexOf('git reset --hard'))),
+    'a rejected push is answered by re-running the sync on the new tip, never by a rebase');
+  ok((wf.match(/node _scraper\/selftest\.mjs --publishing/g) || []).length >= 3,
+    'it runs the selftest in the publishing role before, after, and inside the retry');
+  ok(/git add \$FILES/.test(wf) && /FILES='data\/users-meta\.json data\/users-growth\.json'/.test(wf),
+    'the commit names exactly the two served files');
+  ok(/if: github\.ref_name == 'master' && !inputs\.scan/.test(wf), 'and is gated to master and a real run');
+  ok(/- name: Commit\n[\s\S]*?FIREBASE_SERVICE_ACCOUNT: \$\{\{ secrets\.FIREBASE_SERVICE_ACCOUNT \}\}/.test(wf),
+    'the Commit step carries the credential, since a rebuild reads Auth');
+  ok(!/—/.test(wf.slice(wf.indexOf('IT ALSO WRITES'), wf.indexOf('on:\n'))), 'no em dash in the new header text');
 }
 
 /* ------------------------------ the Universities directory (owner, 2026-08-24)
@@ -5469,8 +5617,9 @@ async function testDirectoryWiring() {
   ok(block.length > 100, 'the rules carry a directoryEdits block');
   ok(/allow read: if true;/.test(block.slice(0, 400)),
     'an edit reaches EVERY visitor — a correction is not an editor-only view');
-  ok(/allow create, update: if signedIn\(\)/.test(block.slice(0, 900)),
-    'and ANY registered user may write one (owner, 2026-08-24)');
+  ok(/allow create, update: if verified\(\)/.test(block.slice(0, 900)),
+    'and ANY registered user with a verified address may write one (owner, ' +
+    '2026-08-24; the verification gate joined every user write on 2026-09-04)');
   ok(/request\.resource\.data\.by == request\.auth\.uid/.test(block.slice(0, 1200)),
     'attribution cannot be forged: `by` is pinned to the writing account');
   ok(/'hidden' in request\.resource\.data[\s\S]{0,220}isAdmin\(\)/.test(block),
@@ -8929,7 +9078,9 @@ async function testReviewWiring() {
      writer is the outage this file records, and the flag CREEPING INTO the PR
      check would leave nothing enforcing it anywhere. */
   const WRITERS = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
-    'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml'];
+    'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml',
+    // the roster sync writes data/users-meta.json and data/users-growth.json (2026-09-05)
+    'oa-user-directory.yml'];
   for (const name of WRITERS) {
     const src = await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8');
     const runs = [...src.matchAll(/node _scraper\/selftest\.mjs([^\n]*)/g)].map((m) => m[1]);
@@ -9421,25 +9572,31 @@ async function testAdminArea() {
   ok(/match \/feedback\/\{id\}[\s\S]*?allow read, update, delete: if isAdmin\(\);/.test(rules),
     'and the feedback inbox stays admin-read');
 
-  /* the reveal grouping is the build's own semantics: before the date every
-     queued profile is held, from the day itself queued means published */
+  /* the reveal grouping is the build's own semantics: before the reveal
+     INSTANT (14:00 UTC on the day, assets/oa-reveal.js) every queued profile
+     is held, from the instant itself queued means published. The function is
+     handed the module the page hands it, and a real clock. */
   const fn = /function candGroupOf[\s\S]*?\n  }/.exec(js);
   ok(fn, 'candGroupOf is present');
   if (fn) {
+    const OAReveal = require(path.join(HERE, '..', 'assets', 'oa-reveal.js'));
     /* eslint-disable-next-line no-new-func */
-    const candGroupOf = new Function('return (' + fn[0] + ')')();
-    eq(candGroupOf({ status: 'queued' }, '2026-10-11', '2026-08-23'), 'held',
+    const candGroupOf = new Function('OAReveal', 'return (' + fn[0] + ')')(OAReveal);
+    const AUG = new Date('2026-08-23T12:00:00Z');
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', AUG), 'held',
       'a queued profile before the reveal is HELD');
-    eq(candGroupOf({ status: 'queued' }, '2026-10-11', '2026-10-11'), 'live',
-      'and on the reveal day itself it is live — the same >= the page uses');
-    eq(candGroupOf({ status: 'withdrawn' }, '2026-10-11', '2026-08-23'), 'withdrawn',
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', new Date('2026-10-11T13:59:59Z')), 'held',
+      'and still held on the reveal day up to the last second before 14:00 UTC');
+    eq(candGroupOf({ status: 'queued' }, '2026-10-11', new Date('2026-10-11T14:00:00Z')), 'live',
+      'and at 14:00 UTC on the reveal day it is live, the same instant the build reveals on');
+    eq(candGroupOf({ status: 'withdrawn' }, '2026-10-11', AUG), 'withdrawn',
       'a withdrawal stays the candidate\u2019s own whatever the date');
-    eq(candGroupOf({ status: 'hidden' }, '', '2026-08-23'), 'hidden',
+    eq(candGroupOf({ status: 'hidden' }, '', AUG), 'hidden',
       'and a takedown stays the maintainer\u2019s');
-    eq(candGroupOf({}, '', '2026-08-23'), 'held',
+    eq(candGroupOf({}, '', AUG), 'held',
       'no reveal date announced means EVERYTHING is held \u2014 the build\u2019s own ' +
       'revealGate (candidates-model.mjs) publishes nothing until a date is set');
-    eq(candGroupOf({}, 'soon', '2026-08-23'), 'held',
+    eq(candGroupOf({}, 'soon', AUG), 'held',
       'and a malformed date holds too \u2014 the typo revealGate exists to survive ' +
       'must not read as \u201ceverything is public\u201d here');
   }
@@ -9818,6 +9975,20 @@ async function testCandidateProfilePolicy() {
     'oa-candidateform: an existing profile is looked up by the OWNER, not by name');
   ok(/location\.replace\('post-a-candidate\.html\?edit='/.test(form),
     'and found, the form reopens it for editing instead of creating a second');
+  /* A LAST-SEASON PROFILE IS NAMED, NOT REDIRECTED TO OR PASSED OVER: the
+     account menu's "My candidate profile" count has no year filter, so an
+     account whose only profile is last spring's is promised one, and a blank
+     create form that mentioned nothing would read as the row lying. */
+  ok(/if \(Number\(v\.year\) !== season\) \{[\s\S]{0,200}?older = d\.id;/.test(form),
+    'oa-candidateform: a profile from another season is remembered (the newest of them)');
+  ok(/You have a profile from /.test(form) && /'open it'/.test(form) &&
+     /\?edit=' \+ encodeURIComponent\(older\)/.test(form),
+    'and with no current-season profile it is named above the form, with a link to open it');
+  ok(/if \(msg && msg\.nodeType\) \{ m\.textContent = ''; m\.appendChild\(msg\); \}/.test(form) &&
+     /else m\.textContent = msg \|\| '';/.test(form),
+    'say() takes a DOM node for the one message that carries a link; text stays textContent');
+  ok(!/innerHTML/.test(form.slice(form.indexOf('function redirectToOwnProfile'),
+    form.indexOf('OAAccounts.onChange'))), 'and the message is built from nodes, never markup');
 
   /* the model backstop: one account, one market year, one row — whatever the
      names say (the detail the name key cannot see) */
@@ -9849,6 +10020,694 @@ async function testCandidateProfilePolicy() {
     'the profile points at its replacement');
   ok(/supersededId !== uploaded\.id/.test(build),
     'and never the file just filed');
+}
+
+/* ------------------- the reveal is an INSTANT, and a candidate can edit
+
+   Owner, 2026-09-04: candidate profiles go public at 14:00 UTC on the reveal
+   day (07:00 Los Angeles, 10:00 New York, 15:00 London, 22:00 Shanghai, all
+   still that calendar day), not at the first build after midnight UTC, which
+   is five in the afternoon of the PREVIOUS day in California. And a candidate
+   may edit at any time; the card then says when (`updatedAt`, a public field
+   since the same day).
+
+   assets/oa-reveal.js is the ONE definition. The build's revealGate calls it,
+   and every page and mailer that used to compare a calendar day against
+   `revealAt` reads it instead, which this test pins file by file: two copies
+   of "is it out yet" disagreeing is a profile one page calls held while
+   another calls it live. */
+
+async function testCandidateReveal() {
+  const R = require(path.join(HERE, '..', 'assets', 'oa-reveal.js'));
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+
+  /* ---- the module, to the second ------------------------------------ */
+  eq(R.REVEAL_HOUR_UTC, 14, 'reveal: the hour is 14:00 UTC');
+  eq(R.revealInstant('2026-10-11').toISOString(), '2026-10-11T14:00:00.000Z',
+    'reveal: the instant is 14:00 UTC on the stored day');
+  eq(R.revealInstant(' 2026-10-11 ').toISOString(), '2026-10-11T14:00:00.000Z',
+    'reveal: the stored day is trimmed');
+  for (const junk of ['', 'soon', '11/10/2026', '2026-13-45', '2026-02-31',
+    '2026-10-11T00:00:00Z', null, undefined, 20261011]) {
+    eq(R.revealInstant(junk), null, `reveal: ${JSON.stringify(junk)} is no instant`);
+    eq(R.isRevealed(junk, new Date('2030-01-01T00:00:00Z')), false,
+      `reveal: ...and can never reveal (${JSON.stringify(junk)}), however late the clock`);
+  }
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-10T14:00:00Z')), false, 'reveal: the day before, held');
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-11T00:00:00Z')), false,
+    'reveal: midnight UTC on the day is NOT the reveal (that was the old gate)');
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-11T13:59:59Z')), false, 'reveal: 13:59:59Z, held');
+  eq(R.isRevealed('2026-10-11', new Date('2026-10-11T14:00:00Z')), true, 'reveal: 14:00:00Z, revealed');
+  eq(R.isRevealed('2026-10-11', '2026-10-11T14:00:00Z'), true, 'reveal: a clock given as a string works too');
+  eq(R.isRevealed('2026-10-11', 'not a clock'), false, 'reveal: an unreadable clock holds');
+  eq(R.revealStamp('2026-10-11'), '2026-10-11T14:00:00.000Z', 'reveal: the stamp the meta carries');
+  eq(R.revealStamp('soon'), '', 'reveal: no day, no stamp');
+  eq(R.formatDay('2026-10-02'), '2 October 2026', 'reveal: the site’s day-month-year, no suffix');
+  eq(R.formatDay('2026-10-11T14:00:00Z'), '', 'reveal: a stamp is not a day (cut it first)');
+
+  /* describeReveal: computed with Intl from named zones, never typed. The
+     weekday expectation is computed here too, so a wrong literal in the
+     spec ("Saturday") cannot be pinned into the test. */
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long',
+    day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(new Date('2026-10-11T14:00:00Z'));
+  const part = (t) => parts.find((x) => x.type === t).value;
+  const d = R.describeReveal('2026-10-11', { now: new Date('2026-09-04T00:00:00Z'),
+    timeZone: 'Pacific/Auckland' });
+  eq(d.dayLong, `${part('weekday')} ${part('day')} ${part('month')} ${part('year')}`,
+    'reveal: dayLong is the weekday and the day, without en-GB’s comma');
+  eq(d.day, '2026-10-11', 'reveal: the day'); eq(d.instant, '2026-10-11T14:00:00.000Z', 'reveal: the instant');
+  eq(d.utc, '14:00 UTC', 'reveal: the UTC clock'); eq(d.revealed, false, 'reveal: not yet, at that `now`');
+  eq(d.cities.map((c) => c.name), ['Los Angeles', 'New York', 'London', 'Shanghai'],
+    'reveal: the four cities, west to east');
+  eq(d.cities.map((c) => c.time), ['07:00', '10:00', '15:00', '22:00'],
+    'reveal: their clocks at 14:00 UTC on 2026-10-11');
+  eq(d.cities.map((c) => c.sameDay), [true, true, true, true],
+    'reveal: all four still on the reveal day, which is what the hour was chosen for');
+  /* the SAME hour on a November day is an hour earlier in the three cities
+     that observe daylight saving, which is why no page TYPES the four clocks
+     (the 2026-09-04 review found them typed in three places): they are
+     computed per date, and a typed 07:00 would be wrong for this reveal */
+  eq(R.describeReveal('2026-11-08', { now: new Date('2026-09-04T00:00:00Z') }).cities.map((c) => c.time),
+    ['06:00', '09:00', '14:00', '22:00'],
+    'reveal: after the clocks go back the same 14:00 UTC reads 06:00, 09:00, 14:00 and 22:00');
+  eq(d.local, { timeZone: 'Pacific/Auckland', time: '03:00', sameDay: false },
+    'reveal: a reader in Auckland sees three in the morning of the NEXT day, and is told so');
+  eq(R.describeReveal('2026-10-11', { timeZone: 'Not/AZone' }).local,
+    { timeZone: 'Not/AZone', time: null, sameDay: null },
+    'reveal: a zone Intl does not know answers null, never a guess');
+  eq(R.describeReveal('soon'), null, 'reveal: nothing to describe without a day');
+  eq(R.describeReveal('2026-10-11', { now: new Date('2026-10-11T14:00:00Z') }).revealed, true,
+    'reveal: describeReveal says when it is already out');
+  const revealSrc = await read('assets', 'oa-reveal.js');
+  for (const z of ['America/Los_Angeles', 'America/New_York', 'Europe/London', 'Asia/Shanghai']) {
+    ok(revealSrc.includes(`'${z}'`), `reveal: ${z} is a NAMED zone, so daylight saving follows on its own`);
+  }
+  /* read with the comments STRIPPED: the module EXPLAINS its shape with an
+     example, and a guard that could not tell the example from a literal
+     would have to be satisfied by deleting the explanation */
+  ok(!/'[0-2][0-9]:[0-5][0-9]'/.test(revealSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')),
+    'reveal: no clock time is typed into the module; every one is computed');
+  /* driven WITHOUT Intl: the fields are null and the day still prints, so the
+     copy can fall back to its UTC sentence */
+  const noIntl = {};
+  // eslint-disable-next-line no-new-func
+  new Function('self', 'Intl', revealSrc)(noIntl, undefined);
+  const bare = noIntl.OAReveal.describeReveal('2026-10-11');
+  ok(bare && bare.dayLong === d.dayLong && bare.utc === '14:00 UTC',
+    'reveal: without Intl the day and the UTC clock still print');
+  eq(bare.cities.map((c) => c.time), [null, null, null, null],
+    'reveal: ...and the city clocks are null rather than guessed');
+  eq(bare.local.time, null, 'reveal: ...as is the reader’s own');
+  eq(noIntl.OAReveal.isRevealed('2026-10-11', new Date('2026-10-11T14:00:00Z')), true,
+    'reveal: the gate itself never needed Intl');
+
+  /* ---- the build's gate is a thin caller ----------------------------- */
+  eq(revealGate('2026-10-11', new Date('2026-10-11T13:59:59Z')).held, true, 'gate: 13:59:59Z held');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T14:00:00Z')).held, false, 'gate: 14:00:00Z revealed');
+  eq(revealGate('2026-10-11', new Date('2026-10-10T14:00:00Z')).held, true, 'gate: the day before, held');
+  eq(revealGate('2026-10-11', new Date('2026-10-11T00:00:00Z')).held, true,
+    'gate: midnight UTC on the day, held (the old gate revealed here)');
+  eq(revealGate('soon', new Date('2030-01-01')).held, true, 'gate: junk holds everything');
+  eq(revealGate(' 2026-10-11 ', new Date('2026-09-04')).revealAt, '2026-10-11', 'gate: echoes the day it parsed');
+  eq(revealGate('soon', new Date('2026-09-04')).revealAt, '', 'gate: and nothing for junk');
+  eq(buildCandidatesMeta([], { generated: 'g', revealAt: '2026-10-11', heldCount: 3 }).revealAtInstant,
+    '2026-10-11T14:00:00.000Z', 'meta: carries the instant beside the day');
+  eq(buildCandidatesMeta([], { generated: 'g' }).revealAtInstant, '', 'meta: no day, an empty instant');
+  const model = await read('_scraper', 'candidates-model.mjs');
+  ok(/require\('\.\.\/assets\/oa-reveal\.js'\)/.test(model), 'gate: candidates-model reads the module');
+  ok(/held: !OAReveal\.isRevealed\(at, now\)/.test(model), 'gate: revealGate is a thin caller of it');
+  const revealFile = JSON.parse(await read('data', 'candidates-reveal.json'));
+  ok(/14:00 UTC/.test(revealFile['//']) && /oa-reveal\.js/.test(revealFile['//']),
+    'candidates-reveal.json says 14:00 UTC in its own comment, and names the module');
+  ok(!revealFile.revealAt || R.revealInstant(revealFile.revealAt),
+    'the committed reveal date is a real day, or empty (a typo holds everything, but is still a typo)');
+
+  /* ---- every comparison goes through the module ---------------------- */
+  const DAY_COMPARE =
+    /\b(today|todayIso\(\)|toISOString\(\)\.slice\(0, 10\)|isoDay\(now\))\s*[<>]=?\s*(at|revealAt|cmeta\.revealAt)\b/;
+  for (const f of ['index.html', 'assets/oa-alerts.js', 'assets/oa-alert-match.js',
+    'assets/oa-adminarea.js', 'assets/oa-submissions.js', '_scraper/submissions-mailer.mjs',
+    '_scraper/candidates-model.mjs', '_scraper/page-test.mjs']) {
+    const src = await read(...f.split('/'));
+    ok(!DAY_COMPARE.test(src), `${f}: no private calendar-day comparison against revealAt`);
+    ok(/OAReveal\w*\.(isRevealed|revealInstant|describeReveal|revealDay|revealStamp)\(/.test(src),
+      `${f}: asks the module instead`);
+  }
+  const matchSrc = await read('assets', 'oa-alert-match.js');
+  ok(!/\bmark < day\b/.test(matchSrc), 'oa-alert-match: the note is no longer keyed on a bare day');
+  ok(/require\('\.\/oa-reveal\.js'\)/.test(matchSrc) && /root\.OAReveal/.test(matchSrc),
+    'oa-alert-match: the factory is handed the module on both sides');
+  const mailerSrc = await read('_scraper', 'submissions-mailer.mjs');
+  ok(!/=== 'candidate' && revealAt;/.test(mailerSrc),
+    'submissions-mailer: "held" is no longer the mere presence of a date');
+  ok(/OAReveal\.describeReveal\(revealAt, \{ now \}\)/.test(mailerSrc),
+    'submissions-mailer: ...it asks the module, with the clock injected');
+  const admin = await read('assets', 'oa-adminarea.js');
+  ok(/OAReveal\.isRevealed\(meta\.revealAt\)/.test(admin), 'oa-adminarea: heldCandidates asks the module');
+  ok(/var held = !OAReveal\.isRevealed\(revealAt, now\);/.test(admin),
+    'oa-adminarea: candGroupOf asks it, with the clock injected');
+  ok(/candGroupOf\(v, revealAt, now\)/.test(admin), 'oa-adminarea: ...and is handed a real clock');
+  ok(/OAReveal\.describeReveal\(revealAt\)/.test(admin), 'oa-adminarea: the panel hint names the computed instant');
+  const subs = await read('assets', 'oa-submissions.js');
+  ok(/OAReveal\.describeReveal\(revealAt\)/.test(subs) && /Held until/.test(subs),
+    'oa-submissions: the card names the instant and still says "Held until"');
+  /* NO DATE ANNOUNCED is the one state in which the build holds every
+     profile, and both readers once called it live (`!!revealAt && ...`):
+     held is now "the module does not say revealed", exactly the build's test */
+  ok(!/!!revealAt &&/.test(subs) && /var held = kind\.key === 'candidate' && !\(when && when\.revealed\);/.test(subs),
+    'oa-submissions: with no reveal date announced a profile reads HELD, as the build holds it');
+  ok(/const held = kind\.key === 'candidate' && !\(when && when\.revealed\);/.test(mailerSrc)
+     && /the reveal date is announced/.test(mailerSrc),
+    'submissions-mailer: the same reading, and the held paragraph has words for an unannounced date');
+  const acct = await read('assets', 'oa-accounts.js');
+  ok(/loadScript\('assets\/oa-reveal\.js', 'OAReveal'\)/.test(acct),
+    'oa-accounts: adminPending loads the module before oa-adminarea.js needs it, on every page');
+  ok(acct.indexOf("loadScript('assets/oa-reveal.js', 'OAReveal')")
+     < acct.indexOf("loadScript('assets/oa-adminarea.js', 'OAAdminArea')"),
+    'oa-accounts: ...listed before it');
+
+  /* ---- the alerts: the note is keyed on the instant ------------------ */
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const CT = { topics: ['candidates'] };
+  const ROWS = [
+    { id: 'a', name: 'A', addedAt: '2026-08-20T09:00:00Z' },
+    { id: 'b', name: 'B', addedAt: '2026-10-11T09:00:00Z' },
+  ];
+  eq(M.candidateNews(ROWS, CT, '2026-10-11T13:59:59Z', '2026-10-11').kind, 'reveal',
+    'alerts: a mark on the reveal day before 14:00 UTC gets the note');
+  const note = M.candidateNews(ROWS, CT, '', '2026-10-11');
+  eq(note.mark, '2026-10-11T14:00:00Z',
+    'alerts: the note’s mark is the instant when every profile predates it');
+  eq(M.candidateNews(ROWS, CT, note.mark, '2026-10-11'), null,
+    'alerts: ...so the note goes once (the repeat a posting-time mark had)');
+  eq(M.candidateNews(ROWS, CT, '2026-10-11T14:00:00Z', '2026-10-11'), null,
+    'alerts: at the instant, nothing new to list');
+  /* driven WITHOUT the module: the old fallback, an empty mark announces and
+     a set mark lists, never a private guess at the instant */
+  const bareRoot = {
+    OACountries: require(path.join(HERE, '..', 'assets', 'oa-countries.js')),
+    OASchools: require(path.join(HERE, '..', 'assets', 'oa-schools.js')),
+    OAJobNav: require(path.join(HERE, '..', 'assets', 'oa-jobnav.js')),
+  };
+  // eslint-disable-next-line no-new-func
+  new Function('self', matchSrc)(bareRoot);
+  eq(bareRoot.OAAlertMatch.candidateNews(ROWS, CT, '', '2026-10-11').kind, 'reveal',
+    'alerts (no module): an empty mark announces');
+  eq(bareRoot.OAAlertMatch.candidateNews(ROWS, CT, '2026-10-11T09:00:00Z', '2026-10-11'), null,
+    'alerts (no module): a set mark lists, and here has nothing newer to list');
+  ok(!/function (revealInstant|isRevealed)\(/.test(matchSrc),
+    'alerts: the matcher carries no private copy of the reveal rule');
+
+  /* ---- the pages load the module before its users -------------------- */
+  const tagAt = (html, f) => html.indexOf('<script defer src="assets/' + f + '"></script>');
+  const index = await read('index.html');
+  ok(tagAt(index, 'oa-reveal.js') > 0, 'index.html loads oa-reveal.js, deferred');
+  ok(tagAt(index, 'oa-reveal.js') < index.indexOf('OAReveal.isRevealed('),
+    'index.html: ...before the reveal note that asks it');
+  const alertsHtml = await read('alerts.html');
+  ok(tagAt(alertsHtml, 'oa-reveal.js') > 0 && tagAt(alertsHtml, 'oa-reveal.js') < tagAt(alertsHtml, 'oa-alert-match.js'),
+    'alerts.html loads oa-reveal.js BEFORE the matcher whose factory is handed it');
+  const adminHtml = await read('admin-area.html');
+  ok(tagAt(adminHtml, 'oa-reveal.js') > 0
+     && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-submissions.js')
+     && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-adminarea.js'),
+    'admin-area.html loads oa-reveal.js before both panels that ask it');
+  /* ---- updatedAt: a public field, day-cut, never an alerts cursor ---- */
+  ok(CANDIDATE_PUBLIC_FIELDS.includes('updatedAt'), 'updatedAt: is a published field');
+  eq(CANDIDATE_PUBLIC_FIELDS.indexOf('updatedAt'), CANDIDATE_PUBLIC_FIELDS.indexOf('addedAt') + 1,
+    'updatedAt: right after addedAt in the served order');
+  const NOW = new Date('2026-09-04T12:00:00Z');
+  const base = { uid: 'u-1', first: 'Ada', last: 'Reader', institution: 'Somewhere University',
+    position: 'PhD Candidate', year: 2027, createdAt: '2026-08-20T09:00:00Z' };
+  const r0 = publicCandidateRow(rowFromCandidateSubmission(base, { now: NOW }));
+  ok(!('updatedAt' in r0), 'updatedAt: a profile never edited carries no key at all');
+  const r1 = publicCandidateRow(rowFromCandidateSubmission(
+    { ...base, updatedAt: '2026-10-02T17:45:10.123Z' }, { now: NOW }));
+  eq(r1.updatedAt, '2026-10-02', 'updatedAt: the stamp is cut to its day');
+  eq(Object.keys(r1).indexOf('updatedAt'), Object.keys(r1).indexOf('addedAt') + 1,
+    'updatedAt: ...and written in the served order');
+  eq(r1.addedAt, '2026-08-20T09:00:00Z', 'updatedAt: addedAt is untouched by an edit');
+  eq(publicCandidateRow(rowFromCandidateSubmission(
+    { ...base, updatedAt: { toDate: () => new Date('2026-10-03T01:00:00Z') } }, { now: NOW })).updatedAt,
+    '2026-10-03', 'updatedAt: a Firestore Timestamp shape is read too');
+  ok(!('updatedAt' in publicCandidateRow(rowFromCandidateSubmission(
+    { ...base, updatedAt: 'junk' }, { now: NOW }))), 'updatedAt: junk is dropped, never published');
+  const prevRow = rowFromCandidateSubmission(base, { now: NOW });
+  const nextRow = rowFromCandidateSubmission({ ...base, updatedAt: '2026-10-02T00:00:00Z' },
+    { now: new Date('2026-10-02T12:00:00Z') });
+  const merged = mergeCandidateRows([prevRow], [nextRow]);
+  eq([merged.added, merged.updated], [0, 1], 'updatedAt: an edit is an update of the served row, never a new profile');
+  eq(merged.rows[0].updatedAt, '2026-10-02', 'updatedAt: the fresh day wins');
+  eq(merged.rows[0].addedAt, prevRow.addedAt, 'updatedAt: the alerts cursor stays where it was');
+  eq(M.newCandidatesFor([{ ...r1, updatedAt: '2026-12-01' }], CT, '2026-08-20T09:00:00Z'), [],
+    'updatedAt: the candidates topic lists by addedAt alone, so an edit re-announces nothing');
+  const rules = await read('_firestore.rules');
+  const candBlock = rules.slice(rules.indexOf('match /candidateSubmissions/{id}'),
+    rules.indexOf('// ---------------------------------------------------------- placements'));
+  ok(candBlock.length > 1500 && candBlock.length < 6000, 'updatedAt: the rules slice is the candidates block');
+  ok(/&& str\('updatedAt', 40\)/.test(candBlock), 'updatedAt: candShapeOk bounds it as a string');
+  ok(!/hasOnly\(\[[^\]]*updatedAt/.test(candBlock), 'updatedAt: never in the merge hand-over’s hasOnly');
+  ok(/allow update: if isOwner\(resource\.data\.uid\)\n\s+&& request\.resource\.data\.uid == resource\.data\.uid[\s\S]*?&& candShapeOk\(\);/.test(candBlock),
+    'updatedAt: the owner’s update runs candShapeOk, so an edit carrying it is accepted');
+  ok(new Date().toISOString().length <= 40, 'updatedAt: an ISO stamp fits the bound');
+  for (const [f, re] of [
+    ['assets/oa-candidateform.js', /updatedAt(:| =) new Date\(\)\.toISOString\(\)/],
+    ['assets/oa-candidateedit.js', /updatedAt: new Date\(\)\.toISOString\(\)/],
+    ['assets/oa-adminarea.js', /updatedAt: new Date\(\)\.toISOString\(\)/],
+  ]) {
+    ok(re.test(await read(...f.split('/'))), `${f}: writes updatedAt as an ISO stamp`);
+  }
+  /* edit at ANY time: nothing gates Edit on the reveal, before or after */
+  const editJs = await read('assets', 'oa-candidateedit.js');
+  const editSlice = editJs.slice(editJs.indexOf('function decorate'), editJs.indexOf('function takeDown'));
+  ok(editSlice.length > 500 && editSlice.length < 5000, 'edit: the decorate slice is bounded both ends');
+  ok(!/revealAt|isRevealed|OAReveal/.test(editSlice), 'edit: the card’s Edit button is not gated on the reveal');
+  const formJs = await read('assets', 'oa-candidateform.js');
+  const editMode = formJs.slice(formJs.indexOf('function enterEditMode'), formJs.indexOf('function wireTakeDown'));
+  ok(editMode.length > 500 && editMode.length < 8000, 'edit: the enterEditMode slice is bounded both ends');
+  ok(!/revealAt|isRevealed/.test(editMode), 'edit: the form opens a profile for editing whatever the date');
+
+  /* ---- the doorbell: revealCandidates ------------------------------- */
+  const fnSrc = await read('_functions', 'index.js');
+  ok(/require\('firebase-functions\/v2\/scheduler'\)/.test(fnSrc), 'doorbell: the scheduler is imported');
+  ok(/exports\.revealCandidates = onSchedule\(/.test(fnSrc), 'doorbell: revealCandidates is a scheduled function');
+  const bell = fnSrc.slice(fnSrc.indexOf('exports.revealCandidates'),
+    fnSrc.indexOf('/* --------------------------------------------------------------- approvals */'));
+  ok(bell.length > 800 && bell.length < 4000, 'doorbell: the slice is the function, bounded both ends');
+  ok(/schedule: '0 14 \* \* \*'/.test(bell) && /timeZone: 'UTC'/.test(bell), 'doorbell: 14:00 UTC daily');
+  eq(Number(/schedule: '0 (\d+) \* \* \*'/.exec(bell)[1]), R.REVEAL_HOUR_UTC,
+    'doorbell: its hour IS the module’s hour');
+  eq(Number(/const REVEAL_HOUR_UTC = (\d+);/.exec(fnSrc)[1]), R.REVEAL_HOUR_UTC,
+    'doorbell: ...and so is the constant it logs');
+  ok(/secrets: \[GH_DISPATCH_TOKEN\]/.test(bell), 'doorbell: carries the dispatch token like the others');
+  ok(/candidates-reveal\.json/.test(bell) && /Date\.now\(\)/.test(bell) && /cache: 'no-store'/.test(bell),
+    'doorbell: reads the served reveal file, cache-busted');
+  ok(/await ring\(EVENT_TYPE, \{ reason: 'reveal'/.test(bell),
+    'doorbell: rings the SAME helper with the SAME event type the other doorbells use');
+  ok(/revealAt !== today/.test(bell) && /'reveal: not today'/.test(bell),
+    'doorbell: on every other day it logs why it did not ring');
+  ok(/FOUR doorbells/.test(fnSrc) && !/THREE doorbells/.test(fnSrc), 'doorbell: the header counts four');
+  ok(/the fifth function, and one of the\s+two here that are not doorbells/.test(fnSrc),
+    'doorbell: recordVisit is the fifth function');
+  /* ONE producer for the event: no GitHub cron may fire at 14:00, the
+     duplicate-doorbell outage (One event, one build) in another costume.
+     The hour field is EXPANDED before it is tested: a bare star, a step
+     (every second hour) and a range (12-16) all fire at 14:00 and none of
+     them contains the literal "14", so the first version of this guard,
+     which split the field on commas, passed every one of them. The minute
+     field is expanded the same way, because the build's own :07/:27/:47
+     fires in the 14:00 HOUR by design (it is the safety net) and must pass;
+     what is refused is a fire AT 14:00. */
+  const cronField = (field, max) => {
+    const out = new Set();
+    for (const part of String(field).trim().split(',')) {
+      const m = /^(\*|\d+(?:-\d+)?)(?:\/(\d+))?$/.exec(part);
+      if (!m) continue;
+      const step = m[2] ? Number(m[2]) : 1;
+      let lo, hi;
+      if (m[1] === '*') { lo = 0; hi = max; }
+      else if (m[1].includes('-')) { [lo, hi] = m[1].split('-').map(Number); }
+      else { lo = Number(m[1]); hi = m[2] ? max : lo; }
+      for (let v = lo; v <= hi; v += step) out.add(v);
+    }
+    return out;
+  };
+  eq(cronField('*', 23).size, 24, 'cronField: a star is every hour');
+  ok(cronField('*/2', 23).has(14) && !cronField('*/2', 23).has(13), 'cronField: a step is every Nth hour');
+  ok(cronField('12-16', 23).has(14) && !cronField('12-16', 23).has(17), 'cronField: a range');
+  ok(cronField('7,22', 23).has(22) && !cronField('7,22', 23).has(14), 'cronField: a list');
+  ok(cronField('10-20/5', 23).has(15) && !cronField('10-20/5', 23).has(14), 'cronField: a stepped range');
+  ok(cronField('0', 59).has(0) && cronField('7,27,47', 59).has(27) && !cronField('7,27,47', 59).has(0),
+    'cronField: minutes');
+  const firesAtReveal = (cron) => {
+    const [min, hour] = cron.trim().split(/\s+/);
+    return cronField(hour, 23).has(R.REVEAL_HOUR_UTC) && cronField(min, 59).has(0);
+  };
+  ok(firesAtReveal('0 * * * *') && firesAtReveal('0 */2 * * *') && firesAtReveal('0 12-16 * * *')
+     && firesAtReveal('0,30 14 * * *'),
+    'firesAtReveal: an hourly, a stepped, a ranged and a listed cron that reach 14:00 are all caught');
+  ok(!firesAtReveal('7,27,47 * * * *') && !firesAtReveal('0 13 * * *') && !firesAtReveal('23 * * * *'),
+    'firesAtReveal: ...and the build’s own safety net, a 13:00 daily and an hourly at :23 are not');
+  const wfDir = path.join(HERE, '..', '.github', 'workflows');
+  for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
+    const src = await readFile(path.join(wfDir, file), 'utf8');
+    for (const m of src.matchAll(/cron:\s*['"]([^'"]+)['"]/g)) {
+      ok(!firesAtReveal(m[1]),
+        `${file}: no workflow cron fires at ${R.REVEAL_HOUR_UTC}:00 UTC (${m[1]}); the Cloud Function is the one producer`);
+    }
+  }
+  const setup = await read('_SETUP-INSTANT-PUBLISH.md');
+  ok(/`revealCandidates`/.test(setup) && /which is six/.test(setup) && /read back\s+six/.test(setup),
+    'setup guide: names revealCandidates and counts six functions');
+  ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
+  ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
+  ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
+
+  /* ---- CLAUDE.md records the decisions ------------------------------- */
+  const claude = await read('CLAUDE.md');
+  ok(/^## The reveal is an instant, not a day, and a candidate can see their own card first$/m.test(claude),
+    'CLAUDE.md: the section is there');
+  ok(/14:00 UTC/.test(claude), 'CLAUDE.md: ...and names the hour');
+  ok(/`assets\/oa-candcard\.js`/.test(claude) && /publicRowFromDoc/.test(claude),
+    'CLAUDE.md: ...and records the one renderer and its twin');
+
+  /* ---- ONE renderer, ONE projection: assets/oa-candcard.js ----------- */
+  const C = require(path.join(HERE, '..', 'assets', 'oa-candcard.js'));
+  eq(C.FIELDS, CANDIDATE_PUBLIC_FIELDS,
+    'candcard: FIELDS is CANDIDATE_PUBLIC_FIELDS, in order (both ways, by equality)');
+  for (const k of C.FIELDS) ok(CANDIDATE_PUBLIC_FIELDS.includes(k), `candcard: ${k} is a published field`);
+  for (const k of CANDIDATE_PUBLIC_FIELDS) ok(C.FIELDS.includes(k), `candcard: ${k} is in the browser copy`);
+
+  /* the twin of publicCandidateRow(rowFromCandidateSubmission(doc)), driven
+     over a fixture table that reaches every branch and compared as the
+     served JSON would read: same keys, same order, same values */
+  const TNOW = new Date('2026-09-04T12:00:00Z');
+  const inject = { canonColumns, ownerTag, marketYear, now: TNOW };
+  const ok3 = { uid: 'uid-twin-1', first: 'Ada', last: 'Reader', institution: 'Northwestern University',
+    school: 'Kellogg School of Management', unit: 'Operations', position: 'PhD Candidate',
+    year: 2027, createdAt: '2026-08-20T09:00:00Z', email: 'ada@example.edu', emailPublic: true,
+    researchAreas: ['Operations', 'Queueing Theory'], informsDays: ['Monday', 'Sunday'],
+    cvUrl: 'https://example.edu/cv.pdf', webUrl: 'https://ada.example.edu', ref: 'OA-CAND-260820-ABCD' };
+  const TWIN_CASES = [
+    ['three-part names, every field', ok3],
+    ['the school spelled short (canonColumns is injected)', { ...ok3, school: 'Kellogg' }],
+    ['a legacy one-line affiliation', { ...ok3, institution: '', school: '', unit: '',
+      affiliation: 'Wharton, University of Pennsylvania' }],
+    ['a lone university, no school or unit', { ...ok3, school: '', unit: '' }],
+    ['a lone unit and no university (still publishes the line it has)', { ...ok3, institution: '', school: '' }],
+    ['diacritics in the name (the id slug folds them)', { ...ok3, first: 'Zoë', last: 'Müller-Ó Briain' }],
+    ['whitespace and control characters, trimmed and collapsed', { ...ok3, first: '  Ada \t', last: 'Reader  ', position: ' PhD  Candidate ' }],
+    ['a pending upload with no filed link', { ...ok3, cvUrl: '', cvUploadPath: 'uploads/u/candidates/1-cv.pdf', cvUploadName: 'cv.pdf' }],
+    ['a filed Drive link', { ...ok3, cvUrl: 'https://drive.google.com/file/d/abc/view' }],
+    ['updatedAt absent', { ...ok3 }],
+    ['updatedAt earlier than addedAt (an Admin-SDK oddity)', { ...ok3, updatedAt: '2026-08-01T00:00:00Z' }],
+    ['updatedAt the same day', { ...ok3, updatedAt: '2026-08-20T23:59:59Z' }],
+    ['updatedAt a later day, as a stamp', { ...ok3, updatedAt: '2026-10-02T17:45:10.123Z' }],
+    ['updatedAt as a Firestore Timestamp', { ...ok3, updatedAt: { toDate: () => new Date('2026-10-03T01:00:00Z') } }],
+    ['updatedAt junk', { ...ok3, updatedAt: 'yesterday' }],
+    ['createdAt as a Firestore Timestamp', { ...ok3, createdAt: { toDate: () => new Date('2026-08-21T10:00:00Z') } }],
+    ['createdAt as an ISO string', { ...ok3, createdAt: '2026-08-22T10:00:00.000Z' }],
+    ['createdAt as an unreadable number (falls to now)', { ...ok3, createdAt: 1e16 }],
+    ['createdAt absent (falls to now)', { ...ok3, createdAt: undefined }],
+    ['emailPublic true', { ...ok3, emailPublic: true }],
+    ['emailPublic false', { ...ok3, emailPublic: false }],
+    ['emailPublic 1 (not literally true, so private)', { ...ok3, emailPublic: 1 }],
+    ['emailPublic true on a junk address', { ...ok3, emailPublic: true, email: 'not an address' }],
+    ['junk links (javascript:, a bare domain)', { ...ok3, cvUrl: 'javascript:alert(1)', webUrl: 'example.com', rsUrl: 'ftp://x.y' }],
+    ['a research-summary link from the days the form asked', { ...ok3, rsUrl: 'https://example.edu/rs.pdf' }],
+    ['a junk year (falls to the market year)', { ...ok3, year: 'abc' }],
+    ['a year out of range', { ...ok3, year: 1999 }],
+    ['a fractional year', { ...ok3, year: 2027.9 }],
+    ['postedOn earlier than the stamp (honoured)', { ...ok3, postedOn: '2026-08-01' }],
+    ['postedOn in the future (refused)', { ...ok3, postedOn: '2026-09-30' }],
+    ['too many research areas, duplicates and blanks', { ...ok3,
+      researchAreas: ['A', 'B', 'A', '', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'] }],
+    ['research areas as one string', { ...ok3, researchAreas: 'Operations' }],
+    ['research areas named like prototype members (the seen-set is prototype-free)',
+      { ...ok3, researchAreas: ['constructor', 'toString', 'Operations', 'constructor'] }],
+    ['an INFORMS day off the list, and a repeat', { ...ok3, informsDays: ['Saturday', 'Monday', 'Monday'] }],
+    ['no source (defaults to the form)', { ...ok3, source: undefined }],
+    ['an import source', { ...ok3, source: 'legacy-sheet' }],
+    ['no ref', { ...ok3, ref: '' }],
+    ['no uid (no owner)', { ...ok3, uid: '' }],
+    ['no last name (nothing publishes)', { ...ok3, last: '' }],
+    ['no position (nothing publishes)', { ...ok3, position: '' }],
+    ['no affiliation at all (nothing publishes)', { ...ok3, institution: '', school: '', unit: '', affiliation: '' }],
+  ];
+  for (const [label, doc] of TWIN_CASES) {
+    const real = rowFromCandidateSubmission(doc, { now: TNOW });
+    const want = real ? publicCandidateRow(real) : null;
+    const got = C.publicRowFromDoc(doc, inject);
+    eq(JSON.stringify(got), JSON.stringify(want), `candcard twin: ${label}`);
+  }
+  /* the browser has no synchronous sha256, so it omits `owner` the way the
+     build omits an empty `ref`, and is otherwise the same row */
+  {
+    const browser = C.publicRowFromDoc(ok3, { canonColumns, marketYear, now: TNOW });
+    const { owner, ...rest } = publicCandidateRow(rowFromCandidateSubmission(ok3, { now: TNOW }));
+    ok(owner && !('owner' in browser), 'candcard twin: without ownerTag the owner digest is left out, never faked');
+    eq(JSON.stringify(browser), JSON.stringify(rest), 'candcard twin: ...and everything else is the build’s row');
+    eq(C.publicRowFromDoc({ ...ok3, year: 'abc' }, { canonColumns, now: TNOW }), null,
+      'candcard twin: a junk year with no marketYear injected is null, never a private copy of the July roll');
+    const jsSrc = await read('assets', 'oa-candcard.js');
+    ok(!/MARKET_ROLL|getUTCMonth\(\) >= 6/.test(jsSrc), 'candcard: carries no copy of the market-year rule');
+    ok(!/createHash|sha256/i.test(jsSrc.replace(/\/\*[\s\S]*?\*\//g, '')), 'candcard: ...nor of the owner digest');
+  }
+
+  /* the card: the seven labelled rows, in the order the list has always shown
+     them, calling the INJECTED helpers */
+  {
+    const calls = [];
+    const helpers = {
+      link: (u, l) => { calls.push(['link', u, l]); return u ? '<a>' + l + '</a>' : null; },
+      uniLink: (n) => { calls.push(['uni', n]); return '<a>' + n + '</a>'; },
+      mailto: (e) => { calls.push(['mail', e]); return e ? '<a>' + e + '</a>' : null; },
+    };
+    const cfg = C.cardConfig(helpers);
+    const row = C.publicRowFromDoc(ok3, inject);
+    eq(cfg.title(row), 'Ada Reader', 'candcard: the title is the name');
+    eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
+      'candcard: the subtitle is affiliation, position');
+    const rows = cfg.rows(row);
+    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'University page', 'CV',
+      'Research summary', 'Web page', 'Contact'], 'candcard: the seven labels, in the list’s order');
+    eq(rows[0].value, 'Operations, Queueing Theory', 'candcard: areas joined');
+    eq(rows[1].value, 'Monday, Sunday', 'candcard: INFORMS days as given');
+    eq(calls.map((c) => c[0]), ['uni', 'link', 'link', 'link', 'mail'], 'candcard: every link goes through the injected helper');
+    eq(calls[0][1], row.affiliation, 'candcard: the university link is asked of the whole affiliation line');
+    eq(calls[1].slice(1), ['https://example.edu/cv.pdf', 'link to CV'], 'candcard: the CV link and its label');
+    eq(rows[4].html, null, 'candcard: an empty research-summary link draws nothing');
+    ok(/parts\[parts\.length - 1\]/.test(await read('assets', 'oa-candcard.js')),
+      'candcard: the default university link reads the LAST part of the line, like index.html’s');
+  }
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
+    'Profile updated on 2 October 2026', 'candcard: the updated line, day-month-year, no suffix');
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-08-20' }, R.formatDay), '',
+    'candcard: an edit on the day it was posted says nothing');
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-08-01' }, R.formatDay), '',
+    'candcard: ...nor an earlier day');
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z' }, R.formatDay), '', 'candcard: ...nor no edit at all');
+  eq(C.updatedOnText(null, R.formatDay), '', 'candcard: no row, no line');
+  ok(/root\.OAReveal\.formatDay/.test(await read('assets', 'oa-candcard.js')),
+    'candcard: in the browser the day comes from OAReveal.formatDay, the one home of day-month-year');
+  /* decorate: a card with no body (a locked one) is left exactly alone; a
+     body gets the line LAST, once */
+  {
+    C.decorate({ querySelector: () => null }, { addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' });
+    ok(true, 'candcard: decorate on a bodiless (locked) card is a no-op');
+    const kids = [];
+    const body = {
+      querySelector: (s) => (s === '.oa-card-updated' ? kids[kids.length - 1] || null : null),
+      appendChild: (n) => kids.push(n),
+      ownerDocument: { createElement: (t) => ({ tag: t, className: '', textContent: '', parentNode: null }) },
+    };
+    const li = { querySelector: (s) => (s === '.oa-card-body' ? body : null) };
+    C.decorate(li, { addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' });
+    eq(kids.length, 1, 'candcard: decorate appends one line');
+    eq(kids[0].className, 'oa-card-updated', 'candcard: ...as .oa-card-updated');
+    ok(/^Profile updated on /.test(kids[0].textContent), 'candcard: ...saying when');
+    const kids2 = [];
+    const body2 = { querySelector: () => null, appendChild: (n) => kids2.push(n), ownerDocument: body.ownerDocument };
+    C.decorate({ querySelector: (s) => (s === '.oa-card-body' ? body2 : null) },
+      { addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-08-20' });
+    eq(kids2.length, 0, 'candcard: a same-day edit appends nothing');
+  }
+
+  /* ---- the three pages, wired in order --------------------------------- */
+  const cardTag = (html) => tagAt(html, 'oa-candcard.js');
+  /* index.html: the list goes through the module and its output is what it
+     was (the page passes its OWN three link helpers) */
+  ok(cardTag(index) > tagAt(index, 'oa-list.js') && cardTag(index) < index.indexOf('OACandCard.cardConfig('),
+    'index.html loads oa-candcard.js after the engine and before the mount that asks it');
+  ok(/card: OACandCard\.cardConfig\(\{ link: link, uniLink: uniLink, mailto: mailto \}\)/.test(index),
+    'index.html: the candidate card is cardConfig with the page’s own helpers injected');
+  ok(/OACandCard\.decorate\(li, r\);/.test(index), 'index.html: onCard decorates (the updated line) then hands over to the edit layer');
+  ok(!/label: 'Research area\(s\)'/.test(index), 'index.html: no inline copy of the rows remains');
+  ok(/mount: '#oa-candidates'[\s\S]{0,400}urlPrefix/.test(index) && /cardOpen: OAGate\.cardOpen\(/.test(index),
+    'index.html: cardOpen, urlPrefix and the filters stay inline (the gate and deep-link pins)');
+  /* the reveal note: a static sentence true without JS, filled in by JS */
+  const noteHtml = index.slice(index.indexOf('id="oa-reveal-note"'), index.indexOf('id="oa-candidates"'));
+  ok(noteHtml.length > 300 && noteHtml.length < 2000, 'index.html: the reveal note slice is bounded both ends');
+  ok(/at 14:00 UTC on/.test(noteHtml) && /id="oa-reveal-cities"><\/span>/.test(noteHtml),
+    'index.html: the note’s static sentence names the UTC time and leaves the city clocks to the script (an empty span)');
+  ok(/known\.length === when\.cities\.length\s*\?/.test(index) && /: '';/.test(index.slice(index.indexOf('oa-reveal-cities\').textContent'))),
+    'index.html: the script fills all four city clocks or none, never a partial list over a typed one');
+  for (const id of ['oa-reveal-day', 'oa-reveal-cities', 'oa-reveal-local', 'oa-reveal-count']) {
+    ok(noteHtml.includes(`id="${id}"`), `index.html: the note carries #${id} for the script to fill`);
+  }
+  ok(!/oa-reveal-date/.test(index) && !/var MONTHS = \[/.test(index),
+    'index.html: the old month-first date line and its MONTHS table are gone');
+  ok(/OAReveal\.describeReveal\(at\)/.test(index) && /when\.local\.time/.test(index),
+    'index.html: the day, the cities and the reader’s clock come from describeReveal');
+  ok(/emptyDataHint: '[^']*14:00 UTC/.test(index), 'index.html: the empty list’s hint names the time');
+  ok(/Can I see my profile before the reveal\?/.test(index) && /Can I change my profile\?/.test(index),
+    'index.html: the FAQ gains the two questions');
+  ok(/only you and the\s+site&rsquo;s maintainer can\s+see\s+it/.test(index.replace(/<[^>]+>/g, ''))
+     && /the card then shows when it was last updated/.test(index),
+    'index.html: ...with the spec’s answers, naming the maintainer, who can read every profile');
+  /* account.html: the own-card section, reading ONLY this account's documents */
+  const acctHtml = await read('account.html');
+  for (const f of ['oa-schools.js', 'oa-jobnav.js', 'oa-reveal.js', 'oa-candcard.js']) {
+    ok(tagAt(acctHtml, f) > 0, `account.html loads ${f}, deferred`);
+  }
+  ok(tagAt(acctHtml, 'oa-schools.js') < tagAt(acctHtml, 'oa-candcard.js')
+     && tagAt(acctHtml, 'oa-jobnav.js') < tagAt(acctHtml, 'oa-candcard.js')
+     && tagAt(acctHtml, 'oa-reveal.js') < tagAt(acctHtml, 'oa-candcard.js')
+     && tagAt(acctHtml, 'oa-candcard.js') < acctHtml.indexOf('OACandCard.publicRowFromDoc('),
+    'account.html: the card module comes after what it asks and before the script that draws it');
+  ok(/id="pa-cand-preview"/.test(acctHtml) && /id="pa-cand-preview-card"/.test(acctHtml)
+     && /id="pa-cand-edit"/.test(acctHtml), 'account.html: the section, its card host and its Edit control');
+  ok(/'How your profile will appear'/.test(acctHtml) && /'Your profile, as shown on the Candidates page'/.test(acctHtml),
+    'account.html: headed for before and after the reveal');
+  ok(/OAReveal\.describeReveal\(revealAt\)/.test(acctHtml) && /when\.local\.time/.test(acctHtml),
+    'account.html: the note names the day, 14:00 UTC and the reader’s own clock from the module');
+  ok(/candidates-meta\.json', \{ credentials: 'same-origin', cache: 'no-cache' \}/.test(acctHtml),
+    'account.html: the meta is fetched with cache: no-cache');
+  {
+    const candReads = acctHtml.match(/OAFB\.col\.candidateSubmissions\)[^\n]*/g) || [];
+    eq(candReads.length, 1, 'account.html: exactly one read of candidateSubmissions');
+    ok(/\.where\('uid', '==', user\.uid\)\.get\(\)/.test(candReads[0]),
+      'account.html: ...and it is the owner’s own, by uid (the read the rules allow)');
+    ok(!/\.doc\(['"]?[a-z]/.test(candReads[0]), 'account.html: never a document by id somebody else could type');
+    ok(/allow read: if isOwner\(resource\.data\.uid\) \|\| isAdmin\(\);/.test(candBlock),
+      'rules: the owner may read their own candidateSubmissions document');
+  }
+  ok(/'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(mine\.id\)/.test(acctHtml),
+    'account.html: Edit opens the candidate’s own document on the form');
+  {
+    /* both markers taken FORWARD from the function: the end marker also
+       appears earlier in the page (loadCounts' own guard), and a slice taken
+       on that one is empty and passes every negative check by vacuity */
+    const noteAt = acctHtml.indexOf('function paintRevealNote');
+    const noteFn = acctHtml.slice(noteAt, acctHtml.indexOf('if (!window.OAFB || !OAFB.enabled)', noteAt));
+    ok(noteFn.length > 500 && noteFn.length < 3000, 'account.html: the paintRevealNote slice is bounded both ends');
+    ok(!/pa-cand-edit/.test(noteFn), 'account.html: Edit is offered whatever the reveal says (it is set before the note is)');
+  }
+  ok(/OACandCard\.mount\(host, row\)/.test(acctHtml), 'account.html: the card is the module’s own render');
+  /* the two states the first version headed as "will go public" */
+  ok(/'Your profile \(taken down\)'/.test(acctHtml) && /'Your profile from a previous season'/.test(acctHtml),
+    'account.html: headed as taken down, and as a past season’s, where it is either');
+  ok(/takenDown: v\.status !== 'queued' && v\.status !== 'published'/.test(acctHtml)
+     && !/v\.status === 'withdrawn' \|\| v\.status === 'hidden'/.test(acctHtml),
+    'account.html: taken down is anything the build does not publish (it rewrites withdrawn to removed), not two named words');
+  ok(/if \(!mine\) mine = newest\(false\);/.test(acctHtml) && /previous season is shown below/.test(acctHtml),
+    'account.html: a past season’s profile is drawn when none matches this season, and the card above says so');
+  /* post-a-candidate.html: the live preview under the form */
+  const formHtml = await read('post-a-candidate.html');
+  for (const f of ['oa-jobnav.js', 'oa-reveal.js', 'oa-candcard.js']) {
+    ok(tagAt(formHtml, f) > 0 && tagAt(formHtml, f) < tagAt(formHtml, 'oa-candidateform.js'),
+      `post-a-candidate.html loads ${f} BEFORE the form script that draws the preview`);
+  }
+  ok(tagAt(formHtml, 'oa-schools.js') < tagAt(formHtml, 'oa-candcard.js'),
+    'post-a-candidate.html: the canonicaliser is loaded before the card module');
+  ok(/id="oa-cand-preview"[^>]*hidden/.test(formHtml) && /id="oa-cand-preview-card"/.test(formHtml)
+     && /<h3 id="oa-cand-preview-h">Preview<\/h3>/.test(formHtml) && /id="oa-cand-preview-note"/.test(formHtml),
+    'post-a-candidate.html: the Preview panel, hidden until the form shows, with its note');
+  ok(formHtml.indexOf('id="oa-cand-preview"') > formHtml.indexOf('</form>')
+     && formHtml.indexOf('id="oa-cand-preview"') < formHtml.indexOf('id="oa-done"'),
+    'post-a-candidate.html: the preview sits under the form and before the thank-you panel');
+  ok(/at 14:00 UTC on that day/.test(formHtml) && /revealed all together at 14:00 UTC/.test(formHtml),
+    'post-a-candidate.html: the intro and the thank-you name the time');
+  for (const f of ['post-a-candidate.html', 'account.html', 'assets/oa-candidateform.js', 'assets/oa-candidateedit.js']) {
+    ok(!/within an hour/.test(await read(...f.split('/'))),
+      `${f}: no longer promises "within an hour" (the doorbell publishes in minutes; the reveal at 14:00 UTC)`);
+  }
+  ok(/function readForm\(\)/.test(formJs) && /var out = readForm\(\), firstBad = null;/.test(formJs),
+    'oa-candidateform: collect() validates on top of a quiet readForm()');
+  {
+    const rf = formJs.slice(formJs.indexOf('function readForm()'), formJs.indexOf('function collect()'));
+    ok(rf.length > 500 && rf.length < 3000, 'oa-candidateform: the readForm slice is bounded both ends');
+    ok(!/setError\(|\.focus\(|say\(/.test(rf), 'oa-candidateform: readForm paints no error, moves no focus, says nothing');
+    const pv = formJs.slice(formJs.indexOf('function paintCardPreview()'), formJs.indexOf('function paintPreviewNote'));
+    ok(pv.length > 500 && pv.length < 3000, 'oa-candidateform: the paintCardPreview slice is bounded both ends');
+    ok(/readForm\(\)/.test(pv) && !/collect\(\)/.test(pv), 'oa-candidateform: the preview reads quietly, never through collect()');
+    ok(/OACandCard\.publicRowFromDoc\(v, \{/.test(pv) && /canonColumns: window\.OASchools && OASchools\.canonColumns/.test(pv)
+       && /marketYear: window\.OAJobNav && OAJobNav\.marketYear/.test(pv),
+      'oa-candidateform: the preview is the twin, with the site’s canonicaliser and market year injected');
+    ok(/OACandCard\.mount\(host, row\)/.test(pv), 'oa-candidateform: ...drawn by the module’s own render');
+    ok(/cvSlot\.file \|\| cvSlot\.pending/.test(pv), 'oa-candidateform: a chosen-but-unfiled CV is explained rather than linked');
+    ok(/dirty \? new Date\(\)\.toISOString\(\) : EDIT_DOC\.updatedAt/.test(pv),
+      'oa-candidateform: in edit mode the updated line previews what saving now would write');
+    ok(/form\.addEventListener\('input'[\s\S]{0,400}paintCardPreview\(\);/.test(formJs)
+       && /form\.addEventListener\('change'[\s\S]{0,400}paintCardPreview\(\);/.test(formJs),
+      'oa-candidateform: the preview follows every keystroke and every tick');
+    ok(/show\(\$\('oa-cand-preview'\), !!user\);/.test(formJs), 'oa-candidateform: the panel shows with the form and hides with it');
+    ok(/EDIT_DOC = v;\s+dirty = false;\s+paintCardPreview\(\);/.test(formJs), 'oa-candidateform: fill() ends by drawing the loaded profile');
+    ok(/OAReveal\.describeReveal\(revealAt\)/.test(formJs), 'oa-candidateform: the note names the instant from the module');
+    ok(/var posted = !!EDIT_ID;/.test(formJs) && /once you post it/.test(formJs),
+      'oa-candidateform: in create mode the note says "once you post it", never "as everyone sees it" over a blank form');
+    for (const [f, src] of [['account.html', acctHtml], ['assets/oa-candidateform.js', formJs]]) {
+      ok(!/when\.local\.timeZone/.test(src) && /' where you are'/.test(src),
+        `${f}: the reader’s clock carries no zone id (the front page says "where you are" and stops)`);
+      ok(/Only you and the site\\'s maintainer/.test(src),
+        `${f}: the only-you line names the maintainer, who can read every profile`);
+    }
+    {
+      /* the edit-save path: updatedAt only when something changed */
+      const at = formJs.search(/if \(EDIT_ID\) \{\s*doc\.status = 'queued';/);
+      const save = formJs.slice(at, formJs.indexOf('doc.ref = makeRef();', at));
+      ok(at > 0 && save.length > 200 && save.length < 1500, 'oa-candidateform: the edit-save slice is bounded both ends');
+      ok(/if \(dirty\) doc\.updatedAt = new Date\(\)\.toISOString\(\);/.test(save) && /else delete doc\.updatedAt;/.test(save)
+         && !/^\s*doc\.updatedAt = new Date\(\)\.toISOString\(\);/m.test(save),
+        'oa-candidateform: updatedAt is stamped only when something changed, the test the preview draws the line by');
+      ok(/cvSlot\.onChange = function \(\) \{ dirty = true; paintCardPreview\(\); \};/.test(formJs)
+         && (formJs.match(/if \(slot\.onChange\) slot\.onChange\(\);/g) || []).length === 2,
+        'oa-candidateform: the CV slot reports a chosen, un-chosen or removed file as a change (Remove is a button, not a field)');
+    }
+    ok(/14:00 UTC/.test(editMode) && /account\.html/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
+  }
+  {
+    const listCss = await read('assets', 'oa-list.css');
+    ok(/\.oa-card-preview \.oa-card-head:hover \.oa-card-title \{ text-decoration: none; \}/.test(listCss)
+       && /\.oa-card-preview \.oa-card-head \{ cursor: default; \}/.test(listCss),
+      'oa-list.css: a preview card’s head, which does nothing when pressed, takes neither the pointer nor the hover underline');
+  }
+  /* NO TYPED CITY CLOCK on any served page or in the log: 07:00 Los Angeles
+     is the summer-time reading, wrong by an hour for a November reveal, and
+     it stood wherever a script did not overwrite it (the 2026-09-04 review
+     found it in the FAQ, the form's intro and the note's fallback) */
+  {
+    const TYPED_CLOCK = /\b\d{2}:\d{2}\b[^.<\n]{0,40}\b(Los Angeles|New York|London|Shanghai|Paris)\b/;
+    for (const [f, src] of [['index.html', index], ['post-a-candidate.html', formHtml], ['account.html', acctHtml],
+      ['assets/oa-candidateform.js', formJs], ['changelog.json', await read('changelog.json')]]) {
+      ok(!TYPED_CLOCK.test(src), `${f}: no city clock is typed (describeReveal computes them per date)`);
+    }
+  }
+  /* both stylesheets carry the line's rule, small and muted */
+  for (const f of ['assets/oa-list.css', 'assets/v3.css']) {
+    const css = await read(...f.split('/'));
+    const rule = /\.oa-card-updated \{[^}]*\}/.exec(css);
+    ok(rule && /font-size: 12\.5px/.test(rule[0]) && /color: var\(--mut/.test(rule[0]),
+      `${f}: .oa-card-updated is 12.5px in var(--mut)`);
+  }
+  {
+    const ui = await read('assets', 'oa-ui.css');
+    ok(/\.oa-cand-preview \{/.test(ui), 'oa-ui.css: the form’s preview panel is styled');
+    const m = /@media screen and \(max-width: 640px\) \{[^}]*\.oa-cand-preview \{[^}]*width: 100%/.exec(ui);
+    ok(!!m, 'oa-ui.css: on a phone the preview stacks full-width under the form');
+  }
+  /* the change log: three entries, dated, at the top */
+  const log = JSON.parse(await read('changelog.json'));
+  /* the e-mail verification entry, shipped in the same change, sits among them */
+  /* found by id rather than by position: later changes add their own entries
+     above these, and a pin on index 0 would break on every one of them */
+  const THREE = ['candidate-preview-2026-09', 'profile-updated-line-2026-09', 'reveal-time-2026-09'];
+  const idxOf = (id) => log.updates.findIndex((u) => u.id === id);
+  ok(THREE.every((id) => idxOf(id) >= 0), 'changelog: the three entries are in the log');
+  ok(log.updates.slice(0, Math.max(...THREE.map(idxOf)) + 1).every((u) => u.date >= '2026-09-04'),
+    'changelog: the three entries precede every earlier-dated entry, so the log stays newest first');
+  for (const u of THREE.map((id) => log.updates[idxOf(id)])) {
+    eq(u.date, '2026-09-04', `changelog: ${u.id} is dated 2026-09-04`);
+    ok(u.title && u.summary && u.url, `changelog: ${u.id} has a title, a summary and a link`);
+    ok(!/—/.test(u.title + u.summary), `changelog: ${u.id} carries no em dash`);
+  }
+  ok(/14:00 UTC/.test(log.updates.find((u) => u.id === 'reveal-time-2026-09').summary),
+    'changelog: the reveal entry names the time');
+  ok(/only you and the site's maintainer can see it/.test(log.updates.find((u) => u.id === 'candidate-preview-2026-09').summary),
+    'changelog: the preview entry says who can see it');
+  ok(/Profile updated on/.test(log.updates.find((u) => u.id === 'profile-updated-line-2026-09').summary),
+    'changelog: the updated-line entry quotes the line');
+
 }
 
 /* ------------------------------------------------- the Excel download
@@ -10054,8 +10913,10 @@ async function testJobExportWiring() {
     ok(jobs.includes(`<script defer src="${src}"></script>`),
       `export: jobs.html loads ${src}, deferred like every other script on it`);
   }
-  ok(/actions:\s*window\.OAJobExport/.test(jobs),
-    'export: the jobs mount declares the action');
+  /* the download leads the list; "Save as e-mail alert" follows it since
+     2026-09-04 (testSaveSearchAsAlert pins the second) */
+  ok(/actions:\s*\[\s*window\.OAJobExport\s*\?\s*OAJobExport\.action\(/.test(jobs),
+    'export: the jobs mount declares the action, first in the list');
 
   /* The ENGINE renders it, and that is not a style choice: buildBar() empties
      the bar whenever the filters are cleared, so a button the page appended
@@ -10143,6 +11004,121 @@ async function testJobExportWiring() {
        engine's and v3.css is the live design's override, and a rule in only
        one of them is either invisible on the site or lost on the next page —
        CLAUDE.md records that trap under the Excel button. */
+/* ---------------- two pickers take SEVERAL values, one of them ALL-OF
+
+   Owner, 2026-09-04: Entry level and Characteristics on jobs.html were
+   single-select radios. Both take several values now, and they combine them
+   differently because the questions differ — Entry level ANY-OF ("Assistant
+   Professor or Post-Doc" is two things one candidate could take),
+   Characteristics ALL-OF ("PhD and Research seminars" is a department that
+   has both). `match: 'all'` is a generic engine option; this pins the option,
+   the honest counts under AND, the note in the menu, the word the Excel
+   download writes between the values, and that the 'one' type the other
+   pages still use kept working. What a reader sees is measured in
+   page-test.mjs against expectations computed from the served file.        */
+
+async function testMultiSelectFilters() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const jobs = await read('jobs.html');
+  const list = await read('assets', 'oa-list.js');
+  const listCss = await read('assets', 'oa-list.css');
+  const v3css = await read('assets', 'v3.css');
+  const mod = await read('assets', 'oa-jobexport.js');
+  const pm = await read('previous-markets.html');
+  const dir = await read('assets', 'oa-directory.js');
+
+  /* the two filters, as the jobs page declares them */
+  const level = /\{ key: 'level',[^}]*\}/.exec(jobs);
+  ok(level && !/type: 'one'/.test(level[0]) && !/match:/.test(level[0]),
+    'multi: Entry level takes several values, any-of (the engine default)');
+  const chars = /\{ key: 'chars',[\s\S]*?placeholder: 'All characteristics' \}/.exec(jobs);
+  ok(chars && !/type: 'one'/.test(chars[0]) && /match: 'all'/.test(chars[0]),
+    'multi: Characteristics takes several values, ALL-OF');
+  const hint = chars && /hint: '([^']+)'/.exec(chars[0]);
+  ok(hint && /every characteristic you tick/.test(hint[1]),
+    'multi: …and words the rule for its own dataset');
+  ok(hint && !/—/.test(hint[1]), 'multi: in plain words, with no em dash');
+
+  /* the 'one' type stays in use, and the engine keeps it */
+  ok(/key: 'level',[^}]*type: 'one'/.test(pm),
+    "multi: the archive's Entry level (previous-markets) keeps its single choice");
+  ok(/key: 'show',[^}]*type: 'one'/.test(dir) && /key: 'edited',[^}]*type: 'one'/.test(dir),
+    'multi: …as do the directory\'s Show and Last edited');
+  ok(/var multi = f\.type !== 'one';/.test(list) &&
+     /type: multi \? 'checkbox' : 'radio'/.test(list),
+    'engine: a single-choice filter is still drawn as radios');
+  ok(/if \(f\.type === 'one'\) add\(all\[all\.length - 1\]\); else all\.forEach\(add\);/.test(list),
+    'engine: a link names ONE value for it (the last) and every value for a multi');
+
+  /* the rule, where a row is tested */
+  const m = list.slice(list.indexOf('function matches(row, f, chosen, draft)'),
+    list.indexOf('/* ------------------------------------------------------------------ mount */'));
+  ok(m.length > 500 && m.length < 3000, 'engine: matches() is where this expects it');
+  ok(/if \(f\.match === 'all'\)/.test(m) && /vals\.indexOf\(v\) === -1\) missing = true/.test(m),
+    'engine: under match all, EVERY chosen value must be on the row');
+  ok(/chosen\.has\(vals\[i\]\)\) return true;/.test(m), 'engine: …and any-of stays the default');
+
+  /* the counts, which change meaning under AND */
+  const o = list.slice(list.indexOf('function optionsFor(f)'), list.indexOf('function focusRow()'));
+  ok(o.length > 800 && o.length < 4000, 'engine: optionsFor() is where this expects it');
+  ok(/f\.match === 'all' && sel\[f\.key\]\.size/.test(o) &&
+     /carriesAll = matches\(r, f, sel\[f\.key\]\)/.test(o),
+    'engine: an all-of count is what ticking that value AS WELL would leave');
+  ok(/counts\[v\] = \(counts\[v\] \|\| 0\) \+ \(carriesAll \? 1 : 0\)/.test(o),
+    'engine: …listing every value the other filters allow, at 0 where nothing has it ' +
+    'beside what is ticked, so no value seems to vanish');
+
+  /* the picker: counts refreshed in place, the note in the menu and as the title */
+  const pk = list.slice(list.indexOf('function buildPicker(f, id, onPick)'),
+    list.indexOf('/* ------------------------------------------------------------ render */'));
+  ok(pk.length > 3000 && pk.length < 14000, 'engine: buildPicker() is where this expects it');
+  ok(/var allOf = multi && f\.match === 'all';/.test(pk), 'picker: knows an all-of filter');
+  ok(/if \(allOf\) recount\(\);/.test(pk) && /function recount\(\)/.test(pk) &&
+     /countEls\[v\]\.textContent/.test(pk),
+    'picker: an all-of tick refreshes the counts IN PLACE');
+  ok(!/if \(allOf\) fill\(/.test(pk),
+    'picker: …never by redrawing the rows, which would take the keyboard focus with them');
+  ok(/class: 'oa-pick-hint'/.test(pk) && /title: hint \|\| null/.test(pk),
+    'picker: the rule is said inside the menu and as the button\'s title');
+  const fallback = /f\.hint \|\| \(allOf \? '([^']+)' : ''\)/.exec(pk);
+  ok(fallback, 'picker: worded by the page, with an engine fallback for an all-of filter');
+  ok(fallback && !/—/.test(fallback[1]), 'picker: the fallback is plain words too');
+  ok(/\.oa-pick-hint\s*\{/.test(listCss), 'picker: the note is styled in the engine stylesheet');
+  ok(/body\.v3 \.oa-pick-hint\s*\{/.test(v3css), 'picker: …and themed in the live design');
+
+  /* what the search is DESCRIBED as: the engine says how a filter combines,
+     the About sheet writes the word the list meant */
+  ok(/match: f\.match === 'all' \? 'all' : 'any'/.test(list),
+    'engine: activeFilters says how each filter combines its values');
+  ok(/f\.match === 'all' \? '  and  ' : '  or  '/.test(mod),
+    'export: the About sheet joins an all-of filter\'s values with "and"');
+  const E = require(path.join(HERE, '..', 'assets', 'oa-jobexport.js'));
+  const sheets = E.sheets([], { market: '2026-2027', total: 5, filters: [
+    { label: 'Entry level', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
+    { label: 'Characteristics', values: ['PhD', 'Research seminars'], match: 'all' },
+  ] });
+  const about = JSON.stringify(sheets[2].rows);
+  ok(about.includes('Assistant Professor  or  Post-Doc'), 'export: an any-of filter reads "or"');
+  ok(about.includes('PhD  and  Research seminars') && !about.includes('PhD  or  Research seminars'),
+    'export: an all-of filter reads "and", never "or"');
+  const legacy = JSON.stringify(E.sheets([], { market: '2026-2027', total: 5,
+    filters: [{ label: 'Location', values: ['Ireland', 'France'] }] })[2].rows);
+  ok(legacy.includes('Ireland  or  France'),
+    'export: a filter that says nothing about how it combines still reads "or"');
+
+  /* announced, and recorded */
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = (log.updates || []).find((u) => u.id === 'levels-and-characteristics-multi-select');
+  ok(entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+    'multi: changelog.json announces it, dated, linking the jobs page');
+  ok(entry && /only the departments that have both/.test(entry.summary) &&
+     !/—/.test(entry.title + entry.summary),
+    'multi: …saying the AND rule in plain words');
+  const claude = await read('CLAUDE.md');
+  ok(/`match: 'all'`/.test(claude) && /Characteristics is\s+ALL-OF/.test(claude),
+    'multi: CLAUDE.md records the all-of option and why Characteristics uses it');
+}
+
 /* --------------------------------- what a reader who has not registered SEES
 
    Owner, 2026-08-29, from two screenshots of the site signed out: an
@@ -10759,6 +11735,452 @@ async function testSponsors() {
    here is mostly the honesty the replacement is built for: that a day is never
    counted twice, that an unreachable source cannot shorten the history, and
    that nothing on the page claims the frozen archive is current. */
+/* ------------------------------------- "Closing this week", the fourth topic
+
+   Owner, 2026-09-04: an alert may also remind its subscriber of the postings
+   matching their filters whose FINAL apply-by date (applyByDate) or SUGGESTED
+   apply-by date (reviewDate) falls within the next seven days. One pure
+   function decides it — closingSoonFor in assets/oa-alert-match.js, read by
+   the mailer and by the alerts page's preview alike — and its mark is the END
+   of the window last checked (`lastDeadlineUntil`), never a wall clock, so
+   each closing date is named once. The mailer's own selftest pins the mark
+   from its source and the rendered section; this pins the decision, the
+   module driven without its dependency, and the wiring. */
+
+/* ------------------------------------- save the search as an e-mail alert
+
+   Owner, 2026-09-04: a signed-in reader who has narrowed the jobs list can
+   press "Save as e-mail alert" beside the Excel download and land on
+   alerts.html with a new alert filled in from the filters they had set.
+   assets/oa-alertsave.js is ONE module on both ends — the jobs page writes
+   the hand-over and the alerts page reads it through the same file — so this
+   drives the pure half offline and pins the wiring on both pages; the reader
+   is measured in page-test.mjs. */
+async function testSaveSearchAsAlert() {
+  const read = (...p) => readFile(path.join(HERE, '..', ...p), 'utf8');
+  const S = require(path.join(HERE, '..', 'assets', 'oa-alertsave.js'));
+
+  /* --- the mapping: four filters carry, everything else is REPORTED ------ */
+  const filters = [
+    { key: 'institution', label: 'University search', values: ['Utah', 'Princeton'], match: 'any' },
+    { key: 'review', label: 'Suggested deadline', values: ['Review ahead'], match: 'any' },
+    { key: 'deadline', label: 'Final deadline', values: ['Closing soon'], match: 'any' },
+    { key: 'type', label: 'Type', values: ['Business School'], match: 'any' },
+    { key: 'level', label: 'Entry level', values: ['Assistant Professor', 'Post-Doc'], match: 'any' },
+    { key: 'country', label: 'Location', values: ['USA', 'Ireland'], match: 'any' },
+    { key: 'chars', label: 'Characteristics', values: ['PhD'], match: 'all' },
+    { key: 'posted', label: 'Date posted', values: ['Last 7 days'], match: 'any' },
+  ];
+  const c = S.carry(filters, '2027-somewhere-20260901');
+  eq(c.criteria, { text: 'Utah', type: ['Business School'],
+    level: ['Assistant Professor', 'Post-Doc'], country: ['United States', 'Ireland'] },
+  'save-search: the four filters an alert can hold are carried, the country through the ONE table');
+  eq(c.dropped, ['terms', 'review', 'deadline', 'chars', 'posted', 'job'],
+    'save-search: …and everything else is reported — the extra search terms and the ?job= focus included');
+  eq(S.carry([], ''), null, 'save-search: nothing filtered is nothing to save');
+  eq(S.carry([{ key: 'level', values: [] }], 'some-id'), null,
+    'save-search: …a focus alone included — a filter with no values is no filter');
+  eq(S.carry([{ key: 'institution', values: ['Dublin'] }]).dropped, [],
+    'save-search: one search term drops nothing');
+  eq(S.carry([{ key: 'country', values: ['United States', 'USA'] }]).criteria.country, ['United States'],
+    'save-search: two spellings of one country are one tick box');
+
+  /* THE FIRST TERM ONLY is deliberate, and the matcher is why: it searches
+     ONE substring across institution and department, where the jobs page ORs
+     its terms. Joined, the needle finds neither. */
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const row = { institution: 'University of Utah', department: 'Operations', type: 'University',
+    levels: ['Assistant Professor'], country: 'United States', characteristics: [] };
+  ok(M.matchesJob(row, { text: 'Utah' }) && !M.matchesJob(row, { text: 'Utah Princeton' }),
+    'save-search: …because two terms joined are a needle that matches neither posting');
+
+  /* --- the round trip ---------------------------------------------------- */
+  const u = S.url(c);
+  ok(u.startsWith('alerts.html?prefill=1&'),
+    'save-search: the hand-over is a URL on alerts.html carrying the flag');
+  eq((u.match(/(^|&)level=/g) || []).length, 2,
+    'save-search: one key per value, like the jobs page\'s own links');
+  eq(S.read(u.slice(u.indexOf('?'))), c,
+    'save-search: what the alerts page reads is exactly what the jobs page sent');
+  eq(S.read('?topic=updates'), null, 'save-search: no flag, no prefill');
+  eq(S.read('?prefill=1'), null, 'save-search: a bare flag fills nothing and says nothing');
+  eq(S.read('?prefill=1&country=USA').criteria.country, ['United States'],
+    'save-search: a hand-edited link is canonicalised on arrival too');
+  eq(S.strip('?prefill=1&text=a&level=b&level=c&country=d&type=e&dropped=chars&unsubscribe=abc&topic=updates'),
+    '?unsubscribe=abc&topic=updates',
+    'save-search: stripping the address keeps every key that is somebody else\'s');
+  eq(S.strip('?prefill=1&text=a'), '',
+    'save-search: …and leaves a clean address when nothing else was there');
+
+  /* --- the name and the note --------------------------------------------- */
+  eq(S.suggestName({ level: ['Assistant Professor'], country: ['United States'] }),
+    'Assistant Professor in United States', 'save-search: the suggested name, in the owner\'s example');
+  eq(S.suggestName(c.criteria),
+    'Assistant Professor or Post-Doc matching “Utah” in United States or Ireland',
+    'save-search: …levels, the search term and the countries, in that order');
+  eq(S.suggestName({ type: ['Business School'], country: ['France'] }), 'Business School posts in France',
+    'save-search: …the type leads when no level was chosen');
+  eq(S.suggestName({}), 'Job postings', 'save-search: …and something rather than nothing');
+  ok(S.suggestName({ text: 'x'.repeat(200) }).length <= 120,
+    'save-search: the name fits the form\'s own maxlength');
+  const note = S.note(c);
+  ok(/^Filled in from your search on the jobs page\./.test(note),
+    'save-search: the note says where the values came from');
+  ok(/cannot filter on them: every university search term after the first, the suggested-deadline bucket, the final-deadline bucket, the characteristics you ticked, the date-posted window and the one posting you had open on its own\./.test(note),
+    'save-search: …and names each thing it left out, in words');
+  ok(/Postings closing within 7 days/.test(note),
+    'save-search: …pointing a dropped deadline bucket at the topic that stands in for it');
+  ok(!/Not carried/.test(S.note({ dropped: [] })) && !/closing within/.test(S.note({ dropped: ['chars'] })),
+    'save-search: nothing dropped, nothing said; no deadline dropped, no pointer');
+  eq(S.words(['mystery']), 'the mystery filter',
+    'save-search: a filter with no wording is still reported, never dropped silently');
+
+  /* every jobs-page filter an alert cannot hold HAS a wording, and every
+     wording names a real filter — read from the mount, so a filter added to
+     jobs.html tomorrow fails here rather than reaching the note unnamed */
+  const jobs = await read('jobs.html');
+  const keys = [...jobs.matchAll(/\{\s*key:\s*'([a-z]+)'/g)].map((m) => m[1]);
+  ok(keys.length >= 8, `save-search: the jobs mount's filter keys were found (${keys.length})`);
+  for (const k of keys) {
+    ok(['institution', 'type', 'level', 'country'].includes(k) || k in S.DROPPED,
+      `save-search: the "${k}" filter is carried, or has a wording in DROPPED`);
+  }
+  for (const k of Object.keys(S.DROPPED)) {
+    ok(keys.includes(k) || k === 'terms' || k === 'job',
+      `save-search: DROPPED.${k} names a real jobs-page filter`);
+  }
+
+  /* NO EM DASH in anything a reader sees, and the two tooltips say what
+     they must: the disabled one names the topic that already covers
+     "everything", the signed-out one that an account is what unlocks it. */
+  for (const [k, v] of Object.entries(S.COPY)) ok(!/—/.test(v), `save-search: COPY.${k} carries no em dash`);
+  for (const [k, v] of Object.entries(S.DROPPED)) ok(!/—/.test(v), `save-search: DROPPED.${k} carries no em dash`);
+  ok(!/—/.test(note) && !/—/.test(S.suggestName(c.criteria)),
+    'save-search: nor do the note and the suggested name');
+  ok(/New job postings/.test(S.COPY.noFilter) && /leave the filters blank/i.test(S.COPY.noFilter),
+    'save-search: the disabled tooltip says an alert for everything is the topic with no filters');
+  ok(/with an account/.test(S.COPY.saveSignedOut) && !/with an account/.test(S.COPY.save),
+    'save-search: the signed-out tooltip sells the account; the signed-in one does not');
+  ok(/Save as e-mail alert/.test(S.COPY.label), 'save-search: the label says what it does');
+
+  /* --- the country table ABSENT: passes through, because the receiving
+         page canonicalises again (a fallback that is right, not a guess) --- */
+  const src = await read('assets', 'oa-alertsave.js');
+  const bare = { exports: {} };
+  new Function('module', 'require', src)(bare, () => null);
+  eq(bare.exports.carry([{ key: 'country', values: ['USA'] }]).criteria.country, ['USA'],
+    'save-search: without the country table the value passes through as typed…');
+  const matchSrc = await read('assets', 'oa-alert-match.js');
+  ok(/country:\s*arr\(c\.country\)\.map\(canonCountry\)/.test(matchSrc),
+    'save-search: …because the alerts page normalises every country through the same table on arrival');
+
+  /* --- the gate, the download's --------------------------------------- */
+  ok(/whenSignedIn/.test(src), 'save-search: the hop goes through the site\'s own signed-in gate');
+  ok(!/hint\(\)\s*===\s*'in'/.test(src), 'save-search: …never the localStorage hint alone');
+  ok(/function signedIn\(\)\s*\{[\s\S]{0,200}?OAGate/.test(src),
+    'save-search: it asks the gate who is signed in, not its own copy');
+  ok(!/firestore\(\)|\.collection\(/.test(src),
+    'save-search: the module writes nothing to Firestore — the alert is saved by the form, in the shape the rules already allow');
+
+  /* --- wiring: the jobs page ---------------------------------------------- */
+  ok(jobs.includes('<script defer src="assets/oa-alertsave.js"></script>'),
+    'save-search: jobs.html loads the module, deferred like every other script on it');
+  for (const dep of ['assets/oa-countries.js', 'assets/oa-gate.js', 'assets/oa-jobexport.js']) {
+    ok(jobs.indexOf(dep) < jobs.indexOf('assets/oa-alertsave.js'),
+      `save-search: jobs.html loads ${dep} before the module that reads it`);
+  }
+  const mount = jobs.slice(jobs.indexOf('actions: ['), jobs.indexOf('sort: function'));
+  ok(mount.length > 100 && mount.length < 2500, 'save-search: the mount\'s actions block is where this expects it');
+  ok(/OAJobExport\.action\(/.test(mount) && /OAAlertSave\.action\(/.test(mount) &&
+     mount.indexOf('OAJobExport.action(') < mount.indexOf('OAAlertSave.action('),
+    'save-search: the jobs mount declares the button BESIDE the download, after it');
+  ok(/focused:\s*function\s*\(\)\s*\{\s*return jobs \? jobs\.focused\(\) : ''/.test(mount),
+    'save-search: …handing it the ?job= focus, guarded for a refresh before the mount returns');
+
+  /* the lock card names it — the one place a signed-out reader is told what
+     an account gives. Comments stripped and bounded at both ends, the
+     testReaderGate discipline. */
+  const jobsCopy = jobs.replace(/<!--[\s\S]*?-->/g, '');
+  const card = jobsCopy.slice(jobsCopy.indexOf('class="v3-lock-card"'), jobsCopy.indexOf('<div id="oa-jobs">'));
+  ok(card.length > 200 && card.length < 2000, 'save-search: the sign-in card is where this expects it');
+  ok(/e-mail alert/i.test(card) && /Excel/.test(card),
+    'save-search: the sign-in card names the alert beside the download');
+  const sentence = card.slice(card.indexOf('<p>'), card.indexOf('</p>'));
+  ok(sentence.length > 100 && !/—|&mdash;/.test(sentence),
+    'save-search: …in a sentence with no em dash');
+
+  /* --- wiring: the alerts page -------------------------------------------- */
+  const alertsHtml = await read('alerts.html');
+  const alertsJs = await read('assets', 'oa-alerts.js');
+  ok(alertsHtml.includes('<script defer src="assets/oa-alertsave.js"></script>'),
+    'save-search: alerts.html loads the same module');
+  /* the TAGS, not the first mention — a comment over the note names the
+     module hundreds of lines above the scripts */
+  const tag = (f) => alertsHtml.indexOf(`<script defer src="${f}"></script>`);
+  ok(tag('assets/oa-countries.js') !== -1 && tag('assets/oa-countries.js') < tag('assets/oa-alertsave.js') &&
+     tag('assets/oa-alertsave.js') < tag('assets/oa-alerts.js'),
+    'save-search: …after the country table and before the page script that reads it');
+  ok(/id="oa-prefill-note"\s+hidden/.test(alertsHtml),
+    'save-search: the note over the form exists and starts hidden');
+  const bootSrc = alertsJs.slice(alertsJs.indexOf('function boot()'), alertsJs.indexOf("$('oa-needauth-btn')"));
+  ok(bootSrc.length > 100 && bootSrc.length < 1500, 'save-search: boot() is where this expects it');
+  ok(bootSrc.indexOf('Save.stash()') !== -1 && bootSrc.indexOf('Save.stash()') < bootSrc.indexOf('OAFB.enabled'),
+    'save-search: boot() stashes and strips the address FIRST, before the offline gate can return');
+  ok(/\.then\(handleUnsubscribeLink\)[\s\S]{0,300}?\.then\(applyPrefill\)/.test(alertsJs),
+    'save-search: the prefill is applied after the list and the vocabulary, on the signed-in path');
+  const apply = alertsJs.slice(alertsJs.indexOf('function applyPrefill()'), alertsJs.indexOf('function load()'));
+  ok(apply.length > 300 && apply.length < 2500, 'save-search: applyPrefill is where this expects it');
+  ok(/Save\.take\(\)/.test(apply), 'save-search: …taken from the stash, once');
+  ok(/topics:\s*\['jobs'\]/.test(apply) && /editingId = null/.test(apply),
+    'save-search: …as a NEW alert on the jobs topic');
+  ok(/Save\.suggestName\(/.test(apply) && /Save\.note\(/.test(apply),
+    'save-search: …named and annotated by the module, not by a second copy of its words');
+  const wf = alertsJs.slice(alertsJs.indexOf('function writeForm('), alertsJs.indexOf('function syncFormState('));
+  ok(wf.length > 200 && /show\(\$\('oa-prefill-note'\), false\)/.test(wf),
+    'save-search: every other path through writeForm hides the note');
+
+  /* --- keep-in-sync: the change log, the FAQ, the record ------------------ */
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = (log.updates || []).find((x) => x.id === 'save-search-as-email-alert');
+  ok(!!entry && entry.date === '2026-09-04' && entry.url === '/jobs.html',
+    'save-search: changelog.json announces it, dated, linking the jobs page');
+  ok(!!entry && !/—/.test(entry.title + entry.summary) && /Save as e-mail alert/.test(entry.summary),
+    'save-search: …naming the button, with no em dash');
+  const home = await read('index.html');
+  const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
+  ok(faq.length > 200 && faq.length < 2500 && /Save as e-mail\s+alert/.test(faq) && /jobs\.html/.test(faq),
+    'save-search: the FAQ answer on e-mail alerts names the button and links the jobs page');
+  ok(!/—|&mdash;/.test(faq.slice(faq.indexOf('Quicker still'))),
+    'save-search: …in a sentence with no em dash');
+  const claude = await read('CLAUDE.md');
+  ok(/oa-alertsave\.js/.test(claude) && /FIRST term only/.test(claude),
+    'save-search: CLAUDE.md records the module and the first-term rule');
+}
+
+async function testClosingSoonDigest() {
+  const M = require(path.join(HERE, '..', 'assets', 'oa-alert-match.js'));
+  const DL = { topics: ['deadlines'] };
+  const FROM = '2026-09-04', UNTIL = M.shiftDay(FROM, M.DEADLINE_WINDOW_DAYS);
+  const row = (id, extra) => ({ id, institution: id + ' University', department: 'Operations',
+    type: 'University', country: 'Ireland', levels: ['Assistant Professor'],
+    characteristics: [], posted: '2026-09-01', year: 2027, applyByDate: '', reviewDate: '',
+    ...extra });
+  const closing = (rows, c, covered) =>
+    M.closingSoonFor(rows, c || DL, { from: FROM, until: UNTIL, coveredUntil: covered || '' })
+      .map((e) => `${e.row.id}:${e.kind}:${e.date}`);
+
+  ok(M.TOPICS.includes('deadlines'), 'closing: "deadlines" is a topic the matcher knows');
+  ok(M.wantsDeadlines(DL) && !M.wantsDeadlines({ topics: ['jobs'] }),
+    'closing: wantsDeadlines reads the stored topics like the other three');
+  ok(M.hasIntent(DL), 'closing: a deadlines-only alert has intent, so it can be saved');
+  eq(UNTIL, '2026-09-11', 'closing: the window is seven days, from the shared constant');
+  eq(M.shiftDay('2026-12-30', 3), '2027-01-02', 'closing: the day arithmetic crosses a year');
+  eq(M.shiftDay('Until filled.', 7), '', 'closing: …and a non-day shifts to nothing');
+
+  /* THE WINDOW EDGES, both inclusive: a search closes at the end of the day
+     named, and "within seven days" includes the seventh. */
+  eq(closing([row('on-from', { applyByDate: FROM })]), ['on-from:final:2026-09-04'],
+    'closing: a deadline TODAY is in the window');
+  eq(closing([row('on-until', { applyByDate: UNTIL })]), ['on-until:final:2026-09-11'],
+    'closing: …and so is one on the seventh day');
+  eq(closing([row('before', { applyByDate: M.shiftDay(FROM, -1) })]), [],
+    'closing: one that closed yesterday is not');
+  eq(closing([row('after', { applyByDate: M.shiftDay(UNTIL, 1) })]), [],
+    'closing: nor one closing on the eighth day');
+
+  /* COVERED UNTIL: the end of the window last checked. A date on or before it
+     has been announced (or looked at and found empty), so it is never named
+     twice; the day after it is the first the next digest may carry. */
+  const pair = [row('a', { applyByDate: '2026-09-06' }), row('b', { applyByDate: '2026-09-07' })];
+  eq(closing(pair, DL, '2026-09-06'), ['b:final:2026-09-07'],
+    'closing: a date ON the covered end is excluded, the day after it is not');
+  eq(closing(pair, DL, UNTIL), [],
+    'closing: with the window end as the mark, nothing in the window goes twice');
+  eq(closing(pair, DL, ''), ['a:final:2026-09-06', 'b:final:2026-09-07'],
+    'closing: an alert never checked is told the whole window, earliest first');
+
+  /* SUGGESTED VERSUS FINAL: each named as what it is; where both fall due in
+     one window the final one is named, since it is the date that closes the
+     search; and the final date gets its own turn when only the suggested one
+     was in the window before. */
+  eq(closing([row('s', { reviewDate: '2026-09-05' })]), ['s:suggested:2026-09-05'],
+    'closing: a suggested apply-by date is named as suggested');
+  eq(closing([row('both', { reviewDate: '2026-09-05', applyByDate: '2026-09-10' })]),
+    ['both:final:2026-09-10'],
+    'closing: where both fall in one window, the FINAL date is the one named');
+  eq(closing([row('later', { reviewDate: '2026-09-05', applyByDate: '2026-09-20' })]),
+    ['later:suggested:2026-09-05'],
+    'closing: a final date outside the window leaves the suggested one to be named');
+  eq(M.closingSoonFor([row('later', { reviewDate: '2026-09-05', applyByDate: '2026-09-20' })],
+    DL, { from: '2026-09-15', until: '2026-09-22', coveredUntil: '2026-09-14' })
+    .map((e) => e.kind), ['final'],
+    'closing: …and the final date is named when its own window comes round');
+
+  /* THE MARKET FILTER: a row whose season has rolled is not on the jobs page
+     and is not reminded of, however its dates read. A deadline in the window
+     is by itself an open deadline, which keeps a posting in the market. */
+  eq(closing([row('old', { reviewDate: '2026-09-05', posted: '2024-09-01', year: 2025 })]), [],
+    'closing: a posting from a closed season is not reminded of');
+  eq(closing([row('old-open', { applyByDate: '2026-09-05', posted: '2024-09-01', year: 2025 })]),
+    ['old-open:final:2026-09-05'],
+    'closing: …unless its final deadline is still open, which keeps it on the jobs page');
+
+  /* THE FILTERS are the jobs topic's own, and no filter means every posting. */
+  eq(closing(pair, { topics: ['deadlines'], country: ['Germany'] }), [],
+    'closing: the alert\'s country filter applies to the reminder');
+  eq(closing(pair, { topics: ['deadlines'], text: 'b univ' }), ['b:final:2026-09-07'],
+    'closing: …and so does its text filter');
+  eq(closing(pair, { topics: ['jobs'] }), [],
+    'closing: an alert without the topic is reminded of nothing');
+
+  /* STRING DATES. Every date is yyyy-mm-dd compared as text: a stamp is cut to
+     its day, prose is never a date, and the window itself is cut the same way. */
+  eq(closing([row('stamp', { applyByDate: '2026-09-06T00:00:00Z' })]), ['stamp:final:2026-09-06'],
+    'closing: an apply-by carrying a time is read as its day');
+  eq(closing([row('prose', { applyByDate: 'Until filled.' })]), [],
+    'closing: prose in the date field never matches');
+  eq(M.closingSoonFor(pair, DL, { from: FROM + 'T12:00:00Z', until: UNTIL + 'T12:00:00Z' })
+    .length, 2, 'closing: a window given as stamps is read as days');
+  eq(M.closingSoonFor(pair, DL, { from: '', until: UNTIL }), [],
+    'closing: a window with no start decides nothing');
+  eq(M.closingSoonFor(pair, DL, {}), [], 'closing: …nor one with no window at all');
+
+  /* DRIVEN WITHOUT ITS DEPENDENCY. The market rule is assets/oa-jobnav.js,
+     handed to the factory; a page that forgot the tag must get NO, not a
+     private guess at the season (the oa-sponsors.js lesson). */
+  const matchSrc = await readFile(path.join(HERE, '..', 'assets', 'oa-alert-match.js'), 'utf8');
+  const bare = {
+    OACountries: require(path.join(HERE, '..', 'assets', 'oa-countries.js')),
+    OASchools: require(path.join(HERE, '..', 'assets', 'oa-schools.js')),
+  };
+  // eslint-disable-next-line no-new-func
+  new Function('self', matchSrc)(bare);
+  ok(!!bare.OAAlertMatch, 'closing: the matcher still LOADS without oa-jobnav.js');
+  eq(bare.OAAlertMatch.closingSoonFor(pair, DL, { from: FROM, until: UNTIL }), [],
+    'closing: …but reminds of nothing rather than guessing which season a posting is in');
+  ok(bare.OAAlertMatch.matchesJob(pair[0], { topics: ['jobs'] }),
+    'closing: …while the jobs topic, which never asked for it, is unaffected');
+  ok(!/function (marketYear|inCurrentMarket|deadlineOpen)\(/.test(matchSrc),
+    'closing: the matcher carries no private copy of the market rule');
+
+  /* ---- THE WIRING ------------------------------------------------------- */
+
+  const alertsHtml = await readFile(path.join(HERE, '..', 'alerts.html'), 'utf8');
+  const alertsJs = await readFile(path.join(HERE, '..', 'assets', 'oa-alerts.js'), 'utf8');
+  const mailer = await readFile(path.join(HERE, 'alerts-mailer.mjs'), 'utf8');
+
+  ok(/<input type="checkbox" id="t-deadlines">/.test(alertsHtml),
+    'closing: alerts.html offers the fourth tick box');
+  ok(/Postings closing within 7 days\./.test(alertsHtml),
+    'closing: …labelled in the words the summary line and the FAQ use');
+  ok(alertsHtml.includes('<script defer src="assets/oa-jobnav.js"></script>'),
+    'closing: alerts.html loads the market rule, deferred like every other script');
+  // on the TAGS, not the file names — the comment above the tag names it too
+  const tagAt = (f) => alertsHtml.indexOf('<script defer src="assets/' + f + '"></script>');
+  ok(tagAt('oa-jobnav.js') > 0 && tagAt('oa-jobnav.js') < tagAt('oa-alert-match.js'),
+    'closing: …BEFORE the matcher, whose factory is handed it');
+  ok(tagAt('oa-alert-match.js') > 0 && tagAt('oa-alert-match.js') < tagAt('oa-alerts.js'),
+    'closing: …and the matcher before the page that reads it');
+  ok(/within the week/.test(alertsHtml), 'closing: the alerts page lede names the reminder');
+
+  ok(/if \(\$\('t-deadlines'\)\.checked\) topics\.push\('deadlines'\);/.test(alertsJs),
+    'closing: the form saves the topic');
+  ok(/\$\('t-deadlines'\)\.checked = c\.topics\.indexOf\('deadlines'\) !== -1;/.test(alertsJs),
+    'closing: …and an edit opens with it ticked');
+  ok(/show\(\$\('a-filters'\), \$\('t-jobs'\)\.checked \|\| \$\('t-deadlines'\)\.checked\);/
+    .test(alertsJs), 'closing: the filters stay on screen for a deadlines-only alert');
+  ok(/M\.closingSoonFor\(jobs, c, \{[\s\S]{0,200}?coveredUntil: ''/.test(alertsJs),
+    'closing: the preview samples through the SAME function the mailer runs, with no window covered');
+  ok(/M\.shiftDay\(today, M\.DEADLINE_WINDOW_DAYS\)/.test(alertsJs) &&
+     /M\.shiftDay\(today, M\.DEADLINE_WINDOW_DAYS\)/.test(mailer),
+    'closing: both sides take the window from the shared constant');
+  ok(/postings closing within 7 days/.test(alertsJs),
+    'closing: the summary line on an alert\'s card names the reminder');
+  /* THE PREVIEW MIRRORS THE MAILER'S TEMPLATE, word for word where the words
+     are the same thing: the heading, the count line, and the two date labels. */
+  for (const words of ['Closing this week', 'matching your alert close in the next seven days',
+    'Final apply by ', 'Suggested apply by ', 'Open the posting']) {
+    ok(alertsJs.includes(words) && mailer.includes(words),
+      `closing: the preview and the mailer both say "${words.trim()}"`);
+  }
+
+  ok(/import \{ livePostingUrl \} from '\.\/submissions-mailer\.mjs';/.test(mailer),
+    'closing: the reminder links a posting through the rule the poster\'s e-mail already uses');
+  ok(/livePostingUrl\(r, \{ now \}\)/.test(mailer),
+    'closing: …asked at send time, so a posting whose season has rolled opens on Previous markets');
+  ok(/M\.closingSoonFor\(rows, a\.criteria, \{/.test(mailer),
+    'closing: the mailer decides through the shared function');
+
+  /* THE MARK NEEDS NO RULES CHANGE: alerts live under the blanket owner rule
+     with no key ceiling, so an Admin-SDK stamp cannot freeze a subscription
+     against its own owner. Pinned rather than remembered. */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  // cut at the NEXT match, not at the first `}` — `{document=**}` carries one
+  const usersBlock = rules.slice(rules.indexOf('match /users/{uid}/{document=**}'));
+  const usersRule = usersBlock.slice(0, usersBlock.indexOf('match /', 10));
+  ok(usersRule.length > 60 && usersRule.length < 400 &&
+     /allow read, write: if isOwner\(uid\);/.test(usersRule) && !/hasOnly/.test(usersRule),
+    'closing: the alerts subtree carries no key ceiling, so the new mark freezes nothing');
+
+  /* A MERGE CARRIES THE MARK, in both copies of the accounts module, or a
+     merged alert re-announces the week it was already told about. */
+  for (const dir of [[], ['v2']]) {
+    const acc = await readFile(path.join(HERE, '..', ...dir, 'assets', 'oa-accounts.js'), 'utf8');
+    const fields = (acc.match(/var ALERT_FIELDS = \[[\s\S]*?\];/) || [''])[0];
+    ok(fields.includes("'lastDeadlineUntil'"),
+      `closing: ${[...dir, 'oa-accounts.js'].join('/')} copies lastDeadlineUntil with a merged alert`);
+  }
+
+  /* KEEP-IN-SYNC: the change log, the FAQ, the record of the decision. */
+  const log = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
+  const entry = (log.updates || []).find((u) => u.id === 'closing-this-week-alerts');
+  ok(!!entry && entry.date === '2026-09-04' && /alerts\.html/.test(entry.url || ''),
+    'closing: changelog.json announces the topic, dated, linking the alerts page');
+  const home = await readFile(path.join(HERE, '..', 'index.html'), 'utf8');
+  const faq = home.slice(home.indexOf('Can I get e-mail alerts?'), home.indexOf('Do all Operations job postings'));
+  ok(faq.length > 200 && faq.length < 2000 && /closing|close/i.test(faq) && /seven days|7 days/.test(faq),
+    'closing: the FAQ answer on e-mail alerts names the reminder');
+  const claude = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  ok(/lastDeadlineUntil/.test(claude), 'closing: CLAUDE.md records the mark and why');
+
+  /* NO EM-DASH in the copy this shipped (the site's rule for user-facing
+     words): the tick box, the lede, the hint, the FAQ sentence. */
+  const tick = alertsHtml.slice(alertsHtml.indexOf('id="t-deadlines"'), alertsHtml.indexOf('id="t-candidates"'));
+  ok(tick.length > 50 && tick.length < 600 && !tick.includes('—') && !tick.includes('&mdash;'),
+    'closing: the tick box copy carries no em-dash');
+
+  /* A MONTHLY ALERT SEES ONE WEEK IN FOUR, and the page says so rather than
+     promising every closing date: the window is the seven days from each run
+     and a monthly digest is due 28 days after the last, so days 8 to 27 are
+     in no window. Said on the tick box, under the frequency while the pair is
+     chosen, and in the FAQ. */
+  ok(/seven days after each digest, each named\s+once \(choose daily or weekly to see every closing date\)/.test(tick),
+    'closing: the tick box says the reminder covers the seven days AFTER EACH DIGEST');
+  ok(!/falls in the next seven days, each named once\./.test(alertsHtml),
+    'closing: …and no longer reads as a promise about every closing posting');
+  const freqNote = alertsHtml.slice(alertsHtml.indexOf('id="a-freq-note"'), alertsHtml.indexOf('id="a-email"'));
+  ok(freqNote.length > 100 && freqNote.length < 700 && /hidden/.test(freqNote.slice(0, 40)) &&
+     /one week|other three weeks/.test(freqNote) && !freqNote.includes('—') && !freqNote.includes('&mdash;'),
+    'closing: a hint under the frequency select, born hidden, says what a monthly digest misses, no em-dash');
+  ok(/show\(\$\('a-freq-note'\), \$\('t-deadlines'\)\.checked && \$\('a-freq'\)\.value === 'monthly'\);/.test(alertsJs),
+    'closing: syncFormState draws it only while deadlines is ticked AND the frequency is monthly');
+  ok(/e\.target === \$\('a-freq'\)\) syncFormState\(\);/.test(alertsJs),
+    'closing: …and a change of frequency re-syncs the form, so the hint follows the select');
+  ok(/seven days after each digest/.test(faq),
+    'closing: the FAQ says "after each digest" too');
+  ok(/one week in four/.test(claude), 'closing: CLAUDE.md records the monthly reading');
+
+  /* AN UNREAD JOBS FILE IS NOT AN EMPTY WINDOW: the mailer's own selftest
+     drives the guard; this pins that the mark is gated at all. */
+  ok(/if \(wantsDeadlines && jobsOk\) idle\.lastDeadlineUntil/.test(mailer) &&
+     /if \(wantsDeadlines && jobsOk\) patch\.lastDeadlineUntil/.test(mailer),
+    'closing: the mark is written only when data/jobs.json was actually read');
+  const lede = alertsHtml.slice(alertsHtml.indexOf('Be told when something you care about'),
+    alertsHtml.indexOf('oa-unsub-notice'));
+  ok(lede.length > 100 && lede.length < 800 && !lede.includes('—') && !lede.includes('&mdash;'),
+    'closing: nor does the lede');
+}
+
 async function testAnalytics() {
   const A = require(path.join(HERE, '..', 'assets', 'oa-analytics-model.js'));
 
@@ -11321,6 +12743,86 @@ async function testAnalytics() {
     'and never rebases: data/ is a build output, so a rejected push is REBUILT');
   ok(/GA4_PROPERTY_ID/.test(wf) && /FIREBASE_SERVICE_ACCOUNT/.test(wf),
     'it passes every gated source its credential');
+
+  /* --- how the community has grown (owner, 2026-09-05) -------------------
+
+     The dashed "expected growth" line is ONE pure function in the model, so
+     what it is can be pinned here rather than read off a screenshot: a
+     least-squares slope over the last `window` points, carried `ahead` days
+     through the last actual point, never below it, reading no clock. */
+  const gday = (i) => new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10);
+  const straight = Array.from({ length: 200 }, (_, i) => [gday(i), 10 + 2 * i]);
+  const gp = A.growthProjection(straight, { window: 90, ahead: 180 });
+  ok(gp && Math.abs(gp.slope - 2) < 1e-9, 'growth: the slope of a straight line is recovered exactly');
+  eq([gp.fitted, gp.lastDay, gp.lastValue], [90, gday(199), 408],
+    'growth: fitted over the last 90 points, through the last actual point');
+  eq(gp.points.length, 181, 'growth: the projection starts AT the last actual day and runs 180 days on');
+  eq([gp.points[0], gp.points[1], gp.points[180]], [[gday(199), 408], [gday(200), 410], [gday(379), 768]],
+    'growth: …and continues the straight line exactly, whole numbers, one per day');
+  eq([gp.horizon, gp.reached], [gday(379), 768], 'growth: horizon and reached are the last projected point');
+  /* a kink OLDER than the window does not move the slope: the first 110
+     points climb by 7 a day, the last 90 by 2 */
+  const kinked = straight.map((p, i) => [p[0], i < 110 ? 7 * i : 7 * 109 + 2 * (i - 109)]);
+  ok(Math.abs(A.growthProjection(kinked, { window: 90, ahead: 10 }).slope - 2) < 1e-9,
+    'growth: the window is respected, so a kink older than 90 days does not move the slope');
+  const plateau = A.growthProjection(Array.from({ length: 40 }, (_, i) => [gday(i), 64]), { ahead: 30 });
+  ok(plateau && plateau.slope === 0 && plateau.points.every((p) => p[1] === 64) && plateau.points.length === 31,
+    'growth: a plateau projects flat at the last value');
+  const falling = A.growthProjection(Array.from({ length: 40 }, (_, i) => [gday(i), 100 - i]), { ahead: 30 });
+  ok(falling && falling.slope === 0 && falling.points.every((p) => p[1] === 61),
+    'growth: a falling series never projects below the last actual value (the count never falls)');
+  eq(A.growthProjection([[gday(0), 5]]), null, 'growth: fewer than two points is refused');
+  eq(A.growthProjection([], {}), null, 'growth: …and so is nothing at all');
+  eq(A.growthProjection(straight.slice(0, 5), { window: 90, ahead: 3 }).fitted, 5,
+    'growth: a record shorter than the window is fitted whole');
+  eq(A.growthProjection(straight.slice().reverse(), { window: 90, ahead: 180 }), gp,
+    'growth: the order the points arrive in does not matter');
+  eq(A.growthProjection(straight, { window: 90, ahead: 180 }), gp,
+    'growth: deterministic, two calls agree to the byte');
+  const anchored = A.growthProjection(straight, { window: 90, ahead: 10, today: gday(230) });
+  eq([anchored.horizon, anchored.points.length, anchored.slope], [gday(240), 42, gp.slope],
+    'growth: `today` anchors the horizon (a stale copy still gets `ahead` days from today) and nothing else');
+  eq(A.growthProjection(straight, { window: 90, ahead: 10, today: gday(100) }).horizon, gday(209),
+    'growth: …and a `today` behind the last actual day changes nothing');
+  ok(!/Date\.now|new Date\(\)/.test(A.growthProjection.toString()),
+    'growth: the model reads no clock');
+
+  /* the page: its own fetch, the figure, the caption built from the constants,
+     the accent line dashed, the monthly table through the generic override */
+  ok(/fetch\('\/data\/users-growth\.json', \{ cache: 'no-cache' \}\)/.test(page),
+    'growth: the page fetches data/users-growth.json with no-cache, absolute like every served file');
+  ok(/A\.growthProjection\(actual, \{ window: GROWTH_WINDOW, ahead: GROWTH_AHEAD, today: today \}\)/.test(page),
+    'growth: the dashed line is the model\'s projection, under the page\'s two constants');
+  ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 180;/.test(page),
+    'growth: fitted over 90 days, carried 180 forward');
+  ok(/figure\('How the community has grown',/.test(page), 'growth: the figure has the agreed title');
+  ok(/'dashed line is a straight-line trend fitted over the last ' \+ GROWTH_WINDOW \+\s*\n?\s*' days and carried ' \+ carried \+ ' days forward; an expectation from past ' \+\s*\n?\s*'growth, not a target\. '/.test(page),
+    'growth: the caption is BUILT from the window constant and the days really carried, and says what the line is and is not');
+  ok(/var carried = Math\.round\(\(Date\.parse\(proj\.horizon\) - Date\.parse\(proj\.lastDay\)\) \/ 86400000\);/.test(page),
+    'growth: …the days carried are read off the RESULT (horizon minus last real day), so a stale copy projected past today is not captioned as 180');
+  const growthBlock = page.slice(page.indexOf('/* 1b.'), page.indexOf('drawGrowth();', page.indexOf('/* 1b.')));
+  ok(growthBlock.length > 50 && growthBlock.length < 400 && !/—/.test(growthBlock),
+    'growth: the page\'s own 1b comment carries no em dash');
+  ok(/let last = s\.values\.length - 1;\s*\n\s*while \(last > first && s\.values\[last\] == null\) last--;/.test(charts),
+    'growth: line() closes an area wash at the last REAL point, so a series with trailing nulls cannot wash under the projection');
+  ok(/C\.full\(proj\.lastValue\) \+ ' registered users on '/.test(page) && /the trend reaches ' \+ C\.full\(proj\.reached\)/.test(page),
+    'growth: …and gives the current count and the count the trend reaches');
+  ok(/\{ name: 'Expected growth', values: expect, kind: 'accent', dashed: true \}/.test(page),
+    'growth: the expected line is the chart ACCENT (re-stepped in dark) and dashed, never --gold directly');
+  ok(/\{ name: 'Registered users', values: have, kind: 'brand', area: true \}/.test(page),
+    'growth: the real count is the brand line');
+  ok(/if \(actual\.length < 2\) return;/.test(page) && page.indexOf('if (actual.length < 2) return;') < page.indexOf("figure('How the community has grown'"),
+    'growth: with no file, a seed, or one point, the figure is not drawn at all');
+  ok(/cols: \['Month', 'Registered users', 'Expected growth'\]/.test(page),
+    'growth: the numbers table is one row per month');
+  ok(/if \(opts\.table && Array\.isArray\(opts\.table\.cols\) && Array\.isArray\(opts\.table\.rows\)\) \{\s*\n\s*table\(host, opts\.table\.cols, opts\.table\.rows\);\s*\n\s*return;/.test(charts),
+    'growth: line() honours a caller\'s own table, the generic override the monthly rows go through');
+  const growthCalls = page.replace(/\/\*[\s\S]*?\*\//g, '').match(/^\s*drawGrowth\(\);$/gm) || [];
+  eq(growthCalls.length, 2, 'growth: drawn from draw() with data and from its empty branch, since its file is its own');
+  ok(page.indexOf('drawGrowth();\n\n    /* 2 — the weekly rhythm */') > 0 || /drawGrowth\(\);\s*\n\s*\/\* 2 — the weekly rhythm/.test(page),
+    'growth: …under the visitors chart, before everything the reader scrolls for');
+  ok(!/id: 'growth', kind:/.test(page), 'growth: it is NOT a DIMENSIONS entry (the BREAKDOWN_IDS pin above stays exact)');
+  ok(/how the community of registered users has grown/.test(html), 'growth: the analytics lede names the figure');
 }
 
 /* ------------------------------------------------------- the GA4 tag
@@ -11690,6 +13192,999 @@ async function testUniversityVisits() {
     'from an IP and says so nowhere is wrong whatever its rules allow');
 }
 
+/* ------------------------------- a candidate's PRIVATE view statistics
+
+   Owner, 2026-09-04: each candidate may see how often their own profile
+   card was opened on the site and how often its CV link was clicked, this
+   season and in the last 7 days, and nobody else may. Computed by
+   _scraper/build-candidate-stats.mjs from the site's own usage record and
+   written onto the candidate's OWN document, which is the one document the
+   rules already let them read — so nothing here reaches data/ and no new
+   read rule exists. What is pinned: the attribution rule the usage record
+   carries, the id derivation through the model, the owner exclusion, the
+   rules letting an owner CARRY the map but never write it, the caller, and
+   that nothing under data/ is written. */
+async function testCandidateStats() {
+  const root = path.join(HERE, '..');
+  const read = (rel) => readFile(path.join(root, ...rel.split('/')), 'utf8');
+
+  /* --- the pure core, driven by the builder's own offline suite ------------ */
+  ok(CSTATS.selftest(), 'build-candidate-stats.mjs passes its own offline selftest');
+
+  /* --- the id is the MODEL's, never a copy ------------------------------- */
+  const src = await read('_scraper/build-candidate-stats.mjs');
+  ok(/import \{ rowFromCandidateSubmission, assignCandidateIds \} from '\.\/candidates-model\.mjs'/.test(src),
+    'the builder derives a card id through the model functions build-candidates uses');
+  ok(!/\$\{row\.year\}-\$\{slug/.test(src) && !/function candidateId/.test(src),
+    'and carries no copy of candidateId — two derivations of one id disagree silently');
+  ok(/byRef\.get\(/.test(src),
+    'the served row is asked FIRST, by ref — the key that identifies a submission ' +
+    'rather than a name and a year (the matchServed lesson)');
+  ok(CANDIDATE_PUBLIC_FIELDS.includes('ref'),
+    'and the served candidate row carries that ref, so the join has a key');
+  // the SAME collision the site resolves: two documents, one name, one season
+  const NOW = new Date('2026-10-20T12:00:00Z');
+  const twoDocs = [
+    { id: 'b', data: { uid: 'u2', ref: 'R-B', first: 'Jane', last: 'Doe', affiliation: 'U',
+      position: 'PhD Candidate', year: 2027, createdAt: '2026-09-02T00:00:00Z' } },
+    { id: 'a', data: { uid: 'u1', ref: 'R-A', first: 'Jane', last: 'Doe', affiliation: 'U',
+      position: 'PhD Candidate', year: 2027, createdAt: '2026-09-01T00:00:00Z' } },
+  ];
+  const fresh = twoDocs.map((d) => ({ key: d.id, row: rowFromCandidateSubmission(d.data, { now: NOW }) }));
+  assignCandidateIds(fresh);
+  const siteIds = Object.fromEntries(fresh.map((f) => [f.key, f.row.id]));
+  const cards = CSTATS.cardsFor(twoDocs, Object.values(siteIds).map((id) => ({ id })), { now: NOW });
+  eq([[...cards.get('a').ids], [...cards.get('b').ids]], [[siteIds.a], [siteIds.b]],
+    'a name collision lands on the SAME -2 the site gives it');
+
+  /* --- the owner's own clicks are never counted -------------------------- */
+  const card = cards.get('a');
+  const at = Date.parse('2026-10-10T12:00:00Z');
+  const own = CSTATS.tally([
+    { uid: 'u1', clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
+    { uid: 'anon:x', clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
+    { uid: 'm', email: 'kstouras@gmail.com',
+      clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
+  ], cards, { from: 0 });
+  eq(own.get('a').opens, 1,
+    'of three opens — the candidate’s own, an anonymous reader’s, the maintainer’s — ' +
+    'exactly the anonymous one counts');
+  ok(card.uids.has('u1'), 'the exclusion is keyed on the document’s own uid');
+  const rules = await read('_firestore.rules');
+  const adminInRules = (rules.match(/request\.auth\.token\.email == '([^']+)'/) || [])[1];
+  eq(CSTATS.ADMIN_EMAILS, [adminInRules],
+    'the maintainer the builder excludes is the one isAdmin() names');
+
+  /* --- what the usage record carries ------------------------------------- */
+  const usage = await read('assets/oa-usage.js');
+  ok(/closest\('li\.oa-card'\)/.test(usage) && /c: String\(li\.id\)\.slice\(0, 120\)/.test(usage),
+    'a click inside a card carries the card’s element id, capped');
+  ok(/classList\.contains\('oa-card-head'\)/.test(usage) &&
+     /!li\.classList\.contains\('oa-card-locked'\)/.test(usage) &&
+     /getAttribute\('aria-expanded'\) !== 'true'/.test(usage),
+    'and `o` marks an OPEN: the head, on a card the reader may read, not already expanded');
+  const payload = usage.slice(usage.indexOf('var payload = {'), usage.indexOf('OAFB.ready()'));
+  ok(payload.length > 100 && payload.length < 800, 'the payload slice is bounded');
+  ok(!/\bc:|\bo:/.test(payload),
+    'no new TOP-LEVEL field joins the session document — the attribution rides inside ' +
+    'the clicks list the rules already bound');
+  ok(/list\('clicks', 400\)/.test(rules), 'which the rules still bound at 400');
+  ok(/'job-' \+ r\.id/.test(await read('assets/oa-list.js')),
+    'the engine still names every card job-<row id>, candidates included');
+
+  /* --- the rules: an owner CARRIES the map, never writes it -------------- */
+  const block = rules.slice(rules.indexOf('match /candidateSubmissions/'),
+                            rules.indexOf('match /placementSubmissions/'));
+  ok(block.length > 500, 'the candidateSubmissions block was sliced');
+  ok(/function statsUntouched\(\)/.test(block) &&
+     /request\.resource\.data\.stats == resource\.data\.stats/.test(block),
+    'statsUntouched(): the merged document may carry stats only as it was stored');
+  const ownerUpdate = block.slice(block.indexOf('allow update: if isOwner'),
+                                  block.indexOf('// account merge hand-over'));
+  ok(ownerUpdate.length > 100 && /statsUntouched\(\)/.test(ownerUpdate),
+    'the owner’s correct-and-withdraw update requires it');
+  ok(/allow create: if verified\(\)[\s\S]*?!\('stats' in request\.resource\.data\)/.test(block),
+    'and a new profile may not arrive with a count of its own');
+  ok(!/keys\(\)\.hasOnly\(/.test(block),
+    'no rule pins the document to a fixed key SET, so the Admin-SDK stamp cannot freeze ' +
+    'the profile against its own owner (the sync-user-directory trap)');
+  ok(!/str\('stats'/.test(block), 'stats is a map, not one of the bounded strings');
+
+  /* --- the caller, and nothing under data/ ------------------------------- */
+  const wf = await read('.github/workflows/oa-analytics.yml');
+  ok(wf.includes('build-candidate-stats.mjs'), 'oa-analytics.yml runs the builder');
+  ok(wf.indexOf('build-candidate-stats.mjs') > wf.indexOf('build-analytics.mjs'),
+    'after the analytics build, beside the read it shares');
+  const step = wf.slice(wf.indexOf('- name: Candidate statistics'), wf.indexOf('- name: Commit'));
+  ok(step.length > 100 && /FIREBASE_SERVICE_ACCOUNT/.test(step),
+    'with the service account, which is the only credential it needs');
+  ok(/continue-on-error: true/.test(step),
+    'and continue-on-error, so a failure here never holds the analytics commit back');
+  ok(!BUILDERS.some((b) => b.script === 'build-candidate-stats.mjs'),
+    'it is NOT in BUILDERS — it writes no data/ file');
+  ok(!/writeFile/.test(src) && !/\.mkdir\(/.test(src),
+    'the builder writes no file at all: a served file is public and these figures are one person’s');
+  ok(/status\) !== 'published'/.test(src),
+    'a stamp lands only on a published document — the state the Cloud Function does not ring on');
+  ok(/'usageSessions'/.test(src) && /marketStart\(now\)/.test(src),
+    'it reads the usage record from the season start');
+
+  /* --- the surfaces ------------------------------------------------------- */
+  const form = await read('assets/oa-candidateform.js');
+  const panel = form.slice(form.indexOf('function paintStats('), form.indexOf('function enterEditMode('));
+  ok(panel.length > 500, 'the panel painter was sliced');
+  ok(/v\.stats/.test(panel) && /candidates-reveal\.json', \{ cache: 'no-cache' \}/.test(panel),
+    'the edit page reads the document’s stats and the reveal date it is gated on');
+  ok(/not public yet/.test(panel), 'and says so before the reveal date, rather than showing a zero');
+  ok(/textContent|createTextNode/.test(panel) && !/innerHTML = ['"]<|innerHTML \+=/.test(panel),
+    'every figure and word goes through text nodes, never markup');
+  ok(!/—/.test(panel), 'no em dash in the panel’s copy');
+  ok(!/out\.stats|stats:/.test(form.slice(form.indexOf('function collect('), form.indexOf('function makeRef('))),
+    'the form never sends stats — the count is not the candidate’s to write');
+  ok(/id="oa-cand-stats" hidden/.test(await read('post-a-candidate.html')),
+    'post-a-candidate.html carries the panel, born hidden (edit mode reveals it)');
+  ok(/v\.stats/.test(await read('account.html')) && /its CV/.test(await read('account.html')),
+    'the personal area’s candidate card carries the season totals');
+  const inbox = await read('assets/oa-submissions.js');
+  ok(/function statsLine\(d\)/.test(inbox),
+    'and the maintainer’s inbox card shows the same numbers');
+  ok(/times\(n\(st\.opens\)\)/.test(inbox) && /times\(n\(st\.cvClicks\)\)/.test(inbox) &&
+     !/time\(s\)/.test(inbox.slice(inbox.indexOf('function statsLine'), inbox.indexOf('function cardHtml'))),
+    '…written out ("1 time" / "3 times"), as the candidate’s own panel and account.html write them');
+  /* THE PANEL SAYS WHO SEES THE FIGURES, and the maintainer is one of them
+     (the inbox card above, and the admin read the rules grant): "only you"
+     was a privacy statement that was false, and the Privacy Policy already
+     said otherwise. The two must agree. */
+  ok(/only you and the site maintainer can see them/.test(panel),
+    'the panel names the maintainer among who can see the figures, as the Privacy Policy does');
+  ok(!/only you can see them/.test(form),
+    '…and never claims the candidate alone can');
+
+  /* --- disclosed and announced ------------------------------------------- */
+  const pp = await read('privacy-policy.html');
+  ok(/how often each\s+candidate profile was opened and its CV clicked/.test(pp) &&
+     /shown only to that candidate/.test(pp),
+    'the Privacy Policy says the count exists and who sees it');
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = log.updates.find((u) => u.id === 'candidate-profile-view-statistics');
+  ok(!!entry && /only you and the site maintainer can see them/.test(entry.summary),
+    'the change-log entry says the same about who sees them');
+  ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate.html',
+    'changelog.json announces it, dated, linking the profile page');
+  ok(entry && !/—/.test(entry.title + entry.summary), 'with no em dash in the announcement');
+}
+
+/* ------------------------------------------ registration is verified by e-mail
+
+   An account registered with an e-mail address and a password must press the
+   link in a message before it can be used (CLAUDE.md, "Registration is
+   verified by e-mail"). Three pieces carry it and each is pinned here: the
+   message itself (_functions/verify-email.js), the function that sends it
+   (sendVerificationEmail in _functions/index.js), and the rules, which read
+   `email_verified` off the token through verified() on every user write with
+   the one exception the registration form needs. The browser half is pinned
+   further down, at the anchor marked FRONTEND PINS. */
+async function testEmailVerification() {
+  const root = path.join(HERE, '..');
+  const site = 'https://www.operationsacademia.org';
+  const noDash = (s) => !/—/.test(String(s));
+
+  /* --- the message ------------------------------------------------------- */
+
+  const V = require(path.join(root, '_functions', 'verify-email.js'));
+  const link = `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC123xyz` +
+    `&continueUrl=${encodeURIComponent(site + '/account.html')}`;
+  const r = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link });
+  const count = (hay, needle) => String(hay).split(needle).length - 1;
+  const escLink = V.esc(link);
+  const visible = r.html.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&');
+
+  eq(r.subject, 'Verify your e-mail address for Operations Academia',
+    'verify: the subject line is the one the owner approved');
+  ok(/One more step/.test(r.html) && /Hello Ada,/.test(r.html),
+    'verify: the heading and a greeting by first name');
+  ok(/>Hello,</.test(V.renderVerifyEmail({ link }).html),
+    'verify: with no name on the profile the greeting is a bare "Hello,"');
+  ok(count(r.html, 'Verify my e-mail address') >= 1 && count(r.text, 'Verify my e-mail address') === 1,
+    'verify: the button says "Verify my e-mail address", once in the plain text');
+  ok(count(r.html, `href="${escLink}"`) >= 1,
+    'verify: the button carries the link');
+  ok(count(visible, link) === 1,
+    'verify: and the link is written out in full ONCE as text a reader can copy');
+  ok(count(r.html, escLink) >= 2,
+    'verify: so the link is in the HTML at least twice, behind the button and as text');
+  ok(count(r.text, link) === 1,
+    'verify: the plain-text alternative carries the link exactly once');
+  ok(/copy this link into your browser:/.test(r.html)
+     && /You will not be able to sign in until your address is verified\./.test(r.html)
+     && /you can ignore this message and no account will be used\./.test(r.html),
+    'verify: the fallback sentence and the two closing sentences are as written');
+  ok(r.text.length > 300 && !/<[a-z]/i.test(r.text),
+    'verify: there IS a plain-text alternative, and it holds no markup');
+  ok(noDash(r.html) && noDash(r.text) && noDash(r.subject),
+    'verify: no em dash anywhere in the message');
+  ok(!/<script/i.test(r.html), 'verify: no script in an e-mail');
+  ok(/<meta name="color-scheme" content="light dark">/.test(r.html)
+     && /<meta name="supported-color-schemes" content="light dark">/.test(r.html),
+    'verify: the head declares both colour schemes');
+  ok(new RegExp(`<img src="${site}/images/OA-logo-solo\\.png"[^>]*alt="[^"]+"`).test(r.html),
+    'verify: the logo is an absolute https image with alt text');
+  ok(/Operations Academia<span[^>]*>\.org<\/span>/.test(r.html),
+    'verify: the wordmark is TEXT beside the logo, so the header reads with images blocked');
+  ok(/mso-hide:all/.test(r.html) && /display:none;max-height:0/.test(r.html),
+    'verify: a hidden preheader');
+  ok(/<v:roundrect[^>]*href="[^>]*fillcolor="#3a424d"/.test(r.html)
+     && /<a href="[^"]+" class="oa-btn" style="[^"]*background-color:#3a424d;/.test(r.html),
+    'verify: the button is a padded link that draws its own pill, with a VML roundrect for Outlook');
+  ok(!/<td[^>]*bgcolor=/.test(r.html) && !/<td[^>]*background-color:#3a424d/.test(r.html),
+    'verify: and the cell around them carries NO colour, or Outlook paints a square block behind the rounded one');
+  ok(/(\?|&amp;|%)<wbr>/.test(r.html) && !/<wbr>/.test(r.text)
+     && (r.html.match(/<wbr>/g) || []).length >= 3,
+    'verify: the written-out link carries a break opportunity after every ? & and %, for Outlook, and the text copy none');
+  eq(V.breakable('a?b&amp;c%2Fd'), 'a?<wbr>b&amp;<wbr>c%<wbr>2Fd',
+    'verify: breakable() breaks after the WHOLE &amp; entity, so the escaping survives');
+  ok(/@media \(prefers-color-scheme: dark\)/.test(r.html)
+     && /\.oa-card \{ background-color: #15181d !important; border-color: #363d47 !important; color: #eef0f2 !important; \}/.test(r.html)
+     && /\.oa-card \.oa-btn \{ background-color: #c6ccd4 !important; color: #0d0f12 !important; \}/.test(r.html)
+     && /\.oa-ground \{ background-color: #0d0f12 !important; \}/.test(r.html),
+    'verify: the head declares dark support AND carries the dark half, in the live site\'s own dark tokens');
+  ok(/<td class="oa-card" /.test(r.html) && /<body class="oa-ground" /.test(r.html) && /<h1 class="oa-ink" /.test(r.html),
+    'verify: …on classed elements, since inline styles are what the light half is written in');
+  for (const hex of ['#f8f7f4', '#ffffff', '#ccd1d7', '#22272e', '#454c56', '#646c78', '#3a424d']) {
+    ok(r.html.includes(hex), `verify: the live site's palette, ${hex}`);
+  }
+  ok(/border-radius:14px/.test(r.html) && /border-radius:999px/.test(r.html)
+     && /padding:14px 26px/.test(r.html) && /width="600"/.test(r.html),
+    'verify: the card radius, the pill button and the 600px table');
+  ok(/Georgia/.test(r.html) && /Inter, Helvetica, Arial/.test(r.html),
+    'verify: Georgia for the heading, Inter with Helvetica and Arial behind it for the body');
+  ok(/questions to <a href="mailto:operationsacademia@gmail\.com"/.test(r.html)
+     && /<a href="https:\/\/www\.operationsacademia\.org"[^>]*>operationsacademia\.org<\/a>/.test(r.html)
+     && /questions to operationsacademia@gmail\.com/.test(r.text),
+    'verify: the footer names the site and the contact address, with links');
+  const hostile = V.renderVerifyEmail({ firstName: 'Ada <x>', link }).html;
+  ok(hostile.includes('Hello Ada &lt;x&gt;,') && !hostile.includes('<x>'),
+    'verify: a first name somebody typed is escaped');
+  /* The profile is the one document an UNVERIFIED account may write, and its
+     holder may have registered with a stranger's address: the first name is
+     then a line the stranger reads in a message from the site's mailbox. */
+  const phish = 'Your account is suspended, restore it at http://evil.example';
+  eq(V.greetingName(phish), '', 'verify: a "first name" carrying a link is not used');
+  eq(V.greetingName('a'.repeat(V.NAME_MAX + 1)), '', 'verify: nor one longer than NAME_MAX');
+  eq(V.greetingName('write to me@evil.example'), '', 'verify: nor one carrying an address');
+  eq(V.greetingName('see www.evil.example'), '', 'verify: nor a www. host');
+  eq(V.greetingName('a/b'), '', 'verify: nor a slash, which every path has');
+  eq(V.greetingName('Ada\nLovelace'), 'Ada Lovelace', 'verify: a line break is folded to a space');
+  eq(V.greetingName("  Mary-Jo O'Brien "), "Mary-Jo O'Brien", 'verify: a real name, trimmed, is used as typed');
+  eq(V.greetingName(''), '', 'verify: and no name is no name');
+  ok(/<p style="margin:0 0 14px;">Hello,<\/p>/.test(V.renderVerifyEmail({ firstName: phish, link }).html)
+     && /^Hello,$/m.test(V.renderVerifyEmail({ firstName: phish, link }).text),
+    'verify: so the rendered message falls back to a bare "Hello," in both halves');
+  ok(new RegExp(`^Verify my e-mail address: ${link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm').test(r.text)
+     && /by opening the link below\./.test(r.text) && !/button/.test(r.text) && /^Hello Ada,$/m.test(r.text),
+    'verify: the plain text is written FOR text: the label and the address on one line, and no "button below" pointing at nothing');
+  const shell = V.brandShell({ title: 'T', preheader: 'P', bodyHtml: '<p>BODY</p>' });
+  ok(/^<!DOCTYPE html>/.test(shell) && shell.includes('<p>BODY</p>') && /<title>T<\/title>/.test(shell),
+    'verify: brandShell is exported and wraps whatever it is given');
+  eq(V.toPlain('<!--[if mso]><center>twice</center><![endif]--><p>once</p>'), 'once',
+    'verify: toPlain drops the Outlook copy of the button, so its label is not printed twice');
+
+  /* --- siteVerifyLink: the ONE rewrite of the minted address (2026-09-05) --- */
+  const minted = 'https://operations-academia.firebaseapp.com/__/auth/action?mode=verifyEmail' +
+    '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount.html&lang=en';
+  eq(V.siteVerifyLink(minted, site),
+    `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account.html')}`,
+    'verify: siteVerifyLink puts the minted code on the site\'s own page with the account page as continueUrl, the code encoded');
+  eq(V.siteVerifyLink('https://x.test/?mode=verifyEmail', site), '', 'verify: no code, no link');
+  eq(V.siteVerifyLink('not a url', site), '', 'verify: an unparsable address answers nothing rather than throwing');
+  eq(V.siteVerifyLink(minted, site + '/'), V.siteVerifyLink(minted, site), 'verify: a trailing slash on the site is folded');
+
+  /* --- the member variant, for the campaign over existing accounts --------- */
+  const member = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link,
+    existing: { since: '2025-03-05T10:00:00Z' } });
+  eq(member.subject, r.subject, 'verify: the member variant keeps the subject');
+  ok(/Please confirm your e-mail address/.test(member.html) && !/One more step/.test(member.html)
+     && /You registered with Operations Academia on 5 March 2025\./.test(member.html)
+     && /Every address is now confirmed once before signing in: one click, and nothing else about your account changes\./.test(member.html)
+     && !/Thank you for registering/.test(member.html) && !/Thank you for registering/.test(member.text),
+    'verify: with existing:{since} the heading and the first paragraph read for a member who registered on a named day');
+  ok(count(member.html, 'Verify my e-mail address') === count(r.html, 'Verify my e-mail address')
+     && count(member.html, escLink) === count(r.html, escLink) && count(member.text, link) === 1
+     && /questions to operationsacademia@gmail\.com/.test(member.text),
+    'verify: the same button, the same printed link and the same footer as the newcomer\'s');
+  ok(!/Please confirm your e-mail address/.test(r.html) && !/You registered with/.test(r.html),
+    'verify: and without existing the newcomer\'s message is unchanged in shape');
+  eq(V.longDay('2025-03-05T10:00:00Z'), '5 March 2025', 'verify: longDay is day month year, UTC');
+  ok(noDash(member.html) && noDash(member.text), 'verify: no em dash in the member variant');
+
+  const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
+  ok(!/\brequire\(/.test(rendererSrc) && !/^\s*import /m.test(rendererSrc),
+    'verify: the renderer depends on NOTHING, since firebase deploy ships only _functions');
+  ok(!/Date\.now\(/.test(rendererSrc) && !/new Date\(\)/.test(rendererSrc),
+    'verify: the renderer reads no clock, so a message is the same whenever it is rendered');
+  ok(/searchParams\.get\('oobCode'\)/.test(rendererSrc) && /verify-email\.html\?mode=verifyEmail/.test(rendererSrc)
+     && /encodeURIComponent\(S \+ '\/account\.html'\)/.test(rendererSrc),
+    'verify: the rewrite lives in the renderer (siteVerifyLink) and nowhere else');
+  ok(noDash(rendererSrc), 'verify: no em dash in the renderer');
+
+  /* --- the rules --------------------------------------------------------- */
+
+  const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
+  ok(/function verified\(\)\s*\{\s*return signedIn\(\)\s*&&\s*\(request\.auth\.token\.email_verified == true\s*\|\|\s*request\.auth\.token\.firebase\.sign_in_provider != "password"\);?\s*\}/.test(rules),
+    'rules: verified() is a sign-in whose address is verified OR whose provider is not the password one');
+  ok(/function isOwner\(uid\)\s*\{\s*return verified\(\) && request\.auth\.uid == uid;/.test(rules),
+    'rules: isOwner goes through verified(), so every owner write is gated');
+
+  /* EVERY user write goes through verified(), with ONE exception. Read as
+     allow statements rather than lines, since a clause spans several. */
+  const allows = rules.match(/allow [\s\S]*?;/g) || [];
+  ok(allows.length > 40, 'rules: the allow statements were really found');
+  const bareWrites = allows.filter((a) => /^allow [^:]*\b(create|update|write)\b/.test(a)
+    && /signedIn\(\)/.test(a));
+  eq(bareWrites.length, 2,
+    'rules: exactly TWO write clauses are granted on a bare sign-in (a create and an update)');
+  const profBlock = rules.slice(rules.indexOf('match /profiles/{uid}'));
+  const profRule = profBlock.slice(0, profBlock.indexOf('match /', 10));
+  ok(bareWrites.length === 2 && bareWrites.every((w) => profRule.includes(w)),
+    'rules: and both are the owner\'s own profile, which the registration form writes ' +
+    'in the same breath as the account, before any link can have been pressed');
+  ok(/allow create: if signedIn\(\) && request\.auth\.uid == uid\s*&& request\.resource\.data\.keys\(\)\.hasOnly\(profileKeys\(\)\)\s*&& profileShape\(\);/.test(profRule)
+     && /allow update: if signedIn\(\) && request\.auth\.uid == uid\s*&& request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\.hasOnly\(profileKeys\(\)\)\s*&& profileShape\(\);/.test(profRule)
+     && /allow read, delete: if isOwner\(uid\);/.test(profRule),
+    'rules: the profile exception is create and update only, each SHAPED (keys and bounds), and an update judged on the keys it changes; read and delete stay owner-gated');
+  /* The one write an unverified account may make carries a shape, and the
+     shape is the module's own key list, both ways. */
+  const acctForKeys = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  const profKeysRules = (/function profileKeys\(\) \{\s*return \[([\s\S]*?)\];/.exec(rules) || [])[1];
+  const profKeysModule = (/var PROFILE_DOC_KEYS = \[([\s\S]*?)\];/.exec(acctForKeys) || [])[1];
+  const keyList = (src) => [...String(src || '').matchAll(/'([A-Za-z]+)'/g)].map((m) => m[1]).sort();
+  ok(profKeysRules && profKeysModule, 'rules: profileKeys() and PROFILE_DOC_KEYS were both found');
+  eq(keyList(profKeysRules), keyList(profKeysModule),
+    'rules: profileKeys() in the rules IS PROFILE_DOC_KEYS in oa-accounts.js, both ways');
+  for (const k of keyList(profKeysModule)) {
+    ok(new RegExp(`(\\b${k}:|\\.${k}\\s*=|'${k}')`).test(acctForKeys.replace(/var PROFILE_DOC_KEYS = \[[\s\S]*?\];/, '')),
+      `rules: …and ${k} really is a key the module writes or reads on the profile`);
+  }
+  for (const k of ['firstName', 'lastName', 'affiliation', 'website', 'orcid', 'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded']) {
+    ok(keyList(profKeysModule).includes(k), `rules: the profile key list carries ${k}, which the module writes`);
+  }
+  ok(/function profileShape\(\) \{[\s\S]*?str\('firstName', 300\)[\s\S]*?str\('lastName', 300\)[\s\S]*?str\('affiliation', 300\)[\s\S]*?str\('website', 300\)[\s\S]*?str\('orcid', 40\)[\s\S]*?str\('photo', 120000\)/.test(rules),
+    'rules: every text field on the profile is bounded, the photo (a data URL) at its own size');
+  /* Storage: an upload is a write like the others. */
+  const storageRules = await readFile(path.join(root, '_storage.rules'), 'utf8');
+  ok(/function verified\(\) \{\s*return signedIn\(\)\s*&&\s*\(request\.auth\.token\.email_verified == true\s*\|\|\s*request\.auth\.token\.firebase\.sign_in_provider != 'password'\);?\s*\}/.test(storageRules),
+    'storage rules: carry the same verified() test');
+  ok(/allow create: if verified\(\)\s*&& request\.auth\.uid == uid/.test(storageRules)
+     && !/allow create: if signedIn\(\)/.test(storageRules),
+    'storage rules: an upload needs a verified account, never a bare sign-in');
+  ok(/allow get: if signedIn\(\);/.test(rules),
+    'rules: an identity key can still be looked up on a bare sign-in (a READ, not a write)');
+  ok(/\(verified\(\) && request\.resource\.data\.uid == request\.auth\.uid\)/.test(rules),
+    'rules: a signed-in usage session is pinned to a verified account');
+  ok((rules.match(/verified\(\)/g) || []).length >= 9,
+    'rules: verified() really is used across the user-write clauses');
+  ok(/match \/verifyMail\/\{uid\} \{\s*allow read, write: if false;/.test(rules),
+    'rules: the rate-limit documents are closed to every client');
+  ok(!/signedIn\(\)\s*&&\s*request\.auth\.uid == uid/.test(rules.replace(profRule, '')),
+    'rules: nothing outside the profile block re-implements the un-gated owner test');
+
+  /* --- the function ------------------------------------------------------ */
+
+  const fn = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+  ok(/require\('firebase-functions\/v2\/https'\)/.test(fn) && /\bonCall\b/.test(fn)
+     && /\bHttpsError\b/.test(fn),
+    'function: an onCall v2 callable with HttpsError');
+  ok(/exports\.sendVerificationEmail = onCall\(/.test(fn),
+    'function: it is exported as sendVerificationEmail, the name the browser calls');
+  const at = fn.indexOf('exports.sendVerificationEmail');
+  const end = fn.indexOf('exports.recordVisit');
+  ok(at > 0 && end > at, 'function: the handler sits before recordVisit (whose own slice scans everything after it)');
+  const handler = fn.slice(at, end);
+  ok(handler.length > 500, 'function: the handler was really found (or the checks below are vacuous)');
+  ok(/secrets: \[SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS\]/.test(handler),
+    'function: the four SMTP secrets are listed on the callable');
+  for (const n of ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`const ${n} = defineSecret\\('${n}'\\);`).test(fn), `function: ${n} is a defineSecret`);
+  }
+  ok(/region: 'us-central1'/.test(handler),
+    'function: us-central1, where the compat client looks by default');
+  ok(/require\('firebase-admin\/auth'\)/.test(fn) && /require\('nodemailer'\)/.test(fn)
+     && /const \{ renderVerifyEmail, siteVerifyLink \} = require\('\.\/verify-email\.js'\);/.test(fn),
+    'function: the Admin Auth API, nodemailer, the renderer and the shared link helper are required');
+  ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(handler),
+    'function: the link is generated by the Admin SDK with the account page as its continue URL');
+  ok(/const link = siteVerifyLink\(generated, SITE\);/.test(handler)
+     && !/searchParams\.get\('oobCode'\)/.test(handler) && !/verify-email\.html\?mode=verifyEmail/.test(handler),
+    'function: the code is put on the SITE\'s own page by siteVerifyLink, the one helper the campaign mailer shares, never inline');
+  ok(/if \(!link\) \{[\s\S]{0,200}await releaseSlot\(\);/.test(handler),
+    'function: a minted address that carried no code still gives the slot back');
+  ok(/if \(!request\.auth\)[\s\S]{0,80}'unauthenticated'/.test(handler),
+    'function: it refuses a caller who is not signed in');
+  ok(/token\.email/.test(handler) && /to: email,/.test(handler) && !/request\.data/.test(handler),
+    'function: the message goes to the address on the TOKEN, never one the client sends');
+  ok(/email_verified === true[\s\S]{0,200}'failed-precondition'/.test(handler),
+    'function: an already-verified address is refused');
+  ok(/collection\('verifyMail'\)\.doc\(uid\)/.test(handler)
+     && /VERIFY_MIN_GAP_MS = 90 \* 1000/.test(fn) && /VERIFY_DAY_MAX = 6/.test(fn)
+     && (handler.match(/'resource-exhausted'/g) || []).length === 2,
+    'function: the rate limit lives in verifyMail/{uid}: one send in 90 seconds, six a day');
+  ok(/db\.runTransaction\(async \(tx\) => \{[\s\S]*?tx\.get\(limitRef\)[\s\S]*?tx\.set\(limitRef, \{ sentAt: now, day: today, count: count \+ 1 \}, \{ merge: true \}\);/.test(handler)
+     && handler.indexOf('runTransaction(') < handler.indexOf('sendMail(')
+     && handler.indexOf('tx.set(limitRef') < handler.indexOf('sendMail('),
+    'function: the rate-limit slot is RESERVED in a transaction before the send, so parallel calls cannot all pass the check');
+  ok(!/await limitRef\.set\(\{ sentAt/.test(handler),
+    'function: …and there is no read-check-send-write stamp left');
+  ok(!/tx\.set\(limitRef, \{[^}]*\}\);/.test(handler) && (handler.match(/tx\.set\(limitRef/g) || []).length === 1,
+    'function: the reservation MERGES, so the campaign\'s campaignAt mark survives a send that succeeds, not only one that fails (releaseSlot)');
+  const sendCatch = handler.slice(handler.indexOf('await transport.sendMail('), handler.indexOf("'The message could not be sent.'"));
+  ok(sendCatch.length > 100 && sendCatch.length < 1200, 'function: the send\'s catch was really sliced');
+  ok(/await releaseSlot\(\);/.test(sendCatch) && (handler.match(/await releaseSlot\(\);/g) || []).length >= 3,
+    'function: a send that fails gives the slot back, as does a link that could not be minted');
+  ok(/const releaseSlot = async \(\) => \{[\s\S]*?limitRef\.set\(slot\.before\)[\s\S]*?limitRef\.delete\(\)/.test(handler),
+    'function: …restoring the stamp that was there before, or deleting one that was not');
+  ok(!/e\.message/.test(handler) && /error: e\.code, response: e\.responseCode/.test(handler),
+    'function: no log line prints an error\'s message text, which for an SMTP refusal quotes the address in full');
+  ok(/secure: port === 465/.test(handler) && /from: `Operations Academia <\$\{SMTP_USER\.value\(\)\.trim\(\)\}>`/.test(handler),
+    'function: TLS on 465, and From is the site\'s own mailbox');
+  ok(/collection\('profiles'\)\.doc\(uid\)/.test(handler) && /prof\.firstName/.test(handler),
+    'function: the greeting takes the first name from the profile');
+  ok(/return \{ sent: true, to: redact\(email\) \}/.test(handler),
+    'function: it answers with a redacted address, never the full one');
+  const logCalls = handler.match(/logger\.\w+\([\s\S]*?\);/g) || [];
+  ok(logCalls.length >= 4, 'function: the log lines were really found');
+  /* `e.code` and `e.responseCode` are an error's own classification (an SMTP
+     code, a Firestore code), never the verification token; they are the only
+     "code" a log line may carry. */
+  ok(logCalls.every((c) => !/\b(link|generated|code|oobCode)\b/.test(c.replace(/\be\.(code|responseCode)\b/g, ''))
+      && !/\bemail\b/.test(c.replace(/redact\(email\)/g, ''))),
+    'function: NO log line names the link, the code or the address (redact() only)');
+  ok(logCalls.some((c) => /error: e\.code/.test(c)),
+    'function: …and the exemption above is exercised, so it is not vacuous');
+  ok(!/console\.log/.test(handler), 'function: nothing goes through console.log');
+  const blockAt = fn.indexOf('E-MAIL VERIFICATION');
+  const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
+  ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
+    'function: no em dash in the verification block');
+  ok(/SIX functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts six and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
+    'function: the file exports exactly six functions, the count a deploy must read back');
+
+  const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
+  ok(pkg.dependencies && pkg.dependencies.nodemailer,
+    'function: nodemailer is a declared dependency, or the deploy dies at load');
+  const lock = JSON.parse(await readFile(path.join(root, '_functions', 'package-lock.json'), 'utf8'));
+  ok(lock.packages && lock.packages['node_modules/nodemailer'],
+    'function: and the lockfile resolves it, so a deploy is deterministic');
+
+  /* --- the setup page and CLAUDE.md -------------------------------------- */
+
+  const setup = await readFile(path.join(root, '_SETUP-EMAIL-VERIFICATION.md'), 'utf8');
+  for (const n of ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`firebase functions:secrets:set ${n} --project operations-academia`).test(setup),
+      `setup: the command that sets ${n}`);
+  }
+  ok(/npm install --prefix _functions/.test(setup)
+     && /firebase deploy --only functions --project operations-academia/.test(setup),
+    'setup: install, then deploy, naming the project');
+  ok(/\bsix\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count SIX');
+  ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
+     && /firebaseapp\.com/.test(setup),
+    'setup: says what the browser does while the function is absent');
+  ok(/verify-email\.html/.test(setup) && /verifyMail/.test(setup) && /functions:log/.test(setup),
+    'setup: how to test');
+  ok(/Every password account that already exists is gated too/.test(setup) && /Send the e-mail/.test(setup)
+     && /BEFORE the gate/.test(setup),
+    'setup: says that every existing password account is pending on its next sign-in and how it gets out');
+  ok(/firebase deploy --only storage --project operations-academia/.test(setup) && /_storage\.rules/.test(setup),
+    'setup: says the Storage rules still deploy by hand, and how');
+  ok(/transaction/i.test(setup) && /enough messages for today/.test(setup),
+    'setup: describes the reserved slot and the two refusals the card prints');
+  ok(noDash(setup), 'setup: no em dash');
+
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('## Registration is verified by e-mail');
+  ok(secAt > 0, 'CLAUDE.md records the decision');
+  const section = claude.slice(secAt, claude.indexOf('\n## ', secAt + 10));
+  ok(section.length > 800 && /verified\(\)/.test(section) && /profiles/.test(section)
+     && /sendVerificationEmail/.test(section) && /\bsix\b/i.test(section),
+    'CLAUDE.md: the section names the rule, the exception, the function and the deploy count');
+  ok(noDash(section), 'CLAUDE.md: no em dash in the section');
+
+  const instant = await readFile(path.join(root, '_SETUP-INSTANT-PUBLISH.md'), 'utf8');
+  ok(/sendVerificationEmail/.test(instant) && /\bfive\b/i.test(instant),
+    'the instant-publish page counts five now, so the deploy check there is not stale');
+
+  /* --- the browser half: the accounts module --------------------------- */
+
+  const acct = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  ok(/function needsVerification\(u\) \{\s*return !!\(u && u\.emailVerified === false && hasProvider\('password', u\)\);/.test(acct),
+    'accounts: needsVerification is an unconfirmed address on the PASSWORD provider and nothing else ' +
+    '(an ORCID sign-in carries no e-mail claim and would be locked out for ever)');
+  for (const name of ['needsVerification', 'sendVerification', 'confirmVerified', 'pendingUser', 'openVerifyPanel', 'friendly']) {
+    ok(new RegExp(`^\\s+${name}: `, 'm').test(acct), `accounts: ${name} is exported, for the verify page and the browser checks`);
+  }
+  ok(/user: function \(\) \{ return state\.pending \? null : state\.user; \}/.test(acct),
+    'accounts: user() answers null while the address is unconfirmed, so every page treats the account as signed out');
+  ok(/pendingUser: function \(\) \{ return state\.pending \? state\.user : null; \}/.test(acct),
+    'accounts: pendingUser() is the one export that can see the unconfirmed account');
+  ok(/return state\.user && !state\.pending \? 'in' : 'out';/.test(acct),
+    'accounts: hint() answers out while pending, so the gate locks from the first paint');
+  ok(/if \(state\.resolved\) fn\(state\.pending \? null : state\.user\);/.test(acct),
+    'accounts: a listener registered while pending hears null');
+  /* the pending branch of the auth handler: no hint, no session, listeners told null */
+  const pendAt = acct.indexOf('state.pending = needsVerification(u);');
+  const pendEnd = acct.indexOf('return;', acct.indexOf('notify(null);', pendAt));
+  ok(pendAt > 0 && pendEnd > pendAt, 'accounts: the auth handler has a pending branch');
+  const pendBranch = acct.slice(pendAt, pendEnd + 'return;'.length);
+  ok(pendBranch.length > 100 && pendBranch.length < 1400, 'accounts: the pending branch was really sliced');
+  ok(/writeHint\(null\)/.test(pendBranch) && /return;/.test(pendBranch)
+     && !/enterSession\(/.test(pendBranch) && !/loadProfile\(/.test(pendBranch),
+    'accounts: while pending the hint is CLEARED and the session is never entered (no profile read, no roster row, no tally)');
+  ok(/openVerifyPanel\(null, null, true\)/.test(pendBranch),
+    'accounts: …and the "Check your inbox" card opens instead');
+  ok(/function enterSession\(u, fb\)/.test(acct) && /enterSession\(u, fb\);/.test(acct)
+     && (acct.match(/enterSession\(u, fb\)/g) || []).length >= 3,
+    'accounts: everything a usable session does on arrival is ONE function, shared by the auth handler and the lift');
+  /* the registration path no longer seeds the hint */
+  const regAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value');
+  const regEnd = acct.indexOf('signInWithEmailAndPassword(f.email.value', regAt);
+  ok(regAt > 0 && regEnd > regAt, 'accounts: the registration path was found');
+  const reg = acct.slice(regAt, regEnd);
+  ok(reg.length > 500 && reg.length < 3000, 'accounts: the registration slice is the right size');
+  ok(!/writeHint\(u, first/.test(reg), 'accounts: registering with a password no longer writes the signed-in hint');
+  ok(/openVerifyPanel\('sent', created\)/.test(reg) && /sendVerification\(created\)/.test(reg),
+    'accounts: …it opens the card and sends the message instead of finishing the sign-in');
+  ok(/needsVerification\(created\)/.test(reg) && /finish\(true\)/.test(reg),
+    'accounts: …and only for an account that needs it (a provider that arrives verified still lands on the personal area)');
+  /* the send: the callable FIRST, Firebase's own message as the fallback */
+  ok(/OAFB\.readyFunctions\(\)/.test(acct) && /fb\.functions\(\)\.httpsCallable\('sendVerificationEmail'\)\(\{\}\)/.test(acct),
+    'accounts: sendVerification calls the site\'s own function first, by the name the function exports');
+  for (const c of ['functions/not-found', 'functions/unavailable', 'functions/internal']) {
+    ok(acct.includes(`'${c}'`), `accounts: ${c} is a reason to fall back`);
+  }
+  ok(/'functions\/resource-exhausted'/.test(acct) && /throttled: true/.test(acct)
+     && /sent a moment ago/.test(acct),
+    'accounts: a throttled send is reported as such, never re-sent through Firebase');
+  ok(/u\.sendEmailVerification\(\{ url: SITE \+ '\/verify-email\.html' \}\)/.test(acct)
+     && /var SITE = 'https:\/\/www\.operationsacademia\.org';/.test(acct),
+    'accounts: the fallback is Firebase\'s own message, landing on the site\'s verify page (an authorised domain, never location.origin)');
+  ok(acct.indexOf("httpsCallable('sendVerificationEmail')") < acct.indexOf('return fallback();'),
+    'accounts: …and it is the fallback, tried after the function');
+  ok(/sdk-load-failed/.test(acct.slice(acct.indexOf('function sendVerification'), acct.indexOf('function confirmVerified'))),
+    'accounts: a Functions SDK that failed to load falls back too');
+  /* the lift refreshes the TOKEN */
+  const liftSrc = acct.slice(acct.indexOf('function confirmVerified'), acct.indexOf('function liftVerification'));
+  ok(liftSrc.length > 200 && liftSrc.length < 1500, 'accounts: confirmVerified was really sliced');
+  ok(/u\.reload\(\)/.test(liftSrc) && /u\.getIdToken\(true\)/.test(liftSrc)
+     && liftSrc.indexOf('u.reload()') < liftSrc.indexOf('u.getIdToken(true)'),
+    'accounts: confirming reloads the user and THEN forces a fresh ID token, or the rules go on reading it unverified');
+  ok(/if \(needsVerification\(u\)\) return false;/.test(liftSrc) && /liftVerification\(u\);/.test(liftSrc),
+    'accounts: …and lifts the gate only when the reload says the address is confirmed');
+  /* the card */
+  ok(/<h3 id="oa-verify-h">Check your inbox<\/h3>/.test(acct)
+     && /id="oa-verify-send">' \+\s*\(status === 'sent' \? 'Send the e-mail again' : 'Send the e-mail'\)/.test(acct)
+     && /id="oa-verify-check">I have verified it</.test(acct)
+     && /id="oa-verify-out">Use a different account</.test(acct)
+     && /Look in spam too\. The message comes from ' \+\s*VERIFY_SENDER/.test(acct)
+     && /VERIFY_SENDER = 'operationsacademia@gmail\.com'/.test(acct),
+    'accounts: the card carries its heading, its three controls and the spam line naming the sender');
+  ok(/if \(auto && document\.querySelector\('\[data-oa-verify-page\]'\)\) return;/.test(acct)
+     && /function openVerifyPanel\(status, who, auto\)/.test(acct),
+    'accounts: the card is not drawn over the verify page ON ITS OWN (the page confirms the address itself), but a press still opens it there');
+  ok(/openVerifyPanel\(null, null, true\);/.test(pendBranch),
+    'accounts: …and the auth handler is the one caller that says auto');
+  ok((acct.match(/openVerifyPanel\(\);/g) || []).length >= 4,
+    'accounts: the chip, the sheet link, openAuth, whenSignedIn and openProfile all press it explicitly');
+  ok(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/.test(acct)
+     && (acct.match(/if \(state\.pending\) \{ openVerifyPanel\(\); return; \}/g) || []).length >= 3,
+    'accounts: openAuth, whenSignedIn and openProfile all open the card for a pending account');
+  ok(/class="oa-acct-btn oa-acct-pending" id="oa-verify-chip"[^>]*>Verify your e-mail</.test(acct)
+     && /id="oa-np-verify" href="#">Verify your e-mail</.test(acct),
+    'accounts: the header chip and the phone sheet both read "Verify your e-mail" while pending');
+  ok(/state\.pending = false;\s*closeVerifyPanel\(\);/.test(acct.slice(acct.indexOf('function signOut'))),
+    'accounts: signing out (Use a different account) clears the pending state and the card');
+  ok(/'auth\/expired-action-code'/.test(acct) && /'auth\/invalid-action-code'/.test(acct)
+     && /That link has expired/.test(acct) && /not valid any more/.test(acct),
+    'accounts: friendly() explains both answers a link can come back with');
+  ok(/We will e-mail you a link to ' \+\s*'confirm your address\. Nothing works until you click it\./.test(acct),
+    'accounts: the register form says, under its button, that a link is coming and nothing works until it is clicked');
+  const verifyBlock = acct.slice(acct.indexOf('E-MAIL VERIFICATION (owner, 2026-09-04)'), acct.indexOf('DUPLICATE ACCOUNTS'));
+  ok(acct.indexOf('DUPLICATE ACCOUNTS') < acct.indexOf('var MERGE_APP'), 'accounts: the merge comment still heads the merge region');
+  ok(verifyBlock.length > 3000, 'accounts: the verification block sits before the merge region, which is byte-pinned against /v2/');
+  ok(noDash(verifyBlock), 'accounts: no em dash in the verification block');
+  /* the two ledes: a promise only where something was sent */
+  ok(/status === 'sent'\s*\?\s*'Your account is created\. A message from Operations Academia is on its way to '/.test(acct)
+     && /'Your e-mail address has not been confirmed yet\. If a message from Operations ' \+\s*'Academia reached <strong>'/.test(acct)
+     && /Otherwise press the button below and we will send one\./.test(acct)
+     && !/A message from Operations Academia is on its way to <strong>' \+ esc\(u\.email \|\| ''\) \+\s*'<\/strong>\. Press the link in it to confirm the address\. Until then/.test(acct),
+    'accounts: the card promises a message "on its way" ONLY on the registration path; a sign-in or a page load, which sent nothing, says what to do instead');
+  /* the throttle: the function\'s own reason */
+  ok(/return \{ via: 'function', throttled: true, reason: \(err && err\.message\) \|\| '' \};/.test(acct)
+     && /verifySay\(r\.reason \|\| 'The last message was sent a moment ago/.test(acct),
+    'accounts: a throttle carries the function\'s own words (too soon, or enough for the day), printed when present');
+  /* a Functions error is not a sign-in failure */
+  ok(/if \(\/\^functions\\\/\/\.test\(c\)\) \{\s*return 'We could not send the message just now\./.test(acct),
+    'accounts: friendly() words a functions/* error as a send that failed, never as "Sign-in failed" with a raw code');
+  ok(/'functions\/deadline-exceeded'/.test(acct)
+     && /VERIFY_FALLBACK_CODES = \['functions\/not-found', 'functions\/unavailable',\s*'functions\/internal', 'functions\/deadline-exceeded'\]/.test(acct),
+    'accounts: a send that timed out (a slow mailbox) falls back to Firebase\'s own message too');
+  /* the pending marker, against the archive\'s hint */
+  ok(/var PENDING_KEY = 'oaAuthPending';/.test(acct)
+     && /if \(h && h\.uid && localStorage\.getItem\(PENDING_KEY\) === h\.uid\) return null;/.test(acct.slice(acct.indexOf('function readHint'), acct.indexOf('function markPending'))),
+    'accounts: readHint() reads a hint naming a pending uid as no hint (the frozen /v2/ writes one for any signed-in user)');
+  ok(/markPending\(u\.uid, true\);/.test(pendBranch),
+    'accounts: …the pending branch writes the marker');
+  ok(/markPending\(u\.uid, false\);/.test(acct.slice(acct.indexOf('function writeHint'), acct.indexOf('function writePhotoHint')))
+     && /else if \(localStorage\.getItem\(PENDING_KEY\) === uid\) localStorage\.removeItem\(PENDING_KEY\);/.test(acct),
+    'accounts: …and writing a hint for a usable session clears it, for that uid only');
+  /* the modal keys: Tab stays inside, focus goes back */
+  const keysSrc = acct.slice(acct.indexOf('function wireModalKeys'), acct.indexOf('function openNotice'));
+  ok(keysSrc.length > 500 && keysSrc.length < 3000, 'accounts: wireModalKeys was really sliced');
+  ok(/e\.key === 'Escape'/.test(keysSrc) && /e\.key !== 'Tab'\) return;/.test(keysSrc)
+     && /last\.focus\(\)/.test(keysSrc) && /first\.focus\(\)/.test(keysSrc) && /e\.preventDefault\(\)/.test(keysSrc),
+    'accounts: every card that claims aria-modal keeps Tab inside it, wrapping at both ends');
+  ok(/function removeModal\(wrap, backTo\)/.test(keysSrc) && /wrap\.contains\(document\.activeElement\)/.test(keysSrc),
+    'accounts: removing a card puts focus back on the control that opened it, when focus was inside');
+  ok(/var VERIFY_BACK = '#oa-verify-chip, #oa-np-verify';/.test(acct)
+     && (acct.match(/removeModal\(\w+, VERIFY_BACK\)/g) || []).length === 2,
+    'accounts: …which for the verify card is the header chip or the phone-sheet link, on both close paths');
+
+  /* the usage tracker files a pending account as an anonymous visitor */
+  const usage = await readFile(path.join(root, 'assets', 'oa-usage.js'), 'utf8');
+  ok(/function usable\(u\) \{[\s\S]*?providerId === 'password'[\s\S]*?return u\.emailVerified === false && pw \? null : u;/.test(usage)
+     && /user = usable\(u\);/.test(usage) && !/user = u \|\| null;/.test(usage),
+    'oa-usage.js files an unconfirmed password account as an anonymous visitor, since the rule refuses its uid and the refusal is silent');
+  ok(/function pageOf\(\) \{[\s\S]*?\[\?&\]oobCode=[\s\S]*?return location\.pathname/.test(usage) && /page: pageOf\(\),/.test(usage),
+    'oa-usage.js never records a query carrying a one-time code');
+  const ga4 = await readFile(path.join(root, 'assets', 'oa-ga4.js'), 'utf8');
+  ok(/function pageLocation\(\) \{[\s\S]*?\[\?&\]oobCode=[\s\S]*?return location\.origin \+ location\.pathname;/.test(ga4)
+     && /gtag\('config', MEASUREMENT_ID, \{\s*page_location: pageLocation\(\),/.test(ga4),
+    'oa-ga4.js reports a page_location without the code, since it runs before the page can scrub it');
+
+  const fbjs = await readFile(path.join(root, 'assets', 'oa-firebase.js'), 'utf8');
+  ok(/readyFunctions: function \(\)/.test(fbjs) && /SDK \+ 'firebase-functions-compat\.js'/.test(fbjs),
+    'oa-firebase.js loads the Functions SDK lazily, the way it loads Storage');
+  ok(/if \(fb\.functions\) resolve\(fb\);\s*else reject\(new Error\('firebase-sdk-load-failed'\)\);/.test(fbjs),
+    '…and a bundle that loaded and defined nothing is a load failure, which is the fallback branch');
+
+  /* the pending control is styled in BOTH stylesheets, ink named with the ground */
+  for (const [file, rx] of [
+    ['assets/oa-ui.css', /\.oa-acct-btn\.oa-acct-pending \{[^}]*border-color: var\(--err[^}]*color: var\(--err[^}]*background: var\(--err-soft/],
+    ['assets/v3.css', /body\.v3 \.oa-acct-btn\.oa-acct-pending \{[^}]*border-color: var\(--err\);[^}]*color: var\(--err\);[^}]*background: var\(--err-soft\);/],
+  ]) {
+    const css = await readFile(path.join(root, file), 'utf8');
+    ok(rx.test(css), `${file} styles the pending chip in the error hue, ink and ground together`);
+  }
+
+  /* --- the verify page ---------------------------------------------------- */
+
+  const vpage = await readFile(path.join(root, 'verify-email.html'), 'utf8');
+  ok(/<meta name="robots" content="noindex,nofollow">/.test(vpage), 'verify page: noindex');
+  ok(!/property="og:/.test(vpage) && !/name="twitter:/.test(vpage) && !/rel="image_src"/.test(vpage),
+    'verify page: no preview block at all (an og:url on it would claim an identity nobody should share)');
+  const firstTag = /<head[^>]*>\s*(<[^>]+>)/i.exec(vpage);
+  ok(firstTag && /^<meta\s+charset=/i.test(firstTag[1]), 'verify page: <meta charset> is the first element in <head>');
+  ok(vpage.includes('assets/oa-ga4.js') && vpage.includes('assets/oa-visit.js'),
+    'verify page: carries the GA4 tag and the visit ping like every served page');
+  ok(/<a class="v3-skip" href="#main">/.test(vpage) && /<main id="main" data-oa-verify-page>/.test(vpage),
+    'verify page: a skip link to a main that carries the attribute the accounts module reads');
+  const scripts = [...vpage.matchAll(/<script (defer )?src="([^"]+)"/g)];
+  ok(scripts.length >= 6 && scripts.every((m) => m[1] === 'defer '),
+    'verify page: every script tag is deferred');
+  const order = scripts.map((m) => m[2]);
+  ok(order.indexOf('assets/oa-verify.js') > order.indexOf('assets/oa-accounts.js')
+     && order.indexOf('assets/oa-accounts.js') > order.indexOf('assets/oa-firebase.js'),
+    'verify page: oa-verify.js loads after the accounts module, which loads after the Firebase config');
+  for (const id of ['ve-wait', 've-done', 've-error', 've-nocode', 've-continue', 've-signin', 've-resend', 've-error-hint', 've-nocode-signin']) {
+    ok(vpage.includes(`id="${id}"`), `verify page: carries #${id}`);
+  }
+  ok(/Your e-mail address is verified/.test(vpage) && /Continue to your account/.test(vpage)
+     && /Send me a new link/.test(vpage) && /That link did not work/.test(vpage),
+    'verify page: the four states carry the owner\'s wording');
+  ok(/id="ve-continue" href="account\.html"/.test(vpage), 'verify page: Continue goes to the account page');
+  ok(noDash(vpage), 'verify page: no em dash');
+  ok(!/&mdash;/.test(vpage), 'verify page: …not as an entity either');
+
+  const vjs = await readFile(path.join(root, 'assets', 'oa-verify.js'), 'utf8');
+  ok(/fb\.auth\(\)\.applyActionCode\(code\)/.test(vjs) && /mode === 'verifyEmail' && code/.test(vjs),
+    'oa-verify.js applies the code the address carries, on mode=verifyEmail');
+  ok(/A\.confirmVerified\(\)/.test(vjs) && /A\.sendVerification\(\)/.test(vjs) && /A\.friendly\(err\)/.test(vjs)
+     && /A\.needsVerification\(p\)/.test(vjs) && /A\.pendingUser\(\)/.test(vjs),
+    'oa-verify.js goes through the accounts module for the lift, the resend, the wording and the pending account');
+  ok(!/\bfirebase\.functions\b|sendEmailVerification/.test(vjs),
+    'oa-verify.js sends nothing itself, so the page and the card cannot drift on how a message goes');
+  ok(/params\.get\('oobCode'\)/.test(vjs), 'oa-verify.js reads the code off the query string');
+  ok(/history\.replaceState\(null, '', location\.pathname \+ location\.hash\)/.test(vjs)
+     && vjs.indexOf('history.replaceState(') < vjs.indexOf('function start(')
+     && vjs.indexOf('history.replaceState(') < vjs.indexOf('OAFB.ready()'),
+    'oa-verify.js takes the code OFF the address bar as soon as it is read, before any async work');
+  ok(/querySelector\('h2'\);\s*if \(h && typeof h\.focus === 'function'\) h\.focus\(\);/.test(vjs)
+     && (vpage.match(/<h2 class="v3-h3" style="font-size:26px" tabindex="-1">/g) || []).length === 3,
+    'oa-verify.js moves focus to the shown card\'s heading, and the three result headings can take it');
+  ok(/A\.onChange\(function \(\) \{\s*if \(!\$\('ve-done'\)\.hidden\) showDone\(\);\s*else if \(!\$\('ve-nocode'\)\.hidden\) showNoCode\(\);/.test(vjs),
+    'oa-verify.js re-decides the shown card\'s buttons when the session changes (a sign-in on the verified card)');
+  ok(/showDone\(ok === false\);/.test(vjs) && /function showDone\(mismatch\)/.test(vjs)
+     && /MISMATCH_NOTE = 'The link confirmed an address, but not the one this account uses/.test(vjs)
+     && /'Use a different account' : 'Sign in'/.test(vjs),
+    'oa-verify.js treats a code that applied while THIS account stays unconfirmed as another address\'s link, and does not offer Continue into a locked account');
+  ok(/function signInFromDone\(\) \{\s*if \(pendingUser\(\)\) A\.signOut\(\);\s*A\.openAuth\(\);/.test(vjs),
+    'oa-verify.js signs a pending account out before opening the box for the other one');
+  ok(/say\(msgId, r\.reason \|\| 'The last message was sent a moment ago/.test(vjs),
+    'oa-verify.js prints the function\'s own throttle reason too');
+  /* every live page's head snippet reads the marker the pending branch writes */
+  const snippetPages = (await readdir(root)).filter((f) => f.endsWith('.html'));
+  let snippetSeen = 0;
+  for (const f of snippetPages) {
+    const html = await readFile(path.join(root, f), 'utf8');
+    if (!html.includes("localStorage.getItem('oaAuthHint')")) continue;
+    snippetSeen++;
+    ok(html.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
+      `${f}: the head snippet reads a hint for a pending account as signed out`);
+  }
+  ok(snippetSeen >= 20, `the head snippet was found on ${snippetSeen} pages, so the loop above measured something`);
+  ok(noDash(vjs), 'oa-verify.js: no em dash');
+
+  const lc = await readFile(path.join(HERE, 'link-check.mjs'), 'utf8');
+  ok(/NOINDEX_OK = new Set\(\[[\s\S]*?'verify-email\.html',[\s\S]*?\]\)/.test(lc),
+    'link-check names verify-email.html as a live page that chooses noindex, with its reason');
+  const sc = await readFile(path.join(HERE, 'share-check.mjs'), 'utf8');
+  ok(/file: 'verify-email\.html', card: false,\s*why: '[^']{40,}'/.test(sc),
+    'share-check lists verify-email.html card: false, with a reason');
+  const sitemap = await readFile(path.join(root, 'sitemap.xml'), 'utf8');
+  ok(!/verify-email\.html/.test(sitemap),
+    'the sitemap does not list it, like the other sign-in-only shells');
+
+  /* --- the copy, the changelog, the shim ----------------------------------- */
+
+  const home = await readFile(path.join(root, 'index.html'), 'utf8');
+  ok(/we first e-mail you a\s+link to confirm that the address is yours, and nothing on the site works for the\s+new account until you click it/.test(home),
+    'the FAQ says a password registration is confirmed by a link first, and that nothing works until it is clicked');
+  ok(/Signing in with Google needs no extra step/.test(home), '…and that Google needs no extra step');
+  const policy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/If you register with an e-mail address and a password, we send that address\s+<strong>one<\/strong> message, from operationsacademia@gmail\.com/.test(policy)
+     && /The account cannot be used until the link is clicked/.test(policy),
+    'the Privacy Policy records the verification message: one, from the site\'s address, and what it gates');
+
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  const evAt = log.findIndex((u) => u.id === 'email-verification-2026-09');
+  const ev = log[evAt];
+  ok(ev && ev.date === '2026-09-04', 'the changelog entry carries the agreed id and date');
+  ok(evAt >= 0 && log.slice(0, evAt).every((u) => u.date > '2026-09-04') && log.slice(evAt).every((u) => u.date <= '2026-09-04'),
+    'and it sits directly below the block of later-dated entries, the log newest first');
+  ok(/e-mail address and a password/.test(ev.summary) && /Google/.test(ev.summary) && noDash(ev.title + ev.summary),
+    '…and says what changed, for both kinds of sign-in, with no em dash');
+  ok(/before this change/.test(ev.summary) && /Send the e-mail/.test(ev.summary),
+    '…and tells an account registered before the gate what it has to do once');
+
+  const shim = await readFile(path.join(HERE, '_fake-firebase.js'), 'utf8');
+  ok(/Object\.assign\(\{ emailVerified: true, providerData: \[\{ providerId: 'google\.com' \}\] \}, spec\)/.test(shim),
+    'the fake Firebase user is VERIFIED by default, so every existing browser check keeps a verified reader');
+  for (const fn of ['reload', 'getIdToken', 'sendEmailVerification', 'applyActionCode', 'httpsCallable']) {
+    ok(new RegExp(`\\b${fn}\\b`).test(shim), `…and the shim records ${fn}`);
+  }
+  ok(/seed\.reloadVerifies/.test(shim) && /seed\.callableFails/.test(shim) && /seed\.applyActionCodeFails/.test(shim),
+    '…with the switches the browser checks drive the failure branches through');
+  const pt = await readFile(path.join(HERE, 'page-test.mjs'), 'utf8');
+  ok(/e-mail verification on registration/.test(pt) && /callableFails: 'functions\/not-found'/.test(pt)
+     && /applyActionCodeFails: 'auth\/expired-action-code'/.test(pt) && /reloadVerifies: true/.test(pt)
+     && /'Verify your e-mail'/.test(pt) && /verify-email\.html\?mode=verifyEmail&oobCode=/.test(pt),
+    'page-test.mjs drives the pending session, the fallback, the lift and the verify page in a real browser');
+  ok(/callableFails: 'functions\/resource-exhausted'/.test(pt) && /callableMessage:/.test(pt)
+     && /callableFails: 'functions\/deadline-exceeded'/.test(pt) && /callableFails: 'functions\/permission-denied'/.test(pt)
+     && /noFunctions: true/.test(pt) && /signInUser:/.test(pt) && /oaAuthPending/.test(pt),
+    'page-test.mjs also drives the throttle reason, the slow send, a refused send, the Functions bundle that loads nothing, a sign-in on the verified card, and the archive\'s hint');
+  ok(/seed\.callableMessage/.test(shim) && /seed\.signInUser/.test(shim) && /seed\.noFunctions/.test(shim),
+    'the shim carries the switches those checks drive');
+}
+
+/* ------------- the campaign over EXISTING accounts (owner, 2026-09-05)
+
+   Every password account that registered before the e-mail gate is pending
+   on its next sign-in and was never sent a message. verify-existing-users.mjs
+   writes to each of them ONCE, through the same renderer and the same link
+   helper the callable uses. Pinned here: both senders through siteVerifyLink,
+   the mailer's own offline suite, the dispatch-only workflow with its
+   scan-by-default input, and the documentation. */
+async function testVerifyExistingUsers() {
+  const root = path.join(HERE, '..');
+  const noDash = (s) => !/—/.test(String(s));
+  const strip = (s) => s.replace(/#.*$/gm, '');
+
+  /* the mailer's own suite: the selection rule, the member variant, the
+     once-only mark and the dry-run order read from its source */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'verify-existing-users.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/verify-existing-users selftest: \d+ checks passed/.test(out),
+    'the campaign mailer\'s own selftest is green:\n' + out.slice(0, 1500));
+
+  const M = await import('./verify-existing-users.mjs');
+  eq(M.campaignTarget({ providerData: [{ providerId: 'password' }], emailVerified: false, email: 'a@b.edu' }), 'send',
+    'the selection rule is exported and picks a password-only unverified account');
+  eq(M.campaignTarget({ providerData: [{ providerId: 'google.com' }, { providerId: 'password' }], emailVerified: false, email: 'a@b.edu' }),
+    'provider', 'and skips a Google-plus-password link, which Google has verified');
+  eq([M.VERIFY_MAIL, M.CAMPAIGN_AT, M.PACE_MS], ['verifyMail', 'campaignAt', 1000],
+    'the mark is campaignAt on the callable\'s verifyMail document, one message a second');
+
+  /* ONE rewrite of the minted address, in both senders */
+  const mailer = await readFile(path.join(HERE, 'verify-existing-users.mjs'), 'utf8');
+  const fn = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+  ok(/V\.siteVerifyLink\(generated, SITE\)/.test(mailer) && /siteVerifyLink\(generated, SITE\)/.test(fn),
+    'the mailer and the callable both call siteVerifyLink, so the two senders cannot build the link differently');
+  const mailerMain = mailer.slice(mailer.indexOf('async function main()'), mailer.indexOf('async function selftest()'));
+  ok(mailerMain.length > 1500 && !/oobCode/.test(mailerMain) && !/verify-email\.html/.test(mailerMain),
+    'the mailer carries no copy of the rewrite (its own selftest may name the page it lands on)');
+  ok(/existing: \{ since: stamp\(/.test(mailer), 'and renders the member variant, dated from Auth');
+  ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(mailer),
+    'the link is minted exactly as the callable mints it');
+  ok(/from '\.\/_main\.mjs'/.test(mailer) && /isMain\(import\.meta\.url\)/.test(mailer), 'importing the mailer sends nothing');
+  const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
+  ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
+    'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
+    'the helper lives in verify-email.js, so index.js still exports exactly six functions');
+
+  /* the shared Admin SDK handle */
+  const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
+  ok(/export async function firebaseAdmin\(\)/.test(mail) && /return \{ db: app\.firestore\(\), auth: app\.auth\(\) \};/.test(mail),
+    '_mail.mjs exports firebaseAdmin(), returning Firestore and Auth');
+  ok(/export async function firestore\(\) \{\s*const fb = await firebaseAdmin\(\);\s*return fb \? fb\.db : null;\s*\}/.test(mail),
+    'and firestore() is a wrapper over it, so there is ONE definition of "the Admin SDK, or null"');
+  ok(/import \{ send, transport, firebaseAdmin, redact, SITE, CONTACT \} from '\.\/_mail\.mjs'/.test(mailer),
+    'the mailer reads it from there');
+
+  /* the workflow: pressed, never scheduled; a scan unless told to send */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-verify-existing.yml'), 'utf8');
+  const wfCode = strip(wf);
+  ok(/^on:\s*\n\s*workflow_dispatch:/m.test(wfCode), 'the campaign workflow runs on workflow_dispatch');
+  ok(!/^\s*schedule:/m.test(wfCode) && !/^\s*workflow_run:/m.test(wfCode) && !/^\s*repository_dispatch:/m.test(wfCode)
+     && !/^\s*push:/m.test(wfCode),
+    'and on NOTHING else: a campaign is pressed, never scheduled or chained');
+  ok(/send:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wfCode),
+    'its one input is a boolean `send` defaulting to false, so the button is a scan until it is ticked');
+  ok(/if \[ "\$\{\{ inputs\.send \}\}" = "true" \]; then\s*\n\s*node _scraper\/verify-existing-users\.mjs\s*\n\s*else\s*\n\s*node _scraper\/verify-existing-users\.mjs --scan/.test(wfCode),
+    'ticked it sends, unticked it scans');
+  for (const n of ['FIREBASE_SERVICE_ACCOUNT', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`${n}: \\$\\{\\{ secrets\\.${n} \\}\\}`).test(wf), `the send step carries ${n}`);
+  }
+  ok(/concurrency:\s*\n\s*group: oa-verify-existing/.test(wfCode), 'it has a concurrency group of its own');
+  ok(/permissions:\s*\n\s*contents: read/.test(wfCode), 'and commits nothing');
+  ok(/npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6/.test(wfCode),
+    'it installs the pinned Admin SDK and nodemailer');
+  ok(/node _scraper\/verify-existing-users\.mjs --selftest/.test(wfCode), 'and proves the rule before anything is minted');
+  ok(/::warning::FIREBASE_SERVICE_ACCOUNT is not set/.test(wf) && /::warning::SMTP_HOST, SMTP_USER or SMTP_PASS is not set/.test(wf),
+    'without the secrets it warns');
+  ok(noDash(wf), 'no em dash in the workflow');
+
+  /* the documentation names the button and the rule */
+  const setup = await readFile(path.join(root, '_SETUP-EMAIL-VERIFICATION.md'), 'utf8');
+  ok(/oa-verify-existing\.yml/.test(setup) && /verify-existing-users\.mjs/.test(setup) && /workflow_dispatch/.test(setup),
+    'the setup page names the workflow, the script and that it is pressed');
+  ok(/EVERY one of its sign-in\s+providers is `password`, its address is not verified, it is not disabled/.test(setup)
+     && /Google and ORCID sign-ins are verified by their provider/.test(setup),
+    'and states the selection rule');
+  ok(/defaults to a scan/.test(setup) && /campaignAt/.test(setup) && /written to ONCE/.test(setup),
+    'and the scan default and the once-only mark');
+  ok(!/If the roster is large, a line to the/.test(setup), 'the sentence the campaign replaces is gone');
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('## Registration is verified by e-mail');
+  const section = claude.slice(secAt, claude.indexOf('\n## ', secAt + 10));
+  ok(/verify-existing-users\.mjs/.test(section) && /oa-verify-existing\.yml/.test(section)
+     && /campaignTarget/.test(section) && /campaignAt/.test(section) && /siteVerifyLink/.test(section),
+    'CLAUDE.md records the campaign, its rule, its mark and the shared helper');
+  ok(noDash(section), 'CLAUDE.md: still no em dash in the section');
+  const adminAt = claude.indexOf('## The Admin area');
+  const admin = claude.slice(adminAt, claude.indexOf('\n## ', adminAt + 10));
+  ok(/The COUNT itself is public since 2026-09-05/.test(admin) && /data\/users-meta\.json/.test(admin)
+     && /the COLLECTION is \*\*the maintainer's alone\*\*/.test(admin),
+    'CLAUDE.md: the Admin-area section says the collection stays admin-read and the count is public, in the present tense');
+  const rosterAt = claude.indexOf('### The roster is seeded from Auth');
+  const roster = claude.slice(rosterAt, claude.indexOf('\n### ', rosterAt + 10));
+  ok(/users-meta\.json/.test(roster) && /users-growth\.json/.test(roster) && /usersGrowth/.test(roster)
+     && /WRITERS/.test(roster),
+    'CLAUDE.md: the roster section records the two served files and the workflow becoming a writer');
+
+  /* the announcement and the disclosure */
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  const at = log.findIndex((u) => u.id === 'verify-existing-2026-09');
+  const u = log[at];
+  ok(u && u.date === '2026-09-05' && u.title && u.summary && u.url,
+    'changelog: verify-existing-2026-09 is dated 2026-09-05 with a title, a summary and a link');
+  ok(at >= 0 && log.slice(0, at).every((e) => e.date >= '2026-09-05'),
+    'and sits in the block at the top, newest first');
+  ok(/one e-mail asking you to confirm/.test(u.summary) && /Google and ORCID/.test(u.summary) && noDash(u.title + u.summary),
+    'worded for readers: one e-mail, what to press, who receives nothing, no em dash');
+  const policy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/The one thing\s+about registered accounts that is public is how many there are/.test(policy)
+     && /readable by the\s+maintainer alone/.test(policy),
+    'the Privacy Policy says the count is public and the record is not');
+}
+
+/* ------------------------------- the registered-users figure (owner, 2026-09-05)
+
+   The front page's fifth key figure, and the page half of the two served
+   files the roster sync writes. The tile is BORN HIDDEN with no number in it,
+   revealed by the page only when data/users-meta.json holds ten or more, and
+   the strip has to fit four OR five tiles on one row. */
+async function testRegisteredUsersFigure() {
+  const root = path.join(HERE, '..');
+  const noDash = (s) => !/—/.test(String(s));
+  const html = await readFile(path.join(root, 'index.html'), 'utf8');
+
+  /* the tile: hidden, empty, labelled */
+  ok(/<div class="v3-stat" hidden data-stat="users"><b><\/b><span>registered users<\/span><\/div>/.test(html),
+    'index.html: the registered-users tile is born hidden with an EMPTY number, since no seed can be written without the credential');
+  const strip = html.slice(html.indexOf('id="v3-stats"'), html.indexOf('</div>\n          </div>', html.indexOf('id="v3-stats"')));
+  eq((strip.match(/class="v3-stat"/g) || []).length, 5, 'index.html: the strip holds five tiles, the four seeded ones and this one');
+  ok(/<b>200\+<\/b>/.test(strip) && /data-stat="candidates">700\+/.test(strip) && /data-stat="placements">170\+/.test(strip) && /<b>2014<\/b>/.test(strip),
+    'index.html: …and the four seeded figures are as they were');
+
+  /* the reveal: the served file with no-cache, the floor, the rounding, the order */
+  const reveal = html.slice(html.indexOf("fetch('/data/users-meta.json'"), html.indexOf('candidates stat + reveal note'));
+  ok(reveal.length > 300 && reveal.length < 1500, 'index.html: the reveal slice is bounded both ends');
+  ok(/fetch\('\/data\/users-meta\.json', \{ credentials: 'same-origin', cache: 'no-cache' \}\)/.test(reveal),
+    'index.html: the count is read from the served file with no-cache, like every read of data/');
+  ok(/if \(!tile \|\| count < 10\) return;/.test(reveal), 'index.html: under ten nothing changes');
+  ok(/\(Math\.floor\(count \/ 10\) \* 10\)\.toLocaleString\('en-US'\) \+ '\+'/.test(reveal),
+    'index.html: the figure is rounded DOWN to the nearest ten with a plus, so it is never more than the count');
+  ok(reveal.indexOf('tile.hidden = false;') > 0 && reveal.indexOf('tile.hidden = false;') < reveal.indexOf("V3.statTo(tile.querySelector('b')"),
+    'index.html: the tile is revealed BEFORE statTo, whose count-up waits for the tile to scroll into view and a hidden one never does');
+  ok(/\.catch\(function \(\) \{\}\);/.test(reveal), 'index.html: a missing file changes nothing');
+
+  /* the grid fits four or five */
+  const css = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
+  const live = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const statsRule = (live.match(/\n\.v3-stats\s*\{[^}]*\}/) || [''])[0];
+  ok(statsRule.length > 40, 'v3.css: the .v3-stats rule was found');
+  ok(/grid-auto-flow:\s*column;/.test(statsRule) && /grid-auto-columns:\s*minmax\(0,\s*1fr\);/.test(statsRule),
+    'v3.css: the strip is column auto-flow, so every SHOWN tile gets an equal track and a hidden one claims none');
+  ok(!/repeat\(4/.test(statsRule), 'v3.css: …and no fixed four-track template is left to orphan a fifth tile');
+  eq((live.match(/\.v3-stats \{ grid-auto-flow: row; grid-template-columns: 1fr(?: 1fr)?; \}/g) || []).length, 2,
+    'v3.css: both phone breakpoints switch back to row flow with their own templates');
+
+  /* the FAQ says the count is public and who they are is not */
+  const faq = html.slice(html.indexOf('Is my personal information published?'), html.indexOf('terms-and-conditions.html', html.indexOf('Is my personal information published?')));
+  ok(faq.length > 300 && faq.length < 2000, 'index.html: the FAQ answer slice is bounded both ends');
+  ok(/The one thing about registered accounts that is public is how many\s+there are/.test(faq)
+     && /analytics\.html">analytics\s+page<\/a> shows how it has grown, and neither says who they are/.test(faq),
+    'index.html: the privacy FAQ names the count and the growth chart as the one public fact about accounts');
+  ok(!/—/.test(faq.replace(/&mdash;/g, '—').slice(faq.indexOf('The one thing'))), 'index.html: …with no em dash in the new sentence');
+
+  /* the announcements */
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  eq([log[0].id, log[1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
+    'changelog: the two figures are announced at the top');
+  for (const u of log.slice(0, 2)) {
+    ok(u.date === '2026-09-05' && u.title && u.summary && u.url && noDash(u.title + u.summary),
+      `changelog: ${u.id} is dated 2026-09-05 with a title, a summary and a link, no em dash`);
+  }
+  ok(/rounded down to the nearest ten/.test(log[0].summary) && /Who has registered stays/.test(log[0].summary),
+    'changelog: the figure entry says how it is rounded and what stays private');
+  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /next 180 days/.test(log[1].summary)
+     && /not a target/.test(log[1].summary),
+    'changelog: the chart entry names the figure, the window, the horizon and what the line is not');
+
+  /* CLAUDE.md, in the file's own voice */
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const tileAt = claude.indexOf("### The front page's fifth key figure is BORN HIDDEN");
+  const tile = claude.slice(tileAt, claude.indexOf('\n### ', tileAt + 10));
+  ok(tileAt > 0 && tile.length > 800 && /statTo/.test(tile) && /IntersectionObserver/.test(tile) && /users-meta\.json/.test(tile)
+     && /grid-auto-flow|column auto-flow/.test(tile) && noDash(tile),
+    'CLAUDE.md: the tile section records the hidden birth, the reveal order and the grid, no em dash');
+  const chartAt = claude.indexOf('### How the community has grown, and what the dashed line is');
+  const chart = claude.slice(chartAt, claude.indexOf('\n### ', chartAt + 10));
+  ok(chartAt > 0 && chart.length > 800 && /growthProjection/.test(chart) && /GROWTH_WINDOW/.test(chart)
+     && /--oa-chart-accent/.test(chart) && /opts\.table/.test(chart) && /not a target/.test(chart) && noDash(chart),
+    'CLAUDE.md: the chart section records the one function, the constants, the accent, the table override, no em dash');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -11779,12 +14274,20 @@ if (isMain(import.meta.url)) {
   await testSubmissionNotices();
   await testPostedByAndLiveEmail();
   await testCandidateProfilePolicy();
+  await testCandidateReveal();
   await testJobExport();
   await testJobExportWiring();
+  await testMultiSelectFilters();
   await testSponsors();
   await testReaderGate();
+  await testClosingSoonDigest();
+  await testSaveSearchAsAlert();
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();
+  await testCandidateStats();
+  await testEmailVerification();
+  await testVerifyExistingUsers();
+  await testRegisteredUsersFigure();
   process.exit(finish() ? 0 : 1);
 }

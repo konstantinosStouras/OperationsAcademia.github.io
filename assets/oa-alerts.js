@@ -14,6 +14,7 @@
   'use strict';
 
   var M = window.OAAlertMatch;
+  var Save = window.OAAlertSave;   // the jobs page's "Save as e-mail alert" hand-over
   var jobs = [];          // the current postings, for the preview and the vocab
   var jobsState = 'loading';   // 'loading' | 'ok' | 'failed' — see renderPreview
   var cands = [];         // data/candidates.json — EMPTY until the reveal date,
@@ -137,6 +138,7 @@
     if ($('t-jobs').checked) topics.push('jobs');
     if ($('t-updates').checked) topics.push('updates');
     if ($('t-candidates').checked) topics.push('candidates');
+    if ($('t-deadlines').checked) topics.push('deadlines');
     return {
       name: $('a-name').value.trim().slice(0, 120),
       email: $('a-email').value.trim().slice(0, 200),
@@ -161,16 +163,20 @@
     // asked for the OTHER stream, so the new form starts there instead.
     if (!a) {
       var wanted = new URLSearchParams(location.search).get('topic');
-      a = { criteria: { topics: wanted === 'updates' || wanted === 'candidates'
-        ? [wanted] : ['jobs'] } };
+      a = { criteria: { topics: wanted === 'updates' || wanted === 'candidates' ||
+        wanted === 'deadlines' ? [wanted] : ['jobs'] } };
     }
     var c = M.normalise(a.criteria);
+    /* the "filled in from the jobs page" note belongs to ONE filling; every
+       other path through here (an edit, a reset after a save) hides it */
+    show($('oa-prefill-note'), false);
     $('a-name').value = a.name || '';
     $('a-email').value = a.email || (OAAccounts.user() || {}).email || '';
     $('a-freq').value = a.frequency || 'daily';
     $('t-jobs').checked = c.topics.indexOf('jobs') !== -1;
     $('t-updates').checked = c.topics.indexOf('updates') !== -1;
     $('t-candidates').checked = c.topics.indexOf('candidates') !== -1;
+    $('t-deadlines').checked = c.topics.indexOf('deadlines') !== -1;
     $('a-text').value = c.text || '';
     writeGroup('type', c.type);
     writeGroup('level', c.level);
@@ -179,7 +185,13 @@
   }
 
   function syncFormState() {
-    show($('a-filters'), $('t-jobs').checked);
+    // the filters choose the postings for BOTH paper topics: the new ones
+    // announced, and the ones reminded of before they close
+    show($('a-filters'), $('t-jobs').checked || $('t-deadlines').checked);
+    /* the reminder covers the seven days after each digest, and a monthly
+       digest therefore sees one week in four: say so under the frequency,
+       where the choice is being made, rather than promise every closing date */
+    show($('a-freq-note'), $('t-deadlines').checked && $('a-freq').value === 'monthly');
     $('oa-form-legend').textContent = editingId ? 'Edit this alert' : 'Create an alert';
     $('a-save').textContent = editingId ? 'Save changes' : 'Create alert';
     show($('a-cancel'), !!editingId);
@@ -226,12 +238,26 @@
     var sample = hits.slice(0, 3);
     var matching = hits.length;
 
+    /* CLOSING THIS WEEK: the postings matching these filters whose final or
+       suggested apply-by date is within the mailer's window from today — the
+       same closingSoonFor the mailer runs, over the same served file, with no
+       window yet covered (a new alert's first digest carries the whole week).
+       Today is the UTC day, like the mailer's. */
+    var today = new Date().toISOString().slice(0, 10);
+    var closing = M.wantsDeadlines(c) ? M.closingSoonFor(jobs, c, {
+      from: today, until: M.shiftDay(today, M.DEADLINE_WINDOW_DAYS), coveredUntil: ''
+    }) : [];
+
     var parts = [];
     /* The subject the MAILER gives an unnamed alert (alerts-mailer.mjs):
-       "N new job posting(s)" when postings went, else what is new. */
+       "N new job posting(s)" when postings went, "N postings close this week"
+       when only the reminder did, else what is new. */
     var fallbackSubject = M.wantsJobs(c) && matching
       ? matching + ' new job posting' + (matching > 1 ? 's' : '')
-      : 'What is new on Operations Academia';
+      : closing.length
+        ? closing.length + ' posting' + (closing.length > 1 ? 's' : '') +
+          ' close' + (closing.length === 1 ? 's' : '') + ' this week'
+        : 'What is new on Operations Academia';
     parts.push('<div class="oa-preview-head"><strong>Subject:</strong> ' +
       esc(a.name || fallbackSubject) + '</div>');
     parts.push('<div class="oa-preview-body">');
@@ -272,6 +298,37 @@
       }
     }
 
+    if (M.wantsDeadlines(c)) {
+      /* mirrors the mailer's section (alerts-mailer.mjs renderAlertEmail):
+         the heading, the count line, then institution, department, which
+         date it is and the date — keep the wording in step */
+      parts.push('<p><strong>Closing this week</strong></p>');
+      if (closing.length) {
+        parts.push('<p>' + esc(closing.length === 1
+          ? 'One posting matching your alert closes in the next seven days:'
+          : closing.length + ' postings matching your alert close in the next seven days:') +
+          '</p><ul>');
+        closing.slice(0, 3).forEach(function (e) {
+          parts.push('<li><strong>' + esc(e.row.institution) + '</strong><br>' +
+            esc(e.row.department) + '<br><span class="oa-hint" style="display:inline">' +
+            esc((e.kind === 'suggested' ? 'Suggested apply by ' : 'Final apply by ') +
+              longDate(e.date)) + ' &middot; <u>Open the posting</u></span></li>');
+        });
+        parts.push('</ul>');
+        if (closing.length > 3) {
+          parts.push('<p class="oa-hint">…and ' + (closing.length - 3) + ' more.</p>');
+        }
+      } else if (jobsState === 'loading') {
+        parts.push('<p class="oa-hint">Loading the current postings…</p>');
+      } else if (jobsState === 'failed') {
+        parts.push('<p class="oa-hint"><strong>We could not load the current postings, ' +
+          'so there is nothing to sample here.</strong> The reminder itself is unaffected.</p>');
+      } else {
+        parts.push('<p class="oa-hint">No posting matching these filters closes in the ' +
+          'next seven days. You will be reminded when one does, each posting once.</p>');
+      }
+    }
+
     if (M.wantsCandidates(c)) {
       parts.push('<p><strong>Job market candidates</strong></p>');
       if (cands.length) {
@@ -294,9 +351,13 @@
            itself announces, so it is all the preview may say either. */
         var revealAt = (candMeta || {}).revealAt || '';
         var held = (candMeta || {}).heldCount || 0;
+        /* the instant, named the way the site names it (assets/oa-reveal.js:
+           the day with its weekday, and 14:00 UTC), never the bare stored day */
+        var when = window.OAReveal ? OAReveal.describeReveal(revealAt) : null;
         parts.push('<p class="oa-hint">Profiles are being collected now and go up all at ' +
-          'once' + (revealAt ? ' on <strong>' + esc(revealAt) + '</strong>'
-            : ', on a date the site will announce') +
+          'once' + (when ? ' on <strong>' + esc(when.dayLong) + ' at ' + esc(when.utc) + '</strong>'
+            : (revealAt ? ' on <strong>' + esc(revealAt) + '</strong>'
+              : ', on a date the site will announce')) +
           (held ? ' (' + held + ' already waiting)' : '') +
           '. Nothing is e-mailed about any profile before then. On the day you will get ' +
           'one short, friendly note that the candidates are live, and from then on a note ' +
@@ -333,6 +394,18 @@
         c.level.length ? c.level.join(' or ') : '',
         c.country.length ? c.country.join(' or ') : ''
       ].filter(Boolean).join(', '));
+    }
+    if (c.topics.indexOf('deadlines') !== -1) {
+      // the same filters as the jobs topic; named here only when the jobs
+      // line above has not already said what they are
+      var jobsToo = c.topics.indexOf('jobs') !== -1;
+      bits.push('postings closing within 7 days' +
+        (jobsToo || M.isBroad(c) ? '' : ' matching ' + [
+          c.text ? '“' + c.text + '”' : '',
+          c.type.length ? c.type.join(' or ') : '',
+          c.level.length ? c.level.join(' or ') : '',
+          c.country.length ? c.country.join(' or ') : ''
+        ].filter(Boolean).join(', ')));
     }
     if (c.topics.indexOf('candidates') !== -1) bits.push('new job market candidates');
     if (c.topics.indexOf('updates') !== -1) bits.push('changes to the website');
@@ -404,6 +477,44 @@
     editingId = null;
     editing = null;
     writeForm(null);
+  }
+
+  /* ------------------------------------ the hand-over from the jobs page
+
+     A reader who narrowed the jobs list and pressed "Save as e-mail alert"
+     lands here with their filters on the address (assets/oa-alertsave.js).
+     boot() STASHES that the moment the page loads and strips the address, so
+     a reload does not fill the form twice; this applies it ONCE the form can
+     be drawn — after sign-in, after the vocabulary is built — as a NEW alert
+     on the jobs topic, with a suggested name, and a note over the form saying
+     which of the search's filters an alert cannot hold. The stash is taken as
+     it is applied, so a second auth event, or the next save's resetForm(),
+     finds nothing to apply. */
+  function applyPrefill() {
+    if (!Save) return;
+    var got = Save.take();
+    if (!got) return;
+    editingId = null;
+    editing = null;
+    writeForm({
+      name: Save.suggestName(got.criteria),
+      criteria: {
+        topics: ['jobs'],
+        text: got.criteria.text,
+        type: got.criteria.type,
+        level: got.criteria.level,
+        country: got.criteria.country
+      }
+    });
+    var note = $('oa-prefill-note');
+    if (note) {
+      note.textContent = Save.note(got);
+      note.setAttribute('data-dropped', (got.dropped || []).join(','));
+      show(note, true);
+    }
+    say('Filled in from your search on the jobs page. Check it, then press Create alert.');
+    var form = $('oa-alert-form');
+    if (form && form.scrollIntoView) form.scrollIntoView({ block: 'start' });
   }
 
   function load() {
@@ -498,6 +609,13 @@
   /* -------------------------------------------------------------- wiring */
 
   function boot() {
+    /* FIRST, before anything can navigate or repaint: the jobs page's
+       hand-over is read off the address and the address stripped, whoever is
+       reading and whether or not alerts are switched on — a reload must
+       never fill the form twice, and a signed-out reader keeps what they
+       brought across the sign-in (the stash outlives the URL). */
+    if (Save) Save.stash();
+
     if (!window.OAFB || !OAFB.enabled) {
       show($('oa-offline'), true);
       return;
@@ -550,7 +668,8 @@
     var form = $('oa-alert-form');
     form.addEventListener('input', renderPreview);
     form.addEventListener('change', function (e) {
-      if (e.target === $('t-jobs') || e.target === $('t-updates')) syncFormState();
+      if (e.target === $('t-jobs') || e.target === $('t-updates') ||
+          e.target === $('t-deadlines') || e.target === $('a-freq')) syncFormState();
       else renderPreview();
     });
 
@@ -602,7 +721,10 @@
       ready.then(function () {
         resetForm();
         return load();
-      }).then(handleUnsubscribeLink);
+      }).then(handleUnsubscribeLink)
+        /* after the list and the vocabulary, so the tick boxes it needs
+           exist; a no-op unless the jobs page sent something */
+        .then(applyPrefill);
     });
   }
 

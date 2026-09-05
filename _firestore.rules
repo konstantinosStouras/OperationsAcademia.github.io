@@ -25,8 +25,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // A signed-in account whose address is known to be real. An account
+    // registered with an e-mail address and a password must press the link
+    // in the verification message first (assets/oa-accounts.js, the
+    // sendVerificationEmail function); a Google sign-in arrives already
+    // verified by Google, and an ORCID sign-in carries no e-mail claim at
+    // all, so anything but the password provider passes. Every write a
+    // signed-in user makes goes through this, with ONE exception, named at
+    // profiles/{uid} below.
+    function verified() {
+      return signedIn()
+        && (request.auth.token.email_verified == true
+            || request.auth.token.firebase.sign_in_provider != "password");
+    }
+
     function isOwner(uid) {
-      return signedIn() && request.auth.uid == uid;
+      return verified() && request.auth.uid == uid;
     }
 
     // The maintainer. Keep in sync with ADMIN_EMAIL in v2/assets/oa-firebase.js
@@ -69,6 +83,20 @@ service cloud.firestore {
         || request.resource.data[field] == null
         || (request.resource.data[field] is string
             && request.resource.data[field].size() <= maxLen);
+    }
+
+    /* The profile document's keys and bounds, for profiles/{uid} below. The
+       photo is a 192x192 JPEG data URL (assets/oa-accounts.js caps the hint
+       copy at 96 KB), so its bound is the one field here that is not 300. */
+    function profileKeys() {
+      return ['firstName', 'lastName', 'affiliation', 'website', 'orcid',
+              'orcidVerified', 'orcidSeeded', 'photo', 'photoSeeded'];
+    }
+
+    function profileShape() {
+      return str('firstName', 300) && str('lastName', 300)
+        && str('affiliation', 300) && str('website', 300)
+        && str('orcid', 40) && str('photo', 120000);
     }
 
     function list(field, maxItems) {
@@ -139,7 +167,7 @@ service cloud.firestore {
       // upload case was refused as permission-denied while a link-only
       // posting sailed through. selftest.mjs pins this arithmetic against
       // the form source, so a new field fails the build, not the poster.
-      allow create: if signedIn()
+      allow create: if verified()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
@@ -217,6 +245,12 @@ service cloud.firestore {
             && str('personalEmail', 200)
             && str('note', 1500)       && str('source', 40)
             && str('authEmail', 200)   && str('ref', 60)
+            // the day the candidate last edited the profile (owner,
+            // 2026-09-04): the edit form writes an ISO stamp, the build
+            // publishes the day, and the card says "Profile updated on …".
+            // Bounded like every other string; never in the merge clause
+            // below, which names only the hand-over keys
+            && str('updatedAt', 40)
             && str('cvUploadPath', 400) && str('cvUploadName', 200)
             && str('cvUploadType', 100)
             && str('rsUploadPath', 400) && str('rsUploadName', 200)
@@ -233,11 +267,27 @@ service cloud.firestore {
             && !('featured' in request.resource.data);
       }
 
-      allow create: if signedIn()
+      /* `stats` is written by the Admin SDK alone (_scraper/build-candidate-
+         stats.mjs): how often the profile's card was opened on the site and
+         its CV clicked, shown to the owner on their own edit page and to
+         the maintainer (the Admin area's inbox card), and to nobody else.
+         The owner may CARRY it — an update sends the merged
+         document back, so a rule refusing the key would freeze the profile
+         against its own owner the moment the first count landed (the
+         sync-user-directory trap) — but never write it, change it or drop
+         it: a candidate cannot count their own clicks. */
+      function statsUntouched() {
+        return ('stats' in request.resource.data) == ('stats' in resource.data)
+            && (!('stats' in request.resource.data)
+                || request.resource.data.stats == resource.data.stats);
+      }
+
+      allow create: if verified()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && candShapeOk()
+                    && !('stats' in request.resource.data)
                     && !('mergedFrom' in request.resource.data)
                     // 34 like jobSubmissions: the three affiliation parts
                     // (2026-08-24) took the form's worst-case key inventory
@@ -251,6 +301,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && mergedFromUnchanged()
+                    && statsUntouched()
                     && candShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions
@@ -287,7 +338,7 @@ service cloud.firestore {
             && !('featured' in request.resource.data);
       }
 
-      allow create: if signedIn()
+      allow create: if verified()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
@@ -357,7 +408,30 @@ service cloud.firestore {
     }
 
     match /profiles/{uid} {
-      allow read, write: if isOwner(uid);
+      // THE ONE WRITE AN UNVERIFIED ACCOUNT MAY MAKE. The registration form
+      // writes the profile in the same breath as it creates the account,
+      // before any verification link can have been pressed, so the owner's
+      // create and update here need only a sign-in and not verified().
+      // Reading and deleting it go through isOwner(uid) like everything
+      // else: the form writes and moves on, and nothing reads the profile
+      // back until the address is verified and the session is let in.
+      //
+      // AND IT IS THE ONE WRITE THAT HAS TO CARRY A SHAPE, for the same
+      // reason: whoever holds the account has not proved the address is
+      // theirs, and the first name they type is printed at the top of the
+      // verification message that goes TO that address, from the site's own
+      // mailbox. So the keys are the ones assets/oa-accounts.js writes
+      // (PROFILE_DOC_KEYS there, pinned both ways by the selftest) and every
+      // text field is bounded. An update may touch only those keys, judged
+      // on what it CHANGES, so a document carrying an older field is not
+      // frozen against its own owner (the sync-user-directory lesson).
+      allow read, delete: if isOwner(uid);
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(profileKeys())
+                    && profileShape();
+      allow update: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(profileKeys())
+                    && profileShape();
     }
 
     // A contentless tally of registered accounts: one document per account
@@ -572,7 +646,7 @@ service cloud.firestore {
     // other account themselves. It is never an authorisation.
     match /accountKeys/{key} {
       allow get: if signedIn();
-      allow create, update: if signedIn()
+      allow create, update: if verified()
                             && request.resource.data.keys().hasOnly(['uid', 't'])
                             && request.resource.data.uid == request.auth.uid
                             && request.resource.data.t is number;
@@ -756,7 +830,7 @@ service cloud.firestore {
     // errors and evaluates false (the newsOverrides lesson).
     match /directoryEdits/{id} {
       allow read: if true;
-      allow create, update: if signedIn()
+      allow create, update: if verified()
                    && id == request.resource.data.rowId
                    && request.resource.data.by == request.auth.uid
                    && request.resource.data.keys().hasOnly([
@@ -849,7 +923,7 @@ service cloud.firestore {
     // part of what was suggested and stay as filed — hence the tighter
     // affectedKeys() on update rather than a plain isAdmin() write.
     match /nameFixes/{id} {
-      allow create: if signedIn()
+      allow create: if verified()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'pending'
                     && request.resource.data.createdAt == request.time
@@ -895,7 +969,7 @@ service cloud.firestore {
                     && id == request.resource.data.uid + '__' + request.resource.data.sid
                     && str('email', 200) && str('sid', 80) && str('page', 300)
                     && list('clicks', 400) && list('fields', 300)
-                    && ((signedIn() && request.resource.data.uid == request.auth.uid)
+                    && ((verified() && request.resource.data.uid == request.auth.uid)
                         || request.resource.data.uid.matches('anon:[a-z0-9]+'));
       allow read, delete: if isAdmin();
     }
@@ -915,6 +989,18 @@ service cloud.firestore {
     // the admin too: the served data/analytics.json already carries every
     // figure this collection produces, so nothing needs a second route to it.
     match /universityVisits/{day} {
+      allow read, write: if false;
+    }
+
+    // ---------------------------------------- verification sends (no client)
+    // One document per account, `verifyMail/{uid}` { sentAt, count, day }: how
+    // recently, and how often today, the sendVerificationEmail function has
+    // mailed that account its verification link. It is the function's own
+    // rate limit and it is written by the function alone, with the Admin SDK.
+    // Closed to every client in both directions for the same reason as the
+    // visit counters above: a document a browser could rewrite is a limit a
+    // browser could lift.
+    match /verifyMail/{uid} {
       allow read, write: if false;
     }
 

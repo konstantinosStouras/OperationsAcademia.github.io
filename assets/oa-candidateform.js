@@ -101,7 +101,9 @@
   function say(msg, kind) {
     var m = $('oa-msg');
     if (!m) return;
-    m.textContent = msg || '';
+    // a Node for the one message that carries a link; text stays textContent
+    if (msg && msg.nodeType) { m.textContent = ''; m.appendChild(msg); }
+    else m.textContent = msg || '';
     m.className = 'oa-form-msg' + (kind ? ' is-' + kind : '');
   }
 
@@ -215,23 +217,27 @@
     if (!el) return;
     var line = joinAffiliation(placeParts());
     el.textContent = line ? 'Your affiliation will read: ' + line : '';
+    // the cascade's onChange lands here too, so the card follows a value the
+    // picker filled in or re-spelled, which no keystroke listener sees
+    paintCardPreview();
   }
 
-  /** Read + validate the form. Returns the submission document, or null. */
-  function collect() {
-    var out = {}, firstBad = null;
-
-    function need(id, key, label) {
+  /** Read the form QUIETLY: the values as the submission would carry them,
+      with no validation, no error painted and no focus moved. `collect()`
+      validates on top of this; the live card preview reads it on every
+      keystroke, and a read that painted "Please give your last name" while
+      the reader was still typing their first would be intolerable. The
+      published shape is the build's (the browser twin in oa-candcard.js
+      re-sanitises every value), so nothing here has to be strict. */
+  function readForm() {
+    var out = {};
+    function val(id, key) {
       var el = $(id);
-      var v = String(el.value || '').trim().slice(0, MAX[key] || 400);
-      setError(el, v ? '' : 'Please give ' + label + '.');
-      if (!v && !firstBad) firstBad = el;
-      out[key] = v;
+      return String((el && el.value) || '').trim().slice(0, MAX[key] || 400);
     }
 
-    need('f-first', 'first', 'your first name');
-    need('f-last', 'last', 'your last name');
-    need('f-institution', 'institution', 'the university you are at');
+    out.first = val('f-first', 'first');
+    out.last = val('f-last', 'last');
 
     var place = placeParts();
     out.institution = place.institution;
@@ -240,42 +246,68 @@
     // derived, never typed: the one line every consumer of the profile reads
     out.affiliation = joinAffiliation(place);
 
-    var position = $('f-position');
-    setError(position, position.value ? '' : 'Please choose your current position.');
-    if (!position.value && !firstBad) firstBad = position;
-    out.position = position.value;
-
-    var email = $('f-email');
-    var ev = String(email.value || '').trim();
-    var emailOk = EMAIL_RE.test(ev);
-    setError(email, emailOk ? '' : 'Please give an e-mail address we can reach you at.');
-    if (!emailOk && !firstBad) firstBad = email;
-    out.email = ev.slice(0, MAX.email);
-    out.emailPublic = !!$('f-emailPublic').checked;
+    out.position = String(($('f-position') || {}).value || '');
+    out.email = val('f-email', 'email');
+    out.emailPublic = !!($('f-emailPublic') || {}).checked;
 
     /* The PERSONAL address (owner, 2026-08-24): asked of everyone, so the
        maintainer can still reach a candidate after their school address dies
        with the affiliation. NEVER published — it is not in candidates-model's
        CANDIDATE_PUBLIC_FIELDS, so it can never reach data/candidates.json. */
-    var pemail = $('f-personalEmail');
-    var pev = String(pemail.value || '').trim();
-    var pemailOk = EMAIL_RE.test(pev);
-    setError(pemail, pemailOk ? ''
-      : 'Please give a personal e-mail address — one that stays with you after you graduate.');
-    if (!pemailOk && !firstBad) firstBad = pemail;
-    out.personalEmail = pev.slice(0, MAX.personalEmail);
+    out.personalEmail = val('f-personalEmail', 'personalEmail');
 
     var tickedAreas = checked('researchAreas');
     out.researchAreas = tickedAreas.concat(ownAreas(tickedAreas));
+    out.informsDays = checked('informsDays');
+
+    out.cvUrl = val('f-cvUrl', 'cvUrl');
+    out.webUrl = val('f-webUrl', 'webUrl');
+
+    out.year = postingYear();
+    out.note = val('f-note', 'note');
+    return out;
+  }
+
+  /** Read + validate the form. Returns the submission document, or null. */
+  function collect() {
+    var out = readForm(), firstBad = null;
+
+    function bad(el) { if (el && !firstBad) firstBad = el; }
+    function need(id, key, label) {
+      var el = $(id);
+      // the presence test is on what was TYPED; the value kept is the
+      // canonical one readForm already settled
+      var typed = String((el && el.value) || '').trim();
+      setError(el, typed && out[key] ? '' : 'Please give ' + label + '.');
+      if (!(typed && out[key])) bad(el);
+    }
+
+    need('f-first', 'first', 'your first name');
+    need('f-last', 'last', 'your last name');
+    need('f-institution', 'institution', 'the university you are at');
+
+    var position = $('f-position');
+    setError(position, out.position ? '' : 'Please choose your current position.');
+    if (!out.position) bad(position);
+
+    var email = $('f-email');
+    var emailOk = EMAIL_RE.test(String(email.value || '').trim());
+    setError(email, emailOk ? '' : 'Please give an e-mail address we can reach you at.');
+    if (!emailOk) bad(email);
+
+    var pemail = $('f-personalEmail');
+    var pemailOk = EMAIL_RE.test(String(pemail.value || '').trim());
+    setError(pemail, pemailOk ? ''
+      : 'Please give a personal e-mail address — one that stays with you after you graduate.');
+    if (!pemailOk) bad(pemail);
+
     if (out.researchAreas.length > AREAS_MAX) {
       setError($('f-areas'), 'Please keep to at most ' + AREAS_MAX +
         ' research areas — ticked and your own together.');
-      if (!firstBad) firstBad = $('f-areas');
+      bad($('f-areas'));
     } else {
       setError($('f-areas'), '');
     }
-
-    out.informsDays = checked('informsDays');
 
     var urlFields = [['f-cvUrl', 'cvUrl'], ['f-webUrl', 'webUrl']];
     for (var i = 0; i < urlFields.length; i++) {
@@ -283,16 +315,13 @@
       var u = httpUrl(el.value);
       if (u === null) {
         setError(el, 'That does not look like a web address. It should start with https://');
-        if (!firstBad) firstBad = el;
+        bad(el);
         out[urlFields[i][1]] = '';
       } else {
         setError(el, '');
         out[urlFields[i][1]] = u.slice(0, MAX[urlFields[i][1]]);
       }
     }
-
-    out.year = postingYear();
-    out.note = String($('f-note').value || '').trim().slice(0, MAX.note);
 
     if (firstBad) {
       say('Please check the highlighted fields.', 'err');
@@ -415,6 +444,7 @@
         slot.file = f || null;
         sayFile('');
         paint();
+        if (slot.onChange) slot.onChange();
       });
 
       clear.addEventListener('click', function () {
@@ -432,6 +462,10 @@
         }
         sayFile('');
         paint();
+        /* Remove is a button, not a field: it fires no input or change
+           event on the form, so the slot says so itself, or removing a CV
+           would leave the profile "unchanged" for the stamp and the preview */
+        if (slot.onChange) slot.onChange();
       });
     }
 
@@ -593,6 +627,217 @@
     if (v.cvUploadPath) cvSlot.showPending(v.cvUploadName);
 
     EDIT_REF = v.ref || '';
+    paintStats(v);
+    EDIT_DOC = v;
+    dirty = false;
+    paintCardPreview();
+  }
+
+  /* ------------------------------------------ the profile's OWN figures
+
+     How often this profile's card was opened on the site and its CV link
+     clicked — this season and in the last 7 days — read from the `stats` map
+     _scraper/build-candidate-stats.mjs writes onto the candidate's own
+     document once a day. The owner is the only reader the rules allow, so
+     this panel is drawn in edit mode and nowhere else. Numbers only: every
+     figure goes through Number() and every string through textContent.
+
+     Before the reveal date there is nothing to count — the served file is
+     empty, so no card exists to open — and the panel says exactly that
+     rather than showing a zero that reads as "nobody is interested".      */
+
+  function statsNumber(v) {
+    var n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+  }
+
+  /** Opens and CV clicks over the last `n` UTC days of a `days` map
+      ({ 'YYYY-MM-DD': [opens, cv] }), today included. */
+  function statsLastDays(days, n, now) {
+    var out = [0, 0];
+    if (!days || typeof days !== 'object') return out;
+    var cutoff = new Date((now || new Date()).getTime() - (n - 1) * 86400000)
+      .toISOString().slice(0, 10);
+    Object.keys(days).forEach(function (day) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < cutoff) return;
+      var cell = days[day];
+      if (!Array.isArray(cell)) return;
+      out[0] += statsNumber(cell[0]);
+      out[1] += statsNumber(cell[1]);
+    });
+    return out;
+  }
+
+  function times(n) { return n + (n === 1 ? ' time' : ' times'); }
+
+  function paintStats(v) {
+    var box = $('oa-cand-stats');
+    if (!box || !EDIT_ID) return;
+
+    function line(text, strong) {
+      var p = document.createElement('p');
+      if (strong) {
+        var b = document.createElement('strong');
+        b.textContent = strong;
+        p.appendChild(b);
+        p.appendChild(document.createTextNode(' '));
+      }
+      p.appendChild(document.createTextNode(text));
+      return p;
+    }
+
+    /* the reveal date, from the same file the candidates page announces it
+       from; unreadable = treat the profile as not yet public, the safe reading */
+    fetch('data/candidates-reveal.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .catch(function () { return {}; })
+      .then(function (cfg) {
+        var revealAt = /^\d{4}-\d{2}-\d{2}$/.test(String((cfg || {}).revealAt || ''))
+          ? String(cfg.revealAt) : '';
+        var today = new Date().toISOString().slice(0, 10);
+        var held = !revealAt || today < revealAt;
+        var st = v && v.stats && typeof v.stats === 'object' ? v.stats : null;
+
+        box.innerHTML = '';
+        box.appendChild(line('These figures are private: only you and the site maintainer can see them.',
+          'Your profile on the site.'));
+
+        if (held && !st) {
+          box.appendChild(line(revealAt
+            ? 'Your profile is not public yet. Profiles appear on the candidates page all ' +
+              'at once on ' + revealAt + ', so there is nothing to count until then.'
+            : 'Your profile is not public yet. Profiles appear on the candidates page all ' +
+              'at once on the reveal date, so there is nothing to count until then.'));
+        } else if (!st) {
+          box.appendChild(line('No figures yet. The count is updated once a day and starts ' +
+            'on the first day your profile is shown.'));
+        } else {
+          var opens = statsNumber(st.opens);
+          var cvs = statsNumber(st.cvClicks);
+          var week = statsLastDays(st.days, 7);
+          box.appendChild(line('Opened ' + times(opens) + ' this season, ' +
+            times(week[0]) + ' in the last 7 days.'));
+          box.appendChild(line('CV opened ' + times(cvs) + ' this season, ' +
+            times(week[1]) + ' in the last 7 days.'));
+          var upd = String(st.updatedAt || '').slice(0, 10);
+          box.appendChild(line((/^\d{4}-\d{2}-\d{2}$/.test(upd)
+            ? 'Updated ' + upd + '. ' : '') +
+            'The count is updated once a day. Your own visits, and those of the ' +
+            'site maintainer, are not counted.'));
+        }
+        box.hidden = false;
+      });
+  }
+
+  /* ------------------------------------------------------ the live preview
+
+     "How your profile will appear" (owner, 2026-09-04), drawn UNDER the form
+     while the candidate types, by assets/oa-candcard.js: the SAME card
+     builder the candidates list draws with, over the SAME projection of the
+     document the build publishes (publicRowFromDoc, the twin of
+     candidates-model's rowFromCandidateSubmission + publicCandidateRow,
+     pinned against it in selftest.mjs). So the preview cannot show a link
+     the build would refuse or a name it would re-spell, and it cannot drift
+     from the card everyone else will see.
+
+     Quiet by construction: it reads readForm(), never collect(), so no error
+     is painted and no focus moves as the reader types. In edit mode the
+     loaded document supplies what the form does not hold (createdAt, the
+     reference), and `updatedAt` is what SAVING NOW would write once anything
+     has changed, so the "Profile updated on" line the card would carry is
+     shown before it is earned rather than after. */
+
+  var EDIT_DOC = null;      // the loaded document, in edit mode
+  var dirty = false;        // has anything changed since fill()?
+
+  function paintCardPreview() {
+    var sec = $('oa-cand-preview');
+    if (!sec || !window.OACandCard) return;
+    var host = $('oa-cand-preview-card');
+    if (!host) return;
+
+    var v = readForm();
+    if (EDIT_DOC) {
+      v.createdAt = EDIT_DOC.createdAt;
+      v.ref = EDIT_DOC.ref;
+      v.updatedAt = dirty ? new Date().toISOString() : EDIT_DOC.updatedAt;
+      // an upload from a previous visit still waiting to be filed
+      v.cvUploadPath = EDIT_DOC.cvUploadPath;
+    }
+    /* a file chosen this visit supersedes the link (the slot blanks it), and
+       the build writes the link only when it has filed the file */
+    var cvWaiting = !!(cvSlot && (cvSlot.file || cvSlot.pending)) && !v.cvUrl;
+
+    var row = OACandCard.publicRowFromDoc(v, {
+      canonColumns: window.OASchools && OASchools.canonColumns,
+      marketYear: window.OAJobNav && OAJobNav.marketYear
+    });
+    var empty = $('oa-cand-preview-empty');
+    if (row) {
+      OACandCard.mount(host, row);
+      show(empty, false);
+    } else {
+      host.innerHTML = '';
+      show(empty, true);
+    }
+    var note = $('oa-cand-preview-cv');
+    if (note) {
+      note.textContent = cvWaiting
+        ? 'Your CV appears on the card as a link once the next update has filed the file.'
+        : '';
+      note.hidden = !cvWaiting;
+    }
+  }
+
+  /* the only-you line under the preview's heading, from the ONE definition
+     of the reveal (assets/oa-reveal.js) once the served meta names the day;
+     without it the sentence still says what is true of every reveal */
+  function paintPreviewNote(revealAt) {
+    var note = $('oa-cand-preview-note');
+    if (!note || !window.OAReveal) return;
+    var when = OAReveal.describeReveal(revealAt);
+    /* CREATE mode (no ?edit=) is a profile nobody has yet, so the note says
+       "once you post it": after the reveal, "as everyone sees it" over a
+       blank form would describe a card that is on no page. EDIT_ID is read
+       off the address at load, so the branch is right from the first paint. */
+    var posted = !!EDIT_ID;
+    if (when && when.revealed) {
+      note.textContent = posted
+        ? 'This is your card as everyone sees it on the candidates page. ' +
+          'A change you save reaches the page within a few minutes.'
+        : 'This is how your card will appear on the candidates page once you post it. ' +
+          'The reveal has passed, so a new profile goes up within a few minutes of saving.';
+      return;
+    }
+    /* "only you": the maintainer can read every profile (the rules say so,
+       and the Admin area lists the held ones), so the sentence names them */
+    var who = posted
+      ? 'Only you and the site\'s maintainer can see this until the reveal: '
+      : 'Only you and the site\'s maintainer will be able to see this until the reveal. ' +
+        'Once you post it, ';
+    if (!when) {
+      note.textContent = who + 'every profile goes public at once at 14:00 UTC on the ' +
+        'reveal date announced on the candidates page. You can edit it at any time.';
+      return;
+    }
+    /* the reader's own clock, with no zone id beside it: "where you are" is
+       what the front page says, and "America/Los_Angeles" is not a place */
+    var local = when.local && when.local.time
+      ? ', which is ' + when.local.time + (when.local.sameDay ? '' : ' the next day') +
+        ' where you are'
+      : '';
+    note.textContent = who + 'every profile goes public at once on ' + when.dayLong +
+      ' at ' + when.utc + local + '. You can edit it at any time, before or after.';
+  }
+
+  function wirePreview() {
+    if (!$('oa-cand-preview')) return;
+    paintPreviewNote('');
+    if (typeof fetch !== 'function') return;
+    fetch('/data/candidates-meta.json', { credentials: 'same-origin', cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (meta) { paintPreviewNote(String((meta && meta.revealAt) || '')); })
+      .catch(function () { /* no meta: the note already says what it can */ });
   }
 
   function enterEditMode() {
@@ -612,11 +857,13 @@
 
     var intro = $('oa-intro');
     if (intro) {
-      intro.innerHTML = '<p><strong>You are editing your profile.</strong> Once this ' +
-        'season\'s profiles have been revealed, your changes appear on the ' +
-        '<a href="candidates.html">candidates page</a> at the next update, normally ' +
-        'within an hour; until the reveal date your profile stays private and is ' +
-        'published with everyone else\'s on the day. The posting date does not change.</p>';
+      intro.innerHTML = '<p><strong>You are editing your profile.</strong> You can change ' +
+        'anything, at any time. Once this season\'s profiles have been revealed, a change ' +
+        'you save reaches the <a href="candidates.html">candidates page</a> within a few ' +
+        'minutes and the card then says when you last updated it; until the reveal your ' +
+        'profile stays private and goes public with everyone else\'s at 14:00 UTC on the ' +
+        'reveal date, changes included. The card below shows how it will appear, and so ' +
+        'does your <a href="account.html">account page</a>. The posting date does not change.</p>';
     }
 
     /* The three file verbs, said where the reader is looking: the same widget
@@ -674,8 +921,8 @@
     btn.addEventListener('click', function () {
       if (!window.confirm(
         'Take your profile down?\n\n' +
-        'It stops appearing on the candidates page at the next update, normally ' +
-        'within an hour (or is left out of the reveal, if that is still to come). ' +
+        'It stops appearing on the candidates page within a few minutes (or is left ' +
+        'out of the reveal, if that is still to come). ' +
         'Nothing is deleted — you can put it back at any time by editing it again.')) return;
 
       btn.disabled = true;
@@ -700,12 +947,13 @@
           done.innerHTML =
             '<h3>Your profile has been taken down.</h3>' +
             '<p>It disappears from the <a href="candidates.html">candidates page</a> ' +
-            'at the next update, normally within an hour, or is left out of the reveal ' +
-            'if that is still to come. Nothing is deleted: to put it back, sign in and ' +
-            'edit it again — saving re-publishes it.</p>' +
+            'within a few minutes, or is left out of the reveal if that is still to come. ' +
+            'Nothing is deleted: to put it back, sign in and edit it again, and saving ' +
+            're-publishes it.</p>' +
             '<p class="oa-done-actions">' +
             '<a class="button blue" href="candidates.html">Back to the candidates</a></p>';
           show($('oa-cand-form'), false);
+          show($('oa-cand-preview'), false);
           show($('oa-intro'), false);
           show(done, true);
           done.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -755,10 +1003,13 @@
 
   function boot() {
     cvSlot = makeSlot('cv', 'CV');
+    // a file chosen, un-chosen or removed is a change, like a typed field
+    cvSlot.onChange = function () { dirty = true; paintCardPreview(); };
     enterEditMode();
     wireTakeDown();
     paintYearNote();
     wireVocab();
+    wirePreview();
 
     var sent = false;                 // latched once the profile has been written
     var form = $('oa-cand-form');
@@ -781,10 +1032,14 @@
       // the areas-count error hangs on the GROUP (#f-areas), so typing in the
       // own-areas box would never clear it through the aria-invalid path above
       if (e.target.id === 'f-areasOther') setError($('f-areas'), '');
+      dirty = true;
+      paintCardPreview();
     }, true);
     form.addEventListener('change', function (e) {
       if (e.target.getAttribute('aria-invalid') === 'true') setError(e.target, '');
       if (e.target.name === 'researchAreas') setError($('f-areas'), '');
+      dirty = true;
+      paintCardPreview();
     }, true);
 
     /* Say what has happened rather than offering a control that cannot work —
@@ -798,6 +1053,7 @@
       show($('oa-intro'), false);
       show(needauth, true);
       show(form, false);
+      show($('oa-cand-preview'), false);
       [$('oa-needauth-btn'), $('oa-needauth-new')].forEach(function (b) {
         b.disabled = true;
         b.setAttribute('aria-disabled', 'true');
@@ -813,6 +1069,12 @@
        Checked once per page load; a failure to check is not fatal — the
        build's collapse is the backstop. */
     var oneProfileChecked = false;
+    /* How many profiles this account holds, ALL seasons, from the check's
+       own query — null until it has answered. It is what the account menu's
+       "My candidate profile" row is drawn from (OAAccounts.setCount('cands'),
+       the exact-where-the-data-is-loaded rule oa-myjobs.js follows for
+       postings), and what a successful CREATE adds one to. */
+    var ownProfiles = null;
     function redirectToOwnProfile(user) {
       if (EDIT_ID || sent || oneProfileChecked || !user) return;
       oneProfileChecked = true;
@@ -821,18 +1083,45 @@
         return fb.firestore().collection(col()).where('uid', '==', user.uid).get();
       }).then(function (snap) {
         if (sent) return;
+        ownProfiles = snap.size;
+        if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('cands', snap.size);
         var season = jobMarketYears().current;
         var found = '', foundAt = '';
+        // …and the newest profile of ANY season, for the message below
+        var older = '', olderAt = '', olderYear = 0;
         snap.forEach(function (d) {
           var v = d.data() || {};
-          if (Number(v.year) !== season) return;
-          // several (a pre-rule duplicate): open the newest, the one the
-          // build's collapse keeps
           var at = v.createdAt && v.createdAt.toDate
             ? v.createdAt.toDate().toISOString() : String(v.createdAt || '');
+          if (Number(v.year) !== season) {
+            if (!older || at >= olderAt) { older = d.id; olderAt = at; olderYear = Number(v.year) || 0; }
+            return;
+          }
+          // several (a pre-rule duplicate): open the newest, the one the
+          // build's collapse keeps
           if (!found || at >= foundAt) { found = d.id; foundAt = at; }
         });
-        if (!found) return;
+        if (!found) {
+          /* A profile from a PAST season is not the one this form is for —
+             one profile per market year — but the account menu's row counted
+             it, and a blank form that mentioned no profile would read as the
+             row lying. Name it, with a way to open it; the form below stays
+             the way to file for the season under way. */
+          if (older) {
+            var msg = document.createElement('span');
+            msg.appendChild(document.createTextNode('You have a profile from ' +
+              (olderYear ? 'the ' + (olderYear - 1) + '\u2013' + olderYear + ' job market' :
+                'a previous job market') + ': '));
+            var a = document.createElement('a');
+            a.href = 'post-a-candidate.html?edit=' + encodeURIComponent(older);
+            a.textContent = 'open it';
+            msg.appendChild(a);
+            msg.appendChild(document.createTextNode(', or file one for the ' + (season - 1) +
+              '\u2013' + season + ' market below.'));
+            say(msg);
+          }
+          return;
+        }
         say('You already have a profile for the ' + (season - 1) + '–' + season +
             ' job market — opening it for editing. One profile per market year.');
         location.replace('post-a-candidate.html?edit=' + encodeURIComponent(found));
@@ -859,9 +1148,12 @@
 
       show(form, !!user);
       show(needauth, !user);
-      // the intro explains a form that is not on screen while signed out
+      // the intro explains a form that is not on screen while signed out,
+      // and so does the preview under it
       show($('oa-intro'), !!user);
+      show($('oa-cand-preview'), !!user);
       if (user && !$('f-email').value) $('f-email').value = user.email || '';
+      if (user) paintCardPreview();
     });
 
     form.addEventListener('submit', function (e) {
@@ -893,7 +1185,16 @@
              later edit un-withdraws one. */
           if (EDIT_ID) {
             doc.status = 'queued';
-            doc.updatedAt = new Date().toISOString();
+            /* `updatedAt` is stamped only when something CHANGED (`dirty`,
+               the same test the preview draws its "Profile updated on" line
+               by): the card prints that line from it, and a Save pressed
+               over an untouched form is not an update to report. Unchanged,
+               the stored stamp is written back, or nothing at all where
+               there was none, so the two never disagree in the no-change
+               case and the rules' bounded-string test still passes. */
+            if (dirty) doc.updatedAt = new Date().toISOString();
+            else if (EDIT_DOC && typeof EDIT_DOC.updatedAt === 'string' && EDIT_DOC.updatedAt) doc.updatedAt = EDIT_DOC.updatedAt;
+            else delete doc.updatedAt;
             delete doc.uid;
             return c.doc(EDIT_ID).update(doc).then(function () { return EDIT_REF; });
           }
@@ -907,6 +1208,14 @@
           return c.add(doc).then(function () { return doc.ref; });
         }).then(function (ref) {
           sent = true;
+          /* A NEW profile is one more than the account held: the menu's
+             "My candidate profile" row appears from this moment, not from
+             the next session's refresh. An edit changes nothing here (the
+             profile already counted), and neither does a take-down — a
+             withdrawn profile still exists and is its owner's to restore. */
+          if (!EDIT_ID && window.OAAccounts && OAAccounts.setCount) {
+            OAAccounts.setCount('cands', (ownProfiles === null ? 0 : ownProfiles) + 1);
+          }
           /* The confirmation is written for a NEW profile — a reference to
              keep, "post another". Neither is true of an edit, so say what
              actually happened instead. */
@@ -914,16 +1223,19 @@
             var done = $('oa-done');
             done.innerHTML =
               '<h3>Your changes have been saved.</h3>' +
-              '<p>Your profile is updated on the ' +
-              '<a href="candidates.html">candidates page</a> at the next update, ' +
-              'normally within an hour — or, before the reveal date, goes live with ' +
-              'everyone else\'s on the day, changes included.</p>' +
+              '<p>After the reveal, a change reaches the ' +
+              '<a href="candidates.html">candidates page</a> within a few minutes and ' +
+              'the card says when you last updated it; before it, your profile stays ' +
+              'private and goes live with everyone else\'s at 14:00 UTC on the reveal ' +
+              'date, changes included. You can see it as it will appear on your ' +
+              '<a href="account.html">account page</a>, and edit it again at any time.</p>' +
               '<p class="oa-done-actions">' +
               '<a class="button blue" href="candidates.html">Back to the candidates</a></p>';
           } else {
             $('oa-ref').textContent = ref || '—';
           }
           show(form, false);
+          show($('oa-cand-preview'), false);
           show($('oa-intro'), false);
           show($('oa-done'), true);
           $('oa-done').scrollIntoView({ block: 'start', behavior: 'smooth' });

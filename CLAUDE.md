@@ -1472,6 +1472,125 @@ against a served set that WOULD match (an empty one made it pass for the wrong
 reason: with nothing published, no kind could produce mail, so flipping
 `tellsPoster` onto candidates left the suite green).
 
+## The reveal is an instant, not a day, and a candidate can see their own card first
+
+Three owner requests, 2026-09-04: a candidate who has posted a profile can see
+how THEIR OWN profile will appear before the reveal (only their own, never
+anyone else's); the reveal happens at a time of day that suits readers from
+California to Shanghai; and a candidate can edit anything at any time, with the
+card then saying when. What was decided, so nobody re-opens it:
+
+**14:00 UTC on the reveal day.** The gate was a UTC calendar day, so the first
+scheduled build after midnight UTC revealed, which is 17:00 the previous day in
+California. 14:00 UTC is morning in the Americas, afternoon in Europe and
+evening in East Asia, all still that calendar day (07:00 Los Angeles, 10:00
+New York, 15:00 London, 22:00 Shanghai for the October 2026 reveal). **No page
+TYPES those four clocks**: they are the daylight-saving readings, and a reveal
+set after the clocks go back (late October, November) is an hour earlier in
+the first three. The review sweep found them typed in the FAQ, the form's
+intro and the reveal note's fallback; every one now says the UTC hour and the
+part of the day, and the clocks a page shows are filled by script from
+`describeReveal`, all four or none, with the selftest refusing a typed
+`HH:MM` before a city name on the served pages. **`assets/oa-reveal.js` is
+the ONE definition** (dual-mode, the `oa-jobnav.js` shape): `revealInstant`
+(null for anything but a real yyyy-mm-dd, so a typo can never reveal early),
+`isRevealed`, `describeReveal` (the day with its weekday, `14:00 UTC`, the four
+cities and the reader's own clock, computed with Intl from NAMED zones rather
+than typed, so daylight saving follows on its own, and null where Intl cannot
+answer) and `formatDay`, the site's one day-month-year formatter ("2 October
+2026"; `longDate` in jobs-model is the other order and stays what it is).
+`revealGate` in `candidates-model.mjs` is a thin caller of it, and the meta
+carries `revealAtInstant` beside `revealAt`. Seven files compared a calendar day
+against `revealAt`, none through a module; every one asks `isRevealed` now, and
+`testCandidateReveal` pins the old comparison OUT of each file, because two
+copies of "is it out yet" disagreeing is a profile one page calls held while
+another calls it live.
+
+**The trigger is a Cloud Function, not a cron.** Nothing in Firestore changes at
+14:00, so no document trigger can ring the build; `revealCandidates` in
+`_functions/index.js` is a scheduled function (`0 14 * * *`, UTC) that reads the
+served `candidates-reveal.json` (cache-busted; Pages holds it ten minutes) and,
+on the reveal day, rings the same `ring()` the other doorbells ring with the
+same `oa-jobs-changed`. The build's :07/:27/:47 schedule is the safety net, so a
+lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:00
+as well**: two producers for one event is the duplicate-doorbell outage under
+"One event, one build", and the selftest refuses a workflow cron on that hour.
+Like every function here it is inert until deployed; the deploy also creates
+the Cloud Scheduler job, and `firebase functions:list` must read back SIX
+(the four doorbells, `recordVisit` and `sendVerificationEmail`).
+
+**The alerts' reveal note is keyed on the instant, and its mark is lifted to
+it.** `candidateNews` announced when the alert's mark preceded the reveal DAY;
+it precedes the INSTANT now, so a mark stamped at 09:00 on the reveal day still
+gets the note. And the note's stored mark is the newer of the instant and the
+newest profile: every profile's `addedAt` is its posting time, weeks before the
+reveal, so a mark that was only "the newest profile" sat before the boundary and
+the next due run sent the note again (the old fixture hid it with a row dated
+the day after the reveal; the new one has every profile posted before it). With
+the module absent the old fallback stands: an empty mark announces, a set mark
+lists.
+
+**`updatedAt` is a public field, day-cut**, right after `addedAt` and skipped
+when empty like `ref`; the card prints "Profile updated on 2 October 2026" only
+when it is a later day than `addedAt` (the renderer is `oa-candcard.js`, the one
+card builder the public list and the two previews share). It is NOT an alerts
+cursor: the candidates topic lists by `addedAt` alone, so an edit never
+re-announces a profile, and `mergeCandidateRows` keeps the previous `addedAt`
+while taking the fresh `updatedAt`. The rules bound it (`str('updatedAt', 40)`
+in `candShapeOk`, never in the merge hand-over's `hasOnly`); the create ceiling
+of 34 stands, since the form writes it only on the edit path. Nothing gates Edit
+on the reveal, before or after it, and the selftest pins that nothing does.
+
+**Only the candidate sees their own card early, and the copy names the
+maintainer too.** The account page reads `candidateSubmissions` by
+`where('uid', '==', user.uid)`, which the rules already allow the owner
+(`allow read: if isOwner(resource.data.uid) || isAdmin()`), and draws it
+through the same renderer as the public list with a browser twin of the
+build's projection pinned against the real one, so the preview is what the
+build would publish and never anyone else's document. The `|| isAdmin()` is
+why the line reads "only you and the site's maintainer": the Admin area lists
+every held profile, and a site that reads something and says so nowhere is
+wrong whatever its rules allow. The section also answers the two states the
+first version headed as "will go public": a TAKEN-DOWN profile is anything
+the build does not publish (it reads `queued` and `published` only, and
+rewrites a candidate's `withdrawn` to `removed` within minutes, so testing for
+the two words the page knew missed the one it lands in), headed "Your profile
+(taken down)"; and a profile from a PAST season, headed as such, drawn when no
+profile matches the market under way, with the card above offering this
+season's rather than claiming one exists. And "Profile updated on" is stamped
+only when something CHANGED (`dirty`, the test the preview already drew the
+line by; the CV slot's Remove is a button and reports itself), so a Save over
+an untouched form writes the stored stamp back rather than today.
+
+**ONE renderer, ONE projection: `assets/oa-candcard.js`.** The card the
+candidates list draws was inline in `index.html`; it is `cardConfig` now (the
+same seven labelled rows in the same order, with `index.html` passing its own
+three link helpers so the list's output is byte for byte what it was), and
+`publicRowFromDoc` is the browser twin of `rowFromCandidateSubmission` +
+`publicCandidateRow`, with the name canonicaliser, the market year and the
+owner digest INJECTED the way `OAFresh.approvedRow` injects `canonColumns`. The
+account page's own-card section and the form's live preview (`paintCardPreview`
+in `oa-candidateform.js`, reading a QUIET `readForm()` that paints no error and
+moves no focus while the reader types) both go through it, so a preview cannot
+show a link the build refuses or a name it re-spells. `decorate` adds the
+"Profile updated on" line only INSIDE a card body: a locked card has none, so
+the blurred strip never advertises the line and the values stay absent rather
+than hidden. The twin is pinned against the real projection over a fixture
+table covering every branch, `FIELDS` against `CANDIDATE_PUBLIC_FIELDS` both
+ways, and the load order on all three pages; `page-test.mjs` drives the account
+preview with a second, foreign document that must never appear, the form's
+preview following a keystroke, the updated-on line on exactly the served row
+that earned it, the reveal note's local clock, and both pages at 390px.
+
+Tests: `testCandidateReveal` in `_scraper/selftest.mjs` (the module to the
+second, with and without Intl; the gate's parity; the meta's instant; every
+consumer through the module and the old comparison out of each; the doorbell's
+shape, hour and helper; no workflow cron at 14:00; the setup guide; the public
+field, the rules and the three writers; Edit ungated), the reveal block of
+`build-candidates.mjs --selftest`, `alerts-mailer.mjs --selftest` for the note's
+instant and its lifted mark, and `submissions-mailer.mjs --selftest` for an
+e-mail that stops saying "held" from the instant on.
+
 ## Nothing on "What's new" publishes itself either
 
 `changelog.json` says WHAT was announced. Firestore `newsOverrides/{changelog
@@ -1577,9 +1696,14 @@ entries.
 (owner, 2026-08-23): a `count()` aggregate over `registeredUsers`, the
 contentless per-account tally every sign-in already writes (oa-accounts.js).
 It is /lit/'s registered-users tile with the visibility inverted — there the
-figure is public, here it is **the maintainer's alone**: the collection is
+figure is public, here the COLLECTION is **the maintainer's alone**: it is
 admin-read in `_firestore.rules` (it was public-read, which nothing public
-ever consumed) and the Admin area is the one place it is shown. The card is
+ever consumed) and the Admin area is the one place the live aggregate is
+shown. **The COUNT itself is public since 2026-09-05** (owner: the number of
+registered users belongs on the front page, as on /lit/): the roster sync
+writes it to `data/users-meta.json` from Auth, which is the public path, and
+the front page reads that served file; the collection's read rule did not
+move, so a browser still cannot count the tally itself. The card is
 deliberately NOT a queue: `registeredCount()` in `oa-adminarea.js` is separate
 from `pendingCounts()`, so the "Admin area N" badge never counts it (a figure
 nobody can clear would inflate it for ever) and no other page's badge refresh
@@ -1814,8 +1938,64 @@ Three properties, and the first is the one that could have gone badly wrong:
   browser writes the name the account shows itself under, which is derived from
   the profile and is the better one where they differ.
 
-An account already current costs no write, so a daily fire commits nothing. The
-dispatch exists for the case that created the gap: right after a rules deploy.
+An account already current costs no write, so a daily fire commits nothing to
+the roster. The dispatch exists for the case that created the gap: right after
+a rules deploy.
+
+**Its scan prints the document, never the person.** The `--scan` and
+`--dry-run` lines used to print each changed account's full address and name,
+and the workflow's `scan` button runs exactly that mode into the Actions log of
+a public repository. They carry the id and a redacted address now, through
+`redact()` from `_mail.mjs`, and no name at all (the id already says which row
+would change); the sync's own selftest and `testUserDirectorySync` sweep every
+log line in `main()` for it, the way the campaign mailer's suite already did.
+
+**The same read writes two SERVED files** (owner, 2026-09-05: the number of
+registered users on the front page, as on /lit/, and a growth chart on the
+analytics page). `usersMeta` writes `data/users-meta.json`, `{ generated,
+count }`, every account Auth holds that is not disabled; `usersGrowth` writes
+`data/users-growth.json`, `{ generated, first, days: [[yyyy-mm-dd, n], ...] }`,
+one point per UTC day from the first account's creation day to the generated
+day, cumulative and never decreasing, its last point equal to the count so
+the two files cannot disagree. Counts and dates and NOTHING else, because
+everything under `data/` is served to anyone who asks; the selftest pins the
+key lists exactly and sweeps both files for an address. The committed seeds
+are the valid empty shapes (`{"generated":"","count":0}`,
+`{"generated":"","first":"","days":[]}`), so the front page hides its tile and
+the chart is absent until a run with the credential writes real ones, and the
+shape pin is never vacuous. `oa-user-directory.yml` is a data WRITER now: it
+joined `WRITERS` in the selftest, runs `selftest.mjs --publishing` before and
+after the sync, checks out `github.ref_name`, and commits the two files with
+the rebuild-never-rebase retry (the sync is re-run on the other writer's tip,
+never rebased). The growth file gains a point every day by construction, so
+the job commits daily, like `data/analytics.json`. The sync's Admin SDK handle
+is `firebaseAdmin()` from `_mail.mjs`, shared with the mailers, so there is
+one definition of "the credential is missing or malformed".
+
+### The front page's fifth key figure is BORN HIDDEN
+
+The hero strip (`#v3-stats` in `index.html`) held four figures, three of them
+seeded in the markup and raised by the live files (`V3.statTo` only ever
+raises). The fifth, **registered users**, has no seed it could honestly carry:
+nothing in this repository can write the count without the credential, and a
+"0+" over a community of some dozens is a lie in the first thing a visitor
+reads. So the tile is in the HTML with an EMPTY `<b>` and the `hidden`
+attribute, and the page reveals it only when `data/users-meta.json` loads with
+a count of ten or more, printed **rounded DOWN to the nearest ten with a
+plus** ("60+"), so the number shown is never more than the count. Under ten
+nothing changes, and a missing or seed file changes nothing either.
+
+Two orderings are load-bearing and both are pinned. **Reveal BEFORE
+`statTo`**: the count-up waits for the tile to scroll into view through an
+IntersectionObserver, and a `display: none` element never intersects, so a
+tile revealed after the call would sit on 0 for ever. And **the grid fits four
+OR five**: `.v3-stats` was `repeat(4, minmax(0, 1fr))`, which puts a fifth
+tile alone on a second row at every desktop width; it is column auto-flow now
+(a hidden tile is `display: none` and claims no track), with the two phone
+breakpoints switching back to row flow with their own templates. The fetch
+carries `cache: 'no-cache'` like every read of `data/`. The FAQ's "Is my
+personal information published?" answer says the count is public and who they
+are is not, the same sentence the Privacy Policy already carries.
 
 ### Both review tabs can be cleared a page at a time
 
@@ -1843,6 +2023,197 @@ on all four pages) and the roster/messaging block in `_scraper/page-test.mjs`
 (the money path in a real browser, hostile input included, the remove/restore
 round trip asserted to leave the body, `from` and the timestamp untouched, a
 thread whose messages are all removed still answerable, plus the 390px gate).
+
+## Registration is verified by e-mail
+
+Owner, 2026-09-04: a person who registers with an e-mail address and a
+password must press a link in a message before the account can be used.
+Google sign-ins are already verified by Google; ORCID sign-ins carry no
+e-mail claim and are not gated. The decisions, so nobody re-opens them:
+
+    _functions/verify-email.js        the message (renderer, zero dependencies)
+    _functions/index.js               sendVerificationEmail, the callable that sends it
+    _firestore.rules                  verified(), on every write a signed-in user makes
+    assets/oa-accounts.js             the pending session and the "Check your inbox" card
+    verify-email.html + oa-verify.js  where the link lands
+    _SETUP-EMAIL-VERIFICATION.md      the four secrets, the deploy, how to test
+
+**The rules read the TOKEN, and `verified()` is the one place they read it.**
+`verified()` is a sign-in whose `email_verified` claim is true OR whose
+provider is anything but `password`, and `isOwner(uid)` goes through it, so
+every owner write is gated with no text change at its call sites. The
+top-level user writes (`jobSubmissions`, `candidateSubmissions`,
+`placementSubmissions`, `accountKeys`, `directoryEdits`, `nameFixes`, the
+signed-in branch of `usageSessions`) name `verified()` where they named
+`signedIn()`. **The ONE exception is `profiles/{uid}`**: its owner may create
+and update it on a bare sign-in, because the registration form writes the
+profile in the same breath as it creates the account, before any link can
+have been pressed. Read and delete there stay owner-gated. The selftest pins
+that exactly one write clause in the file is granted on a bare sign-in and
+that it is that one. **Because it is the one write an unverified account may
+make, it is also the one that has to carry a shape**: whoever holds the
+account has not proved the address is theirs, and the first name they type
+is printed at the top of the message that goes TO that address from the
+site's mailbox. So `profileKeys()` in the rules is exactly
+`PROFILE_DOC_KEYS` in `oa-accounts.js` (pinned both ways), every text field
+is bounded, and an update is judged on the keys it CHANGES
+(`diff().affectedKeys()`), so a document carrying an older field is not
+frozen against its own owner. The renderer guards the same line from its
+end: `greetingName` uses a first name only when it is short, on one line and
+carries no address or link, else the greeting is a bare "Hello,". The
+Storage rules gate an upload on the same `verified()`; they still deploy by
+hand (`firebase deploy --only storage --project operations-academia`).
+
+**Every password account that already existed is gated too**, and nothing was
+ever sent to it, because none of them registered through the path that
+sends. So the card promises a message only on the registration path (status
+`'sent'`); on a sign-in or a page load it says "if a message reached you when
+you registered, press its link, otherwise press the button" and the button
+reads "Send the e-mail", which is the one press those accounts need. The
+setup page and the changelog say so.
+
+**And the site writes to them once, rather than waiting for each to find the
+card** (owner, 2026-09-05). `_scraper/verify-existing-users.mjs`, pressed
+through `.github/workflows/oa-verify-existing.yml` (`workflow_dispatch` only,
+a boolean `send` input defaulting to false, so the button is a scan until it
+is ticked), lists every Auth account and selects the ones whose EVERY provider
+is `password`, whose address is unverified, which are not disabled and which
+have an address (`campaignTarget`, pure); a Google or ORCID sign-in is
+verified by its provider and is skipped, a Google-plus-password link counts
+as Google, and the summary counts each reason and says why. Each is sent the
+SAME message, rendered by `renderVerifyEmail` with `existing: { since }` (the
+heading "Please confirm your e-mail address" and a first paragraph naming the
+day they registered replace the newcomer's thanks; the button, the printed
+link and the footer are unchanged), and the link is built by `siteVerifyLink`
+in `verify-email.js`, the ONE helper the callable uses too, pinned both ways
+so the two senders cannot put the code on different pages. A successful send
+stamps `verifyMail/{uid}.campaignAt` (the callable's own document, closed to
+clients, so no rules change), a stamped account is never mailed again however
+often the button is pressed, and a failed send stamps nothing. The callable
+leaves the mark alone on BOTH of its paths: its slot reservation is a MERGED
+write, so a member who presses Send the e-mail on the card keeps the mark
+through a send that succeeds (a plain set there erased it, and the next press
+of the button wrote to them again), and `releaseSlot` restores the document
+whole after a send that fails; the selftest pins both. A stamp that could not
+be written after a successful send is warned about by id, counted in the
+summary and never stops the queue, since that account may be mailed again on
+the next press. One message a second. The log carries counts, ids and
+redacted addresses only; `--dry-run` mints nothing, because `_mail.mjs`
+prints a dry-run message's text and the text carries the link; and without
+SMTP nothing is minted, since a code minted for a message that cannot go out
+expires unused. The Admin SDK handle comes from `firebaseAdmin()` in
+`_mail.mjs`, the one definition of "the Admin SDK, or null", which returns
+Firestore and Auth together; `firestore()` is a wrapper over it and the
+roster sync reads the same function. Tests: the mailer's own `--selftest`
+(the selection rule over fixture accounts, the member variant against the
+newcomer's, the once-only mark and the dry-run order read from the file's own
+source, no address in any log line) and `testVerifyExistingUsers` in
+`selftest.mjs` (both senders through `siteVerifyLink`, the workflow
+dispatch-only with its input and secrets, the setup page and this section).
+
+**A pending session is signed out for everything but the panel.** The browser
+keeps the user for the "Check your inbox" card and nothing else: `user()`
+answers null, `hint()` answers `'out'`, `onChange` fires null, nothing writes
+the hint, the roster row, the tally, the identity keys or the counts, and the
+chip reads "Verify your e-mail". Anything less leaves a flash of unlocked
+cards on the next page, painted from a remembered hint the SDK then
+contradicts. **The archive can still write that hint**: `/v2/` is frozen,
+shares the origin, and its accounts module writes `oaAuthHint` for any
+signed-in user, pending ones included. So the pending branch writes a marker
+beside it, `oaAuthPending` = the uid, and a hint naming that uid is read as
+no hint at all, in `readHint()` and in every live page's `<head>` snippet;
+the marker is cleared the moment that account becomes usable
+(`markPending`). The usage tracker (`oa-usage.js`) makes the same
+`needsVerification` test itself and files a pending account's session as an
+anonymous visitor, because the `usageSessions` rule refuses one filed under
+an unverified uid and the refusal is silent.
+
+**The card opens on its own everywhere but the verify page, and opens on a
+press anywhere.** `openVerifyPanel(status, who, auto)`: the auth handler
+passes `auto`, and only an auto open stands down on `verify-email.html`
+(which confirms the address itself); a press on the chip or the phone-sheet
+link opens it there too, or the one account control in the header would do
+nothing. Closing it puts focus back on that chip, and `wireModalKeys` keeps
+Tab inside every card that claims `aria-modal`.
+
+**The one-time code comes off the address bar at once.** `oa-verify.js`
+reads `mode` and `oobCode` and calls `history.replaceState` before any
+async work; `oa-ga4.js` reports a `page_location` without the code (it runs
+first in the deferred order) and `oa-usage.js` records the path alone when
+the query carries one. The page also moves focus to the heading of the card
+it shows, re-decides its buttons when the session changes (`A.onChange`), and
+treats `confirmVerified()` answering false after a successful
+`applyActionCode` as the link having confirmed a DIFFERENT address, offering
+"Use a different account" rather than a Continue into a locked account page.
+
+**Verification does not refresh the token by itself.** `user.reload()` updates
+`emailVerified` on the object; the rules read the ID token, which is cached
+for up to an hour. So every lift calls `getIdToken(true)` before the first
+write, or the roster row, the tally and the profile read all bounce with
+permission-denied that looks exactly like undeployed rules.
+
+**The site's own message, with Firebase's as the fallback.** The callable
+generates the link with the Admin SDK, cuts the code out of it, and puts it on
+the site's own page (`verify-email.html?mode=verifyEmail&oobCode=...`), so the
+reader lands on operationsacademia.org rather than a firebaseapp.com handler.
+It mails the address on the token only, refuses an already-verified one, and
+keeps its own rate limit in `verifyMail/{uid}` (one send in 90 seconds, six in
+a UTC day), because Firebase's resend limits do not apply to links the Admin
+SDK mints. The slot is RESERVED in a transaction before the send, so parallel
+calls cannot all pass the check and each send a message, and a failed send
+gives the slot back. Neither the link nor the code is ever logged, and neither
+is an SMTP error's message text, which quotes the rejected address in full.
+The browser prints the function's own refusal (too soon, or enough for the
+day) rather than one sentence for both, and a `functions/*` error is worded
+as a send that failed, never as a sign-in failure. When the callable
+cannot be reached (not deployed, down, or the SDK failed to load) the browser
+falls back to `sendEmailVerification`, so nobody is stranded; that message
+comes from Firebase's own address and lands on the same page with no code.
+
+**The renderer is deploy-local.** `firebase deploy` ships only `_functions/`,
+so `verify-email.js` copies the shape of `_scraper/_mail.mjs` (a 600px table,
+an escaper, a plain-text alternative) and imports nothing. The palette is the
+live site's from `assets/v3.css`, the button is a coloured table cell with a
+VML fallback for Outlook, and the link is written out in full as text as well
+as behind the button.
+
+**The deploy count is SIX now.** Four doorbells (`revealCandidates` among
+them), `recordVisit`, and `sendVerificationEmail`. Read the list back after
+every deploy; fewer means a stale checkout. `npm install --prefix _functions` first, since the CLI loads
+`index.js` and this function requires `nodemailer`.
+
+**Where the browser keeps it, so nobody looks in the wrong place.**
+`needsVerification(u)` is the one test (unconfirmed address AND the password
+provider); the auth handler sets `state.pending` from it and takes the
+pending branch before anything a session does; `enterSession(u, fb)` is what
+a usable session does on arrival, factored out because the lift
+(`liftVerification`) has to do the same list later and two copies would
+drift. The registration form no longer writes the signed-in hint for a
+password account; it opens the card and calls `sendVerification` with the
+user it just created, because the auth event may not have fired yet. The
+Functions SDK is loaded lazily by `OAFB.readyFunctions()`, the way Storage
+is, so the ~30 KB bundle costs only the page that presses the button. The
+verify page marks its `<main>` with `data-oa-verify-page`, which is how the
+accounts module knows not to draw the card over it. The header chip while
+pending is `.oa-acct-pending`, styled in BOTH `oa-ui.css` and `v3.css` (the
+live design overrides the engine's rule at a higher specificity, the Excel
+button's lesson). And `_scraper/_fake-firebase.js` makes every seeded user
+VERIFIED by default, so every browser check written before the gate keeps a
+verified reader; an unverified password account is a seed that says so.
+
+Tests: `testEmailVerification` in `_scraper/selftest.mjs` (the message, the
+rules with the exception, the function's secrets and what it never logs, the
+package and lockfile, the setup page and this section, then the browser
+half's source: the exports, the callable-first send with Firebase's message
+as the fallback, `user()` null while pending, the reload-then-token lift,
+the verify page noindex with both tags and no preview block, the two
+registries, the copy on the FAQ and the Privacy Policy, the changelog entry
+at index 0, and the shim's defaults), plus the block in
+`_scraper/page-test.mjs`, which drives it in a real browser: the pending
+session on the jobs page (locked cards, the chip, the card, no hint and no
+writes), Send again reaching the callable and falling back when it is
+absent, "I have verified it" lifting the gate with a fresh token, and the
+verify page's four cards for both readers, at 390px too.
 
 ## What "immediate" costs, and where the waiting used to be
 
@@ -1982,6 +2353,98 @@ window at all.
 The alerts workflow is also pinned to the build **by its current name**:
 `workflow_run` matches on the literal string, so renaming a workflow silently
 unchains every listener.
+
+### …and a "Closing this week" digest, whose mark is a WINDOW END
+
+Owner, 2026-09-04: an alert may also remind its subscriber of the postings
+matching their filters whose **final apply-by date** (`applyByDate`) or
+**suggested apply-by date** (`reviewDate`) falls within the next seven days.
+It is a fourth topic, `deadlines`, on the existing alert system rather than a
+mailer of its own: the tick box sits beside the other three on `alerts.html`,
+the same `criteria` filters choose the postings (no filter means every
+posting), the same `isDue` honours the alert's frequency, and a digest may
+carry jobs, candidates, updates and deadlines together — the section is
+headed **Closing this week** and lists institution, department, which date it
+is and the date, each posting linked through `livePostingUrl`, the same
+`OAJobNav.hrefFor` rule the poster's own e-mail already uses (so a posting
+whose season has rolled opens on Previous markets). A digest that carried
+only deadlines is subjected "N postings close this week".
+
+**One pure function decides it, on both sides.** `closingSoonFor(rows,
+criteria, {from, until, coveredUntil})` in `assets/oa-alert-match.js` — the
+alerts page's preview and the mailer both call it, over the same served
+file, so the sample a subscriber sees is the e-mail they get. Dates are
+`yyyy-mm-dd` strings compared as strings (a stamp is cut to its day, prose is
+never a date), today is the UTC day like the rest of the pipeline, and both
+window edges are inclusive: a search closes at the end of the day named, and
+"within seven days" includes the seventh. Where both dates fall due in one
+window the FINAL one is named, since it is the date that closes the search;
+where only the suggested one is in the window it is named as suggested, and
+the final date gets its own turn. The window's length is ONE constant,
+`DEADLINE_WINDOW_DAYS`, read by both consumers, so the page cannot promise a
+week the mailer does not send.
+
+**The mark is `lastDeadlineUntil`: the END of the window the alert was last
+checked against**, written when a digest was delivered and on the idle
+branch, and never a wall clock — the shape `lastJobAt`, `lastUpdateDate` and
+`lastCandidateAt` have, for the reason the section above records. The next
+window announces only dates AFTER it, which is what makes a closing date
+named exactly once: a daily alert sees each posting on the day its date
+enters the window, a weekly one sees the week's worth, and a run that could
+not send (no mark written) re-checks the same days rather than losing them.
+A checked-and-EMPTY window is covered too — a delivered digest with no
+closing rows, or an idle run, still writes the window end — because what the
+mark records is what was looked at, not what was found. **And it is written
+ONLY when `data/jobs.json` was actually read** (`jobsOk` in the mailer): the
+read falls back to `[]` on failure, which is the safe direction for the jobs
+and candidates marks (they move only behind a delivery) and the WRONG one for
+this mark, the one that moves on the idle branch — an unread file reads
+exactly like an empty window, and every closing date in the week would have
+been stamped covered without being looked at. Unread, the mark stays where it
+was and the next run re-checks the same days; the run says so.
+
+**A MONTHLY alert sees one week in four**, and the page says so rather than
+promising every closing date. `isDue` makes a monthly digest due 28 days after
+the last one, and the window is always the seven days from the run, so a
+closing date in days 8 to 27 after a monthly digest is in no window it is
+ever checked against. The tick box says "the seven days after each digest
+(choose daily or weekly to see every closing date)", the FAQ says the same,
+and `syncFormState` draws a hint under the frequency select (`#a-freq-note`)
+while deadlines is ticked and the frequency is monthly — where the choice is
+being made. Widening a monthly alert's window to 28 days was not done: the
+reminder is a "closing this week" list, and a month of deadlines under that
+heading would be a different message.
+
+**The cost, stated rather than hidden**: a posting that ENTERS the window late
+— added, or given a date, after the window was covered — is not announced by
+this topic. The jobs topic is what announces a new posting, and a subscriber
+who wants both ticks both; a per-posting ledger would keep "never twice"
+without that gap and was not worth a document that grows for ever.
+
+**The matcher is handed the market rule, and says no without it.** A posting
+from a closed season is not on the jobs page and is not reminded of, however
+its dates read, so `closingSoonFor` asks `OAJobNav.inCurrentMarket` — the ONE
+definition — through a third factory argument. `alerts.html` therefore loads
+`oa-jobnav.js` BEFORE `oa-alert-match.js`, and with the module absent the
+function returns nothing rather than a private guess at the season (the
+`oa-sponsors.js` lesson, pinned by evaluating the file with a bare root).
+The dependency changes nothing for the jobs, updates and candidates topics.
+
+**No rules change**: alerts live under the blanket `users/{uid}/**` owner
+rule with no key ceiling, so the Admin-SDK stamp freezes nothing (pinned).
+`ALERT_FIELDS` carries the mark in both copies of `oa-accounts.js`, or a
+merged alert would re-announce the week it was already told about.
+
+Tests: `testClosingSoonDigest` in `_scraper/selftest.mjs` (the window edges,
+the covered-until exclusion, suggested versus final, the market filter,
+string dates, the module without its dependency, and the wiring on the page,
+the mailer, both accounts copies, the rules, the changelog and the FAQ),
+`alerts-mailer.mjs --selftest` (the section rendered with the permalink, the
+subject, and — from the file's own source — that the mark is the window end
+on the idle branch and behind a delivery, and never `now`), and the alerts
+block in `_scraper/page-test.mjs` (the tick box, the preview section over a
+routed file, and a deadlines-only alert saved through the fake Firebase shim
+with exactly that topic).
 
 ### A rejected push is REBUILT, never rebased
 
@@ -2276,6 +2739,54 @@ no label of its own — gets that height back from an empty `.oa-label-spacer`
 styled by the same rule as a real label, rather than from a pixel value that
 would silently drift when the type changes. `page-test.mjs` measures the
 baseline per row and fails if any control leaves it.
+
+### …and two pickers take several values, one of them ALL-OF
+
+Owner, 2026-09-04: Entry level and Characteristics on `jobs.html` were
+single-select (`type: 'one'`, drawn as radios), one answer forced on two
+questions that have several. Both are multi now, and they combine their values
+DIFFERENTLY, because the questions differ. **Entry level is ANY-OF**, the
+engine's default and the text search's own reading: a candidate who could take
+an assistant professorship or a post-doc wants to see both, and AND would be
+empty for everybody not advertised at two ranks at once. **Characteristics is
+ALL-OF** (`match: 'all'` on the filter): a candidate ticking "PhD" and
+"Research seminars" wants a department that has BOTH, and a widening search
+would show them departments with neither of the things they asked for
+together.
+
+`match: 'all'` is a GENERIC engine option (`matches()` in `oa-list.js`), so the
+decision stays on the page that knows its dataset. Three things follow, each
+pinned in `testMultiSelectFilters` and driven in `page-test.mjs`:
+
+* **The counts change meaning under AND.** A cross-filtered count is "rows
+  carrying this value, given every OTHER filter", and the moment one value is
+  ticked that overstates every other option: "MBA 82" beside a ticked "PhD",
+  where a tick would show the postings that have both. An all-of count is
+  therefore WHAT TICKING THIS AS WELL WOULD LEAVE, counted over the rows
+  already carrying every ticked value — a ticked value's own count is the
+  current result, and every value the other filters allow stays listed, at an
+  honest 0 where nothing has it beside what is ticked. Because those numbers
+  move with the menu's own ticks, an all-of tick refreshes them IN PLACE
+  (`recount`) rather than redrawing the rows, which would throw away the
+  checkbox just pressed and the keyboard focus with it.
+* **The rule is said where the reader is choosing** — a line inside the menu
+  (`.oa-pick-hint`, styled in BOTH stylesheets) and the button's title — never
+  under the control, where it would move the bar about on a phone. The page
+  words it for its dataset (`hint:`); the engine has a fallback.
+* **The Excel download's About sheet writes "and" between an all-of filter's
+  values** (`activeFilters()` now says how each filter combines, `match:
+  'all' | 'any'`), because "or" would describe a search the reader was not
+  shown.
+
+The URL needed nothing: a multi filter already carries one parameter per value
+(`?chars=PhD&chars=Research+seminars`), and a single-value link from the radio
+days still selects. `type: 'one'` stays in use — the archive's Entry level on
+`previous-markets.html` and the directory's Show and Last edited — and the
+engine keeps drawing it as radios that take the last value a link names. On a
+phone the chips under a picker hang below its control, so a row whose partner
+has none is not on one line while values are chosen; that was already true of
+Location and is not what rule 12 in `_MOBILE-STANDARDS.md` measures (nothing
+chosen).
 
 ## A guard that fires on a legitimate posting stops the whole site publishing
 
@@ -2618,6 +3129,63 @@ would be half a screen — where the mobile rules give both the full width and a
 the two buttons' shared baseline at desktop width, and the full-width targets
 at 390px.
 
+### …and a search can be saved as an e-mail alert
+
+Owner, 2026-09-04: a signed-in reader who has narrowed the jobs list can
+press **Save as e-mail alert**, beside the Excel download, and land on
+`alerts.html` with a new alert filled in from the filters they had set.
+
+    assets/oa-alertsave.js   what is carried, what is reported as left out,
+                             the URL, the note, the button (dual-mode)
+
+**One module on both ends**, like `oa-alert-match.js`: the jobs page WRITES
+the hand-over and the alerts page READS it through the same file, so the two
+cannot disagree about its shape, and `selftest.mjs` drives the pure half.
+
+**The university search carries its FIRST term only.** The matcher searches
+ONE substring across the institution and the department, where the jobs page
+ORs several terms; "utah princeton" as one needle matches nothing, so joining
+them would hand the reader an alert that never sends. The others are reported
+as `terms`. Type, entry levels and locations carry whole (through
+`OACountries.canon`, so a legacy `?country=USA` lands as the name the form
+offers). **Characteristics, the two deadline buckets, the date-posted window
+and the `?job=` focus are not carried** and cannot be: nothing in an alert
+holds them. Their keys travel as `dropped` and the alerts page says, in one
+line over the form, what it left out, pointing a dropped deadline bucket at
+the "Postings closing within 7 days" topic. A jobs-page filter added without
+a wording in `DROPPED` is still reported, as "the <key> filter", never dropped
+silently, and the selftest pins that every filter key has one.
+
+**The transport is the URL and the stash is sessionStorage.**
+`alerts.html?prefill=1&text=…&level=…&level=…&country=…&dropped=chars`, one
+key per value as the jobs page's own links are. The alerts page stashes it
+the moment it loads and strips the keys from the address with
+`history.replaceState` (keeping `?unsubscribe=` and `?topic=`, which are
+somebody else's), so a reload after the form was filled does not fill it
+again; the stash is consumed ONCE, when the form can be drawn, which for a
+reader who arrived signed out is after they sign in. It opens as a NEW alert
+on the jobs topic with a suggested name ("Assistant Professor in United
+States"), because the name is the e-mail's subject and a blank one is the
+first thing the form refuses.
+
+**Gated exactly like the download**: `whenSignedIn`, never the hint, and it
+says no without the gate module. **Disabled with nothing filtered**, and the
+tooltip says why: an alert for every new posting already exists as the "New
+job postings" topic with the filters left blank, so an empty form would be
+the wrong answer. The `.oa-action` rules in both stylesheets cover it with no
+addition; measured at 1280px the three buttons share one line and the bar
+stays two rows deep, and at 390px they stack full-width.
+
+Tests: `testSaveSearchAsAlert` in `_scraper/selftest.mjs` (the mapping,
+the round trip, what is kept off the address, the name, the note, the
+no-em-dash rule over every word the module shows, the gate, and the wiring
+on both pages, the lock card, the FAQ and the change log) and the
+save-search block in `_scraper/page-test.mjs` (signed out it opens the
+sign-in box and goes nowhere; signed in it lands on the alerts page with the
+boxes ticked and the note naming the characteristics; a reload does not
+re-fill; a signed-out arrival on the alerts page keeps the prefill across the
+sign-in; the row at 1280px and the stack at 390px).
+
 ## A department that SPONSORED the site, and what that may change
 
 CUHK Business School's Department of Decisions, Operations and Technology
@@ -2950,6 +3518,90 @@ to sign anybody in — and it can only ever reveal what is already in a public
 served file, which is the argument `OAJobEdit.__setPermissionsForTest` is
 written under.
 
+## A candidate sees how often their OWN profile was opened, and nobody else does
+
+Owner, 2026-09-04: each candidate may see how many times their profile card
+was opened on the site and how many times its CV link was clicked, this season
+and in the last 7 days, computed from the usage record the site already keeps
+and shown to that candidate alone.
+
+    assets/oa-usage.js                    a click inside a card now says WHICH card (c) and whether it OPENED it (o)
+    _scraper/build-candidate-stats.mjs    tally the season per profile, stamp it onto the document (pure core + Admin SDK)
+    .github/workflows/oa-analytics.yml    runs it daily as a second step, after the analytics build
+    assets/oa-candidateform.js            the "Your profile on the site" panel, in edit mode only
+    account.html / assets/oa-submissions.js   the season totals on the personal-area card and the maintainer's inbox card
+
+**The attribution rule is in the record, not guessed afterwards.** The list
+engine gives every card the element id `job-<row id>` (candidates included),
+so `oa-usage.js` carries that id on any click that lands inside a card as `c`,
+and sets `o: 1` when the click OPENED the card: the head button, on a card the
+reader may read (never the blurred locked one, whose press only offers the
+sign-in box), and not already expanded (the same button closes it). It reads
+that state in the capture phase, before the engine's own handler flips it. A
+CV click is an `a` whose href IS the profile's `cvUrl`, or a link inside the
+card whose label reads CV. Both ride inside the `clicks` list the rules already
+bound at 400 small maps, so **no rules change was needed for the record** and
+no new top-level field joined the session document.
+
+**Which card is theirs is decided the way the site decided it.**
+`cardsFor()` derives every live document's id through the model,
+`rowFromCandidateSubmission` and `assignCandidateIds` keyed on the document id,
+exactly as `build-candidates.mjs` does, so two people sharing a name in one
+season take the same `-2` here as on the page. And the SERVED file is asked
+first, by `ref`, the key that identifies a submission rather than a name and a
+year (the `matchServed` lesson). A card the served file does not carry was
+never on the site, so nothing is counted for it; a derived id the served file
+holds under ANOTHER submission's ref is "not sure", which means count nothing.
+That is also what makes the reveal gate honest: before the reveal day the
+served file is empty, nothing is counted, and the owner's panel says the
+profile is not public yet rather than showing a zero that reads as "nobody is
+interested".
+
+**Whose clicks do not count.** Sessions filed under the profile's own account
+(its `uid`, and the `mergedFrom` uid) and the maintainer's, by the admin
+address a signed-in session carries (`ADMIN_EMAILS`, pinned to `isAdmin()` in
+the rules). Anonymous sessions count: a reader who has not signed in still
+opened the card. The window is the season, from `marketStart(now)`, capped at
+the analytics build's own 50,000-document read and reported when hit; the
+per-day map keeps the newest 120 days (`DAY_CAP`), the totals are not capped.
+
+**Why it lives on the candidate's own document.** The owner can already read
+that one document and nobody else can, so a bounded `stats` map there
+(`{opens, cvClicks, days: {YYYY-MM-DD: [opens, cv]}, updatedAt}`) needs no new
+collection, no new read rule and no served file: nothing under `data/`, which
+Pages hands to anyone who asks, and these figures are one person's. The rules
+let an owner CARRY the map and never write it: `statsUntouched()` requires the
+merged document's `stats` to equal the stored one on the owner's
+correct-and-withdraw update, and a new profile may not arrive with one. That
+is the sync-user-directory trap answered rather than avoided: an Admin-SDK
+key on a document whose owner update sends the merged document back must be
+allowed through unchanged, or the first count would freeze the profile against
+its own owner. `candidateSubmissions` still has no `keys().hasOnly()`, which
+the selftest pins beside the new function.
+
+**A stamp lands only on a document the build has marked `published`.**
+`publishOnCandidateChange` rings the build on the client-left states (queued,
+withdrawn, hidden) and ignores that one, so a daily bookkeeping write rings
+nothing; a profile mid-edit is counted on the next run. The step is
+`continue-on-error` in `oa-analytics.yml`, so a failure here never holds the
+analytics figures back from their commit. It is NOT in `build-all.mjs`'s
+`BUILDERS`, because it writes no `data/` file; the "every builder has a
+caller" guard is satisfied by the workflow naming it.
+
+Disclosed in the Privacy Policy's usage paragraph and announced in
+`changelog.json`.
+
+Tests: `testCandidateStats` in `_scraper/selftest.mjs` (the builder's own
+offline suite driven in-process, the id through the model with the collision
+the site resolves, the owner and maintainer exclusions, what the usage record
+carries and that no new top-level field joined it, the rules both ways, the
+workflow step and its `continue-on-error`, that the builder writes no file,
+the surfaces, the disclosure and the announcement) and the candidate block in
+`_scraper/page-test.mjs` (the panel before the reveal naming the day, after it
+with the season and 7-day figures, a hostile value rendered as 0 and never as
+markup, and the personal-area card's totals), plus
+`node _scraper/build-candidate-stats.mjs --selftest`.
+
 ## The analytics page draws its own charts, because the old ones died in 2023
 
 `analytics.html` was four Google Sheets `pubchart` `<iframe>`s. The
@@ -3147,6 +3799,65 @@ figures cannot come back, matched present-tense so the files may go on
 RECOUNTING the mistake in order to correct it), plus the universities block in
 `_scraper/page-test.mjs` (a live section carrying no archive chip and printing
 its own coverage, and an archived one still labelled with its range).
+
+### How the community has grown, and what the dashed line is
+
+Owner, 2026-09-05: a chart of registered users over time, with the growth one
+would expect from the recent trend. The figure, **How the community has
+grown**, sits under the daily visitors chart and is drawn from
+`data/users-growth.json`, the roster sync's second served file (one cumulative
+point per UTC day, counts and dates only, the same read that writes the front
+page's count). It is DRAWN ONLY WHEN THE FILE HOLDS SOMETHING, the page's rule
+for every figure: the committed seed carries no days, and its absence is
+silent. It is fetched separately with `cache: 'no-cache'`, so a failure costs
+the one figure and nothing else, and the page draws again if the file lands
+after `analytics.json` did.
+
+**The dashed yellow line is ONE pure function, `growthProjection(days,
+{window, ahead, today})` in `assets/oa-analytics-model.js`**, so the caption,
+the chart and the selftest cannot disagree about what "expected growth" means:
+a least-squares straight line fitted over the last 90 actual points (the whole
+record when shorter), whose SLOPE is kept and whose intercept is not, carried
+180 days forward THROUGH THE LAST ACTUAL POINT so the two lines meet. Fitting
+the intercept too would start the dashed line above or below the real count on
+the day it takes over, a disagreement about a number both sides know. The
+count never falls, so a negative slope is clamped and no projected value is
+below the last actual one; it refuses fewer than two points; it reads no
+clock, `today` being the anchor of the horizon and nothing else (a reader with
+a stale copy still gets 180 days from today); and it is pinned on a synthetic
+straight line, on a plateau and on a falling series. The two constants live
+in `oa-analytics.js` as `GROWTH_WINDOW`/`GROWTH_AHEAD` and the caption is BUILT
+from the window constant and from the RESULT, so the words under the chart
+cannot promise a window the model did not use or a horizon it did not draw. The
+caption says exactly what the line is ("a straight-line trend fitted over the
+last 90 days and carried N days forward; an expectation from past growth,
+not a target") and gives the count on the last day and the count the trend
+reaches.
+N is the days between the last real point and the horizon, read off the
+projection: 180 on the fresh copy the daily sync writes, and more on a stale
+one, because the model carries the line to 180 days after TODAY and a fixed
+"180" would then understate the line drawn above it (the page-test fixture,
+whose last day is fixed, is exactly that stale copy, and it asserts the number
+against today). **The wash under the count ends where the count ends.**
+`line()` closes an area series at its last REAL point rather than the last
+index of its values; the growth chart is the first caller whose area series
+carries trailing nulls (every projected day), and before that the brand wash
+ran on under the dashed projection to the horizon in the colour that means
+measured data. `page-test.mjs` reads the three paths back and pins that the
+wash's furthest x is the count's last x.
+
+**The line is the chart accent, dashed, and never `--gold` directly.**
+`--oa-chart-accent` is the token re-stepped in the dark theme so two overlaid
+lines stay tellable apart (the daily chart's own reason), and `page-test.mjs`
+measures the two strokes from what the browser paints in BOTH themes. The
+legend is the existing click-to-hide control, and the numbers table lists one
+row per month (the last real count in it and the last expected one) through a
+new generic `opts.table` override on `line()` in `oa-charts.js`, because a
+record that grows by a day for ever would print a thousand rows under itself.
+The growth figure is deliberately NOT a `DIMENSIONS` entry: it is not a
+`breakdowns` record of `analytics.json`, and the pin that reads that table
+against `BREAKDOWN_IDS` both ways must stay exact. The current count and the
+count reached go in the CAPTION, never a sixth tile (the strip caps at five).
 
 ### Two figures that are each OPTIONAL cannot promise each other
 
@@ -4197,7 +4908,8 @@ filed correction — is measured in page-test.mjs.
 dozen, so each carries its number now — the shape `/lit/`'s account menu uses.
 
 A menu is on EVERY page of a static site, so a read per page per visitor is a
-real cost. Three rules keep it cheap, and `testAccountCounts` pins all three:
+real cost. Three rules keep it cheap, and `testAccountCounts` pins all four
+(the fourth is below):
 
 * **Paint from the cache first.** The count is remembered per account in
   `localStorage` beside the name hint, so the badge lands with the menu.
@@ -4213,6 +4925,70 @@ and zero shows nothing either, since an empty pill beside "My postings" reads
 as a fault rather than as "none yet". The cache is keyed to its own uid, a read
 that lands after a sign-out is dropped, and signing out forgets it: a shared
 machine must not show the next person the last one's numbers.
+
+### …and a row is drawn only for what the account holds
+
+Owner, 2026-09-04: *"my job postings should appear in the account menu of a
+user who has posted, otherwise it shouldn't show it there"*, and a **My
+candidate profile** row *"only for those users who posted a candidate
+profile"*. So the fourth rule: **"My postings" is listed only for an account
+that has made a job posting, "My candidate profile" only for one that has
+filed a profile, and an account holding neither sees neither row.** E-mail
+alerts, Messages, My personal area and the maintainer's Admin area are
+untouched; the phone sheet follows the same rule.
+
+* **The count decides the row, under the badge's own rule.** A third cached
+  count, `cands`, joins `postings` and `alerts` in the same once-per-session
+  `count()` refresh — `candidateSubmissions where uid == me`, the query the
+  candidate form's one-profile check and `account.html` already issue and the
+  rules already allow the owner. **Nothing is excluded by status**: a
+  withdrawn profile still exists and is its owner's to restore, so it earns
+  the row. The rows carry `data-held` and are BORN HIDDEN in the markup;
+  `paintCounts` — the one function that knows the numbers — reveals a row
+  exactly when it would show its badge (known, and more than zero). One
+  function on purpose: a row and its badge cannot disagree about whether
+  there is anything there, and every path that already repainted badges
+  (the deferred repaint after `paint()`, `setCount`, the refresh) now reveals
+  the rows too, so a row appears the moment its count becomes known.
+* **A count NOT KNOWN draws neither row.** Never a row that may be wrong: the
+  refresh lands within a second on the first page of a session, and every
+  later page paints the final form from the cache before that. The browser
+  check reproduces the state (no cache, session latch set) and asserts the
+  poster's own "My postings" is withheld.
+* **The candidate form is the third exact-where-loaded source.** Its
+  one-profile query returns every profile the account holds, so it calls
+  `OAAccounts.setCount('cands', snap.size)`; a successful CREATE adds one, so
+  the row appears from that moment rather than the next session; an edit or
+  a take-down changes nothing, because the profile still exists.
+  `account.html` holds all three lists and corrects all three counts.
+* **The row links `post-a-candidate.html`**, which sends an owner straight to
+  their own profile (`redirectToOwnProfile`) — a `count()` aggregate could not
+  hand the menu a document id anyway. The personal area's card, which DOES
+  read the documents, links straight to `?edit=<newest profile>` and reads
+  "Your candidate profile"; newest overall is the current season's where one
+  exists, because `createdAt` is set once and a new profile takes the season
+  under way. **A profile from a PAST season is not redirected to** — one
+  profile per market year means the form is the right page for this season —
+  **but it is named**: the count has no year filter, so an account whose only
+  profile is last spring's sees "My candidate profile 1", and a blank create
+  form that mentioned no profile would read as the row lying (every candidate
+  who filed in spring 2026 was in that state on 2026-09-05). So when no
+  current-season profile is found and the snapshot holds older ones, the
+  newest of them is named above the form with a link to open it, and the form
+  below stays the way to file for the season under way. `say()` takes a DOM
+  node for it — the message carries a link, and `textContent` is what keeps
+  every other message inert.
+
+Tests: the rule-4 block of `testAccountCounts` in `_scraper/selftest.mjs`
+(both menus carry both rows born hidden, the painter reveals them under the
+badge's own rule, the refresh counts by uid with no status filter, the form
+and the personal area correct the cache) and the "held rows" block in
+`_scraper/page-test.mjs` (three seeded accounts through the shim: neither row,
+My postings with its count, My candidate profile for a WITHDRAWN profile with
+its count, the phone sheet mirroring each, the not-known state withholding the
+poster's own row, a last-season profile named above the create form with a
+link rather than redirected to or passed over, and the personal area's card linking straight to the
+profile).
 
 ## A same-day collapse is keyed on the ADVERTISEMENT, not just the day
 
@@ -4680,6 +5456,14 @@ the workflow rather than a terminal.
                                     # both stylesheets, and that no page calls
                                     # it privacy or security)
     node _scraper/build-netmap.mjs --selftest      # domain -> university, derived
+    node _scraper/sync-user-directory.mjs --selftest   # the roster row, the two
+                                    # served files, and that its scan prints
+                                    # ids and redacted addresses only (also
+                                    # spawned by selftest.mjs, so a PR check
+                                    # sees it, not only the daily writer)
+    node _scraper/verify-existing-users.mjs --selftest # the campaign mailer: who
+                                    # is written to, the member variant, the
+                                    # once-only mark (also spawned by selftest.mjs)
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

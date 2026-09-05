@@ -69,6 +69,20 @@ jobs:
             ${{ inputs.scan && '--scan' || '' }} \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
+      # Each candidate's PRIVATE view figures — how often their own profile
+      # card was opened and its CV clicked — from the SAME usageSessions read,
+      # written onto the candidate's own candidateSubmissions document and
+      # nowhere under data/ (a served file is public). Same secret, same
+      # cadence; a run with no credential is a clean no-op like the build
+      # above. continue-on-error, deliberately: a failure here must never
+      # hold the analytics figures back from their commit below.
+      - name: Candidate statistics
+        if: ${{ !inputs.scan }}
+        continue-on-error: true
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node _scraper/build-candidate-stats.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
       - name: Commit
         if: github.ref_name == 'master' && !inputs.dry_run && !inputs.scan
         run: |

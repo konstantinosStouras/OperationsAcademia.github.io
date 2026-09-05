@@ -174,8 +174,13 @@ async function signedInPage(url, opts = {}) {
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
   const who = ('user' in opts) ? opts.user : A_READER;   // null = signed out
+  /* `seed` carries the shim's own switches (reloadVerifies, callableFails,
+     applyActionCodeFails …) for the checks that drive a failure branch */
   await p.addInitScript(
-    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [] })};`);
+    `window.__FAKE_FB = ${JSON.stringify({ user: who, docs: opts.docs || [], ...(opts.seed || {}) })};`);
+  /* `init` is extra script run before the page's own (a localStorage seed, an
+     observer on the first paint), for the checks that measure the head */
+  if (opts.init) await p.addInitScript(opts.init);
   await p.route('**/firebasejs/**', (r) =>
     r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_FB }));
   await p.goto(BASE + url, { waitUntil: opts.waitUntil || 'load' });
@@ -1648,6 +1653,122 @@ for (const [name, expect] of [
   eq([one.areaTicked, one.areaOther], [true, 'Queueing Theory'],
     'editing round-trips a candidate\u2019s OWN research area into its box \u2014 ' +
     'a save must never silently drop an area the checkbox list does not offer');
+
+  /* -- a profile from a PAST season is named, not redirected to ------------
+
+     The menu's "My candidate profile" count has no year filter, so an account
+     whose only profile is last spring's is promised one; the form is the right
+     page for THIS season (one profile per market year), but a blank form that
+     mentioned nothing would read as the row lying. */
+  const lastSeed = { user: keptUser, docs: [{ path: 'candidateSubmissions/c8', data: {
+    uid: KEPT, status: 'queued', ref: 'OA-CAND-260220-YYYY',
+    first: 'Ada', last: 'Lovelace', affiliation: 'Test University',
+    position: 'PhD Candidate', year: marketYear() - 1,
+    createdAt: '2026-02-20T00:00:00.000Z',
+  } }] };
+  const last = await onSite('post-a-candidate.html', lastSeed, async (q) => {
+    await q.waitForFunction(() => /You have a profile from/.test(
+      (document.getElementById('oa-msg') || {}).textContent || ''), null, { timeout: 10000 });
+    return q.evaluate(() => ({
+      url: location.pathname + location.search,
+      heading: (document.querySelector('.v3-pa-hero .v3-h1') ||
+        document.querySelector('.title-heading h2') || {}).textContent || '',
+      msg: document.getElementById('oa-msg').textContent.replace(/\s+/g, ' ').trim(),
+      link: (document.querySelector('#oa-msg a') || {}).getAttribute('href'),
+      first: document.getElementById('f-first').value,
+      formShown: !document.getElementById('oa-cand-form').hidden,
+    }));
+  });
+  ok(!/\?edit=/.test(last.url), 'last season: the account is NOT redirected to a past season\'s profile');
+  ok(last.heading.trim() !== 'Edit your profile' && last.first === '' && last.formShown,
+    'last season: …the create form for the season under way is what it gets');
+  const ly = marketYear() - 1;
+  ok(new RegExp('You have a profile from the ' + (ly - 1) + '\u2013' + ly + ' job market: open it, ' +
+     'or file one for the ' + (marketYear() - 1) + '\u2013' + marketYear() + ' market below\\.').test(last.msg),
+    'last season: …and the older profile is named above it, with its market year');
+  eq(last.link, 'post-a-candidate.html?edit=c8',
+    'last season: the message links straight to that profile');
+
+  /* -- the candidate's PRIVATE view statistics (owner, 2026-09-04) ---------
+
+     The edit page draws a panel from the `stats` map build-candidate-stats.mjs
+     writes onto the candidate's own document. Two states, chosen by ROUTING
+     the reveal file rather than by the calendar, so this stays green on the
+     reveal day: before the reveal it says the profile is not public yet and
+     names the date; after it, the season and 7-day figures, with a hostile
+     value rendered as a number and never as markup. */
+  async function onSiteRouted(url, seed, reveal, drive) {
+    const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify(seed)};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.route('**/data/candidates-reveal.json*', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(reveal) }));
+    await q.goto(BASE + url, { waitUntil: 'domcontentloaded' });
+    const out = await drive(q);
+    eq(errors, [], `${url}: no uncaught script error`);
+    await q.close();
+    return out;
+  }
+  const readPanel = async (q) => {
+    await q.waitForFunction(() => {
+      const b = document.getElementById('oa-cand-stats');
+      return b && !b.hidden && b.textContent.trim().length > 0;
+    }, null, { timeout: 8000 });
+    return q.evaluate(() => {
+      const b = document.getElementById('oa-cand-stats');
+      return { text: b.textContent.replace(/\s+/g, ' ').trim(), imgs: b.querySelectorAll('img').length };
+    });
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  const longAgo = new Date(Date.now() - 40 * 86400000).toISOString().slice(0, 10);
+  const statsDoc = { ...oneSeed.docs[0].data, stats: {
+    opens: 12, cvClicks: 3, updatedAt: today + 'T04:30:00.000Z',
+    days: { [longAgo]: [10, 2], [today]: [2, 1] },
+  } };
+
+  const heldPanel = await onSiteRouted('post-a-candidate.html?edit=c9', oneSeed,
+    { revealAt: '2099-01-01' }, readPanel);
+  ok(/Your profile on the site/.test(heldPanel.text) && /not public yet/.test(heldPanel.text) &&
+     /2099-01-01/.test(heldPanel.text),
+    'before the reveal the panel says the profile is not public yet, and names the day');
+  ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
+
+  const shownPanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
+    { revealAt: '2000-01-01' }, readPanel);
+  ok(/Opened 12 times this season, 2 times in the last 7 days/.test(shownPanel.text),
+    'after the reveal it shows the season opens and the last 7 days (the 40-day-old day is out)');
+  ok(/CV opened 3 times this season, 1 time in the last 7 days/.test(shownPanel.text),
+    'and the CV clicks, singular where it is one');
+  ok(shownPanel.text.includes('Updated ' + today), 'and when the count was last updated');
+  ok(/only you and the site maintainer can see them/.test(shownPanel.text),
+    'and says the figures are private — naming the maintainer, who sees them on the ' +
+    'Admin area inbox card, as the Privacy Policy does');
+
+  const hostilePanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
+      opens: '<img src=x onerror=alert(1)>', cvClicks: -4, updatedAt: '<b>x</b>', days: 'nope',
+    } } }] },
+    { revealAt: '2000-01-01' }, readPanel);
+  eq(hostilePanel.imgs, 0, 'a hostile value in the stats map draws no element');
+  ok(/Opened 0 times this season, 0 times in the last 7 days/.test(hostilePanel.text) &&
+     /CV opened 0 times/.test(hostilePanel.text) && !/<b>/.test(hostilePanel.text),
+    'and every figure is a number, never text or markup');
+
+  /* \u2026and the personal area's candidate card carries the season totals */
+  const areaCard = await onSiteRouted('account.html',
+    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
+    { revealAt: '2000-01-01' }, async (q) => {
+      await q.waitForFunction(() =>
+        /its CV/.test((document.getElementById('pa-cand-card') || {}).textContent || ''),
+        null, { timeout: 8000 });
+      return q.evaluate(() => document.getElementById('pa-cand-card').textContent.replace(/\s+/g, ' '));
+    });
+  ok(/opened 12 times and its CV 3 times/.test(areaCard),
+    'account.html: the candidate card says how often the profile and its CV were opened this season');
 
   /* -- report a placement on /v3/ ------------------------------------------ */
 
@@ -4016,6 +4137,174 @@ for (const [from, hash] of [
   await a.close();
 }
 
+/* ------------------------ the menu lists only what the account HOLDS
+
+   Owner, 2026-09-04: "My postings" for an account that has posted, "My
+   candidate profile" for one that has filed a profile, and NEITHER for an
+   account holding nothing. Three seeded accounts through the site's own
+   sign-in path (the shim), each on index.html, which carries the header menu
+   AND the phone sheet's copy. A row is measured as the reader meets it — the
+   menu opened by the chip, the row visible or not — never by its presence in
+   the markup, because being in the markup and hidden until the count says
+   otherwise is exactly the mechanism. The fourth reading is the one no
+   scenario reaches on its own: a count NOT KNOWN (no cache, no refresh this
+   session) draws neither row, the poster's included. */
+{
+  const HELD = A_READER.uid;
+  const seeds = {
+    nothing: [],
+    poster: [{ path: 'jobSubmissions/held-j1', data: {
+      uid: HELD, status: 'published', ref: 'OA-JOB-260901-HELD',
+      institution: 'Held University', department: 'Operations',
+      createdAt: '2026-09-01T00:00:00.000Z' } }],
+    /* WITHDRAWN on purpose: a taken-down profile still exists and is its
+       owner's to restore, so it must still earn the row */
+    candidate: [{ path: 'candidateSubmissions/held-c1', data: {
+      uid: HELD, status: 'withdrawn', ref: 'OA-CAND-260901-HELD',
+      first: 'Grace', last: 'Hopper', affiliation: 'Held University',
+      position: 'PhD Candidate', year: marketYear(), researchAreas: [],
+      createdAt: '2026-09-01T00:00:00.000Z' } }],
+  };
+  const readRows = (q) => q.evaluate(() => {
+    const row = (root, href) => {
+      const el = document.querySelector(root + ' a[href="' + href + '"]');
+      if (!el) return null;
+      const badge = el.querySelector('.oa-acct-n');
+      // the LABEL: the row's own text nodes, without the icon glyph or the badge
+      const text = [...el.childNodes].filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent).join('').trim();
+      return { hidden: el.hidden, text,
+        badge: badge ? (badge.hidden ? '' : badge.textContent) : null };
+    };
+    return {
+      menuPostings: row('#oa-menu', 'my-postings.html'),
+      menuCand: row('#oa-menu', 'post-a-candidate.html'),
+      sheetPostings: row('#oa-np', 'my-postings.html'),
+      sheetCand: row('#oa-np', 'post-a-candidate.html'),
+      alerts: row('#oa-menu', 'alerts.html'),
+      messages: row('#oa-menu', 'messages.html'),
+      area: row('#oa-menu', 'account.html'),
+    };
+  });
+  async function heldRows(name, docs) {
+    const { ctx, page: q, errors } = await signedInPage('index.html', { docs, selector: '#oa-chip' });
+    // the refresh has landed once the once-per-session latch is written
+    await q.waitForFunction((uid) => {
+      try { return sessionStorage.getItem('oa-acct-counts-fresh') === uid; } catch (e) { return false; }
+    }, HELD, { timeout: 15000 });
+    await q.waitForTimeout(100);
+    await q.click('#oa-chip');
+    const rows = await readRows(q);
+    const shown = {
+      postings: await q.locator('#oa-menu a[href="my-postings.html"]').isVisible(),
+      cand: await q.locator('#oa-menu a[href="post-a-candidate.html"]').isVisible(),
+    };
+    eq(errors, [], `held rows (${name}): no uncaught script error`);
+    return { ctx, q, rows, shown };
+  }
+
+  /* -- an account holding nothing: neither row, the rest of the menu intact */
+  {
+    const { ctx, rows, shown } = await heldRows('nothing', seeds.nothing);
+    eq(shown, { postings: false, cand: false },
+      'held rows: an account with no posting and no profile is shown neither row');
+    ok(rows.menuPostings && rows.menuPostings.hidden && rows.menuCand && rows.menuCand.hidden,
+      'held rows: …the rows are in the markup, hidden — not drawn and then removed');
+    ok(rows.sheetPostings && rows.sheetPostings.hidden && rows.sheetCand && rows.sheetCand.hidden,
+      'held rows: and the phone sheet mirrors it');
+    ok(rows.alerts && !rows.alerts.hidden && rows.messages && !rows.messages.hidden &&
+       rows.area && !rows.area.hidden,
+      'held rows: E-mail alerts, Messages and My personal area stay as they were');
+    await ctx.close();
+  }
+
+  /* -- an account that has posted a job: My postings, with its count ------- */
+  {
+    const { ctx, q, rows, shown } = await heldRows('poster', seeds.poster);
+    eq(shown, { postings: true, cand: false },
+      'held rows: an account with a job posting is shown My postings and not the profile row');
+    eq(rows.menuPostings.badge, '1', 'held rows: …and the badge still counts');
+    eq(rows.menuPostings.text, 'My postings', 'held rows: labelled My postings');
+    ok(!rows.sheetPostings.hidden && rows.sheetCand.hidden,
+      'held rows: the phone sheet draws My postings and not the profile row');
+
+    /* the count NOT KNOWN: no cache and no refresh this session — the same
+       account, and the row it has earned is withheld rather than guessed */
+    await q.evaluate((uid) => {
+      localStorage.removeItem('oa-acct-counts');
+      sessionStorage.setItem('oa-acct-counts-fresh', uid);
+    }, HELD);
+    await q.reload({ waitUntil: 'load' });
+    await q.waitForSelector('#oa-chip', { timeout: 15000 });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForTimeout(400);
+    await q.click('#oa-chip');
+    const unknown = await readRows(q);
+    ok(unknown.menuPostings.hidden && unknown.menuCand.hidden &&
+       unknown.sheetPostings.hidden && unknown.sheetCand.hidden &&
+       unknown.menuPostings.badge === '',
+      'held rows: with the count not known, NEITHER row is drawn — the poster\'s ' +
+      'own My postings included — rather than a row that may be wrong');
+    await ctx.close();
+  }
+
+  /* -- an account that has filed a candidate profile (withdrawn) ------------ */
+  {
+    const { ctx, q, rows, shown } = await heldRows('candidate', seeds.candidate);
+    eq(shown, { postings: false, cand: true },
+      'held rows: an account with a candidate profile is shown My candidate profile and not My postings');
+    eq(rows.menuCand.text, 'My candidate profile', 'held rows: labelled My candidate profile');
+    eq(rows.menuCand.badge, '1',
+      'held rows: a WITHDRAWN profile still counts — it exists and is its owner\'s to restore');
+    ok(!rows.sheetCand.hidden && rows.sheetPostings.hidden,
+      'held rows: the phone sheet draws My candidate profile and not My postings');
+    eq(await q.locator('#oa-menu a[href="post-a-candidate.html"]').getAttribute('href'),
+      'post-a-candidate.html',
+      'held rows: the row opens post-a-candidate.html, which sends an owner to their own profile');
+    await ctx.close();
+  }
+
+  /* -- the personal area's card goes straight to the profile ---------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('account.html',
+      { docs: seeds.candidate, selector: '#oa-chip' });
+    await q.waitForFunction(() =>
+      /\?edit=/.test((document.getElementById('pa-cand-card') || {}).href || ''),
+      null, { timeout: 15000 });
+    const card = await q.evaluate(() => {
+      const el = document.getElementById('pa-cand-card');
+      return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
+    });
+    eq(card.href, 'post-a-candidate.html?edit=held-c1',
+      'personal area: the candidate card links straight to the profile the account holds');
+    ok(/Your candidate profile/.test(card.h3), 'personal area: …and reads "Your candidate profile"');
+    /* and, holding the real lists, it corrected the menu's cache for free */
+    const cached = await q.evaluate(() =>
+      (JSON.parse(localStorage.getItem('oa-acct-counts') || '{}').n || {}));
+    eq([cached.postings, cached.cands], [0, 1],
+      'personal area: the page corrects the postings and profile counts it just read');
+    eq(errors, [], 'personal area: no uncaught script error');
+    await ctx.close();
+  }
+  {
+    const { ctx, page: q } = await signedInPage('account.html',
+      { docs: seeds.nothing, selector: '#oa-chip' });
+    await q.waitForFunction(() =>
+      (document.getElementById('pa-n-jobs') || {}).textContent === '0', null, { timeout: 15000 });
+    const card = await q.evaluate(() => {
+      const el = document.getElementById('pa-cand-card');
+      return { href: el.getAttribute('href'), h3: el.querySelector('h3').textContent.trim() };
+    });
+    eq(card.href, 'post-a-candidate.html',
+      'personal area: with no profile the card still offers the form');
+    ok(/^Candidate profile$/.test(card.h3.replace(/^\S+\s*/, '')) || /Candidate profile/.test(card.h3),
+      'personal area: …and reads "Candidate profile", not "Your"');
+    ok(!/Your candidate profile/.test(card.h3), 'personal area: never "Your candidate profile" for nobody');
+    await ctx.close();
+  }
+}
+
 /* --------------------------------------- the SPONSOR mark, as it renders
 
    selftest.mjs pins the rule, the wiring and the stylesheets. This is the
@@ -4992,10 +5281,13 @@ for (const w of [320, 360, 390, 430]) {
   const changelog = JSON.parse(await readFile(path.join(ROOT, 'changelog.json'), 'utf8'));
   const newsPending = OANewsNode.partition(changelog.updates, {}).pending.length;
   const cmeta = JSON.parse(await readFile(path.join(ROOT, 'data', 'candidates-meta.json'), 'utf8'));
-  const today = new Date().toISOString().slice(0, 10);
-  const validReveal = /^\d{4}-\d{2}-\d{2}$/.test(String(cmeta.revealAt || ''));
-  // the build's gate: no announced date holds everything
-  const preReveal = !validReveal || today < cmeta.revealAt;
+  /* the build's gate, asked of the ONE definition (assets/oa-reveal.js): no
+     announced date holds everything, and the reveal is an INSTANT, 14:00 UTC
+     on the day, so between midnight and 14:00 on the reveal day the panel
+     says held and so must this expectation. A calendar-day compare here would
+     go red for exactly those fourteen hours. */
+  const OARevealNode = createRequire(import.meta.url)(path.join(ROOT, 'assets', 'oa-reveal.js'));
+  const preReveal = !OARevealNode.isRevealed(cmeta.revealAt, new Date());
   const metaHeld = preReveal ? (Number(cmeta.heldCount) || 0) : 0;
 
   /* WHICH SEASON A POSTING IS FOR is read off its apply-by dates (owner,
@@ -6226,6 +6518,266 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ------------------------------ the candidate's own card, before the reveal
+
+   Owner, 2026-09-04: a candidate who has posted a profile can see how THEIR
+   OWN profile will appear (only their own), the form shows the same card as
+   they type, an edited card says when, and the reveal is 14:00 UTC on the day
+   with the reader's own clock beside it. All of it drawn by ONE renderer
+   (assets/oa-candcard.js) over the build's projection, which selftest.mjs
+   pins; this is the reader. The reveal date is ROUTED to a day a month out,
+   so the pre-reveal headings are what is measured whatever the calendar. */
+{
+  const { createRequire } = await import('node:module');
+  const R = createRequire(import.meta.url)(path.join(ROOT, 'assets', 'oa-reveal.js'));
+  const future = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+  const META = { generated: new Date().toISOString(), revealAt: future,
+    revealAtInstant: R.revealStamp(future), heldCount: 2, total: 0 };
+  const routeMeta = (pg) => pg.route('**/data/candidates-meta.json', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(META) }));
+  const todayLine = 'Profile updated on ' + R.formatDay(new Date().toISOString().slice(0, 10));
+
+  const mine = { path: 'candidateSubmissions/cand-me', data: { uid: A_READER.uid, status: 'queued',
+    year: marketYear(), first: 'Ada', last: 'Reader', institution: 'Somewhere University',
+    school: 'School of Business', unit: 'Operations', position: 'PhD Candidate',
+    researchAreas: ['Operations'], informsDays: ['Sunday'], email: 'ada@example.edu',
+    emailPublic: true, cvUrl: 'https://example.edu/ada-cv.pdf',
+    createdAt: '2026-08-20T00:00:00.000Z', updatedAt: '2026-08-25T10:00:00.000Z',
+    ref: 'OA-CAND-260820-MINE' } };
+  /* somebody ELSE's profile, in the same collection: the page must never
+     draw it, and the shim's where() filters by uid so this proves the scope */
+  const other = { path: 'candidateSubmissions/cand-other', data: { uid: 'someone-else-uid',
+    status: 'queued', year: marketYear(), first: 'Nobody', last: 'Elsewhere',
+    institution: 'Other University', position: 'Post-Doc',
+    createdAt: '2026-08-21T00:00:00.000Z' } };
+
+  /* -- account.html: the preview, and only their own ---------------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('account.html', { docs: [mine, other], wait: false });
+    await routeMeta(q);
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+    await q.waitForSelector('#pa-cand-preview:not([hidden]) .oa-card', { timeout: 15000 });
+    await q.waitForFunction(() => /\d{2}:\d{2}/.test(
+      document.getElementById('pa-cand-preview-note').textContent), null, { timeout: 8000 });
+    const a = await q.evaluate(() => ({
+      heading: document.getElementById('pa-cand-preview-h').textContent.trim(),
+      note: document.getElementById('pa-cand-preview-note').textContent,
+      title: document.querySelector('#pa-cand-preview .oa-card-title').textContent.trim(),
+      sub: document.querySelector('#pa-cand-preview .oa-card-sub').textContent.trim(),
+      cards: document.querySelectorAll('#pa-cand-preview .oa-card').length,
+      labels: Array.from(document.querySelectorAll('#pa-cand-preview .oa-kv th')).map((n) => n.textContent),
+      updated: (document.querySelector('#pa-cand-preview .oa-card-updated') || {}).textContent || '',
+      edit: document.getElementById('pa-cand-edit').getAttribute('href'),
+      html: document.documentElement.outerHTML,
+    }));
+    eq(a.heading, 'How your profile will appear', 'own card: headed as a preview before the reveal');
+    eq([a.cards, a.title], [1, 'Ada Reader'], 'own card: one card, and it is the reader’s own');
+    eq(a.sub, 'Operations, School of Business, Somewhere University — PhD Candidate',
+      'own card: the affiliation line the build would publish, joined smallest first');
+    ok(!/Nobody Elsewhere|Other University/.test(a.html),
+      'own card: somebody else’s profile is nowhere in the document');
+    ok(/Only you and the site's maintainer can see this until the reveal/.test(a.note),
+      'own card: the only-you line, naming the maintainer');
+    ok(!/\(\w+\/\w+\)/.test(a.note), 'own card: ...with no zone id after the reader’s clock');
+    ok(a.note.includes(R.describeReveal(future).dayLong) && /14:00 UTC/.test(a.note),
+      'own card: ...naming the reveal day and 14:00 UTC');
+    ok(/\d{2}:\d{2}[^.]*where you are/.test(a.note), 'own card: ...and the reader’s own clock');
+    ok(a.labels.includes('CV') && a.labels.includes('Contact'),
+      'own card: the profile’s rows are drawn open (a CV, a way to contact them)');
+    eq(a.updated, 'Profile updated on 25 August 2026',
+      'own card: the updated-on line, from the document’s later updatedAt');
+    ok(/\?edit=cand-me$/.test(a.edit), 'own card: Edit opens the reader’s own document');
+    eq(errors, [], 'own card: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a taken-down profile, and one from a past season: neither is "will
+        go public", and the card above says the same thing ----------------- */
+  for (const [label, doc, heading, notePat, cardPat] of [
+    ['taken down (the build has rewritten withdrawn to removed)',
+      { path: 'candidateSubmissions/cand-gone', data: { ...mine.data, status: 'removed' } },
+      'Your profile (taken down)', /not shown to anyone/, /filed for this season/],
+    ['from a past season',
+      { path: 'candidateSubmissions/cand-old', data: { ...mine.data, year: marketYear() - 1, ref: 'OA-CAND-250820-OLD' } },
+      'Your profile from a previous season', /no longer on the candidates page/, /previous season is shown below/],
+  ]) {
+    const { ctx, page: q, errors } = await signedInPage('account.html', { docs: [doc], wait: false });
+    await routeMeta(q);
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+    await q.waitForSelector('#pa-cand-preview:not([hidden]) .oa-card', { timeout: 15000 });
+    await q.waitForTimeout(700);   // time for a meta fetch to land, which must NOT rewrite the note
+    const a = await q.evaluate(() => ({
+      heading: document.getElementById('pa-cand-preview-h').textContent.trim(),
+      note: document.getElementById('pa-cand-preview-note').textContent,
+      title: document.querySelector('#pa-cand-preview .oa-card-title').textContent.trim(),
+      card: document.querySelector('#pa-cand-card p').textContent,
+    }));
+    eq(a.heading, heading, `own card ${label}: headed as what it is`);
+    ok(notePat.test(a.note), `own card ${label}: the note says so`);
+    ok(!/goes public|as everyone sees it/.test(a.note), `own card ${label}: ...and never that it will go public`);
+    eq(a.title, 'Ada Reader', `own card ${label}: the card itself is still drawn`);
+    ok(cardPat.test(a.card), `own card ${label}: the card above agrees with the section below`);
+    eq(errors, [], `own card ${label}: no uncaught script error`);
+    await ctx.close();
+  }
+
+  /* -- post-a-candidate.html: the live preview follows a keystroke -------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html',
+      { docs: [], selector: '#oa-cand-preview:not([hidden])' });
+    const empty = await q.evaluate(() => ({
+      hint: !document.getElementById('oa-cand-preview-empty').hidden,
+      cards: document.querySelectorAll('#oa-cand-preview .oa-card').length,
+      heading: document.getElementById('oa-cand-preview-h').textContent.trim(),
+    }));
+    eq([empty.heading, empty.hint, empty.cards], ['Preview', true, 0],
+      'form preview: a blank form shows the hint and no card');
+    await q.fill('#f-first', 'Grace');
+    await q.fill('#f-last', 'Hopper');
+    await q.fill('#f-institution', 'Northwestern University');
+    await q.selectOption('#f-position', 'PhD Candidate');
+    await q.waitForSelector('#oa-cand-preview .oa-card-title', { timeout: 8000 });
+    eq(await q.$eval('#oa-cand-preview .oa-card-title', (n) => n.textContent.trim()), 'Grace Hopper',
+      'form preview: the card appears once the form holds what a card needs');
+    await q.fill('#f-first', 'Grace Brewster');
+    await q.waitForFunction(() => document.querySelector('#oa-cand-preview .oa-card-title')
+      .textContent.trim() === 'Grace Brewster Hopper', null, { timeout: 8000 });
+    ok(true, 'form preview: ...and follows the next keystroke');
+    const noErr = await q.evaluate(() => document.querySelectorAll('#oa-cand-form .oa-err').length);
+    eq(noErr, 0, 'form preview: drawing it painted no validation error (the read is quiet)');
+    const noUpd = await q.evaluate(() => !document.querySelector('#oa-cand-preview .oa-card-updated'));
+    ok(noUpd, 'form preview: a NEW profile carries no updated-on line');
+    eq(errors, [], 'form preview: no uncaught script error');
+    await ctx.close();
+  }
+  {
+    /* edit mode: the loaded profile is drawn, and typing previews the
+       updated-on line SAVING would earn */
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html?edit=cand-me',
+      { docs: [{ path: mine.path, data: { ...mine.data, updatedAt: undefined } }],
+        selector: '#oa-cand-preview .oa-card-title' });
+    const before = await q.evaluate(() => ({
+      title: document.querySelector('#oa-cand-preview .oa-card-title').textContent.trim(),
+      updated: !!document.querySelector('#oa-cand-preview .oa-card-updated'),
+    }));
+    eq(before, { title: 'Ada Reader', updated: false },
+      'form preview (edit): the loaded profile is drawn, with no updated line until something changes');
+    await q.fill('#f-first', 'Adelaide');
+    await q.waitForFunction(() => document.querySelector('#oa-cand-preview .oa-card-title')
+      .textContent.trim() === 'Adelaide Reader', null, { timeout: 8000 });
+    eq(await q.$eval('#oa-cand-preview .oa-card-updated', (n) => n.textContent), todayLine,
+      'form preview (edit): a change previews the "Profile updated on" line saving now would publish');
+    eq(errors, [], 'form preview (edit): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- the updated-on line on the SERVED rows ----------------------------- */
+  {
+    const today = new Date().toISOString().slice(0, 10);
+    const SEED = [
+      { id: 'upd-1', name: 'Edited Candidate', affiliation: 'Somewhere University',
+        position: 'PhD Candidate', year: String(marketYear()), posted: today,
+        researchAreas: ['Operations'], informsDays: ['Sunday'],
+        addedAt: '2026-08-20T00:00:00Z', updatedAt: '2026-08-25', cvUrl: 'https://example.edu/cv.pdf' },
+      { id: 'upd-2', name: 'Fresh Candidate', affiliation: 'Elsewhere University',
+        position: 'Post-Doc', year: String(marketYear()), posted: today,
+        researchAreas: ['Operations'], informsDays: ['Monday'],
+        addedAt: '2026-08-21T00:00:00Z', cvUrl: 'https://example.edu/cv2.pdf' },
+    ];
+    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+    const { ctx, page: q } = await signedInPage('index.html', { wait: false });
+    await seed(q);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    for (const h of await q.$$('#oa-candidates .oa-card .oa-card-head')) await h.click();
+    await q.waitForTimeout(250);
+    const u = await q.evaluate(() => Array.from(document.querySelectorAll('#oa-candidates .oa-card'))
+      .map((c) => {
+        const line = c.querySelector('.oa-card-updated');
+        const body = c.querySelector('.oa-card-body');
+        return { name: c.querySelector('.oa-card-title').textContent.trim(),
+          line: line ? line.textContent : null,
+          last: !!line && body.lastElementChild === line };
+      }));
+    eq(u.map((c) => [c.name, c.line]),
+      [['Edited Candidate', 'Profile updated on 25 August 2026'], ['Fresh Candidate', null]],
+      'served rows: the updated-on line on exactly the profile with a later updatedAt');
+    ok(u[0].last, 'served rows: ...as the LAST line of the card body');
+    await ctx.close();
+
+    const { ctx: outCtx, page: out } = await signedOutPage('index.html', { wait: false });
+    await seed(out);
+    await out.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await out.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await out.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await out.waitForTimeout(300);
+    const locked = await out.evaluate(() => ({
+      lines: document.querySelectorAll('#oa-candidates .oa-card-updated').length,
+      bodies: document.querySelectorAll('#oa-candidates .oa-card-body').length,
+      html: document.querySelector('#oa-candidates').innerHTML,
+    }));
+    eq([locked.lines, locked.bodies], [0, 0],
+      'served rows (signed out): a locked card has no body and therefore no updated-on line');
+    ok(!/Profile updated on/.test(locked.html), 'served rows (signed out): ...and the line is not in the markup at all');
+    await outCtx.close();
+  }
+
+  /* -- the reveal note prints the reader's own clock ---------------------- */
+  {
+    const { ctx, page: q } = await signedOutPage('index.html', { wait: false });
+    await routeMeta(q);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForSelector('#oa-reveal-note:not([hidden])', { timeout: 15000 });
+    const n = await q.evaluate(() => ({
+      day: document.getElementById('oa-reveal-day').textContent,
+      cities: document.getElementById('oa-reveal-cities').textContent,
+      local: document.getElementById('oa-reveal-local').textContent,
+      count: document.getElementById('oa-reveal-count').textContent,
+      text: document.getElementById('oa-reveal-note').textContent.replace(/\s+/g, ' '),
+    }));
+    eq(n.day, R.describeReveal(future).dayLong, 'reveal note: the day, with its weekday, from the module');
+    ok(/^ \(\d{2}:\d{2} Los Angeles, \d{2}:\d{2} New York, \d{2}:\d{2} London, 22:00 Shanghai\)$/.test(n.cities),
+      'reveal note: the four cities, filled by the script (the markup carries no clock)');
+    ok(/^, which is \d{2}:\d{2}.* where you are$/.test(n.local), 'reveal note: the reader’s own clock');
+    ok(/at 14:00 UTC on/.test(n.text), 'reveal note: ...beside the UTC time the static sentence names');
+    ok(/2 profiles have already been filed/.test(n.count), 'reveal note: the held count');
+    await ctx.close();
+  }
+
+  /* -- a phone --------------------------------------------------------- */
+  for (const [url, selector, docs] of [
+    ['account.html', '#pa-cand-preview:not([hidden]) .oa-card', [mine]],
+    ['post-a-candidate.html?edit=cand-me', '#oa-cand-preview .oa-card-title', [mine]],
+  ]) {
+    const { ctx, page: q } = await signedInPage(url, { docs, selector,
+      viewport: { width: 390, height: 844 } });
+    const m = await q.evaluate(() => {
+      const over = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+      const edit = document.getElementById('pa-cand-edit');
+      const form = document.getElementById('oa-cand-form');
+      const prev = document.getElementById('oa-cand-preview');
+      return {
+        over,
+        editH: edit ? edit.getBoundingClientRect().height : null,
+        stacked: form && prev
+          ? prev.getBoundingClientRect().top >= form.getBoundingClientRect().bottom - 1 : null,
+        cardW: document.querySelector('.oa-card').getBoundingClientRect().width,
+      };
+    });
+    ok(m.over <= 1, `${url} at 390px: the page does not scroll sideways (${m.over}px)`);
+    ok(m.cardW <= 390 && m.cardW > 300, `${url} at 390px: the card fits the screen (${Math.round(m.cardW)}px)`);
+    if (m.editH !== null) ok(m.editH >= 42, `${url} at 390px: the Edit control is a ${Math.round(m.editH)}px target`);
+    if (m.stacked !== null) ok(m.stacked, `${url} at 390px: the preview stacks UNDER the form`);
+    await ctx.close();
+  }
+}
+
 /* ------------------------------------------- the Excel download, measured
 
    A registered reader may download the postings the jobs page is SHOWING as a
@@ -6300,10 +6852,16 @@ for (const w of [320, 360, 390, 430]) {
       const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
       const c = document.querySelector('.oa-clear');
       const clear = c.getBoundingClientRect();
+      /* the LAST action in the cell is what holds the bar's right edge —
+         since 2026-09-04 that is "Save as e-mail alert", and the download
+         sits between Clear and it */
+      const last = b.closest('.oa-filter-actions').lastElementChild.getBoundingClientRect();
+      const next = document.querySelector('.oa-alert-save');
       return { title: b.title, text: b.textContent.trim(), disabled: b.disabled,
         h: Math.round(r.height), w: Math.round(r.width),
-        x: Math.round(r.x), top: Math.round(r.top),
-        rightGap: Math.round(cell.right - r.right),
+        x: Math.round(r.x), right: Math.round(r.right), top: Math.round(r.top),
+        rightGap: Math.round(cell.right - last.right),
+        nextX: next ? Math.round(next.getBoundingClientRect().x) : null,
         clearW: Math.round(clear.width), clearH: Math.round(clear.height),
         clearX: Math.round(clear.x), clearTop: Math.round(clear.top),
         locked: !!document.querySelector('.v3-lock.is-locked') };
@@ -6330,8 +6888,10 @@ for (const w of [320, 360, 390, 430]) {
     ok(Math.abs(btn.top - btn.clearTop) <= 2 && btn.h === btn.clearH,
       `jobs export: on ONE line with Clear filters, same height ` +
       `(${btn.h} vs ${btn.clearH}, tops ${btn.top}/${btn.clearTop})`);
-    ok(btn.x > btn.clearX && Math.abs(btn.rightGap) <= 1.5,
-      'jobs export: …to its right, holding the bar\'s right edge');
+    ok(btn.x > btn.clearX && btn.nextX !== null && btn.right < btn.nextX,
+      'jobs export: …to its right, and left of "Save as e-mail alert"');
+    ok(Math.abs(btn.rightGap) <= 1.5,
+      'jobs export: …with the last button in the cell holding the bar\'s right edge');
 
     /* TWO ROWS, WITH ENTRY LEVEL ON THE FIRST (owner, 2026-08-27: "pushing
        'entry level' search field on the top line, so that 'clear filters' and
@@ -6549,6 +7109,316 @@ for (const w of [320, 360, 390, 430]) {
     }
     await ctx.close();
   }
+
+  /* -- TWO PICKERS TAKE SEVERAL VALUES, and combine them differently -------
+
+     Owner, 2026-09-04: Entry level and Characteristics were single-select
+     radios. Entry level is ANY-OF now ("Assistant Professor or Post-Doc" is
+     two things one candidate could take), Characteristics ALL-OF ("PhD and
+     Research seminars" is a department that has both). Every expectation
+     below is computed from the served file under the page's own market rule,
+     never from a number that would move with the corpus, and the values
+     ticked are whichever the open menu offers, for the same reason. */
+  {
+    const { ctx, q, errors } = await jobsPage(READER);
+    const shown = () => q.$eval('.oa-count', (n) =>
+      Number(n.textContent.split('/')[1].trim().split(' ')[0]));
+    const menu = () => q.$$eval('.oa-pick-menu:not([hidden]) .oa-opt:not(.is-empty)', (ns) =>
+      ns.map((n) => ({ v: n.querySelector('.oa-opt-name').textContent,
+        n: Number(n.querySelector('.oa-opt-n').textContent),
+        type: n.querySelector('input').type, on: n.querySelector('input').checked })));
+    const chips = () => q.$$eval('.oa-filter.oa-pick .oa-chip .oa-chip-label',
+      (ns) => ns.map((n) => n.textContent));
+    const tick = async (opts, v) => {
+      const i = opts.findIndex((o) => o.v === v) + 1;
+      await q.click(`.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(${i}) input`);
+      await q.waitForTimeout(300);
+    };
+    /* the rows the page holds, with the two fields these filters read */
+    const rows = await q.evaluate(async () => {
+      const d = await (await fetch('/data/jobs.json')).json();
+      return (Array.isArray(d) ? d : d.rows)
+        .filter((r) => window.OAJobNav.inCurrentMarket(r))
+        .map((r) => ({ levels: r.levels || [], chars: r.characteristics || [] }));
+    });
+    const total = await shown();
+    eq(rows.length, total,
+      'multi: the expectations are computed over exactly the rows the page holds');
+    const anyOf = (rs, vals) => rs.filter((r) => vals.some((v) => r.levels.includes(v)));
+    const allOf = (rs, vals) => rs.filter((r) => vals.every((v) => r.chars.includes(v)));
+
+    /* ENTRY LEVEL: tick boxes, and a second tick WIDENS */
+    await q.click('#oaf-level');
+    await q.waitForTimeout(200);
+    let opts = await menu();
+    ok(opts.length >= 2 && opts.every((o) => o.type === 'checkbox'),
+      'multi: Entry level offers tick boxes, not radios');
+    eq(await q.$$eval('.oa-pick-menu:not([hidden]) .oa-pick-hint', (n) => n.length), 0,
+      'multi: …and carries no note, because any-of is what every other picker means');
+    const L = opts.slice().sort((a, b) => b.n - a.n).slice(0, 2).map((o) => o.v);
+    await tick(opts, L[0]);
+    const one = await shown();
+    eq(one, anyOf(rows, [L[0]]).length, `multi: one level shows its own postings ("${L[0]}")`);
+    eq(await q.$$eval('.oa-pick-menu:not([hidden])', (n) => n.length), 1,
+      'multi: the menu stays open for the next tick');
+    await tick(opts, L[1]);
+    const two = await shown();
+    eq(two, anyOf(rows, L).length,
+      `multi: two levels show EITHER (${one} -> ${two}), the union the data holds`);
+    ok(two >= Math.max(...L.map((v) => anyOf(rows, [v]).length)),
+      'multi: …at least as many as the larger alone, which an AND could never be');
+    await q.keyboard.press('Escape');
+    eq(await chips(), L, 'multi: both levels are chips under the control');
+
+    /* CHARACTERISTICS: tick boxes, a note, and a second tick NARROWS */
+    await q.click('#oaf-chars');
+    await q.waitForTimeout(200);
+    opts = await menu();
+    ok(opts.length >= 2 && opts.every((o) => o.type === 'checkbox'),
+      'multi: Characteristics offers tick boxes too');
+    const hint = await q.$eval('.oa-pick-menu:not([hidden]) .oa-pick-hint', (n) => n.textContent);
+    ok(/every characteristic you tick/.test(hint),
+      'multi: …and its menu says what ticking several means');
+    eq(await q.$eval('#oaf-chars', (n) => n.title), hint,
+      'multi: the button says it as its title, for a pointer that hovers first');
+    const inLevels = anyOf(rows, L);   // its counts are cross-filtered on the ticked levels
+    for (const o of opts) {
+      eq(o.n, allOf(inLevels, [o.v]).length,
+        `multi: "${o.v}" counts the postings that have it, within the ticked levels`);
+    }
+    const c0 = opts.slice().sort((a, b) => b.n - a.n)[0].v;
+    await tick(opts, c0);
+    const x = await shown();
+    eq(x, allOf(inLevels, [c0]).length, `multi: one characteristic shows its postings ("${c0}")`);
+    /* THE COUNTS MOVE, IN PLACE: each is now what ticking it AS WELL would leave */
+    const after = await menu();
+    for (const o of after) {
+      eq(o.n, allOf(inLevels, [c0, o.v]).length,
+        `multi: with "${c0}" ticked, "${o.v}" says what ticking it as well would leave`);
+    }
+    eq(after.map((o) => o.v), opts.map((o) => o.v),
+      'multi: every characteristic is still listed, so none seems to have vanished');
+    eq(await q.evaluate(() => document.activeElement && document.activeElement.type), 'checkbox',
+      'multi: the keyboard focus stayed on the box just ticked — the counts were refreshed, not redrawn');
+    const c1 = after.filter((o) => o.v !== c0).sort((a, b) => b.n - a.n)[0].v;
+    await tick(opts, c1);
+    const xy = await shown();
+    eq(xy, allOf(inLevels, [c0, c1]).length,
+      `multi: two characteristics show only postings with BOTH (${x} -> ${xy})`);
+    ok(xy <= x, 'multi: …a second tick narrows, it never widens');
+    const own = (await menu()).find((o) => o.v === c0);
+    eq(own && own.n, xy, "multi: a ticked value's own count is the current result");
+    await q.keyboard.press('Escape');
+    const C = [c0, c1];
+    eq(await chips(), [...L, ...C], 'multi: every value is a chip under its own control');
+
+    /* the address carries all four, one parameter per value */
+    const u = new URL(q.url());
+    eq(u.searchParams.getAll('level'), L, 'multi: the address carries both levels');
+    eq(u.searchParams.getAll('chars'), C, 'multi: …and both characteristics');
+
+    /* the workbook says "and" where the list meant it, "or" where it meant that */
+    if (xy > 0) {
+      const dl = q.waitForEvent('download', { timeout: 30000 });
+      await q.click('.oa-export');
+      const file = await (await dl).path();
+      const parts = unzipStore(new Uint8Array(await readFile(file)));
+      const about = sheetCells(parts['xl/worksheets/sheet3.xml']);
+      const text = Object.keys(about).map((k) => about[k].v).join(' | ');
+      ok(text.includes(`${L[0]}  or  ${L[1]}`),
+        'multi: the About sheet joins the levels with "or"');
+      ok(text.includes(`${c0}  and  ${c1}`),
+        'multi: …and the characteristics with "and" — the word the list used');
+    }
+
+    /* CHIPS MOVE NOTHING — the desktop baseline rule, with chips under two
+       PICKERS this time (the existing check hangs them under the text
+       search) — and a phone still fits everything on screen. */
+    for (const width of [1280, 390, 320]) {
+      await q.setViewportSize({ width, height: 1000 });
+      await q.waitForTimeout(250);
+      const geo = await q.evaluate(() => {
+        const doc = document.documentElement;
+        const bar = document.querySelector('.oa-filters');
+        const ctrls = [...document.querySelectorAll(
+          '.oa-filters input[type=search], .oa-filters .oa-pick-btn, .oa-filters .oa-clear')];
+        const lines = [];
+        ctrls.forEach((n) => {
+          const t = n.getBoundingClientRect().top;
+          const row = lines.find((r) => Math.abs(r.top - t) < 1.5);
+          if (row) row.n++; else lines.push({ top: t, n: 1 });
+        });
+        const cells = new Set([...bar.children]
+          .map((c) => Math.round(c.getBoundingClientRect().top))).size;
+        const menus = [...document.querySelectorAll('.oa-pick .oa-pick-btn')].map((btn) => {
+          btn.click();
+          const r = btn.parentElement.querySelector('.oa-pick-menu').getBoundingClientRect();
+          btn.click();
+          return { left: Math.round(r.left), right: Math.round(r.right) };
+        });
+        return { over: doc.scrollWidth - doc.clientWidth, lines: lines.length, cells,
+          chips: document.querySelectorAll('.oa-pick .oa-chip').length, menus, vw: doc.clientWidth };
+      });
+      eq(geo.chips, 4, `multi @${width}: the four chips are showing, so the measurement means something`);
+      ok(geo.over <= 1, `multi @${width}: the page does not scroll sideways (${geo.over}px)`);
+      ok(geo.menus.every((r) => r.left >= 0 && r.right <= geo.vw),
+        `multi @${width}: every picker menu stays on screen (${JSON.stringify(geo.menus)})`);
+      if (width >= 1000) {
+        eq(geo.lines, geo.cells,
+          `multi @${width}: every control sits on its row's baseline with chips under two pickers`);
+      }
+    }
+    await q.setViewportSize({ width: 1280, height: 1000 });
+
+    /* a link is a search: reloading it restores every value */
+    await q.goto(u.href, { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card, .oa-empty');
+    await q.waitForTimeout(400);
+    eq(await shown(), xy, 'multi: reloading the link restores the same result');
+    eq(await chips(), [...L, ...C], 'multi: …with every value back as a chip');
+
+    /* a link from the single-choice days names ONE value, and still selects it;
+       the older "a|b" join, which links in the wild still carry, selects both */
+    await q.goto(BASE + 'jobs.html?level=' + encodeURIComponent(L[0]) +
+      '&chars=' + encodeURIComponent(c0), { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card, .oa-empty');
+    await q.waitForTimeout(400);
+    eq(await shown(), allOf(anyOf(rows, [L[0]]), [c0]).length,
+      'multi: a one-value link from the radio days still selects what it names');
+    eq(await chips(), [L[0], c0], 'multi: …as one chip each');
+    await q.goto(BASE + 'jobs.html?chars=' + encodeURIComponent(C.join('|')), { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card, .oa-empty');
+    await q.waitForTimeout(400);
+    eq(await shown(), allOf(rows, C).length,
+      'multi: the legacy "a|b" join lands as both values, and under AND means both');
+    eq(errors, [], 'multi: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- and the SINGLE-CHOICE type the other pages use kept working ---------
+
+     previous-markets keeps `type: 'one'` on its Entry level (the directory
+     on two of its filters): radios, one value at a time, and a link naming
+     several takes the last. A page-level decision, so it is measured on the
+     page that made it. */
+  {
+    const { ctx, page: p, errors } = await signedInPage('previous-markets.html');
+    await p.click('#oaf-level');
+    await p.waitForTimeout(200);
+    const opts = await p.$$eval('.oa-pick-menu:not([hidden]) .oa-opt:not(.is-empty)', (ns) =>
+      ns.map((n) => ({ v: n.querySelector('.oa-opt-name').textContent,
+        type: n.querySelector('input').type })));
+    ok(opts.length >= 2 && opts.every((o) => o.type === 'radio'),
+      "one: the archive's Entry level is still drawn as radios");
+    await p.click('.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(1) input');
+    await p.waitForTimeout(300);
+    eq(await p.$$eval('.oa-pick-menu:not([hidden])', (n) => n.length), 0,
+      'one: choosing a value closes the menu, as it always did');
+    await p.click('#oaf-level');
+    await p.waitForTimeout(200);
+    await p.click('.oa-pick-menu:not([hidden]) .oa-opt:nth-of-type(2) input');
+    await p.waitForTimeout(300);
+    eq(await p.$$eval('.oa-filter.oa-pick .oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
+      [opts[1].v], 'one: a second choice REPLACES the first');
+    eq(new URL(p.url()).searchParams.getAll('level'), [opts[1].v],
+      'one: …and the address names one value');
+    await p.goto(BASE + 'previous-markets.html?level=' + encodeURIComponent(opts[0].v) +
+      '&level=' + encodeURIComponent(opts[1].v), { waitUntil: 'load' });
+    await p.waitForSelector('.oa-card, .oa-empty');
+    await p.waitForTimeout(400);
+    eq(await p.$$eval('.oa-filter.oa-pick .oa-chip .oa-chip-label', (ns) => ns.map((n) => n.textContent)),
+      [opts[1].v], 'one: a link naming two values selects the LAST, as before');
+    eq(errors, [], 'one: no uncaught script error');
+    await ctx.close();
+  }
+}
+
+/* -------------------------------- the registered-users tile (owner, 2026-09-05)
+
+   The front page's fifth key figure is born HIDDEN with no number in it, and
+   the page reveals it only when data/users-meta.json holds ten or more, rounded
+   down to the nearest ten with a plus. What a unit test cannot see is the
+   half that matters: that the count-up really reaches "60+" (the tile has to
+   be revealed BEFORE statTo, or its observer never fires), that a missing or
+   too-small file leaves the strip exactly as it was, and that five tiles sit
+   on ONE row at every desktop width rather than the fifth orphaning below. */
+{
+  const meta = (pg, body) => pg.route('**/data/users-meta.json', (r) => body == null
+    ? r.fulfill({ status: 404, contentType: 'text/plain', body: 'not found' })
+    : r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) }));
+  const readStrip = (pg) => pg.evaluate(() => {
+    const tiles = [...document.querySelectorAll('#v3-stats .v3-stat')];
+    const shown = tiles.filter((t) => !t.hidden && getComputedStyle(t).display !== 'none');
+    const tops = [...new Set(shown.map((t) => Math.round(t.getBoundingClientRect().top)))];
+    const users = document.querySelector('[data-stat="users"]');
+    return {
+      total: tiles.length,
+      shown: shown.length,
+      rows: tops.length,
+      hidden: !!(users && users.hidden),
+      text: users ? users.querySelector('b').textContent : null,
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      clipped: shown.some((t) => t.getBoundingClientRect().right > window.innerWidth + 1),
+    };
+  });
+
+  /* no file: the strip is the four tiles it always was */
+  for (const body of [null, { generated: '2026-09-05T00:00:00Z', count: 9 }]) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('users tile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await meta(q, body);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForTimeout(400);
+    const r = await readStrip(q);
+    const label = body ? 'a count under ten' : 'no file';
+    eq(r.total, 5, `users tile (${label}): the fifth tile is in the markup`);
+    ok(r.hidden, `users tile (${label}): …and stays hidden`);
+    eq(r.shown, 4, `users tile (${label}): the strip shows the four seeded figures and nothing else`);
+    eq(r.rows, 1, `users tile (${label}): …on one row`);
+    eq(r.text, '', `users tile (${label}): the hidden tile carries no number, not even a 0`);
+    await ctx.close();
+  }
+
+  /* 64 registered users: revealed, counted up to "60+", and on the same row */
+  for (const width of [1280, 1180, 1024]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('users tile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await meta(q, { generated: '2026-09-05T00:00:00Z', count: 64 });
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForSelector('[data-stat="users"]:not([hidden])', { timeout: 10000 });
+    await q.evaluate(() => document.querySelector('[data-stat="users"]').scrollIntoView({ block: 'center' }));
+    /* the count-up is 800ms once the tile is in view; a tile revealed AFTER
+       statTo would sit on 0 for ever, which is what this wait is for */
+    await q.waitForFunction(() => document.querySelector('[data-stat="users"] b').textContent === '60+', null, { timeout: 8000 });
+    await q.evaluate(() => window.scrollTo(0, 0));
+    const r = await readStrip(q);
+    eq(r.shown, 5, `users tile (${width}px): all five tiles are shown`);
+    eq(r.text, '60+', `users tile (${width}px): 64 accounts read "60+", rounded DOWN to the nearest ten`);
+    eq(r.rows, 1, `users tile (${width}px): five tiles on ONE row, no orphan below`);
+    ok(!r.overflowX && !r.clipped, `users tile (${width}px): nothing runs off the screen`);
+    await ctx.close();
+  }
+
+  /* and on a phone, revealed, in the single column the breakpoint gives it */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('users tile 390: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await meta(q, { generated: '2026-09-05T00:00:00Z', count: 64 });
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForSelector('[data-stat="users"]:not([hidden])', { timeout: 10000 });
+    await q.evaluate(() => document.querySelector('[data-stat="users"]').scrollIntoView({ block: 'center' }));
+    await q.waitForFunction(() => document.querySelector('[data-stat="users"] b').textContent === '60+', null, { timeout: 8000 });
+    const r = await readStrip(q);
+    eq(r.shown, 5, 'users tile (390px): all five tiles are shown on a phone');
+    ok(!r.overflowX && !r.clipped, 'users tile (390px): …and the page does not scroll sideways');
+    await ctx.close();
+  }
 }
 
 /* ----------------------------------------------------- the analytics page
@@ -6646,6 +7516,44 @@ for (const w of [320, 360, 390, 430]) {
     status: 200, contentType: 'application/json', body: JSON.stringify(body),
   }));
 
+  /* THE COMMUNITY'S GROWTH (owner, 2026-09-05): 400 days of registrations,
+     slow at first and quicker in the last three months, so the dashed trend
+     visibly differs from a line through the whole record */
+  const growthDays = [];
+  {
+    let n = 0;
+    for (let i = 0; i < 400; i++) {
+      const t = new Date(end);
+      t.setUTCDate(t.getUTCDate() - 399 + i);
+      n += i < 300 ? (i % 6 === 0 ? 1 : 0) : (i % 2 === 0 ? 1 : 0);
+      growthDays.push([t.toISOString().slice(0, 10), n]);
+    }
+  }
+  const growthDemo = {
+    generated: new Date(end).toISOString(),
+    first: growthDays[0][0],
+    days: growthDays,
+  };
+  const serveGrowth = (pg, body) => pg.route('**/data/users-growth.json', (r) => body == null
+    ? r.fulfill({ status: 404, contentType: 'text/plain', body: 'not found' })
+    : r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) }));
+  /* the months the growth table must list: from the first registration to
+     180 days after TODAY (the model anchors its horizon on the reader's day,
+     so a stale copy of the file still gets 180 days ahead) */
+  /* the days the caption must say the trend is carried: from the fixture's
+     last day to 180 days after TODAY, since the model anchors the horizon on
+     the reader's day and the caption reads the number off the result */
+  const carriedExpected = (() => {
+    const to = new Date(); to.setUTCHours(0, 0, 0, 0); to.setUTCDate(to.getUTCDate() + 180);
+    return Math.round((to.getTime() - Date.parse(growthDays[growthDays.length - 1][0])) / 86400000);
+  })();
+  const monthsExpected = (() => {
+    const to = new Date(); to.setUTCDate(to.getUTCDate() + 180);
+    const a = growthDays[0][0].slice(0, 7).split('-').map(Number);
+    const b = to.toISOString().slice(0, 7).split('-').map(Number);
+    return (b[0] - a[0]) * 12 + (b[1] - a[1]) + 1;
+  })();
+
   /* --- with data, in BOTH themes ---------------------------------------- */
 
   for (const theme of ['light', 'dark']) {
@@ -6654,9 +7562,12 @@ for (const w of [320, 360, 390, 430]) {
     q.on('pageerror', (e) => jsErrors.push(`analytics ${theme}: ` + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
     await serveDemo(q, demo);
+    await serveGrowth(q, growthDemo);
     await q.addInitScript((t) => { try { localStorage.setItem('oaV3Theme', t); } catch (e) { /**/ } }, theme);
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    await q.waitForFunction(() => [...document.querySelectorAll('.oa-figure > h2')]
+      .some((h) => /How the community has grown/.test(h.textContent)), null, { timeout: 15000 });
 
     const seen = await q.evaluate(() => ({
       figures: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
@@ -6758,6 +7669,93 @@ for (const w of [320, 360, 390, 430]) {
       getComputedStyle(document.querySelector('.oa-line.oa-accent')).strokeDasharray);
     ok(dashed && dashed !== 'none',
       `analytics (${theme}): the rolling mean is dashed too — identity is never colour alone`);
+
+    /* HOW THE COMMUNITY HAS GROWN (owner, 2026-09-05): two series, the real
+       count in the brand ink and the expected growth dashed in the accent,
+       measured from what the browser paints in this theme; the caption says
+       exactly what the dashed line is and names both counts; the legend puts
+       the trend away and brings it back; the table is one row per month. */
+    const growth = await q.evaluate(() => {
+      const fig = [...document.querySelectorAll('.oa-figure')]
+        .find((f) => /How the community has grown/.test((f.querySelector('h2') || {}).textContent || ''));
+      if (!fig) return null;
+      const px = (el) => getComputedStyle(el).stroke;
+      const brand = fig.querySelector('.oa-line.oa-brand');
+      const accent = fig.querySelector('.oa-line.oa-accent');
+      const heads = [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent);
+      return {
+        position: heads.indexOf('How the community has grown'),
+        lines: fig.querySelectorAll('.oa-line').length,
+        brand: brand ? px(brand) : '', accent: accent ? px(accent) : '',
+        dash: accent ? getComputedStyle(accent).strokeDasharray : '',
+        brandDash: brand ? getComputedStyle(brand).strokeDasharray : '',
+        brandD: brand ? brand.getAttribute('d') : '',
+        areaD: (fig.querySelector('.oa-area.oa-brand') || { getAttribute: () => '' }).getAttribute('d') || '',
+        accentD: accent ? accent.getAttribute('d') : '',
+        sub: (fig.querySelector('.oa-figure-sub') || {}).textContent || '',
+        legend: [...fig.querySelectorAll('.oa-chart-legend-on button')].map((b) => b.textContent.trim()),
+        tableCols: [...fig.querySelectorAll('.oa-chart-table thead th')].map((t) => t.textContent),
+        tableRows: fig.querySelectorAll('.oa-chart-table tbody tr').length,
+        firstRow: [...(fig.querySelector('.oa-chart-table tbody tr') || { children: [] }).children].map((c) => c.textContent),
+        lastRow: [...([...fig.querySelectorAll('.oa-chart-table tbody tr')].pop() || { children: [] }).children].map((c) => c.textContent),
+      };
+    });
+    ok(growth, `analytics (${theme}): the growth figure is drawn from its routed file`);
+    if (growth) {
+      eq(growth.position, 1, `analytics (${theme}): …directly under the visitors chart`);
+      eq(growth.lines, 2, `analytics (${theme}): …with two lines, the count and the trend`);
+      const rgb = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const [ar, ag, ab] = rgb(growth.brand);
+      const [br, bg, bb] = rgb(growth.accent);
+      const dist = Math.abs(ar - br) + Math.abs(ag - bg) + Math.abs(ab - bb);
+      ok(growth.brand !== growth.accent && dist > 90,
+        `analytics (${theme}): the trend is the chart ACCENT, far enough from the brand line to read as ` +
+        `two lines (channel distance ${dist})`);
+      ok(growth.dash && growth.dash !== 'none' && (!growth.brandDash || growth.brandDash === 'none'),
+        `analytics (${theme}): …and dashed where the real count is solid, so the pair never relies on colour alone`);
+      ok(new RegExp('straight-line trend fitted over the last 90 days and carried ' + carriedExpected +
+                    ' days forward; an expectation from past growth, not a target').test(growth.sub),
+        `analytics (${theme}): the caption says exactly what the dashed line is, and is not, with the days really carried (${carriedExpected}: the fixture is stale against today, so 180 would understate the line)`);
+      /* THE WASH ENDS WHERE THE COUNT ENDS. The brand series carries trailing
+         nulls for every projected day; the area under it must close at the
+         last real point, never run on under the dashed projection to the
+         horizon in the colour that means measured data. */
+      const xs = (d) => (String(d).match(/[ML]\s*([\d.]+)\s+[\d.]+/g) || []).map((m) => Number(m.replace(/^[ML]\s*/, '').split(/\s+/)[0]));
+      const brandXs = xs(growth.brandD);
+      const areaXs = xs(growth.areaD);
+      const accentXs = xs(growth.accentD);
+      ok(brandXs.length > 1 && areaXs.length > 1 && accentXs.length > 1, `analytics (${theme}): the three paths were read`);
+      ok(Math.max(...areaXs) === brandXs[brandXs.length - 1],
+        `analytics (${theme}): the wash under the count ends at the count's last point (${brandXs[brandXs.length - 1]}), not at ${Math.max(...areaXs)}`);
+      ok(Math.max(...accentXs) > brandXs[brandXs.length - 1] + 100,
+        `analytics (${theme}): …while the dashed projection runs well past it, so the check is not vacuous`);
+      const nums = growth.sub.match(/\b\d[\d,]*\b registered users on/) && growth.sub.match(/the trend reaches \b\d[\d,]*\b by/);
+      ok(nums, `analytics (${theme}): …and names the count today and the count the trend reaches`);
+      ok(!/—/.test(growth.sub), `analytics (${theme}): …without an em dash`);
+      eq(growth.legend, ['Registered users', 'Expected growth'],
+        `analytics (${theme}): the legend is the page's click-to-hide control, naming both series`);
+      eq(growth.tableCols, ['Month', 'Registered users', 'Expected growth'],
+        `analytics (${theme}): the numbers table is one row per MONTH, not per day`);
+      eq(growth.tableRows, monthsExpected,
+        `analytics (${theme}): …one for every month from the first registration to the end of the projection`);
+      ok(/^[A-Z][a-z]{2} \d{4}$/.test(growth.firstRow[0]) && growth.firstRow[2] === '—',
+        `analytics (${theme}): the first month carries a real count and no projection`);
+      ok(growth.lastRow[1] === '—' && /^\d[\d,]*$/.test(growth.lastRow[2]),
+        `analytics (${theme}): …and the last month a projection and no real count`);
+    }
+    const trend = await q.evaluate(() => {
+      const fig = [...document.querySelectorAll('.oa-figure')]
+        .find((f) => /How the community has grown/.test((f.querySelector('h2') || {}).textContent || ''));
+      const btn = [...fig.querySelectorAll('.oa-chart-legend-on button')].find((b) => /Expected growth/.test(b.textContent));
+      const line = fig.querySelector('.oa-line.oa-accent');
+      btn.click();
+      const off = { pressed: btn.getAttribute('aria-pressed'), display: line.style.display };
+      btn.click();
+      return { off, backOn: line.style.display };
+    });
+    eq(trend.off, { pressed: 'false', display: 'none' },
+      `analytics (${theme}): pressing Expected growth in the legend puts the trend away`);
+    ok(trend.backOn !== 'none', `analytics (${theme}): …and a second press brings it back`);
 
     /* A MONTH THE RECORD HAS NOT COVERED IS NOT A MONTH WITH NO VISITORS.
        Under the default 90-day range the season chart used to draw eight
@@ -7164,8 +8162,10 @@ for (const w of [320, 360, 390, 430]) {
     q.on('pageerror', (e) => jsErrors.push('analytics no-dims: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
     await serveDemo(q, { ...demo, breakdowns: {}, engagement: null });
+    await serveGrowth(q, null);           // no growth file either
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    await q.waitForTimeout(400);
     const bare = await q.evaluate(() => ({
       heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
       body: document.querySelector('#oa-analytics').textContent,
@@ -7175,6 +8175,9 @@ for (const w of [320, 360, 390, 430]) {
     }));
     ok(!bare.heads.includes('Where readers are'),
       'analytics: a figure no source has answered for is not drawn at all');
+    ok(!bare.heads.includes('How the community has grown'),
+      'analytics: …and with no growth file the growth figure is absent too, silently, ' +
+      'like every figure whose source has not answered');
     ok(!/Where these figures come from|Not on this page yet|own resolver/.test(bare.body),
       'analytics: …and no foot note describes the plumbing in its place — ' +
       'owner, 2026-08-30');
@@ -7183,6 +8186,40 @@ for (const w of [320, 360, 390, 430]) {
       'shape of the defect the page was rebuilt to remove');
     ok(!/Typical visit|Time on a page/.test(bare.tiles),
       'analytics: and a tile with no measurement behind it is absent, never a zero');
+    await ctx.close();
+  }
+
+  /* --- on a phone, with the growth chart drawn --------------------------
+     analytics.html is not an OAList page and is not in MOBILE_PAGES, so the
+     phone claims for it are made here: no sideways scroll, every chart drawn
+     at the size it is shown at, the growth figure among them. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics 390: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await serveGrowth(q, growthDemo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForFunction(() => [...document.querySelectorAll('.oa-figure > h2')]
+      .some((h) => /How the community has grown/.test(h.textContent)), null, { timeout: 15000 });
+    const phone = await q.evaluate(() => ({
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      scales: [...document.querySelectorAll('.oa-chart-svg')].map((svg) => {
+        const vb = svg.getAttribute('viewBox').split(' ').map(Number);
+        const r = svg.getBoundingClientRect();
+        return { sx: r.width / vb[2], sy: r.height / vb[3] };
+      }),
+      growthLines: (() => {
+        const fig = [...document.querySelectorAll('.oa-figure')]
+          .find((f) => /How the community has grown/.test((f.querySelector('h2') || {}).textContent || ''));
+        return fig ? fig.querySelectorAll('.oa-line').length : 0;
+      })(),
+    }));
+    ok(!phone.overflowX, 'analytics (390px): the page never scrolls sideways with the growth chart drawn');
+    ok(phone.scales.length > 3 && phone.scales.every((c) => Math.abs(c.sx - 1) < 0.02 && Math.abs(c.sy - 1) < 0.02),
+      'analytics (390px): every chart, the growth chart included, is drawn at the size it is shown at');
+    eq(phone.growthLines, 2, 'analytics (390px): the growth chart carries both lines on a phone');
     await ctx.close();
   }
 
@@ -7352,6 +8389,871 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+
+/* ------------------------------------- "Closing this week" on the alerts page
+
+   The deadlines topic (owner, 2026-09-04): a fourth tick box, a preview
+   section built by the SAME function the mailer runs, and a deadlines-only
+   alert that saves with exactly that topic. The served file is routed to a
+   fixture, because whether any real posting closes in the next seven days is
+   a fact about the calendar and a guard about a corpus must not move with
+   it; the reader is signed in through the shim, since the preview carries
+   real postings and is drawn for a registered reader only.               */
+{
+  const today = new Date().toISOString().slice(0, 10);
+  const plus = (n) => new Date(Date.parse(today + 'T00:00:00Z') + n * 86400000)
+    .toISOString().slice(0, 10);
+  const yr = marketYear();
+  const row = (id, extra) => ({ id, year: yr, years: [yr], posted: today,
+    institution: id + ' University', department: 'Operations', school: '', unit: 'Operations',
+    type: 'University', levels: ['Assistant Professor'], applyBy: 'Until filled.',
+    applyByDate: '', country: 'Ireland', characteristics: [], featured: false,
+    source: 'oa-form', addedAt: today + 'T00:00:00Z', ...extra });
+  const SEED = [
+    row('closing-final', { applyByDate: plus(3), applyBy: 'soon' }),
+    row('closing-review', { reviewDate: plus(5) }),
+    row('closing-later', { applyByDate: plus(30), applyBy: 'later' }),
+  ];
+
+  const { ctx, page: q, errors } = await signedInPage('alerts.html', { wait: false });
+  await q.route('**/data/jobs.json', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+  await q.goto(BASE + 'alerts.html', { waitUntil: 'load' });
+  await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+    null, { timeout: 15000 });
+  await q.waitForSelector('#oa-alerts-app', { timeout: 15000 });
+  // the filter vocabulary is built from the routed file, so this is "loaded"
+  await q.waitForSelector('#a-country input', { timeout: 15000 });
+  await q.waitForTimeout(250);
+
+  const box = await q.evaluate(() => {
+    const t = document.querySelector('#t-deadlines');
+    return t && { checked: t.checked,
+      label: t.closest('label').textContent.replace(/\s+/g, ' ').trim() };
+  });
+  ok(box && !box.checked, 'closing: the fourth tick box is offered, unticked on a new alert');
+  ok(box && /^Postings closing within 7 days\./.test(box.label),
+    'closing: …and says what it does');
+
+  // a deadlines-ONLY alert: the filters stay, the preview shows the section
+  await q.uncheck('#t-jobs');
+  await q.check('#t-deadlines');
+  await q.waitForTimeout(150);
+  const pv = await q.evaluate(() => ({
+    filters: !document.querySelector('#a-filters').hidden,
+    subject: document.querySelector('#oa-preview .oa-preview-head').textContent.replace(/\s+/g, ' '),
+    text: document.querySelector('#oa-preview').textContent.replace(/\s+/g, ' '),
+  }));
+  ok(pv.filters, 'closing: the filters stay on screen for a deadlines-only alert — they choose its postings');
+  ok(/Closing this week/.test(pv.text), 'closing: the preview carries the "Closing this week" section');
+  ok(/2 postings matching your alert close in the next seven days/.test(pv.text),
+    'closing: …counting the two that close within the week');
+  ok(/closing-final University/.test(pv.text) && /Final apply by/.test(pv.text),
+    'closing: …the final apply-by named as final');
+  ok(/closing-review University/.test(pv.text) && /Suggested apply by/.test(pv.text),
+    'closing: …the suggested one as suggested');
+  ok(!/closing-later University/.test(pv.text),
+    'closing: …and not the posting closing in a month');
+  ok(/Subject: 2 postings close this week/.test(pv.subject),
+    'closing: an unnamed deadlines-only alert previews the subject the mailer gives it');
+
+  // the alert's own filters narrow the reminder, live
+  await q.fill('#a-text', 'closing-final');
+  await q.waitForTimeout(150);
+  const narrowed = await q.$eval('#oa-preview', (n) => n.textContent.replace(/\s+/g, ' '));
+  ok(/One posting matching your alert closes in the next seven days/.test(narrowed) &&
+     !/closing-review University/.test(narrowed),
+    'closing: a filter narrows the reminder the way it narrows new postings');
+
+  // a MONTHLY digest sees one week in four: the hint under the frequency
+  // appears for exactly that pair, and goes with either half of it
+  await q.selectOption('#a-freq', 'monthly');
+  await q.waitForTimeout(100);
+  const noteOn = await q.$eval('#a-freq-note', (n) => ({ hidden: n.hidden,
+    text: n.textContent.replace(/\s+/g, ' ').trim() }));
+  ok(!noteOn.hidden && /seven days after it goes out/.test(noteOn.text) &&
+     /daily or weekly/.test(noteOn.text),
+    'closing: deadlines ticked + monthly draws the hint saying what a monthly digest misses');
+  await q.selectOption('#a-freq', 'weekly');
+  await q.waitForTimeout(100);
+  ok(await q.$eval('#a-freq-note', (n) => n.hidden),
+    'closing: …weekly puts it away (a week\'s cadence covers every closing date)');
+  await q.selectOption('#a-freq', 'monthly');
+  await q.uncheck('#t-deadlines');
+  await q.waitForTimeout(100);
+  ok(await q.$eval('#a-freq-note', (n) => n.hidden),
+    'closing: …and so does unticking deadlines, whatever the frequency');
+  await q.check('#t-deadlines');
+  await q.selectOption('#a-freq', 'daily');
+  await q.waitForTimeout(100);
+
+  // …and it saves, with exactly that topic, through the shim
+  await q.fill('#a-name', 'Closing soon');
+  await q.click('#a-save');
+  await q.waitForFunction(() => /Alert created/.test(
+    document.querySelector('#a-msg').textContent), null, { timeout: 15000 });
+  await q.waitForTimeout(250);
+  const saved = await q.evaluate((uid) => {
+    const key = Object.keys(window.__fb.docs).find((k) => k.startsWith('users/' + uid + '/alerts/'));
+    const d = key && window.__fb.docs[key];
+    return d && { topics: d.criteria.topics, text: d.criteria.text, enabled: d.enabled,
+      email: d.email, hasMark: 'lastDeadlineUntil' in d,
+      card: (document.querySelector('#oa-alert-list .oa-alert-card') || {}).textContent
+        .replace(/\s+/g, ' ') };
+  }, A_READER.uid);
+  eq(saved && saved.topics, ['deadlines'],
+    'closing: a deadlines-only alert is saved with that one topic — it has intent on its own');
+  ok(saved && saved.text === 'closing-final' && saved.enabled === true &&
+     saved.email === A_READER.email,
+    'closing: …with its filter, enabled, to the account\'s own address');
+  ok(saved && !saved.hasMark,
+    'closing: the page writes no mark — lastDeadlineUntil is the mailer\'s, behind a delivery');
+  ok(saved && /postings closing within 7 days matching “closing-final”/.test(saved.card),
+    'closing: the card\'s summary line names the reminder and its filter');
+  eq(errors, [], 'closing: no script errors on the alerts page');
+  await ctx.close();
+}
+
+/* ------------------------------------- save the search as an e-mail alert
+
+   A signed-in reader who has narrowed the jobs list can press "Save as
+   e-mail alert", beside the Excel download, and land on alerts.html with a
+   new alert filled in from the filters they had set (owner, 2026-09-04;
+   assets/oa-alertsave.js). selftest.mjs pins the mapping and the wiring;
+   this drives the reader: signed out it opens the sign-in box and goes
+   nowhere, signed in it lands on the alerts page with the boxes ticked and a
+   note naming what was left out, a reload does not fill the form twice, a
+   signed-out arrival on the alerts page keeps the prefill across the
+   sign-in, and the button shares the download's line at 1280px and its
+   stack at 390px.
+
+   The fixture is read off the served file under the page's own market rule
+   rather than named: a guard about a corpus must not move with the corpus. */
+{
+  /* wrapped: filter() hands the index as the predicate's second argument,
+     which inCurrentMarket reads as `now` */
+  const served = JSON.parse(await readFile(path.join(ROOT, 'data', 'jobs.json'), 'utf8'))
+    .filter((r) => inCurrentMarket(r));
+  const pick = served.find((r) => (r.characteristics || []).length &&
+    (r.levels || []).length && r.country && r.institution);
+  ok(!!pick, 'save-search: a served posting in the current market carries a level, a country and a characteristic');
+  const LEVEL = pick.levels[0], CHAR = pick.characteristics[0], COUNTRY = pick.country;
+  const TERM = pick.institution.slice(0, 6);
+  const enc = encodeURIComponent;
+  const SEARCH = `jobs.html?institution=${enc(TERM)}&level=${enc(LEVEL)}` +
+    `&country=${enc(COUNTRY)}&chars=${enc(CHAR)}`;
+
+  /* -- signed OUT: the sign-in box, and no navigation --------------------- */
+  {
+    const { ctx, page: q, errors } = await signedOutPage(SEARCH);
+    const before = await q.evaluate(() => {
+      const b = document.querySelector('.oa-alert-save');
+      return { there: !!b, disabled: b ? b.disabled : null, title: b ? b.title : '',
+        locked: !!document.querySelector('.v3-lock.is-locked') };
+    });
+    ok(before.there && before.locked, 'save-search: the button is in the locked filter bar');
+    ok(before.disabled === false && /with an account/.test(before.title),
+      'save-search: filtered, it is live and says the alert is free with an account');
+    /* through the lock's pointer-events:none deliberately — the lock is a
+       nudge, and what is under test is the module's own gate */
+    await q.evaluate(() => document.querySelector('.oa-alert-save').click());
+    await q.waitForTimeout(1000);
+    ok(/jobs\.html$/.test(new URL(q.url()).pathname),
+      'save-search: pressing it signed out goes NOWHERE');
+    ok(await q.evaluate(() => !!document.querySelector('.oa-modal')),
+      'save-search: …it offers the sign-in box instead');
+    ok(await q.$eval('#v3-lock-card', (n) => /e-mail alert/i.test(n.textContent)),
+      'save-search: and the sign-in card names it as a reason to register');
+    eq(errors, [], 'save-search: signed-out run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- signed IN: disabled with nothing filtered, then the hop ------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html');
+    const idle = await q.evaluate(() => {
+      const b = document.querySelector('.oa-alert-save');
+      return { disabled: b.disabled, title: b.title, aria: b.getAttribute('aria-label') };
+    });
+    ok(idle.disabled, 'save-search: with nothing filtered the button is disabled');
+    ok(/New job postings/.test(idle.title) && /leave the filters blank/i.test(idle.title),
+      'save-search: …and its tooltip says an alert for everything is the topic with no filters');
+    eq(idle.aria, idle.title, 'save-search: …readable by a screen reader too');
+
+    await q.goto(BASE + SEARCH, { waitUntil: 'load' });
+    await q.waitForSelector('.oa-card', { timeout: 15000 });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForTimeout(300);
+    const row = await q.evaluate(() => {
+      const g = (s) => document.querySelector(s).getBoundingClientRect();
+      const b = document.querySelector('.oa-alert-save');
+      const r = g('.oa-alert-save'), c = g('.oa-clear'), x = g('.oa-export');
+      const cell = b.closest('.oa-filter-actions').getBoundingClientRect();
+      const tops = new Set([...document.querySelector('.oa-filters').children]
+        .map((n) => Math.round(n.getBoundingClientRect().top)));
+      return { disabled: b.disabled, title: b.title, text: b.textContent.trim(),
+        top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), x: Math.round(r.x),
+        clearTop: Math.round(c.top), clearH: Math.round(c.height), clearW: Math.round(c.width),
+        expRight: Math.round(x.right), expTop: Math.round(x.top),
+        rightGap: Math.round(cell.right - r.right), rows: tops.size };
+    });
+    ok(!row.disabled && !/with an account/.test(row.title),
+      'save-search: filtered and signed in, the button is live and no longer sells the account');
+    ok(/save as e-mail alert/i.test(row.text),
+      `save-search: the label says what it does (${JSON.stringify(row.text)})`);
+    ok(Math.abs(row.top - row.clearTop) <= 2 && row.h === row.clearH && Math.abs(row.top - row.expTop) <= 2,
+      `save-search: on ONE line with Clear and the download, same height ` +
+      `(${row.h}, tops ${row.top}/${row.clearTop}/${row.expTop})`);
+    ok(row.w < row.clearW, `save-search: narrower than Clear (${row.w} vs ${row.clearW})`);
+    ok(row.x > row.expRight && Math.abs(row.rightGap) <= 1.5,
+      'save-search: to the right of the download, holding the bar\'s right edge');
+    eq(row.rows, 2, `save-search: the bar is still two rows deep (${row.rows})`);
+
+    await q.click('.oa-alert-save');
+    await q.waitForURL(/alerts\.html/, { timeout: 15000 });
+    await q.waitForSelector('#oa-prefill-note:not([hidden])', { timeout: 15000 });
+    await q.waitForTimeout(250);
+    const landed = await q.evaluate(([level, country]) => {
+      const checked = (host, v) => {
+        const i = [...document.querySelectorAll('#' + host + ' input')].find((n) => n.value === v);
+        return i ? i.checked : null;
+      };
+      const note = document.querySelector('#oa-prefill-note');
+      return { search: location.search, text: document.querySelector('#a-text').value,
+        name: document.querySelector('#a-name').value,
+        level: checked('a-level', level), country: checked('a-country', country),
+        jobs: document.querySelector('#t-jobs').checked,
+        deadlines: document.querySelector('#t-deadlines').checked,
+        legend: document.querySelector('#oa-form-legend').textContent,
+        note: note.textContent.replace(/\s+/g, ' '), dropped: note.getAttribute('data-dropped') || '',
+        stash: sessionStorage.getItem('oaAlertPrefill'),
+        msg: document.querySelector('#a-msg').textContent,
+        filters: !document.querySelector('#a-filters').hidden };
+    }, [LEVEL, COUNTRY]);
+    eq(landed.text, TERM, 'save-search: the university search term is in the text box');
+    eq(landed.level, true, `save-search: the entry level is ticked (${LEVEL})`);
+    eq(landed.country, true, `save-search: the location is ticked (${COUNTRY})`);
+    ok(landed.jobs && !landed.deadlines && landed.filters,
+      'save-search: New job postings is the topic, and the filters are on screen');
+    ok(landed.name.includes(LEVEL) && landed.name.includes(COUNTRY),
+      `save-search: a name is suggested from the filters (${JSON.stringify(landed.name)})`);
+    ok(/Create an alert/.test(landed.legend), 'save-search: it is a NEW alert, not an edit');
+    ok(/^Filled in from your search/.test(landed.note) && /characteristics you ticked/.test(landed.note),
+      'save-search: the note says the form was filled in, and names the characteristics as not carried');
+    ok(landed.dropped.split(',').includes('chars'), 'save-search: …keyed on the filter that was dropped');
+    ok(!/prefill|level=|chars=/.test(landed.search),
+      `save-search: the parameters are gone from the address (${JSON.stringify(landed.search)})`);
+    eq(landed.stash, null, 'save-search: and the stash is spent');
+    ok(/jobs page/.test(landed.msg), 'save-search: the form\'s own message line says where the values came from');
+
+    /* a reload does NOT fill the form again */
+    await q.reload({ waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForSelector('#a-country input', { timeout: 15000 });
+    await q.waitForTimeout(400);
+    const again = await q.evaluate(() => ({
+      note: document.querySelector('#oa-prefill-note').hidden,
+      text: document.querySelector('#a-text').value,
+      name: document.querySelector('#a-name').value }));
+    ok(again.note && again.text === '' && again.name === '',
+      'save-search: a reload after the form was filled starts clean');
+    eq(errors, [], 'save-search: signed-in run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- arriving signed OUT on the alerts page keeps the prefill ------------ */
+  {
+    const { ctx, page: q, errors } = await signedOutPage(
+      `alerts.html?prefill=1&level=${enc(LEVEL)}&dropped=chars`, { wait: false });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.waitForSelector('#oa-needauth:not([hidden])', { timeout: 15000 });
+    const held = await q.evaluate(() => ({ search: location.search,
+      stash: sessionStorage.getItem('oaAlertPrefill'),
+      note: document.querySelector('#oa-prefill-note').hidden }));
+    ok(!/prefill/.test(held.search), 'save-search: signed out, the address is stripped on arrival');
+    ok(!!held.stash && held.note,
+      'save-search: …the prefill is held, and nothing is drawn for a reader who cannot see the form');
+    /* the reader signs in: the shim signs whoever the seed names, so the seed
+       is given the reader first (the gate block's own trick) */
+    await q.evaluate((u) => {
+      window.__FAKE_FB.user = u;
+      return window.OAFB.ready().then((fb) => fb.auth().signInWithPopup({}));
+    }, A_READER);
+    await q.waitForSelector('#oa-prefill-note:not([hidden])', { timeout: 15000 });
+    const after = await q.evaluate((level) => ({
+      level: ([...document.querySelectorAll('#a-level input')].find((n) => n.value === level) || {}).checked,
+      stash: sessionStorage.getItem('oaAlertPrefill'),
+      note: document.querySelector('#oa-prefill-note').textContent }), LEVEL);
+    eq(after.level, true, 'save-search: …and signing in fills the form from it');
+    ok(/characteristics/.test(after.note) && after.stash === null,
+      'save-search: …note and all, spent once');
+    eq(errors, [], 'save-search: alerts-page run — no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a phone: full width, stacked under the download, one shape --------- */
+  {
+    const { ctx, page: q } = await signedInPage(SEARCH, { viewport: { width: 390, height: 850 } });
+    const m = await q.evaluate(() => {
+      const b = document.querySelector('.oa-alert-save'), x = document.querySelector('.oa-export');
+      const r = b.getBoundingClientRect(), xr = x.getBoundingClientRect();
+      const bar = document.querySelector('.oa-filters').getBoundingClientRect();
+      return { h: Math.round(r.height), w: Math.round(r.width), barW: Math.round(bar.width),
+        gap: Math.round(r.top - xr.bottom), shape: getComputedStyle(b).borderRadius,
+        expShape: getComputedStyle(x).borderRadius, expW: Math.round(xr.width),
+        over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    ok(m.h >= 40, `save-search at 390px: a 40px+ target (${m.h}px)`);
+    ok(m.w > m.barW * 0.7 && m.w === m.expW,
+      'save-search at 390px: full width, the same width as the download');
+    ok(m.gap >= 6, `save-search at 390px: stacked under the download with room (${m.gap}px)`);
+    eq(m.shape, m.expShape, 'save-search at 390px: …and the same shape as it');
+    ok(m.over <= 1, 'save-search at 390px: the page still does not scroll sideways');
+    await ctx.close();
+  }
+}
+
+/* ------------------------------ e-mail verification on registration
+
+   Owner, 2026-09-04: an account registered with an e-mail address and a
+   password must press a link in a message before it can be used. The rules
+   enforce it (verified() in _firestore.rules, pinned in selftest.mjs); what
+   is measured HERE is what the BROWSER does with an unverified password
+   account: it is signed out for everything but the "Check your inbox" card,
+   the card's buttons reach the callable first and Firebase's own message
+   when the callable is absent, "I have verified it" lifts the gate, and the
+   page the link opens (verify-email.html) shows the right one of its four
+   cards. The shim stands in for the SDK (_fake-firebase.js: reload,
+   getIdToken, sendEmailVerification, applyActionCode and httpsCallable are
+   all recorded), so every path is driven rather than read off the source. */
+{
+  const UNVERIFIED = { uid: 'unverified-uid-00001', email: 'newcomer@example.edu',
+    displayName: '', emailVerified: false, providerData: [{ providerId: 'password' }] };
+
+  /* -- jobs.html: the pending session is signed out for everything but the card -- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html', { user: UNVERIFIED });
+    await q.waitForSelector('#oa-verify-chip', { timeout: 15000 });
+    await q.waitForTimeout(400);
+    const st = await q.evaluate(() => {
+      const panel = document.querySelector('#oa-verify');
+      const cards = [...document.querySelectorAll('#oa-jobs .oa-card')];
+      return {
+        chip: (document.querySelector('#oa-verify-chip') || {}).textContent,
+        chipPending: !!document.querySelector('#oa-verify-chip.oa-acct-pending'),
+        nameChip: !!document.querySelector('#oa-chip'),
+        panel: !!panel,
+        heading: panel ? panel.querySelector('h3').textContent : '',
+        lede: panel ? panel.querySelector('.oa-modal-lede').textContent : '',
+        text: panel ? panel.textContent : '',
+        send: !!(panel && panel.querySelector('#oa-verify-send')),
+        sendLabel: panel ? panel.querySelector('#oa-verify-send').textContent : '',
+        check: !!(panel && panel.querySelector('#oa-verify-check')),
+        out: !!(panel && panel.querySelector('#oa-verify-out')),
+        cards: cards.length,
+        locked: cards.filter((c) => c.classList.contains('oa-card-locked')).length,
+        auth: document.documentElement.getAttribute('data-oa-auth'),
+        hint: localStorage.getItem('oaAuthHint'),
+        user: window.OAAccounts.user(),
+        hintFn: window.OAAccounts.hint(),
+        pending: (window.OAAccounts.pendingUser() || {}).uid,
+        needs: window.OAAccounts.needsVerification(),
+        writes: window.__fb.ops('set').filter((p) => /^(registeredUsers|userDirectory|accountKeys)\//.test(p)),
+        profileRead: window.__fb.ops('get').filter((p) => /^profiles\//.test(p)),
+      };
+    });
+    eq(st.chip, 'Verify your e-mail', 'verify: the header chip says what the account has to do');
+    ok(st.chipPending && !st.nameChip,
+      'verify: …in its own pending state, and no name chip is painted for an unusable account');
+    ok(st.panel && st.heading === 'Check your inbox',
+      'verify: the "Check your inbox" card opens on its own');
+    ok(st.lede.includes(UNVERIFIED.email) && /Operations Academia/.test(st.lede),
+      'verify: …naming the address, and that a message from Operations Academia is on its way');
+    ok(st.send && st.check && st.out,
+      'verify: …with Send the e-mail again, I have verified it, and a way out');
+    ok(/If a message from Operations Academia reached/.test(st.lede) && !/on its way/.test(st.lede)
+       && st.sendLabel === 'Send the e-mail',
+      'verify: on a sign-in, where nothing was sent, the card promises nothing "on its way" and the button offers to send it');
+    ok(/spam/i.test(st.text) && /operationsacademia@gmail\.com/.test(st.text),
+      'verify: …and says to look in spam, naming the sender');
+    ok(st.cards > 1 && st.locked === st.cards,
+      `verify: every card on the jobs page is LOCKED for the pending account (${st.locked} of ${st.cards})`);
+    eq([st.user, st.hintFn, st.auth], [null, 'out', 'out'],
+      'verify: user() is null, hint() is out, and the head reserve reads out');
+    eq(st.hint, null, 'verify: no localStorage hint is written, so the next page cannot paint it signed in');
+    eq(st.pending, UNVERIFIED.uid, 'verify: pendingUser() is the one export that can see the account');
+    ok(st.needs === true, 'verify: needsVerification() says so');
+    eq(st.writes, [], 'verify: no roster row, no tally and no identity key is written while pending');
+    eq(st.profileRead, [], 'verify: …and the profile is not read either');
+
+    /* Send again: the callable FIRST, and only that */
+    await q.click('#oa-verify-send');
+    await q.waitForFunction(() => window.__fb.at('callable', 'sendVerificationEmail') >= 0,
+      null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const sent = await q.evaluate((uid) => ({
+      callable: window.__fb.at('callable', 'sendVerificationEmail'),
+      fallback: window.__fb.at('sendEmailVerification', uid),
+      msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+    }), UNVERIFIED.uid);
+    ok(sent.callable >= 0 && sent.fallback < 0,
+      'verify: Send again calls the site\'s own function and NOT Firebase\'s message');
+    ok(/Sent to newcomer@example\.edu/.test(sent.msg), 'verify: …and the card says it went');
+
+    /* I have verified it, while it has not been: the gate holds */
+    await q.click('#oa-verify-check');
+    await q.waitForTimeout(400);
+    const held = await q.evaluate(() => ({
+      reload: window.__fb.at('reload', 'unverified-uid-00001'),
+      panel: !!document.querySelector('#oa-verify'),
+      msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+      user: window.OAAccounts.user(),
+    }));
+    ok(held.reload >= 0 && held.panel && held.user === null && /Not confirmed yet/.test(held.msg),
+      'verify: "I have verified it" reloads the user, and holds the gate while the address is still unconfirmed');
+    eq(errors, [], 'verify: no uncaught script error on the pending jobs page');
+    await ctx.close();
+  }
+
+  /* -- the callable is absent: Firebase's own message is the fallback ------ */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/not-found' } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction((uid) => window.__fb.at('sendEmailVerification', uid) >= 0,
+      UNVERIFIED.uid, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const fb = await q.evaluate((uid) => {
+      const rec = window.__fb.log.find((e) => e.op === 'sendEmailVerification' && e.path === uid);
+      return {
+        callable: window.__fb.at('callable', 'sendVerificationEmail'),
+        fallback: window.__fb.at('sendEmailVerification', uid),
+        url: rec && rec.data && rec.data.url,
+        from: (document.querySelector('#oa-verify-from') || {}).textContent,
+        msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+      };
+    }, UNVERIFIED.uid);
+    ok(fb.callable >= 0 && fb.fallback > fb.callable,
+      'verify: with the function not deployed, the card tries it and then FALLS BACK to sendEmailVerification');
+    eq(fb.url, 'https://www.operationsacademia.org/verify-email.html',
+      'verify: …landing Firebase\'s own link on the site\'s verify page');
+    ok(/firebaseapp\.com/.test(fb.from) && /Sent to/.test(fb.msg),
+      'verify: …and the sender line then names Firebase\'s address, so the reader knows what to look for');
+    eq(errors, [], 'verify: no uncaught script error on the fallback path');
+    await ctx.close();
+  }
+
+  /* -- the function refuses, and says why: its words reach the card --------- */
+  {
+    const DAY = 'That is enough messages for today. Try again tomorrow, and look in spam.';
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/resource-exhausted', callableMessage: DAY } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction(() => /today|moment ago/.test((document.querySelector('#oa-verify-msg') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    const th = await q.evaluate((uid) => ({
+      msg: document.querySelector('#oa-verify-msg').textContent,
+      fallback: window.__fb.at('sendEmailVerification', uid),
+    }), UNVERIFIED.uid);
+    eq(th.msg, DAY, 'verify: a daily-limit refusal reaches the card in the function\'s own words, not the 90-second sentence');
+    eq(th.fallback, -1, 'verify: …and a throttle is never re-sent through Firebase');
+    eq(errors, [], 'verify: no uncaught script error on the throttle path');
+    await ctx.close();
+  }
+  {
+    // a slow mailbox: the callable times out, and Firebase's message goes instead
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/deadline-exceeded' } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction((uid) => window.__fb.at('sendEmailVerification', uid) >= 0,
+      UNVERIFIED.uid, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const slow = await q.evaluate(() => ({ msg: document.querySelector('#oa-verify-msg').textContent }));
+    ok(/Sent to newcomer@example\.edu/.test(slow.msg),
+      'verify: a send that timed out falls back to Firebase\'s own message rather than reporting a failure');
+    eq(errors, [], 'verify: no uncaught script error on the slow-send path');
+    await ctx.close();
+  }
+  {
+    // a refusal that is neither a throttle nor a reason to fall back: worded
+    // as a send that failed, never as a sign-in failure with a raw code
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { callableFails: 'functions/permission-denied' } });
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction(() => /could not|failed/i.test((document.querySelector('#oa-verify-msg') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    const ref = await q.evaluate((uid) => ({
+      msg: document.querySelector('#oa-verify-msg').textContent,
+      fallback: window.__fb.at('sendEmailVerification', uid),
+    }), UNVERIFIED.uid);
+    ok(/We could not send the message just now/.test(ref.msg) && !/Sign-in failed/.test(ref.msg) && !/functions\//.test(ref.msg),
+      'verify: a refused send is worded as one, with no "Sign-in failed" and no raw code');
+    eq(ref.fallback, -1, 'verify: …and is not the fallback\'s business');
+    eq(errors, [], 'verify: no uncaught script error on the refused path');
+    await ctx.close();
+  }
+  {
+    // the Functions bundle loads and defines nothing: the load-failure branch,
+    // driven for real rather than read off the source
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { noFunctions: true } });
+    await q.route('**/firebase-functions-compat.js', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: '/* nothing */' }));
+    await q.waitForSelector('#oa-verify-send', { timeout: 15000 });
+    await q.click('#oa-verify-send');
+    await q.waitForFunction((uid) => window.__fb.at('sendEmailVerification', uid) >= 0,
+      UNVERIFIED.uid, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    const nf = await q.evaluate((uid) => ({
+      callable: window.__fb.at('callable', 'sendVerificationEmail'),
+      fallback: window.__fb.at('sendEmailVerification', uid),
+      from: (document.querySelector('#oa-verify-from') || {}).textContent,
+      msg: (document.querySelector('#oa-verify-msg') || {}).textContent,
+    }), UNVERIFIED.uid);
+    ok(nf.callable === -1 && nf.fallback >= 0,
+      'verify: with a Functions bundle that defined nothing, no callable is tried and Firebase\'s message goes');
+    ok(/firebaseapp\.com/.test(nf.from) && /Sent to/.test(nf.msg),
+      'verify: …and the sender line names Firebase\'s address');
+    eq(errors, [], 'verify: no uncaught script error on the load-failure path');
+    await ctx.close();
+  }
+
+  /* -- the archive's hint: a pending account is painted signed OUT --------- */
+  {
+    /* /v2/ is frozen and writes oaAuthHint for any signed-in user. The live
+       pending branch writes a marker beside it, and the head snippet on every
+       live page reads a hint naming that uid as no hint: measured on the
+       FIRST value the snippet stamps, before any script of the page runs. */
+    /* an init script runs before the document has an element to observe, so
+       the stamp is caught where it is made: every setAttribute of that name */
+    const observe = `
+      window.__auth = [];
+      (function () {
+        var orig = Element.prototype.setAttribute;
+        Element.prototype.setAttribute = function (n, v) {
+          if (n === 'data-oa-auth') window.__auth.push(String(v));
+          return orig.apply(this, arguments);
+        };
+      })();`;
+    const hintFor = (u) => `localStorage.setItem('oaAuthHint', ${JSON.stringify(JSON.stringify({ uid: u.uid, email: u.email, name: 'X', w: 120 }))});`;
+    {
+      const { ctx, page: q, errors } = await signedInPage('jobs.html', {
+        user: UNVERIFIED,
+        init: hintFor(UNVERIFIED) + `localStorage.setItem('oaAuthPending', ${JSON.stringify(UNVERIFIED.uid)});` + observe,
+      });
+      await q.waitForSelector('#oa-verify-chip', { timeout: 15000 });
+      await q.waitForTimeout(300);
+      const h = await q.evaluate(() => ({
+        first: window.__auth[0],
+        now: document.documentElement.getAttribute('data-oa-auth'),
+        hintFn: window.OAAccounts.hint(),
+        hint: localStorage.getItem('oaAuthHint'),
+        marker: localStorage.getItem('oaAuthPending'),
+        locked: document.querySelectorAll('#oa-jobs .oa-card-locked').length,
+        cards: document.querySelectorAll('#oa-jobs .oa-card').length,
+      }));
+      eq(h.first, 'out', 'archive hint: the head snippet paints a hint for a PENDING uid as signed out, on the first frame');
+      ok(h.now === 'out' && h.hintFn === 'out' && h.hint === null && h.marker === UNVERIFIED.uid,
+        'archive hint: …the pending branch then clears the hint and keeps the marker');
+      ok(h.cards > 1 && h.locked === h.cards, 'archive hint: …and every card is locked');
+      eq(errors, [], 'archive hint: no uncaught script error');
+      await ctx.close();
+    }
+    {
+      // the control: the same hint for a verified reader, no marker, paints in
+      const { ctx, page: q, errors } = await signedInPage('jobs.html', { user: A_READER, init: hintFor(A_READER) + observe });
+      const h = await q.evaluate(() => ({ first: window.__auth[0], marker: localStorage.getItem('oaAuthPending') }));
+      eq(h.first, 'in', 'archive hint: a hint with no marker still paints signed in on the first frame');
+      eq(h.marker, null, 'archive hint: …and a usable session writes no marker');
+      eq(errors, [], 'archive hint: no uncaught script error on the control');
+      await ctx.close();
+    }
+  }
+
+  /* -- "I have verified it", once the link HAS been pressed: the lift ------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('jobs.html',
+      { user: UNVERIFIED, seed: { reloadVerifies: true } });
+    await q.waitForSelector('#oa-verify-check', { timeout: 15000 });
+    await q.click('#oa-verify-check');
+    await q.waitForSelector('#oa-chip', { timeout: 15000 });
+    await q.waitForTimeout(500);
+    const lifted = await q.evaluate((uid) => ({
+      panel: !!document.querySelector('#oa-verify'),
+      pendingChip: !!document.querySelector('#oa-verify-chip'),
+      locked: document.querySelectorAll('#oa-jobs .oa-card-locked').length,
+      auth: document.documentElement.getAttribute('data-oa-auth'),
+      hint: (JSON.parse(localStorage.getItem('oaAuthHint') || 'null') || {}).uid,
+      user: (window.OAAccounts.user() || {}).uid,
+      token: window.__fb.at('getIdToken', uid + ':force'),
+      reload: window.__fb.at('reload', uid),
+      tally: window.__fb.ops('set').some((p) => p === 'registeredUsers/' + uid),
+    }), UNVERIFIED.uid);
+    ok(!lifted.panel && !lifted.pendingChip,
+      'verify: once confirmed, the card closes and the pending chip goes');
+    eq(lifted.locked, 0, 'verify: …every card unlocks');
+    eq([lifted.auth, lifted.hint, lifted.user], ['in', UNVERIFIED.uid, UNVERIFIED.uid],
+      'verify: …the session is an ordinary signed-in one: hint written, reserve in, user() answers');
+    ok(lifted.token > lifted.reload,
+      'verify: the lift refreshes the ID TOKEN after the reload, or the rules still read it unverified');
+    ok(lifted.tally, 'verify: …and the session then does what a sign-in does (the tally is written)');
+    eq(errors, [], 'verify: no uncaught script error on the lift');
+    await ctx.close();
+  }
+
+  /* -- verify-email.html: where the link lands ------------------------------ */
+  const LINK = 'verify-email.html?mode=verifyEmail&oobCode=AbC123xyz&continueUrl=' +
+    encodeURIComponent('https://www.operationsacademia.org/account.html');
+
+  {
+    // the signed-in pending reader, whose link works. The registration form
+    // stamps oaProfileAsked before any link can be pressed, so the fixture
+    // does too; without it the first-run profile card opens the moment the
+    // account is lifted and takes the focus this block measures.
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main',
+        init: `localStorage.setItem('oaProfileAsked:${UNVERIFIED.uid}', '1');` });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.waitForTimeout(300);
+    const done = await q.evaluate((uid) => ({
+      h2: document.querySelector('#ve-done h2').textContent,
+      cont: document.querySelector('#ve-continue'),
+      contShown: !document.querySelector('#ve-continue').hidden,
+      contHref: document.querySelector('#ve-continue').getAttribute('href'),
+      signinShown: !document.querySelector('#ve-signin').hidden,
+      applied: window.__fb.log.find((e) => e.op === 'applyActionCode'),
+      reload: window.__fb.at('reload', uid),
+      panel: !!document.querySelector('#oa-verify'),
+      chip: !!document.querySelector('#oa-chip'),
+      user: (window.OAAccounts.user() || {}).uid,
+      others: ['ve-wait', 've-error', 've-nocode'].filter((id) => !document.getElementById(id).hidden),
+      focusIn: document.getElementById('ve-done').contains(document.activeElement),
+      focusTag: document.activeElement && document.activeElement.tagName,
+      url: location.search,
+      note: document.getElementById('ve-done-note').textContent,
+    }), UNVERIFIED.uid);
+    eq(done.h2, 'Your e-mail address is verified', 'verify page: a working link shows the verified state');
+    ok(done.focusIn && done.focusTag === 'H2',
+      'verify page: …and the keyboard lands on its heading, so a screen reader hears the outcome');
+    eq(done.url, '', 'verify page: the one-time code is off the address bar');
+    ok(/ready to use/.test(done.note), 'verify page: the card\'s own note stands for a confirmed account');
+    ok(done.contShown && done.contHref === 'account.html' && !done.signinShown,
+      'verify page: …with Continue to your account for the signed-in reader');
+    ok(done.applied && done.applied.path === 'AbC123xyz',
+      'verify page: the code on the address is the one applied');
+    ok(done.reload >= 0 && done.user === UNVERIFIED.uid && done.chip,
+      'verify page: the pending account is reloaded and lifted, so the chip shows the name');
+    ok(!done.panel, 'verify page: the "Check your inbox" card is never drawn over this page');
+    eq(done.others, [], 'verify page: the other three cards stay hidden');
+    eq(errors, [], 'verify page: no uncaught script error');
+    await ctx.close();
+  }
+  {
+    // a reader with no session at all (the commonest case: the link opened in
+    // another browser) still gets the confirmation, and a way to sign in
+    const { ctx, page: q, errors } = await signedOutPage(LINK, { selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    const out = await q.evaluate(() => ({
+      contShown: !document.querySelector('#ve-continue').hidden,
+      signinShown: !document.querySelector('#ve-signin').hidden,
+    }));
+    ok(!out.contShown && out.signinShown, 'verify page: signed out, the verified state offers Sign in instead');
+    await q.click('#ve-signin');
+    await q.waitForSelector('#oa-auth', { timeout: 8000 });
+    ok(true, 'verify page: …which opens the sign-in box');
+    eq(errors, [], 'verify page: no uncaught script error signed out');
+    await ctx.close();
+  }
+  {
+    // …and signing in THROUGH that box changes the card: Continue appears,
+    // Sign in goes, with no reload (the page listens for the session)
+    const { ctx, page: q, errors } = await signedOutPage(LINK,
+      { seed: { signInUser: A_READER }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.click('#ve-signin');
+    await q.waitForSelector('#oa-auth-form', { timeout: 8000 });
+    await q.fill('#oa-auth-form [name="email"]', A_READER.email);
+    await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+    await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+    await q.waitForFunction(() => !document.querySelector('#ve-continue').hidden, null, { timeout: 8000 });
+    const si = await q.evaluate(() => ({
+      signinShown: !document.querySelector('#ve-signin').hidden,
+      box: !!document.querySelector('#oa-auth'),
+      user: (window.OAAccounts.user() || {}).uid,
+    }));
+    ok(!si.signinShown && si.user === A_READER.uid && !si.box,
+      'verify page: after signing in on the verified card, Continue is offered and Sign in is gone');
+    eq(errors, [], 'verify page: no uncaught script error signing in on the card');
+    await ctx.close();
+  }
+  {
+    // the code applied, but THIS account is still unconfirmed after its reload:
+    // the link belonged to another address, and Continue would lead to a
+    // locked account page
+    const { ctx, page: q, errors } = await signedInPage(LINK, { user: UNVERIFIED, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    await q.waitForTimeout(200);
+    const mm = await q.evaluate(() => ({
+      note: document.getElementById('ve-done-note').textContent,
+      contShown: !document.querySelector('#ve-continue').hidden,
+      signinShown: !document.querySelector('#ve-signin').hidden,
+      signinText: document.querySelector('#ve-signin').textContent,
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent,
+      pending: (window.OAAccounts.pendingUser() || {}).uid,
+      applied: window.__fb.log.some((e) => e.op === 'applyActionCode'),
+    }));
+    ok(mm.applied && /not the one this account uses/.test(mm.note),
+      'verify page: a code that applied while this account stays unconfirmed says the link was another address\'s');
+    ok(!mm.contShown && mm.signinShown && mm.signinText === 'Use a different account',
+      'verify page: …offers a different account, never Continue into a locked account page');
+    ok(mm.chip === 'Verify your e-mail' && mm.pending === UNVERIFIED.uid,
+      'verify page: …and the account here stays pending');
+    await q.click('#ve-signin');
+    await q.waitForSelector('#oa-auth', { timeout: 8000 });
+    const out2 = await q.evaluate((uid) => ({
+      pending: window.OAAccounts.pendingUser(),
+      signedOut: window.__fb.at('signOut', '[DEFAULT]') >= 0,
+      note: document.getElementById('ve-done-note').textContent,
+      panel: !!document.querySelector('#oa-verify'),
+    }), UNVERIFIED.uid);
+    ok(out2.pending === null && out2.signedOut && !out2.panel && /ready to use/.test(out2.note),
+      'verify page: pressing it signs the pending account out and opens the sign-in box, and the card re-decides its note');
+    eq(errors, [], 'verify page: no uncaught script error on the mismatch path');
+    await ctx.close();
+  }
+  {
+    // an expired link, with the unconfirmed account signed in: say what
+    // happened, and offer a new one that goes through the same send path
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { applyActionCodeFails: 'auth/expired-action-code' }, selector: '#main' });
+    await q.waitForSelector('#ve-error', { state: 'visible', timeout: 15000 });
+    const err = await q.evaluate(() => ({
+      why: document.querySelector('#ve-error-why').textContent,
+      resendShown: !document.querySelector('#ve-resend').hidden,
+      hintShown: !document.querySelector('#ve-error-hint').hidden,
+      done: !document.getElementById('ve-done').hidden,
+      panel: !!document.querySelector('#oa-verify'),
+      chip: (document.querySelector('#oa-verify-chip') || {}).textContent,
+    }));
+    ok(/expired/i.test(err.why) && !err.done, 'verify page: an expired link says so, in the accounts module\'s words');
+    ok(err.resendShown && !err.hintShown, 'verify page: …and offers "Send me a new link" to the unconfirmed account');
+    ok(!err.panel && err.chip === 'Verify your e-mail',
+      'verify page: the account stays pending (chip), and still no card over the page');
+    await q.click('#ve-resend');
+    await q.waitForFunction(() => window.__fb.at('callable', 'sendVerificationEmail') >= 0,
+      null, { timeout: 8000 });
+    await q.waitForTimeout(200);
+    ok(/Sent to newcomer@example\.edu/.test(await q.$eval('#ve-msg', (n) => n.textContent)),
+      'verify page: pressing it sends through the same function the card uses, and says so');
+    /* the chip is the one account control in the header, and on this page a
+       press on it must still do something: it opens the card, which the page
+       otherwise never draws on its own */
+    await q.click('#oa-verify-chip');
+    await q.waitForSelector('#oa-verify', { timeout: 8000 });
+    const pressed = await q.evaluate(() => ({
+      heading: document.querySelector('#oa-verify h3').textContent,
+      focusIn: document.querySelector('#oa-verify').contains(document.activeElement),
+    }));
+    ok(pressed.heading === 'Check your inbox' && pressed.focusIn,
+      'verify page: a PRESS on the header chip opens the card here too, with focus inside it');
+    await q.keyboard.press('Escape');
+    await q.waitForFunction(() => !document.querySelector('#oa-verify'), null, { timeout: 8000 });
+    eq(await q.evaluate(() => document.activeElement && document.activeElement.id), 'oa-verify-chip',
+      'verify page: …and Escape closes it with the keyboard back on the chip');
+    /* Tab stays inside the card while it is open */
+    await q.click('#oa-verify-chip');
+    await q.waitForSelector('#oa-verify', { timeout: 8000 });
+    await q.focus('#oa-verify-out');
+    await q.keyboard.press('Tab');
+    const tabbed = await q.evaluate(() => document.querySelector('#oa-verify').contains(document.activeElement));
+    ok(tabbed, 'verify page: Tab from the card\'s last control wraps to its first rather than leaving the dialog');
+    await q.keyboard.press('Escape');
+    eq(errors, [], 'verify page: no uncaught script error on the expired path');
+    await ctx.close();
+  }
+  {
+    // an invalid link, signed out: no account to resend for, so say what to do
+    const { ctx, page: q, errors } = await signedOutPage(LINK,
+      { seed: { applyActionCodeFails: 'auth/invalid-action-code' }, selector: '#main' });
+    await q.waitForSelector('#ve-error', { state: 'visible', timeout: 15000 });
+    const err = await q.evaluate(() => ({
+      why: document.querySelector('#ve-error-why').textContent,
+      resendShown: !document.querySelector('#ve-resend').hidden,
+      hint: document.querySelector('#ve-error-hint'),
+      hintShown: !document.querySelector('#ve-error-hint').hidden,
+      hintText: document.querySelector('#ve-error-hint').textContent,
+    }));
+    ok(/not valid any more/.test(err.why), 'verify page: an invalid link says so');
+    ok(!err.resendShown && err.hintShown && /sign in with your e-mail/i.test(err.hintText),
+      'verify page: …and, signed out, says to sign in with the e-mail and password to get a new one');
+    eq(errors, [], 'verify page: no uncaught script error on the invalid path');
+    await ctx.close();
+  }
+  {
+    // no code at all: Firebase's own fallback handler applies the code and
+    // then lands here, so a pending account is reloaded and shown verified
+    const { ctx, page: q, errors } = await signedInPage('verify-email.html',
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main' });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    const nc = await q.evaluate((uid) => ({
+      applied: window.__fb.log.some((e) => e.op === 'applyActionCode'),
+      reload: window.__fb.at('reload', uid),
+      user: (window.OAAccounts.user() || {}).uid,
+    }), UNVERIFIED.uid);
+    ok(!nc.applied && nc.reload >= 0 && nc.user === UNVERIFIED.uid,
+      'verify page: with no code, a signed-in account is reloaded rather than refused, and lifted');
+    eq(errors, [], 'verify page: no uncaught script error with no code, signed in');
+    await ctx.close();
+  }
+  {
+    // no code, signed out: a short explanation and a Sign in button
+    const { ctx, page: q, errors } = await signedOutPage('verify-email.html', { selector: '#main' });
+    await q.waitForSelector('#ve-nocode', { state: 'visible', timeout: 15000 });
+    const nc = await q.evaluate(() => ({
+      why: document.querySelector('#ve-nocode-why').textContent,
+      signin: !document.querySelector('#ve-nocode-signin').hidden,
+      resend: !document.querySelector('#ve-nocode-resend').hidden,
+    }));
+    ok(/link in the message/.test(nc.why) && nc.signin && !nc.resend,
+      'verify page: with no code and no session, it explains itself and offers Sign in');
+    eq(errors, [], 'verify page: no uncaught script error with no code, signed out');
+    await ctx.close();
+  }
+
+  /* -- the 390px gate for the new page, both readers ------------------------ */
+  for (const [label, opts] of [
+    ['signed out', { user: null }],
+    ['pending', { user: UNVERIFIED, seed: { applyActionCodeFails: 'auth/expired-action-code' } }],
+  ]) {
+    const { ctx, page: m, errors } = await signedInPage(LINK,
+      { ...opts, selector: '#main', viewport: { width: 390, height: 844 } });
+    await m.waitForFunction(() => document.getElementById('ve-wait').hidden, null, { timeout: 15000 });
+    await m.waitForTimeout(300);
+    const r = await m.evaluate(() => {
+      const btns = [...document.querySelectorAll('#main .v3-btn')]
+        .filter((b) => !b.hidden && b.getBoundingClientRect().height > 0);
+      return {
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        buttons: btns.length,
+        short: btns.filter((b) => b.getBoundingClientRect().height < 42).map((b) => b.id),
+        wide: btns.filter((b) => b.getBoundingClientRect().right > window.innerWidth).map((b) => b.id),
+      };
+    });
+    eq(r.overflowX, 0, `verify page (${label}): no sideways scroll at 390px`);
+    ok(r.buttons > 0, `verify page (${label}): a button is on screen to measure`);
+    eq(r.short, [], `verify page (${label}): every button is a 42px target`);
+    eq(r.wide, [], `verify page (${label}): …and none runs off the screen`);
+    eq(errors, [], `verify page (${label}): no uncaught script error at 390px`);
+    await ctx.close();
+  }
+}
 
 /* ------------------------------------------------------------------ done */
 

@@ -228,9 +228,12 @@ export function unsubHeaders(manageUrl) {
 
 /* ------------------------------------------------------------------ admin */
 
-/** The Firebase Admin SDK, or null. Shared so both mailers report the same
-    thing when the credential is missing or malformed. */
-export async function firestore() {
+/** The Firebase Admin SDK, or null. Shared so every mailer and the roster
+    sync report the same thing when the credential is missing or malformed.
+    Returns `{ db, auth }`: the Firestore handle every mailer reads, and the
+    Auth handle the two jobs that list accounts need (sync-user-directory.mjs,
+    verify-existing-users.mjs). ONE definition of "the Admin SDK, or null". */
+export async function firebaseAdmin() {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (!raw || !raw.trim()) return null;
   let creds;
@@ -253,5 +256,11 @@ export async function firestore() {
   }
   const app = admin.default || admin;
   if (!app.apps.length) app.initializeApp({ credential: app.credential.cert(creds) });
-  return app.firestore();
+  return { db: app.firestore(), auth: app.auth() };
+}
+
+/** Firestore alone, for the mailers that never touch Auth. */
+export async function firestore() {
+  const fb = await firebaseAdmin();
+  return fb ? fb.db : null;
 }

@@ -59,7 +59,7 @@
          draws anything. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         /* the width the chip MEASURED last visit, so the reserve is the real
            one and not a guess at how long a name is; absent on a first visit,
            where the stylesheet's own minimum takes over. Bounded because this
@@ -177,6 +177,11 @@
           which we feel may interest you, where you have consented to be contacted for such purposes;
           to notify you about changes to our service. We may contact you by e-mail. If you change your
           mind about being contacted in the future then please let us know.</p>
+          <p>If you register with an e-mail address and a password, we send that address
+          <strong>one</strong> message, from operationsacademia@gmail.com, with a link that confirms
+          the address is yours. The account cannot be used until the link is clicked, and the
+          message is sent again only when you ask for it. Registering with Google needs no such
+          message, because Google has already confirmed the address.</p>
           <p>If you post a job through the Site, we e-mail the address you give us <strong>once</strong>,
           when your posting becomes publicly shown, with the posting as it appears and a link to it.
           That message is about your own submission rather than a subscription, so there is nothing to
@@ -252,15 +257,20 @@
           this is linked to your account; otherwise it is linked only to a random identifier stored in
           your browser. This information is used solely by the Site&rsquo;s maintainer to understand
           how the Site is used and to improve it; it is never published, shared with third parties, or
-          used for advertising. You can request a copy or the deletion of this information at any time
-          by contacting us.</p>
+          used for advertising. From the same record the Site keeps a count of how often each
+          candidate profile was opened and its CV clicked, which is shown only to that candidate
+          (and to the maintainer) and never to anyone else. You can request a copy or the deletion of
+          this information at any time by contacting us.</p>
 
           <p>When you hold an Operations Academia account we keep a short record of
           it so that the Site&rsquo;s maintainer can see who has registered and get in
           touch: the name you show yourself under, the e-mail address you sign in
           with, and when your account was first and last seen. It is readable by the
           maintainer alone &mdash; never by other users, never by the public, and it
-          is never published on the Site or shared with third parties. The maintainer
+          is never published on the Site or shared with third parties. The one thing
+          about registered accounts that is public is how many there are: the Site
+          shows the number of registered users, and how that number has grown over
+          time, and nothing about who they are. The maintainer
           may use it to send you a message, which appears in your own area on the
           Site under &ldquo;Messages&rdquo; and which you can reply to there; those
           messages are private to the two of you. You may remove any message from

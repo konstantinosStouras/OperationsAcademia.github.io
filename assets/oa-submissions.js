@@ -96,13 +96,34 @@
     return d.toISOString().slice(0, 10);
   }
 
+  /** The profile's own view figures, where build-candidate-stats.mjs has
+      written them (the `stats` map on the document): the candidate sees the
+      same numbers on their edit page. Numbers only, and only when present. */
+  function statsLine(d) {
+    var st = d && d.stats && typeof d.stats === 'object' ? d.stats : null;
+    if (!st) return '';
+    var n = function (v) { var x = Number(v); return Number.isFinite(x) && x >= 0 ? Math.floor(x) : 0; };
+    // written out, as the candidate's own panel and account.html write it
+    var times = function (k) { return k + (k === 1 ? ' time' : ' times'); };
+    var upd = String(st.updatedAt || '').slice(0, 10);
+    return '<p class="oa-hint">Opened ' + times(n(st.opens)) + ' and its CV clicked ' +
+      times(n(st.cvClicks)) + ' this season' +
+      (/^\d{4}-\d{2}-\d{2}$/.test(upd) ? ' (updated ' + esc(upd) + ')' : '') + '.</p>';
+  }
+
   function cardHtml(kind, id, d, revealAt) {
     var href = safeHref(kind.link(d));
-    /* Held only while the reveal date is still AHEAD — the same test
-       oa-adminarea's candGroupOf makes, so the two panels on one page cannot
-       disagree about a profile from the reveal day on. */
-    var held = kind.key === 'candidate' && !!revealAt &&
-      new Date().toISOString().slice(0, 10) < revealAt;
+    /* Held only while the reveal INSTANT (14:00 UTC on the reveal day) is
+       still ahead, asked of assets/oa-reveal.js, the same module
+       oa-adminarea's candGroupOf asks, so the two panels on one page cannot
+       disagree about a profile from the reveal day on. No date announced, or
+       a malformed one, reads as held, exactly as the build's gate reads it:
+       describeReveal answers null then, and null is not "revealed". (It used
+       to test the mere presence of a date first, which called every profile
+       live while none was announced, the one state in which the build holds
+       them all.) */
+    var when = kind.key === 'candidate' ? OAReveal.describeReveal(revealAt) : null;
+    var held = kind.key === 'candidate' && !(when && when.revealed);
 
     return '<header>' +
         '<strong>' + esc(kind.title(d)) + '</strong>' +
@@ -122,9 +143,12 @@
         /* Saying so on the card matters: a profile that is nowhere on the site
            looks like one that failed to save, and the reveal gate is the only
            reason it is not there. */
-        ? '<p class="oa-hint">Held until <strong>' + esc(revealAt) + '</strong> — profiles ' +
-          'appear all at once on the day, so this one is not on the site yet.</p>'
+        ? '<p class="oa-hint">Held until <strong>' +
+          esc(when ? when.utc + ' on ' + when.dayLong : 'the reveal date is announced') +
+          '</strong>: profiles appear all at once at that moment, so this one is not on ' +
+          'the site yet.</p>'
         : '') +
+      statsLine(d) +
       '<p class="oa-rv-actions">' +
         '<a class="button blue" href="' + esc(kind.editPath + encodeURIComponent(id)) +
           '">Open &amp; correct</a> ' +

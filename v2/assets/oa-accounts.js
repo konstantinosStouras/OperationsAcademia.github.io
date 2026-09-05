@@ -963,7 +963,8 @@
      to the newest mark it still had. */
   var ALERT_FIELDS = ['name', 'email', 'frequency', 'enabled', 'criteria',
                       'createdAt', 'lastSentAt', 'lastJobAt', 'lastCheckedAt',
-                      'lastUpdateDate', 'lastCandidateAt', 'lastSentCount'];
+                      'lastUpdateDate', 'lastCandidateAt', 'lastDeadlineUntil',
+                      'lastSentCount'];
 
   /** "1 job posting" / "3 job postings". Written out rather than "(s)": these
       lines are the only account of what a merge did, and they should read as

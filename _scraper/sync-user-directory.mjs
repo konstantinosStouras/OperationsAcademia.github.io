@@ -37,6 +37,28 @@
    Auth's lastSignInTime can lag it. The later of the two wins, so a sync run
    can only ever add what Auth knows and never contradict what the site saw.
 
+   TWO SERVED FILES RIDE ON THE SAME READ (owner, 2026-09-05: the number of
+   registered users belongs on the front page, as on /lit/, and the analytics
+   page may show how it grew). Both hold COUNTS AND DATES AND NOTHING ELSE,
+   because everything under data/ is served to anyone who asks:
+
+     data/users-meta.json     { generated, count }
+                              every account Auth holds that is not disabled
+     data/users-growth.json   { generated, first, days: [[yyyy-mm-dd, n], ...] }
+                              one point per UTC day from the first account's
+                              creation day to the generated day, n = how many
+                              of those accounts existed by the end of that day
+
+   `usersMeta` and `usersGrowth` are the pure halves. The collection stays
+   admin-read; the served file is the public path to the one figure the owner
+   made public, and it carries no identity of any kind. The workflow commits
+   them with the rebuild-never-rebase retry the other data writers use; the
+   growth file gains a point every day by construction, so the job commits
+   daily, like data/analytics.json. The COMMITTED SEEDS are the valid empty
+   shapes ({"generated":"","count":0} and {"generated":"","first":"","days":[]}):
+   the page hides its tile and the chart is absent until a run with the
+   credential writes real ones, and the selftest's shape pin is never vacuous.
+
    Modes:
      --scan       report what Auth holds and what would change, write nothing
      --dry-run    the same, said as a diff
@@ -44,6 +66,17 @@
    --------------------------------------------------------------------------- */
 
 import { isMain } from './_main.mjs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
+import { firebaseAdmin, redact } from './_mail.mjs';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const DATA = path.join(HERE, '..', 'data');
+/** The two served files, named once. */
+export const USERS_META = 'users-meta.json';
+export const USERS_GROWTH = 'users-growth.json';
 
 const argv = new Set(process.argv.slice(2));
 const SCAN = argv.has('--scan');
@@ -124,38 +157,78 @@ export function summarise({ seen, written, skipped }) {
     `${skipped} already current.`;
 }
 
-/* -------------------------------------------------------------------- main */
+/* -------------------------------------------------- the two served files */
 
-async function firestoreAndAuth() {
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!raw || !raw.trim()) return null;
-
-  let creds;
-  try {
-    creds = JSON.parse(raw);
-  } catch {
-    try {
-      creds = JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
-    } catch {
-      warn('FIREBASE_SERVICE_ACCOUNT is set but is neither JSON nor base64 JSON');
-      return null;
-    }
-  }
-
-  let admin;
-  try {
-    admin = await import('firebase-admin');
-  } catch {
-    warn('firebase-admin is not installed — run `npm i firebase-admin` in the workflow');
-    return null;
-  }
-  const app = admin.default || admin;
-  if (!app.apps.length) app.initializeApp({ credential: app.credential.cert(creds) });
-  return { db: app.firestore(), auth: app.auth() };
+/** yyyy-mm-dd in UTC from epoch ms. */
+function utcDay(ms) {
+  return new Date(ms).toISOString().slice(0, 10);
 }
 
+/** The accounts a public count may include: everything Auth holds that is
+    not disabled. A disabled account is not a member. */
+export function countable(users) {
+  return (users || []).filter((u) => u && !u.disabled);
+}
+
+/**
+ * data/users-meta.json: how many registered users there are, and when that
+ * was measured. Counts and a date, nothing else, since the file is public.
+ */
+export function usersMeta(users, now) {
+  const at = now instanceof Date ? now : new Date(now || Date.now());
+  return { generated: at.toISOString(), count: countable(users).length };
+}
+
+/**
+ * data/users-growth.json: the cumulative count, one point per UTC day from
+ * the first account's creation day to the generated day. `n` for a day is
+ * how many not-disabled accounts had been created by the end of it, so the
+ * series never decreases and its last value is `usersMeta().count` whenever
+ * every account carries a creation time. Accounts with no readable creation
+ * time are counted from the first day (they exist; when is unknown), so the
+ * two files never disagree about the total. With no accounts at all the
+ * shape is the empty one the seed carries.
+ */
+export function usersGrowth(users, now) {
+  const at = now instanceof Date ? now : new Date(now || Date.now());
+  const list = countable(users);
+  const created = list.map((u) => stamp(u.metadata && u.metadata.creationTime));
+  const known = created.filter(Boolean);
+  if (!list.length) return { generated: at.toISOString(), first: '', days: [] };
+  const undated = created.length - known.length;
+  const firstMs = known.length ? Math.min(...known) : at.getTime();
+  const first = utcDay(firstMs);
+  const last = utcDay(at.getTime());
+  const perDay = new Map();
+  for (const t of known) {
+    const d = utcDay(t);
+    perDay.set(d, (perDay.get(d) || 0) + 1);
+  }
+  const days = [];
+  let running = undated;
+  const cursor = new Date(first + 'T00:00:00Z');
+  const end = new Date(last + 'T00:00:00Z');
+  // a creation time after `now` (a clock skew) is folded into the last day
+  let late = 0;
+  for (const [d, n] of perDay) if (d > last) late += n;
+  while (cursor.getTime() <= end.getTime()) {
+    const d = cursor.toISOString().slice(0, 10);
+    running += perDay.get(d) || 0;
+    if (d === last) running += late;
+    days.push([d, running]);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return { generated: at.toISOString(), first, days };
+}
+
+/* -------------------------------------------------------------------- main */
+
+/* `firebaseAdmin()` in _mail.mjs is the one definition of "the Admin SDK, or
+   null" (credential parsing, the missing-package warning); it returns the
+   Firestore AND the Auth handle, and this job needs both. */
+
 async function main() {
-  const fb = await firestoreAndAuth();
+  const fb = await firebaseAdmin();
   if (!fb) {
     log('no Firebase credentials in this environment — nothing to sync.');
     log('(this is the expected state until the project is set up: _SETUP-FIREBASE.md)');
@@ -172,6 +245,9 @@ async function main() {
 
   let seen = 0, written = 0, skipped = 0;
   let pending = [];
+  /* What the two served files are built from: the flags and the creation
+     time of every account, never a name or an address. */
+  const accounts = [];
 
   const flush = async () => {
     if (!pending.length || SCAN || DRY) { pending = []; return; }
@@ -187,11 +263,16 @@ async function main() {
     const page = await fb.auth.listUsers(1000, token);
     for (const user of page.users) {
       seen++;
+      accounts.push({ disabled: !!user.disabled, metadata: { creationTime: (user.metadata || {}).creationTime } });
       const row = rowFromAuthUser(user, existing[user.uid]);
       if (!row) { skipped++; continue; }
       written++;
       if (SCAN || DRY) {
-        log(`  ${user.uid}  ${row.email || '(no address)'}  ${row.name || '(no name)'}`);
+        /* THE DOCUMENT, NEVER THE PERSON. This prints into the Actions log of
+           a public repository (the workflow's scan button runs it), so the
+           line carries the id and a REDACTED address and never the name: the
+           id already says which row would change. */
+        log(`  ${user.uid}  ${redact(row.email)}`);
       }
       pending.push([user.uid, row]);
       if (pending.length >= 400) await flush();
@@ -202,6 +283,24 @@ async function main() {
   await flush();
 
   log(summarise({ seen, written, skipped }));
+
+  /* The two served files, from the same read. Written whole, every run, and
+     both CHANGE every run: the growth file gains a day's point by
+     construction and the meta file's `generated` is the run instant. So the
+     job commits daily, and the workflow's "nothing changed" branch is the
+     guard for a scan or an empty checkout, never a routine outcome. */
+  const now = new Date();
+  const meta = usersMeta(accounts, now);
+  const growth = usersGrowth(accounts, now);
+  if (!SCAN && !DRY) {
+    await writeFile(path.join(DATA, USERS_META), JSON.stringify(meta, null, 2) + '\n');
+    await writeFile(path.join(DATA, USERS_GROWTH), JSON.stringify(growth) + '\n');
+    log(`wrote data/${USERS_META} (${meta.count} registered users) and ` +
+        `data/${USERS_GROWTH} (${growth.days.length} day(s) from ${growth.first || 'nothing'}).`);
+  } else {
+    log(`would write data/${USERS_META} with count ${meta.count} and ` +
+        `data/${USERS_GROWTH} with ${growth.days.length} day(s).`);
+  }
   if (SCAN || DRY) log(SCAN ? '--scan: nothing written.' : '--dry-run: nothing written.');
 }
 
@@ -260,6 +359,49 @@ function selftest() {
 
   ok(/3 row\(s\) written/.test(summarise({ seen: 10, written: 3, skipped: 7 })),
     'the run says what it did, so a quiet fire is not a silent one');
+
+  /* --- the two served files: counts and dates, nothing else -------------- */
+  const NOW = new Date('2026-09-05T12:00:00Z');
+  const acc = (creation, disabled) => ({ disabled: !!disabled, metadata: { creationTime: creation },
+    email: 'x@y.edu', displayName: 'Somebody' });
+  const roster = [
+    acc('Wed, 02 Sep 2026 08:00:00 GMT'),
+    acc('Wed, 02 Sep 2026 21:00:00 GMT'),
+    acc('Fri, 04 Sep 2026 03:00:00 GMT'),
+    acc('Thu, 03 Sep 2026 03:00:00 GMT', true),
+  ];
+  const meta = usersMeta(roster, NOW);
+  eq(Object.keys(meta), ['generated', 'count'], 'users-meta carries generated and count and nothing else');
+  eq(meta.count, 3, 'the count is every account that is not disabled');
+  eq(meta.generated, '2026-09-05T12:00:00.000Z', 'generated is the run instant, ISO');
+  const growth = usersGrowth(roster, NOW);
+  eq(Object.keys(growth), ['generated', 'first', 'days'], 'users-growth carries generated, first and days and nothing else');
+  eq(growth.first, '2026-09-02', 'first is the first not-disabled account\'s creation day, UTC');
+  eq(growth.days, [['2026-09-02', 2], ['2026-09-03', 2], ['2026-09-04', 3], ['2026-09-05', 3]],
+    'one point per UTC day from the first day to the generated day, cumulative, the disabled account not counted');
+  eq(growth.days[growth.days.length - 1][1], meta.count, 'the last point equals the count, so the two files agree');
+  ok(growth.days.every(([d], i, a) => i === 0 || a[i - 1][0] < d) && growth.days.every(([, n], i, a) => i === 0 || a[i - 1][1] <= n),
+    'days are sorted and never decrease');
+  eq(usersGrowth([], NOW), { generated: '2026-09-05T12:00:00.000Z', first: '', days: [] },
+    'with no accounts the shape is the empty one the seed carries');
+  eq(usersGrowth([acc(undefined)], NOW).days, [['2026-09-05', 1]],
+    'an account with no readable creation time is still counted (from the first day), so the total is never short');
+  ok(!/@|Somebody/.test(JSON.stringify(meta) + JSON.stringify(growth)),
+    'neither file carries an address or a name, whatever the records held');
+
+  /* --- the run's own log, which prints into a PUBLIC Actions log ---------- */
+  const src = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  const mainAt = src.indexOf('async function main()');
+  const mainEnd = src.indexOf('/* ---------------------------------------------------------------- selftest */');
+  ok(mainAt > 0 && mainEnd > mainAt, 'main() was found');
+  const body = src.slice(mainAt, mainEnd);
+  ok(body.length > 1500, 'and is the right size, or the checks below are vacuous');
+  const calls = body.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
+  ok(calls.length >= 5, 'the log lines were really found');
+  ok(calls.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
+      && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, '')) && !/e\.message/.test(l)),
+    'no log line names a person: an address reaches it through redact() only, and a name never');
+  ok(calls.some((l) => /redact\(row\.email\)/.test(l)), 'and the redact exemption is exercised, so the check is not vacuous');
 
   console.log(fails.length
     ? `sync-user-directory selftest: ${fails.length} FAILED, ${pass} passed\n\n  ${fails.join('\n  ')}`

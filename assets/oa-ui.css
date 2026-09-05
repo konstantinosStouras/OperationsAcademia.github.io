@@ -56,6 +56,18 @@
 .oa-acct-btn:hover,
 .oa-acct-chip:hover { background: var(--brand); color: var(--on-brand, #fff); }
 
+/* the PENDING control: a password account whose address is not confirmed
+   yet reads "Verify your e-mail" in the header, in the site's error hue so it
+   is not taken for the signed-out pill or for a name chip. Ink named with the
+   ground, as every painted surface here must be. The live design overrides
+   this in v3.css at a higher specificity; keep the two in step. */
+.oa-acct-btn.oa-acct-pending {
+  border-color: var(--err, #b3413d);
+  color: var(--err, #b3413d);
+  background: var(--err-soft, #fdf1f0);
+}
+.oa-acct-btn.oa-acct-pending:hover { background: var(--err, #b3413d); color: var(--on-brand, #fff); }
+
 .oa-acct-off {
   /* the state shown when sign-in is not configured or unreachable: same box as
      the real control, so the header row never changes height under it */
@@ -1007,6 +1019,23 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
   border-top: 1px solid var(--line-soft, #eee);
   font-size: 12px;
   color: var(--mut, #888);
+}
+
+/* the candidate form's LIVE CARD PREVIEW (owner, 2026-09-04), under the form
+   in the same panel chrome as the alerts page's example e-mail; the card
+   inside it is the candidates list's own (oa-list.css), drawn standing open */
+.oa-cand-preview { margin: 26px 0 0; }
+.oa-cand-preview .oa-preview-head h3 { margin: 0 0 4px; font-size: 17px; }
+.oa-cand-preview .oa-preview-head p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--mut, #646c78); }
+.oa-cand-preview .oa-cards { margin: 0; }
+.oa-cand-preview .oa-card-preview .oa-card-head { cursor: default; }
+.oa-cand-preview .oa-hint { margin: 0; }
+.oa-cand-preview #oa-cand-preview-cv { margin-top: 10px; }
+@media screen and (max-width: 640px) {
+  /* on a phone the preview STACKS under the form, full width, never beside
+     it; the form itself is a single column at this width already */
+  .oa-cand-preview { margin-top: 20px; width: 100%; max-width: 100%; }
+  .oa-cand-preview .oa-preview-body { padding: 12px; }
 }
 
 /* ------------------------------------------------------ the preview index */

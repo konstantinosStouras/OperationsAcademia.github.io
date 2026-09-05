@@ -115,9 +115,9 @@
     var what = row.name + (row.affiliation ? ' — ' + row.affiliation : '');
     if (!window.confirm(
       'Take this profile down?\n\n' + what + '\n\n' +
-      'It stops appearing on the site at the next update, normally within an ' +
-      'hour (or is left out of the reveal, if that is still to come). Nothing is ' +
-      'deleted — editing it again puts it back.')) return;
+      'It stops appearing on the candidates page within a few minutes, or is left ' +
+      'out of the reveal if that is still to come. Nothing is deleted: editing it ' +
+      'again puts it back.')) return;
 
     btn.disabled = true;
     btn.textContent = 'Taking down…';

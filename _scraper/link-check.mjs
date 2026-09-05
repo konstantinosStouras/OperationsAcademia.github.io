@@ -148,6 +148,11 @@ const NOINDEX_OK = new Set([
   // page whose whole audience is one signed-in account has no business in a
   // search index (share-check lists it card: false for the same reason)
   'admin-area.html',
+  // the e-mail verification landing page: reached only from the link in a
+  // message, it confirms one address and says whether that worked. There is
+  // nothing on it for a search index and nothing anybody would share
+  // (share-check lists it card: false for the same reason)
+  'verify-email.html',
 ]);
 
 for (const file of walk(ROOT)) {

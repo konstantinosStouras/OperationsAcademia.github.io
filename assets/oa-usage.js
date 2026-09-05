@@ -31,6 +31,28 @@
   var timer = null;
   var pending = false;
 
+  /** A password account whose address is not confirmed yet is signed out
+      for everything on the site, this record included: the rules refuse a
+      session filed under its uid (verified() in _firestore.rules), and a
+      refused write is silently dropped below, so the session would simply
+      vanish from the record. It is filed as an anonymous visitor instead.
+      The test is the one assets/oa-accounts.js makes in needsVerification. */
+  function usable(u) {
+    if (!u) return null;
+    var pw = (u.providerData || []).some(function (p) { return !!p && p.providerId === 'password'; });
+    return u.emailVerified === false && pw ? null : u;
+  }
+
+  /** The page a session is filed under. verify-email.html is opened with a
+      one-time verification code on its query string, and a code is a
+      credential: it is never copied into a record, so a query carrying one
+      is dropped whole and the path alone is kept. */
+  function pageOf() {
+    var q = String(location.search || '');
+    if (/[?&]oobCode=/.test(q)) return location.pathname.slice(0, 300);
+    return (location.pathname + q).slice(0, 300);
+  }
+
   /** The identity a session is filed under: the uid, else a stable random
       per-browser id so an anonymous visitor's return visits correlate. */
   function who() {
@@ -55,7 +77,7 @@
       uid: id,
       email: (user && user.email) || '',
       sid: sid,
-      page: (location.pathname + location.search).slice(0, 300),
+      page: pageOf(),
       start: start,
       last: Date.now(),
       dur: Math.round((Date.now() - start) / 1000),
@@ -71,17 +93,47 @@
       .catch(function () { pending = false; /* rules not deployed / offline */ });
   }
 
+  /* WHICH CARD a click landed in, when it landed in one (2026-09-05). A card
+     on a list page is an `li.oa-card` whose id is the row's own
+     ('job-<row id>', candidates included — the engine names every card that
+     way), so the id is carried as `c` and the click can be attributed to
+     one posting or one profile afterwards. `o` is set when the click OPENED
+     the card: the head button, on a card the reader may read (not the
+     blurred locked one, whose press offers the sign-in box), and not already
+     expanded (the same button closes it). Read in the capture phase, so the
+     state is the one BEFORE the engine's own handler flips it. This is what
+     build-candidate-stats.mjs counts a candidate's own profile from; the
+     shape stays a small map in the same bounded list, so the rules need
+     nothing new. */
+  function cardOf(el) {
+    var li = el.closest && el.closest('li.oa-card');
+    if (!li || !li.id) return null;
+    var out = { c: String(li.id).slice(0, 120) };
+    if (el.classList.contains('oa-card-head') &&
+        !li.classList.contains('oa-card-locked') &&
+        el.getAttribute('aria-expanded') !== 'true') {
+      out.o = 1;
+    }
+    return out;
+  }
+
   // capture-phase, so a click that navigates away is still seen; only
   // interactive elements, short label only — never form VALUES
   document.addEventListener('click', function (e) {
     var el = e.target && e.target.closest && e.target.closest('a, button');
     if (!el) return;
-    clicks.push({
+    var rec = {
       t: Date.now(),
       k: el.tagName.toLowerCase(),
       x: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
       h: (el.getAttribute('href') || '').slice(0, 200)
-    });
+    };
+    var card = cardOf(el);
+    if (card) {
+      rec.c = card.c;
+      if (card.o) rec.o = 1;
+    }
+    clicks.push(rec);
     if (clicks.length > 400) clicks = clicks.slice(-400);
   }, true);
 
@@ -102,7 +154,7 @@
 
   OAFB.ready().then(function (fb) {
     fb.auth().onAuthStateChanged(function (u) {
-      user = u || null;
+      user = usable(u);
       if (!timer) {
         flush();                                  // session opens
         timer = setInterval(flush, 60000);        // rolling duration
