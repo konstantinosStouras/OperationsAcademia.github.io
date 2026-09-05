@@ -14451,6 +14451,88 @@ async function testEmailVerification() {
     'the shim carries the switches those checks drive');
 }
 
+/* ------------- the Q&A archive carried into the forum (owner, 2026-09-05)
+
+   "prepopulate the OA forum with anonymous users having posted the questions
+   ... and then anonymous users having posted the answers", from the tracking
+   workbook's 2026 Q&A tab, tagged 2026 Q&A. _scraper/seed-forum.mjs is the
+   ONE writer of a forum document that lives outside _functions/forum/, so
+   the writer-against-model discipline the @doc scan applies to the callables
+   is applied to it by its own suite, which is spawned here the way the
+   roster sync's and the campaign mailer's are. Pinned here besides: the seed
+   is not under data/ (which Pages serves to anyone who asks, and these
+   threads are a room's), the room and season it is cut for, the
+   dispatch-only workflow with its plan-by-default input, and this file's
+   own section. */
+async function testForumSeed() {
+  const root = path.join(HERE, '..');
+
+  /* the seeder's own suite: the digest, the ids, the minute-aligned clock,
+     the model's KEYS over every document it would write, and the guard
+     re-run over the committed seed */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'seed-forum.mjs'), '--selftest'], { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/seed-forum selftest: \d+ checks passed/.test(out),
+    'the forum seeder\'s own selftest is green:\n' + out.slice(0, 1500));
+
+  const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
+  const FG = require(path.join(root, 'assets', 'oa-forum-guard.js'));
+  const S = await import('./seed-forum.mjs');
+  const seed = JSON.parse(await readFile(path.join(HERE, S.SEED_FILE), 'utf8'));
+
+  /* NOT under data/: everything there is served to anyone who asks, and the
+     Candidates' room is what decides who reads these */
+  ok(!S.SEED_FILE.includes('/') && !/^data\//.test(S.SEED_FILE),
+    'the seed lives beside the seeder under _scraper/, never under data/');
+  const served = await readdir(path.join(root, 'data'));
+  ok(!served.some((f) => /forum/i.test(f)), 'and no forum file reached data/');
+
+  /* what it is cut for */
+  eq(seed.room, 'candidates', 'the seed is cut for the Candidates\' room');
+  ok(FM.ROOMS.includes(seed.room), 'which is a room the model names');
+  ok(Number.isInteger(seed.season), 'it names its season');
+  ok(seed.threads.length > 0 && seed.threads.every((t) => Array.isArray(t.posts) && t.posts.length > 0),
+    'every thread in it carries at least one post');
+  ok(seed.threads.every((t) => t.tags.includes('2026-q-a')),
+    'every thread carries the tag the owner asked for');
+  ok(seed.threads.every((t) => FM.tagsOk(t.tags)), 'and one to five well-formed slugs');
+  /* one handle per post, and never the guide thread's */
+  const handles = seed.threads.flatMap((t) => t.posts.map((p) => FM.slug(p.by)));
+  eq(handles.length, new Set(handles).size, 'no handle speaks for two posters');
+  ok(!handles.includes(FM.slug(FM.MODERATOR)), 'and none of them is Moderator, which is the guide thread\'s');
+  /* nothing that could name a person travels in the file */
+  const raw = JSON.stringify(seed.threads);
+  ok(!FG.check(raw.replace(/\\[nrt]/g, ' ')), 'the whole seed passes the forum guard');
+  ok(!/"uid"|"email"|"authEmail"/.test(raw), 'and it carries no uid and no address');
+  /* what the sheet held and the forum does not: said in the file, not dropped */
+  ok(Array.isArray(seed.skipped) && seed.skipped.every((x) => x.why),
+    'anything not carried over is listed with the reason it was not');
+
+  /* the workflow: pressed, never scheduled, and a plan until it is ticked */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-forum-seed.yml'), 'utf8');
+  const wfCode = wf.replace(/^\s*#.*$/gm, '');
+  ok(/workflow_dispatch:/.test(wfCode) && !/\bschedule:/.test(wfCode),
+    'the seeding workflow is dispatch-only: no cron touches the forum');
+  ok(/write:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wfCode),
+    'and its write input defaults to a plan');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'it checks out the branch tip');
+  ok(/seed-forum\.mjs --selftest/.test(wfCode), 'and runs the seeder\'s own checks before it writes');
+
+  /* the seeder never writes a season head, and changes no rule */
+  const src = await readFile(path.join(HERE, 'seed-forum.mjs'), 'utf8');
+  ok(/firestore\(\)/.test(src) && !/initializeApp/.test(src.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'it takes its Admin SDK handle from _mail.mjs, the one definition');
+
+  /* and this file says so */
+  const doc = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  ok(/seed-forum\.mjs/.test(doc) && /forum-seed-2026-qa\.json/.test(doc),
+    'CLAUDE.md names the seeder and its seed');
+}
+
 /* ------------- the campaign over EXISTING accounts (owner, 2026-09-05)
 
    Every password account that registered before the e-mail gate is pending
@@ -15479,5 +15561,6 @@ if (isMain(import.meta.url)) {
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
   await testForum();
+  await testForumSeed();
   process.exit(finish() ? 0 : 1);
 }
