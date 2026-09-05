@@ -181,7 +181,7 @@ export function documentsFor(th, ctx) {
   docs.push({ kind: 'thread', path: ['thread', th.tid], doc: thread });
   for (const p of th.posts) {
     const post = {
-      season, room, tid: th.tid, n: p.n, by: p.by, body: p.body, kind: '',
+      season, room, tid: th.tid, n: p.n, by: p.by, body: p.body,
       t: p.t, up: 0, down: 0, hidden: false, hiddenBy: '',
     };
     if (p.n > 1) post.quote = null;
