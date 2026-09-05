@@ -13404,7 +13404,8 @@ async function testEmailVerification() {
       return e.isDirectory() ? walk(p) : (/\.js$/.test(e.name) ? [p] : []);
     });
     const files = walk(fnDir);
-    ok(files.length >= 8, 'admin app: the functions tree was walked (' + files.length + ' files)');
+    ok(files.some((p) => p.endsWith('index.js')) && files.some((p) => p.endsWith('verify-email.js')),
+      'admin app: the functions tree was walked (' + files.length + ' files, index.js and verify-email.js among them)');
     for (const p of files) {
       const code = readFileSync(p, 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
