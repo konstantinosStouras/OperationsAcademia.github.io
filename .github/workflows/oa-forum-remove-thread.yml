@@ -69,8 +69,13 @@ jobs:
             echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be read or written."
           fi
 
+      # firebase-admin 12, like every other workflow here that runs a _scraper/
+      # script: _mail.mjs's firebaseAdmin() uses the NAMESPACED admin.* surface
+      # (admin.apps, admin.credential.cert, admin.firestore()), and 14 removed
+      # it whole. The ^14 in _functions/package.json is the deployed Cloud
+      # Functions runtime, which uses the modular API and is a different thing.
       - name: Install firebase-admin
-        run: npm i --no-save firebase-admin@^14
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
 
       - name: The remover's own checks
         run: node _scraper/remove-forum-thread.mjs --selftest
