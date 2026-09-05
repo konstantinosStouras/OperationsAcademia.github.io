@@ -14701,12 +14701,15 @@ async function testForum() {
      the word would be one edit from drawing the control again. */
   ok(!('KINDS' in FM) && !FM.KEYS.post.includes('kind'),
     'forum: there is no kind list and a post carries no kind');
-  eq(FM.TAG_BANNED, ['rumour', 'rumours', 'rumor', 'rumors', 'gossip', 'hearsay'],
-    'forum: the slugs a tag may never be');
-  ok(FM.TAG_BANNED.every((t) => !FM.tagOk(t) && !FM.tagsOk([t]) && !FM.tagsOk(['offers', t])),
-    'forum: and tagOk refuses every one of them, alone or beside a good tag');
-  ok(FM.tagOk('rumour-mill') && FM.tagOk('rejections'),
-    'forum: an exact list and never a pattern, so a tag that merely contains the word still posts');
+  /* NO TAG IS REFUSED, and that is the owner's own correction (2026-09-05):
+     a first draft of this change refused `rumour` and five spellings beside
+     it, and the answer was "don't remove the possibility users use the tag
+     rumour on a post... what I was saying is let's not nudge users to post
+     rumours and gossips". What changed is what the site OFFERS, not what it
+     accepts, so the pin runs the other way: the word still posts, and the
+     curated list no longer suggests it. */
+  ok(!('TAG_BANNED' in FM) && FM.tagOk('rumour') && FM.tagsOk(['rumour']) && FM.tagsOk(['offers', 'gossip']),
+    'forum: a poster may still tag a post rumour, alone or beside another tag');
   eq(FM.RATE, { threads: 3, posts: 40, votes: 60, gapMs: 20000 }, 'forum: the rate limits as written');
   eq(FM.slug('Quiet Heron 42'), 'quiet-heron-42', 'forum: slug() folds a handle');
   eq(FM.slug('  Two-Body!! Problem '), 'two-body-problem', 'forum: slug() folds punctuation to one hyphen and trims');
@@ -14719,7 +14722,8 @@ async function testForum() {
     'forum: one character, a capital, a space and a repeat are all refused');
   ok(FM.TAGS.every(FM.tagOk) && FM.tagsOk(FM.TAGS.slice(0, 5)), 'forum: every curated tag passes its own rule');
   ok(FM.TAGS.includes('about') && FM.TAGS.length >= 30, 'forum: the curated list carries about and is about thirty long');
-  ok(FM.TAGS.every((t) => !FM.TAG_BANNED.includes(t)), 'forum: and the curated list offers none of the banned slugs');
+  ok(!FM.TAGS.includes('rumour') && !FM.TAGS.includes('gossip'),
+    'forum: and the curated list, which is what the picker SUGGESTS, nudges nobody towards one');
   eq(new Set(FM.TAGS).size, FM.TAGS.length, 'forum: no curated tag twice');
   eq(FM.minute(1700000000123), 1699999980000, 'forum: minute() rounds DOWN to the minute');
   ok(FM.minute() % 60000 === 0, 'forum: and now is a whole minute');
@@ -15408,8 +15412,8 @@ async function testForum() {
     'page-test: a reply with a quote, and what forumPost was sent, which no longer carries a kind');
   ok(/\.oa-forum-kind, \.oa-forum-kinds/.test(fb) && /eq\(th\.kinds, 0,/.test(fb),
     'page-test: and the removed control is measured as an absence on a rendered thread, chip and radios alike');
-  ok(/'#oa-forum-tag-in', 'Rumour'/.test(fb) && /rule 5/i.test(fb) && /oa-forum-taghint/.test(fb),
-    'page-test: a rumour tag is refused in a real browser, says why, and is never offered');
+  ok(/!suggested\.includes\('rumour'\)/.test(fb) && /'offers', 'teaching-release', 'rumour'/.test(fb),
+    'page-test: in a real browser the picker suggests no rumour tag and a reader who types one still gets it');
   ok(/eq\(v0\.sent, \[1, -1, 0\]/.test(fb) && /voteDocs, \[\]/.test(fb), 'page-test: up, down and withdrawn, with the page sending the vote and never a delta');
   ok(/data-act="edit"/.test(fb) && /\[data-edit="save"\]/.test(fb), 'page-test: an edit inside the window');
   ok(/op: 'seedGuide', room: 'candidates'/.test(fb) && /never Moderator/.test(fb), 'page-test: the maintainer seeds the guide and posts under a drawn handle');

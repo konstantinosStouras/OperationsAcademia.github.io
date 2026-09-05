@@ -245,8 +245,12 @@ async function main() {
   }
   const badTags = await call('forumPost', tokens.cand, { room: 'candidates', title: 'T', tags: ['a', 'b', 'c', 'd', 'e', 'f'], body: 'body text', acceptGuide: true });
   ok(status(badTags) === 'INVALID_ARGUMENT' && reason(badTags) === 'tags', 'six tags are refused');
-  const rumourTag = await call('forumPost', tokens.cand, { room: 'candidates', title: 'What I heard', tags: ['rumour'], body: 'body text', acceptGuide: true });
-  ok(status(rumourTag) === 'INVALID_ARGUMENT' && reason(rumourTag) === 'tags', 'a thread cannot tag itself a rumour');
+  /* A TAG THE CURATED LIST DOES NOT OFFER IS STILL A TAG (owner, 2026-09-05:
+     "don't remove the possibility users use the tag rumour on a post"). The
+     maintainer posts it: the candidate is at two of its three threads for the
+     day by here, and the reply loop above has just set its gap. */
+  const freeTag = await call('forumPost', tokens.adm, { room: 'candidates', title: 'A question with a free tag', tags: ['rumour'], body: 'A tag the curated list does not offer is still a tag, and the rules are what ask people not to trade in them.', acceptGuide: true });
+  ok(!freeTag.error && freeTag.result.tid, 'a tag the curated list does not offer is still accepted', JSON.stringify(freeTag));
   const noRoom = await call('forumPost', tokens.cand, { room: 'lobby', body: 'x' });
   ok(status(noRoom) === 'INVALID_ARGUMENT' && reason(noRoom) === 'room', 'an unknown room is refused');
   const openByReader = await call('forumPost', tokens.open, { room: 'candidates', tid: t1.result.tid, body: 'hello' });

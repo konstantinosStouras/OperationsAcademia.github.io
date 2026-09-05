@@ -9959,22 +9959,21 @@ for (const w of [320, 360, 390, 430]) {
     await q.press('#oa-forum-tag-in', 'Enter');
     await q.fill('#oa-forum-tag-in', 'Teaching Release');
     await q.press('#oa-forum-tag-in', 'Enter');
-    /* a thread may not label itself a rumour, and is told why rather than
-       having the word swallowed (owner, 2026-09-05) */
+    /* NUDGE NOBODY, REFUSE NOBODY (owner, 2026-09-05). The curated list no
+       longer offers `rumour`, so the picker suggests it to no one; a poster
+       who types it anyway still gets the tag, which is the half the owner
+       asked to keep. Measured on the suggestion list AND on the chip. */
+    await q.fill('#oa-forum-tag-in', 'rumou');
+    const suggested = await q.$$eval('#oa-forum-tagsugg [data-tag]', (ns) => ns.map((b) => b.getAttribute('data-tag')));
+    ok(!suggested.includes('rumour'), 'forum (candidate): the picker suggests no rumour tag, since the curated list carries none');
     await q.fill('#oa-forum-tag-in', 'Rumour');
     await q.press('#oa-forum-tag-in', 'Enter');
-    const banned = await q.evaluate(() => ({
-      chips: [...document.querySelectorAll('#oa-forum-tagchips .oa-chip')].map((n) => n.getAttribute('data-tag')),
-      hint: document.getElementById('oa-forum-taghint').textContent,
-      offered: [...document.querySelectorAll('#oa-forum-tagsugg [data-tag]')].map((b) => b.getAttribute('data-tag')),
-    }));
-    eq(banned.chips, ['offers', 'teaching-release'], 'forum (candidate): a rumour tag never becomes a chip');
-    ok(/rule 5/i.test(banned.hint) && /rumour/i.test(banned.hint),
-      'forum (candidate): and the box says why, rather than swallowing the word in silence');
-    ok(!banned.offered.some((t) => /rumou?rs?|gossip|hearsay/.test(t)),
-      'forum (candidate): nor is one ever offered, as a suggestion or as a tag to create');
     const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
-    eq(chips, ['offers', 'teaching-release'], 'forum (candidate): two tags, the second normalised to a slug');
+    eq(chips, ['offers', 'teaching-release', 'rumour'],
+      'forum (candidate): two curated tags and a free one the reader typed, each normalised to a slug');
+    await q.click('#oa-forum-tagchips .oa-chip[data-tag="rumour"]');
+    eq(await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag'))),
+      ['offers', 'teaching-release'], 'forum (candidate): and it comes off again like any other chip');
     await q.click('#oa-forum-ask-send');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const asked = await q.evaluate((t) => {

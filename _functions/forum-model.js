@@ -106,7 +106,18 @@
 
   /** The curated tags, offered first in the compose picker. Free tags are
       allowed beside them (normalised through slug()); `about` is the guide
-      thread's own tag. Slugs only, 2 to 24 characters of [a-z0-9-]. */
+      thread's own tag. Slugs only, 2 to 24 characters of [a-z0-9-].
+
+      `rumour` WAS ON THIS LIST and is deliberately off it (owner,
+      2026-09-05). The list is what the site SUGGESTS, and suggesting the
+      word is the site nudging people towards the thing rule 5 asks them not
+      to do. NOTHING HERE REFUSES A TAG, and that is the owner's own
+      correction: a first draft of this change refused a short list of
+      rumour-ish slugs outright, and the answer was *"don't remove the
+      possibility users use the tag rumour on a post... what I was saying is
+      let's not nudge users to post rumours and gossips."* So a poster who
+      types the word still gets the tag. The guide is where the rule lives;
+      the picker simply stops offering it. */
   var TAGS = [
     'about', 'interviews', 'first-round', 'flyouts', 'job-talk', 'offers',
     'negotiation', 'startup', 'teaching', 'teaching-release', 'research-statement',
@@ -115,16 +126,6 @@
     'north-america', 'uk', 'australia', 'industry', 'postdoc', 'tenure',
     'committees'
   ];
-
-  /** Slugs a tag may never be. A tag is the one part of a post that is a
-      MACHINE-READABLE LABEL rather than prose, so this is the one place
-      "no rumours" (rule 5) can be enforced rather than only asked for: a
-      thread cannot advertise itself as one. Nothing here reads the body,
-      which no honest rule could classify. An exact list of spellings and
-      never a pattern: a pattern would go on to refuse tags that merely
-      contain the word, and a list is something the next reader can see the
-      whole of. */
-  var TAG_BANNED = ['rumour', 'rumours', 'rumor', 'rumors', 'gossip', 'hearsay'];
 
   var TAG_MIN = 1;
   var TAG_MAX = 5;
@@ -174,7 +175,7 @@
   var TAG_RX = /^[a-z0-9-]{2,24}$/;
 
   function tagOk(t) {
-    return typeof t === 'string' && TAG_RX.test(t) && TAG_BANNED.indexOf(t) === -1;
+    return typeof t === 'string' && TAG_RX.test(t);
   }
 
   /** 1 to 5 slugs, each well formed, no repeats. The page normalises through
@@ -209,7 +210,6 @@
     KEYS: KEYS,
     BOUNDS: BOUNDS,
     TAGS: TAGS,
-    TAG_BANNED: TAG_BANNED,
     TAG_MIN: TAG_MIN,
     TAG_MAX: TAG_MAX,
     TAG_COUNT_CAP: TAG_COUNT_CAP,

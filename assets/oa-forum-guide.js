@@ -36,10 +36,16 @@
    the permission they implied: a rumour may not be posted at all, so the
    forum offers no way to declare one, and the rule now says so. Rule 1 says
    the other half of the same instruction in the owner's own words: be kind,
-   and be a good colleague. What can be ENFORCED rather than only asked for
-   is the tag, the one machine-readable label a post carries: TAG_BANNED in
-   oa-forum-model.js refuses a thread that would advertise itself as a
-   rumour. Nothing reads a body, because no honest rule could.
+   and be a good colleague.
+
+   IT IS THE RULE THAT CARRIES THIS, and nothing mechanical. A first draft
+   also refused `rumour` and five spellings beside it as TAGS, and the owner
+   reversed that in as many words: *"don't remove the possibility users use
+   the tag rumour on a post... what I was saying is let's not nudge users to
+   post rumours and gossips."* So the forum refuses no tag and reads no body
+   (no honest rule could classify one); what changed is only what the site
+   OFFERS, which is why `rumour` came off the curated tag list in
+   oa-forum-model.js and the rules below say the rest.
 
    NO LINKS IN THE GUIDE ITSELF, still, though the guard now allows one in an
    ordinary post: the guide is seeded as a post and a bare address in a house

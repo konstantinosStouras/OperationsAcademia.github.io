@@ -103,7 +103,7 @@
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
     bounds: 'Too long, or empty. A title is at most ' + M.BOUNDS.title + ' characters and a post at most ' + M.BOUNDS.body + '.',
-    tags: 'One to five tags, each 2 to 24 characters of letters, digits and hyphens, and none of them labelling the post a rumour.',
+    tags: 'One to five tags, each 2 to 24 characters of letters, digits and hyphens.',
     quote: 'A quote must be a passage of the post as it stands now, at most ' + M.BOUNDS.quote + ' characters.',
     thread: 'That thread could not be found.',
     threads: 'You have opened as many questions today as the forum allows. Tomorrow is fine.',
@@ -1165,25 +1165,9 @@
       input.disabled = tags.length >= M.TAG_MAX;
       input.placeholder = tags.length >= M.TAG_MAX ? 'Five is the most' : (tags.length ? 'Another tag' : 'Type a tag and press Enter');
     }
-    var TAGHINT = ($('oa-forum-taghint') || {}).textContent || '';
-    function tagHint(msg) {
-      var h = $('oa-forum-taghint');
-      if (h) h.textContent = msg || TAGHINT;
-    }
     function add(raw) {
       var s = M.slug(raw);
-      /* A BANNED SLUG SAYS WHY. Dropping it in silence below, with the rest
-         of what add() refuses, would read as a broken box; this is the one
-         refusal here a poster has to be told the reason for, because the
-         reason is a house rule and not a typo. */
-      if (s && M.TAG_BANNED.indexOf(s) !== -1) {
-        tagHint('There is no tag for a rumour: rumours and unverified stories are not posted here (rule 5 of the forum guide).');
-        input.value = '';
-        drawSugg();
-        return;
-      }
       if (!s || !M.tagOk(s) || tags.indexOf(s) !== -1 || tags.length >= M.TAG_MAX) { input.value = ''; drawSugg(); return; }
-      tagHint('');
       tags.push(s);
       input.value = '';
       drawChips();

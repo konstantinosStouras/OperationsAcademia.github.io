@@ -2648,8 +2648,9 @@ profile id, on a uid-keyed document that never sits beside a handle) and
 
 **Tags replace the blueprint's one category.** A thread carries 1 to 5 slugs
 of `[a-z0-9-]{2,24}`; `TAGS` in the model is the curated list of about thirty
-and free tags are allowed beside them, normalised through `slug()`, EXCEPT the
-handful `TAG_BANNED` refuses (see "No rumours" below). The tally
+and free tags are allowed beside them, normalised through `slug()`. NO TAG IS
+REFUSED: the list is only what the picker OFFERS (see "No rumours" below,
+where `rumour` comes off it and stays postable). The tally
 `forumTags/{Y}_{room}` is bumped in the thread transaction as a NESTED map
 with `FieldValue.increment` (the `recordVisit` lesson: never a dotted path),
 capped at `TAG_COUNT_CAP` (400) distinct slugs so the one hot document cannot
@@ -2771,24 +2772,31 @@ thirteen and why no rule still tells anybody to MARK a post as anything.
 "Bitching" is the owner's word for what rule 1 and rule 5 forbid; the guide
 words it as a colleague would.
 
-**What can be ENFORCED is the TAG, and only the tag.** A body cannot be
-classified: no rule this repository could write would tell a rumour from a
-question about one, and a guess that refuses a legitimate post is worse than
-the post it refuses (the `deadlineDay` discipline, applied to prose). A tag is
-the one part of a post that is a MACHINE-READABLE LABEL the poster chooses, so
-`TAG_BANNED` in the model (`rumour`, `rumours`, `rumor`, `rumors`, `gossip`,
-`hearsay`) is refused by `tagOk`, which means the functions refuse it, the
-page never offers it as a suggestion or as a tag to create, and the curated
-list no longer carries it. An EXACT LIST and never a pattern: a pattern would
-go on to refuse `rumour-mill` and every other tag that merely contains the
-word, and a list is something the next reader can see the whole of.
+**NOTHING IS ENFORCED, AND THAT IS THE OWNER'S OWN CORRECTION.** A body
+cannot be classified: no rule this repository could write would tell a rumour
+from a question about one, and a guess that refuses a legitimate post is
+worse than the post it refuses (the `deadlineDay` discipline, applied to
+prose). The TAG looked like the one exception, being the one part of a post
+that is a machine-readable label the poster picks, so the first draft refused
+`rumour` and five spellings beside it (`TAG_BANNED`, refused by `tagOk` in
+the model, in the functions and in the page, with the tag box saying why).
+The owner reversed it the same day, and the sentence is the whole rule:
+*"don't remove the possibility users use the tag rumour on a post... what I
+was saying is let's not nudge users to post rumours and gossips on the forum.
+The updated rules are fine now."*
 
-**A refused tag SAYS WHY.** `add()` in `oa-forum.js` drops what it cannot use
-in silence, which is right for a typo and wrong for a house rule: a poster who
-types "Rumour" and presses Enter would watch the word vanish with nothing on
-screen to explain it. That one refusal writes into the tag hint, where the
-reader is looking: *"There is no tag for a rumour: rumours and unverified
-stories are not posted here (rule 5 of the forum guide)."*
+So `TAG_BANNED` is gone, `tagOk` refuses nothing a slug rule allows, and the
+one thing that stays is the NUDGE: **`rumour` is off `TAGS`**, the curated
+list the picker suggests from, so the site offers the word to nobody and
+accepts it from anybody who types it. The distinction is worth keeping
+straight, because it is the difference between a forum with house rules and
+a forum with a filter: **a rule is what the guide says and moderation acts
+on; a suggestion list is what the site puts in front of you.** Only the
+second was the problem. The selftest pins it that way round now (the word
+still tags a post, alone or beside another; the curated list carries neither
+it nor `gossip`), and `page-test.mjs` measures both halves in a browser: the
+picker suggests nothing for "rumou", and a reader who types the word gets
+the chip.
 
 **The pinned guide thread had to be refreshable for any of this to reach a
 reader**, which is the paragraph above ("A SECOND PRESS REFRESHES THE
@@ -2800,13 +2808,14 @@ surface it lived on, comments stripped (no `KINDS`, no `kind` on a post, no
 `kindField` or `d.kind` in any callable, neither label named anywhere in the
 functions, no radios or chip in the page or either stylesheet, none in the
 shim's simulator), the two rewritten rules by their opening words, that no
-rule still describes the marker, `TAG_BANNED` refused alone and beside a good
-tag with `rumour-mill` still posting, and the compose bar aligned to its end
-now that its left-hand control is gone. `page-test.mjs` measures a rendered
-thread carrying no chip and no radio group, a reply sent without a kind, and
-the rumour tag refused in a real browser with the hint saying why; the
-emulator test drives the same refusal against the real function, and the
-seed-then-refresh cycle against a guide whose words have been moved on.
+rule still describes the marker, that no tag is refused and the curated list
+suggests none of these, and the compose bar aligned to its end now that its
+left-hand control is gone. `page-test.mjs` measures a rendered thread
+carrying no chip and no radio group, a reply sent without a kind, and the
+picker suggesting no rumour tag while a typed one still becomes a chip; the
+emulator test posts a thread under a tag the curated list does not offer, and
+drives the seed-then-refresh cycle against a guide whose words have been
+moved on.
 
 ### The question list is laid out the way Stack Overflow lays one out
 

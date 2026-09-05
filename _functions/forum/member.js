@@ -67,7 +67,7 @@ const ERRORS = {
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',
   bounds: 'That is too long, or empty.',
-  tags: 'Choose one to five tags of letters, digits and hyphens, and nothing that labels a post as a rumour.',
+  tags: 'Choose one to five tags of letters, digits and hyphens.',
   quote: 'The quote must be a passage of the post it names, as it stands now.',
   threads: 'That is enough new threads for today.',
   posts: 'That is enough posts for today.',
