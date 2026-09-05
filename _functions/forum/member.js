@@ -85,7 +85,11 @@ function refuse(code, reason) {
 }
 
 function db() {
-  if (!getApps().length) initializeApp();
+  /* By NAME, never by count: the functions library holds a named app of its
+     own for token verification, so getApps() is non-empty inside every
+     callable while the default app may still be missing (the
+     sendVerificationEmail outage of 2026-09-05; see adminApp in index.js). */
+  if (!getApps().some((a) => a.name === '[DEFAULT]')) initializeApp();
   return getFirestore();
 }
 

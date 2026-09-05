@@ -89,9 +89,21 @@ const SMTP_PASS = defineSecret('SMTP_PASS');
 const SITE = 'https://www.operationsacademia.org';
 const CONTACT = 'operationsacademia@gmail.com';
 
-/** The Admin app, initialised once whichever function touches it first. */
+/** The Admin app, initialised once whichever function touches it first.
+
+    It looks for the DEFAULT app by name, never for "any app". The functions
+    library creates a NAMED app of its own (__FIREBASE_FUNCTIONS_SDK__) to
+    verify a callable's sign-in token, so by the time a callable's handler
+    runs getApps() is already non-empty while the default app, the one
+    getFirestore() and getAuth() read, does not exist. Written as
+    `if (!getApps().length) initializeApp()` this helper skipped the
+    initialisation on every call and sendVerificationEmail died with
+    "The default Firebase app does not exist" (2026-09-05, measured in the
+    live log: three calls, three fallbacks to Firebase's own message).
+    recordVisit never hit it because an onRequest handler verifies no
+    token. The selftest refuses the length test in every functions file. */
 function adminApp() {
-  if (!getApps().length) initializeApp();
+  if (!getApps().some((a) => a.name === '[DEFAULT]')) initializeApp();
 }
 
 const REPO = 'konstantinosStouras/OperationsAcademia.github.io';
