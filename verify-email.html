@@ -132,6 +132,9 @@
             <a class="v3-btn primary" id="ve-continue" href="account.html">Continue to your account</a>
             <button type="button" class="v3-btn primary" id="ve-signin" hidden>Sign in</button>
           </div>
+          <!-- filled by oa-verify.js for a signed-in reader: the box moves on
+               to the account page by itself after a few seconds -->
+          <p class="v3-mut" id="ve-count" aria-live="polite" hidden style="margin:16px 0 0;font-size:14px"></p>
         </div>
 
         <!-- the link was refused: expired, used already, or copied short -->
@@ -162,7 +165,7 @@
           <p class="oa-auth-msg" id="ve-nocode-msg" role="alert"></p>
         </div>
 
-        <p class="v3-mut" style="text-align:center;margin:0 0 70px">
+        <p class="v3-mut ve-foot" style="text-align:center;margin:0 0 70px">
           Questions? <a href="mailto:operationsacademia@gmail.com">Email us</a>.</p>
       </div>
     </main>

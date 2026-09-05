@@ -9056,6 +9056,39 @@ for (const w of [320, 360, 390, 430]) {
     await ctx.close();
   }
   {
+    // …and for that reader the confirmation is a BOX in the middle of the
+    // screen (owner, 2026-09-05): the hero and the footer line go, a line
+    // counts the seconds down, and after five the page moves on to the
+    // account by itself, replacing the spent link
+    const { ctx, page: q, errors } = await signedInPage(LINK,
+      { user: UNVERIFIED, seed: { reloadVerifies: true }, selector: '#main',
+        init: `localStorage.setItem('oaProfileAsked:${UNVERIFIED.uid}', '1');` });
+    await q.waitForSelector('#ve-done', { state: 'visible', timeout: 15000 });
+    const box = await q.evaluate(() => {
+      const card = document.getElementById('ve-done').getBoundingClientRect();
+      const hero = document.querySelector('.v3-pa-hero');
+      const shown = (el) => !!el && el.getBoundingClientRect().height > 0;
+      return {
+        focus: document.body.classList.contains('ve-focus'),
+        heroShown: shown(hero),
+        footShown: [...document.querySelectorAll('.ve-foot')].some(shown),
+        count: document.getElementById('ve-count').textContent,
+        countShown: !document.getElementById('ve-count').hidden,
+        offCentre: Math.abs((card.top + card.bottom) / 2 - window.innerHeight / 2),
+        header: shown(document.querySelector('.v3-header')),
+      };
+    });
+    ok(box.focus && !box.heroShown && !box.footShown && box.header,
+      'verify page: once confirmed, the page is the box under the header and nothing else');
+    ok(box.offCentre < 90, 'verify page: …and the box sits in the middle of the screen (' + Math.round(box.offCentre) + 'px off)');
+    ok(box.countShown && /Taking you to your account in [1-5] seconds?\./.test(box.count),
+      'verify page: …saying it will move on in a few seconds');
+    eq(errors, [], 'verify page: no uncaught script error while the box counts down');
+    await q.waitForURL(/account\.html$/, { timeout: 9000 });
+    ok(true, 'verify page: after five seconds the reader is on the account page without pressing anything');
+    await ctx.close();
+  }
+  {
     // a reader with no session at all (the commonest case: the link opened in
     // another browser) still gets the confirmation, and a way to sign in
     const { ctx, page: q, errors } = await signedOutPage(LINK, { selector: '#main' });
