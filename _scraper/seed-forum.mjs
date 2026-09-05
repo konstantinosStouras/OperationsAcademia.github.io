@@ -42,6 +42,15 @@
    each thread first and skips the ones already there, which is also what
    keeps the tag tally from being counted twice.
 
+   AN UPVOTE COUNT IS THE SHEET'S OWN RECORD, NOT AN INVENTED ONE. A trailing
+   `xN` in a Q&A cell is N people upvoting the post it follows (owner,
+   2026-09-05), so it is carried as `up` and the marker leaves the words; a
+   cell that is only `xN` is a vote count rather than a post. No `votes/{H}`
+   document is written for them, and that is right rather than a shortcut:
+   those documents record WHO voted so a member can change their own vote,
+   the sheet records no voter, and a reader's own vote still increments and
+   decrements from the seeded count exactly as it would from any other.
+
    NO ACCOUNT IS BEHIND A SEEDED HANDLE. A real handle's id is
    HMAC(FORUM_SECRET, season + ':' + uid); a seeded one is a digest of its
    own post id and NOTHING else — no uid, no secret, no clock — so no forum
@@ -149,7 +158,9 @@ export function planFrom(seed, opts) {
       if (M.slug(p.by) === M.slug(M.MODERATOR)) problems.push(`${pid}: ${M.MODERATOR} is reserved for the guide thread`);
       const hit = GUARD.check(p.body);
       if (hit) problems.push(`${pid}: the forum guard refuses the body (${hit})`);
-      posts.push({ pid, n, by: p.by, body: p.body, t: instantOf(t.date, hour, n),
+      const up = Number(p.up || 0);
+      if (!Number.isInteger(up) || up < 0) problems.push(`${pid}: up must be a count, not ${JSON.stringify(p.up)}`);
+      posts.push({ pid, n, by: p.by, body: p.body, up, t: instantOf(t.date, hour, n),
         H: seedHandleKey(season, room, pid), slug: M.slug(p.by) });
     });
     plan.push({ tid, row: t.row, date: t.date, title: t.title, tags: t.tags.slice(), posts });
@@ -176,13 +187,15 @@ export function documentsFor(th, ctx) {
     season, room, title: th.title, tags: th.tags,
     by: th.posts[0].by, t: th.posts[0].t, lastAt: last.t, lastBy: last.by,
     n: th.posts.length, excerpt: excerptOf(th.posts[0].body),
-    score: 0, pinned: false, locked: false, hidden: false,
+    /* the card shows the OPENING post's net, which is what forumVote keeps
+       here too, so a seeded thread sorts and reads like a posted one */
+    score: th.posts[0].up, pinned: false, locked: false, hidden: false,
   };
   docs.push({ kind: 'thread', path: ['thread', th.tid], doc: thread });
   for (const p of th.posts) {
     const post = {
       season, room, tid: th.tid, n: p.n, by: p.by, body: p.body,
-      t: p.t, up: 0, down: 0, hidden: false, hiddenBy: '',
+      t: p.t, up: p.up, down: 0, hidden: false, hiddenBy: '',
     };
     if (p.n > 1) post.quote = null;
     docs.push({ kind: 'post', path: ['post', th.tid, p.pid], doc: post });
@@ -446,6 +459,23 @@ async function selftest() {
       : p2.startsWith('forumNames/') ? 'name' : 'tags';
     eqs(shapeOk(kind, doc), [], `${p2} stores only keys the model names for ${kind}`);
   }
+  /* the sheet's upvote counts travel, and the marker does not */
+  for (const th of plan) {
+    for (const p2 of th.posts) {
+      ok(Number.isInteger(p2.up) && p2.up >= 0, `${p2.pid} carries a count`);
+      ok(!/\s[xX]\s?\d+$/.test(p2.body), `${p2.pid} does not still end in an xN marker`);
+      ok(!/^[xX]\s?\d+$/.test(p2.body.trim()), `${p2.pid} is a post and not a bare vote count`);
+      const stored = store.get(`forumSeasons/${season}/rooms/${room}/threads/${th.tid}/posts/${p2.pid}`);
+      eqs(stored.up, p2.up, `${p2.pid} stores the count the sheet recorded`);
+      eqs(stored.down, 0, `${p2.pid} stores no dislikes: the sheet records none`);
+    }
+    const head = store.get(`forumSeasons/${season}/rooms/${room}/threads/${th.tid}`);
+    eqs(head.score, th.posts[0].up, `${th.tid} scores its opening post's net, as forumVote keeps it`);
+  }
+  ok(plan.some((t) => t.posts.some((p2) => p2.up > 0)), 'and some post really did carry one, so this is not vacuous');
+  /* no vote document is invented: the sheet records no voter */
+  ok(![...store.keys()].some((p2) => /\/votes\//.test(p2)), 'no votes/{H} document is written');
+
   /* a thread's stamps agree with its posts */
   for (const th of plan) {
     const stored = store.get(`forumSeasons/${season}/rooms/${room}/threads/${th.tid}`);

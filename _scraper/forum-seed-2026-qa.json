@@ -1,5 +1,5 @@
 {
- "note": "The 2026 Q&A tab of the OM Job Market tracking workbook, carried into the forum by _scraper/seed-forum.mjs. NOT under data/, which GitHub Pages serves to anyone who asks: these threads are the Candidates' room's, and the room decides who reads them. Each post is one contributor's own words, verbatim; the sheet packs several people's replies into one cell with '<<' and '<-', and each such segment is its own post here. A handle is drawn per post and claims no linkage between posts, because the sheet records none. Edit this file to change what is seeded; the seeder re-runs without duplicating.",
+ "note": "The 2026 Q&A tab of the OM Job Market tracking workbook, carried into the forum by _scraper/seed-forum.mjs. NOT under data/, which GitHub Pages serves to anyone who asks: these threads are the Candidates' room's, and the room decides who reads them. Each post is one contributor's own words, verbatim; a trailing 'xN' is not text but N upvotes on the post it follows (owner, 2026-09-05), so it is recorded as `up` and a cell that is only 'xN' is a vote count rather than a post; the sheet packs several people's replies into one cell with '<<' and '<-', and each such segment is its own post here. A handle is drawn per post and claims no linkage between posts, because the sheet records none. Edit this file to change what is seeded; the seeder re-runs without duplicating.",
  "source": {
   "workbook": "OM Job Market",
   "owner": "omjobmarket2023@gmail.com",
@@ -23,11 +23,8 @@
    "posts": [
     {
      "by": "true gull 31",
-     "body": "Good luck to everyone on the market this year!"
-    },
-    {
-     "by": "dusky meadow 31",
-     "body": "x20"
+     "body": "Good luck to everyone on the market this year!",
+     "up": 20
     }
    ]
   },
@@ -42,15 +39,18 @@
    "posts": [
     {
      "by": "coral glade 63",
-     "body": "Any update on UCL GBSH?"
+     "body": "Any update on UCL GBSH?",
+     "up": 0
     },
     {
      "by": "copper willow 55",
-     "body": "They update the position to a teaching position"
+     "body": "They update the position to a teaching position",
+     "up": 0
     },
     {
      "by": "plain aspen 29",
-     "body": "did they hire"
+     "body": "did they hire",
+     "up": 0
     }
    ]
   },
@@ -64,19 +64,13 @@
    "posts": [
     {
      "by": "coral reed 32",
-     "body": "Is there any sheet for IEOR or OR?"
-    },
-    {
-     "by": "still cedar 84",
-     "body": "x6"
+     "body": "Is there any sheet for IEOR or OR?",
+     "up": 6
     },
     {
      "by": "witty kestrel 52",
-     "body": "Just add the positions here :) many people apply simultaneuously to IE/OR/OM. x2"
-    },
-    {
-     "by": "grand dune 72",
-     "body": "x2"
+     "body": "Just add the positions here :) many people apply simultaneuously to IE/OR/OM.",
+     "up": 4
     }
    ]
   },
@@ -90,11 +84,13 @@
    "posts": [
     {
      "by": "honest starling 49",
-     "body": "Is there any separate sheet for IS?"
+     "body": "Is there any separate sheet for IS?",
+     "up": 0
     },
     {
      "by": "pale shore 64",
-     "body": "Thank you! x5"
+     "body": "Thank you!",
+     "up": 5
     }
    ]
   },
@@ -109,51 +105,63 @@
    "posts": [
     {
      "by": "coral isle 35",
-     "body": "It looks like a strong market this year. Best of luck to everyone!"
+     "body": "It looks like a strong market this year. Best of luck to everyone!",
+     "up": 0
     },
     {
      "by": "ready glade 78",
-     "body": "thank you! perfect!!!!"
+     "body": "thank you! perfect!!!!",
+     "up": 0
     },
     {
      "by": "ready willow 29",
-     "body": "Also a really strong slate of candidates! x4"
+     "body": "Also a really strong slate of candidates!",
+     "up": 4
     },
     {
      "by": "nimble birch 88",
-     "body": "some lagging effects. Candidate chose not to be market last year would likely have to this year. This year's candidate may choose to be on market this year since it's a good market. And some rookie AP would seek for changes in a good year."
+     "body": "some lagging effects. Candidate chose not to be market last year would likely have to this year. This year's candidate may choose to be on market this year since it's a good market. And some rookie AP would seek for changes in a good year.",
+     "up": 0
     },
     {
      "by": "hazel moor 34",
-     "body": "How to tell whether this year is strong or not?"
+     "body": "How to tell whether this year is strong or not?",
+     "up": 0
     },
     {
      "by": "gentle reed 95",
-     "body": "Many top schools have openings."
+     "body": "Many top schools have openings.",
+     "up": 0
     },
     {
      "by": "bright thrush 10",
-     "body": "Doesn't that just suggest hiring ability of top universities? It may not necessarily be true for mid- or lower- tier schools"
+     "body": "Doesn't that just suggest hiring ability of top universities? It may not necessarily be true for mid- or lower- tier schools",
+     "up": 0
     },
     {
      "by": "plain osprey 60",
-     "body": "if top candidates have more options at top schools, then its better for other candidates... I guess"
+     "body": "if top candidates have more options at top schools, then its better for other candidates... I guess",
+     "up": 0
     },
     {
      "by": "steady lark 25",
-     "body": "So, top school candidates do not need to come down to lower tier. However, some faculty members told me that top tier schools would have positions like MIT and Havard last year. That does not mean they would actually hire. I do not understand what that means."
+     "body": "So, top school candidates do not need to come down to lower tier. However, some faculty members told me that top tier schools would have positions like MIT and Havard last year. That does not mean they would actually hire. I do not understand what that means.",
+     "up": 0
     },
     {
      "by": "brisk heron 52",
-     "body": "it sounds like top schools can afford to post and potentially not hire every year, but that doesn't necessarily signal much for mid-tier schools/candidates"
+     "body": "it sounds like top schools can afford to post and potentially not hire every year, but that doesn't necessarily signal much for mid-tier schools/candidates",
+     "up": 0
     },
     {
      "by": "silver harbour 60",
-     "body": "correct, last year several top schools closed without hiring (Darden for two positions, for example), because they have the money and time to play the market each year"
+     "body": "correct, last year several top schools closed without hiring (Darden for two positions, for example), because they have the money and time to play the market each year",
+     "up": 0
     },
     {
      "by": "subtle glade 87",
-     "body": "Darden is not a top school though. Last year it was sth to do with their Dean I heard"
+     "body": "Darden is not a top school though. Last year it was sth to do with their Dean I heard",
+     "up": 0
     }
    ]
   },
@@ -168,11 +176,13 @@
    "posts": [
     {
      "by": "stout birch 34",
-     "body": "Last year all IS positions come out pretty late. This year looks the same so far?"
+     "body": "Last year all IS positions come out pretty late. This year looks the same so far?",
+     "up": 0
     },
     {
      "by": "proud delta 32",
-     "body": "When does the IS market open?"
+     "body": "When does the IS market open?",
+     "up": 0
     }
    ]
   },
@@ -186,15 +196,18 @@
    "posts": [
     {
      "by": "still owl 97",
-     "body": "I think the link shared for the Darden position (https://apply.interfolio.com/173754) is for the posting from last year, based on the dates in the posting. I've emailed them to ask if there is a new link for this year, and will update the link in the spreadsheet if they respond"
+     "body": "I think the link shared for the Darden position (https://apply.interfolio.com/173754) is for the posting from last year, based on the dates in the posting. I've emailed them to ask if there is a new link for this year, and will update the link in the spreadsheet if they respond",
+     "up": 0
     },
     {
      "by": "copper elm 57",
-     "body": "Thank you! X2"
+     "body": "Thank you!",
+     "up": 2
     },
     {
      "by": "plain oak 83",
-     "body": "They said they're working on generating a new link for this year"
+     "body": "They said they're working on generating a new link for this year",
+     "up": 0
     }
    ]
   },
@@ -209,11 +222,13 @@
    "posts": [
     {
      "by": "fair tide 79",
-     "body": "At what point will we know if this is most of the schools that will hire this year?"
+     "body": "At what point will we know if this is most of the schools that will hire this year?",
+     "up": 0
     },
     {
      "by": "zesty river 90",
-     "body": "Last year half of the jobs were added in mid Oct or later. It's still very early"
+     "body": "Last year half of the jobs were added in mid Oct or later. It's still very early",
+     "up": 0
     }
    ]
   },
@@ -227,11 +242,13 @@
    "posts": [
     {
      "by": "grand reed 54",
-     "body": "What do the yellow highlights on the job list mean?"
+     "body": "What do the yellow highlights on the job list mean?",
+     "up": 0
     },
     {
      "by": "mellow valley 81",
-     "body": "Color coding for interviews/flyouts/offers"
+     "body": "Color coding for interviews/flyouts/offers",
+     "up": 0
     }
    ]
   },
@@ -246,19 +263,23 @@
    "posts": [
     {
      "by": "even orchard 56",
-     "body": "Market is looking great this year! Postings are up 32% through 8/29. Good luck to everyone!"
+     "body": "Market is looking great this year! Postings are up 32% through 8/29. Good luck to everyone!",
+     "up": 0
     },
     {
      "by": "hardy pine 28",
-     "body": "First time on the market. Is it really good for OM candidates?"
+     "body": "First time on the market. Is it really good for OM candidates?",
+     "up": 0
     },
     {
      "by": "north linnet 27",
-     "body": "People are adding all possible jobs to the list, that is why postings are up. At least makes it easier to find things to apply for"
+     "body": "People are adding all possible jobs to the list, that is why postings are up. At least makes it easier to find things to apply for",
+     "up": 0
     },
     {
      "by": "kind swan 57",
-     "body": "Some schools (especially those added on the early end) already removed the posts... some were removed after 3-4 weeks... so idk"
+     "body": "Some schools (especially those added on the early end) already removed the posts... some were removed after 3-4 weeks... so idk",
+     "up": 0
     }
    ]
   },
@@ -272,11 +293,13 @@
    "posts": [
     {
      "by": "dusky ridge 44",
-     "body": "UIUC (line# 28) opening is probably dummy one for administrative reasons. As of now, they have no confirmed opening."
+     "body": "UIUC (line# 28) opening is probably dummy one for administrative reasons. As of now, they have no confirmed opening.",
+     "up": 0
     },
     {
      "by": "lucid tide 43",
-     "body": "Thanks for letting us know. I edited the row and put it in strikethrough"
+     "body": "Thanks for letting us know. I edited the row and put it in strikethrough",
+     "up": 0
     }
    ]
   },
@@ -290,15 +313,18 @@
    "posts": [
     {
      "by": "sunny finch 60",
-     "body": "why are some job posts deleted even before the full consideration date? Does this indicate those schools decide not to hire?"
+     "body": "why are some job posts deleted even before the full consideration date? Does this indicate those schools decide not to hire?",
+     "up": 0
     },
     {
      "by": "plain willow 96",
-     "body": "Check www.OperationsAcademia.org for all posts and Job Candidates in OM from verified sources"
+     "body": "Check www.OperationsAcademia.org for all posts and Job Candidates in OM from verified sources",
+     "up": 0
     },
     {
      "by": "timid sable 96",
-     "body": "Thank you!"
+     "body": "Thank you!",
+     "up": 0
     }
    ]
   },
@@ -313,51 +339,63 @@
    "posts": [
     {
      "by": "steady meadow 96",
-     "body": "Does anyone know how much the pay is at continental European schools like IESE and Catolica Lisbon?"
+     "body": "Does anyone know how much the pay is at continental European schools like IESE and Catolica Lisbon?",
+     "up": 0
     },
     {
      "by": "wary ember 89",
-     "body": "Catolica Lisbon is 80K euros, I think. You have some tax advantages as well. IESE pays a lot more, something like 150K euros. There may also be tax advantages in Spaind"
+     "body": "Catolica Lisbon is 80K euros, I think. You have some tax advantages as well. IESE pays a lot more, something like 150K euros. There may also be tax advantages in Spaind",
+     "up": 0
     },
     {
      "by": "noble jay 72",
-     "body": "Thank you!"
+     "body": "Thank you!",
+     "up": 0
     },
     {
      "by": "kind osprey 86",
-     "body": "IESE used to be close to 100k, now maybe more. There is indeed a tax advantage. Other schools - it really depends. Majority would be around 100-120k range. Dutch schools, closer to 70-80. INSEAD and LBS pay US salary (but taxes are obviously higher). French schools like NEOMA, I don't know. I would guess 80-100k"
+     "body": "IESE used to be close to 100k, now maybe more. There is indeed a tax advantage. Other schools - it really depends. Majority would be around 100-120k range. Dutch schools, closer to 70-80. INSEAD and LBS pay US salary (but taxes are obviously higher). French schools like NEOMA, I don't know. I would guess 80-100k",
+     "up": 0
     },
     {
      "by": "noble owl 28",
-     "body": "IESE pays 120-130k for rookies"
+     "body": "IESE pays 120-130k for rookies",
+     "up": 0
     },
     {
      "by": "late oak 64",
-     "body": "For rookies, IESE pays 130k + 15k publication bonus if you publish enough (guaranteed for the first 3 years). Catolica pays 80k + 12k bonus per publication. Both Portugal and Spain have tax advantages."
+     "body": "For rookies, IESE pays 130k + 15k publication bonus if you publish enough (guaranteed for the first 3 years). Catolica pays 80k + 12k bonus per publication. Both Portugal and Spain have tax advantages.",
+     "up": 0
     },
     {
      "by": "mild tern 74",
-     "body": "Spain tax advantages have a time limit. Read about the Beckham law. Also, there are very heavy taxes on savings, investments, etc"
+     "body": "Spain tax advantages have a time limit. Read about the Beckham law. Also, there are very heavy taxes on savings, investments, etc",
+     "up": 0
     },
     {
      "by": "noble beech 50",
-     "body": "Yeh, but good tapas and wine, you can't have it all!"
+     "body": "Yeh, but good tapas and wine, you can't have it all!",
+     "up": 0
     },
     {
      "by": "late eagle 52",
-     "body": "Tapas are for tourists. Spanish people may eat one while drinking a caña. There is real Spanish food!"
+     "body": "Tapas are for tourists. Spanish people may eat one while drinking a caña. There is real Spanish food!",
+     "up": 0
     },
     {
      "by": "wary heron 46",
-     "body": "What do other European schools pay nowadays? Any recent info?"
+     "body": "What do other European schools pay nowadays? Any recent info?",
+     "up": 0
     },
     {
      "by": "mild shore 35",
-     "body": "Which schools? Other comments mentioned Netherlands, INSEAD/LBS. UCL/Imperial pay 140K GBP (no tax advantages in the UK). The rest pay very well for European standards, but nothing crazy"
+     "body": "Which schools? Other comments mentioned Netherlands, INSEAD/LBS. UCL/Imperial pay 140K GBP (no tax advantages in the UK). The rest pay very well for European standards, but nothing crazy",
+     "up": 0
     },
     {
      "by": "brisk gull 88",
-     "body": "What does NEOMA pay or other french schools?"
+     "body": "What does NEOMA pay or other french schools?",
+     "up": 0
     }
    ]
   },
@@ -373,11 +411,13 @@
    "posts": [
     {
      "by": "zesty heron 10",
-     "body": "How does the informs job market work for the people who are not presenting? I mean the first round interviews"
+     "body": "How does the informs job market work for the people who are not presenting? I mean the first round interviews",
+     "up": 0
     },
     {
      "by": "early yew 93",
-     "body": "If you are not present there, some schools may arrange for virtual interviews before/after."
+     "body": "If you are not present there, some schools may arrange for virtual interviews before/after.",
+     "up": 0
     }
    ]
   }

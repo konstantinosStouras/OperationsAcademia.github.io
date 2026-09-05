@@ -3266,13 +3266,33 @@ pressed.
 **WHAT THE SHEET RECORDS AND WHAT IT DOES NOT.** A cell packs several people's
 replies together with `<<` and `<-` (row 5's Response 3 is an eight-turn
 exchange in one cell), so each segment is its own post: 14 rows became 14
-threads and 55 posts, nobody's words altered and only the splits added. The
+threads and 52 posts, nobody's words altered and only the splits added. The
 sheet names no author anywhere, so **a handle is drawn per POST** and asserts
 no linkage between two posts, because the sheet records none. A seeded
 handle's id is a digest of its own post id and nothing else, never a uid and
 never `FORUM_SECRET`, so no seeded document can be joined to a person; each
 claims its slug in `forumNames`, or `forumJoin` could later draw a name a
 seeded post already speaks under.
+
+**AN `xN` IS N UPVOTES, NOT N PEOPLE SAYING THE SAME THING** (owner,
+2026-09-05: *"'Thank you! x5' means that someone wrote 'Thank you!' and then 5
+users upvoted it"*). The first cut read those markers as text and published
+posts that said `x20` and `x6`, which is the sheet's convention misread as
+prose. A marker attaches to the post it FOLLOWS, wherever it sits: trailing
+the words it applauds it becomes that post's `up` and leaves the text, and a
+cell that is only `xN` is a vote count rather than a post at all, so its
+count lands on the post before it and no empty post is published. Seven
+markers, 41 upvotes, and three posts that were never posts.
+
+**No `votes/{H}` document is written for them, and that is right rather than
+a shortcut.** Those documents record WHO voted, so that a member can change
+their own vote; the sheet records no voter, and inventing one would be the
+one thing this file refuses everywhere. A seeded count behaves correctly
+without them: a reader's own vote increments and decrements from it exactly
+as it would from any other, and nobody can un-cast a vote that was never
+theirs. The thread's `score` is its opening post's net, which is what
+`forumVote` keeps there, so a seeded thread sorts and reads like a posted
+one.
 
 **THE GUARD IS RE-RUN AT WRITE TIME**, over every title and body, so a text
 the site's own rule refuses cannot be smuggled in through a committed file.
@@ -3309,8 +3329,10 @@ secret or clock, read from a bounded and comment-stripped slice of its own
 source because the file EXPLAINS the HMAC it does not compute; the ids; the
 minute-aligned clock; `KEYS` over every document it would write and the four
 kinds it builds; the guard re-run over the committed seed; a duplicate handle
-and `Moderator` both refused; and every handle one the word lists could have
-drawn) and `testForumSeed` in `_scraper/selftest.mjs`, which spawns that suite
+and `Moderator` both refused; every handle one the word lists could have
+drawn; and the upvote counts stored with no marker left in the words, no
+post that is only a count, the thread's score its opening post's, and no
+invented vote document) and `testForumSeed` in `_scraper/selftest.mjs`, which spawns that suite
 the way the roster sync's is spawned and pins the seed out of `data/`, its
 room and season, the owner's tag on every thread, one handle per post, the
 dispatch-only workflow with its plan-by-default input, and this section.
