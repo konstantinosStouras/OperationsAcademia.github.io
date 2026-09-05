@@ -5562,6 +5562,27 @@ async function testAccountDeletion() {
     'and address, the chair\'s, and the private note, and is otherwise cleared ' +
     'only by a successful send');
 
+  /* NEITHER STEP MAY BE ATTEMPTED TWICE, AND NEITHER MAY ASK FOR A PASSWORD
+     (owner, 2026-09-05, reporting an account they could no longer delete: the
+     password prompt stopped them part way, and the second attempt was refused
+     because a `set` over the work order it had already filed is an UPDATE,
+     which every browser update of one is refused as). */
+  ok(/ref\.get\(\)/.test(selfSrc) && /snap && snap\.exists/.test(selfSrc),
+    'the work order is READ before it is written, so a second attempt carries ' +
+    'on from the one already filed instead of being refused as an update');
+  ok(/deleteSignIn\(\{ reauth: false \}\)/.test(selfSrc),
+    'and the sign-in is deleted WITHOUT asking for the password back: the sweep ' +
+    'removes it with the Admin SDK, so a password box between somebody and the ' +
+    'door buys nothing');
+  ok(!/reauth(enticate)?[A-Za-z]*\(/.test(selfSrc.replace(/reauth: false/g, '')),
+    '…and nothing on this path re-proves the session at all');
+  ok(/ref\.get\(\)/.test(mod.slice(mod.indexOf('function requestFor'),
+       mod.indexOf('function cancelFor'))),
+    'the maintainer\'s own write reads first for the same reason');
+  ok(/reauth: false/.test(accounts) && /quiet \? u\['delete'\]\(\)/.test(accounts),
+    'oa-accounts.js offers the quiet delete, and keeps the merge asking — the ' +
+    'merge has no sweep behind it to finish what a refusal leaves');
+
   ok(/notDeployed\(err\)/.test(selfSrc) && /NOT_DEPLOYED/.test(mod),
     'a permission-denied says what to press and to reload first, rather than ' +
     'showing a bare error — the rule every rule-gated panel here follows');

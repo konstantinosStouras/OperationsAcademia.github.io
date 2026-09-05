@@ -532,19 +532,32 @@ async function sweepOwned(db, uid) {
 async function purgeSubmissions(fb, uid, order, held) {
   const db = fb.db;
   const cleared = Number(order.clearedAt) || 0;
-  const built = await builtAt();
-  if (built === null) return { done: false, why: 'data/jobs-meta.json could not be read' };
-  if (built < cleared + BUILD_GRACE_MS) {
-    return { done: false, why: 'the site has not been rebuilt since their postings were taken down' };
-  }
 
-  for (const s of SUBMISSIONS) {
-    const docs = held[s.col] || [];
-    if (!docs.length) continue;
-    const rows = await servedRows(s.file);
-    if (rows === null) return { done: false, why: `data/${s.file} could not be read` };
-    if (stillServed(rows, specOf(uid, docs)).length) {
-      return { done: false, why: `the site is still showing something in data/${s.file}` };
+  /* AN ACCOUNT THAT POSTED NOTHING SKIPS THE FIRST TWO GATES ENTIRELY. They
+     exist to stop a document going while the row it built is still on the
+     site, and an account with no submissions has no row to orphan. Measured
+     rather than assumed: this is the first thing the live log got wrong, on
+     the owner's own test account, where it reported "the site has not been
+     rebuilt since their postings were taken down" about somebody who had
+     never posted. A gate that cannot apply must not be applied, and a line
+     that says why must be true in every branch. */
+  const posted = SUBMISSIONS.reduce((n, s) => n + (held[s.col] || []).length, 0);
+
+  if (posted) {
+    const built = await builtAt();
+    if (built === null) return { done: false, why: 'data/jobs-meta.json could not be read' };
+    if (built < cleared + BUILD_GRACE_MS) {
+      return { done: false, why: 'the site has not been rebuilt since their postings were taken down' };
+    }
+
+    for (const s of SUBMISSIONS) {
+      const docs = held[s.col] || [];
+      if (!docs.length) continue;
+      const rows = await servedRows(s.file);
+      if (rows === null) return { done: false, why: `data/${s.file} could not be read` };
+      if (stillServed(rows, specOf(uid, docs)).length) {
+        return { done: false, why: `the site is still showing something in data/${s.file}` };
+      }
     }
   }
 
@@ -552,8 +565,8 @@ async function purgeSubmissions(fb, uid, order, held) {
   if (drive === null) return { done: false, why: 'a file filed in Google Drive is still there' };
 
   if (Date.now() < cleared + TOKEN_TTL_MS) {
-    return { done: false, why: 'waiting an hour from the sign-in going, so no token it ' +
-      'left behind can still be writing' };
+    return { done: false, why: 'the account is gone; waiting an hour from the sign-in ' +
+      'going, so no token it left behind can still be writing' };
   }
   /* …and sweep the three owned documents once more, in case one of those
      tokens re-created the tally mark or the roster row while we waited. */
@@ -758,6 +771,11 @@ async function selftest() {
   ok(/rows === null/.test(purgeSrc) && /done: false/.test(purgeSrc),
     'an unreadable served file is ABSENT, never empty: it stops the purge rather ' +
     'than letting a document go while its row is still on the site');
+  ok(/const posted = SUBMISSIONS\.reduce/.test(purgeSrc) && /if \(posted\) \{/.test(purgeSrc),
+    'an account that posted NOTHING skips the two gates about published rows: ' +
+    'they exist to stop a document going while its row is still on the site, and ' +
+    'there is no row. The live log said "since their postings were taken down" ' +
+    'about somebody who had never posted');
   ok(/built < cleared \+ BUILD_GRACE_MS/.test(purgeSrc),
     'a document is not deleted until the site has been REBUILT since the ' +
     'withdrawal — the served file from before it would say a row is gone that ' +
