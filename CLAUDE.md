@@ -2587,6 +2587,93 @@ loop runs, factored out of the loop so the standard is applied one way
 13's own numbers: the vote column above the post, the 16px textarea, the
 42px tabs, votes, actions and Post.
 
+### It is BUILT and NOT ANNOUNCED, and everything it would say is held together
+
+Owner, 2026-09-05: *"do not add it on the top bar yet and don't mention it
+anywhere on the website yet. I want to pre-populate it with certain topics I
+will tell you."* So `forum.html` ships, is served and is reachable by typing
+its address — which is how the maintainer signs in, presses the seed button
+for each room and posts the first threads — and **nothing on the site points
+at it**: not the home page, not the account menus, not the change log, not
+the sitemap, not the privacy policy.
+
+**One switch, and it is `FORUM_ANNOUNCED` in `assets/oa-accounts.js`.** That
+file is the only one that DRAWS a link (both menus), so the flag lives beside
+what it governs rather than in the model, which most pages never load — a
+flag read through a module that is absent would be false everywhere and could
+never be turned on. The row's markup is written behind it and not merely
+hidden: this file's own rule is that **nothing merely hidden counts as
+withheld**, so the link is not in the document at all.
+
+**The static surfaces cannot read a flag, so they were REMOVED and their
+words kept here.** Announcing the forum is one change that puts all of them
+back and flips the switch:
+
+1. `FORUM_ANNOUNCED = false` → `true` in `assets/oa-accounts.js`;
+2. the home page's button, in the candidates section's `.v3-section-cta`,
+   where a comment holds its place:
+
+       <a class="v3-btn ghost" href="forum.html">Candidates&rsquo; forum</a>
+
+3. the home page's FAQ answer, restored as a `.v3-faq-item` immediately
+   before *Is my personal information published?*. Its question, on one line:
+
+       Is there somewhere to talk to other candidates and to faculty?
+
+   and its answer: *Yes. The
+   site has an anonymous [forum](forum.html) in two rooms. The **Candidates'
+   room** is for the accounts holding a candidate profile for the season under
+   way; the **Open forum** is for every registered account with a confirmed
+   e-mail address, faculty included. You post under a random handle drawn for
+   the season, the same in both rooms and never your name; threads carry tags,
+   replies can quote a passage of an earlier post, and a post can be liked or
+   disliked. Sign in and open **Forum** from your account menu. The forum guide
+   is pinned at the top of each room; read it once before your first post.*
+4. the privacy policy's paragraph, restored where its comment holds the place,
+   above `<h2>Security</h2>`, VERBATIM:
+
+```html
+          <p>The Site has an anonymous forum in two rooms: a Candidates&rsquo; room for the
+          accounts holding a candidate profile for the season under way, and an Open forum for
+          every registered account whose e-mail address is confirmed. You post there under a
+          handle, and the handle is random: two words and a number drawn by chance when you
+          first join in a season, the same in both rooms, and changed at the July roll. The Site
+          links a handle to an account only through a keyed one-way hash computed inside its
+          server functions, whose key is destroyed a month after the season ends; after that
+          nobody, the maintainer included, can tell which account held which handle in that
+          season. The forum does not read the address your browser connects from, stores no
+          record of it and does not load the analytics and visit measurements the rest of the
+          Site carries. Google&rsquo;s own request logs for the server functions record the
+          connecting address and the minute of each call for their standard retention; only the
+          maintainer&rsquo;s project login can read them, and the forum writes nothing of its
+          own to them. Every time a post or a vote is stored is rounded down to the minute. The
+          maintainer can read and post in both rooms as an ordinary member under a handle like
+          anyone else&rsquo;s, and moderates them; linking a current-season handle to a person
+          would take a deliberate step with the key and never happens by accident.</p>
+```
+
+5. the change log entry, restored at index 0 of `changelog.json`:
+
+```json
+{
+  "id": "forum-2026-09",
+  "date": "2026-09-05",
+  "title": "An anonymous forum, in two rooms",
+  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post can be edited for fifteen minutes. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
+  "url": "/forum.html"
+}
+```
+
+**R9 is deferred, never waived, and the guard is what makes that true.**
+`testForum` reads the switch out of the source and demands the opposite
+things on either side of it: while it is false, no served page may carry an
+`href="forum.html"`, the policy must NOT describe the forum, no change log
+entry may exist, and these five wordings must be here verbatim; the moment it
+is true, every one of those surfaces is demanded back, the policy paragraph
+included. So the disclosure cannot be the thing somebody forgets on announce
+day, and meanwhile it discloses nothing because no reader can reach the
+forum: the pre-population is the maintainer posting under their own handle.
+
 **What is not solved, and is said rather than hidden.** A constant per-season
 handle lets a reader connect one person's posts across threads, and a detail
 here beside a detail there can identify someone in a population of a few

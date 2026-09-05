@@ -448,6 +448,19 @@
     forum: '&#128488;'
   };
 
+  /* THE FORUM IS BUILT AND NOT ANNOUNCED (owner, 2026-09-05: "do not add it
+     on the top bar yet and don't mention it anywhere on the website yet. I
+     want to pre-populate it with certain topics"). forum.html is served and
+     reachable by typing its address, which is how the maintainer seeds the
+     guide and the first threads; nothing on the site points at it.
+
+     This is the ONE switch. Flipping it to true draws the Forum row on both
+     menus, and the announce step named in CLAUDE.md puts the home page's
+     button and its FAQ answer back in the same change. A hidden row is NOT
+     the answer here: this site's own rule is that nothing merely hidden
+     counts as withheld, so the markup is not written at all. */
+  var FORUM_ANNOUNCED = false;
+
   /* Whether to DRAW the maintainer's menu entry. From the resolved session
      it is OAAccounts.isAdmin()'s exact test, verified address included; while
      the header still paints from the localStorage hint the address alone
@@ -590,9 +603,11 @@
                no profile read and no data-held rule. The badge is born hidden
                and stays so in step 1; step 3 (private messages) fills it
                under the same rule as every other badge here. */
-            '<a role="menuitem" href="forum.html">' +
-              '<span class="oa-mi" aria-hidden="true">' + ICON.forum + '</span>Forum' +
-              '<span class="oa-acct-n" data-count="forum" hidden></span></a>' +
+            (FORUM_ANNOUNCED
+              ? '<a role="menuitem" href="forum.html">' +
+                  '<span class="oa-mi" aria-hidden="true">' + ICON.forum + '</span>Forum' +
+                  '<span class="oa-acct-n" data-count="forum" hidden></span></a>'
+              : '') +
             '<button role="menuitem" type="button" id="oa-editprofile">' +
               '<span class="oa-mi" aria-hidden="true">&#9998;</span>Edit profile</button>' +
             '<a role="menuitem" href="feedback.html">' +
@@ -712,7 +727,7 @@
       '<a class="link depth-0" href="my-postings.html" data-held="postings" hidden>My postings</a>' +
       '<a class="link depth-0" href="post-a-candidate.html" data-held="cands" hidden>My candidate profile</a>' +
       '<a class="link depth-0" href="messages.html">Messages</a>' +
-      '<a class="link depth-0" href="forum.html">Forum</a>' +
+      (FORUM_ANNOUNCED ? '<a class="link depth-0" href="forum.html">Forum</a>' : '') +
       '<a class="link depth-0" id="oa-np-profile" href="#">Edit profile</a>' +
       '<a class="link depth-0" id="oa-np-signout" href="#">Sign out</a>';
     $('#oa-np-profile').addEventListener('click', function (e) {

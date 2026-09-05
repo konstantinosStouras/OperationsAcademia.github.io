@@ -14569,20 +14569,39 @@ async function testForum() {
   ok(/^## The forum secret$/m.test(setup) && /firebase functions:secrets:set FORUM_SECRET --project operations-academia/.test(setup)
      && /gcloud secrets versions destroy/.test(setup) && /secretVersion/.test(setup) && /renames every handle/.test(setup),
     'forum: the runbook sets the secret once, says a rotation renames every handle, and destroys the previous version on 1 August');
+  /* THE FORUM IS BUILT AND NOT ANNOUNCED (owner, 2026-09-05). Everything the
+     site would SAY about it — the home page's button, its FAQ answer, the
+     policy paragraph, the change log entry and the row on both account menus
+     — is held back together, behind the one switch in oa-accounts.js, and
+     these pins follow that switch rather than blocking it: while it is false
+     they demand that nothing anywhere points at the page, and the moment it
+     is true they demand every one of those surfaces back. That pairing is
+     what keeps the DISCLOSURE from being the thing somebody forgets: R9 is
+     not waived here, it is deferred to the day a reader can reach the forum,
+     and its wording is kept verbatim in CLAUDE.md meanwhile. */
+  const acctSrc = await read('assets', 'oa-accounts.js');
+  const annM = /var FORUM_ANNOUNCED = (true|false);/.exec(acctSrc);
+  ok(annM, 'forum: oa-accounts.js carries the one announce switch');
+  const announced = !!annM && annM[1] === 'true';
   const pp = await read('privacy-policy.html');
-  ok(/handle is random/.test(pp) && /keyed one-way hash/.test(pp) && /destroyed a month after the season ends/.test(pp),
-    'forum R9: the policy says handles are random and how, and when the key is destroyed');
-  ok(/does not read the address your browser connects from/.test(pp) && /Google&rsquo;s own request logs/.test(pp) && /standard retention/.test(pp)
-     && /forum writes nothing of its\s+own to them/.test(pp),
-    'forum R9: it says the forum reads no address, and what Google\'s own logs hold and who reads them');
-  ok(/maintainer can read and post in both rooms as an ordinary member/.test(pp), 'forum: the policy says the maintainer reads and posts in both rooms');
-  const ppForum = pp.slice(pp.indexOf('The Site has an anonymous forum'), pp.indexOf('<h2>Security</h2>'));
-  ok(ppForum.length > 800 && ppForum.length < 3000 && noDash(ppForum.replace(/&mdash;/g, '—')), 'forum: the policy paragraph is bounded and carries no em dash');
   const log = JSON.parse(await read('changelog.json')).updates;
   const entry = log.find((u) => u.id === 'forum-2026-09');
-  ok(entry && entry.date === '2026-09-05' && entry.url === '/forum.html' && /two rooms/i.test(entry.title + entry.summary) && noDash(entry.title + entry.summary),
-    'forum: the change log entry, dated the ship day, linking the page, no em dash');
-  ok(log.indexOf(entry) === 0, 'forum: it is at the top');
+  if (announced) {
+    ok(/handle is random/.test(pp) && /keyed one-way hash/.test(pp) && /destroyed a month after the season ends/.test(pp),
+      'forum R9: the policy says handles are random and how, and when the key is destroyed');
+    ok(/does not read the address your browser connects from/.test(pp) && /Google&rsquo;s own request logs/.test(pp) && /standard retention/.test(pp)
+       && /forum writes nothing of its\s+own to them/.test(pp),
+      'forum R9: it says the forum reads no address, and what Google\'s own logs hold and who reads them');
+    ok(/maintainer can read and post in both rooms as an ordinary member/.test(pp), 'forum: the policy says the maintainer reads and posts in both rooms');
+    const ppForum = pp.slice(pp.indexOf('The Site has an anonymous forum'), pp.indexOf('<h2>Security</h2>'));
+    ok(ppForum.length > 800 && ppForum.length < 3000 && noDash(ppForum.replace(/&mdash;/g, '—')), 'forum: the policy paragraph is bounded and carries no em dash');
+    ok(entry && entry.url === '/forum.html' && /two rooms/i.test(entry.title + entry.summary) && noDash(entry.title + entry.summary),
+      'forum: the change log entry, linking the page, no em dash');
+  } else {
+    ok(!/anonymous forum/.test(pp), 'forum (not announced): the policy paragraph is held back with the rest');
+    ok(/THE FORUM'S PARAGRAPH BELONGS HERE/.test(pp), 'forum (not announced): the policy says where the paragraph goes back');
+    ok(!entry, 'forum (not announced): no change log entry, so no digest announces it');
+  }
   const claude = await read('CLAUDE.md');
   ok(/^## The forum$/m.test(claude), 'forum: CLAUDE.md has the section');
   const cf = claude.slice(claude.indexOf('\n## The forum\n'), claude.indexOf('\n## ', claude.indexOf('\n## The forum\n') + 10));
@@ -14663,9 +14682,14 @@ async function testForum() {
   for (const k of ['candidateMarkers', 'forumSeasons', 'forumRooms', 'forumThreads', 'forumPosts', 'forumVotes', 'forumTags', 'forumHandles', 'forumNames', 'forumHidden', 'forumReports', 'forumMail']) {
     ok(new RegExp(`\\n\\s+${k}: '[a-zA-Z]+'`).test(fbJs), `oa-firebase.js: col.${k}`);
   }
-  const acct = await read('assets', 'oa-accounts.js');
-  ok(/<a role="menuitem" href="forum\.html">/.test(acct) && /data-count="forum" hidden/.test(acct), 'oa-accounts.js: the Forum row with its badge born hidden');
-  ok(/<a class="link depth-0" href="forum\.html">Forum<\/a>/.test(acct), 'oa-accounts.js: the phone sheet has the row too');
+  const acct = acctSrc;
+  /* The row is WRITTEN either way — the switch decides whether it is drawn —
+     so both menus are pinned to carry it behind the flag, and the flag is
+     pinned to be the only thing between them and the page. */
+  ok(/\(FORUM_ANNOUNCED\s*\n?\s*\? '<a role="menuitem" href="forum\.html">'/.test(acct) && /data-count="forum" hidden/.test(acct),
+    'oa-accounts.js: the Forum row with its badge born hidden, behind the announce switch');
+  ok(/\(FORUM_ANNOUNCED \? '<a class="link depth-0" href="forum\.html">Forum<\/a>' : ''\)/.test(acct),
+    'oa-accounts.js: the phone sheet has the row too, behind the same switch');
   ok(!/data-held="forum"/.test(acct), 'oa-accounts.js: the row is drawn for every signed-in account, not held on a count');
   const signOutSrc = acct.slice(acct.indexOf('  function signOut() {'), acct.indexOf('OAFB.ready()', acct.indexOf('  function signOut() {')));
   ok(signOutSrc.length > 300 && signOutSrc.length < 3000, 'oa-accounts.js: signOut was sliced');
@@ -14697,11 +14721,31 @@ async function testForum() {
 
   /* the home page, the standard, the stylesheet */
   const home = await read('index.html');
-  ok(/<a class="v3-btn ghost" href="forum\.html">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
-  const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
-  ok(faq.length > 300 && faq.length < 2500 && /forum\.html/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
-    'index.html: the FAQ names both rooms and where the forum is reached');
-  ok(noDash(faq.replace(/&mdash;/g, '\u2014')), 'index.html: the FAQ answer carries no em dash');
+  if (announced) {
+    ok(/<a class="v3-btn ghost" href="forum\.html">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
+    const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
+    ok(faq.length > 300 && faq.length < 2500 && /forum\.html/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
+      'index.html: the FAQ names both rooms and where the forum is reached');
+    ok(noDash(faq.replace(/&mdash;/g, '\u2014')), 'index.html: the FAQ answer carries no em dash');
+  } else {
+    ok(!/href="forum\.html"/.test(home) && !/Is there somewhere to talk to other candidates/.test(home),
+      'index.html (not announced): no button and no FAQ answer');
+    ok(/FORUM_ANNOUNCED in assets\/oa-accounts\.js/.test(home), 'index.html: the comment says where the button comes back from');
+    /* the sweep the switch is actually FOR: not one served page, anywhere,
+       points a reader at forum.html. The page itself is the exception — it
+       is how the maintainer reaches it to seed the rooms. */
+    for (const nm of readdirSync(path.join(HERE, '..'))) {
+      if (!nm.endsWith('.html') || nm === 'forum.html') continue;
+      const src = await read(nm);
+      ok(!/(href|src)="forum\.html/.test(src), `${nm} (not announced): does not point at the forum`);
+    }
+    /* …and the words it will need are kept, so announcing is a restore
+       rather than a rewrite */
+    const kept = await read('CLAUDE.md');
+    ok(/The Site has an anonymous forum in two rooms/.test(kept) && /Candidates&rsquo; forum<\/a>/.test(kept)
+       && /Is there somewhere to talk to other candidates/.test(kept),
+      'CLAUDE.md: the withheld policy paragraph, button and FAQ answer are kept verbatim');
+  }
   const std = await read('_MOBILE-STANDARDS.md');
   const rule13 = std.slice(std.indexOf('13. **A compose box is a control.**'), std.indexOf('## The test gate'));
   ok(rule13.length > 300 && /16px/.test(rule13) && /42px/.test(rule13) && /forum\.html/.test(rule13), '_MOBILE-STANDARDS.md: rule 13, the compose box');
