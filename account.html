@@ -220,8 +220,8 @@
           </a>
           <a class="v3-pa-card" href="post-a-candidate.html">
             <h3><span class="v3-ico" aria-hidden="true">&#127891;</span> Candidate profile</h3>
-            <p>On the market this season? Create your profile, with your CV and research
-            summary attached.</p>
+            <p>On the market this season? Create your profile, with your CV attached, and
+            see how it will appear before anyone else does.</p>
           </a>
           <a class="v3-pa-card" href="#" id="pa-profile">
             <h3><span class="v3-ico" aria-hidden="true">&#128100;</span> Edit account</h3>
@@ -234,6 +234,22 @@
             ticket and an answer.</p>
           </a>
         </div>
+
+        <!-- THE CANDIDATE'S OWN CARD, before anyone else can see it (owner,
+             2026-09-04). Drawn by assets/oa-candcard.js, the same renderer
+             the candidates list uses, from THIS account's own document
+             projected the way the build projects it, so the preview is what
+             the build will publish. Only ever this account's document: the
+             read is where('uid', '==', user.uid), which the rules allow the
+             owner, and nothing else is queried. Hidden until a document is
+             found; after the reveal the same card stays, re-headed. -->
+        <section class="v3-pa-cand" id="pa-cand-preview" hidden aria-labelledby="pa-cand-preview-h">
+          <h2 class="v3-h3" id="pa-cand-preview-h">How your profile will appear</h2>
+          <p class="v3-mut" id="pa-cand-preview-note"></p>
+          <p class="v3-mut" id="pa-cand-preview-status" hidden></p>
+          <div id="pa-cand-preview-card"></div>
+          <p class="v3-cta-row"><a class="v3-btn primary" id="pa-cand-edit" href="post-a-candidate.html">Edit your profile</a></p>
+        </section>
 
         <p class="v3-mut" style="text-align:center;margin:0 0 70px">
           Questions? <a href="mailto:konstantinos.stouras@ucd.ie">Email us</a>.</p>
@@ -298,6 +314,16 @@
     <script defer src="assets/oa-firebase.js"></script>
     <script defer src="assets/oa-accounts.js"></script>
     <script defer src="assets/oa-usage.js"></script>
+    <!-- The own-card preview's dependencies, in the order they are asked:
+         oa-schools.js (the one spelling per place the projection injects),
+         oa-jobnav.js (the one definition of the market year, so this page
+         picks the same season's profile the form reopens), oa-reveal.js (the
+         one definition of the reveal instant) and then oa-candcard.js, the
+         card renderer and the build's browser twin. -->
+    <script defer src="assets/oa-schools.js"></script>
+    <script defer src="assets/oa-jobnav.js"></script>
+    <script defer src="assets/oa-reveal.js"></script>
+    <script defer src="assets/oa-candcard.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one
@@ -383,7 +409,14 @@
              to ignore: a candidate with only a profile was told the account
              held nothing. Owner-readable by the deployed rules. */
           var candQ = db.collection(OAFB.col.candidateSubmissions).where('uid', '==', user.uid).get()
-            .then(function (s) { return s.size; }).catch(function () { return null; });
+            .then(function (s) {
+              /* the documents themselves, not just the count: the own-card
+                 preview below is drawn from this account's own profile, and
+                 this read (the owner's, by uid) is the only one it needs */
+              var docs = [];
+              s.forEach(function (d) { docs.push({ id: d.id, data: d.data() || {} }); });
+              return docs;
+            }).catch(function () { return null; });
           var alertsQ = db.collection(OAFB.col.users).doc(user.uid)
             .collection(OAFB.col.alerts).get()
             .then(function (s) { return s.size; }).catch(function () { return null; });
@@ -398,7 +431,10 @@
             }).catch(function () { return null; });
           return Promise.all([jobsQ, alertsQ, msgQ, candQ]);
         }).then(function (r) {
-          var jobs = r[0], alerts = r[1], msgs = r[2], cands = r[3];
+          var jobs = r[0], alerts = r[1], msgs = r[2];
+          var candDocs = r[3];
+          var cands = candDocs === null ? null : candDocs.length;
+          if (candDocs && candDocs.length) paintCandidatePreview(candDocs);
           var candCard = document.querySelector('.v3-pa-card[href="post-a-candidate.html"] h3');
           if (cands > 0 && candCard) {
             candCard.innerHTML = '<span class="v3-ico" aria-hidden="true">&#127891;</span> Your candidate profile';
@@ -411,6 +447,102 @@
           // holding nothing at all → the friendly nudge card above the grid
           if (jobs === 0 && alerts === 0 && cands === 0) empty.hidden = false;
         }).catch(function () { /* counts are decoration — the links still work */ });
+      }
+
+      /* ------------------------------------- the candidate's own card
+
+         "A candidate who has posted a profile can already see how THEIR OWN
+         profile will appear when all profiles are revealed. Only their own,
+         never anyone else's." (owner, 2026-09-04). The documents are this
+         account's, by uid; the card is the list's own renderer
+         (assets/oa-candcard.js) over the build's projection of the document,
+         so what is drawn here is what the build publishes and nothing the
+         build would refuse. THIS season's profile, the newest where there
+         are several (the same choice the form makes when it reopens one),
+         because the candidates page shows the market under way. */
+      function paintCandidatePreview(docs) {
+        var sec = document.getElementById('pa-cand-preview');
+        if (!sec || !window.OACandCard || !window.OAReveal) return;
+        var season = (window.OAJobNav && OAJobNav.marketYear) ? OAJobNav.marketYear() : 0;
+        var mine = null, at = '';
+        docs.forEach(function (d) {
+          var v = d.data || {};
+          if (season && Number(v.year) !== season) return;
+          var t = v.createdAt && v.createdAt.toDate
+            ? v.createdAt.toDate().toISOString() : String(v.createdAt || '');
+          if (!mine || t >= at) { mine = d; at = t; }
+        });
+        if (!mine) return;
+
+        var v = mine.data;
+        document.getElementById('pa-cand-edit').href =
+          'post-a-candidate.html?edit=' + encodeURIComponent(mine.id);
+
+        var row = OACandCard.publicRowFromDoc(v, {
+          canonColumns: window.OASchools && OASchools.canonColumns,
+          marketYear: window.OAJobNav && OAJobNav.marketYear
+        });
+        var host = document.getElementById('pa-cand-preview-card');
+        if (row) {
+          OACandCard.mount(host, row);
+        } else {
+          host.innerHTML = '';
+          var p = document.createElement('p');
+          p.className = 'v3-mut';
+          p.textContent = 'Your profile is missing a detail the candidates page needs ' +
+            '(a name, a university or a position). Open it to complete it.';
+          host.appendChild(p);
+        }
+
+        /* what the card cannot show yet, said beside it rather than left to
+           be wondered about */
+        var status = document.getElementById('pa-cand-preview-status');
+        var notes = [];
+        if (v.status === 'withdrawn' || v.status === 'hidden') {
+          notes.push('This profile is currently taken down and is not shown to anyone; ' +
+            'saving an edit puts it back.');
+        }
+        if (v.cvUploadPath && !v.cvUrl) {
+          notes.push('Your uploaded CV appears as a link once the next update has filed it.');
+        }
+        status.textContent = notes.join(' ');
+        status.hidden = !notes.length;
+
+        sec.hidden = false;
+        paintRevealNote('');
+        fetch('/data/candidates-meta.json', { credentials: 'same-origin', cache: 'no-cache' })
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (meta) { paintRevealNote(String((meta && meta.revealAt) || '')); })
+          .catch(function () { /* no meta: the note already says what it can */ });
+      }
+
+      /* the heading and the note follow the ONE definition of the reveal
+         (assets/oa-reveal.js): before the instant this is a preview only its
+         owner can see, from the instant on it is the card as everyone sees it */
+      function paintRevealNote(revealAt) {
+        var h = document.getElementById('pa-cand-preview-h');
+        var note = document.getElementById('pa-cand-preview-note');
+        var when = OAReveal.describeReveal(revealAt);
+        if (when && when.revealed) {
+          h.textContent = 'Your profile, as shown on the Candidates page';
+          note.textContent = 'This is your card as everyone sees it on the ' +
+            'candidates page. A change you save reaches the page within a few minutes.';
+          return;
+        }
+        h.textContent = 'How your profile will appear';
+        if (!when) {
+          note.textContent = 'Only you can see this until the reveal, on a date the site ' +
+            'will announce on the candidates page; every profile goes public at once at ' +
+            '14:00 UTC on that day. You can edit it at any time.';
+          return;
+        }
+        var local = when.local && when.local.time
+          ? ', which is ' + when.local.time + (when.local.sameDay ? '' : ' the next day') +
+            ' where you are (' + when.local.timeZone + ')'
+          : '';
+        note.textContent = 'Only you can see this until the reveal: every profile goes ' +
+          'public at once on ' + when.dayLong + ' at ' + when.utc + local +
+          '. You can edit it at any time, before or after.';
       }
 
       if (!window.OAFB || !OAFB.enabled) {

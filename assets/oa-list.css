@@ -885,6 +885,19 @@
 
 .oa-card-note.is-bad { color: var(--err, #a3364a); }
 
+/* "Profile updated on 2 October 2026" (owner, 2026-09-04): the LAST line of a
+   candidate card's body, small and muted, drawn by assets/oa-candcard.js
+   only inside a body (a locked card has none, so never gets one). v3.css
+   carries the same rule for the live design; the two are pinned together in
+   selftest.mjs, like every other card rule that lives in both files. */
+.oa-card-updated {
+  margin: 0;
+  padding: 6px 0 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mut, #646c78);
+}
+
 .oa-card-gone { opacity: 0.55; }
 
 @media screen and (max-width: 640px) {

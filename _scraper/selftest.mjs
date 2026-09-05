@@ -10056,10 +10056,6 @@ async function testCandidateReveal() {
      && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-submissions.js')
      && tagAt(adminHtml, 'oa-reveal.js') < tagAt(adminHtml, 'oa-adminarea.js'),
     'admin-area.html loads oa-reveal.js before both panels that ask it');
-  /* account.html and post-a-candidate.html load it with the candidate card
-     (oa-candcard.js) and the previews; their load-order pins live with that
-     work, beside the twin's parity table. */
-
   /* ---- updatedAt: a public field, day-cut, never an alerts cursor ---- */
   ok(CANDIDATE_PUBLIC_FIELDS.includes('updatedAt'), 'updatedAt: is a published field');
   eq(CANDIDATE_PUBLIC_FIELDS.indexOf('updatedAt'), CANDIDATE_PUBLIC_FIELDS.indexOf('addedAt') + 1,
@@ -10160,6 +10156,291 @@ async function testCandidateReveal() {
   ok(/^## The reveal is an instant, not a day, and a candidate can see their own card first$/m.test(claude),
     'CLAUDE.md: the section is there');
   ok(/14:00 UTC/.test(claude), 'CLAUDE.md: ...and names the hour');
+  ok(/`assets\/oa-candcard\.js`/.test(claude) && /publicRowFromDoc/.test(claude),
+    'CLAUDE.md: ...and records the one renderer and its twin');
+
+  /* ---- ONE renderer, ONE projection: assets/oa-candcard.js ----------- */
+  const C = require(path.join(HERE, '..', 'assets', 'oa-candcard.js'));
+  eq(C.FIELDS, CANDIDATE_PUBLIC_FIELDS,
+    'candcard: FIELDS is CANDIDATE_PUBLIC_FIELDS, in order (both ways, by equality)');
+  for (const k of C.FIELDS) ok(CANDIDATE_PUBLIC_FIELDS.includes(k), `candcard: ${k} is a published field`);
+  for (const k of CANDIDATE_PUBLIC_FIELDS) ok(C.FIELDS.includes(k), `candcard: ${k} is in the browser copy`);
+
+  /* the twin of publicCandidateRow(rowFromCandidateSubmission(doc)), driven
+     over a fixture table that reaches every branch and compared as the
+     served JSON would read: same keys, same order, same values */
+  const TNOW = new Date('2026-09-04T12:00:00Z');
+  const inject = { canonColumns, ownerTag, marketYear, now: TNOW };
+  const ok3 = { uid: 'uid-twin-1', first: 'Ada', last: 'Reader', institution: 'Northwestern University',
+    school: 'Kellogg School of Management', unit: 'Operations', position: 'PhD Candidate',
+    year: 2027, createdAt: '2026-08-20T09:00:00Z', email: 'ada@example.edu', emailPublic: true,
+    researchAreas: ['Operations', 'Queueing Theory'], informsDays: ['Monday', 'Sunday'],
+    cvUrl: 'https://example.edu/cv.pdf', webUrl: 'https://ada.example.edu', ref: 'OA-CAND-260820-ABCD' };
+  const TWIN_CASES = [
+    ['three-part names, every field', ok3],
+    ['the school spelled short (canonColumns is injected)', { ...ok3, school: 'Kellogg' }],
+    ['a legacy one-line affiliation', { ...ok3, institution: '', school: '', unit: '',
+      affiliation: 'Wharton, University of Pennsylvania' }],
+    ['a lone university, no school or unit', { ...ok3, school: '', unit: '' }],
+    ['a lone unit and no university (still publishes the line it has)', { ...ok3, institution: '', school: '' }],
+    ['diacritics in the name (the id slug folds them)', { ...ok3, first: 'Zoë', last: 'Müller-Ó Briain' }],
+    ['whitespace and control characters, trimmed and collapsed', { ...ok3, first: '  Ada \t', last: 'Reader  ', position: ' PhD  Candidate ' }],
+    ['a pending upload with no filed link', { ...ok3, cvUrl: '', cvUploadPath: 'uploads/u/candidates/1-cv.pdf', cvUploadName: 'cv.pdf' }],
+    ['a filed Drive link', { ...ok3, cvUrl: 'https://drive.google.com/file/d/abc/view' }],
+    ['updatedAt absent', { ...ok3 }],
+    ['updatedAt earlier than addedAt (an Admin-SDK oddity)', { ...ok3, updatedAt: '2026-08-01T00:00:00Z' }],
+    ['updatedAt the same day', { ...ok3, updatedAt: '2026-08-20T23:59:59Z' }],
+    ['updatedAt a later day, as a stamp', { ...ok3, updatedAt: '2026-10-02T17:45:10.123Z' }],
+    ['updatedAt as a Firestore Timestamp', { ...ok3, updatedAt: { toDate: () => new Date('2026-10-03T01:00:00Z') } }],
+    ['updatedAt junk', { ...ok3, updatedAt: 'yesterday' }],
+    ['createdAt as a Firestore Timestamp', { ...ok3, createdAt: { toDate: () => new Date('2026-08-21T10:00:00Z') } }],
+    ['createdAt as an ISO string', { ...ok3, createdAt: '2026-08-22T10:00:00.000Z' }],
+    ['createdAt as an unreadable number (falls to now)', { ...ok3, createdAt: 1e16 }],
+    ['createdAt absent (falls to now)', { ...ok3, createdAt: undefined }],
+    ['emailPublic true', { ...ok3, emailPublic: true }],
+    ['emailPublic false', { ...ok3, emailPublic: false }],
+    ['emailPublic 1 (not literally true, so private)', { ...ok3, emailPublic: 1 }],
+    ['emailPublic true on a junk address', { ...ok3, emailPublic: true, email: 'not an address' }],
+    ['junk links (javascript:, a bare domain)', { ...ok3, cvUrl: 'javascript:alert(1)', webUrl: 'example.com', rsUrl: 'ftp://x.y' }],
+    ['a research-summary link from the days the form asked', { ...ok3, rsUrl: 'https://example.edu/rs.pdf' }],
+    ['a junk year (falls to the market year)', { ...ok3, year: 'abc' }],
+    ['a year out of range', { ...ok3, year: 1999 }],
+    ['a fractional year', { ...ok3, year: 2027.9 }],
+    ['postedOn earlier than the stamp (honoured)', { ...ok3, postedOn: '2026-08-01' }],
+    ['postedOn in the future (refused)', { ...ok3, postedOn: '2026-09-30' }],
+    ['too many research areas, duplicates and blanks', { ...ok3,
+      researchAreas: ['A', 'B', 'A', '', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'] }],
+    ['research areas as one string', { ...ok3, researchAreas: 'Operations' }],
+    ['an INFORMS day off the list, and a repeat', { ...ok3, informsDays: ['Saturday', 'Monday', 'Monday'] }],
+    ['no source (defaults to the form)', { ...ok3, source: undefined }],
+    ['an import source', { ...ok3, source: 'legacy-sheet' }],
+    ['no ref', { ...ok3, ref: '' }],
+    ['no uid (no owner)', { ...ok3, uid: '' }],
+    ['no last name (nothing publishes)', { ...ok3, last: '' }],
+    ['no position (nothing publishes)', { ...ok3, position: '' }],
+    ['no affiliation at all (nothing publishes)', { ...ok3, institution: '', school: '', unit: '', affiliation: '' }],
+  ];
+  for (const [label, doc] of TWIN_CASES) {
+    const real = rowFromCandidateSubmission(doc, { now: TNOW });
+    const want = real ? publicCandidateRow(real) : null;
+    const got = C.publicRowFromDoc(doc, inject);
+    eq(JSON.stringify(got), JSON.stringify(want), `candcard twin: ${label}`);
+  }
+  /* the browser has no synchronous sha256, so it omits `owner` the way the
+     build omits an empty `ref`, and is otherwise the same row */
+  {
+    const browser = C.publicRowFromDoc(ok3, { canonColumns, marketYear, now: TNOW });
+    const { owner, ...rest } = publicCandidateRow(rowFromCandidateSubmission(ok3, { now: TNOW }));
+    ok(owner && !('owner' in browser), 'candcard twin: without ownerTag the owner digest is left out, never faked');
+    eq(JSON.stringify(browser), JSON.stringify(rest), 'candcard twin: ...and everything else is the build’s row');
+    eq(C.publicRowFromDoc({ ...ok3, year: 'abc' }, { canonColumns, now: TNOW }), null,
+      'candcard twin: a junk year with no marketYear injected is null, never a private copy of the July roll');
+    const jsSrc = await read('assets', 'oa-candcard.js');
+    ok(!/MARKET_ROLL|getUTCMonth\(\) >= 6/.test(jsSrc), 'candcard: carries no copy of the market-year rule');
+    ok(!/createHash|sha256/i.test(jsSrc.replace(/\/\*[\s\S]*?\*\//g, '')), 'candcard: ...nor of the owner digest');
+  }
+
+  /* the card: the seven labelled rows, in the order the list has always shown
+     them, calling the INJECTED helpers */
+  {
+    const calls = [];
+    const helpers = {
+      link: (u, l) => { calls.push(['link', u, l]); return u ? '<a>' + l + '</a>' : null; },
+      uniLink: (n) => { calls.push(['uni', n]); return '<a>' + n + '</a>'; },
+      mailto: (e) => { calls.push(['mail', e]); return e ? '<a>' + e + '</a>' : null; },
+    };
+    const cfg = C.cardConfig(helpers);
+    const row = C.publicRowFromDoc(ok3, inject);
+    eq(cfg.title(row), 'Ada Reader', 'candcard: the title is the name');
+    eq(cfg.subtitle(row), 'Operations, Kellogg School of Management, Northwestern University — PhD Candidate',
+      'candcard: the subtitle is affiliation, position');
+    const rows = cfg.rows(row);
+    eq(rows.map((r) => r.label), ['Research area(s)', 'Presenting at INFORMS', 'University page', 'CV',
+      'Research summary', 'Web page', 'Contact'], 'candcard: the seven labels, in the list’s order');
+    eq(rows[0].value, 'Operations, Queueing Theory', 'candcard: areas joined');
+    eq(rows[1].value, 'Monday, Sunday', 'candcard: INFORMS days as given');
+    eq(calls.map((c) => c[0]), ['uni', 'link', 'link', 'link', 'mail'], 'candcard: every link goes through the injected helper');
+    eq(calls[0][1], row.affiliation, 'candcard: the university link is asked of the whole affiliation line');
+    eq(calls[1].slice(1), ['https://example.edu/cv.pdf', 'link to CV'], 'candcard: the CV link and its label');
+    eq(rows[4].html, null, 'candcard: an empty research-summary link draws nothing');
+    ok(/parts\[parts\.length - 1\]/.test(await read('assets', 'oa-candcard.js')),
+      'candcard: the default university link reads the LAST part of the line, like index.html’s');
+  }
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' }, R.formatDay),
+    'Profile updated on 2 October 2026', 'candcard: the updated line, day-month-year, no suffix');
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-08-20' }, R.formatDay), '',
+    'candcard: an edit on the day it was posted says nothing');
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-08-01' }, R.formatDay), '',
+    'candcard: ...nor an earlier day');
+  eq(C.updatedOnText({ addedAt: '2026-08-20T09:00:00Z' }, R.formatDay), '', 'candcard: ...nor no edit at all');
+  eq(C.updatedOnText(null, R.formatDay), '', 'candcard: no row, no line');
+  ok(/root\.OAReveal\.formatDay/.test(await read('assets', 'oa-candcard.js')),
+    'candcard: in the browser the day comes from OAReveal.formatDay, the one home of day-month-year');
+  /* decorate: a card with no body (a locked one) is left exactly alone; a
+     body gets the line LAST, once */
+  {
+    C.decorate({ querySelector: () => null }, { addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' });
+    ok(true, 'candcard: decorate on a bodiless (locked) card is a no-op');
+    const kids = [];
+    const body = {
+      querySelector: (s) => (s === '.oa-card-updated' ? kids[kids.length - 1] || null : null),
+      appendChild: (n) => kids.push(n),
+      ownerDocument: { createElement: (t) => ({ tag: t, className: '', textContent: '', parentNode: null }) },
+    };
+    const li = { querySelector: (s) => (s === '.oa-card-body' ? body : null) };
+    C.decorate(li, { addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-10-02' });
+    eq(kids.length, 1, 'candcard: decorate appends one line');
+    eq(kids[0].className, 'oa-card-updated', 'candcard: ...as .oa-card-updated');
+    ok(/^Profile updated on /.test(kids[0].textContent), 'candcard: ...saying when');
+    const kids2 = [];
+    const body2 = { querySelector: () => null, appendChild: (n) => kids2.push(n), ownerDocument: body.ownerDocument };
+    C.decorate({ querySelector: (s) => (s === '.oa-card-body' ? body2 : null) },
+      { addedAt: '2026-08-20T09:00:00Z', updatedAt: '2026-08-20' });
+    eq(kids2.length, 0, 'candcard: a same-day edit appends nothing');
+  }
+
+  /* ---- the three pages, wired in order --------------------------------- */
+  const cardTag = (html) => tagAt(html, 'oa-candcard.js');
+  /* index.html: the list goes through the module and its output is what it
+     was (the page passes its OWN three link helpers) */
+  ok(cardTag(index) > tagAt(index, 'oa-list.js') && cardTag(index) < index.indexOf('OACandCard.cardConfig('),
+    'index.html loads oa-candcard.js after the engine and before the mount that asks it');
+  ok(/card: OACandCard\.cardConfig\(\{ link: link, uniLink: uniLink, mailto: mailto \}\)/.test(index),
+    'index.html: the candidate card is cardConfig with the page’s own helpers injected');
+  ok(/OACandCard\.decorate\(li, r\);/.test(index), 'index.html: onCard decorates (the updated line) then hands over to the edit layer');
+  ok(!/label: 'Research area\(s\)'/.test(index), 'index.html: no inline copy of the rows remains');
+  ok(/mount: '#oa-candidates'[\s\S]{0,400}urlPrefix/.test(index) && /cardOpen: OAGate\.cardOpen\(/.test(index),
+    'index.html: cardOpen, urlPrefix and the filters stay inline (the gate and deep-link pins)');
+  /* the reveal note: a static sentence true without JS, filled in by JS */
+  const noteHtml = index.slice(index.indexOf('id="oa-reveal-note"'), index.indexOf('id="oa-candidates"'));
+  ok(noteHtml.length > 300 && noteHtml.length < 2000, 'index.html: the reveal note slice is bounded both ends');
+  ok(/at 14:00 UTC on/.test(noteHtml) && /07:00 Los Angeles, 10:00 New York, 15:00 London, 22:00 Shanghai/.test(noteHtml),
+    'index.html: the note’s static sentence names the time and the four cities');
+  for (const id of ['oa-reveal-day', 'oa-reveal-cities', 'oa-reveal-local', 'oa-reveal-count']) {
+    ok(noteHtml.includes(`id="${id}"`), `index.html: the note carries #${id} for the script to fill`);
+  }
+  ok(!/oa-reveal-date/.test(index) && !/var MONTHS = \[/.test(index),
+    'index.html: the old month-first date line and its MONTHS table are gone');
+  ok(/OAReveal\.describeReveal\(at\)/.test(index) && /when\.local\.time/.test(index),
+    'index.html: the day, the cities and the reader’s clock come from describeReveal');
+  ok(/emptyDataHint: '[^']*14:00 UTC/.test(index), 'index.html: the empty list’s hint names the time');
+  ok(/Can I see my profile before the reveal\?/.test(index) && /Can I change my profile\?/.test(index),
+    'index.html: the FAQ gains the two questions');
+  ok(/only you can\s+see\s+it/.test(index.replace(/<[^>]+>/g, '')) && /the card then shows when it was last updated/.test(index),
+    'index.html: ...with the spec’s answers');
+  /* account.html: the own-card section, reading ONLY this account's documents */
+  const acctHtml = await read('account.html');
+  for (const f of ['oa-schools.js', 'oa-jobnav.js', 'oa-reveal.js', 'oa-candcard.js']) {
+    ok(tagAt(acctHtml, f) > 0, `account.html loads ${f}, deferred`);
+  }
+  ok(tagAt(acctHtml, 'oa-schools.js') < tagAt(acctHtml, 'oa-candcard.js')
+     && tagAt(acctHtml, 'oa-jobnav.js') < tagAt(acctHtml, 'oa-candcard.js')
+     && tagAt(acctHtml, 'oa-reveal.js') < tagAt(acctHtml, 'oa-candcard.js')
+     && tagAt(acctHtml, 'oa-candcard.js') < acctHtml.indexOf('OACandCard.publicRowFromDoc('),
+    'account.html: the card module comes after what it asks and before the script that draws it');
+  ok(/id="pa-cand-preview"/.test(acctHtml) && /id="pa-cand-preview-card"/.test(acctHtml)
+     && /id="pa-cand-edit"/.test(acctHtml), 'account.html: the section, its card host and its Edit control');
+  ok(/'How your profile will appear'/.test(acctHtml) && /'Your profile, as shown on the Candidates page'/.test(acctHtml),
+    'account.html: headed for before and after the reveal');
+  ok(/OAReveal\.describeReveal\(revealAt\)/.test(acctHtml) && /when\.local\.time/.test(acctHtml),
+    'account.html: the note names the day, 14:00 UTC and the reader’s own clock from the module');
+  ok(/candidates-meta\.json', \{ credentials: 'same-origin', cache: 'no-cache' \}/.test(acctHtml),
+    'account.html: the meta is fetched with cache: no-cache');
+  {
+    const candReads = acctHtml.match(/OAFB\.col\.candidateSubmissions\)[^\n]*/g) || [];
+    eq(candReads.length, 1, 'account.html: exactly one read of candidateSubmissions');
+    ok(/\.where\('uid', '==', user\.uid\)\.get\(\)/.test(candReads[0]),
+      'account.html: ...and it is the owner’s own, by uid (the read the rules allow)');
+    ok(!/\.doc\(['"]?[a-z]/.test(candReads[0]), 'account.html: never a document by id somebody else could type');
+    ok(/allow read: if isOwner\(resource\.data\.uid\) \|\| isAdmin\(\);/.test(candBlock),
+      'rules: the owner may read their own candidateSubmissions document');
+  }
+  ok(/'post-a-candidate\.html\?edit=' \+ encodeURIComponent\(mine\.id\)/.test(acctHtml),
+    'account.html: Edit opens the candidate’s own document on the form');
+  {
+    /* both markers taken FORWARD from the function: the end marker also
+       appears earlier in the page (loadCounts' own guard), and a slice taken
+       on that one is empty and passes every negative check by vacuity */
+    const noteAt = acctHtml.indexOf('function paintRevealNote');
+    const noteFn = acctHtml.slice(noteAt, acctHtml.indexOf('if (!window.OAFB || !OAFB.enabled)', noteAt));
+    ok(noteFn.length > 500 && noteFn.length < 3000, 'account.html: the paintRevealNote slice is bounded both ends');
+    ok(!/pa-cand-edit/.test(noteFn), 'account.html: Edit is offered whatever the reveal says (it is set before the note is)');
+  }
+  ok(/OACandCard\.mount\(host, row\)/.test(acctHtml), 'account.html: the card is the module’s own render');
+  /* post-a-candidate.html: the live preview under the form */
+  const formHtml = await read('post-a-candidate.html');
+  for (const f of ['oa-jobnav.js', 'oa-reveal.js', 'oa-candcard.js']) {
+    ok(tagAt(formHtml, f) > 0 && tagAt(formHtml, f) < tagAt(formHtml, 'oa-candidateform.js'),
+      `post-a-candidate.html loads ${f} BEFORE the form script that draws the preview`);
+  }
+  ok(tagAt(formHtml, 'oa-schools.js') < tagAt(formHtml, 'oa-candcard.js'),
+    'post-a-candidate.html: the canonicaliser is loaded before the card module');
+  ok(/id="oa-cand-preview"[^>]*hidden/.test(formHtml) && /id="oa-cand-preview-card"/.test(formHtml)
+     && /<h3 id="oa-cand-preview-h">Preview<\/h3>/.test(formHtml) && /id="oa-cand-preview-note"/.test(formHtml),
+    'post-a-candidate.html: the Preview panel, hidden until the form shows, with its note');
+  ok(formHtml.indexOf('id="oa-cand-preview"') > formHtml.indexOf('</form>')
+     && formHtml.indexOf('id="oa-cand-preview"') < formHtml.indexOf('id="oa-done"'),
+    'post-a-candidate.html: the preview sits under the form and before the thank-you panel');
+  ok(/at 14:00 UTC on that day/.test(formHtml) && /revealed all together at 14:00 UTC/.test(formHtml),
+    'post-a-candidate.html: the intro and the thank-you name the time');
+  for (const f of ['post-a-candidate.html', 'account.html', 'assets/oa-candidateform.js']) {
+    ok(!/within an hour/.test(await read(...f.split('/'))),
+      `${f}: no longer promises "within an hour" (the doorbell publishes in minutes; the reveal at 14:00 UTC)`);
+  }
+  ok(/function readForm\(\)/.test(formJs) && /var out = readForm\(\), firstBad = null;/.test(formJs),
+    'oa-candidateform: collect() validates on top of a quiet readForm()');
+  {
+    const rf = formJs.slice(formJs.indexOf('function readForm()'), formJs.indexOf('function collect()'));
+    ok(rf.length > 500 && rf.length < 3000, 'oa-candidateform: the readForm slice is bounded both ends');
+    ok(!/setError\(|\.focus\(|say\(/.test(rf), 'oa-candidateform: readForm paints no error, moves no focus, says nothing');
+    const pv = formJs.slice(formJs.indexOf('function paintCardPreview()'), formJs.indexOf('function paintPreviewNote'));
+    ok(pv.length > 500 && pv.length < 3000, 'oa-candidateform: the paintCardPreview slice is bounded both ends');
+    ok(/readForm\(\)/.test(pv) && !/collect\(\)/.test(pv), 'oa-candidateform: the preview reads quietly, never through collect()');
+    ok(/OACandCard\.publicRowFromDoc\(v, \{/.test(pv) && /canonColumns: window\.OASchools && OASchools\.canonColumns/.test(pv)
+       && /marketYear: window\.OAJobNav && OAJobNav\.marketYear/.test(pv),
+      'oa-candidateform: the preview is the twin, with the site’s canonicaliser and market year injected');
+    ok(/OACandCard\.mount\(host, row\)/.test(pv), 'oa-candidateform: ...drawn by the module’s own render');
+    ok(/cvSlot\.file \|\| cvSlot\.pending/.test(pv), 'oa-candidateform: a chosen-but-unfiled CV is explained rather than linked');
+    ok(/dirty \? new Date\(\)\.toISOString\(\) : EDIT_DOC\.updatedAt/.test(pv),
+      'oa-candidateform: in edit mode the updated line previews what saving now would write');
+    ok(/form\.addEventListener\('input'[\s\S]{0,400}paintCardPreview\(\);/.test(formJs)
+       && /form\.addEventListener\('change'[\s\S]{0,400}paintCardPreview\(\);/.test(formJs),
+      'oa-candidateform: the preview follows every keystroke and every tick');
+    ok(/show\(\$\('oa-cand-preview'\), !!user\);/.test(formJs), 'oa-candidateform: the panel shows with the form and hides with it');
+    ok(/EDIT_DOC = v;\s+dirty = false;\s+paintCardPreview\(\);/.test(formJs), 'oa-candidateform: fill() ends by drawing the loaded profile');
+    ok(/OAReveal\.describeReveal\(revealAt\)/.test(formJs), 'oa-candidateform: the note names the instant from the module');
+    ok(/14:00 UTC/.test(editMode) && /account\.html/.test(editMode), 'oa-candidateform: the edit intro names the time and the account page');
+  }
+  /* both stylesheets carry the line's rule, small and muted */
+  for (const f of ['assets/oa-list.css', 'assets/v3.css']) {
+    const css = await read(...f.split('/'));
+    const rule = /\.oa-card-updated \{[^}]*\}/.exec(css);
+    ok(rule && /font-size: 12\.5px/.test(rule[0]) && /color: var\(--mut/.test(rule[0]),
+      `${f}: .oa-card-updated is 12.5px in var(--mut)`);
+  }
+  {
+    const ui = await read('assets', 'oa-ui.css');
+    ok(/\.oa-cand-preview \{/.test(ui), 'oa-ui.css: the form’s preview panel is styled');
+    const m = /@media screen and \(max-width: 640px\) \{[^}]*\.oa-cand-preview \{[^}]*width: 100%/.exec(ui);
+    ok(!!m, 'oa-ui.css: on a phone the preview stacks full-width under the form');
+  }
+  /* the change log: three entries, dated, at the top */
+  const log = JSON.parse(await read('changelog.json'));
+  const top = log.updates.slice(0, 3).map((u) => u.id);
+  eq(top.sort(), ['candidate-preview-2026-09', 'profile-updated-line-2026-09', 'reveal-time-2026-09'],
+    'changelog: the three entries lead the log');
+  for (const u of log.updates.slice(0, 3)) {
+    eq(u.date, '2026-09-04', `changelog: ${u.id} is dated 2026-09-04`);
+    ok(u.title && u.summary && u.url, `changelog: ${u.id} has a title, a summary and a link`);
+    ok(!/—/.test(u.title + u.summary), `changelog: ${u.id} carries no em dash`);
+  }
+  ok(/14:00 UTC/.test(log.updates.find((u) => u.id === 'reveal-time-2026-09').summary),
+    'changelog: the reveal entry names the time');
+  ok(/only you can see it/.test(log.updates.find((u) => u.id === 'candidate-preview-2026-09').summary),
+    'changelog: the preview entry says who can see it');
+  ok(/Profile updated on/.test(log.updates.find((u) => u.id === 'profile-updated-line-2026-09').summary),
+    'changelog: the updated-line entry quotes the line');
+
 }
 
 /* ------------------------------------------------- the Excel download

@@ -6229,6 +6229,233 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ------------------------------ the candidate's own card, before the reveal
+
+   Owner, 2026-09-04: a candidate who has posted a profile can see how THEIR
+   OWN profile will appear (only their own), the form shows the same card as
+   they type, an edited card says when, and the reveal is 14:00 UTC on the day
+   with the reader's own clock beside it. All of it drawn by ONE renderer
+   (assets/oa-candcard.js) over the build's projection, which selftest.mjs
+   pins; this is the reader. The reveal date is ROUTED to a day a month out,
+   so the pre-reveal headings are what is measured whatever the calendar. */
+{
+  const { createRequire } = await import('node:module');
+  const R = createRequire(import.meta.url)(path.join(ROOT, 'assets', 'oa-reveal.js'));
+  const future = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+  const META = { generated: new Date().toISOString(), revealAt: future,
+    revealAtInstant: R.revealStamp(future), heldCount: 2, total: 0 };
+  const routeMeta = (pg) => pg.route('**/data/candidates-meta.json', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(META) }));
+  const todayLine = 'Profile updated on ' + R.formatDay(new Date().toISOString().slice(0, 10));
+
+  const mine = { path: 'candidateSubmissions/cand-me', data: { uid: A_READER.uid, status: 'queued',
+    year: marketYear(), first: 'Ada', last: 'Reader', institution: 'Somewhere University',
+    school: 'School of Business', unit: 'Operations', position: 'PhD Candidate',
+    researchAreas: ['Operations'], informsDays: ['Sunday'], email: 'ada@example.edu',
+    emailPublic: true, cvUrl: 'https://example.edu/ada-cv.pdf',
+    createdAt: '2026-08-20T00:00:00.000Z', updatedAt: '2026-08-25T10:00:00.000Z',
+    ref: 'OA-CAND-260820-MINE' } };
+  /* somebody ELSE's profile, in the same collection: the page must never
+     draw it, and the shim's where() filters by uid so this proves the scope */
+  const other = { path: 'candidateSubmissions/cand-other', data: { uid: 'someone-else-uid',
+    status: 'queued', year: marketYear(), first: 'Nobody', last: 'Elsewhere',
+    institution: 'Other University', position: 'Post-Doc',
+    createdAt: '2026-08-21T00:00:00.000Z' } };
+
+  /* -- account.html: the preview, and only their own ---------------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('account.html', { docs: [mine, other], wait: false });
+    await routeMeta(q);
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+    await q.waitForSelector('#pa-cand-preview:not([hidden]) .oa-card', { timeout: 15000 });
+    await q.waitForFunction(() => /\d{2}:\d{2}/.test(
+      document.getElementById('pa-cand-preview-note').textContent), null, { timeout: 8000 });
+    const a = await q.evaluate(() => ({
+      heading: document.getElementById('pa-cand-preview-h').textContent.trim(),
+      note: document.getElementById('pa-cand-preview-note').textContent,
+      title: document.querySelector('#pa-cand-preview .oa-card-title').textContent.trim(),
+      sub: document.querySelector('#pa-cand-preview .oa-card-sub').textContent.trim(),
+      cards: document.querySelectorAll('#pa-cand-preview .oa-card').length,
+      labels: Array.from(document.querySelectorAll('#pa-cand-preview .oa-kv th')).map((n) => n.textContent),
+      updated: (document.querySelector('#pa-cand-preview .oa-card-updated') || {}).textContent || '',
+      edit: document.getElementById('pa-cand-edit').getAttribute('href'),
+      html: document.documentElement.outerHTML,
+    }));
+    eq(a.heading, 'How your profile will appear', 'own card: headed as a preview before the reveal');
+    eq([a.cards, a.title], [1, 'Ada Reader'], 'own card: one card, and it is the reader’s own');
+    eq(a.sub, 'Operations, School of Business, Somewhere University — PhD Candidate',
+      'own card: the affiliation line the build would publish, joined smallest first');
+    ok(!/Nobody Elsewhere|Other University/.test(a.html),
+      'own card: somebody else’s profile is nowhere in the document');
+    ok(/Only you can see this until the reveal/.test(a.note), 'own card: the only-you line');
+    ok(a.note.includes(R.describeReveal(future).dayLong) && /14:00 UTC/.test(a.note),
+      'own card: ...naming the reveal day and 14:00 UTC');
+    ok(/\d{2}:\d{2}[^.]*where you are/.test(a.note), 'own card: ...and the reader’s own clock');
+    ok(a.labels.includes('CV') && a.labels.includes('Contact'),
+      'own card: the profile’s rows are drawn open (a CV, a way to contact them)');
+    eq(a.updated, 'Profile updated on 25 August 2026',
+      'own card: the updated-on line, from the document’s later updatedAt');
+    ok(/\?edit=cand-me$/.test(a.edit), 'own card: Edit opens the reader’s own document');
+    eq(errors, [], 'own card: no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- post-a-candidate.html: the live preview follows a keystroke -------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html',
+      { docs: [], selector: '#oa-cand-preview:not([hidden])' });
+    const empty = await q.evaluate(() => ({
+      hint: !document.getElementById('oa-cand-preview-empty').hidden,
+      cards: document.querySelectorAll('#oa-cand-preview .oa-card').length,
+      heading: document.getElementById('oa-cand-preview-h').textContent.trim(),
+    }));
+    eq([empty.heading, empty.hint, empty.cards], ['Preview', true, 0],
+      'form preview: a blank form shows the hint and no card');
+    await q.fill('#f-first', 'Grace');
+    await q.fill('#f-last', 'Hopper');
+    await q.fill('#f-institution', 'Northwestern University');
+    await q.selectOption('#f-position', 'PhD Candidate');
+    await q.waitForSelector('#oa-cand-preview .oa-card-title', { timeout: 8000 });
+    eq(await q.$eval('#oa-cand-preview .oa-card-title', (n) => n.textContent.trim()), 'Grace Hopper',
+      'form preview: the card appears once the form holds what a card needs');
+    await q.fill('#f-first', 'Grace Brewster');
+    await q.waitForFunction(() => document.querySelector('#oa-cand-preview .oa-card-title')
+      .textContent.trim() === 'Grace Brewster Hopper', null, { timeout: 8000 });
+    ok(true, 'form preview: ...and follows the next keystroke');
+    const noErr = await q.evaluate(() => document.querySelectorAll('#oa-cand-form .oa-err').length);
+    eq(noErr, 0, 'form preview: drawing it painted no validation error (the read is quiet)');
+    const noUpd = await q.evaluate(() => !document.querySelector('#oa-cand-preview .oa-card-updated'));
+    ok(noUpd, 'form preview: a NEW profile carries no updated-on line');
+    eq(errors, [], 'form preview: no uncaught script error');
+    await ctx.close();
+  }
+  {
+    /* edit mode: the loaded profile is drawn, and typing previews the
+       updated-on line SAVING would earn */
+    const { ctx, page: q, errors } = await signedInPage('post-a-candidate.html?edit=cand-me',
+      { docs: [{ path: mine.path, data: { ...mine.data, updatedAt: undefined } }],
+        selector: '#oa-cand-preview .oa-card-title' });
+    const before = await q.evaluate(() => ({
+      title: document.querySelector('#oa-cand-preview .oa-card-title').textContent.trim(),
+      updated: !!document.querySelector('#oa-cand-preview .oa-card-updated'),
+    }));
+    eq(before, { title: 'Ada Reader', updated: false },
+      'form preview (edit): the loaded profile is drawn, with no updated line until something changes');
+    await q.fill('#f-first', 'Adelaide');
+    await q.waitForFunction(() => document.querySelector('#oa-cand-preview .oa-card-title')
+      .textContent.trim() === 'Adelaide Reader', null, { timeout: 8000 });
+    eq(await q.$eval('#oa-cand-preview .oa-card-updated', (n) => n.textContent), todayLine,
+      'form preview (edit): a change previews the "Profile updated on" line saving now would publish');
+    eq(errors, [], 'form preview (edit): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- the updated-on line on the SERVED rows ----------------------------- */
+  {
+    const today = new Date().toISOString().slice(0, 10);
+    const SEED = [
+      { id: 'upd-1', name: 'Edited Candidate', affiliation: 'Somewhere University',
+        position: 'PhD Candidate', year: String(marketYear()), posted: today,
+        researchAreas: ['Operations'], informsDays: ['Sunday'],
+        addedAt: '2026-08-20T00:00:00Z', updatedAt: '2026-08-25', cvUrl: 'https://example.edu/cv.pdf' },
+      { id: 'upd-2', name: 'Fresh Candidate', affiliation: 'Elsewhere University',
+        position: 'Post-Doc', year: String(marketYear()), posted: today,
+        researchAreas: ['Operations'], informsDays: ['Monday'],
+        addedAt: '2026-08-21T00:00:00Z', cvUrl: 'https://example.edu/cv2.pdf' },
+    ];
+    const seed = (pg) => pg.route('**/data/candidates.json', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SEED) }));
+    const { ctx, page: q } = await signedInPage('index.html', { wait: false });
+    await seed(q);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await q.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await q.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    for (const h of await q.$$('#oa-candidates .oa-card .oa-card-head')) await h.click();
+    await q.waitForTimeout(250);
+    const u = await q.evaluate(() => Array.from(document.querySelectorAll('#oa-candidates .oa-card'))
+      .map((c) => {
+        const line = c.querySelector('.oa-card-updated');
+        const body = c.querySelector('.oa-card-body');
+        return { name: c.querySelector('.oa-card-title').textContent.trim(),
+          line: line ? line.textContent : null,
+          last: !!line && body.lastElementChild === line };
+      }));
+    eq(u.map((c) => [c.name, c.line]),
+      [['Edited Candidate', 'Profile updated on 25 August 2026'], ['Fresh Candidate', null]],
+      'served rows: the updated-on line on exactly the profile with a later updatedAt');
+    ok(u[0].last, 'served rows: ...as the LAST line of the card body');
+    await ctx.close();
+
+    const { ctx: outCtx, page: out } = await signedOutPage('index.html', { wait: false });
+    await seed(out);
+    await out.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await out.waitForFunction(() => !!(window.OAAccounts && window.OAAccounts.resolved()),
+      null, { timeout: 15000 });
+    await out.evaluate(() => document.querySelector('#oa-candidates').scrollIntoView({ block: 'center' }));
+    await out.waitForSelector('#oa-candidates .oa-card', { timeout: 15000 });
+    await out.waitForTimeout(300);
+    const locked = await out.evaluate(() => ({
+      lines: document.querySelectorAll('#oa-candidates .oa-card-updated').length,
+      bodies: document.querySelectorAll('#oa-candidates .oa-card-body').length,
+      html: document.querySelector('#oa-candidates').innerHTML,
+    }));
+    eq([locked.lines, locked.bodies], [0, 0],
+      'served rows (signed out): a locked card has no body and therefore no updated-on line');
+    ok(!/Profile updated on/.test(locked.html), 'served rows (signed out): ...and the line is not in the markup at all');
+    await outCtx.close();
+  }
+
+  /* -- the reveal note prints the reader's own clock ---------------------- */
+  {
+    const { ctx, page: q } = await signedOutPage('index.html', { wait: false });
+    await routeMeta(q);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForSelector('#oa-reveal-note:not([hidden])', { timeout: 15000 });
+    const n = await q.evaluate(() => ({
+      day: document.getElementById('oa-reveal-day').textContent,
+      cities: document.getElementById('oa-reveal-cities').textContent,
+      local: document.getElementById('oa-reveal-local').textContent,
+      count: document.getElementById('oa-reveal-count').textContent,
+      text: document.getElementById('oa-reveal-note').textContent.replace(/\s+/g, ' '),
+    }));
+    eq(n.day, R.describeReveal(future).dayLong, 'reveal note: the day, with its weekday, from the module');
+    eq(n.cities.split(', ').length, 4, 'reveal note: the four cities');
+    ok(/^, which is \d{2}:\d{2}.* where you are$/.test(n.local), 'reveal note: the reader’s own clock');
+    ok(/at 14:00 UTC on/.test(n.text), 'reveal note: ...beside the UTC time the static sentence names');
+    ok(/2 profiles have already been filed/.test(n.count), 'reveal note: the held count');
+    await ctx.close();
+  }
+
+  /* -- a phone --------------------------------------------------------- */
+  for (const [url, selector, docs] of [
+    ['account.html', '#pa-cand-preview:not([hidden]) .oa-card', [mine]],
+    ['post-a-candidate.html?edit=cand-me', '#oa-cand-preview .oa-card-title', [mine]],
+  ]) {
+    const { ctx, page: q } = await signedInPage(url, { docs, selector,
+      viewport: { width: 390, height: 844 } });
+    const m = await q.evaluate(() => {
+      const over = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+      const edit = document.getElementById('pa-cand-edit');
+      const form = document.getElementById('oa-cand-form');
+      const prev = document.getElementById('oa-cand-preview');
+      return {
+        over,
+        editH: edit ? edit.getBoundingClientRect().height : null,
+        stacked: form && prev
+          ? prev.getBoundingClientRect().top >= form.getBoundingClientRect().bottom - 1 : null,
+        cardW: document.querySelector('.oa-card').getBoundingClientRect().width,
+      };
+    });
+    ok(m.over <= 1, `${url} at 390px: the page does not scroll sideways (${m.over}px)`);
+    ok(m.cardW <= 390 && m.cardW > 300, `${url} at 390px: the card fits the screen (${Math.round(m.cardW)}px)`);
+    if (m.editH !== null) ok(m.editH >= 42, `${url} at 390px: the Edit control is a ${Math.round(m.editH)}px target`);
+    if (m.stacked !== null) ok(m.stacked, `${url} at 390px: the preview stacks UNDER the form`);
+    await ctx.close();
+  }
+}
+
 /* ------------------------------------------- the Excel download, measured
 
    A registered reader may download the postings the jobs page is SHOWING as a

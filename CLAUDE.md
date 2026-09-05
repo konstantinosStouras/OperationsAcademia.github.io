@@ -1539,6 +1539,26 @@ draws it through the same renderer as the public list with a browser twin of the
 build's projection pinned against the real one, so the preview is what the build
 would publish and never anyone else's document.
 
+**ONE renderer, ONE projection: `assets/oa-candcard.js`.** The card the
+candidates list draws was inline in `index.html`; it is `cardConfig` now (the
+same seven labelled rows in the same order, with `index.html` passing its own
+three link helpers so the list's output is byte for byte what it was), and
+`publicRowFromDoc` is the browser twin of `rowFromCandidateSubmission` +
+`publicCandidateRow`, with the name canonicaliser, the market year and the
+owner digest INJECTED the way `OAFresh.approvedRow` injects `canonColumns`. The
+account page's own-card section and the form's live preview (`paintCardPreview`
+in `oa-candidateform.js`, reading a QUIET `readForm()` that paints no error and
+moves no focus while the reader types) both go through it, so a preview cannot
+show a link the build refuses or a name it re-spells. `decorate` adds the
+"Profile updated on" line only INSIDE a card body: a locked card has none, so
+the blurred strip never advertises the line and the values stay absent rather
+than hidden. The twin is pinned against the real projection over a fixture
+table covering every branch, `FIELDS` against `CANDIDATE_PUBLIC_FIELDS` both
+ways, and the load order on all three pages; `page-test.mjs` drives the account
+preview with a second, foreign document that must never appear, the form's
+preview following a keystroke, the updated-on line on exactly the served row
+that earned it, the reveal note's local clock, and both pages at 390px.
+
 Tests: `testCandidateReveal` in `_scraper/selftest.mjs` (the module to the
 second, with and without Intl; the gate's parity; the meta's instant; every
 consumer through the module and the old comparison out of each; the doorbell's

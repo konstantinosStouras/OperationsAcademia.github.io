@@ -288,15 +288,21 @@
             </div>
           </div>
 
-          <!-- profiles are collected continuously but revealed ALL AT ONCE on
-               the date the admin set; until then this note explains the empty
-               list (filled from /data/candidates-meta.json) -->
+          <!-- profiles are collected continuously but revealed ALL AT ONCE, at
+               14:00 UTC on the date the admin set (assets/oa-reveal.js is the
+               one definition of that instant); until then this note explains
+               the empty list (filled from /data/candidates-meta.json). The
+               sentence is TRUE AS WRITTEN: the day, the four city clocks and
+               the reader's own clock are filled in by the script below, and
+               without it the typed clocks stand. -->
           <div class="oa-note" id="oa-reveal-note" hidden>
-            <p><strong>Candidate profiles are revealed all at once on
-            <span id="oa-reveal-date"></span>.</strong>
+            <p><strong>Candidate profiles are revealed all at once, at 14:00 UTC on
+            <span id="oa-reveal-day">the reveal date</span></strong>
+            (<span id="oa-reveal-cities">07:00 Los Angeles, 10:00 New York, 15:00 London, 22:00 Shanghai</span>)<span id="oa-reveal-local"></span>.
             <span id="oa-reveal-count"></span>
-            Post yours now &mdash; it stays private until then, and appears
-            with everyone else&rsquo;s on the day.</p>
+            Post yours now: it stays private until then, you can see how it will look on
+            your <a href="account.html">account page</a>, and it appears with everyone
+            else&rsquo;s at that moment.</p>
           </div>
 
           <div id="oa-candidates"></div>
@@ -448,13 +454,37 @@
                 <a href="post-a-candidate.html">create your job-market profile</a> &mdash; with
                 your CV attached, your research areas, and the day(s) you
                 present at INFORMS, so hiring committees can find your talk and attend it.</p>
-                <p>Profiles are collected continuously but revealed <strong>all at once</strong>
-                on a set date each season, so no one gains from posting earlier or later. Each
+                <p>Profiles are collected continuously but revealed <strong>all at once</strong>,
+                at 14:00 UTC on a set date each season (07:00 in Los Angeles, 10:00 in New
+                York, 15:00 in London, 22:00 in Shanghai), so no one gains from posting
+                earlier or later. Each
                 candidate has <strong>one profile per market year</strong> &mdash; if you have
                 already filed one this season, the form reopens it for editing. You
                 can edit your profile, replace or remove its files (a replaced CV keeps only
                 the newest version), or take it down at any time;
                 your contact address is shown only if you opt in.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Can I see my profile before the reveal?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Yes, on your <a href="account.html">account page</a>, and only you can see
+                it. It is drawn exactly as it will appear on the candidates page once every
+                profile is revealed, and the form shows the same preview while you type.</p>
+              </div></div></div>
+            </div>
+
+            <div class="v3-faq-item">
+              <button type="button" class="v3-faq-q">Can I change my profile?
+                <span class="v3-faq-chev" aria-hidden="true">+</span></button>
+              <div class="v3-faq-a"><div><div class="v3-faq-body">
+                <p>Yes, at any time; the card then shows when it was last updated. Before the
+                reveal your changes stay private and go public with everyone else&rsquo;s at
+                14:00 UTC on the reveal date; after it they reach the candidates page within a
+                few minutes of saving. Open <a href="post-a-candidate.html">Post your
+                candidacy</a> while signed in and it reopens your profile.</p>
               </div></div></div>
             </div>
 
@@ -478,9 +508,9 @@
               <div class="v3-faq-a"><div><div class="v3-faq-body">
                 <p>Continuously. Postings, profiles and placements are submitted by the
                 community and publish automatically &mdash; job postings normally within a few
-                minutes, placements within the hour, and candidate profiles all together on the
-                season&rsquo;s reveal date &mdash; there is no third-party service between a poster
-                and the page any more.</p>
+                minutes, placements within the hour, and candidate profiles all together at
+                14:00 UTC on the season&rsquo;s reveal date &mdash; there is no third-party service
+                between a poster and the page any more.</p>
                 <p>The lists always show the job-market year under way. A market year runs from
                 1 July to 30 June and is numbered by the year it ends &mdash; so the
                 <span id="oa-faq-season">current</span> market began on
@@ -748,6 +778,10 @@
     <script defer src="assets/oa-gate.js"></script>
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-list.js"></script>
+    <!-- oa-candcard.js: the candidate card, the ONE renderer the list below
+         and the two own-card previews (account.html, post-a-candidate.html)
+         share, so a preview cannot drift from the card it previews. -->
+    <script defer src="assets/oa-candcard.js"></script>
     <script defer src="assets/oa-jobedit.js"></script>
     <script defer src="assets/oa-candidateedit.js"></script>
     <script defer src="assets/oa-placementedit.js"></script>
@@ -951,13 +985,22 @@
           var at = String(meta.revealAt || '');
           if (!OAReveal.revealInstant(at)) return;
           if (OAReveal.isRevealed(at)) return;        // revealed, the list speaks
-          /* the note's times (the four cities, the reader's own clock) come
-             from OAReveal.describeReveal(at) too; the day is printed below */
-          var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-            'August', 'September', 'October', 'November', 'December'];
-          document.getElementById('oa-reveal-date').textContent =
-            MONTHS[Number(at.slice(5, 7)) - 1] + ' ' + Number(at.slice(8, 10)) +
-            ', ' + at.slice(0, 4);
+          /* the day, the four city clocks and the reader's own clock all come
+             from OAReveal.describeReveal(at), COMPUTED from named zones: a
+             typed clock would be wrong the year daylight saving moves */
+          var when = OAReveal.describeReveal(at);
+          document.getElementById('oa-reveal-day').textContent = when.dayLong;
+          var known = when.cities.filter(function (c) { return c.time; });
+          if (known.length === when.cities.length) {
+            document.getElementById('oa-reveal-cities').textContent = known
+              .map(function (c) { return c.time + ' ' + c.name; }).join(', ');
+          }
+          /* the reader's own clock, and honestly the NEXT day where it is one
+             (Auckland reads three in the morning of the day after) */
+          document.getElementById('oa-reveal-local').textContent = when.local.time
+            ? ', which is ' + when.local.time +
+              (when.local.sameDay ? '' : ' the next day') + ' where you are'
+            : '';
           var n = Number(meta.heldCount) || 0;
           document.getElementById('oa-reveal-count').textContent = n
             ? n + (n === 1 ? ' profile has' : ' profiles have') + ' already been filed. '
@@ -1086,7 +1129,7 @@
           strings: {
             loading: 'Loading candidate profiles…',
             emptyData: 'No candidate profiles are public yet.',
-            emptyDataHint: 'Before the reveal date, profiles are held privately and appear here together on the day; after it, new ones appear as candidates post them.',
+            emptyDataHint: 'Before the reveal, profiles are held privately and appear here together at 14:00 UTC on the reveal date (this list can take a few minutes to catch up with that moment); after it, new ones appear as candidates post them.',
             emptyFiltered: 'No candidate profiles match these filters.',
             emptyFilteredHint: 'Try removing a filter, or clear them all to see every profile.',
             loadError: 'The candidate profiles could not be loaded.',
@@ -1123,27 +1166,18 @@
              card where it stands. */
           cardOpen: OAGate.cardOpen({ note: 'Sign in to see this profile' }),
 
-          onCard: function (li, r) { window.OACandidateEdit && OACandidateEdit.onCard(li, r); },
-          card: {
-            title:    function (r) { return r.name; },
-            subtitle: function (r) {
-              return [r.affiliation, r.position].filter(Boolean).join(' — ');
-            },
-            rows: function (r) {
-              return [
-                { label: 'Research area(s)',      value: (r.researchAreas || []).join(', ') },
-                { label: 'Presenting at INFORMS', value: (r.informsDays || []).join(', ') },
-                { label: 'University page',       html: uniLink(r.affiliation) },
-                { label: 'CV',                    html: link(r.cvUrl, 'link to CV') },
-                // the form stopped asking for a research summary (2026-08-24);
-                // the row stays for profiles filed while it still did, and an
-                // empty rsUrl draws nothing
-                { label: 'Research summary',      html: link(r.rsUrl, 'link') },
-                { label: 'Web page',              html: link(r.webUrl, 'link') },
-                { label: 'Contact',               html: mailto(r.email) }
-              ];
-            }
-          }
+          /* the "Profile updated on" line first (inside the body, so a locked
+             card never gets one), then the owner's Edit / Take down bar */
+          onCard: function (li, r) {
+            OACandCard.decorate(li, r);
+            if (window.OACandidateEdit) OACandidateEdit.onCard(li, r);
+          },
+          /* THE CARD IS DRAWN BY assets/oa-candcard.js, the one renderer the
+             account page's own-card preview and the posting form's live
+             preview share (owner, 2026-09-04): title, subtitle and the seven
+             labelled rows in their order. This page's own three link helpers
+             are passed in, so the list's output is exactly what it was. */
+          card: OACandCard.cardConfig({ link: link, uniLink: uniLink, mailto: mailto })
         });
         if (window.OACandidateEdit) OACandidateEdit.attach(cands);
         OAGate.watch(cands);
