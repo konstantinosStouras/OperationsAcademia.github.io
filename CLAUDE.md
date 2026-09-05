@@ -1516,8 +1516,9 @@ lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:0
 as well**: two producers for one event is the duplicate-doorbell outage under
 "One event, one build", and the selftest refuses a workflow cron on that hour.
 Like every function here it is inert until deployed; the deploy also creates
-the Cloud Scheduler job, and `firebase functions:list` must read back SIX
-(the four doorbells, `recordVisit` and `sendVerificationEmail`).
+the Cloud Scheduler job, and `firebase functions:list` must read back TWELVE
+(the four doorbells, `recordVisit`, `sendVerificationEmail` and the six forum
+callables).
 
 **The alerts' reveal note is keyed on the instant, and its mark is lifted to
 it.** `candidateNews` announced when the alert's mark preceded the reveal DAY;
@@ -2177,9 +2178,10 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is SIX now.** Four doorbells (`revealCandidates` among
-them), `recordVisit`, and `sendVerificationEmail`. Read the list back after
-every deploy; fewer means a stale checkout. `npm install --prefix _functions` first, since the CLI loads
+**The deploy count is TWELVE now.** Four doorbells (`revealCandidates` among
+them), `recordVisit`, `sendVerificationEmail`, and the six forum callables
+(see "The forum"). Read the list back after every deploy; fewer means a stale
+checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
 
 **Where the browser keeps it, so nobody looks in the wrong place.**
@@ -2214,6 +2216,250 @@ session on the jobs page (locked cards, the chip, the card, no hint and no
 writes), Send again reaching the callable and falling back when it is
 absent, "I have verified it" lifting the gate with a fresh token, and the
 verify page's four cards for both readers, at 390px too.
+
+## The forum
+
+Owner, 2026-09-04 and 05: an anonymous forum for the candidates of the
+season under way, and beside it an Open forum for every registered account;
+tags on threads, like and dislike on posts, quote and reply; and the
+maintainer admitted to both rooms as an ordinary member. The design brief is
+the forum blueprint and its privacy audit (read against Ederer,
+Goldsmith-Pinkham and Jensen's paper on EJMR, whose four-character usernames
+were a hash of the poster's IP address and a topic id, with no secret, and
+were reversed for two thirds of seven million posts from the public pages
+alone). Step 1 is the server half and the page; follows and mail are step 2,
+reports and moderation of reports step 3. The decisions, so nobody re-opens
+them:
+
+    assets/oa-forum-model.js     rooms, KEYS, BOUNDS, TAGS, RATE, slug(), minute()   (dual-mode)
+    assets/oa-forum-guard.js     what a post may not contain, one check() for both sides
+    assets/oa-forum-guide.js     the thirteen rules, three notes, the maintainer paragraph
+    _functions/forum/identity.js the ONE HMAC, the handle draw, the season's secret version
+    _functions/forum/member.js   the shared preamble: who, which room, limits, ERRORS
+    _functions/forum/{join,post,edit,vote,moderate}.js   the six callables
+    _scraper/build-functions-vendor.mjs   copies the four modules into _functions/ (in BUILDERS)
+    _functions/test/forum-emulator.mjs    the functions and the rules against the real emulator
+
+**The uid never sits beside a handle, anywhere, in any form.** The only link
+between a handle and a person is `H = HMAC-SHA256(FORUM_SECRET, season + ':' +
+uid)`, computed in `identity.js` and nowhere else (the selftest pins that
+`createHmac` appears once in the forum, that no other file computes over a
+uid, and that H is never truncated), used whole as the id of
+`forumHandles/{H}` and of a vote, `posts/{pid}/votes/{H}`. No custom claim,
+no sealed uid, no served file, no Actions log ever carries H beside a uid.
+Every forum document is written by the Cloud Functions and by nothing else:
+every content path in `_firestore.rules` is `allow write: if false`, the
+maintainer's browser included, and the votes and `forumNames` are closed in
+BOTH directions to everyone. The handle a member sees is drawn with
+`crypto.randomInt` from two word lists and a number, INSIDE the transaction
+that claims its slug in `forumNames` (retried on a collision), and is a
+function of nothing: not H, not the uid, not the clock. `Moderator` is
+reserved and never drawn; only `seedGuide` posts under it.
+
+**Two rooms under one handle scheme.** The path is
+`forumSeasons/{Y}/rooms/{room}/threads/{tid}/posts/{pid}`, `room` in
+`['candidates', 'open']`, so the rules read the room off the PATH and need no
+document read for it; there are no room documents. `forumReader(room)` admits
+a current candidate or the maintainer to the candidates room and any
+`verified()` account to the open room, compared by NAME (never a regex, the
+trap the map warned about), and the selftest pins the two names against
+`OAForumModel.ROOMS` both ways. A current candidate is a `candidateMarkers/
+{uid}` marker (written by `forumJoin`, owner-read, owner-delete, never
+client-written) naming a profile the caller owns, of THIS season, queued or
+published, RE-READ on every request, so a withdrawal ends access at once. The
+handle is keyed on the season and the account, never the room, so one person
+has one handle in both rooms for the season, and the guide says so in one
+sentence. `verified()` passes any non-password provider, so an ORCID account
+(no e-mail claim) reads and posts in the open room; the site never signs
+anyone in anonymously, and if it ever did that provider would pass too.
+`verifiedToken` in `member.js` mirrors the rule exactly, both halves, and
+`ADMIN` there is the one literal shared with `isAdmin()` in the rules (pinned).
+
+**The maintainer may enter both rooms** (owner, 2026-09-05: "the admin should
+be able to have access to all forums because I need to check how people use
+it initially and for testing purposes"). `admitted()` lets `adminToken()`
+into the candidates room with no profile; `forumJoin` gives them a random
+handle like anyone else; `forumPost`, `forumEdit` and `forumVote` take them
+in either room through the same `member()`; their posts are indistinguishable
+from any member's on the page. `forumModerate` alone checks `adminToken` and
+refuses everyone else. The guide, the Privacy Policy and this section say so
+plainly.
+
+**One refusal for two causes (R5).** The candidates room answers
+`permission-denied {reason:'candidate'}` whether the caller is unverified or
+simply holds no profile, so a caller learns nothing about the profile
+database from the error; only the open room names `verified`. A refusal's
+`details` object carries `reason` and NOTHING else (R6), and a rate limit
+names its counter, never a count. Every reason string lives in `ERRORS` in
+`member.js`, and `refuse()` is the one shape.
+
+**The model is pinned against the WRITERS, both ways.** There is no
+`hasOnly()` list in the rules to pin a client write against, because no
+client writes. So every write in `_functions/forum/*.js` is a named object
+inside a `/* @doc <kind> */ ... /* @end */` block; the selftest reads each
+block's keys and holds them to `KEYS[kind]` in `oa-forum-model.js`, and holds
+the union of every block of a kind to exactly that list, so a key nobody
+writes and a write nobody declared both fail the build. An inline object
+handed to `set()`/`update()` fails it too. No list carries `uid`, `email`,
+`name` or `sub`, with the two named exceptions: `candidateMarkers.sub` (a
+profile id, on a uid-keyed document that never sits beside a handle) and
+`forumNames.key` (the one field on any forum document that holds a hash).
+
+**Tags replace the blueprint's one category.** A thread carries 1 to 5 slugs
+of `[a-z0-9-]{2,24}`; `TAGS` in the model is the curated list of about thirty
+and free tags are allowed beside them, normalised through `slug()`. The tally
+`forumTags/{Y}_{room}` is bumped in the thread transaction as a NESTED map
+with `FieldValue.increment` (the `recordVisit` lesson: never a dotted path),
+capped at `TAG_COUNT_CAP` (400) distinct slugs so the one hot document cannot
+grow without bound (a tag past the cap is still on its thread, just not
+tallied). Tags are fixed at creation: `forumEdit` touches body and kind only,
+so the tally never drifts, and the guide says "Tags are set when the question
+is asked". The guide thread is tagged `about`.
+
+**Like and dislike.** `posts/{pid}` carries `up` and `down`; `forumVote {room,
+tid, pid, v: 1 | -1 | 0}` reads the caller's vote at `votes/{H}` and moves the
+two tallies by the DELTA with `FieldValue.increment`, so a retried
+transaction never re-applies a stale absolute, and moves the thread head's
+`score` when the post is n 1, which is the net the list card shows without
+reading post 1 per card. Own post: `failed-precondition {reason:'own'}`. The
+caller's own votes for a thread come back from `forumThreadVotes` in one
+`getAll`. A contended transaction (Firestore's ABORTED) is mapped to
+`resource-exhausted {reason:'busy'}` so the page says "try again in a moment"
+rather than a raw code. Votes are 60 per handle per day.
+
+**Quote and reply.** `forumPost` on a reply accepts `quote: {n, text}`, reads
+post `n` INSIDE the transaction (one equality on one collection, no index),
+refuses `invalid-argument {reason:'quote'}` unless `text` is a non-empty
+substring of that post's body as it stands NOW and at most `BOUNDS.quote`
+(600) characters, and stores a COPY `{n, by, text}` on the reply, so a later
+edit or removal of the original never rewrites it. Never the quoted pid.
+
+**Timestamps are whole minutes (R7).** Every `t`, `lastAt`, `joinedAt`,
+`editedAt`, `createdAt` comes from `minute()`; `serverTimestamp()` and
+`Date.now()` appear in no forum function (pinned), and the emulator walk
+asserts every numeric stamp `% 60000 === 0`. A minute cannot be joined
+exactly to any other record of the same moment.
+
+**The secret is VERSIONED BY SEASON (decision 15, R8).** `FORUM_SECRET` is
+one Secret Manager secret with versions; `forumSeasons/{Y}.secretVersion`
+names the version the season's handles are derived under, written on the
+season's first join from whatever `latest` resolved to at that moment, and
+`identity.js` then reads exactly that version through
+`@google-cloud/secret-manager` (`.value()` cannot read a named version; the
+`secrets:` binding on the callables is what grants the runtime account
+access). `latest` is named in the create branch of `ensureSeason` and
+nowhere else; `secretVersion` is read in `identity.js` and nowhere else; the
+one season document read is the season passed in. The runbook is in
+`_SETUP-INSTANT-PUBLISH.md` ("The forum secret"): set once, a rotation
+renames every handle so it is the answer to a suspected leak and nothing
+else, and on 1 August the previous season's version is destroyed with
+`gcloud secrets versions destroy`, after which an archived season's handles
+cannot be re-derived by anyone. The housekeeping that runs that and stamps
+`secretDestroyedAt` is step 2; the field is in the model's comment now so the
+key list gains it with its writer. The emulator has no Secret Manager, so
+under `FUNCTIONS_EMULATOR === 'true'` only, versions `env` and `env2` read
+`FORUM_SECRET_TEST` and `FORUM_SECRET_TEST_2`, and the emulator test proves
+two versions give two handles for one uid.
+
+**No forum source reads the request's address (R1).** No `rawRequest`, `ip`,
+`x-forwarded-for`, `remoteAddress` or `headers` anywhere under
+`_functions/forum/` or in the four vendored modules (pinned; `recordVisit` in
+`index.js` legitimately reads headers and is outside the scan). Google's own
+request logs for the functions still record the connecting address and the
+minute for their standard retention; the Privacy Policy says so (R9), says
+who can read them, and says the forum writes nothing of its own to them.
+
+**Ids are Firestore auto-ids (R4).** Threads and posts are minted with
+`.doc()`; the selftest pins that the only ids built from a hash are
+`forumHandles/{H}` and `votes/{H}`, and the only one built from a uid is
+`candidateMarkers/{uid}`.
+
+**The guide is ONE text.** `forumModerate {op:'seedGuide', room}` takes no
+body: it renders `guide.text()` itself as the first post of a pinned, locked
+thread under `Moderator`, once per room per season (a second press is
+`already-exists`), and stamps `forumSeasons/{Y}.guides.{room}`. The panel on
+the page draws `html()` from the same module, so the pinned thread and the
+panel cannot disagree. Thirteen rules, the owner's two notices verbatim, the
+small-population note, and the maintainer paragraph, which says the key is
+destroyed a month after the season and that the maintainer reads and posts in
+both rooms. No link in it (the guard would refuse the seed), and it fits the
+body bound, both pinned.
+
+**The guard is one module on both sides.** `check(text)` answers `''` or
+`email | orcid | phone | url`; `EMAIL_RX` is the literal from
+`_scraper/jobs-model.mjs`, which a browser cannot import, so the selftest
+reads the literal out of that source and holds the copy to it character for
+character. The phone rule is nine or more digits joined by at most one
+separator each, so `2026-2027`, `2026-09-04` and `$120,000-150,000` pass and
+`(617) 253-1000` does not; the blueprint's fixtures are pinned. The function
+runs the same `check()` on every title and body and refuses with the same
+reason word the page shows.
+
+**Vendored copies are GENERATED, never edited.** `firebase deploy` ships only
+`_functions/`, so `build-functions-vendor.mjs` (in `BUILDERS` after
+`build-netmap.mjs`, offline, `writeIfChanged`) copies `oa-jobnav.js`,
+`oa-forum-model.js`, `oa-forum-guard.js` and `oa-forum-guide.js` to the top
+of `_functions/`, and the selftest pins each pair byte for byte. It is
+deliberately NOT named in any workflow: the "every builder has a caller,
+never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
+the byte pin already catches drift, so the `--check` mode is for a hand run.
+
+**The deploy count is TWELVE.** `_functions/index.js` re-exports the six
+callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
+per-function lines and the selftest's count of them agree; the header, both
+setup pages and the count sentences in this file moved from six together.
+`npm install --prefix _functions` first, as always: `@google-cloud/secret-
+manager` arrived with the forum and the CLI's own load of `index.js` dies on
+a `require` it cannot resolve. Owner, by hand, once: `firebase
+functions:secrets:set FORUM_SECRET --project operations-academia`, then
+`git pull && npm install --prefix _functions && firebase deploy --only
+functions --project operations-academia`, read twelve back, and press the
+seed for each room. The rules publish themselves behind the green check.
+
+**The emulator test is the ground truth, and it skips honestly.**
+`_functions/test/forum-emulator.mjs` runs under `firebase emulators:exec
+--project demo-oa-forum --only auth,firestore,functions` (a `demo-` project
+never touches operations-academia; the `functions` predeploy guard does not
+run under the emulator; `firebase.json` fixes the three ports). It signs
+real password users in against the Auth emulator so tokens carry
+`sign_in_provider: 'password'` as a browser's would, drives every callable
+and every refusal, drives the rules through `@firebase/rules-unit-testing`
+for all four readers, and then WALKS every document under `forumSeasons`,
+`forumTags`, `forumHandles` and `forumNames` for any test uid, e-mail
+address, `candidateSubmissions` id or 64-hex string outside `forumHandles`
+ids, `votes` ids and `forumNames.key` (R10), with `candidateMarkers` walked
+apart for e-mail and hash. Without Java or firebase-tools it prints SKIPPED
+and exits 0; under `CI` that same skip exits 1 (page-test's rule), so
+`oa-checks.yml` runs it in a job of its own with `setup-java`, a bounded and
+retried `npm i -g firebase-tools@14`, `npm ci --prefix _functions`, `CI:
+true` and the two test secrets, keeping the first job's "No network" header
+true. No workflow cron touches the forum (pinned); nothing here runs on a
+schedule.
+
+**`forum.html` loads none of GA4, `oa-usage.js` or `oa-visit.js`** (decision
+12): GA4 would send `forum.html?t=<tid>` as `page_location`, usage writes a
+uid-keyed document with click timings, and the visit ping sends the address
+to a function. The page's own pins (`QUIET_PAGES` in the two page walks, the
+load order, `card: false` in share-check, `NOINDEX_OK`, the FAQ, rule 13 in
+`_MOBILE-STANDARDS.md`) arrive with the page. Cost, stated: forum use is
+unmeasured.
+
+**What is not solved, and is said rather than hidden.** A constant per-season
+handle lets a reader connect one person's posts across threads, and a detail
+here beside a detail there can identify someone in a population of a few
+hundred; the guide's small-population note says so. With the current
+season's secret and the Admin SDK the maintainer can link a current handle to
+an account; that is a deliberate step, disclosed in the guide and the policy,
+and it ends for a season when that season's version is destroyed.
+
+Tests: `testForum` in `_scraper/selftest.mjs` (the model, the writers against
+the model both ways through the `@doc` blocks, R1 to R8 as source scans, the
+rules block clause by clause with the rooms pinned against the model both
+ways, the guard's literal and fixtures, the guide, the twelve exports, the
+package and lockfile, the emulator test's shape and the workflow job, no
+forum cron, the runbook, the policy paragraph (R9), the change log entry and
+this section) and `_functions/test/forum-emulator.mjs` (R7 and R10 against
+the real thing).
 
 ## What "immediate" costs, and where the waiting used to be
 

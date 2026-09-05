@@ -12,6 +12,7 @@
 import { isMain } from './_main.mjs';
 import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
+import { PAIRS as VENDOR_PAIRS, drift as vendorDrift } from './build-functions-vendor.mjs';
 import * as CSTATS from './build-candidate-stats.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
@@ -5390,8 +5391,13 @@ async function testUsersAndMessages() {
 
   /* ---------------------------------------------------------- the threads */
 
-  const thr = rules.slice(rules.indexOf('match /messages/{uid}'),
-    rules.indexOf('// ------------------------------------------------------ identity keys'));
+  /* Bounded at the next section header, whatever section follows: the forum
+     block sits between the messages and the identity keys now, and a slice
+     that ran on to the identity keys read the forum's own `allow delete`
+     into the items check below. */
+  const thrStart = rules.indexOf('match /messages/{uid}');
+  const thr = rules.slice(thrStart, rules.indexOf('\n    // -------', thrStart));
+  ok(thr.length > 400 && !/match \/forumSeasons/.test(thr), 'the messages slice ends before the next section');
   ok(thr.length > 400, 'the rules carry a messages block');
   ok(/allow read: if isAdmin\(\) \|\| isOwner\(uid\);/.test(thr),
     'a thread is readable by its two parties and nobody else');
@@ -9336,8 +9342,8 @@ async function testReviewWiring() {
      with, drop it the other and a posting's new card waits for a secret its
      build never needed. */
   eq(plan({ firebase: false }).map((b) => b.script),
-    ['build-directory.mjs', 'build-netmap.mjs'],
-    'without the service account only the two OFFLINE builders run');
+    ['build-directory.mjs', 'build-netmap.mjs', 'build-functions-vendor.mjs'],
+    'without the service account only the three OFFLINE builders run');
   eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
     'with it, the whole build does');
 
@@ -10357,8 +10363,8 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is six/.test(setup) && /read back\s+six/.test(setup),
-    'setup guide: names revealCandidates and counts six functions');
+  ok(/`revealCandidates`/.test(setup) && /which is twelve/.test(setup) && /read back\s+twelve/.test(setup),
+    'setup guide: names revealCandidates and counts twelve functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
   ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
@@ -13522,6 +13528,8 @@ async function testEmailVerification() {
   ok(allows.length > 40, 'rules: the allow statements were really found');
   const bareWrites = allows.filter((a) => /^allow [^:]*\b(create|update|write)\b/.test(a)
     && /signedIn\(\)/.test(a));
+  /* the forum block adds many clauses and every one names verified(),
+     isOwner(), isAdmin() or `false`, so this count is unmoved by it */
   eq(bareWrites.length, 2,
     'rules: exactly TWO write clauses are granted on a bare sign-in (a create and an update)');
   const profBlock = rules.slice(rules.indexOf('match /profiles/{uid}'));
@@ -13646,10 +13654,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/SIX functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts six and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
-    'function: the file exports exactly six functions, the count a deploy must read back');
+  ok(/TWELVE functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts twelve and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 12,
+    'function: the file exports exactly twelve functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -13668,8 +13676,8 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\bsix\b/i.test(setup) && /functions:list/.test(setup),
-    'setup: read the deployed list back and count SIX');
+  ok(/\btwelve\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count TWELVE');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
     'setup: says what the browser does while the function is absent');
@@ -14028,8 +14036,8 @@ async function testVerifyExistingUsers() {
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
-    'the helper lives in verify-email.js, so index.js still exports exactly six functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 12,
+    'the helper lives in verify-email.js, so index.js still exports exactly twelve functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -14113,6 +14121,385 @@ async function testVerifyExistingUsers() {
    files the roster sync writes. The tile is BORN HIDDEN with no number in it,
    revealed by the page only when data/users-meta.json holds ten or more, and
    the strip has to fit four OR five tiles on one row. */
+/* --------------------------------------------------------------- the forum
+
+   Two rooms under one handle scheme, step 1 (owner, 2026-09-04 and 05; the
+   privacy audit's R1 to R10). What is pinned here is the SERVER half and
+   everything it shares with the page: the model against the writers both
+   ways, the rules block, the identity file's discipline, the vendored
+   pairs, the guard and the guide, the function count, the runbook, the
+   policy paragraph, the change log and CLAUDE.md. The page's own pins
+   (load order, QUIET_PAGES, share-check, link-check, the FAQ) arrive with
+   forum.html. */
+
+async function testForum() {
+  const root = path.join(HERE, '..');
+  const read = (...p) => readFile(path.join(root, ...p), 'utf8');
+  const noDash = (s) => !/—/.test(String(s));
+  const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
+  const FG = require(path.join(root, 'assets', 'oa-forum-guard.js'));
+  const GUIDE = require(path.join(root, 'assets', 'oa-forum-guide.js'));
+  const NAV = require(path.join(root, 'assets', 'oa-jobnav.js'));
+
+  /* --- the model ------------------------------------------------------- */
+
+  eq(FM.ROOMS, ['candidates', 'open'], 'forum: two rooms, and the only two');
+  ok(FM.isRoom('open') && FM.isRoom('candidates') && !FM.isRoom('lobby') && !FM.isRoom(''), 'forum: isRoom knows exactly those');
+  eq(FM.BOUNDS.quote, 600, 'forum: a quote is at most 600 characters');
+  eq(FM.BOUNDS.body, 4000, 'forum: a body is at most 4000');
+  eq(FM.EDIT_WINDOW_MS, 15 * 60 * 1000, 'forum: the edit window is fifteen minutes');
+  eq(FM.KINDS, ['', 'first-hand', 'rumour'], 'forum: the three kinds');
+  eq(FM.RATE, { threads: 3, posts: 40, votes: 60, gapMs: 20000 }, 'forum: the rate limits as written');
+  eq(FM.slug('Quiet Heron 42'), 'quiet-heron-42', 'forum: slug() folds a handle');
+  eq(FM.slug('  Two-Body!! Problem '), 'two-body-problem', 'forum: slug() folds punctuation to one hyphen and trims');
+  eq(FM.slug('Écoles européennes'), 'ecoles-europeennes', 'forum: slug() folds accents');
+  eq(FM.slug('a'.repeat(30)), 'a'.repeat(24), 'forum: slug() cuts to the tag bound');
+  eq(FM.slug(''), '', 'forum: an empty slug is empty');
+  ok(!FM.tagsOk([]) && !FM.tagsOk(['a1', 'b2', 'c3', 'd4', 'e5', 'f6']), 'forum: zero and six tags are refused');
+  ok(FM.tagsOk(['a'.repeat(24)]) && !FM.tagsOk(['a'.repeat(25)]), 'forum: 24 characters kept, 25 refused');
+  ok(!FM.tagsOk(['a']) && !FM.tagsOk(['Offers']) && !FM.tagsOk(['two body']) && !FM.tagsOk(['offers', 'offers']),
+    'forum: one character, a capital, a space and a repeat are all refused');
+  ok(FM.TAGS.every(FM.tagOk) && FM.tagsOk(FM.TAGS.slice(0, 5)), 'forum: every curated tag passes its own rule');
+  ok(FM.TAGS.includes('about') && FM.TAGS.length >= 30, 'forum: the curated list carries about and is about thirty long');
+  eq(new Set(FM.TAGS).size, FM.TAGS.length, 'forum: no curated tag twice');
+  eq(FM.minute(1700000000123), 1699999980000, 'forum: minute() rounds DOWN to the minute');
+  ok(FM.minute() % 60000 === 0, 'forum: and now is a whole minute');
+  eq(FM.MODERATOR, 'Moderator', 'forum: the reserved handle');
+  const PRIVATE = /^(uid|email|name|sub|key)$/;
+  for (const [kind, keys] of Object.entries(FM.KEYS)) {
+    const leaks = keys.filter((k) => PRIVATE.test(k));
+    const allowed = kind === 'marker' ? ['sub'] : kind === 'name' ? ['key'] : [];
+    eq(leaks, allowed, `forum: KEYS.${kind} carries no uid, e-mail, name or profile id (the two named exceptions aside)`);
+  }
+  eq(Object.keys(FM.KEYS).sort(), ['handle', 'marker', 'name', 'post', 'quote', 'season', 'tags', 'thread', 'vote'],
+    'forum: the step-1 kinds, and only those');
+
+  /* --- the vendored pairs, byte for byte ------------------------------- */
+
+  eq(VENDOR_PAIRS.map((p) => p[0]).sort(),
+    ['assets/oa-forum-guard.js', 'assets/oa-forum-guide.js', 'assets/oa-forum-model.js', 'assets/oa-jobnav.js'],
+    'forum: the vendor builder copies the four modules the functions read');
+  for (const [src, vendored] of VENDOR_PAIRS) {
+    eq(await read(vendored), await read(src),
+      `forum: ${vendored} is byte-identical to ${src}: firebase deploy ships only _functions, so a drifted copy would refuse text the page allows`);
+  }
+  eq(await vendorDrift(root), [], 'forum: the builder\'s own drift check agrees');
+  const vb = BUILDERS.find((b) => b.script === 'build-functions-vendor.mjs');
+  ok(vb && vb.needsFirebase === false, 'forum: build-functions-vendor.mjs is in BUILDERS, offline');
+  ok(BUILDERS.map((b) => b.script).indexOf('build-functions-vendor.mjs') > BUILDERS.map((b) => b.script).indexOf('build-netmap.mjs'),
+    'forum: and runs after the netmap');
+
+  /* --- the writers against the model, both ways ------------------------ */
+
+  const forumDir = path.join(root, '_functions', 'forum');
+  const forumFiles = (await readdir(forumDir)).filter((f) => f.endsWith('.js')).sort();
+  eq(forumFiles, ['edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
+    'forum: the function files, and only those');
+  const forumSrc = {};
+  for (const f of forumFiles) forumSrc[f] = await read('_functions', 'forum', f);
+  const allForum = Object.values(forumSrc).join('\n');
+  const vendoredSrc = {};
+  for (const [, v] of VENDOR_PAIRS) vendoredSrc[v] = await read(v);
+
+  const written = {};
+  let blocks = 0;
+  for (const [f, src] of Object.entries(forumSrc)) {
+    for (const m of src.matchAll(/\/\* @doc (\w+) \*\/([\s\S]*?)\/\* @end \*\//g)) {
+      blocks++;
+      const kind = m[1];
+      ok(FM.KEYS[kind], `forum: ${f} writes a document kind the model knows (${kind})`);
+      const inner = m[2].slice(m[2].indexOf('{') + 1, m[2].lastIndexOf('}'));
+      const keys = [];
+      for (const line of inner.split('\n')) {
+        const km = /^\s*([A-Za-z_]\w*)\s*(?::|,?\s*$)/.exec(line.replace(/,\s*$/, ''));
+        if (km) keys.push(km[1]);
+      }
+      ok(keys.length > 0, `forum: the @doc ${kind} block in ${f} really names keys`);
+      const strays = keys.filter((k) => !(FM.KEYS[kind] || []).includes(k));
+      eq(strays, [], `forum: ${f} writes only keys the model names for ${kind}`);
+      written[kind] = new Set([...(written[kind] || []), ...keys]);
+    }
+  }
+  ok(blocks >= 18, `forum: the writer scan found the @doc blocks (${blocks}), so it is not vacuous`);
+  for (const [kind, keys] of Object.entries(FM.KEYS)) {
+    eq([...(written[kind] || [])].sort(), [...keys].sort(),
+      `forum: every key the model names for ${kind} is written somewhere, and nothing else is`);
+  }
+  /* data reaches Firestore only through a named @doc object */
+  ok(!/\.(set|update|create)\(\s*[^,()]+,\s*\{/.test(allForum),
+    'forum: no inline object literal is ever handed to set/update, so every write is a declared block');
+  ok(!/\.create\(/.test(allForum), 'forum: nothing uses create()');
+  /* auto-ids for threads and posts (R4); the two H-keyed ids are named */
+  for (const f of ['post.js', 'moderate.js']) {
+    ok(/collection\('threads'\)\.doc\(\)/.test(forumSrc[f]) && /collection\('posts'\)\.doc\(\)/.test(forumSrc[f]),
+      `forum: ${f} mints thread and post ids with .doc(), a Firestore auto-id`);
+  }
+  const hDocs = [...allForum.matchAll(/\.doc\(([^)]*\b(?:H|handle|now|minute|uid)\b[^)]*)\)/g)].map((m) => m[1]);
+  eq([...new Set(hDocs)].sort(), ['H', 'm.H', 'uid'].sort(),
+    'forum: the only ids built from a hash are forumHandles/{H} and votes/{H}, and the only one from a uid is candidateMarkers/{uid}');
+  ok(/collection\('forumHandles'\)\.doc\(H\)/.test(allForum) && /collection\('votes'\)\.doc\(m\.H\)/.test(allForum)
+     && /collection\('candidateMarkers'\)\.doc\(uid\)/.test(allForum),
+    'forum: those three, and by name');
+
+  /* --- R1: no forum source reads the request's address -------------------- */
+
+  const R1 = /rawRequest|\.ip\b|x-forwarded-for|remoteAddress|headers/;
+  for (const [f, src] of [...Object.entries(forumSrc), ...Object.entries(vendoredSrc)]) {
+    ok(!R1.test(src.replace(/\/\*[\s\S]*?\*\//g, '')), `forum R1: ${f} names no rawRequest, ip, x-forwarded-for, remoteAddress or headers`);
+  }
+
+  /* --- R2: one HMAC, in one file, used whole ------------------------------ */
+
+  const idSrc = forumSrc['identity.js'];
+  eq((allForum.match(/createHmac/g) || []).length, 1, 'forum R2: createHmac appears once in the forum');
+  ok(/createHmac\('sha256', String\(secret\)\)\s*\.update\(String\(season\) \+ ':' \+ String\(uid\)\)\s*\.digest\('hex'\)/.test(idSrc),
+    'forum R2: the input is season + ":" + uid and nothing else, hex out');
+  const uidUpdates = Object.entries(forumSrc).filter(([, src]) => /\.update\([^;]*\buid\b/.test(src)).map(([f]) => f);
+  eq(uidUpdates, ['identity.js'], 'forum R2: no other file computes over a uid');
+  ok(!/\bH\.(slice|substring|substr)\(|hashFor\([^)]*\)\.(slice|substring|substr)\(/.test(allForum),
+    'forum R2: H is never truncated (the r8 case belongs to step 3 and is not here)');
+
+  /* --- R3: the handle is drawn, never derived ------------------------------ */
+
+  ok(/crypto\.randomInt\(ADJ\.length\)/.test(idSrc) && /crypto\.randomInt\(NOUN\.length\)/.test(idSrc) && /crypto\.randomInt\(10, 100\)/.test(idSrc),
+    'forum R3: the three draws are crypto.randomInt');
+  const draw = idSrc.slice(idSrc.indexOf('function drawHandle('), idSrc.indexOf('function reserved('));
+  ok(draw.length > 100 && draw.length < 600, 'forum R3: drawHandle was sliced');
+  ok(/function drawHandle\(\)/.test(draw) && !/\b(H|uid|Date|season|now)\b/.test(draw.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'forum R3: drawHandle takes nothing and names no hash, uid, season or clock');
+  ok(/const handle = identity\.drawHandle\(\);/.test(forumSrc['join.js'])
+     && forumSrc['join.js'].indexOf('runTransaction(async (tx) => {') < forumSrc['join.js'].indexOf('identity.drawHandle()'),
+    'forum R3: the draw happens inside the claim transaction, retried on a collision');
+  ok(/CLAIM_TRIES = 20/.test(forumSrc['join.js']) && /identity\.reserved\(slug\)/.test(forumSrc['join.js']),
+    'forum R3: twenty tries, and a reserved slug is a collision');
+  const words = forumSrc['words.js'];
+  ok(/RESERVED = \['moderator'\]/.test(words) && !/'moderator'/.test(words.replace(/RESERVED = \['moderator'\]/, '')),
+    'forum: Moderator is reserved and in neither word list');
+
+  /* --- R5: one refusal for the candidates room ---------------------------- */
+
+  const memberSrc = forumSrc['member.js'];
+  const admitted = memberSrc.slice(memberSrc.indexOf('async function admitted('), memberSrc.indexOf('async function member('));
+  ok(admitted.length > 300 && admitted.length < 1500, 'forum R5: admitted() was sliced');
+  eq((admitted.match(/refuse\('permission-denied', 'candidate'\)/g) || []).length, 2,
+    'forum R5: the candidates room refuses an unverified caller and a non-candidate with ONE reason');
+  eq((admitted.match(/refuse\('permission-denied', 'verified'\)/g) || []).length, 1,
+    'forum R5: only the open room names verified');
+  ok(/if \(admin\) return \{ admin, profile: null \};/.test(admitted), 'forum: the maintainer enters the candidates room with no profile');
+  ok(/adminToken\(/.test(admitted), 'forum: admitted() asks adminToken');
+
+  /* --- R6: a refusal carries a reason and nothing else -------------------- */
+
+  const details = [...allForum.matchAll(/new HttpsError\([^;]*?,\s*(\{[^}]*\})\)/g)].map((m) => m[1]);
+  ok(details.length >= 6, `forum R6: the HttpsError details were found (${details.length})`);
+  ok(details.every((d) => /^\{\s*reason(:\s*'[a-z]+')?\s*\}$/.test(d)), 'forum R6: every details object is { reason } alone, never a count');
+  ok(/throw new HttpsError\(code, ERRORS\[reason\] \|\| 'Refused\.', \{ reason \}\);/.test(memberSrc), 'forum R6: refuse() is the one shape');
+  const errKeys = [...memberSrc.slice(memberSrc.indexOf('const ERRORS = {'), memberSrc.indexOf('};', memberSrc.indexOf('const ERRORS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
+  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'url', 'orcid']) {
+    ok(errKeys.includes(r), `forum: ERRORS words the reason ${r}`);
+  }
+  for (const m of allForum.matchAll(/refuse\('[a-z-]+', '([a-z]+)'\)/g)) {
+    ok(errKeys.includes(m[1]), `forum: refuse() is only ever called with a worded reason (${m[1]})`);
+  }
+  ok(/refuse\('resource-exhausted', counter\.replace\(\/\^day\/, ''\)\.toLowerCase\(\)\)/.test(memberSrc),
+    'forum R6: a rate limit names its counter and never a number');
+
+  /* --- R7: every stamp is a whole minute --------------------------------- */
+
+  ok(!/serverTimestamp/.test(allForum), 'forum R7: serverTimestamp is never used on a forum document');
+  ok(!/Date\.now\(\)|new Date\(/.test(allForum), 'forum R7: no forum function reads the clock except through minute()');
+  ok((allForum.match(/M\.minute\(\)/g) || []).length >= 8, 'forum R7: minute() is what every stamp comes from');
+
+  /* --- R8: the secret is read by the season's own version ------------------ */
+
+  eq((allForum.match(/accessSecretVersion/g) || []).length, 1, 'forum R8: accessSecretVersion appears once');
+  ok(/accessSecretVersion/.test(idSrc) && /'\/versions\/' \+ version/.test(idSrc), 'forum R8: in identity.js, with the version from its argument');
+  const latest = [...idSrc.matchAll(/'latest'/g)].length;
+  ok(latest >= 1 && /await accessVersion\('latest'\)/.test(idSrc)
+     && idSrc.indexOf("accessVersion('latest')") > idSrc.indexOf('async function ensureSeason(')
+     && idSrc.indexOf("accessVersion('latest')") < idSrc.indexOf('async function secretForSeason('),
+    'forum R8: latest is named only inside the create branch of ensureSeason');
+  ok(!/'latest'/.test(idSrc.slice(idSrc.indexOf('async function secretForSeason('))), 'forum R8: secretForSeason never asks for latest');
+  const others = Object.entries(forumSrc).filter(([f, src]) => f !== 'identity.js' && /secretVersion/.test(src)).map(([f]) => f);
+  eq(others, [], 'forum R8: secretVersion is read in identity.js and nowhere else');
+  ok(/db\.collection\('forumSeasons'\)\.doc\(String\(season\)\)/.test(idSrc) && (idSrc.match(/collection\('forumSeasons'\)/g) || []).length === 1,
+    'forum R8: the one season document read is the season passed in');
+  ok(/function emulated\(\) \{\s*return process\.env\.FUNCTIONS_EMULATOR === 'true';\s*\}/.test(idSrc), 'forum R8: the emulator branch is guarded on FUNCTIONS_EMULATOR');
+  const av = idSrc.slice(idSrc.indexOf('async function accessVersion('), idSrc.indexOf('const cache = new Map()'));
+  ok(av.length > 300 && av.indexOf('if (emulated())') < av.indexOf('FORUM_SECRET_TEST'), 'forum R8: the test secrets are read only after that guard');
+  ok(!/FORUM_SECRET_TEST/.test(Object.entries(forumSrc).filter(([f]) => f !== 'identity.js').map(([, s]) => s).join('')), 'forum R8: and nowhere else');
+  ok(/defineSecret\('FORUM_SECRET'\)/.test(memberSrc) && /secrets: \[FORUM_SECRET\]/.test(memberSrc), 'forum: the secret is bound to the callables');
+  eq(FM.KEYS.season.includes('secretVersion'), true, 'forum R8: the season head carries the version');
+
+  /* --- the maintainer literal and the verified mirror ------------------ */
+
+  const rules = await read('_firestore.rules');
+  const adminInRules = (/request\.auth\.token\.email == '([^']+)'/.exec(rules) || [])[1];
+  ok(new RegExp(`const ADMIN = '${adminInRules}';`).test(memberSrc), 'forum: ADMIN in member.js is the isAdmin() address in the rules');
+  ok(/t\.email_verified === true\s*\|\| \(!!t\.firebase && typeof t\.firebase\.sign_in_provider === 'string'\s*&& t\.firebase\.sign_in_provider !== 'password'\)/.test(memberSrc),
+    'forum: verifiedToken mirrors verified(), both halves');
+  ok(/return t\.email === ADMIN && t\.email_verified === true;/.test(memberSrc), 'forum: adminToken mirrors isAdmin()');
+  for (const f of ['join.js', 'post.js', 'edit.js', 'vote.js', 'moderate.js']) {
+    ok(/onCall\(P\.OPTS,/.test(forumSrc[f]), `forum: ${f} declares its callable(s) with the shared OPTS`);
+  }
+  ok(/region: 'us-central1'/.test(memberSrc) && /enforceAppCheck: false/.test(memberSrc) && /maxInstances: 10/.test(memberSrc) && /timeoutSeconds: 30/.test(memberSrc),
+    'forum: the shared options as written');
+  ok(/mapAborted|code === 10 \|\| e\.code === 'aborted'/.test(memberSrc) && /refuse\('resource-exhausted', 'busy'\)/.test(memberSrc),
+    'forum: a contended transaction answers busy, never a raw code');
+  ok(/if \(pv\.by === m\.handle\) P\.refuse\('failed-precondition', 'own'\);/.test(forumSrc['vote.js']), 'forum: no voting on your own post');
+  ok(/FieldValue\.increment\(du\)/.test(forumSrc['vote.js']) && /score: FieldValue\.increment\(du - dd\)/.test(forumSrc['vote.js']),
+    'forum: votes move by delta with increment, and the first post\'s net lands on the thread head');
+  ok(/D\.getAll\(\.\.\.refs\)/.test(forumSrc['vote.js']), 'forum: forumThreadVotes reads the caller\'s votes in one round trip');
+  ok(/text\.length > M\.BOUNDS\.quote/.test(forumSrc['post.js']) && /String\(src\.body\)\.indexOf\(text\) === -1/.test(forumSrc['post.js']),
+    'forum: a quote is bounded and must be a passage of the post as it stands');
+  ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
+  ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
+    'forum: seedGuide renders the guide itself and takes no body');
+  ok(/now >= Number\(pv\.t\) \+ M\.EDIT_WINDOW_MS/.test(forumSrc['edit.js']), 'forum: the edit window is measured from the stamped minute');
+  ok(/ring\('oa-forum-posted'/.test(forumSrc['post.js']) && !/await ring\(/.test(forumSrc['post.js']), 'forum: the step-2 doorbell is an anchor, not a call');
+  ok(!/setCustomUserClaims/.test(allForum), 'forum: no custom claim ever carries a hash beside a uid');
+
+  /* --- the rules block ---------------------------------------------------- */
+
+  const fAt = rules.indexOf('function forumSeasonNow()');
+  const fEnd = rules.indexOf('// ------------------------------------------------------ identity keys');
+  ok(fAt > 0 && fEnd > fAt, 'forum: the rules block sits between messages and the identity keys');
+  const fr = rules.slice(fAt, fEnd);
+  ok(fr.length > 1500, 'forum: the block was really sliced');
+  const roll = NAV.MARKET_ROLL_MONTH + 1;
+  ok(new RegExp(`request\\.time\\.month\\(\\) >= ${roll} \\? 1 : 0`).test(fr), 'forum: forumSeasonNow rolls on the month oa-jobnav.js rolls on (1-based)');
+  const reader = fr.slice(fr.indexOf('function forumReader(room)'), fr.indexOf('}', fr.indexOf('function forumReader(room)')));
+  ok(/room == 'candidates' && \(isCurrentCandidate\(\) \|\| isAdmin\(\)\)/.test(reader) && /room == 'open' && verified\(\)/.test(reader),
+    'forum: forumReader admits a current candidate or the maintainer to the candidates room and any verified account to the open room');
+  eq([...reader.matchAll(/room == '([a-z]+)'/g)].map((m) => m[1]).sort(), [...FM.ROOMS].sort(),
+    'forum: the rooms the rules compare against are exactly the model\'s, both ways');
+  ok(!/matches\(/.test(reader), 'forum: the room is compared by name, never by a regex');
+  ok(/function isCurrentCandidate\(\) \{\s*return verified\(\)/.test(fr), 'forum: isCurrentCandidate starts from verified()');
+  ok(/forumProfile\(\)\.uid == request\.auth\.uid/.test(fr) && /forumProfile\(\)\.status in \['queued', 'published'\]/.test(fr)
+     && /get\(forumMarkerPath\(\)\)\.data\.year == forumSeasonNow\(\)/.test(fr) && /forumProfile\(\)\.year == forumSeasonNow\(\)/.test(fr),
+    'forum: the profile is re-read, owned by the caller, of this season, and queued or published');
+  ok(/match \/candidateMarkers\/\{uid\} \{\s*allow read: if isOwner\(uid\) \|\| isAdmin\(\);\s*allow delete: if isOwner\(uid\) \|\| isAdmin\(\);\s*allow create, update: if false;/.test(fr),
+    'forum: a marker is owner-read, owner-delete, never client-written');
+  ok(/match \/forumSeasons\/\{season\} \{\s*allow read: if verified\(\);\s*allow write: if false;/.test(fr), 'forum: the season head is readable to verified accounts and written by nobody');
+  ok(/match \/rooms\/\{room\}\/threads\/\{tid\} \{\s*allow read: if forumReader\(room\);\s*allow write: if false;/.test(fr), 'forum: a thread is read through forumReader and written by nobody');
+  ok(/match \/posts\/\{pid\} \{\s*allow read: if forumReader\(room\);\s*allow write: if false;/.test(fr), 'forum: a post likewise');
+  ok(/match \/votes\/\{key\} \{\s*allow read, write: if false;/.test(fr), 'forum: a vote is closed to everyone in both directions');
+  ok(/match \/forumTags\/\{id\} \{\s*allow read: if verified\(\);\s*allow write: if false;/.test(fr), 'forum: the tag tally is verified-read, function-written');
+  ok(/match \/forumNames\/\{slug\}\s*\{ allow read, write: if false; \}/.test(fr), 'forum: the reverse index is nobody\'s');
+  ok(/match \/forumHandles\/\{key\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr), 'forum: the handle table is the maintainer\'s to read');
+  const mailLine = (fr.match(/match \/forumMail\/\{document=\*\*\}[^\n]*/) || [''])[0];
+  ok(/allow read, write: if false;/.test(mailLine) && !/isAdmin/.test(mailLine), 'forum: the mailboxes (step 3) are one recursive if-false with no admin clause');
+  ok(/match \/forumHidden\/\{document=\*\*\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr) && /match \/forumReports\/\{id\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr),
+    'forum: the step-3 anchors are admin-read, function-written');
+  ok(!/signedIn\(\)/.test(fr), 'forum: no clause in the block grants anything on a bare sign-in');
+  ok(noDash(fr), 'forum: no em dash in the block');
+
+  /* --- the guard ---------------------------------------------------------- */
+
+  const jm = await read('_scraper', 'jobs-model.mjs');
+  const rxIn = (/const EMAIL_RX = (\/.*\/g);/.exec(jm) || [])[1];
+  const rxGuard = (/var EMAIL_RX = (\/.*\/g);/.exec(await read('assets', 'oa-forum-guard.js')) || [])[1];
+  ok(rxIn && rxGuard && rxIn === rxGuard, 'forum guard: EMAIL_RX is the jobs-model literal, character for character');
+  for (const s of ['2026-2027', '2026-09-04', '$120,000-150,000', 'e.g.', 'vs.', '10.1287/mnsc.2020.3745', 'OA posting 2027-university-of-houston-20250923']) {
+    eq(FG.check(s), '', `forum guard: allows "${s}"`);
+  }
+  for (const [s, why] of [['+1 617 253 1000', 'phone'], ['617-253-1000', 'phone'], ['(617) 253-1000', 'phone'], ['jane@mit.edu', 'email'],
+    ['mit.edu/~jane', 'url'], ['www.example.org', 'url'], ['0000-0002-1825-0097', 'orcid'], ['see https://example.org/x', 'url']]) {
+    eq(FG.check(s), why, `forum guard: refuses "${s}" as ${why}`);
+  }
+  eq(FG.check(''), '', 'forum guard: nothing is fine');
+  ok(Object.keys(FG.WHY).sort().join() === 'email,orcid,phone,url', 'forum guard: a sentence per reason');
+
+  /* --- the guide ---------------------------------------------------------- */
+
+  eq(GUIDE.RULES.length, 13, 'forum guide: thirteen rules');
+  eq(GUIDE.NOTES.length, 3, 'forum guide: three notes');
+  ok(GUIDE.RULES[11].endsWith('To appeal, use Send feedback and quote your handle.'), 'forum guide: rule 12 ends on the appeal sentence');
+  ok(GUIDE.RULES.some((r) => /same in both rooms this season, and changes at the July roll/.test(r)), 'forum guide: one handle in both rooms, said in one sentence');
+  ok(/read and post in both rooms/.test(GUIDE.WHAT_THE_MAINTAINER_CAN_SEE) && /destroyed a month after the season ends/.test(GUIDE.WHAT_THE_MAINTAINER_CAN_SEE),
+    'forum guide: the maintainer paragraph says they read and post in both rooms, and that the key is destroyed');
+  ok(GUIDE.NOTES[0].lead === 'Nothing here is legal or immigration advice.' && /hard season/.test(GUIDE.NOTES[1].lead) && /This forum is small/.test(GUIDE.NOTES[2].lead),
+    'forum guide: the owner\'s two notices and the small-population note');
+  const gt = GUIDE.text();
+  const gh = GUIDE.html();
+  ok(!/http|www\./i.test(gt) && !/http|www\./i.test(gh), 'forum guide: no link in either rendering');
+  ok(noDash(gt) && noDash(gh) && noDash(JSON.stringify(GUIDE.RULES)), 'forum guide: no em dash');
+  ok(gt.length <= FM.BOUNDS.body, 'forum guide: the text fits the body bound, so seedGuide can post it');
+  eq(FG.check(gt), '', 'forum guide: the guard allows its own text');
+  const order = (s, esc) => GUIDE.RULES.map((r) => s.indexOf(esc ? r.replace(/&/g, '&amp;').replace(/'/g, "'") : r));
+  ok(order(gt).every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1])) && order(gh, true).every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1])),
+    'forum guide: text() and html() carry every rule in the same order');
+  ok(/<ol class="oa-forum-rules">/.test(gh) && (gh.match(/<li>/g) || []).length === 13 && !/<script/i.test(gh), 'forum guide: html() is an ordered list of thirteen, nothing executable');
+  eq(GUIDE.html().replace(/<[^>]+>/g, '').includes('<'), false, 'forum guide: every rule is escaped');
+
+  /* --- index.js, the package, the lockfile -------------------------------- */
+
+  const fn = await read('_functions', 'index.js');
+  ok(/const forum = require\('\.\/forum'\);/.test(fn), 'forum: index.js requires ./forum');
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+    ok(new RegExp(`^exports\\.${name} = forum\\.${name};$`, 'm').test(fn), `forum: index.js re-exports ${name} on its own line`);
+  }
+  const pkg = JSON.parse(await read('_functions', 'package.json'));
+  ok(pkg.dependencies['@google-cloud/secret-manager'] && pkg.devDependencies['@firebase/rules-unit-testing'], 'forum: the secret-manager client and the rules test kit are declared');
+  const lock = JSON.parse(await read('_functions', 'package-lock.json'));
+  ok(lock.packages['node_modules/@google-cloud/secret-manager'] && lock.packages['node_modules/@firebase/rules-unit-testing'], 'forum: and the lockfile resolves both');
+
+  /* --- the emulator test, the workflow, no cron ------------------------- */
+
+  const em = await read('_functions', 'test', 'forum-emulator.mjs');
+  ok(/process\.exit\(process\.env\.CI \? 1 : 0\)/.test(em) && /have\('java'/.test(em) && /have\('firebase'/.test(em), 'forum: the emulator test skips without Java or firebase-tools, and exits 1 for that skip under CI');
+  ok(/FORUM_SECRET_TEST_2/.test(em) && /secretVersion: 'env2'/.test(em), 'forum: it proves two secret versions give two handles');
+  for (const col of ['forumSeasons', 'forumTags', 'forumHandles', 'forumNames']) ok(em.includes(`'${col}'`), `forum: the walk covers ${col}`);
+  ok(/candidateMarkers/.test(em) && /\[0-9a-f\]\{64\}/.test(em) && /% 60000 === 0/.test(em), 'forum: it walks the markers apart, hunts 64-hex strings and checks the minute rule');
+  const wfDir = path.join(root, '.github', 'workflows');
+  const checks = await read('.github', 'workflows', 'oa-checks.yml');
+  ok(/^  emulator:$/m.test(checks) && /_functions\/test\/forum-emulator\.mjs/.test(checks) && /actions\/setup-java@v4/.test(checks)
+     && /CI: true/.test(checks) && /FORUM_SECRET_TEST_2:/.test(checks) && /demo-oa-forum/.test(checks),
+    'forum: oa-checks.yml runs the emulator test in its own job, with Java, CI set and a demo project');
+  ok((checks.match(/- '_functions\/\*\*'/g) || []).length === 2, 'forum: a functions-only change now runs the checks (both trigger lists)');
+  for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
+    const src = await readFile(path.join(wfDir, file), 'utf8');
+    ok(!(/schedule:/.test(src) && /forum/i.test(src)), `forum: ${file} has no cron that touches the forum`);
+  }
+  const fbj = JSON.parse(await read('firebase.json'));
+  ok(fbj.emulators && fbj.emulators.auth.port === 9099 && fbj.emulators.firestore.port === 8080 && fbj.emulators.functions.port === 5001,
+    'forum: firebase.json fixes the emulator ports the test connects to');
+
+  /* --- the runbook, the policy, the change log, CLAUDE.md ---------------- */
+
+  const setup = await read('_SETUP-INSTANT-PUBLISH.md');
+  ok(/^## The forum secret$/m.test(setup) && /firebase functions:secrets:set FORUM_SECRET --project operations-academia/.test(setup)
+     && /gcloud secrets versions destroy/.test(setup) && /secretVersion/.test(setup) && /renames every handle/.test(setup),
+    'forum: the runbook sets the secret once, says a rotation renames every handle, and destroys the previous version on 1 August');
+  const pp = await read('privacy-policy.html');
+  ok(/handle is random/.test(pp) && /keyed one-way hash/.test(pp) && /destroyed a month after the season ends/.test(pp),
+    'forum R9: the policy says handles are random and how, and when the key is destroyed');
+  ok(/does not read the address your browser connects from/.test(pp) && /Google&rsquo;s own request logs/.test(pp) && /standard retention/.test(pp)
+     && /forum writes nothing of its\s+own to them/.test(pp),
+    'forum R9: it says the forum reads no address, and what Google\'s own logs hold and who reads them');
+  ok(/maintainer can read and post in both rooms as an ordinary member/.test(pp), 'forum: the policy says the maintainer reads and posts in both rooms');
+  const ppForum = pp.slice(pp.indexOf('The Site has an anonymous forum'), pp.indexOf('<h2>Security</h2>'));
+  ok(ppForum.length > 800 && ppForum.length < 3000 && noDash(ppForum.replace(/&mdash;/g, '—')), 'forum: the policy paragraph is bounded and carries no em dash');
+  const log = JSON.parse(await read('changelog.json')).updates;
+  const entry = log.find((u) => u.id === 'forum-2026-09');
+  ok(entry && entry.date === '2026-09-05' && entry.url === '/forum.html' && /two rooms/i.test(entry.title + entry.summary) && noDash(entry.title + entry.summary),
+    'forum: the change log entry, dated the ship day, linking the page, no em dash');
+  ok(log.indexOf(entry) === 0, 'forum: it is at the top');
+  const claude = await read('CLAUDE.md');
+  ok(/^## The forum$/m.test(claude), 'forum: CLAUDE.md has the section');
+  const cf = claude.slice(claude.indexOf('\n## The forum\n'), claude.indexOf('\n## ', claude.indexOf('\n## The forum\n') + 10));
+  ok(cf.length > 3000, 'forum: the section was sliced');
+  for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
+    ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
+  }
+  ok(/TWELVE/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads twelve');
+  for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
+    ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
+    ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
+    ok(noDash(src), `forum: no em dash in ${f}`);
+  }
+}
+
 async function testRegisteredUsersFigure() {
   const root = path.join(HERE, '..');
   const noDash = (s) => !/—/.test(String(s));
@@ -14159,16 +14546,22 @@ async function testRegisteredUsersFigure() {
 
   /* the announcements */
   const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
-  eq([log[0].id, log[1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
-    'changelog: the two figures are announced at the top');
-  for (const u of log.slice(0, 2)) {
+  /* Found by id rather than by index: a later feature shipped the same day
+     (the forum) sits above them, and "at the top" means among that day's
+     entries, adjacent and in this order. */
+  const figAt = log.findIndex((u) => u.id === 'registered-users-figure-2026-09');
+  ok(figAt >= 0 && figAt <= 2 && log.slice(0, figAt).every((u) => u.date === '2026-09-05'),
+    'changelog: the two figures are announced at the top, under nothing older than their own day');
+  eq([log[figAt].id, log[figAt + 1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
+    'changelog: the two figures are announced together, in this order');
+  for (const u of log.slice(figAt, figAt + 2)) {
     ok(u.date === '2026-09-05' && u.title && u.summary && u.url && noDash(u.title + u.summary),
       `changelog: ${u.id} is dated 2026-09-05 with a title, a summary and a link, no em dash`);
   }
-  ok(/rounded down to the nearest ten/.test(log[0].summary) && /Who has registered stays/.test(log[0].summary),
+  ok(/rounded down to the nearest ten/.test(log[figAt].summary) && /Who has registered stays/.test(log[figAt].summary),
     'changelog: the figure entry says how it is rounded and what stays private');
-  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /next 180 days/.test(log[1].summary)
-     && /not a target/.test(log[1].summary),
+  ok(/How the community has grown/.test(log[figAt + 1].summary) && /last 90 days/.test(log[figAt + 1].summary) && /next 180 days/.test(log[figAt + 1].summary)
+     && /not a target/.test(log[figAt + 1].summary),
     'changelog: the chart entry names the figure, the window, the horizon and what the line is not');
 
   /* CLAUDE.md, in the file's own voice */
@@ -14289,5 +14682,6 @@ if (isMain(import.meta.url)) {
   await testEmailVerification();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
+  await testForum();
   process.exit(finish() ? 0 : 1);
 }

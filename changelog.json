@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "forum-2026-09",
+      "date": "2026-09-05",
+      "title": "An anonymous forum, in two rooms",
+      "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post can be edited for fifteen minutes. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
+      "url": "/forum.html"
+    },
+    {
       "id": "registered-users-figure-2026-09",
       "date": "2026-09-05",
       "title": "The front page says how many people have registered",
