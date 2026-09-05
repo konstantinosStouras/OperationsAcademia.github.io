@@ -79,6 +79,47 @@
   /* ---------------------------------------------------------- the cards */
 
   var DONE_NOTE = '';        // the card's own wording, read once at boot
+
+  /* The confirmed state is a BOX in the middle of the screen that moves on by
+     itself (owner, 2026-09-05: "just a message box in the center of the
+     screen which would disappear after 5sec"). For a reader whose session is
+     usable, the page's own hero and footer go (body.ve-focus, v3.css), a
+     line under the button counts the seconds down, and at zero the page is
+     REPLACED by the account page, so Back does not return to a spent link.
+     Never for a reader who must sign in first, and never in the mismatch
+     case: there is no account to go to, and a countdown into a locked page
+     would be the very thing Continue is withheld for. Pressing Continue
+     early does the same thing sooner. */
+  var MOVE_ON_S = 5;
+  var countdown = null;
+
+  function stopCountdown() {
+    if (countdown) { clearInterval(countdown); countdown = null; }
+    var c = $('ve-count');
+    if (c) { c.hidden = true; c.textContent = ''; }
+    document.body.classList.remove('ve-focus');
+  }
+
+  function startCountdown(href) {
+    if (countdown) return;
+    document.body.classList.add('ve-focus');
+    var c = $('ve-count');
+    var left = MOVE_ON_S;
+    var tick = function () {
+      if (left <= 0) {
+        clearInterval(countdown); countdown = null;
+        location.replace(href);
+        return;
+      }
+      if (c) {
+        c.hidden = false;
+        c.textContent = 'Taking you to your account in ' + left + (left === 1 ? ' second.' : ' seconds.');
+      }
+      left -= 1;
+    };
+    tick();
+    countdown = setInterval(tick, 1000);
+  }
   var MISMATCH_NOTE = 'The link confirmed an address, but not the one this account uses: ' +
     'this account is still unconfirmed. Sign in with the account that received the message, ' +
     'or ask for a new link from this one.';
@@ -95,6 +136,8 @@
     $('ve-signin').hidden = inside;
     $('ve-signin').textContent = mismatch ? 'Use a different account' : 'Sign in';
     $('ve-title').textContent = 'Address confirmed';
+    if (inside) startCountdown($('ve-continue').getAttribute('href') || 'account.html');
+    else stopCountdown();
   }
 
   function showError(err) {

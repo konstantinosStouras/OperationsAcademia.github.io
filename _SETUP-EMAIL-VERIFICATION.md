@@ -104,8 +104,11 @@ database once (see CLAUDE.md).
    "Verify your e-mail address for Operations Academia", with the site's logo
    and one button. Look in spam the first time.
 3. Press the button. It opens `verify-email.html` on the site, which applies
-   the code and shows "Your e-mail address is verified" with a button to the
-   account page. Back on the site, the cards open and the chip shows the name.
+   the code and shows one box in the middle of the screen, "Your e-mail
+   address is verified". After five seconds it moves on to the account page
+   by itself (or press the button). Back on the site, the cards open and the
+   chip shows the name. A reader who opened the link in a browser with no
+   session sees the same box with a Sign in button and is not moved on.
 4. `firebase functions:log --project operations-academia` shows
    `verification e-mail sent` with the account id and a redacted address, and
    never the link or the code.
@@ -122,6 +125,18 @@ To test the fallback, deploy nothing and register: the message then comes
 from Firebase's own address in its own template, and pressing its link lands
 on `verify-email.html` with no code, which shows the verified state once the
 account has been reloaded.
+
+**The fallback's link passes through a white Firebase page first**
+(`operations-academia.firebaseapp.com/__/auth/action`), because Firebase's
+own template points at its own handler, which applies the code and then
+forwards to the site. One console setting removes that page: Firebase
+console, Authentication, Templates, "Email address verification", the pencil,
+**Customize action URL**, and enter
+`https://www.operationsacademia.org/verify-email.html`. The page reads
+`mode` and `oobCode` off the address exactly as it does for the site's own
+message, so the fallback then lands on the site directly too. The fallback
+also lands in spam far more often than the site's own message: it comes from
+a `noreply@…firebaseapp.com` sender no inbox has seen before.
 
 ## 5. The Storage rules still deploy by hand
 

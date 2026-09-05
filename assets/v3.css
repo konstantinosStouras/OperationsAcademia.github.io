@@ -2105,5 +2105,18 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
 .v3-page { max-width: 900px; padding-bottom: 90px; }
 .v3-page > br { display: none; }   /* the old template breathed with <br>s */
 
+/* verify-email.html, once the address is confirmed for a signed-in reader
+   (oa-verify.js sets body.ve-focus): the hero and the footer line go and
+   the card sits in the middle of the screen, a box and nothing else, until
+   the page moves on to the account by itself. The header stays; the
+   padding-top keeps the box clear of it. */
+body.ve-focus .v3-pa-hero,
+body.ve-focus .ve-foot { display: none; }
+body.ve-focus #main {
+  min-height: 100vh; box-sizing: border-box; padding-top: var(--header-h);
+  display: grid; align-content: center;
+}
+body.ve-focus #main .v3-pa-signin { margin: 24px auto; }
+
 /* [hidden] must always win — the reset lesson from _PLAN.md, carried over */
 [hidden] { display: none !important; }

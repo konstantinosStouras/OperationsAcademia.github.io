@@ -13968,6 +13968,21 @@ async function testEmailVerification() {
       `${f}: the head snippet reads a hint for a pending account as signed out`);
   }
   ok(snippetSeen >= 20, `the head snippet was found on ${snippetSeen} pages, so the loop above measured something`);
+  ok(/id="ve-count"[^>]*aria-live="polite"/.test(vpage),
+    'verify page: the countdown line is announced (aria-live), so a screen reader hears the move coming');
+  ok(/class="v3-mut ve-foot"/.test(vpage),
+    'verify page: the footer line is marked so the confirmed state can hide it');
+  ok(/var MOVE_ON_S = 5;/.test(vjs) && /location\.replace\(href\)/.test(vjs)
+     && /if \(inside\) startCountdown\(/.test(vjs) && /else stopCountdown\(\);/.test(vjs),
+    'oa-verify.js: a confirmed reader with a usable session is moved to the account page after five seconds, REPLACING the spent link; a reader who must sign in, or the mismatch case, is not');
+  ok(/classList\.add\('ve-focus'\)/.test(vjs) && /classList\.remove\('ve-focus'\)/.test(vjs),
+    'oa-verify.js: the confirmed state marks the body so the page becomes the box, and unmarks it when the state changes');
+  {
+    const v3 = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
+    ok(/body\.ve-focus \.v3-pa-hero,\s*body\.ve-focus \.ve-foot \{ display: none; \}/.test(v3)
+       && /body\.ve-focus #main \{[^}]*align-content: center;/.test(v3),
+      'v3.css: the confirmed state hides the hero and the footer line and centres the box');
+  }
   ok(noDash(vjs), 'oa-verify.js: no em dash');
 
   const lc = await readFile(path.join(HERE, 'link-check.mjs'), 'utf8');
