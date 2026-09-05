@@ -2122,6 +2122,46 @@ deleting its document. Deleting the document would leave the row orphaned and
 therefore preserved."* Both ends withdraw; only the sweep deletes the documents,
 and only once four things are true.
 
+### The password box that stopped a deletion, and the retry it made impossible
+
+Owner, 2026-09-05, from a real deletion of their own test account: *"the site
+asked me to add my password. I didn't remember my password. So at that step I
+left it … But then, tried to delete my account and the site doesn't let me …
+There is no reason we ask them to add their password. It's too complicated, not
+needed."* Two defects, and the second was caused by the first.
+
+**THE PROMPT WAS INHERITED FROM THE MERGE AND DOES NOT BELONG HERE.** Firebase
+refuses to delete a session older than a few minutes until it is re-proved, and
+`deleteCurrentSignIn` answers that by asking for the password back. The MERGE
+has to: nothing else can finish a merge. A DELETION has the sweep, which
+removes the sign-in with the Admin SDK and needs no password from anybody. So
+the deletion path passes `{ reauth: false }`, tries, and treats a refusal as
+the ordinary outcome for anyone who did not sign in a minute ago. The card says
+when the sign-in goes rather than claiming it has gone.
+
+**AND A SECOND ATTEMPT WAS REFUSED, WHICH IS THE WORSE HALF.** The work order
+is written FIRST, before anything is taken away, precisely so an interrupted
+run can be finished. But `allow update: if false` is what makes the sweep's
+own stamps safe, and to Firestore a `set` over a document that already exists
+IS an update. So the first attempt filed the order, the prompt stopped it, and
+every attempt after that was refused with a permission-denied — which the panel
+reported as *"This is not switched on yet"*, sending the owner to look for a
+rules deploy that had happened hours before. **The step READS the order first
+now** and carries on from one already filed; a read that itself fails falls
+through to the write, so a genuine rules problem still surfaces as one. The
+maintainer's own `requestFor` has the same shape for the same reason.
+
+**The copy no longer names a cause it cannot know.** A permission-denied now
+says to reload and try once more, and mentions the rules only as what is left
+if that does not help.
+
+Tests: the pins in `testAccountDeletion` (read-before-write on both writers,
+`{ reauth: false }`, and nothing on the path re-proving the session) and the
+block in `page-test.mjs` that drives the owner's exact case — an order already
+filed, a session Firebase will not let delete itself — and asserts it finishes,
+reads rather than writes the order, asks for no password, and says when the
+sign-in goes.
+
 ### The four gates on deleting a submission's document
 
 1. **The build has run SINCE the withdrawal.** `data/jobs-meta.json`'s
