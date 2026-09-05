@@ -13,6 +13,10 @@ name: OA — sync the registered-users roster
 # IT ALSO WRITES TWO SERVED FILES from the same read (owner, 2026-09-05):
 # data/users-meta.json, the number of registered users the front page shows,
 # and data/users-growth.json, the day-by-day count the analytics page charts.
+# The count is the Admin area's own: the Auth accounts that carry the
+# registeredUsers mark a usable sign-in writes, never every account Auth
+# holds (owner, 2026-09-05: the front page said 130+ over a tile saying 106).
+# A tally that cannot be read leaves both files as they are.
 # Counts and dates only, nothing under data/ may carry a name or an address.
 # Both files change on every run (the growth file gains a point by
 # construction and the meta file's `generated` is the run instant), so this job
