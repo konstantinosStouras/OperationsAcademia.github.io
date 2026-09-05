@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-04T12:16:27Z",
+ "generated": "2026-09-05T11:23:58Z",
  "ads": {
   "american.wd1.myworkdayjobs.com/AU/job/Main-Campus-Washington-DC/Professorial-Lecturer_R4814": {
    "url": "https://american.wd1.myworkdayjobs.com/AU/job/Main-Campus-Washington-DC/Professorial-Lecturer_R4814",
@@ -207,7 +207,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/173318": {
    "url": "https://apply.interfolio.com/173318",
@@ -223,7 +223,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/173354": {
    "url": "https://apply.interfolio.com/173354",
@@ -255,7 +255,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/173556": {
    "url": "https://apply.interfolio.com/173556",
@@ -271,7 +271,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/173616": {
    "url": "https://apply.interfolio.com/173616",
@@ -287,7 +287,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/173752": {
    "url": "https://apply.interfolio.com/173752",
@@ -351,7 +351,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/175700": {
    "url": "https://apply.interfolio.com/175700",
@@ -367,7 +367,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/175892": {
    "url": "https://apply.interfolio.com/175892",
@@ -383,7 +383,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "apply.interfolio.com/175964": {
    "url": "https://apply.interfolio.com/175964",
@@ -703,7 +703,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "aub.edu.lb/osb/about/Pages/Employment.aspx": {
    "url": "https://www.aub.edu.lb/osb/about/Pages/Employment.aspx",
@@ -719,7 +719,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "auemployment.com/postings/54241": {
    "url": "https://www.auemployment.com/postings/54241",
@@ -1267,19 +1267,19 @@
   },
   "careers.fresnostate.edu/en-us/job/551845": {
    "url": "https://careers.fresnostate.edu/en-us/job/551845",
-   "status": "ok",
+   "status": "unreadable",
    "via": "page",
-   "title": "JavaScript is disabled",
+   "title": "",
    "institution": "",
    "school": "",
    "department": "",
    "location": "",
    "posted": "",
    "applyByDate": "",
-   "applyByProse": "",
+   "applyByProse": "Administrative Assistant to the Vice President for University Advancement",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "careers.hprod.onehcm.usg.edu/psc/careers/CAREERS/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Action=U&Page=HRS_APP_SCHJOB_FL": {
    "url": "https://careers.hprod.onehcm.usg.edu/psc/careers/CAREERS/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_SCHJOB_FL&Action=U",
@@ -1557,8 +1557,8 @@
    "url": "https://careers.msu.edu/jobs/assistant-associate-professor-tenure-system-east-lansing-michigan-united-states-638308b1-5d2d-434c-9dd7-888de4a1fae8",
    "status": "ok",
    "via": "page",
-   "title": "JavaScript is disabled",
-   "institution": "",
+   "title": "Assistant/Associate Professor Tenure System",
+   "institution": "Michigan State University",
    "school": "",
    "department": "",
    "location": "",
@@ -1566,8 +1566,8 @@
    "applyByDate": "",
    "applyByProse": "",
    "listedUntil": "",
-   "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "careers.pageuppeople.com/968/cw/en-us/job/535250?lApplicationSubSourceID=11250": {
    "url": "https://careers.pageuppeople.com/968/cw/en-us/job/535250?lApplicationSubSourceID=11250",
@@ -1619,7 +1619,7 @@
   },
   "careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states": {
    "url": "https://careers.uh.edu/jobs/assistant-or-associate-professor-supply-chain-logistics-and-technology-houston-texas-united-states",
-   "status": "ok",
+   "status": "gone",
    "via": "page",
    "title": "JavaScript is disabled",
    "institution": "",
@@ -1631,7 +1631,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "careers.uh.edu/jobs/assistant-professor-artificial-intelligence-ai-for-energy-systems-houston-texas-united-states": {
    "url": "https://careers.uh.edu/jobs/assistant-professor-artificial-intelligence-ai-for-energy-systems-houston-texas-united-states",
@@ -1791,7 +1791,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-b560": {
    "url": "https://www.cityu.edu.hk/hro/en/job/current/academic.asp?ref=uac-b560",
@@ -1903,7 +1903,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "connect.informs.org/discussion/tenure-track-positions-at-antai-college-of-economic-and-management-shanghai-jiao-tong-university-8": {
    "url": "https://connect.informs.org/discussion/tenure-track-positions-at-antai-college-of-economic-and-management-shanghai-jiao-tong-university-8",
@@ -1967,7 +1967,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "diversityjobs.com/career/15156249/Tenure-Track-Open-Rank-Faculty-Position-In-Information-Systems-Florida-Miami": {
    "url": "https://diversityjobs.com/career/15156249/Tenure-Track-Open-Rank-Faculty-Position-In-Information-Systems-Florida-Miami?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
@@ -2159,7 +2159,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "iima.ac.in/the-institute/administration/work-with-us/faculty-dubai-campus": {
    "url": "https://www.iima.ac.in/the-institute/administration/work-with-us/faculty-dubai-campus",
@@ -2287,7 +2287,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobmarket.unibocconi.eu/index.php?type=j": {
    "url": "https://jobmarket.unibocconi.eu/index.php?type=j",
@@ -2879,7 +2879,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobs.indstate.edu/postings/53323": {
    "url": "https://jobs.indstate.edu/postings/53323",
@@ -2915,7 +2915,7 @@
   },
   "jobs.jmu.edu/jobs/assistant-professor-department-of-computer-information-systems-and-business-analytics-cis-bsan-two-positions-harrisonburg-virginia-united-states": {
    "url": "https://jobs.jmu.edu/jobs/assistant-professor-department-of-computer-information-systems-and-business-analytics-cis-bsan-two-positions-harrisonburg-virginia-united-states",
-   "status": "ok",
+   "status": "gone",
    "via": "page",
    "title": "JavaScript is disabled",
    "institution": "",
@@ -2927,7 +2927,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobs.leeds.ac.uk/vacancy.aspx?ref=BUSAT1006": {
    "url": "https://jobs.leeds.ac.uk/vacancy.aspx?ref=BUSAT1006",
@@ -3013,8 +3013,8 @@
    "url": "https://jobs.okstate.edu/jobs/assistant-professor-management-science-information-systems-stillwater-oklahoma-united-states",
    "status": "ok",
    "via": "page",
-   "title": "JavaScript is disabled",
-   "institution": "",
+   "title": "Assistant Professor (Management Science & Information Systems) 210018",
+   "institution": "The OSU/A&M System",
    "school": "",
    "department": "",
    "location": "",
@@ -3022,8 +3022,8 @@
    "applyByDate": "",
    "applyByProse": "",
    "listedUntil": "",
-   "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "employmentType": "FULL_TIME",
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobs.omni.fsu.edu/psc/sprdhr_er/EMPLOYEE/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Action=U&FOCUS=Applicant&JobOpeningId=61065&Page=HRS_APP_JBPST_FL&PostingSeq=1&SiteId=1": {
    "url": "https://jobs.omni.fsu.edu/psc/sprdhr_er/EMPLOYEE/HRMS/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_JBPST_FL&Action=U&FOCUS=Applicant&SiteId=1&JobOpeningId=61065&PostingSeq=1",
@@ -3055,7 +3055,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobs.rowan.edu/en-us/job/501084/assistantassociate-professor-of-supply-chain-logistics-department-of-marketing-and-business-information-systems": {
    "url": "https://jobs.rowan.edu/en-us/job/501084/assistantassociate-professor-of-supply-chain-logistics-department-of-marketing-and-business-information-systems",
@@ -3231,7 +3231,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobs.villanova.edu/postings/33341": {
    "url": "https://jobs.villanova.edu/postings/33341",
@@ -3251,7 +3251,7 @@
   },
   "jobs.virginia.gov/jobs/assistant-or-associate-professor-operations-research-blacksburg-virginia-united-states": {
    "url": "https://www.jobs.virginia.gov/jobs/assistant-or-associate-professor-operations-research-blacksburg-virginia-united-states?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
-   "status": "ok",
+   "status": "gone",
    "via": "page",
    "title": "JavaScript is disabled",
    "institution": "",
@@ -3263,7 +3263,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "jobs.virginia.gov/jobs/nsuf0075-tenure-track-assistant-professor-in-business-analytics-norfolk-virginia-united-states": {
    "url": "https://www.jobs.virginia.gov/jobs/nsuf0075-tenure-track-assistant-professor-in-business-analytics-norfolk-virginia-united-states",
@@ -3455,7 +3455,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "paycomonline.net/v4/ats/web.php/jobs/ViewJobDetails?clientkey=019DF7F6E271614BAB2785B88C6A379F&job=191207": {
    "url": "https://www.paycomonline.net/v4/ats/web.php/jobs/ViewJobDetails?job=191207&clientkey=019DF7F6E271614BAB2785B88C6A379F",
@@ -3551,7 +3551,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "poms.org/sites/default/files/2025-12/Position%20IOMS-IOLT%20TBS%20Education%20Toulouse%202026.pdf": {
    "url": "https://www.poms.org/sites/default/files/2025-12/Position%20IOMS-IOLT%20TBS%20Education%20Toulouse%202026.pdf",
@@ -3567,7 +3567,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "poms.org/sites/default/files/2026-01/CEIBS%20Invites%20Applications%20for%20Faculty%20Positions%20in%20Management%20Information%20Systems%20and%20Operations%20Management.pdf": {
    "url": "https://www.poms.org/sites/default/files/2026-01/CEIBS%20Invites%20Applications%20for%20Faculty%20Positions%20in%20Management%20Information%20Systems%20and%20Operations%20Management.pdf",
@@ -4095,7 +4095,7 @@
    "applyByProse": "",
    "listedUntil": "",
    "employmentType": "",
-   "checkedAt": "2026-08-24T05:15:29Z"
+   "checkedAt": "2026-09-05T11:23:58Z"
   },
   "utah.peopleadmin.com/postings/195629": {
    "url": "https://utah.peopleadmin.com/postings/195629",
