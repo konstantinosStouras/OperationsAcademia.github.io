@@ -2679,7 +2679,6 @@ cursor put back and NO account created and no profile stored, the card left
 open on what was typed, and the same form with a real affiliation still
 registering with the value stored trimmed.
 
-
 ## The forum
 
 Owner, 2026-09-04 and 05: an anonymous forum for the candidates of the

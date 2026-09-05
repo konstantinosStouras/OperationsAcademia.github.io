@@ -9702,7 +9702,7 @@ for (const w of [320, 360, 390, 430]) {
   ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
     'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
   ok(card.orcidReq === false,
-    'registration card: the ORCID iD is still genuinely optional — the wording is a recommendation, not a rule');
+    'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
   eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
     'registration card: …and it says it is highly recommended');
 
@@ -9729,7 +9729,7 @@ for (const w of [320, 360, 390, 430]) {
   eq(refused.focused, 'affiliation',
     'registration card: …with the cursor put back in the box, so the fix needs no hunting');
   eq(refused.signedIn, -1,
-    'registration card: …and NO account was created — a refusal leaves nothing behind to sign in to or clean up');
+    'registration card: …and NO account was created, so a refusal leaves nothing behind to sign in to or clean up');
   eq(refused.wroteProfile, -1, 'registration card: …and no profile was stored');
   ok(refused.boxOpen, 'registration card: …and the card stays open on what the reader typed');
 
