@@ -5145,13 +5145,35 @@ async function testUserDirectorySync() {
   ok(!ADDRESS.test(growthRaw), 'and it carries no address');
   /* the pure halves behind them, on a fixture */
   const NOW = new Date('2026-09-05T12:00:00Z');
-  const acc = (creation, disabled) => ({ disabled: !!disabled, metadata: { creationTime: creation } });
-  const fixture = [acc('Wed, 02 Sep 2026 08:00:00 GMT'), acc('Fri, 04 Sep 2026 03:00:00 GMT'),
-    acc('Thu, 03 Sep 2026 03:00:00 GMT', true)];
-  eq(mod.usersMeta(fixture, NOW), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
-    'usersMeta counts every account that is not disabled');
-  eq(mod.usersGrowth(fixture, NOW).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
-    'usersGrowth is one cumulative point per UTC day to the generated day');
+  const acc = (uid, creation, disabled) => ({ uid, disabled: !!disabled, metadata: { creationTime: creation } });
+  const fixture = [acc('a', 'Wed, 02 Sep 2026 08:00:00 GMT'), acc('b', 'Fri, 04 Sep 2026 03:00:00 GMT'),
+    acc('c', 'Thu, 03 Sep 2026 03:00:00 GMT', true), acc('never', 'Tue, 01 Sep 2026 03:00:00 GMT')];
+  /* THE COUNT IS THE ADMIN AREA'S (owner, 2026-09-05: "130+" on the front
+     page over a tile saying 106): an account counts when Auth holds it, it
+     is not disabled AND it carries the registeredUsers mark the tile
+     counts. `never` exists in Auth and never signed in usably. */
+  const marks = new Set(['a', 'b', 'c', 'orphan']);
+  eq(mod.usersMeta(fixture, NOW, marks), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
+    'usersMeta counts the accounts that are not disabled and carry a registeredUsers mark, the Admin tile\'s own set');
+  eq(mod.usersMeta(fixture, NOW, []).count, 0, 'and never Auth alone: with no marks the count is nobody');
+  /* a merge takes one off (owner, 2026-09-05): runMerge in oa-accounts.js
+     deletes the duplicate's registeredUsers mark and then its Auth account,
+     so the mark going is enough for the join to drop the duplicate */
+  eq(mod.usersMeta(fixture, NOW, new Set(['a'])).count, 1,
+    'a merged duplicate leaves the count the moment its mark is deleted, its Auth account still listed or not');
+  const accounts = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  const mergeSrc = accounts.slice(accounts.indexOf('function runMerge('), accounts.indexOf('function runMerge(') + 12000);
+  ok(/db\.collection\(OAFB\.col\.registered\)\.doc\(dupUid\)\.delete\(\)/.test(mergeSrc),
+    'and the merge really deletes the duplicate\'s mark, which is what the count reads');
+  eq(mod.usersGrowth(fixture, NOW, marks).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
+    'usersGrowth is one cumulative point per UTC day to the generated day, over the same members');
+  ok(fbjs.includes(`registered: '${mod.TALLY}'`),
+    'the tally the sync joins on is the collection the Admin area\'s tile counts (oa-firebase.js)');
+  ok(/collection\(TALLY\)\.get\(\)/.test(src) && /usersMeta\(accounts, now, marks\)/.test(src)
+     && /usersGrowth\(accounts, now, marks\)/.test(src),
+    'and main() reads it and hands it to both writers');
+  ok(/if \(!marks\) \{/.test(src) && src.indexOf('if (!marks) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)'),
+    'a tally that could not be read, or reads as empty, leaves both served files as they are');
   ok(/writeFile\(path\.join\(DATA, USERS_META\)/.test(src) && /writeFile\(path\.join\(DATA, USERS_GROWTH\)/.test(src),
     'the sync writes both files');
   ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)')
@@ -5170,8 +5192,8 @@ async function testUserDirectorySync() {
   ok(!/changes only when the count/.test(src) && !/changes only when the count/.test(wf),
     'neither the sync nor its workflow claims the meta file changes only with the count: `generated` is the run instant, so both files change every run');
   ok(/const accounts = \[\];/.test(src)
-     && /accounts\.push\(\{ disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
-    'and what the files are built from holds the flags and the creation time only, never a name or an address');
+     && /accounts\.push\(\{ uid: user\.uid, disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
+    'and what the files are built from holds the uid (the join key), the flags and the creation time only, never a name or an address');
 
   /* the workflow is a DATA WRITER now: the branch tip, the publishing role,
      a commit step naming both files, and a rejected push re-run rather than
@@ -12793,13 +12815,15 @@ async function testAnalytics() {
     'growth: the page fetches data/users-growth.json with no-cache, absolute like every served file');
   ok(/A\.growthProjection\(actual, \{ window: GROWTH_WINDOW, ahead: GROWTH_AHEAD, today: today \}\)/.test(page),
     'growth: the dashed line is the model\'s projection, under the page\'s two constants');
-  ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 180;/.test(page),
-    'growth: fitted over 90 days, carried 180 forward');
+  ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 7;/.test(page),
+    'growth: fitted over 90 days, carried a WEEK forward and no further (owner, 2026-09-05: never beyond a week from now)');
+  eq(A.growthProjection(straight).points.length, 8,
+    'growth: the model\'s own default horizon is the same week, so a caller that names none cannot draw a season');
   ok(/figure\('How the community has grown',/.test(page), 'growth: the figure has the agreed title');
   ok(/'dashed line is a straight-line trend fitted over the last ' \+ GROWTH_WINDOW \+\s*\n?\s*' days and carried ' \+ carried \+ ' days forward; an expectation from past ' \+\s*\n?\s*'growth, not a target\. '/.test(page),
     'growth: the caption is BUILT from the window constant and the days really carried, and says what the line is and is not');
   ok(/var carried = Math\.round\(\(Date\.parse\(proj\.horizon\) - Date\.parse\(proj\.lastDay\)\) \/ 86400000\);/.test(page),
-    'growth: …the days carried are read off the RESULT (horizon minus last real day), so a stale copy projected past today is not captioned as 180');
+    'growth: …the days carried are read off the RESULT (horizon minus last real day), so a stale copy projected past today is not captioned as the constant');
   const growthBlock = page.slice(page.indexOf('/* 1b.'), page.indexOf('drawGrowth();', page.indexOf('/* 1b.')));
   ok(growthBlock.length > 50 && growthBlock.length < 400 && !/—/.test(growthBlock),
     'growth: the page\'s own 1b comment carries no em dash');
@@ -14167,7 +14191,8 @@ async function testRegisteredUsersFigure() {
   }
   ok(/rounded down to the nearest ten/.test(log[0].summary) && /Who has registered stays/.test(log[0].summary),
     'changelog: the figure entry says how it is rounded and what stays private');
-  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /next 180 days/.test(log[1].summary)
+  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /week ahead/.test(log[1].summary)
+     && !/180/.test(log[1].summary)
      && /not a target/.test(log[1].summary),
     'changelog: the chart entry names the figure, the window, the horizon and what the line is not');
 

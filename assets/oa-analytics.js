@@ -142,7 +142,13 @@
      the dashed line is carried. The caption is BUILT from them, so the words
      under the chart cannot promise a window the model did not use. */
   var GROWTH_WINDOW = 90;
-  var GROWTH_AHEAD = 180;
+  /* A WEEK, not a season (owner, 2026-09-05: "do not expand that yellow line
+     beyond a week from where we are now"): the first version carried the
+     trend 180 days out, and a straight line six months long over a record
+     three weeks old read as a forecast of a thousand members, which is not
+     a claim this page can make. Seven days after today is as far as a
+     straight-line reading of the last weeks can honestly go. */
+  var GROWTH_AHEAD = 7;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g,
@@ -617,10 +623,10 @@
    *  a straight-line trend fitted over the last GROWTH_WINDOW days and carried
    *  through the last real point to GROWTH_AHEAD days after TODAY, and the
    *  caption names the window from its constant and the days carried from the
-   *  RESULT (horizon minus last real day): 180 on the fresh copy the daily
-   *  sync writes, more on a stale one, since the model anchors the horizon on
-   *  the reader's day and a fixed "180" would then understate the line drawn
-   *  above it. It calls the line an expectation from past growth rather than
+   *  RESULT (horizon minus last real day): GROWTH_AHEAD (a week) on the fresh
+   *  copy the daily sync writes, more on a stale one, since the model anchors
+   *  the horizon on the reader's day and a fixed "7" would then understate
+   *  the line drawn above it. It calls the line an expectation from past growth rather than
    *  a target, and gives the count it reaches. It is
    *  drawn in the chart accent (the site's yellow, re-stepped in the dark
    *  theme so it stays tellable from the brand line) and dashed, so the pair
