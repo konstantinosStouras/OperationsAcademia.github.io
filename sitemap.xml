@@ -7,7 +7,9 @@
      same reason — they redirect, and it is the section they land on that
      belongs in an index. The three sign-in-only shells (account, my-postings,
      messages) are absent too: to a crawler each is a sign-in box and nothing
-     else, and a thin page indexed is worse than none. -->
+     else, and a thin page indexed is worse than none. So is the forum
+     (forum.html), for the same reason: every thread behind its sign-in card
+     answers only to a signed-in account. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.operationsacademia.org/</loc></url>
   <url><loc>https://www.operationsacademia.org/jobs.html</loc></url>

@@ -52,9 +52,13 @@
 
   /* ------------------------------------------------------------- firestore */
 
+  /* `data()` answers a COPY, as the SDK does: a page that decorates what it
+     read (the forum stamps `id` onto a thread it fetched) must not write into
+     the store behind the shim's back, or a check over `__fb.docs` would see
+     the page's own bookkeeping as a field the simulator wrote. */
   function snapOf(path) {
     var d = docs[path];
-    return { id: path.split('/').pop(), exists: !!d, data: function () { return d; } };
+    return { id: path.split('/').pop(), exists: !!d, data: function () { return d ? Object.assign({}, d) : d; } };
   }
 
   function DocRef(path) {
@@ -361,13 +365,242 @@
 
   /* --------------------------------------------------------- functions
 
-     The one callable the site makes (sendVerificationEmail, from the "Check
-     your inbox" card). Records the name so a check can see it was tried
-     FIRST, and refuses with whatever the seed names: functions/not-found is
-     the shape of a function that is not deployed, which is the branch the
-     card must fall back on (user.sendEmailVerification above). With
-     `noFunctions` the namespace has no functions() at all, which is the
-     load-failure branch. */
+     Two callers. sendVerificationEmail (the "Check your inbox" card) is
+     recorded so a check can see it was tried FIRST, refused with whatever the
+     seed names (functions/not-found is the shape of a function that is not
+     deployed, the branch the card must fall back on: user.sendEmailVerification
+     above), and otherwise answered with a canned receipt. With `noFunctions`
+     the namespace has no functions() at all, which is the load-failure branch.
+
+     THE FORUM'S SIX CALLABLES are simulated over `docs` (forumSim below), so
+     the forum block in page-test.mjs can drive the page through a whole
+     conversation without a Cloud Function: join, a question, a reply with a
+     quote, an edit, a vote and the guide seed all land as documents the page
+     then reads back through the same fake Firestore. It is a SIMULATOR, not
+     the functions: it writes the shapes the page reads (the key lists in
+     assets/oa-forum-model.js), refuses with the codes and reasons member.js
+     answers with, and proves nothing about the real functions, which
+     _functions/test/forum-emulator.mjs drives against the emulator. What it
+     lets the browser suite measure is what the PAGE does with those answers,
+     and that no uid, address or profile id reaches the markup. `seed.refuse`
+     ({ forumPost: { code: 'resource-exhausted', reason: 'posts' } }) makes
+     one callable refuse, for the refusal-wording checks. */
+  var FORUM_NAMES = ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate'];
+  var SIM_HASH = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+  var simN = 0;
+
+  function simRefuse(code, reason) {
+    var err = { code: 'functions/' + code, message: reason || code, details: { reason: reason } };
+    return Promise.reject(err);
+  }
+  function simMinute() { return Math.floor(Date.now() / 60000) * 60000; }
+  /* the season under way, the roll page-test.mjs itself computes (a July roll:
+     getUTCMonth() is 0-based, so June is 5 and July 6) */
+  function simSeason() {
+    var d = new Date();
+    return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+  }
+  function simUser() {
+    var app = APPS['[DEFAULT]'];
+    return (app && app.__user) || null;
+  }
+  function simVerified(u) {
+    var pd = (u && u.providerData) || [];
+    var provider = pd.length && pd[0] && pd[0].providerId;
+    return !!u && (u.emailVerified === true || (typeof provider === 'string' && provider !== 'password'));
+  }
+  function simAdmin(u) {
+    return !!u && u.emailVerified === true && String(u.email || '').toLowerCase() === 'kstouras@gmail.com';
+  }
+  function simProfile(u, Y) {
+    var best = null;
+    childrenOf('candidateSubmissions').forEach(function (p) {
+      var v = docs[p];
+      if (!v || v.uid !== u.uid || Number(v.year) !== Y) return;
+      if (v.status !== 'queued' && v.status !== 'published') return;
+      if (!best) best = { id: p.split('/').pop(), data: v };
+    });
+    return best;
+  }
+  function simThreads(Y, room) { return 'forumSeasons/' + Y + '/rooms/' + room + '/threads'; }
+  function simWrite(path, data) { docs[path] = Object.assign({}, data); record('set', path, data); }
+  function simGuideText() {
+    var g = window.OAForumGuide;
+    try { if (g && typeof g.text === 'function') return g.text(); } catch (e) { /* fall through */ }
+    return 'About this forum. Thirteen rules.';
+  }
+  function simSlug(s) {
+    var m = window.OAForumModel;
+    if (m && m.slug) return m.slug(s);
+    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
+  }
+
+  function forumSim(name, data) {
+    data = data || {};
+    var u = simUser();
+    if (!u) return simRefuse('unauthenticated', 'auth');
+    if (seed.refuse && seed.refuse[name]) return simRefuse(seed.refuse[name].code, seed.refuse[name].reason);
+    var Y = simSeason();
+    var handle = seed.handle || 'quiet heron 42';
+    var admin = simAdmin(u);
+    var verified = simVerified(u);
+    var profile = simProfile(u, Y);
+    var rooms = { candidates: admin || !!profile, open: verified };
+    var now = simMinute();
+
+    if (name === 'forumJoin') {
+      if (!verified) return simRefuse('permission-denied', 'verified');
+      if (profile && !docs['candidateMarkers/' + u.uid]) {
+        simWrite('candidateMarkers/' + u.uid, { sub: profile.id, year: Y, joinedAt: now });
+      }
+      if (!docs['forumSeasons/' + Y]) {
+        simWrite('forumSeasons/' + Y, { season: Y, createdAt: now, secretVersion: 'env', guides: {} });
+      }
+      return Promise.resolve({ data: {
+        season: Y, handle: handle, guideAt: seed.guideAt || 0, banned: false, rooms: rooms, rollsOn: Y + '-07-01'
+      } });
+    }
+
+    var room = String(data.room || '');
+    if (room !== 'candidates' && room !== 'open') return simRefuse('invalid-argument', 'room');
+    if (name !== 'forumModerate' && !rooms[room]) {
+      return simRefuse('permission-denied', room === 'open' ? 'verified' : 'candidate');
+    }
+    var threads = simThreads(Y, room);
+    var guard = window.OAForumGuard;
+    function bad(text) { return guard && guard.check ? guard.check(String(text || '')) : ''; }
+
+    if (name === 'forumModerate') {
+      if (!admin) return simRefuse('permission-denied', 'admin');
+      if (data.op === 'seedGuide') {
+        var head = docs['forumSeasons/' + Y] || { season: Y, createdAt: now, secretVersion: 'env', guides: {} };
+        if (head.guides && head.guides[room]) return simRefuse('already-exists', 'guide');
+        var gtid = 'sim-guide-' + room;
+        simWrite(threads + '/' + gtid, {
+          season: Y, room: room, title: 'About this forum', tags: ['about'], by: 'Moderator', t: now, lastAt: now,
+          lastBy: 'Moderator', n: 1, excerpt: 'How this room works, in thirteen rules.', score: 0,
+          pinned: true, locked: true, hidden: false
+        });
+        simWrite(threads + '/' + gtid + '/posts/' + gtid + '-p1', {
+          season: Y, room: room, tid: gtid, n: 1, by: 'Moderator', body: simGuideText(), kind: '', t: now,
+          up: 0, down: 0, quote: null, hidden: false, hiddenBy: ''
+        });
+        var guides = Object.assign({}, head.guides || {});
+        guides[room] = gtid;
+        simWrite('forumSeasons/' + Y, Object.assign({}, head, { guides: guides }));
+        return Promise.resolve({ data: { ok: true, tid: gtid } });
+      }
+      if (data.op === 'pin' || data.op === 'lock') {
+        var tpath = threads + '/' + String(data.tid || '');
+        if (!docs[tpath]) return simRefuse('not-found', 'thread');
+        var patch = {};
+        patch[data.op === 'pin' ? 'pinned' : 'locked'] = data.on !== false;
+        simWrite(tpath, Object.assign({}, docs[tpath], patch));
+        return Promise.resolve({ data: { ok: true, tid: data.tid } });
+      }
+      return simRefuse('invalid-argument', 'bounds');
+    }
+
+    if (name === 'forumPost') {
+      var body = String(data.body || '').trim();
+      var kind = data.kind == null ? '' : String(data.kind);
+      if (!body || body.length > 4000) return simRefuse('invalid-argument', 'bounds');
+      if (bad(body)) return simRefuse('invalid-argument', bad(body));
+      if (['', 'first-hand', 'rumour'].indexOf(kind) === -1) return simRefuse('invalid-argument', 'kind');
+      var excerpt = body.replace(/\s+/g, ' ').slice(0, 200);
+      if (!data.tid) {
+        var title = String(data.title || '').trim();
+        if (!title || title.length > 120) return simRefuse('invalid-argument', 'bounds');
+        if (bad(title)) return simRefuse('invalid-argument', bad(title));
+        var tags = Array.isArray(data.tags) ? data.tags.map(simSlug) : [];
+        if (!tags.length || tags.length > 5) return simRefuse('invalid-argument', 'tags');
+        var tid = 'sim-t' + (++simN);
+        var pid1 = 'sim-p' + (++simN);
+        simWrite(threads + '/' + tid, {
+          season: Y, room: room, title: title, tags: tags, by: handle, t: now, lastAt: now, lastBy: handle,
+          n: 1, excerpt: excerpt, score: 0, pinned: false, locked: false, hidden: false
+        });
+        simWrite(threads + '/' + tid + '/posts/' + pid1, {
+          season: Y, room: room, tid: tid, n: 1, by: handle, body: body, kind: kind, t: now,
+          up: 0, down: 0, quote: null, hidden: false, hiddenBy: ''
+        });
+        var tallyPath = 'forumTags/' + Y + '_' + room;
+        var counts = Object.assign({}, (docs[tallyPath] || {}).counts || {});
+        tags.forEach(function (t) { counts[t] = (counts[t] || 0) + 1; });
+        simWrite(tallyPath, { counts: counts });
+        return Promise.resolve({ data: { tid: tid, pid: pid1, n: 1 } });
+      }
+      var tp = threads + '/' + String(data.tid);
+      var thread = docs[tp];
+      if (!thread) return simRefuse('not-found', 'thread');
+      if (thread.locked || thread.hidden) return simRefuse('failed-precondition', 'locked');
+      var quote = null;
+      if (data.quote) {
+        var qn = Number(data.quote.n);
+        var qtext = String(data.quote.text || '').trim();
+        var src = null;
+        childrenOf(tp + '/posts').forEach(function (pp) { if (Number(docs[pp].n) === qn) src = docs[pp]; });
+        if (!src || src.hidden || !qtext || qtext.length > 600 || String(src.body).indexOf(qtext) === -1) {
+          return simRefuse('invalid-argument', 'quote');
+        }
+        quote = { n: qn, by: src.by, text: qtext };
+      }
+      var n = (Number(thread.n) || 0) + 1;
+      var pid = 'sim-p' + (++simN);
+      simWrite(tp + '/posts/' + pid, {
+        season: Y, room: room, tid: data.tid, n: n, by: handle, body: body, kind: kind, t: now,
+        up: 0, down: 0, quote: quote, hidden: false, hiddenBy: ''
+      });
+      simWrite(tp, Object.assign({}, thread, { n: n, lastAt: now, lastBy: handle }));
+      return Promise.resolve({ data: { tid: data.tid, pid: pid, n: n } });
+    }
+
+    var tpath2 = threads + '/' + String(data.tid || '');
+    var th = docs[tpath2];
+    if (!th) return simRefuse('not-found', 'thread');
+
+    if (name === 'forumThreadVotes') {
+      var votes = {};
+      childrenOf(tpath2 + '/posts').forEach(function (pp) {
+        var vd = docs[pp + '/votes/' + SIM_HASH];
+        if (vd) votes[pp.split('/').pop()] = vd.v;
+      });
+      return Promise.resolve({ data: { votes: votes } });
+    }
+
+    var ppath = tpath2 + '/posts/' + String(data.pid || '');
+    var post = docs[ppath];
+    if (!post) return simRefuse('not-found', 'thread');
+
+    if (name === 'forumEdit') {
+      if (post.by !== handle) return simRefuse('permission-denied', 'author');
+      if (Date.now() >= Number(post.t) + 15 * 60 * 1000) return simRefuse('failed-precondition', 'window');
+      var nb = String(data.body || '').trim();
+      if (!nb || nb.length > 4000) return simRefuse('invalid-argument', 'bounds');
+      if (bad(nb)) return simRefuse('invalid-argument', bad(nb));
+      simWrite(ppath, Object.assign({}, post, { body: nb, kind: data.kind == null ? '' : String(data.kind), editedAt: now }));
+      return Promise.resolve({ data: { editedAt: now } });
+    }
+
+    if (name === 'forumVote') {
+      if (th.locked || th.hidden) return simRefuse('failed-precondition', 'locked');
+      if (post.by === handle) return simRefuse('failed-precondition', 'own');
+      var v = Number(data.v) || 0;
+      if (v !== 1 && v !== -1 && v !== 0) return simRefuse('invalid-argument', 'bounds');
+      var vpath = ppath + '/votes/' + SIM_HASH;
+      var old = docs[vpath] ? Number(docs[vpath].v) || 0 : 0;
+      var du = (v === 1 ? 1 : 0) - (old === 1 ? 1 : 0);
+      var dd = (v === -1 ? 1 : 0) - (old === -1 ? 1 : 0);
+      var up = (Number(post.up) || 0) + du, down = (Number(post.down) || 0) + dd;
+      simWrite(ppath, Object.assign({}, post, { up: up, down: down }));
+      if (v === 0) { delete docs[vpath]; record('delete', vpath); }
+      else simWrite(vpath, { v: v, t: now });
+      if (Number(post.n) === 1) simWrite(tpath2, Object.assign({}, th, { score: (Number(th.score) || 0) + du - dd }));
+      return Promise.resolve({ data: { up: up, down: down } });
+    }
+    return simRefuse('not-found', 'thread');
+  }
+
   function functionsFor() {
     return {
       httpsCallable: function (name) {
@@ -378,6 +611,7 @@
             // hands it over on err.message (the throttle names its reason there)
             return Promise.reject({ code: seed.callableFails, message: seed.callableMessage || seed.callableFails });
           }
+          if (FORUM_NAMES.indexOf(String(name)) !== -1) return forumSim(String(name), data);
           return Promise.resolve({ data: { sent: true, to: 'r***@example.edu' } });
         };
       }

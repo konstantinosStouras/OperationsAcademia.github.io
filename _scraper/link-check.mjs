@@ -153,6 +153,10 @@ const NOINDEX_OK = new Set([
   // nothing on it for a search index and nothing anybody would share
   // (share-check lists it card: false for the same reason)
   'verify-email.html',
+  // the forum: to a crawler it is a sign-in box and nothing else, and every
+  // thread behind it answers only to a signed-in account. Nothing on it
+  // belongs in an index (share-check lists it card: false for the same reason)
+  'forum.html',
 ]);
 
 for (const file of walk(ROOT)) {

@@ -16,5 +16,12 @@
     "predeploy": ["node check-project.mjs"],
     "//": "The instant-publish doorbell (_functions/index.js): a posting change dispatches the GitHub build. Deploy: firebase deploy --only functions (needs the GH_DISPATCH_TOKEN secret first — see _SETUP-INSTANT-PUBLISH.md).",
     "source": "_functions"
+  },
+  "emulators": {
+    "//": "Fixed ports so _functions/test/forum-emulator.mjs knows where to connect. Local only; a `demo-` project never touches operations-academia.",
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8080 },
+    "functions": { "port": 5001 },
+    "ui": { "enabled": false }
   }
 }
