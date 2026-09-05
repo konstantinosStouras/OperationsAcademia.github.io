@@ -14522,6 +14522,25 @@ async function testForumSeed() {
   ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wfCode), 'it checks out the branch tip');
   ok(/seed-forum\.mjs --selftest/.test(wfCode), 'and runs the seeder\'s own checks before it writes');
 
+  /* EVERY workflow that installs firebase-admin installs 12, and the reason is
+     one API surface. _mail.mjs's firebaseAdmin() reaches for the NAMESPACED
+     admin.* (admin.apps, admin.credential.cert, admin.firestore()), which
+     version 14 removed whole; _functions/package.json's ^14 is the DEPLOYED
+     Cloud Functions runtime on the modular API, a different thing that reads
+     like the number to copy. Copying it is what failed the first seeding run
+     (TypeError: Cannot read properties of undefined, reading 'length'), so the
+     rule is pinned over every workflow rather than remembered per file. */
+  const wfDir = path.join(root, '.github', 'workflows');
+  let installers = 0;
+  for (const f of (await readdir(wfDir)).filter((n) => n.endsWith('.yml'))) {
+    const src = (await readFile(path.join(wfDir, f), 'utf8')).replace(/^\s*#.*$/gm, '');
+    for (const m of src.matchAll(/firebase-admin@\^?(\d+)/g)) {
+      installers++;
+      eq(m[1], '12', `${f} installs firebase-admin 12, the namespaced surface _mail.mjs uses`);
+    }
+  }
+  ok(installers >= 10, `the firebase-admin scan really read the workflows (${installers} installs)`);
+
   /* the seeder never writes a season head, and changes no rule */
   const src = await readFile(path.join(HERE, 'seed-forum.mjs'), 'utf8');
   ok(/firestore\(\)/.test(src) && !/initializeApp/.test(src.replace(/\/\*[\s\S]*?\*\//g, '')),
