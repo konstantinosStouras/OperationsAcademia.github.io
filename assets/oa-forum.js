@@ -99,6 +99,7 @@
     locked: 'This thread is locked, so nothing can be added to it.',
     archive: 'This season is archived and read-only.',
     author: 'Only the author can change their own post.',
+    answered: 'This question has replies, so it cannot be deleted. It can go once every reply has been deleted.',
     window: 'The fifteen-minute edit window has closed; the post stays as written. You can still delete it.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
@@ -793,9 +794,25 @@
     }).join('');
   }
 
+  /** Is the reader the maintainer? Asked of the one definition, so the page
+      and the function cannot disagree about who may remove somebody's post. */
+  function amAdmin() {
+    var A = window.OAAccounts;
+    return !!(A && A.isAdmin && A.isAdmin());
+  }
+
   function renderThread(host, thread, posts) {
-    var readOnly = S.archive || !!thread.locked || !!thread.hidden;
     var first = posts[0] || {};
+    /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED (owner, 2026-09-05: "the
+       entire thread should be deleted too, and noone should be able to reply
+       in such a thread"). Deleting a question now hides its thread, so this
+       reads as closed only for rows written before that rule; the function
+       refuses a reply to one either way, and the maintainer's Delete on the
+       question finishes it off the list. */
+    var gone = !!first.hidden && Number(first.n) === 1;
+    var readOnly = S.archive || !!thread.locked || !!thread.hidden || gone;
+    /* replies still standing: a deleted one no longer holds the question down */
+    var live = posts.filter(function (p) { return Number(p.n) !== 1 && !p.hidden; }).length;
     var out = '';
     out += '<nav class="oa-forum-crumbs" aria-label="You are here"><a href="' + esc(href({ room: S.room, season: S.season })) + '">Questions</a> &rsaquo; ' +
       '<span>' + esc(thread.title) + '</span></nav>';
@@ -813,7 +830,7 @@
 
     out += '<ol class="oa-forum-posts" id="oa-forum-posts">';
     posts.forEach(function (p, i) {
-      out += postHTML(p, readOnly, i === 0);
+      out += postHTML(p, readOnly, i === 0, live);
       if (i === 0 && posts.length > 1) {
         out += '</ol><div class="oa-forum-replies-h"><h2>' + plural(posts.length - 1, 'reply', 'replies') + '</h2></div><ol class="oa-forum-posts">';
       }
@@ -825,7 +842,10 @@
     var compose = $('oa-forum-compose');
     if (compose) {
       compose.innerHTML = '';
-      if (readOnly) {
+      if (gone && !S.archive) {
+        compose.innerHTML = '<div class="oa-note"><p>This question was deleted, so the thread is closed. ' +
+          'Nothing more can be added to it.</p></div>';
+      } else if (readOnly) {
         compose.innerHTML = '<div class="oa-note"><p>' + (S.archive
           ? 'This season is archived. The thread stays readable and nothing can be added to it.'
           : 'This thread is locked. It stays readable and nothing can be added to it.') + '</p></div>';
@@ -837,7 +857,7 @@
     wirePosts(host, thread, posts, readOnly);
   }
 
-  function postHTML(p, readOnly, isFirst) {
+  function postHTML(p, readOnly, isFirst, liveReplies) {
     var mine = p.by === S.me.handle;
     var up = Number(p.up) || 0, down = Number(p.down) || 0;
     var net = up - down;
@@ -857,9 +877,9 @@
     out += '<span class="oa-forum-updown">' + up + ' / ' + down + '</span>';
     out += '</div><div class="oa-forum-pbody">';
     if (p.hidden) {
-      out += '<p class="oa-forum-removed">' + (p.hiddenBy === 'author'
-        ? 'This ' + (isFirst ? 'post' : 'reply') + ' was deleted by its author.'
-        : 'This ' + (isFirst ? 'post' : 'reply') + ' was removed.') + '</p>';
+      out += '<p class="oa-forum-removed">' + (p.hiddenBy === 'admin'
+        ? 'This ' + (isFirst ? 'post' : 'reply') + ' was removed by the maintainer.'
+        : 'This ' + (isFirst ? 'post' : 'reply') + ' was deleted by its author.') + '</p>';
     } else {
       if (p.quote && p.quote.text) {
         out += '<blockquote class="oa-forum-quote"><cite><span class="oa-forum-handle">' + esc(p.quote.by) + '</span> wrote in ' +
@@ -878,9 +898,16 @@
       if (left > 0) {
         out += '<button type="button" class="oa-forum-act" data-act="edit">Edit · ' + Math.max(1, Math.ceil(left / 60000)) + ' min left</button>';
       }
-      /* No window on this one: your own words are yours to take back whenever
-         you like (owner, 2026-09-05). */
-      out += '<button type="button" class="oa-forum-act is-del" data-act="delete">Delete</button>';
+    }
+    /* Delete: your own post at any time, with no window, and ANY post for the
+       maintainer (owner, 2026-09-05). A question somebody has answered cannot
+       be deleted at all, so the control says why rather than failing on the
+       press; a maintainer is not held by that rule. */
+    if (!readOnly && !p.hidden && (mine || amAdmin())) {
+      var stuck = isFirst && !amAdmin() && liveReplies > 0;
+      out += '<button type="button" class="oa-forum-act is-del" data-act="delete"' +
+        (stuck ? ' disabled title="A question with replies cannot be deleted. It can go once every reply has been deleted."' : '') +
+        '>' + (mine ? 'Delete' : 'Remove') + '</button>';
     }
     out += '</div><div class="oa-forum-who">' +
       '<span class="oa-forum-handle' + (mine ? ' is-me' : '') + '">' + esc(p.by) + '</span>' +
@@ -914,16 +941,19 @@
 
   /* Deleting is not a one-way door anywhere else on this site; here it is,
      and the confirmation says so rather than asking a bare "are you sure".
-     The opening post of a thread nobody has replied to takes the thread with
-     it, so the wording differs and the page goes back to the list. */
+     A question always takes its thread with it, so the wording says so and
+     the page goes back to the list; the maintainer's own wording says they
+     are removing somebody else's post rather than deleting their own. */
   function deletePost(thread, p, btn) {
     var isFirst = Number(p.n) === 1;
-    var alone = isFirst && Number((thread && thread.n) || 0) <= 1;
-    var msg = alone
-      ? 'Delete this question? Nobody has replied, so the whole thread goes. The words cannot be brought back.'
-      : (isFirst
-          ? 'Delete your question? The replies stay and the thread keeps its place, but your words and the title go, and they cannot be brought back.'
-          : 'Delete this reply? Its place in the thread stays so the numbering still reads, but the words go, and they cannot be brought back.');
+    var mine = p.by === S.me.handle;
+    var msg = isFirst
+      ? (mine
+          ? 'Delete this question? The whole thread goes with it, and the words cannot be brought back.'
+          : 'Remove this question as the maintainer? The whole thread goes with it, replies included, and the words cannot be brought back.')
+      : (mine
+          ? 'Delete this reply? Its place in the thread stays so the numbering still reads, but the words go, and they cannot be brought back.'
+          : 'Remove this reply as the maintainer? Its place in the thread stays, but the words go, and they cannot be brought back.');
     if (!window.confirm(msg)) return;
     btn.disabled = true;
     call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function (r) {
@@ -974,10 +1004,6 @@
       'I have read <a href="#oa-forum-guide">the forum guide</a>: no names, no contact details, no rumours.</label>';
   }
 
-  var WARN = '<div class="oa-forum-warn"><strong>Read it once more for anything that identifies you.</strong> ' +
-    'Your name, your school, your advisor, a paper title, an unusual detail of your case. Nobody can see who is behind a handle, but the words themselves can give you away. ' +
-    'You can edit it for fifteen minutes, and delete it at any time.</div>';
-
   function replyBox(thread, first) {
     var wrap = el('div', { class: 'oa-forum-compose', id: 'oa-forum-reply' });
     wrap.innerHTML =
@@ -991,8 +1017,7 @@
       '</div>' +
       acceptBox('oa-forum-accept') +
       '<p class="oa-forum-guardmsg" id="oa-forum-guardmsg" aria-live="polite"></p>' +
-      '<p class="oa-forum-msg" id="oa-forum-msg" aria-live="polite"></p>' +
-      WARN;
+      '<p class="oa-forum-msg" id="oa-forum-msg" aria-live="polite"></p>';
     var ta = wrap.querySelector('#oa-forum-body');
     var guard = wrap.querySelector('#oa-forum-guardmsg');
     ta.addEventListener('input', function () { liveGuard(ta, guard); });
@@ -1135,7 +1160,6 @@
           '<ul class="oa-forum-tagsugg" id="oa-forum-tagsugg" role="listbox" aria-label="Suggested tags"></ul>' +
           '<p class="oa-forum-hint" id="oa-forum-taghint">Up to five. Pick existing tags where you can; a new tag is fine if none fits. Tags are set when the question is asked.</p></div>' +
         acceptBox('oa-forum-ask-accept') +
-        WARN +
         '<p class="oa-forum-msg" id="oa-forum-ask-msg" aria-live="polite"></p>' +
         '<div class="oa-forum-actions" style="margin-top:18px">' +
           '<button type="submit" class="oa-forum-send" id="oa-forum-ask-send">Post question</button>' +

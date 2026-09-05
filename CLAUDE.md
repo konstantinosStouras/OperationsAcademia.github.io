@@ -2733,15 +2733,43 @@ your own words away is a different act with a different answer.
 `_functions/forum/delete.js` is the seventh callable, and it reads no
 `EDIT_WINDOW_MS` at all, which the selftest pins rather than trusting.
 
+**BUT NOT A QUESTION SOMEBODY HAS ANSWERED**, and that is the owner changing
+their own instruction the same day after seeing what it produced: *"a user
+cannot delete a question posted that has received at least one answer. If all
+answers are deleted, then the user who posted the respective question should
+be able to delete it. Right now, I delete the question but the looks of it
+looks orphan forum"*.
+
+The first build blanked such a question and left the thread standing, on the
+reasoning that other people's replies must not go with it. The screenshot of
+the result is the argument against it: a page headed *"Deleted by its author"*
+with no question under it and one reply hanging below reads as a broken
+thread, not a tidy one. **So there are two states and no third**: no live
+reply and the whole thread goes; a live reply and the question cannot be
+deleted at all. `DELETED_TITLE` left the model with the state it named, since
+nothing writes it any more.
+
+**"Live" is the second sentence of the instruction.** A reply its own author
+or the maintainer has deleted no longer holds the question down, so a thread
+whose answers have all gone can be withdrawn by the person who asked it. The
+count is one query for posts that are not hidden, `limit(2)`, since the only
+question is whether ANY of them is a reply and only one of them can be the
+question.
+
+**THE MAINTAINER MAY DELETE ANY POST** in either room (*"the admin should be
+able to delete any questions or answers"*), and is not held by the rule above:
+removing a question as moderation takes the thread with it, replies included,
+which is what removing a question means.
+
 **IT IS A TOMBSTONE, AND BOTH HALVES OF THAT ARE THE POINT.** The words really
 go: `body` and `kind` are ERASED in the database, not merely flagged, or
 "delete" is a lie the page tells on the maintainer's behalf. The post's SLOT
 stays, because `n` is the post's name: a reply quotes by number (`#4`), the
 thread's `n` is the next number to hand out, and a hole would renumber nothing
-and break both. So the row is drawn as removed and the thread still reads.
-`hidden` with `hiddenBy: 'author'` says which of the two it is, and the page
-says *"deleted by its author"* rather than *"removed"*, which is what
-moderation's own removals will say when the report queue arrives.
+and break both. So a deleted reply is drawn as removed and the thread reads
+on. `hiddenBy` says which of the two it was, `'author'` or `'admin'`, so the
+page says *"deleted by its author"* or *"removed by the maintainer"* rather
+than guessing.
 
 **A QUOTE OF IT SURVIVES, deliberately.** `forumPost` stores a COPY of the
 quoted words on the reply, which is already what keeps an edit from rewriting
@@ -2749,14 +2777,10 @@ somebody else's reply; the same rule means deleting your post does not blank
 the passage a reply was written about. The guide says your words are gone; it
 does not promise to reach into what other people wrote.
 
-**The opening post is the thread, up to a point.** With no replies the whole
-thread is hidden, off every list, because the title and the question were the
-author's words too. With replies the opening post is blanked and the title is
-replaced by `DELETED_TITLE`, but the thread stands: other members wrote those
-replies, and one person changing their mind must not take a dozen other
-people's words down with it. That is also the griefing answer, since asking a
-question, collecting the answers and deleting the thread is otherwise a move
-the design would allow.
+**The griefing worry the first build was written around is answered by the
+refusal rather than by the blanking**: asking a question, collecting the
+answers and deleting the thread is exactly what "not while it has an answer"
+forbids.
 
 **Refused on an ARCHIVED season and on a HIDDEN thread; allowed on a LOCKED
 one.** Once a season's secret version is destroyed its handles cannot be
@@ -2768,17 +2792,65 @@ second press is a SUCCESS, not an error.
 **The confirmation says what is true of this one.** Everywhere else on this
 site hiding is never a one-way door, and here it is: the words are gone and
 there is no Restore, so the dialog says so rather than asking a bare
-are-you-sure, and it words the three cases differently (a reply, an opening
-post with replies, an opening post that takes its thread).
+are-you-sure, and it words the four cases apart (your reply, your question,
+and the maintainer removing either).
+
+**A THREAD WHOSE QUESTION HAS GONE IS CLOSED, AND NOBODY MAY REPLY IN IT**
+(owner, 2026-09-05, of a screenshot showing a deleted question, a deleted
+reply, and a compose box under both: *"the entire thread should be deleted
+too, and noone should be able to reply in such a thread"*). Deleting a
+question now hides its thread, so `tv.hidden` answers this for anything
+written since; the rows that need the second half are the ones written
+BEFORE that rule, where a blanked question sits under a thread still
+standing. So `forumPost` reads the head post inside the transaction that
+guards the write, one equality on one collection, and refuses `locked` when
+it is missing or hidden. In the FUNCTION rather than only on the page,
+because a page can be got round; on the page too, where the reply box is
+replaced by a line saying the thread is closed. And pressing Delete on a
+question that is already gone FINISHES THE JOB rather than doing nothing:
+it shuts the thread, which is the one press that clears a legacy thread
+left headless.
+
+**And the control says NO before it is pressed.** An answered question draws
+Delete disabled with the reason in its tooltip, rather than a button that
+fails when somebody presses it; the maintainer's own says *Remove* on a post
+that is not theirs. `amAdmin()` asks `OAAccounts.isAdmin()`, the one
+definition, so the page and the function cannot disagree about who may remove
+somebody else's post.
 
 Tests: the `forum delete` block of `testForum` (a callable of its own, no
 window even read, the author check, the erase, the kept slot, the archive and
-hidden refusals, the locked one NOT refused, both opening-post branches, and
-the page's control, confirmation and wording), the emulator test's own block
-against the real function (somebody else refused, the author's reply deleted
-long past the edit window, a second press a success, a quote of it surviving,
-both opening-post branches), and the browser block in `page-test.mjs`, which
-posts a reply, deletes it and reads the stored document back.
+hidden refusals, the locked one NOT refused, the answered refusal counting
+REPLIES, `DELETED_TITLE` gone from the model too, a question always taking its
+thread, the maintainer's two exemptions, and the page's control, confirmation
+and wording), the emulator test's own block against the real function
+(somebody else refused, the author's reply deleted long past the edit window,
+a second press a success, a quote of it surviving, an answered question
+refused, the maintainer removing other people's replies with `hiddenBy:
+'admin'`, the asker then able to delete the question, a reply refused on a
+headless thread and one press closing it), and the browser block in
+`page-test.mjs`, which posts a reply, deletes it, reads the stored document
+back, finds Delete disabled on the question the reply answers, and deletes a
+question of its own to watch the whole thread leave the list.
+
+### The compose box says nothing about being anonymous
+
+It used to carry a standing warning above every question and every reply,
+reminding the writer that a handle is not a disguise and that a detail here
+beside a detail there can identify somebody. The owner had it removed
+(2026-09-05): *"I do not want to over-stress to users that they are
+anonymous, it is OK. They are adults."* Nothing is lost from the record: the
+small-population note ("This forum is small") is still the third of the
+guide's three notes, and rule 4 still says not to reveal who you are; the
+guide is pinned at the top of both rooms and every member ticks it before
+their first post, and
+the Privacy Policy paragraph held verbatim in this file says the same thing
+for announce day. What went is the repetition on every screen.
+
+`.oa-forum-warn` and its copy are DELETED from the page and the stylesheet
+rather than left unrendered, which the selftest pins: this file's own rule
+is that nothing merely hidden counts as withheld, and a block still in the
+source is one CSS change from coming back.
 
 ### No rumours, and no box asking how you know
 
@@ -3238,7 +3310,7 @@ back and flips the switch:
   "id": "forum-2026-09",
   "date": "2026-09-05",
   "title": "An anonymous forum, in two rooms",
-  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit for fifteen minutes and to delete at any time. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
+  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit for fifteen minutes and to delete, a question once every reply has gone. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
   "url": "/forum.html"
 }
 ```

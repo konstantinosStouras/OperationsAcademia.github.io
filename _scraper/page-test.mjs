@@ -9837,11 +9837,14 @@ for (const w of [320, 360, 390, 430]) {
         if (chips[i].t < ex.b - 0.5) clash++;
         if (stats.l < chips[i].r && chips[i].l < stats.r && stats.t < chips[i].b && chips[i].t < stats.b) clash++;
       }
+      const chipStyle = getComputedStyle(card.querySelector('.oa-badges .oa-label'));
       return {
         chips: chips.length, clash,
         tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,
         footRow: Math.abs(sub.b - chips[chips.length - 1].b) < 40 && sub.l > chips[0].l,
         replies: (card.textContent.match(/repl(y|ies)/g) || []).length,
+        chipFont: parseFloat(chipStyle.fontSize),
+        chipHeight: Math.max(...chips.map((c) => c.b - c.t)),
       };
     });
     ok(geom.chips >= 2, `forum (candidate): the card carries a tag row of more than one chip, which is what could collide (${geom.chips})`);
@@ -9849,6 +9852,11 @@ for (const w of [320, 360, 390, 430]) {
     ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
     ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
     eq(geom.replies, 1, 'forum (candidate): and the reply count is printed once, in the tally');
+    /* smaller and lighter than the site's default label, which is 700-weight
+       at 12.5px and reads as crowded when four sit in a row under a question
+       (owner, 2026-09-05: "the tags still look cramped, make them smaller") */
+    ok(geom.chipFont <= 12 && geom.chipHeight <= 22,
+      `forum (candidate): the tag chips are small, not the site's chunky badge (${geom.chipFont}px, ${Math.round(geom.chipHeight)}px tall)`);
     eq(list.filterLabels, ['Tags', 'Search questions'], 'forum (candidate): the list engine draws the tag filter and the text search');
     eq(list.count, '1 question this season', 'forum (candidate): the count line');
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
@@ -10011,6 +10019,10 @@ for (const w of [320, 360, 390, 430]) {
     eq(del.acts, [], 'forum (candidate): a deleted post offers no reply, quote, edit or delete');
     ok(del.still, 'forum (candidate): the other replies are untouched');
     eq(del.title, HOSTILE_TITLE, 'forum (candidate): and the thread keeps its title, since the opening post was not the one deleted');
+    /* the seeded question is another handle's, so an ordinary member is
+       offered nothing on it: delete is the author's or the maintainer's */
+    ok(await q.evaluate(() => !document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]')),
+      'forum (candidate): somebody else\'s question offers this member no Delete at all');
 
     /* the seen-mark and the leak check on a thread page */
     const seen = await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-seen') || 'null'));
@@ -10085,6 +10097,25 @@ for (const w of [320, 360, 390, 430]) {
       'forum (candidate): of every forum document, only the membership marker carries the uid (in its id, by design), and none the address or the name');
     eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
       'forum (candidate): the join is remembered for the session under the handle');
+    /* THEIR OWN QUESTION, WHICH NOBODY HAS ANSWERED: it goes, and the whole
+       thread goes with it, so none is ever left headless (owner, 2026-09-05).
+       The thread just posted is the one case an ordinary member may delete. */
+    q.once('dialog', (d) => d.accept());
+    await q.click('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+    await q.waitForFunction(() => {
+      const list = document.getElementById('oa-forum-list');
+      return list && !list.hidden && list.querySelector('.oa-card');
+    }, null, { timeout: 15000 });
+    const gone = await q.evaluate((t) => {
+      const tid = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumDelete').pop().data.tid;
+      return {
+        thread: window.__fb.docs[t + '/' + tid].hidden,
+        listed: [...document.querySelectorAll('#oa-forum-list .oa-card-title')].map((n) => n.textContent),
+      };
+    }, T);
+    eq(gone.thread, true, 'forum (candidate): deleting a question nobody answered takes the whole thread');
+    ok(!gone.listed.some((t2) => /second-year teaching release/.test(t2)),
+      'forum (candidate): and it is off the list, rather than standing there headless');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
   }
@@ -10152,6 +10183,42 @@ for (const w of [320, 360, 390, 430]) {
     }));
     eq(landed.title, 'A test question from the maintainer', 'forum (maintainer): a post lands');
     ok(landed.by === 'quiet heron 42' && landed.mine, 'forum (maintainer): under their drawn handle, indistinguishable from any member\'s');
+
+    /* THE MAINTAINER MAY DELETE ANY POST (owner, 2026-09-05: "the admin
+       should be able to delete any questions or answers") and is NOT held by
+       the rule that keeps an answered question standing. A live reply by
+       another handle is written in first, or "enabled" would pass for the
+       wrong reason: with nothing holding the question down the rule is not in
+       play at all. The AUTHOR's side of it (the control drawn disabled with
+       its reason) is pinned in the selftest against the page's own source and
+       driven against the real function in the emulator test, which is where a
+       refusal can be proved. */
+    const mineTid = await q.evaluate(() => new URLSearchParams(location.search).get('t'));
+    await q.evaluate(([t, tid]) => {
+      window.__fb.docs[t + '/' + tid + '/posts/other-p2'] = { season: 0, room: 'candidates', tid: tid,
+        n: 2, by: 'patient owl 7', body: 'A reply nobody has deleted.', kind: '', t: Date.now(),
+        up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' };
+      window.__fb.docs[t + '/' + tid].n = 2;
+    }, [T, mineTid]);
+    await q.click('.oa-forum-crumbs a');
+    await q.waitForSelector('#job-' + mineTid + ' .oa-card-head', { timeout: 15000 });
+    await q.click('#job-' + mineTid + ' .oa-card-head');
+    await q.waitForSelector('.oa-forum-post[data-n="2"]', { timeout: 15000 });
+    const asAdmin = await q.evaluate(() => {
+      const one = document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+      const two = document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="delete"]');
+      return {
+        live: document.querySelectorAll('.oa-forum-post:not(.is-first)').length,
+        q: one ? { label: one.textContent, disabled: one.disabled } : null,
+        a: two ? { label: two.textContent, disabled: two.disabled } : null,
+      };
+    });
+    eq(asAdmin.live, 1, 'forum (maintainer): their question carries a live reply, so the answered rule is really in play');
+    eq(asAdmin.q, { label: 'Delete', disabled: false },
+      'forum (maintainer): their own answered question is still deletable, since the rule does not hold them');
+    eq(asAdmin.a, { label: 'Remove', disabled: false },
+      'forum (maintainer): and another handle\'s reply offers Remove, the word for acting on somebody else\'s post');
+
     eq(errors, [], 'forum (maintainer): no uncaught script error');
     await ctx.close();
   }

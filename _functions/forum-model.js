@@ -142,13 +142,9 @@
   /** A member may edit their own post for fifteen minutes from the MINUTE it
       was stamped (so up to 59 seconds more). The function is the authority;
       the page draws a countdown from the same constant. DELETING has no
-      window at all (owner, 2026-09-05); see _functions/forum/delete.js. */
+      window at all (owner, 2026-09-05), though a question somebody has
+      answered cannot be deleted at all; see _functions/forum/delete.js. */
   var EDIT_WINDOW_MS = 15 * 60 * 1000;
-
-  /** What a thread is called once its opening post has been deleted by its
-      author and replies keep the thread standing. The title was the author's
-      words too, so it does not survive them. */
-  var DELETED_TITLE = 'Deleted by its author';
 
   /* THERE IS NO KINDS LIST, and its absence is the point (owner,
      2026-09-05: "I don't understand why a user should select plain and
@@ -216,7 +212,6 @@
     TAG_RX: TAG_RX,
     RATE: RATE,
     EDIT_WINDOW_MS: EDIT_WINDOW_MS,
-    DELETED_TITLE: DELETED_TITLE,
     MODERATOR: MODERATOR,
     slug: slug,
     tagOk: tagOk,

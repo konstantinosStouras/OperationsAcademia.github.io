@@ -15208,7 +15208,7 @@ async function testForum() {
 
   const fn = await read('_functions', 'index.js');
   ok(/const forum = require\('\.\/forum'\);/.test(fn), 'forum: index.js requires ./forum');
-  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
     ok(new RegExp(`^exports\\.${name} = forum\\.${name};$`, 'm').test(fn), `forum: index.js re-exports ${name} on its own line`);
   }
   const pkg = JSON.parse(await read('_functions', 'package.json'));
@@ -15390,27 +15390,77 @@ async function testForum() {
     'forum delete: the author and nobody else');
   ok(/body: '',/.test(delSrc),
     'forum delete: the words are ERASED in the database, not merely flagged, or "delete" is a lie the page tells');
-  ok(/hidden: true,\s*\n\s*hiddenBy: 'author',/.test(delSrc),
-    'forum delete: and the slot is kept, because n is how a reply names the post it answers');
+  ok(/hidden: true,\s*\n\s*hiddenBy:/.test(delSrc) && !/postsRef\.doc\([^)]*\)\.delete\(\)/.test(delSrc)
+     && !/tx\.delete\(/.test(delSrc),
+    'forum delete: and the slot is kept rather than removed, because n is how a reply names the post it answers');
   ok(/Number\(tv\.season\) !== Number\(Y\)/.test(delSrc) && /'archive'/.test(delSrc),
     'forum delete: refused on an archived season, whose handles cannot be re-derived');
   ok(/if \(tv\.hidden\)/.test(delSrc), 'forum delete: refused on a thread moderation has already removed');
   ok(!/tv\.locked/.test(delSrc),
     'forum delete: a LOCKED thread is not refused; locking stops new posts, it does not make your own words un-deletable');
-  ok(/Number\(tv\.n\) <= 1/.test(delSrc) && /DELETED_TITLE/.test(delSrc),
-    'forum delete: the opening post takes the thread only when nobody has replied; with replies the title goes and the thread stands');
+  /* A QUESTION SOMEBODY HAS ANSWERED CANNOT BE DELETED (owner, 2026-09-05,
+     changing their own earlier instruction after seeing the result). The
+     first build blanked such a question and left the thread standing, and a
+     page headed "Deleted by its author" with a reply hanging under it reads
+     as a broken thread. Two states now, and no third. */
+  ok(/where\('hidden', '==', false\)/.test(delSrc) && /'answered'/.test(delSrc),
+    'forum delete: a question is refused while any reply is still standing');
+  ok(/Number\(\(doc\.data\(\) \|\| \{\}\)\.n\) !== 1/.test(delSrc),
+    'forum delete: and "standing" counts REPLIES, so a thread whose answers have all gone can be withdrawn');
+  ok(!/DELETED_TITLE/.test(delSrc) && !/DELETED_TITLE/.test(await read('assets', 'oa-forum-model.js')),
+    'forum delete: the blanked-title state is gone from the model too, since nothing writes it any more');
+  ok(/wholeThread = true;/.test(delSrc) && /const gonePatch = \{\s*\n\s*hidden: true,/.test(delSrc),
+    'forum delete: deleting a question always takes the thread, so none is ever left headless');
+  ok(/const admin = P\.adminToken\(/.test(delSrc) && /if \(!admin && pv\.by !== m\.handle\)/.test(delSrc)
+     && /if \(!admin\) \{/.test(delSrc),
+    'forum delete: the maintainer may remove any post, and is not held by the answered rule');
+  ok(/hiddenBy: admin && pv\.by !== m\.handle \? 'admin' : 'author'/.test(delSrc),
+    'forum delete: hiddenBy says which of the two it was, so the page never has to guess');
+  ok(/hiddenBy === 'admin'/.test(pageJs) && /removed by the maintainer/i.test(pageJs),
+    'forum delete: and the page says removed by the maintainer rather than deleted by its author');
+  ok(/function amAdmin\(/.test(pageJs) && /mine \|\| amAdmin\(\)/.test(pageJs),
+    'forum delete: the page draws the control for the author OR the maintainer');
+  ok(/var stuck = isFirst && !amAdmin\(\) && liveReplies > 0;/.test(pageJs),
+    'forum delete: an answered question shows the control disabled with the reason, rather than failing on the press');
+  {
+    const emu = await read('_functions', 'test', 'forum-emulator.mjs');
+    ok(/nobody may reply to a thread whose question has been deleted/.test(emu)
+       && /a second press on a deleted question shuts the thread/.test(emu),
+      'forum delete: the emulator test builds the headless shape by hand and drives both halves of the rule against the real functions');
+  }
   ok(/deleting the opening post/i.test(await read('_functions', 'test', 'forum-emulator.mjs'))
      || /forumDelete/.test(await read('_functions', 'test', 'forum-emulator.mjs')),
     'forum delete: the emulator test drives it against the real function');
   ok(/data-act="delete"/.test(pageJs) && /function deletePost\(/.test(pageJs)
      && /call\('forumDelete'/.test(pageJs),
     'forum delete: the page draws the control and calls the callable');
+  /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED (owner, 2026-09-05: "the
+     entire thread should be deleted too, and noone should be able to reply in
+     such a thread"). Deleting a question hides its thread, so this is only
+     ever reached by rows written before that rule; it is enforced in the
+     function rather than only drawn on the page. */
+  ok(/where\('n', '==', 1\)\.limit\(1\)/.test(forumSrc['post.js'])
+     && /head\.empty \|\| \(head\.docs\[0\]\.data\(\) \|\| \{\}\)\.hidden/.test(forumSrc['post.js']),
+    'forum delete: a reply to a thread whose question was deleted is refused by the FUNCTION, not merely hidden on the page');
+  ok(/if \(pv\.hidden\) \{[\s\S]{0,400}?const shutPatch/.test(delSrc),
+    'forum delete: and pressing Delete on an already-deleted question finishes the job, so a thread left standing by the old rule can be shut');
+  ok(/var gone = !!first\.hidden && Number\(first\.n\) === 1;/.test(pageJs)
+     && /\|\| gone;/.test(pageJs) && /the thread is closed/.test(pageJs),
+    'forum delete: the page reads such a thread as closed and says so where the reply box was');
+
+  /* the identity warning over every compose box is GONE (owner, 2026-09-05:
+     "I don't want to over-stress to users that they are anonymous, it's OK.
+     They are adults"). Removed rather than hidden, in both files. */
+  ok(!/oa-forum-warn/.test(pageJs) && !/oa-forum-warn/.test(pageCss)
+     && !/Read it once more/.test(pageJs),
+    'forum compose: the identity warning is gone from the page and the stylesheet, not merely unrendered');
+
   ok(/window\.confirm\(msg\)/.test(pageJs) && /cannot be brought back/.test(pageJs),
     'forum delete: it says it is the one thing here that cannot be undone, rather than a bare are-you-sure');
-  ok(/hiddenBy === 'author'/.test(pageJs) && /deleted by its author/i.test(pageJs),
-    'forum delete: a deleted post reads as deleted by its author, never as removed by moderation');
-  ok(/to delete at any\s*'?\s*\+?\s*'?\s*time while the season is running/.test(JSON.stringify(GUIDE.RULES)) || /delete at any/.test(GUIDE.RULES[12]),
-    'forum delete: rule 13 says so, and says the words are gone for good');
+  ok(/deleted by its author/i.test(pageJs),
+    'forum delete: a post its own author deleted reads as exactly that');
+  ok(/gone for good/.test(GUIDE.RULES[12]) && /only be deleted while nobody has answered it/.test(GUIDE.RULES[12]),
+    'forum delete: rule 13 says the words go for good and that an answered question stays');
 
   /* --- a web address posts, and the page draws it as a link -------------- */
 
@@ -15511,7 +15561,7 @@ async function testForum() {
      The functions themselves are proved against the emulator; what the
      browser suite proves is what the PAGE does with their answers, and for
      that _fake-firebase.js carries a simulator of the six callables over its
-     own fake Firestore. Pinned here: the simulator names exactly the six, the
+     own fake Firestore. Pinned here: the simulator names exactly the seven, the
      verification card's own branches are untouched (callableFails first, the
      canned receipt for sendVerificationEmail), a refusal has the SDK's shape
      with a reason and nothing else, the vote id is a fixed 64-hex string that
@@ -15522,7 +15572,7 @@ async function testForum() {
   ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumVote',\s*\n\s*'forumThreadVotes', 'forumModerate'\];/.test(shim),
     'shim: the simulator names the seven forum callables, and only those');
   ok(/function forumSim\(name, data\)/.test(shim) && /if \(FORUM_NAMES\.indexOf\(String\(name\)\) !== -1\) return forumSim\(String\(name\), data\);/.test(shim),
-    'shim: httpsCallable dispatches the six to forumSim');
+    'shim: httpsCallable dispatches the seven to forumSim');
   const fnFor = shim.slice(shim.indexOf('  function functionsFor() {'), shim.indexOf('  var firebase = {'));
   ok(fnFor.length > 300 && fnFor.length < 1500, 'shim: functionsFor was sliced');
   ok(fnFor.indexOf("record('callable', String(name), data || null);") < fnFor.indexOf('if (seed.callableFails)')
@@ -15550,6 +15600,9 @@ async function testForum() {
     'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text}');
   ok(/if \(post\.by === handle\) return simRefuse\('failed-precondition', 'own'\);/.test(sim) && /if \(Number\(post\.n\) === 1\) simWrite\(tpath2, Object\.assign\(\{\}, th, \{ score:/.test(sim),
     'shim: no vote on one\'s own post, and the first post\'s net lands on the thread head');
+  ok(/if \(!head1 \|\| head1\.hidden\) return simRefuse\('failed-precondition', 'locked'\);/.test(sim)
+     && /if \(Number\(post\.n\) === 1 && !th\.hidden\) \{/.test(sim),
+    'shim: the simulator closes a thread whose question has gone, and finishes the job on a second press, as the functions do');
   ok(/data: function \(\) \{ return d \? Object\.assign\(\{\}, d\) : d; \}/.test(shim),
     'shim: a snapshot\'s data() is a copy, as the SDK\'s is, so a page decorating what it read cannot write into the store');
 
