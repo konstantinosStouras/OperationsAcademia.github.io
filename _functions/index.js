@@ -370,7 +370,13 @@ exports.sendVerificationEmail = onCall(
         return { refused: 'too-soon' };
       }
       if (count >= VERIFY_DAY_MAX) return { refused: 'daily-limit' };
-      tx.set(limitRef, { sentAt: now, day: today, count: count + 1 });
+      /* MERGED, not replaced: the campaign over existing accounts
+         (_scraper/verify-existing-users.mjs) stamps `campaignAt` on this
+         same document as its "mailed once" mark. A plain set() here would
+         erase it the moment the person pressed Send the e-mail on the card,
+         and the next press of the campaign button would write to them
+         again. The three slot fields are still replaced by name. */
+      tx.set(limitRef, { sentAt: now, day: today, count: count + 1 }, { merge: true });
       return { before };
     });
     if (slot.refused === 'too-soon') {
@@ -386,8 +392,9 @@ exports.sendVerificationEmail = onCall(
     /** Put the stamp back as it was before this call reserved its slot. The
         document is restored WHOLE, so a `campaignAt` the existing-accounts
         campaign (_scraper/verify-existing-users.mjs) stamped on it survives
-        a failed send here: that mark means "mailed once by the campaign" and
-        has nothing to do with this call's slot. */
+        a failed send here, exactly as the merged reservation above carries
+        it through a send that succeeds: that mark means "mailed once by the
+        campaign" and has nothing to do with this call's slot. */
     const releaseSlot = async () => {
       try {
         if (Object.keys(slot.before).length) await limitRef.set(slot.before);

@@ -7540,6 +7540,13 @@ for (const w of [320, 360, 390, 430]) {
   /* the months the growth table must list: from the first registration to
      180 days after TODAY (the model anchors its horizon on the reader's day,
      so a stale copy of the file still gets 180 days ahead) */
+  /* the days the caption must say the trend is carried: from the fixture's
+     last day to 180 days after TODAY, since the model anchors the horizon on
+     the reader's day and the caption reads the number off the result */
+  const carriedExpected = (() => {
+    const to = new Date(); to.setUTCHours(0, 0, 0, 0); to.setUTCDate(to.getUTCDate() + 180);
+    return Math.round((to.getTime() - Date.parse(growthDays[growthDays.length - 1][0])) / 86400000);
+  })();
   const monthsExpected = (() => {
     const to = new Date(); to.setUTCDate(to.getUTCDate() + 180);
     const a = growthDays[0][0].slice(0, 7).split('-').map(Number);
@@ -7682,6 +7689,9 @@ for (const w of [320, 360, 390, 430]) {
         brand: brand ? px(brand) : '', accent: accent ? px(accent) : '',
         dash: accent ? getComputedStyle(accent).strokeDasharray : '',
         brandDash: brand ? getComputedStyle(brand).strokeDasharray : '',
+        brandD: brand ? brand.getAttribute('d') : '',
+        areaD: (fig.querySelector('.oa-area.oa-brand') || { getAttribute: () => '' }).getAttribute('d') || '',
+        accentD: accent ? accent.getAttribute('d') : '',
         sub: (fig.querySelector('.oa-figure-sub') || {}).textContent || '',
         legend: [...fig.querySelectorAll('.oa-chart-legend-on button')].map((b) => b.textContent.trim()),
         tableCols: [...fig.querySelectorAll('.oa-chart-table thead th')].map((t) => t.textContent),
@@ -7703,8 +7713,22 @@ for (const w of [320, 360, 390, 430]) {
         `two lines (channel distance ${dist})`);
       ok(growth.dash && growth.dash !== 'none' && (!growth.brandDash || growth.brandDash === 'none'),
         `analytics (${theme}): …and dashed where the real count is solid, so the pair never relies on colour alone`);
-      ok(/straight-line trend fitted over the last 90 days and carried 180 days forward; an expectation from past growth, not a target/.test(growth.sub),
-        `analytics (${theme}): the caption says exactly what the dashed line is, and is not`);
+      ok(new RegExp('straight-line trend fitted over the last 90 days and carried ' + carriedExpected +
+                    ' days forward; an expectation from past growth, not a target').test(growth.sub),
+        `analytics (${theme}): the caption says exactly what the dashed line is, and is not, with the days really carried (${carriedExpected}: the fixture is stale against today, so 180 would understate the line)`);
+      /* THE WASH ENDS WHERE THE COUNT ENDS. The brand series carries trailing
+         nulls for every projected day; the area under it must close at the
+         last real point, never run on under the dashed projection to the
+         horizon in the colour that means measured data. */
+      const xs = (d) => (String(d).match(/[ML]\s*([\d.]+)\s+[\d.]+/g) || []).map((m) => Number(m.replace(/^[ML]\s*/, '').split(/\s+/)[0]));
+      const brandXs = xs(growth.brandD);
+      const areaXs = xs(growth.areaD);
+      const accentXs = xs(growth.accentD);
+      ok(brandXs.length > 1 && areaXs.length > 1 && accentXs.length > 1, `analytics (${theme}): the three paths were read`);
+      ok(Math.max(...areaXs) === brandXs[brandXs.length - 1],
+        `analytics (${theme}): the wash under the count ends at the count's last point (${brandXs[brandXs.length - 1]}), not at ${Math.max(...areaXs)}`);
+      ok(Math.max(...accentXs) > brandXs[brandXs.length - 1] + 100,
+        `analytics (${theme}): …while the dashed projection runs well past it, so the check is not vacuous`);
       const nums = growth.sub.match(/\b\d[\d,]*\b registered users on/) && growth.sub.match(/the trend reaches \b\d[\d,]*\b by/);
       ok(nums, `analytics (${theme}): …and names the count today and the count the trend reaches`);
       ok(!/—/.test(growth.sub), `analytics (${theme}): …without an em dash`);

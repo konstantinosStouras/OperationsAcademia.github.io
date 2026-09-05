@@ -68,8 +68,9 @@
 import { isMain } from './_main.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
-import { firebaseAdmin } from './_mail.mjs';
+import { firebaseAdmin, redact } from './_mail.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '..', 'data');
@@ -267,7 +268,11 @@ async function main() {
       if (!row) { skipped++; continue; }
       written++;
       if (SCAN || DRY) {
-        log(`  ${user.uid}  ${row.email || '(no address)'}  ${row.name || '(no name)'}`);
+        /* THE DOCUMENT, NEVER THE PERSON. This prints into the Actions log of
+           a public repository (the workflow's scan button runs it), so the
+           line carries the id and a REDACTED address and never the name: the
+           id already says which row would change. */
+        log(`  ${user.uid}  ${redact(row.email)}`);
       }
       pending.push([user.uid, row]);
       if (pending.length >= 400) await flush();
@@ -279,10 +284,11 @@ async function main() {
 
   log(summarise({ seen, written, skipped }));
 
-  /* The two served files, from the same read. Written whole, every run: the
-     growth file gains a day's point by construction, and the meta file
-     changes only when the count does, so the workflow's "nothing changed"
-     check decides what is committed. */
+  /* The two served files, from the same read. Written whole, every run, and
+     both CHANGE every run: the growth file gains a day's point by
+     construction and the meta file's `generated` is the run instant. So the
+     job commits daily, and the workflow's "nothing changed" branch is the
+     guard for a scan or an empty checkout, never a routine outcome. */
   const now = new Date();
   const meta = usersMeta(accounts, now);
   const growth = usersGrowth(accounts, now);
@@ -382,6 +388,20 @@ function selftest() {
     'an account with no readable creation time is still counted (from the first day), so the total is never short');
   ok(!/@|Somebody/.test(JSON.stringify(meta) + JSON.stringify(growth)),
     'neither file carries an address or a name, whatever the records held');
+
+  /* --- the run's own log, which prints into a PUBLIC Actions log ---------- */
+  const src = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  const mainAt = src.indexOf('async function main()');
+  const mainEnd = src.indexOf('/* ---------------------------------------------------------------- selftest */');
+  ok(mainAt > 0 && mainEnd > mainAt, 'main() was found');
+  const body = src.slice(mainAt, mainEnd);
+  ok(body.length > 1500, 'and is the right size, or the checks below are vacuous');
+  const calls = body.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
+  ok(calls.length >= 5, 'the log lines were really found');
+  ok(calls.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
+      && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, '')) && !/e\.message/.test(l)),
+    'no log line names a person: an address reaches it through redact() only, and a name never');
+  ok(calls.some((l) => /redact\(row\.email\)/.test(l)), 'and the redact exemption is exercised, so the check is not vacuous');
 
   console.log(fails.length
     ? `sync-user-directory selftest: ${fails.length} FAILED, ${pass} passed\n\n  ${fails.join('\n  ')}`

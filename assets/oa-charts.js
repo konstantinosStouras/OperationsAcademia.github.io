@@ -345,9 +345,13 @@
       if (!d.length) return;
       s.nodes = [];
       if (s.area) {
-        /* a wash, never a saturated block */
+        /* a wash, never a saturated block, closed at the last REAL point: a
+           series padded with trailing nulls (the growth chart's count, which
+           stops where its projection begins) must not run its wash on to the
+           end of the axis under a line that means something else */
         const first = s.values.findIndex((v) => v != null);
-        const last = s.values.length - 1;
+        let last = s.values.length - 1;
+        while (last > first && s.values[last] == null) last--;
         s.nodes.push(el('path', {
           class: 'oa-area oa-' + cls,
           d: d.join(' ') + ` L ${X(last).toFixed(1)} ${Y(0)} L ${X(first).toFixed(1)} ${Y(0)} Z`,

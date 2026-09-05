@@ -160,8 +160,13 @@ often the button is pressed: a successful send stamps
 `verifyMail/{uid}.campaignAt` (the callable's own rate-limit document, which
 no client may read or write, so no rules change), a stamped account is never
 mailed again, and a failed send stamps nothing and is retried by the next
-press. Without SMTP nothing is minted at all, because a code minted for a
-message that cannot go out expires unused; the run warns and exits 0.
+press. The callable keeps the mark whether its own send succeeds (its slot
+write merges) or fails (the document is restored whole), so a member who
+presses Send the e-mail on the card is not written to twice. If the stamp
+itself cannot be written after a message went out, the run names that account
+by its id and says it may be mailed again on the next press. Without SMTP
+nothing is minted at all, because a code minted for a message that cannot go
+out expires unused; the run warns and exits 0.
 
 **What each person receives.** The verification message, with the heading
 "Please confirm your e-mail address", a first paragraph saying when they

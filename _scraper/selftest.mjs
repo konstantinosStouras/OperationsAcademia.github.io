@@ -5048,6 +5048,20 @@ async function testRulesDeploy() {
 
 async function testUserDirectorySync() {
   const root = path.join(HERE, '..');
+  /* the sync's own suite first, the way the campaign mailer's is spawned: it
+     carries checks nothing here repeats (the undated account, the no-name and
+     no-address rows, the sweep of its own log lines), and a suite run only by
+     the daily writer catches a PR after merge, where a red step stops the
+     figures rather than the PR */
+  let syncOut = '';
+  try {
+    syncOut = execFileSync(process.execPath, [path.join(HERE, 'sync-user-directory.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    syncOut = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/sync-user-directory selftest: \d+ checks passed/.test(syncOut),
+    'the roster sync\'s own selftest is green:\n' + syncOut.slice(0, 1500));
   const mod = await import('./sync-user-directory.mjs');
   const rules = await readFile(path.join(root, '_firestore.rules'), 'utf8');
 
@@ -5141,8 +5155,20 @@ async function testUserDirectorySync() {
   ok(/writeFile\(path\.join\(DATA, USERS_META\)/.test(src) && /writeFile\(path\.join\(DATA, USERS_GROWTH\)/.test(src),
     'the sync writes both files');
   ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)')
-     && /import \{ firebaseAdmin \} from '\.\/_mail\.mjs'/.test(src) && !/async function firestoreAndAuth/.test(src),
+     && /import \{ firebaseAdmin, redact \} from '\.\/_mail\.mjs'/.test(src) && !/async function firestoreAndAuth/.test(src),
     'never on a scan or a dry run, and the Admin SDK comes from _mail.mjs, the one definition');
+  /* the scan and dry-run lines print into a PUBLIC Actions log (the workflow's
+     scan button runs them): the id and a redacted address, never the name */
+  const syncMain = src.slice(src.indexOf('async function main()'), src.indexOf('/* ---------------------------------------------------------------- selftest */'));
+  ok(syncMain.length > 1500, 'the sync\'s main() was really sliced');
+  const syncLogs = syncMain.match(/\b(log|warn)\(([\s\S]*?)\);\n/g) || [];
+  ok(syncLogs.length >= 5 && syncLogs.some((l) => /redact\(row\.email\)/.test(l)),
+    'the sync\'s log lines were found and the redact exemption is exercised');
+  ok(syncLogs.every((l) => !/row\.name/.test(l) && !/user\.(email|displayName)/.test(l)
+      && !/row\.email/.test(l.replace(/redact\(row\.email\)/g, ''))),
+    'no log line in the sync names a person: an address through redact() only, and never the name (the _mail.mjs redact rule)');
+  ok(!/changes only when the count/.test(src) && !/changes only when the count/.test(wf),
+    'neither the sync nor its workflow claims the meta file changes only with the count: `generated` is the run instant, so both files change every run');
   ok(/const accounts = \[\];/.test(src)
      && /accounts\.push\(\{ disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
     'and what the files are built from holds the flags and the creation time only, never a name or an address');
@@ -12770,8 +12796,15 @@ async function testAnalytics() {
   ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 180;/.test(page),
     'growth: fitted over 90 days, carried 180 forward');
   ok(/figure\('How the community has grown',/.test(page), 'growth: the figure has the agreed title');
-  ok(/'dashed line is a straight-line trend fitted over the last ' \+ GROWTH_WINDOW \+\s*\n?\s*' days and carried ' \+ GROWTH_AHEAD \+ ' days forward; an expectation from past ' \+\s*\n?\s*'growth, not a target\. '/.test(page),
-    'growth: the caption is BUILT from the constants and says what the line is and is not');
+  ok(/'dashed line is a straight-line trend fitted over the last ' \+ GROWTH_WINDOW \+\s*\n?\s*' days and carried ' \+ carried \+ ' days forward; an expectation from past ' \+\s*\n?\s*'growth, not a target\. '/.test(page),
+    'growth: the caption is BUILT from the window constant and the days really carried, and says what the line is and is not');
+  ok(/var carried = Math\.round\(\(Date\.parse\(proj\.horizon\) - Date\.parse\(proj\.lastDay\)\) \/ 86400000\);/.test(page),
+    'growth: …the days carried are read off the RESULT (horizon minus last real day), so a stale copy projected past today is not captioned as 180');
+  const growthBlock = page.slice(page.indexOf('/* 1b.'), page.indexOf('drawGrowth();', page.indexOf('/* 1b.')));
+  ok(growthBlock.length > 50 && growthBlock.length < 400 && !/—/.test(growthBlock),
+    'growth: the page\'s own 1b comment carries no em dash');
+  ok(/let last = s\.values\.length - 1;\s*\n\s*while \(last > first && s\.values\[last\] == null\) last--;/.test(charts),
+    'growth: line() closes an area wash at the last REAL point, so a series with trailing nulls cannot wash under the projection');
   ok(/C\.full\(proj\.lastValue\) \+ ' registered users on '/.test(page) && /the trend reaches ' \+ C\.full\(proj\.reached\)/.test(page),
     'growth: …and gives the current count and the count the trend reaches');
   ok(/\{ name: 'Expected growth', values: expect, kind: 'accent', dashed: true \}/.test(page),
@@ -13576,12 +13609,14 @@ async function testEmailVerification() {
      && /VERIFY_MIN_GAP_MS = 90 \* 1000/.test(fn) && /VERIFY_DAY_MAX = 6/.test(fn)
      && (handler.match(/'resource-exhausted'/g) || []).length === 2,
     'function: the rate limit lives in verifyMail/{uid}: one send in 90 seconds, six a day');
-  ok(/db\.runTransaction\(async \(tx\) => \{[\s\S]*?tx\.get\(limitRef\)[\s\S]*?tx\.set\(limitRef, \{ sentAt: now, day: today, count: count \+ 1 \}\);/.test(handler)
+  ok(/db\.runTransaction\(async \(tx\) => \{[\s\S]*?tx\.get\(limitRef\)[\s\S]*?tx\.set\(limitRef, \{ sentAt: now, day: today, count: count \+ 1 \}, \{ merge: true \}\);/.test(handler)
      && handler.indexOf('runTransaction(') < handler.indexOf('sendMail(')
      && handler.indexOf('tx.set(limitRef') < handler.indexOf('sendMail('),
     'function: the rate-limit slot is RESERVED in a transaction before the send, so parallel calls cannot all pass the check');
   ok(!/await limitRef\.set\(\{ sentAt/.test(handler),
     'function: …and there is no read-check-send-write stamp left');
+  ok(!/tx\.set\(limitRef, \{[^}]*\}\);/.test(handler) && (handler.match(/tx\.set\(limitRef/g) || []).length === 1,
+    'function: the reservation MERGES, so the campaign\'s campaignAt mark survives a send that succeeds, not only one that fails (releaseSlot)');
   const sendCatch = handler.slice(handler.indexOf('await transport.sendMail('), handler.indexOf("'The message could not be sent.'"));
   ok(sendCatch.length > 100 && sendCatch.length < 1200, 'function: the send\'s catch was really sliced');
   ok(/await releaseSlot\(\);/.test(sendCatch) && (handler.match(/await releaseSlot\(\);/g) || []).length >= 3,
@@ -13990,8 +14025,9 @@ async function testVerifyExistingUsers() {
   ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(mailer),
     'the link is minted exactly as the callable mints it');
   ok(/from '\.\/_main\.mjs'/.test(mailer) && /isMain\(import\.meta\.url\)/.test(mailer), 'importing the mailer sends nothing');
-  ok(!/Date\.now\(/.test(fn.slice(fn.indexOf('function siteVerifyLink'), fn.indexOf('function siteVerifyLink') + 400)),
-    'siteVerifyLink is not in index.js at all (the search above finds nothing to read)');
+  const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
+  ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
+    'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
   eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
     'the helper lives in verify-email.js, so index.js still exports exactly six functions');
 

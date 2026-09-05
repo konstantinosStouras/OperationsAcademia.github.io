@@ -1942,6 +1942,14 @@ An account already current costs no write, so a daily fire commits nothing to
 the roster. The dispatch exists for the case that created the gap: right after
 a rules deploy.
 
+**Its scan prints the document, never the person.** The `--scan` and
+`--dry-run` lines used to print each changed account's full address and name,
+and the workflow's `scan` button runs exactly that mode into the Actions log of
+a public repository. They carry the id and a redacted address now, through
+`redact()` from `_mail.mjs`, and no name at all (the id already says which row
+would change); the sync's own selftest and `testUserDirectorySync` sweep every
+log line in `main()` for it, the way the campaign mailer's suite already did.
+
 **The same read writes two SERVED files** (owner, 2026-09-05: the number of
 registered users on the front page, as on /lit/, and a growth chart on the
 analytics page). `usersMeta` writes `data/users-meta.json`, `{ generated,
@@ -2081,9 +2089,15 @@ in `verify-email.js`, the ONE helper the callable uses too, pinned both ways
 so the two senders cannot put the code on different pages. A successful send
 stamps `verifyMail/{uid}.campaignAt` (the callable's own document, closed to
 clients, so no rules change), a stamped account is never mailed again however
-often the button is pressed, and a failed send stamps nothing. The callable's
-`releaseSlot` restores that document whole, so a failed send there cannot
-erase the mark. One message a second. The log carries counts, ids and
+often the button is pressed, and a failed send stamps nothing. The callable
+leaves the mark alone on BOTH of its paths: its slot reservation is a MERGED
+write, so a member who presses Send the e-mail on the card keeps the mark
+through a send that succeeds (a plain set there erased it, and the next press
+of the button wrote to them again), and `releaseSlot` restores the document
+whole after a send that fails; the selftest pins both. A stamp that could not
+be written after a successful send is warned about by id, counted in the
+summary and never stops the queue, since that account may be mailed again on
+the next press. One message a second. The log carries counts, ids and
 redacted addresses only; `--dry-run` mints nothing, because `_mail.mjs`
 prints a dry-run message's text and the text carries the link; and without
 SMTP nothing is minted, since a code minted for a message that cannot go out
@@ -3813,11 +3827,24 @@ clock, `today` being the anchor of the horizon and nothing else (a reader with
 a stale copy still gets 180 days from today); and it is pinned on a synthetic
 straight line, on a plateau and on a falling series. The two constants live
 in `oa-analytics.js` as `GROWTH_WINDOW`/`GROWTH_AHEAD` and the caption is BUILT
-from them, so the words under the chart cannot promise a window the model did
-not use. The caption says exactly what the line is ("a straight-line trend
-fitted over the last 90 days and carried 180 days forward; an expectation from
-past growth, not a target") and gives the count on the last day and the count
-the trend reaches.
+from the window constant and from the RESULT, so the words under the chart
+cannot promise a window the model did not use or a horizon it did not draw. The
+caption says exactly what the line is ("a straight-line trend fitted over the
+last 90 days and carried N days forward; an expectation from past growth,
+not a target") and gives the count on the last day and the count the trend
+reaches.
+N is the days between the last real point and the horizon, read off the
+projection: 180 on the fresh copy the daily sync writes, and more on a stale
+one, because the model carries the line to 180 days after TODAY and a fixed
+"180" would then understate the line drawn above it (the page-test fixture,
+whose last day is fixed, is exactly that stale copy, and it asserts the number
+against today). **The wash under the count ends where the count ends.**
+`line()` closes an area series at its last REAL point rather than the last
+index of its values; the growth chart is the first caller whose area series
+carries trailing nulls (every projected day), and before that the brand wash
+ran on under the dashed projection to the horizon in the colour that means
+measured data. `page-test.mjs` reads the three paths back and pins that the
+wash's furthest x is the count's last x.
 
 **The line is the chart accent, dashed, and never `--gold` directly.**
 `--oa-chart-accent` is the token re-stepped in the dark theme so two overlaid
@@ -5429,6 +5456,14 @@ the workflow rather than a terminal.
                                     # both stylesheets, and that no page calls
                                     # it privacy or security)
     node _scraper/build-netmap.mjs --selftest      # domain -> university, derived
+    node _scraper/sync-user-directory.mjs --selftest   # the roster row, the two
+                                    # served files, and that its scan prints
+                                    # ids and redacted addresses only (also
+                                    # spawned by selftest.mjs, so a PR check
+                                    # sees it, not only the daily writer)
+    node _scraper/verify-existing-users.mjs --selftest # the campaign mailer: who
+                                    # is written to, the member variant, the
+                                    # once-only mark (also spawned by selftest.mjs)
     node _scraper/link-check.mjs    # every internal link resolves, and no
                                     # version of the site reaches into another
     node _scraper/archive-v2.mjs --check   # /v2/ still holds the archive rules

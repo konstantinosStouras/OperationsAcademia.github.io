@@ -421,7 +421,7 @@
       height: 280,
     });
 
-    /* 1b — how the community has grown, under the visitors chart and before
+    /* 1b. how the community has grown, under the visitors chart and before
        everything the reader has to scroll for. Drawn from its own served file
        and only when that file holds something (see drawGrowth). */
     drawGrowth();
@@ -615,9 +615,13 @@
    *
    *  THE DASHED LINE IS SAID EXACTLY. It is `growthProjection` in the model,
    *  a straight-line trend fitted over the last GROWTH_WINDOW days and carried
-   *  GROWTH_AHEAD days forward through the last real point, and the caption
-   *  names both numbers from those constants, calls it an expectation from
-   *  past growth rather than a target, and gives the count it reaches. It is
+   *  through the last real point to GROWTH_AHEAD days after TODAY, and the
+   *  caption names the window from its constant and the days carried from the
+   *  RESULT (horizon minus last real day): 180 on the fresh copy the daily
+   *  sync writes, more on a stale one, since the model anchors the horizon on
+   *  the reader's day and a fixed "180" would then understate the line drawn
+   *  above it. It calls the line an expectation from past growth rather than
+   *  a target, and gives the count it reaches. It is
    *  drawn in the chart accent (the site's yellow, re-stepped in the dark
    *  theme so it stays tellable from the brand line) and dashed, so the pair
    *  never relies on colour alone. The legend is the same click-to-hide
@@ -652,10 +656,13 @@
       expect.push(p[1]);
     });
 
+    /* the days the line is really carried, read off the result rather than
+       the constant: a stale copy of the file is projected past today */
+    var carried = Math.round((Date.parse(proj.horizon) - Date.parse(proj.lastDay)) / 86400000);
     var f = figure('How the community has grown',
       'Registered accounts on the site, day by day, since the first one. The yellow ' +
       'dashed line is a straight-line trend fitted over the last ' + GROWTH_WINDOW +
-      ' days and carried ' + GROWTH_AHEAD + ' days forward; an expectation from past ' +
+      ' days and carried ' + carried + ' days forward; an expectation from past ' +
       'growth, not a target. ' + C.full(proj.lastValue) + ' registered users on ' +
       pretty(proj.lastDay) + '; the trend reaches ' + C.full(proj.reached) + ' by ' +
       pretty(proj.horizon) + '. Press a name in the legend to put either line away.');

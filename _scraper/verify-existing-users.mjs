@@ -26,8 +26,13 @@
    with and one no client may read or write, so no rules change. An account
    carrying the stamp is never mailed again; a failed send stamps nothing and
    is retried by the next press. The callable's own bookkeeping leaves the
-   stamp alone: its `releaseSlot` restores the document WHOLE, so a failed
-   send there cannot erase a campaign mark.
+   stamp alone on both of its paths: its slot reservation is a MERGED write,
+   so a member who presses Send the e-mail on the card keeps the mark through
+   a send that succeeds, and its `releaseSlot` restores the document WHOLE
+   after a send that fails. A stamp that cannot be written after a message
+   went out is the one case that breaks "once": it is warned about by id,
+   counted in the summary, and the queue carries on, since that account may
+   be mailed again on the next press.
 
    THE SAME MESSAGE, WORDED FOR A MEMBER. The link is built by
    `siteVerifyLink`, the one helper the callable uses too, so the two senders
@@ -200,6 +205,7 @@ async function main() {
 
   let sent = 0;
   let failed = 0;
+  let unstamped = 0;
   for (const user of queue) {
     const email = String(user.email || '').trim();
 
@@ -251,17 +257,29 @@ async function main() {
     }
     if (ok) {
       /* Stamped ONLY after the transport took the message: a printed or a
-         failed one leaves the account eligible for the next press. */
-      await fb.db.collection(VERIFY_MAIL).doc(user.uid)
-        .set({ [CAMPAIGN_AT]: new Date().toISOString() }, { merge: true });
+         failed one leaves the account eligible for the next press. The
+         stamp is the one write here that follows a message already gone,
+         so its failure must not escape main(): that would end the run with
+         the rest of the queue unsent, and nothing anywhere saying that this
+         account, mailed and unmarked, will be written to again. It is
+         named by id and counted instead, and the queue carries on. */
       sent++;
-      log(`  sent: ${user.uid}  ${redact(email)}`);
+      try {
+        await fb.db.collection(VERIFY_MAIL).doc(user.uid)
+          .set({ [CAMPAIGN_AT]: new Date().toISOString() }, { merge: true });
+        log(`  sent: ${user.uid}  ${redact(email)}`);
+      } catch (e) {
+        unstamped++;
+        warn(`${user.uid}: sent, but the once-only mark could not be written (${e.code || 'error'}); ` +
+             'this account may be mailed again on the next press');
+      }
     }
     await sleep(PACE_MS);
   }
 
-  log(`${sent} message(s) sent and stamped, ${failed} failed; ` +
-      'a failed one is not stamped and goes out on the next press.');
+  log(`${sent} message(s) sent (${sent - unstamped} stamped, ${unstamped} sent but NOT stamped), ` +
+      `${failed} failed; a failed one is not stamped and goes out on the next press, ` +
+      'and so does one whose stamp could not be written.');
   return 0;
 }
 
@@ -377,6 +395,12 @@ async function selftest() {
   ok(/\{ merge: true \}/.test(body.slice(stampAt, stampAt + 200)),
     'and merged, so the callable\'s own sentAt/day/count survive');
   ok(!/\.set\(\{ \[CAMPAIGN_AT\]/.test(body.slice(0, ifOk)), 'nothing stamps the mark before a send');
+  const stampTry = body.slice(ifOk, body.indexOf('await sleep(PACE_MS);', ifOk));
+  ok(stampTry.length > 300 && stampTry.length < 1500, 'the stamp branch was really sliced');
+  ok(/try \{\s*\n\s*await fb\.db\.collection\(VERIFY_MAIL\)/.test(stampTry) && /\} catch \(e\) \{\s*\n\s*unstamped\+\+;/.test(stampTry)
+     && /may be mailed again on the next press/.test(stampTry) && !/throw/.test(stampTry),
+    'a stamp that fails AFTER a successful send is caught, counted and warned about by id, so the queue carries on and the run says which account may be mailed twice');
+  ok(/\$\{unstamped\} sent but NOT stamped/.test(body), 'and the summary counts those separately');
 
   const mintAt = body.indexOf('generateEmailVerificationLink(');
   const dryAt = body.indexOf('if (DRY) {');
@@ -406,6 +430,12 @@ async function selftest() {
   ok(calls.some((l) => /redact\(email\)/.test(l)), 'and the redact exemption is exercised, so the check is not vacuous');
   ok(!/console\.log\(msg/.test(body) && !/send\(null/.test(body) && !/dryRun: true/.test(body),
     'the dry run never hands a rendered message to the printing path');
+  /* the tail of the file, outside main(): the top-level catch is held to the
+     same rule, since it prints into the same public log */
+  const tail = src.slice(src.lastIndexOf('main().then('));
+  ok(tail.length > 100 && tail.length < 800, 'the tail was really sliced');
+  ok(!/e\.message/.test(tail) && /e\.code \|\| e\.name \|\| 'error'/.test(tail),
+    'the top-level catch prints an error\'s code, never its message text');
 
   console.log(fails.length
     ? `verify-existing-users selftest: ${fails.length} FAILED, ${pass} passed\n\n  ${fails.join('\n  ')}`
@@ -419,7 +449,9 @@ if (!isMain(import.meta.url)) {
   process.exit((await selftest()) ? 0 : 1);
 } else {
   main().then((code) => process.exit(code)).catch((e) => {
-    console.log('::error::verification campaign failed: ' + e.message);
+    /* the code, never the message text: a public log, and an error's message
+       can quote an address or a document path in full */
+    console.log('::error::verification campaign failed: ' + (e.code || e.name || 'error'));
     process.exit(1);
   });
 }

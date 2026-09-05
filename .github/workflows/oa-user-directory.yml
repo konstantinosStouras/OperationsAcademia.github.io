@@ -14,9 +14,11 @@ name: OA — sync the registered-users roster
 # data/users-meta.json, the number of registered users the front page shows,
 # and data/users-growth.json, the day-by-day count the analytics page charts.
 # Counts and dates only, nothing under data/ may carry a name or an address.
-# The growth file gains a point every day by construction, so this job commits
-# daily, like data/analytics.json; the meta file changes only when the count
-# does. The commit step is the rebuild-never-rebase retry every other data
+# Both files change on every run (the growth file gains a point by
+# construction and the meta file's `generated` is the run instant), so this job
+# commits daily, like data/analytics.json, and the Commit step's "nothing
+# changed" branch is the guard for a scan or an empty checkout rather than a
+# routine outcome. The commit step is the rebuild-never-rebase retry every other data
 # writer here uses: data/ is a build output, and a rejected push is answered
 # by taking the other writer's tip and running the sync again on top of it.
 #
