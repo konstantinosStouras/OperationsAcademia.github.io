@@ -30,6 +30,11 @@
                       replies, and one person changing their mind must not
                       take a dozen other people's words down with it.
 
+   AN ACCEPTED ANSWER TAKES THE TICK WITH IT. `accepted` on the thread names
+   this post, and a tick pointing at a tombstone would tell every reader that
+   a question with no answer left in it has been answered, so it is cleared in
+   the same transaction (forumAccept is the other half).
+
    Refused on a HIDDEN thread (moderation has already removed it, so there is
    nothing here to act on) and on any season but the one under way: an
    archived season's handles cannot be re-derived once its secret version is
@@ -75,6 +80,14 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     };
     /* @end */
     tx.update(postRef, postPatch);
+    if (String(tv.accepted || '') === postRef.id) {
+      /* @doc thread */
+      const untick = {
+        accepted: '',
+      };
+      /* @end */
+      tx.update(threadRef, untick);
+    }
     if (Number(pv.n) !== 1) return;
     /* the opening post: the thread goes with it only if nobody has replied */
     if (Number(tv.n) <= 1) {

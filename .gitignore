@@ -13,3 +13,9 @@ _t[0-9]*.mjs
 # this repository, inside this repository). Tooling scratch, removed when the
 # run ends — never content.
 .claude/worktrees/
+
+# The emulator suite writes its own log beside the repository root when
+# _functions/test/forum-emulator.mjs is run locally. Tooling scratch, and the
+# run that produced it is the ground truth rather than the file.
+firestore-debug.log
+ui-debug.log

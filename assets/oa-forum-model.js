@@ -64,9 +64,14 @@
        adds `secretDestroyedAt` when the 1 August housekeeping destroys the
        previous season's version. */
     season: ['season', 'createdAt', 'secretVersion', 'guides'],
-    /* forumSeasons/{Y}/rooms/{room}/threads/{tid} */
+    /* forumSeasons/{Y}/rooms/{room}/threads/{tid}. `accepted` is the id of
+       the post the ASKER ticked as the answer, '' when none: one field, on
+       one document, so the list card can say a question is answered without
+       reading a post per card and the thread view can mark it with what it
+       has already read. The post itself carries no flag, because two places
+       saying the same thing is two places that can disagree. */
     thread: ['season', 'room', 'title', 'tags', 'by', 't', 'lastAt', 'lastBy', 'n',
-      'excerpt', 'score', 'pinned', 'locked', 'hidden'],
+      'excerpt', 'score', 'accepted', 'pinned', 'locked', 'hidden'],
     /* .../threads/{tid}/posts/{pid}. `quote` is a COPY {n, by, text} taken
        at reply time, so a later edit or removal of the quoted post never
        rewrites the reply. `up`/`down` are the like and dislike tallies.

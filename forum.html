@@ -172,6 +172,12 @@
               <div class="oa-archive-banner" id="oa-forum-archive" hidden></div>
               <div class="oa-forum-banner" id="oa-forum-me" hidden></div>
 
+              <!-- what is new in the tags this reader watches. Computed in
+                   the browser from the threads the list has already read and
+                   the seen-marks it already keeps: watching a tag costs no
+                   read and leaves no record anywhere but this browser. -->
+              <div class="oa-forum-watchnew" id="oa-forum-watchnew" hidden></div>
+
               <!-- the list of questions: an OAList mount fed by cfg.source -->
               <div id="oa-forum-listview" hidden>
                 <div class="oa-forum-listhead">
@@ -192,6 +198,16 @@
 
             <aside class="oa-forum-side" aria-label="About this room">
               <div class="oa-forum-card" id="oa-forum-roomcard" hidden></div>
+              <div class="oa-forum-card" id="oa-forum-savedcard" hidden>
+                <h2>Saved</h2>
+                <div class="oa-forum-savedlist" id="oa-forum-saved"></div>
+                <p class="oa-forum-cardnote">Saved in this browser, so the forum
+                keeps no record of what you read.</p>
+              </div>
+              <div class="oa-forum-card" id="oa-forum-watchcard" hidden>
+                <h2>Tags you watch</h2>
+                <div id="oa-forum-watch"></div>
+              </div>
               <div class="oa-forum-card" id="oa-forum-tagcard" hidden>
                 <h2>Popular tags</h2>
                 <div class="oa-forum-tagcloud" id="oa-forum-tags"></div>

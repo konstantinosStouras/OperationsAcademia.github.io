@@ -209,12 +209,30 @@
    they are. */
 body.v3 .oa-forum-q {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-columns: 104px minmax(0, 1fr);
   align-items: start;
+  margin-bottom: 18px;
 }
 
-body.v3 .oa-forum-q .oa-card-lock { grid-column: 1 / -1; }
-body.v3 .oa-forum-q .oa-card-head { padding-left: 4px; }
+/* "Open the thread" is the engine's own strip, and it stays: it is the one
+   thing on the card that says in words what a press does, and it has to reach
+   a screen reader as text rather than as a title nobody hears. What it does
+   not have to be is a line of its own weight under every question, so on this
+   card it is small, muted and tucked against the right, where a reader finds
+   it when they look for it and reads past it when they do not. */
+body.v3 .oa-forum-q .oa-card-lock {
+  grid-column: 2 / -1;
+  justify-content: flex-end;
+  padding: 0 24px 14px 6px;
+  margin-top: -6px;
+}
+
+body.v3 .oa-forum-q .oa-card-lock-note { color: var(--mut); font-size: 12.5px; }
+/* ROOM TO READ IN (owner, 2026-09-05: "add more space to look nicer"). The
+   engine's own head is 12px of air above the title and 22px below; on a
+   question card the tally column beside it is 60px tall, so the tight top
+   left the two visibly out of step and the rows ran into each other. */
+body.v3 .oa-forum-q .oa-card-head { padding: 18px 24px 20px 6px; }
 
 /* the title reads as the link it is */
 body.v3 .oa-forum-q .oa-card-title {
@@ -228,38 +246,55 @@ body.v3 .oa-forum-q .oa-card-title {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
-  padding: 16px 0 0 14px;
+  gap: 10px;
+  padding: 20px 2px 0 14px;
 }
 
+/* The number over its word, right against the question. Both lines are one
+   nowrap block, which is what stops "0" and "votes" being squeezed onto one
+   line by a narrow gutter and reading as one cramped word. */
 .oa-forum-stat {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--mut);
-  font-size: 11.5px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
 .oa-forum-stat b {
   color: var(--ink-2);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .oa-forum-stat i { font-style: normal; }
 
-/* a question that has been answered is marked, the way a boxed count marks
-   one there */
+/* A question WITH answers is boxed in the outline; one whose asker has
+   ticked an answer is filled and carries the tick, which is how the site the
+   owner asked this to resemble says "this one is settled" at a glance. */
 .oa-forum-stat.is-answers.has {
-  padding: 2px 7px 3px;
+  padding: 3px 9px 4px;
   border: 1px solid var(--ok);
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--ok);
 }
 
 .oa-forum-stat.is-answers.has b { color: var(--ok); font-size: 15px; }
+
+.oa-forum-stat.is-answers.is-accepted {
+  border-color: var(--ok);
+  background-color: var(--ok);
+  color: var(--on-brand);
+}
+
+.oa-forum-stat.is-answers.is-accepted b { color: var(--on-brand); }
+
+.oa-forum-stat.is-answers.is-accepted b::before {
+  content: '\2713\00a0';
+  font-weight: 700;
+}
 
 .oa-forum-qfoot {
   display: flex;
@@ -267,7 +302,7 @@ body.v3 .oa-forum-q .oa-card-title {
   align-items: flex-end;
   justify-content: space-between;
   gap: 8px 14px;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 body.v3 .oa-forum-q .oa-badges {
@@ -298,7 +333,7 @@ body.v3 .oa-forum-q .oa-card-sub {
 .oa-forum-when { color: var(--mut); }
 
 .oa-forum-ex {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   color: var(--ink-2);
   font-size: 14px;
   line-height: 1.5;
@@ -308,8 +343,19 @@ body.v3 .oa-forum-q .oa-card-sub {
   overflow: hidden;
 }
 
-/* a tag chip on a card, in the side card and on a thread head: brand ink on
-   the brand wash, both defined in both themes */
+/* A TAG CHIP, on a card, in the side cards and on a thread head: brand ink on
+   the brand wash, both defined in both themes.
+
+   HOVER IS A STEP, NOT A FLIP (owner, 2026-09-05, of the near-black chip the
+   old rule painted: "improve the colour and behaviour"). Filling a small chip
+   with --brand inverts it to near-black in light theme and to near-white in
+   dark, which reads as a pressed state on something that is only being
+   pointed at, and it throws the tag's own colour away at exactly the moment a
+   reader is looking at it. So the ground goes one step firmer, the ink stays
+   the tag's, and a hairline appears: the same move the site the owner asked
+   this to resemble makes. The chip also carries a TITLE saying what pressing
+   it does and how many questions carry it this season, which is the useful
+   half of the popover there. */
 body.v3 .oa-label-tag {
   background-color: var(--brand-soft);
   color: var(--brand);
@@ -317,9 +363,16 @@ body.v3 .oa-label-tag {
   padding: 3px 9px;
   font-size: 12.5px;
   cursor: pointer;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-body.v3 .oa-label-tag:hover { background-color: var(--brand); color: var(--on-brand); }
+body.v3 .oa-label-tag:hover {
+  background-color: var(--line-soft);
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+body.v3 .oa-label-tag:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 body.v3 .oa-label-pinned { background-color: var(--gold); color: var(--on-brand); }
 body.v3 .oa-label-locked { background-color: var(--bg-3); color: var(--ink-2); border: 1px solid var(--line); }
@@ -372,23 +425,40 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   padding: 0;
 }
 
+/* A POST IS GIVEN ROOM (owner, 2026-09-05: "add more space to look nicer.
+   See how stackoverflow does it"). 28px of air above and below the words, a
+   64px gutter for the vote column so the arrows, the score, the tick and the
+   bookmark stand in a column rather than a stack of touching squares, and a
+   hairline between one post and the next. */
 .oa-forum-post {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  gap: 18px;
-  padding: 18px 0;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 22px;
+  padding: 28px 0;
   border-bottom: 1px solid var(--line-soft);
 }
 
-.oa-forum-post.is-first { border-bottom: 2px solid var(--line); }
+.oa-forum-post.is-first { border-bottom: 0; padding-top: 22px; }
 
 .oa-forum-post:target { background: var(--brand-soft); border-radius: 12px; padding-left: 8px; padding-right: 8px; }
+
+/* THE ANSWER THE ASKER TICKED. A wash the width of the row and the room's own
+   green down its left edge: the same "this one is settled" the boxed count in
+   the list says, said again where the words are. The rail is a border on the
+   row itself rather than an element, so it cannot overlap the focus ring. */
+.oa-forum-post.is-accepted {
+  border-left: 3px solid var(--ok);
+  background-color: var(--ok-soft);
+  border-radius: 0 12px 12px 0;
+  padding-left: 14px;
+  padding-right: 12px;
+}
 
 .oa-forum-vote {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   color: var(--mut);
   font-size: 11.5px;
   text-align: center;
@@ -424,6 +494,36 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   line-height: 1.1;
   color: var(--ink);
 }
+
+/* the tick and the bookmark, under the arrows: 34px targets that read as
+   quiet outlines until they are on */
+.oa-forum-acc,
+.oa-forum-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--mut);
+  font: inherit;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+button.oa-forum-acc:hover, .oa-forum-save:hover { border-color: var(--line); color: var(--ink-2); }
+.oa-forum-acc:focus-visible, .oa-forum-save:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.oa-forum-acc[aria-pressed='true'], .oa-forum-acc.is-on { color: var(--ok); }
+button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
+.oa-forum-acc.is-on { cursor: default; }
+.oa-forum-save[aria-pressed='true'] { color: var(--gold); }
+
+.oa-forum-updown { letter-spacing: 0.02em; }
 
 .oa-forum-pbody { min-width: 0; }
 
@@ -533,17 +633,53 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-kind.is-first-hand { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
 .oa-forum-kind.is-rumour { color: var(--ink-2); border-color: var(--warn-line); background: var(--warn-bg); }
 
-/* "N replies" is a heading with a rule under it, the answers band */
-.oa-forum-replies-h {
+/* "N Answers" is a heading with a rule under it and the order beside it: the
+   answers band. There are no comments under either half, and there is no plan
+   for any (owner, 2026-09-05); a thread is a question and the answers to it. */
+.oa-forum-answers-h {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 28px 0 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
+  gap: 12px 18px;
+  flex-wrap: wrap;
+  margin: 10px 0 0;
+  padding: 18px 0 10px;
+  border-top: 2px solid var(--line);
+  border-bottom: 1px solid var(--line-soft);
 }
 
-.oa-forum-replies-h h2 { margin: 0; font-size: 21px; font-weight: 500; }
+.oa-forum-answers-h h2 { margin: 0; font-size: 21px; font-weight: 500; }
+
+.oa-forum-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mut);
+  font-size: 13px;
+}
+
+.oa-forum-sort select {
+  min-height: 34px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background-color: var(--bg-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.oa-forum-sort select:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* THE HEADING TAKES FOCUS when a thread is opened, so a reader arriving by
+   keyboard or with a screen reader lands on the question rather than at the
+   top of the page. It must not be RINGED for it. The ring is the browser
+   saying where the keyboard is, and `tabindex="-1"` means nothing can tab
+   here: every focus this element ever takes is the script's, so a ring on it
+   is always a line around a heading nobody moved to. Chrome matches
+   :focus-visible on a programmatic focus, so both have to say so. */
+.oa-forum-th h1[tabindex='-1']:focus,
+.oa-forum-th h1[tabindex='-1']:focus-visible { outline: none; }
 
 /* ------------------------------------------------------------ composing */
 
@@ -838,23 +974,116 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-card p { margin: 0; font-size: 13.5px; line-height: 1.5; }
 .oa-forum-card p + p { margin-top: 8px; }
 
-.oa-forum-tagcloud { display: flex; flex-wrap: wrap; gap: 6px; }
+.oa-forum-tagcloud { display: flex; flex-wrap: wrap; gap: 8px; }
 
-.oa-forum-tagcloud a {
+/* a tag and the bell that watches it, one unit so they wrap together */
+.oa-forum-tagrow {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.oa-forum-tagchip {
   display: inline-flex;
   align-items: center;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 6px;
-  background: var(--brand-soft);
+  background-color: var(--brand-soft);
   color: var(--brand);
   font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.oa-forum-tagcloud a:hover { background: var(--brand); color: var(--on-brand); }
-.oa-forum-tagcloud a i { font-style: normal; font-weight: 500; color: var(--mut); margin-left: 6px; }
-.oa-forum-tagcloud a:hover i { color: var(--on-brand); }
+/* the same step as a chip anywhere else, never the near-black flip */
+.oa-forum-tagchip:hover {
+  background-color: var(--line-soft);
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.oa-forum-tagchip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.oa-forum-tagchip i { font-style: normal; font-weight: 500; color: var(--mut); margin-left: 7px; }
+
+/* the bell: quiet until it is pressed, then the room's own green, so a
+   watched tag is legible at a glance down the card */
+.oa-forum-watch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background-color: var(--bg-2);
+  color: var(--mut);
+  cursor: pointer;
+  padding: 0;
+}
+
+.oa-forum-watch:hover { border-color: var(--brand); color: var(--brand); }
+.oa-forum-watch:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.oa-forum-watch[aria-pressed='true'] {
+  border-color: var(--ok);
+  background-color: var(--ok-soft);
+  color: var(--ok);
+}
+
+/* the saved list, and the note under both cards */
+.oa-forum-cardnote { margin: 10px 0 0; color: var(--mut); font-size: 12.5px; line-height: 1.5; }
+.oa-forum-cardnote a { color: var(--brand); }
+
+.oa-forum-savedrow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.oa-forum-savedrow:last-child { border-bottom: 0; }
+.oa-forum-savedrow a { color: var(--ink-2); flex: 1 1 auto; }
+.oa-forum-savedrow a:hover { color: var(--brand); }
+.oa-forum-savedwhat { color: var(--mut); font-size: 12px; white-space: nowrap; }
+
+.oa-forum-unsave {
+  flex: none;
+  min-width: 26px;
+  min-height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--mut);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.oa-forum-unsave:hover { background-color: var(--bg-3); color: var(--err); }
+.oa-forum-unsave:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* what is new in the tags this reader watches, over the list */
+.oa-forum-watchnew {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  margin: 0 0 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ok);
+  border-radius: var(--radius);
+  background-color: var(--ok-soft);
+  color: var(--ink-2);
+}
+
+.oa-forum-watchnew p { margin: 0; font-size: 14px; }
+.oa-forum-watchnew strong { color: var(--ink); }
 
 .oa-forum-seasons a { display: block; padding: 6px 0; color: var(--ink-2); font-size: 13.5px; }
 .oa-forum-seasons a.is-now { color: var(--ink); font-weight: 600; }
@@ -903,7 +1132,7 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
      92px gutter, the same move the vote column makes in a thread (rule 13) */
   body.v3 .oa-forum-q { grid-template-columns: minmax(0, 1fr); }
   body.v3 .oa-forum-q .oa-card-head { padding-left: 16px; }
-  body.v3 .oa-forum-q .oa-card-lock { order: 3; }
+  body.v3 .oa-forum-q .oa-card-lock { order: 3; grid-column: 1 / -1; padding-left: 16px; justify-content: flex-start; }
   .oa-forum-stats {
     flex-direction: row;
     align-items: center;
@@ -915,8 +1144,14 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   .oa-forum-stat b { font-size: 14px; }
   .oa-forum-tabs { width: 100%; }
   .oa-forum-tab { flex: 1 1 0; justify-content: center; }
-  .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .oa-forum-vote { flex-direction: row; justify-content: flex-start; gap: 10px; }
+  .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px 0; }
+  .oa-forum-post.is-accepted { padding-left: 10px; padding-right: 8px; }
+  .oa-forum-vote { flex-direction: row; justify-content: flex-start; align-items: center; gap: 10px; }
+  /* rule 13: every control the thread offers is a 42px target on a phone */
+  .oa-forum-acc, .oa-forum-save { width: 42px; height: 42px; }
+  .oa-forum-watch { width: 42px; }
+  .oa-forum-sort select { min-height: 42px; font-size: 16px; }
+  .oa-forum-answers-h { align-items: flex-start; flex-direction: column; }
   .oa-forum-pacts .oa-forum-act { min-height: 42px; }
   .oa-forum-send, .oa-forum-cancel, .oa-forum-askbtn { width: 100%; }
   .oa-forum-bar { align-items: stretch; }

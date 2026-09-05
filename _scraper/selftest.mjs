@@ -10795,8 +10795,8 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is thirteen/.test(setup) && /read back\s+thirteen/.test(setup),
-    'setup guide: names revealCandidates and counts thirteen functions');
+  ok(/`revealCandidates`/.test(setup) && /which is fourteen/.test(setup) && /read back\s+fourteen/.test(setup),
+    'setup guide: names revealCandidates and counts fourteen functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
   ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
@@ -14136,10 +14136,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/THIRTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts thirteen and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 13,
-    'function: the file exports exactly thirteen functions, the count a deploy must read back');
+  ok(/FOURTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts fourteen and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 14,
+    'function: the file exports exactly fourteen functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -14158,8 +14158,8 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\bthirteen\b/i.test(setup) && /functions:list/.test(setup),
-    'setup: read the deployed list back and count THIRTEEN');
+  ok(/\bfourteen\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count FOURTEEN');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
     'setup: says what the browser does while the function is absent');
@@ -14741,8 +14741,8 @@ async function testVerifyExistingUsers() {
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 13,
-    'the helper lives in verify-email.js, so index.js still exports exactly thirteen functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 14,
+    'the helper lives in verify-email.js, so index.js still exports exactly fourteen functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -14898,7 +14898,7 @@ async function testForum() {
 
   const forumDir = path.join(root, '_functions', 'forum');
   const forumFiles = (await readdir(forumDir)).filter((f) => f.endsWith('.js')).sort();
-  eq(forumFiles, ['delete.js', 'edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
+  eq(forumFiles, ['accept.js', 'delete.js', 'edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
     'forum: the function files, and only those');
   const forumSrc = {};
   for (const f of forumFiles) forumSrc[f] = await read('_functions', 'forum', f);
@@ -15000,7 +15000,7 @@ async function testForum() {
   ok(details.every((d) => /^\{\s*reason(:\s*'[a-z]+')?\s*\}$/.test(d)), 'forum R6: every details object is { reason } alone, never a count');
   ok(/throw new HttpsError\(code, ERRORS\[reason\] \|\| 'Refused\.', \{ reason \}\);/.test(memberSrc), 'forum R6: refuse() is the one shape');
   const errKeys = [...memberSrc.slice(memberSrc.indexOf('const ERRORS = {'), memberSrc.indexOf('};', memberSrc.indexOf('const ERRORS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
-  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'orcid']) {
+  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'asker', 'answer', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'orcid']) {
     ok(errKeys.includes(r), `forum: ERRORS words the reason ${r}`);
   }
   for (const m of allForum.matchAll(/refuse\('[a-z-]+', '([a-z]+)'\)/g)) {
@@ -15044,7 +15044,7 @@ async function testForum() {
   ok(/t\.email_verified === true\s*\|\| \(!!t\.firebase && typeof t\.firebase\.sign_in_provider === 'string'\s*&& t\.firebase\.sign_in_provider !== 'password'\)/.test(memberSrc),
     'forum: verifiedToken mirrors verified(), both halves');
   ok(/return t\.email === ADMIN && t\.email_verified === true;/.test(memberSrc), 'forum: adminToken mirrors isAdmin()');
-  for (const f of ['join.js', 'post.js', 'edit.js', 'vote.js', 'moderate.js']) {
+  for (const f of ['join.js', 'post.js', 'edit.js', 'accept.js', 'vote.js', 'moderate.js']) {
     ok(/onCall\(P\.OPTS,/.test(forumSrc[f]), `forum: ${f} declares its callable(s) with the shared OPTS`);
   }
   ok(/region: 'us-central1'/.test(memberSrc) && /enforceAppCheck: false/.test(memberSrc) && /maxInstances: 10/.test(memberSrc) && /timeoutSeconds: 30/.test(memberSrc),
@@ -15166,7 +15166,7 @@ async function testForum() {
 
   const fn = await read('_functions', 'index.js');
   ok(/const forum = require\('\.\/forum'\);/.test(fn), 'forum: index.js requires ./forum');
-  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
     ok(new RegExp(`^exports\\.${name} = forum\\.${name};$`, 'm').test(fn), `forum: index.js re-exports ${name} on its own line`);
   }
   const pkg = JSON.parse(await read('_functions', 'package.json'));
@@ -15241,7 +15241,7 @@ async function testForum() {
   for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
     ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
   }
-  ok(/THIRTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads thirteen');
+  ok(/FOURTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads fourteen');
   for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
     ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
     ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
@@ -15331,7 +15331,7 @@ async function testForum() {
   ok(/v\.uid === uid && Number\(v\.season\) === Y && v\.handle/.test(pageJs), 'oa-forum.js: the cached join is trusted only for the same account and season');
 
   /* the callables and their words */
-  for (const n of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) ok(pageJs.includes(`'${n}'`), `oa-forum.js: calls ${n}`);
+  for (const n of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumModerate']) ok(pageJs.includes(`'${n}'`), `oa-forum.js: calls ${n}`);
   ok(/REGION = 'us-central1'/.test(pageJs) && /fb\.app\(\)\.functions\(REGION\)\.httpsCallable\(name\)/.test(pageJs), 'oa-forum.js: the callables by region through OAFB.readyFunctions');
   ok(/OAFB\.readyFunctions\(\)/.test(pageJs), 'oa-forum.js: the Functions SDK is loaded on demand');
   const reasonKeys = [...pageJs.slice(pageJs.indexOf('var REASONS = {'), pageJs.indexOf('};', pageJs.indexOf('var REASONS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
@@ -15370,6 +15370,80 @@ async function testForum() {
   ok(/to delete at any\s*'?\s*\+?\s*'?\s*time while the season is running/.test(JSON.stringify(GUIDE.RULES)) || /delete at any/.test(GUIDE.RULES[12]),
     'forum delete: rule 13 says so, and says the words are gone for good');
 
+  /* --- ticking the answer, and no comments anywhere (owner, 2026-09-05) --- */
+
+  const accSrc = forumSrc['accept.js'];
+  ok(/exports\.forumAccept = onCall\(P\.OPTS/.test(accSrc), 'forum accept: a callable of its own, on the shared options');
+  ok(/tv\.by !== m\.handle/.test(accSrc) && /refuse\('permission-denied', 'asker'\)/.test(accSrc),
+    'forum accept: the member who ASKED, and nobody else, not even the maintainer');
+  ok(/Number\(pv\.n\) === 1 \|\| pv\.hidden/.test(accSrc) && /'answer'/.test(accSrc),
+    'forum accept: the question itself and a deleted post are not answers');
+  ok(/Number\(tv\.season\) !== Number\(Y\)/.test(accSrc) && /'archive'/.test(accSrc),
+    'forum accept: refused on an archived season, which cannot answer who asked');
+  ok(!/tv\.locked/.test(accSrc),
+    'forum accept: a LOCKED thread is not refused; saying which answer worked is not a new post');
+  ok(/if \(was === pid\) return;/.test(accSrc), 'forum accept: asking for the tick where it already is writes nothing');
+  ok(/accepted: pid,/.test(accSrc), 'forum accept: ONE field, on the thread');
+  ok(FM.KEYS.thread.includes('accepted') && !FM.KEYS.post.includes('accepted'),
+    'forum accept: the tick is a thread key and never a post one, so the two cannot disagree');
+  ok(/String\(tv\.accepted \|\| ''\) === postRef\.id/.test(delSrc) && /accepted: '',/.test(delSrc),
+    'forum accept: deleting the ticked answer takes the tick with it, or the thread points at a tombstone');
+  ok(/data-act="accept"/.test(pageJs) && /call\('forumAccept'/.test(pageJs) && /function acceptAnswer\(/.test(pageJs),
+    'forum accept: the page draws the control and calls the callable');
+  ok(/thread\.by === S\.me\.handle/.test(pageJs), 'forum accept: and draws it for the asker alone');
+  ok(/function sortAnswers\(/.test(pageJs) && /if \(av !== bv\) return av \? -1 : 1;/.test(pageJs),
+    'forum accept: the ticked answer is read first, then the best liked');
+  ok(/oa-forum-answers-h/.test(pageJs) && /oa-forum-answers-h/.test(pageCss) && !/oa-forum-replies-h/.test(pageJs + pageCss),
+    'forum: the band under a question is ANSWERS, and the replies band is gone from both files');
+  ok(/'Answer' : 'Answers'/.test(pageJs), 'forum: it counts them the way the site the owner named counts them');
+  ok(/is-accepted/.test(pageJs) && /\.oa-forum-post\.is-accepted/.test(pageCss) && /\.oa-forum-stat\.is-answers\.is-accepted/.test(pageCss),
+    'forum accept: the answer is marked where the words are AND in the list card\'s tally');
+
+  /* THERE ARE NO COMMENTS, and there is no plan for any (owner, 2026-09-05,
+     of the comment threads under a Stack Exchange answer: "comments as shown
+     in red should not be posted"). A thread is a question and the answers to
+     it. Read with the comments stripped, since this file's own explanation of
+     the decision names the word it forbids. */
+  const jsCode = pageJs.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+  ok(!/comment/i.test(jsCode), 'forum: the page offers nothing called a comment, in any string it draws');
+  ok(!Object.keys(FM.KEYS).some((k) => /comment/i.test(k)) && !/comment/i.test(JSON.stringify(FM.KEYS)),
+    'forum: and the model knows no comment document, so nothing could write one');
+
+  /* --- saved questions and watched tags, in this browser and nowhere else -- */
+
+  ok(/SAVED_KEY = 'oa-forum-saved'/.test(pageJs), 'forum marks: one local store for the saved list and the watched tags');
+  ok(/localStorage\.removeItem\('oa-forum-saved'\)/.test(signOutSrc),
+    'forum marks: signing out forgets it, like the handle and the seen-marks');
+  ok(!/forumBookmark|forumWatch|forumSaved/.test(allForum) && !/collection\((?:C\.)?(?:'|")?forum(?:Saved|Watch)/.test(pageJs),
+    'forum marks: no collection, no document and no callable, which is the whole decision');
+  ok(/data-act="save"/.test(pageJs) && /function savePost\(/.test(pageJs) && /function toggleSaved\(/.test(pageJs),
+    'forum marks: the bookmark is drawn on a post and written locally');
+  ok(/data-watch=/.test(pageJs) && /function toggleWatch\(/.test(pageJs) && /function paintWatchNew\(/.test(pageJs),
+    'forum marks: a tag is watched from its own chip, and what is new in it is said over the list');
+  ok(/Kept in this browser/.test(pageJs) || /kept in this browser/i.test(pageJs),
+    'forum marks: and the card says where the list lives, so nobody takes it for a subscription the site keeps');
+  for (const id of ['oa-forum-watchnew', 'oa-forum-savedcard', 'oa-forum-saved', 'oa-forum-watchcard', 'oa-forum-watch']) {
+    ok(page.includes(`id="${id}"`), `forum marks: the page carries #${id}`);
+  }
+  ok(/id="oa-forum-watchnew" hidden/.test(page) && /id="oa-forum-savedcard" hidden/.test(page),
+    'forum marks: both are born hidden, so a reader with no marks sees no empty furniture');
+
+  /* --- the looks: the hover on a tag, and the room a post is given -------- */
+
+  ok(/body\.v3 \.oa-label-tag:hover \{[^}]*background-color: var\(--line-soft\)/.test(pageCss)
+     && !/\.oa-label-tag:hover \{[^}]*background-color: var\(--brand\)/.test(pageCss)
+     && !/\.oa-forum-tagchip:hover \{[^}]*background-color: var\(--brand\)/.test(pageCss),
+    'forum tags: hover is a STEP on the same chip, never the near-black flip the owner reported');
+  ok(/\.oa-forum-tagchip:hover \{[^}]*background-color: var\(--line-soft\)/.test(pageCss),
+    'forum tags: and the side card\'s chips move the same way');
+  ok(/transition: background-color/.test(pageCss), 'forum tags: with a transition, so the step reads as a response');
+  ok(/title="' \+ esc\(title\)/.test(pageJs) && /Questions tagged/.test(pageJs),
+    'forum tags: hovering one says what it does and how many questions carry it');
+  ok(/\.oa-forum-post \{[^}]*padding: 28px 0/.test(pageCss),
+    'forum looks: a post is given room, which is what the owner asked for');
+  ok(/h1\[tabindex='-1'\]:focus,\s*\n\s*\.oa-forum-th h1\[tabindex='-1'\]:focus-visible \{ outline: none; \}/.test(pageCss),
+    'forum looks: the heading the script focuses is not ringed as though a reader had tabbed to it');
+
   /* --- a web address posts, and the page draws it as a link -------------- */
 
   ok(/function linkify\(/.test(pageJs) && /linkify\(esc\(para\)\)/.test(pageJs),
@@ -15385,7 +15459,7 @@ async function testForum() {
 
   /* --- the question card, in the Stack Overflow arrangement -------------- */
 
-  ok(/grid-template-columns: 92px minmax\(0, 1fr\)/.test(pageCss),
+  ok(/grid-template-columns: 104px minmax\(0, 1fr\)/.test(pageCss),
     'forum card: a tally column on the left and the question beside it, the shape the owner asked for');
   ok(/oa-forum-stats'/.test(pageJs) && /is-answers/.test(pageJs) && /is-answers/.test(pageCss),
     'forum card: the tally column carries the votes and the replies, the answered ones marked');
@@ -15465,10 +15539,10 @@ async function testForum() {
      the gate can meet, the leak check and the 390px block. */
 
   const shim = await read('_scraper', '_fake-firebase.js');
-  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumVote',\s*\n\s*'forumThreadVotes', 'forumModerate'\];/.test(shim),
-    'shim: the simulator names the seven forum callables, and only those');
+  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept',\s*\n\s*'forumVote', 'forumThreadVotes', 'forumModerate'\];/.test(shim),
+    'shim: the simulator names the eight forum callables, and only those');
   ok(/function forumSim\(name, data\)/.test(shim) && /if \(FORUM_NAMES\.indexOf\(String\(name\)\) !== -1\) return forumSim\(String\(name\), data\);/.test(shim),
-    'shim: httpsCallable dispatches the six to forumSim');
+    'shim: httpsCallable dispatches the eight to forumSim');
   const fnFor = shim.slice(shim.indexOf('  function functionsFor() {'), shim.indexOf('  var firebase = {'));
   ok(fnFor.length > 300 && fnFor.length < 1500, 'shim: functionsFor was sliced');
   ok(fnFor.indexOf("record('callable', String(name), data || null);") < fnFor.indexOf('if (seed.callableFails)')
@@ -15477,7 +15551,7 @@ async function testForum() {
     'shim: every call is recorded first, callableFails still refuses everything, and sendVerificationEmail keeps its canned receipt');
   const sim = shim.slice(shim.indexOf('  function forumSim(name, data) {'), shim.indexOf('  function functionsFor() {'));
   ok(sim.length > 3000, 'shim: forumSim was sliced');
-  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumAccept', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
     ok(sim.includes(`name === '${name}'`), `shim: forumSim answers ${name}`);
   }
   ok(/var err = \{ code: 'functions\/' \+ code, message: reason \|\| code, details: \{ reason: reason \} \};/.test(shim),
@@ -15486,7 +15560,7 @@ async function testForum() {
     'shim: seed.refuse makes one callable refuse, for the wording checks');
   ok(/var SIM_HASH = '[0-9a-f]{64}';/.test(shim) && !/SIM_HASH[^;]*uid|uid[^;]*SIM_HASH/.test(sim),
     'shim: the vote id is a fixed 64-hex string that never derives from the uid');
-  for (const reason of ['own', 'quote', 'author', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'kind', 'bounds', 'thread', 'guide']) {
+  for (const reason of ['own', 'quote', 'author', 'asker', 'answer', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'kind', 'bounds', 'thread', 'guide']) {
     ok(sim.includes(`'${reason}'`) && errKeys.includes(reason), `shim: the simulator refuses with ${reason}, a reason member.js can answer with`);
   }
   ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)

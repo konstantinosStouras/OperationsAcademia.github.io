@@ -35,6 +35,23 @@
    re-implementing it. A card opens the THREAD (cardOpen), which is the same
    "this card is a way in" shape the one-pager's teaser uses.
 
+   A QUESTION AND ITS ANSWERS, AND NOTHING BETWEEN THEM. There are no
+   comments here and there is no plan for any (owner, 2026-09-05, of the
+   comment threads under a Stack Exchange answer: "comments as shown in red
+   should not be posted"). A thread is one question and the answers to it;
+   post 1 is the question, every other post is an answer, and the one who
+   ASKED may tick the answer that worked (forumAccept). The tick lives on the
+   thread, so the card in the list can say a question is answered and the
+   answers band can put that answer first.
+
+   SAVED QUESTIONS AND WATCHED TAGS ARE THIS BROWSER'S, and deliberately.
+   They are kept in localStorage beside the seen-marks, keyed to the account,
+   never in Firestore: a uid-keyed document listing which threads a member
+   reads or which tags they follow is exactly the record this page refuses to
+   let the site keep (it loads no analytics and no usage tracker for the same
+   reason). The cost is stated where it is offered: they follow the reader on
+   this device and no other, and the forum learns nothing.
+
    ERRORS ARE WORDED, NEVER RAW. A callable refuses with a code and
    details.reason; REASONS below carries a sentence for every reason
    member.js can answer with, so a refusal reads as a sentence and never as
@@ -58,6 +75,17 @@
   var REGION = 'us-central1';
   var ME_KEY = 'oa-forum-me';
   var SEEN_KEY = 'oa-forum-seen';
+  var SAVED_KEY = 'oa-forum-saved';
+
+  /* Two glyphs the page draws as controls. Inline so they take the reader's
+     own ink through currentColor and cost no request; aria-hidden, because
+     the button beside them carries the label. */
+  var ICON_SAVE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>';
+  var ICON_WATCH = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
 
   function $(id) { return document.getElementById(id); }
   function show(el, on) { if (el) el.hidden = !on; }
@@ -99,6 +127,8 @@
     locked: 'This thread is locked, so nothing can be added to it.',
     archive: 'This season is archived and read-only.',
     author: 'Only the author can change their own post.',
+    asker: 'Only the member who asked the question can tick the answer.',
+    answer: 'Only an answer can be ticked, and only while its words are still there.',
     window: 'The fifteen-minute edit window has closed; the post stays as written. You can still delete it.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
@@ -163,7 +193,13 @@
     guides: {},                     // room -> guide thread id, this season
     tally: {},                      // slug -> count, this room and season
     votes: {},                      // pid -> the caller's own vote, this thread
-    quote: null,                    // { n, by, text } waiting above the reply box
+    quote: null,                    // { n, by, text } waiting above the answer box
+    saved: { uid: '', items: {}, tags: [] },   // this browser's own marks
+    rows: [],                       // the threads the list last read
+    sort: 'score',                  // how the answers band is ordered
+    thread: null,                   // the thread on screen, and its posts
+    posts: [],
+    readOnly: false,
     list: null
   };
 
@@ -193,7 +229,9 @@
     if (season !== Y) p.set('season', String(season));
     if (o && o.t) p.set('t', o.t);
     if (o && o.ask) p.set('ask', '1');
-    if (o && o.tags) p.set('tags', o.tags);
+    /* the engine's own URL key, one parameter per value, so a link that
+       carries every tag a reader watches selects them all */
+    if (o && o.tags) [].concat(o.tags).forEach(function (t) { if (t) p.append('tags', t); });
     return 'forum.html?' + p.toString() + ((o && o.hash) ? '#' + o.hash : '');
   }
   /** Move between the page's views IN PLACE: push the new address, re-read
@@ -247,6 +285,65 @@
   }
   function writeSeen(v) {
     try { localStorage.setItem(SEEN_KEY, JSON.stringify(v)); } catch (e) { /* ignore */ }
+  }
+
+  /* WHAT THIS READER HAS SAVED AND WHICH TAGS THEY WATCH, in this browser and
+     nowhere else. The shape is the seen-marks': one document keyed to the
+     account, so a shared machine cannot show the next person the last one's
+     list, and sign-out clears it (oa-accounts.js). It is not in Firestore on
+     purpose: a uid beside a thread id is a record of what a member reads in a
+     room built so that nothing records that. */
+  function readSaved(uid) {
+    try {
+      var v = JSON.parse(localStorage.getItem(SAVED_KEY) || 'null');
+      if (v && v.uid === uid) {
+        return {
+          uid: uid,
+          items: (v.items && typeof v.items === 'object') ? v.items : {},
+          tags: Array.isArray(v.tags) ? v.tags.filter(M.tagOk) : []
+        };
+      }
+    } catch (e) { /* private mode */ }
+    return { uid: uid, items: {}, tags: [] };
+  }
+  function writeSaved() {
+    try { localStorage.setItem(SAVED_KEY, JSON.stringify(S.saved)); } catch (e) { /* ignore */ }
+  }
+  /** A saved mark names the room, the season, the thread and, for an answer,
+      the post: saving an answer and saving its question are two marks. */
+  function savedKey(tid, pid) {
+    return S.room + ':' + S.season + ':' + tid + (pid ? ':' + pid : '');
+  }
+  function isSaved(tid, pid) { return !!S.saved.items[savedKey(tid, pid)]; }
+  function toggleSaved(tid, pid, title, n) {
+    var k = savedKey(tid, pid);
+    if (S.saved.items[k]) delete S.saved.items[k];
+    else {
+      S.saved.items[k] = { room: S.room, season: S.season, tid: tid, pid: pid || '',
+        n: Number(n) || 0, title: String(title || ''), at: Date.now() };
+    }
+    writeSaved();
+    drawSaved();
+    return !!S.saved.items[k];
+  }
+  function watching(tag) { return S.saved.tags.indexOf(tag) !== -1; }
+  function toggleWatch(tag) {
+    if (!M.tagOk(tag)) return false;
+    var at = S.saved.tags.indexOf(tag);
+    if (at === -1) S.saved.tags.push(tag);
+    else S.saved.tags.splice(at, 1);
+    writeSaved();
+    drawWatch();
+    drawTags();
+    if (!S.tid && !S.ask) paintWatchNew(S.rows, readSeen(S.me.uid));
+    return watching(tag);
+  }
+
+  /** New TO THIS READER: a thread they have not read to the end of, by the
+      same rule the New badge is drawn from. One definition, two consumers. */
+  function unreadOf(r, seen) {
+    var was = seen.seen[r.id];
+    return typeof was === 'number' ? r.n > was : (r.lastAt > (seen.since || 0));
   }
 
   /* ------------------------------------------------------- the callables */
@@ -309,6 +406,7 @@
       if (!u) { hideAll(); show($('oa-needauth'), true); started = null; return; }
       if (started === u.uid) return;
       started = u.uid;
+      S.saved = readSaved(u.uid);
       hideAll();
       show($('oa-forum-loading'), true);
       join(u).then(function (me) {
@@ -352,6 +450,7 @@
   }
 
   function hideViews() {
+    show($('oa-forum-watchnew'), false);
     ['oa-forum-listview', 'oa-forum-thread', 'oa-forum-compose'].forEach(function (id) {
       var n = $(id);
       if (!n) return;
@@ -371,6 +470,8 @@
     drawTabs();
     drawBanner();
     drawGuide();
+    drawWatch();
+    drawSaved();
     if (S.tid) drawThread();
     else if (S.ask && !S.archive) drawAsk();
     else drawList();
@@ -480,6 +581,7 @@
       S.guides = (now && now.guides) || {};
       drawSeasons();
       drawTags();
+      drawWatch();
       drawAdmin();
     }).catch(function () { /* the side cards are extras; the room still reads */ });
   }
@@ -500,6 +602,37 @@
     show(card, true);
   }
 
+  /** A tag as it is drawn in the side cards: the chip that filters the room
+      by it, and the bell that says "tell me when a new question carries it".
+      The chip's own title is what a reader gets for hovering it, which is
+      what the tag popovers on the site the owner asked this to resemble are
+      for; the count comes from the room's tally where there is one. */
+  function tagChip(tag, count) {
+    var title = 'Questions tagged ' + tag + (count ? ', ' + plural(count, 'question', 'questions') + ' this season' : '');
+    var on = watching(tag);
+    return '<span class="oa-forum-tagrow">' +
+      '<a class="oa-forum-tagchip" href="' + esc(href({ room: S.room, season: S.season, tags: tag })) + '" ' +
+        'data-tag="' + esc(tag) + '" title="' + esc(title) + '">' + esc(tag) +
+        (count ? '<i>' + count + '</i>' : '') + '</a>' +
+      '<button type="button" class="oa-forum-watch" data-watch="' + esc(tag) + '" ' +
+        'aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? 'Stop watching ' : 'Watch ') + esc(tag) + '" ' +
+        'aria-label="' + (on ? 'Stop watching the tag ' : 'Watch the tag ') + esc(tag) + '">' + ICON_WATCH + '</button>' +
+      '</span>';
+  }
+
+  /** Wire every bell inside a host: pressing one is a local mark and nothing
+      leaves the browser, so it repaints where it stands. */
+  function wireWatch(host) {
+    if (!host) return;
+    Array.prototype.forEach.call(host.querySelectorAll('[data-watch]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWatch(b.getAttribute('data-watch'));
+      });
+    });
+  }
+
   function drawTags() {
     var card = $('oa-forum-tagcard');
     var host = $('oa-forum-tags');
@@ -509,11 +642,81 @@
       .sort(function (a, b) { return b[1] - a[1] || (a[0] < b[0] ? -1 : 1); })
       .slice(0, 12);
     if (!pairs.length) { show(card, false); return; }
-    host.innerHTML = pairs.map(function (p) {
-      return '<a href="' + esc(href({ room: S.room, season: S.season, tags: p[0] })) + '" data-tag="' + esc(p[0]) + '">' +
-        esc(p[0]) + '<i>' + p[1] + '</i></a>';
-    }).join('');
+    host.innerHTML = pairs.map(function (p) { return tagChip(p[0], p[1]); }).join('');
+    wireWatch(host);
     show(card, true);
+  }
+
+  /** The tags this reader watches. Drawn even when the list is empty, because
+      the card is where the bell is explained; the line under it says plainly
+      that the list lives in this browser, so nobody takes it for a
+      subscription the site is keeping for them. */
+  function drawWatch() {
+    var card = $('oa-forum-watchcard');
+    var host = $('oa-forum-watch');
+    if (!card || !host) return;
+    var tags = S.saved.tags.slice().sort();
+    if (!tags.length) {
+      host.innerHTML = '<p class="oa-forum-cardnote">No tags yet. Press the bell beside a tag to be told ' +
+        'here when a new question carries it.</p>';
+    } else {
+      host.innerHTML = '<div class="oa-forum-tagcloud">' + tags.map(function (t) {
+        return tagChip(t, Number(S.tally[t]) || 0);
+      }).join('') + '</div>' +
+        '<p class="oa-forum-cardnote"><a href="' + esc(href({ room: S.room, season: S.season, tags: tags })) + '">' +
+        'Show only these questions</a></p>' +
+        '<p class="oa-forum-cardnote">Kept in this browser, so the forum records nothing about what you follow.</p>';
+      wireWatch(host);
+    }
+    show(card, true);
+  }
+
+  /** The questions and answers this reader has saved. Hidden while there are
+      none: the bookmark on a post is what introduces it, and an empty card
+      in the sidebar of every page is clutter rather than an invitation. */
+  function drawSaved() {
+    var card = $('oa-forum-savedcard');
+    var host = $('oa-forum-saved');
+    if (!card || !host) return;
+    var items = Object.keys(S.saved.items).map(function (k) {
+      var v = S.saved.items[k];
+      return { key: k, room: v.room, season: v.season, tid: v.tid, pid: v.pid,
+        n: Number(v.n) || 0, title: String(v.title || ''), at: Number(v.at) || 0 };
+    }).filter(function (v) { return v.room === S.room && Number(v.season) === Number(S.season) && v.tid; })
+      .sort(function (a, b) { return b.at - a.at; })
+      .slice(0, 8);
+    if (!items.length) { show(card, false); return; }
+    host.innerHTML = items.map(function (v) {
+      var to = href({ room: v.room, season: v.season, t: v.tid, hash: v.pid ? 'p' + v.n : '' });
+      return '<div class="oa-forum-savedrow">' +
+        '<a href="' + esc(to) + '">' + esc(v.title || 'A question') + '</a>' +
+        (v.pid ? '<span class="oa-forum-savedwhat">answer #' + v.n + '</span>' : '') +
+        '<button type="button" class="oa-forum-unsave" data-unsave="' + esc(v.key) + '" ' +
+          'title="Remove it from your saved list" aria-label="Remove this from your saved list">&times;</button>' +
+        '</div>';
+    }).join('');
+    Array.prototype.forEach.call(host.querySelectorAll('[data-unsave]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        delete S.saved.items[b.getAttribute('data-unsave')];
+        writeSaved();
+        drawSaved();
+        if (S.tid) paintSaveButtons();
+      });
+    });
+    show(card, true);
+  }
+
+  /** After the saved list is edited from the side card, the bookmarks in the
+      thread beside it have to agree: one store, two views of it. */
+  function paintSaveButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll('#oa-forum-thread [data-act="save"]'), function (b) {
+      var li = b.closest ? b.closest('.oa-forum-post') : null;
+      if (!li) return;
+      var on = isSaved(S.tid, li.getAttribute('data-n') === '1' ? '' : li.getAttribute('data-pid'));
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.title = on ? 'Saved in this browser. Press to remove it.' : 'Save this in this browser';
+    });
   }
 
   /** The maintainer's seed button: one per admitted room whose guide thread
@@ -569,12 +772,36 @@
           n: Number(v.n) || 0,
           excerpt: String(v.excerpt || ''),
           score: Number(v.score) || 0,
+          accepted: String(v.accepted || ''),
           pinned: !!v.pinned,
           locked: !!v.locked
         });
       });
       return rows;
     });
+  }
+
+  /** WHAT IS NEW IN THE TAGS THIS READER WATCHES. Computed from the rows the
+      list has already read and the seen-marks it already keeps, so watching a
+      tag costs no read, no document and nothing the site could later be asked
+      to hand over. It is the in-app half of "tell me when a question carries
+      this tag"; the e-mail half waits for the forum to be announced, since a
+      digest naming a thread in the Candidates' room would announce the forum
+      to whoever opens the message. */
+  function paintWatchNew(rows, seen) {
+    var box = $('oa-forum-watchnew');
+    if (!box) return;
+    var tags = S.saved.tags;
+    if (!tags.length || S.archive || !Array.isArray(rows) || !rows.length) { show(box, false); return; }
+    var hits = rows.filter(function (r) {
+      if (!unreadOf(r, seen)) return false;
+      return r.tags.some(function (t) { return tags.indexOf(t) !== -1; });
+    });
+    if (!hits.length) { show(box, false); return; }
+    box.innerHTML = '<p><strong>' + plural(hits.length, 'new question', 'new questions') +
+      '</strong> in the tags you watch.</p>' +
+      '<a class="v3-btn soft" href="' + esc(href({ room: S.room, season: S.season, tags: tags })) + '">Show them</a>';
+    show(box, true);
   }
 
   function drawList() {
@@ -609,6 +836,8 @@
         });
         var count = $('oa-forum-listcount');
         if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
+        S.rows = rows;
+        paintWatchNew(rows, seen);
         return rows;
       },
       filters: [
@@ -619,16 +848,14 @@
         title: function (r) { return r.title; },
         /* The handle alone: the counts and the last activity are appended as
            their own elements in onCard, so each fact is said once and in one
-           place (owner, 2026-09-05: the card printed the reply count twice,
+           place (owner, 2026-09-05: the card printed the answer count twice,
            in a side column and again here). */
         subtitle: function (r) { return r.by; },
         badges: function (r) {
           var out = [];
           if (r.pinned) out.push({ text: 'Pinned', cls: 'oa-label-pinned' });
           if (r.locked) out.push({ text: 'Locked', cls: 'oa-label-locked' });
-          var was = seen.seen[r.id];
-          var unread = typeof was === 'number' ? r.n > was : (r.lastAt > (seen.since || 0));
-          if (unread && !S.archive) out.push({ text: 'New', cls: 'oa-label-new' });
+          if (unreadOf(r, seen) && !S.archive) out.push({ text: 'New', cls: 'oa-label-new' });
           r.tags.forEach(function (t) { out.push({ text: t, cls: 'oa-label-tag' }); });
           return out;
         },
@@ -655,17 +882,25 @@
          heading. */
       onCard: function (li, r) {
         li.classList.add('oa-forum-q');
-        var replies = Math.max(0, r.n - 1);
+        var answers = Math.max(0, r.n - 1);
+        var answered = !!r.accepted;
         var head = li.querySelector('.oa-card-head');
         var t = li.querySelector('.oa-card-title');
         if (t && r.excerpt) t.insertAdjacentElement('afterend', el('p', { class: 'oa-forum-ex', text: r.excerpt }));
 
+        /* THE ANSWERED BOX IS THE ONE THING THE TALLY SAYS TWICE OVER: an
+           outline while a question merely has answers, filled with a tick
+           once the member who asked has said which of them worked. It is
+           read off the thread's own row, so no card costs a post read. */
         li.insertBefore(el('div', { class: 'oa-forum-stats' }, [
-          el('span', { class: 'oa-forum-stat' }, [
+          el('span', { class: 'oa-forum-stat', title: plural(r.score, 'like', 'likes') + ' on the question, less its dislikes' }, [
             el('b', { text: String(r.score) }), el('i', { text: Math.abs(r.score) === 1 ? 'vote' : 'votes' })
           ]),
-          el('span', { class: 'oa-forum-stat is-answers' + (replies ? ' has' : '') }, [
-            el('b', { text: String(replies) }), el('i', { text: replies === 1 ? 'reply' : 'replies' })
+          el('span', {
+            class: 'oa-forum-stat is-answers' + (answers ? ' has' : '') + (answered ? ' is-accepted' : ''),
+            title: answered ? 'Answered: the member who asked ticked one of these' : plural(answers, 'answer', 'answers')
+          }, [
+            el('b', { text: String(answers) }), el('i', { text: answers === 1 ? 'answer' : 'answers' })
           ])
         ]), li.firstChild);
 
@@ -786,9 +1021,50 @@
     }).join('');
   }
 
+  /** THE ORDER THE ANSWERS ARE READ IN. Accepted first, then the best liked,
+      then the oldest, which is the arrangement the site the owner asked this
+      to resemble has used for fifteen years; the other reading, strictly as
+      they were written, is one press away and says so above them. The
+      NUMBERING never moves with it: `n` is a post's name, a quote points at
+      it, and the permalink under each answer is that number. */
+  function sortAnswers(answers, thread, mode) {
+    var acc = String((thread && thread.accepted) || '');
+    var out = answers.slice();
+    if (mode === 'oldest') {
+      out.sort(function (a, b) { return (Number(a.n) || 0) - (Number(b.n) || 0); });
+      return out;
+    }
+    out.sort(function (a, b) {
+      var av = a.id === acc, bv = b.id === acc;
+      if (av !== bv) return av ? -1 : 1;
+      var an = (Number(a.up) || 0) - (Number(a.down) || 0);
+      var bn = (Number(b.up) || 0) - (Number(b.down) || 0);
+      if (an !== bn) return bn - an;
+      return (Number(a.n) || 0) - (Number(b.n) || 0);
+    });
+    return out;
+  }
+
+  /** The answers band alone, repainted where it stands: an answer ticked or
+      the order changed must not rebuild the box below it, which may be
+      holding something half written. */
+  function paintAnswers() {
+    var ol = $('oa-forum-answers');
+    if (!ol || !S.thread) return;
+    var answers = S.posts.slice(1);
+    ol.innerHTML = sortAnswers(answers, S.thread, S.sort).map(function (p) {
+      return postHTML(p, S.thread, S.readOnly, false);
+    }).join('');
+    wirePosts(ol, S.thread, answers, S.readOnly);
+  }
+
   function renderThread(host, thread, posts) {
     var readOnly = S.archive || !!thread.locked || !!thread.hidden;
     var first = posts[0] || {};
+    var answers = posts.slice(1);
+    S.thread = thread;
+    S.posts = posts;
+    S.readOnly = readOnly;
     var out = '';
     out += '<nav class="oa-forum-crumbs" aria-label="You are here"><a href="' + esc(href({ room: S.room, season: S.season })) + '">Questions</a> &rsaquo; ' +
       '<span>' + esc(thread.title) + '</span></nav>';
@@ -804,17 +1080,28 @@
         return '<a class="oa-label oa-label-tag" data-tag="' + esc(t) + '" href="' + esc(href({ room: S.room, season: S.season, tags: t })) + '">' + esc(t) + '</a>';
       }).join('') + '</div></header>';
 
-    out += '<ol class="oa-forum-posts" id="oa-forum-posts">';
-    posts.forEach(function (p, i) {
-      out += postHTML(p, readOnly, i === 0);
-      if (i === 0 && posts.length > 1) {
-        out += '</ol><div class="oa-forum-replies-h"><h2>' + plural(posts.length - 1, 'reply', 'replies') + '</h2></div><ol class="oa-forum-posts">';
-      }
-    });
-    out += '</ol>';
+    out += '<ol class="oa-forum-posts oa-forum-qpost" id="oa-forum-posts">' +
+      postHTML(first, thread, readOnly, true) + '</ol>';
+    out += '<div class="oa-forum-answers-h"' + (answers.length ? '' : ' hidden') + '>' +
+      '<h2>' + answers.length + ' ' + (answers.length === 1 ? 'Answer' : 'Answers') + '</h2>' +
+      '<label class="oa-forum-sort">Sorted by ' +
+        '<select id="oa-forum-sort">' +
+          '<option value="score"' + (S.sort === 'score' ? ' selected' : '') + '>Highest score (default)</option>' +
+          '<option value="oldest"' + (S.sort === 'oldest' ? ' selected' : '') + '>Oldest first</option>' +
+        '</select></label></div>';
+    out += '<ol class="oa-forum-posts" id="oa-forum-answers"></ol>';
     host.innerHTML = out;
+    paintAnswers();
+    wirePosts($('oa-forum-posts'), thread, posts, readOnly);
+    var sort = $('oa-forum-sort');
+    if (sort) {
+      sort.addEventListener('change', function () {
+        S.sort = sort.value === 'oldest' ? 'oldest' : 'score';
+        paintAnswers();
+      });
+    }
 
-    // the reply box lives OUTSIDE the list of posts
+    // the answer box lives OUTSIDE the list of posts
     var compose = $('oa-forum-compose');
     if (compose) {
       compose.innerHTML = '';
@@ -827,32 +1114,54 @@
       }
       show(compose, true);
     }
-    wirePosts(host, thread, posts, readOnly);
   }
 
-  function postHTML(p, readOnly, isFirst) {
+  function postHTML(p, thread, readOnly, isFirst) {
     var mine = p.by === S.me.handle;
     var up = Number(p.up) || 0, down = Number(p.down) || 0;
     var net = up - down;
     var v = Number(S.votes[p.id]) || 0;
     var n = Number(p.n) || 0;
-    var out = '<li class="oa-forum-post' + (isFirst ? ' is-first' : '') + '" id="p' + n + '" data-pid="' + esc(p.id) + '" data-n="' + n + '">';
+    var what = isFirst ? 'question' : 'answer';
+    /* the tick: on the thread, never on the post, so there is one place it
+       can be read from and nothing to keep in step */
+    var accepted = !isFirst && String((thread && thread.accepted) || '') === p.id;
+    var canAccept = !isFirst && !readOnly && !p.hidden && !!thread && thread.by === S.me.handle;
+    var saved = isSaved(S.tid, isFirst ? '' : p.id);
+    var out = '<li class="oa-forum-post' + (isFirst ? ' is-first' : '') + (accepted ? ' is-accepted' : '') +
+      '" id="p' + n + '" data-pid="' + esc(p.id) + '" data-n="' + n + '">';
     out += '<div class="oa-forum-vote">';
     if (!readOnly) {
       out += '<button type="button" class="oa-forum-v up" data-v="1" aria-pressed="' + (v === 1 ? 'true' : 'false') + '" ' +
-        'aria-label="Like this post"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9650;</button>';
+        'aria-label="Like this ' + what + '"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9650;</button>';
     }
     out += '<b class="oa-forum-score" title="' + plural(up, 'like', 'likes') + ', ' + plural(down, 'dislike', 'dislikes') + '">' + (net > 0 ? '+' : '') + net + '</b>';
     if (!readOnly) {
       out += '<button type="button" class="oa-forum-v down" data-v="-1" aria-pressed="' + (v === -1 ? 'true' : 'false') + '" ' +
-        'aria-label="Dislike this post"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9660;</button>';
+        'aria-label="Dislike this ' + what + '"' + (mine ? ' disabled title="You cannot vote on your own post"' : '') + '>&#9660;</button>';
     }
     out += '<span class="oa-forum-updown">' + up + ' / ' + down + '</span>';
+    /* THE TICK. The member who ASKED gets a button; everybody else gets the
+       mark itself, and only once it is there, because a control nobody may
+       press is worse than no control. */
+    if (canAccept) {
+      out += '<button type="button" class="oa-forum-acc" data-act="accept" aria-pressed="' + (accepted ? 'true' : 'false') + '" ' +
+        'title="' + (accepted ? 'This is the answer you ticked. Press to untick it.' : 'Tick this as the answer to your question') + '" ' +
+        'aria-label="' + (accepted ? 'Untick this answer' : 'Tick this as the answer') + '">&#10003;</button>';
+    } else if (accepted) {
+      out += '<span class="oa-forum-acc is-on" title="The member who asked ticked this as the answer" ' +
+        'aria-label="Accepted answer">&#10003;</span>';
+    }
+    if (!p.hidden) {
+      out += '<button type="button" class="oa-forum-save" data-act="save" aria-pressed="' + (saved ? 'true' : 'false') + '" ' +
+        'title="' + (saved ? 'Saved in this browser. Press to remove it.' : 'Save this ' + what + ' in this browser') + '" ' +
+        'aria-label="' + (saved ? 'Remove this ' + what + ' from your saved list' : 'Save this ' + what) + '">' + ICON_SAVE + '</button>';
+    }
     out += '</div><div class="oa-forum-pbody">';
     if (p.hidden) {
       out += '<p class="oa-forum-removed">' + (p.hiddenBy === 'author'
-        ? 'This ' + (isFirst ? 'post' : 'reply') + ' was deleted by its author.'
-        : 'This ' + (isFirst ? 'post' : 'reply') + ' was removed.') + '</p>';
+        ? 'This ' + what + ' was deleted by its author.'
+        : 'This ' + what + ' was removed.') + '</p>';
     } else {
       if (p.quote && p.quote.text) {
         out += '<blockquote class="oa-forum-quote"><cite><span class="oa-forum-handle">' + esc(p.quote.by) + '</span> wrote in ' +
@@ -862,7 +1171,7 @@
     }
     out += '<div class="oa-forum-pfoot"><div class="oa-forum-pacts">';
     if (!readOnly && !p.hidden) {
-      out += '<button type="button" class="oa-forum-act" data-act="reply">Reply</button>';
+      if (isFirst) out += '<button type="button" class="oa-forum-act" data-act="reply">Answer this question</button>';
       out += '<button type="button" class="oa-forum-act" data-act="quote">Quote</button>';
     }
     out += '<a class="oa-forum-act" href="' + esc(href({ room: S.room, season: S.season, t: S.tid, hash: 'p' + n })) + '" title="A link to this post">#' + n + '</a>';
@@ -878,16 +1187,20 @@
     out += '</div><div class="oa-forum-who">' +
       (p.kind && KIND_LABEL[p.kind] ? '<span class="oa-forum-kind is-' + esc(p.kind) + '">' + KIND_LABEL[p.kind] + '</span>' : '') +
       '<span class="oa-forum-handle' + (mine ? ' is-me' : '') + '">' + esc(p.by) + '</span>' +
-      '<span title="' + esc(stamp(p.t)) + '">' + (isFirst ? 'asked ' : 'replied ') + esc(ago(p.t)) + '</span>' +
+      '<span title="' + esc(stamp(p.t)) + '">' + (isFirst ? 'asked ' : 'answered ') + esc(ago(p.t)) + '</span>' +
       (p.editedAt ? '<span title="' + esc(stamp(p.editedAt)) + '">edited</span>' : '') +
       '</div></div></div></li>';
     return out;
   }
 
-  function wirePosts(host, thread, posts, readOnly) {
+  /** Wire the posts inside ONE root: the question's list and the answers band
+      are painted separately, so each wires its own and a repaint of the band
+      cannot leave the question carrying two of every listener. */
+  function wirePosts(root, thread, posts, readOnly) {
+    if (!root) return;
     var byId = {};
     posts.forEach(function (p) { byId[p.id] = p; });
-    Array.prototype.forEach.call(host.querySelectorAll('.oa-forum-post'), function (li) {
+    Array.prototype.forEach.call(root.querySelectorAll('.oa-forum-post'), function (li) {
       var pid = li.getAttribute('data-pid');
       var p = byId[pid];
       if (!p) return;
@@ -901,9 +1214,44 @@
           else if (act === 'quote') quoteFrom(li, p);
           else if (act === 'edit') editPost(li, p);
           else if (act === 'delete') deletePost(thread, p, b);
+          else if (act === 'accept') acceptAnswer(thread, p, b);
+          else if (act === 'save') savePost(li, thread, p, b);
         });
       });
     });
+  }
+
+  /* TICKING THE ANSWER. The member who asked, and only they: the function
+     refuses everyone else with `asker` whatever this page draws. The tick is
+     one field on the thread, so what comes back is what the whole page reads
+     from, and the band is repainted so the answer moves to the top where the
+     order says it should be. Pressing the ticked one again unticks it. */
+  function acceptAnswer(thread, p, btn) {
+    if (S.readOnly) return;
+    var on = String(thread.accepted || '') === p.id;
+    btn.disabled = true;
+    call('forumAccept', { room: S.room, tid: S.tid, pid: on ? '' : p.id }).then(function (r) {
+      thread.accepted = String((r && r.accepted) || '');
+      S.thread = thread;
+      paintAnswers();
+      say(thread.accepted ? 'Ticked as the answer.' : 'The tick is off.');
+    }).catch(function (err) {
+      btn.disabled = false;
+      say(friendly(err), true);
+    });
+  }
+
+  /* SAVING one. Nothing is sent anywhere: the mark is this browser's, the
+     button says so in its own title, and the side card is where the list of
+     them is read back. */
+  function savePost(li, thread, p, btn) {
+    var isFirst = Number(p.n) === 1;
+    var what = isFirst ? 'question' : 'answer';
+    var on = toggleSaved(S.tid, isFirst ? '' : p.id, thread.title, p.n);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.title = on ? 'Saved in this browser. Press to remove it.' : 'Save this ' + what + ' in this browser';
+    btn.setAttribute('aria-label', on ? 'Remove this ' + what + ' from your saved list' : 'Save this ' + what);
+    say(on ? 'Saved in this browser.' : 'Removed from your saved list.');
   }
 
   /* Deleting is not a one-way door anywhere else on this site; here it is,
@@ -914,10 +1262,10 @@
     var isFirst = Number(p.n) === 1;
     var alone = isFirst && Number((thread && thread.n) || 0) <= 1;
     var msg = alone
-      ? 'Delete this question? Nobody has replied, so the whole thread goes. The words cannot be brought back.'
+      ? 'Delete this question? Nobody has answered, so the whole thread goes. The words cannot be brought back.'
       : (isFirst
-          ? 'Delete your question? The replies stay and the thread keeps its place, but your words and the title go, and they cannot be brought back.'
-          : 'Delete this reply? Its place in the thread stays so the numbering still reads, but the words go, and they cannot be brought back.');
+          ? 'Delete your question? The answers stay and the thread keeps its place, but your words and the title go, and they cannot be brought back.'
+          : 'Delete this answer? Its place in the thread stays so the numbering still reads, but the words go, and they cannot be brought back.');
     if (!window.confirm(msg)) return;
     btn.disabled = true;
     call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function (r) {
@@ -953,7 +1301,7 @@
     });
   }
 
-  /* --------------------------------------------------- the reply box */
+  /* -------------------------------------------------- the answer box */
 
   function kindRadios(name, current) {
     return '<div class="oa-forum-kinds" role="radiogroup" aria-label="How do you know?">' +
@@ -975,12 +1323,12 @@
   function replyBox(thread, first) {
     var wrap = el('div', { class: 'oa-forum-compose', id: 'oa-forum-reply' });
     wrap.innerHTML =
-      '<h2>Your reply <span class="oa-forum-as">as <span class="oa-forum-handle is-me">' + esc(S.me.handle) + '</span></span></h2>' +
+      '<h2>Your answer <span class="oa-forum-as">as <span class="oa-forum-handle is-me">' + esc(S.me.handle) + '</span></span></h2>' +
       '<div class="oa-forum-quotebox" id="oa-forum-quotebox" hidden></div>' +
       '<div class="oa-forum-editor">' +
-        '<textarea id="oa-forum-body" rows="6" maxlength="' + M.BOUNDS.body + '" placeholder="Write your reply. Plain text, a few paragraphs at most." aria-label="Your reply"></textarea>' +
+        '<textarea id="oa-forum-body" rows="6" maxlength="' + M.BOUNDS.body + '" placeholder="Answer the question. Plain text, a few paragraphs at most." aria-label="Your answer"></textarea>' +
         '<div class="oa-forum-bar">' + kindRadios('oa-forum-kind', '') +
-          '<button type="button" class="oa-forum-send" id="oa-forum-send">Post reply</button>' +
+          '<button type="button" class="oa-forum-send" id="oa-forum-send">Post your answer</button>' +
         '</div>' +
       '</div>' +
       acceptBox('oa-forum-accept') +
@@ -1002,7 +1350,10 @@
 
   function say(msg, isErr) {
     var m = $('oa-forum-msg') || $('oa-forum-ask-msg');
-    if (!m) { if (msg) window.alert(msg); return; }
+    /* A read-only thread draws no answer box and therefore no message line.
+       An error still has to be seen; a "saved in this browser" does not, and
+       an alert for one would be worse than saying nothing. */
+    if (!m) { if (msg && isErr) window.alert(msg); return; }
     m.textContent = msg || '';
     m.className = 'oa-forum-msg' + (isErr ? ' is-err' : '');
   }

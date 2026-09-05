@@ -2819,11 +2819,16 @@
     /* the counts belong to the account that is leaving; a shared machine must
        not show the next person how many postings the last one had */
     try { localStorage.removeItem(COUNT_KEY); sessionStorage.removeItem(COUNT_SESSION); } catch (e) { /* ignore */ }
-    /* the forum's handle for the season (sessionStorage) and its seen-marks
-       (localStorage) belong to the account that is leaving too: a handle is
-       the one identity the forum has, and the next person on this machine
-       must not inherit it or the marks of what the last one had read */
-    try { sessionStorage.removeItem('oa-forum-me'); localStorage.removeItem('oa-forum-seen'); } catch (e) { /* ignore */ }
+    /* the forum's handle for the season (sessionStorage) and its seen-marks,
+       saved questions and watched tags (localStorage) belong to the account
+       that is leaving too: a handle is the one identity the forum has, and
+       the next person on this machine must not inherit it, the marks of what
+       the last one had read, or the list of what they had saved */
+    try {
+      sessionStorage.removeItem('oa-forum-me');
+      localStorage.removeItem('oa-forum-seen');
+      localStorage.removeItem('oa-forum-saved');
+    } catch (e) { /* ignore */ }
     paint();
     notify(null);
     if (!window.OAFB || !OAFB.enabled) return;

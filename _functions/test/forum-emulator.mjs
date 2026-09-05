@@ -290,6 +290,29 @@ async function main() {
   const votes = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${t1.result.pid}/votes`).get();
   ok(votes.empty, 'a withdrawn vote leaves no document');
 
+  /* ----------------------------------------------------------- accept */
+  console.log('\nforumAccept');
+  const accNotAsker = await call('forumAccept', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: q1.result.pid });
+  ok(status(accNotAsker) === 'PERMISSION_DENIED' && reason(accNotAsker) === 'asker',
+    'only the member who ASKED can tick an answer', JSON.stringify(accNotAsker));
+  const accQuestion = await call('forumAccept', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  ok(status(accQuestion) === 'FAILED_PRECONDITION' && reason(accQuestion) === 'answer',
+    'the question itself is not an answer');
+  const acc1 = await call('forumAccept', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: q1.result.pid });
+  ok(!acc1.error && acc1.result.accepted === q1.result.pid, 'the asker ticks an answer', JSON.stringify(acc1));
+  const thAcc = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(thAcc.data().accepted === q1.result.pid, 'and the tick is one field on the THREAD, naming the post');
+  const acc2 = await call('forumAccept', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: q1.result.pid });
+  ok(!acc2.error && acc2.result.accepted === q1.result.pid, 'asking for the one already ticked is a success that changes nothing');
+  const accMove = await call('forumAccept', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: quoteSource.pid });
+  ok(!accMove.error && accMove.result.accepted === quoteSource.pid, 'ticking another answer MOVES the tick');
+  const thMove = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(thMove.data().accepted === quoteSource.pid, 'so a thread never has two');
+  const accOff = await call('forumAccept', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: '' });
+  ok(!accOff.error && accOff.result.accepted === '', 'an empty pid unticks it');
+  /* ticked again, so the deletion below can be watched taking it with it */
+  await call('forumAccept', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: quoteSource.pid });
+
   /* ----------------------------------------------------------- delete */
   console.log('\nforumDelete');
   const notMine = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
@@ -304,6 +327,8 @@ async function main() {
   ok(dp.exists && dp.data().body === '' && dp.data().kind === '' && dp.data().hidden === true && dp.data().hiddenBy === 'author',
     'the words are erased in the database, not merely flagged');
   ok(dp.data().n === repN, 'and the slot keeps its number, so the replies still read');
+  const thUntick = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(thUntick.data().accepted === '', 'deleting the ticked answer takes the tick with it, or the thread points at a tombstone');
   ok(dp.data().editedAt % 60000 === 0, 'the stamp is on the minute (R7)');
   const again = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: quoteSource.pid });
   ok(!again.error, 'a second press is a success, not an error');
@@ -343,6 +368,8 @@ async function main() {
      cannot be re-derived, so "the author" is not a question with an answer */
   const arDel = await call('forumDelete', tokens.cand, { room: 'candidates', tid: oldThread.id, pid: 'whatever' });
   ok(reason(arDel) === 'thread' || reason(arDel) === 'archive', 'and refuses a deletion');
+  const arAcc = await call('forumAccept', tokens.cand, { room: 'candidates', tid: oldThread.id, pid: '' });
+  ok(reason(arAcc) === 'archive' || reason(arAcc) === 'asker', 'and refuses a tick, whose "did this member ask it" an archive cannot answer');
   await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${oldThread.id}`).delete();
 
   /* ------------------------------------------- two secret versions, one uid */

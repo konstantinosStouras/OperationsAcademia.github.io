@@ -63,6 +63,8 @@ const ERRORS = {
   thread: 'No such thread or post.',
   archive: 'This season is an archive and is read-only.',
   author: 'Only the author may change their own post.',
+  asker: 'Only the member who asked the question can tick the answer.',
+  answer: 'Only an answer can be ticked, and only while its words are still there.',
   window: 'The fifteen-minute edit window has closed. You can still delete the post.',
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',
