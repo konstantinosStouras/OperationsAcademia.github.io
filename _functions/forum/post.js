@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   forumPost({ room, tid?, title?, tags?, body, kind, quote?, acceptGuide? })
+   forumPost({ room, tid?, title?, tags?, body, quote?, acceptGuide? })
      -> { tid, pid, n }
 
    No `tid` opens a NEW THREAD: title, one to five tags, the first post
@@ -61,7 +61,6 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
   const m = await P.member(req, room);
   const { D, Y } = m;
   const body = P.textField(d.body, M.BOUNDS.body, true);
-  const kind = P.kindField(d.kind);
   const accept = d.acceptGuide === true;
   const roomRef = D.collection('forumSeasons').doc(String(Y)).collection('rooms').doc(room);
 
@@ -110,7 +109,6 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
         n: 1,
         by: m.handle,
         body,
-        kind,
         t: now,
         up: 0,
         down: 0,
@@ -188,7 +186,6 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
       n,
       by: m.handle,
       body,
-      kind,
       t: now,
       up: 0,
       down: 0,

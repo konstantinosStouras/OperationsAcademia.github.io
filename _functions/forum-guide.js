@@ -29,6 +29,24 @@
    gone from this module entirely rather than left unrendered, because
    nothing merely unused counts as removed.
 
+   RULE 5 USED TO DESCRIBE A CONTROL, and the control is gone (owner,
+   2026-09-05). It read "say how you know: mark a post first-hand when it
+   happened to you and rumour when it did not", which the compose box
+   answered with three radio buttons. The owner removed both the buttons and
+   the permission they implied: a rumour may not be posted at all, so the
+   forum offers no way to declare one, and the rule now says so. Rule 1 says
+   the other half of the same instruction in the owner's own words: be kind,
+   and be a good colleague.
+
+   IT IS THE RULE THAT CARRIES THIS, and nothing mechanical. A first draft
+   also refused `rumour` and five spellings beside it as TAGS, and the owner
+   reversed that in as many words: *"don't remove the possibility users use
+   the tag rumour on a post... what I was saying is let's not nudge users to
+   post rumours and gossips."* So the forum refuses no tag and reads no body
+   (no honest rule could classify one); what changed is only what the site
+   OFFERS, which is why `rumour` came off the curated tag list in
+   oa-forum-model.js and the rules below say the rest.
+
    NO LINKS IN THE GUIDE ITSELF, still, though the guard now allows one in an
    ordinary post: the guide is seeded as a post and a bare address in a house
    rulebook is a thing to mistype rather than to press. The selftest pins
@@ -54,15 +72,20 @@
     'never under your name. Thirteen rules and three notes.';
 
   var RULES = [
-    'Be respectful. Disagree with the point, never the person.',
+    'Be kind, and be a good colleague. Disagree with the point, never the person, ' +
+      'and write nothing about a school, a department or a fellow candidate that you ' +
+      'would not put your own name to.',
     'No sexist, racist or otherwise demeaning content. One strike, and the handle is ' +
       'banned for the season.',
     'Never name a person: not a committee member, not a specific candidate, not a ' +
       'colleague. Departments and processes, not individuals.',
     'Do not reveal who you are, and do not try to work out who is behind a handle. Leave ' +
       'out your name, your university, your advisor and any unusual detail of your case.',
-    'Say how you know. Mark a post first-hand when it happened to you and rumour when it ' +
-      'did not, and say in the text when it comes from someone directly involved.',
+    'No rumours and no unverified stories. Post what happened to you, or what you can ' +
+      'point to; if you have only heard it, leave it out. Running down a school, a ' +
+      'department or a colleague is not on either, however politely it is phrased. A ' +
+      'wrong story travels a long way in a field this small, and the person it is about ' +
+      'may never get to answer it.',
     'No screenshots, pasted e-mails, offer letters or committee correspondence, in any form.',
     'No contact details. The forum refuses an e-mail address, a telephone number and an ' +
       'ORCID iD, so nobody can be reached off the forum or named exactly by one. A link ' +

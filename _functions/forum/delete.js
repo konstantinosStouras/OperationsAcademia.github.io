@@ -8,7 +8,7 @@
    act with a different answer.
 
    IT IS A TOMBSTONE, AND BOTH HALVES OF THAT ARE THE POINT. The words really
-   go: `body` and `kind` are erased in the database, not merely flagged, or
+   go: `body` is erased in the database, not merely flagged, or
    "delete" would be a lie the page told on the maintainer's behalf. The
    post's SLOT stays, because `n` is the post's name: replies quote by number
    (`#4`), the thread's `n` is the next number to hand out, and a hole in the
@@ -68,7 +68,6 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     /* @doc post */
     const postPatch = {
       body: '',
-      kind: '',
       hidden: true,
       hiddenBy: 'author',
       editedAt: now,

@@ -14853,7 +14853,23 @@ async function testForum() {
   eq(FM.BOUNDS.quote, 600, 'forum: a quote is at most 600 characters');
   eq(FM.BOUNDS.body, 4000, 'forum: a body is at most 4000');
   eq(FM.EDIT_WINDOW_MS, 15 * 60 * 1000, 'forum: the edit window is fifteen minutes');
-  eq(FM.KINDS, ['', 'first-hand', 'rumour'], 'forum: the three kinds');
+  /* NO SELF-DECLARED KIND, ANYWHERE (owner, 2026-09-05). A post carried '',
+     'first-hand' or 'rumour', chosen from three radio buttons in the compose
+     box: a question with no good reason to be asked, whose third answer was
+     the one thing rule 5 forbids. Pinned as an ABSENCE across the whole
+     feature rather than as a narrowed list, because a model that still knew
+     the word would be one edit from drawing the control again. */
+  ok(!('KINDS' in FM) && !FM.KEYS.post.includes('kind'),
+    'forum: there is no kind list and a post carries no kind');
+  /* NO TAG IS REFUSED, and that is the owner's own correction (2026-09-05):
+     a first draft of this change refused `rumour` and five spellings beside
+     it, and the answer was "don't remove the possibility users use the tag
+     rumour on a post... what I was saying is let's not nudge users to post
+     rumours and gossips". What changed is what the site OFFERS, not what it
+     accepts, so the pin runs the other way: the word still posts, and the
+     curated list no longer suggests it. */
+  ok(!('TAG_BANNED' in FM) && FM.tagOk('rumour') && FM.tagsOk(['rumour']) && FM.tagsOk(['offers', 'gossip']),
+    'forum: a poster may still tag a post rumour, alone or beside another tag');
   eq(FM.RATE, { threads: 3, posts: 40, votes: 60, gapMs: 20000 }, 'forum: the rate limits as written');
   eq(FM.slug('Quiet Heron 42'), 'quiet-heron-42', 'forum: slug() folds a handle');
   eq(FM.slug('  Two-Body!! Problem '), 'two-body-problem', 'forum: slug() folds punctuation to one hyphen and trims');
@@ -14866,6 +14882,8 @@ async function testForum() {
     'forum: one character, a capital, a space and a repeat are all refused');
   ok(FM.TAGS.every(FM.tagOk) && FM.tagsOk(FM.TAGS.slice(0, 5)), 'forum: every curated tag passes its own rule');
   ok(FM.TAGS.includes('about') && FM.TAGS.length >= 30, 'forum: the curated list carries about and is about thirty long');
+  ok(!FM.TAGS.includes('rumour') && !FM.TAGS.includes('gossip'),
+    'forum: and the curated list, which is what the picker SUGGESTS, nudges nobody towards one');
   eq(new Set(FM.TAGS).size, FM.TAGS.length, 'forum: no curated tag twice');
   eq(FM.minute(1700000000123), 1699999980000, 'forum: minute() rounds DOWN to the minute');
   ok(FM.minute() % 60000 === 0, 'forum: and now is a whole minute');
@@ -14934,6 +14952,17 @@ async function testForum() {
   ok(!/\.(set|update|create)\(\s*[^,()]+,\s*\{/.test(allForum),
     'forum: no inline object literal is ever handed to set/update, so every write is a declared block');
   ok(!/\.create\(/.test(allForum), 'forum: nothing uses create()');
+  /* THE REMOVED CONTROL, PINNED AS AN ABSENCE. The writer scan above already
+     refuses a `kind` on a post, since the model no longer names one; this is
+     the rest of the surface: nothing validates a kind, nothing takes one off
+     the request. Read with the COMMENTS STRIPPED, because delete.js and
+     member.js explain the removal by name and a guard that could not tell the
+     explanation from the thing would have to be satisfied by deleting the
+     explanation (the analytics page's own no-iframes lesson). */
+  const bare = (src) => src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+  ok(!/kindField|d\.kind|\bkind\b\s*[,:}]/.test(bare(allForum)),
+    'forum: no callable reads, validates or writes a post kind');
+  ok(!/'first-hand'|'rumour'/.test(allForum), 'forum: and neither label is named anywhere in the functions');
   /* auto-ids for threads and posts (R4); the two H-keyed ids are named */
   for (const f of ['post.js', 'moderate.js']) {
     ok(/collection\('threads'\)\.doc\(\)/.test(forumSrc[f]) && /collection\('posts'\)\.doc\(\)/.test(forumSrc[f]),
@@ -15130,6 +15159,19 @@ async function testForum() {
   eq(GUIDE.RULES.length, 13, 'forum guide: thirteen rules');
   eq(GUIDE.NOTES.length, 3, 'forum guide: three notes');
   ok(GUIDE.RULES[11].endsWith('To appeal, use Send feedback and quote your handle.'), 'forum guide: rule 12 ends on the appeal sentence');
+  /* The owner's words, 2026-09-05: posting rumours, unverified stories or
+     running colleagues down is not allowed; be nice and be a good colleague.
+     Rule 1 carries the second half and rule 5 the first, and rule 5 no longer
+     tells anybody to MARK a post as a rumour, because there is nothing to
+     mark it with and it may not be posted at all. */
+  ok(/^Be kind, and be a good colleague\./.test(GUIDE.RULES[0]),
+    'forum guide: rule 1 asks for kindness and for being a good colleague');
+  ok(/^No rumours and no unverified stories\./.test(GUIDE.RULES[4]),
+    'forum guide: rule 5 forbids rumours and unverified stories');
+  ok(/Running down a school, a department or a colleague/.test(GUIDE.RULES[4]),
+    'forum guide: and says so about running colleagues down, in the owner\'s nicer words');
+  ok(!/first-hand|mark a post|Mark a post/i.test(JSON.stringify(GUIDE.RULES)),
+    'forum guide: and no rule still describes the marker that was removed');
   ok(GUIDE.RULES.some((r) => /same in both rooms this season, and changes at the July roll/.test(r)), 'forum guide: one handle in both rooms, said in one sentence');
   /* THE MAINTAINER PARAGRAPH IS GONE at the owner's word (2026-09-05), and
      gone from the module rather than merely unrendered, since nothing merely
@@ -15346,7 +15388,7 @@ async function testForum() {
     'forum delete: NO WINDOW, and none is even read: your own words are yours to take back whenever you like');
   ok(/pv\.by !== m\.handle/.test(delSrc) && /refuse\('permission-denied', 'author'\)/.test(delSrc),
     'forum delete: the author and nobody else');
-  ok(/body: '',/.test(delSrc) && /kind: '',/.test(delSrc),
+  ok(/body: '',/.test(delSrc),
     'forum delete: the words are ERASED in the database, not merely flagged, or "delete" is a lie the page tells');
   ok(/hidden: true,\s*\n\s*hiddenBy: 'author',/.test(delSrc),
     'forum delete: and the slot is kept, because n is how a reply names the post it answers');
@@ -15404,6 +15446,18 @@ async function testForum() {
   ok(/function friendly\(err\)/.test(pageJs) && /err\.details && err\.details\.reason/.test(pageJs), 'oa-forum.js: a refusal is worded by its reason, never shown as a code');
   ok(!/\b(u|user|me|S\.me)\.(email|displayName|uid)\b[^;]*innerHTML|innerHTML[^;]*\b(email|displayName)\b/.test(pageJs), 'oa-forum.js: no address or name is ever drawn');
   ok(/G\.check\(/.test(pageJs) && /OAForumGuard/.test(pageJs), 'oa-forum.js: the guard runs in the browser too');
+  /* THE COMPOSE BOX ASKS NO "how do you know" QUESTION (owner, 2026-09-05).
+     Pinned on all three surfaces it lived on, comments stripped: the page
+     draws no radio group and sends no kind, and the stylesheet paints
+     neither the chip nor the radios, so nothing is merely hidden. */
+  ok(!/kindRadios|KIND_LABEL|kindOf\(/.test(bare(pageJs)) && !/'first-hand'|'rumour'|First-hand, it happened to me/.test(pageJs),
+    'oa-forum.js: no kind radios, no kind label, no kind sent');
+  ok(!/oa-forum-kinds?\b/.test(bare(pageJs)) && !/oa-forum-kinds?\s*[.{,:]/.test(bare(pageCss)),
+    'forum page: and neither the markup nor the stylesheet still carries the chip or the radios');
+  ok(/justify-content: flex-end;/.test(pageCss.slice(pageCss.indexOf('.oa-forum-bar {'), pageCss.indexOf('}', pageCss.indexOf('.oa-forum-bar {')))),
+    'forum page: the compose bar aligns to its END, since space-between would leave a lone Post button at the start');
+  ok(/no rumours\.<\/label>|no rumours\./.test(pageJs),
+    'oa-forum.js: and the acceptance box says what the guide now says');
   ok(/GUIDE\.html\(\)/.test(pageJs), 'oa-forum.js: the guide panel is the module\'s html()');
   ok(/M\.BOUNDS\.quote/.test(pageJs) && /S\.quote = \{ n: Number\(p\.n\) \|\| 0, by: p\.by, text: text \}/.test(pageJs), 'oa-forum.js: a quote is cut to the bound and carries n, by, text');
   ok(/data\.quote = \{ n: S\.quote\.n, text: S\.quote\.text \}/.test(pageJs), 'oa-forum.js: and only n and text are sent');
@@ -15486,7 +15540,9 @@ async function testForum() {
     'shim: seed.refuse makes one callable refuse, for the wording checks');
   ok(/var SIM_HASH = '[0-9a-f]{64}';/.test(shim) && !/SIM_HASH[^;]*uid|uid[^;]*SIM_HASH/.test(sim),
     'shim: the vote id is a fixed 64-hex string that never derives from the uid');
-  for (const reason of ['own', 'quote', 'author', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'kind', 'bounds', 'thread', 'guide']) {
+  ok(!/kind/.test(bare(sim)),
+    'shim: and the simulator carries no post kind either, so the browser suite cannot pass on a field the functions no longer write');
+  for (const reason of ['own', 'quote', 'author', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'bounds', 'thread', 'guide']) {
     ok(sim.includes(`'${reason}'`) && errKeys.includes(reason), `shim: the simulator refuses with ${reason}, a reason member.js can answer with`);
   }
   ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)
@@ -15512,11 +15568,17 @@ async function testForum() {
      && /document\.querySelector\('#main'\)\.outerHTML/.test(fb) && /document\.documentElement\.outerHTML/.test(fb),
     'page-test: the leak check hunts the uid, the address, both names, the affiliation and the profile id in #main, and the uid and profile id in the whole document');
   ok(/HOSTILE_BODY/.test(fb) && /window\.__pwned/.test(fb), 'page-test: a hostile body is rendered and asserted inert');
-  ok(/data-act="quote"/.test(fb) && /wrote in #1/.test(fb) && /\['acceptGuide', 'body', 'kind', 'quote', 'room', 'tid'\]/.test(fb),
-    'page-test: a reply with a quote, and what forumPost was sent');
+  ok(/data-act="quote"/.test(fb) && /wrote in #1/.test(fb) && /\['acceptGuide', 'body', 'quote', 'room', 'tid'\]/.test(fb),
+    'page-test: a reply with a quote, and what forumPost was sent, which no longer carries a kind');
+  ok(/\.oa-forum-kind, \.oa-forum-kinds/.test(fb) && /eq\(th\.kinds, 0,/.test(fb),
+    'page-test: and the removed control is measured as an absence on a rendered thread, chip and radios alike');
+  ok(/!suggested\.includes\('rumour'\)/.test(fb) && /'offers', 'teaching-release', 'rumour'/.test(fb),
+    'page-test: in a real browser the picker suggests no rumour tag and a reader who types one still gets it');
   ok(/eq\(v0\.sent, \[1, -1, 0\]/.test(fb) && /voteDocs, \[\]/.test(fb), 'page-test: up, down and withdrawn, with the page sending the vote and never a delta');
   ok(/data-act="edit"/.test(fb) && /\[data-edit="save"\]/.test(fb), 'page-test: an edit inside the window');
   ok(/op: 'seedGuide', room: 'candidates'/.test(fb) && /never Moderator/.test(fb), 'page-test: the maintainer seeds the guide and posts under a drawn handle');
+  ok(/Update the guide/.test(fb) && /Post the guide/.test(fb),
+    'page-test: and the seeded room keeps a button, reading Update rather than Post, since the pinned thread is a stored copy');
   ok(/season=\$\{PY\}/.test(fb) && /forumThreadVotes is never asked for an archived thread/.test(fb), 'page-test: the archive view is read-only, and asks for no votes');
   ok(/m\.evaluate\(MOBILE_LIST_MEASURE\)/.test(fb) && /assertMobileList\(mob, 'forum mobile \(list\):'\)/.test(fb)
      && /voteAbove/.test(fb) && /taFont >= 16/.test(fb) && /every\(\(h\) => h >= 42\)/.test(fb),

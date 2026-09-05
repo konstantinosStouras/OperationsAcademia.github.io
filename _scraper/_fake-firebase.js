@@ -460,6 +460,10 @@
     return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
   }
 
+  /* whether this browser has accepted the guide in this simulated session:
+     the handle document's guideAt, in the one form the sim needs */
+  var simAccepted = false;
+
   function forumSim(name, data) {
     data = data || {};
     var u = simUser();
@@ -499,15 +503,27 @@
       if (!admin) return simRefuse('permission-denied', 'admin');
       if (data.op === 'seedGuide') {
         var head = docs['forumSeasons/' + Y] || { season: Y, createdAt: now, secretVersion: 'env', guides: {} };
-        if (head.guides && head.guides[room]) return simRefuse('already-exists', 'guide');
         var gtid = 'sim-guide-' + room;
+        /* a second press REFRESHES the pinned thread from the module rather
+           than refusing, so the panel and the thread stay one text after the
+           rules are edited (_functions/forum/moderate.js) */
+        if (head.guides && head.guides[room]) {
+          var seeded = head.guides[room];
+          var gp = null;
+          childrenOf(threads + '/' + seeded + '/posts').forEach(function (pp) { if (Number(docs[pp].n) === 1) gp = pp; });
+          if (!gp) return simRefuse('not-found', 'thread');
+          var fresh = simGuideText();
+          if (docs[gp].body === fresh) return Promise.resolve({ data: { ok: true, tid: seeded, updated: false } });
+          simWrite(gp, Object.assign({}, docs[gp], { body: fresh, editedAt: now }));
+          return Promise.resolve({ data: { ok: true, tid: seeded, updated: true } });
+        }
         simWrite(threads + '/' + gtid, {
           season: Y, room: room, title: 'About this forum', tags: ['about'], by: 'Moderator', t: now, lastAt: now,
           lastBy: 'Moderator', n: 1, excerpt: 'How this room works, in thirteen rules.', score: 0,
           pinned: true, locked: true, hidden: false
         });
         simWrite(threads + '/' + gtid + '/posts/' + gtid + '-p1', {
-          season: Y, room: room, tid: gtid, n: 1, by: 'Moderator', body: simGuideText(), kind: '', t: now,
+          season: Y, room: room, tid: gtid, n: 1, by: 'Moderator', body: simGuideText(), t: now,
           up: 0, down: 0, quote: null, hidden: false, hiddenBy: ''
         });
         var guides = Object.assign({}, head.guides || {});
@@ -528,10 +544,13 @@
 
     if (name === 'forumPost') {
       var body = String(data.body || '').trim();
-      var kind = data.kind == null ? '' : String(data.kind);
       if (!body || body.length > 4000) return simRefuse('invalid-argument', 'bounds');
       if (bad(body)) return simRefuse('invalid-argument', bad(body));
-      if (['', 'first-hand', 'rumour'].indexOf(kind) === -1) return simRefuse('invalid-argument', 'kind');
+      /* the real forumPost refuses a member's FIRST post until the guide is
+         accepted (failed-precondition {reason:'guide'}), so the simulator
+         does too, or the page's accept box would be decoration here */
+      if (!seed.guideAt && !simAccepted && data.acceptGuide !== true) return simRefuse('failed-precondition', 'guide');
+      if (data.acceptGuide === true) simAccepted = true;
       var excerpt = body.replace(/\s+/g, ' ').slice(0, 200);
       if (!data.tid) {
         var title = String(data.title || '').trim();
@@ -546,7 +565,7 @@
           n: 1, excerpt: excerpt, score: 0, pinned: false, locked: false, hidden: false
         });
         simWrite(threads + '/' + tid + '/posts/' + pid1, {
-          season: Y, room: room, tid: tid, n: 1, by: handle, body: body, kind: kind, t: now,
+          season: Y, room: room, tid: tid, n: 1, by: handle, body: body, t: now,
           up: 0, down: 0, quote: null, hidden: false, hiddenBy: ''
         });
         var tallyPath = 'forumTags/' + Y + '_' + room;
@@ -573,7 +592,7 @@
       var n = (Number(thread.n) || 0) + 1;
       var pid = 'sim-p' + (++simN);
       simWrite(tp + '/posts/' + pid, {
-        season: Y, room: room, tid: data.tid, n: n, by: handle, body: body, kind: kind, t: now,
+        season: Y, room: room, tid: data.tid, n: n, by: handle, body: body, t: now,
         up: 0, down: 0, quote: quote, hidden: false, hiddenBy: ''
       });
       simWrite(tp, Object.assign({}, thread, { n: n, lastAt: now, lastBy: handle }));
@@ -603,20 +622,20 @@
       var nb = String(data.body || '').trim();
       if (!nb || nb.length > 4000) return simRefuse('invalid-argument', 'bounds');
       if (bad(nb)) return simRefuse('invalid-argument', bad(nb));
-      simWrite(ppath, Object.assign({}, post, { body: nb, kind: data.kind == null ? '' : String(data.kind), editedAt: now }));
+      simWrite(ppath, Object.assign({}, post, { body: nb, editedAt: now }));
       return Promise.resolve({ data: { editedAt: now } });
     }
 
-    /* the author's own post, no window: the body and the kind are erased and
-       the slot kept, and the opening post takes the thread with it only when
-       nobody has replied (_functions/forum/delete.js) */
+    /* the author's own post, no window: the body is erased and the slot
+       kept, and the opening post takes the thread with it only when nobody
+       has replied (_functions/forum/delete.js) */
     if (name === 'forumDelete') {
       if (th.hidden) return simRefuse('failed-precondition', 'locked');
       if (post.by !== handle) return simRefuse('permission-denied', 'author');
       var whole = false;
       if (!post.hidden) {
         simWrite(ppath, Object.assign({}, post, {
-          body: '', kind: '', hidden: true, hiddenBy: 'author', editedAt: now
+          body: '', hidden: true, hiddenBy: 'author', editedAt: now
         }));
         if (Number(post.n) === 1) {
           if ((Number(th.n) || 0) <= 1) {

@@ -2695,12 +2695,14 @@ profile id, on a uid-keyed document that never sits beside a handle) and
 
 **Tags replace the blueprint's one category.** A thread carries 1 to 5 slugs
 of `[a-z0-9-]{2,24}`; `TAGS` in the model is the curated list of about thirty
-and free tags are allowed beside them, normalised through `slug()`. The tally
+and free tags are allowed beside them, normalised through `slug()`. NO TAG IS
+REFUSED: the list is only what the picker OFFERS (see "No rumours" below,
+where `rumour` comes off it and stays postable). The tally
 `forumTags/{Y}_{room}` is bumped in the thread transaction as a NESTED map
 with `FieldValue.increment` (the `recordVisit` lesson: never a dotted path),
 capped at `TAG_COUNT_CAP` (400) distinct slugs so the one hot document cannot
 grow without bound (a tag past the cap is still on its thread, just not
-tallied). Tags are fixed at creation: `forumEdit` touches body and kind only,
+tallied). Tags are fixed at creation: `forumEdit` touches the body only,
 so the tally never drifts, and the guide says "Tags are set when the question
 is asked". The guide thread is tagged `about`.
 
@@ -2777,6 +2779,102 @@ against the real function (somebody else refused, the author's reply deleted
 long past the edit window, a second press a success, a quote of it surviving,
 both opening-post branches), and the browser block in `page-test.mjs`, which
 posts a reply, deletes it and reads the stored document back.
+
+### No rumours, and no box asking how you know
+
+Owner, 2026-09-05, over a screenshot of the reply box with its three radio
+buttons ringed in red: *"what are these? Add in the forum's rules that posting
+rumors, unverified stories or [running colleagues down] is not allowed. Be
+nice and be a good citizen/colleague... and don't let users to post a rumor.
+Also I don't understand why a user should select 'plain' and 'First-hand, it
+happened to me', perhaps remove these."*
+
+**The three radio buttons were `KINDS`, and all three are gone.** A post
+carried `kind`: `''` (Plain), `'first-hand'` or `'rumour'`, drawn as a chip
+under the post, asked in the reply box, in the edit box and in the ask form.
+Both halves of that were wrong. It asked every poster a question with no good
+answer, which is what the owner saw: nothing on the page said what turned on
+it, nothing read it, and the honest answer to "how do you know" is the post
+itself. And its third option WAS PERMISSION: a box labelled Rumour is the site
+telling a member that a rumour is a thing to post here, tidily, as long as it
+is ticked. Removing the label is what makes rule 5 mean something.
+
+**Removed from the model, not narrowed to one value.** `KINDS` is gone from
+`oa-forum-model.js`, `kind` is out of `KEYS.post`, `kindField` is out of
+`member.js`, the reason `kind` is out of `ERRORS` and `REASONS`, and the
+radios, the chip and their CSS are out of the page. The writer scan does the
+rest for free: `KEYS.post` no longer names `kind`, so a `@doc post` block that
+wrote one would FAIL THE BUILD, both ways. A model that still knew the word
+would be one edit from drawing the control again.
+
+**The rules say the two things the owner asked for, in his own order.** Rule 1
+is *"Be kind, and be a good colleague. Disagree with the point, never the
+person, and write nothing about a school, a department or a fellow candidate
+that you would not put your own name to."* Rule 5 is *"No rumours and no
+unverified stories. Post what happened to you, or what you can point to; if
+you have only heard it, leave it out. Running down a school, a department or a
+colleague is not on either, however politely it is phrased..."* Rule 5 is
+where the marker's own rule used to be, which is why the count is still
+thirteen and why no rule still tells anybody to MARK a post as anything.
+"Bitching" is the owner's word for what rule 1 and rule 5 forbid; the guide
+words it as a colleague would.
+
+**NOTHING IS ENFORCED, AND THAT IS THE OWNER'S OWN CORRECTION.** A body
+cannot be classified: no rule this repository could write would tell a rumour
+from a question about one, and a guess that refuses a legitimate post is
+worse than the post it refuses (the `deadlineDay` discipline, applied to
+prose). The TAG looked like the one exception, being the one part of a post
+that is a machine-readable label the poster picks, so the first draft refused
+`rumour` and five spellings beside it (`TAG_BANNED`, refused by `tagOk` in
+the model, in the functions and in the page, with the tag box saying why).
+The owner reversed it the same day, and the sentence is the whole rule:
+*"don't remove the possibility users use the tag rumour on a post... what I
+was saying is let's not nudge users to post rumours and gossips on the forum.
+The updated rules are fine now."*
+
+So `TAG_BANNED` is gone, `tagOk` refuses nothing a slug rule allows, and the
+one thing that stays is the NUDGE: **`rumour` is off `TAGS`**, the curated
+list the picker suggests from, so the site offers the word to nobody and
+accepts it from anybody who types it. The distinction is worth keeping
+straight, because it is the difference between a forum with house rules and
+a forum with a filter: **a rule is what the guide says and moderation acts
+on; a suggestion list is what the site puts in front of you.** Only the
+second was the problem. The selftest pins it that way round now (the word
+still tags a post, alone or beside another; the curated list carries neither
+it nor `gossip`), and `page-test.mjs` measures both halves in a browser: the
+picker suggests nothing for "rumou", and a reader who types the word gets
+the chip.
+
+**WHAT IS STILL A NUDGE, SAID RATHER THAN HIDDEN.** The compose picker's
+suggestion pool is the curated list PLUS THE ROOM'S OWN TALLY
+(`drawSugg` in `oa-forum.js`), and the "Popular tags" card is the tally
+alone (`drawTags`). So the first thread anybody tags `rumour` puts the word
+into both, high up, ordered by use like every other tag. That is deliberate
+for now and the reading is: the curated list is the SITE recommending
+something, and the tally is the ROOM describing itself, which is also what
+makes the card a truthful filter. It is the owner's call, and the one-line
+change if they want it is a suppression list read by `drawSugg`/`drawTags`
+only, never by `tagOk`, so nothing would be refused. The browser check says
+which half it measures, rather than a message that reads as covering both.
+
+**The pinned guide thread had to be refreshable for any of this to reach a
+reader**, which is the paragraph above ("A SECOND PRESS REFRESHES THE
+THREAD"): the panel renders the module, the thread is a copy, and rules edited
+after a seed reach only the panel until the button is pressed again.
+
+Tests: the block in `testForum` pins the removal as an ABSENCE on every
+surface it lived on, comments stripped (no `KINDS`, no `kind` on a post, no
+`kindField` or `d.kind` in any callable, neither label named anywhere in the
+functions, no radios or chip in the page or either stylesheet, none in the
+shim's simulator), the two rewritten rules by their opening words, that no
+rule still describes the marker, that no tag is refused and the curated list
+suggests none of these, and the compose bar aligned to its end now that its
+left-hand control is gone. `page-test.mjs` measures a rendered thread
+carrying no chip and no radio group, a reply sent without a kind, and the
+picker suggesting no rumour tag while a typed one still becomes a chip; the
+emulator test posts a thread under a tag the curated list does not offer, and
+drives the seed-then-refresh cycle against a guide whose words have been
+moved on.
 
 ### The question list is laid out the way Stack Overflow lays one out
 
@@ -2869,14 +2967,27 @@ who can read them, and says the forum writes nothing of its own to them.
 
 **The guide is ONE text.** `forumModerate {op:'seedGuide', room}` takes no
 body: it renders `guide.text()` itself as the first post of a pinned, locked
-thread under `Moderator`, once per room per season (a second press is
-`already-exists`), and stamps `forumSeasons/{Y}.guides.{room}`. The panel on
-the page draws `html()` from the same module, so the pinned thread and the
-panel cannot disagree. Thirteen rules, the owner's two notices verbatim, the
-small-population note, and the maintainer paragraph, which says the key is
-destroyed a month after the season and that the maintainer reads and posts in
-both rooms. No link in it (the guard would refuse the seed), and it fits the
-body bound, both pinned.
+thread under `Moderator`, one per room per season, and stamps
+`forumSeasons/{Y}.guides.{room}`. The panel on the page draws `html()` from
+the same module, so the pinned thread and the panel cannot disagree. Thirteen
+rules, the owner's two notices verbatim and the small-population note (the
+maintainer paragraph was removed at the owner's word on 2026-09-05 and lives
+in the Privacy Policy). No link in it (the guard would refuse the seed), and
+it fits the body bound, both pinned.
+
+**A SECOND PRESS REFRESHES THE THREAD**, since 2026-09-05, and that is what
+keeps "one text" true rather than true on the day it was seeded. It used to
+answer `already-exists`: the panel renders the module on every load while the
+thread is a STORED COPY of what the module said when the button was pressed,
+so the morning rules 1 and 5 were rewritten, every reader of the panel saw
+the new rules and every reader of the pinned thread saw the old ones. The
+refresh writes `guide.text()` and nothing else, so the op still cannot carry a
+body of somebody's own; an unchanged guide writes nothing and answers
+`{ updated: false }`, which the button reports rather than navigating. The
+maintainer's card therefore draws a button per admitted room at all times,
+reading "Post the guide" where a room has none and "Update the guide" where it
+has one. **After changing anything in `oa-forum-guide.js`, press it in both
+rooms.**
 
 **The guard is one module on both sides.** `check(text)` answers `''` or
 `email | orcid | phone`; `EMAIL_RX` is the literal from
