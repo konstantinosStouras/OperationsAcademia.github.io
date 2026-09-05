@@ -35,11 +35,11 @@
    by the maintainer" rather than guessing.
 
    IT IS A TOMBSTONE, AND BOTH HALVES OF THAT ARE THE POINT. The words really
-   go: `body` and `kind` are erased in the database, not merely flagged, or
-   "delete" is a lie the page tells. The post's SLOT stays, because `n` is the
-   post's name: replies quote by number (`#4`), the thread's `n` is the next
-   number to hand out, and a hole in the sequence would renumber nothing and
-   break both. So a deleted reply is drawn as removed and the thread reads on.
+   go: `body` is erased in the database, not merely flagged, or "delete" is a
+   lie the page tells. The post's SLOT stays, because `n` is the post's name:
+   replies quote by number (`#4`), the thread's `n` is the next number to hand
+   out, and a hole in the sequence would renumber nothing and break both. So a
+   deleted reply is drawn as removed and the thread reads on.
 
    A QUOTE OF IT SURVIVES, deliberately. `forumPost` stores a COPY of the
    quoted words on the reply, which is what already keeps an edit from
@@ -115,7 +115,6 @@ exports.forumDelete = onCall(P.OPTS, async (req) => {
     /* @doc post */
     const postPatch = {
       body: '',
-      kind: '',
       hidden: true,
       hiddenBy: admin && pv.by !== m.handle ? 'admin' : 'author',
       editedAt: now,

@@ -2162,6 +2162,53 @@ filed, a session Firebase will not let delete itself — and asserts it finishes
 reads rather than writes the order, asks for no password, and says when the
 sign-in goes.
 
+### …and then a NEW account could not be deleted either
+
+Owner, 2026-09-05, minutes after registering one: *"I registered a new user.
+Then immediately after tried to delete that user profile entirely. The website
+doesn't let me."* The panel said *"We could not read what this account has
+posted, so we cannot take it down"* and **disabled the button**, so there was
+nothing left on the page to press.
+
+**THE CAUSE IS THE TOKEN, AND THIS FILE ALREADY KNEW THE FACT.** `isOwner()`
+goes through `verified()`, which reads `email_verified` off the ID TOKEN, and
+the SDK caches that token for up to an hour — the same fact gate 4 below turns
+the other way round, that deleting an Auth account does not invalidate a token
+already minted. So an account that confirmed its address minutes ago goes on
+presenting the claims it had BEFORE it did, and every read of its own data is
+refused: its postings, its alerts, its profile. `confirmVerified` states the
+rule on the LIFT (*reload() updates the user object; the rules read the token*,
+with `getIdToken(true)` beside it and a comment saying the second call is not
+optional) and a session RESTORED on a later page load lifts nothing, so nothing
+refreshed it. **`OAAccounts.survey()` re-mints it first now** (`freshClaims`),
+best effort and deliberately: a refresh that fails changes nothing, and the read
+behind it reports for itself.
+
+**AND THE PANEL NO LONGER DEAD-ENDS ON A READ IT WAS REFUSED.** The survey is
+how the panel NAMES what will go; it is not what does the removal. The removal
+is the sweep's, with the Admin SDK, over an account it enumerates server-side
+and cannot be refused. So a survey the browser could not read is a list it
+cannot print, never a deletion it must refuse: **the typed word is the only gate
+on the button**, the note in the list's place says the list is missing and that
+everything goes regardless, and `describe()` stops saying *"your account holds
+nothing you have posted"*, which this page has no way of knowing. The work order
+is filed exactly as before, which is the whole of what the sweep needs.
+
+**THE MERGE KEEPS THE OPPOSITE RULE, and what separates them is what finishes
+them.** `runMerge` still refuses when the postings could not be listed, because
+nothing but that browser finishes a merge: what it cannot enumerate it cannot
+move, and its last step removes the only sign-in that could ever reach it again.
+A deletion has a sweep behind it. One survey, two flows, opposite answers, for
+that one reason.
+
+Tests: the pins in `testAccountDeletion` (the token re-minted before the survey,
+the typed word as the only gate, and `describe()` claiming no empty account it
+cannot see) and the block in `page-test.mjs` that drives the owner's own case in
+a real browser — every read of the account refused, through the shim's
+`refuseReads`, which is its stand-in for a stale token: the note drawn, the
+button offered, the deletion finished, the work order filed, and the forced
+token ahead of the survey's first query.
+
 ### The four gates on deleting a submission's document
 
 1. **The build has run SINCE the withdrawal.** `data/jobs-meta.json`'s
@@ -2289,8 +2336,8 @@ the dates and the counts.
 the remembered hint, because a control that deletes an account must not be
 painted for a reader the SDK then says is not there. It names each posting and
 profile that is about to come off the site, asks for the word DELETE to be
-typed, and refuses outright when the postings could not be LISTED — the merge's
-own *refuse rather than strand*, for the same reason.
+typed. A survey it could not READ leaves the list empty and a note in its
+place; it never withholds the button (see the section above).
 
 `admin-area.html`'s roster gains **Delete** on every row, and **Cancel** while
 one is queued. **The control is withheld where the queue could not be read** —
@@ -2648,12 +2695,14 @@ profile id, on a uid-keyed document that never sits beside a handle) and
 
 **Tags replace the blueprint's one category.** A thread carries 1 to 5 slugs
 of `[a-z0-9-]{2,24}`; `TAGS` in the model is the curated list of about thirty
-and free tags are allowed beside them, normalised through `slug()`. The tally
+and free tags are allowed beside them, normalised through `slug()`. NO TAG IS
+REFUSED: the list is only what the picker OFFERS (see "No rumours" below,
+where `rumour` comes off it and stays postable). The tally
 `forumTags/{Y}_{room}` is bumped in the thread transaction as a NESTED map
 with `FieldValue.increment` (the `recordVisit` lesson: never a dotted path),
 capped at `TAG_COUNT_CAP` (400) distinct slugs so the one hot document cannot
 grow without bound (a tag past the cap is still on its thread, just not
-tallied). Tags are fixed at creation: `forumEdit` touches body and kind only,
+tallied). Tags are fixed at creation: `forumEdit` touches the body only,
 so the tally never drifts, and the guide says "Tags are set when the question
 is asked". The guide thread is tagged `about`.
 
@@ -2803,6 +2852,102 @@ rather than left unrendered, which the selftest pins: this file's own rule
 is that nothing merely hidden counts as withheld, and a block still in the
 source is one CSS change from coming back.
 
+### No rumours, and no box asking how you know
+
+Owner, 2026-09-05, over a screenshot of the reply box with its three radio
+buttons ringed in red: *"what are these? Add in the forum's rules that posting
+rumors, unverified stories or [running colleagues down] is not allowed. Be
+nice and be a good citizen/colleague... and don't let users to post a rumor.
+Also I don't understand why a user should select 'plain' and 'First-hand, it
+happened to me', perhaps remove these."*
+
+**The three radio buttons were `KINDS`, and all three are gone.** A post
+carried `kind`: `''` (Plain), `'first-hand'` or `'rumour'`, drawn as a chip
+under the post, asked in the reply box, in the edit box and in the ask form.
+Both halves of that were wrong. It asked every poster a question with no good
+answer, which is what the owner saw: nothing on the page said what turned on
+it, nothing read it, and the honest answer to "how do you know" is the post
+itself. And its third option WAS PERMISSION: a box labelled Rumour is the site
+telling a member that a rumour is a thing to post here, tidily, as long as it
+is ticked. Removing the label is what makes rule 5 mean something.
+
+**Removed from the model, not narrowed to one value.** `KINDS` is gone from
+`oa-forum-model.js`, `kind` is out of `KEYS.post`, `kindField` is out of
+`member.js`, the reason `kind` is out of `ERRORS` and `REASONS`, and the
+radios, the chip and their CSS are out of the page. The writer scan does the
+rest for free: `KEYS.post` no longer names `kind`, so a `@doc post` block that
+wrote one would FAIL THE BUILD, both ways. A model that still knew the word
+would be one edit from drawing the control again.
+
+**The rules say the two things the owner asked for, in his own order.** Rule 1
+is *"Be kind, and be a good colleague. Disagree with the point, never the
+person, and write nothing about a school, a department or a fellow candidate
+that you would not put your own name to."* Rule 5 is *"No rumours and no
+unverified stories. Post what happened to you, or what you can point to; if
+you have only heard it, leave it out. Running down a school, a department or a
+colleague is not on either, however politely it is phrased..."* Rule 5 is
+where the marker's own rule used to be, which is why the count is still
+thirteen and why no rule still tells anybody to MARK a post as anything.
+"Bitching" is the owner's word for what rule 1 and rule 5 forbid; the guide
+words it as a colleague would.
+
+**NOTHING IS ENFORCED, AND THAT IS THE OWNER'S OWN CORRECTION.** A body
+cannot be classified: no rule this repository could write would tell a rumour
+from a question about one, and a guess that refuses a legitimate post is
+worse than the post it refuses (the `deadlineDay` discipline, applied to
+prose). The TAG looked like the one exception, being the one part of a post
+that is a machine-readable label the poster picks, so the first draft refused
+`rumour` and five spellings beside it (`TAG_BANNED`, refused by `tagOk` in
+the model, in the functions and in the page, with the tag box saying why).
+The owner reversed it the same day, and the sentence is the whole rule:
+*"don't remove the possibility users use the tag rumour on a post... what I
+was saying is let's not nudge users to post rumours and gossips on the forum.
+The updated rules are fine now."*
+
+So `TAG_BANNED` is gone, `tagOk` refuses nothing a slug rule allows, and the
+one thing that stays is the NUDGE: **`rumour` is off `TAGS`**, the curated
+list the picker suggests from, so the site offers the word to nobody and
+accepts it from anybody who types it. The distinction is worth keeping
+straight, because it is the difference between a forum with house rules and
+a forum with a filter: **a rule is what the guide says and moderation acts
+on; a suggestion list is what the site puts in front of you.** Only the
+second was the problem. The selftest pins it that way round now (the word
+still tags a post, alone or beside another; the curated list carries neither
+it nor `gossip`), and `page-test.mjs` measures both halves in a browser: the
+picker suggests nothing for "rumou", and a reader who types the word gets
+the chip.
+
+**WHAT IS STILL A NUDGE, SAID RATHER THAN HIDDEN.** The compose picker's
+suggestion pool is the curated list PLUS THE ROOM'S OWN TALLY
+(`drawSugg` in `oa-forum.js`), and the "Popular tags" card is the tally
+alone (`drawTags`). So the first thread anybody tags `rumour` puts the word
+into both, high up, ordered by use like every other tag. That is deliberate
+for now and the reading is: the curated list is the SITE recommending
+something, and the tally is the ROOM describing itself, which is also what
+makes the card a truthful filter. It is the owner's call, and the one-line
+change if they want it is a suppression list read by `drawSugg`/`drawTags`
+only, never by `tagOk`, so nothing would be refused. The browser check says
+which half it measures, rather than a message that reads as covering both.
+
+**The pinned guide thread had to be refreshable for any of this to reach a
+reader**, which is the paragraph above ("A SECOND PRESS REFRESHES THE
+THREAD"): the panel renders the module, the thread is a copy, and rules edited
+after a seed reach only the panel until the button is pressed again.
+
+Tests: the block in `testForum` pins the removal as an ABSENCE on every
+surface it lived on, comments stripped (no `KINDS`, no `kind` on a post, no
+`kindField` or `d.kind` in any callable, neither label named anywhere in the
+functions, no radios or chip in the page or either stylesheet, none in the
+shim's simulator), the two rewritten rules by their opening words, that no
+rule still describes the marker, that no tag is refused and the curated list
+suggests none of these, and the compose bar aligned to its end now that its
+left-hand control is gone. `page-test.mjs` measures a rendered thread
+carrying no chip and no radio group, a reply sent without a kind, and the
+picker suggesting no rumour tag while a typed one still becomes a chip; the
+emulator test posts a thread under a tag the curated list does not offer, and
+drives the seed-then-refresh cycle against a guide whose words have been
+moved on.
+
 ### The question list is laid out the way Stack Overflow lays one out
 
 Two owner messages on 2026-09-05, and they are one change rather than two.
@@ -2894,14 +3039,27 @@ who can read them, and says the forum writes nothing of its own to them.
 
 **The guide is ONE text.** `forumModerate {op:'seedGuide', room}` takes no
 body: it renders `guide.text()` itself as the first post of a pinned, locked
-thread under `Moderator`, once per room per season (a second press is
-`already-exists`), and stamps `forumSeasons/{Y}.guides.{room}`. The panel on
-the page draws `html()` from the same module, so the pinned thread and the
-panel cannot disagree. Thirteen rules, the owner's two notices verbatim, the
-small-population note, and the maintainer paragraph, which says the key is
-destroyed a month after the season and that the maintainer reads and posts in
-both rooms. No link in it (the guard would refuse the seed), and it fits the
-body bound, both pinned.
+thread under `Moderator`, one per room per season, and stamps
+`forumSeasons/{Y}.guides.{room}`. The panel on the page draws `html()` from
+the same module, so the pinned thread and the panel cannot disagree. Thirteen
+rules, the owner's two notices verbatim and the small-population note (the
+maintainer paragraph was removed at the owner's word on 2026-09-05 and lives
+in the Privacy Policy). No link in it (the guard would refuse the seed), and
+it fits the body bound, both pinned.
+
+**A SECOND PRESS REFRESHES THE THREAD**, since 2026-09-05, and that is what
+keeps "one text" true rather than true on the day it was seeded. It used to
+answer `already-exists`: the panel renders the module on every load while the
+thread is a STORED COPY of what the module said when the button was pressed,
+so the morning rules 1 and 5 were rewritten, every reader of the panel saw
+the new rules and every reader of the pinned thread saw the old ones. The
+refresh writes `guide.text()` and nothing else, so the op still cannot carry a
+body of somebody's own; an unchanged guide writes nothing and answers
+`{ updated: false }`, which the button reports rather than navigating. The
+maintainer's card therefore draws a button per admitted room at all times,
+reading "Post the guide" where a room has none and "Update the guide" where it
+has one. **After changing anything in `oa-forum-guide.js`, press it in both
+rooms.**
 
 **The guard is one module on both sides.** `check(text)` answers `''` or
 `email | orcid | phone`; `EMAIL_RX` is the literal from
@@ -3309,6 +3467,75 @@ invented vote document) and `testForumSeed` in `_scraper/selftest.mjs`, which sp
 the way the roster sync's is spawned and pins the seed out of `data/`, its
 room and season, the owner's tag on every thread, one handle per post, the
 dispatch-only workflow with its plan-by-default input, and this section.
+
+### …and one thread can be taken off entirely
+
+Owner, 2026-09-05, of a thread on the Candidates' room list: *remove this
+thread in red entirely*. It was one whose author had deleted the opening post
+with a reply already under it — `forumDelete`'s documented middle case, where
+the words go, the title becomes `DELETED_TITLE` and the thread STANDS, because
+one person changing their mind must not take other people's replies down with
+them. That is right for an author and it is not the maintainer's answer: what
+was left was a card reading "Deleted by its author" over a reply, with no way
+to be rid of it. Nothing in the forum could remove it — every content path in
+`_firestore.rules` is `allow write: if false`, the maintainer's browser
+included, and `forumModerate` carries `seedGuide`, `pin` and `lock` and no
+removal, since moderation of reports is step 3.
+
+    _scraper/remove-forum-thread.mjs           the plan, the guards, the deletes
+    .github/workflows/oa-forum-remove-thread.yml   pressed, never scheduled
+
+**THE SEEDER'S ROAD AGAIN, and for its reason.** An `op` on `forumModerate`
+would be inert until somebody ran `firebase deploy --only functions` by hand,
+which this file has recorded twice the cost of; `FIREBASE_SERVICE_ACCOUNT` has
+been a secret here for months, so a script is live on merge. It joins
+`seed-forum.mjs` as the second writer of a forum document outside
+`_functions/forum/`, and like it, the one document it WRITES is held to the
+model: the room's tag tally, whose only key `KEYS.tags` names. Everything else
+it touches, it deletes.
+
+**IT PRINTS NO WORDS, because the log is public.** A dispatched run prints into
+the Actions log of a public repository and the Candidates' room decides who
+reads what is in it, so a thread is named by its ID, its tags, its counts and
+its days — never a title, never a body, never a handle. That is also what makes
+the LIST mode usable at all: with no id the run lists the room and marks the
+threads whose author has deleted the opening post `opener-deleted`, which is
+how the one the owner circled is told apart without publishing anybody's words
+to the world. The id itself comes off the address bar (`?t=`) or off that list.
+
+**THE TALLY IS GIVEN BACK, BY VALUE.** `forumTags/{Y}_{room}` is an `increment`
+tally and the one thing here that cannot be recomputed from what is stored, so
+a removal that ignored it would leave **Popular tags** counting a thread nobody
+can open. It is read and written back floored at zero rather than incremented
+by −1: a tag past `TAG_COUNT_CAP` was never counted, has nothing to give back,
+and `increment(-1)` would print a negative in that panel.
+
+**WHAT IT NEVER REACHES.** `forumHandles/{H}` and `forumNames/{slug}` are the
+ACCOUNT's handle for the season, shared by every thread it has posted in, so a
+thread removal must not take one with it; nor `candidateMarkers`, which is the
+membership marker. And the room's own **guide thread is refused outright** —
+`forumSeasons/{Y}.guides.{room}` names it and the seed button is drawn only
+while that field is empty, so a removed guide is a room that can never have one
+again.
+
+**The order is recoverable, and it is permanent.** The posts and their votes go
+first and the thread document LAST, so a run interrupted half way leaves the
+thread standing and a second press finishes it; the other order would strand
+posts under a thread nothing can reach. There is no Restore, and the plan is
+what stands in for one: elsewhere on this site hiding is never a one-way door
+because those are controls a READER presses, this is the maintainer's own tool,
+and nothing happens until `--write`.
+
+Tests: `node _scraper/remove-forum-thread.mjs --selftest` (the tally floored at
+zero and never incremented, the guide refused, a printed line carrying no
+title, handle or body while still saying `opener-deleted`, the arguments, and
+the source scans over a slice bounded at BOTH ends and its length asserted —
+the file explains the things it must not do, so a scan over the whole of it
+would be satisfied by deleting the explanation) and `testForumThreadRemoval` in
+`_scraper/selftest.mjs`, which spawns that suite the way the seeder's is
+spawned and pins the one document it writes against `KEYS.tags`, the
+collections it may never reach, the dispatch-only workflow with its
+plan-by-default input and its list-to-find-the-id line, and this section.
 
 ## What "immediate" costs, and where the waiting used to be
 

@@ -11,9 +11,8 @@
 
    ANYTHING THAT PAINTS ITS OWN GROUND NAMES ITS OWN INK, in both themes: no
    rule below sets a background without a colour beside it, and every colour
-   is a token defined in both themes of v3.css (the canvas's raw hexes for the
-   rumour and first-hand chips are replaced by --warn-* and --ok-*). A rule
-   keyed on the phone breakpoint takes a control's SIZE up (rule 0 in
+   is a token defined in both themes of v3.css. A rule keyed on the phone
+   breakpoint takes a control's SIZE up (rule 0 in
    _MOBILE-STANDARDS.md) and never its shape; rule 13 there is what the
    compose box holds to: a 16px textarea and 42px buttons, measured.
 
@@ -533,22 +532,6 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-who .oa-forum-handle { color: var(--brand); }
 .oa-forum-who .oa-forum-handle.is-me { color: var(--ink); }
 
-/* how the author knows */
-.oa-forum-kind {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border: 1px solid;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.oa-forum-kind.is-first-hand { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
-.oa-forum-kind.is-rumour { color: var(--ink-2); border-color: var(--warn-line); background: var(--warn-bg); }
-
 /* "N replies" is a heading with a rule under it, the answers band */
 .oa-forum-replies-h {
   display: flex;
@@ -606,10 +589,15 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 
 .oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand-soft); }
 
+/* The compose bar under a textarea. It used to carry the "how do you know"
+   radios on the left with the send button on the right; the radios are gone
+   (owner, 2026-09-05), so it aligns to the END: space-between leaves a lone
+   child at the START, which would put Post reply under the left edge of the
+   box it belongs to. */
 .oa-forum-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
   padding: 12px 14px;
@@ -617,24 +605,6 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   background: var(--bg-3);
   color: var(--ink-2);
 }
-
-.oa-forum-kinds {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  font-size: 13.5px;
-  color: var(--ink-2);
-}
-
-.oa-forum-kinds label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  cursor: pointer;
-}
-
-.oa-forum-kinds input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); }
 
 .oa-forum-accept {
   display: flex;

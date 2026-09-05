@@ -11,6 +11,15 @@
    per room per season, and stamps forumSeasons/{Y}.guides.{room}. It takes
    no body, so the panel on the page and the thread are one text and nobody
    can seed a body of their own. pin and lock flip one boolean on a thread.
+
+   A SECOND PRESS REFRESHES THE THREAD, it does not refuse (2026-09-05, the
+   run that rewrote rules 1 and 5). "The panel and the pinned thread are one
+   text" was true only until the text changed: the panel renders the module
+   on every load, while the thread is a stored copy of what the module said
+   the day it was seeded, so a rule the owner adds today would reach every
+   reader of the panel and no reader of the pinned thread. The refresh writes
+   guide.text() and nothing else, so the op still cannot carry a body of
+   somebody's own; an unchanged guide writes nothing and says so.
    --------------------------------------------------------------------------- */
 
 'use strict';
@@ -35,8 +44,36 @@ exports.forumModerate = onCall(P.OPTS, async (req) => {
 
   if (d.op === 'seedGuide') {
     const head = await identity.ensureSeason(D, Y);
-    if (head.guides && head.guides[room]) {
-      throw new HttpsError('already-exists', 'This room already has its guide thread.', { reason: 'guide' });
+    const standing = head.guides && head.guides[room];
+    if (standing) {
+      /* the thread is already there: bring its words up to date */
+      const seededRef = roomRef.collection('threads').doc(String(standing));
+      const fresh = guide.text();
+      let updated = false;
+      await P.run(D, async (tx) => {
+        const th = await tx.get(seededRef);
+        if (!th.exists) P.refuse('not-found', 'thread');
+        const first = await tx.get(seededRef.collection('posts').where('n', '==', 1).limit(1));
+        const doc = first.docs[0];
+        if (!doc) P.refuse('not-found', 'thread');
+        if (doc.data().body === fresh && th.data().title === guide.TITLE) return;
+        updated = true;
+        /* @doc post */
+        const guidePatch = {
+          body: fresh,
+          editedAt: M.minute(),
+        };
+        /* @end */
+        tx.update(doc.ref, guidePatch);
+        /* @doc thread */
+        const guideHead = {
+          title: guide.TITLE,
+          excerpt: P.excerptOf(fresh),
+        };
+        /* @end */
+        tx.update(seededRef, guideHead);
+      });
+      return { ok: true, tid: String(standing), updated };
     }
     const threadRef = roomRef.collection('threads').doc();
     const postRef = threadRef.collection('posts').doc();
@@ -73,7 +110,6 @@ exports.forumModerate = onCall(P.OPTS, async (req) => {
         n: 1,
         by: M.MODERATOR,
         body,
-        kind: '',
         t: now,
         up: 0,
         down: 0,

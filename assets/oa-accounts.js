@@ -2974,6 +2974,36 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
+  /** THE TOKEN THE RULES READ, RE-MINTED BEFORE THE ACCOUNT IS SURVEYED.
+
+      `isOwner()` goes through `verified()`, which reads `email_verified` off
+      the ID TOKEN, and the SDK caches that token for up to an hour. So an
+      account that confirmed its address minutes ago goes on presenting the
+      claims it had BEFORE it did, and every read of its own data is refused:
+      its postings, its alerts, its profile. This file already records the
+      rule on the verification lift (`confirmVerified`: reload() updates the
+      user object, the rules read the token, "the second call is not
+      optional") — and a session restored on a LATER page load lifts nothing,
+      so nothing refreshed it.
+
+      Owner, 2026-09-05: a newly registered account, taken straight to the
+      personal area, could not be deleted. The panel reported that it could
+      not read what the account had posted and disabled the button, which is
+      a permission-denied wearing the clothes of a broken page.
+
+      Best effort, deliberately: a refresh that fails changes nothing, and the
+      read behind it reports for itself. */
+  function freshClaims(u) {
+    if (!u) return Promise.resolve();
+    return Promise.resolve()
+      .then(function () { return typeof u.reload === 'function' ? u.reload() : null; })
+      ['catch'](function () {})
+      .then(function () {
+        return typeof u.getIdToken === 'function' ? u.getIdToken(true) : null;
+      })
+      ['catch'](function () {});
+  }
+
   window.OAAccounts = {
     openAuth: openAuth,
     /** A page holding the real list corrects the menu's badge, for free. */
@@ -2994,7 +3024,10 @@
       if (!state.user || !window.OAFB || !OAFB.enabled) {
         return Promise.reject(new Error('not signed in'));
       }
-      return OAFB.ready().then(surveyAccount);
+      var u = state.user;
+      return OAFB.ready().then(function (fb) {
+        return freshClaims(u).then(function () { return surveyAccount(fb); });
+      });
     },
     /* `{ reauth: false }` deletes the sign-in WITHOUT asking for the password
        back. Firebase refuses to delete a session older than a few minutes

@@ -6700,6 +6700,78 @@ for (const w of [320, 360, 390, 430]) {
     await ctx0.close();
   }
 
+  /* -- A BRAND-NEW ACCOUNT, WHOSE READS ARE STILL BEING REFUSED ------------
+
+     Owner, 2026-09-05: "I registered a new user. Then immediately after tried
+     to delete that user profile entirely. The website doesn't let me." The
+     panel said it could not read what the account had posted and DISABLED the
+     button, so there was no way past it at all.
+
+     The cause is one this file already records at the other end of the same
+     feature: the rules read `email_verified` off the ID TOKEN, the SDK caches
+     that token for up to an hour, and an account that confirmed its address
+     minutes ago goes on presenting the claims it had before it did. So every
+     read of its own data is refused, which reads as a broken page.
+
+     Both halves are driven: the token is re-minted BEFORE the survey (the
+     cause), and a survey that comes back refused anyway is a list the panel
+     cannot print rather than a deletion it must refuse (the consequence).
+     `refuseReads` is the shim's stand-in for the stale token, which no shim
+     can mint. */
+  {
+    const ctx0 = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
+    const q = await ctx0.newPage();
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify({ user: LEAVER, docs: seed,
+      refuseReads: ['users/', 'jobSubmissions', 'candidateSubmissions',
+        'placementSubmissions'] })};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.goto(BASE + 'account.html', { waitUntil: 'load' });
+
+    await q.waitForSelector('#pa-delete:not([hidden])', { timeout: 10000 });
+    /* Everything the PAGE reads for itself is already in the log by now, the
+       postings list included, so the survey's own reads are measured from
+       here on. */
+    const beforeOpen = await q.evaluate(() => window.__fb.log.length);
+    await q.click('#pa-delete-open');
+    await q.waitForSelector('#pa-delete-word', { timeout: 10000 });
+
+    const said = await q.textContent('#pa-delete-panel');
+    ok(said.indexOf('could not list') !== -1 && said.indexOf('still removes') !== -1,
+      'delete: a survey it could not read says so, and says the deletion goes ' +
+      'ahead regardless — the sweep enumerates the account server-side');
+    ok(said.indexOf('nothing you have posted') === -1,
+      'delete: …and never claims an empty account, which this page cannot know');
+
+    await q.fill('#pa-delete-word', 'DELETE');
+    await q.waitForTimeout(80);
+    eq(await q.$eval('#pa-delete-go', (n) => n.disabled), false,
+      'delete: THE TYPED WORD IS THE ONLY GATE. This is the owner\'s bug: the ' +
+      'button was disabled by a read the browser was refused, and nothing on ' +
+      'the page could get past it');
+
+    await q.click('#pa-delete-go');
+    await q.waitForSelector('#pa-delete-panel h3', { timeout: 10000 });
+    ok((await q.textContent('#pa-delete-panel')).indexOf('Your account is gone') !== -1,
+      'delete: and it finishes');
+
+    const seq = await q.evaluate((n) =>
+      window.__fb.log.slice(n).map((e) => e.op + ' ' + e.path), beforeOpen);
+    const iToken = seq.findIndex((l) => l.indexOf('getIdToken') === 0 &&
+      l.indexOf(':force') !== -1);
+    const iSurvey = seq.findIndex((l) => l.indexOf('query jobSubmissions?uid==') === 0);
+    ok(iToken >= 0 && iSurvey > iToken,
+      'delete: the token the rules read is re-minted BEFORE the account is ' +
+      'surveyed, which is the cause rather than the symptom');
+    ok(seq.some((l) => l.indexOf('set accountDeletions/') === 0),
+      'delete: the work order is filed even though nothing could be listed — ' +
+      'without it there is no record the account was meant to go');
+    eq(errors, [], 'delete: no page errors');
+    await ctx0.close();
+  }
+
   /* -- the maintainer is offered the reason instead of the button ----------- */
   {
     const { ctx, q } = await open(ADMIN, 'account.html');
@@ -9625,7 +9697,7 @@ for (const w of [320, 360, 390, 430]) {
       by: 'patient owl 7', t: OLD, lastAt: OLD, lastBy: 'patient owl 7', n: 1, excerpt: 'Congratulations on the flyout',
       score: 0, pinned: false, locked: false, hidden: false } },
     { path: `${T}/seed-t1/posts/seed-p1`, data: { season: FY, room: 'candidates', tid: 'seed-t1', n: 1, by: 'patient owl 7',
-      body: HOSTILE_BODY, kind: 'first-hand', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+      body: HOSTILE_BODY, t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
     { path: `forumTags/${FY}_candidates`, data: { counts: { flyouts: 1, europe: 1 } } },
   ];
   const LEAKS = [CAND.uid, CAND.email, 'Cassiopeia', 'Zyxwvut', 'Uncommon University', 'forum-c1'];
@@ -9799,7 +9871,7 @@ for (const w of [320, 360, 390, 430]) {
       pwned: window.__pwned,
       injected: document.querySelectorAll('.oa-forum-text img, .oa-forum-text script').length,
       text: document.querySelector('.oa-forum-text').textContent,
-      kind: (document.querySelector('.oa-forum-kind') || {}).textContent,
+      kinds: document.querySelectorAll('.oa-forum-kind, .oa-forum-kinds').length,
       votes: document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v:not([disabled])').length,
       score: document.querySelector('.oa-forum-score').textContent,
       updown: document.querySelector('.oa-forum-updown').textContent,
@@ -9810,7 +9882,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(th.title, HOSTILE_TITLE, 'forum (candidate): the thread heading prints the title as text');
     ok(th.pwned === undefined && th.injected === 0 && th.text.includes('<img src=x'),
       'forum (candidate): a hostile body renders as text, nothing executes');
-    eq(th.kind, 'First-hand', 'forum (candidate): the post says how the author knows');
+    eq(th.kinds, 0, 'forum (candidate): no post declares a kind and no compose box asks for one (the control was removed, owner 2026-09-05)');
     eq(th.votes, 2, 'forum (candidate): another member\'s post offers like and dislike');
     ok(th.score === '0' && th.updown === '0 / 0', 'forum (candidate): the counts start at nought');
     eq(th.threadVotes, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
@@ -9858,7 +9930,6 @@ for (const w of [320, 360, 390, 430]) {
     ok(qb.accept, 'forum (candidate): a first post asks for the guide to be accepted');
     await q.fill('#oa-forum-body', 'Thank you. The teaching load question worked for me too.');
     await q.check('#oa-forum-accept');
-    await q.check('.oa-forum-kinds input[value="first-hand"]');
     await q.click('#oa-forum-send');
     await q.waitForSelector('.oa-forum-post[data-n="2"]', { timeout: 15000 });
     const rep = await q.evaluate(() => {
@@ -9871,7 +9942,6 @@ for (const w of [320, 360, 390, 430]) {
         mine: !!p2.querySelector('.oa-forum-handle.is-me'),
         own: p2.querySelectorAll('.oa-forum-v[disabled]').length,
         edit: (p2.querySelector('.oa-forum-act[data-act="edit"]') || {}).textContent,
-        kind: (p2.querySelector('.oa-forum-kind') || {}).textContent,
         heading: document.querySelector('.oa-forum-replies-h h2').textContent,
         sent: { keys: Object.keys(sent).sort(), quote: sent.quote, accept: sent.acceptGuide },
         hash: location.hash,
@@ -9883,9 +9953,8 @@ for (const w of [320, 360, 390, 430]) {
     ok(/teaching load question worked/.test(rep.body), 'forum (candidate): the reply\'s own words follow');
     ok(rep.mine && rep.own === 2, 'forum (candidate): the reply is marked as the reader\'s own, with both vote buttons disabled');
     ok(/^Edit · \d+ min left$/.test(rep.edit || ''), 'forum (candidate): the author is offered Edit with the minutes left');
-    eq(rep.kind, 'First-hand', 'forum (candidate): the kind the reader chose');
     eq(rep.heading, '1 reply', 'forum (candidate): the replies heading counts');
-    eq(rep.sent.keys, ['acceptGuide', 'body', 'kind', 'quote', 'room', 'tid'], 'forum (candidate): the reply sent room, tid, body, kind, the quote and the acceptance');
+    eq(rep.sent.keys, ['acceptGuide', 'body', 'quote', 'room', 'tid'], 'forum (candidate): the reply sent room, tid, body, the quote and the acceptance, and no kind');
     eq(Object.keys(rep.sent.quote).sort(), ['n', 'text'], 'forum (candidate): the quote sent is n and text only');
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
 
@@ -9937,7 +10006,7 @@ for (const w of [320, 360, 390, 430]) {
         note: p3.querySelector('.oa-forum-removed').textContent,
         body: p3.querySelector('.oa-forum-text'),
         anchor: p3.querySelector('a[href*="sigecom"]'),
-        stored: doc && { body: doc.body, kind: doc.kind, hidden: doc.hidden, hiddenBy: doc.hiddenBy, n: doc.n },
+        stored: doc && { body: doc.body, hidden: doc.hidden, hiddenBy: doc.hiddenBy, n: doc.n },
         acts: [...p3.querySelectorAll('.oa-forum-act')].map((b) => b.getAttribute('data-act')).filter(Boolean),
         still: !!document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-text'),
         title: document.getElementById('oa-forum-title').textContent,
@@ -9945,7 +10014,7 @@ for (const w of [320, 360, 390, 430]) {
     }, T);
     ok(/deleted by its author/i.test(del.note), 'forum (candidate): a deleted reply says who deleted it, never that moderation removed it');
     ok(!del.body && !del.anchor, 'forum (candidate): its words and its link are off the page');
-    eq(del.stored, { body: '', kind: '', hidden: true, hiddenBy: 'author', n: 3 },
+    eq(del.stored, { body: '', hidden: true, hiddenBy: 'author', n: 3 },
       'forum (candidate): and erased in the database, with the slot kept so the numbering still reads');
     eq(del.acts, [], 'forum (candidate): a deleted post offers no reply, quote, edit or delete');
     ok(del.still, 'forum (candidate): the other replies are untouched');
@@ -9974,8 +10043,26 @@ for (const w of [320, 360, 390, 430]) {
     await q.press('#oa-forum-tag-in', 'Enter');
     await q.fill('#oa-forum-tag-in', 'Teaching Release');
     await q.press('#oa-forum-tag-in', 'Enter');
+    /* NUDGE NOBODY, REFUSE NOBODY (owner, 2026-09-05). The curated list no
+       longer offers `rumour`, so the picker suggests it to no one; a poster
+       who types it anyway still gets the tag, which is the half the owner
+       asked to keep. Measured on the suggestion list AND on the chip. */
+    await q.fill('#oa-forum-tag-in', 'rumou');
+    const suggested = await q.$$eval('#oa-forum-tagsugg [data-tag]', (ns) => ns.map((b) => b.getAttribute('data-tag')));
+    /* SCOPE, said exactly: the seeded tally here holds flyouts and europe, so
+       what this measures is the CURATED half of the pool. The other half is
+       the room's own tally, and a tag a member has really used is offered
+       like any other: the room describing itself rather than the site
+       recommending it. */
+    ok(!suggested.includes('rumour'), 'forum (candidate): the curated half of the picker offers no rumour tag');
+    await q.fill('#oa-forum-tag-in', 'Rumour');
+    await q.press('#oa-forum-tag-in', 'Enter');
     const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
-    eq(chips, ['offers', 'teaching-release'], 'forum (candidate): two tags, the second normalised to a slug');
+    eq(chips, ['offers', 'teaching-release', 'rumour'],
+      'forum (candidate): two curated tags and a free one the reader typed, each normalised to a slug');
+    await q.click('#oa-forum-tagchips .oa-chip[data-tag="rumour"]');
+    eq(await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag'))),
+      ['offers', 'teaching-release'], 'forum (candidate): and it comes off again like any other chip');
     await q.click('#oa-forum-ask-send');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const asked = await q.evaluate((t) => {
@@ -10042,7 +10129,9 @@ for (const w of [320, 360, 390, 430]) {
     ok(await q.evaluate(() => !window.__fb.docs['candidateMarkers/admin-uid-0000000000']), 'forum (maintainer): no marker is written for them');
     await q.waitForSelector('#oa-forum-admin:not([hidden])', { timeout: 15000 });
     eq(await q.$$eval('#oa-forum-admin [data-seed-room]', (ns) => ns.map((n) => n.getAttribute('data-seed-room'))), ['candidates', 'open'],
-      'forum (maintainer): the seed card offers the guide for each room not yet seeded');
+      'forum (maintainer): the guide card offers a button for each admitted room');
+    ok((await q.$$eval('#oa-forum-admin [data-seed-room]', (ns) => ns.map((n) => n.textContent))).every((t) => /^Post the guide/.test(t)),
+      'forum (maintainer): reading Post the guide while neither room has one');
     await q.click('#oa-forum-admin [data-seed-room="candidates"]');
     await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
     const seeded = await q.evaluate(() => {
@@ -10053,6 +10142,7 @@ for (const w of [320, 360, 390, 430]) {
         sub: card.querySelector('.oa-card-sub').textContent,
         sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumModerate').map((e) => e.data),
         left: [...document.querySelectorAll('#oa-forum-admin [data-seed-room]')].map((n) => n.getAttribute('data-seed-room')),
+        labels: [...document.querySelectorAll('#oa-forum-admin [data-seed-room]')].map((n) => n.textContent),
         handle: document.getElementById('oa-forum-myhandle').textContent,
       };
     });
@@ -10061,7 +10151,9 @@ for (const w of [320, 360, 390, 430]) {
       'forum (maintainer): pinned, locked and tagged about');
     ok(/^Moderator/.test(seeded.sub), 'forum (maintainer): under the Moderator handle');
     eq(seeded.sent, [{ op: 'seedGuide', room: 'candidates' }], 'forum (maintainer): forumModerate was sent the op and the room, and no body');
-    eq(seeded.left, ['open'], 'forum (maintainer): the seed card now offers the other room alone');
+    eq(seeded.left, ['candidates', 'open'], 'forum (maintainer): both buttons stay, since the guide is a stored copy that has to be refreshable');
+    ok(/^Update the guide/.test(seeded.labels[0]) && /^Post the guide/.test(seeded.labels[1]),
+      'forum (maintainer): the seeded room now reads Update the guide, the unseeded one still Post it');
     eq(seeded.handle, 'quiet heron 42', 'forum (maintainer): their own handle is an ordinary drawn one, never Moderator');
     await q.click('#oa-forum-list .oa-card .oa-card-head');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
@@ -10140,7 +10232,7 @@ for (const w of [320, 360, 390, 430]) {
       { path: `${PT}/old-t1`, data: { season: PY, room: 'candidates', title: 'How long did offers take last year?', tags: ['offers', 'waiting'],
         by: 'brisk marten 3', t: OLD, lastAt: OLD, lastBy: 'brisk marten 3', n: 1, excerpt: 'Weeks.', score: 4, pinned: false, locked: false, hidden: false } },
       { path: `${PT}/old-t1/posts/old-p1`, data: { season: PY, room: 'candidates', tid: 'old-t1', n: 1, by: 'brisk marten 3',
-        body: 'Weeks, in my case. Three to five after the flyout.', kind: '', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
+        body: 'Weeks, in my case. Three to five after the flyout.', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
     ];
     const { ctx, page: q, errors } = await signedInPage(`forum.html?room=candidates&season=${PY}`,
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...archive], selector: '#oa-forum' });
