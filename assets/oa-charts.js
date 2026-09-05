@@ -282,7 +282,8 @@
    * rather than a categorical palette: at one series the title already names
    * what is plotted and a one-swatch legend would only restate it.
    *
-   * opts: { points:[{x,label,tip}], series:[{name,values,kind,area}], yLabel }
+   * opts: { points:[{x,label,tip}], series:[{name,values,kind,area}], yLabel,
+   *         table?: { cols, rows } to replace the per-point numbers table }
    */
   function line(host, opts) {
     const pts = opts.points || [];
@@ -446,6 +447,17 @@
         (s.nodes || []).forEach((n) => { n.style.display = on ? '' : 'none'; });
         leave();
       });
+    }
+    /* THE TABLE MAY BE COARSER THAN THE PLOT. By default it lists every point,
+       which is right for a chart over a range the reader chose. A chart over
+       a whole record that grows by a day for ever would print a thousand rows
+       under itself, so a caller may hand in its own `{ cols, rows }` (the
+       growth chart lists one row per month). The override is still built by
+       the caller from the same series the marks were drawn from, which is the
+       only property the table exists for. */
+    if (opts.table && Array.isArray(opts.table.cols) && Array.isArray(opts.table.rows)) {
+      table(host, opts.table.cols, opts.table.rows);
+      return;
     }
     table(host,
       [opts.xTitle || 'Day'].concat(series.map((s) => s.name)),

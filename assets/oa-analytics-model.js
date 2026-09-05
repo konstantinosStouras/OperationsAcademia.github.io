@@ -624,6 +624,86 @@
     };
   }
 
+  /* ------------------------------------------------- the community's growth
+
+     data/users-growth.json is written by the roster sync (one cumulative point
+     per UTC day, counts only) and the analytics page draws it as a line, with
+     a SECOND, dashed line beside it: where the count would be if the last few
+     months' growth simply continued. This is the whole of that second line,
+     kept pure and in the model so the caption, the chart and the selftest
+     cannot disagree about what "expected growth" means.
+
+     WHAT IT IS, EXACTLY. A least-squares straight line fitted over the last
+     `window` actual points (the whole record when shorter), whose SLOPE is
+     kept and whose intercept is not: the projection is a straight line
+     THROUGH THE LAST ACTUAL POINT with that slope, carried `ahead` days on.
+     Fitting the intercept too would make the dashed line start above or below
+     the real count on the day it takes over, which reads as a disagreement
+     about a number both sides know. The count of registered accounts never
+     falls (an account deleted in the console is the one exception, and it is
+     rare), so a slope that came out negative is clamped: no projected value
+     is ever below the last actual one. Whole numbers throughout, because a
+     fraction of a person is not a count.
+
+     DETERMINISTIC BY CONSTRUCTION: no clock is read. `today`, when given as a
+     yyyy-mm-dd, is the anchor of the horizon and nothing else. The file is
+     written daily but a reader may open a stale copy, so the projection is
+     carried to `ahead` days after the later of the last actual day and
+     `today`; the slope and the point it passes through are unchanged by it.
+     A caller that omits it gets `ahead` days after the last actual day.
+
+     Refuses fewer than two points (a slope needs two), and returns null.
+
+     Returns { slope, fitted, lastDay, lastValue, horizon, reached, points },
+     where `points` is [[yyyy-mm-dd, value], ...] starting AT the last actual
+     day (so the two lines meet) and ending on `horizon`. */
+  function dayPlus(day, n) {
+    const q = String(day).split('-');
+    return new Date(Date.UTC(+q[0], +q[1] - 1, +q[2] + n)).toISOString().slice(0, 10);
+  }
+
+  function growthProjection(days, { window = 90, ahead = 180, today = '' } = {}) {
+    const pts = (Array.isArray(days) ? days : [])
+      .filter((p) => Array.isArray(p) && isDay(p[0]) && Number.isFinite(Number(p[1])))
+      .map((p) => [p[0], Number(p[1])])
+      .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+    if (pts.length < 2) return null;
+    const win = Math.max(2, Math.min(pts.length, Math.floor(Number(window)) || 2));
+    const fit = pts.slice(pts.length - win);
+    /* x is the day index from the first fitted point, so a gap in the file
+       (a day the sync missed) weighs by time rather than by row */
+    const x0 = fit[0][0];
+    const xs = fit.map((p) => Math.round((Date.parse(p[0]) - Date.parse(x0)) / 86400000));
+    const n = xs.length;
+    const mx = xs.reduce((a, b) => a + b, 0) / n;
+    const my = fit.reduce((a, p) => a + p[1], 0) / n;
+    let sxy = 0, sxx = 0;
+    for (let i = 0; i < n; i++) {
+      sxy += (xs[i] - mx) * (fit[i][1] - my);
+      sxx += (xs[i] - mx) * (xs[i] - mx);
+    }
+    const slope = sxx ? Math.max(0, sxy / sxx) : 0;
+    const last = pts[pts.length - 1];
+    const lastDay = last[0];
+    const lastValue = last[1];
+    const from = isDay(today) && today > lastDay ? today : lastDay;
+    const span = Math.round((Date.parse(from) - Date.parse(lastDay)) / 86400000) +
+      Math.max(0, Math.floor(Number(ahead)) || 0);
+    const points = [];
+    for (let k = 0; k <= span; k++) {
+      points.push([dayPlus(lastDay, k), Math.max(lastValue, Math.round(lastValue + slope * k))]);
+    }
+    return {
+      slope,
+      fitted: win,
+      lastDay,
+      lastValue,
+      horizon: points[points.length - 1][0],
+      reached: points[points.length - 1][1],
+      points,
+    };
+  }
+
   return {
     DAY_FIELDS, SOURCE_ORDER, WEEKDAYS, MONTHS, STALE_DAYS,
     BREAKDOWN_DAYS, BREAKDOWN_IDS, HOURS, UNKNOWN_LABELS,
@@ -633,5 +713,6 @@
     mergePages, topPages,
     cleanLabel, prettyLabel, breakdown, mergeBreakdown, hourBuckets, withShare,
     engagement,
+    growthProjection,
   };
 }));

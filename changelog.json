@@ -3,6 +3,20 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "registered-users-figure-2026-09",
+      "date": "2026-09-05",
+      "title": "The front page says how many people have registered",
+      "summary": "The key figures at the top of the front page gain a fifth one: the number of registered users, rounded down to the nearest ten. It is the count and nothing else. Who has registered stays between each person and the site, exactly as before.",
+      "url": "/"
+    },
+    {
+      "id": "community-growth-chart-2026-09",
+      "date": "2026-09-05",
+      "title": "A growth chart on the analytics page",
+      "summary": "The analytics page gains a figure called How the community has grown: the number of registered accounts day by day since the first one, with a dashed yellow line showing where the last 90 days of growth would take the count over the next 180 days. That line is an expectation from past growth, not a target, and the caption says so. Press a name in the legend to put either line away, and open the table under the chart for one row per month.",
+      "url": "/analytics.html"
+    },
+    {
       "id": "verify-existing-2026-09",
       "date": "2026-09-05",
       "title": "Existing members are asked to confirm their e-mail address, once",

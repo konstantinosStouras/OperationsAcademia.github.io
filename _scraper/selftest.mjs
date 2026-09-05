@@ -12717,6 +12717,79 @@ async function testAnalytics() {
     'and never rebases: data/ is a build output, so a rejected push is REBUILT');
   ok(/GA4_PROPERTY_ID/.test(wf) && /FIREBASE_SERVICE_ACCOUNT/.test(wf),
     'it passes every gated source its credential');
+
+  /* --- how the community has grown (owner, 2026-09-05) -------------------
+
+     The dashed "expected growth" line is ONE pure function in the model, so
+     what it is can be pinned here rather than read off a screenshot: a
+     least-squares slope over the last `window` points, carried `ahead` days
+     through the last actual point, never below it, reading no clock. */
+  const gday = (i) => new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10);
+  const straight = Array.from({ length: 200 }, (_, i) => [gday(i), 10 + 2 * i]);
+  const gp = A.growthProjection(straight, { window: 90, ahead: 180 });
+  ok(gp && Math.abs(gp.slope - 2) < 1e-9, 'growth: the slope of a straight line is recovered exactly');
+  eq([gp.fitted, gp.lastDay, gp.lastValue], [90, gday(199), 408],
+    'growth: fitted over the last 90 points, through the last actual point');
+  eq(gp.points.length, 181, 'growth: the projection starts AT the last actual day and runs 180 days on');
+  eq([gp.points[0], gp.points[1], gp.points[180]], [[gday(199), 408], [gday(200), 410], [gday(379), 768]],
+    'growth: …and continues the straight line exactly, whole numbers, one per day');
+  eq([gp.horizon, gp.reached], [gday(379), 768], 'growth: horizon and reached are the last projected point');
+  /* a kink OLDER than the window does not move the slope: the first 110
+     points climb by 7 a day, the last 90 by 2 */
+  const kinked = straight.map((p, i) => [p[0], i < 110 ? 7 * i : 7 * 109 + 2 * (i - 109)]);
+  ok(Math.abs(A.growthProjection(kinked, { window: 90, ahead: 10 }).slope - 2) < 1e-9,
+    'growth: the window is respected, so a kink older than 90 days does not move the slope');
+  const plateau = A.growthProjection(Array.from({ length: 40 }, (_, i) => [gday(i), 64]), { ahead: 30 });
+  ok(plateau && plateau.slope === 0 && plateau.points.every((p) => p[1] === 64) && plateau.points.length === 31,
+    'growth: a plateau projects flat at the last value');
+  const falling = A.growthProjection(Array.from({ length: 40 }, (_, i) => [gday(i), 100 - i]), { ahead: 30 });
+  ok(falling && falling.slope === 0 && falling.points.every((p) => p[1] === 61),
+    'growth: a falling series never projects below the last actual value (the count never falls)');
+  eq(A.growthProjection([[gday(0), 5]]), null, 'growth: fewer than two points is refused');
+  eq(A.growthProjection([], {}), null, 'growth: …and so is nothing at all');
+  eq(A.growthProjection(straight.slice(0, 5), { window: 90, ahead: 3 }).fitted, 5,
+    'growth: a record shorter than the window is fitted whole');
+  eq(A.growthProjection(straight.slice().reverse(), { window: 90, ahead: 180 }), gp,
+    'growth: the order the points arrive in does not matter');
+  eq(A.growthProjection(straight, { window: 90, ahead: 180 }), gp,
+    'growth: deterministic, two calls agree to the byte');
+  const anchored = A.growthProjection(straight, { window: 90, ahead: 10, today: gday(230) });
+  eq([anchored.horizon, anchored.points.length, anchored.slope], [gday(240), 42, gp.slope],
+    'growth: `today` anchors the horizon (a stale copy still gets `ahead` days from today) and nothing else');
+  eq(A.growthProjection(straight, { window: 90, ahead: 10, today: gday(100) }).horizon, gday(209),
+    'growth: …and a `today` behind the last actual day changes nothing');
+  ok(!/Date\.now|new Date\(\)/.test(A.growthProjection.toString()),
+    'growth: the model reads no clock');
+
+  /* the page: its own fetch, the figure, the caption built from the constants,
+     the accent line dashed, the monthly table through the generic override */
+  ok(/fetch\('\/data\/users-growth\.json', \{ cache: 'no-cache' \}\)/.test(page),
+    'growth: the page fetches data/users-growth.json with no-cache, absolute like every served file');
+  ok(/A\.growthProjection\(actual, \{ window: GROWTH_WINDOW, ahead: GROWTH_AHEAD, today: today \}\)/.test(page),
+    'growth: the dashed line is the model\'s projection, under the page\'s two constants');
+  ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 180;/.test(page),
+    'growth: fitted over 90 days, carried 180 forward');
+  ok(/figure\('How the community has grown',/.test(page), 'growth: the figure has the agreed title');
+  ok(/'dashed line is a straight-line trend fitted over the last ' \+ GROWTH_WINDOW \+\s*\n?\s*' days and carried ' \+ GROWTH_AHEAD \+ ' days forward; an expectation from past ' \+\s*\n?\s*'growth, not a target\. '/.test(page),
+    'growth: the caption is BUILT from the constants and says what the line is and is not');
+  ok(/C\.full\(proj\.lastValue\) \+ ' registered users on '/.test(page) && /the trend reaches ' \+ C\.full\(proj\.reached\)/.test(page),
+    'growth: …and gives the current count and the count the trend reaches');
+  ok(/\{ name: 'Expected growth', values: expect, kind: 'accent', dashed: true \}/.test(page),
+    'growth: the expected line is the chart ACCENT (re-stepped in dark) and dashed, never --gold directly');
+  ok(/\{ name: 'Registered users', values: have, kind: 'brand', area: true \}/.test(page),
+    'growth: the real count is the brand line');
+  ok(/if \(actual\.length < 2\) return;/.test(page) && page.indexOf('if (actual.length < 2) return;') < page.indexOf("figure('How the community has grown'"),
+    'growth: with no file, a seed, or one point, the figure is not drawn at all');
+  ok(/cols: \['Month', 'Registered users', 'Expected growth'\]/.test(page),
+    'growth: the numbers table is one row per month');
+  ok(/if \(opts\.table && Array\.isArray\(opts\.table\.cols\) && Array\.isArray\(opts\.table\.rows\)\) \{\s*\n\s*table\(host, opts\.table\.cols, opts\.table\.rows\);\s*\n\s*return;/.test(charts),
+    'growth: line() honours a caller\'s own table, the generic override the monthly rows go through');
+  const growthCalls = page.replace(/\/\*[\s\S]*?\*\//g, '').match(/^\s*drawGrowth\(\);$/gm) || [];
+  eq(growthCalls.length, 2, 'growth: drawn from draw() with data and from its empty branch, since its file is its own');
+  ok(page.indexOf('drawGrowth();\n\n    /* 2 — the weekly rhythm */') > 0 || /drawGrowth\(\);\s*\n\s*\/\* 2 — the weekly rhythm/.test(page),
+    'growth: …under the visitors chart, before everything the reader scrolls for');
+  ok(!/id: 'growth', kind:/.test(page), 'growth: it is NOT a DIMENSIONS entry (the BREAKDOWN_IDS pin above stays exact)');
+  ok(/how the community of registered users has grown/.test(html), 'growth: the analytics lede names the figure');
 }
 
 /* ------------------------------------------------------- the GA4 tag
@@ -13998,6 +14071,84 @@ async function testVerifyExistingUsers() {
     'the Privacy Policy says the count is public and the record is not');
 }
 
+/* ------------------------------- the registered-users figure (owner, 2026-09-05)
+
+   The front page's fifth key figure, and the page half of the two served
+   files the roster sync writes. The tile is BORN HIDDEN with no number in it,
+   revealed by the page only when data/users-meta.json holds ten or more, and
+   the strip has to fit four OR five tiles on one row. */
+async function testRegisteredUsersFigure() {
+  const root = path.join(HERE, '..');
+  const noDash = (s) => !/—/.test(String(s));
+  const html = await readFile(path.join(root, 'index.html'), 'utf8');
+
+  /* the tile: hidden, empty, labelled */
+  ok(/<div class="v3-stat" hidden data-stat="users"><b><\/b><span>registered users<\/span><\/div>/.test(html),
+    'index.html: the registered-users tile is born hidden with an EMPTY number, since no seed can be written without the credential');
+  const strip = html.slice(html.indexOf('id="v3-stats"'), html.indexOf('</div>\n          </div>', html.indexOf('id="v3-stats"')));
+  eq((strip.match(/class="v3-stat"/g) || []).length, 5, 'index.html: the strip holds five tiles, the four seeded ones and this one');
+  ok(/<b>200\+<\/b>/.test(strip) && /data-stat="candidates">700\+/.test(strip) && /data-stat="placements">170\+/.test(strip) && /<b>2014<\/b>/.test(strip),
+    'index.html: …and the four seeded figures are as they were');
+
+  /* the reveal: the served file with no-cache, the floor, the rounding, the order */
+  const reveal = html.slice(html.indexOf("fetch('/data/users-meta.json'"), html.indexOf('candidates stat + reveal note'));
+  ok(reveal.length > 300 && reveal.length < 1500, 'index.html: the reveal slice is bounded both ends');
+  ok(/fetch\('\/data\/users-meta\.json', \{ credentials: 'same-origin', cache: 'no-cache' \}\)/.test(reveal),
+    'index.html: the count is read from the served file with no-cache, like every read of data/');
+  ok(/if \(!tile \|\| count < 10\) return;/.test(reveal), 'index.html: under ten nothing changes');
+  ok(/\(Math\.floor\(count \/ 10\) \* 10\)\.toLocaleString\('en-US'\) \+ '\+'/.test(reveal),
+    'index.html: the figure is rounded DOWN to the nearest ten with a plus, so it is never more than the count');
+  ok(reveal.indexOf('tile.hidden = false;') > 0 && reveal.indexOf('tile.hidden = false;') < reveal.indexOf("V3.statTo(tile.querySelector('b')"),
+    'index.html: the tile is revealed BEFORE statTo, whose count-up waits for the tile to scroll into view and a hidden one never does');
+  ok(/\.catch\(function \(\) \{\}\);/.test(reveal), 'index.html: a missing file changes nothing');
+
+  /* the grid fits four or five */
+  const css = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
+  const live = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const statsRule = (live.match(/\n\.v3-stats\s*\{[^}]*\}/) || [''])[0];
+  ok(statsRule.length > 40, 'v3.css: the .v3-stats rule was found');
+  ok(/grid-auto-flow:\s*column;/.test(statsRule) && /grid-auto-columns:\s*minmax\(0,\s*1fr\);/.test(statsRule),
+    'v3.css: the strip is column auto-flow, so every SHOWN tile gets an equal track and a hidden one claims none');
+  ok(!/repeat\(4/.test(statsRule), 'v3.css: …and no fixed four-track template is left to orphan a fifth tile');
+  eq((live.match(/\.v3-stats \{ grid-auto-flow: row; grid-template-columns: 1fr(?: 1fr)?; \}/g) || []).length, 2,
+    'v3.css: both phone breakpoints switch back to row flow with their own templates');
+
+  /* the FAQ says the count is public and who they are is not */
+  const faq = html.slice(html.indexOf('Is my personal information published?'), html.indexOf('terms-and-conditions.html', html.indexOf('Is my personal information published?')));
+  ok(faq.length > 300 && faq.length < 2000, 'index.html: the FAQ answer slice is bounded both ends');
+  ok(/The one thing about registered accounts that is public is how many\s+there are/.test(faq)
+     && /analytics\.html">analytics\s+page<\/a> shows how it has grown, and neither says who they are/.test(faq),
+    'index.html: the privacy FAQ names the count and the growth chart as the one public fact about accounts');
+  ok(!/—/.test(faq.replace(/&mdash;/g, '—').slice(faq.indexOf('The one thing'))), 'index.html: …with no em dash in the new sentence');
+
+  /* the announcements */
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  eq([log[0].id, log[1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
+    'changelog: the two figures are announced at the top');
+  for (const u of log.slice(0, 2)) {
+    ok(u.date === '2026-09-05' && u.title && u.summary && u.url && noDash(u.title + u.summary),
+      `changelog: ${u.id} is dated 2026-09-05 with a title, a summary and a link, no em dash`);
+  }
+  ok(/rounded down to the nearest ten/.test(log[0].summary) && /Who has registered stays/.test(log[0].summary),
+    'changelog: the figure entry says how it is rounded and what stays private');
+  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /next 180 days/.test(log[1].summary)
+     && /not a target/.test(log[1].summary),
+    'changelog: the chart entry names the figure, the window, the horizon and what the line is not');
+
+  /* CLAUDE.md, in the file's own voice */
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const tileAt = claude.indexOf("### The front page's fifth key figure is BORN HIDDEN");
+  const tile = claude.slice(tileAt, claude.indexOf('\n### ', tileAt + 10));
+  ok(tileAt > 0 && tile.length > 800 && /statTo/.test(tile) && /IntersectionObserver/.test(tile) && /users-meta\.json/.test(tile)
+     && /grid-auto-flow|column auto-flow/.test(tile) && noDash(tile),
+    'CLAUDE.md: the tile section records the hidden birth, the reveal order and the grid, no em dash');
+  const chartAt = claude.indexOf('### How the community has grown, and what the dashed line is');
+  const chart = claude.slice(chartAt, claude.indexOf('\n### ', chartAt + 10));
+  ok(chartAt > 0 && chart.length > 800 && /growthProjection/.test(chart) && /GROWTH_WINDOW/.test(chart)
+     && /--oa-chart-accent/.test(chart) && /opts\.table/.test(chart) && /not a target/.test(chart) && noDash(chart),
+    'CLAUDE.md: the chart section records the one function, the constants, the accent, the table override, no em dash');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -14101,5 +14252,6 @@ if (isMain(import.meta.url)) {
   await testCandidateStats();
   await testEmailVerification();
   await testVerifyExistingUsers();
+  await testRegisteredUsersFigure();
   process.exit(finish() ? 0 : 1);
 }

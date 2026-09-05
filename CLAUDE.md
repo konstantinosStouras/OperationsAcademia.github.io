@@ -1964,6 +1964,31 @@ the job commits daily, like `data/analytics.json`. The sync's Admin SDK handle
 is `firebaseAdmin()` from `_mail.mjs`, shared with the mailers, so there is
 one definition of "the credential is missing or malformed".
 
+### The front page's fifth key figure is BORN HIDDEN
+
+The hero strip (`#v3-stats` in `index.html`) held four figures, three of them
+seeded in the markup and raised by the live files (`V3.statTo` only ever
+raises). The fifth, **registered users**, has no seed it could honestly carry:
+nothing in this repository can write the count without the credential, and a
+"0+" over a community of some dozens is a lie in the first thing a visitor
+reads. So the tile is in the HTML with an EMPTY `<b>` and the `hidden`
+attribute, and the page reveals it only when `data/users-meta.json` loads with
+a count of ten or more, printed **rounded DOWN to the nearest ten with a
+plus** ("60+"), so the number shown is never more than the count. Under ten
+nothing changes, and a missing or seed file changes nothing either.
+
+Two orderings are load-bearing and both are pinned. **Reveal BEFORE
+`statTo`**: the count-up waits for the tile to scroll into view through an
+IntersectionObserver, and a `display: none` element never intersects, so a
+tile revealed after the call would sit on 0 for ever. And **the grid fits four
+OR five**: `.v3-stats` was `repeat(4, minmax(0, 1fr))`, which puts a fifth
+tile alone on a second row at every desktop width; it is column auto-flow now
+(a hidden tile is `display: none` and claims no track), with the two phone
+breakpoints switching back to row flow with their own templates. The fetch
+carries `cache: 'no-cache'` like every read of `data/`. The FAQ's "Is my
+personal information published?" answer says the count is public and who they
+are is not, the same sentence the Privacy Policy already carries.
+
 ### Both review tabs can be cleared a page at a time
 
 `approveAll` was gated to the crawled tab on the reasoning that "approve-the-page
@@ -3760,6 +3785,52 @@ figures cannot come back, matched present-tense so the files may go on
 RECOUNTING the mistake in order to correct it), plus the universities block in
 `_scraper/page-test.mjs` (a live section carrying no archive chip and printing
 its own coverage, and an archived one still labelled with its range).
+
+### How the community has grown, and what the dashed line is
+
+Owner, 2026-09-05: a chart of registered users over time, with the growth one
+would expect from the recent trend. The figure, **How the community has
+grown**, sits under the daily visitors chart and is drawn from
+`data/users-growth.json`, the roster sync's second served file (one cumulative
+point per UTC day, counts and dates only, the same read that writes the front
+page's count). It is DRAWN ONLY WHEN THE FILE HOLDS SOMETHING, the page's rule
+for every figure: the committed seed carries no days, and its absence is
+silent. It is fetched separately with `cache: 'no-cache'`, so a failure costs
+the one figure and nothing else, and the page draws again if the file lands
+after `analytics.json` did.
+
+**The dashed yellow line is ONE pure function, `growthProjection(days,
+{window, ahead, today})` in `assets/oa-analytics-model.js`**, so the caption,
+the chart and the selftest cannot disagree about what "expected growth" means:
+a least-squares straight line fitted over the last 90 actual points (the whole
+record when shorter), whose SLOPE is kept and whose intercept is not, carried
+180 days forward THROUGH THE LAST ACTUAL POINT so the two lines meet. Fitting
+the intercept too would start the dashed line above or below the real count on
+the day it takes over, a disagreement about a number both sides know. The
+count never falls, so a negative slope is clamped and no projected value is
+below the last actual one; it refuses fewer than two points; it reads no
+clock, `today` being the anchor of the horizon and nothing else (a reader with
+a stale copy still gets 180 days from today); and it is pinned on a synthetic
+straight line, on a plateau and on a falling series. The two constants live
+in `oa-analytics.js` as `GROWTH_WINDOW`/`GROWTH_AHEAD` and the caption is BUILT
+from them, so the words under the chart cannot promise a window the model did
+not use. The caption says exactly what the line is ("a straight-line trend
+fitted over the last 90 days and carried 180 days forward; an expectation from
+past growth, not a target") and gives the count on the last day and the count
+the trend reaches.
+
+**The line is the chart accent, dashed, and never `--gold` directly.**
+`--oa-chart-accent` is the token re-stepped in the dark theme so two overlaid
+lines stay tellable apart (the daily chart's own reason), and `page-test.mjs`
+measures the two strokes from what the browser paints in BOTH themes. The
+legend is the existing click-to-hide control, and the numbers table lists one
+row per month (the last real count in it and the last expected one) through a
+new generic `opts.table` override on `line()` in `oa-charts.js`, because a
+record that grows by a day for ever would print a thousand rows under itself.
+The growth figure is deliberately NOT a `DIMENSIONS` entry: it is not a
+`breakdowns` record of `analytics.json`, and the pin that reads that table
+against `BREAKDOWN_IDS` both ways must stay exact. The current count and the
+count reached go in the CAPTION, never a sixth tile (the strip caps at five).
 
 ### Two figures that are each OPTIONAL cannot promise each other
 

@@ -136,7 +136,13 @@
     },
   ];
 
-  var state = { data: null, range: '90', metric: 'visitors' };
+  var state = { data: null, growth: null, range: '90', metric: 'visitors' };
+
+  /* THE GROWTH CHART'S TWO NUMBERS, in one place: the fit window and how far
+     the dashed line is carried. The caption is BUILT from them, so the words
+     under the chart cannot promise a window the model did not use. */
+  var GROWTH_WINDOW = 90;
+  var GROWTH_AHEAD = 180;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g,
@@ -361,7 +367,10 @@
         'deleted a year later. They have shown nothing since. See ' +
         '<code>_SETUP-ANALYTICS.md</code> for what each source needs.</p>'));
       /* the frozen archive may still have something worth showing even with no
-         day rows at all, so it is drawn below rather than skipped */
+         day rows at all, so it is drawn below rather than skipped; the
+         community's growth has a file of its own and is drawn on the same
+         terms */
+      drawGrowth();
       renderUniversities();
       return;
     }
@@ -411,6 +420,11 @@
       xTitle: 'Day',
       height: 280,
     });
+
+    /* 1b — how the community has grown, under the visitors chart and before
+       everything the reader has to scroll for. Drawn from its own served file
+       and only when that file holds something (see drawGrowth). */
+    drawGrowth();
 
     /* 2 — the weekly rhythm */
     var wk = A.byWeekday(rows);
@@ -589,6 +603,93 @@
     provenance(f.section, rec);
   }
 
+  /** How the community has grown: the registered accounts, day by day, and
+   *  where the last few months' growth would take the count if it simply
+   *  continued.
+   *
+   *  DRAWN ONLY WHEN data/users-growth.json HOLDS SOMETHING, the page's rule
+   *  for every figure: the committed seed carries no days, and a seed drawn as
+   *  a chart would be the empty axis this page was rebuilt to remove. The
+   *  file is written by the roster sync (counts and dates, nothing else) and
+   *  is the same source the front page's registered-users tile reads.
+   *
+   *  THE DASHED LINE IS SAID EXACTLY. It is `growthProjection` in the model,
+   *  a straight-line trend fitted over the last GROWTH_WINDOW days and carried
+   *  GROWTH_AHEAD days forward through the last real point, and the caption
+   *  names both numbers from those constants, calls it an expectation from
+   *  past growth rather than a target, and gives the count it reaches. It is
+   *  drawn in the chart accent (the site's yellow, re-stepped in the dark
+   *  theme so it stays tellable from the brand line) and dashed, so the pair
+   *  never relies on colour alone. The legend is the same click-to-hide
+   *  control the daily chart has, and the numbers table lists one row per
+   *  month rather than one per day (a record that grows by a day for ever
+   *  would print a thousand rows under itself). */
+  function monthLabel(day) {
+    if (!day) return '';
+    var p = day.split('-');
+    return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).toLocaleDateString('en-GB',
+      { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  function drawGrowth() {
+    var g = state.growth;
+    var actual = g && Array.isArray(g.days) ? g.days.filter(function (p) {
+      return Array.isArray(p) && A.isDay(p[0]) && Number.isFinite(Number(p[1]));
+    }) : [];
+    if (actual.length < 2) return;
+    var today = new Date().toISOString().slice(0, 10);
+    var proj = A.growthProjection(actual, { window: GROWTH_WINDOW, ahead: GROWTH_AHEAD, today: today });
+    if (!proj) return;
+
+    var days = actual.map(function (p) { return p[0]; });
+    var have = actual.map(function (p) { return Number(p[1]); });
+    var expect = actual.map(function () { return null; });
+    /* the two lines MEET: the projection's first point is the last actual day */
+    expect[expect.length - 1] = proj.points[0][1];
+    proj.points.slice(1).forEach(function (p) {
+      days.push(p[0]);
+      have.push(null);
+      expect.push(p[1]);
+    });
+
+    var f = figure('How the community has grown',
+      'Registered accounts on the site, day by day, since the first one. The yellow ' +
+      'dashed line is a straight-line trend fitted over the last ' + GROWTH_WINDOW +
+      ' days and carried ' + GROWTH_AHEAD + ' days forward; an expectation from past ' +
+      'growth, not a target. ' + C.full(proj.lastValue) + ' registered users on ' +
+      pretty(proj.lastDay) + '; the trend reaches ' + C.full(proj.reached) + ' by ' +
+      pretty(proj.horizon) + '. Press a name in the legend to put either line away.');
+    root.appendChild(f.section);
+
+    /* one row per MONTH: the last real count in it, and the last expected one */
+    var months = [];
+    var byMonth = {};
+    days.forEach(function (d, i) {
+      var m = d.slice(0, 7);
+      if (!byMonth[m]) { byMonth[m] = { label: monthLabel(d), have: null, expect: null }; months.push(m); }
+      if (have[i] != null) byMonth[m].have = have[i];
+      if (expect[i] != null) byMonth[m].expect = expect[i];
+    });
+
+    C.line(f.body, {
+      title: 'Registered users over time',
+      points: days.map(function (d) { return { label: monthLabel(d), label2: pretty(d) }; }),
+      series: [
+        { name: 'Registered users', values: have, kind: 'brand', area: true },
+        { name: 'Expected growth', values: expect, kind: 'accent', dashed: true },
+      ],
+      xTitle: 'Day',
+      height: 260,
+      table: {
+        cols: ['Month', 'Registered users', 'Expected growth'],
+        rows: months.map(function (m) {
+          var r = byMonth[m];
+          return [r.label, r.have == null ? '—' : C.full(r.have), r.expect == null ? '—' : C.full(r.expect)];
+        }),
+      },
+    });
+  }
+
   /** Which universities read the site.
    *
    *  IT IS A SAMPLE AND IT SAYS SO. The university is worked out from the
@@ -698,6 +799,20 @@
       if (Math.abs(w - drawnAt) > 1) draw();
     }, 150);
   });
+
+  /* THE GROWTH FILE IS A SECOND, INDEPENDENT READ. A failure here costs the
+     one figure and nothing else: the page draws whatever it has, and draws
+     again if the file lands after the analytics data did. */
+  fetch('/data/users-growth.json', { cache: 'no-cache' })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (g) {
+      state.growth = g && Array.isArray(g.days) ? g : null;
+      if (state.data && state.growth && state.growth.days.length) draw();
+    })
+    .catch(function () { state.growth = null; });
 
   fetch('/data/analytics.json', { cache: 'no-cache' })   // the shared substrate is absolute
     .then(function (r) {

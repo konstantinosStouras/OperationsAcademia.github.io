@@ -490,7 +490,15 @@ body.v3-sheet-open { overflow: hidden; }
 
 .v3-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* ONE ROW OF WHATEVER TILES ARE SHOWN. This was `repeat(4, minmax(0, 1fr))`
+     when the strip held exactly four; the fifth tile (registered users) is
+     revealed by script only when its served file holds a count, so the row
+     has to fit four OR five, and a fixed four-track template would put the
+     fifth alone on a second row. Column auto-flow gives every SHOWN tile an
+     equal track; a hidden tile is display:none and claims none. The phone
+     breakpoints below switch back to row flow with their own templates. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 14px;
   margin-top: clamp(44px, 7vh, 72px);
 }
@@ -2059,7 +2067,7 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
   .v3-header .v3-w1, .v3-header .v3-w2 { font-size: 13px; letter-spacing: -0.016em; }
   .v3-header .v3-logo .v3-mark { width: 26px; height: 36px; }
   .v3-header-inner { padding: 0 14px; gap: 10px; }
-  .v3-stats { grid-template-columns: 1fr 1fr; }
+  .v3-stats { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
   .v3-grid, .v3-grid.two, .v3-pa-grid { grid-template-columns: 1fr; }
   .v3-footer-grid { grid-template-columns: 1fr; }
   .v3-cta-row .v3-btn { flex: 1 1 auto; }
@@ -2090,7 +2098,7 @@ body.v3 .v3-panel .oa-card.oa-sponsored { border-left: 3px solid var(--sponsor);
   .v3-header .v3-w1, .v3-header .v3-w2 { font-size: 11.5px; }
   .v3-header .v3-logo .v3-mark { width: 22px; height: 30px; }
   .v3-header-inner { gap: 8px; padding: 0 12px; }
-  .v3-stats { grid-template-columns: 1fr; }
+  .v3-stats { grid-auto-flow: row; grid-template-columns: 1fr; }
 }
 
 /* ported action pages: a narrower reading column under the page hero */

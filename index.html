@@ -191,6 +191,14 @@
             <div class="v3-stat"><b data-stat="candidates">700+</b><span>candidates listed</span></div>
             <div class="v3-stat"><b data-stat="placements">170+</b><span>placements recorded</span></div>
             <div class="v3-stat"><b>2014</b><span>serving the community since</span></div>
+            <!-- BORN HIDDEN, with no number in it: the count comes from
+                 /data/users-meta.json, which only a run with the credential
+                 can write, and V3.statTo only ever raises a figure. The page
+                 reveals the tile when the file holds ten or more, rounded
+                 DOWN to the nearest ten with a plus, so the printed number is
+                 never more than the count (owner, 2026-09-05: the number of
+                 registered users is public, as on /lit/). -->
+            <div class="v3-stat" hidden data-stat="users"><b></b><span>registered users</span></div>
           </div>
 
           <div class="v3-sponsors">
@@ -568,7 +576,9 @@
                 appear on the site. E-mail addresses are never published &mdash; a
                 candidate&rsquo;s contact address is shown only if they opt in. Accounts exist
                 so that we know where a posting comes from and can reach its author, nothing
-                more.</p>
+                more. The one thing about registered accounts that is public is how many
+                there are: the front page shows the count and the <a href="analytics.html">analytics
+                page</a> shows how it has grown, and neither says who they are.</p>
                 <p>The details are in the <a href="privacy-policy.html">Privacy Policy</a> and
                 the <a href="terms-and-conditions.html">Terms and Conditions</a>, which you
                 accept by using the site.</p>
@@ -973,6 +983,26 @@
           var rows = Array.isArray(data) ? data : data.rows || [];
           var el = document.querySelector('[data-stat="placements"]');
           if (el && rows.length > 170) V3.statTo(el, rows.length.toLocaleString('en-US'));
+        }).catch(function () {});
+
+      /* --------------------------------- registered users (owner, 2026-09-05)
+         The fifth tile. Its file is written daily by the roster sync from
+         Firebase Auth (a count and a date, nothing else), so the tile has no
+         seed number and is born hidden: nothing here can be written without
+         the credential, and a "0+" would be a lie about a community of some
+         dozens. It is REVEALED before the count-up runs, because the count-up
+         waits for the tile to scroll into view and a hidden element never
+         does; the figure is rounded DOWN to the nearest ten with a plus, so
+         it is never more than the count; and under ten nothing changes, so a
+         near-empty roster is not announced as a figure. */
+      fetch('/data/users-meta.json', { credentials: 'same-origin', cache: 'no-cache' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (meta) {
+          var count = Math.floor(Number(meta && meta.count) || 0);
+          var tile = document.querySelector('[data-stat="users"]');
+          if (!tile || count < 10) return;
+          tile.hidden = false;
+          V3.statTo(tile.querySelector('b'), (Math.floor(count / 10) * 10).toLocaleString('en-US') + '+');
         }).catch(function () {});
 
       /* --------------------------------- candidates stat + reveal note

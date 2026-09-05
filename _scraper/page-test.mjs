@@ -7333,6 +7333,94 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* -------------------------------- the registered-users tile (owner, 2026-09-05)
+
+   The front page's fifth key figure is born HIDDEN with no number in it, and
+   the page reveals it only when data/users-meta.json holds ten or more, rounded
+   down to the nearest ten with a plus. What a unit test cannot see is the
+   half that matters: that the count-up really reaches "60+" (the tile has to
+   be revealed BEFORE statTo, or its observer never fires), that a missing or
+   too-small file leaves the strip exactly as it was, and that five tiles sit
+   on ONE row at every desktop width rather than the fifth orphaning below. */
+{
+  const meta = (pg, body) => pg.route('**/data/users-meta.json', (r) => body == null
+    ? r.fulfill({ status: 404, contentType: 'text/plain', body: 'not found' })
+    : r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) }));
+  const readStrip = (pg) => pg.evaluate(() => {
+    const tiles = [...document.querySelectorAll('#v3-stats .v3-stat')];
+    const shown = tiles.filter((t) => !t.hidden && getComputedStyle(t).display !== 'none');
+    const tops = [...new Set(shown.map((t) => Math.round(t.getBoundingClientRect().top)))];
+    const users = document.querySelector('[data-stat="users"]');
+    return {
+      total: tiles.length,
+      shown: shown.length,
+      rows: tops.length,
+      hidden: !!(users && users.hidden),
+      text: users ? users.querySelector('b').textContent : null,
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      clipped: shown.some((t) => t.getBoundingClientRect().right > window.innerWidth + 1),
+    };
+  });
+
+  /* no file: the strip is the four tiles it always was */
+  for (const body of [null, { generated: '2026-09-05T00:00:00Z', count: 9 }]) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('users tile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await meta(q, body);
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForTimeout(400);
+    const r = await readStrip(q);
+    const label = body ? 'a count under ten' : 'no file';
+    eq(r.total, 5, `users tile (${label}): the fifth tile is in the markup`);
+    ok(r.hidden, `users tile (${label}): …and stays hidden`);
+    eq(r.shown, 4, `users tile (${label}): the strip shows the four seeded figures and nothing else`);
+    eq(r.rows, 1, `users tile (${label}): …on one row`);
+    eq(r.text, '', `users tile (${label}): the hidden tile carries no number, not even a 0`);
+    await ctx.close();
+  }
+
+  /* 64 registered users: revealed, counted up to "60+", and on the same row */
+  for (const width of [1280, 1180, 1024]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 900 } });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('users tile: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await meta(q, { generated: '2026-09-05T00:00:00Z', count: 64 });
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForSelector('[data-stat="users"]:not([hidden])', { timeout: 10000 });
+    await q.evaluate(() => document.querySelector('[data-stat="users"]').scrollIntoView({ block: 'center' }));
+    /* the count-up is 800ms once the tile is in view; a tile revealed AFTER
+       statTo would sit on 0 for ever, which is what this wait is for */
+    await q.waitForFunction(() => document.querySelector('[data-stat="users"] b').textContent === '60+', null, { timeout: 8000 });
+    await q.evaluate(() => window.scrollTo(0, 0));
+    const r = await readStrip(q);
+    eq(r.shown, 5, `users tile (${width}px): all five tiles are shown`);
+    eq(r.text, '60+', `users tile (${width}px): 64 accounts read "60+", rounded DOWN to the nearest ten`);
+    eq(r.rows, 1, `users tile (${width}px): five tiles on ONE row, no orphan below`);
+    ok(!r.overflowX && !r.clipped, `users tile (${width}px): nothing runs off the screen`);
+    await ctx.close();
+  }
+
+  /* and on a phone, revealed, in the single column the breakpoint gives it */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('users tile 390: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await meta(q, { generated: '2026-09-05T00:00:00Z', count: 64 });
+    await q.goto(BASE + 'index.html', { waitUntil: 'load' });
+    await q.waitForSelector('[data-stat="users"]:not([hidden])', { timeout: 10000 });
+    await q.evaluate(() => document.querySelector('[data-stat="users"]').scrollIntoView({ block: 'center' }));
+    await q.waitForFunction(() => document.querySelector('[data-stat="users"] b').textContent === '60+', null, { timeout: 8000 });
+    const r = await readStrip(q);
+    eq(r.shown, 5, 'users tile (390px): all five tiles are shown on a phone');
+    ok(!r.overflowX && !r.clipped, 'users tile (390px): …and the page does not scroll sideways');
+    await ctx.close();
+  }
+}
+
 /* ----------------------------------------------------- the analytics page
 
    It was four Google Sheets <iframe>s, dead since Universal Analytics was
@@ -7428,6 +7516,37 @@ for (const w of [320, 360, 390, 430]) {
     status: 200, contentType: 'application/json', body: JSON.stringify(body),
   }));
 
+  /* THE COMMUNITY'S GROWTH (owner, 2026-09-05): 400 days of registrations,
+     slow at first and quicker in the last three months, so the dashed trend
+     visibly differs from a line through the whole record */
+  const growthDays = [];
+  {
+    let n = 0;
+    for (let i = 0; i < 400; i++) {
+      const t = new Date(end);
+      t.setUTCDate(t.getUTCDate() - 399 + i);
+      n += i < 300 ? (i % 6 === 0 ? 1 : 0) : (i % 2 === 0 ? 1 : 0);
+      growthDays.push([t.toISOString().slice(0, 10), n]);
+    }
+  }
+  const growthDemo = {
+    generated: new Date(end).toISOString(),
+    first: growthDays[0][0],
+    days: growthDays,
+  };
+  const serveGrowth = (pg, body) => pg.route('**/data/users-growth.json', (r) => body == null
+    ? r.fulfill({ status: 404, contentType: 'text/plain', body: 'not found' })
+    : r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) }));
+  /* the months the growth table must list: from the first registration to
+     180 days after TODAY (the model anchors its horizon on the reader's day,
+     so a stale copy of the file still gets 180 days ahead) */
+  const monthsExpected = (() => {
+    const to = new Date(); to.setUTCDate(to.getUTCDate() + 180);
+    const a = growthDays[0][0].slice(0, 7).split('-').map(Number);
+    const b = to.toISOString().slice(0, 7).split('-').map(Number);
+    return (b[0] - a[0]) * 12 + (b[1] - a[1]) + 1;
+  })();
+
   /* --- with data, in BOTH themes ---------------------------------------- */
 
   for (const theme of ['light', 'dark']) {
@@ -7436,9 +7555,12 @@ for (const w of [320, 360, 390, 430]) {
     q.on('pageerror', (e) => jsErrors.push(`analytics ${theme}: ` + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
     await serveDemo(q, demo);
+    await serveGrowth(q, growthDemo);
     await q.addInitScript((t) => { try { localStorage.setItem('oaV3Theme', t); } catch (e) { /**/ } }, theme);
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    await q.waitForFunction(() => [...document.querySelectorAll('.oa-figure > h2')]
+      .some((h) => /How the community has grown/.test(h.textContent)), null, { timeout: 15000 });
 
     const seen = await q.evaluate(() => ({
       figures: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
@@ -7540,6 +7662,76 @@ for (const w of [320, 360, 390, 430]) {
       getComputedStyle(document.querySelector('.oa-line.oa-accent')).strokeDasharray);
     ok(dashed && dashed !== 'none',
       `analytics (${theme}): the rolling mean is dashed too — identity is never colour alone`);
+
+    /* HOW THE COMMUNITY HAS GROWN (owner, 2026-09-05): two series, the real
+       count in the brand ink and the expected growth dashed in the accent,
+       measured from what the browser paints in this theme; the caption says
+       exactly what the dashed line is and names both counts; the legend puts
+       the trend away and brings it back; the table is one row per month. */
+    const growth = await q.evaluate(() => {
+      const fig = [...document.querySelectorAll('.oa-figure')]
+        .find((f) => /How the community has grown/.test((f.querySelector('h2') || {}).textContent || ''));
+      if (!fig) return null;
+      const px = (el) => getComputedStyle(el).stroke;
+      const brand = fig.querySelector('.oa-line.oa-brand');
+      const accent = fig.querySelector('.oa-line.oa-accent');
+      const heads = [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent);
+      return {
+        position: heads.indexOf('How the community has grown'),
+        lines: fig.querySelectorAll('.oa-line').length,
+        brand: brand ? px(brand) : '', accent: accent ? px(accent) : '',
+        dash: accent ? getComputedStyle(accent).strokeDasharray : '',
+        brandDash: brand ? getComputedStyle(brand).strokeDasharray : '',
+        sub: (fig.querySelector('.oa-figure-sub') || {}).textContent || '',
+        legend: [...fig.querySelectorAll('.oa-chart-legend-on button')].map((b) => b.textContent.trim()),
+        tableCols: [...fig.querySelectorAll('.oa-chart-table thead th')].map((t) => t.textContent),
+        tableRows: fig.querySelectorAll('.oa-chart-table tbody tr').length,
+        firstRow: [...(fig.querySelector('.oa-chart-table tbody tr') || { children: [] }).children].map((c) => c.textContent),
+        lastRow: [...([...fig.querySelectorAll('.oa-chart-table tbody tr')].pop() || { children: [] }).children].map((c) => c.textContent),
+      };
+    });
+    ok(growth, `analytics (${theme}): the growth figure is drawn from its routed file`);
+    if (growth) {
+      eq(growth.position, 1, `analytics (${theme}): …directly under the visitors chart`);
+      eq(growth.lines, 2, `analytics (${theme}): …with two lines, the count and the trend`);
+      const rgb = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const [ar, ag, ab] = rgb(growth.brand);
+      const [br, bg, bb] = rgb(growth.accent);
+      const dist = Math.abs(ar - br) + Math.abs(ag - bg) + Math.abs(ab - bb);
+      ok(growth.brand !== growth.accent && dist > 90,
+        `analytics (${theme}): the trend is the chart ACCENT, far enough from the brand line to read as ` +
+        `two lines (channel distance ${dist})`);
+      ok(growth.dash && growth.dash !== 'none' && (!growth.brandDash || growth.brandDash === 'none'),
+        `analytics (${theme}): …and dashed where the real count is solid, so the pair never relies on colour alone`);
+      ok(/straight-line trend fitted over the last 90 days and carried 180 days forward; an expectation from past growth, not a target/.test(growth.sub),
+        `analytics (${theme}): the caption says exactly what the dashed line is, and is not`);
+      const nums = growth.sub.match(/\b\d[\d,]*\b registered users on/) && growth.sub.match(/the trend reaches \b\d[\d,]*\b by/);
+      ok(nums, `analytics (${theme}): …and names the count today and the count the trend reaches`);
+      ok(!/—/.test(growth.sub), `analytics (${theme}): …without an em dash`);
+      eq(growth.legend, ['Registered users', 'Expected growth'],
+        `analytics (${theme}): the legend is the page's click-to-hide control, naming both series`);
+      eq(growth.tableCols, ['Month', 'Registered users', 'Expected growth'],
+        `analytics (${theme}): the numbers table is one row per MONTH, not per day`);
+      eq(growth.tableRows, monthsExpected,
+        `analytics (${theme}): …one for every month from the first registration to the end of the projection`);
+      ok(/^[A-Z][a-z]{2} \d{4}$/.test(growth.firstRow[0]) && growth.firstRow[2] === '—',
+        `analytics (${theme}): the first month carries a real count and no projection`);
+      ok(growth.lastRow[1] === '—' && /^\d[\d,]*$/.test(growth.lastRow[2]),
+        `analytics (${theme}): …and the last month a projection and no real count`);
+    }
+    const trend = await q.evaluate(() => {
+      const fig = [...document.querySelectorAll('.oa-figure')]
+        .find((f) => /How the community has grown/.test((f.querySelector('h2') || {}).textContent || ''));
+      const btn = [...fig.querySelectorAll('.oa-chart-legend-on button')].find((b) => /Expected growth/.test(b.textContent));
+      const line = fig.querySelector('.oa-line.oa-accent');
+      btn.click();
+      const off = { pressed: btn.getAttribute('aria-pressed'), display: line.style.display };
+      btn.click();
+      return { off, backOn: line.style.display };
+    });
+    eq(trend.off, { pressed: 'false', display: 'none' },
+      `analytics (${theme}): pressing Expected growth in the legend puts the trend away`);
+    ok(trend.backOn !== 'none', `analytics (${theme}): …and a second press brings it back`);
 
     /* A MONTH THE RECORD HAS NOT COVERED IS NOT A MONTH WITH NO VISITORS.
        Under the default 90-day range the season chart used to draw eight
@@ -7946,8 +8138,10 @@ for (const w of [320, 360, 390, 430]) {
     q.on('pageerror', (e) => jsErrors.push('analytics no-dims: ' + e.message));
     await q.route('**/firebasejs/**', (r) => r.abort());
     await serveDemo(q, { ...demo, breakdowns: {}, engagement: null });
+    await serveGrowth(q, null);           // no growth file either
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-figure', { timeout: 15000 });
+    await q.waitForTimeout(400);
     const bare = await q.evaluate(() => ({
       heads: [...document.querySelectorAll('.oa-figure > h2')].map((h) => h.textContent),
       body: document.querySelector('#oa-analytics').textContent,
@@ -7957,6 +8151,9 @@ for (const w of [320, 360, 390, 430]) {
     }));
     ok(!bare.heads.includes('Where readers are'),
       'analytics: a figure no source has answered for is not drawn at all');
+    ok(!bare.heads.includes('How the community has grown'),
+      'analytics: …and with no growth file the growth figure is absent too, silently, ' +
+      'like every figure whose source has not answered');
     ok(!/Where these figures come from|Not on this page yet|own resolver/.test(bare.body),
       'analytics: …and no foot note describes the plumbing in its place — ' +
       'owner, 2026-08-30');
@@ -7965,6 +8162,40 @@ for (const w of [320, 360, 390, 430]) {
       'shape of the defect the page was rebuilt to remove');
     ok(!/Typical visit|Time on a page/.test(bare.tiles),
       'analytics: and a tile with no measurement behind it is absent, never a zero');
+    await ctx.close();
+  }
+
+  /* --- on a phone, with the growth chart drawn --------------------------
+     analytics.html is not an OAList page and is not in MOBILE_PAGES, so the
+     phone claims for it are made here: no sideways scroll, every chart drawn
+     at the size it is shown at, the growth figure among them. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const q = await ctx.newPage();
+    q.on('pageerror', (e) => jsErrors.push('analytics 390: ' + e.message));
+    await q.route('**/firebasejs/**', (r) => r.abort());
+    await serveDemo(q, demo);
+    await serveGrowth(q, growthDemo);
+    await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
+    await q.waitForFunction(() => [...document.querySelectorAll('.oa-figure > h2')]
+      .some((h) => /How the community has grown/.test(h.textContent)), null, { timeout: 15000 });
+    const phone = await q.evaluate(() => ({
+      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      scales: [...document.querySelectorAll('.oa-chart-svg')].map((svg) => {
+        const vb = svg.getAttribute('viewBox').split(' ').map(Number);
+        const r = svg.getBoundingClientRect();
+        return { sx: r.width / vb[2], sy: r.height / vb[3] };
+      }),
+      growthLines: (() => {
+        const fig = [...document.querySelectorAll('.oa-figure')]
+          .find((f) => /How the community has grown/.test((f.querySelector('h2') || {}).textContent || ''));
+        return fig ? fig.querySelectorAll('.oa-line').length : 0;
+      })(),
+    }));
+    ok(!phone.overflowX, 'analytics (390px): the page never scrolls sideways with the growth chart drawn');
+    ok(phone.scales.length > 3 && phone.scales.every((c) => Math.abs(c.sx - 1) < 0.02 && Math.abs(c.sy - 1) < 0.02),
+      'analytics (390px): every chart, the growth chart included, is drawn at the size it is shown at');
+    eq(phone.growthLines, 2, 'analytics (390px): the growth chart carries both lines on a phone');
     await ctx.close();
   }
 
