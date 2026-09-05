@@ -8237,6 +8237,12 @@ for (const w of [320, 360, 390, 430]) {
       totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
       range: { from: '', to: '' }, recentDays: 7,
     });
+    /* The growth chart reads its OWN file, so the empty state has to serve
+       that one empty too: the committed seed. Left to the checkout, master's
+       real users-growth.json (written daily by the roster sync since
+       2026-09-05) drew the one chart this block says must not be there, and
+       only on the PR merge commit, where the branch's own seed still passed. */
+    await serveGrowth(q, { generated: '', first: '', days: [] });
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-an-note', { timeout: 15000 });
     const note = await q.evaluate(() => document.querySelector('#oa-analytics').textContent);
@@ -8245,6 +8251,9 @@ for (const w of [320, 360, 390, 430]) {
       'to anybody is how the old charts stayed dead for three years');
     ok(/Universal Analytics/.test(note) && /_SETUP-ANALYTICS\.md/.test(note),
       'analytics: …and names both the cause and where to read what to do about it');
+    /* the growth chart arrives on its own fetch, after the note: count once
+       it has had time to land, or a chart drawn late passes this by luck */
+    await q.waitForTimeout(800);
     eq(await q.evaluate(() => document.querySelectorAll('.oa-chart-svg').length), 0,
       'analytics: and draws no empty chart beside it');
     await ctx.close();
