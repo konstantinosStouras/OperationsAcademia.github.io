@@ -2842,8 +2842,9 @@ on; a suggestion list is what the site puts in front of you.** Only the
 second was the problem. The selftest pins it that way round now (the word
 still tags a post, alone or beside another; the curated list carries neither
 it nor `gossip`), and `page-test.mjs` measures both halves in a browser: the
-picker suggests nothing for "rumou", and a reader who types the word gets
-the chip.
+CURATED half of the picker offers no rumour tag for "rumou" (what it does
+draw there is the create-a-tag row for the prefix, which is how a free tag
+is made at all), and a reader who types the word gets the chip.
 
 **WHAT IS STILL A NUDGE, SAID RATHER THAN HIDDEN.** The compose picker's
 suggestion pool is the curated list PLUS THE ROOM'S OWN TALLY
