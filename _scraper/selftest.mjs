@@ -14,7 +14,7 @@ import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
 import * as CSTATS from './build-candidate-stats.mjs';
 import { readFile, readdir } from 'node:fs/promises';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -13393,6 +13393,42 @@ async function testEmailVerification() {
   const site = 'https://www.operationsacademia.org';
   const noDash = (s) => !/—/.test(String(s));
 
+  /* --- the Admin app is found by NAME, never by count --------------------
+     The functions library holds a named app of its own to verify a callable's
+     token, so getApps() is non-empty inside every onCall handler while the
+     default app may not exist. `if (!getApps().length) initializeApp()` is
+     therefore a helper that skips the initialisation exactly when a callable
+     runs: sendVerificationEmail died on "The default Firebase app does not
+     exist" on every call the day it went live (2026-09-05), and the site fell
+     back to Firebase's own message, which landed in spam. Every functions file
+     is read with its comments stripped, so this sentence cannot satisfy it. */
+  {
+    const fnDir = path.join(root, '_functions');
+    const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => {
+      if (e.name === 'node_modules' || e.name === 'test') return [];
+      const p = path.join(d, e.name);
+      return e.isDirectory() ? walk(p) : (/\.js$/.test(e.name) ? [p] : []);
+    });
+    const files = walk(fnDir);
+    ok(files.some((p) => p.endsWith('index.js')) && files.some((p) => p.endsWith('verify-email.js')),
+      'admin app: the functions tree was walked (' + files.length + ' files, index.js and verify-email.js among them)');
+    for (const p of files) {
+      const code = readFileSync(p, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+      ok(!/getApps\(\)\.length/.test(code),
+        'admin app: ' + path.relative(root, p) + ' never tests getApps().length for the default app');
+      if (/initializeApp\(\)/.test(code)) {
+        ok(/getApps\(\)\.some\(\(a\) => a\.name === '\[DEFAULT\]'\)/.test(code),
+          'admin app: ' + path.relative(root, p) + ' initialises the default app only when none is NAMED [DEFAULT]');
+      }
+    }
+    const sdk = path.join(fnDir, 'node_modules', 'firebase-functions', 'lib', 'common', 'app.js');
+    if (existsSync(sdk)) {
+      ok(/__FIREBASE_FUNCTIONS_SDK__/.test(readFileSync(sdk, 'utf8')),
+        'admin app: the installed functions library still creates its own named app, the reason the count test is wrong');
+    }
+  }
+
   /* --- the message ------------------------------------------------------- */
 
   const V = require(path.join(root, '_functions', 'verify-email.js'));
@@ -13949,6 +13985,21 @@ async function testEmailVerification() {
       `${f}: the head snippet reads a hint for a pending account as signed out`);
   }
   ok(snippetSeen >= 20, `the head snippet was found on ${snippetSeen} pages, so the loop above measured something`);
+  ok(/id="ve-count"[^>]*aria-live="polite"/.test(vpage),
+    'verify page: the countdown line is announced (aria-live), so a screen reader hears the move coming');
+  ok(/class="v3-mut ve-foot"/.test(vpage),
+    'verify page: the footer line is marked so the confirmed state can hide it');
+  ok(/var MOVE_ON_S = 5;/.test(vjs) && /location\.replace\(href\)/.test(vjs)
+     && /if \(inside\) startCountdown\(/.test(vjs) && /else stopCountdown\(\);/.test(vjs),
+    'oa-verify.js: a confirmed reader with a usable session is moved to the account page after five seconds, REPLACING the spent link; a reader who must sign in, or the mismatch case, is not');
+  ok(/classList\.add\('ve-focus'\)/.test(vjs) && /classList\.remove\('ve-focus'\)/.test(vjs),
+    'oa-verify.js: the confirmed state marks the body so the page becomes the box, and unmarks it when the state changes');
+  {
+    const v3 = await readFile(path.join(root, 'assets', 'v3.css'), 'utf8');
+    ok(/body\.ve-focus \.v3-pa-hero,\s*body\.ve-focus \.ve-foot \{ display: none; \}/.test(v3)
+       && /body\.ve-focus #main \{[^}]*align-content: center;/.test(v3),
+      'v3.css: the confirmed state hides the hero and the footer line and centres the box');
+  }
   ok(noDash(vjs), 'oa-verify.js: no em dash');
 
   const lc = await readFile(path.join(HERE, 'link-check.mjs'), 'utf8');

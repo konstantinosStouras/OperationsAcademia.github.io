@@ -2203,6 +2203,34 @@ them), `recordVisit`, and `sendVerificationEmail`. Read the list back after
 every deploy; fewer means a stale checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
 
+**The confirmed state is a box in the middle of the screen that moves on by
+itself** (owner, 2026-09-05: "just a message box in the center of the screen
+which would disappear after 5sec"). For a reader whose session is usable the
+page's hero and footer line go (`body.ve-focus`, rules in `v3.css`), a line
+under the button counts five seconds down (`aria-live`, so it is heard), and
+at zero `location.replace` moves to the account page, so Back does not
+return to a spent link. Never for a reader who must sign in first, and never
+in the mismatch case: there is no account to go to, and a countdown into a
+locked page would be the very thing Continue is withheld for. The one-time
+code is already off the address bar by then. The white page the owner saw
+between the message and the site was Firebase's OWN handler, reached only
+from the fallback message's link; the setup page names the console setting
+(the template's action URL) that points it at `verify-email.html` instead.
+
+**The Admin app is found by NAME, never by count.** The functions
+library creates a named app of its own to verify a callable's token, so
+inside every callable `getApps()` is already non-empty while the default
+app, the one `getFirestore()` and `getAuth()` read, may not exist.
+`if (!getApps().length) initializeApp()` therefore skipped the
+initialisation exactly when a callable ran: the day this went live
+(2026-09-05) every call to `sendVerificationEmail` died on "The default
+Firebase app does not exist", the browser fell back to Firebase's own
+message, and that message landed in spam. `recordVisit` never hit it
+because an onRequest handler verifies no token, which is why the deploy
+looked fine. `adminApp()` in `index.js` and `db()` in the forum's
+`member.js` test for an app named `[DEFAULT]`, and the selftest reads
+every functions file with its comments stripped and refuses the count test.
+
 **Where the browser keeps it, so nobody looks in the wrong place.**
 `needsVerification(u)` is the one test (unconfirmed address AND the password
 provider); the auth handler sets `state.pending` from it and takes the
