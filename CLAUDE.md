@@ -2122,6 +2122,46 @@ deleting its document. Deleting the document would leave the row orphaned and
 therefore preserved."* Both ends withdraw; only the sweep deletes the documents,
 and only once four things are true.
 
+### The password box that stopped a deletion, and the retry it made impossible
+
+Owner, 2026-09-05, from a real deletion of their own test account: *"the site
+asked me to add my password. I didn't remember my password. So at that step I
+left it … But then, tried to delete my account and the site doesn't let me …
+There is no reason we ask them to add their password. It's too complicated, not
+needed."* Two defects, and the second was caused by the first.
+
+**THE PROMPT WAS INHERITED FROM THE MERGE AND DOES NOT BELONG HERE.** Firebase
+refuses to delete a session older than a few minutes until it is re-proved, and
+`deleteCurrentSignIn` answers that by asking for the password back. The MERGE
+has to: nothing else can finish a merge. A DELETION has the sweep, which
+removes the sign-in with the Admin SDK and needs no password from anybody. So
+the deletion path passes `{ reauth: false }`, tries, and treats a refusal as
+the ordinary outcome for anyone who did not sign in a minute ago. The card says
+when the sign-in goes rather than claiming it has gone.
+
+**AND A SECOND ATTEMPT WAS REFUSED, WHICH IS THE WORSE HALF.** The work order
+is written FIRST, before anything is taken away, precisely so an interrupted
+run can be finished. But `allow update: if false` is what makes the sweep's
+own stamps safe, and to Firestore a `set` over a document that already exists
+IS an update. So the first attempt filed the order, the prompt stopped it, and
+every attempt after that was refused with a permission-denied — which the panel
+reported as *"This is not switched on yet"*, sending the owner to look for a
+rules deploy that had happened hours before. **The step READS the order first
+now** and carries on from one already filed; a read that itself fails falls
+through to the write, so a genuine rules problem still surfaces as one. The
+maintainer's own `requestFor` has the same shape for the same reason.
+
+**The copy no longer names a cause it cannot know.** A permission-denied now
+says to reload and try once more, and mentions the rules only as what is left
+if that does not help.
+
+Tests: the pins in `testAccountDeletion` (read-before-write on both writers,
+`{ reauth: false }`, and nothing on the path re-proving the session) and the
+block in `page-test.mjs` that drives the owner's exact case — an order already
+filed, a session Firebase will not let delete itself — and asserts it finishes,
+reads rather than writes the order, asks for no password, and says when the
+sign-in goes.
+
 ### The four gates on deleting a submission's document
 
 1. **The build has run SINCE the withdrawal.** `data/jobs-meta.json`'s
@@ -3184,6 +3224,87 @@ names and only those, the refusal shape, the fixed vote id, the reasons it
 answers with) and the browser block (every reader driven, the leak needles,
 the shared measure), so a block deleted or a reader dropped fails the
 build.
+
+### The 2026 Q&A archive, carried in as threads
+
+Owner, 2026-09-05: *"prepopulate the OA forum with anonymous users having
+posted the questions shown here and then anonymous users having posted the
+answers ... tag: 2026 Q&A"*, from the tracking workbook's **2026 Q&A** tab,
+which is the sheet's own anonymous forum and the thing this forum replaces.
+
+    _scraper/forum-seed-2026-qa.json   what is posted, committed and reviewable
+    _scraper/seed-forum.mjs            the plan, the guards, the write
+    .github/workflows/oa-forum-seed.yml   pressed, never scheduled
+
+**A SCRIPT, NOT AN `op` ON `forumModerate`.** A callable would be inert until
+somebody ran `firebase deploy --only functions` by hand, and this file has
+twice recorded what that costs: *a feature that needs a manual step to become
+real looks installed and is not*. `FIREBASE_SERVICE_ACCOUNT` has been a secret
+here for months, so this road is live on merge. It is also the one writer of a
+forum document outside `_functions/forum/`, which is why `shapeOk` holds every
+document it builds to `KEYS` in `oa-forum-model.js`: the writer-against-model
+discipline the `@doc` scan applies to the callables, applied to the one writer
+the scan cannot see.
+
+**THE SEED IS COMMITTED, NOT FETCHED**, and it is under `_scraper/` rather
+than `data/`. Two reasons, and they are separate. Everything under `data/` is
+served by Pages to anyone who asks, and these threads belong to the room that
+decides who reads them. And a one-off seed read live from a crowdsourced
+workbook could not be reviewed before it was posted, nor re-run against the
+same words: the file is what the button will post, in the diff, before it is
+pressed.
+
+**WHAT THE SHEET RECORDS AND WHAT IT DOES NOT.** A cell packs several people's
+replies together with `<<` and `<-` (row 5's Response 3 is an eight-turn
+exchange in one cell), so each segment is its own post: 14 rows became 14
+threads and 55 posts, nobody's words altered and only the splits added. The
+sheet names no author anywhere, so **a handle is drawn per POST** and asserts
+no linkage between two posts, because the sheet records none. A seeded
+handle's id is a digest of its own post id and nothing else, never a uid and
+never `FORUM_SECRET`, so no seeded document can be joined to a person; each
+claims its slug in `forumNames`, or `forumJoin` could later draw a name a
+seeded post already speaks under.
+
+**THE GUARD IS RE-RUN AT WRITE TIME**, over every title and body, so a text
+the site's own rule refuses cannot be smuggled in through a committed file.
+One response was refused and is listed in the seed's own `skipped` block with
+the reason: a Substack post id (`p-165440484`) is nine consecutive digits and
+`hasPhone` cannot tell it from a telephone number. It is **reported, never
+weakened away** — relaxing a privacy guard to import content is the wrong way
+round, and the run log names what did not travel. A `"ddd"` somebody typed
+into the sheet is listed there too.
+
+**IDEMPOTENT BY DOCUMENT ID.** A thread is `qa2026-r<row>` and a post
+`qa2026-r<row>-p<n>`, so a second press writes nothing: the run reads each
+thread first and skips the ones already there, which is also what keeps the
+room's tag tally from being counted twice. It never writes a **season head**:
+`secretVersion` is `identity.js`'s to mint from Secret Manager on the season's
+first real join, and a head written without one would be a season whose
+handles no version derives.
+
+**The season is the one under way and the run refuses a mismatch.** The tab is
+named for the calendar year the market opens in and the site names a season
+for the year it ends in, so "2026 Q&A" is season **2027**; the seed says so
+and the seeder stops rather than filing a closed season's questions under the
+one now running (`--force-season` if that is ever really meant). Each post
+carries the day the sheet recorded, at 12:00 UTC plus a minute per post, so a
+thread reads in order and every stamp is a whole minute (R7).
+
+**It changes nothing about the announce switch.** `FORUM_ANNOUNCED` stays
+false, no served page gains a link, and the pre-population is exactly what the
+owner described: the forum is reachable by typing its address, which is how
+the seed is read back and the guide seeded.
+
+Tests: `node _scraper/seed-forum.mjs --selftest` (the digest naming no uid,
+secret or clock, read from a bounded and comment-stripped slice of its own
+source because the file EXPLAINS the HMAC it does not compute; the ids; the
+minute-aligned clock; `KEYS` over every document it would write and the four
+kinds it builds; the guard re-run over the committed seed; a duplicate handle
+and `Moderator` both refused; and every handle one the word lists could have
+drawn) and `testForumSeed` in `_scraper/selftest.mjs`, which spawns that suite
+the way the roster sync's is spawned and pins the seed out of `data/`, its
+room and season, the owner's tag on every thread, one handle per post, the
+dispatch-only workflow with its plan-by-default input, and this section.
 
 ## What "immediate" costs, and where the waiting used to be
 
