@@ -1953,11 +1953,27 @@ log line in `main()` for it, the way the campaign mailer's suite already did.
 **The same read writes two SERVED files** (owner, 2026-09-05: the number of
 registered users on the front page, as on /lit/, and a growth chart on the
 analytics page). `usersMeta` writes `data/users-meta.json`, `{ generated,
-count }`, every account Auth holds that is not disabled; `usersGrowth` writes
+count }`; `usersGrowth` writes
 `data/users-growth.json`, `{ generated, first, days: [[yyyy-mm-dd, n], ...] }`,
 one point per UTC day from the first account's creation day to the generated
 day, cumulative and never decreasing, its last point equal to the count so
-the two files cannot disagree. Counts and dates and NOTHING else, because
+the two files cannot disagree. **The count is the Admin area's, not Auth's**
+(owner, 2026-09-05: the front page said "130+" over a Registered-users tile
+saying 106, "it should say 100+ instead"). Auth holds every account ever
+CREATED, and many never became usable: a password registration whose address
+was never confirmed, an account made and never signed in. The tile counts
+`registeredUsers`, the mark a usable sign-in writes, and that is what the
+figure has meant since the tile shipped. So `members(users, marks)` counts
+the Auth accounts that are not disabled AND carry a mark, the run reads the
+tally beside Auth and hands its uids to both writers, and the growth chart
+dates those same people by Auth's `creationTime` (the mark's `t` is last
+seen, not joined). A mark with no account behind it is not counted, so the
+front page reads at or below the tile and never above. **A tally that cannot
+be read, or reads as empty, writes neither file**: the committed ones stand
+and the run says so, the unreachable-source rule. Pinned in the sync's own
+selftest and `testUserDirectorySync` (the join, Auth alone never the count,
+the orphan mark ignored, the collection name against `oa-firebase.js`, and
+the write withheld without the tally). Counts and dates and NOTHING else, because
 everything under `data/` is served to anyone who asks; the selftest pins the
 key lists exactly and sweeps both files for an address. The committed seeds
 are the valid empty shapes (`{"generated":"","count":0}`,

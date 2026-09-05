@@ -5145,13 +5145,26 @@ async function testUserDirectorySync() {
   ok(!ADDRESS.test(growthRaw), 'and it carries no address');
   /* the pure halves behind them, on a fixture */
   const NOW = new Date('2026-09-05T12:00:00Z');
-  const acc = (creation, disabled) => ({ disabled: !!disabled, metadata: { creationTime: creation } });
-  const fixture = [acc('Wed, 02 Sep 2026 08:00:00 GMT'), acc('Fri, 04 Sep 2026 03:00:00 GMT'),
-    acc('Thu, 03 Sep 2026 03:00:00 GMT', true)];
-  eq(mod.usersMeta(fixture, NOW), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
-    'usersMeta counts every account that is not disabled');
-  eq(mod.usersGrowth(fixture, NOW).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
-    'usersGrowth is one cumulative point per UTC day to the generated day');
+  const acc = (uid, creation, disabled) => ({ uid, disabled: !!disabled, metadata: { creationTime: creation } });
+  const fixture = [acc('a', 'Wed, 02 Sep 2026 08:00:00 GMT'), acc('b', 'Fri, 04 Sep 2026 03:00:00 GMT'),
+    acc('c', 'Thu, 03 Sep 2026 03:00:00 GMT', true), acc('never', 'Tue, 01 Sep 2026 03:00:00 GMT')];
+  /* THE COUNT IS THE ADMIN AREA'S (owner, 2026-09-05: "130+" on the front
+     page over a tile saying 106): an account counts when Auth holds it, it
+     is not disabled AND it carries the registeredUsers mark the tile
+     counts. `never` exists in Auth and never signed in usably. */
+  const marks = new Set(['a', 'b', 'c', 'orphan']);
+  eq(mod.usersMeta(fixture, NOW, marks), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
+    'usersMeta counts the accounts that are not disabled and carry a registeredUsers mark, the Admin tile\'s own set');
+  eq(mod.usersMeta(fixture, NOW, []).count, 0, 'and never Auth alone: with no marks the count is nobody');
+  eq(mod.usersGrowth(fixture, NOW, marks).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
+    'usersGrowth is one cumulative point per UTC day to the generated day, over the same members');
+  ok(fbjs.includes(`registered: '${mod.TALLY}'`),
+    'the tally the sync joins on is the collection the Admin area\'s tile counts (oa-firebase.js)');
+  ok(/collection\(TALLY\)\.get\(\)/.test(src) && /usersMeta\(accounts, now, marks\)/.test(src)
+     && /usersGrowth\(accounts, now, marks\)/.test(src),
+    'and main() reads it and hands it to both writers');
+  ok(/if \(!marks\) \{/.test(src) && src.indexOf('if (!marks) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)'),
+    'a tally that could not be read, or reads as empty, leaves both served files as they are');
   ok(/writeFile\(path\.join\(DATA, USERS_META\)/.test(src) && /writeFile\(path\.join\(DATA, USERS_GROWTH\)/.test(src),
     'the sync writes both files');
   ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)')
@@ -5170,8 +5183,8 @@ async function testUserDirectorySync() {
   ok(!/changes only when the count/.test(src) && !/changes only when the count/.test(wf),
     'neither the sync nor its workflow claims the meta file changes only with the count: `generated` is the run instant, so both files change every run');
   ok(/const accounts = \[\];/.test(src)
-     && /accounts\.push\(\{ disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
-    'and what the files are built from holds the flags and the creation time only, never a name or an address');
+     && /accounts\.push\(\{ uid: user\.uid, disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
+    'and what the files are built from holds the uid (the join key), the flags and the creation time only, never a name or an address');
 
   /* the workflow is a DATA WRITER now: the branch tip, the publishing role,
      a commit step naming both files, and a rejected push re-run rather than

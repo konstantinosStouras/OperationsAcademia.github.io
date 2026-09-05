@@ -6,7 +6,7 @@
       "id": "registered-users-figure-2026-09",
       "date": "2026-09-05",
       "title": "The front page says how many people have registered",
-      "summary": "The key figures at the top of the front page gain a fifth one: the number of registered users, rounded down to the nearest ten. It is the count and nothing else. Who has registered stays between each person and the site, exactly as before.",
+      "summary": "The key figures at the top of the front page gain a fifth one: the number of registered users, rounded down to the nearest ten. It counts the accounts that have signed in to the site, the same count the maintainer sees, and nothing else. Who has registered stays between each person and the site, exactly as before.",
       "url": "/"
     },
     {
