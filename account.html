@@ -251,6 +251,31 @@
           <p class="v3-cta-row"><a class="v3-btn primary" id="pa-cand-edit" href="post-a-candidate.html">Edit your profile</a></p>
         </section>
 
+        <!-- DELETING THE ACCOUNT, the last thing on the page (owner,
+             2026-09-05: "There is no option for a user to completely delete
+             their profile. You should have it within their personal area").
+             Drawn by assets/oa-account-delete.js, which is the ONE definition
+             of what a deletion is: this panel writes the same work order the
+             maintainer's roster writes, and _scraper/purge-accounts.mjs reads
+             it. Hidden until the auth event says somebody is signed in, never
+             painted from the remembered hint: a control that deletes an
+             account must not be drawn for a reader the SDK then says is not
+             there. -->
+        <section class="v3-pa-danger" id="pa-delete" hidden aria-labelledby="pa-delete-h">
+          <h2 class="v3-h3" id="pa-delete-h">Delete my account</h2>
+          <p>Everything you have posted comes off the site, your e-mail alerts
+            stop, your details, your messages and the record of how you used the
+            site are removed, and your sign-in is deleted. Afterwards we keep the
+            date it happened and how many things came off with it, and nothing
+            that says who you were. The
+            <a href="privacy-policy.html">Privacy Policy</a> says exactly what
+            goes and what stays.</p>
+          <p><button type="button" class="v3-btn danger" id="pa-delete-open">Delete my
+            account</button></p>
+          <div id="pa-delete-panel" hidden></div>
+          <p class="oa-form-msg" id="pa-delete-msg" role="status"></p>
+        </section>
+
         <p class="v3-mut" style="text-align:center;margin:0 0 70px">
           Questions? <a href="mailto:konstantinos.stouras@ucd.ie">Email us</a>.</p>
       </div>
@@ -324,6 +349,10 @@
     <script defer src="assets/oa-jobnav.js"></script>
     <script defer src="assets/oa-reveal.js"></script>
     <script defer src="assets/oa-candcard.js"></script>
+    <!-- the delete panel at the foot of the page. Loaded HERE and on
+         admin-area.html and nowhere else: its markup and its copy have no
+         business in the file every page of the site downloads. -->
+    <script defer src="assets/oa-account-delete.js"></script>
     <script>
     /* The external scripts above are DEFERRED, so they execute after the
        document has been parsed — which is AFTER an inline script like this one

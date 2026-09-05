@@ -1952,6 +1952,17 @@ button[disabled], .button[disabled] { opacity: 0.55; cursor: default; }
 }
 .oa-u-sort.is-on { color: var(--brand, #3a424d); }
 
+/* The account-deletion controls at the end of a roster row. The state chip
+   names its OWN ink as well as its ground (the rule the dark theme taught
+   this file), and --err/--err-soft are defined in both themes. */
+.oa-u-actions { white-space: nowrap; }
+.oa-u-going {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  color: var(--err, #b3413d);
+  background-color: var(--err-soft, #fdf1f0);
+  border: 1px solid var(--err, #b3413d);
+}
 .oa-u-ghosts { list-style: none; margin: 8px 0 0; padding: 0; }
 .oa-u-ghosts li { padding: 4px 0; font-size: 14px; color: var(--ink, #23272e); }
 .oa-u-open {

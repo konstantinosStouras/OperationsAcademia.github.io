@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "delete-your-account-2026-09",
+      "date": "2026-09-05",
+      "title": "You can delete your account yourself",
+      "summary": "Your personal area has a Delete my account button at the foot of the page. It shows you what the account holds, asks you to type the word DELETE, and then takes everything you posted off the site, stops your e-mail alerts, removes your details and your messages, and deletes your sign-in. Most of it happens straight away and the rest within a few minutes. The Privacy Policy says exactly what goes and what stays, and the site's maintainer can now delete an account too.",
+      "url": "/account.html"
+    },
+    {
       "id": "registered-users-figure-2026-09",
       "date": "2026-09-05",
       "title": "The front page says how many people have registered",

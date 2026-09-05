@@ -1542,6 +1542,13 @@
     if (c === 'auth/weak-password') return 'Please choose a password of at least 6 characters.';
     if (c === 'auth/popup-blocked') return 'Your browser blocked the sign-in window. Allow pop-ups and try again.';
     if (c === 'auth/popup-closed-by-user') return '';
+    /* Firebase asks for a session to be re-proved before it will delete it or
+       change its address. Without a line here it fell through to the generic
+       'Sign-in failed' below, which is the wrong sentence entirely: nothing
+       has failed, the person is simply being asked to prove it is them. */
+    if (c === 'auth/requires-recent-login') {
+      return 'For safety, please sign in again and then try that once more.';
+    }
     if (c === 'auth/operation-not-allowed') {
       return 'That sign-in method is not switched on for this site yet. ' +
         'Please use one of the others for now.';
@@ -2940,6 +2947,26 @@
     setCount: setCount,
     openProfile: openProfile,
     openMerge: openMerge,
+    /* --- what an account holds, and how it goes -------------------------
+
+       Both are the MERGE's own machinery, exported because deleting an
+       account needs exactly the same two answers and a second copy of either
+       would drift: `survey()` is what is at stake, and `deleteSignIn()` is
+       the last step of both operations, re-proving the session first if
+       Firebase asks. assets/oa-account-delete.js is the one caller; it is
+       loaded by account.html and admin-area.html and by nothing else, so the
+       delete panel's markup and copy stay out of the file every page
+       downloads. */
+    survey: function () {
+      if (!state.user || !window.OAFB || !OAFB.enabled) {
+        return Promise.reject(new Error('not signed in'));
+      }
+      return OAFB.ready().then(surveyAccount);
+    },
+    deleteSignIn: function () {
+      if (!state.user) return Promise.reject(new Error('not signed in'));
+      return OAFB.ready().then(deleteCurrentSignIn);
+    },
     profile: function () { return state.profile; },
     displayName: function () { return displayName(state.user); },
     signOut: signOut,
