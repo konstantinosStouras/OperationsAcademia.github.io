@@ -18,6 +18,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
 
 import {
   text, url, day, slug, pickList, jobId, rowFromSubmission, mergeRows,
@@ -5093,6 +5094,77 @@ async function testUserDirectorySync() {
   const src = await readFile(path.join(root, '_scraper', 'sync-user-directory.mjs'), 'utf8');
   ok(/isMain\(import\.meta\.url\)/.test(src),
     'and importing it syncs nothing');
+
+  /* ---- THE TWO SERVED FILES (owner, 2026-09-05) ------------------------
+     data/users-meta.json is the front page's registered-users figure and
+     data/users-growth.json the analytics page's growth chart. Both are
+     public, so they carry counts and dates and nothing else, and the shape
+     is pinned EXACTLY: a key added for convenience is a key served to
+     anyone who asks. */
+  const ADDRESS = /[\w.+-]+@[\w-]+\.[\w.]+/;
+  const DAY = /^\d{4}-\d{2}-\d{2}$/;
+  const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+  const metaRaw = await readFile(path.join(root, 'data', mod.USERS_META), 'utf8');
+  const meta = JSON.parse(metaRaw);
+  eq(Object.keys(meta), ['generated', 'count'],
+    'data/users-meta.json carries generated and count and nothing else');
+  ok(Number.isInteger(meta.count) && meta.count >= 0, 'the count is a whole number');
+  ok(meta.count === 0 ? meta.generated === '' || ISO.test(meta.generated) : ISO.test(meta.generated),
+    'generated is an ISO instant, or empty only on the committed seed with a count of 0');
+  ok(!ADDRESS.test(metaRaw), 'and it carries no address');
+  const growthRaw = await readFile(path.join(root, 'data', mod.USERS_GROWTH), 'utf8');
+  const growth = JSON.parse(growthRaw);
+  eq(Object.keys(growth), ['generated', 'first', 'days'],
+    'data/users-growth.json carries generated, first and days and nothing else');
+  ok(Array.isArray(growth.days), 'days is a list');
+  if (growth.days.length) {
+    ok(ISO.test(growth.generated) && DAY.test(growth.first), 'a real growth file carries an ISO generated and a first day');
+    eq(growth.days[0][0], growth.first, 'and its first point is the first day');
+    ok(growth.days.every((p) => Array.isArray(p) && p.length === 2 && DAY.test(p[0]) && Number.isInteger(p[1])),
+      'every point is [yyyy-mm-dd, whole number]');
+    ok(growth.days.every((p, i, a) => i === 0 || (a[i - 1][0] < p[0] && a[i - 1][1] <= p[1])),
+      'the days are sorted and the counts never decrease');
+    eq(growth.days[growth.days.length - 1][1], meta.count, 'the last point is the count the meta file carries');
+  } else {
+    eq([growth.generated, growth.first], ['', ''], 'the empty seed carries no dates either');
+  }
+  ok(!ADDRESS.test(growthRaw), 'and it carries no address');
+  /* the pure halves behind them, on a fixture */
+  const NOW = new Date('2026-09-05T12:00:00Z');
+  const acc = (creation, disabled) => ({ disabled: !!disabled, metadata: { creationTime: creation } });
+  const fixture = [acc('Wed, 02 Sep 2026 08:00:00 GMT'), acc('Fri, 04 Sep 2026 03:00:00 GMT'),
+    acc('Thu, 03 Sep 2026 03:00:00 GMT', true)];
+  eq(mod.usersMeta(fixture, NOW), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
+    'usersMeta counts every account that is not disabled');
+  eq(mod.usersGrowth(fixture, NOW).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
+    'usersGrowth is one cumulative point per UTC day to the generated day');
+  ok(/writeFile\(path\.join\(DATA, USERS_META\)/.test(src) && /writeFile\(path\.join\(DATA, USERS_GROWTH\)/.test(src),
+    'the sync writes both files');
+  ok(src.indexOf('if (!SCAN && !DRY) {') < src.indexOf('writeFile(path.join(DATA, USERS_META)')
+     && /import \{ firebaseAdmin \} from '\.\/_mail\.mjs'/.test(src) && !/async function firestoreAndAuth/.test(src),
+    'never on a scan or a dry run, and the Admin SDK comes from _mail.mjs, the one definition');
+  ok(/const accounts = \[\];/.test(src)
+     && /accounts\.push\(\{ disabled: !!user\.disabled, metadata: \{ creationTime: \(user\.metadata \|\| \{\}\)\.creationTime \} \}\);/.test(src),
+    'and what the files are built from holds the flags and the creation time only, never a name or an address');
+
+  /* the workflow is a DATA WRITER now: the branch tip, the publishing role,
+     a commit step naming both files, and a rejected push re-run rather than
+     rebased (read with the comments stripped, since the step explains the
+     rebase it does not do) */
+  const wfCode = wf.replace(/#.*$/gm, '');
+  ok(/permissions:\s*\n\s*contents: write/.test(wf), 'the sync workflow may commit');
+  ok(/ref: \$\{\{ github\.ref_name \}\}/.test(wf), 'it checks out the branch TIP, never github.sha');
+  ok(!/pull --rebase/.test(wfCode) && /git reset --hard FETCH_HEAD/.test(wfCode)
+     && /node _scraper\/sync-user-directory\.mjs\s*\n/.test(wfCode.slice(wfCode.indexOf('git reset --hard'))),
+    'a rejected push is answered by re-running the sync on the new tip, never by a rebase');
+  ok((wf.match(/node _scraper\/selftest\.mjs --publishing/g) || []).length >= 3,
+    'it runs the selftest in the publishing role before, after, and inside the retry');
+  ok(/git add \$FILES/.test(wf) && /FILES='data\/users-meta\.json data\/users-growth\.json'/.test(wf),
+    'the commit names exactly the two served files');
+  ok(/if: github\.ref_name == 'master' && !inputs\.scan/.test(wf), 'and is gated to master and a real run');
+  ok(/- name: Commit\n[\s\S]*?FIREBASE_SERVICE_ACCOUNT: \$\{\{ secrets\.FIREBASE_SERVICE_ACCOUNT \}\}/.test(wf),
+    'the Commit step carries the credential, since a rebuild reads Auth');
+  ok(!/—/.test(wf.slice(wf.indexOf('IT ALSO WRITES'), wf.indexOf('on:\n'))), 'no em dash in the new header text');
 }
 
 /* ------------------------------ the Universities directory (owner, 2026-08-24)
@@ -8980,7 +9052,9 @@ async function testReviewWiring() {
      writer is the outage this file records, and the flag CREEPING INTO the PR
      check would leave nothing enforcing it anywhere. */
   const WRITERS = ['oa-jobs-build.yml', 'oa-jobmarket-sheet.yml', 'oa-higheredjobs-verify.yml',
-    'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml'];
+    'oa-adverts-verify.yml', 'oa-jobs-sheet-sync.yml', 'oa-legacy-import.yml',
+    // the roster sync writes data/users-meta.json and data/users-growth.json (2026-09-05)
+    'oa-user-directory.yml'];
   for (const name of WRITERS) {
     const src = await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8');
     const runs = [...src.matchAll(/node _scraper\/selftest\.mjs([^\n]*)/g)].map((m) => m[1]);
@@ -10589,10 +10663,14 @@ async function testCandidateReveal() {
   /* the change log: three entries, dated, at the top */
   const log = JSON.parse(await read('changelog.json'));
   /* the e-mail verification entry, shipped in the same change, sits among them */
-  const top = log.updates.slice(0, 4).map((u) => u.id).filter((id) => id !== 'email-verification-2026-09');
-  eq(top.sort(), ['candidate-preview-2026-09', 'profile-updated-line-2026-09', 'reveal-time-2026-09'],
-    'changelog: the three entries lead the log');
-  for (const u of log.updates.slice(0, 4).filter((u) => u.id !== 'email-verification-2026-09')) {
+  /* found by id rather than by position: later changes add their own entries
+     above these, and a pin on index 0 would break on every one of them */
+  const THREE = ['candidate-preview-2026-09', 'profile-updated-line-2026-09', 'reveal-time-2026-09'];
+  const idxOf = (id) => log.updates.findIndex((u) => u.id === id);
+  ok(THREE.every((id) => idxOf(id) >= 0), 'changelog: the three entries are in the log');
+  ok(log.updates.slice(0, Math.max(...THREE.map(idxOf)) + 1).every((u) => u.date >= '2026-09-04'),
+    'changelog: the three entries precede every earlier-dated entry, so the log stays newest first');
+  for (const u of THREE.map((id) => log.updates[idxOf(id)])) {
     eq(u.date, '2026-09-04', `changelog: ${u.id} is dated 2026-09-04`);
     ok(u.title && u.summary && u.url, `changelog: ${u.id} has a title, a summary and a link`);
     ok(!/—/.test(u.title + u.summary), `changelog: ${u.id} carries no em dash`);
@@ -13286,9 +13364,42 @@ async function testEmailVerification() {
   eq(V.toPlain('<!--[if mso]><center>twice</center><![endif]--><p>once</p>'), 'once',
     'verify: toPlain drops the Outlook copy of the button, so its label is not printed twice');
 
+  /* --- siteVerifyLink: the ONE rewrite of the minted address (2026-09-05) --- */
+  const minted = 'https://operations-academia.firebaseapp.com/__/auth/action?mode=verifyEmail' +
+    '&oobCode=AbC%2F123&continueUrl=https%3A%2F%2Fwww.operationsacademia.org%2Faccount.html&lang=en';
+  eq(V.siteVerifyLink(minted, site),
+    `${site}/verify-email.html?mode=verifyEmail&oobCode=AbC%2F123&continueUrl=${encodeURIComponent(site + '/account.html')}`,
+    'verify: siteVerifyLink puts the minted code on the site\'s own page with the account page as continueUrl, the code encoded');
+  eq(V.siteVerifyLink('https://x.test/?mode=verifyEmail', site), '', 'verify: no code, no link');
+  eq(V.siteVerifyLink('not a url', site), '', 'verify: an unparsable address answers nothing rather than throwing');
+  eq(V.siteVerifyLink(minted, site + '/'), V.siteVerifyLink(minted, site), 'verify: a trailing slash on the site is folded');
+
+  /* --- the member variant, for the campaign over existing accounts --------- */
+  const member = V.renderVerifyEmail({ firstName: 'Ada', email: 'ada@example.edu', link,
+    existing: { since: '2025-03-05T10:00:00Z' } });
+  eq(member.subject, r.subject, 'verify: the member variant keeps the subject');
+  ok(/Please confirm your e-mail address/.test(member.html) && !/One more step/.test(member.html)
+     && /You registered with Operations Academia on 5 March 2025\./.test(member.html)
+     && /Every address is now confirmed once before signing in: one click, and nothing else about your account changes\./.test(member.html)
+     && !/Thank you for registering/.test(member.html) && !/Thank you for registering/.test(member.text),
+    'verify: with existing:{since} the heading and the first paragraph read for a member who registered on a named day');
+  ok(count(member.html, 'Verify my e-mail address') === count(r.html, 'Verify my e-mail address')
+     && count(member.html, escLink) === count(r.html, escLink) && count(member.text, link) === 1
+     && /questions to operationsacademia@gmail\.com/.test(member.text),
+    'verify: the same button, the same printed link and the same footer as the newcomer\'s');
+  ok(!/Please confirm your e-mail address/.test(r.html) && !/You registered with/.test(r.html),
+    'verify: and without existing the newcomer\'s message is unchanged in shape');
+  eq(V.longDay('2025-03-05T10:00:00Z'), '5 March 2025', 'verify: longDay is day month year, UTC');
+  ok(noDash(member.html) && noDash(member.text), 'verify: no em dash in the member variant');
+
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/\brequire\(/.test(rendererSrc) && !/^\s*import /m.test(rendererSrc),
     'verify: the renderer depends on NOTHING, since firebase deploy ships only _functions');
+  ok(!/Date\.now\(/.test(rendererSrc) && !/new Date\(\)/.test(rendererSrc),
+    'verify: the renderer reads no clock, so a message is the same whenever it is rendered');
+  ok(/searchParams\.get\('oobCode'\)/.test(rendererSrc) && /verify-email\.html\?mode=verifyEmail/.test(rendererSrc)
+     && /encodeURIComponent\(S \+ '\/account\.html'\)/.test(rendererSrc),
+    'verify: the rewrite lives in the renderer (siteVerifyLink) and nowhere else');
   ok(noDash(rendererSrc), 'verify: no em dash in the renderer');
 
   /* --- the rules --------------------------------------------------------- */
@@ -13373,14 +13484,15 @@ async function testEmailVerification() {
   ok(/region: 'us-central1'/.test(handler),
     'function: us-central1, where the compat client looks by default');
   ok(/require\('firebase-admin\/auth'\)/.test(fn) && /require\('nodemailer'\)/.test(fn)
-     && /require\('\.\/verify-email\.js'\)/.test(fn),
-    'function: the Admin Auth API, nodemailer and the renderer are required');
+     && /const \{ renderVerifyEmail, siteVerifyLink \} = require\('\.\/verify-email\.js'\);/.test(fn),
+    'function: the Admin Auth API, nodemailer, the renderer and the shared link helper are required');
   ok(/getAuth\(\)\.generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(handler),
     'function: the link is generated by the Admin SDK with the account page as its continue URL');
-  ok(/searchParams\.get\('oobCode'\)/.test(handler)
-     && /verify-email\.html\?mode=verifyEmail/.test(handler)
-     && /encodeURIComponent\(SITE \+ '\/account\.html'\)/.test(handler),
-    'function: the code is cut out of the generated link and put on the SITE\'s own page');
+  ok(/const link = siteVerifyLink\(generated, SITE\);/.test(handler)
+     && !/searchParams\.get\('oobCode'\)/.test(handler) && !/verify-email\.html\?mode=verifyEmail/.test(handler),
+    'function: the code is put on the SITE\'s own page by siteVerifyLink, the one helper the campaign mailer shares, never inline');
+  ok(/if \(!link\) \{[\s\S]{0,200}await releaseSlot\(\);/.test(handler),
+    'function: a minted address that carried no code still gives the slot back');
   ok(/if \(!request\.auth\)[\s\S]{0,80}'unauthenticated'/.test(handler),
     'function: it refuses a caller who is not signed in');
   ok(/token\.email/.test(handler) && /to: email,/.test(handler) && !/request\.data/.test(handler),
@@ -13729,11 +13841,14 @@ async function testEmailVerification() {
     'the Privacy Policy records the verification message: one, from the site\'s address, and what it gates');
 
   const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
-  eq([log[0].id, log[0].date], ['email-verification-2026-09', '2026-09-04'],
-    'the changelog entry sits at index 0 with the agreed id and date');
-  ok(/e-mail address and a password/.test(log[0].summary) && /Google/.test(log[0].summary) && noDash(log[0].title + log[0].summary),
+  const evAt = log.findIndex((u) => u.id === 'email-verification-2026-09');
+  const ev = log[evAt];
+  ok(ev && ev.date === '2026-09-04', 'the changelog entry carries the agreed id and date');
+  ok(evAt >= 0 && log.slice(0, evAt).every((u) => u.date > '2026-09-04') && log.slice(evAt).every((u) => u.date <= '2026-09-04'),
+    'and it sits directly below the block of later-dated entries, the log newest first');
+  ok(/e-mail address and a password/.test(ev.summary) && /Google/.test(ev.summary) && noDash(ev.title + ev.summary),
     '…and says what changed, for both kinds of sign-in, with no em dash');
-  ok(/before this change/.test(log[0].summary) && /Send the e-mail/.test(log[0].summary),
+  ok(/before this change/.test(ev.summary) && /Send the e-mail/.test(ev.summary),
     '…and tells an account registered before the gate what it has to do once');
 
   const shim = await readFile(path.join(HERE, '_fake-firebase.js'), 'utf8');
@@ -13755,6 +13870,132 @@ async function testEmailVerification() {
     'page-test.mjs also drives the throttle reason, the slow send, a refused send, the Functions bundle that loads nothing, a sign-in on the verified card, and the archive\'s hint');
   ok(/seed\.callableMessage/.test(shim) && /seed\.signInUser/.test(shim) && /seed\.noFunctions/.test(shim),
     'the shim carries the switches those checks drive');
+}
+
+/* ------------- the campaign over EXISTING accounts (owner, 2026-09-05)
+
+   Every password account that registered before the e-mail gate is pending
+   on its next sign-in and was never sent a message. verify-existing-users.mjs
+   writes to each of them ONCE, through the same renderer and the same link
+   helper the callable uses. Pinned here: both senders through siteVerifyLink,
+   the mailer's own offline suite, the dispatch-only workflow with its
+   scan-by-default input, and the documentation. */
+async function testVerifyExistingUsers() {
+  const root = path.join(HERE, '..');
+  const noDash = (s) => !/—/.test(String(s));
+  const strip = (s) => s.replace(/#.*$/gm, '');
+
+  /* the mailer's own suite: the selection rule, the member variant, the
+     once-only mark and the dry-run order read from its source */
+  let out = '';
+  try {
+    out = execFileSync(process.execPath, [path.join(HERE, 'verify-existing-users.mjs'), '--selftest'],
+      { encoding: 'utf8' });
+  } catch (e) {
+    out = String((e.stdout || '') + (e.stderr || ''));
+  }
+  ok(/verify-existing-users selftest: \d+ checks passed/.test(out),
+    'the campaign mailer\'s own selftest is green:\n' + out.slice(0, 1500));
+
+  const M = await import('./verify-existing-users.mjs');
+  eq(M.campaignTarget({ providerData: [{ providerId: 'password' }], emailVerified: false, email: 'a@b.edu' }), 'send',
+    'the selection rule is exported and picks a password-only unverified account');
+  eq(M.campaignTarget({ providerData: [{ providerId: 'google.com' }, { providerId: 'password' }], emailVerified: false, email: 'a@b.edu' }),
+    'provider', 'and skips a Google-plus-password link, which Google has verified');
+  eq([M.VERIFY_MAIL, M.CAMPAIGN_AT, M.PACE_MS], ['verifyMail', 'campaignAt', 1000],
+    'the mark is campaignAt on the callable\'s verifyMail document, one message a second');
+
+  /* ONE rewrite of the minted address, in both senders */
+  const mailer = await readFile(path.join(HERE, 'verify-existing-users.mjs'), 'utf8');
+  const fn = await readFile(path.join(root, '_functions', 'index.js'), 'utf8');
+  ok(/V\.siteVerifyLink\(generated, SITE\)/.test(mailer) && /siteVerifyLink\(generated, SITE\)/.test(fn),
+    'the mailer and the callable both call siteVerifyLink, so the two senders cannot build the link differently');
+  const mailerMain = mailer.slice(mailer.indexOf('async function main()'), mailer.indexOf('async function selftest()'));
+  ok(mailerMain.length > 1500 && !/oobCode/.test(mailerMain) && !/verify-email\.html/.test(mailerMain),
+    'the mailer carries no copy of the rewrite (its own selftest may name the page it lands on)');
+  ok(/existing: \{ since: stamp\(/.test(mailer), 'and renders the member variant, dated from Auth');
+  ok(/generateEmailVerificationLink\(email, \{\s*url: SITE \+ '\/account\.html',?\s*\}\)/.test(mailer),
+    'the link is minted exactly as the callable mints it');
+  ok(/from '\.\/_main\.mjs'/.test(mailer) && /isMain\(import\.meta\.url\)/.test(mailer), 'importing the mailer sends nothing');
+  ok(!/Date\.now\(/.test(fn.slice(fn.indexOf('function siteVerifyLink'), fn.indexOf('function siteVerifyLink') + 400)),
+    'siteVerifyLink is not in index.js at all (the search above finds nothing to read)');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
+    'the helper lives in verify-email.js, so index.js still exports exactly six functions');
+
+  /* the shared Admin SDK handle */
+  const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
+  ok(/export async function firebaseAdmin\(\)/.test(mail) && /return \{ db: app\.firestore\(\), auth: app\.auth\(\) \};/.test(mail),
+    '_mail.mjs exports firebaseAdmin(), returning Firestore and Auth');
+  ok(/export async function firestore\(\) \{\s*const fb = await firebaseAdmin\(\);\s*return fb \? fb\.db : null;\s*\}/.test(mail),
+    'and firestore() is a wrapper over it, so there is ONE definition of "the Admin SDK, or null"');
+  ok(/import \{ send, transport, firebaseAdmin, redact, SITE, CONTACT \} from '\.\/_mail\.mjs'/.test(mailer),
+    'the mailer reads it from there');
+
+  /* the workflow: pressed, never scheduled; a scan unless told to send */
+  const wf = await readFile(path.join(root, '.github', 'workflows', 'oa-verify-existing.yml'), 'utf8');
+  const wfCode = strip(wf);
+  ok(/^on:\s*\n\s*workflow_dispatch:/m.test(wfCode), 'the campaign workflow runs on workflow_dispatch');
+  ok(!/^\s*schedule:/m.test(wfCode) && !/^\s*workflow_run:/m.test(wfCode) && !/^\s*repository_dispatch:/m.test(wfCode)
+     && !/^\s*push:/m.test(wfCode),
+    'and on NOTHING else: a campaign is pressed, never scheduled or chained');
+  ok(/send:\s*\n\s*description:[^\n]*\n\s*type: boolean\s*\n\s*default: false/.test(wfCode),
+    'its one input is a boolean `send` defaulting to false, so the button is a scan until it is ticked');
+  ok(/if \[ "\$\{\{ inputs\.send \}\}" = "true" \]; then\s*\n\s*node _scraper\/verify-existing-users\.mjs\s*\n\s*else\s*\n\s*node _scraper\/verify-existing-users\.mjs --scan/.test(wfCode),
+    'ticked it sends, unticked it scans');
+  for (const n of ['FIREBASE_SERVICE_ACCOUNT', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']) {
+    ok(new RegExp(`${n}: \\$\\{\\{ secrets\\.${n} \\}\\}`).test(wf), `the send step carries ${n}`);
+  }
+  ok(/concurrency:\s*\n\s*group: oa-verify-existing/.test(wfCode), 'it has a concurrency group of its own');
+  ok(/permissions:\s*\n\s*contents: read/.test(wfCode), 'and commits nothing');
+  ok(/npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6/.test(wfCode),
+    'it installs the pinned Admin SDK and nodemailer');
+  ok(/node _scraper\/verify-existing-users\.mjs --selftest/.test(wfCode), 'and proves the rule before anything is minted');
+  ok(/::warning::FIREBASE_SERVICE_ACCOUNT is not set/.test(wf) && /::warning::SMTP_HOST, SMTP_USER or SMTP_PASS is not set/.test(wf),
+    'without the secrets it warns');
+  ok(noDash(wf), 'no em dash in the workflow');
+
+  /* the documentation names the button and the rule */
+  const setup = await readFile(path.join(root, '_SETUP-EMAIL-VERIFICATION.md'), 'utf8');
+  ok(/oa-verify-existing\.yml/.test(setup) && /verify-existing-users\.mjs/.test(setup) && /workflow_dispatch/.test(setup),
+    'the setup page names the workflow, the script and that it is pressed');
+  ok(/EVERY one of its sign-in\s+providers is `password`, its address is not verified, it is not disabled/.test(setup)
+     && /Google and ORCID sign-ins are verified by their provider/.test(setup),
+    'and states the selection rule');
+  ok(/defaults to a scan/.test(setup) && /campaignAt/.test(setup) && /written to ONCE/.test(setup),
+    'and the scan default and the once-only mark');
+  ok(!/If the roster is large, a line to the/.test(setup), 'the sentence the campaign replaces is gone');
+  const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('## Registration is verified by e-mail');
+  const section = claude.slice(secAt, claude.indexOf('\n## ', secAt + 10));
+  ok(/verify-existing-users\.mjs/.test(section) && /oa-verify-existing\.yml/.test(section)
+     && /campaignTarget/.test(section) && /campaignAt/.test(section) && /siteVerifyLink/.test(section),
+    'CLAUDE.md records the campaign, its rule, its mark and the shared helper');
+  ok(noDash(section), 'CLAUDE.md: still no em dash in the section');
+  const adminAt = claude.indexOf('## The Admin area');
+  const admin = claude.slice(adminAt, claude.indexOf('\n## ', adminAt + 10));
+  ok(/The COUNT itself is public since 2026-09-05/.test(admin) && /data\/users-meta\.json/.test(admin)
+     && /the COLLECTION is \*\*the maintainer's alone\*\*/.test(admin),
+    'CLAUDE.md: the Admin-area section says the collection stays admin-read and the count is public, in the present tense');
+  const rosterAt = claude.indexOf('### The roster is seeded from Auth');
+  const roster = claude.slice(rosterAt, claude.indexOf('\n### ', rosterAt + 10));
+  ok(/users-meta\.json/.test(roster) && /users-growth\.json/.test(roster) && /usersGrowth/.test(roster)
+     && /WRITERS/.test(roster),
+    'CLAUDE.md: the roster section records the two served files and the workflow becoming a writer');
+
+  /* the announcement and the disclosure */
+  const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
+  const at = log.findIndex((u) => u.id === 'verify-existing-2026-09');
+  const u = log[at];
+  ok(u && u.date === '2026-09-05' && u.title && u.summary && u.url,
+    'changelog: verify-existing-2026-09 is dated 2026-09-05 with a title, a summary and a link');
+  ok(at >= 0 && log.slice(0, at).every((e) => e.date >= '2026-09-05'),
+    'and sits in the block at the top, newest first');
+  ok(/one e-mail asking you to confirm/.test(u.summary) && /Google and ORCID/.test(u.summary) && noDash(u.title + u.summary),
+    'worded for readers: one e-mail, what to press, who receives nothing, no em dash');
+  const policy = await readFile(path.join(root, 'privacy-policy.html'), 'utf8');
+  ok(/The one thing\s+about registered accounts that is public is how many there are/.test(policy)
+     && /readable by the\s+maintainer alone/.test(policy),
+    'the Privacy Policy says the count is public and the record is not');
 }
 
 if (isMain(import.meta.url)) {
@@ -13859,5 +14100,6 @@ if (isMain(import.meta.url)) {
   await testUniversityVisits();
   await testCandidateStats();
   await testEmailVerification();
+  await testVerifyExistingUsers();
   process.exit(finish() ? 0 : 1);
 }

@@ -2,7 +2,7 @@ name: OA — sync the registered-users roster
 
 # The Admin area showed "31 Registered users" over a roster listing ONE person
 # (owner, 2026-08-25). Both were right: the tally is a mark every sign-in
-# writes, while a roster ROW is written by the browser once per session — and
+# writes, while a roster ROW is written by the browser once per session, and
 # the rules permitting that write had only just been published, so the roster
 # held exactly the people who had signed in since.
 #
@@ -10,10 +10,20 @@ name: OA — sync the registered-users roster
 # reads every account and writes the roster row the browser would have written,
 # with the one field a browser can never know: the true joined date.
 #
-# It is CHEAP and IDEMPOTENT — an account whose row is already current costs no
-# write, so a fire with nothing new commits nothing. Daily is plenty (the
-# browser keeps rows fresh as people visit); the dispatch is for right after a
-# rules deploy, which is exactly the case that created the gap.
+# IT ALSO WRITES TWO SERVED FILES from the same read (owner, 2026-09-05):
+# data/users-meta.json, the number of registered users the front page shows,
+# and data/users-growth.json, the day-by-day count the analytics page charts.
+# Counts and dates only, nothing under data/ may carry a name or an address.
+# The growth file gains a point every day by construction, so this job commits
+# daily, like data/analytics.json; the meta file changes only when the count
+# does. The commit step is the rebuild-never-rebase retry every other data
+# writer here uses: data/ is a build output, and a rejected push is answered
+# by taking the other writer's tip and running the sync again on top of it.
+#
+# The roster half is CHEAP and IDEMPOTENT: an account whose row is already
+# current costs no write. Daily is plenty (the browser keeps rows fresh as
+# people visit); the dispatch is for right after a rules deploy, which is
+# exactly the case that created the gap.
 #
 # A no-op, saying so, until FIREBASE_SERVICE_ACCOUNT is set.
 
@@ -29,7 +39,7 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: oa-user-directory
@@ -40,6 +50,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # the branch tip, never github.sha: on a queued run the default can be
+          # a commit another writer has already moved past, so the push is not
+          # a fast-forward (the trap this repository has hit twice)
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
@@ -49,7 +64,7 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set — nothing will be synced."
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: nothing will be synced."
           fi
 
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12
@@ -57,7 +72,13 @@ jobs:
       # The offline checks over the mapping before anything is written.
       - run: node _scraper/sync-user-directory.mjs --selftest
 
-      - name: Sync the roster
+      # This job writes data/, so it runs the selftest in the publishing role
+      # like every other data writer: a naming duplicate is reported there
+      # rather than stopping the site's data.
+      - name: Offline checks
+        run: node _scraper/selftest.mjs --publishing
+
+      - name: Sync the roster and write the two served files
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
@@ -66,3 +87,53 @@ jobs:
           else
             node _scraper/sync-user-directory.mjs
           fi
+
+      - name: Re-check the files we are about to commit
+        if: ${{ !inputs.scan }}
+        run: node _scraper/selftest.mjs --publishing
+
+      - name: Commit
+        if: github.ref_name == 'master' && !inputs.scan
+        env:
+          # the SAME credential the sync step carries: a rejected push RE-RUNS
+          # the sync on the new tip, and the sync reads Auth
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -e
+          REF='${{ github.ref_name }}'
+          FILES='data/users-meta.json data/users-growth.json'
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "nothing changed."
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add $FILES
+          git commit -m 'data: refresh the registered-users figures'
+          # A REJECTED PUSH IS REBUILT, NEVER REBASED. data/ is a build output,
+          # so a rejected push has nothing to reconcile: take their tip and run
+          # the sync again on top of it, then re-check what that produced with
+          # the same gate the first pass passed through.
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:"$REF"; then
+              echo "pushed"
+              exit 0
+            fi
+            echo "push rejected: syncing again on the new tip (attempt $i)"
+            sleep $((i * 3))
+            git fetch origin "$REF"
+            git reset --hard FETCH_HEAD
+            node _scraper/sync-user-directory.mjs
+            if ! node _scraper/selftest.mjs --publishing; then
+              echo "::error::the files rebuilt on the new tip failed the selftest, so nothing was committed."
+              exit 1
+            fi
+            if [ -z "$(git status --porcelain $FILES)" ]; then
+              echo "the other writer published it all."
+              exit 0
+            fi
+            git add $FILES
+            git commit -m 'data: refresh the registered-users figures'
+          done
+          echo "::error::could not push after five attempts"
+          exit 1

@@ -1696,9 +1696,14 @@ entries.
 (owner, 2026-08-23): a `count()` aggregate over `registeredUsers`, the
 contentless per-account tally every sign-in already writes (oa-accounts.js).
 It is /lit/'s registered-users tile with the visibility inverted — there the
-figure is public, here it is **the maintainer's alone**: the collection is
+figure is public, here the COLLECTION is **the maintainer's alone**: it is
 admin-read in `_firestore.rules` (it was public-read, which nothing public
-ever consumed) and the Admin area is the one place it is shown. The card is
+ever consumed) and the Admin area is the one place the live aggregate is
+shown. **The COUNT itself is public since 2026-09-05** (owner: the number of
+registered users belongs on the front page, as on /lit/): the roster sync
+writes it to `data/users-meta.json` from Auth, which is the public path, and
+the front page reads that served file; the collection's read rule did not
+move, so a browser still cannot count the tally itself. The card is
 deliberately NOT a queue: `registeredCount()` in `oa-adminarea.js` is separate
 from `pendingCounts()`, so the "Admin area N" badge never counts it (a figure
 nobody can clear would inflate it for ever) and no other page's badge refresh
@@ -1933,8 +1938,31 @@ Three properties, and the first is the one that could have gone badly wrong:
   browser writes the name the account shows itself under, which is derived from
   the profile and is the better one where they differ.
 
-An account already current costs no write, so a daily fire commits nothing. The
-dispatch exists for the case that created the gap: right after a rules deploy.
+An account already current costs no write, so a daily fire commits nothing to
+the roster. The dispatch exists for the case that created the gap: right after
+a rules deploy.
+
+**The same read writes two SERVED files** (owner, 2026-09-05: the number of
+registered users on the front page, as on /lit/, and a growth chart on the
+analytics page). `usersMeta` writes `data/users-meta.json`, `{ generated,
+count }`, every account Auth holds that is not disabled; `usersGrowth` writes
+`data/users-growth.json`, `{ generated, first, days: [[yyyy-mm-dd, n], ...] }`,
+one point per UTC day from the first account's creation day to the generated
+day, cumulative and never decreasing, its last point equal to the count so
+the two files cannot disagree. Counts and dates and NOTHING else, because
+everything under `data/` is served to anyone who asks; the selftest pins the
+key lists exactly and sweeps both files for an address. The committed seeds
+are the valid empty shapes (`{"generated":"","count":0}`,
+`{"generated":"","first":"","days":[]}`), so the front page hides its tile and
+the chart is absent until a run with the credential writes real ones, and the
+shape pin is never vacuous. `oa-user-directory.yml` is a data WRITER now: it
+joined `WRITERS` in the selftest, runs `selftest.mjs --publishing` before and
+after the sync, checks out `github.ref_name`, and commits the two files with
+the rebuild-never-rebase retry (the sync is re-run on the other writer's tip,
+never rebased). The growth file gains a point every day by construction, so
+the job commits daily, like `data/analytics.json`. The sync's Admin SDK handle
+is `firebaseAdmin()` from `_mail.mjs`, shared with the mailers, so there is
+one definition of "the credential is missing or malformed".
 
 ### Both review tabs can be cleared a page at a time
 
@@ -2010,6 +2038,39 @@ sends. So the card promises a message only on the registration path (status
 you registered, press its link, otherwise press the button" and the button
 reads "Send the e-mail", which is the one press those accounts need. The
 setup page and the changelog say so.
+
+**And the site writes to them once, rather than waiting for each to find the
+card** (owner, 2026-09-05). `_scraper/verify-existing-users.mjs`, pressed
+through `.github/workflows/oa-verify-existing.yml` (`workflow_dispatch` only,
+a boolean `send` input defaulting to false, so the button is a scan until it
+is ticked), lists every Auth account and selects the ones whose EVERY provider
+is `password`, whose address is unverified, which are not disabled and which
+have an address (`campaignTarget`, pure); a Google or ORCID sign-in is
+verified by its provider and is skipped, a Google-plus-password link counts
+as Google, and the summary counts each reason and says why. Each is sent the
+SAME message, rendered by `renderVerifyEmail` with `existing: { since }` (the
+heading "Please confirm your e-mail address" and a first paragraph naming the
+day they registered replace the newcomer's thanks; the button, the printed
+link and the footer are unchanged), and the link is built by `siteVerifyLink`
+in `verify-email.js`, the ONE helper the callable uses too, pinned both ways
+so the two senders cannot put the code on different pages. A successful send
+stamps `verifyMail/{uid}.campaignAt` (the callable's own document, closed to
+clients, so no rules change), a stamped account is never mailed again however
+often the button is pressed, and a failed send stamps nothing. The callable's
+`releaseSlot` restores that document whole, so a failed send there cannot
+erase the mark. One message a second. The log carries counts, ids and
+redacted addresses only; `--dry-run` mints nothing, because `_mail.mjs`
+prints a dry-run message's text and the text carries the link; and without
+SMTP nothing is minted, since a code minted for a message that cannot go out
+expires unused. The Admin SDK handle comes from `firebaseAdmin()` in
+`_mail.mjs`, the one definition of "the Admin SDK, or null", which returns
+Firestore and Auth together; `firestore()` is a wrapper over it and the
+roster sync reads the same function. Tests: the mailer's own `--selftest`
+(the selection rule over fixture accounts, the member variant against the
+newcomer's, the once-only mark and the dry-run order read from the file's own
+source, no address in any log line) and `testVerifyExistingUsers` in
+`selftest.mjs` (both senders through `siteVerifyLink`, the workflow
+dispatch-only with its input and secrets, the setup page and this section).
 
 **A pending session is signed out for everything but the panel.** The browser
 keeps the user for the "Check your inbox" card and nothing else: `user()`

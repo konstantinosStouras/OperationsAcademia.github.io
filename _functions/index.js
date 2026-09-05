@@ -71,7 +71,7 @@ const { initializeApp, getApps } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getAuth } = require('firebase-admin/auth');
 const nodemailer = require('nodemailer');
-const { renderVerifyEmail } = require('./verify-email.js');
+const { renderVerifyEmail, siteVerifyLink } = require('./verify-email.js');
 
 const GH_DISPATCH_TOKEN = defineSecret('GH_DISPATCH_TOKEN');
 
@@ -383,7 +383,11 @@ exports.sendVerificationEmail = onCall(
       throw new HttpsError('resource-exhausted',
         'That is enough messages for today. Try again tomorrow, and look in spam.');
     }
-    /** Put the stamp back as it was before this call reserved its slot. */
+    /** Put the stamp back as it was before this call reserved its slot. The
+        document is restored WHOLE, so a `campaignAt` the existing-accounts
+        campaign (_scraper/verify-existing-users.mjs) stamped on it survives
+        a failed send here: that mark means "mailed once by the campaign" and
+        has nothing to do with this call's slot. */
     const releaseSlot = async () => {
       try {
         if (Object.keys(slot.before).length) await limitRef.set(slot.before);
@@ -405,15 +409,16 @@ exports.sendVerificationEmail = onCall(
       await releaseSlot();
       throw new HttpsError('internal', 'The verification message could not be made.');
     }
-    const code = new URL(generated).searchParams.get('oobCode');
-    if (!code) {
+    /* The code is cut out of the minted address and put on the site's own
+       page by siteVerifyLink, the ONE definition shared with the campaign
+       mailer for existing accounts (_scraper/verify-existing-users.mjs), so
+       the two senders cannot build the link differently. */
+    const link = siteVerifyLink(generated, SITE);
+    if (!link) {
       logger.error('the minted address carried no verification token', { uid });
       await releaseSlot();
       throw new HttpsError('internal', 'The verification message could not be made.');
     }
-    const link = `${SITE}/verify-email.html?mode=verifyEmail` +
-      `&oobCode=${encodeURIComponent(code)}` +
-      `&continueUrl=${encodeURIComponent(SITE + '/account.html')}`;
 
     /* The greeting. The profile is written by the registration form in the
        same breath as the account, so it is usually there; a missing one only

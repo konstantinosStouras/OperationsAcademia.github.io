@@ -18,6 +18,15 @@
    Copy rules for this file: plain English, no em dashes (a comma or a full
    stop instead), and the link written out in full as TEXT as well as behind
    the button, so a reader whose client strips the button can still copy it.
+
+   TWO SENDERS, ONE RENDERER. The callable in index.js sends this message to
+   a NEW registration; _scraper/verify-existing-users.mjs sends it, once, to
+   every password account that registered before the gate existed (the
+   campaign, 2026-09-05). The second passes `existing: { since }` and the
+   copy reads for a member rather than a newcomer; everything else, the
+   button, the printed link, the footer, is the same. `siteVerifyLink` is the
+   one place the code Firebase mints is moved onto the site's own page, so
+   the two senders cannot build the link differently.
    --------------------------------------------------------------------------- */
 
 'use strict';
@@ -120,6 +129,45 @@ function toPlain(html) {
 }
 
 /**
+ * The address the reader lands on: the site's own verify-email.html carrying
+ * the one-time code Firebase minted, with the account page as the place that
+ * page sends them next. `generated` is what generateEmailVerificationLink
+ * returned (a firebaseapp.com handler URL); the code is cut out of it and
+ * nothing else of it is kept. Returns '' when there is no code to move, so a
+ * caller can refuse rather than mail a link that opens nothing.
+ *
+ * Used by the callable (a new registration) and by the campaign mailer for
+ * existing accounts, and pinned to be the ONE definition of the rewrite.
+ */
+function siteVerifyLink(generated, site) {
+  const S = String(site || SITE_DEFAULT).replace(/\/+$/, '');
+  let code = '';
+  try {
+    code = new URL(String(generated || '')).searchParams.get('oobCode') || '';
+  } catch {
+    code = '';
+  }
+  if (!code) return '';
+  return `${S}/verify-email.html?mode=verifyEmail` +
+    `&oobCode=${encodeURIComponent(code)}` +
+    `&continueUrl=${encodeURIComponent(S + '/account.html')}`;
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+  'August', 'September', 'October', 'November', 'December'];
+
+/** "5 March 2025", read in UTC, from an ISO string, epoch milliseconds or a
+    Date. Hand-rolled rather than Intl so the output is the same on every
+    machine and every locale; '' for anything that is not a date. */
+function longDay(v) {
+  const t = v instanceof Date ? v.getTime()
+    : typeof v === 'number' ? v : Date.parse(String(v || ''));
+  if (!Number.isFinite(t)) return '';
+  const d = new Date(t);
+  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
+/**
  * The chrome every message from this address shares: the page ground, the
  * logo and wordmark, one white card, and the footer naming the site and the
  * contact address. `bodyHtml` goes inside the card as it is.
@@ -197,13 +245,20 @@ ${bodyHtml}
  *   link        the verify-email.html address carrying the code
  *   site        absolute site root, default the live site
  *   contact     the address questions go to
+ *   existing    { since } for an account that registered BEFORE the gate:
+ *               the copy then reads for a member ("Please confirm your
+ *               e-mail address", the day they registered, one click and
+ *               nothing else changes). Absent for a new registration, whose
+ *               message is exactly what it was.
  */
-function renderVerifyEmail({ firstName, email, link, site, contact }) {
+function renderVerifyEmail({ firstName, email, link, site, contact, existing }) {
   const S = String(site || SITE_DEFAULT).replace(/\/+$/, '');
   const K = String(contact || CONTACT_DEFAULT);
   const host = hostOf(S);
   const name = greetingName(firstName);
   const L = String(link || '');
+  const member = existing && typeof existing === 'object' ? existing : null;
+  const since = member ? longDay(member.since) : '';
 
   const subject = 'Verify your e-mail address for Operations Academia';
   const greeting = name ? `Hello ${esc(name)},` : 'Hello,';
@@ -232,18 +287,39 @@ function renderVerifyEmail({ firstName, email, link, site, contact }) {
  </tr>
 </table>`;
 
+  /* The words that differ between a newcomer and a member. The heading, the
+     first paragraph, the closing sentence and the preheader; the button, the
+     printed link, the fallback line and the footer are shared. */
+  const heading = member ? 'Please confirm your e-mail address' : 'One more step';
+  const lead = member
+    ? `You registered with Operations Academia${since ? ` on ${since}` : ''}. ` +
+      'Every address is now confirmed once before signing in: one click, and nothing ' +
+      'else about your account changes. Please confirm that this is your e-mail address ' +
+      'by pressing the button below.'
+    : 'Thank you for registering with Operations Academia. Please confirm that this is ' +
+      'your e-mail address by pressing the button below.';
+  const leadText = lead.replace('by pressing the button below.', 'by opening the link below.');
+  const closing = member
+    ? 'You will not be able to sign in until your address is verified. If you no longer ' +
+      'use your account, you can ignore this message and nothing will change.'
+    : 'You will not be able to sign in until your address is verified. If you did not ' +
+      'register, you can ignore this message and no account will be used.';
+  const preheader = member
+    ? 'Confirm your address once to keep using Operations Academia.'
+    : `Confirm ${email || 'your address'} to start using Operations Academia.`;
+
   const bodyHtml = `
-<h1 class="oa-ink" style="margin:0 0 18px;font-family:${HEAD_FONT};font-size:28px;line-height:1.2;font-weight:600;color:${C.ink};">One more step</h1>
+<h1 class="oa-ink" style="margin:0 0 18px;font-family:${HEAD_FONT};font-size:28px;line-height:1.2;font-weight:600;color:${C.ink};">${heading}</h1>
 <p style="margin:0 0 14px;">${greeting}</p>
-<p style="margin:0 0 22px;">Thank you for registering with Operations Academia. Please confirm that this is your e-mail address by pressing the button below.</p>
+<p style="margin:0 0 22px;">${lead}</p>
 ${button}
 <p class="oa-ink2" style="margin:26px 0 8px;color:${C.ink2};font-size:15px;">The button opens ${esc(host)}. If it does not work, copy this link into your browser:</p>
 <p class="oa-muted" style="margin:0 0 22px;font-size:13px;line-height:1.5;color:${C.muted};word-break:break-all;">${breakable(esc(L))}</p>
-<p class="oa-ink2" style="margin:0;color:${C.ink2};font-size:15px;">You will not be able to sign in until your address is verified. If you did not register, you can ignore this message and no account will be used.</p>`;
+<p class="oa-ink2" style="margin:0;color:${C.ink2};font-size:15px;">${closing}</p>`;
 
   const html = brandShell({
     title: subject,
-    preheader: `Confirm ${email || 'your address'} to start using Operations Academia.`,
+    preheader,
     bodyHtml,
     site: S,
     contact: K,
@@ -256,15 +332,15 @@ ${button}
   const text = [
     'Operations Academia',
     '',
-    'One more step',
+    heading,
     '',
     greetingText,
     '',
-    'Thank you for registering with Operations Academia. Please confirm that this is your e-mail address by opening the link below.',
+    leadText,
     '',
     `${label}: ${L}`,
     '',
-    'You will not be able to sign in until your address is verified. If you did not register, you can ignore this message and no account will be used.',
+    closing,
     '',
     `Operations Academia, ${host}, questions to ${K}`,
   ].join('\n');
@@ -272,4 +348,7 @@ ${button}
   return { subject, html, text };
 }
 
-module.exports = { renderVerifyEmail, brandShell, esc, toPlain, greetingName, breakable, NAME_MAX };
+module.exports = {
+  renderVerifyEmail, siteVerifyLink, longDay, brandShell, esc, toPlain, greetingName,
+  breakable, NAME_MAX,
+};

@@ -29,9 +29,8 @@ registered through the path that sends one. The card says so honestly (it
 promises a message only on the registration path) and its button reads "Send
 the e-mail", which is the one press those accounts need: it sends the
 message, they press the link, and the account is ordinary again. Google and
-ORCID accounts are untouched. If the roster is large, a line to the
-registered users saying "sign in once and press Send the e-mail" saves the
-questions.
+ORCID accounts are untouched. The site can also write to all of them at once,
+before any of them meets the card: section 6, the one-off campaign.
 
 ## 1. The mailbox to send from
 
@@ -132,6 +131,53 @@ file run, from the repository root:
 ```
 firebase deploy --only storage --project operations-academia
 ```
+
+## 6. Existing accounts: the one-off campaign
+
+Every password account that registered before the gate is pending on its
+next sign-in and was never sent a message. Rather than leave each person to
+find the card, the site writes to all of them once, from the same mailbox and
+with the same message worded for a member. The button is the workflow
+**OA: ask existing accounts to confirm their e-mail address**
+(`.github/workflows/oa-verify-existing.yml`), which runs
+`_scraper/verify-existing-users.mjs`. It is `workflow_dispatch` only: a
+campaign is pressed, never scheduled.
+
+**The selection rule.** An account is written to when EVERY one of its sign-in
+providers is `password`, its address is not verified, it is not disabled, and
+it has an address. Google and ORCID sign-ins are verified by their provider,
+so they are skipped, and so is an account that linked Google beside a
+password; the run's summary counts each reason and says why. That is the same
+test the rules make (`verified()`) and the browser makes
+(`needsVerification`).
+
+**The button defaults to a scan.** With the `send` box unticked the run
+prints counts only: how many accounts Auth holds, how many are
+password-unverified, how many the campaign has already mailed, how many it
+would send. Nothing is minted and nothing goes out. Tick `send` to send. The
+messages go out one per second, and each account is written to ONCE however
+often the button is pressed: a successful send stamps
+`verifyMail/{uid}.campaignAt` (the callable's own rate-limit document, which
+no client may read or write, so no rules change), a stamped account is never
+mailed again, and a failed send stamps nothing and is retried by the next
+press. Without SMTP nothing is minted at all, because a code minted for a
+message that cannot go out expires unused; the run warns and exits 0.
+
+**What each person receives.** The verification message, with the heading
+"Please confirm your e-mail address", a first paragraph saying when they
+registered and that every address is now confirmed once before signing in,
+the same button and the same written-out link. The link is built by
+`siteVerifyLink` in `_functions/verify-email.js`, the one helper the callable
+uses too, so it lands on `verify-email.html` exactly as a new registration's
+does; the message is `renderVerifyEmail` with `existing: { since }`.
+
+**What the log shows.** A scan prints counts; a real run names an account by
+its id and a redacted address; `node _scraper/verify-existing-users.mjs
+--dry-run` (from a checkout with the credential) prints the ids and the day
+each registered, mints nothing and sends nothing. No mode prints a link, a
+code or a full address, because the Actions log of this repository is public.
+`node _scraper/verify-existing-users.mjs --selftest` runs the offline checks
+over the selection rule and the message.
 
 ## What is deliberately not done
 

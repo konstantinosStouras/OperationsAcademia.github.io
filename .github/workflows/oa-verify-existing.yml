@@ -1,0 +1,81 @@
+name: "OA: ask existing accounts to confirm their e-mail address"
+
+# A CAMPAIGN IS PRESSED, NEVER SCHEDULED. Registration verifies the e-mail
+# address since 2026-09-04 (_SETUP-EMAIL-VERIFICATION.md); every password
+# account that registered before that day is gated by the same rules and was
+# never sent anything. This button writes to each of them ONCE, with the
+# site's own verification message worded for a member, and stamps
+# verifyMail/{uid}.campaignAt after a successful send, so pressing it again
+# reaches only the accounts a previous press did not.
+#
+# WHO: an account whose every sign-in provider is `password`, unverified, not
+# disabled, with an address. Google and ORCID sign-ins are verified by their
+# provider and are skipped; the run's summary counts them and says why.
+#
+# THE INPUT DEFAULTS TO A SCAN. `send: false` prints counts only (total,
+# password-unverified, already mailed, to send) and mints nothing; tick it
+# to send. A dry run (ids and registration days, nothing minted) is
+# `node _scraper/verify-existing-users.mjs --dry-run` from a checkout with
+# the credential.
+#
+# Without FIREBASE_SERVICE_ACCOUNT nothing is read; without SMTP_* nothing is
+# minted, because a code minted for a message that cannot go out expires
+# unused. Both states warn and exit 0.
+
+on:
+  workflow_dispatch:
+    inputs:
+      send:
+        description: 'Send the messages (unticked = report the counts only)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oa-verify-existing
+  cancel-in-progress: false
+
+jobs:
+  campaign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Check the credentials are present
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set: no account will be read."
+          fi
+          if [ -z "$SMTP_HOST" ] || [ -z "$SMTP_USER" ] || [ -z "$SMTP_PASS" ]; then
+            echo "::warning::SMTP_HOST, SMTP_USER or SMTP_PASS is not set: nothing will be minted or sent."
+          fi
+
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+
+      # The offline checks over the selection rule and the message before
+      # anything is minted.
+      - run: node _scraper/verify-existing-users.mjs --selftest
+
+      - name: Scan, or send
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          if [ "${{ inputs.send }}" = "true" ]; then
+            node _scraper/verify-existing-users.mjs
+          else
+            node _scraper/verify-existing-users.mjs --scan
+          fi

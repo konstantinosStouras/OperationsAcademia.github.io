@@ -3,6 +3,13 @@
   "note": "The single source of truth for what changed on Operations Academia. Read by the About page's 'What's new' list, by the live preview inside the e-mail alerts form, and by the alerts mailer, which sends every entry dated inside a subscriber's window. To announce something, add an entry dated ~today; an entry dated in the past reaches nobody, so seeding history is safe.",
   "updates": [
     {
+      "id": "verify-existing-2026-09",
+      "date": "2026-09-05",
+      "title": "Existing members are asked to confirm their e-mail address, once",
+      "summary": "If you registered with an e-mail address and a password before the site started confirming addresses, you will receive one e-mail asking you to confirm yours: press the button in it and nothing else about your account changes. Until you do, signing in shows the Check your inbox card, which can send the message again. Google and ORCID sign-ins are already confirmed by the provider and receive nothing.",
+      "url": "/account.html"
+    },
+    {
       "id": "email-verification-2026-09",
       "date": "2026-09-04",
       "title": "A new account confirms its e-mail address first",
