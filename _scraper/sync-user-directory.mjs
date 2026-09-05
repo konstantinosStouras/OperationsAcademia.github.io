@@ -43,15 +43,41 @@
    because everything under data/ is served to anyone who asks:
 
      data/users-meta.json     { generated, count }
-                              every account Auth holds that is not disabled
+                              the registered users: every account Auth holds
+                              that is not disabled AND carries a
+                              registeredUsers mark (see below)
      data/users-growth.json   { generated, first, days: [[yyyy-mm-dd, n], ...] }
                               one point per UTC day from the first account's
                               creation day to the generated day, n = how many
                               of those accounts existed by the end of that day
 
-   `usersMeta` and `usersGrowth` are the pure halves. The collection stays
-   admin-read; the served file is the public path to the one figure the owner
-   made public, and it carries no identity of any kind. The workflow commits
+   THE COUNT IS THE ADMIN AREA'S OWN, NOT AUTH'S. The first version counted
+   every Auth account that was not disabled, and the front page said "130+"
+   over an Admin area saying 106 (owner, 2026-09-05: "it should say 100+
+   instead"). Auth holds every account ever CREATED, and a good many of
+   those never became usable: a password registration whose address was
+   never confirmed (the site gates such an account and it can write
+   nothing), and accounts that were made and never signed in. The Admin
+   area's tile counts `registeredUsers`, the contentless mark a usable
+   sign-in writes, and that is what "registered users" has meant on this
+   site since the tile shipped. So the two served files count the accounts
+   Auth holds that CARRY that mark: the same people the tile counts, dated
+   by Auth's creation time, which the mark does not carry (its `t` is last
+   seen). A mark with no Auth account behind it (one deleted in the console)
+   is not counted, so the front page can read at or below the tile and never
+   above it. AND A MERGE TAKES ONE OFF (owner, 2026-09-05: "if two profiles
+   merge, then the number of registered users should decrease by one too"):
+   `runMerge` in oa-accounts.js deletes the duplicate's mark and then its
+   Auth account, and the join drops the duplicate the moment the mark is
+   gone, whether or not the account deletion behind it succeeded, so the
+   count is of PEOPLE, exactly as the tile's is. A tally that cannot be
+   read, or reads as empty, WRITES NOTHING:
+   the committed files stand, the roster half still runs, and the run says
+   so. An unreachable source changes nothing, as everywhere else here.
+
+   `members`, `usersMeta` and `usersGrowth` are the pure halves. The
+   collections stay admin-read; the served file is the public path to the one
+   figure the owner made public, and it carries no identity of any kind. The workflow commits
    them with the rebuild-never-rebase retry the other data writers use; the
    growth file gains a point every day by construction, so the job commits
    daily, like data/analytics.json. The COMMITTED SEEDS are the valid empty
@@ -89,6 +115,12 @@ const warn = (...a) => console.log('::warning::' + a.join(' '));
     pinned against assets/oa-firebase.js by the selftest, the same way every
     other collection name in this repository is. */
 export const DIRECTORY = 'userDirectory';
+
+/** The contentless tally a usable sign-in writes (oa-accounts.js) and the
+    Admin area's Registered-users tile counts. The two served files count the
+    Auth accounts that carry one, so the front page and the tile agree. Pinned
+    against assets/oa-firebase.js by the selftest like DIRECTORY. */
+export const TALLY = 'registeredUsers';
 
 /** EXACTLY the keys _firestore.rules allows on a roster row. A fifth would
     freeze the row against its own owner — see the header. */
@@ -165,33 +197,37 @@ function utcDay(ms) {
 }
 
 /** The accounts a public count may include: everything Auth holds that is
-    not disabled. A disabled account is not a member. */
-export function countable(users) {
-  return (users || []).filter((u) => u && !u.disabled);
+    not disabled AND carries a registeredUsers mark, which is what the Admin
+    area's tile counts (see the header). `marks` is the set of uids the tally
+    holds; a disabled account is not a member, and neither is an account that
+    never signed in usably, however long it has existed in Auth. */
+export function members(users, marks) {
+  const has = marks instanceof Set ? marks : new Set(marks || []);
+  return (users || []).filter((u) => u && !u.disabled && has.has(u.uid));
 }
 
 /**
  * data/users-meta.json: how many registered users there are, and when that
  * was measured. Counts and a date, nothing else, since the file is public.
  */
-export function usersMeta(users, now) {
+export function usersMeta(users, now, marks) {
   const at = now instanceof Date ? now : new Date(now || Date.now());
-  return { generated: at.toISOString(), count: countable(users).length };
+  return { generated: at.toISOString(), count: members(users, marks).length };
 }
 
 /**
  * data/users-growth.json: the cumulative count, one point per UTC day from
  * the first account's creation day to the generated day. `n` for a day is
- * how many not-disabled accounts had been created by the end of it, so the
+ * how many member accounts had been created by the end of it, so the
  * series never decreases and its last value is `usersMeta().count` whenever
  * every account carries a creation time. Accounts with no readable creation
  * time are counted from the first day (they exist; when is unknown), so the
  * two files never disagree about the total. With no accounts at all the
  * shape is the empty one the seed carries.
  */
-export function usersGrowth(users, now) {
+export function usersGrowth(users, now, marks) {
   const at = now instanceof Date ? now : new Date(now || Date.now());
-  const list = countable(users);
+  const list = members(users, marks);
   const created = list.map((u) => stamp(u.metadata && u.metadata.creationTime));
   const known = created.filter(Boolean);
   if (!list.length) return { generated: at.toISOString(), first: '', days: [] };
@@ -243,6 +279,21 @@ async function main() {
   (await col.get()).forEach((d) => { existing[d.id] = d.data() || {}; });
   log(`roster holds ${Object.keys(existing).length} row(s) before this run`);
 
+  /* The tally the Admin area's tile counts: the uids and nothing else (the
+     documents carry only a timestamp anyway). A read that fails or answers
+     empty leaves the two served files exactly as they are, since a count of
+     nobody over a site with a hundred members is a failure, not a figure. */
+  let marks = null;
+  try {
+    const ids = new Set();
+    (await fb.db.collection(TALLY).get()).forEach((d) => ids.add(d.id));
+    if (ids.size) marks = ids;
+    else warn(`${TALLY} is empty: data/${USERS_META} and data/${USERS_GROWTH} are left as they are`);
+  } catch (e) {
+    warn(`${TALLY} could not be read: data/${USERS_META} and data/${USERS_GROWTH} are left as they are`);
+  }
+  log(`${TALLY} holds ${marks ? marks.size : 0} mark(s)`);
+
   let seen = 0, written = 0, skipped = 0;
   let pending = [];
   /* What the two served files are built from: the flags and the creation
@@ -263,7 +314,7 @@ async function main() {
     const page = await fb.auth.listUsers(1000, token);
     for (const user of page.users) {
       seen++;
-      accounts.push({ disabled: !!user.disabled, metadata: { creationTime: (user.metadata || {}).creationTime } });
+      accounts.push({ uid: user.uid, disabled: !!user.disabled, metadata: { creationTime: (user.metadata || {}).creationTime } });
       const row = rowFromAuthUser(user, existing[user.uid]);
       if (!row) { skipped++; continue; }
       written++;
@@ -290,16 +341,23 @@ async function main() {
      job commits daily, and the workflow's "nothing changed" branch is the
      guard for a scan or an empty checkout, never a routine outcome. */
   const now = new Date();
-  const meta = usersMeta(accounts, now);
-  const growth = usersGrowth(accounts, now);
-  if (!SCAN && !DRY) {
-    await writeFile(path.join(DATA, USERS_META), JSON.stringify(meta, null, 2) + '\n');
-    await writeFile(path.join(DATA, USERS_GROWTH), JSON.stringify(growth) + '\n');
-    log(`wrote data/${USERS_META} (${meta.count} registered users) and ` +
-        `data/${USERS_GROWTH} (${growth.days.length} day(s) from ${growth.first || 'nothing'}).`);
+  if (!marks) {
+    log(`the tally was not read: data/${USERS_META} and data/${USERS_GROWTH} not written.`);
   } else {
-    log(`would write data/${USERS_META} with count ${meta.count} and ` +
-        `data/${USERS_GROWTH} with ${growth.days.length} day(s).`);
+    const meta = usersMeta(accounts, now, marks);
+    const growth = usersGrowth(accounts, now, marks);
+    const unmarked = accounts.filter((a) => !a.disabled && !marks.has(a.uid)).length;
+    log(`${meta.count} registered users: ${accounts.length} account(s) in Auth, ` +
+        `${unmarked} of them never signed in usably and ${accounts.length - unmarked - meta.count} disabled.`);
+    if (!SCAN && !DRY) {
+      await writeFile(path.join(DATA, USERS_META), JSON.stringify(meta, null, 2) + '\n');
+      await writeFile(path.join(DATA, USERS_GROWTH), JSON.stringify(growth) + '\n');
+      log(`wrote data/${USERS_META} (${meta.count} registered users) and ` +
+          `data/${USERS_GROWTH} (${growth.days.length} day(s) from ${growth.first || 'nothing'}).`);
+    } else {
+      log(`would write data/${USERS_META} with count ${meta.count} and ` +
+          `data/${USERS_GROWTH} with ${growth.days.length} day(s).`);
+    }
   }
   if (SCAN || DRY) log(SCAN ? '--scan: nothing written.' : '--dry-run: nothing written.');
 }
@@ -362,32 +420,57 @@ function selftest() {
 
   /* --- the two served files: counts and dates, nothing else -------------- */
   const NOW = new Date('2026-09-05T12:00:00Z');
-  const acc = (creation, disabled) => ({ disabled: !!disabled, metadata: { creationTime: creation },
-    email: 'x@y.edu', displayName: 'Somebody' });
+  let n = 0;
+  const acc = (creation, disabled, uid) => ({ uid: uid || ('u' + (++n)), disabled: !!disabled,
+    metadata: { creationTime: creation }, email: 'x@y.edu', displayName: 'Somebody' });
   const roster = [
-    acc('Wed, 02 Sep 2026 08:00:00 GMT'),
-    acc('Wed, 02 Sep 2026 21:00:00 GMT'),
-    acc('Fri, 04 Sep 2026 03:00:00 GMT'),
-    acc('Thu, 03 Sep 2026 03:00:00 GMT', true),
+    acc('Wed, 02 Sep 2026 08:00:00 GMT', false, 'a'),
+    acc('Wed, 02 Sep 2026 21:00:00 GMT', false, 'b'),
+    acc('Fri, 04 Sep 2026 03:00:00 GMT', false, 'c'),
+    acc('Thu, 03 Sep 2026 03:00:00 GMT', true, 'd'),
+    acc('Tue, 01 Sep 2026 03:00:00 GMT', false, 'never'),
   ];
-  const meta = usersMeta(roster, NOW);
+  /* the tally: a, b, c and the disabled d carry a mark; `never` exists in
+     Auth and never signed in usably; `gone` is a mark with no account */
+  const marks = new Set(['a', 'b', 'c', 'd', 'gone']);
+  const meta = usersMeta(roster, NOW, marks);
   eq(Object.keys(meta), ['generated', 'count'], 'users-meta carries generated and count and nothing else');
-  eq(meta.count, 3, 'the count is every account that is not disabled');
+  eq(meta.count, 3, 'the count is every account that is not disabled AND carries a registeredUsers mark: ' +
+    'what the Admin area\'s tile counts, never every account Auth holds');
+  eq(usersMeta(roster, NOW, []).count, 0, 'with no marks nobody is counted: Auth alone is never the count');
+  /* a MERGE takes one off (owner, 2026-09-05): runMerge deletes the
+     duplicate's mark first and its Auth account after, so the count drops
+     by one from the mark alone, whether or not the account is still there */
+  const merged = new Set(marks); merged.delete('b');
+  eq(usersMeta(roster, NOW, merged).count, 2, 'a merged duplicate (mark deleted, account still in Auth) leaves the count');
+  eq(usersMeta(roster.filter((u) => u.uid !== 'b'), NOW, merged).count, 2, 'and the count is the same once its account is gone too');
+  eq(members(roster, ['a', 'b', 'c', 'd', 'gone']).map((u) => u.uid), ['a', 'b', 'c'],
+    'members takes a list as well as a Set, drops the disabled account and ignores a mark with no account behind it');
   eq(meta.generated, '2026-09-05T12:00:00.000Z', 'generated is the run instant, ISO');
-  const growth = usersGrowth(roster, NOW);
+  const growth = usersGrowth(roster, NOW, marks);
   eq(Object.keys(growth), ['generated', 'first', 'days'], 'users-growth carries generated, first and days and nothing else');
-  eq(growth.first, '2026-09-02', 'first is the first not-disabled account\'s creation day, UTC');
+  eq(growth.first, '2026-09-02', 'first is the first MEMBER account\'s creation day, UTC (the unmarked older one does not move it)');
   eq(growth.days, [['2026-09-02', 2], ['2026-09-03', 2], ['2026-09-04', 3], ['2026-09-05', 3]],
-    'one point per UTC day from the first day to the generated day, cumulative, the disabled account not counted');
+    'one point per UTC day from the first day to the generated day, cumulative, the disabled and the unmarked account not counted');
   eq(growth.days[growth.days.length - 1][1], meta.count, 'the last point equals the count, so the two files agree');
   ok(growth.days.every(([d], i, a) => i === 0 || a[i - 1][0] < d) && growth.days.every(([, n], i, a) => i === 0 || a[i - 1][1] <= n),
     'days are sorted and never decrease');
-  eq(usersGrowth([], NOW), { generated: '2026-09-05T12:00:00.000Z', first: '', days: [] },
+  eq(usersGrowth([], NOW, marks), { generated: '2026-09-05T12:00:00.000Z', first: '', days: [] },
     'with no accounts the shape is the empty one the seed carries');
-  eq(usersGrowth([acc(undefined)], NOW).days, [['2026-09-05', 1]],
+  eq(usersGrowth([acc(undefined, false, 'x')], NOW, ['x']).days, [['2026-09-05', 1]],
     'an account with no readable creation time is still counted (from the first day), so the total is never short');
-  ok(!/@|Somebody/.test(JSON.stringify(meta) + JSON.stringify(growth)),
-    'neither file carries an address or a name, whatever the records held');
+  ok(!/@|Somebody|"uid"/.test(JSON.stringify(meta) + JSON.stringify(growth)),
+    'neither file carries an address, a name or a uid, whatever the records held');
+
+  /* the run writes nothing when the tally could not be read or is empty: the
+     committed files stand, as with every unreachable source here */
+  const runSrc = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  const run = runSrc.slice(runSrc.indexOf('async function main()'), runSrc.indexOf('/* ---------------------------------------------------------------- selftest */'));
+  ok(/if \(ids\.size\) marks = ids;/.test(run) && /if \(!marks\) \{/.test(run)
+     && run.indexOf('if (!marks) {') < run.indexOf('writeFile(path.join(DATA, USERS_META)'),
+    'an empty or unreadable tally leaves both served files as they are');
+  ok(/collection\(TALLY\)\.get\(\)/.test(run) && /usersMeta\(accounts, now, marks\)/.test(run) && /usersGrowth\(accounts, now, marks\)/.test(run),
+    'and the files are built from the tally the Admin area counts');
 
   /* --- the run's own log, which prints into a PUBLIC Actions log ---------- */
   const src = readFileSync(fileURLToPath(import.meta.url), 'utf8');

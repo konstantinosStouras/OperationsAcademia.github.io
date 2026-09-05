@@ -7538,17 +7538,19 @@ for (const w of [320, 360, 390, 430]) {
     ? r.fulfill({ status: 404, contentType: 'text/plain', body: 'not found' })
     : r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) }));
   /* the months the growth table must list: from the first registration to
-     180 days after TODAY (the model anchors its horizon on the reader's day,
-     so a stale copy of the file still gets 180 days ahead) */
+     a WEEK after TODAY (the model anchors its horizon on the reader's day,
+     so a stale copy of the file still gets seven days ahead; the owner's
+     rule of 2026-09-05 is that the line never runs beyond a week from now) */
   /* the days the caption must say the trend is carried: from the fixture's
-     last day to 180 days after TODAY, since the model anchors the horizon on
-     the reader's day and the caption reads the number off the result */
+     last day to seven days after TODAY, since the model anchors the horizon
+     on the reader's day and the caption reads the number off the result */
+  const AHEAD = 7;
   const carriedExpected = (() => {
-    const to = new Date(); to.setUTCHours(0, 0, 0, 0); to.setUTCDate(to.getUTCDate() + 180);
+    const to = new Date(); to.setUTCHours(0, 0, 0, 0); to.setUTCDate(to.getUTCDate() + AHEAD);
     return Math.round((to.getTime() - Date.parse(growthDays[growthDays.length - 1][0])) / 86400000);
   })();
   const monthsExpected = (() => {
-    const to = new Date(); to.setUTCDate(to.getUTCDate() + 180);
+    const to = new Date(); to.setUTCDate(to.getUTCDate() + AHEAD);
     const a = growthDays[0][0].slice(0, 7).split('-').map(Number);
     const b = to.toISOString().slice(0, 7).split('-').map(Number);
     return (b[0] - a[0]) * 12 + (b[1] - a[1]) + 1;
@@ -7715,7 +7717,7 @@ for (const w of [320, 360, 390, 430]) {
         `analytics (${theme}): …and dashed where the real count is solid, so the pair never relies on colour alone`);
       ok(new RegExp('straight-line trend fitted over the last 90 days and carried ' + carriedExpected +
                     ' days forward; an expectation from past growth, not a target').test(growth.sub),
-        `analytics (${theme}): the caption says exactly what the dashed line is, and is not, with the days really carried (${carriedExpected}: the fixture is stale against today, so 180 would understate the line)`);
+        `analytics (${theme}): the caption says exactly what the dashed line is, and is not, with the days really carried (${carriedExpected}: the fixture is stale against today, so a bare 7 would understate the line)`);
       /* THE WASH ENDS WHERE THE COUNT ENDS. The brand series carries trailing
          nulls for every projected day; the area under it must close at the
          last real point, never run on under the dashed projection to the
@@ -7727,8 +7729,11 @@ for (const w of [320, 360, 390, 430]) {
       ok(brandXs.length > 1 && areaXs.length > 1 && accentXs.length > 1, `analytics (${theme}): the three paths were read`);
       ok(Math.max(...areaXs) === brandXs[brandXs.length - 1],
         `analytics (${theme}): the wash under the count ends at the count's last point (${brandXs[brandXs.length - 1]}), not at ${Math.max(...areaXs)}`);
-      ok(Math.max(...accentXs) > brandXs[brandXs.length - 1] + 100,
-        `analytics (${theme}): …while the dashed projection runs well past it, so the check is not vacuous`);
+      /* the projection is a WEEK past today (owner, 2026-09-05), which on a
+         400-day axis is a handful of pixels past the count's last point: what
+         makes the check non-vacuous is that it extends past it at all */
+      ok(Math.max(...accentXs) > brandXs[brandXs.length - 1] + 1,
+        `analytics (${theme}): …while the dashed projection runs past it (to ${Math.max(...accentXs)}), so the check is not vacuous`);
       const nums = growth.sub.match(/\b\d[\d,]*\b registered users on/) && growth.sub.match(/the trend reaches \b\d[\d,]*\b by/);
       ok(nums, `analytics (${theme}): …and names the count today and the count the trend reaches`);
       ok(!/—/.test(growth.sub), `analytics (${theme}): …without an em dash`);
@@ -8237,6 +8242,12 @@ for (const w of [320, 360, 390, 430]) {
       totals: { visitors: 0, sessions: 0, pageviews: 0, days: 0, universities: 0 },
       range: { from: '', to: '' }, recentDays: 7,
     });
+    /* the growth file as it SHIPS, the empty seed: the committed one holds
+       real days since the roster sync first ran (2026-09-05), and left
+       unrouted it drew the growth chart under "nothing is being measured",
+       so the "no empty chart" pin went red on a data commit. A browser check
+       must not move with the corpus. */
+    await serveGrowth(q, { generated: '', first: '', days: [] });
     await q.goto(BASE + 'analytics.html', { waitUntil: 'domcontentloaded' });
     await q.waitForSelector('.oa-an-note', { timeout: 15000 });
     const note = await q.evaluate(() => document.querySelector('#oa-analytics').textContent);
