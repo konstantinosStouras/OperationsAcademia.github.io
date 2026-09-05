@@ -13,9 +13,15 @@
        the menu for);
      - the sign-in / registration modal is redesigned: brand header, one mode
        at a time (sign in ⇄ create account), and registration collects the
-       whole profile up front (first/last name, optional affiliation, website
-       and ORCID iD — owner, 2026-08-17; NO confirm-password field) with a
-       Terms/Privacy consent, and a "Back to site" escape;
+       whole profile up front (first/last name and AFFILIATION, all three
+       compulsory — the affiliation since 2026-09-05, owner; plus an optional
+       website and an ORCID iD the card calls highly recommended — owner,
+       2026-08-17; NO confirm-password field) with a Terms/Privacy consent,
+       and a "Back to site" escape. The profile card is deliberately NOT held
+       to the same rule: it is the EDIT surface, and the accounts that reach
+       it with no affiliation — every Google and ORCID registration, and
+       every account made before the rule — must stay able to correct their
+       name or their photograph without inventing one;
      - a successful REGISTRATION lands on account.html (the personal area
        welcome), while a plain sign-in stays where the reader was;
      - the off-canvas copy paints into this design's mobile SHEET, at its
@@ -1417,7 +1423,7 @@
         '<span class="oa-opt oa-fine">You signed in with ORCID, so we know this iD is yours.</span>' +
         '</div>';
     }
-    return '<label>ORCID iD <span class="oa-opt">(optional)</span>' +
+    return '<label>ORCID iD <span class="oa-opt">(highly recommended but optional)</span>' +
       '<input name="orcid" maxlength="40" placeholder="0000-0002-1825-0097" ' +
         'value="' + esc(p.orcid || '') + '">' +
       '<span class="oa-opt oa-fine">Recording it lets us recognise you if you ever sign in ' +
@@ -1697,8 +1703,14 @@
                   '<input type="text" name="lastName" maxlength="80" ' +
                     'autocomplete="family-name" required></label>' +
               '</div>' +
-              '<label>Affiliation <span class="oa-opt">(optional)</span>' +
-                '<input type="text" name="affiliation" maxlength="160" ' +
+              // Affiliation is COMPULSORY on a new account (owner, 2026-09-05).
+              // A bare label is how this card says "required" — the chip is
+              // what marks the optional ones — and the pair of guards is the
+              // one the two name fields already carry: `required` refuses an
+              // EMPTY box in the browser, and the submit guard below refuses a
+              // box holding only spaces, which `required` accepts.
+              '<label>Affiliation' +
+                '<input type="text" name="affiliation" maxlength="160" required ' +
                   'autocomplete="organization" placeholder="University or company"></label>' +
               '<label>Website <span class="oa-opt">(optional)</span>' +
                 '<input type="url" name="website" maxlength="300" ' +
@@ -1712,7 +1724,7 @@
               'autocomplete="' + (registering ? 'new-password' : 'current-password') + '" ' +
               'placeholder="' + (registering ? 'At least 6 characters' : 'Your password') + '"></label>' +
           (registering
-            ? '<label>ORCID iD <span class="oa-opt">(optional)</span>' +
+            ? '<label>ORCID iD <span class="oa-opt">(highly recommended but optional)</span>' +
                 '<input type="text" name="orcid" maxlength="25" autocomplete="off" ' +
                   'placeholder="0000-0002-1825-0097"></label>' +
               '<label class="oa-terms-row"><input type="checkbox" name="terms">' +
@@ -1817,6 +1829,17 @@
           (first ? f.lastName : f.firstName).focus();
           return;
         }
+        /* Compulsory since 2026-09-05, and guarded HERE as well as with the
+           `required` attribute: `required` is satisfied by a box holding only
+           spaces, which would store an empty affiliation on a field the card
+           has just insisted on. Trimmed once, and the trimmed value is what
+           the profile is built from below. */
+        var affiliation = String(f.affiliation.value || '').trim();
+        if (!affiliation) {
+          say('Please give your affiliation, the university or company you are at.');
+          f.affiliation.focus();
+          return;
+        }
         if (!f.email.value || !f.password.value) {
           say('Enter an e-mail address and a password of at least 6 characters.');
           return;
@@ -1846,7 +1869,7 @@
         var prof = {
           firstName: first.slice(0, 300),
           lastName: last.slice(0, 300),
-          affiliation: String(f.affiliation.value || '').trim().slice(0, 300),
+          affiliation: affiliation.slice(0, 300),
           website: website.slice(0, 300)
         };
         if (orcid) prof.orcid = orcid;

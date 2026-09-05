@@ -9657,6 +9657,98 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ------------------------------------ WHAT REGISTRATION ASKS FOR (2026-09-05)
+
+   The affiliation is compulsory on a new account and the ORCID iD says it is
+   worth giving. Both are measured on the RENDERED card rather than in the
+   source, because what is under test is what a person filling the form meets:
+   the chip that is no longer there, the box the browser will not let past
+   empty, and the message the card gives when the box holds only spaces.
+
+   Spaces are the case worth driving. `required` is satisfied by them, so the
+   browser lets the submit through and the JS guard is the only thing standing
+   between a card that has just insisted on an affiliation and a profile
+   stored without one. Driven through the shim, whose operation log is what
+   says whether an account was created.                                      */
+{
+  const UNVERIFIED = { uid: 'newbie-uid-0000', email: 'newbie@example.edu',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('jobs.html',
+    { seed: { signInUser: UNVERIFIED } });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const lab = (name) => {
+      const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
+      return i && i.closest('label') ? i.closest('label').textContent.trim() : null;
+    };
+    const req = (name) => {
+      const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
+      return i ? i.required : null;
+    };
+    return {
+      affLabel: lab('affiliation'), affReq: req('affiliation'),
+      siteLabel: lab('website'), siteReq: req('website'),
+      firstReq: req('firstName'), lastReq: req('lastName'),
+      orcidLabel: lab('orcid'), orcidReq: req('orcid'),
+    };
+  });
+  ok(card.affReq === true, 'registration card: the affiliation box is required');
+  ok(!/optional/i.test(card.affLabel || ''),
+    `registration card: …and its label no longer says optional (got "${card.affLabel}")`);
+  ok(card.firstReq === true && card.lastReq === true,
+    'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
+  ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
+    'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
+  ok(card.orcidReq === false,
+    'registration card: the ORCID iD is still genuinely optional — the wording is a recommendation, not a rule');
+  eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
+    'registration card: …and it says it is highly recommended');
+
+  /* a box holding only spaces: the browser lets it through, the guard does not */
+  await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Lovelace');
+  await q.fill('#oa-auth-form [name="affiliation"]', '   ');
+  await q.fill('#oa-auth-form [name="email"]', 'newbie@example.edu');
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(
+    () => (document.querySelector('#oa-auth-msg') || {}).textContent,
+    null, { timeout: 8000 });
+  const refused = await q.evaluate(() => ({
+    msg: document.querySelector('#oa-auth-msg').textContent.trim(),
+    focused: document.activeElement && document.activeElement.name,
+    signedIn: window.__fb.at('signIn', ''),
+    wroteProfile: window.__fb.at('set', 'profiles/'),
+    boxOpen: !!document.querySelector('#oa-auth'),
+  }));
+  ok(/affiliation/i.test(refused.msg),
+    `registration card: an affiliation of spaces is refused, and the message names the field (got "${refused.msg}")`);
+  eq(refused.focused, 'affiliation',
+    'registration card: …with the cursor put back in the box, so the fix needs no hunting');
+  eq(refused.signedIn, -1,
+    'registration card: …and NO account was created — a refusal leaves nothing behind to sign in to or clean up');
+  eq(refused.wroteProfile, -1, 'registration card: …and no profile was stored');
+  ok(refused.boxOpen, 'registration card: …and the card stays open on what the reader typed');
+
+  /* the same form with a real affiliation still registers, trimmed */
+  await q.fill('#oa-auth-form [name="affiliation"]', '  Test University  ');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/') !== -1, null, { timeout: 8000 });
+  const made = await q.evaluate(() => ({
+    signedIn: window.__fb.at('signIn', '') !== -1,
+    docs: window.__fb.dump(),
+  }));
+  ok(made.signedIn, 'registration card: a complete form still creates the account');
+  const profDoc = Object.keys(made.docs).filter((k) => k.indexOf('profiles/') === 0)[0];
+  eq(made.docs[profDoc].affiliation, 'Test University',
+    'registration card: …and the affiliation is stored TRIMMED, not as the spaces around it');
+  eq(errors, [], 'registration card: no uncaught script error');
+  await ctx.close();
+}
+
 /* ---------------------------------------------------------- the forum
 
    forum.html, driven end to end through the shim's forum simulator
