@@ -8269,6 +8269,9 @@ for (const w of [320, 360, 390, 430]) {
       'to anybody is how the old charts stayed dead for three years');
     ok(/Universal Analytics/.test(note) && /_SETUP-ANALYTICS\.md/.test(note),
       'analytics: …and names both the cause and where to read what to do about it');
+    /* the growth chart arrives on its own fetch, after the note: count once
+       it has had time to land, or a chart drawn late passes this by luck */
+    await q.waitForTimeout(800);
     eq(await q.evaluate(() => document.querySelectorAll('.oa-chart-svg').length), 0,
       'analytics: and draws no empty chart beside it');
     await ctx.close();
