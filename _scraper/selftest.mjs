@@ -10147,7 +10147,7 @@ async function testCandidateReveal() {
   ok(/revealAt !== today/.test(bell) && /'reveal: not today'/.test(bell),
     'doorbell: on every other day it logs why it did not ring');
   ok(/FOUR doorbells/.test(fnSrc) && !/THREE doorbells/.test(fnSrc), 'doorbell: the header counts four');
-  ok(/the fifth function, and the only\s+one here that is not a doorbell/.test(fnSrc),
+  ok(/the fifth function, and one of the\s+two here that are not doorbells/.test(fnSrc),
     'doorbell: recordVisit is the fifth function');
   /* ONE producer for the event: no GitHub cron may fire at 14:00, the
      duplicate-doorbell outage (One event, one build) in another costume.
@@ -10528,10 +10528,11 @@ async function testCandidateReveal() {
   }
   /* the change log: three entries, dated, at the top */
   const log = JSON.parse(await read('changelog.json'));
-  const top = log.updates.slice(0, 3).map((u) => u.id);
+  /* the e-mail verification entry, shipped in the same change, sits among them */
+  const top = log.updates.slice(0, 4).map((u) => u.id).filter((id) => id !== 'email-verification-2026-09');
   eq(top.sort(), ['candidate-preview-2026-09', 'profile-updated-line-2026-09', 'reveal-time-2026-09'],
     'changelog: the three entries lead the log');
-  for (const u of log.updates.slice(0, 3)) {
+  for (const u of log.updates.slice(0, 4).filter((u) => u.id !== 'email-verification-2026-09')) {
     eq(u.date, '2026-09-04', `changelog: ${u.id} is dated 2026-09-04`);
     ok(u.title && u.summary && u.url, `changelog: ${u.id} has a title, a summary and a link`);
     ok(!/—/.test(u.title + u.summary), `changelog: ${u.id} carries no em dash`);
@@ -13007,7 +13008,7 @@ async function testEmailVerification() {
   ok(secAt > 0, 'CLAUDE.md records the decision');
   const section = claude.slice(secAt, claude.indexOf('\n## ', secAt + 10));
   ok(section.length > 800 && /verified\(\)/.test(section) && /profiles/.test(section)
-     && /sendVerificationEmail/.test(section) && /\bfive\b/i.test(section),
+     && /sendVerificationEmail/.test(section) && /\bsix\b/i.test(section),
     'CLAUDE.md: the section names the rule, the exception, the function and the deploy count');
   ok(noDash(section), 'CLAUDE.md: no em dash in the section');
 
