@@ -12,6 +12,7 @@
 import { isMain } from './_main.mjs';
 import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
+import { PAIRS as VENDOR_PAIRS, drift as vendorDrift } from './build-functions-vendor.mjs';
 import * as CSTATS from './build-candidate-stats.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -797,6 +798,17 @@ async function testMobileStandards() {
   // universities.html is a MAP, not a list — it cannot mount OAList, so it has
   // its own phone block in page-test.mjs instead of a MOBILE_PAGES entry
   ok(pt.includes('oa-uni-search'), 'the universities map has its own mobile gate');
+  // forum.html cannot join MOBILE_PAGES either (signed out it shows a sign-in
+  // card and mounts no list, and the loop waits for both), so it has a block
+  // of its own, and that block measures the LIST with the loop's own function:
+  // one measure, factored out, so the standard cannot be applied two ways
+  ok(pt.includes('forum mobile'), 'the forum has its own mobile gate (rule 13)');
+  ok(/const MOBILE_LIST_MEASURE = \(\) => \{/.test(pt) && /function assertMobileList\(mob, at\)/.test(pt),
+    'page-test.mjs factors the phone measure and its assertions into one helper');
+  eq((pt.match(/m\.evaluate\(MOBILE_LIST_MEASURE\)/g) || []).length, 2,
+    'the MOBILE_PAGES loop and the forum block both measure a list with it, and nothing else does');
+  ok(!/const mob = await m\.evaluate\(\(\) => \{\s*const doc = document\.documentElement;\s*\/\/ the first VISIBLE bar/.test(pt),
+    'the loop no longer carries its own copy of the measure');
 
   // the engine rules the standard leans on
   const css = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
@@ -5722,8 +5734,13 @@ async function testUsersAndMessages() {
 
   /* ---------------------------------------------------------- the threads */
 
-  const thr = rules.slice(rules.indexOf('match /messages/{uid}'),
-    rules.indexOf('// ------------------------------------------------------ identity keys'));
+  /* Bounded at the next section header, whatever section follows: the forum
+     block sits between the messages and the identity keys now, and a slice
+     that ran on to the identity keys read the forum's own `allow delete`
+     into the items check below. */
+  const thrStart = rules.indexOf('match /messages/{uid}');
+  const thr = rules.slice(thrStart, rules.indexOf('\n    // -------', thrStart));
+  ok(thr.length > 400 && !/match \/forumSeasons/.test(thr), 'the messages slice ends before the next section');
   ok(thr.length > 400, 'the rules carry a messages block');
   ok(/allow read: if isAdmin\(\) \|\| isOwner\(uid\);/.test(thr),
     'a thread is readable by its two parties and nobody else');
@@ -9673,8 +9690,8 @@ async function testReviewWiring() {
      with, drop it the other and a posting's new card waits for a secret its
      build never needed. */
   eq(plan({ firebase: false }).map((b) => b.script),
-    ['build-directory.mjs', 'build-netmap.mjs'],
-    'without the service account only the two OFFLINE builders run');
+    ['build-directory.mjs', 'build-netmap.mjs', 'build-functions-vendor.mjs'],
+    'without the service account only the three OFFLINE builders run');
   eq(plan({ firebase: true }).map((b) => b.script), BUILDERS.map((b) => b.script),
     'with it, the whole build does');
 
@@ -10704,8 +10721,8 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is six/.test(setup) && /read back\s+six/.test(setup),
-    'setup guide: names revealCandidates and counts six functions');
+  ok(/`revealCandidates`/.test(setup) && /which is twelve/.test(setup) && /read back\s+twelve/.test(setup),
+    'setup guide: names revealCandidates and counts twelve functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
   ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
@@ -13228,19 +13245,26 @@ async function testGa4Tag() {
   const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
   const missing = [];
   const onStub = [];
+  /* THE FORUM IS QUIET BY DESIGN (decision 12 in CLAUDE.md, "The forum"):
+     GA4 would report forum.html?t=<tid> as a page location, which is a record
+     of who read which thread when. It carries no tag, and the walk names it
+     rather than letting a missing tag on a members-only page read as the gap
+     this check exists to catch. */
+  const QUIET_PAGES = new Set(['forum.html']);
   for (const f of pages) {
     const html = await readFile(path.join(root, f), 'utf8');
     const isStub = /http-equiv=["']?refresh/i.test(html);
     const tagged = html.includes('assets/oa-ga4.js');
-    if (isStub && tagged) onStub.push(f);
-    if (!isStub && !tagged) missing.push(f);
+    if ((isStub || QUIET_PAGES.has(f)) && tagged) onStub.push(f);
+    if (!isStub && !QUIET_PAGES.has(f) && !tagged) missing.push(f);
   }
   eq(missing, [],
     'every served page carries the tag — a page added without it measures ' +
     'nothing, and the only symptom is a gap in the figures nobody can see');
   eq(onStub, [],
-    'and no redirect stub does: those meta-refresh to a fragment of the home ' +
-    'page within a moment, so a hit there would double-count the page they go to');
+    'and no redirect stub does, nor the forum: those meta-refresh to a fragment of the home ' +
+    'page within a moment, so a hit there would double-count the page they go to, and the ' +
+    'forum is quiet by design');
   ok(pages.filter((f) => f !== 'index.html').length > 10 && missing.length === 0,
     'the sweep really walked the site rather than passing on an empty list');
 
@@ -13437,6 +13461,10 @@ async function testUniversityVisits() {
   const pages = (await readdir(root)).filter((f) => f.endsWith('.html')).sort();
   const missing = [];
   const shouldNot = [];
+  /* the forum is quiet by design (decision 12 in CLAUDE.md, "The forum"): the
+     visit ping sends the connecting address to a function, and the forum reads
+     no address, so it carries no ping and is named here beside the desk */
+  const QUIET_PAGES = new Set(['forum.html']);
   for (const f of pages) {
     const html = await readFile(path.join(root, f), 'utf8');
     const stub = /http-equiv=["']?refresh/i.test(html);
@@ -13446,12 +13474,13 @@ async function testUniversityVisits() {
        be filtered wrongly by a rule that drifts — which is a stronger
        guarantee than the path predicate the pages list is filtered by, and
        needs no second copy of that predicate in the browser. */
-    if ((stub || f === 'admin-area.html') && has) shouldNot.push(f);
-    if (!stub && f !== 'admin-area.html' && !has) missing.push(f);
+    const quiet = f === 'admin-area.html' || QUIET_PAGES.has(f);
+    if ((stub || quiet) && has) shouldNot.push(f);
+    if (!stub && !quiet && !has) missing.push(f);
   }
   eq(missing, [], 'every public page carries the visit ping');
   eq(shouldNot, [],
-    'and neither the admin desk nor any redirect stub does — the exclusion is ' +
+    'and neither the admin desk, the forum nor any redirect stub does; the exclusion is ' +
     'the absence of a script tag, not a runtime check that could drift');
   ok(pages.length > 20 && !missing.length,
     'the sweep really walked the site rather than passing on an empty list');
@@ -13907,6 +13936,8 @@ async function testEmailVerification() {
   ok(allows.length > 40, 'rules: the allow statements were really found');
   const bareWrites = allows.filter((a) => /^allow [^:]*\b(create|update|write)\b/.test(a)
     && /signedIn\(\)/.test(a));
+  /* the forum block adds many clauses and every one names verified(),
+     isOwner(), isAdmin() or `false`, so this count is unmoved by it */
   eq(bareWrites.length, 2,
     'rules: exactly TWO write clauses are granted on a bare sign-in (a create and an update)');
   const profBlock = rules.slice(rules.indexOf('match /profiles/{uid}'));
@@ -14031,10 +14062,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/SIX functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts six and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
-    'function: the file exports exactly six functions, the count a deploy must read back');
+  ok(/TWELVE functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts twelve and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 12,
+    'function: the file exports exactly twelve functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -14053,8 +14084,8 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\bsix\b/i.test(setup) && /functions:list/.test(setup),
-    'setup: read the deployed list back and count SIX');
+  ok(/\btwelve\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count TWELVE');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
     'setup: says what the browser does while the function is absent');
@@ -14428,8 +14459,8 @@ async function testVerifyExistingUsers() {
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 6,
-    'the helper lives in verify-email.js, so index.js still exports exactly six functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 12,
+    'the helper lives in verify-email.js, so index.js still exports exactly twelve functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -14513,6 +14544,627 @@ async function testVerifyExistingUsers() {
    files the roster sync writes. The tile is BORN HIDDEN with no number in it,
    revealed by the page only when data/users-meta.json holds ten or more, and
    the strip has to fit four OR five tiles on one row. */
+/* --------------------------------------------------------------- the forum
+
+   Two rooms under one handle scheme, step 1 (owner, 2026-09-04 and 05; the
+   privacy audit's R1 to R10). What is pinned here is the SERVER half and
+   everything it shares with the page: the model against the writers both
+   ways, the rules block, the identity file's discipline, the vendored
+   pairs, the guard and the guide, the function count, the runbook, the
+   policy paragraph, the change log and CLAUDE.md. The page's own pins
+   (load order, QUIET_PAGES, share-check, link-check, the FAQ) arrive with
+   forum.html. */
+
+async function testForum() {
+  const root = path.join(HERE, '..');
+  const read = (...p) => readFile(path.join(root, ...p), 'utf8');
+  const noDash = (s) => !/—/.test(String(s));
+  const FM = require(path.join(root, 'assets', 'oa-forum-model.js'));
+  const FG = require(path.join(root, 'assets', 'oa-forum-guard.js'));
+  const GUIDE = require(path.join(root, 'assets', 'oa-forum-guide.js'));
+  const NAV = require(path.join(root, 'assets', 'oa-jobnav.js'));
+
+  /* --- the model ------------------------------------------------------- */
+
+  eq(FM.ROOMS, ['candidates', 'open'], 'forum: two rooms, and the only two');
+  ok(FM.isRoom('open') && FM.isRoom('candidates') && !FM.isRoom('lobby') && !FM.isRoom(''), 'forum: isRoom knows exactly those');
+  eq(FM.BOUNDS.quote, 600, 'forum: a quote is at most 600 characters');
+  eq(FM.BOUNDS.body, 4000, 'forum: a body is at most 4000');
+  eq(FM.EDIT_WINDOW_MS, 15 * 60 * 1000, 'forum: the edit window is fifteen minutes');
+  eq(FM.KINDS, ['', 'first-hand', 'rumour'], 'forum: the three kinds');
+  eq(FM.RATE, { threads: 3, posts: 40, votes: 60, gapMs: 20000 }, 'forum: the rate limits as written');
+  eq(FM.slug('Quiet Heron 42'), 'quiet-heron-42', 'forum: slug() folds a handle');
+  eq(FM.slug('  Two-Body!! Problem '), 'two-body-problem', 'forum: slug() folds punctuation to one hyphen and trims');
+  eq(FM.slug('Écoles européennes'), 'ecoles-europeennes', 'forum: slug() folds accents');
+  eq(FM.slug('a'.repeat(30)), 'a'.repeat(24), 'forum: slug() cuts to the tag bound');
+  eq(FM.slug(''), '', 'forum: an empty slug is empty');
+  ok(!FM.tagsOk([]) && !FM.tagsOk(['a1', 'b2', 'c3', 'd4', 'e5', 'f6']), 'forum: zero and six tags are refused');
+  ok(FM.tagsOk(['a'.repeat(24)]) && !FM.tagsOk(['a'.repeat(25)]), 'forum: 24 characters kept, 25 refused');
+  ok(!FM.tagsOk(['a']) && !FM.tagsOk(['Offers']) && !FM.tagsOk(['two body']) && !FM.tagsOk(['offers', 'offers']),
+    'forum: one character, a capital, a space and a repeat are all refused');
+  ok(FM.TAGS.every(FM.tagOk) && FM.tagsOk(FM.TAGS.slice(0, 5)), 'forum: every curated tag passes its own rule');
+  ok(FM.TAGS.includes('about') && FM.TAGS.length >= 30, 'forum: the curated list carries about and is about thirty long');
+  eq(new Set(FM.TAGS).size, FM.TAGS.length, 'forum: no curated tag twice');
+  eq(FM.minute(1700000000123), 1699999980000, 'forum: minute() rounds DOWN to the minute');
+  ok(FM.minute() % 60000 === 0, 'forum: and now is a whole minute');
+  eq(FM.MODERATOR, 'Moderator', 'forum: the reserved handle');
+  const PRIVATE = /^(uid|email|name|sub|key)$/;
+  for (const [kind, keys] of Object.entries(FM.KEYS)) {
+    const leaks = keys.filter((k) => PRIVATE.test(k));
+    const allowed = kind === 'marker' ? ['sub'] : kind === 'name' ? ['key'] : [];
+    eq(leaks, allowed, `forum: KEYS.${kind} carries no uid, e-mail, name or profile id (the two named exceptions aside)`);
+  }
+  eq(Object.keys(FM.KEYS).sort(), ['handle', 'marker', 'name', 'post', 'quote', 'season', 'tags', 'thread', 'vote'],
+    'forum: the step-1 kinds, and only those');
+
+  /* --- the vendored pairs, byte for byte ------------------------------- */
+
+  eq(VENDOR_PAIRS.map((p) => p[0]).sort(),
+    ['assets/oa-forum-guard.js', 'assets/oa-forum-guide.js', 'assets/oa-forum-model.js', 'assets/oa-jobnav.js'],
+    'forum: the vendor builder copies the four modules the functions read');
+  for (const [src, vendored] of VENDOR_PAIRS) {
+    eq(await read(vendored), await read(src),
+      `forum: ${vendored} is byte-identical to ${src}: firebase deploy ships only _functions, so a drifted copy would refuse text the page allows`);
+  }
+  eq(await vendorDrift(root), [], 'forum: the builder\'s own drift check agrees');
+  const vb = BUILDERS.find((b) => b.script === 'build-functions-vendor.mjs');
+  ok(vb && vb.needsFirebase === false, 'forum: build-functions-vendor.mjs is in BUILDERS, offline');
+  ok(BUILDERS.map((b) => b.script).indexOf('build-functions-vendor.mjs') > BUILDERS.map((b) => b.script).indexOf('build-netmap.mjs'),
+    'forum: and runs after the netmap');
+
+  /* --- the writers against the model, both ways ------------------------ */
+
+  const forumDir = path.join(root, '_functions', 'forum');
+  const forumFiles = (await readdir(forumDir)).filter((f) => f.endsWith('.js')).sort();
+  eq(forumFiles, ['edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
+    'forum: the function files, and only those');
+  const forumSrc = {};
+  for (const f of forumFiles) forumSrc[f] = await read('_functions', 'forum', f);
+  const allForum = Object.values(forumSrc).join('\n');
+  const vendoredSrc = {};
+  for (const [, v] of VENDOR_PAIRS) vendoredSrc[v] = await read(v);
+
+  const written = {};
+  let blocks = 0;
+  for (const [f, src] of Object.entries(forumSrc)) {
+    for (const m of src.matchAll(/\/\* @doc (\w+) \*\/([\s\S]*?)\/\* @end \*\//g)) {
+      blocks++;
+      const kind = m[1];
+      ok(FM.KEYS[kind], `forum: ${f} writes a document kind the model knows (${kind})`);
+      const inner = m[2].slice(m[2].indexOf('{') + 1, m[2].lastIndexOf('}'));
+      const keys = [];
+      for (const line of inner.split('\n')) {
+        const km = /^\s*([A-Za-z_]\w*)\s*(?::|,?\s*$)/.exec(line.replace(/,\s*$/, ''));
+        if (km) keys.push(km[1]);
+      }
+      ok(keys.length > 0, `forum: the @doc ${kind} block in ${f} really names keys`);
+      const strays = keys.filter((k) => !(FM.KEYS[kind] || []).includes(k));
+      eq(strays, [], `forum: ${f} writes only keys the model names for ${kind}`);
+      written[kind] = new Set([...(written[kind] || []), ...keys]);
+    }
+  }
+  ok(blocks >= 18, `forum: the writer scan found the @doc blocks (${blocks}), so it is not vacuous`);
+  for (const [kind, keys] of Object.entries(FM.KEYS)) {
+    eq([...(written[kind] || [])].sort(), [...keys].sort(),
+      `forum: every key the model names for ${kind} is written somewhere, and nothing else is`);
+  }
+  /* data reaches Firestore only through a named @doc object */
+  ok(!/\.(set|update|create)\(\s*[^,()]+,\s*\{/.test(allForum),
+    'forum: no inline object literal is ever handed to set/update, so every write is a declared block');
+  ok(!/\.create\(/.test(allForum), 'forum: nothing uses create()');
+  /* auto-ids for threads and posts (R4); the two H-keyed ids are named */
+  for (const f of ['post.js', 'moderate.js']) {
+    ok(/collection\('threads'\)\.doc\(\)/.test(forumSrc[f]) && /collection\('posts'\)\.doc\(\)/.test(forumSrc[f]),
+      `forum: ${f} mints thread and post ids with .doc(), a Firestore auto-id`);
+  }
+  const hDocs = [...allForum.matchAll(/\.doc\(([^)]*\b(?:H|handle|now|minute|uid)\b[^)]*)\)/g)].map((m) => m[1]);
+  eq([...new Set(hDocs)].sort(), ['H', 'm.H', 'uid'].sort(),
+    'forum: the only ids built from a hash are forumHandles/{H} and votes/{H}, and the only one from a uid is candidateMarkers/{uid}');
+  ok(/collection\('forumHandles'\)\.doc\(H\)/.test(allForum) && /collection\('votes'\)\.doc\(m\.H\)/.test(allForum)
+     && /collection\('candidateMarkers'\)\.doc\(uid\)/.test(allForum),
+    'forum: those three, and by name');
+
+  /* --- R1: no forum source reads the request's address -------------------- */
+
+  const R1 = /rawRequest|\.ip\b|x-forwarded-for|remoteAddress|headers/;
+  for (const [f, src] of [...Object.entries(forumSrc), ...Object.entries(vendoredSrc)]) {
+    ok(!R1.test(src.replace(/\/\*[\s\S]*?\*\//g, '')), `forum R1: ${f} names no rawRequest, ip, x-forwarded-for, remoteAddress or headers`);
+  }
+
+  /* --- R2: one HMAC, in one file, used whole ------------------------------ */
+
+  const idSrc = forumSrc['identity.js'];
+  eq((allForum.match(/createHmac/g) || []).length, 1, 'forum R2: createHmac appears once in the forum');
+  ok(/createHmac\('sha256', String\(secret\)\)\s*\.update\(String\(season\) \+ ':' \+ String\(uid\)\)\s*\.digest\('hex'\)/.test(idSrc),
+    'forum R2: the input is season + ":" + uid and nothing else, hex out');
+  const uidUpdates = Object.entries(forumSrc).filter(([, src]) => /\.update\([^;]*\buid\b/.test(src)).map(([f]) => f);
+  eq(uidUpdates, ['identity.js'], 'forum R2: no other file computes over a uid');
+  ok(!/\bH\.(slice|substring|substr)\(|hashFor\([^)]*\)\.(slice|substring|substr)\(/.test(allForum),
+    'forum R2: H is never truncated (the r8 case belongs to step 3 and is not here)');
+
+  /* --- R3: the handle is drawn, never derived ------------------------------ */
+
+  ok(/crypto\.randomInt\(ADJ\.length\)/.test(idSrc) && /crypto\.randomInt\(NOUN\.length\)/.test(idSrc) && /crypto\.randomInt\(10, 100\)/.test(idSrc),
+    'forum R3: the three draws are crypto.randomInt');
+  const draw = idSrc.slice(idSrc.indexOf('function drawHandle('), idSrc.indexOf('function reserved('));
+  ok(draw.length > 100 && draw.length < 600, 'forum R3: drawHandle was sliced');
+  ok(/function drawHandle\(\)/.test(draw) && !/\b(H|uid|Date|season|now)\b/.test(draw.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'forum R3: drawHandle takes nothing and names no hash, uid, season or clock');
+  ok(/const handle = identity\.drawHandle\(\);/.test(forumSrc['join.js'])
+     && forumSrc['join.js'].indexOf('runTransaction(async (tx) => {') < forumSrc['join.js'].indexOf('identity.drawHandle()'),
+    'forum R3: the draw happens inside the claim transaction, retried on a collision');
+  ok(/CLAIM_TRIES = 20/.test(forumSrc['join.js']) && /identity\.reserved\(slug\)/.test(forumSrc['join.js']),
+    'forum R3: twenty tries, and a reserved slug is a collision');
+  const words = forumSrc['words.js'];
+  ok(/RESERVED = \['moderator'\]/.test(words) && !/'moderator'/.test(words.replace(/RESERVED = \['moderator'\]/, '')),
+    'forum: Moderator is reserved and in neither word list');
+
+  /* --- R5: one refusal for the candidates room ---------------------------- */
+
+  const memberSrc = forumSrc['member.js'];
+  const admitted = memberSrc.slice(memberSrc.indexOf('async function admitted('), memberSrc.indexOf('async function member('));
+  ok(admitted.length > 300 && admitted.length < 1500, 'forum R5: admitted() was sliced');
+  eq((admitted.match(/refuse\('permission-denied', 'candidate'\)/g) || []).length, 2,
+    'forum R5: the candidates room refuses an unverified caller and a non-candidate with ONE reason');
+  eq((admitted.match(/refuse\('permission-denied', 'verified'\)/g) || []).length, 1,
+    'forum R5: only the open room names verified');
+  ok(/if \(admin\) return \{ admin, profile: null \};/.test(admitted), 'forum: the maintainer enters the candidates room with no profile');
+  ok(/adminToken\(/.test(admitted), 'forum: admitted() asks adminToken');
+
+  /* --- R6: a refusal carries a reason and nothing else -------------------- */
+
+  const details = [...allForum.matchAll(/new HttpsError\([^;]*?,\s*(\{[^}]*\})\)/g)].map((m) => m[1]);
+  ok(details.length >= 6, `forum R6: the HttpsError details were found (${details.length})`);
+  ok(details.every((d) => /^\{\s*reason(:\s*'[a-z]+')?\s*\}$/.test(d)), 'forum R6: every details object is { reason } alone, never a count');
+  ok(/throw new HttpsError\(code, ERRORS\[reason\] \|\| 'Refused\.', \{ reason \}\);/.test(memberSrc), 'forum R6: refuse() is the one shape');
+  const errKeys = [...memberSrc.slice(memberSrc.indexOf('const ERRORS = {'), memberSrc.indexOf('};', memberSrc.indexOf('const ERRORS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
+  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'url', 'orcid']) {
+    ok(errKeys.includes(r), `forum: ERRORS words the reason ${r}`);
+  }
+  for (const m of allForum.matchAll(/refuse\('[a-z-]+', '([a-z]+)'\)/g)) {
+    ok(errKeys.includes(m[1]), `forum: refuse() is only ever called with a worded reason (${m[1]})`);
+  }
+  ok(/refuse\('resource-exhausted', counter\.replace\(\/\^day\/, ''\)\.toLowerCase\(\)\)/.test(memberSrc),
+    'forum R6: a rate limit names its counter and never a number');
+
+  /* --- R7: every stamp is a whole minute --------------------------------- */
+
+  ok(!/serverTimestamp/.test(allForum), 'forum R7: serverTimestamp is never used on a forum document');
+  ok(!/Date\.now\(\)|new Date\(/.test(allForum), 'forum R7: no forum function reads the clock except through minute()');
+  ok((allForum.match(/M\.minute\(\)/g) || []).length >= 8, 'forum R7: minute() is what every stamp comes from');
+
+  /* --- R8: the secret is read by the season's own version ------------------ */
+
+  eq((allForum.match(/accessSecretVersion/g) || []).length, 1, 'forum R8: accessSecretVersion appears once');
+  ok(/accessSecretVersion/.test(idSrc) && /'\/versions\/' \+ version/.test(idSrc), 'forum R8: in identity.js, with the version from its argument');
+  const latest = [...idSrc.matchAll(/'latest'/g)].length;
+  ok(latest >= 1 && /await accessVersion\('latest'\)/.test(idSrc)
+     && idSrc.indexOf("accessVersion('latest')") > idSrc.indexOf('async function ensureSeason(')
+     && idSrc.indexOf("accessVersion('latest')") < idSrc.indexOf('async function secretForSeason('),
+    'forum R8: latest is named only inside the create branch of ensureSeason');
+  ok(!/'latest'/.test(idSrc.slice(idSrc.indexOf('async function secretForSeason('))), 'forum R8: secretForSeason never asks for latest');
+  const others = Object.entries(forumSrc).filter(([f, src]) => f !== 'identity.js' && /secretVersion/.test(src)).map(([f]) => f);
+  eq(others, [], 'forum R8: secretVersion is read in identity.js and nowhere else');
+  ok(/db\.collection\('forumSeasons'\)\.doc\(String\(season\)\)/.test(idSrc) && (idSrc.match(/collection\('forumSeasons'\)/g) || []).length === 1,
+    'forum R8: the one season document read is the season passed in');
+  ok(/function emulated\(\) \{\s*return process\.env\.FUNCTIONS_EMULATOR === 'true';\s*\}/.test(idSrc), 'forum R8: the emulator branch is guarded on FUNCTIONS_EMULATOR');
+  const av = idSrc.slice(idSrc.indexOf('async function accessVersion('), idSrc.indexOf('const cache = new Map()'));
+  ok(av.length > 300 && av.indexOf('if (emulated())') < av.indexOf('FORUM_SECRET_TEST'), 'forum R8: the test secrets are read only after that guard');
+  ok(!/FORUM_SECRET_TEST/.test(Object.entries(forumSrc).filter(([f]) => f !== 'identity.js').map(([, s]) => s).join('')), 'forum R8: and nowhere else');
+  ok(/defineSecret\('FORUM_SECRET'\)/.test(memberSrc) && /secrets: \[FORUM_SECRET\]/.test(memberSrc), 'forum: the secret is bound to the callables');
+  eq(FM.KEYS.season.includes('secretVersion'), true, 'forum R8: the season head carries the version');
+
+  /* --- the maintainer literal and the verified mirror ------------------ */
+
+  const rules = await read('_firestore.rules');
+  const adminInRules = (/request\.auth\.token\.email == '([^']+)'/.exec(rules) || [])[1];
+  ok(new RegExp(`const ADMIN = '${adminInRules}';`).test(memberSrc), 'forum: ADMIN in member.js is the isAdmin() address in the rules');
+  ok(/t\.email_verified === true\s*\|\| \(!!t\.firebase && typeof t\.firebase\.sign_in_provider === 'string'\s*&& t\.firebase\.sign_in_provider !== 'password'\)/.test(memberSrc),
+    'forum: verifiedToken mirrors verified(), both halves');
+  ok(/return t\.email === ADMIN && t\.email_verified === true;/.test(memberSrc), 'forum: adminToken mirrors isAdmin()');
+  for (const f of ['join.js', 'post.js', 'edit.js', 'vote.js', 'moderate.js']) {
+    ok(/onCall\(P\.OPTS,/.test(forumSrc[f]), `forum: ${f} declares its callable(s) with the shared OPTS`);
+  }
+  ok(/region: 'us-central1'/.test(memberSrc) && /enforceAppCheck: false/.test(memberSrc) && /maxInstances: 10/.test(memberSrc) && /timeoutSeconds: 30/.test(memberSrc),
+    'forum: the shared options as written');
+  ok(/mapAborted|code === 10 \|\| e\.code === 'aborted'/.test(memberSrc) && /refuse\('resource-exhausted', 'busy'\)/.test(memberSrc),
+    'forum: a contended transaction answers busy, never a raw code');
+  ok(/if \(pv\.by === m\.handle\) P\.refuse\('failed-precondition', 'own'\);/.test(forumSrc['vote.js']), 'forum: no voting on your own post');
+  ok(/FieldValue\.increment\(du\)/.test(forumSrc['vote.js']) && /score: FieldValue\.increment\(du - dd\)/.test(forumSrc['vote.js']),
+    'forum: votes move by delta with increment, and the first post\'s net lands on the thread head');
+  ok(/D\.getAll\(\.\.\.refs\)/.test(forumSrc['vote.js']), 'forum: forumThreadVotes reads the caller\'s votes in one round trip');
+  ok(/text\.length > M\.BOUNDS\.quote/.test(forumSrc['post.js']) && /String\(src\.body\)\.indexOf\(text\) === -1/.test(forumSrc['post.js']),
+    'forum: a quote is bounded and must be a passage of the post as it stands');
+  ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
+  ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
+    'forum: seedGuide renders the guide itself and takes no body');
+  ok(/now >= Number\(pv\.t\) \+ M\.EDIT_WINDOW_MS/.test(forumSrc['edit.js']), 'forum: the edit window is measured from the stamped minute');
+  ok(/ring\('oa-forum-posted'/.test(forumSrc['post.js']) && !/await ring\(/.test(forumSrc['post.js']), 'forum: the step-2 doorbell is an anchor, not a call');
+  ok(!/setCustomUserClaims/.test(allForum), 'forum: no custom claim ever carries a hash beside a uid');
+
+  /* --- the rules block ---------------------------------------------------- */
+
+  const fAt = rules.indexOf('function forumSeasonNow()');
+  const fEnd = rules.indexOf('// ------------------------------------------------------ identity keys');
+  ok(fAt > 0 && fEnd > fAt, 'forum: the rules block sits between messages and the identity keys');
+  const fr = rules.slice(fAt, fEnd);
+  ok(fr.length > 1500, 'forum: the block was really sliced');
+  const roll = NAV.MARKET_ROLL_MONTH + 1;
+  ok(new RegExp(`request\\.time\\.month\\(\\) >= ${roll} \\? 1 : 0`).test(fr), 'forum: forumSeasonNow rolls on the month oa-jobnav.js rolls on (1-based)');
+  const reader = fr.slice(fr.indexOf('function forumReader(room)'), fr.indexOf('}', fr.indexOf('function forumReader(room)')));
+  ok(/room == 'candidates' && \(isCurrentCandidate\(\) \|\| isAdmin\(\)\)/.test(reader) && /room == 'open' && verified\(\)/.test(reader),
+    'forum: forumReader admits a current candidate or the maintainer to the candidates room and any verified account to the open room');
+  eq([...reader.matchAll(/room == '([a-z]+)'/g)].map((m) => m[1]).sort(), [...FM.ROOMS].sort(),
+    'forum: the rooms the rules compare against are exactly the model\'s, both ways');
+  ok(!/matches\(/.test(reader), 'forum: the room is compared by name, never by a regex');
+  ok(/function isCurrentCandidate\(\) \{\s*return verified\(\)/.test(fr), 'forum: isCurrentCandidate starts from verified()');
+  ok(/forumProfile\(\)\.uid == request\.auth\.uid/.test(fr) && /forumProfile\(\)\.status in \['queued', 'published'\]/.test(fr)
+     && /get\(forumMarkerPath\(\)\)\.data\.year == forumSeasonNow\(\)/.test(fr) && /forumProfile\(\)\.year == forumSeasonNow\(\)/.test(fr),
+    'forum: the profile is re-read, owned by the caller, of this season, and queued or published');
+  ok(/match \/candidateMarkers\/\{uid\} \{\s*allow read: if isOwner\(uid\) \|\| isAdmin\(\);\s*allow delete: if isOwner\(uid\) \|\| isAdmin\(\);\s*allow create, update: if false;/.test(fr),
+    'forum: a marker is owner-read, owner-delete, never client-written');
+  ok(/match \/forumSeasons\/\{season\} \{\s*allow read: if verified\(\);\s*allow write: if false;/.test(fr), 'forum: the season head is readable to verified accounts and written by nobody');
+  ok(/match \/rooms\/\{room\}\/threads\/\{tid\} \{\s*allow read: if forumReader\(room\);\s*allow write: if false;/.test(fr), 'forum: a thread is read through forumReader and written by nobody');
+  ok(/match \/posts\/\{pid\} \{\s*allow read: if forumReader\(room\);\s*allow write: if false;/.test(fr), 'forum: a post likewise');
+  ok(/match \/votes\/\{key\} \{\s*allow read, write: if false;/.test(fr), 'forum: a vote is closed to everyone in both directions');
+  ok(/match \/forumTags\/\{id\} \{\s*allow read: if verified\(\);\s*allow write: if false;/.test(fr), 'forum: the tag tally is verified-read, function-written');
+  ok(/match \/forumNames\/\{slug\}\s*\{ allow read, write: if false; \}/.test(fr), 'forum: the reverse index is nobody\'s');
+  ok(/match \/forumHandles\/\{key\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr), 'forum: the handle table is the maintainer\'s to read');
+  const mailLine = (fr.match(/match \/forumMail\/\{document=\*\*\}[^\n]*/) || [''])[0];
+  ok(/allow read, write: if false;/.test(mailLine) && !/isAdmin/.test(mailLine), 'forum: the mailboxes (step 3) are one recursive if-false with no admin clause');
+  ok(/match \/forumHidden\/\{document=\*\*\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr) && /match \/forumReports\/\{id\}\s*\{ allow read: if isAdmin\(\); allow write: if false; \}/.test(fr),
+    'forum: the step-3 anchors are admin-read, function-written');
+  ok(!/signedIn\(\)/.test(fr), 'forum: no clause in the block grants anything on a bare sign-in');
+  ok(noDash(fr), 'forum: no em dash in the block');
+
+  /* --- the guard ---------------------------------------------------------- */
+
+  const jm = await read('_scraper', 'jobs-model.mjs');
+  const rxIn = (/const EMAIL_RX = (\/.*\/g);/.exec(jm) || [])[1];
+  const rxGuard = (/var EMAIL_RX = (\/.*\/g);/.exec(await read('assets', 'oa-forum-guard.js')) || [])[1];
+  ok(rxIn && rxGuard && rxIn === rxGuard, 'forum guard: EMAIL_RX is the jobs-model literal, character for character');
+  for (const s of ['2026-2027', '2026-09-04', '$120,000-150,000', 'e.g.', 'vs.', '10.1287/mnsc.2020.3745', 'OA posting 2027-university-of-houston-20250923']) {
+    eq(FG.check(s), '', `forum guard: allows "${s}"`);
+  }
+  for (const [s, why] of [['+1 617 253 1000', 'phone'], ['617-253-1000', 'phone'], ['(617) 253-1000', 'phone'], ['jane@mit.edu', 'email'],
+    ['mit.edu/~jane', 'url'], ['www.example.org', 'url'], ['0000-0002-1825-0097', 'orcid'], ['see https://example.org/x', 'url']]) {
+    eq(FG.check(s), why, `forum guard: refuses "${s}" as ${why}`);
+  }
+  eq(FG.check(''), '', 'forum guard: nothing is fine');
+  ok(Object.keys(FG.WHY).sort().join() === 'email,orcid,phone,url', 'forum guard: a sentence per reason');
+
+  /* --- the guide ---------------------------------------------------------- */
+
+  eq(GUIDE.RULES.length, 13, 'forum guide: thirteen rules');
+  eq(GUIDE.NOTES.length, 3, 'forum guide: three notes');
+  ok(GUIDE.RULES[11].endsWith('To appeal, use Send feedback and quote your handle.'), 'forum guide: rule 12 ends on the appeal sentence');
+  ok(GUIDE.RULES.some((r) => /same in both rooms this season, and changes at the July roll/.test(r)), 'forum guide: one handle in both rooms, said in one sentence');
+  ok(/read and post in both rooms/.test(GUIDE.WHAT_THE_MAINTAINER_CAN_SEE) && /destroyed a month after the season ends/.test(GUIDE.WHAT_THE_MAINTAINER_CAN_SEE),
+    'forum guide: the maintainer paragraph says they read and post in both rooms, and that the key is destroyed');
+  ok(GUIDE.NOTES[0].lead === 'Nothing here is legal or immigration advice.' && /hard season/.test(GUIDE.NOTES[1].lead) && /This forum is small/.test(GUIDE.NOTES[2].lead),
+    'forum guide: the owner\'s two notices and the small-population note');
+  const gt = GUIDE.text();
+  const gh = GUIDE.html();
+  ok(!/http|www\./i.test(gt) && !/http|www\./i.test(gh), 'forum guide: no link in either rendering');
+  ok(noDash(gt) && noDash(gh) && noDash(JSON.stringify(GUIDE.RULES)), 'forum guide: no em dash');
+  ok(gt.length <= FM.BOUNDS.body, 'forum guide: the text fits the body bound, so seedGuide can post it');
+  eq(FG.check(gt), '', 'forum guide: the guard allows its own text');
+  const order = (s, esc) => GUIDE.RULES.map((r) => s.indexOf(esc ? r.replace(/&/g, '&amp;').replace(/'/g, "'") : r));
+  ok(order(gt).every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1])) && order(gh, true).every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1])),
+    'forum guide: text() and html() carry every rule in the same order');
+  ok(/<ol class="oa-forum-rules">/.test(gh) && (gh.match(/<li>/g) || []).length === 13 && !/<script/i.test(gh), 'forum guide: html() is an ordered list of thirteen, nothing executable');
+  eq(GUIDE.html().replace(/<[^>]+>/g, '').includes('<'), false, 'forum guide: every rule is escaped');
+
+  /* --- index.js, the package, the lockfile -------------------------------- */
+
+  const fn = await read('_functions', 'index.js');
+  ok(/const forum = require\('\.\/forum'\);/.test(fn), 'forum: index.js requires ./forum');
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+    ok(new RegExp(`^exports\\.${name} = forum\\.${name};$`, 'm').test(fn), `forum: index.js re-exports ${name} on its own line`);
+  }
+  const pkg = JSON.parse(await read('_functions', 'package.json'));
+  ok(pkg.dependencies['@google-cloud/secret-manager'] && pkg.devDependencies['@firebase/rules-unit-testing'], 'forum: the secret-manager client and the rules test kit are declared');
+  const lock = JSON.parse(await read('_functions', 'package-lock.json'));
+  ok(lock.packages['node_modules/@google-cloud/secret-manager'] && lock.packages['node_modules/@firebase/rules-unit-testing'], 'forum: and the lockfile resolves both');
+
+  /* --- the emulator test, the workflow, no cron ------------------------- */
+
+  const em = await read('_functions', 'test', 'forum-emulator.mjs');
+  ok(/process\.exit\(process\.env\.CI \? 1 : 0\)/.test(em) && /have\('java'/.test(em) && /have\('firebase'/.test(em), 'forum: the emulator test skips without Java or firebase-tools, and exits 1 for that skip under CI');
+  ok(/FORUM_SECRET_TEST_2/.test(em) && /secretVersion: 'env2'/.test(em), 'forum: it proves two secret versions give two handles');
+  for (const col of ['forumSeasons', 'forumTags', 'forumHandles', 'forumNames']) ok(em.includes(`'${col}'`), `forum: the walk covers ${col}`);
+  ok(/candidateMarkers/.test(em) && /\[0-9a-f\]\{64\}/.test(em) && /% 60000 === 0/.test(em), 'forum: it walks the markers apart, hunts 64-hex strings and checks the minute rule');
+  const wfDir = path.join(root, '.github', 'workflows');
+  const checks = await read('.github', 'workflows', 'oa-checks.yml');
+  ok(/^  emulator:$/m.test(checks) && /_functions\/test\/forum-emulator\.mjs/.test(checks) && /actions\/setup-java@v4/.test(checks)
+     && /CI: true/.test(checks) && /FORUM_SECRET_TEST_2:/.test(checks) && /demo-oa-forum/.test(checks),
+    'forum: oa-checks.yml runs the emulator test in its own job, with Java, CI set and a demo project');
+  ok((checks.match(/- '_functions\/\*\*'/g) || []).length === 2, 'forum: a functions-only change now runs the checks (both trigger lists)');
+  for (const file of (await readdir(wfDir)).filter((f) => f.endsWith('.yml'))) {
+    const src = await readFile(path.join(wfDir, file), 'utf8');
+    ok(!(/schedule:/.test(src) && /forum/i.test(src)), `forum: ${file} has no cron that touches the forum`);
+  }
+  const fbj = JSON.parse(await read('firebase.json'));
+  ok(fbj.emulators && fbj.emulators.auth.port === 9099 && fbj.emulators.firestore.port === 8080 && fbj.emulators.functions.port === 5001,
+    'forum: firebase.json fixes the emulator ports the test connects to');
+
+  /* --- the runbook, the policy, the change log, CLAUDE.md ---------------- */
+
+  const setup = await read('_SETUP-INSTANT-PUBLISH.md');
+  ok(/^## The forum secret$/m.test(setup) && /firebase functions:secrets:set FORUM_SECRET --project operations-academia/.test(setup)
+     && /gcloud secrets versions destroy/.test(setup) && /secretVersion/.test(setup) && /renames every handle/.test(setup),
+    'forum: the runbook sets the secret once, says a rotation renames every handle, and destroys the previous version on 1 August');
+  /* THE FORUM IS BUILT AND NOT ANNOUNCED (owner, 2026-09-05). Everything the
+     site would SAY about it — the home page's button, its FAQ answer, the
+     policy paragraph, the change log entry and the row on both account menus
+     — is held back together, behind the one switch in oa-accounts.js, and
+     these pins follow that switch rather than blocking it: while it is false
+     they demand that nothing anywhere points at the page, and the moment it
+     is true they demand every one of those surfaces back. That pairing is
+     what keeps the DISCLOSURE from being the thing somebody forgets: R9 is
+     not waived here, it is deferred to the day a reader can reach the forum,
+     and its wording is kept verbatim in CLAUDE.md meanwhile. */
+  const acctSrc = await read('assets', 'oa-accounts.js');
+  const annM = /var FORUM_ANNOUNCED = (true|false);/.exec(acctSrc);
+  ok(annM, 'forum: oa-accounts.js carries the one announce switch');
+  const announced = !!annM && annM[1] === 'true';
+  const pp = await read('privacy-policy.html');
+  const log = JSON.parse(await read('changelog.json')).updates;
+  const entry = log.find((u) => u.id === 'forum-2026-09');
+  if (announced) {
+    ok(/handle is random/.test(pp) && /keyed one-way hash/.test(pp) && /destroyed a month after the season ends/.test(pp),
+      'forum R9: the policy says handles are random and how, and when the key is destroyed');
+    ok(/does not read the address your browser connects from/.test(pp) && /Google&rsquo;s own request logs/.test(pp) && /standard retention/.test(pp)
+       && /forum writes nothing of its\s+own to them/.test(pp),
+      'forum R9: it says the forum reads no address, and what Google\'s own logs hold and who reads them');
+    ok(/maintainer can read and post in both rooms as an ordinary member/.test(pp), 'forum: the policy says the maintainer reads and posts in both rooms');
+    const ppForum = pp.slice(pp.indexOf('The Site has an anonymous forum'), pp.indexOf('<h2>Security</h2>'));
+    ok(ppForum.length > 800 && ppForum.length < 3000 && noDash(ppForum.replace(/&mdash;/g, '—')), 'forum: the policy paragraph is bounded and carries no em dash');
+    ok(entry && entry.url === '/forum.html' && /two rooms/i.test(entry.title + entry.summary) && noDash(entry.title + entry.summary),
+      'forum: the change log entry, linking the page, no em dash');
+  } else {
+    ok(!/anonymous forum/.test(pp), 'forum (not announced): the policy paragraph is held back with the rest');
+    ok(/THE FORUM'S PARAGRAPH BELONGS HERE/.test(pp), 'forum (not announced): the policy says where the paragraph goes back');
+    ok(!entry, 'forum (not announced): no change log entry, so no digest announces it');
+  }
+  const claude = await read('CLAUDE.md');
+  ok(/^## The forum$/m.test(claude), 'forum: CLAUDE.md has the section');
+  const cf = claude.slice(claude.indexOf('\n## The forum\n'), claude.indexOf('\n## ', claude.indexOf('\n## The forum\n') + 10));
+  ok(cf.length > 3000, 'forum: the section was sliced');
+  for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
+    ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
+  }
+  ok(/TWELVE/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads twelve');
+  for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
+    ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
+    ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
+    ok(noDash(src), `forum: no em dash in ${f}`);
+  }
+
+  /* --- the page half: forum.html, oa-forum.js, oa-forum.css and the wiring ---
+
+     What the browser half promises, read from the files: the page is quiet,
+     noindexed and unpreviewed; it loads its modules in the order they depend
+     on each other, every one deferred; the app is hidden until an account is
+     admitted and no thread markup ships in the page; the list engine gained
+     cfg.source and nothing else; the account menu carries the row on both
+     menus and sign-out clears the forum's two stores; the refusal words the
+     page can show are exactly the reasons the functions can answer with; and
+     the stylesheet paints with tokens alone, so both themes are covered. */
+
+  const page = await read('forum.html');
+  const pageJs = await read('assets', 'oa-forum.js');
+  const pageCss = await read('assets', 'oa-forum.css');
+  ok(/<meta name="robots" content="noindex,nofollow">/.test(page), 'forum page: noindex, nofollow');
+  ok(!/property="og:|name="twitter:|rel="image_src"|itemprop="image"/.test(page), 'forum page: no preview block, since nobody can share into it');
+  const firstTag = /<head[^>]*>\s*(<[^>]+>)/i.exec(page);
+  ok(firstTag && /^<meta\s+charset=/i.test(firstTag[1]), 'forum page: charset first in head');
+  ok(/<a class="v3-skip" href="#main">/.test(page) && /<main id="main">/.test(page), 'forum page: the skip link and its target');
+  ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
+    'forum page: the head snippet, the exact line every live page carries');
+  const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-list.js', 'oa-forum.js'];
+  const tagAt = (f) => page.indexOf('<script defer src="assets/' + f + '"></script>');
+  ok(LOAD.every((f, i) => tagAt(f) > 0 && (i === 0 || tagAt(f) > tagAt(LOAD[i - 1]))),
+    'forum page: the nine scripts load in dependency order, each deferred');
+  eq((page.match(/<script[^>]*\ssrc=/g) || []).length, LOAD.length, 'forum page: and no other external script');
+  for (const f of ['oa-ga4.js', 'oa-usage.js', 'oa-visit.js']) ok(!page.includes('assets/' + f), `forum page: quiet by design, no ${f}`);
+  for (const f of ['oa-list.css', 'oa-ui.css', 'v3.css', 'oa-forum.css']) ok(page.includes('assets/' + f), `forum page: loads ${f}`);
+  for (const id of ['oa-offline', 'oa-needauth', 'oa-needauth-btn', 'oa-forum-verify', 'oa-forum-verify-btn', 'oa-forum-loading',
+    'oa-forum-error', 'oa-forum', 'oa-forum-rooms', 'oa-forum-roomnote', 'oa-forum-archive', 'oa-forum-me', 'oa-forum-listview',
+    'oa-forum-listtitle', 'oa-forum-listcount', 'oa-forum-list', 'oa-forum-thread', 'oa-forum-compose', 'oa-forum-roomcard',
+    'oa-forum-tagcard', 'oa-forum-tags', 'oa-forum-seasoncard', 'oa-forum-seasons', 'oa-forum-admin', 'oa-forum-guide', 'oa-forum-guidebody']) {
+    ok(page.includes(`id="${id}"`), `forum page: carries #${id}`);
+  }
+  ok(/<div id="oa-forum" hidden>/.test(page) && /id="oa-needauth" hidden/.test(page) && /id="oa-forum-verify" hidden/.test(page),
+    'forum page: the app and both gate cards are born hidden; the script decides which one shows');
+  ok(!/oa-forum-post\b|oa-forum-v\b|oa-forum-handle/.test(page), 'forum page: no thread, post or handle markup ships in the page');
+  ok(/role="tablist"/.test(page) && /class="oa-forum-tabs" id="oa-forum-rooms"/.test(page), 'forum page: the room switch is a tablist');
+  ok(/<title>Forum &middot; Operations Academia<\/title>/.test(page), 'forum page: the title');
+
+  /* the two checks and the sitemap */
+  const sc = await read('_scraper', 'share-check.mjs');
+  const scEntry = /\{ file: 'forum\.html', card: false,\s*why: '([^']+)' \}/.exec(sc);
+  ok(scEntry && scEntry[1].length >= 40, 'forum page: card: false in share-check, with a reason');
+  const lc = await read('_scraper', 'link-check.mjs');
+  const noindexList = lc.slice(lc.indexOf('const NOINDEX_OK'), lc.indexOf(']);', lc.indexOf('const NOINDEX_OK')));
+  ok(/'forum\.html',/.test(noindexList), 'forum page: in NOINDEX_OK');
+  const sitemap = await read('sitemap.xml');
+  ok(!/<loc>[^<]*forum\.html/.test(sitemap) && /forum\.html/.test(sitemap), 'forum page: absent from the sitemap, and its comment says why');
+  const selfSrc = await read('_scraper', 'selftest.mjs');
+  eq((selfSrc.match(/const QUIET_PAGES = new Set\(\['forum\.html'\]\);/g) || []).length, 2,
+    'forum page: QUIET_PAGES names it in the GA4 walk and the visit walk');
+
+  /* the engine's one addition */
+  const listJs = await read('assets', 'oa-list.js');
+  ok(/\(typeof cfg\.source === 'function' \? Promise\.resolve\(\)\.then\(cfg\.source\) : load\(cfg\.data\)\)/.test(listJs),
+    'oa-list.js: cfg.source stands in for load(cfg.data)');
+  ok(/console\.error\('OAList: failed to load ' \+ \(cfg\.data \|\| STR\.unit\), err\)/.test(listJs), 'oa-list.js: a source failure is named by its unit');
+  ok(/source: readThreads,/.test(pageJs) && /OAList\.mount\(\{/.test(pageJs), 'oa-forum.js: the list is an OAList mount fed by source');
+  ok(!/OAFresh/.test(pageJs), 'oa-forum.js: no echo overlay, the source path skips it deliberately');
+
+  /* the collections, the menu, the sign-out */
+  const fbJs = await read('assets', 'oa-firebase.js');
+  for (const k of ['candidateMarkers', 'forumSeasons', 'forumRooms', 'forumThreads', 'forumPosts', 'forumVotes', 'forumTags', 'forumHandles', 'forumNames', 'forumHidden', 'forumReports', 'forumMail']) {
+    ok(new RegExp(`\\n\\s+${k}: '[a-zA-Z]+'`).test(fbJs), `oa-firebase.js: col.${k}`);
+  }
+  const acct = acctSrc;
+  /* The row is WRITTEN either way — the switch decides whether it is drawn —
+     so both menus are pinned to carry it behind the flag, and the flag is
+     pinned to be the only thing between them and the page. */
+  ok(/\(FORUM_ANNOUNCED\s*\n?\s*\? '<a role="menuitem" href="forum\.html">'/.test(acct) && /data-count="forum" hidden/.test(acct),
+    'oa-accounts.js: the Forum row with its badge born hidden, behind the announce switch');
+  ok(/\(FORUM_ANNOUNCED \? '<a class="link depth-0" href="forum\.html">Forum<\/a>' : ''\)/.test(acct),
+    'oa-accounts.js: the phone sheet has the row too, behind the same switch');
+  ok(!/data-held="forum"/.test(acct), 'oa-accounts.js: the row is drawn for every signed-in account, not held on a count');
+  const signOutSrc = acct.slice(acct.indexOf('  function signOut() {'), acct.indexOf('OAFB.ready()', acct.indexOf('  function signOut() {')));
+  ok(signOutSrc.length > 300 && signOutSrc.length < 3000, 'oa-accounts.js: signOut was sliced');
+  ok(/sessionStorage\.removeItem\('oa-forum-me'\)/.test(signOutSrc) && /localStorage\.removeItem\('oa-forum-seen'\)/.test(signOutSrc),
+    'oa-accounts.js: signing out forgets the forum handle and the seen-marks');
+  ok(/ME_KEY = 'oa-forum-me'/.test(pageJs) && /SEEN_KEY = 'oa-forum-seen'/.test(pageJs), 'oa-forum.js: the same two keys');
+  ok(/v\.uid === uid && Number\(v\.season\) === Y && v\.handle/.test(pageJs), 'oa-forum.js: the cached join is trusted only for the same account and season');
+
+  /* the callables and their words */
+  for (const n of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) ok(pageJs.includes(`'${n}'`), `oa-forum.js: calls ${n}`);
+  ok(/REGION = 'us-central1'/.test(pageJs) && /fb\.app\(\)\.functions\(REGION\)\.httpsCallable\(name\)/.test(pageJs), 'oa-forum.js: the callables by region through OAFB.readyFunctions');
+  ok(/OAFB\.readyFunctions\(\)/.test(pageJs), 'oa-forum.js: the Functions SDK is loaded on demand');
+  const reasonKeys = [...pageJs.slice(pageJs.indexOf('var REASONS = {'), pageJs.indexOf('};', pageJs.indexOf('var REASONS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
+  for (const r of errKeys) ok(reasonKeys.includes(r), `oa-forum.js: REASONS words the function reason ${r}`);
+  for (const r of reasonKeys) ok(errKeys.includes(r) || r === 'auth', `oa-forum.js: REASONS.${r} is a reason the functions can answer with`);
+  ok(/function friendly\(err\)/.test(pageJs) && /err\.details && err\.details\.reason/.test(pageJs), 'oa-forum.js: a refusal is worded by its reason, never shown as a code');
+  ok(!/\b(u|user|me|S\.me)\.(email|displayName|uid)\b[^;]*innerHTML|innerHTML[^;]*\b(email|displayName)\b/.test(pageJs), 'oa-forum.js: no address or name is ever drawn');
+  ok(/G\.check\(/.test(pageJs) && /OAForumGuard/.test(pageJs), 'oa-forum.js: the guard runs in the browser too');
+  ok(/GUIDE\.html\(\)/.test(pageJs), 'oa-forum.js: the guide panel is the module\'s html()');
+  ok(/M\.BOUNDS\.quote/.test(pageJs) && /S\.quote = \{ n: Number\(p\.n\) \|\| 0, by: p\.by, text: text \}/.test(pageJs), 'oa-forum.js: a quote is cut to the bound and carries n, by, text');
+  ok(/data\.quote = \{ n: S\.quote\.n, text: S\.quote\.text \}/.test(pageJs), 'oa-forum.js: and only n and text are sent');
+  ok(/history\.pushState\(null, '', to\)/.test(pageJs) && /addEventListener\('popstate'/.test(pageJs), 'oa-forum.js: the three views are one page under three addresses');
+  ok(/if \(!readOnly\)/.test(pageJs) && /S\.archive \|\| !!thread\.locked/.test(pageJs), 'oa-forum.js: an archived or locked thread draws no vote button and no reply box');
+
+  /* the withdraw path */
+  const candForm = await read('assets', 'oa-candidateform.js');
+  ok(/OAFB\.col\.candidateMarkers\)\.doc\(user\.uid\)\['delete'\]\(\)\.catch/.test(candForm) && /!OAAccounts\.isAdmin\(\) && user && user\.uid/.test(candForm),
+    'oa-candidateform.js: a withdrawal drops the owner\'s own forum marker, best-effort, never the maintainer\'s');
+
+  /* the home page, the standard, the stylesheet */
+  const home = await read('index.html');
+  if (announced) {
+    ok(/<a class="v3-btn ghost" href="forum\.html">Candidates&rsquo; forum<\/a>/.test(home), 'index.html: the candidates section links the forum');
+    const faq = home.slice(home.indexOf('Is there somewhere to talk to other candidates'), home.indexOf('Is my personal information published?'));
+    ok(faq.length > 300 && faq.length < 2500 && /forum\.html/.test(faq) && /Candidates&rsquo; room/.test(faq) && /Open forum/.test(faq) && /account menu/.test(faq),
+      'index.html: the FAQ names both rooms and where the forum is reached');
+    ok(noDash(faq.replace(/&mdash;/g, '\u2014')), 'index.html: the FAQ answer carries no em dash');
+  } else {
+    ok(!/href="forum\.html"/.test(home) && !/Is there somewhere to talk to other candidates/.test(home),
+      'index.html (not announced): no button and no FAQ answer');
+    ok(/FORUM_ANNOUNCED in assets\/oa-accounts\.js/.test(home), 'index.html: the comment says where the button comes back from');
+    /* the sweep the switch is actually FOR: not one served page, anywhere,
+       points a reader at forum.html. The page itself is the exception — it
+       is how the maintainer reaches it to seed the rooms. */
+    for (const nm of readdirSync(path.join(HERE, '..'))) {
+      if (!nm.endsWith('.html') || nm === 'forum.html') continue;
+      const src = await read(nm);
+      ok(!/(href|src)="forum\.html/.test(src), `${nm} (not announced): does not point at the forum`);
+    }
+    /* …and the words it will need are kept, so announcing is a restore
+       rather than a rewrite */
+    const kept = await read('CLAUDE.md');
+    ok(/The Site has an anonymous forum in two rooms/.test(kept) && /Candidates&rsquo; forum<\/a>/.test(kept)
+       && /Is there somewhere to talk to other candidates/.test(kept),
+      'CLAUDE.md: the withheld policy paragraph, button and FAQ answer are kept verbatim');
+  }
+  const std = await read('_MOBILE-STANDARDS.md');
+  const rule13 = std.slice(std.indexOf('13. **A compose box is a control.**'), std.indexOf('## The test gate'));
+  ok(rule13.length > 300 && /16px/.test(rule13) && /42px/.test(rule13) && /forum\.html/.test(rule13), '_MOBILE-STANDARDS.md: rule 13, the compose box');
+  const cssBare = pageCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(!/#[0-9a-fA-F]{3,8}\b/.test(cssBare), 'oa-forum.css: no raw colour, every colour is a token defined in both themes');
+  ok(/font-size: 16px/.test(cssBare) && /min-height: 42px/.test(cssBare) && /@media \(max-width: 640px\)/.test(cssBare), 'oa-forum.css: the phone rules rule 13 measures');
+  ok(/\.oa-forum-tab\[aria-selected='true'\]/.test(cssBare) && /\.oa-forum-quote/.test(cssBare) && /\.oa-forum-v\b/.test(cssBare), 'oa-forum.css: the tabs, the quote block and the vote buttons are styled');
+  for (const [f, src] of [['forum.html', page], ['oa-forum.js', pageJs], ['oa-forum.css', pageCss]]) ok(noDash(src), `forum page: no em dash in ${f}`);
+  ok(/cfg\.source/.test(cf) && /QUIET_PAGES/.test(cf) && /oa-forum-me/.test(cf) && /pushState/.test(cf), 'forum: CLAUDE.md records the page half');
+
+  /* --- the browser suite and the shim that drives it -------------------------
+
+     The functions themselves are proved against the emulator; what the
+     browser suite proves is what the PAGE does with their answers, and for
+     that _fake-firebase.js carries a simulator of the six callables over its
+     own fake Firestore. Pinned here: the simulator names exactly the six, the
+     verification card's own branches are untouched (callableFails first, the
+     canned receipt for sendVerificationEmail), a refusal has the SDK's shape
+     with a reason and nothing else, the vote id is a fixed 64-hex string that
+     never derives from the uid, and page-test.mjs really drives every reader
+     the gate can meet, the leak check and the 390px block. */
+
+  const shim = await read('_scraper', '_fake-firebase.js');
+  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate'\];/.test(shim),
+    'shim: the simulator names the six forum callables, and only those');
+  ok(/function forumSim\(name, data\)/.test(shim) && /if \(FORUM_NAMES\.indexOf\(String\(name\)\) !== -1\) return forumSim\(String\(name\), data\);/.test(shim),
+    'shim: httpsCallable dispatches the six to forumSim');
+  const fnFor = shim.slice(shim.indexOf('  function functionsFor() {'), shim.indexOf('  var firebase = {'));
+  ok(fnFor.length > 300 && fnFor.length < 1500, 'shim: functionsFor was sliced');
+  ok(fnFor.indexOf("record('callable', String(name), data || null);") < fnFor.indexOf('if (seed.callableFails)')
+     && fnFor.indexOf('if (seed.callableFails)') < fnFor.indexOf('forumSim(')
+     && /sent: true, to: 'r\*\*\*@example\.edu'/.test(fnFor),
+    'shim: every call is recorded first, callableFails still refuses everything, and sendVerificationEmail keeps its canned receipt');
+  const sim = shim.slice(shim.indexOf('  function forumSim(name, data) {'), shim.indexOf('  function functionsFor() {'));
+  ok(sim.length > 3000, 'shim: forumSim was sliced');
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+    ok(sim.includes(`name === '${name}'`), `shim: forumSim answers ${name}`);
+  }
+  ok(/var err = \{ code: 'functions\/' \+ code, message: reason \|\| code, details: \{ reason: reason \} \};/.test(shim),
+    'shim: a refusal has the SDK\'s shape, code and a details object carrying the reason alone');
+  ok(/if \(seed\.refuse && seed\.refuse\[name\]\) return simRefuse\(seed\.refuse\[name\]\.code, seed\.refuse\[name\]\.reason\);/.test(shim),
+    'shim: seed.refuse makes one callable refuse, for the wording checks');
+  ok(/var SIM_HASH = '[0-9a-f]{64}';/.test(shim) && !/SIM_HASH[^;]*uid|uid[^;]*SIM_HASH/.test(sim),
+    'shim: the vote id is a fixed 64-hex string that never derives from the uid');
+  for (const reason of ['own', 'quote', 'author', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'kind', 'bounds', 'thread', 'guide']) {
+    ok(sim.includes(`'${reason}'`) && errKeys.includes(reason), `shim: the simulator refuses with ${reason}, a reason member.js can answer with`);
+  }
+  ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)
+     && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim) && /String\(src\.body\)\.indexOf\(qtext\) === -1/.test(sim),
+    'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text}');
+  ok(/if \(post\.by === handle\) return simRefuse\('failed-precondition', 'own'\);/.test(sim) && /if \(Number\(post\.n\) === 1\) simWrite\(tpath2, Object\.assign\(\{\}, th, \{ score:/.test(sim),
+    'shim: no vote on one\'s own post, and the first post\'s net lands on the thread head');
+  ok(/data: function \(\) \{ return d \? Object\.assign\(\{\}, d\) : d; \}/.test(shim),
+    'shim: a snapshot\'s data() is a copy, as the SDK\'s is, so a page decorating what it read cannot write into the store');
+
+  const pt = await read('_scraper', 'page-test.mjs');
+  const fb = pt.slice(pt.indexOf('/* ---------------------------------------------------------- the forum'), pt.indexOf('/* ------------------------------------------------------------------ done */'));
+  ok(fb.length > 15000 && fb.length < 60000, 'page-test: the forum block was sliced');
+  for (const reader of ['forum (signed out)', 'forum (unverified)', 'forum (no profile)', 'forum (candidate)', 'forum (maintainer)', 'forum (archive)', 'forum mobile']) {
+    ok(fb.includes(reader + ' (') || fb.includes(reader + ':') || fb.includes(`${reader}`), `page-test: drives ${reader}`);
+  }
+  ok(/signedOutPage\('forum\.html', \{ selector: '#oa-needauth' \}\)/.test(fb) && /selector: '#oa-forum-verify'/.test(fb)
+     && (fb.match(/signedInPage\('forum\.html'/g) || []).length >= 4 && /selector: '#oa-forum'/.test(fb),
+    'page-test: every forum call names its selector, since the page draws no .oa-card until admitted');
+  ok(/'candidateSubmissions\/forum-c1'/.test(fb) && /status: 'queued', year: FY/.test(fb), 'page-test: the candidate is a seeded current profile');
+  ok(/email: 'kstouras@gmail\.com'/.test(fb) && /no candidate profile/.test(fb), 'page-test: the maintainer is signed in with no profile');
+  ok(/LEAK CHECK/.test(fb) && /const LEAKS = \[CAND\.uid, CAND\.email, 'Cassiopeia', 'Zyxwvut', 'Uncommon University', 'forum-c1'\];/.test(fb)
+     && /document\.querySelector\('#main'\)\.outerHTML/.test(fb) && /document\.documentElement\.outerHTML/.test(fb),
+    'page-test: the leak check hunts the uid, the address, both names, the affiliation and the profile id in #main, and the uid and profile id in the whole document');
+  ok(/HOSTILE_BODY/.test(fb) && /window\.__pwned/.test(fb), 'page-test: a hostile body is rendered and asserted inert');
+  ok(/data-act="quote"/.test(fb) && /wrote in #1/.test(fb) && /\['acceptGuide', 'body', 'kind', 'quote', 'room', 'tid'\]/.test(fb),
+    'page-test: a reply with a quote, and what forumPost was sent');
+  ok(/eq\(v0\.sent, \[1, -1, 0\]/.test(fb) && /voteDocs, \[\]/.test(fb), 'page-test: up, down and withdrawn, with the page sending the vote and never a delta');
+  ok(/data-act="edit"/.test(fb) && /\[data-edit="save"\]/.test(fb), 'page-test: an edit inside the window');
+  ok(/op: 'seedGuide', room: 'candidates'/.test(fb) && /never Moderator/.test(fb), 'page-test: the maintainer seeds the guide and posts under a drawn handle');
+  ok(/season=\$\{PY\}/.test(fb) && /forumThreadVotes is never asked for an archived thread/.test(fb), 'page-test: the archive view is read-only, and asks for no votes');
+  ok(/m\.evaluate\(MOBILE_LIST_MEASURE\)/.test(fb) && /assertMobileList\(mob, 'forum mobile \(list\):'\)/.test(fb)
+     && /voteAbove/.test(fb) && /taFont >= 16/.test(fb) && /every\(\(h\) => h >= 42\)/.test(fb),
+    'page-test: the 390px block measures the list with the shared helper, the vote column above the post, the 16px textarea and the 42px targets');
+  const simAll = shim.slice(shim.indexOf('  /* --------------------------------------------------------- functions'), shim.indexOf('  var firebase = {'));
+  ok(simAll.length > 4000 && noDash(fb) && noDash(simAll), 'page-test and shim: no em dash in the forum block or the simulator');
+
+  /* the emulator job's shape: its own timeout, never continue-on-error, the
+     install bounded and retried the way the Playwright install is */
+  const emJob = checks.slice(checks.indexOf('\n  emulator:\n'));
+  ok(emJob.length > 800, 'oa-checks.yml: the emulator job was sliced');
+  ok(/^    timeout-minutes: 15$/m.test(emJob) && !/continue-on-error/.test(emJob), 'oa-checks.yml: the emulator job has its own fifteen minutes and never continue-on-error');
+  ok(/for attempt in 1 2 3; do\s*if timeout 120 npm i -g --no-audit --no-fund firebase-tools@14; then break; fi/.test(emJob),
+    'oa-checks.yml: firebase-tools is installed bounded and retried, the Playwright install\'s shape');
+  ok(/npm ci --prefix _functions/.test(emJob) && /firebase emulators:exec --project demo-oa-forum --only auth,firestore,functions "node _functions\/test\/forum-emulator\.mjs"/.test(emJob),
+    'oa-checks.yml: the functions\' own dependencies, then the exec line');
+  ok(emJob.indexOf('actions/setup-java@v4') < emJob.indexOf('firebase-tools@14'), 'oa-checks.yml: Java before the emulator');
+}
+
 async function testRegisteredUsersFigure() {
   const root = path.join(HERE, '..');
   const noDash = (s) => !/—/.test(String(s));
@@ -14559,24 +15211,23 @@ async function testRegisteredUsersFigure() {
 
   /* the announcements */
   const log = JSON.parse(await readFile(path.join(root, 'changelog.json'), 'utf8')).updates;
-  /* BY ID, NOT BY POSITION. This used to pin the two entries to indices 0 and
-     1, which said nothing about them and went red the next time anything else
-     was announced — a guard that fails on an unrelated change teaches people
-     to edit guards. What matters is that both entries exist, are dated, and
-     say what the feature actually does. */
-  const byId = Object.fromEntries(log.map((u) => [u.id, u]));
-  const figure = byId['registered-users-figure-2026-09'];
-  const chartLog = byId['community-growth-chart-2026-09'];
-  ok(figure && chartLog, 'changelog: both figures are announced');
-  for (const u of [figure, chartLog]) {
-    ok(u && u.date === '2026-09-05' && u.title && u.summary && u.url && noDash(u.title + u.summary),
-      `changelog: ${(u || {}).id} is dated 2026-09-05 with a title, a summary and a link, no em dash`);
+  /* Found by id rather than by index: a later feature shipped the same day
+     (the forum) sits above them, and "at the top" means among that day's
+     entries, adjacent and in this order. */
+  const figAt = log.findIndex((u) => u.id === 'registered-users-figure-2026-09');
+  ok(figAt >= 0 && figAt <= 2 && log.slice(0, figAt).every((u) => u.date === '2026-09-05'),
+    'changelog: the two figures are announced at the top, under nothing older than their own day');
+  eq([log[figAt].id, log[figAt + 1].id], ['registered-users-figure-2026-09', 'community-growth-chart-2026-09'],
+    'changelog: the two figures are announced together, in this order');
+  for (const u of log.slice(figAt, figAt + 2)) {
+    ok(u.date === '2026-09-05' && u.title && u.summary && u.url && noDash(u.title + u.summary),
+      `changelog: ${u.id} is dated 2026-09-05 with a title, a summary and a link, no em dash`);
   }
-  ok(/rounded down to the nearest ten/.test(figure.summary) && /Who has registered stays/.test(figure.summary),
+  ok(/rounded down to the nearest ten/.test(log[figAt].summary) && /Who has registered stays/.test(log[figAt].summary),
     'changelog: the figure entry says how it is rounded and what stays private');
-  ok(/How the community has grown/.test(chartLog.summary) && /last 90 days/.test(chartLog.summary) && /week ahead/.test(chartLog.summary)
-     && !/180/.test(chartLog.summary)
-     && /not a target/.test(chartLog.summary),
+  ok(/How the community has grown/.test(log[figAt + 1].summary) && /last 90 days/.test(log[figAt + 1].summary) && /week ahead/.test(log[figAt + 1].summary)
+     && !/180/.test(log[figAt + 1].summary)
+     && /not a target/.test(log[figAt + 1].summary),
     'changelog: the chart entry names the figure, the window, the horizon and what the line is not');
 
   /* CLAUDE.md, in the file's own voice */
@@ -14698,5 +15349,6 @@ if (isMain(import.meta.url)) {
   await testEmailVerification();
   await testVerifyExistingUsers();
   await testRegisteredUsersFigure();
+  await testForum();
   process.exit(finish() ? 0 : 1);
 }

@@ -248,6 +248,8 @@ export const PAGES = [
     why: "maintainer-only review desk (noindex) — a page nobody shares, and an og:url on it would claim an Open Graph identity for a page that answers only the admin" },
   { file: 'verify-email.html', card: false,
     why: 'e-mail verification landing page (noindex), reached from the link in a message; an og:url on it would claim an identity nobody should share' },
+  { file: 'forum.html', card: false,
+    why: 'members-only forum (noindex), answered only to signed-in accounts; an og:url on it would claim a preview for a page nobody can share into' },
   { file: 'candidates.html', card: false, why: 'redirect stub → /#candidates' },
   { file: 'placements.html', card: false, why: 'redirect stub → /#placements' },
   { file: 'faqs.html', card: false, why: 'redirect stub → /#faq' },

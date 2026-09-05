@@ -70,6 +70,11 @@ export const BUILDERS = [
      network from this run on. Offline and ungated for the same reason as the
      directory — it reads a committed file and writes two. */
   { script: 'build-netmap.mjs', label: 'the university domain map', needsFirebase: false },
+  /* The browser modules the Cloud Functions also read (the season rule, the
+     forum's shape, guard and guide), COPIED under _functions/ because a
+     deploy ships that directory alone. Offline and ungated; an unchanged
+     module writes nothing. The selftest pins every pair byte-for-byte. */
+  { script: 'build-functions-vendor.mjs', label: 'the vendored Functions modules', needsFirebase: false },
 ];
 
 /** Which builders a given environment can actually run. Pure, so the selftest

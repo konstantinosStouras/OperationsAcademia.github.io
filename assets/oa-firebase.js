@@ -183,7 +183,16 @@
                                       messages themselves
          accountKeys/{key}            "one person, two accounts" hints (orcid:… / email:…)
          jobSubmissions/{id}          a posted job, before the build commits it to JSON
-         feedback/{id}                feedback + screenshots                          */
+         feedback/{id}                feedback + screenshots
+         candidateMarkers/{uid}       the forum's membership marker (written by forumJoin,
+                                      owner-read, owner-delete; the rules re-read it)
+         forumSeasons/{Y}             the forum: a season head, then
+           rooms/{room}/threads/{tid}/posts/{pid}/votes/{H}
+                                      every one written by the forum Cloud Functions
+                                      alone; a member reads by the room on the path
+         forumTags/{Y}_{room}         the tag tally a room's threads carry
+         forumHandles/{H}, forumNames/{slug}, forumHidden, forumReports, forumMail
+                                      the maintainer reads some, nobody writes any */
     col: {
       users: 'users',
       alerts: 'alerts',
@@ -197,7 +206,19 @@
       jobSubmissions: 'jobSubmissions',
       candidateSubmissions: 'candidateSubmissions',
       placementSubmissions: 'placementSubmissions',
-      feedback: 'feedback'
+      feedback: 'feedback',
+      candidateMarkers: 'candidateMarkers',
+      forumSeasons: 'forumSeasons',
+      forumRooms: 'rooms',
+      forumThreads: 'threads',
+      forumPosts: 'posts',
+      forumVotes: 'votes',
+      forumTags: 'forumTags',
+      forumHandles: 'forumHandles',
+      forumNames: 'forumNames',
+      forumHidden: 'forumHidden',
+      forumReports: 'forumReports',
+      forumMail: 'forumMail'
     }
   };
 })();

@@ -139,14 +139,17 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is six: the four
+This deploys EVERY function in `_functions/`, which is twelve: the four
 doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
 and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
-and **`sendVerificationEmail`**, the mailer behind e-mail verification on
+**`sendVerificationEmail`**, the mailer behind e-mail verification on
 registration, which needs the four `SMTP_*` secrets set in Secret Manager
-first (`_SETUP-EMAIL-VERIFICATION.md`). `firebase functions:list` must read back
-six; fewer means the checkout predates one of them.
+first (`_SETUP-EMAIL-VERIFICATION.md`); and the six forum callables
+(**`forumJoin`, `forumPost`, `forumEdit`, `forumVote`, `forumThreadVotes`,
+`forumModerate`**), which need `FORUM_SECRET` set first (the next section).
+`firebase functions:list` must read back twelve; fewer means the checkout
+predates one of them.
 
 `revealCandidates` is a SCHEDULED function, so its first deploy also creates a
 Cloud Scheduler job (`0 14 * * *`, UTC) and asks to enable the Cloud Scheduler
@@ -158,6 +161,44 @@ on an ordinary day is the proof it is running.
 Always pass `--project`: the CLI remembers an "active project" per directory,
 and a deploy from this folder has already gone into another project's database
 once (see CLAUDE.md).
+
+## The forum secret
+
+The forum's handles are derived from `FORUM_SECRET`, one Secret Manager
+secret with VERSIONS, read by version rather than as `latest`. Set it once,
+before the first deploy that carries the forum functions:
+
+```
+firebase functions:secrets:set FORUM_SECRET --project operations-academia
+```
+
+Paste 32 random bytes in base64 (`openssl rand -base64 32`). The `secrets:`
+binding on the six callables grants the runtime account access to the secret,
+and `_functions/forum/identity.js` reads the version each season's document
+names (`forumSeasons/{Y}.secretVersion`, written on the season's first join
+from whatever `latest` resolved to at that moment). It never reads another
+season's version and never reads `latest` again for a season that has one.
+
+**A rotation renames every handle.** `secrets:set` again writes a new version,
+but nothing reads it until the season's `secretVersion` is moved to the new
+number, and the moment it is every member of that season gets a new handle
+and a new `forumHandles` document. So a suspected leak is answered by
+rotating at once (`secrets:set`, then set `secretVersion` on the current
+season's document to the new version number in the Firestore console) and
+saying so in the guide thread; nothing else is cheaper or safer.
+
+**On 1 August the previous season's version is destroyed**, so an archived
+season's handles can never again be linked to accounts by anyone, the
+maintainer included:
+
+```
+gcloud secrets versions destroy <N> --secret FORUM_SECRET --project operations-academia
+```
+
+where `<N>` is the `secretVersion` the previous season's document names. The
+housekeeping run that does this and stamps `secretDestroyedAt` on that
+document arrives with the forum's step 2; until then it is this command, by
+hand, once a year.
 
 First deploy asks to enable a few APIs (Cloud Functions, Cloud Build,
 Artifact Registry, Eventarc) — say yes. It takes a few minutes.

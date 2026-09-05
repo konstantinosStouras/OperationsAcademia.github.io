@@ -622,6 +622,91 @@ service cloud.firestore {
       }
     }
 
+    // ---------------------------------------------------------------- forum
+    // Two rooms under one handle scheme. Everything here is WRITTEN by the
+    // forum Cloud Functions (Admin SDK, outside these rules); no client, the
+    // maintainer's browser included, writes a forum document, and the votes
+    // are closed in both directions to everyone. A member READS: the
+    // candidates room needs a current-season profile (re-read on every
+    // request, so a withdrawal ends access at once) or the maintainer; the
+    // open room needs a verified sign-in. assets/oa-forum-model.js is pinned
+    // against every list below both ways (testForum in selftest.mjs).
+
+    // The season under way: the 1 July UTC roll. month() is 1-based here, so
+    // `>= 7` is MARKET_ROLL_MONTH 6 in oa-jobnav.js (pinned).
+    function forumSeasonNow() {
+      return request.time.year() + (request.time.month() >= 7 ? 1 : 0);
+    }
+    function forumMarkerPath() {
+      return /databases/$(database)/documents/candidateMarkers/$(request.auth.uid);
+    }
+    function forumProfile() {
+      return get(/databases/$(database)/documents/candidateSubmissions/$(get(forumMarkerPath()).data.sub)).data;
+    }
+    // A CURRENT candidate: a marker (written by forumJoin) naming a profile
+    // the caller owns, filed for THIS season, not withdrawn or taken down.
+    // Two reads, cached within the evaluation; a get() on a missing
+    // document errors, which is a deny.
+    function isCurrentCandidate() {
+      return verified()
+        && exists(forumMarkerPath())
+        && get(forumMarkerPath()).data.year == forumSeasonNow()
+        && forumProfile().uid == request.auth.uid
+        && forumProfile().year == forumSeasonNow()
+        && forumProfile().status in ['queued', 'published'];
+    }
+    // Who may read a room, decided from the PATH segment: the candidates
+    // room by the profile re-read above or the maintainer (owner, 2026-09-05:
+    // "the admin should be able to have access to all forums"), the open
+    // room by any verified sign-in. A room name that is neither is nobody's.
+    function forumReader(room) {
+      return (room == 'candidates' && (isCurrentCandidate() || isAdmin()))
+          || (room == 'open' && verified());
+    }
+
+    match /candidateMarkers/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow delete: if isOwner(uid) || isAdmin();
+      allow create, update: if false;
+    }
+
+    match /forumSeasons/{season} {
+      allow read: if verified();
+      allow write: if false;
+      match /rooms/{room}/threads/{tid} {
+        allow read: if forumReader(room);
+        allow write: if false;
+        match /posts/{pid} {
+          allow read: if forumReader(room);
+          allow write: if false;
+          // A vote beside a handle is a social fact nobody needs to read:
+          // closed to every client and to the maintainer, both directions.
+          match /votes/{key} {
+            allow read, write: if false;
+          }
+        }
+      }
+    }
+
+    // The tag tallies a room's threads carry, one document per season and
+    // room, written by the thread transaction alone.
+    match /forumTags/{id} {
+      allow read: if verified();
+      allow write: if false;
+    }
+
+    // The bodies moderation removed (step 3), the handle table and the
+    // report queue (step 3): the maintainer reads, the functions write,
+    // nobody else touches them.
+    match /forumHidden/{document=**}  { allow read: if isAdmin(); allow write: if false; }
+    match /forumHandles/{key}         { allow read: if isAdmin(); allow write: if false; }
+    match /forumReports/{id}          { allow read: if isAdmin(); allow write: if false; }
+    // The reverse index is nobody's to read: it resolves a handle to a hash.
+    match /forumNames/{slug}          { allow read, write: if false; }
+    // Mailboxes (step 3) are keyed on the season hash and served by a
+    // callable alone. NO CLIENT, the maintainer's browser included.
+    match /forumMail/{document=**}    { allow read, write: if false; }
+
     // ------------------------------------------------------ identity keys
     //
     // How the site notices that one person has two accounts. Each session

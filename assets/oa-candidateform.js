@@ -928,8 +928,19 @@
       btn.disabled = true;
       say('Taking your profile down…');
 
-      OAAccounts.whenSignedIn(function () {
+      OAAccounts.whenSignedIn(function (user) {
         OAFB.ready().then(function (fb) {
+          /* The forum's membership marker (candidateMarkers/{uid}) goes with
+             a withdrawal, belt and braces: the rules re-read the profile on
+             every forum request and already refuse a withdrawn one, so this
+             only tidies the marker away. The OWNER's marker, never the
+             maintainer's: an admin hiding somebody else's profile has no
+             marker of their own to touch here, so the delete runs only when
+             the account taking the profile down is the one that filed it.
+             Best-effort; a refusal changes nothing about the take-down. */
+          if (!OAAccounts.isAdmin() && user && user.uid && OAFB.col && OAFB.col.candidateMarkers) {
+            fb.firestore().collection(OAFB.col.candidateMarkers).doc(user.uid)['delete']().catch(function () {});
+          }
           return fb.firestore().collection(col()).doc(EDIT_ID).update({
             /* WHO took it down. 'hidden' is the maintainer, 'withdrawn' is
                the owner — the card buttons have always drawn that distinction

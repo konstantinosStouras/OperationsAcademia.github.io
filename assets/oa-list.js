@@ -27,6 +27,10 @@
          card:    { title, subtitle, badges, rows }
        });
 
+   `source: fn` may stand in for `data`: a function returning a promise of the
+   rows, for a list whose dataset is not a served file (the forum reads its
+   threads from Firestore). Everything after the rows land is the same.
+
    FILTER SEMANTICS (matching what Awesome Table did, so results do not shift
    under returning visitors):
      - every filter ANDs with every other filter;
@@ -1307,7 +1311,12 @@
 
     /* -------------------------------------------------------------- load */
 
-    load(cfg.data)
+    /* `cfg.source` is a function answering the rows itself, for a dataset
+       that is not a served file (the forum's threads, read from Firestore
+       under the rules). It deliberately skips `load()`, and with it the
+       OAFresh echo overlay that path applies: the echo is about a POSTING
+       saved in this browser, and nothing a source answers has one. */
+    (typeof cfg.source === 'function' ? Promise.resolve().then(cfg.source) : load(cfg.data))
       .then(function (data) {
         loaded = true;
         rows = (Array.isArray(data) ? data : data.rows || []).filter(Boolean);
@@ -1320,7 +1329,7 @@
       .catch(function (err) {
         loadFailed = true;
         paintLoadError();
-        if (window.console) console.error('OAList: failed to load ' + cfg.data, err);
+        if (window.console) console.error('OAList: failed to load ' + (cfg.data || STR.unit), err);
       });
 
     function paintLoadError() {
