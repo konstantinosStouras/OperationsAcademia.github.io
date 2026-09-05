@@ -662,7 +662,7 @@
     return new Date(Date.UTC(+q[0], +q[1] - 1, +q[2] + n)).toISOString().slice(0, 10);
   }
 
-  function growthProjection(days, { window = 90, ahead = 180, today = '' } = {}) {
+  function growthProjection(days, { window = 90, ahead = 7, today = '' } = {}) {
     const pts = (Array.isArray(days) ? days : [])
       .filter((p) => Array.isArray(p) && isDay(p[0]) && Number.isFinite(Number(p[1])))
       .map((p) => [p[0], Number(p[1])])
