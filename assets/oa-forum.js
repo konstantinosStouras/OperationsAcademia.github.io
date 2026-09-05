@@ -98,8 +98,8 @@
     guide: 'Tick the box to say you have read the guide before your first post.',
     locked: 'This thread is locked, so nothing can be added to it.',
     archive: 'This season is archived and read-only.',
-    author: 'Only the author can edit a post.',
-    window: 'The fifteen-minute edit window has closed; the post stays as written.',
+    author: 'Only the author can change their own post.',
+    window: 'The fifteen-minute edit window has closed; the post stays as written. You can still delete it.',
     own: 'You cannot vote on your own post.',
     busy: 'The forum is busy right now. Please try again in a moment.',
     bounds: 'Too long, or empty. A title is at most ' + M.BOUNDS.title + ' characters and a post at most ' + M.BOUNDS.body + '.',
@@ -113,7 +113,6 @@
     gap: 'Give it a moment between two posts.',
     email: G.WHY.email,
     phone: G.WHY.phone,
-    url: G.WHY.url,
     orcid: G.WHY.orcid
   };
 
@@ -618,11 +617,11 @@
       ],
       card: {
         title: function (r) { return r.title; },
-        subtitle: function (r) {
-          var parts = [r.by, plural(Math.max(0, r.n - 1), 'reply', 'replies')];
-          if (r.lastAt) parts.push('active ' + ago(r.lastAt));
-          return parts.join(' · ');
-        },
+        /* The handle alone: the counts and the last activity are appended as
+           their own elements in onCard, so each fact is said once and in one
+           place (owner, 2026-09-05: the card printed the reply count twice,
+           in a side column and again here). */
+        subtitle: function (r) { return r.by; },
         badges: function (r) {
           var out = [];
           if (r.pinned) out.push({ text: 'Pinned', cls: 'oa-label-pinned' });
@@ -641,18 +640,48 @@
           run: function (row) { go({ room: S.room, season: S.season, t: row.id }); }
         };
       },
+      /* THE QUESTION CARD IS THE STACK OVERFLOW ONE (owner, 2026-09-05: "I
+         want the forum to look like stackoverflow"): a tally column on the
+         left, then the title, the first lines, and a footer carrying the
+         tags on one side and who asked on the other.
+
+         That LAYOUT is also what settles the collision the owner reported
+         the same day. The first attempt stacked everything in one column,
+         which read as a list of paragraphs; the real fault was never the
+         column, it was that the tag chips sat ABOVE the title (and that
+         .oa-label is `display: inline` site-wide, so their padding bled into
+         the rows around them). Tags belong under the excerpt, which is where
+         Stack Overflow has always put them and where nothing can crowd the
+         heading. */
       onCard: function (li, r) {
         li.classList.add('oa-forum-q');
         var replies = Math.max(0, r.n - 1);
-        var stats = el('div', { class: 'oa-forum-stats' }, [
-          el('span', null, [el('b', { text: String(r.score) }), ' ' + (Math.abs(r.score) === 1 ? 'like' : 'likes')]),
-          el('span', { class: 'oa-forum-replies' + (replies ? ' has' : '') }, [
-            el('b', { text: String(replies) }), ' ' + (replies === 1 ? 'reply' : 'replies')
-          ])
-        ]);
-        li.insertBefore(stats, li.firstChild);
+        var head = li.querySelector('.oa-card-head');
         var t = li.querySelector('.oa-card-title');
         if (t && r.excerpt) t.insertAdjacentElement('afterend', el('p', { class: 'oa-forum-ex', text: r.excerpt }));
+
+        li.insertBefore(el('div', { class: 'oa-forum-stats' }, [
+          el('span', { class: 'oa-forum-stat' }, [
+            el('b', { text: String(r.score) }), el('i', { text: Math.abs(r.score) === 1 ? 'vote' : 'votes' })
+          ]),
+          el('span', { class: 'oa-forum-stat is-answers' + (replies ? ' has' : '') }, [
+            el('b', { text: String(replies) }), el('i', { text: replies === 1 ? 'reply' : 'replies' })
+          ])
+        ]), li.firstChild);
+
+        /* the footer: the engine wrote the badges above the title and the
+           handle below it, so both are MOVED here rather than drawn twice */
+        var foot = el('div', { class: 'oa-forum-qfoot' });
+        var badges = li.querySelector('.oa-badges');
+        var sub = li.querySelector('.oa-card-sub');
+        foot.appendChild(badges || el('div', { class: 'oa-badges' }));
+        if (sub) {
+          sub.textContent = '';
+          sub.appendChild(el('span', { class: 'oa-forum-asker', text: r.by }));
+          if (r.lastAt) sub.appendChild(el('span', { class: 'oa-forum-when', text: 'active ' + ago(r.lastAt) }));
+          foot.appendChild(sub);
+        }
+        if (head) head.appendChild(foot);
         Array.prototype.forEach.call(li.querySelectorAll('.oa-label-tag'), function (b) {
           var tag = b.textContent;
           b.setAttribute('data-tag', tag);
@@ -722,9 +751,38 @@
     });
   }
 
+  /* A web address in a post is drawn as a link (owner, 2026-09-05). It runs
+     over text esc() has ALREADY escaped, which is what makes it safe: `&`,
+     `<` and `"` are entities by then, so nothing here can close an attribute
+     or open a tag, and the pattern itself admits only http, https and www,
+     never a `javascript:` href. `noopener noreferrer` keeps the forum's
+     address out of the other site's referrer, and `nofollow` means a forum
+     nobody can crawl cannot be used to pass rank. Trailing sentence
+     punctuation is not part of the address; a closing bracket only counts as
+     punctuation when the address does not open one of its own. */
+  var LINK_RX = /(^|[\s(])((?:https?:\/\/|www\.)[^\s<]+)/g;
+
+  function linkify(escaped) {
+    return escaped.replace(LINK_RX, function (all, lead, raw) {
+      var url = raw;
+      var trail = '';
+      while (url) {
+        var last = url.charAt(url.length - 1);
+        if (last === ')' && url.split('(').length > url.split(')').length) break;
+        if ('.,!?)'.indexOf(last) === -1) break;
+        trail = last + trail;
+        url = url.slice(0, -1);
+      }
+      if (!url || url === 'www.') return all;
+      var href = url.charAt(0) === 'w' || url.charAt(0) === 'W' ? 'https://' + url : url;
+      return lead + '<a href="' + href + '" target="_blank" rel="noopener noreferrer nofollow">' +
+        url + '</a>' + trail;
+    });
+  }
+
   function bodyHTML(text) {
     return String(text || '').split(/\n{2,}/).map(function (para) {
-      return '<p>' + esc(para).replace(/\n/g, '<br>') + '</p>';
+      return '<p>' + linkify(esc(para)).replace(/\n/g, '<br>') + '</p>';
     }).join('');
   }
 
@@ -792,7 +850,9 @@
     out += '<span class="oa-forum-updown">' + up + ' / ' + down + '</span>';
     out += '</div><div class="oa-forum-pbody">';
     if (p.hidden) {
-      out += '<p class="oa-forum-removed">This ' + (isFirst ? 'post' : 'reply') + ' was removed.</p>';
+      out += '<p class="oa-forum-removed">' + (p.hiddenBy === 'author'
+        ? 'This ' + (isFirst ? 'post' : 'reply') + ' was deleted by its author.'
+        : 'This ' + (isFirst ? 'post' : 'reply') + ' was removed.') + '</p>';
     } else {
       if (p.quote && p.quote.text) {
         out += '<blockquote class="oa-forum-quote"><cite><span class="oa-forum-handle">' + esc(p.quote.by) + '</span> wrote in ' +
@@ -811,6 +871,9 @@
       if (left > 0) {
         out += '<button type="button" class="oa-forum-act" data-act="edit">Edit · ' + Math.max(1, Math.ceil(left / 60000)) + ' min left</button>';
       }
+      /* No window on this one: your own words are yours to take back whenever
+         you like (owner, 2026-09-05). */
+      out += '<button type="button" class="oa-forum-act is-del" data-act="delete">Delete</button>';
     }
     out += '</div><div class="oa-forum-who">' +
       (p.kind && KIND_LABEL[p.kind] ? '<span class="oa-forum-kind is-' + esc(p.kind) + '">' + KIND_LABEL[p.kind] + '</span>' : '') +
@@ -837,8 +900,32 @@
           if (act === 'reply') focusReply();
           else if (act === 'quote') quoteFrom(li, p);
           else if (act === 'edit') editPost(li, p);
+          else if (act === 'delete') deletePost(thread, p, b);
         });
       });
+    });
+  }
+
+  /* Deleting is not a one-way door anywhere else on this site; here it is,
+     and the confirmation says so rather than asking a bare "are you sure".
+     The opening post of a thread nobody has replied to takes the thread with
+     it, so the wording differs and the page goes back to the list. */
+  function deletePost(thread, p, btn) {
+    var isFirst = Number(p.n) === 1;
+    var alone = isFirst && Number((thread && thread.n) || 0) <= 1;
+    var msg = alone
+      ? 'Delete this question? Nobody has replied, so the whole thread goes. The words cannot be brought back.'
+      : (isFirst
+          ? 'Delete your question? The replies stay and the thread keeps its place, but your words and the title go, and they cannot be brought back.'
+          : 'Delete this reply? Its place in the thread stays so the numbering still reads, but the words go, and they cannot be brought back.');
+    if (!window.confirm(msg)) return;
+    btn.disabled = true;
+    call('forumDelete', { room: S.room, tid: S.tid, pid: p.id }).then(function (r) {
+      if (r && r.thread) go({ room: S.room, season: S.season });
+      else go({ room: S.room, season: S.season, t: S.tid });
+    }).catch(function (err) {
+      btn.disabled = false;
+      say(friendly(err), true);
     });
   }
 
@@ -878,12 +965,12 @@
   function acceptBox(id) {
     if (S.me.guideAt) return '';
     return '<label class="oa-forum-accept"><input type="checkbox" id="' + id + '">' +
-      'I have read <a href="#oa-forum-guide">the forum guide</a>: no names, no contact details, no links, and I say how I know.</label>';
+      'I have read <a href="#oa-forum-guide">the forum guide</a>: no names, no contact details, and I say how I know.</label>';
   }
 
   var WARN = '<div class="oa-forum-warn"><strong>Read it once more for anything that identifies you.</strong> ' +
     'Your name, your school, your advisor, a paper title, an unusual detail of your case. Nobody can see who is behind a handle, but the words themselves can give you away. ' +
-    'Once the fifteen-minute edit window closes the post stays as written.</div>';
+    'You can edit it for fifteen minutes, and delete it at any time.</div>';
 
   function replyBox(thread, first) {
     var wrap = el('div', { class: 'oa-forum-compose', id: 'oa-forum-reply' });

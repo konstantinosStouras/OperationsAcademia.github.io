@@ -139,16 +139,17 @@ npm install --prefix _functions
 firebase deploy --only functions --project operations-academia
 ```
 
-This deploys EVERY function in `_functions/`, which is twelve: the four
+This deploys EVERY function in `_functions/`, which is thirteen: the four
 doorbells above; **`recordVisit`**, the university-visit resolver behind
 the Analytics page's "which universities visited" chart, which needs no secret
 and is inert until this command has been run (`_SETUP-ANALYTICS.md`, source 4);
 **`sendVerificationEmail`**, the mailer behind e-mail verification on
 registration, which needs the four `SMTP_*` secrets set in Secret Manager
-first (`_SETUP-EMAIL-VERIFICATION.md`); and the six forum callables
-(**`forumJoin`, `forumPost`, `forumEdit`, `forumVote`, `forumThreadVotes`,
-`forumModerate`**), which need `FORUM_SECRET` set first (the next section).
-`firebase functions:list` must read back twelve; fewer means the checkout
+first (`_SETUP-EMAIL-VERIFICATION.md`); and the seven forum callables
+(**`forumJoin`, `forumPost`, `forumEdit`, `forumDelete`, `forumVote`,
+`forumThreadVotes`, `forumModerate`**), which need `FORUM_SECRET` set first
+(the next section).
+`firebase functions:list` must read back thirteen; fewer means the checkout
 predates one of them.
 
 `revealCandidates` is a SCHEDULED function, so its first deploy also creates a

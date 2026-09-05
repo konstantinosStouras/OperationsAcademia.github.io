@@ -195,50 +195,107 @@
   font-size: 14px;
 }
 
-/* the question card: a stats column beside the engine's own head */
+/* THE QUESTION CARD, in the Stack Overflow arrangement (owner, 2026-09-05:
+   "I want the forum to look like stackoverflow"): a tally column on the left,
+   then the title, the first lines, and a footer with the tags on one side and
+   who asked on the other.
+
+   The tags sitting UNDER the excerpt is the half that matters, and it is what
+   settles the collision the owner reported the same day. Above the title they
+   crowded it, and `.oa-label` is `display: inline` site-wide, a Bootstrap
+   inheritance where vertical padding does not grow the line, so several chips
+   on a row bleed into whatever is above and below. Scoped to this card rather
+   than fixed globally, because every other list's badges are measured where
+   they are. */
 body.v3 .oa-forum-q {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 92px minmax(0, 1fr);
   align-items: start;
 }
 
 body.v3 .oa-forum-q .oa-card-lock { grid-column: 1 / -1; }
+body.v3 .oa-forum-q .oa-card-head { padding-left: 4px; }
+
+/* the title reads as the link it is */
+body.v3 .oa-forum-q .oa-card-title {
+  color: var(--brand);
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 500;
+}
 
 .oa-forum-stats {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
-  padding: 18px 0 0 18px;
+  gap: 8px;
+  padding: 16px 0 0 14px;
+}
+
+.oa-forum-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
   color: var(--mut);
-  font-size: 12.5px;
-  text-align: right;
-}
-
-.oa-forum-stats b {
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.oa-forum-replies {
-  padding: 1px 7px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--bg-2);
-  color: var(--ink-2);
+  font-size: 11.5px;
   white-space: nowrap;
 }
 
-.oa-forum-replies.has {
-  border-color: var(--ok);
-  background: var(--ok);
-  color: var(--on-brand);
+.oa-forum-stat b {
+  color: var(--ink-2);
+  font-size: 17px;
+  font-weight: 600;
 }
 
-.oa-forum-replies.has b { color: var(--on-brand); }
+.oa-forum-stat i { font-style: normal; }
 
-body.v3 .oa-forum-q .oa-card-head { padding-left: 0; }
+/* a question that has been answered is marked, the way a boxed count marks
+   one there */
+.oa-forum-stat.is-answers.has {
+  padding: 2px 7px 3px;
+  border: 1px solid var(--ok);
+  border-radius: 4px;
+  color: var(--ok);
+}
+
+.oa-forum-stat.is-answers.has b { color: var(--ok); font-size: 15px; }
+
+.oa-forum-qfoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+
+body.v3 .oa-forum-q .oa-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+body.v3 .oa-forum-q .oa-badges .oa-label {
+  display: inline-block;
+  margin: 0;
+}
+
+body.v3 .oa-forum-q .oa-card-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+  color: var(--mut);
+  font-size: 12.5px;
+}
+
+.oa-forum-asker { color: var(--brand); }
+
+.oa-forum-when { color: var(--mut); }
 
 .oa-forum-ex {
   margin: 4px 0 0;
@@ -344,7 +401,7 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   align-items: center;
   justify-content: center;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--bg-2);
   color: var(--ink-2);
   font: inherit;
@@ -358,10 +415,13 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-v[disabled] { opacity: 0.45; cursor: default; }
 .oa-forum-v:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
+/* the score between the two arrows is the largest thing in the column, the
+   way it is on the site the owner asked this to resemble */
 .oa-forum-score {
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
+  line-height: 1.1;
   color: var(--ink);
 }
 
@@ -447,12 +507,15 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  background: var(--bg-3);
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--brand-soft);
   color: var(--mut);
   font-size: 12.5px;
 }
+
+.oa-forum-who .oa-forum-handle { color: var(--brand); }
+.oa-forum-who .oa-forum-handle.is-me { color: var(--ink); }
 
 /* how the author knows */
 .oa-forum-kind {
@@ -470,14 +533,17 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-kind.is-first-hand { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
 .oa-forum-kind.is-rumour { color: var(--ink-2); border-color: var(--warn-line); background: var(--warn-bg); }
 
+/* "N replies" is a heading with a rule under it, the answers band */
 .oa-forum-replies-h {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 24px 0 4px;
+  margin: 28px 0 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
 }
 
-.oa-forum-replies-h h2 { margin: 0; font-size: 20px; }
+.oa-forum-replies-h h2 { margin: 0; font-size: 21px; font-weight: 500; }
 
 /* ------------------------------------------------------------ composing */
 
@@ -833,18 +899,20 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 }
 
 @media (max-width: 640px) {
+  /* the tally column lies ABOVE the question on a phone, a row rather than a
+     92px gutter, the same move the vote column makes in a thread (rule 13) */
   body.v3 .oa-forum-q { grid-template-columns: minmax(0, 1fr); }
+  body.v3 .oa-forum-q .oa-card-head { padding-left: 16px; }
+  body.v3 .oa-forum-q .oa-card-lock { order: 3; }
   .oa-forum-stats {
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    gap: 12px;
-    order: 2;
-    padding: 0 16px 14px;
-    text-align: left;
+    gap: 16px;
+    padding: 14px 16px 0;
   }
-  body.v3 .oa-forum-q .oa-card-head { padding-left: 16px; }
-  body.v3 .oa-forum-q .oa-card-lock { order: 3; }
+  .oa-forum-stat { flex-direction: row; align-items: baseline; gap: 4px; }
+  .oa-forum-stat b { font-size: 14px; }
   .oa-forum-tabs { width: 100%; }
   .oa-forum-tab { flex: 1 1 0; justify-content: center; }
   .oa-forum-post { grid-template-columns: minmax(0, 1fr); gap: 10px; }

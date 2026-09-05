@@ -1516,8 +1516,8 @@ lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:0
 as well**: two producers for one event is the duplicate-doorbell outage under
 "One event, one build", and the selftest refuses a workflow cron on that hour.
 Like every function here it is inert until deployed; the deploy also creates
-the Cloud Scheduler job, and `firebase functions:list` must read back TWELVE
-(the four doorbells, `recordVisit`, `sendVerificationEmail` and the six forum
+the Cloud Scheduler job, and `firebase functions:list` must read back THIRTEEN
+(the four doorbells, `recordVisit`, `sendVerificationEmail` and the seven forum
 callables).
 
 **The alerts' reveal note is keyed on the instant, and its mark is lifted to
@@ -2451,8 +2451,8 @@ live site's from `assets/v3.css`, the button is a coloured table cell with a
 VML fallback for Outlook, and the link is written out in full as text as well
 as behind the button.
 
-**The deploy count is TWELVE now.** Four doorbells (`revealCandidates` among
-them), `recordVisit`, `sendVerificationEmail`, and the six forum callables
+**The deploy count is THIRTEEN now.** Four doorbells (`revealCandidates` among
+them), `recordVisit`, `sendVerificationEmail`, and the seven forum callables
 (see "The forum"). Read the list back after every deploy; fewer means a stale
 checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
@@ -2534,10 +2534,10 @@ them:
 
     assets/oa-forum-model.js     rooms, KEYS, BOUNDS, TAGS, RATE, slug(), minute()   (dual-mode)
     assets/oa-forum-guard.js     what a post may not contain, one check() for both sides
-    assets/oa-forum-guide.js     the thirteen rules, three notes, the maintainer paragraph
+    assets/oa-forum-guide.js     the thirteen rules and three notes
     _functions/forum/identity.js the ONE HMAC, the handle draw, the season's secret version
     _functions/forum/member.js   the shared preamble: who, which room, limits, ERRORS
-    _functions/forum/{join,post,edit,vote,moderate}.js   the six callables
+    _functions/forum/{join,post,edit,delete,vote,moderate}.js   the seven callables
     _scraper/build-functions-vendor.mjs   copies the four modules into _functions/ (in BUILDERS)
     _functions/test/forum-emulator.mjs    the functions and the rules against the real emulator
 
@@ -2635,6 +2635,111 @@ substring of that post's body as it stands NOW and at most `BOUNDS.quote`
 (600) characters, and stores a COPY `{n, by, text}` on the reply, so a later
 edit or removal of the original never rewrites it. Never the quoted pid.
 
+### A post is its author's to delete, at any time
+
+Owner, 2026-09-05: *"a user can delete a post anytime they want"*. There was
+no window on this and there is none now: `forumEdit`'s fifteen minutes are
+about rewriting words other people may already have replied to, and taking
+your own words away is a different act with a different answer.
+`_functions/forum/delete.js` is the seventh callable, and it reads no
+`EDIT_WINDOW_MS` at all, which the selftest pins rather than trusting.
+
+**IT IS A TOMBSTONE, AND BOTH HALVES OF THAT ARE THE POINT.** The words really
+go: `body` and `kind` are ERASED in the database, not merely flagged, or
+"delete" is a lie the page tells on the maintainer's behalf. The post's SLOT
+stays, because `n` is the post's name: a reply quotes by number (`#4`), the
+thread's `n` is the next number to hand out, and a hole would renumber nothing
+and break both. So the row is drawn as removed and the thread still reads.
+`hidden` with `hiddenBy: 'author'` says which of the two it is, and the page
+says *"deleted by its author"* rather than *"removed"*, which is what
+moderation's own removals will say when the report queue arrives.
+
+**A QUOTE OF IT SURVIVES, deliberately.** `forumPost` stores a COPY of the
+quoted words on the reply, which is already what keeps an edit from rewriting
+somebody else's reply; the same rule means deleting your post does not blank
+the passage a reply was written about. The guide says your words are gone; it
+does not promise to reach into what other people wrote.
+
+**The opening post is the thread, up to a point.** With no replies the whole
+thread is hidden, off every list, because the title and the question were the
+author's words too. With replies the opening post is blanked and the title is
+replaced by `DELETED_TITLE`, but the thread stands: other members wrote those
+replies, and one person changing their mind must not take a dozen other
+people's words down with it. That is also the griefing answer, since asking a
+question, collecting the answers and deleting the thread is otherwise a move
+the design would allow.
+
+**Refused on an ARCHIVED season and on a HIDDEN thread; allowed on a LOCKED
+one.** Once a season's secret version is destroyed its handles cannot be
+re-derived, so *"is this the author"* is not a question that can be answered
+there; a thread moderation has already removed has nothing here to act on; and
+locking stops new posts, it does not make somebody's own words un-deletable. A
+second press is a SUCCESS, not an error.
+
+**The confirmation says what is true of this one.** Everywhere else on this
+site hiding is never a one-way door, and here it is: the words are gone and
+there is no Restore, so the dialog says so rather than asking a bare
+are-you-sure, and it words the three cases differently (a reply, an opening
+post with replies, an opening post that takes its thread).
+
+Tests: the `forum delete` block of `testForum` (a callable of its own, no
+window even read, the author check, the erase, the kept slot, the archive and
+hidden refusals, the locked one NOT refused, both opening-post branches, and
+the page's control, confirmation and wording), the emulator test's own block
+against the real function (somebody else refused, the author's reply deleted
+long past the edit window, a second press a success, a quote of it surviving,
+both opening-post branches), and the browser block in `page-test.mjs`, which
+posts a reply, deletes it and reads the stored document back.
+
+### The question list is laid out the way Stack Overflow lays one out
+
+Two owner messages on 2026-09-05, and they are one change rather than two.
+First, from a screenshot: *"I think these tags are too close to each other,
+update them to look nicer and merge"*. Then, plainly: *"I want the forum to
+look like stackoverflow"*.
+
+The card was a two-column grid with an 88px stat column, and three things met
+badly in it: the like and reply chips sat level with the badge row and the
+title, the badges ran into each other because `.oa-label` is `display:
+inline` site-wide (vertical padding on an inline box does not grow its line,
+so chips bleed into the rows above and below), and the reply count was
+printed twice, once as a chip and once in the line under the excerpt.
+
+**The first fix stacked everything into one column, and that was the wrong
+lesson.** It removed the collision by removing the layout, and the owner's
+next message asked for exactly the arrangement that had just been taken out.
+The column was never the fault: **the tags being ABOVE the title was**, which
+is why Stack Overflow puts them under the excerpt and always has.
+
+So the card is a **tally column on the left** (votes, then replies, the
+answered ones in a green outline) beside the **title, the first lines, and a
+footer** carrying the tags on one side and who asked on the other. `subtitle`
+returns the handle alone; `onCard` MOVES the engine's own `.oa-badges` and
+`.oa-card-sub` into that footer rather than drawing either twice, which is
+what keeps every fact said once and the reply count in the tally alone. The
+chips are `inline-block`, **scoped to this card** rather than fixed globally,
+because every other list's badges are measured where they are. On a phone the
+tally lies ABOVE the question as a row, the same move the vote column makes in
+a thread (rule 13).
+
+The thread already had the shape: crumbs, a heading, a meta bar, a vote column
+per post, a replies band. What changed is the reading: square arrows rather
+than pills, the score the largest thing in its column, the who-block on the
+brand wash with the handle in the link colour, and a rule under the replies
+heading.
+
+**What is NOT copied is the brand.** No orange, no logo, no wordmark, no
+borrowed stylesheet. `oa-forum.css` carries no raw colour at all, which the
+selftest pins, so every one of these rules resolves through the site's own
+tokens and works in both themes. It is the LAYOUT people recognise, and the
+layout is the part that is a good idea rather than somebody's property.
+
+`page-test.mjs` measures it as GEOMETRY rather than as a class list: the tally
+sits left of the title, no two chips overlap, none reaches up into the excerpt
+or across into the tally, the tags and the asker share a footer row, and the
+word "reply" appears once on the card. That survives a change of markup, which
+a check on class names would not.
+
 **Timestamps are whole minutes (R7).** Every `t`, `lastAt`, `joinedAt`,
 `editedAt`, `createdAt` comes from `minute()`; `serverTimestamp()` and
 `Date.now()` appear in no forum function (pinned), and the emulator walk
@@ -2687,7 +2792,7 @@ both rooms. No link in it (the guard would refuse the seed), and it fits the
 body bound, both pinned.
 
 **The guard is one module on both sides.** `check(text)` answers `''` or
-`email | orcid | phone | url`; `EMAIL_RX` is the literal from
+`email | orcid | phone`; `EMAIL_RX` is the literal from
 `_scraper/jobs-model.mjs`, which a browser cannot import, so the selftest
 reads the literal out of that source and holds the copy to it character for
 character. The phone rule is nine or more digits joined by at most one
@@ -2695,6 +2800,28 @@ separator each, so `2026-2027`, `2026-09-04` and `$120,000-150,000` pass and
 `(617) 253-1000` does not; the blueprint's fixtures are pinned. The function
 runs the same `check()` on every title and body and refuses with the same
 reason word the page shows.
+
+**A WEB ADDRESS POSTS** (owner, 2026-09-05: *"I want users to be able to post
+links in their posts or replies"*). It was refused at first, on the reading
+that `mit.edu/~jane` names a person as surely as a card would; the owner's
+call is that a forum where you cannot link the call for papers you are asking
+about is the poorer trade. So `URL_RX` is GONE from the module rather than
+left unread, the fixtures that used to prove the refusal are kept as the
+positive control that a link now posts, and `url` left `WHY`, `ERRORS` and the
+page's `REASONS` with it. What is still refused is a way to be CONTACTED off
+the forum, or an identifier naming exactly one researcher.
+
+**The page draws it as a link, and the safety is the ORDER.** `linkify` in
+`oa-forum.js` runs over text `esc()` has ALREADY escaped, so `&`, `<` and `"`
+are entities by the time it looks: nothing it emits can close an attribute or
+open a tag, and the pattern itself admits only `http`, `https` and `www`,
+never a `javascript:` href. `rel="noopener noreferrer nofollow"` with
+`target="_blank"` keeps the forum's address out of the other site's referrer
+and passes it no rank. Trailing sentence punctuation is not part of the
+address, and a closing bracket counts as punctuation only when the address
+does not open one of its own. The cost, said in rule 7 rather than hidden: a
+link to your own page, paper or profile identifies you as surely as your name
+would.
 
 **Vendored copies are GENERATED, never edited.** `firebase deploy` ships only
 `_functions/`, so `build-functions-vendor.mjs` (in `BUILDERS` after
@@ -2705,16 +2832,17 @@ deliberately NOT named in any workflow: the "every builder has a caller,
 never both" guard refuses a builder both in `BUILDERS` and in a workflow, and
 the byte pin already catches drift, so the `--check` mode is for a hand run.
 
-**The deploy count is TWELVE.** `_functions/index.js` re-exports the six
+**The deploy count is THIRTEEN.** `_functions/index.js` re-exports the seven
 callables one per line (`exports.forumX = forum.forumX;`) so a deploy's
 per-function lines and the selftest's count of them agree; the header, both
-setup pages and the count sentences in this file moved from six together.
+setup pages and the count sentences in this file moved from six together, and
+again from twelve when `forumDelete` arrived.
 `npm install --prefix _functions` first, as always: `@google-cloud/secret-
 manager` arrived with the forum and the CLI's own load of `index.js` dies on
 a `require` it cannot resolve. Owner, by hand, once: `firebase
 functions:secrets:set FORUM_SECRET --project operations-academia`, then
 `git pull && npm install --prefix _functions && firebase deploy --only
-functions --project operations-academia`, read twelve back, and press the
+functions --project operations-academia`, read thirteen back, and press the
 seed for each room. The rules publish themselves behind the green check.
 
 **The emulator test is the ground truth, and it skips honestly.**
@@ -2911,7 +3039,7 @@ back and flips the switch:
   "id": "forum-2026-09",
   "date": "2026-09-05",
   "title": "An anonymous forum, in two rooms",
-  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post can be edited for fifteen minutes. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
+  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit for fifteen minutes and to delete at any time. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
   "url": "/forum.html"
 }
 ```
@@ -2937,7 +3065,7 @@ and it ends for a season when that season's version is destroyed.
 Tests: `testForum` in `_scraper/selftest.mjs` (the model, the writers against
 the model both ways through the `@doc` blocks, R1 to R8 as source scans, the
 rules block clause by clause with the rooms pinned against the model both
-ways, the guard's literal and fixtures, the guide, the twelve exports, the
+ways, the guard's literal and fixtures, the guide, the thirteen exports, the
 package and lockfile, the emulator test's shape and the workflow job, no
 forum cron, the runbook, the policy paragraph (R9), the change log entry and
 this section; then the page half: noindex and no preview block, charset

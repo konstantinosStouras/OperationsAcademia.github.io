@@ -10740,8 +10740,8 @@ async function testCandidateReveal() {
     }
   }
   const setup = await read('_SETUP-INSTANT-PUBLISH.md');
-  ok(/`revealCandidates`/.test(setup) && /which is twelve/.test(setup) && /read back\s+twelve/.test(setup),
-    'setup guide: names revealCandidates and counts twelve functions');
+  ok(/`revealCandidates`/.test(setup) && /which is thirteen/.test(setup) && /read back\s+thirteen/.test(setup),
+    'setup guide: names revealCandidates and counts thirteen functions');
   ok(/functions:revealCandidates/.test(setup), 'setup guide: the explicit --only list carries it');
   ok(/Cloud Scheduler/.test(setup), 'setup guide: says the deploy creates the Cloud Scheduler job');
   ok(!/THESE THREE ARE LIVE/.test(setup), 'setup guide: no longer counts three live doorbells as the whole set');
@@ -14081,10 +14081,10 @@ async function testEmailVerification() {
   const blockEnd = fn.indexOf('WHICH UNIVERSITY A VISITOR CAME FROM');
   ok(blockAt > 0 && blockEnd > blockAt && noDash(fn.slice(blockAt, blockEnd)),
     'function: no em dash in the verification block');
-  ok(/TWELVE functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
-    'function: the file header counts twelve and names the mailer');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 12,
-    'function: the file exports exactly twelve functions, the count a deploy must read back');
+  ok(/THIRTEEN functions/.test(fn.slice(0, 2000)) && /sendVerificationEmail/.test(fn.slice(0, 2000)),
+    'function: the file header counts thirteen and names the mailer');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 13,
+    'function: the file exports exactly thirteen functions, the count a deploy must read back');
 
   const pkg = JSON.parse(await readFile(path.join(root, '_functions', 'package.json'), 'utf8'));
   ok(pkg.dependencies && pkg.dependencies.nodemailer,
@@ -14103,8 +14103,8 @@ async function testEmailVerification() {
   ok(/npm install --prefix _functions/.test(setup)
      && /firebase deploy --only functions --project operations-academia/.test(setup),
     'setup: install, then deploy, naming the project');
-  ok(/\btwelve\b/i.test(setup) && /functions:list/.test(setup),
-    'setup: read the deployed list back and count TWELVE');
+  ok(/\bthirteen\b/i.test(setup) && /functions:list/.test(setup),
+    'setup: read the deployed list back and count THIRTEEN');
   ok(/fall(s|ing)? back/i.test(setup) && /sendEmailVerification/.test(setup)
      && /firebaseapp\.com/.test(setup),
     'setup: says what the browser does while the function is absent');
@@ -14478,8 +14478,8 @@ async function testVerifyExistingUsers() {
   const rendererSrc = await readFile(path.join(root, '_functions', 'verify-email.js'), 'utf8');
   ok(!/function siteVerifyLink\b/.test(fn) && /function siteVerifyLink\(generated, site\)/.test(rendererSrc),
     'siteVerifyLink is defined in verify-email.js and nowhere else, so index.js cannot carry a second copy');
-  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 12,
-    'the helper lives in verify-email.js, so index.js still exports exactly twelve functions');
+  eq((fn.match(/^exports\.\w+ = /gm) || []).length, 13,
+    'the helper lives in verify-email.js, so index.js still exports exactly thirteen functions');
 
   /* the shared Admin SDK handle */
   const mail = await readFile(path.join(HERE, '_mail.mjs'), 'utf8');
@@ -14635,7 +14635,7 @@ async function testForum() {
 
   const forumDir = path.join(root, '_functions', 'forum');
   const forumFiles = (await readdir(forumDir)).filter((f) => f.endsWith('.js')).sort();
-  eq(forumFiles, ['edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
+  eq(forumFiles, ['delete.js', 'edit.js', 'identity.js', 'index.js', 'join.js', 'member.js', 'moderate.js', 'post.js', 'vote.js', 'words.js'],
     'forum: the function files, and only those');
   const forumSrc = {};
   for (const f of forumFiles) forumSrc[f] = await read('_functions', 'forum', f);
@@ -14737,7 +14737,7 @@ async function testForum() {
   ok(details.every((d) => /^\{\s*reason(:\s*'[a-z]+')?\s*\}$/.test(d)), 'forum R6: every details object is { reason } alone, never a count');
   ok(/throw new HttpsError\(code, ERRORS\[reason\] \|\| 'Refused\.', \{ reason \}\);/.test(memberSrc), 'forum R6: refuse() is the one shape');
   const errKeys = [...memberSrc.slice(memberSrc.indexOf('const ERRORS = {'), memberSrc.indexOf('};', memberSrc.indexOf('const ERRORS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
-  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'url', 'orcid']) {
+  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'orcid']) {
     ok(errKeys.includes(r), `forum: ERRORS words the reason ${r}`);
   }
   for (const m of allForum.matchAll(/refuse\('[a-z-]+', '([a-z]+)'\)/g)) {
@@ -14845,12 +14845,22 @@ async function testForum() {
   for (const s of ['2026-2027', '2026-09-04', '$120,000-150,000', 'e.g.', 'vs.', '10.1287/mnsc.2020.3745', 'OA posting 2027-university-of-houston-20250923']) {
     eq(FG.check(s), '', `forum guard: allows "${s}"`);
   }
+  /* A WEB ADDRESS POSTS (owner, 2026-09-05: "I want users to be able to post
+     links in their posts or replies"). It was refused at first; what is still
+     refused is a way to be CONTACTED off the forum, or an identifier naming
+     exactly one researcher. These four are the cases the old rule caught, kept
+     as the positive control that the change really landed. */
+  for (const s of ['mit.edu/~jane', 'www.example.org', 'see https://example.org/x', 'the call is at https://ec26.sigecom.org/']) {
+    eq(FG.check(s), '', `forum guard: a link posts: "${s}"`);
+  }
+  ok(!/URL_RX/.test(await read('assets', 'oa-forum-guard.js')),
+    'forum guard: and the pattern is gone rather than left unread, so nothing can quietly turn it back on');
   for (const [s, why] of [['+1 617 253 1000', 'phone'], ['617-253-1000', 'phone'], ['(617) 253-1000', 'phone'], ['jane@mit.edu', 'email'],
-    ['mit.edu/~jane', 'url'], ['www.example.org', 'url'], ['0000-0002-1825-0097', 'orcid'], ['see https://example.org/x', 'url']]) {
+    ['0000-0002-1825-0097', 'orcid'], ['read https://x.org, then mail jane@mit.edu', 'email']]) {
     eq(FG.check(s), why, `forum guard: refuses "${s}" as ${why}`);
   }
   eq(FG.check(''), '', 'forum guard: nothing is fine');
-  ok(Object.keys(FG.WHY).sort().join() === 'email,orcid,phone,url', 'forum guard: a sentence per reason');
+  ok(Object.keys(FG.WHY).sort().join() === 'email,orcid,phone', 'forum guard: a sentence per reason');
 
   /* --- the guide ---------------------------------------------------------- */
 
@@ -14858,8 +14868,23 @@ async function testForum() {
   eq(GUIDE.NOTES.length, 3, 'forum guide: three notes');
   ok(GUIDE.RULES[11].endsWith('To appeal, use Send feedback and quote your handle.'), 'forum guide: rule 12 ends on the appeal sentence');
   ok(GUIDE.RULES.some((r) => /same in both rooms this season, and changes at the July roll/.test(r)), 'forum guide: one handle in both rooms, said in one sentence');
-  ok(/read and post in both rooms/.test(GUIDE.WHAT_THE_MAINTAINER_CAN_SEE) && /destroyed a month after the season ends/.test(GUIDE.WHAT_THE_MAINTAINER_CAN_SEE),
-    'forum guide: the maintainer paragraph says they read and post in both rooms, and that the key is destroyed');
+  /* THE MAINTAINER PARAGRAPH IS GONE at the owner's word (2026-09-05), and
+     gone from the module rather than merely unrendered, since nothing merely
+     unused counts as removed. What it said survives in the Privacy Policy
+     paragraph CLAUDE.md holds verbatim for announce day, which the R9 block
+     below pins; the guide is the house rules and reads as such. */
+  const guideSrc = await read('assets', 'oa-forum-guide.js');
+  /* read with the comments stripped: the header EXPLAINS the removal by name,
+     and a guard that could not tell the explanation from the thing would have
+     to be satisfied by deleting the explanation (the analytics page's own
+     no-iframes lesson). */
+  const guideCode = guideSrc.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  ok(!('WHAT_THE_MAINTAINER_CAN_SEE' in GUIDE) && !/WHAT_THE_MAINTAINER_CAN_SEE/.test(guideCode),
+    'forum guide: the maintainer paragraph is gone from the module, not left unrendered');
+  ok(!/maintainer/i.test(GUIDE.text()) && !/maintainer/i.test(GUIDE.html()),
+    'forum guide: and neither rendering still names them');
+  ok(/Privacy Policy/.test(guideSrc) && /removed/i.test(guideSrc),
+    'forum guide: the file says where the disclosure went, so the next reader does not think it was lost');
   ok(GUIDE.NOTES[0].lead === 'Nothing here is legal or immigration advice.' && /hard season/.test(GUIDE.NOTES[1].lead) && /This forum is small/.test(GUIDE.NOTES[2].lead),
     'forum guide: the owner\'s two notices and the small-population note');
   const gt = GUIDE.text();
@@ -14953,7 +14978,7 @@ async function testForum() {
   for (const w of [/season \+ ':' \+\s+uid/, /randomInt/, /secretVersion/, /both rooms/, /quote/, /tags/, /`up`/, /Moderator/, /R1\b/, /R10/, /@doc/]) {
     ok(w.test(cf), `forum: CLAUDE.md records ${w}`);
   }
-  ok(/TWELVE/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads twelve');
+  ok(/THIRTEEN/.test(claude.slice(claude.indexOf('**The deploy count is'), claude.indexOf('**The deploy count is') + 200)), 'forum: the deploy count in CLAUDE.md reads thirteen');
   for (const [f, src] of [...Object.entries(forumSrc), ['build-functions-vendor.mjs', await read('_scraper', 'build-functions-vendor.mjs')],
     ['oa-forum-model.js', await read('assets', 'oa-forum-model.js')], ['oa-forum-guard.js', await read('assets', 'oa-forum-guard.js')],
     ['oa-forum-guide.js', await read('assets', 'oa-forum-guide.js')], ['forum-emulator.mjs', em]]) {
@@ -15049,6 +15074,70 @@ async function testForum() {
   const reasonKeys = [...pageJs.slice(pageJs.indexOf('var REASONS = {'), pageJs.indexOf('};', pageJs.indexOf('var REASONS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
   for (const r of errKeys) ok(reasonKeys.includes(r), `oa-forum.js: REASONS words the function reason ${r}`);
   for (const r of reasonKeys) ok(errKeys.includes(r) || r === 'auth', `oa-forum.js: REASONS.${r} is a reason the functions can answer with`);
+
+  /* --- deleting your own post, at any time (owner, 2026-09-05) ----------- */
+
+  const delSrc = forumSrc['delete.js'];
+  ok(/exports\.forumDelete = onCall\(P\.OPTS/.test(delSrc), 'forum delete: a callable of its own, on the shared options');
+  ok(!/EDIT_WINDOW_MS/.test(delSrc),
+    'forum delete: NO WINDOW, and none is even read: your own words are yours to take back whenever you like');
+  ok(/pv\.by !== m\.handle/.test(delSrc) && /refuse\('permission-denied', 'author'\)/.test(delSrc),
+    'forum delete: the author and nobody else');
+  ok(/body: '',/.test(delSrc) && /kind: '',/.test(delSrc),
+    'forum delete: the words are ERASED in the database, not merely flagged, or "delete" is a lie the page tells');
+  ok(/hidden: true,\s*\n\s*hiddenBy: 'author',/.test(delSrc),
+    'forum delete: and the slot is kept, because n is how a reply names the post it answers');
+  ok(/Number\(tv\.season\) !== Number\(Y\)/.test(delSrc) && /'archive'/.test(delSrc),
+    'forum delete: refused on an archived season, whose handles cannot be re-derived');
+  ok(/if \(tv\.hidden\)/.test(delSrc), 'forum delete: refused on a thread moderation has already removed');
+  ok(!/tv\.locked/.test(delSrc),
+    'forum delete: a LOCKED thread is not refused; locking stops new posts, it does not make your own words un-deletable');
+  ok(/Number\(tv\.n\) <= 1/.test(delSrc) && /DELETED_TITLE/.test(delSrc),
+    'forum delete: the opening post takes the thread only when nobody has replied; with replies the title goes and the thread stands');
+  ok(/deleting the opening post/i.test(await read('_functions', 'test', 'forum-emulator.mjs'))
+     || /forumDelete/.test(await read('_functions', 'test', 'forum-emulator.mjs')),
+    'forum delete: the emulator test drives it against the real function');
+  ok(/data-act="delete"/.test(pageJs) && /function deletePost\(/.test(pageJs)
+     && /call\('forumDelete'/.test(pageJs),
+    'forum delete: the page draws the control and calls the callable');
+  ok(/window\.confirm\(msg\)/.test(pageJs) && /cannot be brought back/.test(pageJs),
+    'forum delete: it says it is the one thing here that cannot be undone, rather than a bare are-you-sure');
+  ok(/hiddenBy === 'author'/.test(pageJs) && /deleted by its author/i.test(pageJs),
+    'forum delete: a deleted post reads as deleted by its author, never as removed by moderation');
+  ok(/to delete at any\s*'?\s*\+?\s*'?\s*time while the season is running/.test(JSON.stringify(GUIDE.RULES)) || /delete at any/.test(GUIDE.RULES[12]),
+    'forum delete: rule 13 says so, and says the words are gone for good');
+
+  /* --- a web address posts, and the page draws it as a link -------------- */
+
+  ok(/function linkify\(/.test(pageJs) && /linkify\(esc\(para\)\)/.test(pageJs),
+    'forum links: the page linkifies text esc() has ALREADY escaped, which is what makes it safe');
+  ok(/rel="noopener noreferrer nofollow"/.test(pageJs) && /target="_blank"/.test(pageJs),
+    'forum links: opened away, with no referrer and no rank passed');
+  ok(/https\?:\\\/\\\/|www\\\./.test(pageJs.slice(pageJs.indexOf('var LINK_RX'), pageJs.indexOf('var LINK_RX') + 120)),
+    'forum links: the pattern admits http, https and www and nothing else, so a javascript: href cannot match');
+  ok(!/no links/i.test(pageJs), 'forum links: and no copy on the page still tells a reader they are refused');
+  ok(!/no links/i.test(GUIDE.text()), 'forum links: nor does the guide');
+  ok(/A link is fine/.test(GUIDE.RULES[6]) && /identifies you/.test(GUIDE.RULES[6]),
+    'forum links: rule 7 allows one and says what it costs, which is the honest half');
+
+  /* --- the question card, in the Stack Overflow arrangement -------------- */
+
+  ok(/grid-template-columns: 92px minmax\(0, 1fr\)/.test(pageCss),
+    'forum card: a tally column on the left and the question beside it, the shape the owner asked for');
+  ok(/oa-forum-stats'/.test(pageJs) && /is-answers/.test(pageJs) && /is-answers/.test(pageCss),
+    'forum card: the tally column carries the votes and the replies, the answered ones marked');
+  ok(/subtitle: function \(r\) \{ return r\.by; \}/.test(pageJs),
+    'forum card: the subtitle is the handle alone, so the reply count is said once, in the tally');
+  ok(/class: 'oa-forum-qfoot'/.test(pageJs) && /foot\.appendChild\(badges/.test(pageJs)
+     && /foot\.appendChild\(sub\)/.test(pageJs),
+    'forum card: the tags and the asker are MOVED into a footer under the excerpt rather than drawn twice');
+  ok(/\.oa-forum-qfoot \{[^}]*justify-content: space-between/.test(pageCss),
+    'forum card: the tags on one side of that footer, who asked on the other');
+  ok(/body\.v3 \.oa-forum-q \.oa-badges \{[^}]*display: flex/.test(pageCss)
+     && /body\.v3 \.oa-forum-q \.oa-badges \.oa-label \{[^}]*display: inline-block/.test(pageCss),
+    'forum card: and its chips are inline-BLOCK, so their padding grows the line rather than bleeding into the rows around them');
+  ok(/@media \(max-width: 640px\)[\s\S]*?body\.v3 \.oa-forum-q \{ grid-template-columns: minmax\(0, 1fr\); \}/.test(pageCss),
+    'forum card: on a phone the tally lies above the question rather than in a 92px gutter (rule 13)');
   ok(/function friendly\(err\)/.test(pageJs) && /err\.details && err\.details\.reason/.test(pageJs), 'oa-forum.js: a refusal is worded by its reason, never shown as a code');
   ok(!/\b(u|user|me|S\.me)\.(email|displayName|uid)\b[^;]*innerHTML|innerHTML[^;]*\b(email|displayName)\b/.test(pageJs), 'oa-forum.js: no address or name is ever drawn');
   ok(/G\.check\(/.test(pageJs) && /OAForumGuard/.test(pageJs), 'oa-forum.js: the guard runs in the browser too');
@@ -15113,8 +15202,8 @@ async function testForum() {
      the gate can meet, the leak check and the 390px block. */
 
   const shim = await read('_scraper', '_fake-firebase.js');
-  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate'\];/.test(shim),
-    'shim: the simulator names the six forum callables, and only those');
+  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumVote',\s*\n\s*'forumThreadVotes', 'forumModerate'\];/.test(shim),
+    'shim: the simulator names the seven forum callables, and only those');
   ok(/function forumSim\(name, data\)/.test(shim) && /if \(FORUM_NAMES\.indexOf\(String\(name\)\) !== -1\) return forumSim\(String\(name\), data\);/.test(shim),
     'shim: httpsCallable dispatches the six to forumSim');
   const fnFor = shim.slice(shim.indexOf('  function functionsFor() {'), shim.indexOf('  var firebase = {'));

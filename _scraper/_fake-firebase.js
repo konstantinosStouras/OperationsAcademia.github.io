@@ -372,7 +372,7 @@
      above), and otherwise answered with a canned receipt. With `noFunctions`
      the namespace has no functions() at all, which is the load-failure branch.
 
-     THE FORUM'S SIX CALLABLES are simulated over `docs` (forumSim below), so
+     THE FORUM'S SEVEN CALLABLES are simulated over `docs` (forumSim below), so
      the forum block in page-test.mjs can drive the page through a whole
      conversation without a Cloud Function: join, a question, a reply with a
      quote, an edit, a vote and the guide seed all land as documents the page
@@ -385,7 +385,8 @@
      and that no uid, address or profile id reaches the markup. `seed.refuse`
      ({ forumPost: { code: 'resource-exhausted', reason: 'posts' } }) makes
      one callable refuse, for the refusal-wording checks. */
-  var FORUM_NAMES = ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate'];
+  var FORUM_NAMES = ['forumJoin', 'forumPost', 'forumEdit', 'forumDelete', 'forumVote',
+    'forumThreadVotes', 'forumModerate'];
   var SIM_HASH = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
   var simN = 0;
 
@@ -580,6 +581,29 @@
       if (bad(nb)) return simRefuse('invalid-argument', bad(nb));
       simWrite(ppath, Object.assign({}, post, { body: nb, kind: data.kind == null ? '' : String(data.kind), editedAt: now }));
       return Promise.resolve({ data: { editedAt: now } });
+    }
+
+    /* the author's own post, no window: the body and the kind are erased and
+       the slot kept, and the opening post takes the thread with it only when
+       nobody has replied (_functions/forum/delete.js) */
+    if (name === 'forumDelete') {
+      if (th.hidden) return simRefuse('failed-precondition', 'locked');
+      if (post.by !== handle) return simRefuse('permission-denied', 'author');
+      var whole = false;
+      if (!post.hidden) {
+        simWrite(ppath, Object.assign({}, post, {
+          body: '', kind: '', hidden: true, hiddenBy: 'author', editedAt: now
+        }));
+        if (Number(post.n) === 1) {
+          if ((Number(th.n) || 0) <= 1) {
+            whole = true;
+            simWrite(tpath2, Object.assign({}, th, { hidden: true }));
+          } else {
+            simWrite(tpath2, Object.assign({}, th, { title: 'Deleted by its author', excerpt: '' }));
+          }
+        }
+      }
+      return Promise.resolve({ data: { ok: true, thread: whole } });
     }
 
     if (name === 'forumVote') {

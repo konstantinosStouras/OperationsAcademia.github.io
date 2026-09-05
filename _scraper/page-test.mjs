@@ -9679,7 +9679,7 @@ for (const w of [320, 360, 390, 430]) {
         bold: card.querySelectorAll('.oa-card-title b').length,
         tags: [...card.querySelectorAll('.oa-label-tag')].map((b) => b.getAttribute('data-tag')),
         sub: card.querySelector('.oa-card-sub').textContent,
-        likes: card.querySelector('.oa-forum-stats b').textContent,
+        likes: card.querySelector('.oa-forum-stat b').textContent,
         filterLabels: [...document.querySelectorAll('#oa-forum-list .oa-filter > label')].map((n) => n.textContent),
         count: document.getElementById('oa-forum-listcount').textContent,
         cloud: [...document.querySelectorAll('#oa-forum-tags a')].map((a) => a.getAttribute('data-tag')),
@@ -9689,8 +9689,43 @@ for (const w of [320, 360, 390, 430]) {
     eq(list.n, 1, 'forum (candidate): the seeded question is listed');
     ok(list.title === HOSTILE_TITLE && list.bold === 0, 'forum (candidate): a title carrying markup is printed as text');
     eq(list.tags, ['flyouts', 'europe'], 'forum (candidate): the card carries its tag chips');
-    ok(/patient owl 7/.test(list.sub) && /0 replies/.test(list.sub), 'forum (candidate): the subtitle names the asking handle and the reply count');
-    eq(list.likes, '0', 'forum (candidate): and the first post\'s net score');
+    ok(/patient owl 7/.test(list.sub), 'forum (candidate): the footer names the asking handle');
+    eq(list.likes, '0', 'forum (candidate): and the tally column carries the first post\'s net score');
+    /* THE STACK OVERFLOW ARRANGEMENT (owner, 2026-09-05), measured as
+       geometry rather than as a class list, so it survives a change of
+       markup: a tally column to the LEFT of the title, the tags BELOW the
+       excerpt where they cannot crowd the heading (the collision the owner
+       reported the same day), no two chips overlapping, and the reply count
+       said once. */
+    const geom = await q.evaluate(() => {
+      const card = document.querySelector('#oa-forum-list .oa-card');
+      const box = (n) => { const r = n.getBoundingClientRect(); return { t: r.top, b: r.bottom, l: r.left, r: r.right, w: r.width }; };
+      const chips = [...card.querySelectorAll('.oa-badges .oa-label')].map(box);
+      const title = box(card.querySelector('.oa-card-title'));
+      const stats = box(card.querySelector('.oa-forum-stats'));
+      const ex = box(card.querySelector('.oa-forum-ex'));
+      const sub = box(card.querySelector('.oa-card-sub'));
+      let clash = 0;
+      for (let i = 0; i < chips.length; i++) {
+        for (let j = i + 1; j < chips.length; j++) {
+          const a = chips[i], b = chips[j];
+          if (a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5) clash++;
+        }
+        if (chips[i].t < ex.b - 0.5) clash++;
+        if (stats.l < chips[i].r && chips[i].l < stats.r && stats.t < chips[i].b && chips[i].t < stats.b) clash++;
+      }
+      return {
+        chips: chips.length, clash,
+        tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,
+        footRow: Math.abs(sub.b - chips[chips.length - 1].b) < 40 && sub.l > chips[0].l,
+        replies: (card.textContent.match(/repl(y|ies)/g) || []).length,
+      };
+    });
+    ok(geom.chips >= 2, `forum (candidate): the card carries a tag row of more than one chip, which is what could collide (${geom.chips})`);
+    eq(geom.clash, 0, 'forum (candidate): no two chips overlap, none reaches up into the excerpt, and none runs into the tally column');
+    ok(geom.tallyLeft, 'forum (candidate): the tally column sits to the LEFT of the title, the arrangement the owner asked for');
+    ok(geom.footRow, 'forum (candidate): the tags and who asked share the footer, tags left and asker right');
+    eq(geom.replies, 1, 'forum (candidate): and the reply count is printed once, in the tally');
     eq(list.filterLabels, ['Tags', 'Search questions'], 'forum (candidate): the list engine draws the tag filter and the text search');
     eq(list.count, '1 question this season', 'forum (candidate): the count line');
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
@@ -9804,6 +9839,58 @@ for (const w of [320, 360, 390, 430]) {
       null, { timeout: 8000 });
     ok(await q.evaluate(() => /edited/.test(document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-who').textContent)),
       'forum (candidate): an edit saves through forumEdit and the post says edited');
+
+    /* A LINK POSTS, and the page draws it (owner, 2026-09-05). The guard used
+       to refuse a web address; what it still refuses is a way to be contacted
+       off the forum. */
+    await q.fill('#oa-forum-body', 'The call is at https://ec26.sigecom.org/cfp. Worth a look.');
+    await q.click('#oa-forum-send');
+    await q.waitForSelector('.oa-forum-post[data-n="3"]', { timeout: 15000 });
+    const lk = await q.evaluate(() => {
+      const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
+      const a = p3.querySelector('.oa-forum-text a');
+      return {
+        href: a && a.getAttribute('href'),
+        rel: a && a.getAttribute('rel'),
+        target: a && a.getAttribute('target'),
+        text: a && a.textContent,
+        after: p3.querySelector('.oa-forum-text').textContent,
+      };
+    });
+    eq(lk.href, 'https://ec26.sigecom.org/cfp', 'forum (candidate): a web address in a post is drawn as a link');
+    eq(lk.rel, 'noopener noreferrer nofollow', 'forum (candidate): with no referrer, no window handle and no rank passed');
+    eq(lk.target, '_blank', 'forum (candidate): opened away from the forum');
+    eq(lk.text, 'https://ec26.sigecom.org/cfp', 'forum (candidate): the full stop after it is sentence punctuation, not part of the address');
+    ok(/Worth a look\./.test(lk.after), 'forum (candidate): and the words after it are still there');
+
+    /* DELETING it: the author's own post, no window, the words really gone */
+    q.once('dialog', (d) => d.accept());
+    await q.click('.oa-forum-post[data-n="3"] .oa-forum-act[data-act="delete"]');
+    await q.waitForFunction(() => {
+      const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
+      return p3 && p3.querySelector('.oa-forum-removed');
+    }, null, { timeout: 15000 });
+    const del = await q.evaluate((t) => {
+      const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
+      const pid = p3.getAttribute('data-pid');
+      const doc = window.__fb.docs[t + '/seed-t1/posts/' + pid];
+      return {
+        note: p3.querySelector('.oa-forum-removed').textContent,
+        body: p3.querySelector('.oa-forum-text'),
+        anchor: p3.querySelector('a[href*="sigecom"]'),
+        stored: doc && { body: doc.body, kind: doc.kind, hidden: doc.hidden, hiddenBy: doc.hiddenBy, n: doc.n },
+        acts: [...p3.querySelectorAll('.oa-forum-act')].map((b) => b.getAttribute('data-act')).filter(Boolean),
+        still: !!document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-text'),
+        title: document.getElementById('oa-forum-title').textContent,
+      };
+    }, T);
+    ok(/deleted by its author/i.test(del.note), 'forum (candidate): a deleted reply says who deleted it, never that moderation removed it');
+    ok(!del.body && !del.anchor, 'forum (candidate): its words and its link are off the page');
+    eq(del.stored, { body: '', kind: '', hidden: true, hiddenBy: 'author', n: 3 },
+      'forum (candidate): and erased in the database, with the slot kept so the numbering still reads');
+    eq(del.acts, [], 'forum (candidate): a deleted post offers no reply, quote, edit or delete');
+    ok(del.still, 'forum (candidate): the other replies are untouched');
+    eq(del.title, HOSTILE_TITLE, 'forum (candidate): and the thread keeps its title, since the opening post was not the one deleted');
 
     /* the seen-mark and the leak check on a thread page */
     const seen = await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-seen') || 'null'));

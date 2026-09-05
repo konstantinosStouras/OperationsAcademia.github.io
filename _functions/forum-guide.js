@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------
-   Operations Academia: the forum guide: the rules, the notes, and what the
-   maintainer can see. ONE text, three readers:
+   Operations Academia: the forum guide: the rules and the notes. ONE text,
+   three readers:
 
      forum.html             <script src="assets/oa-forum-guide.js"> -> window.OAForumGuide
                             the guide panel at the top of every view, open until
@@ -14,20 +14,26 @@
                             body of their own
      the selftest           createRequire(...)                    -> module.exports
 
-   WHAT IS IN IT AND WHY. Thirteen rules, three notes and one paragraph about
-   the maintainer. The rules are the owner's; the two notices are as the owner
-   wrote them (nothing here is legal or immigration advice; the job market is a
-   hard season); the third note is the small-population note, because a forum
-   of a few hundred people is one where a detail here beside a detail there
-   identifies somebody. The maintainer paragraph says plainly how a handle is
-   linked to an account and that the maintainer reads and posts in both rooms
-   like any member, since a site that reads something and says so nowhere is
-   wrong whatever its rules allow.
+   WHAT IS IN IT AND WHY. Thirteen rules and three notes. The rules are the
+   owner's; the two notices are as the owner wrote them (nothing here is legal
+   or immigration advice; the job market is a hard season); the third note is
+   the small-population note, because a forum of a few hundred people is one
+   where a detail here beside a detail there identifies somebody.
 
-   NO LINKS. The guard refuses a web address in any post, and the guide is a
-   post (the seeded thread), so it carries none: no http, no www. The selftest
-   pins that, and pins that text() and html() render the same rules in the
-   same order.
+   THE MAINTAINER PARAGRAPH WAS REMOVED at the owner's word (2026-09-05). It
+   said how a handle is linked to an account, that the key is destroyed a
+   month after the season, and that the maintainer reads and posts in both
+   rooms. All of it survives, in the Privacy Policy paragraph CLAUDE.md holds
+   verbatim for announce day, which is where a site's disclosures belong; the
+   guide is the house rules and reads as such. WHAT_THE_MAINTAINER_CAN_SEE is
+   gone from this module entirely rather than left unrendered, because
+   nothing merely unused counts as removed.
+
+   NO LINKS IN THE GUIDE ITSELF, still, though the guard now allows one in an
+   ordinary post: the guide is seeded as a post and a bare address in a house
+   rulebook is a thing to mistype rather than to press. The selftest pins
+   that, and pins that text() and html() render the same rules in the same
+   order.
 
    Written in ES5 so it needs no transpiling for either consumer.
    --------------------------------------------------------------------------- */
@@ -45,8 +51,7 @@
   var INTRO = 'An anonymous forum in two rooms: the Candidates\' room, for the people ' +
     'holding a candidate profile for the season under way, and the Open forum, for ' +
     'every registered account. You post under a handle drawn at random for the season, ' +
-    'never under your name. Thirteen rules, three notes, and a word on what the ' +
-    'maintainer can see.';
+    'never under your name. Thirteen rules and three notes.';
 
   var RULES = [
     'Be respectful. Disagree with the point, never the person.',
@@ -59,9 +64,10 @@
     'Say how you know. Mark a post first-hand when it happened to you and rumour when it ' +
       'did not, and say in the text when it comes from someone directly involved.',
     'No screenshots, pasted e-mails, offer letters or committee correspondence, in any form.',
-    'No contact details and no links. The forum refuses an e-mail address, a phone ' +
-      'number, a web address or an ORCID iD. Cite a posting by the OA posting ID printed ' +
-      'on its card.',
+    'No contact details. The forum refuses an e-mail address, a telephone number and an ' +
+      'ORCID iD, so nobody can be reached off the forum or named exactly by one. A link ' +
+      'is fine, and a link to your own page, paper or profile identifies you as surely ' +
+      'as your name would, so think before you paste one.',
     'One question per thread, with a specific title and one to five tags so people can ' +
       'find it. Tags are set when the question is asked.',
     'Quote fairly. A quote is a copy of the words as they stood when you replied, so ' +
@@ -73,9 +79,10 @@
       'use Send feedback and quote the thread and the post number. Moderation acts on ' +
       'what was written, never on who wrote it: a post may be removed and a handle ' +
       'warned or banned for the season. To appeal, use Send feedback and quote your handle.',
-    'Threads stay readable in the archive for next season\'s candidates. Write for them ' +
-      'too, and use the 15-minute edit window if you need it, because after it the post ' +
-      'stays as written.'
+    'Threads stay readable in the archive for next season\'s candidates, so write for ' +
+      'them too. Your own post is yours to edit for fifteen minutes and to delete at any ' +
+      'time while the season is running; a deleted post keeps its place in the thread so ' +
+      'the replies still read, and its words are gone for good.'
   ];
 
   var NOTES = [
@@ -99,14 +106,6 @@
     }
   ];
 
-  var WHAT_THE_MAINTAINER_CAN_SEE = 'Your handle is assigned at random for this season and ' +
-    'never shown beside your profile. The site links a handle to an account only through a ' +
-    'one-way keyed hash whose secret lives in the site\'s server configuration and is ' +
-    'destroyed a month after the season ends; the maintainer sees handles when reviewing ' +
-    'reports, and linking a handle to a person would take a deliberate step with that ' +
-    'secret. It never happens by accident. The maintainer can also read and post in both ' +
-    'rooms, as an ordinary member under a handle like anyone else\'s.';
-
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
@@ -118,8 +117,6 @@
     for (var i = 0; i < RULES.length; i++) out.push((i + 1) + '. ' + RULES[i]);
     out.push('');
     for (var j = 0; j < NOTES.length; j++) out.push(NOTES[j].lead + ' ' + NOTES[j].text);
-    out.push('');
-    out.push('What the maintainer can see. ' + WHAT_THE_MAINTAINER_CAN_SEE);
     return out.join('\n');
   }
 
@@ -133,8 +130,6 @@
       out += '<p class="oa-forum-note"><strong>' + esc(NOTES[j].lead) + '</strong> ' +
         esc(NOTES[j].text) + '</p>';
     }
-    out += '<p class="oa-forum-maintainer"><strong>What the maintainer can see.</strong> ' +
-      esc(WHAT_THE_MAINTAINER_CAN_SEE) + '</p>';
     return out;
   }
 
@@ -143,7 +138,6 @@
     INTRO: INTRO,
     RULES: RULES,
     NOTES: NOTES,
-    WHAT_THE_MAINTAINER_CAN_SEE: WHAT_THE_MAINTAINER_CAN_SEE,
     text: text,
     html: html
   };

@@ -130,7 +130,8 @@ marked global.
     same numbers as a page where they filter: the textarea is 16px, so iOS
     does not zoom the page on focus, and every button beside it (Post, Cancel,
     the like and dislike buttons in a thread's vote column, the room tabs, the
-    Quote and Reply actions) is a 42px target on a phone, measured. A vote
+    Quote, Reply, Edit and Delete actions) is a 42px target on a phone,
+    measured. A vote
     column that stands beside the post on a desktop lies ABOVE it on a phone,
     a row of two round buttons and the net between them, so nothing is
     squeezed into a 56px gutter. `page-test.mjs` measures the forum's list,
