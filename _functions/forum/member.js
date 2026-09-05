@@ -67,8 +67,7 @@ const ERRORS = {
   own: 'You cannot vote on your own post.',
   busy: 'The forum is busy. Try again in a moment.',
   bounds: 'That is too long, or empty.',
-  kind: 'Say what the post is: first-hand, rumour, or neither.',
-  tags: 'Choose one to five tags of letters, digits and hyphens.',
+  tags: 'Choose one to five tags of letters, digits and hyphens, and nothing that labels a post as a rumour.',
   quote: 'The quote must be a passage of the post it names, as it stands now.',
   threads: 'That is enough new threads for today.',
   posts: 'That is enough posts for today.',
@@ -198,12 +197,6 @@ function textField(v, max, required) {
   return s;
 }
 
-function kindField(v) {
-  const k = v == null ? '' : String(v);
-  if (M.KINDS.indexOf(k) === -1) refuse('invalid-argument', 'kind');
-  return k;
-}
-
 /** The first BOUNDS.excerpt characters of a body, cut at a word. */
 function excerptOf(body) {
   const s = String(body || '').replace(/\s+/g, ' ').trim();
@@ -229,5 +222,5 @@ async function run(D, fn) {
 module.exports = {
   ADMIN, OPTS, ERRORS, FORUM_SECRET,
   refuse, db, season, verifiedToken, adminToken, currentCandidate, admitted, member,
-  counters, checkLimit, checkGap, textField, kindField, excerptOf, run,
+  counters, checkLimit, checkGap, textField, excerptOf, run,
 };

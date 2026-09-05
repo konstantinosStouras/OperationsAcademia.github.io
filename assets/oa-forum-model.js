@@ -72,8 +72,13 @@
        rewrites the reply. `up`/`down` are the like and dislike tallies.
        `hidden` with `hiddenBy: 'author'` is a post its own author deleted:
        the body is erased and the slot kept, because `n` is how replies name
-       it. Moderation's own removals arrive with the report queue. */
-    post: ['season', 'room', 'tid', 'n', 'by', 'body', 'kind', 't', 'editedAt',
+       it. Moderation's own removals arrive with the report queue.
+       THERE IS NO `kind`: a post used to carry one of three self-declared
+       labels (plain, first-hand, rumour) and the owner removed all three on
+       2026-09-05. A post is somebody saying something; the forum has no
+       label for saying it second hand, because a rumour may not be posted
+       at all. */
+    post: ['season', 'room', 'tid', 'n', 'by', 'body', 't', 'editedAt',
       'up', 'down', 'quote', 'hidden', 'hiddenBy'],
     /* the nested quote map on a post */
     quote: ['n', 'by', 'text'],
@@ -108,8 +113,18 @@
     'cv', 'references', 'timelines', 'deadlines', 'waiting', 'rejections', 'visas',
     'relocation', 'two-body', 'family', 'wellbeing', 'europe', 'asia',
     'north-america', 'uk', 'australia', 'industry', 'postdoc', 'tenure',
-    'committees', 'rumour'
+    'committees'
   ];
+
+  /** Slugs a tag may never be. A tag is the one part of a post that is a
+      MACHINE-READABLE LABEL rather than prose, so this is the one place
+      "no rumours" (rule 5) can be enforced rather than only asked for: a
+      thread cannot advertise itself as one. Nothing here reads the body,
+      which no honest rule could classify. An exact list of spellings and
+      never a pattern: a pattern would go on to refuse tags that merely
+      contain the word, and a list is something the next reader can see the
+      whole of. */
+  var TAG_BANNED = ['rumour', 'rumours', 'rumor', 'rumors', 'gossip', 'hearsay'];
 
   var TAG_MIN = 1;
   var TAG_MAX = 5;
@@ -134,8 +149,14 @@
       words too, so it does not survive them. */
   var DELETED_TITLE = 'Deleted by its author';
 
-  /** How a post says what it is. '' is an ordinary post. */
-  var KINDS = ['', 'first-hand', 'rumour'];
+  /* THERE IS NO KINDS LIST, and its absence is the point (owner,
+     2026-09-05: "I don't understand why a user should select plain and
+     first-hand, perhaps remove these"). A post carried '', 'first-hand' or
+     'rumour', and both halves of that were wrong: the choice asked every
+     poster a question they had no reason to answer, and one of the answers
+     offered was the thing the guide now forbids. Removed from the model
+     rather than narrowed to one value, so no writer can send one and no
+     reader can draw one. */
 
   /** The handle reserved for the guide thread; the word lists never draw it. */
   var MODERATOR = 'Moderator';
@@ -153,7 +174,7 @@
   var TAG_RX = /^[a-z0-9-]{2,24}$/;
 
   function tagOk(t) {
-    return typeof t === 'string' && TAG_RX.test(t);
+    return typeof t === 'string' && TAG_RX.test(t) && TAG_BANNED.indexOf(t) === -1;
   }
 
   /** 1 to 5 slugs, each well formed, no repeats. The page normalises through
@@ -188,6 +209,7 @@
     KEYS: KEYS,
     BOUNDS: BOUNDS,
     TAGS: TAGS,
+    TAG_BANNED: TAG_BANNED,
     TAG_MIN: TAG_MIN,
     TAG_MAX: TAG_MAX,
     TAG_COUNT_CAP: TAG_COUNT_CAP,
@@ -195,7 +217,6 @@
     RATE: RATE,
     EDIT_WINDOW_MS: EDIT_WINDOW_MS,
     DELETED_TITLE: DELETED_TITLE,
-    KINDS: KINDS,
     MODERATOR: MODERATOR,
     slug: slug,
     tagOk: tagOk,
