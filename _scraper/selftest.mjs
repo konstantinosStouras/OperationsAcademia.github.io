@@ -798,6 +798,17 @@ async function testMobileStandards() {
   // universities.html is a MAP, not a list — it cannot mount OAList, so it has
   // its own phone block in page-test.mjs instead of a MOBILE_PAGES entry
   ok(pt.includes('oa-uni-search'), 'the universities map has its own mobile gate');
+  // forum.html cannot join MOBILE_PAGES either (signed out it shows a sign-in
+  // card and mounts no list, and the loop waits for both), so it has a block
+  // of its own, and that block measures the LIST with the loop's own function:
+  // one measure, factored out, so the standard cannot be applied two ways
+  ok(pt.includes('forum mobile'), 'the forum has its own mobile gate (rule 13)');
+  ok(/const MOBILE_LIST_MEASURE = \(\) => \{/.test(pt) && /function assertMobileList\(mob, at\)/.test(pt),
+    'page-test.mjs factors the phone measure and its assertions into one helper');
+  eq((pt.match(/m\.evaluate\(MOBILE_LIST_MEASURE\)/g) || []).length, 2,
+    'the MOBILE_PAGES loop and the forum block both measure a list with it, and nothing else does');
+  ok(!/const mob = await m\.evaluate\(\(\) => \{\s*const doc = document\.documentElement;\s*\/\/ the first VISIBLE bar/.test(pt),
+    'the loop no longer carries its own copy of the measure');
 
   // the engine rules the standard leans on
   const css = await readFile(path.join(HERE, '..', 'assets', 'oa-list.css'), 'utf8');
@@ -14676,6 +14687,89 @@ async function testForum() {
   ok(/\.oa-forum-tab\[aria-selected='true'\]/.test(cssBare) && /\.oa-forum-quote/.test(cssBare) && /\.oa-forum-v\b/.test(cssBare), 'oa-forum.css: the tabs, the quote block and the vote buttons are styled');
   for (const [f, src] of [['forum.html', page], ['oa-forum.js', pageJs], ['oa-forum.css', pageCss]]) ok(noDash(src), `forum page: no em dash in ${f}`);
   ok(/cfg\.source/.test(cf) && /QUIET_PAGES/.test(cf) && /oa-forum-me/.test(cf) && /pushState/.test(cf), 'forum: CLAUDE.md records the page half');
+
+  /* --- the browser suite and the shim that drives it -------------------------
+
+     The functions themselves are proved against the emulator; what the
+     browser suite proves is what the PAGE does with their answers, and for
+     that _fake-firebase.js carries a simulator of the six callables over its
+     own fake Firestore. Pinned here: the simulator names exactly the six, the
+     verification card's own branches are untouched (callableFails first, the
+     canned receipt for sendVerificationEmail), a refusal has the SDK's shape
+     with a reason and nothing else, the vote id is a fixed 64-hex string that
+     never derives from the uid, and page-test.mjs really drives every reader
+     the gate can meet, the leak check and the 390px block. */
+
+  const shim = await read('_scraper', '_fake-firebase.js');
+  ok(/var FORUM_NAMES = \['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate'\];/.test(shim),
+    'shim: the simulator names the six forum callables, and only those');
+  ok(/function forumSim\(name, data\)/.test(shim) && /if \(FORUM_NAMES\.indexOf\(String\(name\)\) !== -1\) return forumSim\(String\(name\), data\);/.test(shim),
+    'shim: httpsCallable dispatches the six to forumSim');
+  const fnFor = shim.slice(shim.indexOf('  function functionsFor() {'), shim.indexOf('  var firebase = {'));
+  ok(fnFor.length > 300 && fnFor.length < 1500, 'shim: functionsFor was sliced');
+  ok(fnFor.indexOf("record('callable', String(name), data || null);") < fnFor.indexOf('if (seed.callableFails)')
+     && fnFor.indexOf('if (seed.callableFails)') < fnFor.indexOf('forumSim(')
+     && /sent: true, to: 'r\*\*\*@example\.edu'/.test(fnFor),
+    'shim: every call is recorded first, callableFails still refuses everything, and sendVerificationEmail keeps its canned receipt');
+  const sim = shim.slice(shim.indexOf('  function forumSim(name, data) {'), shim.indexOf('  function functionsFor() {'));
+  ok(sim.length > 3000, 'shim: forumSim was sliced');
+  for (const name of ['forumJoin', 'forumPost', 'forumEdit', 'forumVote', 'forumThreadVotes', 'forumModerate']) {
+    ok(sim.includes(`name === '${name}'`), `shim: forumSim answers ${name}`);
+  }
+  ok(/var err = \{ code: 'functions\/' \+ code, message: reason \|\| code, details: \{ reason: reason \} \};/.test(shim),
+    'shim: a refusal has the SDK\'s shape, code and a details object carrying the reason alone');
+  ok(/if \(seed\.refuse && seed\.refuse\[name\]\) return simRefuse\(seed\.refuse\[name\]\.code, seed\.refuse\[name\]\.reason\);/.test(shim),
+    'shim: seed.refuse makes one callable refuse, for the wording checks');
+  ok(/var SIM_HASH = '[0-9a-f]{64}';/.test(shim) && !/SIM_HASH[^;]*uid|uid[^;]*SIM_HASH/.test(sim),
+    'shim: the vote id is a fixed 64-hex string that never derives from the uid');
+  for (const reason of ['own', 'quote', 'author', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'kind', 'bounds', 'thread', 'guide']) {
+    ok(sim.includes(`'${reason}'`) && errKeys.includes(reason), `shim: the simulator refuses with ${reason}, a reason member.js can answer with`);
+  }
+  ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)
+     && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim) && /String\(src\.body\)\.indexOf\(qtext\) === -1/.test(sim),
+    'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text}');
+  ok(/if \(post\.by === handle\) return simRefuse\('failed-precondition', 'own'\);/.test(sim) && /if \(Number\(post\.n\) === 1\) simWrite\(tpath2, Object\.assign\(\{\}, th, \{ score:/.test(sim),
+    'shim: no vote on one\'s own post, and the first post\'s net lands on the thread head');
+  ok(/data: function \(\) \{ return d \? Object\.assign\(\{\}, d\) : d; \}/.test(shim),
+    'shim: a snapshot\'s data() is a copy, as the SDK\'s is, so a page decorating what it read cannot write into the store');
+
+  const pt = await read('_scraper', 'page-test.mjs');
+  const fb = pt.slice(pt.indexOf('/* ---------------------------------------------------------- the forum'), pt.indexOf('/* ------------------------------------------------------------------ done */'));
+  ok(fb.length > 15000 && fb.length < 60000, 'page-test: the forum block was sliced');
+  for (const reader of ['forum (signed out)', 'forum (unverified)', 'forum (no profile)', 'forum (candidate)', 'forum (maintainer)', 'forum (archive)', 'forum mobile']) {
+    ok(fb.includes(reader + ' (') || fb.includes(reader + ':') || fb.includes(`${reader}`), `page-test: drives ${reader}`);
+  }
+  ok(/signedOutPage\('forum\.html', \{ selector: '#oa-needauth' \}\)/.test(fb) && /selector: '#oa-forum-verify'/.test(fb)
+     && (fb.match(/signedInPage\('forum\.html'/g) || []).length >= 4 && /selector: '#oa-forum'/.test(fb),
+    'page-test: every forum call names its selector, since the page draws no .oa-card until admitted');
+  ok(/'candidateSubmissions\/forum-c1'/.test(fb) && /status: 'queued', year: FY/.test(fb), 'page-test: the candidate is a seeded current profile');
+  ok(/email: 'kstouras@gmail\.com'/.test(fb) && /no candidate profile/.test(fb), 'page-test: the maintainer is signed in with no profile');
+  ok(/LEAK CHECK/.test(fb) && /const LEAKS = \[CAND\.uid, CAND\.email, 'Cassiopeia', 'Zyxwvut', 'Uncommon University', 'forum-c1'\];/.test(fb)
+     && /document\.querySelector\('#main'\)\.outerHTML/.test(fb) && /document\.documentElement\.outerHTML/.test(fb),
+    'page-test: the leak check hunts the uid, the address, both names, the affiliation and the profile id in #main, and the uid and profile id in the whole document');
+  ok(/HOSTILE_BODY/.test(fb) && /window\.__pwned/.test(fb), 'page-test: a hostile body is rendered and asserted inert');
+  ok(/data-act="quote"/.test(fb) && /wrote in #1/.test(fb) && /\['acceptGuide', 'body', 'kind', 'quote', 'room', 'tid'\]/.test(fb),
+    'page-test: a reply with a quote, and what forumPost was sent');
+  ok(/eq\(v0\.sent, \[1, -1, 0\]/.test(fb) && /voteDocs, \[\]/.test(fb), 'page-test: up, down and withdrawn, with the page sending the vote and never a delta');
+  ok(/data-act="edit"/.test(fb) && /\[data-edit="save"\]/.test(fb), 'page-test: an edit inside the window');
+  ok(/op: 'seedGuide', room: 'candidates'/.test(fb) && /never Moderator/.test(fb), 'page-test: the maintainer seeds the guide and posts under a drawn handle');
+  ok(/season=\$\{PY\}/.test(fb) && /forumThreadVotes is never asked for an archived thread/.test(fb), 'page-test: the archive view is read-only, and asks for no votes');
+  ok(/m\.evaluate\(MOBILE_LIST_MEASURE\)/.test(fb) && /assertMobileList\(mob, 'forum mobile \(list\):'\)/.test(fb)
+     && /voteAbove/.test(fb) && /taFont >= 16/.test(fb) && /every\(\(h\) => h >= 42\)/.test(fb),
+    'page-test: the 390px block measures the list with the shared helper, the vote column above the post, the 16px textarea and the 42px targets');
+  const simAll = shim.slice(shim.indexOf('  /* --------------------------------------------------------- functions'), shim.indexOf('  var firebase = {'));
+  ok(simAll.length > 4000 && noDash(fb) && noDash(simAll), 'page-test and shim: no em dash in the forum block or the simulator');
+
+  /* the emulator job's shape: its own timeout, never continue-on-error, the
+     install bounded and retried the way the Playwright install is */
+  const emJob = checks.slice(checks.indexOf('\n  emulator:\n'));
+  ok(emJob.length > 800, 'oa-checks.yml: the emulator job was sliced');
+  ok(/^    timeout-minutes: 15$/m.test(emJob) && !/continue-on-error/.test(emJob), 'oa-checks.yml: the emulator job has its own fifteen minutes and never continue-on-error');
+  ok(/for attempt in 1 2 3; do\s*if timeout 120 npm i -g --no-audit --no-fund firebase-tools@14; then break; fi/.test(emJob),
+    'oa-checks.yml: firebase-tools is installed bounded and retried, the Playwright install\'s shape');
+  ok(/npm ci --prefix _functions/.test(emJob) && /firebase emulators:exec --project demo-oa-forum --only auth,firestore,functions "node _functions\/test\/forum-emulator\.mjs"/.test(emJob),
+    'oa-checks.yml: the functions\' own dependencies, then the exec line');
+  ok(emJob.indexOf('actions/setup-java@v4') < emJob.indexOf('firebase-tools@14'), 'oa-checks.yml: Java before the emulator');
 }
 
 async function testRegisteredUsersFigure() {

@@ -3856,6 +3856,65 @@ for (const [pageName, sel, least, mapBtn] of [
   await p.close();
 }
 
+/* THE ONE MEASURE OF A LIST PAGE ON A PHONE. The MOBILE_PAGES loop below
+   and the forum's own 390px block both call it, so the standard is measured
+   one way: a page that cannot join the loop (forum.html shows a sign-in card
+   signed out and mounts no list, and the loop waits for a rendered list and a
+   visible bar) is still held to the same numbers by the same code. */
+const MOBILE_LIST_MEASURE = () => {
+    const doc = document.documentElement;
+    // the first VISIBLE bar — the v3 one-pager's jobs teaser removes its own
+    // (display:none-in-DOM bars measure as 0×0 and would fail the gutter)
+    const bar = [...document.querySelectorAll('.oa-filters')]
+      .find((el) => el.offsetParent !== null);
+    // every dataset empty → every bar deliberately hidden → nothing to measure
+    if (!bar) return { barless: true, overflowX: doc.scrollWidth > doc.clientWidth };
+    const filters = bar.getBoundingClientRect();
+    const search = bar.querySelector('input[type="search"]') ||
+      document.querySelector('.oa-filter input[type="search"]');
+    const card = document.querySelector('.oa-card');
+    const cr = card && card.getBoundingClientRect();
+    const btns = [...document.querySelectorAll('.oa-pick .oa-pick-btn')];
+    const menus = btns.map((btn) => {
+      btn.click();                                   // open
+      const r = btn.parentElement.querySelector('.oa-pick-menu').getBoundingClientRect();
+      btn.click();                                   // close
+      return { left: Math.round(r.left), right: Math.round(r.right) };
+    });
+    const pager = document.querySelector('.oa-pager button');
+    return {
+      overflowX: doc.scrollWidth > doc.clientWidth,
+      gutterLeft: Math.round(filters.left),
+      cardLeft: cr && Math.round(cr.left),
+      cardRight: cr && Math.round(doc.clientWidth - cr.right),
+      searchFont: parseFloat(getComputedStyle(search).fontSize),
+      searchH: Math.round(search.getBoundingClientRect().height),
+      pickH: btns.length && Math.round(btns[0].getBoundingClientRect().height),
+      pagerH: pager && Math.round(pager.getBoundingClientRect().height),
+      menus,
+      vw: doc.clientWidth,
+    };
+  };
+
+/** The assertions over that measure, `at` naming the page in each message.
+    Answers whether the page had a bar to measure at all (a dataset-empty page
+    hides its bars deliberately, and there is nothing more to hold it to). */
+function assertMobileList(mob, at) {
+  ok(!mob.overflowX, `${at} the page never scrolls sideways`);
+  if (mob.barless) return false;
+  ok(mob.gutterLeft >= 8, `${at} the filters keep a side gutter (got ${mob.gutterLeft})`);
+  ok(mob.cardLeft === null || (mob.cardLeft >= 8 && mob.cardRight >= 8),
+    `${at} cards keep the gutter too (got ${mob.cardLeft}/${mob.cardRight})`);
+  ok(mob.searchFont >= 16,
+    `${at} the search input is 16px+ so iOS does not zoom the page (got ${mob.searchFont}px)`);
+  ok(mob.searchH >= 40 && (!mob.pickH || mob.pickH >= 40),
+    `${at} search and picker controls are touch targets (got ${mob.searchH}/${mob.pickH}px)`);
+  ok(!mob.pagerH || mob.pagerH >= 36, `${at} pager chevrons are tappable (got ${mob.pagerH}px)`);
+  ok(mob.menus.every((r) => r.left >= 0 && r.right <= mob.vw),
+    `${at} every picker menu stays on screen (got ${JSON.stringify(mob.menus)})`);
+  return true;
+}
+
 const MOBILE_PAGES = [
   // the live site: the one-pager (whose jobs teaser has NO filter bar — the
   // first VISIBLE bar is the candidates mount, reached by the walk below;
@@ -3899,54 +3958,8 @@ for (const pageName of MOBILE_PAGES) {
   }, null, { timeout: 30000, polling: 400 });
   await m.evaluate(() => window.scrollTo(0, 0));
 
-  const mob = await m.evaluate(() => {
-    const doc = document.documentElement;
-    // the first VISIBLE bar — the v3 one-pager's jobs teaser removes its own
-    // (display:none-in-DOM bars measure as 0×0 and would fail the gutter)
-    const bar = [...document.querySelectorAll('.oa-filters')]
-      .find((el) => el.offsetParent !== null);
-    // every dataset empty → every bar deliberately hidden → nothing to measure
-    if (!bar) return { barless: true, overflowX: doc.scrollWidth > doc.clientWidth };
-    const filters = bar.getBoundingClientRect();
-    const search = bar.querySelector('input[type="search"]') ||
-      document.querySelector('.oa-filter input[type="search"]');
-    const card = document.querySelector('.oa-card');
-    const cr = card && card.getBoundingClientRect();
-    const btns = [...document.querySelectorAll('.oa-pick .oa-pick-btn')];
-    const menus = btns.map((btn) => {
-      btn.click();                                   // open
-      const r = btn.parentElement.querySelector('.oa-pick-menu').getBoundingClientRect();
-      btn.click();                                   // close
-      return { left: Math.round(r.left), right: Math.round(r.right) };
-    });
-    const pager = document.querySelector('.oa-pager button');
-    return {
-      overflowX: doc.scrollWidth > doc.clientWidth,
-      gutterLeft: Math.round(filters.left),
-      cardLeft: cr && Math.round(cr.left),
-      cardRight: cr && Math.round(doc.clientWidth - cr.right),
-      searchFont: parseFloat(getComputedStyle(search).fontSize),
-      searchH: Math.round(search.getBoundingClientRect().height),
-      pickH: btns.length && Math.round(btns[0].getBoundingClientRect().height),
-      pagerH: pager && Math.round(pager.getBoundingClientRect().height),
-      menus,
-      vw: doc.clientWidth,
-    };
-  });
-
-  const at = `mobile ${pageName}:`;
-  ok(!mob.overflowX, `${at} the page never scrolls sideways`);
-  if (mob.barless) { await m.close(); continue; }
-  ok(mob.gutterLeft >= 8, `${at} the filters keep a side gutter (got ${mob.gutterLeft})`);
-  ok(mob.cardLeft === null || (mob.cardLeft >= 8 && mob.cardRight >= 8),
-    `${at} cards keep the gutter too (got ${mob.cardLeft}/${mob.cardRight})`);
-  ok(mob.searchFont >= 16,
-    `${at} the search input is 16px+ so iOS does not zoom the page (got ${mob.searchFont}px)`);
-  ok(mob.searchH >= 40 && (!mob.pickH || mob.pickH >= 40),
-    `${at} search and picker controls are touch targets (got ${mob.searchH}/${mob.pickH}px)`);
-  ok(!mob.pagerH || mob.pagerH >= 36, `${at} pager chevrons are tappable (got ${mob.pagerH}px)`);
-  ok(mob.menus.every((r) => r.left >= 0 && r.right <= mob.vw),
-    `${at} every picker menu stays on screen (got ${JSON.stringify(mob.menus)})`);
+  const mob = await m.evaluate(MOBILE_LIST_MEASURE);
+  assertMobileList(mob, `mobile ${pageName}:`);
   await m.close();
 }
 
@@ -9284,6 +9297,514 @@ for (const w of [320, 360, 390, 430]) {
     eq(r.short, [], `verify page (${label}): every button is a 42px target`);
     eq(r.wide, [], `verify page (${label}): …and none runs off the screen`);
     eq(errors, [], `verify page (${label}): no uncaught script error at 390px`);
+    await ctx.close();
+  }
+}
+
+/* ---------------------------------------------------------- the forum
+
+   forum.html, driven end to end through the shim's forum simulator
+   (_fake-firebase.js, forumSim): the six callables answer over the fake
+   Firestore, so what is measured here is what the PAGE does with a real
+   answer, never the functions themselves (those are the emulator test's).
+   Five readers, in the order the gate meets them: signed out (the sign-in
+   card and nothing forum-shaped), an unverified password account (the verify
+   prompt, no callable), a verified account with no profile (the Open tab
+   alone and the one line naming the other room), a seeded current candidate
+   (both tabs, a question with two tags, a reply with a quote, an edit, the
+   votes with their counts, and the LEAK CHECK: none of the seeded uid,
+   address, name, affiliation or profile id anywhere in #main, where the
+   forum's markup is; the header's account chip prints the account's own name
+   and address on every page by design, so the uid and the profile id are
+   also checked over the WHOLE document), the maintainer with no profile
+   (both tabs, the guide seeded through forumModerate, a post landing under a
+   random handle and never Moderator), then an archived season (read-only: no
+   Ask, no vote buttons, no reply box, no forumThreadVotes call), and the
+   390px block rule 13 in _MOBILE-STANDARDS.md is measured by. */
+{
+  const FY = marketYear();
+  const CAND = { uid: 'cand-uid-0000000000001', email: 'zyxwvut@example.edu', emailVerified: true,
+    displayName: 'Cassiopeia Zyxwvut', providerData: [] };
+  const CAND_PROFILE = { path: 'candidateSubmissions/forum-c1', data: {
+    uid: CAND.uid, status: 'queued', year: FY, first: 'Cassiopeia', last: 'Zyxwvut', email: CAND.email,
+    affiliation: 'Uncommon University of Somewhere', position: 'PhD Candidate', createdAt: 1700000000000 } };
+  const T = `forumSeasons/${FY}/rooms/candidates/threads`;
+  const OLD = Date.now() - 3 * 24 * 3600 * 1000 - ((Date.now() - 3 * 24 * 3600 * 1000) % 60000);
+  const HOSTILE_TITLE = 'Flyout <b>tips</b> for Europe';
+  const HOSTILE_BODY = '<img src=x onerror="window.__pwned=1"><script>window.__pwned=2</script> Congratulations on the flyout, ask about the teaching load early.';
+  /* a thread by SOMEBODY ELSE, so the candidate has a post to vote on (the
+     simulator refuses a vote on one's own post, as the function does), and a
+     hostile title and body to render inert */
+  const SEEDED = [
+    { path: `forumSeasons/${FY}`, data: { season: FY, createdAt: OLD, secretVersion: 'env', guides: {} } },
+    { path: `${T}/seed-t1`, data: { season: FY, room: 'candidates', title: HOSTILE_TITLE, tags: ['flyouts', 'europe'],
+      by: 'patient owl 7', t: OLD, lastAt: OLD, lastBy: 'patient owl 7', n: 1, excerpt: 'Congratulations on the flyout',
+      score: 0, pinned: false, locked: false, hidden: false } },
+    { path: `${T}/seed-t1/posts/seed-p1`, data: { season: FY, room: 'candidates', tid: 'seed-t1', n: 1, by: 'patient owl 7',
+      body: HOSTILE_BODY, kind: 'first-hand', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+    { path: `forumTags/${FY}_candidates`, data: { counts: { flyouts: 1, europe: 1 } } },
+  ];
+  const LEAKS = [CAND.uid, CAND.email, 'Cassiopeia', 'Zyxwvut', 'Uncommon University', 'forum-c1'];
+  const leakCheck = (q) => q.evaluate((needles) => {
+    const main = document.querySelector('#main').outerHTML;
+    const whole = document.documentElement.outerHTML;
+    return {
+      main: needles.filter((n) => main.includes(n)),
+      whole: needles.filter((n, i) => (i === 0 || i === needles.length - 1) && whole.includes(n)),
+    };
+  }, LEAKS);
+  const tabs = (q) => q.$$eval('#oa-forum-rooms .oa-forum-tab', (ns) => ns.map((n) => n.getAttribute('data-room')));
+  const calls = (q, name) => q.evaluate((n) => window.__fb.log.filter((e) => e.op === 'callable' && e.path === n).map((e) => e.data), name);
+
+  /* -- signed out: the sign-in card, and nothing forum-shaped -------------- */
+  {
+    const { ctx, page: q, errors } = await signedOutPage('forum.html', { selector: '#oa-needauth' });
+    const st = await q.evaluate(() => ({
+      card: !document.getElementById('oa-needauth').hidden,
+      app: document.getElementById('oa-forum').hidden,
+      verify: document.getElementById('oa-forum-verify').hidden,
+      cards: document.querySelectorAll('.oa-card, .oa-forum-post, .oa-forum-handle').length,
+      callables: window.__fb.ops('callable').length,
+      btn: document.getElementById('oa-needauth-btn').textContent,
+    }));
+    ok(st.card && st.app && st.verify, 'forum (signed out): the sign-in card shows, the app and the verify prompt stay hidden');
+    eq(st.cards, 0, 'forum (signed out): no thread, post or handle markup in the document');
+    eq(st.callables, 0, 'forum (signed out): no callable is made for a reader who is not signed in');
+    ok(/Sign in/.test(st.btn), 'forum (signed out): the card offers the sign-in box');
+    await q.click('#oa-needauth-btn');
+    await q.waitForSelector('#oa-auth', { timeout: 8000 });
+    ok(true, 'forum (signed out): pressing it opens the sign-in box');
+    eq(errors, [], 'forum (signed out): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- unverified: the verify prompt, no callable ------------------------- */
+  {
+    const UNV = { uid: 'unverified-uid-00002', email: 'pending@example.edu', displayName: '',
+      emailVerified: false, providerData: [{ providerId: 'password' }] };
+    const { ctx, page: q, errors } = await signedInPage('forum.html', { user: UNV, selector: '#oa-forum-verify' });
+    await q.waitForSelector('#oa-verify-chip', { timeout: 15000 });
+    const st = await q.evaluate(() => ({
+      prompt: !document.getElementById('oa-forum-verify').hidden,
+      app: document.getElementById('oa-forum').hidden,
+      needauth: document.getElementById('oa-needauth').hidden,
+      callables: window.__fb.ops('callable'),
+    }));
+    ok(st.prompt && st.app && st.needauth, 'forum (unverified): the verify prompt shows, the app and the sign-in card stay hidden');
+    eq(st.callables, [], 'forum (unverified): forumJoin is never called for a pending account');
+    /* the accounts module opens the "Check your inbox" card on its own for a
+       pending account; the page's button is for after it has been closed */
+    await q.waitForSelector('#oa-verify', { timeout: 8000 });
+    await q.keyboard.press('Escape');
+    await q.waitForFunction(() => !document.querySelector('#oa-verify'), null, { timeout: 8000 });
+    await q.click('#oa-forum-verify-btn');
+    await q.waitForSelector('#oa-verify', { timeout: 8000 });
+    ok(true, 'forum (unverified): the card opens on its own, and the page\'s button opens it again once closed');
+    eq(errors, [], 'forum (unverified): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a verified account with no profile: the Open tab alone ------------- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('forum.html', { selector: '#oa-forum' });
+    eq(await tabs(q), ['open'], 'forum (no profile): only the Open forum tab is drawn');
+    const st = await q.evaluate(() => ({
+      note: document.getElementById('oa-forum-roomnote').hidden ? '' : document.getElementById('oa-forum-roomnote').textContent,
+      banner: document.getElementById('oa-forum-me').className,
+      handle: document.getElementById('oa-forum-myhandle').textContent,
+      joined: window.__fb.ops('callable'),
+    }));
+    ok(/Candidates’ room opens to accounts holding a candidate profile/.test(st.note) && st.note.includes(`${FY - 1}-${FY}`),
+      'forum (no profile): the one line says what opens the other room, naming the season');
+    ok(/is-open/.test(st.banner), 'forum (no profile): the room banner is the Open forum\'s');
+    eq(st.handle, 'quiet heron 42', 'forum (no profile): the handle the simulator drew is what the banner prints');
+    eq(st.joined, ['forumJoin'], 'forum (no profile): one forumJoin, and nothing else, on entry');
+    const leak = await leakCheck(q);
+    eq(leak.main, [], 'forum (no profile): nothing of a stranger\'s seeded profile is on the page (there is none)');
+    eq(errors, [], 'forum (no profile): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- a seeded current candidate: both tabs, then the whole conversation -- */
+  {
+    const { ctx, page: q, errors } = await signedInPage('forum.html',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum' });
+    eq(await tabs(q), ['candidates', 'open'], 'forum (candidate): both tabs are drawn');
+    eq(await q.$eval('#oa-forum-rooms .oa-forum-tab[aria-selected="true"]', (n) => n.getAttribute('data-room')), 'candidates',
+      'forum (candidate): the Candidates\' room is the one on screen by default');
+    ok(await q.evaluate(() => document.getElementById('oa-forum-roomnote').hidden), 'forum (candidate): no "what opens the other room" line');
+    ok(await q.evaluate((uid) => !!window.__fb.docs['candidateMarkers/' + uid], CAND.uid),
+      'forum (candidate): the join wrote the membership marker the rules re-read');
+
+    /* the list: the seeded question, its tag chips, hostile title inert */
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    const list = await q.evaluate(() => {
+      const card = document.querySelector('#oa-forum-list .oa-card');
+      return {
+        n: document.querySelectorAll('#oa-forum-list .oa-card').length,
+        title: card.querySelector('.oa-card-title').textContent,
+        bold: card.querySelectorAll('.oa-card-title b').length,
+        tags: [...card.querySelectorAll('.oa-label-tag')].map((b) => b.getAttribute('data-tag')),
+        sub: card.querySelector('.oa-card-sub').textContent,
+        likes: card.querySelector('.oa-forum-stats b').textContent,
+        filterLabels: [...document.querySelectorAll('#oa-forum-list .oa-filter > label')].map((n) => n.textContent),
+        count: document.getElementById('oa-forum-listcount').textContent,
+        cloud: [...document.querySelectorAll('#oa-forum-tags a')].map((a) => a.getAttribute('data-tag')),
+        ask: !!document.getElementById('oa-forum-askbtn'),
+      };
+    });
+    eq(list.n, 1, 'forum (candidate): the seeded question is listed');
+    ok(list.title === HOSTILE_TITLE && list.bold === 0, 'forum (candidate): a title carrying markup is printed as text');
+    eq(list.tags, ['flyouts', 'europe'], 'forum (candidate): the card carries its tag chips');
+    ok(/patient owl 7/.test(list.sub) && /0 replies/.test(list.sub), 'forum (candidate): the subtitle names the asking handle and the reply count');
+    eq(list.likes, '0', 'forum (candidate): and the first post\'s net score');
+    eq(list.filterLabels, ['Tags', 'Search questions'], 'forum (candidate): the list engine draws the tag filter and the text search');
+    eq(list.count, '1 question this season', 'forum (candidate): the count line');
+    eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
+    ok(list.ask, 'forum (candidate): Ask a question is offered');
+
+    /* open the seeded thread: hostile body inert, votes up, down, withdrawn */
+    await q.click('#oa-forum-list .oa-card .oa-card-head');
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const th = await q.evaluate(() => ({
+      url: location.search,
+      title: document.getElementById('oa-forum-title').textContent,
+      pwned: window.__pwned,
+      injected: document.querySelectorAll('.oa-forum-text img, .oa-forum-text script').length,
+      text: document.querySelector('.oa-forum-text').textContent,
+      kind: (document.querySelector('.oa-forum-kind') || {}).textContent,
+      votes: document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v:not([disabled])').length,
+      score: document.querySelector('.oa-forum-score').textContent,
+      updown: document.querySelector('.oa-forum-updown').textContent,
+      threadVotes: window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length,
+      reply: !!document.getElementById('oa-forum-body'),
+    }));
+    ok(/[?&]t=seed-t1/.test(th.url) && /room=candidates/.test(th.url), 'forum (candidate): a card opens its thread in place, on its own address');
+    eq(th.title, HOSTILE_TITLE, 'forum (candidate): the thread heading prints the title as text');
+    ok(th.pwned === undefined && th.injected === 0 && th.text.includes('<img src=x'),
+      'forum (candidate): a hostile body renders as text, nothing executes');
+    eq(th.kind, 'First-hand', 'forum (candidate): the post says how the author knows');
+    eq(th.votes, 2, 'forum (candidate): another member\'s post offers like and dislike');
+    ok(th.score === '0' && th.updown === '0 / 0', 'forum (candidate): the counts start at nought');
+    eq(th.threadVotes, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
+    ok(th.reply, 'forum (candidate): the reply box is drawn');
+
+    await q.click('.oa-forum-post.is-first .oa-forum-v.up');
+    await q.waitForFunction(() => document.querySelector('.oa-forum-updown').textContent === '1 / 0', null, { timeout: 8000 });
+    const v1 = await q.evaluate(() => ({
+      score: document.querySelector('.oa-forum-score').textContent,
+      pressed: document.querySelector('.oa-forum-post.is-first .oa-forum-v.up').getAttribute('aria-pressed'),
+      doc: window.__fb.docs['forumSeasons/' + new Date().getUTCFullYear() + '/rooms/candidates/threads/seed-t1'],
+    }));
+    eq(v1.score, '+1', 'forum (candidate): a like shows +1');
+    eq(v1.pressed, 'true', 'forum (candidate): the caller\'s own vote is highlighted');
+    await q.click('.oa-forum-post.is-first .oa-forum-v.down');
+    await q.waitForFunction(() => document.querySelector('.oa-forum-updown').textContent === '0 / 1', null, { timeout: 8000 });
+    eq(await q.$eval('.oa-forum-score', (n) => n.textContent), '-1', 'forum (candidate): moving the vote to dislike shows -1, the like withdrawn');
+    await q.click('.oa-forum-post.is-first .oa-forum-v.down');
+    await q.waitForFunction(() => document.querySelector('.oa-forum-updown').textContent === '0 / 0', null, { timeout: 8000 });
+    const v0 = await q.evaluate((t) => ({
+      score: document.querySelector('.oa-forum-score').textContent,
+      pressed: [...document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v')].map((b) => b.getAttribute('aria-pressed')),
+      thread: window.__fb.docs[t + '/seed-t1'].score,
+      voteDocs: Object.keys(window.__fb.docs).filter((p) => /\/votes\//.test(p)),
+      sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote').map((e) => e.data.v),
+    }), T);
+    eq(v0.score, '0', 'forum (candidate): pressing the same button again withdraws the vote');
+    eq(v0.pressed, ['false', 'false'], 'forum (candidate): and nothing is highlighted');
+    eq(v0.thread, 0, 'forum (candidate): the thread head\'s score followed the first post\'s net all the way');
+    eq(v0.voteDocs, [], 'forum (candidate): a withdrawn vote leaves no vote document');
+    eq(v0.sent, [1, -1, 0], 'forum (candidate): the page sent 1, -1 and 0, never a delta of its own');
+
+    /* reply with a quote: the copy carries the quoted handle and number */
+    await q.click('.oa-forum-post.is-first .oa-forum-act[data-act="quote"]');
+    await q.waitForSelector('#oa-forum-quotebox:not([hidden])', { timeout: 8000 });
+    const qb = await q.evaluate(() => ({
+      cite: document.querySelector('#oa-forum-quotebox cite').textContent,
+      text: document.querySelector('#oa-forum-quotebox p').textContent,
+      focused: document.activeElement && document.activeElement.id,
+      accept: !!document.getElementById('oa-forum-accept'),
+    }));
+    eq(qb.cite, 'patient owl 7 wrote in #1', 'forum (candidate): Quote names the quoted handle and post number');
+    ok(qb.text.startsWith('<img src=x') && qb.text.length <= 600, 'forum (candidate): the whole body, cut to the bound, as text');
+    eq(qb.focused, 'oa-forum-body', 'forum (candidate): and moves the keyboard to the reply box');
+    ok(qb.accept, 'forum (candidate): a first post asks for the guide to be accepted');
+    await q.fill('#oa-forum-body', 'Thank you. The teaching load question worked for me too.');
+    await q.check('#oa-forum-accept');
+    await q.check('.oa-forum-kinds input[value="first-hand"]');
+    await q.click('#oa-forum-send');
+    await q.waitForSelector('.oa-forum-post[data-n="2"]', { timeout: 15000 });
+    const rep = await q.evaluate(() => {
+      const p2 = document.querySelector('.oa-forum-post[data-n="2"]');
+      const sent = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumPost').pop().data;
+      return {
+        cite: p2.querySelector('.oa-forum-quote cite').textContent,
+        link: p2.querySelector('.oa-forum-quote cite a').getAttribute('href'),
+        body: p2.querySelector('.oa-forum-text').textContent,
+        mine: !!p2.querySelector('.oa-forum-handle.is-me'),
+        own: p2.querySelectorAll('.oa-forum-v[disabled]').length,
+        edit: (p2.querySelector('.oa-forum-act[data-act="edit"]') || {}).textContent,
+        kind: (p2.querySelector('.oa-forum-kind') || {}).textContent,
+        heading: document.querySelector('.oa-forum-replies-h h2').textContent,
+        sent: { keys: Object.keys(sent).sort(), quote: sent.quote, accept: sent.acceptGuide },
+        hash: location.hash,
+        acceptGone: !document.getElementById('oa-forum-accept'),
+      };
+    });
+    eq(rep.cite, 'patient owl 7 wrote in #1', 'forum (candidate): the reply carries the quote as a blockquote headed by handle and number');
+    eq(rep.link, '#p1', 'forum (candidate): the heading links the quoted post');
+    ok(/teaching load question worked/.test(rep.body), 'forum (candidate): the reply\'s own words follow');
+    ok(rep.mine && rep.own === 2, 'forum (candidate): the reply is marked as the reader\'s own, with both vote buttons disabled');
+    ok(/^Edit · \d+ min left$/.test(rep.edit || ''), 'forum (candidate): the author is offered Edit with the minutes left');
+    eq(rep.kind, 'First-hand', 'forum (candidate): the kind the reader chose');
+    eq(rep.heading, '1 reply', 'forum (candidate): the replies heading counts');
+    eq(rep.sent.keys, ['acceptGuide', 'body', 'kind', 'quote', 'room', 'tid'], 'forum (candidate): the reply sent room, tid, body, kind, the quote and the acceptance');
+    eq(Object.keys(rep.sent.quote).sort(), ['n', 'text'], 'forum (candidate): the quote sent is n and text only');
+    ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
+
+    /* edit the reply inside the window */
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
+    await q.waitForSelector('.oa-forum-editing textarea', { timeout: 8000 });
+    await q.fill('.oa-forum-editing textarea', 'Thank you. The teaching load question worked for me as well.');
+    await q.click('.oa-forum-editing [data-edit="save"]');
+    await q.waitForFunction(() => /worked for me as well/.test((document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-text') || {}).textContent || ''),
+      null, { timeout: 8000 });
+    ok(await q.evaluate(() => /edited/.test(document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-who').textContent)),
+      'forum (candidate): an edit saves through forumEdit and the post says edited');
+
+    /* the seen-mark and the leak check on a thread page */
+    const seen = await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-seen') || 'null'));
+    ok(seen && seen.uid === CAND.uid && seen.seen['seed-t1'] >= 1, 'forum (candidate): the thread is marked seen, per account');
+    const leak1 = await leakCheck(q);
+    eq(leak1.main, [], 'forum (candidate): LEAK CHECK on a thread: no uid, address, name, affiliation or profile id in #main');
+    eq(leak1.whole, [], 'forum (candidate): …and the uid and the profile id are nowhere in the whole document');
+
+    /* ask a question with two tags, and read it back */
+    await q.click('.oa-forum-crumbs a');
+    await q.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
+    await q.click('#oa-forum-askbtn');
+    await q.waitForSelector('#oa-forum-askform', { timeout: 8000 });
+    ok(/[?&]ask=1/.test(await q.evaluate(() => location.search)), 'forum (candidate): the ask form has its own address');
+    await q.fill('#oa-forum-ask-title', 'Is a second-year teaching release normal to ask for?');
+    await q.fill('#oa-forum-ask-body', 'Two offers on the table, both silent on teaching release. Is it normal to ask, and how?');
+    await q.fill('#oa-forum-tag-in', 'offers');
+    await q.press('#oa-forum-tag-in', 'Enter');
+    await q.fill('#oa-forum-tag-in', 'Teaching Release');
+    await q.press('#oa-forum-tag-in', 'Enter');
+    const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
+    eq(chips, ['offers', 'teaching-release'], 'forum (candidate): two tags, the second normalised to a slug');
+    await q.click('#oa-forum-ask-send');
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const asked = await q.evaluate((t) => {
+      const sent = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumPost').pop().data;
+      const tid = new URLSearchParams(location.search).get('t');
+      const doc = window.__fb.docs[t + '/' + tid];
+      return {
+        title: document.getElementById('oa-forum-title').textContent,
+        tags: [...document.querySelectorAll('.oa-forum-thtags a[data-tag]')].map((a) => a.getAttribute('data-tag')),
+        sentTags: sent.tags, sentTitle: sent.title, sentRoom: sent.room, sentTid: 'tid' in sent,
+        docBy: doc && doc.by, docTags: doc && doc.tags, docKeys: doc && Object.keys(doc).sort(),
+        tally: window.__fb.docs['forumTags/' + doc.season + '_candidates'].counts,
+        own: document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v[disabled]').length,
+      };
+    }, T);
+    eq(asked.title, 'Is a second-year teaching release normal to ask for?', 'forum (candidate): the new question is read back as a thread');
+    eq(asked.tags, ['offers', 'teaching-release'], 'forum (candidate): with its two tags');
+    ok(asked.sentTags.join() === 'offers,teaching-release' && asked.sentRoom === 'candidates' && !asked.sentTid,
+      'forum (candidate): forumPost was sent room, title, tags and body, and no tid for a new thread');
+    eq(asked.docBy, 'quiet heron 42', 'forum (candidate): the thread carries the handle, never the account');
+    eq(asked.docKeys, ['by', 'excerpt', 'hidden', 'lastAt', 'lastBy', 'locked', 'n', 'pinned', 'room', 'score', 'season', 't', 'tags', 'title'],
+      'forum (candidate): the simulator writes the thread shape the model names');
+    eq(asked.tally, { flyouts: 1, europe: 1, offers: 1, 'teaching-release': 1 }, 'forum (candidate): the tag tally was bumped');
+    eq(asked.own, 2, 'forum (candidate): one cannot vote on one\'s own question');
+    const leak2 = await leakCheck(q);
+    eq(leak2.main, [], 'forum (candidate): LEAK CHECK after posting: nothing of the account in #main');
+    eq(leak2.whole, [], 'forum (candidate): …and the uid and the profile id are nowhere in the document');
+    const forumDocs = await q.evaluate((needles) => Object.keys(window.__fb.docs)
+      .filter((p) => /^(forumSeasons|forumTags|candidateMarkers)\//.test(p))
+      .filter((p) => needles.some((k) => (p + ' ' + JSON.stringify(window.__fb.docs[p])).includes(k))), [CAND.email, 'Zyxwvut', CAND.uid]);
+    eq(forumDocs, ['candidateMarkers/' + CAND.uid],
+      'forum (candidate): of every forum document, only the membership marker carries the uid (in its id, by design), and none the address or the name');
+    eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
+      'forum (candidate): the join is remembered for the session under the handle');
+    eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
+    await ctx.close();
+  }
+
+  /* -- the maintainer, with no profile: both rooms, the guide seeded, a post -- */
+  {
+    const ADMIN_USER = { uid: 'admin-uid-0000000000', email: 'kstouras@gmail.com',
+      emailVerified: true, displayName: 'Kostas Stouras', providerData: [] };
+    const { ctx, page: q, errors } = await signedInPage('forum.html', { user: ADMIN_USER, selector: '#oa-forum' });
+    eq(await tabs(q), ['candidates', 'open'], 'forum (maintainer): both tabs, with no candidate profile');
+    ok(await q.evaluate(() => !window.__fb.docs['candidateMarkers/admin-uid-0000000000']), 'forum (maintainer): no marker is written for them');
+    await q.waitForSelector('#oa-forum-admin:not([hidden])', { timeout: 15000 });
+    eq(await q.$$eval('#oa-forum-admin [data-seed-room]', (ns) => ns.map((n) => n.getAttribute('data-seed-room'))), ['candidates', 'open'],
+      'forum (maintainer): the seed card offers the guide for each room not yet seeded');
+    await q.click('#oa-forum-admin [data-seed-room="candidates"]');
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    const seeded = await q.evaluate(() => {
+      const card = document.querySelector('#oa-forum-list .oa-card');
+      return {
+        title: card.querySelector('.oa-card-title').textContent,
+        badges: [...card.querySelectorAll('.oa-label')].map((b) => b.textContent),
+        sub: card.querySelector('.oa-card-sub').textContent,
+        sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumModerate').map((e) => e.data),
+        left: [...document.querySelectorAll('#oa-forum-admin [data-seed-room]')].map((n) => n.getAttribute('data-seed-room')),
+        handle: document.getElementById('oa-forum-myhandle').textContent,
+      };
+    });
+    eq(seeded.title, 'About this forum', 'forum (maintainer): the guide thread appears');
+    ok(seeded.badges.includes('Pinned') && seeded.badges.includes('Locked') && seeded.badges.includes('about'),
+      'forum (maintainer): pinned, locked and tagged about');
+    ok(/^Moderator/.test(seeded.sub), 'forum (maintainer): under the Moderator handle');
+    eq(seeded.sent, [{ op: 'seedGuide', room: 'candidates' }], 'forum (maintainer): forumModerate was sent the op and the room, and no body');
+    eq(seeded.left, ['open'], 'forum (maintainer): the seed card now offers the other room alone');
+    eq(seeded.handle, 'quiet heron 42', 'forum (maintainer): their own handle is an ordinary drawn one, never Moderator');
+    await q.click('#oa-forum-list .oa-card .oa-card-head');
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const guide = await q.evaluate(() => ({
+      votes: document.querySelectorAll('.oa-forum-v').length,
+      reply: !!document.getElementById('oa-forum-body'),
+      note: document.getElementById('oa-forum-compose').textContent,
+      rules: /Thirteen rules|rules/i.test(document.querySelector('.oa-forum-text').textContent),
+    }));
+    ok(guide.votes === 0 && !guide.reply && /locked/.test(guide.note), 'forum (maintainer): the locked guide thread draws no vote button and no reply box');
+    ok(guide.rules, 'forum (maintainer): its body is the guide text');
+    await q.click('.oa-forum-crumbs a');
+    await q.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
+    await q.click('#oa-forum-askbtn');
+    await q.waitForSelector('#oa-forum-askform', { timeout: 8000 });
+    await q.fill('#oa-forum-ask-title', 'A test question from the maintainer');
+    await q.fill('#oa-forum-ask-body', 'Checking how the room reads to a member.');
+    await q.fill('#oa-forum-tag-in', 'about');
+    await q.press('#oa-forum-tag-in', 'Enter');
+    await q.check('#oa-forum-ask-accept');
+    await q.click('#oa-forum-ask-send');
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const landed = await q.evaluate(() => ({
+      title: document.getElementById('oa-forum-title').textContent,
+      by: document.querySelector('.oa-forum-post.is-first .oa-forum-who .oa-forum-handle').textContent,
+      mine: !!document.querySelector('.oa-forum-post.is-first .oa-forum-handle.is-me'),
+    }));
+    eq(landed.title, 'A test question from the maintainer', 'forum (maintainer): a post lands');
+    ok(landed.by === 'quiet heron 42' && landed.mine, 'forum (maintainer): under their drawn handle, indistinguishable from any member\'s');
+    eq(errors, [], 'forum (maintainer): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- an archived season: read-only ----------------------------------------- */
+  {
+    const PY = FY - 1;
+    const PT = `forumSeasons/${PY}/rooms/candidates/threads`;
+    const archive = [
+      { path: `forumSeasons/${PY}`, data: { season: PY, createdAt: OLD, secretVersion: 'env', guides: {} } },
+      { path: `${PT}/old-t1`, data: { season: PY, room: 'candidates', title: 'How long did offers take last year?', tags: ['offers', 'waiting'],
+        by: 'brisk marten 3', t: OLD, lastAt: OLD, lastBy: 'brisk marten 3', n: 1, excerpt: 'Weeks.', score: 4, pinned: false, locked: false, hidden: false } },
+      { path: `${PT}/old-t1/posts/old-p1`, data: { season: PY, room: 'candidates', tid: 'old-t1', n: 1, by: 'brisk marten 3',
+        body: 'Weeks, in my case. Three to five after the flyout.', kind: '', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
+    ];
+    const { ctx, page: q, errors } = await signedInPage(`forum.html?room=candidates&season=${PY}`,
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...archive], selector: '#oa-forum' });
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    const arc = await q.evaluate(() => ({
+      banner: document.getElementById('oa-forum-archive').hidden ? '' : document.getElementById('oa-forum-archive').textContent,
+      ask: !!document.getElementById('oa-forum-askbtn'),
+      handle: !!document.getElementById('oa-forum-myhandle'),
+      seasons: [...document.querySelectorAll('#oa-forum-seasons a')].map((a) => a.className),
+      newBadge: document.querySelectorAll('.oa-label-new').length,
+      title: document.querySelector('#oa-forum-list .oa-card-title').textContent,
+    }));
+    ok(arc.banner.includes(`${PY - 1}-${PY} archive.`) && /Read-only/.test(arc.banner), 'forum (archive): the banner names the season and says read-only');
+    ok(!arc.ask && !arc.handle, 'forum (archive): no Ask button and no "posting as" handle');
+    eq(arc.seasons, ['', 'is-now'], 'forum (archive): the Seasons card lists this season and the archive, the archive marked as the one on screen');
+    eq(arc.newBadge, 0, 'forum (archive): nothing in an archive is New');
+    eq(arc.title, 'How long did offers take last year?', 'forum (archive): the old season\'s question is listed');
+    await q.click('#oa-forum-list .oa-card .oa-card-head');
+    await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    const at = await q.evaluate(() => ({
+      votes: document.querySelectorAll('.oa-forum-v').length,
+      score: document.querySelector('.oa-forum-score').textContent,
+      updown: document.querySelector('.oa-forum-updown').textContent,
+      reply: !!document.getElementById('oa-forum-body'),
+      acts: document.querySelectorAll('button.oa-forum-act').length,
+      note: document.getElementById('oa-forum-compose').textContent,
+      threadVotes: window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length,
+      url: location.search,
+    }));
+    eq(at.votes, 0, 'forum (archive): a thread draws no vote button');
+    ok(at.score === '+4' && at.updown === '5 / 1', 'forum (archive): the counts are still shown');
+    ok(!at.reply && at.acts === 0 && /archived/.test(at.note), 'forum (archive): no reply box, no Reply, Quote or Edit, and the note says why');
+    eq(at.threadVotes, 0, 'forum (archive): forumThreadVotes is never asked for an archived thread');
+    ok(new RegExp(`season=${PY}`).test(at.url), 'forum (archive): the season stays on the address through the navigation');
+    eq(errors, [], 'forum (archive): no uncaught script error');
+    await ctx.close();
+  }
+
+  /* -- forum mobile: rule 13, measured at 390px ------------------------------ */
+  {
+    const { ctx, page: m, errors } = await signedInPage('forum.html',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', viewport: { width: 390, height: 844 } });
+    await m.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    await m.waitForTimeout(200);
+    /* the list: the same measure every list page is held to, plus the tabs */
+    const mob = await m.evaluate(MOBILE_LIST_MEASURE);
+    ok(assertMobileList(mob, 'forum mobile (list):'), 'forum mobile (list): the list has a filter bar to measure');
+    const tabsM = await m.evaluate(() => ({
+      tabH: [...document.querySelectorAll('.oa-forum-tab')].map((b) => Math.round(b.getBoundingClientRect().height)),
+      askH: Math.round(document.getElementById('oa-forum-askbtn').getBoundingClientRect().height),
+      overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    }));
+    ok(tabsM.tabH.length === 2 && tabsM.tabH.every((h) => h >= 42), `forum mobile (list): the room tabs are 42px targets (got ${tabsM.tabH})`);
+    ok(tabsM.askH >= 42, `forum mobile (list): Ask a question is a 42px target (got ${tabsM.askH})`);
+    eq(tabsM.overflowX, 0, 'forum mobile (list): no sideways scroll');
+
+    /* one thread, with the reply box open */
+    await m.click('#oa-forum-list .oa-card .oa-card-head');
+    await m.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
+    await m.waitForTimeout(200);
+    const thM = await m.evaluate(() => {
+      const h = (el) => Math.round(el.getBoundingClientRect().height);
+      const vote = document.querySelector('.oa-forum-post.is-first .oa-forum-vote').getBoundingClientRect();
+      const body = document.querySelector('.oa-forum-post.is-first .oa-forum-pbody').getBoundingClientRect();
+      return {
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        votes: [...document.querySelectorAll('.oa-forum-v')].map(h),
+        acts: [...document.querySelectorAll('.oa-forum-pacts .oa-forum-act')].map(h),
+        voteAbove: vote.bottom <= body.top + 1,
+        taFont: parseFloat(getComputedStyle(document.getElementById('oa-forum-body')).fontSize),
+        send: h(document.getElementById('oa-forum-send')),
+        sendRight: document.getElementById('oa-forum-send').getBoundingClientRect().right <= window.innerWidth,
+      };
+    });
+    eq(thM.overflowX, 0, 'forum mobile (thread): no sideways scroll');
+    ok(thM.votes.length === 2 && thM.votes.every((h) => h >= 42), `forum mobile (thread): like and dislike are 42px targets (got ${thM.votes})`);
+    ok(thM.acts.length >= 3 && thM.acts.every((h) => h >= 42), `forum mobile (thread): Reply, Quote and the post link are 42px targets (got ${thM.acts})`);
+    ok(thM.voteAbove, 'forum mobile (thread): the vote column lies ABOVE the post on a phone, never in a gutter beside it');
+    ok(thM.taFont >= 16, `forum mobile (thread): the reply textarea is 16px so iOS does not zoom (got ${thM.taFont}px)`);
+    ok(thM.send >= 42 && thM.sendRight, `forum mobile (thread): Post reply is a 42px target on screen (got ${thM.send})`);
+
+    /* the ask form */
+    await m.click('.oa-forum-crumbs a');
+    await m.waitForSelector('#oa-forum-askbtn', { timeout: 15000 });
+    await m.click('#oa-forum-askbtn');
+    await m.waitForSelector('#oa-forum-askform', { timeout: 8000 });
+    await m.waitForTimeout(200);
+    const askM = await m.evaluate(() => {
+      const f = (id) => parseFloat(getComputedStyle(document.getElementById(id)).fontSize);
+      const h = (id) => Math.round(document.getElementById(id).getBoundingClientRect().height);
+      return {
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        title: f('oa-forum-ask-title'), body: f('oa-forum-ask-body'), tag: f('oa-forum-tag-in'),
+        send: h('oa-forum-ask-send'),
+        cancel: Math.round(document.querySelector('.oa-forum-cancel').getBoundingClientRect().height),
+      };
+    });
+    eq(askM.overflowX, 0, 'forum mobile (ask): no sideways scroll');
+    ok(askM.title >= 16 && askM.body >= 16 && askM.tag >= 16,
+      `forum mobile (ask): the title, details and tag inputs are 16px (got ${askM.title}/${askM.body}/${askM.tag})`);
+    ok(askM.send >= 42 && askM.cancel >= 42, `forum mobile (ask): Post question and Cancel are 42px targets (got ${askM.send}/${askM.cancel})`);
+    eq(errors, [], 'forum mobile: no uncaught script error');
     await ctx.close();
   }
 }

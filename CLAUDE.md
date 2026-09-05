@@ -2538,6 +2538,34 @@ rule 13 in `_MOBILE-STANDARDS.md` is what its phone block holds to: a 16px
 textarea, 42px tabs, votes, actions and Post; the vote column stands beside
 a post on a desktop and lies above it on a phone.
 
+**The browser suite drives the page through a SIMULATOR, never the
+functions.** `_scraper/_fake-firebase.js` gained `forumSim`, a stand-in for
+the six callables over its own fake Firestore: join writes the marker and
+answers the handle and the rooms (the maintainer's address, verified, opens
+both; a seeded current profile opens the candidates room; `emailVerified` or
+a non-password provider opens the open room, the `verifiedToken` reading), a
+question writes the thread, its first post and the tag tally, a reply
+verifies its quote as a substring of the post as it stands and stores the
+copy `{n, by, text}`, a vote moves `up`/`down` by the delta under a FIXED
+64-hex id that never derives from the uid and carries the first post's net
+onto the thread head, an edit checks the author and the window, and
+`seedGuide` posts `OAForumGuide.text()` under Moderator, pinned, locked,
+tagged `about`. Every refusal has the SDK's shape, `{code:'functions/…',
+details:{reason}}`, with a reason `member.js` can answer with, and
+`seed.refuse` makes one callable refuse for the wording checks. It proves
+nothing about the functions, which the emulator test proves; what it lets
+`page-test.mjs` measure is what the page does with a real answer. The
+verification card's own branches (`callableFails` first, the canned receipt)
+are untouched. One consequence for every shim consumer: a snapshot's `data()`
+now answers a COPY, as the SDK's does, because the forum stamps `id` onto a
+thread it read and a check over `__fb.docs` would otherwise see the page's own
+bookkeeping as a field the simulator wrote. The forum's 390px block measures
+its LIST with `MOBILE_LIST_MEASURE`, the very function the `MOBILE_PAGES`
+loop runs, factored out of the loop so the standard is applied one way
+(`testMobileStandards` pins that exactly the two call it), and adds rule
+13's own numbers: the vote column above the post, the 16px textarea, the
+42px tabs, votes, actions and Post.
+
 **What is not solved, and is said rather than hidden.** A constant per-season
 handle lets a reader connect one person's posts across threads, and a detail
 here beside a detail there can identify someone in a population of a few
@@ -2565,11 +2593,19 @@ forum-emulator.mjs` (R7 and R10 against the real thing), and the forum
 block of `_scraper/page-test.mjs` (the gate for a signed-out, an
 unverified, a verified non-candidate, a seeded candidate and the
 maintainer; a question with two tags posted, read back, replied to with a
-quote and voted on through the shim's forum simulator; the leak check over
+quote, edited inside the window and voted up, down and withdrawn through the
+shim's forum simulator, with the counts and the thread head's score
+following; a hostile title and body rendered inert; the leak check over
 `#main`, which is where the forum's markup is, since the header's account
-chip prints the account's own name and address on every page by design; the
-archive view; and the 390px block for the list, one thread and the open
-compose).
+chip prints the account's own name and address on every page by design, and
+over the whole document for the uid and the profile id; the maintainer
+seeding the guide through `forumModerate` and posting under a drawn handle;
+the archive view asking for no votes; and the 390px block for the list, one
+thread and the open compose). `testForum` also pins the simulator (the six
+names and only those, the refusal shape, the fixed vote id, the reasons it
+answers with) and the browser block (every reader driven, the leak needles,
+the shared measure), so a block deleted or a reader dropped fails the
+build.
 
 ## What "immediate" costs, and where the waiting used to be
 
