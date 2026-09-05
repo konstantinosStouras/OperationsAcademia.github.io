@@ -220,7 +220,8 @@
                             <label class="oa-check"><input type="checkbox" id="t-deadlines">
                               <span><strong>Postings closing within 7 days.</strong> A reminder of
                               the postings matching the filters below whose final or suggested
-                              apply-by date falls in the next seven days, each named once.</span></label>
+                              apply-by date falls in the seven days after each digest, each named
+                              once (choose daily or weekly to see every closing date).</span></label>
                             <label class="oa-check"><input type="checkbox" id="t-candidates">
                               <span><strong>New job market candidates.</strong> One short note when
                               the year's profiles go live, then a note whenever a new candidate
@@ -285,6 +286,13 @@
                               <option value="weekly">A weekly digest</option>
                               <option value="monthly">A monthly digest</option>
                             </select>
+                            <!-- drawn by syncFormState() only while deadlines is ticked AND the
+                                 frequency is monthly: the reminder covers the seven days after
+                                 each digest, and a digest every four weeks sees one week in four -->
+                            <p class="oa-hint" id="a-freq-note" hidden>A monthly digest names only
+                              the postings closing in the seven days after it goes out, so a
+                              closing date in the other three weeks is not announced. Choose daily
+                              or weekly to see every closing date.</p>
                           </div>
                           <div class="oa-field">
                             <label for="a-email">Send to</label>

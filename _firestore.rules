@@ -236,7 +236,8 @@ service cloud.firestore {
       /* `stats` is written by the Admin SDK alone (_scraper/build-candidate-
          stats.mjs): how often the profile's card was opened on the site and
          its CV clicked, shown to the owner on their own edit page and to
-         nobody else. The owner may CARRY it — an update sends the merged
+         the maintainer (the Admin area's inbox card), and to nobody else.
+         The owner may CARRY it — an update sends the merged
          document back, so a rule refusing the key would freeze the profile
          against its own owner the moment the first count landed (the
          sync-user-directory trap) — but never write it, change it or drop

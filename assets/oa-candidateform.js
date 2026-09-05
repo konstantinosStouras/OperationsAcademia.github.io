@@ -101,7 +101,9 @@
   function say(msg, kind) {
     var m = $('oa-msg');
     if (!m) return;
-    m.textContent = msg || '';
+    // a Node for the one message that carries a link; text stays textContent
+    if (msg && msg.nodeType) { m.textContent = ''; m.appendChild(msg); }
+    else m.textContent = msg || '';
     m.className = 'oa-form-msg' + (kind ? ' is-' + kind : '');
   }
 
@@ -662,7 +664,7 @@
         var st = v && v.stats && typeof v.stats === 'object' ? v.stats : null;
 
         box.innerHTML = '';
-        box.appendChild(line('These figures are private: only you can see them.',
+        box.appendChild(line('These figures are private: only you and the site maintainer can see them.',
           'Your profile on the site.'));
 
         if (held && !st) {
@@ -928,16 +930,41 @@
         if (window.OAAccounts && OAAccounts.setCount) OAAccounts.setCount('cands', snap.size);
         var season = jobMarketYears().current;
         var found = '', foundAt = '';
+        // …and the newest profile of ANY season, for the message below
+        var older = '', olderAt = '', olderYear = 0;
         snap.forEach(function (d) {
           var v = d.data() || {};
-          if (Number(v.year) !== season) return;
-          // several (a pre-rule duplicate): open the newest, the one the
-          // build's collapse keeps
           var at = v.createdAt && v.createdAt.toDate
             ? v.createdAt.toDate().toISOString() : String(v.createdAt || '');
+          if (Number(v.year) !== season) {
+            if (!older || at >= olderAt) { older = d.id; olderAt = at; olderYear = Number(v.year) || 0; }
+            return;
+          }
+          // several (a pre-rule duplicate): open the newest, the one the
+          // build's collapse keeps
           if (!found || at >= foundAt) { found = d.id; foundAt = at; }
         });
-        if (!found) return;
+        if (!found) {
+          /* A profile from a PAST season is not the one this form is for —
+             one profile per market year — but the account menu's row counted
+             it, and a blank form that mentioned no profile would read as the
+             row lying. Name it, with a way to open it; the form below stays
+             the way to file for the season under way. */
+          if (older) {
+            var msg = document.createElement('span');
+            msg.appendChild(document.createTextNode('You have a profile from ' +
+              (olderYear ? 'the ' + (olderYear - 1) + '\u2013' + olderYear + ' job market' :
+                'a previous job market') + ': '));
+            var a = document.createElement('a');
+            a.href = 'post-a-candidate.html?edit=' + encodeURIComponent(older);
+            a.textContent = 'open it';
+            msg.appendChild(a);
+            msg.appendChild(document.createTextNode(', or file one for the ' + (season - 1) +
+              '\u2013' + season + ' market below.'));
+            say(msg);
+          }
+          return;
+        }
         say('You already have a profile for the ' + (season - 1) + '–' + season +
             ' job market — opening it for editing. One profile per market year.');
         location.replace('post-a-candidate.html?edit=' + encodeURIComponent(found));

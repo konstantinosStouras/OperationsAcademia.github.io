@@ -545,10 +545,26 @@ async function selftest() {
     'the window end is today plus the shared constant');
   ok(/coveredUntil: a\.lastDeadlineUntil \|\| ''/.test(mailerSrc),
     'and the alert is checked against the days after its own lastDeadlineUntil');
-  ok(/if \(wantsDeadlines\) idle\.lastDeadlineUntil = deadlineUntil;/.test(mailerSrc),
-    'an idle run covers the window it checked and found empty');
-  ok(/if \(wantsDeadlines\) patch\.lastDeadlineUntil = deadlineUntil;/.test(mailerSrc),
-    'a delivered digest covers the window it carried');
+  ok(/if \(wantsDeadlines && jobsOk\) idle\.lastDeadlineUntil = deadlineUntil;/.test(mailerSrc),
+    'an idle run covers the window it checked and found empty — only when the jobs file was read');
+  ok(/if \(wantsDeadlines && jobsOk\) patch\.lastDeadlineUntil = deadlineUntil;/.test(mailerSrc),
+    'a delivered digest covers the window it carried — only when the jobs file was read');
+  /* AN UNREAD JOBS FILE IS NOT AN EMPTY WINDOW. The jobs read falls back to []
+     on failure (the safe direction for the jobs and candidates marks, which
+     move only behind a delivery), and with no rows the deadlines topic finds
+     nothing and takes the idle branch — the one branch that moves a mark
+     without a send. Unguarded, every closing date in that week would be
+     stamped covered without having been looked at. So the read records
+     whether it succeeded and BOTH stamps carry the guard. */
+  ok(/let jobsOk = true;/.test(mailerSrc) &&
+     /\.catch\(\(\) => \{ jobsOk = false; return \[\]; \}\)/.test(mailerSrc),
+    'the jobs read remembers whether it succeeded, apart from what it held');
+  // a literal dot: the pins above write `idle\.` and cannot match themselves
+  ok((mailerSrc.match(/\b(idle|patch)\.lastDeadlineUntil = deadlineUntil;/g) || []).length === 2 &&
+     (mailerSrc.match(/wantsDeadlines && jobsOk\) (idle|patch)\.lastDeadlineUntil = deadlineUntil;/g) || []).length === 2,
+    'every write of the deadlines mark is gated on the jobs file having been read');
+  ok(/::warning::data\/jobs\.json could not be read/.test(mailerSrc),
+    'and an unread jobs file is named in the run log');
   // the needle is assembled, not written, so this check cannot match itself
   ok(!new RegExp('lastDeadlineUntil = ' + '(now|today)\\b').test(mailerSrc),
     'a wall clock never becomes the deadlines mark — the mark is the window END');
@@ -780,8 +796,20 @@ async function main() {
     return;
   }
 
+  /* WHETHER THE JOBS FILE WAS READ, remembered apart from what it held. The
+     jobs and candidates marks move only behind a delivery, so an unreadable
+     file costs them nothing (nothing matched, nothing sent, nothing stamped).
+     The DEADLINES mark is the one mark that moves on the idle branch — a
+     window checked and found empty is covered — and an unreadable file reads
+     exactly like an empty window: every closing date in the week would be
+     stamped covered without ever having been looked at, and "delayed, never
+     lost" would be false for that week. So the two stamps below are gated on
+     this flag, and a run that could not read the file re-checks the same
+     window next time. */
+  let jobsOk = true;
   const [rows, changelog, candRowsAll, candMeta] = await Promise.all([
-    readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8').then(JSON.parse).catch(() => []),
+    readFile(path.join(HERE, '..', 'data', 'jobs.json'), 'utf8').then(JSON.parse)
+      .catch(() => { jobsOk = false; return []; }),
     readFile(path.join(HERE, '..', 'changelog.json'), 'utf8').then(JSON.parse)
       .catch(() => ({ updates: [] })),
     /* THE ONLY SOURCE OF CANDIDATES IS THE SERVED FILE. build-candidates.mjs
@@ -796,6 +824,10 @@ async function main() {
     readFile(path.join(HERE, '..', 'data', 'candidates-meta.json'), 'utf8')
       .then(JSON.parse).catch(() => null),
   ]);
+  if (!jobsOk) {
+    console.log('::warning::data/jobs.json could not be read — the deadlines ' +
+      'window is not marked covered this run, so the next run re-checks it');
+  }
   const cands = Array.isArray(candRowsAll) ? candRowsAll : [];
   const candRevealAt = (candMeta && candMeta.revealAt) || '';
   /* WHAT MAY BE SENT is not the whole change log. An entry the maintainer has
@@ -962,8 +994,9 @@ async function main() {
            ever move on a digest that actually carried postings. */
         if (!a.lastJobAt) idle.lastJobAt = since;
         // the deadlines window was checked and found empty: cover it, so the
-        // next run announces only what enters the window after today's end
-        if (wantsDeadlines) idle.lastDeadlineUntil = deadlineUntil;
+        // next run announces only what enters the window after today's end —
+        // but only if the file was READ; an unread file is not an empty window
+        if (wantsDeadlines && jobsOk) idle.lastDeadlineUntil = deadlineUntil;
         await doc.ref.update(idle);
       }
       continue;
@@ -1081,8 +1114,10 @@ async function main() {
       /* …and the deadlines window this digest covered — its END, whether or
          not a posting fell inside it (a checked-and-empty window is covered
          too). Never `now`: the mark is a day the window reached, and the next
-         window starts after it. */
-      if (wantsDeadlines) patch.lastDeadlineUntil = deadlineUntil;
+         window starts after it. Gated on the file having been read, like
+         the idle stamp: an updates-only digest over an unread jobs file has
+         covered nothing. */
+      if (wantsDeadlines && jobsOk) patch.lastDeadlineUntil = deadlineUntil;
       await doc.ref.update(patch);
 
       sent++;

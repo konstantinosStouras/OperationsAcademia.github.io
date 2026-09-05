@@ -1649,6 +1649,41 @@ for (const [name, expect] of [
     'editing round-trips a candidate\u2019s OWN research area into its box \u2014 ' +
     'a save must never silently drop an area the checkbox list does not offer');
 
+  /* -- a profile from a PAST season is named, not redirected to ------------
+
+     The menu's "My candidate profile" count has no year filter, so an account
+     whose only profile is last spring's is promised one; the form is the right
+     page for THIS season (one profile per market year), but a blank form that
+     mentioned nothing would read as the row lying. */
+  const lastSeed = { user: keptUser, docs: [{ path: 'candidateSubmissions/c8', data: {
+    uid: KEPT, status: 'queued', ref: 'OA-CAND-260220-YYYY',
+    first: 'Ada', last: 'Lovelace', affiliation: 'Test University',
+    position: 'PhD Candidate', year: marketYear() - 1,
+    createdAt: '2026-02-20T00:00:00.000Z',
+  } }] };
+  const last = await onSite('post-a-candidate.html', lastSeed, async (q) => {
+    await q.waitForFunction(() => /You have a profile from/.test(
+      (document.getElementById('oa-msg') || {}).textContent || ''), null, { timeout: 10000 });
+    return q.evaluate(() => ({
+      url: location.pathname + location.search,
+      heading: (document.querySelector('.v3-pa-hero .v3-h1') ||
+        document.querySelector('.title-heading h2') || {}).textContent || '',
+      msg: document.getElementById('oa-msg').textContent.replace(/\s+/g, ' ').trim(),
+      link: (document.querySelector('#oa-msg a') || {}).getAttribute('href'),
+      first: document.getElementById('f-first').value,
+      formShown: !document.getElementById('oa-cand-form').hidden,
+    }));
+  });
+  ok(!/\?edit=/.test(last.url), 'last season: the account is NOT redirected to a past season\'s profile');
+  ok(last.heading.trim() !== 'Edit your profile' && last.first === '' && last.formShown,
+    'last season: …the create form for the season under way is what it gets');
+  const ly = marketYear() - 1;
+  ok(new RegExp('You have a profile from the ' + (ly - 1) + '\u2013' + ly + ' job market: open it, ' +
+     'or file one for the ' + (marketYear() - 1) + '\u2013' + marketYear() + ' market below\\.').test(last.msg),
+    'last season: …and the older profile is named above it, with its market year');
+  eq(last.link, 'post-a-candidate.html?edit=c8',
+    'last season: the message links straight to that profile');
+
   /* -- the candidate's PRIVATE view statistics (owner, 2026-09-04) ---------
 
      The edit page draws a panel from the `stats` map build-candidate-stats.mjs
@@ -1704,7 +1739,9 @@ for (const [name, expect] of [
   ok(/CV opened 3 times this season, 1 time in the last 7 days/.test(shownPanel.text),
     'and the CV clicks, singular where it is one');
   ok(shownPanel.text.includes('Updated ' + today), 'and when the count was last updated');
-  ok(/only you can see them/.test(shownPanel.text), 'and says the figures are private');
+  ok(/only you and the site maintainer can see them/.test(shownPanel.text),
+    'and says the figures are private — naming the maintainer, who sees them on the ' +
+    'Admin area inbox card, as the Privacy Policy does');
 
   const hostilePanel = await onSiteRouted('post-a-candidate.html?edit=c9',
     { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
@@ -7904,6 +7941,28 @@ for (const w of [320, 360, 390, 430]) {
   ok(/One posting matching your alert closes in the next seven days/.test(narrowed) &&
      !/closing-review University/.test(narrowed),
     'closing: a filter narrows the reminder the way it narrows new postings');
+
+  // a MONTHLY digest sees one week in four: the hint under the frequency
+  // appears for exactly that pair, and goes with either half of it
+  await q.selectOption('#a-freq', 'monthly');
+  await q.waitForTimeout(100);
+  const noteOn = await q.$eval('#a-freq-note', (n) => ({ hidden: n.hidden,
+    text: n.textContent.replace(/\s+/g, ' ').trim() }));
+  ok(!noteOn.hidden && /seven days after it goes out/.test(noteOn.text) &&
+     /daily or weekly/.test(noteOn.text),
+    'closing: deadlines ticked + monthly draws the hint saying what a monthly digest misses');
+  await q.selectOption('#a-freq', 'weekly');
+  await q.waitForTimeout(100);
+  ok(await q.$eval('#a-freq-note', (n) => n.hidden),
+    'closing: …weekly puts it away (a week\'s cadence covers every closing date)');
+  await q.selectOption('#a-freq', 'monthly');
+  await q.uncheck('#t-deadlines');
+  await q.waitForTimeout(100);
+  ok(await q.$eval('#a-freq-note', (n) => n.hidden),
+    'closing: …and so does unticking deadlines, whatever the frequency');
+  await q.check('#t-deadlines');
+  await q.selectOption('#a-freq', 'daily');
+  await q.waitForTimeout(100);
 
   // …and it saves, with exactly that topic, through the shim
   await q.fill('#a-name', 'Closing soon');

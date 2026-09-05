@@ -188,6 +188,10 @@
     // the filters choose the postings for BOTH paper topics: the new ones
     // announced, and the ones reminded of before they close
     show($('a-filters'), $('t-jobs').checked || $('t-deadlines').checked);
+    /* the reminder covers the seven days after each digest, and a monthly
+       digest therefore sees one week in four: say so under the frequency,
+       where the choice is being made, rather than promise every closing date */
+    show($('a-freq-note'), $('t-deadlines').checked && $('a-freq').value === 'monthly');
     $('oa-form-legend').textContent = editingId ? 'Edit this alert' : 'Create an alert';
     $('a-save').textContent = editingId ? 'Save changes' : 'Create alert';
     show($('a-cancel'), !!editingId);
@@ -661,7 +665,7 @@
     form.addEventListener('input', renderPreview);
     form.addEventListener('change', function (e) {
       if (e.target === $('t-jobs') || e.target === $('t-updates') ||
-          e.target === $('t-deadlines')) syncFormState();
+          e.target === $('t-deadlines') || e.target === $('a-freq')) syncFormState();
       else renderPreview();
     });
 

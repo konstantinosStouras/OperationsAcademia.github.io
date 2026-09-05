@@ -73,8 +73,16 @@ export const DAY_CAP = 120;
     isAdmin() in _firestore.rules. */
 export const ADMIN_EMAILS = ['kstouras@gmail.com'];
 
-/** How many session documents one run reads at most (the analytics build's
-    own ceiling). Hitting it is reported, never silent. */
+/** How many session documents one PAGE of the read holds — a batch size,
+    never a ceiling. This builder re-reads the WHOLE season on every run
+    (build-analytics.mjs reads only since its last day, which is why its
+    identical-looking `limit()` is safe there), so a single capped read
+    ordered ascending would keep the season's first N sessions and drop every
+    later one: from the day a season crossed it, no new session would ever be
+    counted and every candidate's figures would freeze, the "last 7 days"
+    reading 0 for everybody. Measured at ~150 sessions a day, that is ~55,000
+    a season, so the freeze would have landed in the spring. The read pages
+    with startAfter until a page comes back short. */
 export const READ_CAP = 50000;
 
 export const isoDay = (ms) => {
@@ -326,13 +334,20 @@ async function main() {
     return;
   }
 
-  const snap = await db.collection('usageSessions')
-    .orderBy('start').where('start', '>=', from).limit(READ_CAP).get();
-  if (snap.size >= READ_CAP) {
-    warn(`usageSessions: the read hit its ${READ_CAP}-document ceiling — the season's ` +
-         'earliest sessions may be missing from the totals');
+  // paged until exhausted: a page that comes back short is the last one
+  const sessions = [];
+  let last = null;
+  let pages = 0;
+  for (;;) {
+    let q = db.collection('usageSessions').orderBy('start').where('start', '>=', from);
+    if (last) q = q.startAfter(last);
+    const snap = await q.limit(READ_CAP).get();
+    pages++;
+    for (const d of snap.docs) sessions.push(d.data() || {});
+    if (snap.size < READ_CAP) break;
+    last = snap.docs[snap.docs.length - 1];
   }
-  const sessions = snap.docs.map((d) => d.data() || {});
+  if (pages > 1) log(`usageSessions: read in ${pages} pages of up to ${READ_CAP}`);
   const counts = tally(sessions, cards, { from });
   log(`read ${sessions.length} session(s)`);
 

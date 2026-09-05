@@ -103,9 +103,11 @@
     var st = d && d.stats && typeof d.stats === 'object' ? d.stats : null;
     if (!st) return '';
     var n = function (v) { var x = Number(v); return Number.isFinite(x) && x >= 0 ? Math.floor(x) : 0; };
+    // written out, as the candidate's own panel and account.html write it
+    var times = function (k) { return k + (k === 1 ? ' time' : ' times'); };
     var upd = String(st.updatedAt || '').slice(0, 10);
-    return '<p class="oa-hint">Opened ' + n(st.opens) + ' time(s) and its CV clicked ' +
-      n(st.cvClicks) + ' time(s) this season' +
+    return '<p class="oa-hint">Opened ' + times(n(st.opens)) + ' and its CV clicked ' +
+      times(n(st.cvClicks)) + ' this season' +
       (/^\d{4}-\d{2}-\d{2}$/.test(upd) ? ' (updated ' + esc(upd) + ')' : '') + '.</p>';
   }
 

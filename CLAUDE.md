@@ -2023,7 +2023,26 @@ enters the window, a weekly one sees the week's worth, and a run that could
 not send (no mark written) re-checks the same days rather than losing them.
 A checked-and-EMPTY window is covered too — a delivered digest with no
 closing rows, or an idle run, still writes the window end — because what the
-mark records is what was looked at, not what was found.
+mark records is what was looked at, not what was found. **And it is written
+ONLY when `data/jobs.json` was actually read** (`jobsOk` in the mailer): the
+read falls back to `[]` on failure, which is the safe direction for the jobs
+and candidates marks (they move only behind a delivery) and the WRONG one for
+this mark, the one that moves on the idle branch — an unread file reads
+exactly like an empty window, and every closing date in the week would have
+been stamped covered without being looked at. Unread, the mark stays where it
+was and the next run re-checks the same days; the run says so.
+
+**A MONTHLY alert sees one week in four**, and the page says so rather than
+promising every closing date. `isDue` makes a monthly digest due 28 days after
+the last one, and the window is always the seven days from the run, so a
+closing date in days 8 to 27 after a monthly digest is in no window it is
+ever checked against. The tick box says "the seven days after each digest
+(choose daily or weekly to see every closing date)", the FAQ says the same,
+and `syncFormState` draws a hint under the frequency select (`#a-freq-note`)
+while deadlines is ticked and the frequency is monthly — where the choice is
+being made. Widening a monthly alert's window to 28 days was not done: the
+reminder is a "closing this week" list, and a month of deadlines under that
+heading would be a different message.
 
 **The cost, stated rather than hidden**: a posting that ENTERS the window late
 — added, or given a date, after the window was covered — is not announced by
@@ -4518,7 +4537,17 @@ untouched; the phone sheet follows the same rule.
   read the documents, links straight to `?edit=<newest profile>` and reads
   "Your candidate profile"; newest overall is the current season's where one
   exists, because `createdAt` is set once and a new profile takes the season
-  under way.
+  under way. **A profile from a PAST season is not redirected to** — one
+  profile per market year means the form is the right page for this season —
+  **but it is named**: the count has no year filter, so an account whose only
+  profile is last spring's sees "My candidate profile 1", and a blank create
+  form that mentioned no profile would read as the row lying (every candidate
+  who filed in spring 2026 was in that state on 2026-09-05). So when no
+  current-season profile is found and the snapshot holds older ones, the
+  newest of them is named above the form with a link to open it, and the form
+  below stays the way to file for the season under way. `say()` takes a DOM
+  node for it — the message carries a link, and `textContent` is what keeps
+  every other message inert.
 
 Tests: the rule-4 block of `testAccountCounts` in `_scraper/selftest.mjs`
 (both menus carry both rows born hidden, the painter reveals them under the
@@ -4527,7 +4556,8 @@ and the personal area correct the cache) and the "held rows" block in
 `_scraper/page-test.mjs` (three seeded accounts through the shim: neither row,
 My postings with its count, My candidate profile for a WITHDRAWN profile with
 its count, the phone sheet mirroring each, the not-known state withholding the
-poster's own row, and the personal area's card linking straight to the
+poster's own row, a last-season profile named above the create form with a
+link rather than redirected to or passed over, and the personal area's card linking straight to the
 profile).
 
 ## A same-day collapse is keyed on the ADVERTISEMENT, not just the day

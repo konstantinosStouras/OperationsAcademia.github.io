@@ -9867,6 +9867,20 @@ async function testCandidateProfilePolicy() {
     'oa-candidateform: an existing profile is looked up by the OWNER, not by name');
   ok(/location\.replace\('post-a-candidate\.html\?edit='/.test(form),
     'and found, the form reopens it for editing instead of creating a second');
+  /* A LAST-SEASON PROFILE IS NAMED, NOT REDIRECTED TO OR PASSED OVER: the
+     account menu's "My candidate profile" count has no year filter, so an
+     account whose only profile is last spring's is promised one, and a blank
+     create form that mentioned nothing would read as the row lying. */
+  ok(/if \(Number\(v\.year\) !== season\) \{[\s\S]{0,200}?older = d\.id;/.test(form),
+    'oa-candidateform: a profile from another season is remembered (the newest of them)');
+  ok(/You have a profile from /.test(form) && /'open it'/.test(form) &&
+     /\?edit=' \+ encodeURIComponent\(older\)/.test(form),
+    'and with no current-season profile it is named above the form, with a link to open it');
+  ok(/if \(msg && msg\.nodeType\) \{ m\.textContent = ''; m\.appendChild\(msg\); \}/.test(form) &&
+     /else m\.textContent = msg \|\| '';/.test(form),
+    'say() takes a DOM node for the one message that carries a link; text stays textContent');
+  ok(!/innerHTML/.test(form.slice(form.indexOf('function redirectToOwnProfile'),
+    form.indexOf('OAAccounts.onChange'))), 'and the message is built from nodes, never markup');
 
   /* the model backstop: one account, one market year, one row — whatever the
      names say (the detail the name key cannot see) */
@@ -11338,6 +11352,33 @@ async function testClosingSoonDigest() {
   const tick = alertsHtml.slice(alertsHtml.indexOf('id="t-deadlines"'), alertsHtml.indexOf('id="t-candidates"'));
   ok(tick.length > 50 && tick.length < 600 && !tick.includes('—') && !tick.includes('&mdash;'),
     'closing: the tick box copy carries no em-dash');
+
+  /* A MONTHLY ALERT SEES ONE WEEK IN FOUR, and the page says so rather than
+     promising every closing date: the window is the seven days from each run
+     and a monthly digest is due 28 days after the last, so days 8 to 27 are
+     in no window. Said on the tick box, under the frequency while the pair is
+     chosen, and in the FAQ. */
+  ok(/seven days after each digest, each named\s+once \(choose daily or weekly to see every closing date\)/.test(tick),
+    'closing: the tick box says the reminder covers the seven days AFTER EACH DIGEST');
+  ok(!/falls in the next seven days, each named once\./.test(alertsHtml),
+    'closing: …and no longer reads as a promise about every closing posting');
+  const freqNote = alertsHtml.slice(alertsHtml.indexOf('id="a-freq-note"'), alertsHtml.indexOf('id="a-email"'));
+  ok(freqNote.length > 100 && freqNote.length < 700 && /hidden/.test(freqNote.slice(0, 40)) &&
+     /one week|other three weeks/.test(freqNote) && !freqNote.includes('—') && !freqNote.includes('&mdash;'),
+    'closing: a hint under the frequency select, born hidden, says what a monthly digest misses, no em-dash');
+  ok(/show\(\$\('a-freq-note'\), \$\('t-deadlines'\)\.checked && \$\('a-freq'\)\.value === 'monthly'\);/.test(alertsJs),
+    'closing: syncFormState draws it only while deadlines is ticked AND the frequency is monthly');
+  ok(/e\.target === \$\('a-freq'\)\) syncFormState\(\);/.test(alertsJs),
+    'closing: …and a change of frequency re-syncs the form, so the hint follows the select');
+  ok(/seven days after each digest/.test(faq),
+    'closing: the FAQ says "after each digest" too');
+  ok(/one week in four/.test(claude), 'closing: CLAUDE.md records the monthly reading');
+
+  /* AN UNREAD JOBS FILE IS NOT AN EMPTY WINDOW: the mailer's own selftest
+     drives the guard; this pins that the mark is gated at all. */
+  ok(/if \(wantsDeadlines && jobsOk\) idle\.lastDeadlineUntil/.test(mailer) &&
+     /if \(wantsDeadlines && jobsOk\) patch\.lastDeadlineUntil/.test(mailer),
+    'closing: the mark is written only when data/jobs.json was actually read');
   const lede = alertsHtml.slice(alertsHtml.indexOf('Be told when something you care about'),
     alertsHtml.indexOf('oa-unsub-notice'));
   ok(lede.length > 100 && lede.length < 800 && !lede.includes('—') && !lede.includes('&mdash;'),
@@ -12408,8 +12449,20 @@ async function testCandidateStats() {
     'post-a-candidate.html carries the panel, born hidden (edit mode reveals it)');
   ok(/v\.stats/.test(await read('account.html')) && /its CV/.test(await read('account.html')),
     'the personal area’s candidate card carries the season totals');
-  ok(/function statsLine\(d\)/.test(await read('assets/oa-submissions.js')),
+  const inbox = await read('assets/oa-submissions.js');
+  ok(/function statsLine\(d\)/.test(inbox),
     'and the maintainer’s inbox card shows the same numbers');
+  ok(/times\(n\(st\.opens\)\)/.test(inbox) && /times\(n\(st\.cvClicks\)\)/.test(inbox) &&
+     !/time\(s\)/.test(inbox.slice(inbox.indexOf('function statsLine'), inbox.indexOf('function cardHtml'))),
+    '…written out ("1 time" / "3 times"), as the candidate’s own panel and account.html write them');
+  /* THE PANEL SAYS WHO SEES THE FIGURES, and the maintainer is one of them
+     (the inbox card above, and the admin read the rules grant): "only you"
+     was a privacy statement that was false, and the Privacy Policy already
+     said otherwise. The two must agree. */
+  ok(/only you and the site maintainer can see them/.test(panel),
+    'the panel names the maintainer among who can see the figures, as the Privacy Policy does');
+  ok(!/only you can see them/.test(form),
+    '…and never claims the candidate alone can');
 
   /* --- disclosed and announced ------------------------------------------- */
   const pp = await read('privacy-policy.html');
@@ -12418,6 +12471,8 @@ async function testCandidateStats() {
     'the Privacy Policy says the count exists and who sees it');
   const log = JSON.parse(await read('changelog.json'));
   const entry = log.updates.find((u) => u.id === 'candidate-profile-view-statistics');
+  ok(!!entry && /only you and the site maintainer can see them/.test(entry.summary),
+    'the change-log entry says the same about who sees them');
   ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate.html',
     'changelog.json announces it, dated, linking the profile page');
   ok(entry && !/—/.test(entry.title + entry.summary), 'with no em dash in the announcement');
