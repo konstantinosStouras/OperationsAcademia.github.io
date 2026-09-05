@@ -246,9 +246,16 @@ async function main() {
   const badTags = await call('forumPost', tokens.cand, { room: 'candidates', title: 'T', tags: ['a', 'b', 'c', 'd', 'e', 'f'], body: 'body text', acceptGuide: true });
   ok(status(badTags) === 'INVALID_ARGUMENT' && reason(badTags) === 'tags', 'six tags are refused');
   /* A TAG THE CURATED LIST DOES NOT OFFER IS STILL A TAG (owner, 2026-09-05:
-     "don't remove the possibility users use the tag rumour on a post"). The
-     maintainer posts it: the candidate is at two of its three threads for the
-     day by here, and the reply loop above has just set its gap. */
+     "don't remove the possibility users use the tag rumour on a post").
+     THE MAINTAINER POSTS IT, AND THE REASON IS THE GAP, not the thread
+     budget: the reply loop above resets lastPostAt on every handle and then
+     posts as the candidate, so a candidate thread here would be refused
+     resource-exhausted {reason:'gap'} within the 20 s window, while the
+     maintainer has not posted yet. The candidate's thread count is not the
+     constraint and never was: it stands at one of its three here (a refused
+     call increments nothing: noGuide dies on the guide check inside the
+     transaction and badTags on tagList before it opens), and `solo` further
+     down is its second. */
   const freeTag = await call('forumPost', tokens.adm, { room: 'candidates', title: 'A question with a free tag', tags: ['rumour'], body: 'A tag the curated list does not offer is still a tag, and the rules are what ask people not to trade in them.', acceptGuide: true });
   ok(!freeTag.error && freeTag.result.tid, 'a tag the curated list does not offer is still accepted', JSON.stringify(freeTag));
   const noRoom = await call('forumPost', tokens.cand, { room: 'lobby', body: 'x' });
