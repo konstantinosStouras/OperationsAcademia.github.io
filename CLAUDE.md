@@ -2162,6 +2162,53 @@ filed, a session Firebase will not let delete itself — and asserts it finishes
 reads rather than writes the order, asks for no password, and says when the
 sign-in goes.
 
+### …and then a NEW account could not be deleted either
+
+Owner, 2026-09-05, minutes after registering one: *"I registered a new user.
+Then immediately after tried to delete that user profile entirely. The website
+doesn't let me."* The panel said *"We could not read what this account has
+posted, so we cannot take it down"* and **disabled the button**, so there was
+nothing left on the page to press.
+
+**THE CAUSE IS THE TOKEN, AND THIS FILE ALREADY KNEW THE FACT.** `isOwner()`
+goes through `verified()`, which reads `email_verified` off the ID TOKEN, and
+the SDK caches that token for up to an hour — the same fact gate 4 below turns
+the other way round, that deleting an Auth account does not invalidate a token
+already minted. So an account that confirmed its address minutes ago goes on
+presenting the claims it had BEFORE it did, and every read of its own data is
+refused: its postings, its alerts, its profile. `confirmVerified` states the
+rule on the LIFT (*reload() updates the user object; the rules read the token*,
+with `getIdToken(true)` beside it and a comment saying the second call is not
+optional) and a session RESTORED on a later page load lifts nothing, so nothing
+refreshed it. **`OAAccounts.survey()` re-mints it first now** (`freshClaims`),
+best effort and deliberately: a refresh that fails changes nothing, and the read
+behind it reports for itself.
+
+**AND THE PANEL NO LONGER DEAD-ENDS ON A READ IT WAS REFUSED.** The survey is
+how the panel NAMES what will go; it is not what does the removal. The removal
+is the sweep's, with the Admin SDK, over an account it enumerates server-side
+and cannot be refused. So a survey the browser could not read is a list it
+cannot print, never a deletion it must refuse: **the typed word is the only gate
+on the button**, the note in the list's place says the list is missing and that
+everything goes regardless, and `describe()` stops saying *"your account holds
+nothing you have posted"*, which this page has no way of knowing. The work order
+is filed exactly as before, which is the whole of what the sweep needs.
+
+**THE MERGE KEEPS THE OPPOSITE RULE, and what separates them is what finishes
+them.** `runMerge` still refuses when the postings could not be listed, because
+nothing but that browser finishes a merge: what it cannot enumerate it cannot
+move, and its last step removes the only sign-in that could ever reach it again.
+A deletion has a sweep behind it. One survey, two flows, opposite answers, for
+that one reason.
+
+Tests: the pins in `testAccountDeletion` (the token re-minted before the survey,
+the typed word as the only gate, and `describe()` claiming no empty account it
+cannot see) and the block in `page-test.mjs` that drives the owner's own case in
+a real browser — every read of the account refused, through the shim's
+`refuseReads`, which is its stand-in for a stale token: the note drawn, the
+button offered, the deletion finished, the work order filed, and the forced
+token ahead of the survey's first query.
+
 ### The four gates on deleting a submission's document
 
 1. **The build has run SINCE the withdrawal.** `data/jobs-meta.json`'s
@@ -2289,8 +2336,8 @@ the dates and the counts.
 the remembered hint, because a control that deletes an account must not be
 painted for a reader the SDK then says is not there. It names each posting and
 profile that is about to come off the site, asks for the word DELETE to be
-typed, and refuses outright when the postings could not be LISTED — the merge's
-own *refuse rather than strand*, for the same reason.
+typed. A survey it could not READ leaves the list empty and a note in its
+place; it never withholds the button (see the section above).
 
 `admin-area.html`'s roster gains **Delete** on every row, and **Cancel** while
 one is queued. **The control is withheld where the queue could not be read** —

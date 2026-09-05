@@ -5494,9 +5494,22 @@ async function testAccountDeletion() {
     'the survey is counted the way the panel names it');
   ok(AD.summarise({ postingsOk: false }).postingsOk === false &&
      AD.summarise({}).postingsOk === true,
-    'and a survey that could not read the postings says so — what cannot be ' +
-    'listed cannot be taken down, and the last step removes the only sign-in ' +
-    'that could ever reach it again');
+    'and a survey that could not be read says so: it decides what the panel ' +
+    'can NAME, and never whether the account may go — the sweep enumerates ' +
+    'the account with the Admin SDK and cannot be refused');
+
+  /* A SURVEY IT COULD NOT READ IS A LIST IT CANNOT PRINT, NOT A DELETION IT
+     MUST REFUSE (owner, 2026-09-05, on an account registered minutes earlier:
+     "I registered a new user. Then immediately after tried to delete that user
+     profile entirely. The website doesn't let me"). The panel reported that it
+     could not read what the account had posted and DISABLED the button, which
+     left no way past it at all. */
+  const blind = AD.describe({ postingsOk: false });
+  ok(!/nothing you have posted/.test(blind) && /everything on it/.test(blind),
+    'the sentence above the button does not claim an empty account when ' +
+    'nothing could be read: this page does not know that, and says what is ' +
+    'true of every deletion instead');
+  ok(!/—/.test(blind), '…in the house style, with no em dash');
 
   const sentence = AD.describe(many);
   ok(/2 job postings/.test(sentence) && /off the site/.test(sentence),
@@ -5582,6 +5595,27 @@ async function testAccountDeletion() {
   ok(/reauth: false/.test(accounts) && /quiet \? u\['delete'\]\(\)/.test(accounts),
     'oa-accounts.js offers the quiet delete, and keeps the merge asking — the ' +
     'merge has no sweep behind it to finish what a refusal leaves');
+
+  ok(/go\.disabled = !matchesConfirmation\(word\.value\);/.test(mod),
+    'THE TYPED WORD IS THE ONLY GATE ON THE BUTTON. It also required a readable ' +
+    'survey, and that was a dead end rather than a safeguard: what the browser ' +
+    'could not list, the sweep enumerates server-side');
+
+  /* …AND THE READ THAT FAILED IS FIXED AT ITS CAUSE, not only survived. The
+     rules read `email_verified` off the ID TOKEN, which the SDK caches for up
+     to an hour, so an account that confirmed its address minutes ago presents
+     the claims it had before it did and is refused every read of its own data
+     — a permission-denied wearing the clothes of a broken page. This is the
+     rule confirmVerified() already states on the lift; a session restored on a
+     later page load lifts nothing, so nothing refreshed it. Read with the
+     comments stripped: this file explains the trap in the same words. */
+  const acctSrc = stripJs(accounts);
+  ok(/function freshClaims/.test(acctSrc) &&
+     /getIdToken\(true\)/.test(acctSrc.slice(acctSrc.indexOf('function freshClaims'),
+       acctSrc.indexOf('window.OAAccounts'))),
+    'the survey has a way to re-mint the token the rules read');
+  ok(/freshClaims\(u\)\.then\(function \(\) \{ return surveyAccount\(fb\); \}\)/.test(acctSrc),
+    '…and it uses it, before the account is surveyed at all');
 
   ok(/notDeployed\(err\)/.test(selfSrc) && /NOT_DEPLOYED/.test(mod),
     'a permission-denied says what to press and to reload first, rather than ' +
