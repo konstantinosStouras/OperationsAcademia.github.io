@@ -5575,6 +5575,25 @@ async function testAccountDeletion() {
     'event and never from the remembered hint');
   ok(/assets\/oa-account-delete\.js/.test(acctPage),
     'and the page loads the module that draws it');
+
+  /* THE ONE ACCOUNT IT IS WITHHELD FROM (owner, 2026-09-05). The roster
+     already refuses the maintainer their own row; the personal area was the
+     way round that, and deleting the account that runs the site takes the
+     Admin area, the review queues and the roster with it. */
+  ok(/id="pa-delete-admin"[^>]*hidden/.test(acctPage),
+    'the personal area carries the maintainer\'s note, born hidden like the ' +
+    'button it replaces');
+  ok(/isMaintainer\(\)/.test(mod) && /if \(isMaintainer\(\)\) return;/.test(mod),
+    'and the module refuses to open the panel for them, not merely to draw the ' +
+    'button — a hidden control that still works on a keyboard is not a guard');
+  ok(/show\(\$\('pa-delete-open'\), !!user && !admin\)/.test(mod) &&
+     /show\(\$\('pa-delete-admin'\), admin\)/.test(mod),
+    '…and they are offered the reason in its place');
+  ok(/guard against an accident and not an authorisation/i.test(
+       await readFile(path.join(root, 'assets', 'oa-account-delete.js'), 'utf8')),
+    '…said plainly in the file, because it is one: the rules still let an owner ' +
+    'file their own order, and isAdmin() is keyed on an address rather than on ' +
+    'an account');
   ok(!/oa-account-delete\.js/.test(stripHtml(await readFile(path.join(root, 'jobs.html'), 'utf8'))),
     'while a page that has no account panel does not pay for it');
 
