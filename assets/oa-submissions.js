@@ -96,6 +96,19 @@
     return d.toISOString().slice(0, 10);
   }
 
+  /** The profile's own view figures, where build-candidate-stats.mjs has
+      written them (the `stats` map on the document): the candidate sees the
+      same numbers on their edit page. Numbers only, and only when present. */
+  function statsLine(d) {
+    var st = d && d.stats && typeof d.stats === 'object' ? d.stats : null;
+    if (!st) return '';
+    var n = function (v) { var x = Number(v); return Number.isFinite(x) && x >= 0 ? Math.floor(x) : 0; };
+    var upd = String(st.updatedAt || '').slice(0, 10);
+    return '<p class="oa-hint">Opened ' + n(st.opens) + ' time(s) and its CV clicked ' +
+      n(st.cvClicks) + ' time(s) this season' +
+      (/^\d{4}-\d{2}-\d{2}$/.test(upd) ? ' (updated ' + esc(upd) + ')' : '') + '.</p>';
+  }
+
   function cardHtml(kind, id, d, revealAt) {
     var href = safeHref(kind.link(d));
     /* Held only while the reveal date is still AHEAD — the same test
@@ -125,6 +138,7 @@
         ? '<p class="oa-hint">Held until <strong>' + esc(revealAt) + '</strong> — profiles ' +
           'appear all at once on the day, so this one is not on the site yet.</p>'
         : '') +
+      statsLine(d) +
       '<p class="oa-rv-actions">' +
         '<a class="button blue" href="' + esc(kind.editPath + encodeURIComponent(id)) +
           '">Open &amp; correct</a> ' +

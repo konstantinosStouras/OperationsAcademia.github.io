@@ -3128,6 +3128,90 @@ to sign anybody in — and it can only ever reveal what is already in a public
 served file, which is the argument `OAJobEdit.__setPermissionsForTest` is
 written under.
 
+## A candidate sees how often their OWN profile was opened, and nobody else does
+
+Owner, 2026-09-04: each candidate may see how many times their profile card
+was opened on the site and how many times its CV link was clicked, this season
+and in the last 7 days, computed from the usage record the site already keeps
+and shown to that candidate alone.
+
+    assets/oa-usage.js                    a click inside a card now says WHICH card (c) and whether it OPENED it (o)
+    _scraper/build-candidate-stats.mjs    tally the season per profile, stamp it onto the document (pure core + Admin SDK)
+    .github/workflows/oa-analytics.yml    runs it daily as a second step, after the analytics build
+    assets/oa-candidateform.js            the "Your profile on the site" panel, in edit mode only
+    account.html / assets/oa-submissions.js   the season totals on the personal-area card and the maintainer's inbox card
+
+**The attribution rule is in the record, not guessed afterwards.** The list
+engine gives every card the element id `job-<row id>` (candidates included),
+so `oa-usage.js` carries that id on any click that lands inside a card as `c`,
+and sets `o: 1` when the click OPENED the card: the head button, on a card the
+reader may read (never the blurred locked one, whose press only offers the
+sign-in box), and not already expanded (the same button closes it). It reads
+that state in the capture phase, before the engine's own handler flips it. A
+CV click is an `a` whose href IS the profile's `cvUrl`, or a link inside the
+card whose label reads CV. Both ride inside the `clicks` list the rules already
+bound at 400 small maps, so **no rules change was needed for the record** and
+no new top-level field joined the session document.
+
+**Which card is theirs is decided the way the site decided it.**
+`cardsFor()` derives every live document's id through the model,
+`rowFromCandidateSubmission` and `assignCandidateIds` keyed on the document id,
+exactly as `build-candidates.mjs` does, so two people sharing a name in one
+season take the same `-2` here as on the page. And the SERVED file is asked
+first, by `ref`, the key that identifies a submission rather than a name and a
+year (the `matchServed` lesson). A card the served file does not carry was
+never on the site, so nothing is counted for it; a derived id the served file
+holds under ANOTHER submission's ref is "not sure", which means count nothing.
+That is also what makes the reveal gate honest: before the reveal day the
+served file is empty, nothing is counted, and the owner's panel says the
+profile is not public yet rather than showing a zero that reads as "nobody is
+interested".
+
+**Whose clicks do not count.** Sessions filed under the profile's own account
+(its `uid`, and the `mergedFrom` uid) and the maintainer's, by the admin
+address a signed-in session carries (`ADMIN_EMAILS`, pinned to `isAdmin()` in
+the rules). Anonymous sessions count: a reader who has not signed in still
+opened the card. The window is the season, from `marketStart(now)`, capped at
+the analytics build's own 50,000-document read and reported when hit; the
+per-day map keeps the newest 120 days (`DAY_CAP`), the totals are not capped.
+
+**Why it lives on the candidate's own document.** The owner can already read
+that one document and nobody else can, so a bounded `stats` map there
+(`{opens, cvClicks, days: {YYYY-MM-DD: [opens, cv]}, updatedAt}`) needs no new
+collection, no new read rule and no served file: nothing under `data/`, which
+Pages hands to anyone who asks, and these figures are one person's. The rules
+let an owner CARRY the map and never write it: `statsUntouched()` requires the
+merged document's `stats` to equal the stored one on the owner's
+correct-and-withdraw update, and a new profile may not arrive with one. That
+is the sync-user-directory trap answered rather than avoided: an Admin-SDK
+key on a document whose owner update sends the merged document back must be
+allowed through unchanged, or the first count would freeze the profile against
+its own owner. `candidateSubmissions` still has no `keys().hasOnly()`, which
+the selftest pins beside the new function.
+
+**A stamp lands only on a document the build has marked `published`.**
+`publishOnCandidateChange` rings the build on the client-left states (queued,
+withdrawn, hidden) and ignores that one, so a daily bookkeeping write rings
+nothing; a profile mid-edit is counted on the next run. The step is
+`continue-on-error` in `oa-analytics.yml`, so a failure here never holds the
+analytics figures back from their commit. It is NOT in `build-all.mjs`'s
+`BUILDERS`, because it writes no `data/` file; the "every builder has a
+caller" guard is satisfied by the workflow naming it.
+
+Disclosed in the Privacy Policy's usage paragraph and announced in
+`changelog.json`.
+
+Tests: `testCandidateStats` in `_scraper/selftest.mjs` (the builder's own
+offline suite driven in-process, the id through the model with the collision
+the site resolves, the owner and maintainer exclusions, what the usage record
+carries and that no new top-level field joined it, the rules both ways, the
+workflow step and its `continue-on-error`, that the builder writes no file,
+the surfaces, the disclosure and the announcement) and the candidate block in
+`_scraper/page-test.mjs` (the panel before the reveal naming the day, after it
+with the season and 7-day figures, a hostile value rendered as 0 and never as
+markup, and the personal-area card's totals), plus
+`node _scraper/build-candidate-stats.mjs --selftest`.
+
 ## The analytics page draws its own charts, because the old ones died in 2023
 
 `analytics.html` was four Google Sheets `pubchart` `<iframe>`s. The

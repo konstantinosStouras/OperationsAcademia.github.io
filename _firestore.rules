@@ -233,11 +233,26 @@ service cloud.firestore {
             && !('featured' in request.resource.data);
       }
 
+      /* `stats` is written by the Admin SDK alone (_scraper/build-candidate-
+         stats.mjs): how often the profile's card was opened on the site and
+         its CV clicked, shown to the owner on their own edit page and to
+         nobody else. The owner may CARRY it — an update sends the merged
+         document back, so a rule refusing the key would freeze the profile
+         against its own owner the moment the first count landed (the
+         sync-user-directory trap) — but never write it, change it or drop
+         it: a candidate cannot count their own clicks. */
+      function statsUntouched() {
+        return ('stats' in request.resource.data) == ('stats' in resource.data)
+            && (!('stats' in request.resource.data)
+                || request.resource.data.stats == resource.data.stats);
+      }
+
       allow create: if signedIn()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.status == 'queued'
                     && request.resource.data.createdAt == request.time
                     && candShapeOk()
+                    && !('stats' in request.resource.data)
                     && !('mergedFrom' in request.resource.data)
                     // 34 like jobSubmissions: the three affiliation parts
                     // (2026-08-24) took the form's worst-case key inventory
@@ -251,6 +266,7 @@ service cloud.firestore {
                     && request.resource.data.uid == resource.data.uid
                     && request.resource.data.status in ['queued', 'withdrawn']
                     && mergedFromUnchanged()
+                    && statsUntouched()
                     && candShapeOk();
 
       // account merge hand-over — same shape and reasoning as jobSubmissions

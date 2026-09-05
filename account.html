@@ -390,14 +390,20 @@
              is the one this season where there is one. */
           var candQ = db.collection(OAFB.col.candidateSubmissions).where('uid', '==', user.uid).get()
             .then(function (s) {
-              var newest = '', newestAt = '';
+              var newest = '', newestAt = '', stats = null;
               s.forEach(function (d) {
                 var v = d.data() || {};
                 var at = v.createdAt && v.createdAt.toDate
                   ? v.createdAt.toDate().toISOString() : String(v.createdAt || '');
-                if (!newest || at >= newestAt) { newest = d.id; newestAt = at; }
+                if (!newest || at >= newestAt) {
+                  newest = d.id; newestAt = at;
+                  /* the profile's own view figures, written onto its document
+                     by build-candidate-stats.mjs — the owner's to read and
+                     nobody else's; numbers only reach the card */
+                  stats = v.stats && typeof v.stats === 'object' ? v.stats : null;
+                }
               });
-              return { n: s.size, id: newest };
+              return { n: s.size, id: newest, stats: stats };
             }).catch(function () { return null; });
           var alertsQ = db.collection(OAFB.col.users).doc(user.uid)
             .collection(OAFB.col.alerts).get()
@@ -420,7 +426,16 @@
             candCard.querySelector('h3').innerHTML =
               '<span class="v3-ico" aria-hidden="true">&#127891;</span> Your candidate profile';
             var candP = candCard.querySelector('p');
-            if (candP) candP.textContent = 'Open, edit or take down the profile you have filed.';
+            if (candP) {
+              var st = r[3].stats;
+              var opens = st && Number.isFinite(Number(st.opens)) ? Number(st.opens) : null;
+              var cvs = st && Number.isFinite(Number(st.cvClicks)) ? Number(st.cvClicks) : null;
+              candP.textContent = 'Open, edit or take down the profile you have filed.' +
+                (opens !== null && cvs !== null
+                  ? ' This season it was opened ' + opens + (opens === 1 ? ' time' : ' times') +
+                    ' and its CV ' + cvs + (cvs === 1 ? ' time' : ' times') + '.'
+                  : '');
+            }
             /* straight to the profile — the editor the candidates page's own
                Edit button opens, keyed on the document the read just found */
             if (r[3].id) candCard.href = 'post-a-candidate.html?edit=' + encodeURIComponent(r[3].id);

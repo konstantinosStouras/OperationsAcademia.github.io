@@ -1649,6 +1649,85 @@ for (const [name, expect] of [
     'editing round-trips a candidate\u2019s OWN research area into its box \u2014 ' +
     'a save must never silently drop an area the checkbox list does not offer');
 
+  /* -- the candidate's PRIVATE view statistics (owner, 2026-09-04) ---------
+
+     The edit page draws a panel from the `stats` map build-candidate-stats.mjs
+     writes onto the candidate's own document. Two states, chosen by ROUTING
+     the reveal file rather than by the calendar, so this stays green on the
+     reveal day: before the reveal it says the profile is not public yet and
+     names the date; after it, the season and 7-day figures, with a hostile
+     value rendered as a number and never as markup. */
+  async function onSiteRouted(url, seed, reveal, drive) {
+    const q = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const errors = [];
+    q.on('pageerror', (e) => errors.push(e.message));
+    await q.addInitScript(`window.__FAKE_FB = ${JSON.stringify(seed)};`);
+    await q.route('**/firebasejs/**', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: SHIM }));
+    await q.route('**/data/candidates-reveal.json*', (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(reveal) }));
+    await q.goto(BASE + url, { waitUntil: 'domcontentloaded' });
+    const out = await drive(q);
+    eq(errors, [], `${url}: no uncaught script error`);
+    await q.close();
+    return out;
+  }
+  const readPanel = async (q) => {
+    await q.waitForFunction(() => {
+      const b = document.getElementById('oa-cand-stats');
+      return b && !b.hidden && b.textContent.trim().length > 0;
+    }, null, { timeout: 8000 });
+    return q.evaluate(() => {
+      const b = document.getElementById('oa-cand-stats');
+      return { text: b.textContent.replace(/\s+/g, ' ').trim(), imgs: b.querySelectorAll('img').length };
+    });
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  const longAgo = new Date(Date.now() - 40 * 86400000).toISOString().slice(0, 10);
+  const statsDoc = { ...oneSeed.docs[0].data, stats: {
+    opens: 12, cvClicks: 3, updatedAt: today + 'T04:30:00.000Z',
+    days: { [longAgo]: [10, 2], [today]: [2, 1] },
+  } };
+
+  const heldPanel = await onSiteRouted('post-a-candidate.html?edit=c9', oneSeed,
+    { revealAt: '2099-01-01' }, readPanel);
+  ok(/Your profile on the site/.test(heldPanel.text) && /not public yet/.test(heldPanel.text) &&
+     /2099-01-01/.test(heldPanel.text),
+    'before the reveal the panel says the profile is not public yet, and names the day');
+  ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
+
+  const shownPanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
+    { revealAt: '2000-01-01' }, readPanel);
+  ok(/Opened 12 times this season, 2 times in the last 7 days/.test(shownPanel.text),
+    'after the reveal it shows the season opens and the last 7 days (the 40-day-old day is out)');
+  ok(/CV opened 3 times this season, 1 time in the last 7 days/.test(shownPanel.text),
+    'and the CV clicks, singular where it is one');
+  ok(shownPanel.text.includes('Updated ' + today), 'and when the count was last updated');
+  ok(/only you can see them/.test(shownPanel.text), 'and says the figures are private');
+
+  const hostilePanel = await onSiteRouted('post-a-candidate.html?edit=c9',
+    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: { ...statsDoc, stats: {
+      opens: '<img src=x onerror=alert(1)>', cvClicks: -4, updatedAt: '<b>x</b>', days: 'nope',
+    } } }] },
+    { revealAt: '2000-01-01' }, readPanel);
+  eq(hostilePanel.imgs, 0, 'a hostile value in the stats map draws no element');
+  ok(/Opened 0 times this season, 0 times in the last 7 days/.test(hostilePanel.text) &&
+     /CV opened 0 times/.test(hostilePanel.text) && !/<b>/.test(hostilePanel.text),
+    'and every figure is a number, never text or markup');
+
+  /* \u2026and the personal area's candidate card carries the season totals */
+  const areaCard = await onSiteRouted('account.html',
+    { user: keptUser, docs: [{ path: 'candidateSubmissions/c9', data: statsDoc }] },
+    { revealAt: '2000-01-01' }, async (q) => {
+      await q.waitForFunction(() =>
+        /its CV/.test((document.getElementById('pa-cand-card') || {}).textContent || ''),
+        null, { timeout: 8000 });
+      return q.evaluate(() => document.getElementById('pa-cand-card').textContent.replace(/\s+/g, ' '));
+    });
+  ok(/opened 12 times and its CV 3 times/.test(areaCard),
+    'account.html: the candidate card says how often the profile and its CV were opened this season');
+
   /* -- report a placement on /v3/ ------------------------------------------ */
 
   const plac = await onSite('post-a-placement.html', { user: keptUser, docs: [] }, async (q) => {

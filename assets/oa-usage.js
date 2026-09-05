@@ -71,17 +71,47 @@
       .catch(function () { pending = false; /* rules not deployed / offline */ });
   }
 
+  /* WHICH CARD a click landed in, when it landed in one (2026-09-05). A card
+     on a list page is an `li.oa-card` whose id is the row's own
+     ('job-<row id>', candidates included — the engine names every card that
+     way), so the id is carried as `c` and the click can be attributed to
+     one posting or one profile afterwards. `o` is set when the click OPENED
+     the card: the head button, on a card the reader may read (not the
+     blurred locked one, whose press offers the sign-in box), and not already
+     expanded (the same button closes it). Read in the capture phase, so the
+     state is the one BEFORE the engine's own handler flips it. This is what
+     build-candidate-stats.mjs counts a candidate's own profile from; the
+     shape stays a small map in the same bounded list, so the rules need
+     nothing new. */
+  function cardOf(el) {
+    var li = el.closest && el.closest('li.oa-card');
+    if (!li || !li.id) return null;
+    var out = { c: String(li.id).slice(0, 120) };
+    if (el.classList.contains('oa-card-head') &&
+        !li.classList.contains('oa-card-locked') &&
+        el.getAttribute('aria-expanded') !== 'true') {
+      out.o = 1;
+    }
+    return out;
+  }
+
   // capture-phase, so a click that navigates away is still seen; only
   // interactive elements, short label only — never form VALUES
   document.addEventListener('click', function (e) {
     var el = e.target && e.target.closest && e.target.closest('a, button');
     if (!el) return;
-    clicks.push({
+    var rec = {
       t: Date.now(),
       k: el.tagName.toLowerCase(),
       x: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
       h: (el.getAttribute('href') || '').slice(0, 200)
-    });
+    };
+    var card = cardOf(el);
+    if (card) {
+      rec.c = card.c;
+      if (card.o) rec.o = 1;
+    }
+    clicks.push(rec);
     if (clicks.length > 400) clicks = clicks.slice(-400);
   }, true);
 

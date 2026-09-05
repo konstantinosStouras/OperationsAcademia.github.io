@@ -179,6 +179,12 @@
                     your e-mail address is published only if you ask us to show it.</p>
                   </div>
 
+                  <!-- the candidate's OWN figures: how often the profile was opened and
+                       its CV clicked, from their own document's `stats` map (written
+                       daily by _scraper/build-candidate-stats.mjs). Drawn in edit mode
+                       only, by oa-candidateform.js; shown to nobody else. -->
+                  <div class="oa-note" id="oa-cand-stats" hidden></div>
+
                   <!-- shown while Firebase has not been configured for this site yet -->
                   <div class="oa-note is-warn" id="oa-offline" hidden>
                     <p><strong>Submissions are not switched on yet.</strong> This preview of the

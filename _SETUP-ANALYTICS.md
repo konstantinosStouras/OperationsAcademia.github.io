@@ -347,3 +347,18 @@ node _scraper/build-analytics.mjs              # write data/analytics.json
 `master` only. Every source is independently gated: a missing credential is a
 line in the log, not a failure, and **an unreachable source changes nothing** —
 the committed file stands, because a half-written one is a blank dashboard.
+
+## A second step in the same workflow: each candidate's own view figures
+
+`oa-analytics.yml` runs `_scraper/build-candidate-stats.mjs` after the
+analytics build, with the same `FIREBASE_SERVICE_ACCOUNT` and no other
+credential. It reads the same `usageSessions` record from the season start and
+writes, onto each PUBLISHED candidate's own `candidateSubmissions` document, a
+bounded `stats` map: how often their profile card was opened and its CV link
+clicked, per UTC day (120 days kept) and in total. Nothing under `data/`: the
+figures are one person's and a served file is public. The candidate reads them
+on `post-a-candidate.html?edit=<id>` (their own document is the one they may
+read) and the maintainer on the Admin area's inbox card. The step is
+`continue-on-error`, so a failure there never holds the analytics commit back.
+Offline: `node _scraper/build-candidate-stats.mjs --selftest`; a real run needs
+the secret and is a clean no-op without it.

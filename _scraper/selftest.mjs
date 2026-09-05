@@ -12,6 +12,10 @@
 import { isMain } from './_main.mjs';
 import { BUILDERS, plan } from './build-all.mjs';
 import * as NETMAP from './build-netmap.mjs';
+import * as CSTATS from './build-candidate-stats.mjs';
+import {
+  CANDIDATE_PUBLIC_FIELDS, rowFromCandidateSubmission, assignCandidateIds,
+} from './candidates-model.mjs';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -12271,6 +12275,154 @@ async function testUniversityVisits() {
     'from an IP and says so nowhere is wrong whatever its rules allow');
 }
 
+/* ------------------------------- a candidate's PRIVATE view statistics
+
+   Owner, 2026-09-04: each candidate may see how often their own profile
+   card was opened on the site and how often its CV link was clicked, this
+   season and in the last 7 days, and nobody else may. Computed by
+   _scraper/build-candidate-stats.mjs from the site's own usage record and
+   written onto the candidate's OWN document, which is the one document the
+   rules already let them read — so nothing here reaches data/ and no new
+   read rule exists. What is pinned: the attribution rule the usage record
+   carries, the id derivation through the model, the owner exclusion, the
+   rules letting an owner CARRY the map but never write it, the caller, and
+   that nothing under data/ is written. */
+async function testCandidateStats() {
+  const root = path.join(HERE, '..');
+  const read = (rel) => readFile(path.join(root, ...rel.split('/')), 'utf8');
+
+  /* --- the pure core, driven by the builder's own offline suite ------------ */
+  ok(CSTATS.selftest(), 'build-candidate-stats.mjs passes its own offline selftest');
+
+  /* --- the id is the MODEL's, never a copy ------------------------------- */
+  const src = await read('_scraper/build-candidate-stats.mjs');
+  ok(/import \{ rowFromCandidateSubmission, assignCandidateIds \} from '\.\/candidates-model\.mjs'/.test(src),
+    'the builder derives a card id through the model functions build-candidates uses');
+  ok(!/\$\{row\.year\}-\$\{slug/.test(src) && !/function candidateId/.test(src),
+    'and carries no copy of candidateId — two derivations of one id disagree silently');
+  ok(/byRef\.get\(/.test(src),
+    'the served row is asked FIRST, by ref — the key that identifies a submission ' +
+    'rather than a name and a year (the matchServed lesson)');
+  ok(CANDIDATE_PUBLIC_FIELDS.includes('ref'),
+    'and the served candidate row carries that ref, so the join has a key');
+  // the SAME collision the site resolves: two documents, one name, one season
+  const NOW = new Date('2026-10-20T12:00:00Z');
+  const twoDocs = [
+    { id: 'b', data: { uid: 'u2', ref: 'R-B', first: 'Jane', last: 'Doe', affiliation: 'U',
+      position: 'PhD Candidate', year: 2027, createdAt: '2026-09-02T00:00:00Z' } },
+    { id: 'a', data: { uid: 'u1', ref: 'R-A', first: 'Jane', last: 'Doe', affiliation: 'U',
+      position: 'PhD Candidate', year: 2027, createdAt: '2026-09-01T00:00:00Z' } },
+  ];
+  const fresh = twoDocs.map((d) => ({ key: d.id, row: rowFromCandidateSubmission(d.data, { now: NOW }) }));
+  assignCandidateIds(fresh);
+  const siteIds = Object.fromEntries(fresh.map((f) => [f.key, f.row.id]));
+  const cards = CSTATS.cardsFor(twoDocs, Object.values(siteIds).map((id) => ({ id })), { now: NOW });
+  eq([[...cards.get('a').ids], [...cards.get('b').ids]], [[siteIds.a], [siteIds.b]],
+    'a name collision lands on the SAME -2 the site gives it');
+
+  /* --- the owner's own clicks are never counted -------------------------- */
+  const card = cards.get('a');
+  const at = Date.parse('2026-10-10T12:00:00Z');
+  const own = CSTATS.tally([
+    { uid: 'u1', clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
+    { uid: 'anon:x', clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
+    { uid: 'm', email: 'kstouras@gmail.com',
+      clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
+  ], cards, { from: 0 });
+  eq(own.get('a').opens, 1,
+    'of three opens — the candidate’s own, an anonymous reader’s, the maintainer’s — ' +
+    'exactly the anonymous one counts');
+  ok(card.uids.has('u1'), 'the exclusion is keyed on the document’s own uid');
+  const rules = await read('_firestore.rules');
+  const adminInRules = (rules.match(/request\.auth\.token\.email == '([^']+)'/) || [])[1];
+  eq(CSTATS.ADMIN_EMAILS, [adminInRules],
+    'the maintainer the builder excludes is the one isAdmin() names');
+
+  /* --- what the usage record carries ------------------------------------- */
+  const usage = await read('assets/oa-usage.js');
+  ok(/closest\('li\.oa-card'\)/.test(usage) && /c: String\(li\.id\)\.slice\(0, 120\)/.test(usage),
+    'a click inside a card carries the card’s element id, capped');
+  ok(/classList\.contains\('oa-card-head'\)/.test(usage) &&
+     /!li\.classList\.contains\('oa-card-locked'\)/.test(usage) &&
+     /getAttribute\('aria-expanded'\) !== 'true'/.test(usage),
+    'and `o` marks an OPEN: the head, on a card the reader may read, not already expanded');
+  const payload = usage.slice(usage.indexOf('var payload = {'), usage.indexOf('OAFB.ready()'));
+  ok(payload.length > 100 && payload.length < 800, 'the payload slice is bounded');
+  ok(!/\bc:|\bo:/.test(payload),
+    'no new TOP-LEVEL field joins the session document — the attribution rides inside ' +
+    'the clicks list the rules already bound');
+  ok(/list\('clicks', 400\)/.test(rules), 'which the rules still bound at 400');
+  ok(/'job-' \+ r\.id/.test(await read('assets/oa-list.js')),
+    'the engine still names every card job-<row id>, candidates included');
+
+  /* --- the rules: an owner CARRIES the map, never writes it -------------- */
+  const block = rules.slice(rules.indexOf('match /candidateSubmissions/'),
+                            rules.indexOf('match /placementSubmissions/'));
+  ok(block.length > 500, 'the candidateSubmissions block was sliced');
+  ok(/function statsUntouched\(\)/.test(block) &&
+     /request\.resource\.data\.stats == resource\.data\.stats/.test(block),
+    'statsUntouched(): the merged document may carry stats only as it was stored');
+  const ownerUpdate = block.slice(block.indexOf('allow update: if isOwner'),
+                                  block.indexOf('// account merge hand-over'));
+  ok(ownerUpdate.length > 100 && /statsUntouched\(\)/.test(ownerUpdate),
+    'the owner’s correct-and-withdraw update requires it');
+  ok(/allow create: if signedIn\(\)[\s\S]*?!\('stats' in request\.resource\.data\)/.test(block),
+    'and a new profile may not arrive with a count of its own');
+  ok(!/keys\(\)\.hasOnly\(/.test(block),
+    'no rule pins the document to a fixed key SET, so the Admin-SDK stamp cannot freeze ' +
+    'the profile against its own owner (the sync-user-directory trap)');
+  ok(!/str\('stats'/.test(block), 'stats is a map, not one of the bounded strings');
+
+  /* --- the caller, and nothing under data/ ------------------------------- */
+  const wf = await read('.github/workflows/oa-analytics.yml');
+  ok(wf.includes('build-candidate-stats.mjs'), 'oa-analytics.yml runs the builder');
+  ok(wf.indexOf('build-candidate-stats.mjs') > wf.indexOf('build-analytics.mjs'),
+    'after the analytics build, beside the read it shares');
+  const step = wf.slice(wf.indexOf('- name: Candidate statistics'), wf.indexOf('- name: Commit'));
+  ok(step.length > 100 && /FIREBASE_SERVICE_ACCOUNT/.test(step),
+    'with the service account, which is the only credential it needs');
+  ok(/continue-on-error: true/.test(step),
+    'and continue-on-error, so a failure here never holds the analytics commit back');
+  ok(!BUILDERS.some((b) => b.script === 'build-candidate-stats.mjs'),
+    'it is NOT in BUILDERS — it writes no data/ file');
+  ok(!/writeFile/.test(src) && !/\.mkdir\(/.test(src),
+    'the builder writes no file at all: a served file is public and these figures are one person’s');
+  ok(/status\) !== 'published'/.test(src),
+    'a stamp lands only on a published document — the state the Cloud Function does not ring on');
+  ok(/'usageSessions'/.test(src) && /marketStart\(now\)/.test(src),
+    'it reads the usage record from the season start');
+
+  /* --- the surfaces ------------------------------------------------------- */
+  const form = await read('assets/oa-candidateform.js');
+  const panel = form.slice(form.indexOf('function paintStats('), form.indexOf('function enterEditMode('));
+  ok(panel.length > 500, 'the panel painter was sliced');
+  ok(/v\.stats/.test(panel) && /candidates-reveal\.json', \{ cache: 'no-cache' \}/.test(panel),
+    'the edit page reads the document’s stats and the reveal date it is gated on');
+  ok(/not public yet/.test(panel), 'and says so before the reveal date, rather than showing a zero');
+  ok(/textContent|createTextNode/.test(panel) && !/innerHTML = ['"]<|innerHTML \+=/.test(panel),
+    'every figure and word goes through text nodes, never markup');
+  ok(!/—/.test(panel), 'no em dash in the panel’s copy');
+  ok(!/out\.stats|stats:/.test(form.slice(form.indexOf('function collect('), form.indexOf('function makeRef('))),
+    'the form never sends stats — the count is not the candidate’s to write');
+  ok(/id="oa-cand-stats" hidden/.test(await read('post-a-candidate.html')),
+    'post-a-candidate.html carries the panel, born hidden (edit mode reveals it)');
+  ok(/v\.stats/.test(await read('account.html')) && /its CV/.test(await read('account.html')),
+    'the personal area’s candidate card carries the season totals');
+  ok(/function statsLine\(d\)/.test(await read('assets/oa-submissions.js')),
+    'and the maintainer’s inbox card shows the same numbers');
+
+  /* --- disclosed and announced ------------------------------------------- */
+  const pp = await read('privacy-policy.html');
+  ok(/how often each\s+candidate profile was opened and its CV clicked/.test(pp) &&
+     /shown only to that candidate/.test(pp),
+    'the Privacy Policy says the count exists and who sees it');
+  const log = JSON.parse(await read('changelog.json'));
+  const entry = log.updates.find((u) => u.id === 'candidate-profile-view-statistics');
+  ok(entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.url === '/post-a-candidate.html',
+    'changelog.json announces it, dated, linking the profile page');
+  ok(entry && !/—/.test(entry.title + entry.summary), 'with no em dash in the announcement');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -12370,5 +12522,6 @@ if (isMain(import.meta.url)) {
   await testAnalytics();
   await testGa4Tag();
   await testUniversityVisits();
+  await testCandidateStats();
   process.exit(finish() ? 0 : 1);
 }

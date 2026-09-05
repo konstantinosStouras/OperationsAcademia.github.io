@@ -593,6 +593,103 @@
     if (v.cvUploadPath) cvSlot.showPending(v.cvUploadName);
 
     EDIT_REF = v.ref || '';
+    paintStats(v);
+  }
+
+  /* ------------------------------------------ the profile's OWN figures
+
+     How often this profile's card was opened on the site and its CV link
+     clicked — this season and in the last 7 days — read from the `stats` map
+     _scraper/build-candidate-stats.mjs writes onto the candidate's own
+     document once a day. The owner is the only reader the rules allow, so
+     this panel is drawn in edit mode and nowhere else. Numbers only: every
+     figure goes through Number() and every string through textContent.
+
+     Before the reveal date there is nothing to count — the served file is
+     empty, so no card exists to open — and the panel says exactly that
+     rather than showing a zero that reads as "nobody is interested".      */
+
+  function statsNumber(v) {
+    var n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+  }
+
+  /** Opens and CV clicks over the last `n` UTC days of a `days` map
+      ({ 'YYYY-MM-DD': [opens, cv] }), today included. */
+  function statsLastDays(days, n, now) {
+    var out = [0, 0];
+    if (!days || typeof days !== 'object') return out;
+    var cutoff = new Date((now || new Date()).getTime() - (n - 1) * 86400000)
+      .toISOString().slice(0, 10);
+    Object.keys(days).forEach(function (day) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < cutoff) return;
+      var cell = days[day];
+      if (!Array.isArray(cell)) return;
+      out[0] += statsNumber(cell[0]);
+      out[1] += statsNumber(cell[1]);
+    });
+    return out;
+  }
+
+  function times(n) { return n + (n === 1 ? ' time' : ' times'); }
+
+  function paintStats(v) {
+    var box = $('oa-cand-stats');
+    if (!box || !EDIT_ID) return;
+
+    function line(text, strong) {
+      var p = document.createElement('p');
+      if (strong) {
+        var b = document.createElement('strong');
+        b.textContent = strong;
+        p.appendChild(b);
+        p.appendChild(document.createTextNode(' '));
+      }
+      p.appendChild(document.createTextNode(text));
+      return p;
+    }
+
+    /* the reveal date, from the same file the candidates page announces it
+       from; unreadable = treat the profile as not yet public, the safe reading */
+    fetch('data/candidates-reveal.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .catch(function () { return {}; })
+      .then(function (cfg) {
+        var revealAt = /^\d{4}-\d{2}-\d{2}$/.test(String((cfg || {}).revealAt || ''))
+          ? String(cfg.revealAt) : '';
+        var today = new Date().toISOString().slice(0, 10);
+        var held = !revealAt || today < revealAt;
+        var st = v && v.stats && typeof v.stats === 'object' ? v.stats : null;
+
+        box.innerHTML = '';
+        box.appendChild(line('These figures are private: only you can see them.',
+          'Your profile on the site.'));
+
+        if (held && !st) {
+          box.appendChild(line(revealAt
+            ? 'Your profile is not public yet. Profiles appear on the candidates page all ' +
+              'at once on ' + revealAt + ', so there is nothing to count until then.'
+            : 'Your profile is not public yet. Profiles appear on the candidates page all ' +
+              'at once on the reveal date, so there is nothing to count until then.'));
+        } else if (!st) {
+          box.appendChild(line('No figures yet. The count is updated once a day and starts ' +
+            'on the first day your profile is shown.'));
+        } else {
+          var opens = statsNumber(st.opens);
+          var cvs = statsNumber(st.cvClicks);
+          var week = statsLastDays(st.days, 7);
+          box.appendChild(line('Opened ' + times(opens) + ' this season, ' +
+            times(week[0]) + ' in the last 7 days.'));
+          box.appendChild(line('CV opened ' + times(cvs) + ' this season, ' +
+            times(week[1]) + ' in the last 7 days.'));
+          var upd = String(st.updatedAt || '').slice(0, 10);
+          box.appendChild(line((/^\d{4}-\d{2}-\d{2}$/.test(upd)
+            ? 'Updated ' + upd + '. ' : '') +
+            'The count is updated once a day. Your own visits, and those of the ' +
+            'site maintainer, are not counted.'));
+        }
+        box.hidden = false;
+      });
   }
 
   function enterEditMode() {
