@@ -65,7 +65,13 @@
    by Auth's creation time, which the mark does not carry (its `t` is last
    seen). A mark with no Auth account behind it (one deleted in the console)
    is not counted, so the front page can read at or below the tile and never
-   above it. A tally that cannot be read, or reads as empty, WRITES NOTHING:
+   above it. AND A MERGE TAKES ONE OFF (owner, 2026-09-05: "if two profiles
+   merge, then the number of registered users should decrease by one too"):
+   `runMerge` in oa-accounts.js deletes the duplicate's mark and then its
+   Auth account, and the join drops the duplicate the moment the mark is
+   gone, whether or not the account deletion behind it succeeded, so the
+   count is of PEOPLE, exactly as the tile's is. A tally that cannot be
+   read, or reads as empty, WRITES NOTHING:
    the committed files stand, the roster half still runs, and the run says
    so. An unreachable source changes nothing, as everywhere else here.
 
@@ -432,6 +438,12 @@ function selftest() {
   eq(meta.count, 3, 'the count is every account that is not disabled AND carries a registeredUsers mark: ' +
     'what the Admin area\'s tile counts, never every account Auth holds');
   eq(usersMeta(roster, NOW, []).count, 0, 'with no marks nobody is counted: Auth alone is never the count');
+  /* a MERGE takes one off (owner, 2026-09-05): runMerge deletes the
+     duplicate's mark first and its Auth account after, so the count drops
+     by one from the mark alone, whether or not the account is still there */
+  const merged = new Set(marks); merged.delete('b');
+  eq(usersMeta(roster, NOW, merged).count, 2, 'a merged duplicate (mark deleted, account still in Auth) leaves the count');
+  eq(usersMeta(roster.filter((u) => u.uid !== 'b'), NOW, merged).count, 2, 'and the count is the same once its account is gone too');
   eq(members(roster, ['a', 'b', 'c', 'd', 'gone']).map((u) => u.uid), ['a', 'b', 'c'],
     'members takes a list as well as a Set, drops the disabled account and ignores a mark with no account behind it');
   eq(meta.generated, '2026-09-05T12:00:00.000Z', 'generated is the run instant, ISO');

@@ -5156,6 +5156,15 @@ async function testUserDirectorySync() {
   eq(mod.usersMeta(fixture, NOW, marks), { generated: '2026-09-05T12:00:00.000Z', count: 2 },
     'usersMeta counts the accounts that are not disabled and carry a registeredUsers mark, the Admin tile\'s own set');
   eq(mod.usersMeta(fixture, NOW, []).count, 0, 'and never Auth alone: with no marks the count is nobody');
+  /* a merge takes one off (owner, 2026-09-05): runMerge in oa-accounts.js
+     deletes the duplicate's registeredUsers mark and then its Auth account,
+     so the mark going is enough for the join to drop the duplicate */
+  eq(mod.usersMeta(fixture, NOW, new Set(['a'])).count, 1,
+    'a merged duplicate leaves the count the moment its mark is deleted, its Auth account still listed or not');
+  const accounts = await readFile(path.join(root, 'assets', 'oa-accounts.js'), 'utf8');
+  const mergeSrc = accounts.slice(accounts.indexOf('function runMerge('), accounts.indexOf('function runMerge(') + 12000);
+  ok(/db\.collection\(OAFB\.col\.registered\)\.doc\(dupUid\)\.delete\(\)/.test(mergeSrc),
+    'and the merge really deletes the duplicate\'s mark, which is what the count reads');
   eq(mod.usersGrowth(fixture, NOW, marks).days, [['2026-09-02', 1], ['2026-09-03', 1], ['2026-09-04', 2], ['2026-09-05', 2]],
     'usersGrowth is one cumulative point per UTC day to the generated day, over the same members');
   ok(fbjs.includes(`registered: '${mod.TALLY}'`),

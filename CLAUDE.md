@@ -1968,7 +1968,12 @@ the Auth accounts that are not disabled AND carry a mark, the run reads the
 tally beside Auth and hands its uids to both writers, and the growth chart
 dates those same people by Auth's `creationTime` (the mark's `t` is last
 seen, not joined). A mark with no account behind it is not counted, so the
-front page reads at or below the tile and never above. **A tally that cannot
+front page reads at or below the tile and never above. And **a merge takes
+one off** (owner, the same day: "if two profiles merge, then the number of
+registered users should decrease by one too"): `runMerge` deletes the
+duplicate's mark and then its Auth account, and the join drops the
+duplicate the moment the mark is gone, whether or not the account deletion
+behind it succeeded, so the count is of people exactly as the tile's is. **A tally that cannot
 be read, or reads as empty, writes neither file**: the committed ones stand
 and the run says so, the unreachable-source rule. Pinned in the sync's own
 selftest and `testUserDirectorySync` (the join, Auth alone never the count,
