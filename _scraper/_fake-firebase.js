@@ -535,6 +535,11 @@
       var thread = docs[tp];
       if (!thread) return simRefuse('not-found', 'thread');
       if (thread.locked || thread.hidden) return simRefuse('failed-precondition', 'locked');
+      /* a thread whose QUESTION has gone is closed, however the head reads
+         (_functions/forum/post.js) */
+      var head1 = null;
+      childrenOf(tp + '/posts').forEach(function (pp) { if (Number(docs[pp].n) === 1) head1 = docs[pp]; });
+      if (!head1 || head1.hidden) return simRefuse('failed-precondition', 'locked');
       var quote = null;
       if (data.quote) {
         var qn = Number(data.quote.n);
@@ -583,24 +588,40 @@
       return Promise.resolve({ data: { editedAt: now } });
     }
 
-    /* the author's own post, no window: the body and the kind are erased and
-       the slot kept, and the opening post takes the thread with it only when
-       nobody has replied (_functions/forum/delete.js) */
+    /* the author's own post, no window, or ANY post for the maintainer. The
+       body and the kind are erased and the slot kept; a QUESTION goes only
+       when no reply is still standing, and takes the thread with it
+       (_functions/forum/delete.js) */
     if (name === 'forumDelete') {
       if (th.hidden) return simRefuse('failed-precondition', 'locked');
-      if (post.by !== handle) return simRefuse('permission-denied', 'author');
+      var isAdmin = String((seed.user && seed.user.email) || '').toLowerCase() === 'kstouras@gmail.com';
+      if (!isAdmin && post.by !== handle) return simRefuse('permission-denied', 'author');
       var whole = false;
+      /* already gone: a second press is a success, and for a QUESTION it
+         finishes the job by shutting a thread left standing */
+      if (post.hidden) {
+        if (Number(post.n) === 1 && !th.hidden) {
+          whole = true;
+          simWrite(tpath2, Object.assign({}, th, { hidden: true }));
+        }
+        return Promise.resolve({ data: { ok: true, thread: whole } });
+      }
       if (!post.hidden) {
+        var question = Number(post.n) === 1;
+        if (question && !isAdmin) {
+          var live = Object.keys(docs).filter(function (k) {
+            return k.indexOf(tpath2 + '/posts/') === 0 && docs[k] && !docs[k].hidden
+              && Number(docs[k].n) !== 1;
+          });
+          if (live.length) return simRefuse('failed-precondition', 'answered');
+        }
         simWrite(ppath, Object.assign({}, post, {
-          body: '', kind: '', hidden: true, hiddenBy: 'author', editedAt: now
+          body: '', kind: '', hidden: true,
+          hiddenBy: isAdmin && post.by !== handle ? 'admin' : 'author', editedAt: now
         }));
-        if (Number(post.n) === 1) {
-          if ((Number(th.n) || 0) <= 1) {
-            whole = true;
-            simWrite(tpath2, Object.assign({}, th, { hidden: true }));
-          } else {
-            simWrite(tpath2, Object.assign({}, th, { title: 'Deleted by its author', excerpt: '' }));
-          }
+        if (question) {
+          whole = true;
+          simWrite(tpath2, Object.assign({}, th, { hidden: true }));
         }
       }
       return Promise.resolve({ data: { ok: true, thread: whole } });

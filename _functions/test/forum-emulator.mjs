@@ -310,12 +310,30 @@ async function main() {
   /* a quote of a deleted post survives: forumPost stored a COPY */
   const qAfter = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${q1.result.pid}`).get();
   ok(qAfter.data().quote && qAfter.data().quote.text === 'second-year release', 'a quote of somebody else\'s post is a copy and survives their deletion');
-  /* the OPENING post of a thread that HAS replies: the thread stands */
+  /* A QUESTION SOMEBODY HAS ANSWERED CANNOT BE DELETED (owner, 2026-09-05).
+     t1 still has live replies at this point. */
   const d2 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
-  ok(!d2.error && d2.result.thread === false, 'deleting the opening post of a thread with replies leaves the thread');
+  ok(status(d2) === 'FAILED_PRECONDITION' && reason(d2) === 'answered', 'a question with a live reply cannot be deleted', JSON.stringify(d2));
   const th1e = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
-  ok(th1e.data().hidden === false && th1e.data().title === M.DELETED_TITLE && th1e.data().excerpt === '',
-    'the title and the excerpt were the author\'s words too, and go with them');
+  ok(th1e.data().hidden === false, 'and the thread is untouched by the refusal');
+  /* THE MAINTAINER IS NOT HELD BY IT, and may remove anybody's post */
+  const adminReply = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: q1.result.pid });
+  ok(!adminReply.error && adminReply.result.thread === false, 'the maintainer removes a reply', JSON.stringify(adminReply));
+  /* ONCE EVERY REPLY HAS GONE, SO CAN THE QUESTION. The maintainer clears the
+     rest, which is also the "all answers deleted" path the owner named. */
+  const rest = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts`).get();
+  for (const doc of rest.docs) {
+    const v = doc.data();
+    if (Number(v.n) === 1 || v.hidden) continue;
+    const r = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: doc.id });
+    ok(!r.error, 'the maintainer removes a reply of somebody else\'s', JSON.stringify(r));
+    const back = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${doc.id}`).get();
+    ok(back.data().hiddenBy === 'admin', 'and it is marked as the maintainer\'s removal, not the author\'s');
+  }
+  const d2b = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  ok(!d2b.error && d2b.result.thread === true, 'with every reply gone, the asker can delete the question', JSON.stringify(d2b));
+  const th1f = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(th1f.data().hidden === true, 'and it takes the whole thread, so no thread is ever left headless');
   /* the OPENING post of a thread nobody has replied to: the thread goes */
   await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
   const solo = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question I will withdraw', tags: ['waiting'], body: 'Something I would rather not have asked after all.', kind: '' });
@@ -324,6 +342,25 @@ async function main() {
   ok(!d3.error && d3.result.thread === true, 'deleting it takes the whole thread');
   const soloTh = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${solo.result.tid}`).get();
   ok(soloTh.data().hidden === true, 'and the thread is hidden, off every list');
+
+  /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED, however the thread head
+     reads. Rows written before that rule carry a deleted question under a
+     thread still standing (owner screenshot, 2026-09-05), so the shape is
+     built here by hand rather than reached through the callables. */
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const head = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A legacy headless thread', tags: ['waiting'], body: 'The question that was taken away.', kind: '' });
+  ok(!head.error, 'a thread to make headless', JSON.stringify(head));
+  const headPost = `forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}/posts/${head.result.pid}`;
+  await admin.doc(headPost).update({ body: '', kind: '', hidden: true, hiddenBy: 'author' });
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const headless = await call('forumPost', tokens.adm, { room: 'candidates', tid: head.result.tid, body: 'Can I still reply to this?', kind: '' });
+  ok(status(headless) === 'FAILED_PRECONDITION' && reason(headless) === 'locked',
+    'nobody may reply to a thread whose question has been deleted', JSON.stringify(headless));
+  /* and pressing Delete on the question that is already gone finishes the job */
+  const heal = await call('forumDelete', tokens.cand, { room: 'candidates', tid: head.result.tid, pid: head.result.pid });
+  ok(!heal.error && heal.result.thread === true, 'a second press on a deleted question shuts the thread', JSON.stringify(heal));
+  const healed = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}`).get();
+  ok(healed.data().hidden === true, 'so a thread left headless can always be closed');
 
   /* ---------------------------------------------------------- archive */
   console.log('\narchive');

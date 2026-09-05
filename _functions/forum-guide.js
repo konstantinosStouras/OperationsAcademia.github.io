@@ -80,9 +80,10 @@
       'what was written, never on who wrote it: a post may be removed and a handle ' +
       'warned or banned for the season. To appeal, use Send feedback and quote your handle.',
     'Threads stay readable in the archive for next season\'s candidates, so write for ' +
-      'them too. Your own post is yours to edit for fifteen minutes and to delete at any ' +
-      'time while the season is running; a deleted post keeps its place in the thread so ' +
-      'the replies still read, and its words are gone for good.'
+      'them too. Your own post is yours to edit for fifteen minutes and to delete while ' +
+      'the season is running, and the words are then gone for good. A reply keeps its ' +
+      'place in the thread so the numbering still reads. A question can only be deleted ' +
+      'while nobody has answered it: once every reply has gone, so can the question.'
   ];
 
   var NOTES = [

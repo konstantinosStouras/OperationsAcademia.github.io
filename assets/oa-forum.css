@@ -274,13 +274,29 @@ body.v3 .oa-forum-q .oa-badges {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 5px 7px;
   margin: 0;
 }
 
 body.v3 .oa-forum-q .oa-badges .oa-label {
   display: inline-block;
   margin: 0;
+}
+
+/* THE CHIPS ARE SMALLER AND LIGHTER THAN THE SITE'S DEFAULT LABEL (owner,
+   2026-09-05: "the tags still look cramped, make them smaller"). The base
+   `.oa-label` is 700-weight with generous em padding, which is right for one
+   badge on a job posting and crowded when four sit in a row under a question.
+   Scoped to the forum's own three places, so every other list's labels are
+   measured exactly where they were. */
+body.v3 .oa-forum-q .oa-badges .oa-label,
+body.v3 .oa-forum-thtags .oa-label,
+body.v3 .oa-forum-tagcloud a {
+  padding: 2px 7px 3px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 body.v3 .oa-forum-q .oa-card-sub {
@@ -362,7 +378,7 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-thtags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px 7px;
   margin-top: 12px;
 }
 
@@ -630,19 +646,6 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 }
 
 .oa-forum-accept input { width: 17px; height: 17px; margin: 2px 0 0; flex: none; accent-color: var(--brand); }
-
-.oa-forum-warn {
-  margin: 12px 0 0;
-  padding: 10px 14px;
-  border: 1px solid var(--warn-line);
-  border-radius: 10px;
-  background: var(--warn-bg);
-  color: var(--ink);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.oa-forum-warn strong { color: var(--ink); }
 
 .oa-forum-guardmsg {
   margin: 8px 0 0;
