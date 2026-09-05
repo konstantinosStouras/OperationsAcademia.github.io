@@ -1,12 +1,12 @@
 /* ---------------------------------------------------------------------------
-   forumEdit({ room, tid, pid, body, kind }) -> { editedAt }
+   forumEdit({ room, tid, pid, body }) -> { editedAt }
 
    The author's own post, within EDIT_WINDOW_MS of the MINUTE it was stamped
    (so up to 59 seconds more than fifteen minutes; the function is the
-   authority, the page only draws the countdown). Body and kind change,
-   editedAt is stamped, and the first post's edit recomputes the thread's
-   excerpt. Tags are fixed at creation and are not touched here, so the room
-   tally never drifts.
+   authority, the page only draws the countdown). The body changes, editedAt
+   is stamped, and the first post's edit recomputes the thread's excerpt.
+   Tags are fixed at creation and are not touched here, so the room tally
+   never drifts.
    --------------------------------------------------------------------------- */
 
 'use strict';
@@ -20,7 +20,6 @@ exports.forumEdit = onCall(P.OPTS, async (req) => {
   const m = await P.member(req, d.room);
   const { D, Y } = m;
   const body = P.textField(d.body, M.BOUNDS.body, true);
-  const kind = P.kindField(d.kind);
   const threadRef = D.collection('forumSeasons').doc(String(Y)).collection('rooms').doc(d.room)
     .collection('threads').doc(String(d.tid || ''));
   const postRef = threadRef.collection('posts').doc(String(d.pid || ''));
@@ -41,7 +40,6 @@ exports.forumEdit = onCall(P.OPTS, async (req) => {
     /* @doc post */
     const postPatch = {
       body,
-      kind,
       editedAt,
     };
     /* @end */

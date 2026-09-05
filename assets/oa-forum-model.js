@@ -77,8 +77,13 @@
        rewrites the reply. `up`/`down` are the like and dislike tallies.
        `hidden` with `hiddenBy: 'author'` is a post its own author deleted:
        the body is erased and the slot kept, because `n` is how replies name
-       it. Moderation's own removals arrive with the report queue. */
-    post: ['season', 'room', 'tid', 'n', 'by', 'body', 'kind', 't', 'editedAt',
+       it. Moderation's own removals arrive with the report queue.
+       THERE IS NO `kind`: a post used to carry one of three self-declared
+       labels (plain, first-hand, rumour) and the owner removed all three on
+       2026-09-05. A post is somebody saying something; the forum has no
+       label for saying it second hand, because a rumour may not be posted
+       at all. */
+    post: ['season', 'room', 'tid', 'n', 'by', 'body', 't', 'editedAt',
       'up', 'down', 'quote', 'hidden', 'hiddenBy'],
     /* the nested quote map on a post */
     quote: ['n', 'by', 'text'],
@@ -106,14 +111,25 @@
 
   /** The curated tags, offered first in the compose picker. Free tags are
       allowed beside them (normalised through slug()); `about` is the guide
-      thread's own tag. Slugs only, 2 to 24 characters of [a-z0-9-]. */
+      thread's own tag. Slugs only, 2 to 24 characters of [a-z0-9-].
+
+      `rumour` WAS ON THIS LIST and is deliberately off it (owner,
+      2026-09-05). The list is what the site SUGGESTS, and suggesting the
+      word is the site nudging people towards the thing rule 5 asks them not
+      to do. NOTHING HERE REFUSES A TAG, and that is the owner's own
+      correction: a first draft of this change refused a short list of
+      rumour-ish slugs outright, and the answer was *"don't remove the
+      possibility users use the tag rumour on a post... what I was saying is
+      let's not nudge users to post rumours and gossips."* So a poster who
+      types the word still gets the tag. The guide is where the rule lives;
+      the picker simply stops offering it. */
   var TAGS = [
     'about', 'interviews', 'first-round', 'flyouts', 'job-talk', 'offers',
     'negotiation', 'startup', 'teaching', 'teaching-release', 'research-statement',
     'cv', 'references', 'timelines', 'deadlines', 'waiting', 'rejections', 'visas',
     'relocation', 'two-body', 'family', 'wellbeing', 'europe', 'asia',
     'north-america', 'uk', 'australia', 'industry', 'postdoc', 'tenure',
-    'committees', 'rumour'
+    'committees'
   ];
 
   var TAG_MIN = 1;
@@ -131,16 +147,18 @@
   /** A member may edit their own post for fifteen minutes from the MINUTE it
       was stamped (so up to 59 seconds more). The function is the authority;
       the page draws a countdown from the same constant. DELETING has no
-      window at all (owner, 2026-09-05); see _functions/forum/delete.js. */
+      window at all (owner, 2026-09-05), though a question somebody has
+      answered cannot be deleted at all; see _functions/forum/delete.js. */
   var EDIT_WINDOW_MS = 15 * 60 * 1000;
 
-  /** What a thread is called once its opening post has been deleted by its
-      author and replies keep the thread standing. The title was the author's
-      words too, so it does not survive them. */
-  var DELETED_TITLE = 'Deleted by its author';
-
-  /** How a post says what it is. '' is an ordinary post. */
-  var KINDS = ['', 'first-hand', 'rumour'];
+  /* THERE IS NO KINDS LIST, and its absence is the point (owner,
+     2026-09-05: "I don't understand why a user should select plain and
+     first-hand, perhaps remove these"). A post carried '', 'first-hand' or
+     'rumour', and both halves of that were wrong: the choice asked every
+     poster a question they had no reason to answer, and one of the answers
+     offered was the thing the guide now forbids. Removed from the model
+     rather than narrowed to one value, so no writer can send one and no
+     reader can draw one. */
 
   /** The handle reserved for the guide thread; the word lists never draw it. */
   var MODERATOR = 'Moderator';
@@ -199,8 +217,6 @@
     TAG_RX: TAG_RX,
     RATE: RATE,
     EDIT_WINDOW_MS: EDIT_WINDOW_MS,
-    DELETED_TITLE: DELETED_TITLE,
-    KINDS: KINDS,
     MODERATOR: MODERATOR,
     slug: slug,
     tagOk: tagOk,

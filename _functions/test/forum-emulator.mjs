@@ -85,6 +85,7 @@ const { getAuth } = requireFn('firebase-admin/auth');
 const RUT = requireFn('@firebase/rules-unit-testing');
 const NAV = requireFn(path.join(ROOT, '_functions', 'jobnav.js'));
 const M = requireFn(path.join(ROOT, '_functions', 'forum-model.js'));
+const GUIDE = requireFn(path.join(ROOT, '_functions', 'forum-guide.js'));
 
 initializeApp({ projectId: PROJECT });
 const admin = getFirestore();
@@ -191,7 +192,14 @@ async function main() {
   const s1 = await call('forumModerate', tokens.adm, { op: 'seedGuide', room: 'candidates' });
   ok(!s1.error && s1.result.tid, 'the maintainer seeds the candidates room guide', JSON.stringify(s1));
   const s2 = await call('forumModerate', tokens.adm, { op: 'seedGuide', room: 'candidates' });
-  ok(status(s2) === 'ALREADY_EXISTS', 'seeding the same room twice is refused');
+  ok(!s2.error && s2.result.tid === s1.result.tid && s2.result.updated === false,
+    'seeding the same room twice refreshes the standing thread and writes nothing while the guide is unchanged');
+  await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${s1.result.tid}/posts/${(await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${s1.result.tid}/posts`).get()).docs[0].id}`)
+    .update({ body: 'stale text from an older run of the guide' });
+  const s2b = await call('forumModerate', tokens.adm, { op: 'seedGuide', room: 'candidates' });
+  const guidePost = (await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${s1.result.tid}/posts`).get()).docs[0];
+  ok(!s2b.error && s2b.result.updated === true && guidePost.data().body === GUIDE.text(),
+    'and a guide whose words have moved on is brought back to the module\'s own text');
   const s3 = await call('forumModerate', tokens.adm, { op: 'seedGuide', room: 'open' });
   ok(!s3.error && s3.result.tid && s3.result.tid !== s1.result.tid, 'the open room gets its own guide thread');
   const sc = await call('forumModerate', tokens.cand, { op: 'seedGuide', room: 'open' });
@@ -205,9 +213,9 @@ async function main() {
 
   /* ------------------------------------------------------------- post */
   console.log('\nforumPost');
-  const noGuide = await call('forumPost', tokens.cand, { room: 'candidates', title: 'First question', tags: ['offers'], body: 'Is a second-year release normal to ask for?', kind: 'first-hand' });
+  const noGuide = await call('forumPost', tokens.cand, { room: 'candidates', title: 'First question', tags: ['offers'], body: 'Is a second-year release normal to ask for?' });
   ok(status(noGuide) === 'FAILED_PRECONDITION' && reason(noGuide) === 'guide', 'the first post needs acceptGuide');
-  const t1 = await call('forumPost', tokens.cand, { room: 'candidates', title: 'First question', tags: ['Offers', 'negotiation', 'offers'], body: 'Is a second-year release normal to ask for? Two questions for people who have been through this.', kind: 'first-hand', acceptGuide: true });
+  const t1 = await call('forumPost', tokens.cand, { room: 'candidates', title: 'First question', tags: ['Offers', 'negotiation', 'offers'], body: 'Is a second-year release normal to ask for? Two questions for people who have been through this.', acceptGuide: true });
   ok(!t1.error && t1.result.tid && t1.result.pid && t1.result.n === 1, 'a new thread opens', JSON.stringify(t1));
   const th1 = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
   ok(JSON.stringify(th1.data().tags) === '["offers","negotiation"]', 'tags are slugged and de-duplicated');
@@ -219,7 +227,7 @@ async function main() {
     ['0000-0002-1825-0097', 'orcid'], ['(617) 253-1000', 'phone'],
   ];
   for (const [text, why] of bad) {
-    const r = await call('forumPost', tokens.cand, { room: 'candidates', tid: t1.result.tid, body: 'see ' + text, kind: '' });
+    const r = await call('forumPost', tokens.cand, { room: 'candidates', tid: t1.result.tid, body: 'see ' + text });
     ok(status(r) === 'INVALID_ARGUMENT' && reason(r) === why, `the guard refuses "${text}" as ${why}`);
   }
   /* a link posts (owner, 2026-09-05); the three the guard used to refuse are
@@ -231,44 +239,57 @@ async function main() {
     /* the gap between posts is 20 s, so these are spaced by back-dating the handle */
     await admin.collection('forumHandles').where('season', '==', Y).get().then((s) =>
       Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
-    const r = await call('forumPost', tokens.cand, { room: 'candidates', tid: t1.result.tid, body: 'A reply mentioning ' + text + ' and nothing else.', kind: 'rumour' });
+    const r = await call('forumPost', tokens.cand, { room: 'candidates', tid: t1.result.tid, body: 'A reply mentioning ' + text + ' and nothing else.' });
     ok(!r.error, `the guard allows "${text}"`, JSON.stringify(r));
     if (!quoteSource && !r.error) quoteSource = r.result;
   }
-  const badTags = await call('forumPost', tokens.cand, { room: 'candidates', title: 'T', tags: ['a', 'b', 'c', 'd', 'e', 'f'], body: 'body text', kind: '', acceptGuide: true });
+  const badTags = await call('forumPost', tokens.cand, { room: 'candidates', title: 'T', tags: ['a', 'b', 'c', 'd', 'e', 'f'], body: 'body text', acceptGuide: true });
   ok(status(badTags) === 'INVALID_ARGUMENT' && reason(badTags) === 'tags', 'six tags are refused');
-  const noRoom = await call('forumPost', tokens.cand, { room: 'lobby', body: 'x', kind: '' });
+  /* A TAG THE CURATED LIST DOES NOT OFFER IS STILL A TAG (owner, 2026-09-05:
+     "don't remove the possibility users use the tag rumour on a post").
+     THE MAINTAINER POSTS IT, AND THE REASON IS THE GAP, not the thread
+     budget: the reply loop above resets lastPostAt on every handle and then
+     posts as the candidate, so a candidate thread here would be refused
+     resource-exhausted {reason:'gap'} within the 20 s window, while the
+     maintainer has not posted yet. The candidate's thread count is not the
+     constraint and never was: it stands at one of its three here (a refused
+     call increments nothing: noGuide dies on the guide check inside the
+     transaction and badTags on tagList before it opens), and `solo` further
+     down is its second. */
+  const freeTag = await call('forumPost', tokens.adm, { room: 'candidates', title: 'A question with a free tag', tags: ['rumour'], body: 'A tag the curated list does not offer is still a tag, and the rules are what ask people not to trade in them.', acceptGuide: true });
+  ok(!freeTag.error && freeTag.result.tid, 'a tag the curated list does not offer is still accepted', JSON.stringify(freeTag));
+  const noRoom = await call('forumPost', tokens.cand, { room: 'lobby', body: 'x' });
   ok(status(noRoom) === 'INVALID_ARGUMENT' && reason(noRoom) === 'room', 'an unknown room is refused');
-  const openByReader = await call('forumPost', tokens.open, { room: 'candidates', tid: t1.result.tid, body: 'hello', kind: '' });
+  const openByReader = await call('forumPost', tokens.open, { room: 'candidates', tid: t1.result.tid, body: 'hello' });
   ok(status(openByReader) === 'PERMISSION_DENIED' && reason(openByReader) === 'candidate', 'a non-candidate cannot post in the candidates room, reason candidate');
-  const pendPost = await call('forumPost', tokens.pend, { room: 'candidates', tid: t1.result.tid, body: 'hello', kind: '' });
+  const pendPost = await call('forumPost', tokens.pend, { room: 'candidates', tid: t1.result.tid, body: 'hello' });
   ok(reason(pendPost) === 'candidate', 'an unverified account gets the SAME reason for the candidates room (R5)');
-  const locked = await call('forumPost', tokens.cand, { room: 'candidates', tid: s1.result.tid, body: 'hello', kind: '' });
+  const locked = await call('forumPost', tokens.cand, { room: 'candidates', tid: s1.result.tid, body: 'hello' });
   ok(status(locked) === 'FAILED_PRECONDITION' && reason(locked) === 'locked', 'a locked thread refuses a reply');
 
   /* ------------------------------------------------------------ quote */
   console.log('\nquote');
   await admin.collection('forumHandles').get().then((s) => Promise.all(s.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
-  const q1 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'Agreed, on the whole.', kind: '', acceptGuide: true, quote: { n: 1, text: 'second-year release' } });
+  const q1 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'Agreed, on the whole.', acceptGuide: true, quote: { n: 1, text: 'second-year release' } });
   ok(!q1.error && q1.result.n > 1, 'the maintainer replies with a quote of post 1', JSON.stringify(q1));
   const qp = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${q1.result.pid}`).get();
   ok(qp.data().quote && qp.data().quote.n === 1 && qp.data().quote.by === j1.result.handle && qp.data().quote.text === 'second-year release',
     'the quote is stored as a copy {n, by, text}');
-  const q2 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'x', kind: '', quote: { n: 1, text: 'not in the post' } });
+  const q2 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'x', quote: { n: 1, text: 'not in the post' } });
   ok(status(q2) === 'INVALID_ARGUMENT' && reason(q2) === 'quote', 'a quote that is not a passage of post n is refused');
-  const q3 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'x', kind: '', quote: { n: 99, text: 'a' } });
+  const q3 = await call('forumPost', tokens.adm, { room: 'candidates', tid: t1.result.tid, body: 'x', quote: { n: 99, text: 'a' } });
   ok(reason(q3) === 'quote', 'a quote of a post that does not exist is refused the same way');
 
   /* ------------------------------------------------------------- edit */
   console.log('\nforumEdit');
-  const e1 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'Edited: is a second-year release normal to ask for?', kind: 'first-hand' });
+  const e1 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'Edited: is a second-year release normal to ask for?' });
   ok(!e1.error && e1.result.editedAt % 60000 === 0, 'the author edits within the window, stamp on the minute');
   const th1b = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
   ok(/^Edited:/.test(th1b.data().excerpt), 'editing post 1 recomputes the excerpt');
-  const e2 = await call('forumEdit', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'not mine', kind: '' });
+  const e2 = await call('forumEdit', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'not mine' });
   ok(status(e2) === 'PERMISSION_DENIED' && reason(e2) === 'author', 'somebody else cannot edit it');
   await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${t1.result.pid}`).update({ t: M.minute() - 16 * 60000 });
-  const e3 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'too late', kind: '' });
+  const e3 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'too late' });
   ok(status(e3) === 'FAILED_PRECONDITION' && reason(e3) === 'window', 'sixteen minutes on, the window has closed');
 
   /* ------------------------------------------------------------- vote */
@@ -315,8 +336,16 @@ async function main() {
 
   /* ----------------------------------------------------------- delete */
   console.log('\nforumDelete');
-  const notMine = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  /* SOMEBODY ELSE cannot delete it, and somebody else can no longer be the
+     MAINTAINER, who may remove any post in either room. So the author check
+     is made where two ordinary members meet, which is the open room: the
+     candidates room holds only this candidate and the maintainer. */
+  const oTh = await call('forumPost', tokens.open, { room: 'open', title: 'A question in the open room', tags: ['waiting'], body: 'Asked in the open room by somebody who is not the candidate.', kind: '', acceptGuide: true });
+  ok(!oTh.error && oTh.result.tid, 'a thread in the open room, by another member', JSON.stringify(oTh));
+  const notMine = await call('forumDelete', tokens.cand, { room: 'open', tid: oTh.result.tid, pid: oTh.result.pid });
   ok(status(notMine) === 'PERMISSION_DENIED' && reason(notMine) === 'author', 'somebody else cannot delete it');
+  const stillThere = await admin.doc(`forumSeasons/${Y}/rooms/open/threads/${oTh.result.tid}`).get();
+  ok(stillThere.data().hidden === false, 'and the refusal leaves their thread standing');
   /* the author's own reply, long past the edit window: there is no window */
   const rep = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${quoteSource.pid}`).get();
   const repN = rep.data().n;
@@ -324,7 +353,7 @@ async function main() {
   const d1 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: quoteSource.pid });
   ok(!d1.error && d1.result.ok === true && d1.result.thread === false, 'the author deletes their own reply, window or no window', JSON.stringify(d1));
   const dp = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${quoteSource.pid}`).get();
-  ok(dp.exists && dp.data().body === '' && dp.data().kind === '' && dp.data().hidden === true && dp.data().hiddenBy === 'author',
+  ok(dp.exists && dp.data().body === '' && dp.data().hidden === true && dp.data().hiddenBy === 'author',
     'the words are erased in the database, not merely flagged');
   ok(dp.data().n === repN, 'and the slot keeps its number, so the replies still read');
   const thUntick = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
@@ -335,20 +364,57 @@ async function main() {
   /* a quote of a deleted post survives: forumPost stored a COPY */
   const qAfter = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${q1.result.pid}`).get();
   ok(qAfter.data().quote && qAfter.data().quote.text === 'second-year release', 'a quote of somebody else\'s post is a copy and survives their deletion');
-  /* the OPENING post of a thread that HAS replies: the thread stands */
+  /* A QUESTION SOMEBODY HAS ANSWERED CANNOT BE DELETED (owner, 2026-09-05).
+     t1 still has live replies at this point. */
   const d2 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
-  ok(!d2.error && d2.result.thread === false, 'deleting the opening post of a thread with replies leaves the thread');
+  ok(status(d2) === 'FAILED_PRECONDITION' && reason(d2) === 'answered', 'a question with a live reply cannot be deleted', JSON.stringify(d2));
   const th1e = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
-  ok(th1e.data().hidden === false && th1e.data().title === M.DELETED_TITLE && th1e.data().excerpt === '',
-    'the title and the excerpt were the author\'s words too, and go with them');
+  ok(th1e.data().hidden === false, 'and the thread is untouched by the refusal');
+  /* THE MAINTAINER IS NOT HELD BY IT, and may remove anybody's post */
+  const adminReply = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: q1.result.pid });
+  ok(!adminReply.error && adminReply.result.thread === false, 'the maintainer removes a reply', JSON.stringify(adminReply));
+  /* ONCE EVERY REPLY HAS GONE, SO CAN THE QUESTION. The maintainer clears the
+     rest, which is also the "all answers deleted" path the owner named. */
+  const rest = await admin.collection(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts`).get();
+  for (const doc of rest.docs) {
+    const v = doc.data();
+    if (Number(v.n) === 1 || v.hidden) continue;
+    const r = await call('forumDelete', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: doc.id });
+    ok(!r.error, 'the maintainer removes a reply of somebody else\'s', JSON.stringify(r));
+    const back = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}/posts/${doc.id}`).get();
+    ok(back.data().hiddenBy === 'admin', 'and it is marked as the maintainer\'s removal, not the author\'s');
+  }
+  const d2b = await call('forumDelete', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid });
+  ok(!d2b.error && d2b.result.thread === true, 'with every reply gone, the asker can delete the question', JSON.stringify(d2b));
+  const th1f = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
+  ok(th1f.data().hidden === true, 'and it takes the whole thread, so no thread is ever left headless');
   /* the OPENING post of a thread nobody has replied to: the thread goes */
   await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
-  const solo = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question I will withdraw', tags: ['waiting'], body: 'Something I would rather not have asked after all.', kind: '' });
+  const solo = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A question I will withdraw', tags: ['waiting'], body: 'Something I would rather not have asked after all.' });
   ok(!solo.error, 'a fresh thread with no replies', JSON.stringify(solo));
   const d3 = await call('forumDelete', tokens.cand, { room: 'candidates', tid: solo.result.tid, pid: solo.result.pid });
   ok(!d3.error && d3.result.thread === true, 'deleting it takes the whole thread');
   const soloTh = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${solo.result.tid}`).get();
   ok(soloTh.data().hidden === true, 'and the thread is hidden, off every list');
+
+  /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED, however the thread head
+     reads. Rows written before that rule carry a deleted question under a
+     thread still standing (owner screenshot, 2026-09-05), so the shape is
+     built here by hand rather than reached through the callables. */
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const head = await call('forumPost', tokens.cand, { room: 'candidates', title: 'A legacy headless thread', tags: ['waiting'], body: 'The question that was taken away.', kind: '' });
+  ok(!head.error, 'a thread to make headless', JSON.stringify(head));
+  const headPost = `forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}/posts/${head.result.pid}`;
+  await admin.doc(headPost).update({ body: '', kind: '', hidden: true, hiddenBy: 'author' });
+  await admin.collection('forumHandles').get().then((s2) => Promise.all(s2.docs.map((d) => d.ref.set({ lastPostAt: 0 }, { merge: true }))));
+  const headless = await call('forumPost', tokens.adm, { room: 'candidates', tid: head.result.tid, body: 'Can I still reply to this?', kind: '' });
+  ok(status(headless) === 'FAILED_PRECONDITION' && reason(headless) === 'locked',
+    'nobody may reply to a thread whose question has been deleted', JSON.stringify(headless));
+  /* and pressing Delete on the question that is already gone finishes the job */
+  const heal = await call('forumDelete', tokens.cand, { room: 'candidates', tid: head.result.tid, pid: head.result.pid });
+  ok(!heal.error && heal.result.thread === true, 'a second press on a deleted question shuts the thread', JSON.stringify(heal));
+  const healed = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${head.result.tid}`).get();
+  ok(healed.data().hidden === true, 'so a thread left headless can always be closed');
 
   /* ---------------------------------------------------------- archive */
   console.log('\narchive');
@@ -362,7 +428,7 @@ async function main() {
   await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${oldThread.id}`).set({
     season: Y - 1, room: 'candidates', title: 'Stale', tags: ['about'], by: 'old handle 11', t: 0, lastAt: 0, lastBy: 'old handle 11', n: 1, excerpt: '', score: 0, pinned: false, locked: false, hidden: false,
   });
-  const ar = await call('forumPost', tokens.cand, { room: 'candidates', tid: oldThread.id, body: 'hello', kind: '' });
+  const ar = await call('forumPost', tokens.cand, { room: 'candidates', tid: oldThread.id, body: 'hello' });
   ok(status(ar) === 'FAILED_PRECONDITION' && reason(ar) === 'archive', 'a thread of another season refuses a reply');
   /* and a deletion: once a season's secret version is destroyed its handles
      cannot be re-derived, so "the author" is not a question with an answer */

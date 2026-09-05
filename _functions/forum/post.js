@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   forumPost({ room, tid?, title?, tags?, body, kind, quote?, acceptGuide? })
+   forumPost({ room, tid?, title?, tags?, body, quote?, acceptGuide? })
      -> { tid, pid, n }
 
    No `tid` opens a NEW THREAD: title, one to five tags, the first post
@@ -11,9 +11,10 @@
 
    The first post a member ever makes needs acceptGuide: true, which stamps
    guideAt on the handle. Every text goes through the guard; every write is
-   refused on a locked or hidden thread and on any season but the one under
-   way. Rate limits: 3 threads and 40 posts per handle per UTC day, 20 s
-   between posts.
+   refused on a locked or hidden thread, on a thread whose QUESTION has been
+   deleted (which is closed, however the thread head reads), and on any season
+   but the one under way. Rate limits: 3 threads and 40 posts per handle per
+   UTC day, 20 s between posts.
 
    // step 2: ring('oa-forum-posted', {}) after a successful write, for the
    // follow digests; the payload stays empty by design.
@@ -61,7 +62,6 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
   const m = await P.member(req, room);
   const { D, Y } = m;
   const body = P.textField(d.body, M.BOUNDS.body, true);
-  const kind = P.kindField(d.kind);
   const accept = d.acceptGuide === true;
   const roomRef = D.collection('forumSeasons').doc(String(Y)).collection('rooms').doc(room);
 
@@ -111,7 +111,6 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
         n: 1,
         by: m.handle,
         body,
-        kind,
         t: now,
         up: 0,
         down: 0,
@@ -154,6 +153,15 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
     const tv = th.data();
     if (Number(tv.season) !== Number(Y)) P.refuse('failed-precondition', 'archive');
     if (tv.locked || tv.hidden) P.refuse('failed-precondition', 'locked');
+    /* A THREAD WHOSE QUESTION HAS GONE IS CLOSED (owner, 2026-09-05: "noone
+       should be able to reply in such a thread"). Deleting a question now
+       hides its thread, so `tv.hidden` above already answers this for
+       anything written since; the read is for the rows written before that
+       rule, where a deleted question sits under a thread still standing. One
+       document, inside the transaction that guards the write, so it cannot be
+       raced by a deletion landing between the two. */
+    const head = await tx.get(threadRef.collection('posts').where('n', '==', 1).limit(1));
+    if (head.empty || (head.docs[0].data() || {}).hidden) P.refuse('failed-precondition', 'locked');
 
     let quote = null;
     if (q) {
@@ -189,7 +197,6 @@ exports.forumPost = onCall(P.OPTS, async (req) => {
       n,
       by: m.handle,
       body,
-      kind,
       t: now,
       up: 0,
       down: 0,

@@ -14,8 +14,10 @@ _t[0-9]*.mjs
 # run ends — never content.
 .claude/worktrees/
 
-# The emulator suite writes its own log beside the repository root when
-# _functions/test/forum-emulator.mjs is run locally. Tooling scratch, and the
-# run that produced it is the ground truth rather than the file.
+# Firebase emulator artefacts, written by a local emulators:exec run of
+# _functions/test/forum-emulator.mjs. Tooling scratch, and the run that
+# produced them is the ground truth rather than the files.
 firestore-debug.log
 ui-debug.log
+firebase-debug.log
+pubsub-debug.log

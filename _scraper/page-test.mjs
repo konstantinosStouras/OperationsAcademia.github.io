@@ -9697,7 +9697,7 @@ for (const w of [320, 360, 390, 430]) {
       by: 'patient owl 7', t: OLD, lastAt: OLD, lastBy: 'patient owl 7', n: 1, excerpt: 'Congratulations on the flyout',
       score: 0, pinned: false, locked: false, hidden: false } },
     { path: `${T}/seed-t1/posts/seed-p1`, data: { season: FY, room: 'candidates', tid: 'seed-t1', n: 1, by: 'patient owl 7',
-      body: HOSTILE_BODY, kind: 'first-hand', t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
+      body: HOSTILE_BODY, t: OLD, up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' } },
     { path: `forumTags/${FY}_candidates`, data: { counts: { flyouts: 1, europe: 1 } } },
   ];
   const LEAKS = [CAND.uid, CAND.email, 'Cassiopeia', 'Zyxwvut', 'Uncommon University', 'forum-c1'];
@@ -9839,6 +9839,7 @@ for (const w of [320, 360, 390, 430]) {
         if (chips[i].t < ex.b - 0.5) clash++;
         if (stats.l < chips[i].r && chips[i].l < stats.r && stats.t < chips[i].b && chips[i].t < stats.b) clash++;
       }
+      const chipStyle = getComputedStyle(card.querySelector('.oa-badges .oa-label'));
       return {
         chips: chips.length, clash,
         tallyLeft: stats.r <= title.l + 0.5 && stats.t <= title.t + 40,
@@ -9846,6 +9847,8 @@ for (const w of [320, 360, 390, 430]) {
         answers: (card.textContent.match(/answers?/g) || []).length,
         replies: (card.textContent.match(/repl(y|ies)/g) || []).length,
         comments: (card.textContent.match(/comment/gi) || []).length,
+        chipFont: parseFloat(chipStyle.fontSize),
+        chipHeight: Math.max(...chips.map((c) => c.b - c.t)),
       };
     });
     ok(geom.chips >= 2, `forum (candidate): the card carries a tag row of more than one chip, which is what could collide (${geom.chips})`);
@@ -9855,6 +9858,11 @@ for (const w of [320, 360, 390, 430]) {
     eq(geom.answers, 1, 'forum (candidate): and the answer count is printed once, in the tally');
     eq(geom.replies, 0, 'forum (candidate): the card says answers, never replies');
     eq(geom.comments, 0, 'forum (candidate): and offers no comment on anything, which is the whole model');
+    /* smaller and lighter than the site's default label, which is 700-weight
+       at 12.5px and reads as crowded when four sit in a row under a question
+       (owner, 2026-09-05: "the tags still look cramped, make them smaller") */
+    ok(geom.chipFont <= 12 && geom.chipHeight <= 22,
+      `forum (candidate): the tag chips are small, not the site's chunky badge (${geom.chipFont}px, ${Math.round(geom.chipHeight)}px tall)`);
     eq(list.filterLabels, ['Tags', 'Search questions'], 'forum (candidate): the list engine draws the tag filter and the text search');
     eq(list.count, '1 question this season', 'forum (candidate): the count line');
     eq(list.cloud.sort(), ['europe', 'flyouts'], 'forum (candidate): the Popular tags card is drawn from the tally');
@@ -9869,7 +9877,7 @@ for (const w of [320, 360, 390, 430]) {
       pwned: window.__pwned,
       injected: document.querySelectorAll('.oa-forum-text img, .oa-forum-text script').length,
       text: document.querySelector('.oa-forum-text').textContent,
-      kind: (document.querySelector('.oa-forum-kind') || {}).textContent,
+      kinds: document.querySelectorAll('.oa-forum-kind, .oa-forum-kinds').length,
       votes: document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v:not([disabled])').length,
       score: document.querySelector('.oa-forum-score').textContent,
       updown: document.querySelector('.oa-forum-updown').textContent,
@@ -9880,7 +9888,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(th.title, HOSTILE_TITLE, 'forum (candidate): the thread heading prints the title as text');
     ok(th.pwned === undefined && th.injected === 0 && th.text.includes('<img src=x'),
       'forum (candidate): a hostile body renders as text, nothing executes');
-    eq(th.kind, 'First-hand', 'forum (candidate): the post says how the author knows');
+    eq(th.kinds, 0, 'forum (candidate): no post declares a kind and no compose box asks for one (the control was removed, owner 2026-09-05)');
     eq(th.votes, 2, 'forum (candidate): another member\'s post offers like and dislike');
     ok(th.score === '0' && th.updown === '0 / 0', 'forum (candidate): the counts start at nought');
     eq(th.threadVotes, 1, 'forum (candidate): the caller\'s own votes are asked for once when the thread opens');
@@ -9928,7 +9936,6 @@ for (const w of [320, 360, 390, 430]) {
     ok(qb.accept, 'forum (candidate): a first post asks for the guide to be accepted');
     await q.fill('#oa-forum-body', 'Thank you. The teaching load question worked for me too.');
     await q.check('#oa-forum-accept');
-    await q.check('.oa-forum-kinds input[value="first-hand"]');
     await q.click('#oa-forum-send');
     await q.waitForSelector('.oa-forum-post[data-n="2"]', { timeout: 15000 });
     const rep = await q.evaluate(() => {
@@ -9941,7 +9948,6 @@ for (const w of [320, 360, 390, 430]) {
         mine: !!p2.querySelector('.oa-forum-handle.is-me'),
         own: p2.querySelectorAll('.oa-forum-v[disabled]').length,
         edit: (p2.querySelector('.oa-forum-act[data-act="edit"]') || {}).textContent,
-        kind: (p2.querySelector('.oa-forum-kind') || {}).textContent,
         heading: document.querySelector('.oa-forum-answers-h h2').textContent,
         sortOptions: [...document.querySelectorAll('#oa-forum-sort option')].map((o) => o.value),
         accept: document.querySelectorAll('[data-act="accept"]').length,
@@ -9957,13 +9963,12 @@ for (const w of [320, 360, 390, 430]) {
     ok(/teaching load question worked/.test(rep.body), 'forum (candidate): the reply\'s own words follow');
     ok(rep.mine && rep.own === 2, 'forum (candidate): the reply is marked as the reader\'s own, with both vote buttons disabled');
     ok(/^Edit · \d+ min left$/.test(rep.edit || ''), 'forum (candidate): the author is offered Edit with the minutes left');
-    eq(rep.kind, 'First-hand', 'forum (candidate): the kind the reader chose');
     eq(rep.heading, '1 Answer', 'forum (candidate): the answers band counts, and says answers');
     eq(rep.sortOptions, ['score', 'oldest'], 'forum (candidate): and offers the two orders, highest score first');
     eq(rep.accept, 0, 'forum (candidate): NO tick is offered on somebody else\'s question, whatever this reader thinks of the answer');
     eq(rep.save, 2, 'forum (candidate): the question and the answer can each be saved');
     eq(rep.comments, 0, 'forum (candidate): and there is nowhere to comment on either, which is the whole model');
-    eq(rep.sent.keys, ['acceptGuide', 'body', 'kind', 'quote', 'room', 'tid'], 'forum (candidate): the reply sent room, tid, body, kind, the quote and the acceptance');
+    eq(rep.sent.keys, ['acceptGuide', 'body', 'quote', 'room', 'tid'], 'forum (candidate): the answer sent room, tid, body, the quote and the acceptance, and no kind');
     eq(Object.keys(rep.sent.quote).sort(), ['n', 'text'], 'forum (candidate): the quote sent is n and text only');
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
 
@@ -10015,7 +10020,7 @@ for (const w of [320, 360, 390, 430]) {
         note: p3.querySelector('.oa-forum-removed').textContent,
         body: p3.querySelector('.oa-forum-text'),
         anchor: p3.querySelector('a[href*="sigecom"]'),
-        stored: doc && { body: doc.body, kind: doc.kind, hidden: doc.hidden, hiddenBy: doc.hiddenBy, n: doc.n },
+        stored: doc && { body: doc.body, hidden: doc.hidden, hiddenBy: doc.hiddenBy, n: doc.n },
         acts: [...p3.querySelectorAll('.oa-forum-act')].map((b) => b.getAttribute('data-act')).filter(Boolean),
         still: !!document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-text'),
         title: document.getElementById('oa-forum-title').textContent,
@@ -10023,11 +10028,15 @@ for (const w of [320, 360, 390, 430]) {
     }, T);
     ok(/deleted by its author/i.test(del.note), 'forum (candidate): a deleted reply says who deleted it, never that moderation removed it');
     ok(!del.body && !del.anchor, 'forum (candidate): its words and its link are off the page');
-    eq(del.stored, { body: '', kind: '', hidden: true, hiddenBy: 'author', n: 3 },
+    eq(del.stored, { body: '', hidden: true, hiddenBy: 'author', n: 3 },
       'forum (candidate): and erased in the database, with the slot kept so the numbering still reads');
     eq(del.acts, [], 'forum (candidate): a deleted post offers no reply, quote, edit or delete');
     ok(del.still, 'forum (candidate): the other replies are untouched');
     eq(del.title, HOSTILE_TITLE, 'forum (candidate): and the thread keeps its title, since the opening post was not the one deleted');
+    /* the seeded question is another handle's, so an ordinary member is
+       offered nothing on it: delete is the author's or the maintainer's */
+    ok(await q.evaluate(() => !document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]')),
+      'forum (candidate): somebody else\'s question offers this member no Delete at all');
 
     /* the seen-mark and the leak check on a thread page */
     const seen = await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-seen') || 'null'));
@@ -10048,8 +10057,26 @@ for (const w of [320, 360, 390, 430]) {
     await q.press('#oa-forum-tag-in', 'Enter');
     await q.fill('#oa-forum-tag-in', 'Teaching Release');
     await q.press('#oa-forum-tag-in', 'Enter');
+    /* NUDGE NOBODY, REFUSE NOBODY (owner, 2026-09-05). The curated list no
+       longer offers `rumour`, so the picker suggests it to no one; a poster
+       who types it anyway still gets the tag, which is the half the owner
+       asked to keep. Measured on the suggestion list AND on the chip. */
+    await q.fill('#oa-forum-tag-in', 'rumou');
+    const suggested = await q.$$eval('#oa-forum-tagsugg [data-tag]', (ns) => ns.map((b) => b.getAttribute('data-tag')));
+    /* SCOPE, said exactly: the seeded tally here holds flyouts and europe, so
+       what this measures is the CURATED half of the pool. The other half is
+       the room's own tally, and a tag a member has really used is offered
+       like any other: the room describing itself rather than the site
+       recommending it. */
+    ok(!suggested.includes('rumour'), 'forum (candidate): the curated half of the picker offers no rumour tag');
+    await q.fill('#oa-forum-tag-in', 'Rumour');
+    await q.press('#oa-forum-tag-in', 'Enter');
     const chips = await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag')));
-    eq(chips, ['offers', 'teaching-release'], 'forum (candidate): two tags, the second normalised to a slug');
+    eq(chips, ['offers', 'teaching-release', 'rumour'],
+      'forum (candidate): two curated tags and a free one the reader typed, each normalised to a slug');
+    await q.click('#oa-forum-tagchips .oa-chip[data-tag="rumour"]');
+    eq(await q.$$eval('#oa-forum-tagchips .oa-chip', (ns) => ns.map((n) => n.getAttribute('data-tag'))),
+      ['offers', 'teaching-release'], 'forum (candidate): and it comes off again like any other chip');
     await q.click('#oa-forum-ask-send');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
     const asked = await q.evaluate((t) => {
@@ -10123,6 +10150,26 @@ for (const w of [320, 360, 390, 430]) {
     eq(await q.evaluate((t) => window.__fb.docs[t + '/' + new URLSearchParams(location.search).get('t')].accepted, T), '',
       'forum (accept): pressing it again unticks it, and the thread says so');
 
+    /* TICKED, THEN THE ANSWER DELETED: the tick goes with it, in the same
+       transaction the function writes (forum/delete.js), or the thread would
+       go on telling every reader that a question with no answer left in it
+       has been answered. It also puts this thread back where the step below
+       needs it, with no live answer holding the question down. */
+    await q.click('#oa-forum-answers [data-act="accept"]');
+    await q.waitForSelector('#oa-forum-answers .oa-forum-post.is-accepted', { timeout: 15000 });
+    q.once('dialog', (d) => d.accept());
+    await q.click('#oa-forum-answers .oa-forum-act[data-act="delete"]');
+    await q.waitForFunction(() => !!document.querySelector('#oa-forum-answers .oa-forum-removed'), null, { timeout: 15000 });
+    const untick = await q.evaluate((t) => ({
+      stored: window.__fb.docs[t + '/' + new URLSearchParams(location.search).get('t')].accepted,
+      marked: document.querySelectorAll('#oa-forum-answers .oa-forum-post.is-accepted').length,
+      note: (document.querySelector('#oa-forum-answers .oa-forum-removed') || {}).textContent,
+    }), T);
+    eq(untick.stored, '', 'forum (accept): deleting the ticked answer clears the tick on the thread');
+    eq(untick.marked, 0, 'forum (accept): and nothing on the page still says it was answered');
+    ok(/answer was deleted by its author/i.test(untick.note || ''),
+      'forum (accept): the tombstone reads as an answer, never as a reply');
+
     /* ---- SAVED, and WATCHED: this browser's, and nowhere else -------------
 
        Neither writes a document. A uid beside a thread id is a record of what
@@ -10142,8 +10189,8 @@ for (const w of [320, 360, 390, 430]) {
     ok(saved.mine && Object.keys(saved.store.items).length === 1,
       'forum (saved): the mark is in this browser, keyed to the account');
     ok(!saved.leaks, 'forum (saved): and carries no address');
-    await q.click('.oa-forum-crumbs a');
-    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    /* the tag cards are beside every view, so this needs no navigation, and
+       the thread stays on screen for the step below */
     const before = await q.evaluate(() => window.__fb.log.filter((e) => e.op === 'set' || e.op === 'update').length);
     await q.click('#oa-forum-tags [data-watch]');
     await q.waitForFunction(() => (JSON.parse(localStorage.getItem('oa-forum-saved') || '{}').tags || []).length === 1,
@@ -10162,6 +10209,25 @@ for (const w of [320, 360, 390, 430]) {
 
     eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
       'forum (candidate): the join is remembered for the session under the handle');
+    /* THEIR OWN QUESTION, WHICH NOBODY HAS ANSWERED: it goes, and the whole
+       thread goes with it, so none is ever left headless (owner, 2026-09-05).
+       The thread just posted is the one case an ordinary member may delete. */
+    q.once('dialog', (d) => d.accept());
+    await q.click('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+    await q.waitForFunction(() => {
+      const list = document.getElementById('oa-forum-list');
+      return list && !list.hidden && list.querySelector('.oa-card');
+    }, null, { timeout: 15000 });
+    const gone = await q.evaluate((t) => {
+      const tid = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumDelete').pop().data.tid;
+      return {
+        thread: window.__fb.docs[t + '/' + tid].hidden,
+        listed: [...document.querySelectorAll('#oa-forum-list .oa-card-title')].map((n) => n.textContent),
+      };
+    }, T);
+    eq(gone.thread, true, 'forum (candidate): deleting a question nobody answered takes the whole thread');
+    ok(!gone.listed.some((t2) => /second-year teaching release/.test(t2)),
+      'forum (candidate): and it is off the list, rather than standing there headless');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
   }
@@ -10175,7 +10241,9 @@ for (const w of [320, 360, 390, 430]) {
     ok(await q.evaluate(() => !window.__fb.docs['candidateMarkers/admin-uid-0000000000']), 'forum (maintainer): no marker is written for them');
     await q.waitForSelector('#oa-forum-admin:not([hidden])', { timeout: 15000 });
     eq(await q.$$eval('#oa-forum-admin [data-seed-room]', (ns) => ns.map((n) => n.getAttribute('data-seed-room'))), ['candidates', 'open'],
-      'forum (maintainer): the seed card offers the guide for each room not yet seeded');
+      'forum (maintainer): the guide card offers a button for each admitted room');
+    ok((await q.$$eval('#oa-forum-admin [data-seed-room]', (ns) => ns.map((n) => n.textContent))).every((t) => /^Post the guide/.test(t)),
+      'forum (maintainer): reading Post the guide while neither room has one');
     await q.click('#oa-forum-admin [data-seed-room="candidates"]');
     await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
     const seeded = await q.evaluate(() => {
@@ -10186,6 +10254,7 @@ for (const w of [320, 360, 390, 430]) {
         sub: card.querySelector('.oa-card-sub').textContent,
         sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumModerate').map((e) => e.data),
         left: [...document.querySelectorAll('#oa-forum-admin [data-seed-room]')].map((n) => n.getAttribute('data-seed-room')),
+        labels: [...document.querySelectorAll('#oa-forum-admin [data-seed-room]')].map((n) => n.textContent),
         handle: document.getElementById('oa-forum-myhandle').textContent,
       };
     });
@@ -10194,7 +10263,9 @@ for (const w of [320, 360, 390, 430]) {
       'forum (maintainer): pinned, locked and tagged about');
     ok(/^Moderator/.test(seeded.sub), 'forum (maintainer): under the Moderator handle');
     eq(seeded.sent, [{ op: 'seedGuide', room: 'candidates' }], 'forum (maintainer): forumModerate was sent the op and the room, and no body');
-    eq(seeded.left, ['open'], 'forum (maintainer): the seed card now offers the other room alone');
+    eq(seeded.left, ['candidates', 'open'], 'forum (maintainer): both buttons stay, since the guide is a stored copy that has to be refreshable');
+    ok(/^Update the guide/.test(seeded.labels[0]) && /^Post the guide/.test(seeded.labels[1]),
+      'forum (maintainer): the seeded room now reads Update the guide, the unseeded one still Post it');
     eq(seeded.handle, 'quiet heron 42', 'forum (maintainer): their own handle is an ordinary drawn one, never Moderator');
     await q.click('#oa-forum-list .oa-card .oa-card-head');
     await q.waitForSelector('#oa-forum-thread .oa-forum-post.is-first', { timeout: 15000 });
@@ -10224,6 +10295,42 @@ for (const w of [320, 360, 390, 430]) {
     }));
     eq(landed.title, 'A test question from the maintainer', 'forum (maintainer): a post lands');
     ok(landed.by === 'quiet heron 42' && landed.mine, 'forum (maintainer): under their drawn handle, indistinguishable from any member\'s');
+
+    /* THE MAINTAINER MAY DELETE ANY POST (owner, 2026-09-05: "the admin
+       should be able to delete any questions or answers") and is NOT held by
+       the rule that keeps an answered question standing. A live reply by
+       another handle is written in first, or "enabled" would pass for the
+       wrong reason: with nothing holding the question down the rule is not in
+       play at all. The AUTHOR's side of it (the control drawn disabled with
+       its reason) is pinned in the selftest against the page's own source and
+       driven against the real function in the emulator test, which is where a
+       refusal can be proved. */
+    const mineTid = await q.evaluate(() => new URLSearchParams(location.search).get('t'));
+    await q.evaluate(([t, tid]) => {
+      window.__fb.docs[t + '/' + tid + '/posts/other-p2'] = { season: 0, room: 'candidates', tid: tid,
+        n: 2, by: 'patient owl 7', body: 'A reply nobody has deleted.', kind: '', t: Date.now(),
+        up: 0, down: 0, quote: null, hidden: false, hiddenBy: '' };
+      window.__fb.docs[t + '/' + tid].n = 2;
+    }, [T, mineTid]);
+    await q.click('.oa-forum-crumbs a');
+    await q.waitForSelector('#job-' + mineTid + ' .oa-card-head', { timeout: 15000 });
+    await q.click('#job-' + mineTid + ' .oa-card-head');
+    await q.waitForSelector('.oa-forum-post[data-n="2"]', { timeout: 15000 });
+    const asAdmin = await q.evaluate(() => {
+      const one = document.querySelector('.oa-forum-post.is-first .oa-forum-act[data-act="delete"]');
+      const two = document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="delete"]');
+      return {
+        live: document.querySelectorAll('.oa-forum-post:not(.is-first)').length,
+        q: one ? { label: one.textContent, disabled: one.disabled } : null,
+        a: two ? { label: two.textContent, disabled: two.disabled } : null,
+      };
+    });
+    eq(asAdmin.live, 1, 'forum (maintainer): their question carries a live reply, so the answered rule is really in play');
+    eq(asAdmin.q, { label: 'Delete', disabled: false },
+      'forum (maintainer): their own answered question is still deletable, since the rule does not hold them');
+    eq(asAdmin.a, { label: 'Remove', disabled: false },
+      'forum (maintainer): and another handle\'s reply offers Remove, the word for acting on somebody else\'s post');
+
     eq(errors, [], 'forum (maintainer): no uncaught script error');
     await ctx.close();
   }
@@ -10237,7 +10344,7 @@ for (const w of [320, 360, 390, 430]) {
       { path: `${PT}/old-t1`, data: { season: PY, room: 'candidates', title: 'How long did offers take last year?', tags: ['offers', 'waiting'],
         by: 'brisk marten 3', t: OLD, lastAt: OLD, lastBy: 'brisk marten 3', n: 1, excerpt: 'Weeks.', score: 4, pinned: false, locked: false, hidden: false } },
       { path: `${PT}/old-t1/posts/old-p1`, data: { season: PY, room: 'candidates', tid: 'old-t1', n: 1, by: 'brisk marten 3',
-        body: 'Weeks, in my case. Three to five after the flyout.', kind: '', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
+        body: 'Weeks, in my case. Three to five after the flyout.', t: OLD, up: 5, down: 1, quote: null, hidden: false, hiddenBy: '' } },
     ];
     const { ctx, page: q, errors } = await signedInPage(`forum.html?room=candidates&season=${PY}`,
       { user: CAND, docs: [CAND_PROFILE, ...SEEDED, ...archive], selector: '#oa-forum' });

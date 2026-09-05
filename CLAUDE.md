@@ -2695,12 +2695,14 @@ profile id, on a uid-keyed document that never sits beside a handle) and
 
 **Tags replace the blueprint's one category.** A thread carries 1 to 5 slugs
 of `[a-z0-9-]{2,24}`; `TAGS` in the model is the curated list of about thirty
-and free tags are allowed beside them, normalised through `slug()`. The tally
+and free tags are allowed beside them, normalised through `slug()`. NO TAG IS
+REFUSED: the list is only what the picker OFFERS (see "No rumours" below,
+where `rumour` comes off it and stays postable). The tally
 `forumTags/{Y}_{room}` is bumped in the thread transaction as a NESTED map
 with `FieldValue.increment` (the `recordVisit` lesson: never a dotted path),
 capped at `TAG_COUNT_CAP` (400) distinct slugs so the one hot document cannot
 grow without bound (a tag past the cap is still on its thread, just not
-tallied). Tags are fixed at creation: `forumEdit` touches body and kind only,
+tallied). Tags are fixed at creation: `forumEdit` touches the body only,
 so the tally never drifts, and the guide says "Tags are set when the question
 is asked". The guide thread is tagged `about`.
 
@@ -2731,15 +2733,43 @@ your own words away is a different act with a different answer.
 `_functions/forum/delete.js` is the seventh callable, and it reads no
 `EDIT_WINDOW_MS` at all, which the selftest pins rather than trusting.
 
+**BUT NOT A QUESTION SOMEBODY HAS ANSWERED**, and that is the owner changing
+their own instruction the same day after seeing what it produced: *"a user
+cannot delete a question posted that has received at least one answer. If all
+answers are deleted, then the user who posted the respective question should
+be able to delete it. Right now, I delete the question but the looks of it
+looks orphan forum"*.
+
+The first build blanked such a question and left the thread standing, on the
+reasoning that other people's replies must not go with it. The screenshot of
+the result is the argument against it: a page headed *"Deleted by its author"*
+with no question under it and one reply hanging below reads as a broken
+thread, not a tidy one. **So there are two states and no third**: no live
+reply and the whole thread goes; a live reply and the question cannot be
+deleted at all. `DELETED_TITLE` left the model with the state it named, since
+nothing writes it any more.
+
+**"Live" is the second sentence of the instruction.** A reply its own author
+or the maintainer has deleted no longer holds the question down, so a thread
+whose answers have all gone can be withdrawn by the person who asked it. The
+count is one query for posts that are not hidden, `limit(2)`, since the only
+question is whether ANY of them is a reply and only one of them can be the
+question.
+
+**THE MAINTAINER MAY DELETE ANY POST** in either room (*"the admin should be
+able to delete any questions or answers"*), and is not held by the rule above:
+removing a question as moderation takes the thread with it, replies included,
+which is what removing a question means.
+
 **IT IS A TOMBSTONE, AND BOTH HALVES OF THAT ARE THE POINT.** The words really
 go: `body` and `kind` are ERASED in the database, not merely flagged, or
 "delete" is a lie the page tells on the maintainer's behalf. The post's SLOT
 stays, because `n` is the post's name: a reply quotes by number (`#4`), the
 thread's `n` is the next number to hand out, and a hole would renumber nothing
-and break both. So the row is drawn as removed and the thread still reads.
-`hidden` with `hiddenBy: 'author'` says which of the two it is, and the page
-says *"deleted by its author"* rather than *"removed"*, which is what
-moderation's own removals will say when the report queue arrives.
+and break both. So a deleted reply is drawn as removed and the thread reads
+on. `hiddenBy` says which of the two it was, `'author'` or `'admin'`, so the
+page says *"deleted by its author"* or *"removed by the maintainer"* rather
+than guessing.
 
 **A QUOTE OF IT SURVIVES, deliberately.** `forumPost` stores a COPY of the
 quoted words on the reply, which is already what keeps an edit from rewriting
@@ -2747,14 +2777,10 @@ somebody else's reply; the same rule means deleting your post does not blank
 the passage a reply was written about. The guide says your words are gone; it
 does not promise to reach into what other people wrote.
 
-**The opening post is the thread, up to a point.** With no replies the whole
-thread is hidden, off every list, because the title and the question were the
-author's words too. With replies the opening post is blanked and the title is
-replaced by `DELETED_TITLE`, but the thread stands: other members wrote those
-replies, and one person changing their mind must not take a dozen other
-people's words down with it. That is also the griefing answer, since asking a
-question, collecting the answers and deleting the thread is otherwise a move
-the design would allow.
+**The griefing worry the first build was written around is answered by the
+refusal rather than by the blanking**: asking a question, collecting the
+answers and deleting the thread is exactly what "not while it has an answer"
+forbids.
 
 **Refused on an ARCHIVED season and on a HIDDEN thread; allowed on a LOCKED
 one.** Once a season's secret version is destroyed its handles cannot be
@@ -2766,17 +2792,162 @@ second press is a SUCCESS, not an error.
 **The confirmation says what is true of this one.** Everywhere else on this
 site hiding is never a one-way door, and here it is: the words are gone and
 there is no Restore, so the dialog says so rather than asking a bare
-are-you-sure, and it words the three cases differently (a reply, an opening
-post with replies, an opening post that takes its thread).
+are-you-sure, and it words the four cases apart (your reply, your question,
+and the maintainer removing either).
+
+**A THREAD WHOSE QUESTION HAS GONE IS CLOSED, AND NOBODY MAY REPLY IN IT**
+(owner, 2026-09-05, of a screenshot showing a deleted question, a deleted
+reply, and a compose box under both: *"the entire thread should be deleted
+too, and noone should be able to reply in such a thread"*). Deleting a
+question now hides its thread, so `tv.hidden` answers this for anything
+written since; the rows that need the second half are the ones written
+BEFORE that rule, where a blanked question sits under a thread still
+standing. So `forumPost` reads the head post inside the transaction that
+guards the write, one equality on one collection, and refuses `locked` when
+it is missing or hidden. In the FUNCTION rather than only on the page,
+because a page can be got round; on the page too, where the reply box is
+replaced by a line saying the thread is closed. And pressing Delete on a
+question that is already gone FINISHES THE JOB rather than doing nothing:
+it shuts the thread, which is the one press that clears a legacy thread
+left headless.
+
+**And the control says NO before it is pressed.** An answered question draws
+Delete disabled with the reason in its tooltip, rather than a button that
+fails when somebody presses it; the maintainer's own says *Remove* on a post
+that is not theirs. `amAdmin()` asks `OAAccounts.isAdmin()`, the one
+definition, so the page and the function cannot disagree about who may remove
+somebody else's post.
 
 Tests: the `forum delete` block of `testForum` (a callable of its own, no
 window even read, the author check, the erase, the kept slot, the archive and
-hidden refusals, the locked one NOT refused, both opening-post branches, and
-the page's control, confirmation and wording), the emulator test's own block
-against the real function (somebody else refused, the author's reply deleted
-long past the edit window, a second press a success, a quote of it surviving,
-both opening-post branches), and the browser block in `page-test.mjs`, which
-posts a reply, deletes it and reads the stored document back.
+hidden refusals, the locked one NOT refused, the answered refusal counting
+REPLIES, `DELETED_TITLE` gone from the model too, a question always taking its
+thread, the maintainer's two exemptions, and the page's control, confirmation
+and wording), the emulator test's own block against the real function
+(somebody else refused, the author's reply deleted long past the edit window,
+a second press a success, a quote of it surviving, an answered question
+refused, the maintainer removing other people's replies with `hiddenBy:
+'admin'`, the asker then able to delete the question, a reply refused on a
+headless thread and one press closing it), and the browser block in
+`page-test.mjs`, which posts a reply, deletes it, reads the stored document
+back, finds Delete disabled on the question the reply answers, and deletes a
+question of its own to watch the whole thread leave the list.
+
+### The compose box says nothing about being anonymous
+
+It used to carry a standing warning above every question and every reply,
+reminding the writer that a handle is not a disguise and that a detail here
+beside a detail there can identify somebody. The owner had it removed
+(2026-09-05): *"I do not want to over-stress to users that they are
+anonymous, it is OK. They are adults."* Nothing is lost from the record: the
+small-population note ("This forum is small") is still the third of the
+guide's three notes, and rule 4 still says not to reveal who you are; the
+guide is pinned at the top of both rooms and every member ticks it before
+their first post, and
+the Privacy Policy paragraph held verbatim in this file says the same thing
+for announce day. What went is the repetition on every screen.
+
+`.oa-forum-warn` and its copy are DELETED from the page and the stylesheet
+rather than left unrendered, which the selftest pins: this file's own rule
+is that nothing merely hidden counts as withheld, and a block still in the
+source is one CSS change from coming back.
+
+### No rumours, and no box asking how you know
+
+Owner, 2026-09-05, over a screenshot of the reply box with its three radio
+buttons ringed in red: *"what are these? Add in the forum's rules that posting
+rumors, unverified stories or [running colleagues down] is not allowed. Be
+nice and be a good citizen/colleague... and don't let users to post a rumor.
+Also I don't understand why a user should select 'plain' and 'First-hand, it
+happened to me', perhaps remove these."*
+
+**The three radio buttons were `KINDS`, and all three are gone.** A post
+carried `kind`: `''` (Plain), `'first-hand'` or `'rumour'`, drawn as a chip
+under the post, asked in the reply box, in the edit box and in the ask form.
+Both halves of that were wrong. It asked every poster a question with no good
+answer, which is what the owner saw: nothing on the page said what turned on
+it, nothing read it, and the honest answer to "how do you know" is the post
+itself. And its third option WAS PERMISSION: a box labelled Rumour is the site
+telling a member that a rumour is a thing to post here, tidily, as long as it
+is ticked. Removing the label is what makes rule 5 mean something.
+
+**Removed from the model, not narrowed to one value.** `KINDS` is gone from
+`oa-forum-model.js`, `kind` is out of `KEYS.post`, `kindField` is out of
+`member.js`, the reason `kind` is out of `ERRORS` and `REASONS`, and the
+radios, the chip and their CSS are out of the page. The writer scan does the
+rest for free: `KEYS.post` no longer names `kind`, so a `@doc post` block that
+wrote one would FAIL THE BUILD, both ways. A model that still knew the word
+would be one edit from drawing the control again.
+
+**The rules say the two things the owner asked for, in his own order.** Rule 1
+is *"Be kind, and be a good colleague. Disagree with the point, never the
+person, and write nothing about a school, a department or a fellow candidate
+that you would not put your own name to."* Rule 5 is *"No rumours and no
+unverified stories. Post what happened to you, or what you can point to; if
+you have only heard it, leave it out. Running down a school, a department or a
+colleague is not on either, however politely it is phrased..."* Rule 5 is
+where the marker's own rule used to be, which is why the count is still
+thirteen and why no rule still tells anybody to MARK a post as anything.
+"Bitching" is the owner's word for what rule 1 and rule 5 forbid; the guide
+words it as a colleague would.
+
+**NOTHING IS ENFORCED, AND THAT IS THE OWNER'S OWN CORRECTION.** A body
+cannot be classified: no rule this repository could write would tell a rumour
+from a question about one, and a guess that refuses a legitimate post is
+worse than the post it refuses (the `deadlineDay` discipline, applied to
+prose). The TAG looked like the one exception, being the one part of a post
+that is a machine-readable label the poster picks, so the first draft refused
+`rumour` and five spellings beside it (`TAG_BANNED`, refused by `tagOk` in
+the model, in the functions and in the page, with the tag box saying why).
+The owner reversed it the same day, and the sentence is the whole rule:
+*"don't remove the possibility users use the tag rumour on a post... what I
+was saying is let's not nudge users to post rumours and gossips on the forum.
+The updated rules are fine now."*
+
+So `TAG_BANNED` is gone, `tagOk` refuses nothing a slug rule allows, and the
+one thing that stays is the NUDGE: **`rumour` is off `TAGS`**, the curated
+list the picker suggests from, so the site offers the word to nobody and
+accepts it from anybody who types it. The distinction is worth keeping
+straight, because it is the difference between a forum with house rules and
+a forum with a filter: **a rule is what the guide says and moderation acts
+on; a suggestion list is what the site puts in front of you.** Only the
+second was the problem. The selftest pins it that way round now (the word
+still tags a post, alone or beside another; the curated list carries neither
+it nor `gossip`), and `page-test.mjs` measures both halves in a browser: the
+CURATED half of the picker offers no rumour tag for "rumou" (what it does
+draw there is the create-a-tag row for the prefix, which is how a free tag
+is made at all), and a reader who types the word gets the chip.
+
+**WHAT IS STILL A NUDGE, SAID RATHER THAN HIDDEN.** The compose picker's
+suggestion pool is the curated list PLUS THE ROOM'S OWN TALLY
+(`drawSugg` in `oa-forum.js`), and the "Popular tags" card is the tally
+alone (`drawTags`). So the first thread anybody tags `rumour` puts the word
+into both, high up, ordered by use like every other tag. That is deliberate
+for now and the reading is: the curated list is the SITE recommending
+something, and the tally is the ROOM describing itself, which is also what
+makes the card a truthful filter. It is the owner's call, and the one-line
+change if they want it is a suppression list read by `drawSugg`/`drawTags`
+only, never by `tagOk`, so nothing would be refused. The browser check says
+which half it measures, rather than a message that reads as covering both.
+
+**The pinned guide thread had to be refreshable for any of this to reach a
+reader**, which is the paragraph above ("A SECOND PRESS REFRESHES THE
+THREAD"): the panel renders the module, the thread is a copy, and rules edited
+after a seed reach only the panel until the button is pressed again.
+
+Tests: the block in `testForum` pins the removal as an ABSENCE on every
+surface it lived on, comments stripped (no `KINDS`, no `kind` on a post, no
+`kindField` or `d.kind` in any callable, neither label named anywhere in the
+functions, no radios or chip in the page or either stylesheet, none in the
+shim's simulator), the two rewritten rules by their opening words, that no
+rule still describes the marker, that no tag is refused and the curated list
+suggests none of these, and the compose bar aligned to its end now that its
+left-hand control is gone. `page-test.mjs` measures a rendered thread
+carrying no chip and no radio group, a reply sent without a kind, and the
+picker suggesting no rumour tag while a typed one still becomes a chip; the
+emulator test posts a thread under a tag the curated list does not offer, and
+drives the seed-then-refresh cycle against a guide whose words have been
+moved on.
 
 ### The question list is laid out the way Stack Overflow lays one out
 
@@ -2803,16 +2974,16 @@ answered ones in a green outline) beside the **title, the first lines, and a
 footer** carrying the tags on one side and who asked on the other. `subtitle`
 returns the handle alone; `onCard` MOVES the engine's own `.oa-badges` and
 `.oa-card-sub` into that footer rather than drawing either twice, which is
-what keeps every fact said once and the reply count in the tally alone. The
+what keeps every fact said once and the answer count in the tally alone. The
 chips are `inline-block`, **scoped to this card** rather than fixed globally,
 because every other list's badges are measured where they are. On a phone the
 tally lies ABOVE the question as a row, the same move the vote column makes in
 a thread (rule 13).
 
 The thread already had the shape: crumbs, a heading, a meta bar, a vote column
-per post, a replies band. What changed is the reading: square arrows rather
+per post, an answers band. What changed is the reading: square arrows rather
 than pills, the score the largest thing in its column, the who-block on the
-brand wash with the handle in the link colour, and a rule under the replies
+brand wash with the handle in the link colour, and a rule under the answers
 heading.
 
 **What is NOT copied is the brand.** No orange, no logo, no wordmark, no
@@ -2869,14 +3040,27 @@ who can read them, and says the forum writes nothing of its own to them.
 
 **The guide is ONE text.** `forumModerate {op:'seedGuide', room}` takes no
 body: it renders `guide.text()` itself as the first post of a pinned, locked
-thread under `Moderator`, once per room per season (a second press is
-`already-exists`), and stamps `forumSeasons/{Y}.guides.{room}`. The panel on
-the page draws `html()` from the same module, so the pinned thread and the
-panel cannot disagree. Thirteen rules, the owner's two notices verbatim, the
-small-population note, and the maintainer paragraph, which says the key is
-destroyed a month after the season and that the maintainer reads and posts in
-both rooms. No link in it (the guard would refuse the seed), and it fits the
-body bound, both pinned.
+thread under `Moderator`, one per room per season, and stamps
+`forumSeasons/{Y}.guides.{room}`. The panel on the page draws `html()` from
+the same module, so the pinned thread and the panel cannot disagree. Thirteen
+rules, the owner's two notices verbatim and the small-population note (the
+maintainer paragraph was removed at the owner's word on 2026-09-05 and lives
+in the Privacy Policy). No link in it (the guard would refuse the seed), and
+it fits the body bound, both pinned.
+
+**A SECOND PRESS REFRESHES THE THREAD**, since 2026-09-05, and that is what
+keeps "one text" true rather than true on the day it was seeded. It used to
+answer `already-exists`: the panel renders the module on every load while the
+thread is a STORED COPY of what the module said when the button was pressed,
+so the morning rules 1 and 5 were rewritten, every reader of the panel saw
+the new rules and every reader of the pinned thread saw the old ones. The
+refresh writes `guide.text()` and nothing else, so the op still cannot carry a
+body of somebody's own; an unchanged guide writes nothing and answers
+`{ updated: false }`, which the button reports rather than navigating. The
+maintainer's card therefore draws a button per admitted room at all times,
+reading "Post the guide" where a room has none and "Update the guide" where it
+has one. **After changing anything in `oa-forum-guide.js`, press it in both
+rooms.**
 
 **The guard is one module on both sides.** `check(text)` answers `''` or
 `email | orcid | phone`; `EMAIL_RX` is the literal from
@@ -2996,7 +3180,7 @@ with `pushState` (`go()`, `popstate`, and every link the page draws to its
 own address followed in place), so a post lands on its thread without a
 round trip and the Back button works; `?room=` and `?season=` travel with
 every address, `?tags=` is the engine's own key. **A past season is the
-archive**: `.oa-archive-banner`, no Ask button, no reply box, no vote button
+archive**: `.oa-archive-banner`, no Ask button, no answer box, no vote button
 in the DOM at all (the functions refuse a write there anyway). Votes are
 drawn from `forumThreadVotes` once per thread open and a press calls
 `forumVote` with the toggled value (`aria-pressed` on `.oa-forum-v`, own
@@ -3029,7 +3213,7 @@ a post on a desktop and lies above it on a phone.
 
 **The browser suite drives the page through a SIMULATOR, never the
 functions.** `_scraper/_fake-firebase.js` gained `forumSim`, a stand-in for
-the six callables over its own fake Firestore: join writes the marker and
+the eight callables over its own fake Firestore: join writes the marker and
 answers the handle and the rooms (the maintainer's address, verified, opens
 both; a seeded current profile opens the candidates room; `emailVerified` or
 a non-password provider opens the open room, the `verifiedToken` reading), a
@@ -3127,7 +3311,7 @@ back and flips the switch:
   "id": "forum-2026-09",
   "date": "2026-09-05",
   "title": "An anonymous forum, in two rooms",
-  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit for fifteen minutes and to delete at any time. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
+  "summary": "The site gains a forum. The Candidates' room is for accounts holding a candidate profile for the season under way; the Open forum is for every registered account with a confirmed e-mail address. You post under a random handle, the same in both rooms for the season, never under your name. Threads carry tags, posts can be liked or disliked and quoted in a reply, and your own post is yours to edit for fifteen minutes and to delete, a question once every reply has gone. The forum guide is pinned at the top of each room; read it once before your first post. Reached from your account menu.",
   "url": "/forum.html"
 }
 ```
@@ -3400,7 +3584,9 @@ and writes nothing when asked for the one already ticked (the shape
   worked is not a new post. That is `forumDelete`'s own reading, applied here.
 * **Deleting the ticked answer takes the tick with it**, in the same
   transaction (`delete.js`), or the thread goes on telling every reader that a
-  question with no answer left in it has been answered.
+  question with no answer left in it has been answered. That is the same
+  transaction the rule above it lives in: a question with a live answer cannot
+  be deleted at all, so the tick and the question can never go together.
 * **No rate limit, deliberately.** It writes one field on the caller's own
   thread and creates nothing; the day counters exist to bound what a handle
   can ADD to a room.

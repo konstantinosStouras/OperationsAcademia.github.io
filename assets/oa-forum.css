@@ -11,9 +11,8 @@
 
    ANYTHING THAT PAINTS ITS OWN GROUND NAMES ITS OWN INK, in both themes: no
    rule below sets a background without a colour beside it, and every colour
-   is a token defined in both themes of v3.css (the canvas's raw hexes for the
-   rumour and first-hand chips are replaced by --warn-* and --ok-*). A rule
-   keyed on the phone breakpoint takes a control's SIZE up (rule 0 in
+   is a token defined in both themes of v3.css. A rule keyed on the phone
+   breakpoint takes a control's SIZE up (rule 0 in
    _MOBILE-STANDARDS.md) and never its shape; rule 13 there is what the
    compose box holds to: a 16px textarea and 42px buttons, measured.
 
@@ -309,13 +308,29 @@ body.v3 .oa-forum-q .oa-badges {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 5px 7px;
   margin: 0;
 }
 
 body.v3 .oa-forum-q .oa-badges .oa-label {
   display: inline-block;
   margin: 0;
+}
+
+/* THE CHIPS ARE SMALLER AND LIGHTER THAN THE SITE'S DEFAULT LABEL (owner,
+   2026-09-05: "the tags still look cramped, make them smaller"). The base
+   `.oa-label` is 700-weight with generous em padding, which is right for one
+   badge on a job posting and crowded when four sit in a row under a question.
+   Scoped to the forum's own three places, so every other list's labels are
+   measured exactly where they were. */
+body.v3 .oa-forum-q .oa-badges .oa-label,
+body.v3 .oa-forum-thtags .oa-label,
+body.v3 .oa-forum-tagcloud a {
+  padding: 2px 7px 3px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 body.v3 .oa-forum-q .oa-card-sub {
@@ -415,7 +430,7 @@ body.v3 .oa-label-new { background-color: var(--ok); color: var(--on-brand); }
 .oa-forum-thtags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px 7px;
   margin-top: 12px;
 }
 
@@ -617,22 +632,6 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 .oa-forum-who .oa-forum-handle { color: var(--brand); }
 .oa-forum-who .oa-forum-handle.is-me { color: var(--ink); }
 
-/* how the author knows */
-.oa-forum-kind {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border: 1px solid;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.oa-forum-kind.is-first-hand { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
-.oa-forum-kind.is-rumour { color: var(--ink-2); border-color: var(--warn-line); background: var(--warn-bg); }
-
 /* "N Answers" is a heading with a rule under it and the order beside it: the
    answers band. There are no comments under either half, and there is no plan
    for any (owner, 2026-09-05); a thread is a question and the answers to it. */
@@ -726,10 +725,15 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 
 .oa-forum-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand-soft); }
 
+/* The compose bar under a textarea. It used to carry the "how do you know"
+   radios on the left with the send button on the right; the radios are gone
+   (owner, 2026-09-05), so it aligns to the END: space-between leaves a lone
+   child at the START, which would put Post reply under the left edge of the
+   box it belongs to. */
 .oa-forum-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
   padding: 12px 14px;
@@ -737,24 +741,6 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   background: var(--bg-3);
   color: var(--ink-2);
 }
-
-.oa-forum-kinds {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  font-size: 13.5px;
-  color: var(--ink-2);
-}
-
-.oa-forum-kinds label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  cursor: pointer;
-}
-
-.oa-forum-kinds input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); }
 
 .oa-forum-accept {
   display: flex;
@@ -766,19 +752,6 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
 }
 
 .oa-forum-accept input { width: 17px; height: 17px; margin: 2px 0 0; flex: none; accent-color: var(--brand); }
-
-.oa-forum-warn {
-  margin: 12px 0 0;
-  padding: 10px 14px;
-  border: 1px solid var(--warn-line);
-  border-radius: 10px;
-  background: var(--warn-bg);
-  color: var(--ink);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.oa-forum-warn strong { color: var(--ink); }
 
 .oa-forum-guardmsg {
   margin: 8px 0 0;
@@ -983,15 +956,14 @@ button.oa-forum-acc[aria-pressed='true']:hover { border-color: var(--ok); }
   gap: 2px;
 }
 
+/* the ground, the ink and the hover; the SIZE comes from the rule that sizes
+   every forum chip (body.v3 .oa-forum-tagcloud a, above), so the side cards
+   and the cards in the list stay one size */
 .oa-forum-tagchip {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
   background-color: var(--brand-soft);
   color: var(--brand);
-  font-size: 12.5px;
-  font-weight: 600;
   text-decoration: none;
   transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
