@@ -1472,6 +1472,125 @@ against a served set that WOULD match (an empty one made it pass for the wrong
 reason: with nothing published, no kind could produce mail, so flipping
 `tellsPoster` onto candidates left the suite green).
 
+## The reveal is an instant, not a day, and a candidate can see their own card first
+
+Three owner requests, 2026-09-04: a candidate who has posted a profile can see
+how THEIR OWN profile will appear before the reveal (only their own, never
+anyone else's); the reveal happens at a time of day that suits readers from
+California to Shanghai; and a candidate can edit anything at any time, with the
+card then saying when. What was decided, so nobody re-opens it:
+
+**14:00 UTC on the reveal day.** The gate was a UTC calendar day, so the first
+scheduled build after midnight UTC revealed, which is 17:00 the previous day in
+California. 14:00 UTC is morning in the Americas, afternoon in Europe and
+evening in East Asia, all still that calendar day (07:00 Los Angeles, 10:00
+New York, 15:00 London, 22:00 Shanghai for the October 2026 reveal). **No page
+TYPES those four clocks**: they are the daylight-saving readings, and a reveal
+set after the clocks go back (late October, November) is an hour earlier in
+the first three. The review sweep found them typed in the FAQ, the form's
+intro and the reveal note's fallback; every one now says the UTC hour and the
+part of the day, and the clocks a page shows are filled by script from
+`describeReveal`, all four or none, with the selftest refusing a typed
+`HH:MM` before a city name on the served pages. **`assets/oa-reveal.js` is
+the ONE definition** (dual-mode, the `oa-jobnav.js` shape): `revealInstant`
+(null for anything but a real yyyy-mm-dd, so a typo can never reveal early),
+`isRevealed`, `describeReveal` (the day with its weekday, `14:00 UTC`, the four
+cities and the reader's own clock, computed with Intl from NAMED zones rather
+than typed, so daylight saving follows on its own, and null where Intl cannot
+answer) and `formatDay`, the site's one day-month-year formatter ("2 October
+2026"; `longDate` in jobs-model is the other order and stays what it is).
+`revealGate` in `candidates-model.mjs` is a thin caller of it, and the meta
+carries `revealAtInstant` beside `revealAt`. Seven files compared a calendar day
+against `revealAt`, none through a module; every one asks `isRevealed` now, and
+`testCandidateReveal` pins the old comparison OUT of each file, because two
+copies of "is it out yet" disagreeing is a profile one page calls held while
+another calls it live.
+
+**The trigger is a Cloud Function, not a cron.** Nothing in Firestore changes at
+14:00, so no document trigger can ring the build; `revealCandidates` in
+`_functions/index.js` is a scheduled function (`0 14 * * *`, UTC) that reads the
+served `candidates-reveal.json` (cache-busted; Pages holds it ten minutes) and,
+on the reveal day, rings the same `ring()` the other doorbells ring with the
+same `oa-jobs-changed`. The build's :07/:27/:47 schedule is the safety net, so a
+lost ring lands the reveal at 14:07 at worst. **Do NOT add a GitHub cron at 14:00
+as well**: two producers for one event is the duplicate-doorbell outage under
+"One event, one build", and the selftest refuses a workflow cron on that hour.
+Like every function here it is inert until deployed; the deploy also creates
+the Cloud Scheduler job, and `firebase functions:list` must read back SIX
+(the four doorbells, `recordVisit` and `sendVerificationEmail`).
+
+**The alerts' reveal note is keyed on the instant, and its mark is lifted to
+it.** `candidateNews` announced when the alert's mark preceded the reveal DAY;
+it precedes the INSTANT now, so a mark stamped at 09:00 on the reveal day still
+gets the note. And the note's stored mark is the newer of the instant and the
+newest profile: every profile's `addedAt` is its posting time, weeks before the
+reveal, so a mark that was only "the newest profile" sat before the boundary and
+the next due run sent the note again (the old fixture hid it with a row dated
+the day after the reveal; the new one has every profile posted before it). With
+the module absent the old fallback stands: an empty mark announces, a set mark
+lists.
+
+**`updatedAt` is a public field, day-cut**, right after `addedAt` and skipped
+when empty like `ref`; the card prints "Profile updated on 2 October 2026" only
+when it is a later day than `addedAt` (the renderer is `oa-candcard.js`, the one
+card builder the public list and the two previews share). It is NOT an alerts
+cursor: the candidates topic lists by `addedAt` alone, so an edit never
+re-announces a profile, and `mergeCandidateRows` keeps the previous `addedAt`
+while taking the fresh `updatedAt`. The rules bound it (`str('updatedAt', 40)`
+in `candShapeOk`, never in the merge hand-over's `hasOnly`); the create ceiling
+of 34 stands, since the form writes it only on the edit path. Nothing gates Edit
+on the reveal, before or after it, and the selftest pins that nothing does.
+
+**Only the candidate sees their own card early, and the copy names the
+maintainer too.** The account page reads `candidateSubmissions` by
+`where('uid', '==', user.uid)`, which the rules already allow the owner
+(`allow read: if isOwner(resource.data.uid) || isAdmin()`), and draws it
+through the same renderer as the public list with a browser twin of the
+build's projection pinned against the real one, so the preview is what the
+build would publish and never anyone else's document. The `|| isAdmin()` is
+why the line reads "only you and the site's maintainer": the Admin area lists
+every held profile, and a site that reads something and says so nowhere is
+wrong whatever its rules allow. The section also answers the two states the
+first version headed as "will go public": a TAKEN-DOWN profile is anything
+the build does not publish (it reads `queued` and `published` only, and
+rewrites a candidate's `withdrawn` to `removed` within minutes, so testing for
+the two words the page knew missed the one it lands in), headed "Your profile
+(taken down)"; and a profile from a PAST season, headed as such, drawn when no
+profile matches the market under way, with the card above offering this
+season's rather than claiming one exists. And "Profile updated on" is stamped
+only when something CHANGED (`dirty`, the test the preview already drew the
+line by; the CV slot's Remove is a button and reports itself), so a Save over
+an untouched form writes the stored stamp back rather than today.
+
+**ONE renderer, ONE projection: `assets/oa-candcard.js`.** The card the
+candidates list draws was inline in `index.html`; it is `cardConfig` now (the
+same seven labelled rows in the same order, with `index.html` passing its own
+three link helpers so the list's output is byte for byte what it was), and
+`publicRowFromDoc` is the browser twin of `rowFromCandidateSubmission` +
+`publicCandidateRow`, with the name canonicaliser, the market year and the
+owner digest INJECTED the way `OAFresh.approvedRow` injects `canonColumns`. The
+account page's own-card section and the form's live preview (`paintCardPreview`
+in `oa-candidateform.js`, reading a QUIET `readForm()` that paints no error and
+moves no focus while the reader types) both go through it, so a preview cannot
+show a link the build refuses or a name it re-spells. `decorate` adds the
+"Profile updated on" line only INSIDE a card body: a locked card has none, so
+the blurred strip never advertises the line and the values stay absent rather
+than hidden. The twin is pinned against the real projection over a fixture
+table covering every branch, `FIELDS` against `CANDIDATE_PUBLIC_FIELDS` both
+ways, and the load order on all three pages; `page-test.mjs` drives the account
+preview with a second, foreign document that must never appear, the form's
+preview following a keystroke, the updated-on line on exactly the served row
+that earned it, the reveal note's local clock, and both pages at 390px.
+
+Tests: `testCandidateReveal` in `_scraper/selftest.mjs` (the module to the
+second, with and without Intl; the gate's parity; the meta's instant; every
+consumer through the module and the old comparison out of each; the doorbell's
+shape, hour and helper; no workflow cron at 14:00; the setup guide; the public
+field, the rules and the three writers; Edit ungated), the reveal block of
+`build-candidates.mjs --selftest`, `alerts-mailer.mjs --selftest` for the note's
+instant and its lifted mark, and `submissions-mailer.mjs --selftest` for an
+e-mail that stops saying "held" from the instant on.
+
 ## Nothing on "What's new" publishes itself either
 
 `changelog.json` says WHAT was announced. Firestore `newsOverrides/{changelog
@@ -1843,6 +1962,158 @@ on all four pages) and the roster/messaging block in `_scraper/page-test.mjs`
 (the money path in a real browser, hostile input included, the remove/restore
 round trip asserted to leave the body, `from` and the timestamp untouched, a
 thread whose messages are all removed still answerable, plus the 390px gate).
+
+## Registration is verified by e-mail
+
+Owner, 2026-09-04: a person who registers with an e-mail address and a
+password must press a link in a message before the account can be used.
+Google sign-ins are already verified by Google; ORCID sign-ins carry no
+e-mail claim and are not gated. The decisions, so nobody re-opens them:
+
+    _functions/verify-email.js        the message (renderer, zero dependencies)
+    _functions/index.js               sendVerificationEmail, the callable that sends it
+    _firestore.rules                  verified(), on every write a signed-in user makes
+    assets/oa-accounts.js             the pending session and the "Check your inbox" card
+    verify-email.html + oa-verify.js  where the link lands
+    _SETUP-EMAIL-VERIFICATION.md      the four secrets, the deploy, how to test
+
+**The rules read the TOKEN, and `verified()` is the one place they read it.**
+`verified()` is a sign-in whose `email_verified` claim is true OR whose
+provider is anything but `password`, and `isOwner(uid)` goes through it, so
+every owner write is gated with no text change at its call sites. The
+top-level user writes (`jobSubmissions`, `candidateSubmissions`,
+`placementSubmissions`, `accountKeys`, `directoryEdits`, `nameFixes`, the
+signed-in branch of `usageSessions`) name `verified()` where they named
+`signedIn()`. **The ONE exception is `profiles/{uid}`**: its owner may create
+and update it on a bare sign-in, because the registration form writes the
+profile in the same breath as it creates the account, before any link can
+have been pressed. Read and delete there stay owner-gated. The selftest pins
+that exactly one write clause in the file is granted on a bare sign-in and
+that it is that one. **Because it is the one write an unverified account may
+make, it is also the one that has to carry a shape**: whoever holds the
+account has not proved the address is theirs, and the first name they type
+is printed at the top of the message that goes TO that address from the
+site's mailbox. So `profileKeys()` in the rules is exactly
+`PROFILE_DOC_KEYS` in `oa-accounts.js` (pinned both ways), every text field
+is bounded, and an update is judged on the keys it CHANGES
+(`diff().affectedKeys()`), so a document carrying an older field is not
+frozen against its own owner. The renderer guards the same line from its
+end: `greetingName` uses a first name only when it is short, on one line and
+carries no address or link, else the greeting is a bare "Hello,". The
+Storage rules gate an upload on the same `verified()`; they still deploy by
+hand (`firebase deploy --only storage --project operations-academia`).
+
+**Every password account that already existed is gated too**, and nothing was
+ever sent to it, because none of them registered through the path that
+sends. So the card promises a message only on the registration path (status
+`'sent'`); on a sign-in or a page load it says "if a message reached you when
+you registered, press its link, otherwise press the button" and the button
+reads "Send the e-mail", which is the one press those accounts need. The
+setup page and the changelog say so.
+
+**A pending session is signed out for everything but the panel.** The browser
+keeps the user for the "Check your inbox" card and nothing else: `user()`
+answers null, `hint()` answers `'out'`, `onChange` fires null, nothing writes
+the hint, the roster row, the tally, the identity keys or the counts, and the
+chip reads "Verify your e-mail". Anything less leaves a flash of unlocked
+cards on the next page, painted from a remembered hint the SDK then
+contradicts. **The archive can still write that hint**: `/v2/` is frozen,
+shares the origin, and its accounts module writes `oaAuthHint` for any
+signed-in user, pending ones included. So the pending branch writes a marker
+beside it, `oaAuthPending` = the uid, and a hint naming that uid is read as
+no hint at all, in `readHint()` and in every live page's `<head>` snippet;
+the marker is cleared the moment that account becomes usable
+(`markPending`). The usage tracker (`oa-usage.js`) makes the same
+`needsVerification` test itself and files a pending account's session as an
+anonymous visitor, because the `usageSessions` rule refuses one filed under
+an unverified uid and the refusal is silent.
+
+**The card opens on its own everywhere but the verify page, and opens on a
+press anywhere.** `openVerifyPanel(status, who, auto)`: the auth handler
+passes `auto`, and only an auto open stands down on `verify-email.html`
+(which confirms the address itself); a press on the chip or the phone-sheet
+link opens it there too, or the one account control in the header would do
+nothing. Closing it puts focus back on that chip, and `wireModalKeys` keeps
+Tab inside every card that claims `aria-modal`.
+
+**The one-time code comes off the address bar at once.** `oa-verify.js`
+reads `mode` and `oobCode` and calls `history.replaceState` before any
+async work; `oa-ga4.js` reports a `page_location` without the code (it runs
+first in the deferred order) and `oa-usage.js` records the path alone when
+the query carries one. The page also moves focus to the heading of the card
+it shows, re-decides its buttons when the session changes (`A.onChange`), and
+treats `confirmVerified()` answering false after a successful
+`applyActionCode` as the link having confirmed a DIFFERENT address, offering
+"Use a different account" rather than a Continue into a locked account page.
+
+**Verification does not refresh the token by itself.** `user.reload()` updates
+`emailVerified` on the object; the rules read the ID token, which is cached
+for up to an hour. So every lift calls `getIdToken(true)` before the first
+write, or the roster row, the tally and the profile read all bounce with
+permission-denied that looks exactly like undeployed rules.
+
+**The site's own message, with Firebase's as the fallback.** The callable
+generates the link with the Admin SDK, cuts the code out of it, and puts it on
+the site's own page (`verify-email.html?mode=verifyEmail&oobCode=...`), so the
+reader lands on operationsacademia.org rather than a firebaseapp.com handler.
+It mails the address on the token only, refuses an already-verified one, and
+keeps its own rate limit in `verifyMail/{uid}` (one send in 90 seconds, six in
+a UTC day), because Firebase's resend limits do not apply to links the Admin
+SDK mints. The slot is RESERVED in a transaction before the send, so parallel
+calls cannot all pass the check and each send a message, and a failed send
+gives the slot back. Neither the link nor the code is ever logged, and neither
+is an SMTP error's message text, which quotes the rejected address in full.
+The browser prints the function's own refusal (too soon, or enough for the
+day) rather than one sentence for both, and a `functions/*` error is worded
+as a send that failed, never as a sign-in failure. When the callable
+cannot be reached (not deployed, down, or the SDK failed to load) the browser
+falls back to `sendEmailVerification`, so nobody is stranded; that message
+comes from Firebase's own address and lands on the same page with no code.
+
+**The renderer is deploy-local.** `firebase deploy` ships only `_functions/`,
+so `verify-email.js` copies the shape of `_scraper/_mail.mjs` (a 600px table,
+an escaper, a plain-text alternative) and imports nothing. The palette is the
+live site's from `assets/v3.css`, the button is a coloured table cell with a
+VML fallback for Outlook, and the link is written out in full as text as well
+as behind the button.
+
+**The deploy count is SIX now.** Four doorbells (`revealCandidates` among
+them), `recordVisit`, and `sendVerificationEmail`. Read the list back after
+every deploy; fewer means a stale checkout. `npm install --prefix _functions` first, since the CLI loads
+`index.js` and this function requires `nodemailer`.
+
+**Where the browser keeps it, so nobody looks in the wrong place.**
+`needsVerification(u)` is the one test (unconfirmed address AND the password
+provider); the auth handler sets `state.pending` from it and takes the
+pending branch before anything a session does; `enterSession(u, fb)` is what
+a usable session does on arrival, factored out because the lift
+(`liftVerification`) has to do the same list later and two copies would
+drift. The registration form no longer writes the signed-in hint for a
+password account; it opens the card and calls `sendVerification` with the
+user it just created, because the auth event may not have fired yet. The
+Functions SDK is loaded lazily by `OAFB.readyFunctions()`, the way Storage
+is, so the ~30 KB bundle costs only the page that presses the button. The
+verify page marks its `<main>` with `data-oa-verify-page`, which is how the
+accounts module knows not to draw the card over it. The header chip while
+pending is `.oa-acct-pending`, styled in BOTH `oa-ui.css` and `v3.css` (the
+live design overrides the engine's rule at a higher specificity, the Excel
+button's lesson). And `_scraper/_fake-firebase.js` makes every seeded user
+VERIFIED by default, so every browser check written before the gate keeps a
+verified reader; an unverified password account is a seed that says so.
+
+Tests: `testEmailVerification` in `_scraper/selftest.mjs` (the message, the
+rules with the exception, the function's secrets and what it never logs, the
+package and lockfile, the setup page and this section, then the browser
+half's source: the exports, the callable-first send with Firebase's message
+as the fallback, `user()` null while pending, the reload-then-token lift,
+the verify page noindex with both tags and no preview block, the two
+registries, the copy on the FAQ and the Privacy Policy, the changelog entry
+at index 0, and the shim's defaults), plus the block in
+`_scraper/page-test.mjs`, which drives it in a real browser: the pending
+session on the jobs page (locked cards, the chip, the card, no hint and no
+writes), Send again reaching the callable and falling back when it is
+absent, "I have verified it" lifting the gate with a fresh token, and the
+verify page's four cards for both readers, at 390px too.
 
 ## What "immediate" costs, and where the waiting used to be
 

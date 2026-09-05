@@ -451,15 +451,47 @@ async function selftest() {
     'nothing new means no candidate e-mail, and the mark stands');
 
   /* Seasons repeat: next cycle the admin sets a new reveal date, the served
-     file is held back to empty, and on the new reveal day it fills at once.
-     The announcement is keyed on the REVEAL DAY, so a subscriber whose mark
-     survives from last season is met with the note again, not a listing. */
+     file is held back to empty, and at the new reveal it fills at once.
+     The announcement is keyed on the REVEAL INSTANT (14:00 UTC on the day,
+     assets/oa-reveal.js), so a subscriber whose mark survives from last
+     season is met with the note again, not a listing. */
   const REV = '2026-10-11';
   ok(M.candidateNews(CAND, CT, '2025-11-05T00:00:00Z', REV).kind === 'reveal',
     'a mark left from last season meets the new reveal with the note, never a listing');
-  const after = M.candidateNews(CAND, CT, '2026-10-11T09:00:00Z', REV);
+  /* THE REVEAL IS AN INSTANT, NOT A DAY (owner, 2026-09-04). A mark stamped
+     on the reveal day BEFORE 14:00 UTC is before the reveal: a bare-day
+     comparison called it "after" and would have sent such a subscriber a
+     listing of the whole season instead of the note. */
+  ok(M.candidateNews(CAND, CT, '2026-10-11T09:00:00Z', REV).kind === 'reveal',
+    'a mark stamped on the reveal day before 14:00 UTC is still before the reveal: the note');
+  ok(M.candidateNews(CAND, CT, '2026-10-11T13:59:59Z', REV).kind === 'reveal',
+    'held to the second before the instant');
+  const after = M.candidateNews(CAND, CT, '2026-10-11T14:00:00Z', REV);
   ok(after && after.kind === 'profiles' && after.rows.length === 1,
-    'a mark stamped on or after the reveal day lists only the genuinely new profiles');
+    'a mark stamped at or after the instant lists only the genuinely new profiles');
+  /* THE NOTE'S MARK IS LIFTED TO THE INSTANT. Every profile's addedAt is its
+     posting time, weeks before the reveal, so a mark that was only "the
+     newest profile" sat before the boundary and the next due run sent the
+     note AGAIN, until somebody happened to post after the reveal day. The
+     old fixture hid it with a row dated 2026-10-12; this one has every
+     profile posted before the reveal. */
+  ok(M.candidateNews(CAND, CT, '', REV).mark === '2026-10-12T08:00:00Z',
+    'the note\'s mark is the newer of the instant and the newest profile');
+  const PRE = [CAND[0], { ...CAND[1], addedAt: '2026-10-11T09:00:00Z' }];
+  const note = M.candidateNews(PRE, CT, '', REV);
+  ok(note && note.kind === 'reveal' && note.count === 2 && note.mark === '2026-10-11T14:00:00Z',
+    'with every profile posted before the reveal, the note\'s mark is the INSTANT itself');
+  ok(M.candidateNews(PRE, CT, note.mark, REV) === null,
+    'so the next due run sends the note no second time, and lists nothing (a profile ' +
+    'posted at 09:00 on the reveal day was covered by the note)');
+  ok(M.candidateNews([...PRE, { ...CAND[1], id: 'x', addedAt: '2026-10-11T15:00:00Z' }], CT,
+    note.mark, REV).rows.length === 1,
+    'while one posted at 15:00 that day is listed as new');
+  /* an EDIT is not a new profile: the topic lists by addedAt alone, so a
+     profile whose updatedAt moved is never re-announced (owner, 2026-09-04:
+     a candidate may edit at any time, and the card says when) */
+  ok(M.candidateNews([{ ...CAND[1], updatedAt: '2026-10-20' }], CT, '2026-10-12T08:00:00Z', REV) === null,
+    'an edited profile (updatedAt) is not announced again');
   const filtered = M.candidateNews(CAND,
     { topics: ['candidates'], country: ['USA'], level: ['Post-Doc'] },
     '2026-08-20T09:00:00Z');

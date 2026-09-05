@@ -141,6 +141,30 @@
       });
     },
 
+    /* The Functions SDK, loaded ONLY when asked for, the same way as Storage
+       above. One card on the site calls a Cloud Function (the verification
+       mailer, from oa-accounts.js), and the compat bundle would otherwise tax
+       every page of the site for that one card. Resolves only when the
+       namespace really gained `functions`; a bundle that loaded and defined
+       nothing is a load failure, which is the branch the caller falls back
+       on (Firebase's own verification message), so nobody is stranded. */
+    readyFunctions: function () {
+      return ready().then(function (fb) {
+        if (fb.functions) return fb;
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = SDK + 'firebase-functions-compat.js';
+          s.async = false;
+          s.onload = function () {
+            if (fb.functions) resolve(fb);
+            else reject(new Error('firebase-sdk-load-failed'));
+          };
+          s.onerror = function () { reject(new Error('firebase-sdk-load-failed')); };
+          document.head.appendChild(s);
+        });
+      });
+    },
+
     /* Collection names, so a rename is a one-line change here and in the rules.
        Mirrors the /lit/ layout:
          users/{uid}                  private per-account subtree (alerts live under it)

@@ -28,7 +28,7 @@
          snippet as every other page; see feedback.html for the reasoning. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         if (h && typeof h.w === 'number' && h.w > 0 && h.w < 600) {
           el.style.setProperty('--oa-chip-w', h.w + 'px');
         }
@@ -437,6 +437,10 @@
          approval simply waits for the build, as before. -->
     <script defer src="assets/oa-fresh.js"></script>
     <script defer src="assets/oa-jobreview.js"></script>
+    <!-- oa-reveal.js BEFORE the two panels that ask whether the candidate
+         profiles are out yet (oa-submissions.js, oa-adminarea.js): the reveal
+         is an instant, 14:00 UTC on the reveal day, decided in one place. -->
+    <script defer src="assets/oa-reveal.js"></script>
     <script defer src="assets/oa-submissions.js"></script>
     <script defer src="assets/oa-feedback.js"></script>
     <script defer src="assets/oa-users.js"></script>

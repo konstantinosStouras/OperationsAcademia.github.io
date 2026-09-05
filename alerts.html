@@ -59,7 +59,7 @@
          draws anything. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         /* the width the chip MEASURED last visit, so the reserve is the real
            one and not a guess at how long a name is; absent on a first visit,
            where the stylesheet's own minimum takes over. Bounded because this
@@ -384,6 +384,10 @@
          the ONE market rule (assets/oa-jobnav.js), so the matcher loads after
          it — without it the matcher says no, never guesses -->
     <script defer src="assets/oa-jobnav.js"></script>
+    <!-- oa-reveal.js BEFORE the matcher, whose factory is handed it: the
+         candidates topic announces against the reveal INSTANT (14:00 UTC on
+         the reveal day), and the example e-mail names that instant. -->
+    <script defer src="assets/oa-reveal.js"></script>
     <script defer src="assets/oa-alert-match.js"></script>
     <!-- who is reading: the preview carries real postings, so it is drawn for
          a registered reader only, asked of the same module the cards ask -->

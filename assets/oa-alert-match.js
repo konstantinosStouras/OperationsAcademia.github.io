@@ -17,11 +17,11 @@
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(require('./oa-countries.js'), require('./oa-schools.js'),
-      require('./oa-jobnav.js'));
+      require('./oa-jobnav.js'), require('./oa-reveal.js'));
   } else {
-    root.OAAlertMatch = factory(root.OACountries, root.OASchools, root.OAJobNav);
+    root.OAAlertMatch = factory(root.OACountries, root.OASchools, root.OAJobNav, root.OAReveal);
   }
-}(typeof self !== 'undefined' ? self : this, function (OACountries, OASchools, OAJobNav) {
+}(typeof self !== 'undefined' ? self : this, function (OACountries, OASchools, OAJobNav, OAReveal) {
   'use strict';
 
   var TOPICS = ['jobs', 'updates', 'candidates', 'deadlines', 'news'];
@@ -310,23 +310,34 @@
    *
    * `since` is the alert's own candidate high-water mark (`lastCandidateAt`),
    * empty for an alert that has never been sent a candidate e-mail; `revealAt`
-   * is the announced reveal day (yyyy-mm-dd, from data/candidates-meta.json).
-   * The announcement goes to any alert whose mark PRECEDES the reveal day, and
-   * that rule is what makes the reveal day ONE e-mail instead of eighty:
+   * is the announced reveal day (yyyy-mm-dd, from data/candidates-meta.json),
+   * from which the reveal INSTANT is derived through assets/oa-reveal.js:
+   * 14:00 UTC on that day, the one definition the build's own gate calls.
+   * The announcement goes to any alert whose mark PRECEDES the instant, and
+   * that rule is what makes the reveal ONE e-mail instead of eighty:
    * profiles are collected for weeks and appear all at once, each stamped
-   * `addedAt` when it was POSTED, so on the day the catalogue goes live a
-   * per-profile window would either replay the whole back-catalogue or —
-   * worse — miss it entirely (every stamp already behind the subscriber's
+   * `addedAt` when it was POSTED, so at the moment the catalogue goes live a
+   * per-profile window would either replay the whole back-catalogue or,
+   * worse, miss it entirely (every stamp already behind the subscriber's
    * window). It is a rule about the reveal rather than about first contact
    * because seasons REPEAT: when the admin sets the next cycle's reveal date
-   * the served file is held back to empty, and on the new reveal day an alert
+   * the served file is held back to empty, and at the new reveal an alert
    * whose mark survives from last season must again be met with the short
-   * note, never a sixty-row listing. (With no revealAt readable, an empty
-   * mark still announces — the safe direction — and a set one lists.)
+   * note, never a sixty-row listing. A mark stamped on the reveal day BEFORE
+   * 14:00 UTC is before the reveal, and gets the note: comparing a bare day
+   * would have called it "after". (With no instant readable, an empty mark
+   * still announces, the safe direction, and a set one lists.)
    *
-   * `mark` is the newest addedAt this send covers — advance the stored mark
-   * to it ONLY when the send succeeds, exactly like every other high-water
-   * mark in the mailer.
+   * `mark` is the newest thing this send covers: advance the stored mark to
+   * it ONLY when the send succeeds, exactly like every other high-water mark
+   * in the mailer. FOR THE NOTE IT IS THE INSTANT ITSELF WHERE THAT IS THE
+   * NEWER, never merely the newest profile: every profile's `addedAt` is its
+   * posting time, weeks before the reveal, so a note whose mark was only the
+   * newest posting sat BEFORE the boundary and the next due run sent the note
+   * again, and again, until somebody happened to post after the reveal day.
+   * Lifted to the instant, the mark sits at 14:00 on the day: a profile
+   * posted at 09:00 that morning is covered by the note (it is counted) and is
+   * never listed a second time, and one posted at 15:00 is listed as new.
    *
    * While the profiles are held the rows are [] and this returns null: no
    * announcement, no listing, no mention. That is the reveal gate holding in
@@ -337,11 +348,14 @@
     rows = arr(rows);
     if (!rows.length) return null;
     var mark = since ? String(since) : '';
-    // an ISO stamp compares against a bare day lexicographically: a mark
-    // stamped ON the reveal day ('2026-10-11T…') already sorts after it
-    var day = String(revealAt || '').slice(0, 10);
-    if (!mark || (day && mark < day)) {
-      return { kind: 'reveal', count: rows.length, mark: latestAddedAt(rows) };
+    /* the instant, in the same second-precision ISO shape the rows'
+       `addedAt` and the stored marks carry (jobs-model's isoStamp), so the
+       three compare lexicographically as instants */
+    var inst = OAReveal && OAReveal.revealInstant ? OAReveal.revealInstant(revealAt) : null;
+    var edge = inst ? inst.toISOString().replace(/\.\d{3}Z$/, 'Z') : '';
+    if (!mark || (edge && mark < edge)) {
+      var newest = latestAddedAt(rows);
+      return { kind: 'reveal', count: rows.length, mark: edge > newest ? edge : newest };
     }
     var fresh = newCandidatesFor(rows, c, mark).sort(function (x, y) {
       return String(y.addedAt || '').localeCompare(String(x.addedAt || ''));

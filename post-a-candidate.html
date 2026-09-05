@@ -59,7 +59,7 @@
          draws anything. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         /* the width the chip MEASURED last visit, so the reserve is the real
            one and not a guess at how long a name is; absent on a first visit,
            where the stylesheet's own minimum takes over. Bounded because this
@@ -167,9 +167,13 @@
                   <div class="oa-note" id="oa-intro">
                     <p><strong>Creating a candidate profile is free.</strong> Your profile
                     stays <em>private</em> until the reveal date announced on the
-                    <a href="./#candidates">candidates page</a> — every profile appears
-                    there all at once on that day, and stays for the rest of the job market
-                    year, where it is seen by the hiring committees who use this site.</p>
+                    <a href="./#candidates">candidates page</a>: every profile appears
+                    there all at once at 14:00 UTC on that day (morning in the Americas,
+                    afternoon in Europe, evening in East Asia), and stays for the rest of the
+                    job market year, where it is seen by the hiring committees who use this
+                    site. Until then only you and the site&rsquo;s maintainer can see your card,
+                    as a preview under this form and on your
+                    <a href="account.html">account page</a>.</p>
                     <p>You need an Operations Academia account to post, so that your profile is
                     yours: you can come back any time to <em>edit</em> it, <em>replace or
                     remove</em> the files on it, or <em>take it down</em> altogether. Each
@@ -423,17 +427,41 @@
                     </div>
                   </form>
 
+                  <!-- THE LIVE PREVIEW (owner, 2026-09-04): the candidate's
+                       card as the candidates page will draw it, redrawn as
+                       they type, by assets/oa-candcard.js, the SAME renderer
+                       the public list uses over the SAME projection the build
+                       publishes. Shown with the form, hidden with it. On a
+                       phone it stacks under the form (assets/oa-ui.css). -->
+                  <section class="oa-preview oa-cand-preview" id="oa-cand-preview" hidden
+                    aria-labelledby="oa-cand-preview-h">
+                    <div class="oa-preview-head">
+                      <h3 id="oa-cand-preview-h">Preview</h3>
+                      <p id="oa-cand-preview-note"></p>
+                    </div>
+                    <div class="oa-preview-body">
+                      <p class="oa-hint" id="oa-cand-preview-empty">Your card appears here
+                        once the form has a first name, a last name, a university and a
+                        position.</p>
+                      <div id="oa-cand-preview-card"></div>
+                      <p class="oa-hint" id="oa-cand-preview-cv" hidden></p>
+                    </div>
+                  </section>
+
                   <div class="oa-done" id="oa-done" hidden>
                     <h3>Thank you &mdash; your profile has been received.</h3>
                     <p>Reference <span class="oa-ticket" id="oa-ref"></span> &mdash; keep this if you
                     need to write to us about your profile.</p>
-                    <p>Profiles are revealed all together on the date shown on the
+                    <p>Profiles are revealed all together at 14:00 UTC on the date shown on the
                     <a href="./#candidates">candidates page</a>; until then yours stays private,
-                    and after the reveal it appears there at the next scheduled update, normally
-                    within an hour. You can edit it, replace its files, or take it down at any time
-                    by opening <a href="post-a-candidate.html">Post your candidacy</a> again while
-                    signed in &mdash; it reopens your profile. We do not send a confirmation e-mail,
-                    so please keep the reference above.</p>
+                    and you can see how it will appear on your
+                    <a href="account.html">account page</a>. After the reveal a profile appears
+                    there within a few minutes of posting. You can edit it, replace its files, or
+                    take it down at any time by opening
+                    <a href="post-a-candidate.html">Post your candidacy</a> again while signed in
+                    (it reopens your profile), and the card then says when you last updated
+                    it. We do not send a confirmation e-mail, so please keep the reference
+                    above.</p>
                     <p class="oa-done-actions">
                       <a class="button blue" href="./#candidates">Back to the candidates</a>
                     </p>
@@ -504,6 +532,15 @@
     <script defer src="assets/oa-schools.js"></script>
     <script defer src="assets/oa-combo.js"></script>
     <script defer src="assets/oa-place-picker.js"></script>
+    <!-- The live card preview's dependencies, in the order they are asked:
+         oa-jobnav.js (the one definition of the market year the projection
+         falls back to), oa-reveal.js (the one definition of the reveal
+         instant the note names) and oa-candcard.js (the card renderer and
+         the build's browser twin), all BEFORE the form script that draws
+         the preview. -->
+    <script defer src="assets/oa-jobnav.js"></script>
+    <script defer src="assets/oa-reveal.js"></script>
+    <script defer src="assets/oa-candcard.js"></script>
     <script defer src="assets/oa-candidateform.js"></script>
   </body>
 </html>

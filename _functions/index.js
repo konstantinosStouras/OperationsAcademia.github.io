@@ -1,20 +1,36 @@
 /* ---------------------------------------------------------------------------
-   Operations Academia — instant publish.
+   Operations Academia: instant publish, the visit resolver, and the
+   verification mailer.
 
-   THREE doorbells, one job each. When a job posting changes in Firestore,
+   SIX functions live in this file: four doorbells (publishOnChange,
+   publishOnCandidateChange, publishOnReview, and the clock, revealCandidates),
+   the university-visit resolver (recordVisit), and the e-mail verification
+   mailer (sendVerificationEmail, set up in _SETUP-EMAIL-VERIFICATION.md). A
+   deploy lists all six, and
+   reading that count back is how a deploy from a stale checkout is caught.
+
+   FOUR doorbells, one job each. When a job posting changes in Firestore,
    start the GitHub build that publishes it, so a new posting or an edit
    reaches the site in about a minute instead of waiting for the 20-minute
    schedule; when a CANDIDATE PROFILE changes, start the same build — it runs
-   build-candidates.mjs too, and once the reveal date has passed a new profile
-   is public information the moment it is posted (before the date, the
+   build-candidates.mjs too, and once the reveal instant has passed a new
+   profile is public information the moment it is posted (before it, the
    build's own reveal gate still writes nothing, so ringing early costs
-   nothing and leaks nothing); and
+   nothing and leaks nothing);
    when the maintainer APPROVES a posting from the review queue, start the
    sheet read that publishes it, which is a different workflow because
    data/jobmarket.json holds the approved rows and only that job writes it.
    Approving is an act with an expectation attached — it used to sit invisible
    for up to half an hour, and then up to twenty minutes more while it waited
-   for the build that merges the file it had just written.
+   for the build that merges the file it had just written; and
+   at 14:00 UTC EVERY DAY (`revealCandidates`, a scheduled function rather
+   than a Firestore trigger), read the site's own candidates-reveal.json and,
+   when today is the reveal day, ring the same build, so the profiles go
+   public at the instant the site names rather than at the build's next
+   scheduled tick. The build's :07/:27/:47 schedule stays the safety net: if
+   this ring is lost the reveal lands at 14:07 at worst. It is deliberately
+   NOT a GitHub cron at 14:00 as well: two producers for one event is the
+   duplicate-doorbell outage CLAUDE.md records (One event, one build).
 
    It deliberately does NOT build, e-mail, or touch Drive — the scheduled
    build owns all of that and is already idempotent. This is a doorbell, not a
@@ -36,16 +52,44 @@
         permission "Contents: read and write" — nothing else.
      2. firebase functions:secrets:set GH_DISPATCH_TOKEN   (paste the PAT)
      3. firebase deploy --only functions
-   Steps with screenshots: v2/_SETUP-INSTANT-PUBLISH.md
+   Steps with screenshots: _SETUP-INSTANT-PUBLISH.md (repository root)
    --------------------------------------------------------------------------- */
 
 'use strict';
 
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
+/* MODULAR, because firebase-admin 14 removed the namespaced surface whole:
+   `admin.apps`, `admin.firestore()` and `admin.firestore.FieldValue` are all
+   undefined there: the breaking change the CLI's upgrade warning promised,
+   and the one the load-time smoke test caught (FieldValue.increment would
+   have thrown on the first ping, after a deploy that looked clean). */
+const { initializeApp, getApps } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getAuth } = require('firebase-admin/auth');
+const nodemailer = require('nodemailer');
+const { renderVerifyEmail } = require('./verify-email.js');
 
 const GH_DISPATCH_TOKEN = defineSecret('GH_DISPATCH_TOKEN');
+
+/* The mailbox the verification e-mail is sent from: the same four names the
+   scheduled mailers read from the repository's secrets, held here in Secret
+   Manager (_SETUP-EMAIL-VERIFICATION.md). */
+const SMTP_HOST = defineSecret('SMTP_HOST');
+const SMTP_PORT = defineSecret('SMTP_PORT');
+const SMTP_USER = defineSecret('SMTP_USER');
+const SMTP_PASS = defineSecret('SMTP_PASS');
+
+const SITE = 'https://www.operationsacademia.org';
+const CONTACT = 'operationsacademia@gmail.com';
+
+/** The Admin app, initialised once whichever function touches it first. */
+function adminApp() {
+  if (!getApps().length) initializeApp();
+}
 
 const REPO = 'konstantinosStouras/OperationsAcademia.github.io';
 const EVENT_TYPE = 'oa-jobs-changed';
@@ -57,7 +101,7 @@ const REVIEW_EVENT_TYPE = 'oa-jobreview-decided';
 const CLIENT_STATES = ['queued', 'withdrawn', 'hidden'];
 
 /** One repository_dispatch POST — the whole of what every doorbell does once
-    it has decided to ring. Shared so the three cannot drift. */
+    it has decided to ring. Shared so the four cannot drift. */
 async function ring(eventType, payload, okLine) {
   const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
     method: 'POST',
@@ -135,6 +179,67 @@ exports.publishOnCandidateChange = onDocumentWritten(
       'candidate build dispatched');
   });
 
+/* ------------------------------------------------------------- the reveal
+
+   THE REVEAL IS AN INSTANT, NOT A DAY (owner, 2026-09-04). Profiles are held
+   until 14:00 UTC on the day named in data/candidates-reveal.json (07:00 in
+   Los Angeles, 22:00 in Shanghai, still that calendar day for every reader),
+   and the build's reveal gate (revealGate in _scraper/candidates-model.mjs,
+   a caller of assets/oa-reveal.js) writes the rows only from that instant.
+   Nothing in Firestore changes at 14:00, so no document trigger can ring
+   the build for it; this scheduled function does. It reads the SAME served
+   file the build reads, and when today (UTC) is the reveal day it rings the
+   SAME doorbell the document triggers ring, with the same helper.
+
+   The served file is Pages-cached for ten minutes, so the URL is cache-busted
+   and the fetch asks for no store; a date edited on the reveal morning may
+   still read stale at 14:00, in which case the build's own :07/:27/:47
+   schedule publishes at 14:07, the safety net this doorbell is not a
+   replacement for. It logs why it rang or did not, so the day's function log
+   answers "did the reveal fire" without guessing. */
+
+const REVEAL_HOUR_UTC = 14;   // keep equal to REVEAL_HOUR_UTC in assets/oa-reveal.js
+const REVEAL_FILE = 'https://www.operationsacademia.org/data/candidates-reveal.json';
+
+exports.revealCandidates = onSchedule(
+  {
+    schedule: '0 14 * * *',
+    timeZone: 'UTC',
+    secrets: [GH_DISPATCH_TOKEN],
+    region: 'us-central1',
+    // a failed run is caught by the build's own schedule seven minutes later;
+    // retrying could only ring twice for one reveal
+    retryCount: 0,
+  },
+  async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    let revealAt = '';
+    try {
+      const res = await fetch(`${REVEAL_FILE}?v=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'user-agent': 'operations-academia-functions' },
+      });
+      if (!res.ok) {
+        logger.warn('reveal: could not read candidates-reveal.json', { http: res.status });
+        return;
+      }
+      revealAt = String((await res.json()).revealAt || '').trim();
+    } catch (err) {
+      logger.warn('reveal: could not read candidates-reveal.json', { error: String(err) });
+      return;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(revealAt)) {
+      logger.info('reveal: no date announced', { revealAt, today });
+      return;
+    }
+    if (revealAt !== today) {
+      logger.info('reveal: not today', { revealAt, today, hourUtc: REVEAL_HOUR_UTC });
+      return;
+    }
+    await ring(EVENT_TYPE, { reason: 'reveal', revealAt }, 'reveal build dispatched');
+  });
+
 /* --------------------------------------------------------------- approvals */
 
 /** The states a decision leaves a queued posting in. `pending` is what the
@@ -177,8 +282,190 @@ exports.publishOnReview = onDocumentWritten(
   });
 
 /* ===========================================================================
-   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and the only
-   one here that is not a doorbell.
+   E-MAIL VERIFICATION. The sixth function, and a mailer rather than a
+   doorbell.
+
+   A person who registers with an e-mail address and a password must press a
+   link in a message before the account can be used (the rules read
+   `email_verified` off the token, see verified() in _firestore.rules).
+   Firebase sends a verification message of its own, but from a
+   firebaseapp.com address, in its own template, landing on a Firebase-hosted
+   page. This function sends the site's own message instead, rendered by
+   ./verify-email.js in the live site's palette, from the site's own mailbox,
+   and pointing at verify-email.html on the site.
+
+   HOW IT IS CALLED. The browser's accounts module calls it as a callable
+   (`sendVerificationEmail`) right after registration and from the "send the
+   e-mail again" button. If the callable is unreachable, the browser falls
+   back to Firebase's own `sendEmailVerification`, so nobody is stranded while
+   this function is not yet deployed or is down.
+
+   WHAT IT MUST NEVER DO. The link carries a one-time code that verifies the
+   address for whoever presses it, so neither the link nor the code is ever
+   logged; a log line names the account and a redacted address and nothing
+   more. A message goes to the address on the TOKEN, never to an address the
+   client sends, so nobody can have a verification link mailed to somebody
+   else. The address must be unverified, or there is nothing to do.
+
+   THE RATE LIMIT IS OURS. Firebase's own resend limits apply to messages it
+   sends, not to links the Admin SDK generates, so this function keeps a small
+   document per account, `verifyMail/{uid}` { sentAt, count, day }, and
+   refuses a second message inside 90 seconds or a seventh in a UTC day. The
+   collection is written by this function alone, with the Admin SDK; no
+   client rule names it and the catch-all rule denies it.
+   =========================================================================== */
+
+const VERIFY_MIN_GAP_MS = 90 * 1000;
+const VERIFY_DAY_MAX = 6;
+
+/** `a***@example.org`: enough to recognise in a log, never enough to write to. */
+function redact(email) {
+  const m = String(email || '').trim().match(/^([^@]{1,2})[^@]*(@.*)$/);
+  return m ? `${m[1]}***${m[2]}` : '***';
+}
+
+exports.sendVerificationEmail = onCall(
+  {
+    region: 'us-central1',
+    secrets: [SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS],
+    /* A bounded fan-out: this is pressed once or twice per registration, and
+       a flood should shed load rather than run up a bill. */
+    maxInstances: 5,
+    timeoutSeconds: 30,
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Sign in first.');
+    }
+    const uid = request.auth.uid;
+    const token = request.auth.token || {};
+    const email = String(token.email || '').trim();
+    if (!email) {
+      logger.warn('verification refused', { uid, reason: 'no-address' });
+      throw new HttpsError('failed-precondition',
+        'This account has no e-mail address to verify.');
+    }
+    if (token.email_verified === true) {
+      logger.warn('verification refused', { uid, reason: 'already-verified' });
+      throw new HttpsError('failed-precondition', 'This address is already verified.');
+    }
+
+    adminApp();
+    const db = getFirestore();
+    const today = new Date().toISOString().slice(0, 10);
+    const now = Date.now();
+    const limitRef = db.collection('verifyMail').doc(uid);
+
+    /* The slot is RESERVED in a transaction before anything is sent. Read,
+       check, send and then write would let ten calls fired in the same
+       second all read the same stamp, all pass, and each send a message from
+       the site's mailbox; a transaction makes the check and the stamp one
+       step, so the second caller reads the first one's reservation. A send
+       that then fails puts the previous stamp back (below), so a failed
+       attempt is not counted against the person who presses again. */
+    const slot = await db.runTransaction(async (tx) => {
+      const before = (await tx.get(limitRef)).data() || {};
+      const count = before.day === today ? Number(before.count || 0) : 0;
+      if (typeof before.sentAt === 'number' && now - before.sentAt < VERIFY_MIN_GAP_MS) {
+        return { refused: 'too-soon' };
+      }
+      if (count >= VERIFY_DAY_MAX) return { refused: 'daily-limit' };
+      tx.set(limitRef, { sentAt: now, day: today, count: count + 1 });
+      return { before };
+    });
+    if (slot.refused === 'too-soon') {
+      logger.warn('verification refused', { uid, reason: 'too-soon' });
+      throw new HttpsError('resource-exhausted',
+        'A message went out a moment ago. Give it a minute and look again.');
+    }
+    if (slot.refused === 'daily-limit') {
+      logger.warn('verification refused', { uid, reason: 'daily-limit' });
+      throw new HttpsError('resource-exhausted',
+        'That is enough messages for today. Try again tomorrow, and look in spam.');
+    }
+    /** Put the stamp back as it was before this call reserved its slot. */
+    const releaseSlot = async () => {
+      try {
+        if (Object.keys(slot.before).length) await limitRef.set(slot.before);
+        else await limitRef.delete();
+      } catch (e) {
+        logger.warn('rate-limit stamp not restored', { uid, error: e.code });
+      }
+    };
+
+    /* Firebase mints the one-time code; the site's own page is what the
+       reader lands on. The continueUrl is where that page sends them next. */
+    let generated = '';
+    try {
+      generated = await getAuth().generateEmailVerificationLink(email, {
+        url: SITE + '/account.html',
+      });
+    } catch (e) {
+      logger.error('verification token not minted', { uid, error: e.code });
+      await releaseSlot();
+      throw new HttpsError('internal', 'The verification message could not be made.');
+    }
+    const code = new URL(generated).searchParams.get('oobCode');
+    if (!code) {
+      logger.error('the minted address carried no verification token', { uid });
+      await releaseSlot();
+      throw new HttpsError('internal', 'The verification message could not be made.');
+    }
+    const link = `${SITE}/verify-email.html?mode=verifyEmail` +
+      `&oobCode=${encodeURIComponent(code)}` +
+      `&continueUrl=${encodeURIComponent(SITE + '/account.html')}`;
+
+    /* The greeting. The profile is written by the registration form in the
+       same breath as the account, so it is usually there; a missing one only
+       costs the first name. */
+    let firstName = '';
+    try {
+      const prof = (await db.collection('profiles').doc(uid).get()).data() || {};
+      firstName = String(prof.firstName || '').trim();
+    } catch (e) {
+      logger.warn('profile not read for the greeting', { uid, error: e.code });
+    }
+
+    const msg = renderVerifyEmail({ firstName, email, link, site: SITE, contact: CONTACT });
+    const port = Number(SMTP_PORT.value() || 587);
+    const transport = nodemailer.createTransport({
+      host: SMTP_HOST.value().trim(),
+      port,
+      secure: port === 465,
+      auth: { user: SMTP_USER.value().trim(), pass: SMTP_PASS.value() },
+    });
+    try {
+      await transport.sendMail({
+        from: `Operations Academia <${SMTP_USER.value().trim()}>`,
+        to: email,
+        subject: msg.subject,
+        html: msg.html,
+        text: msg.text,
+      });
+    } catch (e) {
+      /* The SMTP error's own message can quote the rejected recipient in full
+         ("550 5.1.1 <name@example.org>: Recipient address rejected"), which
+         would undo the redaction beside it. So the code and the response
+         number are logged and the message text never is. */
+      logger.error('verification e-mail not sent', {
+        uid, to: redact(email), error: e.code, response: e.responseCode,
+      });
+      await releaseSlot();
+      throw new HttpsError('internal', 'The message could not be sent.');
+    }
+
+    /* The slot was reserved before the send (the transaction above); a send
+       that failed has just given it back, so only a message that really
+       went out counts against the person. */
+    logger.info('verification e-mail sent', { uid, to: redact(email) });
+    return { sent: true, to: redact(email) };
+  });
+
+/* ====================================================================   WHICH UNIVERSITY A VISITOR CAME FROM — the fourth function, and one of the
+   two here that are not doorbells.
+=======
+   WHICH UNIVERSITY A VISITOR CAME FROM: the fifth function, and one of the
+   two here that are not doorbells.
 
    THE CHART THIS RESTORES, AND THE CLAIM IT CORRECTS. analytics.html used to
    show "which universities visited", measured from Universal Analytics'
@@ -224,14 +511,9 @@ exports.publishOnReview = onDocumentWritten(
    per-function lines before the code.
    =========================================================================== */
 
-const { onRequest } = require('firebase-functions/v2/https');
-/* MODULAR, because firebase-admin 14 removed the namespaced surface whole:
-   `admin.apps`, `admin.firestore()` and `admin.firestore.FieldValue` are all
-   undefined there — the breaking change the CLI's upgrade warning promised,
-   and the one the load-time smoke test caught (FieldValue.increment would
-   have thrown on the first ping, after a deploy that looked clean). */
-const { initializeApp, getApps } = require('firebase-admin/app');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+/* `onRequest`, `getFirestore` and `FieldValue` are required at the top of the
+   file with the rest of the Admin SDK, since the verification mailer above
+   shares them. */
 const dns = require('node:dns');
 
 /* Both VENDORED by _scraper/build-netmap.mjs, because `firebase deploy` ships
@@ -266,7 +548,7 @@ async function reverseDns(ip) {
 }
 
 function visitsDb() {
-  if (!getApps().length) initializeApp();
+  adminApp();
   return getFirestore();
 }
 

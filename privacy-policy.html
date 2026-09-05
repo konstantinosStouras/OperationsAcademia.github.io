@@ -59,7 +59,7 @@
          draws anything. */
       try {
         var h = JSON.parse(localStorage.getItem('oaAuthHint') || 'null');
-        el.setAttribute('data-oa-auth', h && h.uid ? 'in' : 'out');
+        el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');
         /* the width the chip MEASURED last visit, so the reserve is the real
            one and not a guess at how long a name is; absent on a first visit,
            where the stylesheet's own minimum takes over. Bounded because this
@@ -177,6 +177,11 @@
           which we feel may interest you, where you have consented to be contacted for such purposes;
           to notify you about changes to our service. We may contact you by e-mail. If you change your
           mind about being contacted in the future then please let us know.</p>
+          <p>If you register with an e-mail address and a password, we send that address
+          <strong>one</strong> message, from operationsacademia@gmail.com, with a link that confirms
+          the address is yours. The account cannot be used until the link is clicked, and the
+          message is sent again only when you ask for it. Registering with Google needs no such
+          message, because Google has already confirmed the address.</p>
           <p>If you post a job through the Site, we e-mail the address you give us <strong>once</strong>,
           when your posting becomes publicly shown, with the posting as it appears and a link to it.
           That message is about your own submission rather than a subscription, so there is nothing to
