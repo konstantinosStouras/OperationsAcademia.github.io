@@ -82,6 +82,9 @@
   var state = { user: null, resolved: false, profile: null, failed: false, pending: false };
   var queue = [];
   var listeners = [];
+  /* Set the instant a sign-up navigates to the personal area, so nothing opens
+     a modal on the page being left behind (see finish() in openAuth). */
+  var leaving = false;
 
   /* ------------------------------------------------------------------ utils */
 
@@ -1149,9 +1152,13 @@
           // a shared or lab machine was never asked at all, and stayed known
           // by the left-hand half of its e-mail address for ever.
           try {
-            if (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)) {
+            /* Taken FIRST and unconditionally, so the mark is spent whether or
+               not the card ends up opening: it means "this account has been
+               asked", and a second page load must not ask again. */
+            var askAff = !leaving && takeAskAffiliation(uid);
+            if (!leaving && (askAff || (!state.profile && !localStorage.getItem('oaProfileAsked:' + uid)))) {
               localStorage.setItem('oaProfileAsked:' + uid, '1');
-              openProfile(true);
+              openProfile(true, { requireAffiliation: askAff && !(state.profile || {}).affiliation });
             }
           } catch (e) { /* private mode */ }
           return seedOrcidFromProvider();
@@ -1218,7 +1225,39 @@
       .catch(function () { /* best effort — never block sign-in on it */ });
   }
 
-  function openProfile(firstRun) {
+  /* A GOOGLE OR ORCID SIGN-UP NEVER SEES THE REGISTRATION FORM (owner,
+     2026-09-05, having been shown that the compulsory affiliation reached one
+     of the three ways in). Its account is created by a popup with no fields at
+     all, and `seedProfileFromUser` then writes the provider's name, which makes
+     `state.profile` truthy — so the first-run prompt below, keyed on having no
+     profile, could never fire for exactly these accounts either. They are asked
+     once, on the WELCOME card, and the ask is keyed on the SIGN-IN rather than
+     on the account's shape: `isNewUser` is the credential's own word for "this
+     account did not exist a moment ago", which is what "brand new" means here.
+     Nothing else qualifies — a later sign-in, a provider LINKED to an existing
+     account, and every account made before today are all untouched, which is
+     the same "an edit must stay correctable" rule the profile card is held to.
+
+     It is a MARK rather than a call because the sign-up usually navigates: the
+     new account lands on its personal area, so the card has to open on the page
+     it arrives at. Per uid, like `oaProfileAsked`, and taken exactly once. */
+  var ASK_AFF = 'oaAskAffiliation:';
+
+  function markAskAffiliation(uid) {
+    try { localStorage.setItem(ASK_AFF + uid, '1'); } catch (e) { /* private mode */ }
+  }
+
+  /** True ONCE per account: reading it clears it, so the card asks and moves on. */
+  function takeAskAffiliation(uid) {
+    try {
+      if (localStorage.getItem(ASK_AFF + uid) === null) return false;
+      localStorage.removeItem(ASK_AFF + uid);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function openProfile(firstRun, opts) {
+    var mustAff = !!(opts && opts.requireAffiliation);
     var u = state.user;
     // an unconfirmed address has nothing to edit yet: the card that opens is
     // the one that gets it confirmed
@@ -1228,7 +1267,7 @@
       // this is, so queue rather than bounce a signed-in reader to a sign-in
       // box. Only once auth has genuinely resolved to "signed out" is the
       // modal the right answer.
-      if (!state.resolved) { whenSignedIn(function () { openProfile(firstRun); }); return; }
+      if (!state.resolved) { whenSignedIn(function () { openProfile(firstRun, opts); }); return; }
       openAuth();
       return;
     }
@@ -1266,9 +1305,18 @@
             '<label>Last name<input name="lastName" maxlength="80" autocomplete="family-name" ' +
               'value="' + esc(p.lastName || '') + '"></label>' +
           '</div>' +
-          '<label>Affiliation <span class="oa-opt">(optional)</span>' +
-            '<input name="affiliation" maxlength="160" placeholder="University or company" ' +
-              'autocomplete="organization" value="' + esc(p.affiliation || '') + '"></label>' +
+          (mustAff
+            /* The ONE case where this card's affiliation is compulsory: a brand
+               new provider account being asked the question the registration
+               form asks everybody else. Every ordinary edit keeps the chip and
+               keeps the box optional. */
+            ? '<label>Affiliation' +
+                '<input name="affiliation" maxlength="160" required ' +
+                  'placeholder="University or company" autocomplete="organization" ' +
+                  'value="' + esc(p.affiliation || '') + '"></label>'
+            : '<label>Affiliation <span class="oa-opt">(optional)</span>' +
+                '<input name="affiliation" maxlength="160" placeholder="University or company" ' +
+                  'autocomplete="organization" value="' + esc(p.affiliation || '') + '"></label>') +
           '<label>Website <span class="oa-opt">(optional)</span>' +
             '<input name="website" maxlength="300" placeholder="https://…" type="url" ' +
               'value="' + esc(p.website || '') + '"></label>' +
@@ -1282,7 +1330,8 @@
           orcidFieldHTML(p) +
           '<div class="oa-auth-actions">' +
             '<button type="submit" class="button blue">Save profile</button>' +
-            (firstRun ? '<button type="button" class="oa-linkbtn" id="oa-profile-later">Not now</button>' : '') +
+            (firstRun && !mustAff
+              ? '<button type="button" class="oa-linkbtn" id="oa-profile-later">Not now</button>' : '') +
           '</div>' +
         '</form>' +
         (firstRun ? '' : otherAccountsHTML(p, u)) +
@@ -1366,6 +1415,13 @@
       // type="url" happily accepts `javascript:alert(1)` as a valid absolute
       // URL, so refuse anything we would not be willing to put in an href
       // rather than storing a stored-XSS seed for the first renderer.
+      if (mustAff && !out.affiliation) {
+        msg.className = 'oa-auth-msg is-err';
+        msg.textContent = 'Please give your affiliation, the university or company you are at.';
+        f.affiliation.focus();
+        return;
+      }
+
       if (out.website && !/^https?:\/\//i.test(out.website)) {
         msg.className = 'oa-auth-msg is-err';
         msg.textContent = 'Please give a website address starting with http:// or https://.';
@@ -1799,7 +1855,11 @@
     function finish(isNewUser) {
       var dest = isNewUser && firstRunDestination();
       close();
-      if (dest) location.href = dest;
+      /* The profile read this sign-in kicked off lands asynchronously, so
+         without this the welcome card could open on the page we are in the act
+         of leaving and be destroyed by the navigation, spending the mark for
+         nothing. */
+      if (dest) { leaving = true; location.href = dest; }
     }
 
     Array.prototype.forEach.call(wrap.querySelectorAll('.oa-auth-provider'), function (b) {
@@ -1811,7 +1871,12 @@
           else p = new fb.auth.OAuthProvider('oidc.orcid');
           return fb.auth().signInWithPopup(p);
         }).then(function (cred) {
-          finish(!!(cred && cred.additionalUserInfo && cred.additionalUserInfo.isNewUser));
+          var fresh = !!(cred && cred.additionalUserInfo && cred.additionalUserInfo.isNewUser);
+          /* A brand new Google or ORCID account has answered no questions at
+             all, so it is asked for its affiliation on the welcome card. Marked
+             before finish(), which may navigate. */
+          if (fresh && cred.user && cred.user.uid) markAskAffiliation(cred.user.uid);
+          finish(fresh);
         }).catch(function (e) { say(friendly(e)); });
       });
     });

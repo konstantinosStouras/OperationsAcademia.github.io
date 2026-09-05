@@ -2642,6 +2642,41 @@ would hold their name and their photograph hostage to a field they were never
 asked for. So the asymmetry is the design, and the module header says so where
 the next reader will look.
 
+**AND THE OTHER TWO ROADS IN ARE ASKED TOO** (owner, 2026-09-05, on being
+shown that the rule reached one of the three ways an account is made). A Google
+or ORCID sign-up never sees this form: the account is created by a popup with
+no fields at all. Worse, it could not even fall through to the first-run profile
+prompt, because that prompt fires on having NO profile and
+`seedProfileFromUser` writes the provider's name a moment earlier, which makes
+one. So those accounts are asked once, on the WELCOME card, with the box
+`required` and the "Not now" escape withheld: answering is what the card is for.
+
+**The ask is keyed on the SIGN-IN, not on the account's shape.**
+`additionalUserInfo.isNewUser` is the credential's own word for "this account
+did not exist a moment ago", which is exactly what "brand new" means here, and
+it is the only reading that cannot catch somebody else: an account signing in
+again, a provider LINKED to an existing account, and every account made before
+today are all untouched. Keying it on "has no affiliation" instead would have
+asked half the existing membership on their next visit, which is the trap this
+section is otherwise entirely about.
+
+**It is a MARK, not a call, because the sign-up usually navigates.** A new
+account lands on its personal area, so the card has to open on the page it
+ARRIVES at; `oaAskAffiliation:<uid>` carries it there and is taken exactly once,
+whether or not the card then opens, so a second page load never asks again. And
+`finish()` sets `leaving` before it navigates, or the card would open on the
+page being left behind and spend the mark for nothing. The compulsory box is
+reachable only through `openProfile(true, { requireAffiliation: true })`: the
+selftest pins that `mustAff` is nothing but a caller-passed option, so every
+ordinary edit keeps the chip, keeps the box optional and keeps its save guard
+off.
+
+**What it deliberately does NOT do is trap anybody.** The card still closes on
+its X and on Escape, like every other modal here; what "required" buys is that
+the welcome step cannot be completed without an answer. A modal a reader cannot
+leave is not a thing this site has, and one compulsory field is not the place to
+start.
+
 **The ORCID iD is still genuinely optional and now says it is worth giving**,
 on BOTH cards, because the two ask one question: a reader who registers and
 then opens Edit account must not be told two different things about the same
@@ -2663,6 +2698,15 @@ selftest pins the claim rather than leaving it to memory.
 three trees are held to. Only the merge region is pinned byte-identical across
 the two copies of `oa-accounts.js` (`var MERGE_APP` to `function signOut`), and
 both cards sit well outside it, so the divergence is expected and permitted.
+
+Tests (the provider half): the pins in `testRegistrationFields` for the mark,
+the `isNewUser` reading, the linking path marking nothing, the once-only take,
+the `leaving` guard and the shim's `additionalUserInfo`; and the Google
+sign-up block in `_scraper/page-test.mjs`, which presses Continue with Google
+as a brand new account and reads the welcome card back (required box, no
+optional chip, no Not now, the mark spent), refuses a save of three spaces
+with nothing added to the document, saves a real one, and drives a RETURNING
+sign-in past the same path to show it is asked nothing.
 
 Tests: `testRegistrationFields` in `_scraper/selftest.mjs` (the bare label with
 the old chip gone, the `required` attribute beside the two name fields, the

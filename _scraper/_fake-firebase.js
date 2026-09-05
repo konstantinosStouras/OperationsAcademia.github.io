@@ -362,7 +362,11 @@
     var u = makeUser(spec, appName);
     APPS[appName].__user = u;
     APPS[appName].__fire();
-    return Promise.resolve({ user: u });
+    /* The credential's own word for "this account did not exist a moment ago".
+       Default FALSE: the accounts module redirects a new sign-up to the personal
+       area and asks it for an affiliation, and neither belongs in the dozens of
+       checks that sign an EXISTING reader in. `seed.newUser` opts in. */
+    return Promise.resolve({ user: u, additionalUserInfo: { isNewUser: !!seed.newUser } });
   };
 
   /* ------------------------------------------------------------------ apps */

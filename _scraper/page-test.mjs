@@ -9749,6 +9749,97 @@ for (const w of [320, 360, 390, 430]) {
   await ctx.close();
 }
 
+/* -------------------- a GOOGLE sign-up is asked for its affiliation too
+
+   The registration form is one of three ways in and the other two answer no
+   questions at all, so a brand new provider account is asked on the welcome
+   card instead. Driven for real: the shim reports isNewUser, the module marks
+   the account, and the card that opens on the next page has a required box and
+   no Not now. An account that is merely signing in again gets neither.        */
+{
+  const NEWBIE = { uid: 'fresh-google-uid', email: 'fresh@example.edu', emailVerified: true,
+    displayName: 'Fresh Newcomer', providerData: [{ providerId: 'google.com' }] };
+
+  /* the sign-up: press Continue with Google on a page it will NOT navigate
+     away from (firstRunDestination stands down on the posting form), so the
+     card opens in place and can be measured */
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: NEWBIE, newUser: true }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="google"]');
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const i = document.querySelector('#oa-profile-form [name="affiliation"]');
+    return {
+      required: i.required,
+      label: i.closest('label').textContent.trim(),
+      later: !!document.querySelector('#oa-profile-later'),
+      heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+      lede: (document.querySelector('.oa-modal-lede') || {}).textContent || '',
+      marked: localStorage.getItem('oaAskAffiliation:fresh-google-uid'),
+    };
+  });
+  ok(card.required === true, 'google sign-up: the welcome card asks for the affiliation and requires it');
+  ok(!/optional/i.test(card.label),
+    `google sign-up: …with no optional chip (got "${card.label}")`);
+  ok(!card.later, 'google sign-up: …and no Not now, since answering is the point of the card');
+  eq(card.heading, 'Welcome', 'google sign-up: it is the welcome card, not the ordinary profile card');
+  ok(/never published/i.test(card.lede),
+    'google sign-up: …and the card still says where the affiliation goes, which is why it may be asked for');
+  eq(card.marked, null, 'google sign-up: the mark is spent, so a second page load does not ask again');
+
+  /* Saving without one is refused, exactly as the registration form refuses it.
+     Counted rather than asserted absent: seedProfileFromUser has legitimately
+     already written the provider's NAME to this same document, so what is under
+     test is that the refused save adds nothing to it. */
+  const before = await q.evaluate(() => window.__fb.ops('set').filter((x) => x.indexOf('profiles/') === 0).length);
+  await q.fill('#oa-profile-form [name="affiliation"]', '   ');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => (document.querySelector('#oa-profile-msg') || {}).textContent,
+    null, { timeout: 8000 });
+  const refused = await q.evaluate(() => ({
+    msg: document.querySelector('#oa-profile-msg').textContent.trim(),
+    writes: window.__fb.ops('set').filter((x) => x.indexOf('profiles/') === 0).length,
+    stored: (window.__fb.dump()['profiles/fresh-google-uid'] || {}).affiliation,
+  }));
+  ok(/affiliation/i.test(refused.msg),
+    `google sign-up: an affiliation of spaces is refused, naming the field (got "${refused.msg}")`);
+  eq(refused.writes, before, 'google sign-up: …and the refused save writes nothing');
+  ok(!refused.stored, 'google sign-up: …so the profile still holds no affiliation');
+
+  await q.fill('#oa-profile-form [name="affiliation"]', 'Fresh University');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/fresh-google-uid') !== -1,
+    null, { timeout: 8000 });
+  const saved = await q.evaluate(() => window.__fb.dump()['profiles/fresh-google-uid']);
+  eq(saved.affiliation, 'Fresh University', 'google sign-up: …and a real one saves');
+  eq(errors, [], 'google sign-up: no uncaught script error');
+  await ctx.close();
+}
+
+{
+  /* the same reader signing in AGAIN is asked nothing: not a new account */
+  const RETURNING = { uid: 'returning-uid', email: 'back@example.edu', emailVerified: true,
+    displayName: 'Back Again', providerData: [{ providerId: 'google.com' }] };
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: RETURNING }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth());
+  await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="google"]');
+  await q.waitForFunction(() => !!(window.OAAccounts.user()), null, { timeout: 8000 });
+  await q.waitForTimeout(700);
+  const after = await q.evaluate(() => ({
+    card: !!document.querySelector('#oa-profile-form'),
+    marked: localStorage.getItem('oaAskAffiliation:returning-uid'),
+  }));
+  ok(!after.card, 'returning sign-in: no welcome card, because the account is not new');
+  eq(after.marked, null, 'returning sign-in: …and nothing was marked');
+  eq(errors, [], 'returning sign-in: no uncaught script error');
+  await ctx.close();
+}
+
 /* ---------------------------------------------------------- the forum
 
    forum.html, driven end to end through the shim's forum simulator

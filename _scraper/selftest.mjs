@@ -15577,10 +15577,17 @@ async function testRegistrationFields() {
   ok(profAt > 0 && profEnd > profAt, 'profile card: the form markup was found');
   const prof = acct.slice(profAt, profEnd);
   ok(/'<label>Affiliation <span class="oa-opt">\(optional\)<\/span>'/.test(prof),
-    'profile card: the affiliation stays OPTIONAL — it is the edit surface, and a Google or ORCID account ' +
-    'reaches it having never been asked for one');
-  ok(!/name="affiliation"[\s\S]{0,140}required/.test(prof),
-    'profile card: …and its box carries no `required`, or correcting a name would demand an affiliation first');
+    'profile card: an ordinary EDIT still gets the optional chip — correcting a name must not demand an ' +
+    'affiliation of the accounts that were never asked for one');
+  /* The card has a second branch since the provider ask (below): the compulsory
+     box exists, and what keeps the edit surface safe is that NOTHING but an
+     explicit option can reach it. Pin that rather than the absence of the word. */
+  ok(/\(mustAff\s*[\s\S]{0,400}\? '<label>Affiliation' \+/.test(prof),
+    'profile card: the compulsory box is behind mustAff, never the default');
+  ok(/var mustAff = !!\(opts && opts\.requireAffiliation\);/.test(acct),
+    'profile card: …and mustAff is nothing but a caller-passed option, so openProfile() alone is never compulsory');
+  ok(/if \(mustAff && !out\.affiliation\) \{/.test(acct),
+    'profile card: the save guard is conditioned on it too, so an ordinary edit can still clear the box');
 
   /* --- the guard, and where it sits ------------------------------------- */
   const subAt = acct.indexOf("$('#oa-auth-form').addEventListener('submit'");
@@ -15616,6 +15623,25 @@ async function testRegistrationFields() {
   const head = acct.slice(0, acct.indexOf('(function ()'));
   ok(/AFFILIATION/.test(head) && /2026-09-05/.test(head) && /profile card is deliberately NOT held/.test(head),
     'accounts: the module header records the compulsory affiliation and why the profile card is exempt');
+
+  /* --- the third road in: a Google or ORCID sign-up ---------------------- */
+  ok(/if \(fresh && cred\.user && cred\.user\.uid\) markAskAffiliation\(cred\.user\.uid\);/.test(acct),
+    'provider sign-up: a BRAND NEW Google or ORCID account is marked to be asked for its affiliation');
+  ok(/var fresh = !!\(cred && cred\.additionalUserInfo && cred\.additionalUserInfo\.isNewUser\);/.test(acct),
+    'provider sign-up: …decided by the credential\'s own isNewUser, so a later sign-in is never asked again');
+  const linkAt = acct.indexOf('function linkProvider(');
+  const link = linkAt > 0 ? acct.slice(linkAt, acct.indexOf('\n  }', linkAt)) : '';
+  ok(linkAt > 0 && !/markAskAffiliation/.test(link),
+    'provider sign-up: LINKING a provider to an existing account marks nothing — that account is not new');
+  ok(/localStorage\.removeItem\(ASK_AFF \+ uid\);/.test(acct) && /var askAff = !leaving && takeAskAffiliation\(uid\);/.test(acct),
+    'provider sign-up: the mark is taken exactly once, so a second page load does not ask again');
+  ok(/if \(dest\) \{ leaving = true; location\.href = dest; \}/.test(acct),
+    'provider sign-up: a sign-up that navigates opens no card on the page it is leaving, or the mark is spent for nothing');
+  ok(/requireAffiliation: askAff && !\(state\.profile \|\| \{\}\)\.affiliation/.test(acct),
+    'provider sign-up: …and an account that somehow already has an affiliation is not asked for one');
+  ok(/additionalUserInfo: \{ isNewUser: !!seed\.newUser \}/.test(
+       await readFile(path.join(HERE, '..', '_scraper', '_fake-firebase.js'), 'utf8')),
+    'shim: a sign-in answers isNewUser, opt-in per seed, so the browser suite can drive a real sign-up');
 
   /* --- and it is announced, and written down ---------------------------- */
   const changelog = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
