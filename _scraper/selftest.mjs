@@ -12815,13 +12815,15 @@ async function testAnalytics() {
     'growth: the page fetches data/users-growth.json with no-cache, absolute like every served file');
   ok(/A\.growthProjection\(actual, \{ window: GROWTH_WINDOW, ahead: GROWTH_AHEAD, today: today \}\)/.test(page),
     'growth: the dashed line is the model\'s projection, under the page\'s two constants');
-  ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 180;/.test(page),
-    'growth: fitted over 90 days, carried 180 forward');
+  ok(/var GROWTH_WINDOW = 90;/.test(page) && /var GROWTH_AHEAD = 7;/.test(page),
+    'growth: fitted over 90 days, carried a WEEK forward and no further (owner, 2026-09-05: never beyond a week from now)');
+  eq(A.growthProjection(straight).points.length, 8,
+    'growth: the model\'s own default horizon is the same week, so a caller that names none cannot draw a season');
   ok(/figure\('How the community has grown',/.test(page), 'growth: the figure has the agreed title');
   ok(/'dashed line is a straight-line trend fitted over the last ' \+ GROWTH_WINDOW \+\s*\n?\s*' days and carried ' \+ carried \+ ' days forward; an expectation from past ' \+\s*\n?\s*'growth, not a target\. '/.test(page),
     'growth: the caption is BUILT from the window constant and the days really carried, and says what the line is and is not');
   ok(/var carried = Math\.round\(\(Date\.parse\(proj\.horizon\) - Date\.parse\(proj\.lastDay\)\) \/ 86400000\);/.test(page),
-    'growth: …the days carried are read off the RESULT (horizon minus last real day), so a stale copy projected past today is not captioned as 180');
+    'growth: …the days carried are read off the RESULT (horizon minus last real day), so a stale copy projected past today is not captioned as the constant');
   const growthBlock = page.slice(page.indexOf('/* 1b.'), page.indexOf('drawGrowth();', page.indexOf('/* 1b.')));
   ok(growthBlock.length > 50 && growthBlock.length < 400 && !/—/.test(growthBlock),
     'growth: the page\'s own 1b comment carries no em dash');
@@ -14189,7 +14191,8 @@ async function testRegisteredUsersFigure() {
   }
   ok(/rounded down to the nearest ten/.test(log[0].summary) && /Who has registered stays/.test(log[0].summary),
     'changelog: the figure entry says how it is rounded and what stays private');
-  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /next 180 days/.test(log[1].summary)
+  ok(/How the community has grown/.test(log[1].summary) && /last 90 days/.test(log[1].summary) && /week ahead/.test(log[1].summary)
+     && !/180/.test(log[1].summary)
      && /not a target/.test(log[1].summary),
     'changelog: the chart entry names the figure, the window, the horizon and what the line is not');
 

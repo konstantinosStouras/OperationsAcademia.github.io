@@ -13,7 +13,7 @@
       "id": "community-growth-chart-2026-09",
       "date": "2026-09-05",
       "title": "A growth chart on the analytics page",
-      "summary": "The analytics page gains a figure called How the community has grown: the number of registered accounts day by day since the first one, with a dashed yellow line showing where the last 90 days of growth would take the count over the next 180 days. That line is an expectation from past growth, not a target, and the caption says so. Press a name in the legend to put either line away, and open the table under the chart for one row per month.",
+      "summary": "The analytics page gains a figure called How the community has grown: the number of registered accounts day by day since the first one, with a short dashed yellow line showing where the last 90 days of growth would take the count over the week ahead. That line is an expectation from past growth, not a target, and the caption says so. Press a name in the legend to put either line away, and open the table under the chart for one row per month.",
       "url": "/analytics.html"
     },
     {

@@ -3839,13 +3839,18 @@ after `analytics.json` did.
 the chart and the selftest cannot disagree about what "expected growth" means:
 a least-squares straight line fitted over the last 90 actual points (the whole
 record when shorter), whose SLOPE is kept and whose intercept is not, carried
-180 days forward THROUGH THE LAST ACTUAL POINT so the two lines meet. Fitting
+**seven days** forward THROUGH THE LAST ACTUAL POINT so the two lines meet.
+**A week and no further** (owner, 2026-09-05: "do not expand that yellow line
+beyond a week from where we are now"): the first version carried it 180 days,
+and a six-month straight line over a record three weeks old read as a forecast
+of a thousand members, a claim the page cannot make. The model's own default
+is the same week, and the selftest pins both. Fitting
 the intercept too would start the dashed line above or below the real count on
 the day it takes over, a disagreement about a number both sides know. The
 count never falls, so a negative slope is clamped and no projected value is
 below the last actual one; it refuses fewer than two points; it reads no
 clock, `today` being the anchor of the horizon and nothing else (a reader with
-a stale copy still gets 180 days from today); and it is pinned on a synthetic
+a stale copy still gets the week from today); and it is pinned on a synthetic
 straight line, on a plateau and on a falling series. The two constants live
 in `oa-analytics.js` as `GROWTH_WINDOW`/`GROWTH_AHEAD` and the caption is BUILT
 from the window constant and from the RESULT, so the words under the chart
@@ -3855,9 +3860,9 @@ last 90 days and carried N days forward; an expectation from past growth,
 not a target") and gives the count on the last day and the count the trend
 reaches.
 N is the days between the last real point and the horizon, read off the
-projection: 180 on the fresh copy the daily sync writes, and more on a stale
-one, because the model carries the line to 180 days after TODAY and a fixed
-"180" would then understate the line drawn above it (the page-test fixture,
+projection: 7 on the fresh copy the daily sync writes, and more on a stale
+one, because the model carries the line to seven days after TODAY and a fixed
+"7" would then understate the line drawn above it (the page-test fixture,
 whose last day is fixed, is exactly that stale copy, and it asserts the number
 against today). **The wash under the count ends where the count ends.**
 `line()` closes an area series at its last REAL point rather than the last
