@@ -2182,6 +2182,20 @@ them), `recordVisit`, and `sendVerificationEmail`. Read the list back after
 every deploy; fewer means a stale checkout. `npm install --prefix _functions` first, since the CLI loads
 `index.js` and this function requires `nodemailer`.
 
+**The Admin app is found by NAME, never by count.** The functions
+library creates a named app of its own to verify a callable's token, so
+inside every callable `getApps()` is already non-empty while the default
+app, the one `getFirestore()` and `getAuth()` read, may not exist.
+`if (!getApps().length) initializeApp()` therefore skipped the
+initialisation exactly when a callable ran: the day this went live
+(2026-09-05) every call to `sendVerificationEmail` died on "The default
+Firebase app does not exist", the browser fell back to Firebase's own
+message, and that message landed in spam. `recordVisit` never hit it
+because an onRequest handler verifies no token, which is why the deploy
+looked fine. `adminApp()` in `index.js` and `db()` in the forum's
+`member.js` test for an app named `[DEFAULT]`, and the selftest reads
+every functions file with its comments stripped and refuses the count test.
+
 **Where the browser keeps it, so nobody looks in the wrong place.**
 `needsVerification(u)` is the one test (unconfirmed address AND the password
 provider); the auth handler sets `state.pending` from it and takes the
