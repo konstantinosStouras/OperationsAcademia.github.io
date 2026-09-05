@@ -68,7 +68,7 @@
   DocRef.prototype.collection = function (name) { return new Col(this.path + '/' + name); };
   DocRef.prototype.get = function () {
     record('get', this.path);
-    return Promise.resolve(snapOf(this.path));
+    return refusedRead(this.path) || Promise.resolve(snapOf(this.path));
   };
   /* Like the SDK: `merge` DEEP-merges (a nested map's keys are added to,
      not replaced — which is exactly why oa-jobreview writes `edits` with
@@ -133,6 +133,27 @@
     };
   }
 
+  /** A READ THE RULES WOULD REFUSE. `refuseReads: ['users/', 'jobSubmissions']`
+      rejects any document read, list or query whose path begins with one of
+      them, with the code and shape Firestore itself sends.
+
+      It exists for a state no shim can reach any other way: in production a
+      read of your own data is refused when the ID token the rules read still
+      carries the claims the account had before it confirmed its address, and
+      an account minutes old is exactly the one that has such a token. What
+      the page must do about it is the same either way, which is what this
+      lets a browser check drive. */
+  function refusedRead(path) {
+    var pre = seed.refuseReads || [];
+    for (var i = 0; i < pre.length; i++) {
+      if (String(path).indexOf(pre[i]) === 0) {
+        return Promise.reject({ code: 'permission-denied',
+          message: 'Missing or insufficient permissions.' });
+      }
+    }
+    return null;
+  }
+
   function Col(path) { this.path = path; }
   Col.prototype.doc = function (id) {
     // no id = mint one, as the real SDK does for `collection(x).doc()`
@@ -149,7 +170,8 @@
   };
   Col.prototype.get = function () {
     record('list', this.path);
-    return Promise.resolve(querySnap(childrenOf(this.path).map(snapOf)));
+    return refusedRead(this.path) ||
+      Promise.resolve(querySnap(childrenOf(this.path).map(snapOf)));
   };
   /* The queries the pages actually issue — where(==), orderBy, limit, get —
      chainable the way the compat SDK chains them. Grown for the Admin area
@@ -176,6 +198,8 @@
     record('query', this.path + this.__f.map(function (f) {
       return '?' + f[0] + '==' + f[1];
     }).join(''));
+    var no = refusedRead(this.path);
+    if (no) return no;
     var snaps = childrenOf(this.path).map(snapOf);
     this.__f.forEach(function (f) {
       snaps = snaps.filter(function (s) { return s.data()[f[0]] === f[1]; });

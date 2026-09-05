@@ -143,10 +143,12 @@
       jobs: n(s.jobs),
       cands: n(s.cands),
       places: n(s.places),
-      /* Whether the postings could be READ at all. The merge refuses to run
-         without this and so does the deletion: what cannot be listed cannot
-         be taken down, and the last step here removes the only sign-in that
-         could ever reach it again. */
+      /* Whether this browser could READ what the account holds. It decides
+         what the panel can SAY and nothing else. The merge refuses to run
+         without it, because nothing but that browser finishes a merge; a
+         deletion is finished by the sweep, which enumerates the account with
+         the Admin SDK and cannot be refused, so an unreadable survey makes
+         the list incomplete and never the deletion impossible. */
       postingsOk: s.postingsOk !== false
     };
   }
@@ -170,6 +172,14 @@
       every piece of copy written since 2026-08 follows. */
   function describe(counts) {
     var c = counts || {};
+    /* Nothing could be read, so "your account holds nothing you have posted"
+       would be this page inventing an answer it does not have. Say what is
+       true of every deletion instead: all of it goes. */
+    if (c.postingsOk === false) {
+      return 'This deletes your account and everything on it. Anything you have ' +
+        'posted comes off the site, and your e-mail alerts, your details, your ' +
+        'messages and your sign-in go with it.';
+    }
     var posted = [];
     if (c.jobs) posted.push(plural(c.jobs, 'job posting'));
     if (c.cands) posted.push(plural(c.cands, 'candidate profile'));
@@ -367,8 +377,10 @@
         : '') +
       (c.postingsOk
         ? ''
-        : '<p class="oa-form-msg is-err" id="pa-delete-unread">We could not read what this ' +
-          'account has posted, so we cannot take it down. Reload the page and try again.</p>') +
+        : '<p class="oa-note is-warn" id="pa-delete-unread">We could not list what ' +
+          'this account holds, so nothing is named above. Deleting still removes all ' +
+          'of it: the site does the removal itself and does not read it from this ' +
+          'page.</p>') +
       '<p class="v3-pa-danger-warn">This cannot be undone. Your sign-in is removed, and ' +
         'signing up again later starts an empty account.</p>' +
       '<p><label for="pa-delete-word">Type <strong>' + esc(CONFIRM_WORD) +
@@ -384,8 +396,15 @@
 
     var word = $('pa-delete-word');
     var go = $('pa-delete-go');
+    /* THE CONFIRMATION IS THE ONLY GATE. It used to require a readable survey
+       as well, and that was a dead end rather than a safeguard: the survey is
+       how the panel NAMES what will go, while the removal itself is the
+       sweep's, with the Admin SDK, over an account it enumerates server-side.
+       Owner, 2026-09-05, on a newly registered account whose reads were still
+       being refused by a token minted before it confirmed its address: the
+       button was disabled and there was no way past it. */
     function refresh() {
-      go.disabled = !(matchesConfirmation(word.value) && c.postingsOk);
+      go.disabled = !matchesConfirmation(word.value);
     }
     word.addEventListener('input', refresh);
     refresh();
