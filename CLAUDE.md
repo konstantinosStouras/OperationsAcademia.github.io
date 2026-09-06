@@ -2825,7 +2825,7 @@ hidden refusals, the locked one NOT refused, the answered refusal counting
 REPLIES, `DELETED_TITLE` gone from the model too, a question always taking its
 thread, the maintainer's two exemptions, and the page's control, confirmation
 and wording), the emulator test's own block against the real function
-(somebody else refused, the author's reply deleted long past the edit window,
+(somebody else refused, the author's reply deleted long after it was posted,
 a second press a success, a quote of it surviving, an answered question
 refused, the maintainer removing other people's replies with `hiddenBy:
 'admin'`, the asker then able to delete the question, a reply refused on a
@@ -3190,8 +3190,9 @@ drawn from `forumThreadVotes` once per thread open and a press calls
 `forumVote` with the toggled value (`aria-pressed` on `.oa-forum-v`, own
 posts disabled with a title saying why); Quote takes the selection inside
 that post's body or the whole body cut to `BOUNDS.quote` at a word boundary
-and sends `{n, text}` only; Edit appears on the author's own post for the
-window (a countdown from `t`, the function the authority). Every refusal is
+and sends `{n, text}` only; Edit appears on the author's own live post at
+any time (no window and no countdown since 2026-09-06; the function is the
+authority). Every refusal is
 worded through `REASONS`, which the selftest pins against `ERRORS` in
 `member.js` both ways (plus `auth`), so a code never reaches the screen; the
 guard runs on every keystroke so the refusal the function would give is
@@ -3718,7 +3719,20 @@ changes, each pinned:
   function unreachable or cold past its timeout, changes nothing, the
   unreachable-source rule this file applies everywhere. The first visit on a
   device still waits for the join, because the handle is drawn on the server
-  and nowhere else.
+  and nowhere else. **The memory is written only once the session is
+  confirmed** (after the answer, never before the check), or a sign-out
+  pressed while the function was cold would be undone by its answer; and it
+  is forgotten on EVERY path that ends the session, a sign-out press or the
+  SDK answering null for a token it could not renew, the same path on which
+  the accounts module forgets its own hint. The cost, said: until one of
+  those, a device that is not signed out keeps the season's handle beside
+  the account, as it already keeps the account beside the threads it has
+  read and the posts it has saved, and the header hint beside its name and
+  picture. A quiet re-read that lands while an EDIT BOX is open inside a
+  post carries the box and its words across the repaint (`paintPosts`,
+  `reopenEdit`), and a list read from a mount the reader has already left
+  keeps its rows to itself (`listSeq`), since the read now waits for the
+  session and a room can be switched while it does.
 * **The SDK is fetched from the first byte of the page.** `forum.html`
   preloads the four bundles `oa-firebase.js` appends and preconnects to the
   two hosts every read and every post goes to. The home page and the forms

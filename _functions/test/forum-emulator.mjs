@@ -283,7 +283,7 @@ async function main() {
   /* ------------------------------------------------------------- edit */
   console.log('\nforumEdit');
   const e1 = await call('forumEdit', tokens.cand, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'Edited: is a second-year release normal to ask for?' });
-  ok(!e1.error && e1.result.editedAt % 60000 === 0, 'the author edits within the window, stamp on the minute');
+  ok(!e1.error && e1.result.editedAt % 60000 === 0, 'the author edits their own post, stamp on the minute');
   const th1b = await admin.doc(`forumSeasons/${Y}/rooms/candidates/threads/${t1.result.tid}`).get();
   ok(/^Edited:/.test(th1b.data().excerpt), 'editing post 1 recomputes the excerpt');
   const e2 = await call('forumEdit', tokens.adm, { room: 'candidates', tid: t1.result.tid, pid: t1.result.pid, body: 'not mine' });

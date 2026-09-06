@@ -522,8 +522,13 @@
 
     var started = null;
     A.onChange(function (u) {
-      if (A.pendingUser()) { hideAll(); show($('oa-forum-verify'), true); started = null; S.me = null; return; }
-      if (!u) { hideAll(); show($('oa-needauth'), true); started = null; S.me = null; return; }
+      /* No usable session, however it ended: a sign-out press, a token the
+         SDK could not renew, an account removed. The accounts module forgets
+         its own hint on this path, and the join memory goes with it, so the
+         device keeps the handle beside the account exactly as long as the
+         site itself remembers the account and not a moment longer. */
+      if (A.pendingUser()) { hideAll(); show($('oa-forum-verify'), true); started = null; S.me = null; forgetMe(); return; }
+      if (!u) { hideAll(); show($('oa-needauth'), true); started = null; S.me = null; forgetMe(); return; }
       if (started === u.uid) return;
       started = u.uid;
       var remembered = S.me && S.me.uid === u.uid ? S.me : readMe(u.uid);
@@ -541,7 +546,8 @@
       hideAll();
       show($('oa-forum-loading'), true);
       join(u).then(function (me) {
-        if (!A.user() || A.user().uid !== u.uid) return;   // signed out mid-flight
+        if (!A.user() || A.user().uid !== u.uid) return;   // signed out mid-flight: nothing is kept
+        writeMe(me);
         S.me = me;
         draw();
       }).catch(function (err) {
@@ -564,13 +570,12 @@
   }
 
   /** forumJoin, for an account this browser has no memory of: the handle and
-      the rooms, waited for, because there is nothing to draw without them. */
+      the rooms, waited for, because there is nothing to draw without them.
+      The answer is NOT remembered here: the caller remembers it once it has
+      checked the session is still the one that asked, or a sign-out pressed
+      while the function was cold would be undone by its answer. */
   function join(u) {
-    return call('forumJoin', {}).then(function (r) {
-      var me = meOf(u, r);
-      writeMe(me);
-      return me;
-    });
+    return call('forumJoin', {}).then(function (r) { return meOf(u, r); });
   }
 
   /** forumJoin again, BEHIND a page already drawn from the memory. Repaints
@@ -582,8 +587,10 @@
     var A = window.OAAccounts;
     call('forumJoin', {}).then(function (r) {
       var me = meOf(u, r);
-      writeMe(me);
+      /* the session first, the memory second: an answer that lands after a
+         sign-out must not put back what the sign-out removed */
       if (!A.user() || A.user().uid !== u.uid || !S.me || S.me.uid !== u.uid) return;
+      writeMe(me);
       var moved = me.handle !== S.me.handle || me.banned !== S.me.banned ||
         me.rooms.candidates !== S.me.rooms.candidates || me.rooms.open !== S.me.rooms.open;
       S.me = me;
@@ -971,6 +978,7 @@
     show(box, true);
   }
 
+  var listSeq = 0;
   function drawList() {
     show($('oa-forum-listview'), true);
     var title = $('oa-forum-listtitle');
@@ -990,6 +998,13 @@
     var seen = readSeen(S.me.uid);
     var mount = $('oa-forum-list');
     if (!mount) return;
+    /* THIS mount's read, told apart from the one before it: a reader who
+       switches rooms while a read is still in flight (the whole of the
+       session restore, now that the list is drawn before it) leaves the old
+       mount answering into detached elements, which is harmless, and into
+       the shared state below, which is not. A read from a mount the reader
+       has left keeps its rows to itself. */
+    var mine = ++listSeq;
 
     S.list = OAList.mount({
       mount: '#oa-forum-list',
@@ -1001,6 +1016,7 @@
           if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
           return (b.lastAt || 0) - (a.lastAt || 0);
         });
+        if (mine !== listSeq) return rows;
         var count = $('oa-forum-listcount');
         if (count) count.textContent = plural(rows.length, 'question', 'questions') + ' this season';
         S.rows = rows;
@@ -1411,13 +1427,39 @@
     if (h2) h2.textContent = answers.length + ' ' + (answers.length === 1 ? 'Answer' : 'Answers');
   }
   /** Everything above the answer box, painted from S: the heading, the
-      question, the answers heading and the band. */
+      question, the answers heading and the band. An EDIT BOX open inside a
+      post is carried across the repaint with whatever was typed in it (the
+      box lives inside the post's own element, which the repaint rebuilds),
+      so a quiet re-read landing while somebody is fixing a typo costs them
+      nothing. */
   function paintPosts() {
+    var editing = document.querySelector('#oa-forum-thread .oa-forum-editing');
+    var keep = null;
+    if (editing) {
+      var editLi = editing.closest ? editing.closest('.oa-forum-post') : null;
+      var editTa = editing.querySelector('textarea');
+      if (editLi && editTa) keep = { pid: editLi.getAttribute('data-pid'), text: editTa.value };
+    }
     paintHeader();
     paintQuestion();
     paintHeading();
     paintAnswers();
     paintVotes();
+    if (keep) reopenEdit(keep.pid, keep.text);
+  }
+
+  /** The edit box again, on the same post, with the words as they were. */
+  function reopenEdit(pid, text) {
+    var li = null;
+    Array.prototype.forEach.call(document.querySelectorAll('#oa-forum-thread .oa-forum-post'), function (n) {
+      if (n.getAttribute('data-pid') === pid) li = n;
+    });
+    var p = null;
+    S.posts.forEach(function (x) { if (x.id === pid) p = x; });
+    if (!li || !p || p.hidden || S.readOnly || p.by !== S.me.handle) return;
+    editPost(li, p);
+    var ta = li.querySelector('.oa-forum-editing textarea');
+    if (ta) ta.value = text;
   }
 
   /** New facts about the thread on screen (a post just made, an edit, a
@@ -1853,6 +1895,10 @@
       save.disabled = true;
       call('forumEdit', { room: S.room, tid: S.tid, pid: p.id, body: body })
         .then(function (r) {
+          /* the box is closed BEFORE the repaint, or the repaint would carry
+             it across as an edit still in progress (paintPosts) */
+          box.remove();
+          text.hidden = false;
           p.body = body;
           p.editedAt = Number(r && r.editedAt) || M.minute();
           if (Number(p.n) === 1 && S.thread) S.thread.excerpt = excerptOf(body);

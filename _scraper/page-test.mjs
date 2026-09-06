@@ -9990,7 +9990,7 @@ for (const w of [320, 360, 390, 430]) {
     eq(rep.votesCalls, 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
     ok(rep.boxEmpty, 'forum (candidate): the box is drawn again empty, the quote gone with it');
 
-    /* edit the reply inside the window */
+    /* edit the reply: the author's own, at any time (there is no window) */
     await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
     await q.waitForSelector('.oa-forum-editing textarea', { timeout: 8000 });
     await q.fill('.oa-forum-editing textarea', 'Thank you. The teaching load question worked for me as well.');
@@ -10023,6 +10023,13 @@ for (const w of [320, 360, 390, 430]) {
     eq(lk.text, 'https://ec26.sigecom.org/cfp', 'forum (candidate): the full stop after it is sentence punctuation, not part of the address');
     ok(/Worth a look\./.test(lk.after), 'forum (candidate): and the words after it are still there');
 
+    /* AN EDIT IN PROGRESS SURVIVES A REPAINT (owner, 2026-09-06, the quiet
+       re-read): the box is opened on the reply and half filled, then another
+       post is deleted, which repaints every post; the box has to come back on
+       the same post with the same words. */
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
+    await q.waitForSelector('.oa-forum-post[data-n="2"] .oa-forum-editing textarea', { timeout: 8000 });
+    await q.fill('.oa-forum-post[data-n="2"] .oa-forum-editing textarea', 'A half-typed correction, not yet saved');
     /* DELETING it: the author's own post, no window, the words really gone */
     q.once('dialog', (d) => d.accept());
     await q.click('.oa-forum-post[data-n="3"] .oa-forum-act[data-act="delete"]');
@@ -10030,6 +10037,14 @@ for (const w of [320, 360, 390, 430]) {
       const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
       return p3 && p3.querySelector('.oa-forum-removed');
     }, null, { timeout: 15000 });
+    const kept = await q.evaluate(() => {
+      const ta = document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-editing textarea');
+      return { open: !!ta, text: ta ? ta.value : '', boxes: document.querySelectorAll('#oa-forum-thread .oa-forum-editing').length };
+    });
+    ok(kept.open && kept.text === 'A half-typed correction, not yet saved' && kept.boxes === 1,
+      'forum (candidate): an edit box open on another post survives the repaint with its words, and once');
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-editing [data-edit="cancel"]');
+    await q.waitForFunction(() => !document.querySelector('#oa-forum-thread .oa-forum-editing'), null, { timeout: 8000 });
     const del = await q.evaluate((t) => {
       const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
       const pid = p3.getAttribute('data-pid');
