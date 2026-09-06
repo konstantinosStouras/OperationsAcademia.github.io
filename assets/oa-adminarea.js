@@ -992,6 +992,18 @@
       return pendingCounts().then(function (c) {
         lastCounts = c;
         paintTiles(c);
+        /* …AND THE BADGE BESIDE "Admin area", which is the same number. It is
+           cached per account and refreshed ONCE a session, so answering a
+           message reply dropped the tile here and left the menu counting it
+           for the rest of the session — the two disagreeing about a figure
+           that is computed by this one function precisely so they cannot.
+           setCount is the exact-where-loaded path the badge rules already
+           name; it writes the cache and repaints, and does nothing at all
+           when this is not the account it belongs to. */
+        if (window.OAAccounts && typeof OAAccounts.setCount === 'function'
+            && c && typeof c.total === 'number') {
+          OAAccounts.setCount('admin', c.total);
+        }
       })['catch'](function () { /* keep what is on screen */ });
     },
     /* the pure pieces, for the selftest */

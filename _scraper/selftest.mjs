@@ -6239,6 +6239,30 @@ async function testUsersAndMessages() {
     ok(U.csvCell(c + 'x').indexOf('"\'' + c) === 0, `…and a leading ${c}`);
   }
   eq(U.csvCell('a"b'), '"a""b"', 'and doubles an internal quote');
+  /* AND THE FILE ANNOUNCES UTF-8 TO EXCEL. It opens a .csv as the machine's
+     own legacy code page unless a byte order mark says otherwise, so every
+     accented or non-Latin NAME in this roster arrived as mojibake — on a file
+     whose whole point is that the maintainer can read who has registered.
+     Every other reader ignores a BOM. */
+  ok(/new Blob\(\['\\uFEFF' \+ csvOf\(headings, rows\)\]/.test(users),
+    'the roster CSV opens with a UTF-8 byte order mark');
+  ok(/charset=utf-8/.test(users),
+    '…and still names the charset, for the readers that read it');
+
+  /* A BROADCAST THAT REACHED NOBODY KEEPS WHAT WAS TYPED. Emptying the box
+     and the ticks is right after a send that reached somebody; after one that
+     reached NOBODY it threw away the message and every recipient, so the only
+     way to try again was to write the whole thing out afresh. */
+  ok(/if \(sent\) \{\s*\n\s*if \(ta\) ta\.value = '';\s*\n\s*state\.picked = \{\};/.test(users),
+    'a send that delivered nothing leaves the message and the recipients alone');
+
+  /* THE TILE AND THE BADGE ARE THE SAME NUMBER, computed by one function so
+     that they cannot disagree — and the badge is cached per account and
+     refreshed once a session, so answering a reply dropped the tile and left
+     the menu counting it for the rest of the session. */
+  const adminJs = await readFile(path.join(HERE, '..', 'assets', 'oa-adminarea.js'), 'utf8');
+  ok(/OAAccounts\.setCount\('admin', c\.total\)/.test(adminJs),
+    'refreshing the tiles corrects the account menu\'s own count too');
 
   /* ------------------------------------------------- what a sort cannot do */
 
@@ -14164,8 +14188,41 @@ async function testAnalytics() {
   const growthBlock = page.slice(page.indexOf('/* 1b.'), page.indexOf('drawGrowth();', page.indexOf('/* 1b.')));
   ok(growthBlock.length > 50 && growthBlock.length < 400 && !/—/.test(growthBlock),
     'growth: the page\'s own 1b comment carries no em dash');
-  ok(/let last = s\.values\.length - 1;\s*\n\s*while \(last > first && s\.values\[last\] == null\) last--;/.test(charts),
-    'growth: line() closes an area wash at the last REAL point, so a series with trailing nulls cannot wash under the projection');
+  /* THE WASH IS CLOSED PER RUN OF REAL VALUES. It used to be one polygon
+     closed at the last real point, which kept the growth chart's trailing
+     nulls out of it and still ran `L last, L first` ACROSS an interior gap —
+     painting a wedge that is not the data on any series with a hole in the
+     middle, which the daily chart's own `withGaps` produces. One closed shape
+     per run covers both, and the trailing-null case falls out of it. */
+  ok(/if \(v == null\) \{ run = null; return; \}/.test(charts)
+     && /for \(const r of runs\) \{[\s\S]{0,400}?class: 'oa-area oa-' \+ cls,/.test(charts),
+    'growth: line() closes an area wash once per RUN of real values, so neither a ' +
+    'trailing null nor a gap in the middle washes under something else');
+  ok(!/d\.join\(' '\) \+ ` L \$\{X\(last\)/.test(charts),
+    'growth: …and the single-polygon closure that crossed a gap is gone');
+  /* A LONE DAY BETWEEN TWO GAPS is a run of one, whose path is a bare moveto
+     and paints nothing at all: in the table, invisible on the chart. */
+  ok(/if \(r\.length !== 1\) continue;/.test(charts) && /class: 'oa-lone oa-' \+ cls/.test(charts),
+    'growth: a day with a gap on either side gets a mark of its own');
+  ok(/\.oa-lone\.oa-brand \{ fill: var\(--oa-chart-brand\); \}/.test(
+    await readFile(path.join(HERE, '..', 'assets', 'oa-analytics.css'), 'utf8')),
+    'growth: …in its series\' own colour, through the theme tokens like everything else');
+
+  /* A MEAN KEEPS ITS DECIMAL. `full()` rounds, which is right for a count and
+     wrong for an average: the weekly-rhythm and season bars carry one-decimal
+     means, so 4.1 and 4.4 both printed "4" under two visibly different bars —
+     the number a reader takes away disagreeing with the picture beside it. */
+  ok(/const fmt = \(v\) => \(opts\.format \? opts\.format\(v\) : exact\(v\)\);/.test(charts),
+    'columns: a value with a real fraction is printed with it');
+  ok(/Number\.isInteger\(v\) \? full\(v\)/.test(charts),
+    'columns: …while a whole number still prints whole, so no count changes');
+
+  /* THE TOOLTIP SITS ABOVE THE HIGHEST PLOTTED POINT. Starting the minimum at
+     `pad.t` made that dead: every Y is at or below the top padding, so the
+     answer was always `pad.t` and the tooltip was pinned to the top of the
+     plot whatever the reader was pointing at. */
+  ok(/let ty = null;/.test(charts) && /ty = ty == null \? Y\(v\) : Math\.min\(ty, Y\(v\)\);/.test(charts),
+    'line: the tooltip follows the highest point rather than the top of the plot');
   ok(/C\.full\(proj\.lastValue\) \+ ' registered users on '/.test(page) && /the trend reaches ' \+ C\.full\(proj\.reached\)/.test(page),
     'growth: …and gives the current count and the count the trend reaches');
   ok(/\{ name: 'Expected growth', values: expect, kind: 'accent', dashed: true \}/.test(page),

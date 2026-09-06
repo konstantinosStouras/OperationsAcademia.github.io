@@ -111,6 +111,15 @@
   }
 
   const full = (n) => Math.round(Number(n) || 0).toLocaleString('en-GB');
+  /** …and one that keeps a real fraction, for the charts whose values are
+      MEANS rather than counts. One decimal, because that is what those series
+      carry; a whole number prints whole, so nothing that was right changes. */
+  const exact = (n) => {
+    const v = Number(n) || 0;
+    return Number.isInteger(v) ? full(v)
+      : (Math.round(v * 10) / 10).toLocaleString('en-GB',
+        { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  };
 
   /** A length of time, said the way a person says it (owner, 2026-08-29:
       "convert seconds to e.g. hours, minute, seconds if seconds is too long").
@@ -335,31 +344,49 @@
 
     series.forEach((s) => {
       const cls = s.kind || 'brand';
-      const d = [];
-      let open = false;
+      /* THE RUNS OF REAL VALUES, one at a time. A null is a gap — a day the
+         record has nothing for — and the line already broke on one; the AREA
+         did not. Closed as a single polygon it ran `L last, L first` across
+         every gap, so a wash under a series with a hole in the middle painted
+         a wedge that is not the data. One closed shape PER RUN is the only
+         reading that draws what the numbers say, and it keeps the trailing-
+         null case (the growth chart's count, which stops where its projection
+         begins) for free. */
+      const runs = [];
+      let run = null;
       s.values.forEach((v, i) => {
-        if (v == null) { open = false; return; }
-        d.push((open ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1));
-        open = true;
+        if (v == null) { run = null; return; }
+        if (!run) { run = []; runs.push(run); }
+        run.push(i);
       });
-      if (!d.length) return;
+      if (!runs.length) return;
+      const d = runs.map((r) => r.map((i, k) =>
+        (k ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(s.values[i]).toFixed(1)).join(' ')).join(' ');
       s.nodes = [];
       if (s.area) {
-        /* a wash, never a saturated block, closed at the last REAL point: a
-           series padded with trailing nulls (the growth chart's count, which
-           stops where its projection begins) must not run its wash on to the
-           end of the axis under a line that means something else */
-        const first = s.values.findIndex((v) => v != null);
-        let last = s.values.length - 1;
-        while (last > first && s.values[last] == null) last--;
-        s.nodes.push(el('path', {
-          class: 'oa-area oa-' + cls,
-          d: d.join(' ') + ` L ${X(last).toFixed(1)} ${Y(0)} L ${X(first).toFixed(1)} ${Y(0)} Z`,
-        }, svg));
+        for (const r of runs) {
+          const seg = r.map((i, k) =>
+            (k ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(s.values[i]).toFixed(1)).join(' ');
+          s.nodes.push(el('path', {
+            class: 'oa-area oa-' + cls,
+            d: `${seg} L ${X(r[r.length - 1]).toFixed(1)} ${Y(0)} ` +
+               `L ${X(r[0]).toFixed(1)} ${Y(0)} Z`,
+          }, svg));
+        }
       }
       s.nodes.push(el('path', {
-        class: 'oa-line oa-' + cls + (s.dashed ? ' oa-dashed' : ''), d: d.join(' '),
+        class: 'oa-line oa-' + cls + (s.dashed ? ' oa-dashed' : ''), d,
       }, svg));
+      /* A LONE DAY BETWEEN TWO GAPS IS STILL A DAY. Its run is one point, so
+         the path holds a bare moveto and paints nothing at all: the value was
+         in the table and invisible on the chart. It gets a mark of its own. */
+      for (const r of runs) {
+        if (r.length !== 1) continue;
+        s.nodes.push(el('circle', {
+          class: 'oa-lone oa-' + cls, r: 2.5,
+          cx: X(r[0]).toFixed(1), cy: Y(s.values[r[0]]).toFixed(1),
+        }, svg));
+      }
     });
 
     /* the hover layer: a crosshair and one tooltip for the whole x, which is
@@ -384,7 +411,12 @@
       rule.setAttribute('x1', x); rule.setAttribute('x2', x);
       rule.classList.add('on');
       let html = '<b>' + pts[i].label2 + '</b>';
-      let ty = pad.t;
+      /* THE TOOLTIP SITS ABOVE THE HIGHEST PLOTTED POINT, which is what the
+         `Math.min` below was for — and starting at `pad.t` made it dead: every
+         Y is at or below the top padding, so the minimum was always `pad.t`
+         and the tooltip was pinned to the top of the plot whatever the reader
+         was pointing at. */
+      let ty = null;
       series.forEach((s, si) => {
         const v = s.hidden ? null : s.values[i];
         if (v == null) {
@@ -395,12 +427,13 @@
         dots[si].setAttribute('cx', x);
         dots[si].setAttribute('cy', Y(v));
         dots[si].classList.add('on');
-        ty = Math.min(ty || 1e9, Y(v));
+        ty = ty == null ? Y(v) : Math.min(ty, Y(v));
         html += '<span><i class="oa-key oa-' + (s.kind || 'brand') + '"></i>' +
           s.name + ' <b>' + full(v) + '</b></span>';
       });
       const box = svg.getBoundingClientRect();
-      showTip(tip, wrap, (x / W) * box.width, ((ty - 8) / H) * box.height, html);
+      showTip(tip, wrap, (x / W) * box.width,
+        (((ty == null ? pad.t : ty) - 8) / H) * box.height, html);
     }
 
     function leave() {
@@ -511,7 +544,12 @@
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.style.height = H + 'px';
     if (!items.length) return;
-    const fmt = (v) => (opts.format ? opts.format(v) : full(v));
+    /* A MEAN KEEPS ITS DECIMAL. `full()` rounds, which is right for a count
+       and wrong for an average: the weekly-rhythm and season bars carry
+       one-decimal means, so 4.1 and 4.4 both printed "4" under two visibly
+       different bars — the number a reader takes away disagreeing with the
+       picture beside it. A whole number still prints whole. */
+    const fmt = (v) => (opts.format ? opts.format(v) : exact(v));
 
     /* An EMPTY bucket is not a zero. A month the record has never covered
        drawn as a zero-height bar reads as "nobody came in September", which on

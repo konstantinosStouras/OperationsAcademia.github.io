@@ -508,7 +508,14 @@
       return [r.name || '', r.email || '', day(r.first), day(r.seen),
         threadLabel(r.thread), r.uid];
     });
-    var blob = new Blob([csvOf(headings, rows)], { type: 'text/csv;charset=utf-8' });
+    /* THE BYTE ORDER MARK IS FOR EXCEL. It opens a .csv as the machine's own
+       legacy code page unless the file announces UTF-8, so "École
+       polytechnique" and every accented or non-Latin NAME in this roster
+       arrived as mojibake — on a file whose whole point is that the
+       maintainer can read who has registered. Every other reader ignores a
+       BOM, and the charset in the type is kept for the ones that read it. */
+    var blob = new Blob(['\uFEFF' + csvOf(headings, rows)],
+      { type: 'text/csv;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
@@ -606,8 +613,16 @@
             ['catch'](function () { failed++; });
         });
       }, Promise.resolve()).then(function () {
-        if (ta) ta.value = '';
-        state.picked = {};
+        /* KEEP THE MESSAGE WHEN NOTHING WENT. Emptying the box and the ticks
+           is right after a send that reached somebody; after one that reached
+           NOBODY it throws away what the maintainer typed and every recipient
+           they had picked, so the only way to try again is to write the whole
+           thing out afresh. renderCompose carries a live draft across its own
+           re-render, so leaving the value alone is all this takes. */
+        if (sent) {
+          if (ta) ta.value = '';
+          state.picked = {};
+        }
         /* Reload FIRST — it repaints the compose block, which would otherwise
            wipe the line below — then say what happened. */
         return load().then(function () {

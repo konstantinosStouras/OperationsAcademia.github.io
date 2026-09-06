@@ -183,6 +183,14 @@
 .oa-area.oa-brand { fill: var(--oa-chart-brand); }
 .oa-area.oa-accent { fill: var(--oa-chart-accent); }
 
+/* A LONE DAY BETWEEN TWO GAPS. Its run holds one point, so the line's path is
+   a bare moveto and paints nothing: the value was in the numbers table and
+   invisible on the chart. Drawn in the series' own colour, at the line's own
+   weight, so it reads as part of the same series. */
+.oa-lone { stroke: none; }
+.oa-lone.oa-brand { fill: var(--oa-chart-brand); }
+.oa-lone.oa-accent { fill: var(--oa-chart-accent); }
+
 .oa-bar.oa-brand { fill: var(--oa-chart-brand); }
 .oa-bar.oa-accent { fill: var(--oa-chart-accent); }
 
