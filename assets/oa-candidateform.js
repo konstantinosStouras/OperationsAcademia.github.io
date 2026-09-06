@@ -125,17 +125,18 @@
     m.hidden = !msg;
   }
 
-  /** The forum page keeps forumJoin's answer for the tab's life
-      (sessionStorage 'oa-forum-me', keyed on the uid) and trusts a cached
-      "yes" without asking again. A take-down deletes the membership marker
-      the rules read on every request, and a later edit puts the profile back
-      without anything rewriting the marker, since only forumJoin may: with
-      the cache still saying yes the room was refused for the rest of the
-      session. So whatever changes a profile's standing forgets the cache,
-      and the next forum visit asks the function, which rewrites the marker
-      from the profile as it stands. The key is the forum page's own. */
+  /** The forum page draws itself from the join this device remembers
+      (localStorage 'oa-forum-me', keyed on the uid) and asks forumJoin again
+      only BEHIND the page. A take-down deletes the membership marker the
+      rules read on every request, and a later edit puts the profile back
+      without anything rewriting the marker, since only forumJoin may: drawn
+      from the memory, the room's first read was refused before the join
+      behind it had written the marker back. So whatever changes a profile's
+      standing forgets the memory, and the next forum visit waits for the
+      function, which rewrites the marker from the profile as it stands. The
+      key is the forum page's own. */
   function forgetForumJoin() {
-    try { sessionStorage.removeItem('oa-forum-me'); } catch (e) { /* private mode */ }
+    try { localStorage.removeItem('oa-forum-me'); } catch (e) { /* private mode */ }
   }
 
   /* The job market year rule, same as oa-jobform.js (and jobs-model.mjs

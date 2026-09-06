@@ -54,6 +54,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+    <!-- THE SDK IS FETCHED FROM THE FIRST BYTE OF THIS PAGE. Elsewhere on the
+         site nothing on screen waits for Firebase, so the home page and the
+         forms deliberately do not preload it (CLAUDE.md, "What the page does
+         before the reader sees anything"). This page is the exception: it is
+         members-only, everything on it is read under the rules, and a reader
+         the header hint remembers is drawn from this browser's memory while
+         the session restores (assets/oa-forum.js), so the one thing left to
+         wait for is the SDK itself. The four bundles are the ones
+         assets/oa-firebase.js appends, at the same version (the selftest pins
+         the two lists together, so a version bump cannot leave these fetching
+         a bundle the loader no longer asks for); the two preconnects are the
+         hosts every read and every post here goes to. -->
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js">
+    <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js">
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://us-central1-operations-academia.cloudfunctions.net">
     <link href="assets/oa-list.css" rel="stylesheet">
     <link href="assets/oa-ui.css" rel="stylesheet">
     <link href="assets/v3.css" rel="stylesheet">
@@ -221,9 +239,6 @@
                 <summary>About this forum: the thirteen rules</summary>
                 <div id="oa-forum-guidebody"></div>
               </details>
-              <div class="oa-forum-note-side">A post is yours to edit for fifteen
-              minutes. After that it stays as written, so read it once more before you
-              press Post.</div>
             </aside>
           </div>
         </div>

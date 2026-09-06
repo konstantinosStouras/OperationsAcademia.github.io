@@ -16425,8 +16425,9 @@ async function testSweep20260906() {
     fj.indexOf('/* ------------------------------------------------------ asking */'));
   ok(editSave.length > 200 && editSave.length < 2500, 'sweep: the edit save was sliced');
   ok(!/go\(\{ room: S\.room, season: S\.season, t: S\.tid, hash: 'p' \+ p\.n \}\)/.test(editSave)
-     && /box\.remove\(\);/.test(editSave) && /paintAnswers\(\);/.test(editSave) && /p\.body = body;/.test(editSave),
-    'sweep: a saved edit repaints the post in place and never through go(), which rebuilt the answer box and lost what was half written');
+     && /box\.remove\(\);/.test(editSave) && /repaintPosts\(S\.thread, S\.posts\);/.test(editSave) && /p\.body = body;/.test(editSave)
+     && /focusOn\.focus\(\{ preventScroll: true \}\)/.test(editSave),
+    'sweep: a saved edit repaints the post in place and never through go(), which rebuilt the answer box and lost what was half written, and puts the keyboard back on the post');
 
   /* 4. removing a saved question keeps the keyboard */
   const unsave = fj.slice(fj.indexOf("host.querySelectorAll('[data-unsave]'), function (b) {"), fj.indexOf('function paintSaveButtons'));
@@ -16437,11 +16438,11 @@ async function testSweep20260906() {
 
   /* 5. a profile put back re-earns the Candidates' room */
   const cf = await rd('assets', 'oa-candidateform.js');
-  ok(/function forgetForumJoin\(\) \{\s*\n\s*try \{ sessionStorage\.removeItem\('oa-forum-me'\); \}/.test(cf),
+  ok(/function forgetForumJoin\(\) \{\s*\n\s*try \{ localStorage\.removeItem\('oa-forum-me'\); \}/.test(cf),
     'sweep: the candidate form forgets the forum\'s cached join');
   eq((cf.match(/forgetForumJoin\(\);/g) || []).length, 2, 'sweep: ...on a take-down and on the edit that puts a profile back');
   ok(/if \(!\/permission-denied\/\.test\(code\) \|\| !S\.me \|\| !S\.me\.rooms \|\| !S\.me\.rooms\[S\.room\] \|\| S\.rejoined\) throw err;/.test(fj)
-     && /S\.rejoined = true;/.test(fj) && /sessionStorage\.removeItem\(ME_KEY\)/.test(fj),
+     && /S\.rejoined = true;\s*\n\s*forgetMe\(\);/.test(fj) && /writeMe\(me\);\s*\n\s*S\.me = me;\s*\n\s*return db\(\);/.test(fj),
     'sweep: and the forum page re-asks forumJoin once when a read the cache promised is refused');
 
   /* 7. the three profile flags are bounded */
@@ -16621,7 +16622,10 @@ async function testForum() {
   ok(FM.isRoom('open') && FM.isRoom('candidates') && !FM.isRoom('lobby') && !FM.isRoom(''), 'forum: isRoom knows exactly those');
   eq(FM.BOUNDS.quote, 600, 'forum: a quote is at most 600 characters');
   eq(FM.BOUNDS.body, 4000, 'forum: a body is at most 4000');
-  eq(FM.EDIT_WINDOW_MS, 15 * 60 * 1000, 'forum: the edit window is fifteen minutes');
+  /* NO EDIT WINDOW (owner, 2026-09-06: "the user can delete and edit the
+     post any time"). Pinned as an absence on the model, so no writer can
+     measure against a constant that is no longer a rule. */
+  ok(!('EDIT_WINDOW_MS' in FM), 'forum: there is no edit window in the model');
   /* NO SELF-DECLARED KIND, ANYWHERE (owner, 2026-09-05). A post carried '',
      'first-hand' or 'rumour', chosen from three radio buttons in the compose
      box: a question with no good reason to be asked, whose third answer was
@@ -16810,9 +16814,10 @@ async function testForum() {
   ok(details.every((d) => /^\{\s*reason(:\s*'[a-z]+')?\s*\}$/.test(d)), 'forum R6: every details object is { reason } alone, never a count');
   ok(/throw new HttpsError\(code, ERRORS\[reason\] \|\| 'Refused\.', \{ reason \}\);/.test(memberSrc), 'forum R6: refuse() is the one shape');
   const errKeys = [...memberSrc.slice(memberSrc.indexOf('const ERRORS = {'), memberSrc.indexOf('};', memberSrc.indexOf('const ERRORS = {'))).matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
-  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'asker', 'answer', 'window', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'orcid']) {
+  for (const r of ['room', 'verified', 'candidate', 'banned', 'admin', 'guide', 'locked', 'archive', 'author', 'asker', 'answer', 'own', 'busy', 'bounds', 'tags', 'quote', 'threads', 'posts', 'votes', 'gap', 'email', 'phone', 'orcid']) {
     ok(errKeys.includes(r), `forum: ERRORS words the reason ${r}`);
   }
+  ok(!errKeys.includes('window'), 'forum: and no reason names an edit window, since there is none (owner, 2026-09-06)');
   for (const m of allForum.matchAll(/refuse\('[a-z-]+', '([a-z]+)'\)/g)) {
     ok(errKeys.includes(m[1]), `forum: refuse() is only ever called with a worded reason (${m[1]})`);
   }
@@ -16984,14 +16989,24 @@ async function testForum() {
   ok(/quote = \{\s*n: qn,\s*by: src\.by,\s*text,\s*\}/.test(forumSrc['post.js']), 'forum: and is stored as a copy {n, by, text}');
   ok(/const body = guide\.text\(\);/.test(forumSrc['moderate.js']) && !/d\.body/.test(forumSrc['moderate.js']),
     'forum: seedGuide renders the guide itself and takes no body');
-  /* AT LEAST fifteen minutes, never fewer. Both stamps are truncated to the
-     minute (R7), so a post made at 10:00:59 is stamped 10:00:00 and a strict
-     `>=` closed its window 59 seconds early, while rule 13 of the guide
-     promises fifteen minutes and the model's own comment said the slack ran
-     the other way. One minute of slack, on the generous side. */
-  ok(/now > Number\(pv\.t\) \+ M\.EDIT_WINDOW_MS/.test(forumSrc['edit.js'])
-     && !/now >= Number\(pv\.t\)/.test(forumSrc['edit.js']),
-    'forum: the edit window is measured from the stamped minute, and never closes early');
+  ok(!/EDIT_WINDOW_MS/.test(forumSrc['edit.js']) && !/'window'/.test(forumSrc['edit.js']),
+    'forum: forumEdit measures no window and refuses on none: your own post is yours to edit at any time (owner, 2026-09-06)');
+  ok(/pv\.by !== m\.handle/.test(forumSrc['edit.js']) && /tv\.locked \|\| tv\.hidden \|\| pv\.hidden/.test(forumSrc['edit.js']),
+    'forum: what forumEdit still refuses is somebody else\'s post, a deleted one, and a locked or hidden thread');
+  /* THE WARM-UP (owner, 2026-09-06: "make posting appear faster"). A callable
+     is a Cloud Run service that goes cold, and the page wakes forumPost and
+     forumVote before they are needed with { room, warm: true }: the preamble
+     runs, then the function answers without a write. Pinned to sit AFTER
+     member() (so a refused caller is refused as a post would be, and the
+     secret and the handle are warm) and BEFORE anything is read or written. */
+  for (const f of ['post.js', 'vote.js']) {
+    const src = forumSrc[f];
+    const at = src.indexOf("if (d.warm === true) return { warm: true };");
+    ok(at > 0, `forum: ${f} answers a warm-up`);
+    const before = src.slice(0, at);
+    ok(/await P\.member\(req, [a-z.]+\);\s*$/.test(before), `forum: ${f} answers it right after the preamble, so a refused caller is refused as a post would be`);
+    ok(!/tx\.|\.get\(|\.set\(|\.update\(/.test(before.slice(before.indexOf('exports.'))), `forum: ${f} reads and writes nothing before answering it`);
+  }
   ok(/ring\('oa-forum-posted'/.test(forumSrc['post.js']) && !/await ring\(/.test(forumSrc['post.js']), 'forum: the step-2 doorbell is an anchor, not a call');
   ok(!/setCustomUserClaims/.test(allForum), 'forum: no custom claim ever carries a hash beside a uid');
 
@@ -17246,6 +17261,64 @@ async function testForum() {
   const firstTag = /<head[^>]*>\s*(<[^>]+>)/i.exec(page);
   ok(firstTag && /^<meta\s+charset=/i.test(firstTag[1]), 'forum page: charset first in head');
   ok(/<a class="v3-skip" href="#main">/.test(page) && /<main id="main">/.test(page), 'forum page: the skip link and its target');
+
+  /* --- FASTER IN, FASTER POSTED (owner, 2026-09-06: "make posting appear
+     faster. Also, when I enter the forum the page doesn't load immediately
+     and needs a few seconds to refresh") --------------------------------
+
+     THE SDK IS PRELOADED ON THIS PAGE, and on this page alone by design: the
+     four bundles the loader appends, at the loader's own version, or a bump
+     in oa-firebase.js would leave the page fetching a bundle nobody asks
+     for. The home page and the forms deliberately do not (see post-a-job's
+     own pin): nothing on screen waits for Firebase there. Here everything
+     does. */
+  const fbLoader = await read('assets', 'oa-firebase.js');
+  const sdkM = /var SDK = '([^']+)';/.exec(fbLoader);
+  const partsM = /var PARTS = \[([^\]]+)\];/.exec(fbLoader);
+  ok(sdkM && partsM, 'forum page: the loader names its SDK base and parts');
+  const sdkParts = [...partsM[1].matchAll(/'([^']+)'/g)].map((m) => m[1]).concat(['firebase-functions-compat.js']);
+  const preloads = [...page.matchAll(/<link rel="preload" as="script" href="([^"]+)">/g)].map((m) => m[1]);
+  eq(preloads, sdkParts.map((p) => sdkM[1] + p), 'forum page: preloads exactly the bundles oa-firebase.js appends, the Functions one included, at its version');
+  ok(/rel="preconnect" href="https:\/\/firestore\.googleapis\.com"/.test(page)
+     && /rel="preconnect" href="https:\/\/us-central1-operations-academia\.cloudfunctions\.net"/.test(page),
+    'forum page: preconnects to the two hosts every read and every post goes to');
+  ok(!/oa-forum-note-side/.test(page) && !/oa-forum-note-side/.test(pageCss),
+    'forum page: the fifteen-minute side note is DELETED from the page and the stylesheet, not hidden (owner, 2026-09-06)');
+  /* the page half of the entry: a remembered reader drawn from this
+     browser's memory before the session resolves, a read that waits for the
+     SDK's own first auth answer, and the join revalidated behind the page */
+  ok(/var hinted = A\.hint\(\) === 'in' \? readMe\(hintUid\(\)\) : null;/.test(pageJs) && /if \(hinted\) \{\s*\n\s*S\.me = hinted;[\s\S]{0,120}draw\(\);/.test(pageJs),
+    'oa-forum.js: a remembered reader is drawn at boot, before the session resolves');
+  ok(/localStorage\.getItem\('oaAuthHint'\)/.test(pageJs) && /localStorage\.getItem\('oaAuthPending'\) !== h\.uid/.test(pageJs),
+    'oa-forum.js: and the account it is drawn for is the one the header hint names, a pending account read as none, as the head snippet reads it');
+  ok(/fb\.auth\(\)\.onAuthStateChanged\(function \(\) \{/.test(pageJs) && /resolve\(fb\.firestore\(\)\);/.test(pageJs),
+    'oa-forum.js: a read waits for the SDK\'s first auth answer, so it never goes out without the token');
+  ok(/function revalidate\(u\)/.test(pageJs) && /if \(moved\) draw\(\);/.test(pageJs),
+    'oa-forum.js: the join is called again behind the page, and repaints only for a difference a reader would see');
+  ok(/reason !== 'verified' && reason !== 'candidate' && reason !== 'auth'\) return;/.test(pageJs) && /forgetMe\(\);/.test(pageJs),
+    'oa-forum.js: a refusal by reason forgets the memory and says so; anything else changes nothing (the unreachable-source rule)');
+  ok(/if \(A\.hint\(\) === 'in'\) OAFB\.readyFunctions\(\)\.catch/.test(pageJs), 'oa-forum.js: the Functions bundle is fetched at boot for a remembered reader');
+  /* the page half of posting: painted from the function's answer, the
+     thread read back quietly, the votes asked for in parallel, the function
+     woken before it is needed */
+  ok(/function localPost\(r, body, quote\)/.test(pageJs) && /var post = localPost\(r, body, S\.quote\);/.test(pageJs) && /function openLocalThread\(thread, posts\)/.test(pageJs),
+    'oa-forum.js: an answer and a question are painted from the receipt and the reader\'s own words');
+  ok(/function refreshThread\(\)/.test(pageJs) && (pageJs.match(/refreshThread\(\);/g) || []).length >= 4,
+    'oa-forum.js: and the thread is read back quietly behind an answer, a question, an edit and a deletion');
+  ok(/function repaintPosts\(thread, posts\)/.test(pageJs) && /if \(shapeOf\(r\.thread, r\.posts\) === shapeOf\(S\.thread, S\.posts\)\) return;/.test(pageJs),
+    'oa-forum.js: a quiet re-read repaints only where what came back differs, and never rebuilds the answer box');
+  const openSrc = pageJs.slice(pageJs.indexOf('  function drawThread() {'), pageJs.indexOf('  /** The reader\'s own votes, onto the buttons'));
+  ok(openSrc.length > 500 && openSrc.length < 4000, 'oa-forum.js: drawThread was sliced');
+  ok(openSrc.indexOf("call('forumThreadVotes'") < openSrc.indexOf('readThread(tid).then') && /if \(painted\) paintVotes\(\);/.test(openSrc),
+    'oa-forum.js: the reader\'s votes are asked for in PARALLEL with the posts, and painted whichever lands first');
+  ok(/headerHTML\(known\)/.test(openSrc) && /function rowOf\(tid\)/.test(pageJs), 'oa-forum.js: the heading is drawn from the list\'s own row before the posts land');
+  ok(/function warmUp\(name\)/.test(pageJs) && /call\(name, \{ room: S\.room, warm: true \}\)/.test(pageJs)
+     && (pageJs.match(/warmUp\('forumPost'\)/g) || []).length >= 3 && (pageJs.match(/warmUp\('forumVote'\)/g) || []).length >= 2,
+    'oa-forum.js: the posting function is woken when a box takes focus and the voting one when a vote column is reached, once each per page');
+  ok(!/min left/.test(pageJs) && /data-act="edit">Edit<\/button>/.test(pageJs) && !/EDIT_WINDOW/.test(pageJs),
+    'oa-forum.js: Edit carries no countdown and reads no window (owner, 2026-09-06)');
+  ok(/Yours to edit or delete afterwards\./.test(pageJs) && !/fifteen minutes/.test(pageJs), 'oa-forum.js: the ask form says the post stays editable');
+  ok(/yours to edit and to delete at any time/.test(await read('assets', 'oa-forum-guide.js')), 'forum guide: rule 13 says a post is editable at any time');
   ok(page.includes("el.setAttribute('data-oa-auth', h && h.uid && localStorage.getItem('oaAuthPending') !== h.uid ? 'in' : 'out');"),
     'forum page: the head snippet, the exact line every live page carries');
   const LOAD = ['v3.js', 'oa-firebase.js', 'oa-accounts.js', 'oa-jobnav.js', 'oa-forum-model.js', 'oa-forum-guard.js', 'oa-forum-guide.js', 'oa-list.js', 'oa-forum.js'];
@@ -17304,8 +17377,10 @@ async function testForum() {
   ok(!/data-held="forum"/.test(acct), 'oa-accounts.js: the row is drawn for every signed-in account, not held on a count');
   const signOutSrc = acct.slice(acct.indexOf('  function signOut() {'), acct.indexOf('OAFB.ready()', acct.indexOf('  function signOut() {')));
   ok(signOutSrc.length > 300 && signOutSrc.length < 3000, 'oa-accounts.js: signOut was sliced');
-  ok(/sessionStorage\.removeItem\('oa-forum-me'\)/.test(signOutSrc) && /localStorage\.removeItem\('oa-forum-seen'\)/.test(signOutSrc),
+  ok(/localStorage\.removeItem\('oa-forum-me'\)/.test(signOutSrc) && /localStorage\.removeItem\('oa-forum-seen'\)/.test(signOutSrc),
     'oa-accounts.js: signing out forgets the forum handle and the seen-marks');
+  ok(/localStorage\.setItem\(ME_KEY/.test(pageJs) && /localStorage\.getItem\(ME_KEY/.test(pageJs) && !/sessionStorage/.test(pageJs),
+    'oa-forum.js: the join is remembered on the DEVICE, in localStorage, so a new tab costs no call (owner, 2026-09-06)');
   ok(/ME_KEY = 'oa-forum-me'/.test(pageJs) && /SEEN_KEY = 'oa-forum-seen'/.test(pageJs), 'oa-forum.js: the same two keys');
   ok(/v\.uid === uid && Number\(v\.season\) === Y && v\.handle/.test(pageJs), 'oa-forum.js: the cached join is trusted only for the same account and season');
 
@@ -17613,8 +17688,13 @@ async function testForum() {
      && /function acceptAnswer\(thread, p, btn\) \{\s*\n\s*if \(S\.frozen\) return;/.test(pageJs)
      && /function vote\(li, p, want\) \{\s*\n\s*if \(S\.frozen \|\| \(S\.thread && S\.thread\.locked\) \|\| p\.hidden\) return;/.test(pageJs),
     'oa-forum.js: and the handlers refuse on the same terms the controls are drawn on');
-  ok(/cached && cached\.rooms && cached\.rooms\.candidates/.test(pageJs),
-    'oa-forum.js: the join cache is trusted only while it says YES, so filing a profile opens the room in the same session');
+  /* since the 2026-09-06 merge the memory is revalidated BEHIND the page on
+     every visit (revalidate, master's own pin), so a profile filed and a
+     room re-earned reach the reader without a cache rule; what this branch
+     keeps is the recovery for a read the memory promised and the rules
+     refused, which asks forumJoin once and reads again (readThreads) */
+  ok(/function revalidate\(u\)/.test(pageJs) && !/cached && cached\.rooms && cached\.rooms\.candidates/.test(pageJs),
+    'oa-forum.js: the join is revalidated behind the page rather than trusted from a cache rule');
   /* THE FRESH SEEN-MARK IS PERSISTED WHERE IT IS MINTED, or `since` is "now"
      on every read and nothing is ever newer than it: only opening a thread
      wrote the store, so a reader's whole first visit had no New badge and no
@@ -17758,18 +17838,23 @@ async function testForum() {
   ok(/function viewKey\(\)/.test(pageJs)
      && /return S\.room \+ '\|' \+ S\.season \+ '\|' \+ \(S\.tid \|\| ''\) \+ '\|' \+ \(S\.ask \? '1' : ''\);/.test(pageJs),
     'oa-forum.js: the view a paint is for is the whole address, in one function');
-  ok(/var forView = viewKey\(\);[\s\S]{0,900}if \(forView !== viewKey\(\)\) return rows;/.test(pageJs),
+  ok(/var forView = viewKey\(\);[\s\S]{0,900}if \(mine !== listSeq \|\| forView !== viewKey\(\)\) return rows;/.test(pageJs),
     '…the list mount stops writing the shared state once the reader has moved');
   ok(!/forRoom|forSeason/.test(pageJs),
     '…and the narrower room-and-season guard it replaced is gone, not left beside it');
+  /* the thread's paint is master's shape since the 2026-09-06 merge (the
+     votes asked for in parallel with the posts, readThread apart), and every
+     completion in it is held to the view AS WELL AS to the thread id */
   const drawTh = pageJs.slice(pageJs.indexOf('function drawThread('), pageJs.indexOf('var LINK_RX'));
-  eq((drawTh.match(/if \(forView !== viewKey\(\)\) return;/g) || []).length, 2,
-    '…and the thread guards BOTH of its terminal callbacks, the failure one included');
-  ok(drawTh.indexOf("if (forView !== viewKey()) return { votes: {} };") <
-     drawTh.indexOf("call('forumThreadVotes'"),
-    '…and again before the votes call, so a thread the reader has left spends no callable');
-  ok(drawTh.indexOf('var forView = viewKey();') < drawTh.indexOf('db().then('),
-    '…keyed on the view it started in, captured before the read');
+  eq((drawTh.match(/forView !== viewKey\(\)/g) || []).length, 3,
+    '…and the thread guards its three completions, the votes, the read and the failure');
+  ok(/if \(S\.tid !== tid \|\| forView !== viewKey\(\)\) return;\s*\n\s*S\.votes = /.test(drawTh),
+    '…so a thread the reader has left paints no votes');
+  ok(/if \(S\.tid !== tid \|\| host\.hidden \|\| forView !== viewKey\(\)\) return;/.test(drawTh),
+    '…and draws nothing over the view they moved to');
+  ok(drawTh.indexOf('var forView = viewKey();') < drawTh.indexOf("call('forumThreadVotes'")
+     && drawTh.indexOf('var forView = viewKey();') < drawTh.indexOf('readThread(tid).then('),
+    '…keyed on the view it started in, captured before either read');
 
   /* the withdraw path */
   const candForm = await read('assets', 'oa-candidateform.js');
@@ -17885,9 +17970,12 @@ async function testForum() {
     'shim: the vote id is a fixed 64-hex string that never derives from the uid');
   ok(!/kind/.test(bare(sim)),
     'shim: and the simulator carries no post kind either, so the browser suite cannot pass on a field the functions no longer write');
-  for (const reason of ['own', 'quote', 'author', 'asker', 'answer', 'window', 'locked', 'admin', 'candidate', 'verified', 'tags', 'bounds', 'thread', 'guide']) {
+  for (const reason of ['own', 'quote', 'author', 'asker', 'answer', 'locked', 'admin', 'candidate', 'verified', 'tags', 'bounds', 'thread', 'guide']) {
     ok(sim.includes(`'${reason}'`) && errKeys.includes(reason), `shim: the simulator refuses with ${reason}, a reason member.js can answer with`);
   }
+  ok(!sim.includes("'window'"), 'shim: and never with a window, since forumEdit has none');
+  ok(/if \(\(name === 'forumPost' \|\| name === 'forumVote'\) && data\.warm === true\) \{\s*\n\s*return Promise\.resolve\(\{ data: \{ warm: true \} \}\);/.test(sim),
+    'shim: the simulator answers the warm-up as the functions do, with a receipt and no write');
   ok(/'candidateMarkers\/' \+ u\.uid/.test(sim) && /by: 'Moderator'/.test(sim) && /tags: \['about'\]/.test(sim)
      && /quote = \{ n: qn, by: src\.by, text: qtext \};/.test(sim) && /flat\(src\.body\)\.indexOf\(flat\(qtext\)\) === -1/.test(sim),
     'shim: the join writes the marker, the seed posts as Moderator tagged about, and a quote is a verified copy {n, by, text}');
@@ -18031,6 +18119,170 @@ async function testRegisteredUsersFigure() {
     'CLAUDE.md: the chart section records the one function, the constants, the accent, the table override, no em dash');
 }
 
+/* =========================================================================
+   WHAT REGISTRATION ASKS FOR (owner, 2026-09-05)
+
+   Two changes to the "Create your account" card, and they are asymmetric on
+   purpose:
+
+   - the AFFILIATION is compulsory. In this card a required field is a BARE
+     label carrying the `required` attribute (First name, Last name, E-mail,
+     Password) and an optional one carries a "(optional)" chip, so becoming
+     compulsory means losing the chip AND gaining the attribute. The submit
+     guard is not redundant beside it: `required` is satisfied by a box
+     holding only spaces, and the whole point is that the stored profile
+     names a place;
+   - the ORCID iD is still optional and now SAYS it is worth giving, on both
+     cards that ask for it, since the two ask one question and a reader who
+     registers and then opens Edit account must not be told two things.
+
+   The PROFILE card keeps an optional affiliation, and that is the recorded
+   "an edit must stay correctable" rule rather than an oversight: every
+   Google and ORCID registration reaches it with no affiliation (those paths
+   never see this form), as does every account made before the rule, and
+   holding their name and their photograph hostage to a field they were
+   never asked for is the trap this repository has already shipped twice.
+   ====================================================================== */
+async function testRegistrationFields() {
+  const acct = await readFile(path.join(HERE, '..', 'assets', 'oa-accounts.js'), 'utf8');
+
+  /* --- the registration card's own markup ------------------------------- */
+  const regAt = acct.indexOf('\'<form id="oa-auth-form">\'');
+  const regEnd = acct.indexOf('\'<div class="oa-auth-links">\'', regAt);
+  ok(regAt > 0 && regEnd > regAt, 'registration: the card markup was found');
+  const card = acct.slice(regAt, regEnd);
+  ok(card.length > 1500 && card.length < 6000, 'registration: the card slice is the right size');
+
+  ok(/'<label>Affiliation' \+/.test(card),
+    'registration: Affiliation is a BARE label — no "(optional)" chip, which is how this card says a field is required');
+  ok(!/Affiliation <span class="oa-opt">\(optional\)<\/span>/.test(card),
+    'registration: …and the old optional chip is gone, not merely moved');
+  ok(/name="affiliation" maxlength="160" required/.test(card),
+    'registration: …and the box carries the `required` attribute, like the two name boxes');
+  for (const f of ['firstName', 'lastName']) {
+    ok(new RegExp(`name="${f}"[\\s\\S]{0,120}required`).test(card),
+      `registration: ${f} still carries required, so affiliation joins a rule rather than inventing one`);
+  }
+  ok(/'<label>Website <span class="oa-opt">\(optional\)<\/span>'/.test(card),
+    'registration: the website stays optional, so the card still distinguishes the two kinds of field');
+  /* It compels a personal field, so it says where the field goes — in the
+     SITE's own words, the ones the profile card's lede already uses, so the two
+     cards cannot make two different claims about one box. */
+  ok(/'<span class="oa-opt oa-fine">Never published\.<\/span><\/label>'/.test(card),
+    'registration: the affiliation box says where the field goes, under it');
+  ok(/Your affiliation is never published\./.test(acct),
+    'registration: …in the phrase the profile card already uses, so the two agree');
+  const welcomeAt = acct.indexOf("? '<label>Affiliation' +");
+  const welcome = welcomeAt > 0 ? acct.slice(welcomeAt, welcomeAt + 400) : '';
+  ok(welcomeAt > 0 && !/Never published/.test(welcome),
+    'welcome card: …and is NOT given it twice, since its own lede already says it');
+
+  ok(/autocomplete="organization"/.test(card),
+    'registration: the affiliation keeps autocomplete="organization" — it describes the person filling the form in, ' +
+    'which is exactly the test the posting form\'s own autocomplete rule applies');
+
+  /* --- the ORCID wording, on BOTH cards --------------------------------- */
+  const CHIP = '<span class="oa-opt">(highly recommended but optional)</span>';
+  eq((acct.match(/\(highly recommended but optional\)/g) || []).length, 2,
+    'ORCID: the new wording appears exactly twice — the registration card and the profile card, the two places the iD is asked for');
+  ok(card.includes('\'<label>ORCID iD ' + CHIP + '\''),
+    'registration: the ORCID chip reads "highly recommended but optional"');
+  const orcidAt = acct.indexOf('function orcidFieldHTML(');
+  const orcidFn = acct.slice(orcidAt, acct.indexOf('\n  }', orcidAt));
+  ok(orcidAt > 0 && orcidFn.includes('<label>ORCID iD ' + CHIP),
+    'profile card: orcidFieldHTML says the same thing, so the two cards cannot tell a reader different things');
+  ok(!/ORCID iD <span class="oa-opt">\(optional\)<\/span>/.test(acct),
+    'ORCID: no card still calls the iD plainly optional');
+
+  /* --- the profile card is deliberately NOT held to the new rule -------- */
+  const profAt = acct.indexOf('\'<form id="oa-profile-form">\'');
+  const profEnd = acct.indexOf('\'<div class="oa-auth-actions">\'', profAt);
+  ok(profAt > 0 && profEnd > profAt, 'profile card: the form markup was found');
+  const prof = acct.slice(profAt, profEnd);
+  ok(/'<label>Affiliation <span class="oa-opt">\(optional\)<\/span>'/.test(prof),
+    'profile card: an ordinary EDIT still gets the optional chip — correcting a name must not demand an ' +
+    'affiliation of the accounts that were never asked for one');
+  /* The card has a second branch since the provider ask (below): the compulsory
+     box exists, and what keeps the edit surface safe is that NOTHING but an
+     explicit option can reach it. Pin that rather than the absence of the word. */
+  ok(/\(mustAff\s*[\s\S]{0,400}\? '<label>Affiliation' \+/.test(prof),
+    'profile card: the compulsory box is behind mustAff, never the default');
+  ok(/var mustAff = !!\(opts && opts\.requireAffiliation\);/.test(acct),
+    'profile card: …and mustAff is nothing but a caller-passed option, so openProfile() alone is never compulsory');
+  ok(/if \(mustAff && !out\.affiliation\) \{/.test(acct),
+    'profile card: the save guard is conditioned on it too, so an ordinary edit can still clear the box');
+
+  /* --- the guard, and where it sits ------------------------------------- */
+  const subAt = acct.indexOf("$('#oa-auth-form').addEventListener('submit'");
+  const createAt = acct.indexOf('createUserWithEmailAndPassword(f.email.value', subAt);
+  ok(subAt > 0 && createAt > subAt, 'registration: the submit handler and the account creation were found');
+  const guards = acct.slice(subAt, createAt);
+  ok(/var affiliation = String\(f\.affiliation\.value \|\| ''\)\.trim\(\);/.test(guards),
+    'registration: the guard TRIMS, so a box holding only spaces is empty — which is the case `required` lets through');
+  ok(/if \(!affiliation\) \{[\s\S]{0,220}f\.affiliation\.focus\(\);[\s\S]{0,40}return;/.test(guards),
+    'registration: …an empty one refuses, puts the cursor in the box and never reaches the account creation');
+  ok(/say\('Please give your affiliation, the university or company you are at\.'\);/.test(guards),
+    'registration: …with the card\'s own voice, naming the field rather than reporting a code');
+  const affAt = acct.indexOf('var affiliation = String(f.affiliation', subAt);
+  ok(affAt > subAt && affAt < createAt,
+    'registration: the guard sits between the submit handler and the account creation, so a refusal leaves nothing behind');
+
+  /* the trimmed value is what is stored — not a second read of the box, which
+     would put the spaces back on the very field the guard just insisted on */
+  ok(/affiliation: affiliation\.slice\(0, 300\),/.test(acct),
+    'registration: the profile is built from the value the guard trimmed');
+  ok(!/affiliation: String\(f\.affiliation\.value/.test(acct),
+    'registration: …and never from a second, untrimmed read of the box');
+
+  /* --- and NOTHING here needs a rules deploy ---------------------------- */
+  const rules = await readFile(path.join(HERE, '..', '_firestore.rules'), 'utf8');
+  ok(/function str\(field, maxLen\) \{\s*return !\(field in request\.resource\.data\)/.test(rules),
+    'rules: str() makes a field optional BY PRESENCE, so a browser-side requirement needs no rule');
+  ok(/str\('affiliation', 300\)/.test(rules),
+    'rules: the affiliation is still bounded and still optional in profileShape — a profile written before the rule ' +
+    'stays writable by its owner, which is what makes this change inert-free (no deploy)');
+
+  /* the header records the decision, both halves of it */
+  const head = acct.slice(0, acct.indexOf('(function ()'));
+  ok(/AFFILIATION/.test(head) && /2026-09-05/.test(head) && /profile card is deliberately NOT held/.test(head),
+    'accounts: the module header records the compulsory affiliation and why the profile card is exempt');
+
+  /* --- the third road in: a Google or ORCID sign-up ---------------------- */
+  ok(/if \(fresh && cred\.user && cred\.user\.uid\) markAskAffiliation\(cred\.user\.uid\);/.test(acct),
+    'provider sign-up: a BRAND NEW Google or ORCID account is marked to be asked for its affiliation');
+  ok(/var fresh = !!\(cred && cred\.additionalUserInfo && cred\.additionalUserInfo\.isNewUser\);/.test(acct),
+    'provider sign-up: …decided by the credential\'s own isNewUser, so a later sign-in is never asked again');
+  const linkAt = acct.indexOf('function linkProvider(');
+  const link = linkAt > 0 ? acct.slice(linkAt, acct.indexOf('\n  }', linkAt)) : '';
+  ok(linkAt > 0 && !/markAskAffiliation/.test(link),
+    'provider sign-up: LINKING a provider to an existing account marks nothing — that account is not new');
+  ok(/localStorage\.removeItem\(ASK_AFF \+ uid\);/.test(acct) && /var askAff = !leaving && takeAskAffiliation\(uid\);/.test(acct),
+    'provider sign-up: the mark is taken exactly once, so a second page load does not ask again');
+  ok(/if \(dest\) \{ leaving = true; location\.href = dest; \}/.test(acct),
+    'provider sign-up: a sign-up that navigates opens no card on the page it is leaving, or the mark is spent for nothing');
+  ok(/requireAffiliation: askAff && !\(state\.profile \|\| \{\}\)\.affiliation/.test(acct),
+    'provider sign-up: …and an account that somehow already has an affiliation is not asked for one');
+  ok(/additionalUserInfo: \{ isNewUser: !!seed\.newUser \}/.test(
+       await readFile(path.join(HERE, '..', '_scraper', '_fake-firebase.js'), 'utf8')),
+    'shim: a sign-in answers isNewUser, opt-in per seed, so the browser suite can drive a real sign-up');
+
+  /* --- and it is announced, and written down ---------------------------- */
+  const changelog = JSON.parse(await readFile(path.join(HERE, '..', 'changelog.json'), 'utf8'));
+  const entry = (changelog.updates || []).find((u) => u.id === 'registration-affiliation-2026-09');
+  ok(entry && entry.date === '2026-09-05' && entry.url && /affiliation/i.test(entry.title),
+    'changelog.json announces the compulsory affiliation, dated, with a link');
+  ok(entry && /highly recommended/.test(entry.summary) && /never published/.test(entry.summary)
+     && !/\u2014/.test(entry.title + entry.summary),
+    'changelog: …and says what the ORCID box now claims and where the affiliation goes, with no em dash');
+
+  const claude = await readFile(path.join(HERE, '..', 'CLAUDE.md'), 'utf8');
+  const secAt = claude.indexOf('### …and it asks for an AFFILIATION');
+  const sec = secAt > 0 ? claude.slice(secAt, claude.indexOf('\n## The forum', secAt)) : '';
+  ok(sec.length > 1500 && /2026-09-05/.test(sec) && /required/.test(sec)
+     && /spaces/.test(sec) && /NO RULES CHANGE/.test(sec) && /EDIT surface/.test(sec),
+    'CLAUDE.md: the section records the owner ruling, the two guards, the profile card exemption and that no rules deploy is needed');
+}
+
 if (isMain(import.meta.url)) {
   testSanitisers();
   testMapping();
@@ -18043,6 +18295,7 @@ if (isMain(import.meta.url)) {
   await testCascadeWiring();
   await testRenamedNamesStillFound();
   await testAccountCounts();
+  await testRegistrationFields();
   await testEveryDatasetNamesPlacesTheSameWay();
   await testNoDuplicateKeys();
   await testScopedUnits();

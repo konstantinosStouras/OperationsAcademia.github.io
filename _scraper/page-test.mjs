@@ -9897,6 +9897,196 @@ for (const w of [320, 360, 390, 430]) {
   }
 }
 
+/* ------------------------------------ WHAT REGISTRATION ASKS FOR (2026-09-05)
+
+   The affiliation is compulsory on a new account and the ORCID iD says it is
+   worth giving. Both are measured on the RENDERED card rather than in the
+   source, because what is under test is what a person filling the form meets:
+   the chip that is no longer there, the box the browser will not let past
+   empty, and the message the card gives when the box holds only spaces.
+
+   Spaces are the case worth driving. `required` is satisfied by them, so the
+   browser lets the submit through and the JS guard is the only thing standing
+   between a card that has just insisted on an affiliation and a profile
+   stored without one. Driven through the shim, whose operation log is what
+   says whether an account was created.                                      */
+{
+  const UNVERIFIED = { uid: 'newbie-uid-0000', email: 'newbie@example.edu',
+    emailVerified: false, displayName: '', providerData: [{ providerId: 'password' }] };
+  const { ctx, page: q, errors } = await signedOutPage('jobs.html',
+    { seed: { signInUser: UNVERIFIED } });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('#oa-auth-form [name="affiliation"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const lab = (name) => {
+      const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
+      return i && i.closest('label') ? i.closest('label').textContent.trim() : null;
+    };
+    const req = (name) => {
+      const i = document.querySelector(`#oa-auth-form [name="${name}"]`);
+      return i ? i.required : null;
+    };
+    return {
+      affLabel: lab('affiliation'), affReq: req('affiliation'),
+      affNote: (() => {
+        const i = document.querySelector('#oa-auth-form [name="affiliation"]');
+        const n = i.closest('label').querySelector('.oa-fine');
+        return n ? n.textContent.trim() : null;
+      })(),
+      siteLabel: lab('website'), siteReq: req('website'),
+      firstReq: req('firstName'), lastReq: req('lastName'),
+      orcidLabel: lab('orcid'), orcidReq: req('orcid'),
+    };
+  });
+  ok(card.affReq === true, 'registration card: the affiliation box is required');
+  ok(!/optional/i.test(card.affLabel || ''),
+    `registration card: …and its label no longer says optional (got "${card.affLabel}")`);
+  eq(card.affNote, 'Never published.',
+    'registration card: …and it says where the compelled field goes, under the box');
+  ok(card.firstReq === true && card.lastReq === true,
+    'registration card: the two name boxes are required too, so the affiliation joins an existing rule');
+  ok(card.siteReq === false && /\(optional\)/.test(card.siteLabel || ''),
+    'registration card: the website is still optional and still says so, so the card distinguishes the two kinds');
+  ok(card.orcidReq === false,
+    'registration card: the ORCID iD is still genuinely optional; the wording is a recommendation, not a rule');
+  eq(card.orcidLabel, 'ORCID iD (highly recommended but optional)',
+    'registration card: …and it says it is highly recommended');
+
+  /* a box holding only spaces: the browser lets it through, the guard does not */
+  await q.fill('#oa-auth-form [name="firstName"]', 'Ada');
+  await q.fill('#oa-auth-form [name="lastName"]', 'Lovelace');
+  await q.fill('#oa-auth-form [name="affiliation"]', '   ');
+  await q.fill('#oa-auth-form [name="email"]', 'newbie@example.edu');
+  await q.fill('#oa-auth-form [name="password"]', 'secret-1');
+  await q.check('#oa-auth-form [name="terms"]');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(
+    () => (document.querySelector('#oa-auth-msg') || {}).textContent,
+    null, { timeout: 8000 });
+  const refused = await q.evaluate(() => ({
+    msg: document.querySelector('#oa-auth-msg').textContent.trim(),
+    focused: document.activeElement && document.activeElement.name,
+    signedIn: window.__fb.at('signIn', ''),
+    wroteProfile: window.__fb.at('set', 'profiles/'),
+    boxOpen: !!document.querySelector('#oa-auth'),
+  }));
+  ok(/affiliation/i.test(refused.msg),
+    `registration card: an affiliation of spaces is refused, and the message names the field (got "${refused.msg}")`);
+  eq(refused.focused, 'affiliation',
+    'registration card: …with the cursor put back in the box, so the fix needs no hunting');
+  eq(refused.signedIn, -1,
+    'registration card: …and NO account was created, so a refusal leaves nothing behind to sign in to or clean up');
+  eq(refused.wroteProfile, -1, 'registration card: …and no profile was stored');
+  ok(refused.boxOpen, 'registration card: …and the card stays open on what the reader typed');
+
+  /* the same form with a real affiliation still registers, trimmed */
+  await q.fill('#oa-auth-form [name="affiliation"]', '  Test University  ');
+  await q.$eval('#oa-auth-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/') !== -1, null, { timeout: 8000 });
+  const made = await q.evaluate(() => ({
+    signedIn: window.__fb.at('signIn', '') !== -1,
+    docs: window.__fb.dump(),
+  }));
+  ok(made.signedIn, 'registration card: a complete form still creates the account');
+  const profDoc = Object.keys(made.docs).filter((k) => k.indexOf('profiles/') === 0)[0];
+  eq(made.docs[profDoc].affiliation, 'Test University',
+    'registration card: …and the affiliation is stored TRIMMED, not as the spaces around it');
+  eq(errors, [], 'registration card: no uncaught script error');
+  await ctx.close();
+}
+
+/* -------------------- a GOOGLE sign-up is asked for its affiliation too
+
+   The registration form is one of three ways in and the other two answer no
+   questions at all, so a brand new provider account is asked on the welcome
+   card instead. Driven for real: the shim reports isNewUser, the module marks
+   the account, and the card that opens on the next page has a required box and
+   no Not now. An account that is merely signing in again gets neither.        */
+{
+  const NEWBIE = { uid: 'fresh-google-uid', email: 'fresh@example.edu', emailVerified: true,
+    displayName: 'Fresh Newcomer', providerData: [{ providerId: 'google.com' }] };
+
+  /* the sign-up: press Continue with Google on a page it will NOT navigate
+     away from (firstRunDestination stands down on the posting form), so the
+     card opens in place and can be measured */
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: NEWBIE, newUser: true }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth('register'));
+  await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="google"]');
+  await q.waitForSelector('#oa-profile-form [name="affiliation"]', { timeout: 8000 });
+
+  const card = await q.evaluate(() => {
+    const i = document.querySelector('#oa-profile-form [name="affiliation"]');
+    return {
+      required: i.required,
+      label: i.closest('label').textContent.trim(),
+      later: !!document.querySelector('#oa-profile-later'),
+      heading: (document.querySelector('#oa-profile-h') || {}).textContent,
+      lede: (document.querySelector('.oa-modal-lede') || {}).textContent || '',
+      marked: localStorage.getItem('oaAskAffiliation:fresh-google-uid'),
+    };
+  });
+  ok(card.required === true, 'google sign-up: the welcome card asks for the affiliation and requires it');
+  ok(!/optional/i.test(card.label),
+    `google sign-up: …with no optional chip (got "${card.label}")`);
+  ok(!card.later, 'google sign-up: …and no Not now, since answering is the point of the card');
+  eq(card.heading, 'Welcome', 'google sign-up: it is the welcome card, not the ordinary profile card');
+  ok(/never published/i.test(card.lede),
+    'google sign-up: …and the card still says where the affiliation goes, which is why it may be asked for');
+  eq(card.marked, null, 'google sign-up: the mark is spent, so a second page load does not ask again');
+
+  /* Saving without one is refused, exactly as the registration form refuses it.
+     Counted rather than asserted absent: seedProfileFromUser has legitimately
+     already written the provider's NAME to this same document, so what is under
+     test is that the refused save adds nothing to it. */
+  const before = await q.evaluate(() => window.__fb.ops('set').filter((x) => x.indexOf('profiles/') === 0).length);
+  await q.fill('#oa-profile-form [name="affiliation"]', '   ');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => (document.querySelector('#oa-profile-msg') || {}).textContent,
+    null, { timeout: 8000 });
+  const refused = await q.evaluate(() => ({
+    msg: document.querySelector('#oa-profile-msg').textContent.trim(),
+    writes: window.__fb.ops('set').filter((x) => x.indexOf('profiles/') === 0).length,
+    stored: (window.__fb.dump()['profiles/fresh-google-uid'] || {}).affiliation,
+  }));
+  ok(/affiliation/i.test(refused.msg),
+    `google sign-up: an affiliation of spaces is refused, naming the field (got "${refused.msg}")`);
+  eq(refused.writes, before, 'google sign-up: …and the refused save writes nothing');
+  ok(!refused.stored, 'google sign-up: …so the profile still holds no affiliation');
+
+  await q.fill('#oa-profile-form [name="affiliation"]', 'Fresh University');
+  await q.$eval('#oa-profile-form', (f) => f.requestSubmit());
+  await q.waitForFunction(() => window.__fb.at('set', 'profiles/fresh-google-uid') !== -1,
+    null, { timeout: 8000 });
+  const saved = await q.evaluate(() => window.__fb.dump()['profiles/fresh-google-uid']);
+  eq(saved.affiliation, 'Fresh University', 'google sign-up: …and a real one saves');
+  eq(errors, [], 'google sign-up: no uncaught script error');
+  await ctx.close();
+}
+
+{
+  /* the same reader signing in AGAIN is asked nothing: not a new account */
+  const RETURNING = { uid: 'returning-uid', email: 'back@example.edu', emailVerified: true,
+    displayName: 'Back Again', providerData: [{ providerId: 'google.com' }] };
+  const { ctx, page: q, errors } = await signedOutPage('post-a-job.html',
+    { seed: { signInUser: RETURNING }, selector: '#main' });
+  await q.evaluate(() => window.OAAccounts.openAuth());
+  await q.waitForSelector('.oa-auth-provider[data-provider="google"]', { timeout: 8000 });
+  await q.click('.oa-auth-provider[data-provider="google"]');
+  await q.waitForFunction(() => !!(window.OAAccounts.user()), null, { timeout: 8000 });
+  await q.waitForTimeout(700);
+  const after = await q.evaluate(() => ({
+    card: !!document.querySelector('#oa-profile-form'),
+    marked: localStorage.getItem('oaAskAffiliation:returning-uid'),
+  }));
+  ok(!after.card, 'returning sign-in: no welcome card, because the account is not new');
+  eq(after.marked, null, 'returning sign-in: …and nothing was marked');
+  eq(errors, [], 'returning sign-in: no uncaught script error');
+  await ctx.close();
+}
+
 /* ---------------------------------------------------------- the forum
 
    forum.html, driven end to end through the shim's forum simulator
@@ -10223,13 +10413,17 @@ for (const w of [320, 360, 390, 430]) {
       pressed: [...document.querySelectorAll('.oa-forum-post.is-first .oa-forum-v')].map((b) => b.getAttribute('aria-pressed')),
       thread: window.__fb.docs[t + '/seed-t1'].score,
       voteDocs: Object.keys(window.__fb.docs).filter((p) => /\/votes\//.test(p)),
-      sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote').map((e) => e.data.v),
+      /* the warm-up the page sends when the pointer first reaches a vote
+         column is a call of its own ({ room, warm: true }) and carries no v */
+      sent: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote' && !e.data.warm).map((e) => e.data.v),
+      warm: window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumVote' && e.data.warm === true).map((e) => Object.keys(e.data).sort()),
     }), T);
     eq(v0.score, '0', 'forum (candidate): pressing the same button again withdraws the vote');
     eq(v0.pressed, ['false', 'false'], 'forum (candidate): and nothing is highlighted');
     eq(v0.thread, 0, 'forum (candidate): the thread head\'s score followed the first post\'s net all the way');
     eq(v0.voteDocs, [], 'forum (candidate): a withdrawn vote leaves no vote document');
     eq(v0.sent, [1, -1, 0], 'forum (candidate): the page sent 1, -1 and 0, never a delta of its own');
+    eq(v0.warm, [['room', 'warm']], 'forum (candidate): and woke the voting function ONCE, before the first press, with the room and nothing else');
 
     /* reply with a quote: the copy carries the quoted handle and number */
     await q.click('.oa-forum-post.is-first .oa-forum-act[data-act="quote"]');
@@ -10266,13 +10460,23 @@ for (const w of [320, 360, 390, 430]) {
         sent: { keys: Object.keys(sent).sort(), quote: sent.quote, accept: sent.acceptGuide },
         hash: location.hash,
         acceptGone: !document.getElementById('oa-forum-accept'),
+        /* FASTER POSTED (owner, 2026-09-06): the posting function woken when
+           the box took focus, before the answer was sent; the answer on the
+           page from the receipt, with no second round of votes asked for;
+           the box drawn again empty, the quote gone with it */
+        warm: (() => {
+          const calls = window.__fb.log.filter((e) => e.op === 'callable' && e.path === 'forumPost');
+          return { n: calls.filter((c) => c.data.warm === true).length, first: calls[0].data.warm === true, keys: Object.keys(calls[0].data).sort() };
+        })(),
+        votesCalls: window.__fb.ops('callable').filter((n) => n === 'forumThreadVotes').length,
+        boxEmpty: document.getElementById('oa-forum-body').value === '' && document.getElementById('oa-forum-quotebox').hidden,
       };
     });
     eq(rep.cite, 'patient owl 7 wrote in #1', 'forum (candidate): the reply carries the quote as a blockquote headed by handle and number');
     eq(rep.link, '#p1', 'forum (candidate): the heading links the quoted post');
     ok(/teaching load question worked/.test(rep.body), 'forum (candidate): the reply\'s own words follow');
     ok(rep.mine && rep.own === 2, 'forum (candidate): the reply is marked as the reader\'s own, with both vote buttons disabled');
-    ok(/^Edit · \d+ min left$/.test(rep.edit || ''), 'forum (candidate): the author is offered Edit with the minutes left');
+    eq(rep.edit, 'Edit', 'forum (candidate): the author is offered Edit, with no countdown: there is no window (owner, 2026-09-06)');
     eq(rep.heading, '1 Answer', 'forum (candidate): the answers band counts, and says answers');
     eq(rep.sortOptions, ['score', 'oldest'], 'forum (candidate): and offers the two orders, highest score first');
     eq(rep.accept, 0, 'forum (candidate): NO tick is offered on somebody else\'s question, whatever this reader thinks of the answer');
@@ -10281,8 +10485,12 @@ for (const w of [320, 360, 390, 430]) {
     eq(rep.sent.keys, ['acceptGuide', 'body', 'quote', 'room', 'tid'], 'forum (candidate): the answer sent room, tid, body, the quote and the acceptance, and no kind');
     eq(Object.keys(rep.sent.quote).sort(), ['n', 'text'], 'forum (candidate): the quote sent is n and text only');
     ok(rep.hash === '#p2' && rep.acceptGone, 'forum (candidate): the page lands on the new post and the acceptance box is gone');
+    eq(rep.warm, { n: 1, first: true, keys: ['room', 'warm'] },
+      'forum (candidate): the posting function was woken ONCE, when the box took focus, with the room and nothing else, before the answer was sent');
+    eq(rep.votesCalls, 1, 'forum (candidate): landing the answer asked for no second round of votes: the page drew it from the receipt');
+    ok(rep.boxEmpty, 'forum (candidate): the box is drawn again empty, the quote gone with it');
 
-    /* edit the reply inside the window */
+    /* edit the reply: the author's own, at any time (there is no window) */
     await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
     await q.waitForSelector('.oa-forum-editing textarea', { timeout: 8000 });
     await q.fill('.oa-forum-editing textarea', 'Thank you. The teaching load question worked for me as well.');
@@ -10335,6 +10543,13 @@ for (const w of [320, 360, 390, 430]) {
     eq(lk.text, 'https://ec26.sigecom.org/cfp', 'forum (candidate): the full stop after it is sentence punctuation, not part of the address');
     ok(/Worth a look\./.test(lk.after), 'forum (candidate): and the words after it are still there');
 
+    /* AN EDIT IN PROGRESS SURVIVES A REPAINT (owner, 2026-09-06, the quiet
+       re-read): the box is opened on the reply and half filled, then another
+       post is deleted, which repaints every post; the box has to come back on
+       the same post with the same words. */
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-act[data-act="edit"]');
+    await q.waitForSelector('.oa-forum-post[data-n="2"] .oa-forum-editing textarea', { timeout: 8000 });
+    await q.fill('.oa-forum-post[data-n="2"] .oa-forum-editing textarea', 'A half-typed correction, not yet saved');
     /* DELETING it: the author's own post, no window, the words really gone */
     q.once('dialog', (d) => d.accept());
     await q.click('.oa-forum-post[data-n="3"] .oa-forum-act[data-act="delete"]');
@@ -10342,6 +10557,14 @@ for (const w of [320, 360, 390, 430]) {
       const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
       return p3 && p3.querySelector('.oa-forum-removed');
     }, null, { timeout: 15000 });
+    const kept = await q.evaluate(() => {
+      const ta = document.querySelector('.oa-forum-post[data-n="2"] .oa-forum-editing textarea');
+      return { open: !!ta, text: ta ? ta.value : '', boxes: document.querySelectorAll('#oa-forum-thread .oa-forum-editing').length };
+    });
+    ok(kept.open && kept.text === 'A half-typed correction, not yet saved' && kept.boxes === 1,
+      'forum (candidate): an edit box open on another post survives the repaint with its words, and once');
+    await q.click('.oa-forum-post[data-n="2"] .oa-forum-editing [data-edit="cancel"]');
+    await q.waitForFunction(() => !document.querySelector('#oa-forum-thread .oa-forum-editing'), null, { timeout: 8000 });
     const del = await q.evaluate((t) => {
       const p3 = document.querySelector('.oa-forum-post[data-n="3"]');
       const pid = p3.getAttribute('data-pid');
@@ -10573,8 +10796,8 @@ for (const w of [320, 360, 390, 430]) {
     await q.click('#oa-forum-tags [data-watch]');
     await q.waitForTimeout(200);
 
-    eq(await q.evaluate(() => JSON.parse(sessionStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
-      'forum (candidate): the join is remembered for the session under the handle');
+    eq(await q.evaluate(() => JSON.parse(localStorage.getItem('oa-forum-me')).handle), 'quiet heron 42',
+      'forum (candidate): the join is remembered on this device under the handle, for the next visit');
     /* THEIR OWN QUESTION, WHICH NOBODY HAS ANSWERED: it goes, and the whole
        thread goes with it, so none is ever left headless (owner, 2026-09-05).
        The thread just posted is the one case an ordinary member may delete. */
@@ -10643,6 +10866,80 @@ for (const w of [320, 360, 390, 430]) {
     await forumContrast(q, 'the list');
     eq(errors, [], 'forum (candidate): no uncaught script error through the whole conversation');
     await ctx.close();
+  }
+
+  /* -- THE SECOND VISIT (owner, 2026-09-06: "when I enter the forum the page
+        doesn't load immediately"): drawn from this browser's memory BEFORE the
+        session resolves, the join called again behind the page; a join that
+        cannot be reached changes nothing, a join refused by reason forgets
+        the memory and says why ---------------------------------------------- */
+  {
+    const memory = JSON.stringify({ uid: CAND.uid, season: FY, handle: 'quiet heron 42', guideAt: 1, banned: false,
+      rooms: { candidates: true, open: true } });
+    const remember = `try { localStorage.setItem('oa-forum-me', ${JSON.stringify(memory)});
+      localStorage.setItem('oaAuthHint', JSON.stringify({ uid: ${JSON.stringify(CAND.uid)}, name: 'C.' })); } catch (e) {}\n`;
+    /* whether the room was on screen before the session resolved: the
+       attribute mutation that reveals #oa-forum, against OAAccounts.resolved()
+       at that moment (the shim resolves the session only after the three
+       routed bundles have loaded, so a draw from memory lands well before it).
+       Observed on the DOCUMENT node: an init script runs before the document
+       element exists, so that is the one node there is to observe. */
+    const watchEarly = `window.__earlyDraw = null;
+      new MutationObserver(function () {
+        var app = document.getElementById('oa-forum');
+        if (app && !app.hidden && window.__earlyDraw === null) window.__earlyDraw = !(window.OAAccounts && window.OAAccounts.resolved());
+      }).observe(document, { attributes: true, subtree: true, attributeFilter: ['hidden'] });\n`;
+    const { ctx, page: q, errors } = await signedInPage('forum.html',
+      { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember + watchEarly });
+    await q.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+    const again = await q.evaluate(() => ({
+      early: window.__earlyDraw,
+      tabs: [...document.querySelectorAll('#oa-forum-rooms .oa-forum-tab')].map((n) => n.getAttribute('data-room')),
+      handle: document.getElementById('oa-forum-myhandle').textContent,
+      joined: window.__fb.ops('callable'),
+      error: document.getElementById('oa-forum-error').hidden,
+      memory: JSON.parse(localStorage.getItem('oa-forum-me') || 'null'),
+    }));
+    eq(again.early, true, 'forum (second visit): the room is drawn from this browser\'s memory BEFORE the session resolves');
+    eq(again.tabs, ['candidates', 'open'], 'forum (second visit): both tabs, from the remembered rooms');
+    eq(again.handle, 'quiet heron 42', 'forum (second visit): under the remembered handle');
+    eq(again.joined, ['forumJoin'], 'forum (second visit): one forumJoin, behind the page, and nothing else');
+    ok(again.error && again.memory && again.memory.uid === CAND.uid, 'forum (second visit): no error, and the memory kept from the answer');
+    eq(errors, [], 'forum (second visit): no uncaught script error');
+    await ctx.close();
+
+    /* the join UNREACHABLE: the room stands, the unreachable-source rule */
+    {
+      const { ctx: c2, page: q2, errors: e2 } = await signedInPage('forum.html',
+        { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum', init: remember,
+          seed: { refuse: { forumJoin: { code: 'unavailable', reason: '' } } } });
+      await q2.waitForSelector('#oa-forum-list .oa-card', { timeout: 15000 });
+      const down = await q2.evaluate(() => ({
+        app: !document.getElementById('oa-forum').hidden,
+        error: document.getElementById('oa-forum-error').hidden,
+        tried: window.__fb.ops('callable'),
+        memory: !!localStorage.getItem('oa-forum-me'),
+      }));
+      ok(down.app && down.error && down.memory, 'forum (second visit): a join that cannot be reached changes nothing: the room stays, the memory stays');
+      eq(down.tried, ['forumJoin'], 'forum (second visit): it was tried, once');
+      eq(e2, [], 'forum (second visit, join down): no uncaught script error');
+      await c2.close();
+    }
+    /* the join REFUSED BY REASON: the memory goes and the refusal is shown */
+    {
+      const { ctx: c3, page: q3, errors: e3 } = await signedInPage('forum.html',
+        { user: CAND, docs: [CAND_PROFILE, ...SEEDED], selector: '#oa-forum-error:not([hidden])', init: remember,
+          seed: { refuse: { forumJoin: { code: 'permission-denied', reason: 'verified' } } } });
+      const refused = await q3.evaluate(() => ({
+        app: document.getElementById('oa-forum').hidden,
+        text: document.getElementById('oa-forum-error').textContent,
+        memory: localStorage.getItem('oa-forum-me'),
+      }));
+      ok(refused.app && /Confirm your e-mail address/.test(refused.text), 'forum (second visit): a join refused by reason takes the room off and says why');
+      eq(refused.memory, null, 'forum (second visit): and forgets the memory, so the next visit asks again');
+      eq(e3, [], 'forum (second visit, refused): no uncaught script error');
+      await c3.close();
+    }
   }
 
   /* -- the maintainer, with no profile: both rooms, the guide seeded, a post -- */

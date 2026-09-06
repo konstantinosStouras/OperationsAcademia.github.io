@@ -1135,16 +1135,6 @@ body.v3 .oa-forum-tagchip:hover {
 .oa-forum-guidepanel .oa-forum-rules li + li { margin-top: 6px; }
 .oa-forum-guidepanel strong { color: var(--ink); }
 
-.oa-forum-note-side {
-  padding: 10px 12px;
-  border: 1px solid var(--warn-line);
-  border-radius: 10px;
-  background: var(--warn-bg);
-  color: var(--ink);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
 .oa-forum-seedbtn { margin-top: 8px; }
 
 /* the Ask button sits in the list head (never in the engine's action bar,

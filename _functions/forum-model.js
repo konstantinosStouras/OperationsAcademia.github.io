@@ -164,16 +164,14 @@
      rule is. */
   var RATE = { threads: 3, posts: 40, votes: 60, gapMs: 60000 };
 
-  /** A member may edit their own post for fifteen minutes from the MINUTE it
-      was stamped. Both stamps are truncated to the minute (R7), so the real
-      window is fifteen minutes plus up to 59 seconds: the slack is on the
-      generous side deliberately, because the guide promises fifteen and a
-      strict comparison closed the window up to 59 seconds EARLY. The
-      function is the authority;
-      the page draws a countdown from the same constant. DELETING has no
-      window at all (owner, 2026-09-05), though a question somebody has
-      answered cannot be deleted at all; see _functions/forum/delete.js. */
-  var EDIT_WINDOW_MS = 15 * 60 * 1000;
+  /* THERE IS NO EDIT WINDOW (owner, 2026-09-06: "the user can delete and
+     edit the post any time"). A member's own post is theirs to edit and to
+     delete for as long as the season is running; the one thing that holds a
+     post is a QUESTION with a live answer under it, which cannot be deleted
+     until every answer has gone (see _functions/forum/delete.js). The
+     fifteen-minute constant the page drew a countdown from is gone from the
+     model rather than set to infinity, so no writer can measure against it.
+   */
 
   /* THERE IS NO KINDS LIST, and its absence is the point (owner,
      2026-09-05: "I don't understand why a user should select plain and
@@ -240,7 +238,6 @@
     TAG_COUNT_CAP: TAG_COUNT_CAP,
     TAG_RX: TAG_RX,
     RATE: RATE,
-    EDIT_WINDOW_MS: EDIT_WINDOW_MS,
     MODERATOR: MODERATOR,
     slug: slug,
     tagOk: tagOk,
