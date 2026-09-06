@@ -115,8 +115,13 @@
   }
 
   /** A line that says the search has no closing date rather than naming one —
-      jobreview.mjs OPEN_ENDED. */
-  var OPEN_ENDED = /until\s*filled|open\s*until|rolling/i;
+      jobs-model.mjs OPEN_ENDED_RX, which jobreview.mjs now imports. A browser
+      file cannot import it, so the selftest holds this literal to that one
+      CHARACTER FOR CHARACTER (the EMAIL_RX idiom): an echo reading the rule
+      differently from the build is a date shown to the maintainer that the
+      published row will not carry, which is exactly what this module's third
+      promise — echo only what the build would publish — forbids. */
+  var OPEN_ENDED = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
   /** jobs-model EMAIL_RX. Nothing under data/ may carry an address, and the
       echo must not show one the build is about to remove. */
   var EMAIL_RX = /[A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/g;

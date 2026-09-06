@@ -32,7 +32,7 @@ import { createRequire } from 'node:module';
 
 import {
   text, url, longDate, LEVELS, TYPES, canonCountry, canonColumns,
-  ownUniversitiesLink, universitiesLink, stripRowEmails,
+  ownUniversitiesLink, universitiesLink, stripRowEmails, OPEN_ENDED_RX,
 } from './jobs-model.mjs';
 import { joinDepartment, businessSchoolOf, BUSINESS_SCHOOL_NAME_RX } from './vocab.mjs';
 
@@ -279,8 +279,12 @@ export function applyEdits(row, edits) {
   return stripRowEmails(settlePlace(settleDeadline(out), row));
 }
 
-/** A line that says the search has no closing date rather than naming one. */
-const OPEN_ENDED = /until\s*filled|open\s*until|rolling/i;
+/** A line that says the search has no closing date rather than naming one —
+    jobs-model's OPEN_ENDED_RX, imported. It was a second hand-written copy of
+    that literal, so a change to the rule reached the build and the sheet
+    ingest and stopped here, which is a review card settling a deadline by a
+    rule the row is then published under a different one. */
+const OPEN_ENDED = OPEN_ENDED_RX;
 
 /**
  * The closing date and the line the card shows for it, settled against each

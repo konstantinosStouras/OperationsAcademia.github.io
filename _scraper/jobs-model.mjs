@@ -56,12 +56,36 @@ export const PUBLIC_FIELDS = [
   'characteristics', 'featured', 'source', 'addedAt', 'ref', 'owner',
 ];
 
-/* Prose that means the search stays open. ONE definition: import-sheet.mjs
-   clears parsed dates with it, rowFromSubmission clears stored dates with it,
-   and the selftest rejects any served row whose applyBy matches it while a
-   date is set — the page buckets "Until filled" purely on the date being
-   empty, so a row carrying both would sort as dated and read as open-ended. */
-export const OPEN_ENDED_RX = /until\s*filled|open\s*until|rolling/i;
+/* Prose that means the search stays open. ONE definition — and it is one for
+   the first time: import-sheet.mjs and jobreview.mjs IMPORT it, and the
+   browser twin in assets/oa-fresh.js is pinned against this literal character
+   for character (selftest.mjs, the EMAIL_RX idiom). It had been four
+   hand-written copies of one rule under a comment already calling itself the
+   single definition, which is the drift oa-countries.js, oa-schools.js and
+   oa-jobnav.js all exist to prevent: change the rule and three writers keep
+   the old one, silently. rowFromSubmission clears a stored date with it, the
+   sheet ingest clears a parsed one, and the served-file guard rejects any row
+   whose applyBy matches while a date is set — the page buckets "Until filled"
+   purely on the date being empty, so a row carrying both would sort as dated
+   and read as open-ended.
+
+   "ON A ROLLING BASIS" IS NOT SUCH PROSE. It says how applications are
+   REVIEWED, not when the search closes, and reading it as an open-ended
+   search discarded a closing date the advertisement had stated: "March 16,
+   2026. Applications will be reviewed on a rolling basis" published with an
+   EMPTY applyByDate under a line still printing March 16 — a card naming a
+   date the Deadline filter buckets "Until filled" and the market roll treats
+   as never closing. Measured over the served corpus the word appears nine
+   ways and every one is either that review-cadence phrase or a bare
+   "Rolling — full consideration <date>", which this still reads.
+
+   THE `until…filled` LEG STAYS LITERAL, for the same reason in reverse.
+   Sixteen served rows state a real closing date beside "review will continue
+   until the position is filled"; widening the leg to reach them flips all
+   sixteen to open-ended, and the served-file guard would then refuse
+   every one of them and stop the whole site publishing — the failure this
+   repository has already shipped four times. */
+export const OPEN_ENDED_RX = /until\s*filled|open\s*until|rolling(?!\s+basis)/i;
 
 export const LEVELS = [
   'Assistant Professor',

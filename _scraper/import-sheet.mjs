@@ -39,7 +39,7 @@ import {
   text, url, day, jobId, publicRow, serialise, displayOrder, buildMeta, mergeRows,
   LEVELS, CHARACTERISTICS, TYPES, longDate, pickList,
   marketYear, marketLabel, marketFloor, MARKET_WINDOW, collapseSameDay,
-  keyOf, isoStamp, canonCountry, canonPlace,
+  keyOf, isoStamp, canonCountry, canonPlace, OPEN_ENDED_RX,
 } from './jobs-model.mjs';
 import { buildVocab, serialiseVocab, splitDepartment, joinDepartment } from './vocab.mjs';
 
@@ -248,8 +248,11 @@ export function rowsFromSheets(displayRows, rawRows) {
        invariant (jobs-model.mjs: `untilFilled ? '' : …`). Four shipped rows
        had both, and the page's Deadline bucket then read the date ("Open" /
        "Expired") while the visible text said "until filled" — the same regex
-       oa-list.js buckets by, so the two can never disagree. */
-    if (/until\s*filled|open\s*until|rolling/i.test(applyProse)) applyByDate = '';
+       oa-list.js buckets by, so the two can never disagree. IMPORTED rather
+       than written out again: this file carried its own copy of the literal,
+       so narrowing the rule in jobs-model.mjs would have left this ingest
+       reading the old one with nothing to say so. */
+    if (OPEN_ENDED_RX.test(applyProse)) applyByDate = '';
 
     const applyBy = redactEmails(applyProse) ||
       (applyByDate ? longDate(applyByDate) : 'Until filled.');

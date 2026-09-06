@@ -35,7 +35,7 @@ import {
   parseProseDay, extractReviewDate, extractFinalDate, healReviewDate,
   PUBLIC_FIELDS, LEVELS, CHARACTERISTICS, TYPES,
   stripEmails, stripRowEmails, patchDeadlines, canonColumns, canonCountry,
-  postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE,
+  postedBy, contactEmail, sourceLabel, CRAWLER_SOURCES, FORM_SOURCE, OPEN_ENDED_RX,
 } from './jobs-model.mjs';
 import {
   CANDIDATE_PUBLIC_FIELDS, rowFromCandidateSubmission, assignCandidateIds, publicCandidateRow,
@@ -290,11 +290,23 @@ function testOwnershipAndPending() {
   eq(healed.applyByDate, '', 'prose that says "open until filled" wins over a stored date');
   eq(healed.applyBy, 'December 12, 2025. Position will remain open until filled.',
     'while the prose itself is untouched');
+  /* "ON A ROLLING BASIS" IS THE REVIEW CADENCE, NOT AN OPEN-ENDED SEARCH.
+     It used to veto the date beside it, so a posting whose own line printed
+     "March 16, 2026" published with an EMPTY applyByDate — a card naming a
+     date the Deadline filter buckets "Until filled" and the roll treats as
+     never closing. A BARE "Rolling" still says the search stays open, which
+     is how the tracking workbook writes one, so both readings are pinned. */
   const rolling = rowFromSubmission({
     ...GOOD, applyByDate: '2026-03-16',
     applyByNote: 'Applications will be reviewed on a rolling basis.',
   });
-  eq(rolling.applyByDate, '', '"rolling" is open-ended too');
+  eq(rolling.applyByDate, '2026-03-16',
+    'a rolling REVIEW cadence never discards the date beside it');
+  const rollingOpen = rowFromSubmission({
+    ...GOOD, applyByDate: '2026-03-16',
+    applyByText: 'Rolling \u2014 full consideration by March 15, 2026.',
+  });
+  eq(rollingOpen.applyByDate, '', 'while a bare "Rolling" is still open-ended');
   eq(rowFromSubmission(GOOD).applyByDate, '2025-11-30',
     'a dated posting with ordinary prose keeps its date');
 
@@ -433,12 +445,15 @@ async function testServedFile() {
 
 /* -------------------------------------------------------------------- run */
 
-export function runSelftest() {
-  testSanitisers();
-  testMapping();
-  testMerge();
-  return finish();
-}
+/* THERE IS NO THREE-SUITE SUBSET ANY MORE. `runSelftest()` ran
+   testSanitisers/testMapping/testMerge and printed "selftest: N checks
+   passed", which is what a green run of the whole file prints — so a caller
+   reaching for it skipped the merge, served-file and migration checks and said
+   so in words that read as complete coverage. build-jobs.mjs and
+   sync-jobmarket-sheet.mjs had already written that lesson down and moved to
+   spawning this file as itself; migrate-to-firestore.mjs was the last caller
+   and has followed them, so the subset is gone rather than left for the next
+   one to find. `testModuleSuites` pins that no module imports it back. */
 
 function finish() {
   if (fails.length) {
@@ -748,18 +763,55 @@ async function testFleetPins() {
   eq(merged.rows[0].addedAt, a.addedAt, 'a correction keeps the original addedAt');
   eq(merged.rows[0].comments, 'corrected', 'while the correction itself lands');
 
-  // The open-ended-deadline rule lives in the WRITERS: the page buckets a row
-  // "Until filled" purely on `applyByDate` being empty, so import-sheet.mjs
-  // (this regex) and rowFromSubmission (`untilFilled ? '' : …`, tested above)
-  // must guarantee an open-ended posting never carries a date — and no served
-  // row may violate it.
-  const RX_OPEN = 'until\\s*filled|open\\s*until|rolling';
-  const sheet = await readFile(path.join(HERE, 'import-sheet.mjs'), 'utf8');
-  ok(sheet.includes(RX_OPEN), 'import-sheet.mjs clears dates with the open-ended regex');
+  /* The open-ended-deadline rule lives in the WRITERS: the page buckets a row
+     "Until filled" purely on `applyByDate` being empty, so import-sheet.mjs,
+     jobreview.mjs and rowFromSubmission (`untilFilled ? '' : …`, tested
+     above) must guarantee an open-ended posting never carries a date — and no
+     served row may violate it.
+
+     IT IS ONE RULE AND THIS GUARD NOW READS THE RULE ITSELF. It used to carry
+     a hand-copied SOURCE STRING and assert that import-sheet.mjs contained the
+     same characters — which pinned one copy to another copy while
+     jobs-model.mjs's own constant, jobreview.mjs's and the browser twin's went
+     unchecked. Four literals, under a comment already calling itself the
+     single definition: narrowing the rule would have moved the build and left
+     the review card and the echo reading the old one, with nothing anywhere
+     saying so. The two Node writers import the constant now, and the scan
+     below refuses a private copy coming back. */
+  const openLiteral = `/${OPEN_ENDED_RX.source}/i`;
+  /* Read with the comments stripped, because two of these files EXPLAIN the
+     copy they no longer carry — a guard that could not tell the explanation
+     from the thing would have to be satisfied by deleting the explanation. */
+  const bareJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  /* THE WHOLE DIRECTORY, not a list of the files that had a copy — a list only
+     ever pins the copies somebody remembered, and it was exactly a file
+     missing from one that let four of these drift. The needle is the literal's
+     own first alternative: there is no way to write this rule without it, and
+     jobs-model.mjs is the one file allowed to. */
+  const NEEDLE = 'until\\s*filled';
+  const readers = [];
+  for (const f of (await readdir(HERE)).filter((n) => n.endsWith('.mjs')).sort()) {
+    if (f === 'jobs-model.mjs' || f === 'selftest.mjs') continue;
+    const src = bareJs(await readFile(path.join(HERE, f), 'utf8'));
+    ok(!src.includes(NEEDLE),
+      `${f} imports the open-ended rule rather than writing its own copy of it`);
+    if (/OPEN_ENDED_RX/.test(src)) readers.push(f);
+  }
+  eq(readers.join(', '),
+    'adverts.mjs, higheredjobs.mjs, import-sheet.mjs, jobmarket-sheet.mjs, jobreview.mjs',
+    'and the five writers that decide a deadline all read the one constant');
+  /* The browser twin cannot import, so it is held to the literal CHARACTER FOR
+     CHARACTER — the EMAIL_RX idiom. An echo that read the rule differently
+     from the build would show the maintainer a date the published row will not
+     carry, which is precisely what oa-fresh.js's third promise forbids. */
+  const fresh = await readFile(path.join(HERE, '..', 'assets', 'oa-fresh.js'), 'utf8');
+  const freshRx = (/var OPEN_ENDED = (\/.*\/i);/.exec(fresh) || [])[1];
+  eq(freshRx, openLiteral,
+    'oa-fresh.js carries the jobs-model open-ended literal, character for character');
   if (existsSync(JOBS)) {
     const rows = JSON.parse(await readFile(JOBS, 'utf8'));
     const contradicts = rows.filter((r) =>
-      r.applyByDate && new RegExp(RX_OPEN, 'i').test(r.applyBy || ''));
+      r.applyByDate && OPEN_ENDED_RX.test(r.applyBy || ''));
     eq(contradicts.map((r) => r.id).join(', '), '',
       'no served row carries both an "until filled" deadline and a date');
   }
@@ -6766,6 +6818,76 @@ async function testMandatoryPostingFields() {
     ok(/institution|inst\.value/.test(c),
       `…and each passes the institution, so no surface joins the raw boxes: ${c.split('\n')[0]}`);
   }
+}
+
+/* ------------------------- three ways the posting form threw work away
+
+   Each is a control that stops working after an ordinary mistake, and each
+   was found by walking the form as a poster rather than by reading it: a
+   refused upload, a group error that would not clear, and a correction to an
+   old posting eating the new one being written. */
+async function testPostingFormRecovery() {
+  const form = await readFile(path.join(HERE, '..', 'assets', 'oa-jobform.js'), 'utf8');
+  const page = await readFile(path.join(HERE, '..', 'post-a-job.html'), 'utf8');
+  /* A `//` that follows a colon is a URL SCHEME, not a comment — the code
+     under test writes `placeholder = 'https://'`, and a naive line-comment
+     strip eats the rest of that statement and makes the pin below match
+     nothing while reading as though it had. */
+  const bare = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  const wire = bare(form.slice(form.indexOf('function wireAdFile('),
+    form.indexOf('function uploadAdvert(')));
+
+  /* A REFUSED FILE LEAVES NO FILE, so the link box must come back with it.
+     Choosing a good advert disables the box and hides its placeholder behind
+     "the uploaded file will be the File link"; choosing a BAD one next cleared
+     the file and hid Remove — the ONE control that re-enables the box — and
+     returned, so the poster had no way to give an advert at all short of
+     reloading. The two branches leave the same state now, and that is asserted
+     as an EQUALITY rather than by naming the strings twice: they are one
+     answer to "there is no file", and a fix that drifted apart again would
+     pass a pair of independent greps. Read with the comments stripped, since
+     the branch explains the defect in these words. */
+  const restore = /if \(urlEl\) \{ urlEl\.disabled = false; urlEl\.placeholder = 'https:\/\/'; \}/g;
+  eq((wire.match(restore) || []).length, 2,
+    'oa-jobform.js: a refused advert gives the link box back, exactly as Remove does');
+  const refused = wire.slice(wire.indexOf('var bad = adFileProblem(f);'), wire.indexOf('adFile = f || null;'));
+  ok(restore.test(refused) && /clear\.hidden = true;/.test(refused),
+    '…in the branch that refuses the file, before it returns');
+  ok(/placeholder="https:\/\/"/.test(page),
+    'and https:// is the placeholder the page itself ships, so the restore is the original');
+
+  /* A GROUP'S ERROR LIVES ON THE GROUP, never on the box that was ticked, so
+     the generic `aria-invalid` reset above it cannot see one. Levels had a
+     line of its own and characteristics did not, so "Please tick at least one
+     characteristic" sat under a group the poster had already answered until
+     the next failed submit. Both groups, both ways: the ids are the ones
+     collect() sets the error on. */
+  const change = bare(form.slice(form.indexOf("form.addEventListener('change'"),
+    form.indexOf('// toggling "until filled"')));
+  for (const [name, id] of [['levels', 'f-levels'], ['characteristics', 'f-chars']]) {
+    ok(new RegExp(`e\\.target\\.name === '${name}'\\) setError\\(\\$\\('${id}'\\)`).test(change),
+      `oa-jobform.js: ticking a ${name} box clears that group's own error`);
+    ok(new RegExp(`setError\\(\\$\\('${id}'\\)`).test(
+      bare(form.slice(form.indexOf('function collect('), form.indexOf('function makeRef(')))),
+      `…and #${id} is where collect() puts it, so the two name one element`);
+    ok(page.includes(`id="${id}"`), `…which post-a-job.html carries`);
+  }
+
+  /* THE DRAFT IS THE UNSENT NEW POSTING, AND AN EDIT IS NOT IT. The draft key
+     holds one half-written posting per browser; saving a CORRECTION to an
+     existing posting threw it away, so a poster who opened an old posting to
+     fix a typo lost the new one they had been writing. The save and the
+     restore had ALREADY stood down under EDIT_ID — only the clear had not, so
+     an edit could never write the draft and could always destroy it. There is
+     exactly one call, and it is guarded. */
+  eq((bare(form).match(/(?<!function )draftClear\(\)/g) || []).length, 1,
+    'oa-jobform.js clears the draft in exactly one place');
+  ok(/if \(!EDIT_ID\) draftClear\(\);/.test(bare(form)),
+    '…and only for a NEW posting, which is the posting the draft holds');
+  const draft = bare(form.slice(form.indexOf('var DRAFT_KEY'), form.indexOf('function draftClear(')));
+  ok(/EDIT_ID\) return;/.test(draft),
+    'the draft save and restore stand down under EDIT_ID, which is the same rule');
 }
 
 async function testRowOverrides() {
@@ -15667,6 +15789,45 @@ async function testModuleSuites() {
       `${f}'s own selftest is green:\n` + out.slice(0, 1200));
   }
 
+  /* A DELEGATE SPAWNS THIS FILE, IT NEVER IMPORTS IT — and that cannot be
+     checked by running the delegate, because running it would run this suite
+     again. So it is checked by SHAPE, which is the shape that was wrong:
+     migrate-to-firestore.mjs did `await import('./selftest.mjs')` from its own
+     top-level body while this file statically imports migrate-to-firestore,
+     so the two waited on each other across a top-level await and node ended
+     the process with exit code 13 having checked NOTHING. It had never once
+     worked, and nothing said so — the orphan rule above counted it as covered
+     because a delegate was all it asked for. A child process closes no cycle.
+
+     There is also no subset to delegate TO any more: `runSelftest()` printed
+     the same "selftest: N checks passed" line as a whole green run while
+     running three of its suites, so a caller that reached for it reported
+     complete coverage of a fraction. */
+  const bareJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  for (const f of DELEGATING_SUITES) {
+    if (f === 'selftest.mjs') continue;
+    /* comments stripped: the delegate now EXPLAINS the import it no longer
+       does, by name, and a guard that could not tell the explanation from the
+       thing would have to be satisfied by deleting the explanation */
+    const src = bareJs(readFileSync(path.join(HERE, f), 'utf8'));
+    ok(/spawnSync\(process\.execPath, \[path\.join\(HERE, 'selftest\.mjs'\)\]/.test(src),
+      `${f} delegates --selftest by SPAWNING the suite`);
+    ok(!/import\(['"]\.\/selftest\.mjs['"]\)/.test(src) && !/from ['"]\.\/selftest\.mjs['"]/.test(src),
+      `…and never by importing it, which would close a cycle across a top-level await`);
+  }
+  /* The needle is COMPOSED, because a guard that spells out what it forbids
+     puts that text into the very file it is reading and can then never pass —
+     this file is its own subject. */
+  const SUBSET = 'export function ' + 'runSelftest';
+  const mjs = readdirSync(HERE).filter((f) => f.endsWith('.mjs')).sort();
+  for (const f of mjs) {
+    const src = bareJs(readFileSync(path.join(HERE, f), 'utf8'));
+    ok(!src.includes(SUBSET.slice(16)) || f === 'selftest.mjs',
+      `${f} does not reach for a three-suite subset of this suite`);
+  }
+  ok(!bareJs(readFileSync(path.join(HERE, 'selftest.mjs'), 'utf8')).includes(SUBSET),
+    'and there is no three-suite subset for a delegate to call by mistake');
+
   /* THE RULE, so a sixth orphan cannot appear. Every scraper module that
      answers --selftest must be run by somebody: this list, a workflow, this
      file's own imports, or a delegate that runs this suite. */
@@ -17285,6 +17446,7 @@ if (isMain(import.meta.url)) {
   await testDirectoryWiring();
   await testUniInfo();
   await testMandatoryPostingFields();
+  await testPostingFormRecovery();
   await testRowOverrides();
   await testNewsReview();
   await testNameFixes();

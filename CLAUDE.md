@@ -678,6 +678,53 @@ simply typed). `reviewDate` is in
 every surface. The `/v2/` archive deliberately ignores the new key — its
 frozen assets read `applyBy`/`applyByDate` exactly as before.
 
+### "Until filled" is ONE rule, and it had four copies
+
+`OPEN_ENDED_RX` in `_scraper/jobs-model.mjs` decides whether a line means the
+search stays open, and its own comment has called itself the single definition
+since the day it was written. It was not one: `import-sheet.mjs`,
+`jobreview.mjs` and `assets/oa-fresh.js` each carried the same characters
+written out again, and the served-file guard in `selftest.mjs` pinned one of
+those copies against ANOTHER copy rather than against the constant. Change the
+rule and the build moves while the legacy import, the review card and the
+maintainer's edit echo keep the old one, silently — the drift
+`oa-countries.js`, `oa-schools.js`, `oa-news.js` and `oa-jobnav.js` all exist
+to prevent, and the reason it survived is that nothing compared any copy to the
+thing it was a copy of.
+
+**The two Node writers IMPORT it now**, the browser twin is held to the
+literal CHARACTER FOR CHARACTER (the `EMAIL_RX` idiom — a browser file cannot
+import, and an echo reading the rule differently from the build would show the
+maintainer a date the published row will not carry), and the guard scans
+**the whole `_scraper/` directory** rather than a list of the files somebody
+remembered: any `.mjs` but `jobs-model.mjs` containing the literal's own first
+alternative fails the build. A list only ever pins the copies you thought of,
+which is how there came to be four.
+
+**And the rule itself was wrong about one word.** *"On a rolling basis"* says
+how applications are REVIEWED, not when the search closes, and reading it as
+an open-ended search threw away the closing date beside it: "March 16, 2026.
+Applications will be reviewed on a rolling basis" published with an EMPTY
+`applyByDate` under a line still printing March 16 — a card naming a date the
+Final-deadline filter buckets "Until filled" and the market roll treats as
+never closing. Measured over the served corpus the word appears in nine
+distinct contexts and every one is either that review-cadence phrase or a bare
+"Rolling — full consideration <date>", which `rolling(?!\s+basis)` still
+reads.
+
+**The `until…filled` leg stays LITERAL, and that is the same measurement in
+reverse.** Widening it to reach "until the position is filled" flips SIXTEEN
+served rows that state a real closing date beside "review will continue until
+the position is filled" — and the served-file guard would then refuse all
+sixteen and stop the whole site publishing, which is the failure this file
+already records four times. The narrow adjacency is what the tracking workbook
+writes when a search really is open-ended, and it is load-bearing.
+
+Tests: the two-way unit pin (a rolling review cadence never discards the date
+beside it; a bare "Rolling" still does), the directory scan both ways (a
+private copy in an existing file AND in a new one), and the character-for-
+character twin.
+
 ## The frozen archives, and how the maintainer edits them
 
 `data/past-postings.json`, `data/recent-faculty.json` and
@@ -5827,7 +5874,12 @@ merge re-authentication asks for the password in a `window.prompt`;
 "University of Leeds, UK" is served as an institution with an empty country
 (an alias moves its id, which is the join key to the queue); the archive lists
 the same San Diego advertisement under two seasons; JobPosting structured data
-is only viable if the gated fields are shown to crawlers.
+is only viable if the gated fields are shown to crawlers; and `directoryEdits`
+is public-read while carrying the writer's RAW uid in `by`, so anyone can join
+it to the unsalted `owner` tag every posting publishes and name the account
+behind a posting (the same class as the `accountKeys` item above, and salting
+the tag would rewrite the `owner` of all 577 served rows, which is the join key
+a takedown is scoped by).
 
 **Running the browser suite locally**: `node_modules` may be a SYMLINK to a
 global install that holds `playwright` (`ln -s /opt/node22/lib/node_modules
@@ -6967,6 +7019,31 @@ cached, and on 2026-08-18 a failing-over Ubuntu mirror hung it until the job
 cap killed three runs of the same commit. The libraries ship with the runner
 image; the apt call is kept bounded and best-effort, and the browser launch is
 what proves it.
+
+**A DELEGATE SPAWNS THE SUITE; IT NEVER IMPORTS IT.** `build-jobs.mjs`,
+`sync-jobmarket-sheet.mjs` and `migrate-to-firestore.mjs` all answer
+`--selftest` by running this file as itself. The first two spawn a child
+process; the third IMPORTED it — and `selftest.mjs` statically imports
+`migrate-to-firestore.mjs` (`docIdFor`, `migrationDoc`, `lostFields`,
+`migratable`), so the dynamic import closed a cycle across a top-level await:
+the suite waited for the module and the module waited for the suite, and node
+ended the process with *"Detected unsettled top-level await"* and exit code
+13. It had never once worked, and the orphan rule counted it as covered
+because a delegate was all it asked for — a command that reports a failure
+having checked nothing is the same shape as the doorbell that was never
+deployed. A child process closes no cycle, so that is what the rule now
+requires, checked by SHAPE because running the delegate would run this suite
+again.
+
+There is also **no three-suite subset** any more. `runSelftest()` ran three of
+this file's suites and printed `selftest: N checks passed`, which is what a
+whole green run prints — so a caller reaching for it reported complete
+coverage of a fraction. `build-jobs.mjs` and `sync-jobmarket-sheet.mjs` had
+already written that lesson into their own comments and moved off it;
+`migrate-to-firestore.mjs` was the last caller, so the subset is deleted
+rather than left for the next one to find. The guard's needle is COMPOSED from
+two strings, because a guard that spells out what it forbids puts that text
+into the very file it is reading.
 
 `page-test.mjs` drives BOTH served designs: the checks that assert on the old
 chrome (`#nav`, `#header-wrapper`, `#titleBar`, `#navPanel`, `window.ga`,
