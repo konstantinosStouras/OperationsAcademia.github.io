@@ -109,6 +109,18 @@
     var li = el.closest && el.closest('li.oa-card');
     if (!li || !li.id) return null;
     var out = { c: String(li.id).slice(0, 120) };
+    /* WHICH LIST the card was in. The element id is the ROW's id, and two
+       datasets mint the same one: placementId and candidateId are both
+       "<year>-<last>-<first>", so a candidate who filed a profile AND has a
+       confirmed placement in one season has the same card id on both lists —
+       and the one-pager draws both — so every open of their PLACEMENT card
+       was counted as an open of their candidate profile. The engine gives its
+       own <ul> no id, so the nearest id above the card is the page's own
+       mount ('oa-candidates', 'oa-placements', 'oa-jobs-recent'), which is
+       what tells the two apart. A small string in the same bounded list, so
+       the rules still need nothing new. */
+    var up = li.parentElement && li.parentElement.closest && li.parentElement.closest('[id]');
+    if (up && up.id) out.m = String(up.id).slice(0, 60);
     if (el.classList.contains('oa-card-head') &&
         !li.classList.contains('oa-card-locked') &&
         el.getAttribute('aria-expanded') !== 'true') {
@@ -131,6 +143,7 @@
     var card = cardOf(el);
     if (card) {
       rec.c = card.c;
+      if (card.m) rec.m = card.m;
       if (card.o) rec.o = 1;
     }
     clicks.push(rec);

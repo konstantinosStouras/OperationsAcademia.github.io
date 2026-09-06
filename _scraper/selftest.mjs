@@ -12233,6 +12233,30 @@ async function testReaderGate() {
   ok(/'aria-expanded': gate \? null/.test(engine) && /'aria-controls': gate \? null/.test(engine),
     'gate: a head that no longer discloses anything stops claiming to');
 
+  /* A TERM THAT FOLDS TO NOTHING IS NOT A TERM. The terms are OR'd and
+     `textHit` answers true for an empty needle, so a box holding only a space
+     or a bracket matched every row and turned the whole filter off while its
+     banked chips still said otherwise. */
+  ok(/if \(chosen\) chosen\.forEach\(function \(t\) \{ if \(fold\(t\)\) terms\.push\(t\); \}\);/.test(engine)
+     && /if \(draft && fold\(draft\)\) terms\.push\(draft\);/.test(engine),
+    'list: a draft that folds to nothing is dropped, never OR-ed in as a match-all');
+
+  /* THE FOCUSED TITLE IS RESTORED WHICHEVER WAY THE FOCUS ENDS. The restore
+     was inside the focused branch, so it ran when a focused id turned out not
+     to be here and never when the reader pressed "Show all postings": the tab,
+     the history entry and a bookmark went on naming the one posting that was
+     no longer on screen. */
+  eq((engine.match(/document\.title = focusTitleWas; focusTitleWas = '';/g) || []).length, 2,
+    'list: the focused title is put back on both exits, not only the missing-id one');
+
+  /* THE PAGER KEEPS THE KEYBOARD: render() rebuilds the bar, so the button
+     just pressed is gone and focus fell to <body>. */
+  ok(/pagerFocus = 'next'/.test(engine) && /pagerFocus = 'prev'/.test(engine)
+     && /takes\.focus\(\{ preventScroll: true \}\)/.test(engine),
+    'list: the replacement pager button takes the focus the pressed one had');
+  ok(/var takes = want\.disabled \? other : want;/.test(engine),
+    'list: …and its sibling does when the press is what disabled it');
+
   /* `open(id)` ANSWERS whether it opened, and only for a row this list has —
      the other half of the claim rule above. Without the membership test a
      list would report success for an id it does not carry, which is exactly
@@ -12245,6 +12269,17 @@ async function testReaderGate() {
     'gate: open() says whether it opened the card');
   ok(/rows\[i\]/.test(openFn),
     'gate: …and only ever for a row this list actually carries');
+  /* ...AND ONLY FOR A CARD THAT CAN OPEN. A GATED card renders no body at all
+     (cfg.cardOpen): on the one-pager's teasers a press carries the reader to
+     the full list instead. Answering true for one of those spent the pending
+     id on nothing — the reader pressed a locked card, signed in, and the card
+     they pressed stayed shut. Both lists on that page are teasers, which is
+     why the membership test alone could not catch it. */
+  ok(/if \(cardOpen\(rows\[i\]\)\) return false;/.test(openFn),
+    'gate: …and never for a gated card, which has no body to open');
+  const openAt = engine.indexOf('if (cardOpen(rows[i])) return false;');
+  ok(openAt > 0 && openAt < engine.indexOf('expanded[key] = true;', openAt),
+    'gate: …tested BEFORE the card is marked open, or the answer and the state disagree');
 
   /* ---- BOTH stylesheets ------------------------------------------------- */
 
@@ -14207,7 +14242,7 @@ async function testCandidateStats() {
     { uid: 'anon:x', clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
     { uid: 'm', email: 'kstouras@gmail.com',
       clicks: [{ t: at, k: 'button', c: 'job-' + siteIds.a, o: 1 }] },
-  ], cards, { from: 0 });
+  ], cards, { from: 0, until: at + 1 });
   eq(own.get('a').opens, 1,
     'of three opens — the candidate’s own, an anonymous reader’s, the maintainer’s — ' +
     'exactly the anonymous one counts');
@@ -14233,6 +14268,32 @@ async function testCandidateStats() {
   ok(/list\('clicks', 400\)/.test(rules), 'which the rules still bound at 400');
   ok(/'job-' \+ r\.id/.test(await read('assets/oa-list.js')),
     'the engine still names every card job-<row id>, candidates included');
+
+  /* ...WHICH IS WHY THE CLICK ALSO SAYS WHICH LIST IT WAS IN. `placementId`
+     and `candidateId` are the same string — "<year>-<last>-<first>" — and the
+     one-pager draws BOTH lists, so a candidate who filed a profile and has a
+     confirmed placement in one season had every open of their PLACEMENT card
+     counted as an open of their candidate profile, on a figure shown to that
+     person as theirs. The engine's own <ul> has no id, so the nearest id
+     above the card is the page's mount, which tells the two apart. */
+  ok(/li\.parentElement\.closest\('\[id\]'\)/.test(usage) && /out\.m = String\(up\.id\)/.test(usage),
+    'a click inside a card also carries the list mount it landed in');
+  ok(!/\bm:/.test(payload), 'and that too rides inside the clicks list, not beside it');
+  ok(/const sameList = !m \|\| CANDIDATE_MOUNTS\.has\(m\);/.test(
+    await read('_scraper/build-candidate-stats.mjs')),
+    'the tally reads it, and a record written before it is read exactly as before');
+  const oneP = await read('index.html');
+  for (const id of CSTATS.CANDIDATE_MOUNTS) {
+    ok(oneP.includes(`mount: '#${id}'`),
+      `the mount named as a candidates list (#${id}) is one the home page really mounts`);
+  }
+  ok(/mount: '#oa-placements'/.test(oneP) && !CSTATS.CANDIDATE_MOUNTS.has('oa-placements'),
+    'and the placements list beside it is not one of them — the collision this exists for');
+
+  /* A CLICK CANNOT HAVE HAPPENED AFTER THE RUN READ IT: `t` is the reader's
+     own clock, and a future day stays inside the seven-day window for ever. */
+  ok(CSTATS.CLOCK_SKEW_MS > 0 && /t > until/.test(await read('_scraper/build-candidate-stats.mjs')),
+    'a click stamped in the future is refused, with a day of clock skew allowed');
 
   /* --- the rules: an owner CARRIES the map, never writes it -------------- */
   const block = rules.slice(rules.indexOf('match /candidateSubmissions/'),
@@ -16437,8 +16498,44 @@ async function testForum() {
 
   /* the withdraw path */
   const candForm = await read('assets', 'oa-candidateform.js');
-  ok(/OAFB\.col\.candidateMarkers\)\.doc\(user\.uid\)\['delete'\]\(\)\.catch/.test(candForm) && /!OAAccounts\.isAdmin\(\) && user && user\.uid/.test(candForm),
+  ok(/!OAAccounts\.isAdmin\(\) && user && user\.uid/.test(candForm)
+     && /mref\['delete'\]\(\)/.test(candForm) && /\.catch\(function \(\) \{\}\);/.test(candForm),
     'oa-candidateform.js: a withdrawal drops the owner\'s own forum marker, best-effort, never the maintainer\'s');
+  /* ...AND ONLY WHEN IT IS THE PROFILE THE MARKER WAS EARNED BY. There is one
+     marker per ACCOUNT and it names the profile it was written for, so
+     withdrawing a PAST season's profile used to revoke the room access the
+     CURRENT one earns. A marker naming another profile, or naming none, is
+     left alone: the rules re-read the profile on every request, so the marker
+     alone grants nothing and absence of evidence must not revoke. */
+  ok(/if \(sub && sub === String\(EDIT_ID\)\) return mref\['delete'\]\(\);/.test(candForm),
+    'oa-candidateform.js: ...and only when the marker names THIS profile');
+
+  /* A MESSAGE THAT SURVIVES THE FORM BEING HIDDEN. `#oa-msg` is INSIDE the
+     form, so the two edit-load failures — the profile is gone, or this account
+     may not read it — wrote their explanation into the form and then hid the
+     form with it: a blank panel, and nothing said. */
+  const candPage = await read('post-a-candidate.html');
+  const formAt = candPage.indexOf('<form id="oa-cand-form"');
+  const formEnd = candPage.indexOf('</form>', formAt);
+  ok(formAt > 0 && candPage.indexOf('id="oa-msg"') > formAt
+     && candPage.indexOf('id="oa-msg"') < formEnd,
+    'the form\'s own message really is inside the form — which is the trap');
+  ok(candPage.indexOf('id="oa-msg-out"') > formEnd,
+    'and there is a message OUTSIDE it, for what is said once the form has gone');
+  ok(/function sayOutside\(msg\)/.test(candForm)
+     && /sayOutside\('That profile no longer exists\.'\)/.test(candForm)
+     && /sayOutside\(err && err\.code === 'permission-denied'/.test(candForm),
+    'oa-candidateform.js: both edit-load failures speak through it');
+
+  /* AND REMOVE MUST NOT DESTROY THE CV IT WAS NEVER ASKED ABOUT. fill() puts
+     the stored link in the box, choosing a file empties it, and Remove — which
+     the handler documents as "un-chooses it, and what it would have replaced
+     is back on the profile, untouched" — left the box empty, so saving wrote
+     an empty cvUrl and the CV was gone. */
+  ok(/if \(urlEl\.value\) slot\.urlWas = urlEl\.value;/.test(candForm)
+     && /\} else if \(slot\.urlWas\) \{/.test(candForm)
+     && /if \(!urlEl\.value\) urlEl\.value = slot\.urlWas;/.test(candForm),
+    'oa-candidateform.js: a link a chosen file superseded comes back when the file goes');
 
   /* the home page, the standard, the stylesheet */
   const home = await read('index.html');

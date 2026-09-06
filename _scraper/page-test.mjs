@@ -2595,11 +2595,42 @@ for (const [name, expect] of [
   eq(stranded, [pair.b],
     'jobs: erasing the box and pressing Enter drops the draft, it does not strand it');
 
+  /* A DRAFT THAT FOLDS TO NOTHING MUST NOT TURN THE FILTER OFF. The terms are
+     OR'd and an empty needle matched every row, so a box holding only a space
+     or a bracket — which every reader types in the middle of a name — showed
+     the WHOLE list while the chips above it still said otherwise. */
+  await j.fill('#oaf-institution', ' ');
+  await j.waitForTimeout(350);
+  eq(await j.$$eval('.oa-filter:not(.oa-pick) .oa-chip .oa-chip-label',
+    (ns) => ns.map((n) => n.textContent)), [pair.b],
+    'jobs: a punctuation-only draft leaves the banked chip standing');
+  ok(await shown() < total,
+    'jobs: ...and the list it narrowed stays narrowed rather than opening up');
+  await j.fill('#oaf-institution', '');
+  await j.waitForTimeout(350);
+
   await j.click('.oa-clear');
   await j.waitForTimeout(250);
   eq(await j.$$eval('.oa-chip', (ns) => ns.length), 0,
     'jobs: Clear filters drops the banked terms too');
   eq(await shown(), total, 'jobs: and the whole listing comes back');
+
+  /* THE PAGER KEEPS THE KEYBOARD. render() rebuilds the result bar, so the
+     button just pressed is gone and focus fell to <body>: a reader turning
+     pages from the keyboard had to Tab all the way back in for every page. */
+  const pagerState = async () => j.evaluate(() => {
+    const a = document.activeElement;
+    return { tag: a ? a.tagName.toLowerCase() : '', label: a ? (a.getAttribute('aria-label') || '') : '' };
+  });
+  await j.$eval('.oa-pager button[aria-label="Next page"]', (n) => n.focus());
+  await j.click('.oa-pager button[aria-label="Next page"]');
+  await j.waitForTimeout(250);
+  eq(await pagerState(), { tag: 'button', label: 'Next page' },
+    'jobs: turning to the next page leaves the focus on the pager, not on <body>');
+  await j.click('.oa-pager button[aria-label="Previous page"]');
+  await j.waitForTimeout(250);
+  eq((await pagerState()).tag, 'button',
+    'jobs: and back again — a keyboard reader can turn more than one page per Tab');
 
   /* EVERY CONTROL ON ONE BASELINE, CHIPS OR NO CHIPS, and CLEAR CLOSES ITS ROW.
      The bar is a grid whose items were bottom-aligned, so a filter carrying

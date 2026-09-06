@@ -237,9 +237,16 @@
 
          A single term behaves exactly as before, which is what keeps every
          saved link and every other list page unchanged. */
+      /* A TERM THAT FOLDS TO NOTHING IS NOT A TERM. `textHit` answers true
+         for an empty needle, and the terms are OR'd — so a draft of a space,
+         a hyphen or a bracket, which every reader types in the middle of a
+         name, matched EVERY row and turned the whole filter off while its
+         banked chips still said otherwise. Dropped instead: the chips go on
+         narrowing, and a box holding only punctuation narrows nothing of its
+         own, which is what it means. */
       var terms = [];
-      if (chosen) chosen.forEach(function (t) { terms.push(t); });
-      if (draft) terms.push(draft);
+      if (chosen) chosen.forEach(function (t) { if (fold(t)) terms.push(t); });
+      if (draft && fold(draft)) terms.push(draft);
       if (!terms.length) return true;
       return terms.some(function (t) { return textHit(row, f, t); });
     }
@@ -315,6 +322,8 @@
     var focusParam = cfg.focusParam || '';
     var focusId = '';
     var focusTitleWas = '';
+    /* which pager button was pressed, so its replacement can take the focus */
+    var pagerFocus = '';
     var focusOpened = false;   // the card is opened once, not on every render
     var focusScrolled = false; // …and scrolled to once, on the render that finds it
     /* A focus that arrived as `#job-<id>` — see readUrl(). The fragment is
@@ -466,6 +475,12 @@
       } else {
         view = passing(null);
         if (cfg.sort) view.sort(cfg.sort);
+        /* ...AND WHEN THE FOCUS IS LEFT. The restore was inside the focused
+           branch, so it ran when a focused id turned out not to be here and
+           never when the reader pressed "Show all postings": the tab, the
+           history entry and a bookmark went on naming the one posting that
+           was no longer on screen. */
+        if (focusTitleWas) { document.title = focusTitleWas; focusTitleWas = ''; }
       }
       var maxPage = Math.max(0, Math.ceil(view.length / perPage) - 1);
       if (page > maxPage) page = maxPage;
@@ -923,17 +938,37 @@
       );
       var prev = el('button', {
         type: 'button', 'aria-label': 'Previous page', html: '&lsaquo;',
-        onclick: function () { if (page > 0) { page--; render(); syncUrl(); scrollTop(); } },
+        onclick: function () {
+          if (page > 0) { page--; pagerFocus = 'prev'; render(); syncUrl(); scrollTop(); }
+        },
       });
       var next = el('button', {
         type: 'button', 'aria-label': 'Next page', html: '&rsaquo;',
         onclick: function () {
-          if ((page + 1) * perPage < view.length) { page++; render(); syncUrl(); scrollTop(); }
+          if ((page + 1) * perPage < view.length) {
+            page++; pagerFocus = 'next'; render(); syncUrl(); scrollTop();
+          }
         },
       });
       prev.disabled = page === 0;
       next.disabled = (page + 1) * perPage >= view.length;
       resEl.appendChild(el('div', { class: 'oa-pager' }, [prev, next]));
+      /* THE PAGER MUST NOT DROP THE KEYBOARD. render() rebuilds this bar, so
+         the button just pressed is gone and focus falls to <body>: a reader
+         turning pages from the keyboard had to Tab all the way back in for
+         every page. The replacement takes it; if the press is what disabled
+         it — the last page, or the first — its sibling does, because focus on
+         a disabled button goes nowhere. preventScroll, since scrollTop() has
+         the last word on where the reader is looking. */
+      if (pagerFocus) {
+        var want = pagerFocus === 'next' ? next : prev;
+        var other = pagerFocus === 'next' ? prev : next;
+        pagerFocus = '';
+        var takes = want.disabled ? other : want;
+        if (!takes.disabled) {
+          try { takes.focus({ preventScroll: true }); } catch (e) { takes.focus(); }
+        }
+      }
 
       // cards
       listEl.innerHTML = '';
@@ -1379,6 +1414,13 @@
           if (String(rows[i] && rows[i].id) === key) { found = true; break; }
         }
         if (!found) return false;
+        /* ...AND THE CARD HAS TO BE ONE THAT CAN OPEN. A gated card renders no
+           body at all (see cfg.cardOpen): on the one-pager's teasers a press
+           carries the reader to the full list instead. Answering true for one
+           of those spent oa-gate.js's pending id on nothing — the reader
+           pressed a locked card, signed in, and the card they pressed stayed
+           shut. "Whether it opened" is what this answers. */
+        if (cardOpen(rows[i])) return false;
         expanded[key] = true;
         render();
         return true;
