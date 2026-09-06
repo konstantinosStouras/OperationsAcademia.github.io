@@ -64,6 +64,7 @@ import {
 import {
   parseAd, cacheEntry, needFetch, applyVerified, deadlineOf, labelledFields,
   isHigherEdJobsUrl, jobCodeOf, detailsUrl, hejDate, DEADLINE_FIELDS,
+  believableDeadline,
 } from './higheredjobs.mjs';
 import {
   parseAdvert, advertDate, advertKeyOf, isAdvertUrl, workdayApiUrl,
@@ -380,6 +381,22 @@ async function testServedFile() {
   ok(!/@[a-z0-9-]+\.[a-z]{2,}/i.test(blob),
     'the served file contains no e-mail address');
   ok(!/javascript:|data:text/i.test(blob), 'the served file contains no script URL');
+
+  /* ...AND SO DOES EVERY OTHER FILE UNDER data/, which is the rule CI already
+     greps the whole directory for. It was asserted here over jobs.json alone,
+     so a writer could commit an address into one of the other twenty-eight and
+     the checks would go red on MASTER with the commit already made — the
+     "publishing has stopped" alarm, rung by a file no gate was looking at.
+     data/adverts.json and data/higheredjobs.json are the reachable ones: both
+     cache a sentence captured from an employer's page, and "apply to
+     hr@example.edu by 15 October 2026" is an ordinary thing for one to say.
+     They strip it where they store it now; this is the belt to that braces. */
+  const dataDir = path.join(HERE, '..', 'data');
+  for (const f of readdirSync(dataDir).filter((n) => n.endsWith('.json')).sort()) {
+    const raw = readFileSync(path.join(dataDir, f), 'utf8');
+    ok(!/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+/.test(raw),
+      `data/${f} carries no e-mail address — everything here is served to anyone`);
+  }
 
   for (const r of rows) {
     ok(!r.type || TYPES.includes(r.type), `row ${r.id}: type "${r.type}" is known`);
@@ -1268,6 +1285,20 @@ async function testMarketYearCascade() {
       'build-jobs: a dry run does not file an upload into Drive or delete it from Storage');
     ok(/if \(db && sheetPresent && DRY\) \{/.test(b2) && /not refreshing the tracking sheet/.test(b2),
       'build-jobs: nor does it write the tracking sheet\'s edit handles');
+    /* ...AND THE CANDIDATES BUILD HAD THE SAME HOLE, on a file that is more
+       personal still: it uploads a candidate's own CV and research summary to
+       Drive, writes the links onto their document and deletes the
+       landing-strip objects. Its stamping pass was gated; this one was not.
+       Pinned as a RULE over both builds rather than as a fact about one. */
+    const bc = await readFile(path.join(HERE, 'build-candidates.mjs'), 'utf8');
+    ok(/if \(DRY\) \{[\s\S]{0,500}?not filing/.test(bc)
+       && /\} else \{\s*\n\s*filed = \(await transferUploads/.test(bc),
+      'build-candidates: a dry run does not file a CV into Drive or delete it from Storage');
+    for (const [name, src] of [['build-jobs.mjs', b2], ['build-candidates.mjs', bc]]) {
+      const call = src.indexOf('await transferUploads(');
+      ok(call > 0 && /DRY/.test(src.slice(Math.max(0, call - 700), call)),
+        `${name}: the upload transfer is behind a DRY test, not merely near one`);
+    }
   }
 
   /* 10. THE WIRING, read from the source. */
@@ -8246,6 +8277,32 @@ function testAdvertsApply() {
   eq(reRead.institution, wasRead.institution, 'and everything else it had learnt with it');
   eq(reRead.checkedAt, '2026-08-25T00:00:00Z', 'while still recording that it looked');
 
+  /* THE CLOSING DATE HAS TO BE ONE THE ADVERTISEMENT COULD HAVE MEANT.
+     `needFetch` FREEZES an entry whose deadline has passed ("the search is
+     over and the page will not change again"), so a date mis-read into the
+     past is published, rolls the posting out of the market it is recruiting
+     for, and is then never re-read. `deadlineDay`'s discipline, applied to a
+     scraped page — and ONE definition, shared by both passes, or the two
+     disagree about what an advertisement could have meant. */
+  ok(believableDeadline('2026-09-01', '2026-11-15'), 'a date after the posting is believed');
+  ok(believableDeadline('2026-09-01', '2026-09-01'), 'a search closing the day it opens is too');
+  ok(!believableDeadline('2026-09-01', '2026-08-31'),
+    'a search cannot close before it was advertised');
+  ok(believableDeadline('2026-09-01', '2028-08-31'), 'two years out is still a date');
+  ok(!believableDeadline('2026-09-01', '2028-09-02'), 'further than that is junk');
+  ok(believableDeadline('', '2026-11-15'),
+    'with no posting date there is nothing to test it against, so it stands');
+  ok(!believableDeadline('2026-09-01', 'not a date'), 'and prose is never a date');
+
+  const past = [{ id: 'p', adUrl: link, posted: '2026-08-18', applyBy: 'Until filled.', applyByDate: '' }];
+  const wrong = { ads: { [key]: { ...cache.ads[key], applyByDate: '2020-01-01' } } };
+  const refused = applyAdverts(past, wrong, { today: '2026-08-18' });
+  eq(refused.rows[0].applyByDate, '',
+    'a closing date the advertisement could not have meant leaves the posting open-ended');
+  eq(refused.changed.length, 0, 'and is not counted as a correction');
+  ok(refused.conflicts.length === 1 && refused.conflicts[0].implausible,
+    'it is REPORTED instead, flagged as what it is');
+
   /* A page that IS read and simply no longer states a field still clears it:
      there the page is the authority, which is the whole point of reading it. */
   const stated = advertCacheEntry(
@@ -8351,6 +8408,58 @@ async function testAdvertsWiring() {
      queue pass spends the run's budget FIRST (owner, 2026-08-24). */
   ok(verify.indexOf('await queuePass') < verify.indexOf('await publishedPass'),
     'the queue pass runs before the published one — pending cards first');
+
+  /* ------------------- what the two passes share, and what they must not lose
+
+     ONE PLAUSIBILITY GUARD, in one place. Both passes fill an open-ended
+     posting from an advertisement, both freeze an entry whose deadline has
+     passed, and a second copy of "could the ad have meant this" would drift
+     the first time either was corrected. */
+  const hej = await readFile(path.join(HERE, 'higheredjobs.mjs'), 'utf8');
+  const adv = await readFile(path.join(HERE, 'adverts.mjs'), 'utf8');
+  ok(/export function believableDeadline/.test(hej),
+    'the guard is defined once, beside the pass it was written for');
+  ok(!/function believableDeadline/.test(adv)
+     && /believableDeadline/.test(adv) && /from '\.\/higheredjobs\.mjs'/.test(adv),
+    'and the other pass imports it rather than carrying a copy');
+  for (const [name, src] of [['higheredjobs.mjs', hej], ['adverts.mjs', adv]]) {
+    ok(/if \(!believableDeadline\(row\.posted, ad\.applyByDate\)\)/.test(src),
+      `${name}: the apply refuses a date the advertisement could not have meant`);
+    /* NOTHING UNDER data/ MAY CARRY AN E-MAIL, and both caches store a
+       sentence captured from an employer's page. */
+    ok(/const keep = \(now, before\) => stripEmails\(/.test(src),
+      `${name}: the cache strips an address out of the text it stores`);
+    /* An ad fetched and NOT UNDERSTOOD must not un-say what an earlier read
+       learnt: blanking there quietly returns the posting to "Until filled." */
+    ok(/\(parsed\.gone \|\| !parsed\.ok\) && !now/.test(src),
+      `${name}: ...and an unreadable parse keeps what was already known`);
+  }
+
+  /* A PAGE FETCHED AND NOT UNDERSTOOD IS RECORDED, not skipped: skipped it had
+     no entry at all, so needFetch read it again every run for ever, ahead of
+     advertisements never read once. */
+  const hejV = await readFile(path.join(HERE, 'higheredjobs-verify.mjs'), 'utf8');
+  ok(/if \(!parsed\.ok && !parsed\.gone\) \{[\s\S]{0,900}?cache\.ads\[q\.jobCode\] = cacheEntry/.test(hejV),
+    'higheredjobs-verify notes a page it could not read rather than skipping it');
+  ok(/if \(read \|\| noted\)/.test(hejV),
+    'and stamps the cache when that is the only thing that changed');
+
+  /* AND EVERYTHING A RUN LEARNT IS WRITTEN AFTER THE LOOP, so a run killed by
+     the job's own timeout threw all of it away. LIMIT reads, each paced, each
+     with up to three tries of a 30-second timeout, is far more than the
+     workflow allows, so that was reachable rather than theoretical. */
+  for (const [name, src, wf] of [
+    ['higheredjobs-verify.mjs', hejV, 'oa-higheredjobs-verify.yml'],
+    ['adverts-verify.mjs', verify, 'oa-adverts-verify.yml'],
+  ]) {
+    ok(/READ_WINDOW_MS/.test(src), `${name}: the fetching is bounded by a clock, not only a count`);
+    const wfSrc = await readFile(path.join(HERE, '..', '.github', 'workflows', wf), 'utf8');
+    const cap = Number((wfSrc.match(/timeout-minutes:\s*(\d+)/) || [])[1] || 0);
+    const win = Number((src.match(/\|\| (\d+) \* 60_000/) || [])[1] || 0);
+    ok(cap > 0 && win > 0 && win < cap,
+      `${name}: the read window (${win}m) leaves the write and the commit room ` +
+      `inside the job's ${cap}-minute cap`);
+  }
 
   /* The cache is data/, so it must survive a round trip like every other
      file there — and the served postings must still satisfy the served-file
@@ -9833,6 +9942,29 @@ async function testReviewWiring() {
     ok(runs.every((rest) => rest.includes('--publishing')),
       `and does it in the publishing role, where a naming duplicate cannot stop the site`);
   }
+  /* ...AND THE RETRY LOOP RUNS IT TOO. A rejected push is answered by taking
+     the other writer's tip and re-deriving on top of it -- a rebase in these
+     five, a reset-and-rebuild in the build and the roster sync -- and either
+     way the tree that is about to be pushed is NOT the tree the gate passed
+     before the loop. Five writers pushed straight after re-applying, so a
+     retry could commit exactly what the gate exists to refuse: the rule was
+     written down for oa-jobs-build.yml and never carried to its siblings.
+     Pinned over every writer with a retry loop rather than as a fact about
+     one, and read with the YAML comments stripped, since the steps explain
+     the gate in the same words. */
+  for (const name of WRITERS) {
+    const src = (await readFile(path.join(HERE, '..', '.github', 'workflows', name), 'utf8'))
+      .replace(/^\s*#.*$/gm, '');
+    const at = src.indexOf('for i in 1 2 3 4 5');
+    if (at < 0) continue;
+    const loop = src.slice(at, src.indexOf('done', at));
+    ok(/node _scraper\/selftest\.mjs --publishing/.test(loop),
+      `${name}: the retry loop re-checks the rebuilt data/ before pushing it`);
+    ok(loop.indexOf('--publishing') > loop.indexOf('git push'),
+      `${name}: ...inside the loop, after the push that was rejected — a gate ` +
+      'run only before the loop says nothing about the tree the retry pushes');
+  }
+
   const prCheck = await readFile(
     path.join(HERE, '..', '.github', 'workflows', 'oa-checks.yml'), 'utf8');
   ok(/node _scraper\/selftest\.mjs\s*$/m.test(prCheck),
@@ -10935,8 +11067,15 @@ async function testCandidateReveal() {
   /* ---- every comparison goes through the module ---------------------- */
   const DAY_COMPARE =
     /\b(today|todayIso\(\)|toISOString\(\)\.slice\(0, 10\)|isoDay\(now\))\s*[<>]=?\s*(at|revealAt|cmeta\.revealAt)\b/;
+  /* oa-candidateform.js joined the list on 2026-09-06: the stats panel added
+     for the "how often was my profile opened" figures compared a UTC calendar
+     day against the date all over again, and told a candidate on reveal
+     morning that their profile was public and had no figures yet while the
+     gate was still holding it. A file that reads the module elsewhere is not
+     covered by that; the comparison is what is pinned out. */
   for (const f of ['index.html', 'assets/oa-alerts.js', 'assets/oa-alert-match.js',
-    'assets/oa-adminarea.js', 'assets/oa-submissions.js', '_scraper/submissions-mailer.mjs',
+    'assets/oa-adminarea.js', 'assets/oa-submissions.js', 'assets/oa-candidateform.js',
+    '_scraper/submissions-mailer.mjs',
     '_scraper/candidates-model.mjs', '_scraper/page-test.mjs']) {
     const src = await read(...f.split('/'));
     ok(!DAY_COMPARE.test(src), `${f}: no private calendar-day comparison against revealAt`);
@@ -10958,6 +11097,13 @@ async function testCandidateReveal() {
     'oa-adminarea: candGroupOf asks it, with the clock injected');
   ok(/candGroupOf\(v, revealAt, now\)/.test(admin), 'oa-adminarea: ...and is handed a real clock');
   ok(/OAReveal\.describeReveal\(revealAt\)/.test(admin), 'oa-adminarea: the panel hint names the computed instant');
+  const cform = await read('assets', 'oa-candidateform.js');
+  ok(/var held = !R \|\| !R\.isRevealed \? true : !R\.isRevealed\(revealAt\);/.test(cform),
+    'oa-candidateform: the stats panel asks the module, and holds without it');
+  ok(!/today < revealAt/.test(cform),
+    'and the calendar-day comparison is gone rather than merely unused');
+  ok(/R\.formatDay\(revealAt\)/.test(cform),
+    'and the day it prints is the site\'s one formatter, not a raw ISO string');
   const subs = await read('assets', 'oa-submissions.js');
   ok(/OAReveal\.describeReveal\(revealAt\)/.test(subs) && /Held until/.test(subs),
     'oa-submissions: the card names the instant and still says "Held until"');
@@ -14973,6 +15119,73 @@ async function testForumSeed() {
    scheduled with its plan-by-default input, the one document it may WRITE (the
    tag tally, whose keys the model names), the ones it may never reach, and
    that a public log never carries a title, a body or a handle. */
+
+/* ------------------------------------------------ every module suite has a caller
+
+   A TEST SUITE NOBODY RUNS IS A SUITE THAT SILENTLY ROTS -- the "every builder
+   has a caller" rule one layer over, and it had five of them. `--selftest` in
+   build-analytics.mjs, build-candidates.mjs, build-netmap.mjs,
+   build-placements.mjs and build-functions-vendor.mjs was run by NOTHING: not
+   oa-checks.yml, not this file, not any data writer. Between them they hold
+   185 checks, and two of them are named in CLAUDE.md's own "Tests that must
+   stay green" -- so the file said they were green while nothing had asked
+   them since they were written.
+
+   Spawned here rather than added to the workflow, the way the roster sync's,
+   the account purge's and the two forum scripts' suites already are: a PR
+   check then sees them, and a suite added tomorrow is covered by the RULE
+   below rather than by somebody remembering the workflow. All five together
+   cost about 300ms.                                                          */
+const SPAWNED_SUITES = [
+  'build-analytics.mjs',
+  'build-candidates.mjs',
+  'build-functions-vendor.mjs',
+  'build-netmap.mjs',
+  'build-placements.mjs',
+];
+
+/* Files whose `--selftest` is a DELEGATE to this suite rather than a suite of
+   its own, so running them here would recurse. */
+const DELEGATING_SUITES = ['build-jobs.mjs', 'migrate-to-firestore.mjs', 'selftest.mjs'];
+
+/* ...and the ones this file drives IN PROCESS, by importing them. */
+const IN_PROCESS_SUITES = ['build-candidate-stats.mjs'];
+
+async function testModuleSuites() {
+  for (const f of SPAWNED_SUITES) {
+    let out = '';
+    try {
+      out = execFileSync(process.execPath, [path.join(HERE, f), '--selftest'],
+        { encoding: 'utf8' });
+    } catch (e) {
+      out = String((e.stdout || '') + (e.stderr || ''));
+    }
+    ok(/selftest:.*(?:passed|checks passed)/.test(out) && !/\bFAIL\b/.test(out)
+       && !/[1-9]\d* failed/.test(out),
+      `${f}'s own selftest is green:\n` + out.slice(0, 1200));
+  }
+
+  /* THE RULE, so a sixth orphan cannot appear. Every scraper module that
+     answers --selftest must be run by somebody: this list, a workflow, this
+     file's own imports, or a delegate that runs this suite. */
+  const files = readdirSync(HERE).filter((f) => f.endsWith('.mjs')).sort();
+  const wfDir = path.join(HERE, '..', '.github', 'workflows');
+  const workflows = readdirSync(wfDir)
+    .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
+    .map((f) => readFileSync(path.join(wfDir, f), 'utf8')).join('\n');
+  for (const f of files) {
+    const src = readFileSync(path.join(HERE, f), 'utf8');
+    if (!/(?:argv\.has|has|includes)\('--selftest'\)/.test(src)) continue;
+    const covered = SPAWNED_SUITES.includes(f)
+      || DELEGATING_SUITES.includes(f)
+      || IN_PROCESS_SUITES.includes(f)
+      || workflows.includes(`${f} --selftest`);
+    ok(covered,
+      `${f} answers --selftest, so something must run it — add it to ` +
+      'SPAWNED_SUITES here or to a workflow');
+  }
+}
+
 async function testForumThreadRemoval() {
   const root = path.join(HERE, '..');
 
@@ -16554,5 +16767,6 @@ if (isMain(import.meta.url)) {
   await testForum();
   await testForumSeed();
   await testForumThreadRemoval();
+  await testModuleSuites();
   process.exit(finish() ? 0 : 1);
 }

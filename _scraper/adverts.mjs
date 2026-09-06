@@ -44,8 +44,12 @@
    --------------------------------------------------------------------------- */
 
 import {
-  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns, withMarketYears } from './jobs-model.mjs';
-import { isHigherEdJobsUrl } from './higheredjobs.mjs';
+  text, url, longDate, OPEN_ENDED_RX, healReviewDate, canonColumns, withMarketYears,
+  stripEmails } from './jobs-model.mjs';
+/* believableDeadline is ONE definition, shared with the pass it was written
+   for: the same guard on both roads, or the two disagree about what an
+   advertisement could have meant. */
+import { isHigherEdJobsUrl, believableDeadline } from './higheredjobs.mjs';
 import { universityForSchool, schoolForUnit, SCHOOLS } from './vocab.mjs';
 
 /* fold(), for "is this stated name the organisation repeated?" — the same
@@ -622,7 +626,15 @@ export function cacheEntry(parsed, { adUrl = '', checkedAt = '', previous = null
      entry alone) and not for a page fetched and not understood. A readable
      page that simply no longer states a field still clears it: there the page
      is the authority. */
-  const keep = (now, before) => ((parsed.gone || !parsed.ok) && !now) ? (before || '') : (now || '');
+  /* NOTHING UNDER data/ MAY CARRY AN E-MAIL, and this cache is served like
+     everything else there: CI greps the whole directory, and one address in a
+     captured sentence ("apply to hr@example.edu by 15 October 2026") turns
+     the checks red on master with the writer having already committed it.
+     Stripped where the text is stored, the stripRowEmails rule applied to the
+     one other place free prose reaches a served file; the URL is left alone,
+     exactly as there. */
+  const keep = (now, before) => stripEmails(
+    ((parsed.gone || !parsed.ok) && !now) ? (before || '') : (now || ''));
 
   return {
     url: adUrl,
@@ -710,6 +722,20 @@ export function applyAdverts(rows, cache, { today = '' } = {}) {
       if (row.applyByDate !== ad.applyByDate) {
         conflicts.push({ id: row.id, key, sheet: row.applyByDate, ad: ad.applyByDate });
       }
+      return row;
+    }
+
+    /* AND IT HAS TO BE A DATE THE ADVERTISEMENT COULD HAVE MEANT — the same
+       guard the HigherEdJobs apply uses, from the same function, because a
+       date mis-read into the past is published, rolls the posting out of the
+       market it is recruiting for, and is then frozen by `needFetch` for ever
+       ("the search is over and the page will not change again"). Refused, the
+       posting stays open-ended, which is what it already said. */
+    if (!believableDeadline(row.posted, ad.applyByDate)) {
+      conflicts.push({
+        id: row.id, key, sheet: row.applyByDate || '(none)', ad: ad.applyByDate,
+        implausible: true, posted: row.posted || '',
+      });
       return row;
     }
 

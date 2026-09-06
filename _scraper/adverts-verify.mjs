@@ -107,6 +107,10 @@ const TTL_DAYS = Math.max(0, Number(opt('--ttl', '7')) || 7);
 /** Between requests. These are a hundred different small hosts being read a
     page or two each — a human pace costs none of them anything, and a run
     reads at most LIMIT pages in total, so the whole thing is bounded. */
+/* How long the fetching may run before the run writes what it has. The
+   workflow allows 30 minutes; this leaves the apply, the three file writes,
+   the commit and the retry loop room to finish inside it. */
+const READ_WINDOW_MS = Math.max(60_000, Number(opt('--read-window-ms', '')) || 22 * 60_000);
 const PACE_MS = 1500;
 
 const UA = 'operationsacademia.org posting check (+https://www.operationsacademia.org)';
@@ -307,6 +311,11 @@ async function publishedPass(cache, { today, now, budget }) {
       }
     } else {
       for (const q of slice) {
+        if (Date.now() > budget.until) {
+          log('the time budget for this run is spent — writing what was read; ' +
+              'the rest wait for the next run.');
+          break;
+        }
         const { fetched, parsed } = await readAdvert(q.row.adUrl);
         budget.left--;
 
@@ -392,7 +401,7 @@ async function queuePass({ today, now, budget }) {
 
   let wrote = 0;
   for (const w of want) {
-    if (budget.left <= 0) {
+    if (budget.left <= 0 || Date.now() > budget.until) {
       log('the read budget for this run is spent — the rest wait for the next one.');
       break;
     }
@@ -449,7 +458,15 @@ async function main() {
 
   const now = new Date();
   const today = isoStamp(now).slice(0, 10);
-  const budget = { left: LIMIT };
+  /* AND A CLOCK BESIDE THE COUNT. Everything this run learnt is written
+     AFTER both passes, so a run killed by the job's own timeout throws away
+     every advertisement it read — and the arithmetic makes that reachable
+     rather than theoretical: LIMIT reads, each paced, each with up to three
+     tries of a 30-second timeout, is far more than the 30 minutes the
+     workflow allows. The passes stop when the deadline is reached and the run
+     writes what it has; the rest wait for tomorrow, which is what the budget
+     already does for the count. */
+  const budget = { left: LIMIT, until: Date.now() + READ_WINDOW_MS };
 
   const cache = await readCache();
 
@@ -474,6 +491,17 @@ async function main() {
     log(`  ${c.id}: "${c.from}" -> "${c.to}"${c.past ? '  (that deadline has passed)' : ''}`);
   }
   for (const c of applied.conflicts) {
+    /* Two different disagreements, and they need different words. An
+       IMPLAUSIBLE date is one the advertisement could not have meant for this
+       posting (before it was advertised, or more than two years out): the
+       sheet said nothing, so "the sheet wins" would read as the maintainer
+       having decided something. */
+    if (c.implausible) {
+      warn(`${c.id}: the advertisement states a closing date of ${c.ad}, which is ` +
+           `not a date it could have meant for a posting advertised on ${c.posted || '?'} — ` +
+           'left open-ended. Type the real date into the sheet if you know it.');
+      continue;
+    }
     warn(`${c.id}: the sheet says ${c.sheet}, the advertisement says ${c.ad} — ` +
          'the sheet wins. Correct the sheet if the advertisement is right.');
   }

@@ -28,14 +28,14 @@
    --------------------------------------------------------------------------- */
 
 import { readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   rowFromCandidateSubmission, mergeCandidateRows, buildCandidatesMeta,
   serialiseCandidates, publicCandidateRow, candidateDisplayOrder,
-  assignCandidateIds, collapseSameCandidate, candidateId, freeList,
+  assignCandidateIds, collapseSameCandidate, sameCandidateKey, candidateId, freeList,
   CANDIDATE_PUBLIC_FIELDS, INFORMS_DAYS,
   revealGate,
 } from './candidates-model.mjs';
@@ -286,7 +286,14 @@ async function transferUploads(db, live, { now }) {
           }
         }
 
-        log(`  filed ${slot.label} for ${v.ref || d.id}: ${uploaded.name}`);
+        /* THE FILE'S NAME IS THE PERSON'S NAME. driveFileName builds
+           "2026-10-02 Jane Doe — CV (OA-CAND-…).pdf", and this line prints
+           into the Actions log of a PUBLIC repository — for a profile the
+           reveal gate is holding back for weeks. The log says WHICH
+           submission and WHAT was filed; the reference is what names a row
+           everywhere else here. Same rule as purge-accounts and the roster
+           sync: counts, ids and nothing that is a person. */
+        log(`  filed ${slot.label} for ${v.ref || d.id}`);
       } catch (e) {
         warn(`candidate uploads: ${v.ref || d.id} ${slot.label}: ${e.message} — left for the next run`);
       }
@@ -329,11 +336,11 @@ async function main() {
         `${pulled.length} withdrawn/hidden`);
     for (const d of queued) {
       const v = d.data();
-      log(`  queued  ${v.ref || d.id}  ${v.first} ${v.last} — ${v.affiliation}`);
+      log(`  queued  ${v.ref || d.id}${v.cvUploadPath || v.cvUrl ? '  (with a CV)' : ''}`);
     }
     for (const d of pulled) {
       const v = d.data();
-      log(`  pulled  ${v.ref || d.id}  ${v.first} ${v.last}  (${v.status})`);
+      log(`  pulled  ${v.ref || d.id}  (${v.status})`);
     }
     return;
   }
@@ -344,8 +351,26 @@ async function main() {
      "Candidates Files" folder first, so the SAME build publishes each profile
      with its links. WHOLLY NON-FATAL — Drive down, a missing credential, an
      unconfigured season each warn and the profile publishes without that
-     link; the upload stays in Storage and the next run retries. */
-  const filed = (await transferUploads(db, live, { now })) || new Map();
+     link; the upload stays in Storage and the next run retries.
+
+     NOT UNDER --dry-run, WHICH PROMISES TO WRITE NOTHING (the same hole
+     build-jobs.mjs had, and the same fix). This pass uploads a candidate's
+     own CV and research summary to Google Drive, writes the links onto their
+     document and DELETES the landing-strip objects in Storage: the most
+     irreversible thing this build does. The stamping pass at the end is
+     gated on DRY; this one was not. A dry run therefore prints the rows
+     WITHOUT the File links a real run would have filed, and says so. */
+  let filed = new Map();
+  if (DRY) {
+    const waiting = live.filter((d) => {
+      const v = d.data() || {};
+      return SLOTS.some((s) => v[s.path] && !v[s.url]);
+    });
+    log(`--dry-run: not filing ${waiting.length} uploaded file(s) into Drive; ` +
+        'the rows below carry no File link.');
+  } else {
+    filed = (await transferUploads(db, live, { now })) || new Map();
+  }
 
   const fresh = [];
   const rejected = [];
@@ -440,7 +465,7 @@ async function main() {
     log('the dataset is already up to date — writing nothing.');
   } else {
     log(`candidates.json: +${added} new, ${updated} updated, ${removed} removed  (${projected.length} served)`);
-    for (const f of fresh) log(`  + ${f.row.ref || f.row.id}  ${f.row.name}`);
+    for (const f of fresh) log(`  + ${f.row.ref || f.row.id}`);
     if (DRY) {
       log('--dry-run: not writing.');
     } else {
@@ -693,6 +718,31 @@ function selftest() {
   c = collapseSameCandidate([row, { ...respelled, year: 2028, id: '2028-doe-jane-a' }]);
   eq(c.collapsed, 0, 'the same account in the NEXT market year is a genuinely new profile');
 
+  /* EVERY SCRIPT'S LETTERS ARE PART OF THE NAME. The fold was `[^a-z0-9]`, so
+     a name written in Chinese, Greek, Cyrillic, Arabic or Hebrew had NO
+     surviving character: all of them keyed "<year>|", the collapse read the
+     whole set as one person, and every profile but the fullest was silently
+     dropped. */
+  const cjk = { year: 2027, name: '\u5f20\u4f1f', owner: '', ref: '' };
+  const cjk2 = { year: 2027, name: '\u674e\u5a1c', owner: '', ref: '' };
+  const cyr = { year: 2027, name: '\u0418\u0432\u0430\u043d \u0418\u0432\u0430\u043d\u043e\u0432', owner: '', ref: '' };
+  ok(sameCandidateKey(cjk) !== sameCandidateKey(cjk2),
+    'two different Chinese names are two people');
+  ok(sameCandidateKey(cjk) !== sameCandidateKey(cyr),
+    'and a Cyrillic name is a third');
+  eq(collapseSameCandidate([cjk, cjk2, cyr]).collapsed, 0,
+    'so three candidates in three scripts stay three profiles');
+  eq(collapseSameCandidate([cjk, { ...cjk }]).collapsed, 1,
+    'while the same name twice still collapses, in any script');
+  eq(sameCandidateKey({ year: 2027, name: 'Jos\u00e9 \u00c1lvarez' }),
+     sameCandidateKey({ year: 2027, name: 'Jose Alvarez' }),
+    'and accents still fold, which is what the collapse was always for');
+  eq(sameCandidateKey({ year: 2027, name: '...' }), null,
+    'a name the fold leaves empty keys nothing at all');
+  eq(collapseSameCandidate([{ year: 2027, name: '...', owner: '', ref: '' },
+    { year: 2027, name: '???', owner: '', ref: '' }]).collapsed, 0,
+    'so two of them are two visible rows, never one silent removal');
+
   /* -------------------------------------------------- ids + serialisation */
 
   // two real people sharing a name in one year: distinct, stable ids
@@ -755,6 +805,36 @@ function selftest() {
   eq(INFORMS_DAYS.length, 4, 'the INFORMS day vocabulary is Sunday-Wednesday');
   eq(candidateDisplayOrder({ posted: '2026-01-02' }, { posted: '2026-01-01' }) < 0, true,
     'newer posted sorts first');
+
+  /* ------------------------------------------------ what this build PRINTS
+
+     THE ACTIONS LOG OF A PUBLIC REPOSITORY, and a candidate profile is HELD
+     until the reveal instant -- the whole point of the gate. Four log lines
+     carried the person: two in --scan, one naming the built row, and the CV
+     filing's, which printed the Drive filename, and driveFileName builds
+     "2026-10-02 Jane Doe -- CV (OA-CAND-...).pdf". The reference is what
+     names a submission everywhere else here, so that is what the log says:
+     counts, ids, and nothing that is a person. The same rule the account
+     purge, the roster sync and the campaign mailer are held to.
+
+     Read with the comments stripped and the slice bounded at both ends: this
+     block explains the very fields it refuses, and a scan over the whole file
+     would have to be satisfied by deleting the explanation. */
+  const srcAll = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  const runSrc = srcAll.slice(srcAll.indexOf('async function transferUploads'),
+    srcAll.indexOf('function selftest('))
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  ok(runSrc.length > 3000 && runSrc.length < 30000,
+    'the run was really sliced, at both ends');
+  const printed = runSrc.match(/(?:log|warn)\(([\s\S]*?)\);\n/g) || [];
+  ok(printed.length > 8, 'and it really has log lines to sweep');
+  for (const rx of [/\$\{v\.first\}/, /\$\{v\.last\}/, /\$\{v\.affiliation\}/,
+    /\$\{v\.email\}/, /row\.name\}/, /uploaded\.name\}/]) {
+    ok(!printed.some((l) => rx.test(l)),
+      `no log line prints ${rx.source} -- a held profile is not public yet`);
+  }
+  ok(printed.some((l) => /v\.ref \|\| d\.id/.test(l)),
+    'while the reference still names which submission each line is about');
 
   console.log(`build-candidates selftest: ${passed} checks passed` +
     (fails.length ? `, ${fails.length} FAILED` : ''));

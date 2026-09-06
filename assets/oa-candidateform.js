@@ -694,8 +694,18 @@
       .then(function (cfg) {
         var revealAt = /^\d{4}-\d{2}-\d{2}$/.test(String((cfg || {}).revealAt || ''))
           ? String(cfg.revealAt) : '';
-        var today = new Date().toISOString().slice(0, 10);
-        var held = !revealAt || today < revealAt;
+        /* THE REVEAL IS AN INSTANT, NOT A DAY -- 14:00 UTC on the reveal day,
+           so it is still that calendar day from California to Shanghai. This
+           panel compared a UTC calendar day against the date, which is the
+           reading seven other files were taken off, and it is wrong for the
+           fourteen hours of reveal morning: it told a candidate their profile
+           was public and had no figures yet while the gate was still holding
+           it. `assets/oa-reveal.js` is the one definition, and it is already
+           this file's dependency (paintPreviewNote reads it); without it, hold
+           -- the safe reading the comment above already states. */
+        var R = window.OAReveal;
+        var held = !R || !R.isRevealed ? true : !R.isRevealed(revealAt);
+        var revealDay = (R && R.formatDay && R.formatDay(revealAt)) || revealAt;
         var st = v && v.stats && typeof v.stats === 'object' ? v.stats : null;
 
         box.innerHTML = '';
@@ -705,7 +715,7 @@
         if (held && !st) {
           box.appendChild(line(revealAt
             ? 'Your profile is not public yet. Profiles appear on the candidates page all ' +
-              'at once on ' + revealAt + ', so there is nothing to count until then.'
+              'at once on ' + revealDay + ', so there is nothing to count until then.'
             : 'Your profile is not public yet. Profiles appear on the candidates page all ' +
               'at once on the reveal date, so there is nothing to count until then.'));
         } else if (!st) {

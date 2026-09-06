@@ -74,6 +74,10 @@ const TTL_DAYS = Math.max(0, Number(opt('--ttl', '7')) || 7);
 /** Between requests. HigherEdJobs is a small publisher being read on someone
     else's behalf; a handful of pages a day at human pace costs them nothing.
     A run reads at most LIMIT of them, so the whole thing is bounded. */
+/* How long the fetching may run before the run writes what it has. The
+   workflow allows 20 minutes; this leaves the apply, the file writes, the
+   commit and the retry loop room to finish inside it. */
+const READ_WINDOW_MS = Math.max(60_000, Number(opt('--read-window-ms', '')) || 13 * 60_000);
 const PACE_MS = 1500;
 
 const UA = 'operationsacademia.org posting check (+https://www.operationsacademia.org)';
@@ -158,7 +162,7 @@ async function main() {
 
   /* ------------------------------------------------------------ the fetch */
 
-  let read = 0, failed = 0;
+  let read = 0, failed = 0, noted = 0;
 
   if (APPLY_ONLY) {
     log('--apply-only: re-applying the committed cache, fetching nothing.');
@@ -184,7 +188,19 @@ async function main() {
       return 0;
     }
 
+    /* A CLOCK, because everything this run learnt is written AFTER the loop.
+       LIMIT reads, each paced, each with up to three tries of a 30-second
+       timeout, is far more than the 20 minutes the workflow allows — so a bad
+       morning threw away every advertisement it had read. It stops and writes
+       what it has; the rest wait for the next run, which is what the count
+       budget already does. */
+    const readUntil = Date.now() + READ_WINDOW_MS;
     for (const q of slice) {
+      if (Date.now() > readUntil) {
+        log('the time budget for this run is spent — writing what was read; ' +
+            'the rest wait for the next run.');
+        break;
+      }
       const url = detailsUrl(q.jobCode);
       const res = await fetchAd(url);
 
@@ -202,10 +218,24 @@ async function main() {
         ? { ...parseAd(''), gone: true, jobCode: q.jobCode }
         : parseAd(res.body, { jobCode: q.jobCode });
 
+      /* A PAGE FETCHED AND NOT UNDERSTOOD IS RECORDED, not skipped. Skipped,
+         it had no cache entry at all, so `needFetch` read it again every
+         single run for ever — ahead of advertisements never read once, since
+         both are "never read" to that rule — and a handful of unparseable
+         pages could spend the whole daily budget. Recorded as `unreadable` it
+         is retried on the TTL, exactly as adverts.mjs already does it, and it
+         still CHANGES NOTHING: applyVerified publishes only `ok` and `gone`,
+         and cacheEntry's `keep` holds whatever an earlier read had learnt. */
       if (!parsed.ok && !parsed.gone) {
         failed++;
         warn(`${q.jobCode}: the page was fetched but could not be read — ` +
-             'the layout may have changed. Left as it was.');
+             'the layout may have changed. Nothing published changes; it is ' +
+             'noted so the next run does not read it again straight away.');
+        cache.ads[q.jobCode] = cacheEntry(parsed, {
+          jobCode: q.jobCode, url, checkedAt: isoStamp(now),
+          previous: cache.ads[q.jobCode] || null, via: 'page',
+        });
+        noted++;
         await sleep(PACE_MS);
         continue;
       }
@@ -228,8 +258,12 @@ async function main() {
     /* Stamped only when something was actually read. A run where every fetch
        failed knows nothing new, and bumping the date would rewrite the file —
        committing, and redeploying the site, to say so. */
-    if (read) cache.generated = isoStamp(now);
-    if (failed) log(`${failed} advertisement(s) could not be read this run.`);
+    /* `noted` counts too: a page recorded as unreadable is a real change to
+       the cache, and leaving `generated` behind would write the file without
+       saying when. */
+    if (read || noted) cache.generated = isoStamp(now);
+    if (failed) log(`${failed} advertisement(s) could not be read this run` +
+      (noted ? ` (${noted} of them noted, so the next run does not retry them at once)` : '') + '.');
   }
 
   /* ----------------------------------------------------------- the apply */
@@ -240,6 +274,17 @@ async function main() {
     log(`  ${c.id}: "${c.from}" -> "${c.to}"${c.past ? '  (that deadline has passed)' : ''}`);
   }
   for (const c of applied.conflicts) {
+    /* Two different disagreements, and they need different words. An
+       IMPLAUSIBLE date is one the advertisement could not have meant for this
+       posting (before it was advertised, or more than two years out): the
+       sheet said nothing, so "the sheet wins" would read as the maintainer
+       having decided something. */
+    if (c.implausible) {
+      warn(`${c.id}: the advertisement states a closing date of ${c.ad}, which is ` +
+           `not a date it could have meant for a posting advertised on ${c.posted || '?'} — ` +
+           'left open-ended. Type the real date into the sheet if you know it.');
+      continue;
+    }
     warn(`${c.id}: the sheet says ${c.sheet}, the advertisement says ${c.ad} — ` +
          'the sheet wins. Correct the sheet if the advertisement is right.');
   }

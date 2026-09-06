@@ -1818,9 +1818,20 @@ for (const [name, expect] of [
 
   const heldPanel = await onSiteRouted('post-a-candidate.html?edit=c9', oneSeed,
     { revealAt: '2099-01-01' }, readPanel);
+  /* THE DAY AS THE SITE WRITES IT, asked of the module rather than typed: the
+     panel used to compare a UTC calendar day against the date (the reading
+     seven other files were taken off, wrong for the fourteen hours of reveal
+     morning) and to print the raw ISO string. Both go through
+     assets/oa-reveal.js now, so this check cannot disagree with the page
+     about either. */
+  const { createRequire: reqFor } = await import('node:module');
+  const RevealNode = reqFor(import.meta.url)(path.join(ROOT, 'assets', 'oa-reveal.js'));
+  const heldDay = RevealNode.formatDay('2099-01-01');
   ok(/Your profile on the site/.test(heldPanel.text) && /not public yet/.test(heldPanel.text) &&
-     /2099-01-01/.test(heldPanel.text),
-    'before the reveal the panel says the profile is not public yet, and names the day');
+     heldPanel.text.indexOf(heldDay) !== -1,
+    `before the reveal the panel says the profile is not public yet, and names the day (${heldDay})`);
+  ok(heldPanel.text.indexOf('2099-01-01') === -1,
+    'as the site writes a day, never as a raw ISO string');
   ok(!/Opened \d/.test(heldPanel.text), 'and shows no count that would read as "nobody is interested"');
 
   const shownPanel = await onSiteRouted('post-a-candidate.html?edit=c9',
